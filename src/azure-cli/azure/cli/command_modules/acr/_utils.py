@@ -125,7 +125,7 @@ def get_registry_from_name_or_login_server(cli_ctx, login_server, registry_name=
 
     if len(elements) == 1:
         return elements[0]
-    elif len(elements) > 1:
+    if len(elements) > 1:
         logger.warning(
             "More than one registries were found by %s.", login_server)
     return None
@@ -553,4 +553,3 @@ def is_vault_secret(cmd, credential):
 class ResourceNotFound(CLIError):
     """For exceptions that a resource couldn't be found in user's subscription
     """
-    pass

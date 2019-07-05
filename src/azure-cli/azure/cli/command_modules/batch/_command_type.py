@@ -48,9 +48,9 @@ def _join_prefix(prefix, name):
     """
     if prefix.endswith("_specification"):
         return prefix[:-14] + "_" + name
-    elif prefix.endswith("_patch_parameter"):
+    if prefix.endswith("_patch_parameter"):
         return prefix[:-16] + "_" + name
-    elif prefix.endswith("_update_parameter"):
+    if prefix.endswith("_update_parameter"):
         return prefix[:-17] + "_" + name
     return prefix + "_" + name
 
@@ -514,7 +514,7 @@ class AzureBatchDataPlaneCommand(object):
                     return
 
                 # Otherwise handle based on return type of results
-                elif isinstance(result, Paged):
+                if isinstance(result, Paged):
                     return list(result)
 
                 return result

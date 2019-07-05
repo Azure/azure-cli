@@ -212,11 +212,9 @@ def check_remote_source_code(source_location):
             # This is because Azure DevOps doesn't follow the standard git server convention of putting
             # .git at the end of their URLs, so we have to special case them.
             return source_location
-        elif not lower_source_location.startswith("github.com/"):
+        if not lower_source_location.startswith("github.com/"):
             # Others are tarball
             if requests.head(source_location).status_code < 400:
                 return source_location
-            else:
-                raise CLIError("'{}' doesn't exist.".format(source_location))
-
+            raise CLIError("'{}' doesn't exist.".format(source_location))
     raise CLIError("'{}' doesn't exist.".format(source_location))

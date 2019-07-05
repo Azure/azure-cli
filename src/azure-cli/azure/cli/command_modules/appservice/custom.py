@@ -1176,37 +1176,36 @@ def config_source_control(cmd, resource_group_name, name, repo_url, repository_t
             raise CLIError(ex)
         logger.warning(status.status_message)
         return status
-    else:
-        non_vsts_params = [cd_app_type, app_working_dir, nodejs_task_runner, python_framework,
-                           python_version, cd_account_create, test, slot_swap]
-        if any(non_vsts_params):
-            raise CLIError('Following parameters are of no use when cd_project_url is None: ' +
-                           'cd_app_type, app_working_dir, nodejs_task_runner, python_framework,' +
-                           'python_version, cd_account_create, test, slot_swap')
-        from azure.mgmt.web.models import SiteSourceControl, SourceControl
-        if git_token:
-            sc = SourceControl(location=location, source_control_name='GitHub', token=git_token)
-            client.update_source_control('GitHub', sc)
+    non_vsts_params = [cd_app_type, app_working_dir, nodejs_task_runner, python_framework,
+                       python_version, cd_account_create, test, slot_swap]
+    if any(non_vsts_params):
+        raise CLIError('Following parameters are of no use when cd_project_url is None: ' +
+                       'cd_app_type, app_working_dir, nodejs_task_runner, python_framework,' +
+                       'python_version, cd_account_create, test, slot_swap')
+    from azure.mgmt.web.models import SiteSourceControl, SourceControl
+    if git_token:
+        sc = SourceControl(location=location, source_control_name='GitHub', token=git_token)
+        client.update_source_control('GitHub', sc)
 
-        source_control = SiteSourceControl(location=location, repo_url=repo_url, branch=branch,
-                                           is_manual_integration=manual_integration,
-                                           is_mercurial=(repository_type != 'git'))
+    source_control = SiteSourceControl(location=location, repo_url=repo_url, branch=branch,
+                                       is_manual_integration=manual_integration,
+                                       is_mercurial=(repository_type != 'git'))
 
-        # SCC config can fail if previous commands caused SCMSite shutdown, so retry here.
-        for i in range(5):
-            try:
-                poller = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
-                                                 'create_or_update_source_control',
-                                                 slot, source_control)
-                return LongRunningOperation(cmd.cli_ctx)(poller)
-            except Exception as ex:  # pylint: disable=broad-except
-                import re
-                ex = ex_handler_factory(no_throw=True)(ex)
-                # for non server errors(50x), just throw; otherwise retry 4 times
-                if i == 4 or not re.findall(r'\(50\d\)', str(ex)):
-                    raise
-                logger.warning('retrying %s/4', i + 1)
-                time.sleep(5)   # retry in a moment
+    # SCC config can fail if previous commands caused SCMSite shutdown, so retry here.
+    for i in range(5):
+        try:
+            poller = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
+                                             'create_or_update_source_control',
+                                             slot, source_control)
+            return LongRunningOperation(cmd.cli_ctx)(poller)
+        except Exception as ex:  # pylint: disable=broad-except
+            import re
+            ex = ex_handler_factory(no_throw=True)(ex)
+            # for non server errors(50x), just throw; otherwise retry 4 times
+            if i == 4 or not re.findall(r'\(50\d\)', str(ex)):
+                raise
+            logger.warning('retrying %s/4', i + 1)
+            time.sleep(5)   # retry in a moment
 
 
 def update_git_token(cmd, git_token=None):
@@ -1431,21 +1430,20 @@ def restore_snapshot(cmd, resource_group_name, name, time, slot=None, restore_co
         if slot:
             return client.web_apps.restore_snapshot_slot(resource_group_name, name, request, slot)
         return client.web_apps.restore_snapshot(resource_group_name, name, request)
-    elif any([source_resource_group, source_name]):
+    if any([source_resource_group, source_name]):
         raise CLIError('usage error: --source-resource-group and --source-name must both be specified if one is used')
-    else:
-        # Overwrite app with its own snapshot
-        request = SnapshotRestoreRequest(overwrite=True, snapshot_time=time, recover_configuration=recover_config)
-        if slot:
-            return client.web_apps.restore_snapshot_slot(resource_group_name, name, request, slot)
-        return client.web_apps.restore_snapshot(resource_group_name, name, request)
+    # Overwrite app with its own snapshot
+    request = SnapshotRestoreRequest(overwrite=True, snapshot_time=time, recover_configuration=recover_config)
+    if slot:
+        return client.web_apps.restore_snapshot_slot(resource_group_name, name, request, slot)
+    return client.web_apps.restore_snapshot(resource_group_name, name, request)
 
 
 # pylint: disable=inconsistent-return-statements
 def _create_db_setting(db_name, db_type, db_connection_string):
     if all([db_name, db_type, db_connection_string]):
         return [DatabaseBackupSetting(database_type=db_type, name=db_name, connection_string=db_connection_string)]
-    elif any([db_name, db_type, db_connection_string]):
+    if any([db_name, db_type, db_connection_string]):
         raise CLIError('usage error: --db-name NAME --db-type TYPE --db-connection-string STRING')
 
 
@@ -1684,7 +1682,7 @@ def swap_slot(cmd, resource_group_name, webapp, slot, target_slot=None, action='
         poller = client.web_apps.swap_slot_slot(resource_group_name, webapp,
                                                 slot, (target_slot or 'production'), True)
         return poller
-    elif action == 'preview':
+    if action == 'preview':
         if target_slot is None:
             result = client.web_apps.apply_slot_config_to_production(resource_group_name,
                                                                      webapp, slot, True)
@@ -1692,13 +1690,12 @@ def swap_slot(cmd, resource_group_name, webapp, slot, target_slot=None, action='
             result = client.web_apps.apply_slot_configuration_slot(resource_group_name, webapp,
                                                                    slot, target_slot, True)
         return result
-    else:  # reset
-        # we will reset both source slot and target slot
-        if target_slot is None:
-            client.web_apps.reset_production_slot_config(resource_group_name, webapp)
-        else:
-            client.web_apps.reset_slot_configuration_slot(resource_group_name, webapp, target_slot)
-        return None
+    # we will reset both source slot and target slot
+    if target_slot is None:
+        client.web_apps.reset_production_slot_config(resource_group_name, webapp)
+    else:
+        client.web_apps.reset_slot_configuration_slot(resource_group_name, webapp, target_slot)
+    return None
 
 
 def delete_slot(cmd, resource_group_name, webapp, slot):
@@ -2136,7 +2133,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
         if is_linux and runtime not in LINUX_RUNTIMES:
             raise CLIError("usage error: Currently supported runtimes (--runtime) in linux function apps are: {}."
                            .format(', '.join(LINUX_RUNTIMES)))
-        elif not is_linux and runtime not in WINDOWS_RUNTIMES:
+        if not is_linux and runtime not in WINDOWS_RUNTIMES:
             raise CLIError("usage error: Currently supported runtimes (--runtime) in windows function apps are: {}."
                            .format(', '.join(WINDOWS_RUNTIMES)))
         site_config.app_settings.append(NameValuePair(name='FUNCTIONS_WORKER_RUNTIME', value=runtime))
@@ -2332,7 +2329,7 @@ def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, auth
             _configure_default_logging(cmd, rg_name, name)
             raise CLIError("""Zip deployment failed. {}. Please run the command az webapp log tail
                            -n {} -g {}""".format(res_dict, name, rg_name))
-        elif res_dict.get('status', 0) == 4:
+        if res_dict.get('status', 0) == 4:
             break
         if 'progress' in res_dict:
             logger.info(res_dict['progress'])  # show only in debug mode, customers seem to find this confusing
@@ -2413,7 +2410,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None,  # pylint: disable
         user = user.split('#', 1)[1]
     logger.info("UserPrefix to use '%s'", user)
     # if dir is empty, show a message in dry run
-    do_deployment = False if os.listdir(src_dir) == [] else True
+    do_deployment = not os.listdir(src_dir) == []
     _create_new_rg = True
     _create_new_asp = True
     _create_new_app = True
@@ -2449,7 +2446,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None,  # pylint: disable
     full_sku = get_sku_name(sku)
     location = set_location(cmd, sku, location)
     loc_name = location.replace(" ", "").lower()
-    is_linux = True if os_val == 'Linux' else False
+    is_linux = os_val == 'Linux'
 
     if resource_group_name is None:
         logger.info('Using default ResourceGroup value')
@@ -2760,8 +2757,7 @@ def ssh_webapp(cmd, resource_group_name, name, port=None, slot=None, timeout=Non
     import platform
     if platform.system() == "Windows":
         raise CLIError('webapp ssh is only supported on linux and mac')
-    else:
-        create_tunnel_and_session(cmd, resource_group_name, name, port=port, slot=slot, timeout=timeout)
+    create_tunnel_and_session(cmd, resource_group_name, name, port=port, slot=slot, timeout=timeout)
 
 
 def create_devops_pipeline(
