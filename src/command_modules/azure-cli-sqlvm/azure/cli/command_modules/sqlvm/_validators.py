@@ -97,3 +97,14 @@ def validate_subnet(cmd, namespace):
             name=vnet, child_type_1='subnets',
             child_name_1=subnet
         )
+
+
+# pylint: disable=too-many-statements,line-too-long
+def validate_sqlmanagement(namespace):
+    '''
+    Validates if sql management mode provided, the offer type and sku type has to be provided.
+    '''
+    sql_mgmt_mode = namespace.sql_management_mode
+
+    if (sql_mgmt_mode == "NoAgent" and (namespace.sql_image_sku is None or namespace.sql_image_offer is None)):
+        raise CLIError("incorrect usage: --sql-mgmt-type NoAgent --image-sku NAME --image-offer NAME")

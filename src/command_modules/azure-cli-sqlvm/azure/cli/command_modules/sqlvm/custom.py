@@ -178,7 +178,7 @@ def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, sql
                  full_backup_frequency=None, full_backup_start_time=None, full_backup_window_hours=None, log_backup_frequency=None,
                  enable_key_vault_credential=None, credential_name=None, azure_key_vault_url=None, service_principal_name=None,
                  service_principal_secret=None, connectivity_type=None, port=None, sql_auth_update_username=None,
-                 sql_auth_update_password=None, sql_workload_type=None, enable_r_services=None, tags=None):
+                 sql_auth_update_password=None, sql_workload_type=None, enable_r_services=None, tags=None, sql_image_offer=None):
     '''
     Creates a SQL virtual machine.
     '''
@@ -253,7 +253,8 @@ def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, sql
                                      virtual_machine_resource_id=virtual_machine_resource_id,
                                      sql_server_license_type=sql_server_license_type,
                                      sql_image_sku=sql_image_sku,
-                                     sql_management_mode=sql_management_mode,
+                                     sql_management=sql_management_mode,
+                                     sql_image_offer=sql_image_offer,
                                      auto_patching_settings=auto_patching_object,
                                      auto_backup_settings=auto_backup_object,
                                      key_vault_credential_settings=keyvault_object,
@@ -271,7 +272,7 @@ def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, sql
 def sqlvm_update(instance, sql_server_license_type=None, sql_image_sku=None, enable_auto_patching=None,
                  day_of_week=None, maintenance_window_starting_hour=None, maintenance_window_duration=None,
                  enable_auto_backup=None, enable_encryption=False, retention_period=None, storage_account_url=None,
-                 storage_access_key=None, backup_password=None, backup_system_dbs=False, backup_schedule_type=None,
+                 storage_access_key=None, backup_password=None, backup_system_dbs=False, backup_schedule_type=None, sql_management_mode=None,
                  full_backup_frequency=None, full_backup_start_time=None, full_backup_window_hours=None, log_backup_frequency=None,
                  enable_key_vault_credential=None, credential_name=None, azure_key_vault_url=None, service_principal_name=None,
                  service_principal_secret=None, connectivity_type=None, port=None, sql_workload_type=None, enable_r_services=None, tags=None):
@@ -284,6 +285,8 @@ def sqlvm_update(instance, sql_server_license_type=None, sql_image_sku=None, ena
         instance.sql_server_license_type = sql_server_license_type
     if sql_image_sku is not None:
         instance.sql_image_sku = sql_image_sku
+    if sql_management_mode is not None:
+        instance.sql_management = sql_management_mode
 
     if (enable_auto_patching is not None or day_of_week is not None or maintenance_window_starting_hour is not None or maintenance_window_duration is not None):
 

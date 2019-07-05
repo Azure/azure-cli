@@ -4,7 +4,7 @@ Release History
 ===============
 0.2.1
 +++++
-* New optional paramenter to setup SQL management mode on creation time of a sql vm.
+* New optional paramenter to setup SQL management type on creation time of a sql vm.
 
 0.2.0
 +++++

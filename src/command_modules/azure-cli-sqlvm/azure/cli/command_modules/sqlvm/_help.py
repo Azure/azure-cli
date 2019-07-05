@@ -67,6 +67,9 @@ helps['sql vm create'] = """
         - name: Create a SQL virtual machine with specific sku type and license type.
           text: >
             az sql vm create -n sqlvm -g myresourcegroup -l eastus --image-sku Enterprise --license-type AHUB
+        - name: Create a SQL virtual machine with NoAgent type, only valid for EOS SQL 2008 and SQL 2008 R2.
+          text: >
+            az sql vm create -n sqlvm -g myresourcegroup -l eastus --license-type AHUB --sql-mgmt-type NoAgent --image-sku Enterprise --image-offer SQL2008-WS2008R2
         - name: Enable R services in SQL2016 onwards.
           text: >
             az sql vm create -n sqlvm -g myresourcegroup -l eastus --license-type PAYG --sql-mgmt-type Full --enable-r-services true
