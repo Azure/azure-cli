@@ -8,7 +8,6 @@ from msrestazure.tools import is_valid_resource_id, parse_resource_id
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from ._client_factory import web_client_factory
 from .utils import _normalize_sku
-from ._appservice_utils import _generic_site_operation
 
 
 def validate_timeout_value(namespace):
