@@ -21,13 +21,14 @@ from knack.util import CLIError
 class DataLakeStoreFileAccessScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_adls_access')
-    def test_dls_file_access_mgmt(self, resource_group):
+    def test_dls_file_access_mgmt(self):
 
         user_id = '470c0ccf-c91a-4597-98cd-48507d2f1486'
 
         self.kwargs.update({
             'dls': self.create_random_name('cliadls', 24),
             'loc': 'eastus2',
+            'rg': 'adls-cli-rg',
             'dir': 'adltestfolder01',
             'user_id': user_id,
             'acl_to_add': 'user:{}:rwx'.format(user_id),
@@ -149,6 +150,7 @@ class DataLakeStoreFileScenarioTest(ScenarioTest):
         self.kwargs.update({
             'dls': self.create_random_name('cliadls', 24),
             'loc': 'eastus2',
+            'rg': 'adls-cli-rg',
             'dir': local_folder,
             'local_folder': os.path.join(os.getcwd(), local_folder),
             'local_file': os.path.join(local_folder, 'sample_file.txt'),
@@ -311,7 +313,8 @@ class DataLakeStoreAccountScenarioTest(ScenarioTest):
 
         self.kwargs.update({
             'dls': self.create_random_name('cliadls', 24),
-            'loc': 'eastus2'
+            'loc': 'eastus2',
+            'rg': 'adls-cli-rg'
         })
 
         # test create keyvault with default access policy set
