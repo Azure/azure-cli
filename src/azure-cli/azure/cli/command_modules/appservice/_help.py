@@ -678,7 +678,7 @@ short-summary: Configure a web app.
 
 helps['webapp config appsettings'] = """
 type: group
-short-summary: Configure web app settings.
+short-summary: Configure web app settings. Note: Updating or removing application settings will cause an app recycle.
 """
 
 helps['webapp config appsettings delete'] = """
