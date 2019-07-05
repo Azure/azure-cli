@@ -26,7 +26,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_service_endpoint_policy_definitions, cf_dns_references, cf_private_endpoints, cf_network_profiles,
     cf_express_route_circuit_connections, cf_express_route_gateways, cf_express_route_connections,
     cf_express_route_ports, cf_express_route_port_locations, cf_express_route_links, cf_app_gateway_waf_policy,
-    cf_service_tags)
+    cf_service_tags, cf_private_link_services, cf_private_endpoint_types)
 from azure.cli.command_modules.network._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry)
 from azure.cli.command_modules.network._format import (
@@ -172,6 +172,12 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.network.operations#PrivateEndpointsOperations.{}',
         client_factory=cf_private_endpoints,
         min_api='2018-08-01'
+    )
+
+    network_private_link_service_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations#PrivateLinkServicesOperations.{}',
+        client_factory=cf_private_link_services,
+        min_api='2018-02-01'
     )
 
     network_lb_sdk = CliCommandType(
@@ -577,8 +583,30 @@ def load_command_table(self, _):
 
     # region PrivateEndpoint
     with self.command_group('network private-endpoint', network_private_endpoint_sdk) as g:
+        g.custom_command('create', 'create_private_endpoint', min_api='2018-02-01', is_preview=True)
+        g.command('delete', 'delete', min_api='2018-02-01', is_preview=True)
         g.custom_command('list', 'list_private_endpoints')
         g.show_command('show')
+        g.generic_update_command('update', custom_func_name='update_private_endpoint', is_preview=True, min_api='2018-02-01')
+        g.command(
+            'list-types', 'list',
+            operations_tmpl='azure.mgmt.network.operations#AvailablePrivateEndpointTypesOperations.{}',
+            client_factory=cf_private_endpoint_types,
+            is_preview=True
+        )
+    # endregion
+
+    # region PrivateLinkServices
+    with self.command_group('network private-link-service', network_private_link_service_sdk, is_preview=True) as g:
+        g.custom_command('create', 'create_private_link_service')
+        g.command('delete', 'delete')
+        g.custom_command('list', 'list_private_link_services')
+        g.show_command('show')
+        g.generic_update_command('update', custom_func_name='update_private_link_service')
+
+    with self.command_group('network private-link-service connection', network_private_link_service_sdk) as g:
+        g.command('delete', 'delete_private_endpoint_connection')
+        g.custom_command('update', 'update_private_endpoint_connection')
     # endregion
 
     # region LoadBalancers

@@ -3191,6 +3191,16 @@ type: group
 short-summary: Manage private endpoints.
 """
 
+helps['network private-endpoint create'] = """
+type: command
+short-summary: Create a private endpoint.
+"""
+
+helps['network private-endpoint delete'] = """
+type: command
+short-summary: Delete a private endpoint.
+"""
+
 helps['network private-endpoint list'] = """
 type: command
 short-summary: List private endpoints.
@@ -3198,7 +3208,57 @@ short-summary: List private endpoints.
 
 helps['network private-endpoint show'] = """
 type: command
-short-summary: Get the details of an private endpoint.
+short-summary: Get the details of a private endpoint.
+"""
+
+helps['network private-endpoint update'] = """
+type: command
+short-summary: Update a private endpoint.
+"""
+
+helps['network private-link-service'] = """
+type: group
+short-summary: Manage private link services.
+"""
+
+helps['network private-link-service create'] = """
+type: command
+short-summary: Create a private link service.
+"""
+
+helps['network private-link-service delete'] = """
+type: command
+short-summary: Delete a private link service.
+"""
+
+helps['network private-link-service list'] = """
+type: command
+short-summary: List private link services.
+"""
+
+helps['network private-link-service show'] = """
+type: command
+short-summary: Get the details of a private link service.
+"""
+
+helps['network private-link-service update'] = """
+type: command
+short-summary: Update a private link service.
+"""
+
+helps['network private-link-service connection'] = """
+type: group
+short-summary: Manage private link service endpoint connections.
+"""
+
+helps['network private-link-service connection delete'] = """
+type: command
+short-summary: Delete a private link service endpoint connection.
+"""
+
+helps['network private-link-service connection update'] = """
+type: command
+short-summary: Update a private link service endpoint connection.
 """
 
 helps['network profile'] = """
