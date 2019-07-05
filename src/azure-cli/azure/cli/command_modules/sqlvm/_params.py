@@ -202,8 +202,7 @@ def load_arguments(self, _):
 
     with self.argument_context('sql vm add-to-group', arg_group='WSFC Domain Credentials') as c:
         c.argument('cluster_bootstrap_account_password',
-                   options_list=['-b', '--bootstrap-acc-pwd',
-                                 c.deprecate(target='--boostrap-acc-pwd', redirect='--bootstrap-acc-pwd')],
+                   options_list=['-b', '--bootstrap-acc-pwd'],
                    help='Password for the cluster bootstrap account if provided in the SQL virtual machine group.')
         c.argument('cluster_operator_account_password',
                    options_list=['--operator-acc-pwd', '-p'],

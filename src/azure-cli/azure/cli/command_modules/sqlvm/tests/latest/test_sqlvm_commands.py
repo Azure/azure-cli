@@ -121,12 +121,18 @@ class SqlVmScenarioTest(ScenarioTest):
     def test_sqlvm_mgmt(self, resource_group, resource_group_location, sqlvm, storage_account):
 
         loc = 'westus'
+        self.cmd('storage account update -n {} -g {} --set kind=StorageV2'.format(storage_account, resource_group))
 
         sa = self.cmd('storage account show -n {} -g {}'
                       .format(storage_account, resource_group)).get_output_in_json()
 
         key = self.cmd('storage account keys list -n {} -g {}'
                        .format(storage_account, resource_group)).get_output_in_json()
+
+        # Assert customer cannot create a SQL vm with no agent and do not provide offer and sku
+        with self.assertRaisesRegexp(CLIError, "incorrect usage: --sql-mgmt-type NoAgent --image-sku NAME --image-offer NAME"):
+            self.cmd('sql vm create -n {} -g {} -l {} --license-type {} --sql-mgmt-type {}'
+                     .format(sqlvm, resource_group, loc, 'PAYG', 'NoAgent'))
 
         # test create sqlvm with minimal required parameters
         sqlvm_1 = self.cmd('sql vm create -n {} -g {} -l {} --license-type {}'
@@ -294,6 +300,8 @@ class SqlVmScenarioTest(ScenarioTest):
                  ])
 
         # test create sqlvm1 with auto backup
+        self.cmd('storage account update -n {} -g {} --set kind=StorageV2'.format(storage_account, resource_group))
+
         sa = self.cmd('storage account show -n {} -g {}'
                       .format(storage_account, resource_group)).get_output_in_json()
 
@@ -401,13 +409,14 @@ class SqlVmGroupScenarioTest(ScenarioTest):
         sql_service_acc = 'sqlservice'
 
         self.cmd('storage account update -n {} -g {} --set kind=StorageV2'.format(storage_account1, resource_group))
-        self.cmd('storage account update -n {} -g {} --set kind=StorageV2'.format(storage_account2, resource_group))
 
         sa_1 = self.cmd('storage account show -n {} -g {}'
                         .format(storage_account1, resource_group)).get_output_in_json()
 
         key_1 = self.cmd('storage account keys list -n {} -g {}'
                          .format(storage_account1, resource_group)).get_output_in_json()
+
+        self.cmd('storage account update -n {} -g {} --set kind=StorageV2'.format(storage_account2, resource_group))
 
         sa_2 = self.cmd('storage account show -n {} -g {}'
                         .format(storage_account2, resource_group)).get_output_in_json()
@@ -450,8 +459,8 @@ class SqlVmGroupScenarioTest(ScenarioTest):
                  ])
 
         # change the domain
-        self.cmd('sql vm group update -n {} -g {} -f {}'
-                 .format(name, resource_group, 'my' + domain),
+        self.cmd('sql vm group update -n {} -g {} -f {} -k {}'
+                 .format(name, resource_group, 'my' + domain, key_2[0]['value']),
                  checks=[
                      JMESPathCheck('name', name),
                      JMESPathCheck('location', resource_group_location),
@@ -459,8 +468,8 @@ class SqlVmGroupScenarioTest(ScenarioTest):
                  ])
 
         # change the operator account
-        self.cmd('sql vm group update -n {} -g {} -p {}'
-                 .format(name, resource_group, 'my' + operator_acc),
+        self.cmd('sql vm group update -n {} -g {} -p {} -k {}'
+                 .format(name, resource_group, 'my' + operator_acc, key_2[0]['value']),
                  checks=[
                      JMESPathCheck('name', name),
                      JMESPathCheck('location', resource_group_location),
@@ -501,6 +510,8 @@ class SqlVmAndGroupScenarioTest(ScenarioTest):
                          resource_group,
                          'https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/201-vm-domain-join-existing/azuredeploy.json',
                          parameters_string))
+
+        self.cmd('storage account update -n {} -g {} --set kind=StorageV2'.format(storage_account, resource_group))
 
         # Create the sqlvm group
         sa = self.cmd('storage account show -n {} -g {}'

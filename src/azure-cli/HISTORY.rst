@@ -75,6 +75,11 @@ Release History
 
 * Document allowed values for sql db create --sample-name
 
+**SQL VM**
+
+* New optional paramenter to setup SQL management type on creation time of a sql vm. --sql-mgmt-type
+* Minor fixes on sql vm group
+
 **VM**
 
 * vmss create: Fix bug where command returns an error message when run with `--no-wait`. The command succesfully sends

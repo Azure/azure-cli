@@ -110,9 +110,9 @@ def sqlvm_group_update(instance, domain_fqdn=None, cluster_operator_account=None
     if storage_account_url is not None:
         instance.wsfc_domain_profile.storage_account_url = storage_account_url
     if storage_account_key is not None:
-        instance.wsfc_domain_profile.storage_access_key = storage_account_key
+        instance.wsfc_domain_profile.storage_account_primary_key = storage_account_key
     if storage_account_url and not storage_account_key:
-        instance.wsfc_domain_profile.storage_access_key = prompt_pass('Storage Key: ', confirm=True)
+        instance.wsfc_domain_profile.storage_account_primary_key = prompt_pass('Storage Key: ', confirm=True)
     if file_share_witness_path is not None:
         instance.wsfc_domain_profile.file_share_witness_path = file_share_witness_path
     if ou_path is not None:
