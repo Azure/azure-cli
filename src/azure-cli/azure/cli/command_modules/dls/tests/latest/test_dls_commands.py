@@ -120,19 +120,20 @@ class DataLakeStoreFileAccessScenarioTest(ScenarioTest):
 
 # Convert back to ScenarioTest and re-record when #5175 is addressed
 class DataLakeStoreFileScenarioTest(ScenarioTest):
+
     def setUp(self):
-        import uuid
         try:
             import unittest.mock as mock
         except ImportError:
             import mock
-
+        import uuid
+        
         def const_uuid():
             return uuid.UUID('{12345678-1234-5678-1234-567812345678}')
 
         self.mp = mock.patch('uuid.uuid4', const_uuid)
         self.mp.__enter__()
-
+        super(DataLakeStoreFileScenarioTest, self).setUp()
 
     def tearDown(self):
         local_folder = self.kwargs.get('local_folder', None)
