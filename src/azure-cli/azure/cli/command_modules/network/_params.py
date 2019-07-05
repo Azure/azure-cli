@@ -607,13 +607,31 @@ def load_arguments(self, _):
         c.argument('location_name', options_list=['--location', '-l'])
     # endregion
 
-    # region InterfaceEndpoint
+    # region PrivateEndpoint
     private_endpoint_name = CLIArgumentType(options_list='--endpoint-name', id_part='name', help='Name of the private endpoint.', completer=get_resource_name_completion_list('Microsoft.Network/interfaceEndpoints'))
 
     with self.argument_context('network private-endpoint') as c:
         c.argument('private_endpoint_name', private_endpoint_name, options_list=['--name', '-n'])
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
         c.ignore('expand')
+    # endregion
+
+    # region PrivateLinkService
+    service_name = CLIArgumentType(options_list='--service-name', id_part='name', help='Name of the private link service.', completer=get_resource_name_completion_list('Microsoft.Network/privateLinkServices'))
+    with self.argument_context('network private-link-service') as c:
+        # TODO: Validators
+        c.argument('service_name', service_name, options_list=['--name', '-n'])
+        c.argument('auto_approval', nargs='+', help='Space-separated list of subscription IDs to auto-approve.')
+        c.argument('visbility', nargs='+', help='Space-separated list of subscription IDs for which the private link service is visible.')
+        c.argument('load_balancer_frontend_ips', nargs='+', options_list='--lb-frontend-ip-configs', help='Space-separated list of load balancer frontend IP configurations to link to.')
+        c.argument('ip_configs', nargs='+', help='Space-separated list of private link service IP configurations.')
+        c.argument('private_endpoint_connections', nargs='+', help='Space-separated list of private endpoint connections.')
+        c.argument('fqdns', nargs='+', help='Space-separated list of FQDNs.')
+        c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
+
+    with self.argument_context('network private-link-service connection') as c:
+        c.argument('service_name', service_name)
+        c.argument('pe_connection_name', help='Name of the private endpoint connection.', id_part='child_name_1', options_list=['--name', '-n'])
     # endregion
 
     # region LoadBalancers

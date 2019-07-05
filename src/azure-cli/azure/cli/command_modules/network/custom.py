@@ -2058,11 +2058,66 @@ def list_express_route_ports(cmd, resource_group_name=None):
 
 
 # region PrivateEndpoint
+def create_private_endpoint(cmd, resource_group_name, subnet, vnet_name=None, tags=None,
+                            private_link_service_connections=None, manual_private_link_service_connections=None):
+    pass
+
+
+def update_private_endpoint(instance):
+    return instance
+
+
 def list_private_endpoints(cmd, resource_group_name=None):
     client = network_client_factory(cmd.cli_ctx).private_endpoints
     if resource_group_name:
         return client.list(resource_group_name)
     return client.list_by_subscription()
+# endregion
+
+
+# region PrivateLinkService
+def create_private_link_service(cmd, resource_group_name, service_name, location=None, tags=None,
+                                load_balancer_frontend_ips=None,
+                                ip_configs=None, private_endpoint_connections=None, visibility=None,
+                                auto_approval=None, fqdns=None):
+    client = network_client_factory(cmd.cli_ctx).private_link_services
+    PrivateLinkService = cmd.get_models('PrivateLinkService')
+    link_service = PrivateLinkService(
+        location=location,
+        load_balancer_frontend_ip_configurations=load_balancer_frontend_ips,
+        ip_configurations=ip_configs,
+        private_endpoint_connections=private_endpoint_connections,
+        visbility=visibility,
+        auto_approval=auto_approval,
+        fqdns=fqdns
+    )
+    return client.create_or_update(resource_group_name, service_name, link_service)
+
+
+def update_private_link_service(instance, cmd, tags=None, load_balancer_frontend_ips=None,
+                                ip_configs=None, private_endpoint_connections=None, visibility=None,
+                                auto_approval=None, fqdns=None):
+    with cmd.update_context(instance) as c:
+        c.set_param('tags', tags)
+        c.set_param('load_balancer_frontend_ip_configurations', load_balancer_frontend_ips)
+        c.set_param('ip_configurations', ip_configs)
+        c.set_param('private_endpoint_connections', private_endpoint_connections)
+        c.set_param('visibility', visibility)
+        c.set_param('auto_approval', auto_approval)
+        c.set_param('fqdns', fqdns)
+    return instance
+
+
+def list_private_link_services(cmd, resource_group_name=None):
+    client = network_client_factory(cmd.cli_ctx).private_link_services
+    if resource_group_name:
+        return client.list(resource_group_name)
+    return client.list_by_subscription()
+
+
+def update_private_endpoint_connection(cmd, resource_group_name, service_name, pe_connection_name,
+                                       connection_status, description=None, action_required=None):
+    raise CLIError('TODO: Implement')
 # endregion
 
 
