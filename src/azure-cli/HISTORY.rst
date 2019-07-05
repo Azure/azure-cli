@@ -16,6 +16,11 @@ Release History
 * Add optional parameter to specify replica SKU for create replica command.
 * Fix the issue with CI test failure with creating MySQL replica.
 
+**Storage**
+
+* Enable Files AADDS for storage account update.
+* Fixed issue `storage blob service-properties update --set`.
+
 2.0.68
 ++++++
 **ACR**

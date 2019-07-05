@@ -75,6 +75,14 @@ def set_service_properties(client, parameters, delete_retention=None, delete_ret
         parameters.static_website.index_document = index_document
     if error_document_404_path is not None:
         parameters.static_website.error_document_404_path = error_document_404_path
+    if hasattr(parameters, 'hour_metrics'):
+        kwargs['hour_metrics'] = parameters.hour_metrics
+    if hasattr(parameters, 'logging'):
+        kwargs['logging'] = parameters.logging
+    if hasattr(parameters, 'minute_metrics'):
+        kwargs['minute_metrics'] = parameters.minute_metrics
+    if hasattr(parameters, 'cors'):
+        kwargs['cors'] = parameters.cors
 
     # checks
     policy = kwargs.get('delete_retention_policy', None)
