@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from __future__ import print_function
 
-__version__ = "2.0.66"
+__version__ = "2.0.68"
 
 import os
 import sys
@@ -257,14 +257,22 @@ class MainCommandsLoader(CLICommandsLoader):
 
         return self.command_table
 
-    def load_arguments(self, command):
+    def load_arguments(self, command=None):
         from azure.cli.core.commands.parameters import resource_group_name_type, get_location_type, deployment_name_type
         from knack.arguments import ignore_type
 
-        command_loaders = self.cmd_to_loader_map.get(command, None)
+        # omit specific command to load everything
+        if command is None:
+            command_loaders = set()
+            for loaders in self.cmd_to_loader_map.values():
+                command_loaders = command_loaders.union(set(loaders))
+            logger.info('Applying %s command loaders...', len(command_loaders))
+        else:
+            command_loaders = self.cmd_to_loader_map.get(command, None)
 
         if command_loaders:
             for loader in command_loaders:
+
                 # register global args
                 with loader.argument_context('') as c:
                     c.argument('resource_group_name', resource_group_name_type)
@@ -272,9 +280,16 @@ class MainCommandsLoader(CLICommandsLoader):
                     c.argument('deployment_name', deployment_name_type)
                     c.argument('cmd', ignore_type)
 
-                loader.command_name = command
-                self.command_table[command].load_arguments()  # this loads the arguments via reflection
-                loader.load_arguments(command)  # this adds entries to the argument registries
+                if command is None:
+                    # load all arguments via reflection
+                    for cmd in loader.command_table.values():
+                        cmd.load_arguments()  # this loads the arguments via reflection
+                    loader.skip_applicability = True
+                    loader.load_arguments('')  # this adds entries to the argument registries
+                else:
+                    loader.command_name = command
+                    self.command_table[command].load_arguments()  # this loads the arguments via reflection
+                    loader.load_arguments(command)  # this adds entries to the argument registries
                 self.argument_registry.arguments.update(loader.argument_registry.arguments)
                 self.extra_argument_registry.update(loader.extra_argument_registry)
                 loader._update_command_definitions()  # pylint: disable=protected-access
@@ -310,16 +325,13 @@ class ModExtensionSuppress(object):  # pylint: disable=too-few-public-methods
 
 class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-attributes
 
-    def __init__(self, cli_ctx=None, min_profile=None, max_profile='latest',
-                 command_group_cls=None, argument_context_cls=None, suppress_extension=None,
-                 **kwargs):
+    def __init__(self, cli_ctx=None, command_group_cls=None, argument_context_cls=None,
+                 suppress_extension=None, **kwargs):
         from azure.cli.core.commands import AzCliCommand, AzCommandGroup, AzArgumentContext
 
         super(AzCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                command_cls=AzCliCommand,
                                                excluded_command_handler_args=EXCLUDED_PARAMS)
-        self.min_profile = min_profile
-        self.max_profile = max_profile
         self.suppress_extension = suppress_extension
         self.module_kwargs = kwargs
         self.command_name = None
@@ -395,14 +407,20 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
         api_support = supported_api_version(
             cli_ctx=self.cli_ctx,
             resource_type=resource_type or self._get_resource_type(),
-            min_api=min_api or self.min_profile,
-            max_api=max_api or self.max_profile,
+            min_api=min_api,
+            max_api=max_api,
             operation_group=operation_group)
         if isinstance(api_support, bool):
             return api_support
         if operation_group:
             return getattr(api_support, operation_group)
         return api_support
+
+    def supported_resource_type(self, resource_type=None):
+        from azure.cli.core.profiles import supported_resource_type
+        return supported_resource_type(
+            cli_ctx=self.cli_ctx,
+            resource_type=resource_type or self._get_resource_type())
 
     def get_sdk(self, *attr_args, **kwargs):
         from azure.cli.core.profiles import get_sdk

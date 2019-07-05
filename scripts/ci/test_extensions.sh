@@ -19,6 +19,13 @@ output=$(az extension list-available --query [].name -otsv)
 exit_code=0
 
 for ext in $output; do
+
+    # TODO: Remove when ML extension is compatible with CLI 2.0.69 core
+    # https://github.com/Azure/azure-cli-extensions/issues/826
+    if [ $ext == 'azure-cli-ml' ]; then
+        continue
+    fi
+
     echo
     echo "Verifying extension:" $ext
     az extension add -n $ext
@@ -29,7 +36,7 @@ for ext in $output; do
     fi
 done
 
-azdev verify load-all
+az self-test
 if [ $? != 0 ]
 then
     exit_code=1

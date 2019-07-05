@@ -38,22 +38,13 @@ A great cloud needs great tools; we're excited to introduce Azure CLI,
 
 %prep
 %install
-# Create the venv
+# Create a fully instantiated virtual environment, ready to use the CLI.
 %{python_cmd} -m virtualenv --python %{python_cmd} %{buildroot}%{cli_lib_dir}
+source %{buildroot}%{cli_lib_dir}/bin/activate
 
-# Build the wheels from the source
-source_dir=%{repo_path}
-dist_dir=$(mktemp -d)
-for d in $source_dir/src/azure-cli $source_dir/src/azure-cli-core $source_dir/src/azure-cli-telemetry $source_dir/src/azure-cli-nspkg $source_dir/src/azure-cli-command_modules-nspkg $source_dir/src/command_modules/azure-cli-*/; \
-do cd $d; %{buildroot}%{cli_lib_dir}/bin/python setup.py bdist_wheel -d $dist_dir; cd -; done;
+source %{repo_path}/scripts/install_full.sh
 
-[ -d $source_dir/privates ] && cp $source_dir/privates/*.whl $dist_dir
-
-# Install the CLI
-all_modules=`find $dist_dir -name "*.whl"`
-%{buildroot}%{cli_lib_dir}/bin/pip install --no-compile $all_modules
-%{buildroot}%{cli_lib_dir}/bin/pip install --no-compile --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg
-%{buildroot}%{cli_lib_dir}/bin/pip install --no-compile --force-reinstall urllib3==1.24.2
+deactivate
 
 # Fix up %{buildroot} appearing in some files...
 for d in %{buildroot}%{cli_lib_dir}/bin/*; do perl -p -i -e "s#%{buildroot}##g" $d; done;
@@ -66,7 +57,7 @@ rm %{buildroot}%{cli_lib_dir}/bin/python* %{buildroot}%{cli_lib_dir}/bin/pip*
 
 # Set up tab completion
 mkdir -p %{buildroot}%{_sysconfdir}/bash_completion.d/
-cat $source_dir/az.completion > %{buildroot}%{_sysconfdir}/bash_completion.d/azure-cli
+cat %{repo_path}/az.completion > %{buildroot}%{_sysconfdir}/bash_completion.d/azure-cli
 
 %files
 %exclude %{cli_lib_dir}/bin/
