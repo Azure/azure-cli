@@ -170,10 +170,9 @@ def _validate_network_parameters(cli_ctx, namespace, formula=None):
         if not lab_vnets:
             err = "Unable to find any virtual network in the '{}' lab.".format(namespace.lab_name)
             raise CLIError(err)
-        else:
-            lab_vnet = lab_vnets[0]
-            namespace.vnet_name = lab_vnet.name
-            namespace.lab_virtual_network_id = lab_vnet.id
+        lab_vnet = lab_vnets[0]
+        namespace.vnet_name = lab_vnet.name
+        namespace.lab_virtual_network_id = lab_vnet.id
     # User did provide vnet or has been selected from formula
     else:
         lab_vnet = vnet_operation.get(namespace.resource_group_name, namespace.lab_name, namespace.vnet_name)
@@ -249,7 +248,7 @@ def _validate_image_argument(cli_ctx, namespace, formula=None):
                                       version=gallery_image_reference.version)
             namespace.os_type = gallery_image_reference.os_type
             return
-        elif formula.formula_content.custom_image_id:
+        if formula.formula_content.custom_image_id:
             # Custom image id from the formula is in the form of "customimages/{name}"
             namespace.image = formula.formula_content.custom_image_id.split('/')[-1]
             namespace.image_type = 'custom'
@@ -277,17 +276,16 @@ def _use_gallery_image(cli_ctx, namespace):
         err = "Unable to find image name '{}' in the '{}' lab Gallery.".format(namespace.image,
                                                                                namespace.lab_name)
         raise CLIError(err)
-    elif len(gallery_images) > 1:
+    if len(gallery_images) > 1:
         err = "Found more than 1 image with name '{}'. Please pick one from {}"
         raise CLIError(err.format(namespace.image, [x.name for x in gallery_images]))
-    else:
-        namespace.gallery_image_reference = \
-            GalleryImageReference(offer=gallery_images[0].image_reference.offer,
-                                  publisher=gallery_images[0].image_reference.publisher,
-                                  os_type=gallery_images[0].image_reference.os_type,
-                                  sku=gallery_images[0].image_reference.sku,
-                                  version=gallery_images[0].image_reference.version)
-        namespace.os_type = gallery_images[0].image_reference.os_type
+    namespace.gallery_image_reference = \
+        GalleryImageReference(offer=gallery_images[0].image_reference.offer,
+                              publisher=gallery_images[0].image_reference.publisher,
+                              os_type=gallery_images[0].image_reference.os_type,
+                              sku=gallery_images[0].image_reference.sku,
+                              version=gallery_images[0].image_reference.version)
+    namespace.os_type = gallery_images[0].image_reference.os_type
 
 
 # pylint: disable=no-member
@@ -305,23 +303,22 @@ def _use_custom_image(cli_ctx, namespace):
         if not custom_images:
             err = "Unable to find custom image name '{}' in the '{}' lab.".format(namespace.image, namespace.lab_name)
             raise CLIError(err)
-        elif len(custom_images) > 1:
+        if len(custom_images) > 1:
             err = "Found more than 1 image with name '{}'. Please pick one from {}"
             raise CLIError(err.format(namespace.image, [x.name for x in custom_images]))
-        else:
-            namespace.custom_image_id = custom_images[0].id
+        namespace.custom_image_id = custom_images[0].id
 
-            if custom_images[0].vm is not None:
-                if custom_images[0].vm.windows_os_info is not None:
-                    os_type = "Windows"
-                else:
-                    os_type = "Linux"
-            elif custom_images[0].vhd is not None:
-                os_type = custom_images[0].vhd.os_type
+        if custom_images[0].vm is not None:
+            if custom_images[0].vm.windows_os_info is not None:
+                os_type = "Windows"
             else:
-                raise CLIError("OS type cannot be inferred from the custom image {}".format(custom_images[0].id))
+                os_type = "Linux"
+        elif custom_images[0].vhd is not None:
+            os_type = custom_images[0].vhd.os_type
+        else:
+            raise CLIError("OS type cannot be inferred from the custom image {}".format(custom_images[0].id))
 
-            namespace.os_type = os_type
+        namespace.os_type = os_type
 
 
 def _get_formula(cli_ctx, namespace):
@@ -334,7 +331,7 @@ def _get_formula(cli_ctx, namespace):
     if not formula_images:
         err = "Unable to find formula name '{}' in the '{}' lab.".format(namespace.formula, namespace.lab_name)
         raise CLIError(err)
-    elif len(formula_images) > 1:
+    if len(formula_images) > 1:
         err = "Found more than 1 formula with name '{}'. Please pick one from {}"
         raise CLIError(err.format(namespace.formula, [x.name for x in formula_images]))
     return formula_images[0]
@@ -558,10 +555,9 @@ def _get_object_id_from_subscription(graph_client, subscription):
     if subscription['user']:
         if subscription['user']['type'] == 'user':
             return _get_object_id_by_upn(graph_client, subscription['user']['name'])
-        elif subscription['user']['type'] == 'servicePrincipal':
+        if subscription['user']['type'] == 'servicePrincipal':
             return _get_object_id_by_spn(graph_client, subscription['user']['name'])
-        else:
-            logger.warning("Unknown user type '%s'", subscription['user']['type'])
+        logger.warning("Unknown user type '%s'", subscription['user']['type'])
     else:
         logger.warning('Current credentials are not from a user or service principal. '
                        'Azure DevTest Lab does not work with certificate credentials.')

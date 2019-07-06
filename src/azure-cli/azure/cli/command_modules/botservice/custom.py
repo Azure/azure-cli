@@ -154,44 +154,43 @@ def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, pa
         )
 
     # Web app and function bots require deploying custom ARM templates, we do that in a separate method
-    else:
-        logger.info('Detected kind %s, validating parameters for the specified kind.', kind)
+    logger.info('Detected kind %s, validating parameters for the specified kind.', kind)
 
-        if not language:
-            raise CLIError("You must pass in a language when creating a {0} or {1} bot. See 'az bot create --help'."
-                           .format(webapp_kind, function_kind))
-        language = language.lower()
+    if not language:
+        raise CLIError("You must pass in a language when creating a {0} or {1} bot. See 'az bot create --help'."
+                       .format(webapp_kind, function_kind))
+    language = language.lower()
 
-        bot_template_type = __bot_template_validator(version, deploy_echo)
+    bot_template_type = __bot_template_validator(version, deploy_echo)
 
-        if version == 'v4':
-            if storageAccountName:
-                logger.warning('WARNING: `az bot create` for v4 bots no longer creates or uses a Storage Account. If '
-                               'you wish to create a Storage Account via Azure CLI, please use `az storage account` or '
-                               'an ARM template.')
-            if appInsightsLocation:
-                logger.warning(
-                    'WARNING: `az bot create` for v4 bots no longer creates or uses Application Insights. If '
-                    'you wish to create Application Insights via Azure CLI, please use an ARM template.')
-            storageAccountName = None
-            appInsightsLocation = None
-        if version == 'v3' and not appInsightsLocation:
-            appInsightsLocation = 'South Central US'
+    if version == 'v4':
+        if storageAccountName:
+            logger.warning('WARNING: `az bot create` for v4 bots no longer creates or uses a Storage Account. If '
+                           'you wish to create a Storage Account via Azure CLI, please use `az storage account` or '
+                           'an ARM template.')
+        if appInsightsLocation:
+            logger.warning(
+                'WARNING: `az bot create` for v4 bots no longer creates or uses Application Insights. If '
+                'you wish to create Application Insights via Azure CLI, please use an ARM template.')
+        storageAccountName = None
+        appInsightsLocation = None
+    if version == 'v3' and not appInsightsLocation:
+        appInsightsLocation = 'South Central US'
 
-        creation_results = BotTemplateDeployer.create_app(
-            cmd, logger, client, resource_group_name, resource_name, description, kind, msa_app_id, password,
-            storageAccountName, location, sku_name, appInsightsLocation, language, version, bot_template_type)
+    creation_results = BotTemplateDeployer.create_app(
+        cmd, logger, client, resource_group_name, resource_name, description, kind, msa_app_id, password,
+        storageAccountName, location, sku_name, appInsightsLocation, language, version, bot_template_type)
 
-        subscription_id = get_subscription_id(cmd.cli_ctx)
-        publish_cmd = "az bot publish --resource-group %s -n %s --subscription %s -v %s" % (
-            resource_group_name, resource_name, subscription_id, version)
-        if language == CSHARP:
-            proj_file = '%s.csproj' % resource_name
-            publish_cmd += " --proj-file-path %s" % proj_file
-        creation_results['publishCommand'] = publish_cmd
-        logger.info('To publish your local changes to Azure, use the following command from your code directory:\n  %s',
-                    publish_cmd)
-        return creation_results
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    publish_cmd = "az bot publish --resource-group %s -n %s --subscription %s -v %s" % (
+        resource_group_name, resource_name, subscription_id, version)
+    if language == CSHARP:
+        proj_file = '%s.csproj' % resource_name
+        publish_cmd += " --proj-file-path %s" % proj_file
+    creation_results['publishCommand'] = publish_cmd
+    logger.info('To publish your local changes to Azure, use the following command from your code directory:\n  %s',
+                publish_cmd)
+    return creation_results
 
 
 def get_bot(cmd, client, resource_group_name, resource_name, bot_json=None):
@@ -535,7 +534,7 @@ def prepare_webapp_deploy(language, code_dir=None, proj_file_path=None):
                            'prepare-deploy"' % (file_name, code_dir, file_name))
     language = language.lower()
 
-    if language == JAVASCRIPT or language == TYPESCRIPT:
+    if language in (JAVASCRIPT, TYPESCRIPT):
         if proj_file_path:
             raise CLIError('--proj-file-path should not be passed in if language is not Csharp')
         does_file_exist('web.config')
@@ -612,8 +611,8 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
     # 2. We shouldn't delete their local web.config and issnode.yml files (if they exist).
     iis_publish_info = {
         'lang': CSHARP if not os.path.exists(os.path.join(code_dir, 'package.json')) else JAVASCRIPT,
-        'has_web_config': True if os.path.exists(os.path.join(code_dir, 'web.config')) else False,
-        'has_iisnode_yml': True if os.path.exists(os.path.join(code_dir, 'iisnode.yml')) else False
+        'has_web_config': bool(os.path.exists(os.path.join(code_dir, 'web.config'))),
+        'has_iisnode_yml': bool(os.path.exists(os.path.join(code_dir, 'iisnode.yml')))
     }
 
     # Ensure that the directory contains appropriate post deploy scripts folder

@@ -109,7 +109,7 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
         if in_cloud_console():
             return profile.find_subscriptions_in_cloud_console()
         return profile.find_subscriptions_in_vm_with_msi(username, allow_no_subscriptions)
-    elif in_cloud_console():  # tell users they might not need login
+    if in_cloud_console():  # tell users they might not need login
         logger.warning(_CLOUD_CONSOLE_LOGIN_WARNING)
 
     if username:

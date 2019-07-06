@@ -11,7 +11,6 @@ def billing_exception_handler(ex):
     if isinstance(ex, ErrorResponseException):
         message = ex.error.error.message
         raise CLIError(message)
-    else:
-        import sys
-        from six import reraise
-        reraise(*sys.exc_info())
+    import sys
+    from six import reraise
+    reraise(*sys.exc_info())

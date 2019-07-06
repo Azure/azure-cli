@@ -121,7 +121,7 @@ class BotJsonFormatter:  # pylint:disable=too-few-public-methods
 
             if len(app_passwords) == 1:
                 return decrypt(bot_file_secret, app_passwords[0], logger)
-            elif len(app_passwords) > 1:
+            if len(app_passwords) > 1:
                 logger.info('More than one Microsoft App Password found in bot file. Evaluating if more than one '
                             'unique App Password exists.')
                 app_passwords = [decrypt(bot_file_secret, pw, logger) for pw in app_passwords]
