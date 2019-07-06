@@ -84,9 +84,9 @@ def validate_network_profile(cmd, ns):
 
     if ns.network_profile and ns.ip_address:
         raise CLIError('Can not use "--network-profile" with IP address type "Public".')
-    elif ns.network_profile and ns.dns_name_label:
+    if ns.network_profile and ns.dns_name_label:
         raise CLIError('Can not use "--network-profile" with "--dns-name-label".')
-    elif ns.network_profile:
+    if ns.network_profile:
         if not is_valid_resource_id(ns.network_profile):
             ns.network_profile = resource_id(
                 subscription=get_subscription_id(cmd.cli_ctx),

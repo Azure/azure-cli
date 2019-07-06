@@ -183,11 +183,11 @@ def _stream_logs(no_format,  # pylint: disable=too-many-locals, too-many-stateme
     logger.debug("status was: '%s'", build_status)
 
     if raise_error_on_failure:
-        if build_status == 'internalerror' or build_status == 'failed':
+        if build_status in ('internalerror', 'failed'):
             raise CLIError("Run failed")
-        elif build_status == 'timedout':
+        if build_status == 'timedout':
             raise CLIError("Run timed out")
-        elif build_status == 'canceled':
+        if build_status == 'canceled':
             raise CLIError("Run was canceled")
 
 

@@ -255,7 +255,7 @@ def submit_adla_job(client, account_name, job_name, script, runtime_version=None
     from azure.mgmt.datalake.analytics.job.models import (
         JobType, CreateJobParameters, BuildJobParameters, CreateUSqlJobProperties, JobRelationshipProperties)
 
-    if not script or len(script) < 1:
+    if not script:
         # pylint: disable=line-too-long
         raise CLIError('Could not read script content from the supplied --script param. It is either empty or an invalid file')
 

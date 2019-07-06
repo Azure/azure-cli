@@ -22,7 +22,7 @@ name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME')
 # pylint: disable=too-many-statements
 def load_arguments(self, _):
     with self.argument_context('ad') as c:
-        c.argument('_subscription')  # hide global subscription param
+        c.ignore('_subscription')  # hide global subscription param
         c.argument('owner_object_id', help="owner's object id")
         c.argument('show_mine', action='store_true', help='list entities owned by the current user')
         c.argument('include_all', options_list='--all', action='store_true',

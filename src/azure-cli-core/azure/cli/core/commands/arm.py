@@ -356,13 +356,11 @@ def register_global_subscription_argument(cli_ctx):
             'arg_group': 'Global',
             'action': SubscriptionNameOrIdAction,
             'configured_default': 'subscription',
-            'id_part': 'subscription',
-            'options_list': ['--subscription']
+            'id_part': 'subscription'
         }
 
         for _, cmd in cmd_tbl.items():
-            options = default_sub_kwargs.pop('options_list', [])
-            cmd.add_argument('_subscription', *options, **default_sub_kwargs)
+            cmd.add_argument('_subscription', *['--subscription'], **default_sub_kwargs)
 
     cli_ctx.register_event(EVENT_INVOKER_PRE_LOAD_ARGUMENTS, add_subscription_parameter)
 
