@@ -25,7 +25,7 @@ def _operation(name):
 # pylint: disable=too-many-locals, too-many-statements, line-too-long
 def load_command_table(self, _):
 
-    data_path = 'azure.batch.operations.{}_operations#{}.'
+    data_path = 'azure.batch.operations._{}_operations#{}.'
     mgmt_path = 'azure.mgmt.batch.operations.{}_operations#{}.'
 
     def get_data_type(name):
@@ -82,8 +82,8 @@ def load_command_table(self, _):
         g.batch_command('list', 'list')
         g.batch_command('show', 'get')
 
-    with self.command_group('batch pool node-agent-skus', get_data_type('account')) as g:
-        g.batch_command('list', 'list_node_agent_skus')
+    with self.command_group('batch pool supported-images', get_data_type('account')) as g:
+        g.batch_command('list', 'list_supported_images')
 
     with self.command_group('batch pool node-counts', get_data_type('account')) as g:
         g.batch_command('list', 'list_pool_node_counts')

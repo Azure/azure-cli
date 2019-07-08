@@ -445,35 +445,35 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
 
         self.command_pool = _command_type.AzureBatchDataPlaneCommand(
             'azure.batch.operations.pool_operations#PoolOperations.add',
-            operations.pool_operations.PoolOperations.add,
+            operations._pool_operations.PoolOperations.add,
             client_factory=get_client)
         self.command_node = _command_type.AzureBatchDataPlaneCommand(
-            'azure.batch.operations.compute_node_operations#ComputeNodeOperations.reboot',
-            operations.compute_node_operations.ComputeNodeOperations.reboot,
+            'azure.batch.operations._compute_node_operations#ComputeNodeOperations.reboot',
+            operations._compute_node_operations.ComputeNodeOperations.reboot,
             client_factory=get_client)
         self.command_job = _command_type.AzureBatchDataPlaneCommand(
             'azure.batch.operations.job_operations#JobOperations.add',
-            operations.job_operations.JobOperations.add,
+            operations._job_operations.JobOperations.add,
             client_factory=get_client)
         self.command_task = _command_type.AzureBatchDataPlaneCommand(
             'azure.batch.operations.task_operations#TaskOperations.add',
-            operations.task_operations.TaskOperations.add,
+            operations._task_operations.TaskOperations.add,
             client_factory=get_client, flatten=1)
         self.command_file = _command_type.AzureBatchDataPlaneCommand(
-            'azure.batch.operations.file_operations#FileOperations.get_from_task',
-            operations.file_operations.FileOperations.get_from_task,
+            'azure.batch.operations._file_operations#FileOperations.get_from_task',
+            operations._file_operations.FileOperations.get_from_task,
             client_factory=get_client)
         self.command_list = _command_type.AzureBatchDataPlaneCommand(
-            'azure.batch.operations.job_operations#JobOperations.list',
-            operations.job_operations.JobOperations.list,
+            'azure.batch.operations._job_operations#JobOperations.list',
+            operations._job_operations.JobOperations.list,
             client_factory=get_client)
         self.command_delete = _command_type.AzureBatchDataPlaneCommand(
-            'azure.batch.operations.pool_operations#PoolOperations.delete',
-            operations.pool_operations.PoolOperations.delete,
+            'azure.batch.operations._pool_operations#PoolOperations.delete',
+            operations._pool_operations.PoolOperations.delete,
             client_factory=get_client)
         self.command_conflicts = _command_type.AzureBatchDataPlaneCommand(
-            'azure.batch.operations.job_schedule_operations#JobScheduleOperations.add',
-            operations.job_schedule_operations.JobScheduleOperations.add,
+            'azure.batch.operations._job_schedule_operations#JobScheduleOperations.add',
+            operations._job_schedule_operations.JobScheduleOperations.add,
             client_factory=get_client, flatten=4)
         return super(TestBatchLoader, self).setUp()
 
@@ -511,7 +511,7 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
 
     def test_batch_options(self):
         self.command_delete._load_options_model(
-            operations.pool_operations.PoolOperations.delete)
+            operations._pool_operations.PoolOperations.delete)
         self.assertIsInstance(self.command_delete._options_model, models.PoolDeleteOptions)
         self.assertEqual(sorted(self.command_delete._options_attrs),
                          ['additional_properties',
@@ -558,7 +558,7 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
 
     def test_batch_load_arguments(self):
         # pylint: disable=too-many-statements
-        handler = operations.pool_operations.PoolOperations.add
+        handler = operations._pool_operations.PoolOperations.add
         args = list(self.command_pool._load_transformed_arguments(handler))
         self.assertEqual(len(args), 28)
         self.assertFalse('yes' in [a for a, _ in args])
@@ -568,25 +568,25 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
         self.assertFalse('start_task_environment_settings' in [a for a, _ in args])
         self.assertTrue('certificate_references' in [a for a, _ in args])
         self.assertTrue('metadata' in [a for a, _ in args])
-        handler = operations.job_operations.JobOperations.add
+        handler = operations._job_operations.JobOperations.add
         args = list(self.command_job._load_transformed_arguments(handler))
         self.assertEqual(len(args), 16)
         self.assertFalse('yes' in [a for a, _ in args])
         self.assertTrue('json_file' in [a for a, _ in args])
         self.assertFalse('destination' in [a for a, _ in args])
-        handler = operations.task_operations.TaskOperations.add
+        handler = operations._task_operations.TaskOperations.add
         args = list(self.command_task._load_transformed_arguments(handler))
         self.assertEqual(len(args), 11)
         self.assertFalse('yes' in [a for a, _ in args])
         self.assertTrue('json_file' in [a for a, _ in args])
         self.assertFalse('destination' in [a for a, _ in args])
-        handler = operations.file_operations.FileOperations.get_from_task
+        handler = operations._file_operations.FileOperations.get_from_task
         args = list(self.command_file._load_transformed_arguments(handler))
         self.assertEqual(len(args), 12)
         self.assertFalse('yes' in [a for a, _ in args])
         self.assertFalse('json_file' in [a for a, _ in args])
         self.assertTrue('destination' in [a for a, _ in args])
-        handler = operations.job_operations.JobOperations.list
+        handler = operations._job_operations.JobOperations.list
         args = list(self.command_list._load_transformed_arguments(handler))
         self.assertEqual(len(args), 7)
         names = [a for a, _ in args]
@@ -594,13 +594,13 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
         self.assertFalse('yes' in [a for a, _ in args])
         self.assertFalse('json_file' in [a for a, _ in args])
         self.assertFalse('destination' in [a for a, _ in args])
-        handler = operations.pool_operations.PoolOperations.delete
+        handler = operations._pool_operations.PoolOperations.delete
         args = list(self.command_delete._load_transformed_arguments(handler))
         self.assertEqual(len(args), 10)
         self.assertTrue('yes' in [a for a, _ in args])
         self.assertFalse('json_file' in [a for a, _ in args])
         self.assertFalse('destination' in [a for a, _ in args])
-        handler = operations.job_schedule_operations.JobScheduleOperations.add
+        handler = operations._job_schedule_operations.JobScheduleOperations.add
         args = [a for a, _ in self.command_conflicts._load_transformed_arguments(handler)]
         self.assertEqual(len(args), 20)
         self.assertTrue('id' in args)
@@ -611,7 +611,7 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
         self.assertFalse('yes' in args)
         self.assertTrue('json_file' in args)
         self.assertFalse('destination' in args)
-        handler = operations.compute_node_operations.ComputeNodeOperations.reboot
+        handler = operations._compute_node_operations.ComputeNodeOperations.reboot
         args = list(self.command_node._load_transformed_arguments(handler))
         self.assertEqual(len(args), 7)
         self.assertTrue('node_reboot_option' in [a for a, _ in args])
