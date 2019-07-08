@@ -14,7 +14,7 @@ from azure.cli.core.commands.parameters import \
     (tags_type, get_location_type, resource_group_name_type,
      get_resource_name_completion_list, file_type, get_enum_type)
 
-from azure.cli.command_modules.batch._completers import load_node_agent_skus
+from azure.cli.command_modules.batch._completers import load_supported_images
 from azure.cli.command_modules.batch._validators import \
     (application_enabled, datetime_format, storage_account_id, metadata_item_format,
      application_package_reference_format, validate_pool_resize_parameters,
@@ -120,8 +120,8 @@ def load_arguments(self, _):
     with self.argument_context('batch pool create') as c:
         c.argument('os_family', arg_type=get_enum_type(['2', '3', '4', '5']))
         c.argument('auto_scale_formula', help='A formula for the desired number of compute nodes in the pool. The formula is checked for validity before the pool is created. If the formula is not valid, the Batch service rejects the request with detailed error information. For more information about specifying this formula, see https://azure.microsoft.com/documentation/articles/batch-automatic-scaling/.')
-        c.extra('image', completer=load_node_agent_skus, arg_group="Pool: Virtual Machine Configuration",
-                help="OS image reference. This can be either 'publisher:offer:sku[:version]' format, or a fully qualified ARM image id of the form '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.Compute/images/{imageName}'. If 'publisher:offer:sku[:version]' format, version is optional and if omitted latest will be used. Valid values can be retrieved via 'az batch pool node-agent-skus list'. For example: 'MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:latest'")
+        c.extra('image', completer=load_supported_images, arg_group="Pool: Virtual Machine Configuration",
+                help="OS image reference. This can be either 'publisher:offer:sku[:version]' format, or a fully qualified ARM image id of the form '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.Compute/images/{imageName}'. If 'publisher:offer:sku[:version]' format, version is optional and if omitted latest will be used. Valid values can be retrieved via 'az batch pool supported-images list'. For example: 'MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:latest'")
 
     with self.argument_context('batch certificate') as c:
         c.argument('thumbprint', help='The certificate thumbprint.')
