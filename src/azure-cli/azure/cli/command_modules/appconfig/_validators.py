@@ -12,18 +12,6 @@ from ._utils import is_valid_connection_string, resolve_resource_group
 from .azconfig.models import QueryFields
 
 
-def validate_tags(namespace):
-    if namespace.tags is not None:
-        if not namespace.tags:
-            return
-        tag_content = namespace.tags.split(',')
-        for tag_kv in tag_content:
-            tag = tag_kv.split("=")
-            if len(tag) != 2:
-                raise CLIError(
-                    "Tags are not valid. It should be this format 'key1=value1,key2=value2'")
-
-
 def validate_datetime(namespace):
     ''' valid datetime format:YYYY-MM-DDThh:mm:ssZ '''
     datetime_format = '^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])T(2[0-3]|[01][0-9]):[0-5][0-9]:[0-5][0-9][a-zA-Z]{0,5}$'
@@ -65,37 +53,27 @@ def validate_separator(namespace):
 def validate_import(namespace):
     source = namespace.source
     if source == 'file':
-        if namespace.path is None:
-            raise CLIError("Please specify the file path.")
-        if namespace.format_ is None:
-            raise CLIError("Please specify the file format.")
+        if namespace.path is None or namespace.format_ is None:
+            raise CLIError("usage error: --path PATH --format FORMAT")
     elif source == 'appconfig':
         if (namespace.src_name is None) and (namespace.src_connection_string is None):
-            raise CLIError(
-                "Please specify either the AppConfig name or its connection string.")
+            raise CLIError("usage error: --config-name NAME | --connection-string STR")
     elif source == 'appservice':
         if namespace.appservice_account is None:
-            raise CLIError(
-                "Please specify the name of the AppService account.")
+            raise CLIError("usage error: --appservice-account NAME_OR_ID")
 
 
 def validate_export(namespace):
     destination = namespace.destination
     if destination == 'file':
-        if namespace.path is None:
-            raise CLIError("Please specify the file path.")
-        if namespace.format_ is None:
-            raise CLIError("Please specify the file format.")
+        if namespace.path is None or namespace.format_ is None:
+            raise CLIError("usage error: --path PATH --format FORMAT")
     elif destination == 'appconfig':
         if (namespace.dest_name is None) and (namespace.dest_connection_string is None):
-            raise CLIError(
-                "Please specify either the AppConfig name or its connection string.")
+            raise CLIError("usage error: --config-name NAME | --connection-string STR")
     elif destination == 'appservice':
         if namespace.appservice_name is None:
-            raise CLIError("Please specify the name of the AppService.")
-        if namespace.appservice_resource_group is None:
-            raise CLIError(
-                "Please specify the name of the AppService's resource group.")
+            raise CLIError("usage error: --appservice-account NAME_OR_ID")
 
 
 def validate_appservice_name_or_id(cmd, namespace):

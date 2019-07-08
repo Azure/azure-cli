@@ -55,7 +55,7 @@ def user_confirmation(message, yes=False):
 
 def resolve_connection_string(cmd, config_store_name=None, connection_string=None):
     string = ''
-    error_message = '''You may have specified both store name and connection string, which is a confliction.
+    error_message = '''You may have specified both store name and connection string, which is a conflict.
 Please specify exactly ONE (suggest connection string) in one of the following options:\n
 1 pass in App Configuration store name as a parameter\n
 2 pass in connection string as a parameter\n
