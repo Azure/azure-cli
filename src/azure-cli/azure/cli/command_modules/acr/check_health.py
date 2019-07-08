@@ -84,8 +84,7 @@ def _get_docker_status_and_version(ignore_errors, yes):
         _handle_error(error, ignore_errors)
         if error.error_title != DOCKER_DAEMON_ERROR.error_title:
             return  # We cannot proceed if the error is unexpected or with docker command
-        else:
-            docker_daemon_available = False
+        docker_daemon_available = False
 
     if docker_daemon_available:
         print("Docker daemon status: available")
@@ -286,5 +285,3 @@ def acr_check_health(cmd,  # pylint: disable useless-return
     _check_health_environment(ignore_errors, yes)
     _check_health_connectivity(cmd, registry_name, ignore_errors)
     print(FAQ_MESSAGE)
-
-    return None

@@ -35,7 +35,7 @@ def list_kinds(client):
     """
     # The client should be ResourceSkusOperations, and list() should return a list of SKUs for all regions.
     # The sku will have "kind" and we use that to extract full list of kinds.
-    kinds = set([x.kind for x in client.list()])
+    kinds = {x.kind for x in client.list()}
     return sorted(list(kinds))
 
 

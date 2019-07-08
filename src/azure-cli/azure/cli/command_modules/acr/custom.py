@@ -49,10 +49,10 @@ def acr_create(cmd,
         raise CLIError(NETWORK_RULE_NOT_SUPPORTED)
 
     if sku in get_managed_sku(cmd) and storage_account_name:
-        raise CLIError("Please specify '--sku {}' without providing an existing storage account "
-                       "to create a managed registry, or specify '--sku Classic --storage-account-name {}' "
-                       "to create a Classic registry using storage account `{}`."
-                       .format(sku, storage_account_name, storage_account_name))
+        raise CLIError("Please specify '--sku {0}' without providing an existing storage account "
+                       "to create a managed registry, or specify '--sku Classic --storage-account-name {1}' "
+                       "to create a Classic registry using storage account `{1}`."
+                       .format(sku, storage_account_name))
 
     if sku in get_classic_sku(cmd):
         result = client.check_name_availability(registry_name)
@@ -92,16 +92,16 @@ def acr_create(cmd,
                     deployment_name)
             )
         return client.get(resource_group_name, registry_name)
-    else:
-        if storage_account_name:
-            logger.warning(
-                "The registry '%s' in '%s' SKU is a managed registry. The specified storage account will be ignored.",
-                registry_name, sku)
-        Registry, Sku, NetworkRuleSet = cmd.get_models('Registry', 'Sku', 'NetworkRuleSet')
-        registry = Registry(location=location, sku=Sku(name=sku), admin_user_enabled=admin_enabled)
-        if default_action:
-            registry.network_rule_set = NetworkRuleSet(default_action=default_action)
-        return client.create(resource_group_name, registry_name, registry)
+
+    if storage_account_name:
+        logger.warning(
+            "The registry '%s' in '%s' SKU is a managed registry. The specified storage account will be ignored.",
+            registry_name, sku)
+    Registry, Sku, NetworkRuleSet = cmd.get_models('Registry', 'Sku', 'NetworkRuleSet')
+    registry = Registry(location=location, sku=Sku(name=sku), admin_user_enabled=admin_enabled)
+    if default_action:
+        registry.network_rule_set = NetworkRuleSet(default_action=default_action)
+    return client.create(resource_group_name, registry_name, registry)
 
 
 def acr_delete(cmd, client, registry_name, resource_group_name=None):
@@ -293,20 +293,20 @@ def _check_wincred(login_server):
                     return False
             # Don't update config file or retry as this doesn't seem to be a wincred issue
             return False
-        else:
-            import os
-            content = {
-                "auths": {
-                    login_server: {}
-                }
+
+        import os
+        content = {
+            "auths": {
+                login_server: {}
             }
-            try:
-                os.makedirs(docker_directory)
-            except OSError as e:
-                logger.debug("Could not create docker directory '%s'. Exception: %s", docker_directory, str(e))
-            with open(config_path, 'w') as output_file:
-                json.dump(content, output_file, indent=4)
-                output_file.close()
-            return True
+        }
+        try:
+            os.makedirs(docker_directory)
+        except OSError as e:
+            logger.debug("Could not create docker directory '%s'. Exception: %s", docker_directory, str(e))
+        with open(config_path, 'w') as output_file:
+            json.dump(content, output_file, indent=4)
+            output_file.close()
+        return True
 
     return False

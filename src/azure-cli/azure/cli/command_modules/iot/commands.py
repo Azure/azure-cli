@@ -38,7 +38,6 @@ class HubDeleteResultTransform(LongRunningOperation):  # pylint: disable=too-few
         except CLIError as e:
             if 'not found' not in str(e):
                 raise e
-        return None
 
 
 def load_command_table(self, _):  # pylint: disable=too-many-statements

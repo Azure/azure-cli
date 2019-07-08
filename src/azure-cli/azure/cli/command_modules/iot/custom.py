@@ -414,10 +414,9 @@ def iot_hub_show_connection_string(client, hub_name=None, resource_group_name=No
         def conn_str_getter(h):
             return _get_hub_connection_string(client, h.name, h.additional_properties['resourcegroup'], policy_name, key_type, show_all)
         return [{'name': h.name, 'connectionString': conn_str_getter(h)} for h in hubs]
-    else:
-        resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
-        conn_str = _get_hub_connection_string(client, hub_name, resource_group_name, policy_name, key_type, show_all)
-        return {'connectionString': conn_str if show_all else conn_str[0]}
+    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
+    conn_str = _get_hub_connection_string(client, hub_name, resource_group_name, policy_name, key_type, show_all)
+    return {'connectionString': conn_str if show_all else conn_str[0]}
 
 
 def _get_hub_connection_string(client, hub_name, resource_group_name, policy_name, key_type, show_all):
@@ -521,7 +520,7 @@ def iot_hub_policy_key_renew(cmd, client, hub_name, policy_name, regenerate_key,
 
 
 def _is_policy_existed(policies, policy_name):
-    policy_set = set([p.key_name.lower() for p in policies])
+    policy_set = {p.key_name.lower() for p in policies}
     return policy_name.lower() in policy_set
 
 
@@ -609,13 +608,13 @@ def iot_hub_routing_endpoint_list(client, hub_name, endpoint_type=None, resource
     hub = iot_hub_get(client, hub_name, resource_group_name)
     if not endpoint_type:
         return hub.properties.routing.endpoints
-    elif EndpointType.EventHub.value == endpoint_type.lower():
+    if EndpointType.EventHub.value == endpoint_type.lower():
         return hub.properties.routing.endpoints.event_hubs
-    elif EndpointType.ServiceBusQueue.value == endpoint_type.lower():
+    if EndpointType.ServiceBusQueue.value == endpoint_type.lower():
         return hub.properties.routing.endpoints.service_bus_queues
-    elif EndpointType.ServiceBusTopic.value == endpoint_type.lower():
+    if EndpointType.ServiceBusTopic.value == endpoint_type.lower():
         return hub.properties.routing.endpoints.service_bus_topics
-    elif EndpointType.AzureStorageContainer.value == endpoint_type.lower():
+    if EndpointType.AzureStorageContainer.value == endpoint_type.lower():
         return hub.properties.routing.endpoints.storage_containers
 
 
@@ -877,7 +876,7 @@ def _convert_perms_to_access_rights(perm_list):
 
 
 def _is_linked_hub_existed(hubs, hub_name):
-    hub_set = set([h.name.lower() for h in hubs])
+    hub_set = {h.name.lower() for h in hubs}
     return hub_name.lower() in hub_set
 
 

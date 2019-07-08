@@ -105,7 +105,7 @@ def _build_filter_string(ids=None, resource_group_name=None, category=None):
         if categoryFilter:
             return '({}) and {}'.format(idFilter, categoryFilter)
         return idFilter
-    elif categoryFilter:
+    if categoryFilter:
         return categoryFilter
 
     return None
