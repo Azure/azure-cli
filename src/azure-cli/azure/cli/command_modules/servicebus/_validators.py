@@ -119,5 +119,6 @@ def validate_subnet(cmd, namespace):
 
 
 def validate_rights(namespace):
-    if 'Manage' in namespace.rights and 'Listen' not in namespace.rights or 'Send' not in namespace.rights:
-        raise CLIError('Error : Assigning \'Manage\' to --rights requires \'Listen\' and \'Send\' to be included with. e.g. --rights Manage Send Listen')
+    if 'Manage' in namespace.rights:
+        if 'Listen' not in namespace.rights or 'Send' not in namespace.rights:
+            raise CLIError('Error : Assigning \'Manage\' to --rights requires \'Listen\' and \'Send\' to be included with. e.g. --rights Manage Send Listen')
