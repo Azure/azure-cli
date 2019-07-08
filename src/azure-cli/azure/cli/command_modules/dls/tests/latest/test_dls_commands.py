@@ -126,7 +126,7 @@ class DataLakeStoreFileScenarioTest(ScenarioTest):
         except ImportError:
             import mock
         import uuid
-        
+
         def const_uuid():
             return uuid.UUID('{12345678-1234-5678-1234-567812345678}')
 
