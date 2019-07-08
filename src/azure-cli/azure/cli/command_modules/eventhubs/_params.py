@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long
 # pylint: disable=too-many-statements
+# pylint: disable=too-many-locals
 
 
 # pylint: disable=line-too-long

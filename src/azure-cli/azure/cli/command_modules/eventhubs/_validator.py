@@ -60,8 +60,6 @@ def validate_subnet(cmd, namespace):
     delattr(namespace, 'vnet_name')
 
 
-def validate_rights(cmd, namespace):
-    from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import is_valid_resource_id, resource_id
+def validate_rights(namespace):
     if 'Manage' in namespace.rights and 'Listen' not in namespace.rights or 'Send' not in namespace.rights:
         raise CLIError('Error : Assigning \'Manage\' to --rights requires \'Listen\' and \'Send\' to be included with. e.g. --rights Manage Send Listen')
