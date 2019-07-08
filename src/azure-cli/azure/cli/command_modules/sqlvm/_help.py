@@ -97,6 +97,9 @@ helps['sql vm update'] = """
         - name: Update a SQL virtual machine with specific sku type.
           text: >
             az sql vm update -n sqlvm -g myresourcegroup --image-sku Enterprise
+        - name: Update a SQL virtual machine manageability from LightWeight to Full.
+          text: >
+            az sql vm update -n sqlvm -g myresourcegroup --sql-mgmt-type Full --yes
         - name: Update SQL virtual machine auto backup settings.
           text: >
             az sql vm update -n sqlvm -g myresourcegroup --backup-schedule-type manual --full-backup-frequency Weekly --full-backup-start-hour 2 --full-backup-duration 2

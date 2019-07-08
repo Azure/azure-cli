@@ -161,7 +161,7 @@ def load_arguments(self, _):
                    help='Get the SQLIaaSExtension configuration settings.',
                    arg_type=get_enum_type(['*']))
         c.argument('sql_management_mode',
-                   help='SQL Server management type. If NoAgent selected, please provide --image-sku and --offer-type',
+                   help='SQL Server management type. If NoAgent selected, please provide --image-sku and --offer-type.',
                    options_list=['--sql-mgmt-type'],
                    validator=validate_sqlmanagement,
                    arg_type=get_enum_type(SqlManagementMode))
@@ -177,7 +177,7 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(SqlImageSku))
         c.argument('sql_image_offer',
                    options_list=['--image-offer'],
-                   help='SQL image offer. Examples include SQL2016-WS2016, SQL2017-WS2016, SQL2014-WS2012R2.')
+                   help='SQL image offer. Examples include SQL2008R2-WS2008R2, SQL2008R2-WS2008, SQL2008-WS2008, SQL2008-WS2008R2.')
 
     with self.argument_context('sql vm add-to-group') as c:
         c.argument('sql_virtual_machine_group_resource_id',
@@ -196,9 +196,12 @@ def load_arguments(self, _):
 
     with self.argument_context('sql vm update') as c:
         c.argument('sql_management_mode',
-                   help='SQL Server management type.',
+                   help='SQL Server management type. Updates from LightWeight to Full.',
                    options_list=['--sql-mgmt-type'],
                    arg_type=get_enum_type(['Full']))
+        c.argument('prompt',
+                   options_list=['--yes', '-y'],
+                   help="Do not prompt for confirmation. Requires --sql-mgmt-type.")
 
     with self.argument_context('sql vm add-to-group', arg_group='WSFC Domain Credentials') as c:
         c.argument('cluster_bootstrap_account_password',

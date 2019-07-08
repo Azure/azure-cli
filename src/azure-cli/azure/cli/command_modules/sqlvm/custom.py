@@ -271,7 +271,7 @@ def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, sql
 # pylint: disable=too-many-statements, line-too-long, too-many-boolean-expressions
 def sqlvm_update(instance, sql_server_license_type=None, sql_image_sku=None, enable_auto_patching=None,
                  day_of_week=None, maintenance_window_starting_hour=None, maintenance_window_duration=None,
-                 enable_auto_backup=None, enable_encryption=False, retention_period=None, storage_account_url=None,
+                 enable_auto_backup=None, enable_encryption=False, retention_period=None, storage_account_url=None, prompt=True,
                  storage_access_key=None, backup_password=None, backup_system_dbs=False, backup_schedule_type=None, sql_management_mode=None,
                  full_backup_frequency=None, full_backup_start_time=None, full_backup_window_hours=None, log_backup_frequency=None,
                  enable_key_vault_credential=None, credential_name=None, azure_key_vault_url=None, service_principal_name=None,
@@ -285,8 +285,14 @@ def sqlvm_update(instance, sql_server_license_type=None, sql_image_sku=None, ena
         instance.sql_server_license_type = sql_server_license_type
     if sql_image_sku is not None:
         instance.sql_image_sku = sql_image_sku
-    if sql_management_mode is not None:
-        instance.sql_management = sql_management_mode
+    if sql_management_mode is not None and instance.sql_management != "Full":
+        from knack.prompting import prompt_y_n
+        if not prompt:
+            instance.sql_management = sql_management_mode
+        else:
+            confirmation = prompt_y_n("Upgrading SQL manageability mode to Full will restart the SQL Server. Proceed?")
+            if confirmation:
+                instance.sql_management = sql_management_mode
 
     if (enable_auto_patching is not None or day_of_week is not None or maintenance_window_starting_hour is not None or maintenance_window_duration is not None):
 

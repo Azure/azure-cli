@@ -166,7 +166,7 @@ class SqlVmScenarioTest(ScenarioTest):
                  ])
 
         # test update sqlvm with management mode to make sure it updates to full.
-        self.cmd('sql vm update -n {} -g {} --sql-mgmt-type {}'
+        self.cmd('sql vm update -n {} -g {} --sql-mgmt-type {} --yes'
                  .format(sqlvm, resource_group, 'Full'),
                  checks=[
                      JMESPathCheck('name', sqlvm),
