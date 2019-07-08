@@ -8,23 +8,12 @@ import azure.cli.command_modules.backup.custom_wl as custom_wl
 import azure.cli.command_modules.backup.custom_help as custom_help
 # pylint: disable=import-error
 
-from knack.log import get_logger
 
-logger = get_logger(__name__)
-
-fabric_name = "Azure"
-default_policy_name = "DefaultPolicy"
-os_windows = 'Windows'
-os_linux = 'Linux'
-password_offset = 33
-password_length = 15
-
-
-def show_container(client, name, resource_group_name, vault_name, container_type="AzureIaasVM", status="Registered"):
+def show_container(cmd, client, name, resource_group_name, vault_name, container_type="AzureIaasVM", status="Registered"):
     if container_type == "AzureIaasVM":
         return custom.show_container(client, name, resource_group_name, vault_name, container_type, status)
     else:
-        return custom_wl.show_wl_container(client, name, resource_group_name, vault_name, container_type)
+        return custom_wl.show_wl_container(cmd, name, resource_group_name, vault_name, container_type)
 
 
 def list_containers(client, resource_group_name, vault_name, container_type="AzureIaasVM", status="Registered"):
@@ -48,11 +37,11 @@ def list_policies(client, resource_group_name, vault_name, workload_type=None, c
         return custom_wl.list_wl_policies(client, resource_group_name, vault_name, workload_type, container_type)
 
 
-def show_item(cmd, client, resource_group_name, vault_name, container_name, name, workload_type=None, container_type="AzureIaasVM"):
-    if container_type == "AzureIaasVM" and workload_type is None:
+def show_item(cmd, client, resource_group_name, vault_name, container_name, name, container_type="AzureIaasVM"):
+    if container_type == "AzureIaasVM":
         return custom.show_item(cmd, client, resource_group_name, vault_name, container_name, name)
     else:
-        return custom_wl.show_wl_item(client, resource_group_name, vault_name, container_name, name, workload_type)
+        return custom_wl.show_wl_item(cmd, resource_group_name, vault_name, container_name, name)
 
 
 def list_items(cmd, client, resource_group_name, vault_name, workload_type=None, container_name=None, container_type="AzureIaasVM",

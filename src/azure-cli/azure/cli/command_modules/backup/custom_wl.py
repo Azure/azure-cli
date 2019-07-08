@@ -7,7 +7,6 @@ import azure.cli.command_modules.backup.custom_help as cust_help
 import json
 # pylint: disable=import-error
 
-from knack.log import get_logger
 from datetime import datetime
 from uuid import uuid4
 from importlib import import_module
@@ -15,11 +14,12 @@ from azure.cli.command_modules.backup._validators import datetime_type
 
 from azure.mgmt.recoveryservicesbackup.models import AzureVMAppContainerProtectionContainer, ProtectionContainerResource, \
     AzureWorkloadBackupRequest, ProtectedItemResource, AzureRecoveryServiceVaultProtectionIntent, TargetRestoreInfo, \
-    RestoreRequestResource, BackupRequestResource, ProtectionIntentResource, AzureWorkloadRestoreRequest, SQLDataDirectoryMapping \
+    RestoreRequestResource, BackupRequestResource, ProtectionIntentResource, SQLDataDirectoryMapping \
 
 from azure.cli.core.util import CLIError, sdk_no_wait
-from azure.cli.command_modules.backup._client_factory import (backup_workload_items_cf, \
-    protected_items_cf, protection_containers_cf, protectable_containers_cf, protection_policies_cf)
+from azure.cli.command_modules.backup._client_factory import backup_workload_items_cf, \
+     protected_items_cf, protection_containers_cf, protectable_containers_cf, protection_policies_cf, \
+     backup_protection_containers_cf
 
 fabric_name = "Azure"
 
@@ -30,6 +30,10 @@ workload_type_map = {'MSSQL': 'SQLDataBase',
 # Mapping of module name
 module_map = {'sqldatabase': 'sql_database',
               'saphanadatabase': 'sap_hana_database'}
+
+# Mapping of attribute name
+attr_map = {'sqldatabase': 'SQLDatabase',
+            'saphanadatabase': 'SAPHanaDatabase'}
 
 
 def show_wl_policy(client, resource_group_name, vault_name, name):
@@ -83,10 +87,11 @@ def register_wl_container(cmd, client, vault_name, resource_group_name, workload
     containers = list_protectable_containers(cmd, resource_group_name, vault_name)
 
     for container in containers:
-        if container.properties.container_id == resource_id:
+        if cust_help._get_resource_id(container.properties.container_id) == cust_help._get_resource_id(resource_id):
             container_name = container.name
+            break
 
-    if container_name == resource_id.split('/')[-1]:
+    if not cust_help._is_native_name(container_name):
         raise CLIError(
             """
             Container unavailable or already registered.
@@ -96,6 +101,7 @@ def register_wl_container(cmd, client, vault_name, resource_group_name, workload
                                                         workload_type=workload_type)
     param = ProtectionContainerResource(properties=properties)
 
+    # Trigger register and wait for completion
     result = sdk_no_wait(True, client.register,
                          vault_name, resource_group_name, fabric_name, container_name, param)
     return cust_help._track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name, container_name)
@@ -117,6 +123,7 @@ def re_register_wl_container(cmd, client, vault_name, resource_group_name, workl
     for container in containers:
         if container.name == container_name:
             source_resource_id = container.properties.source_resource_id
+            break
 
     if not source_resource_id:
         raise CLIError(
@@ -128,6 +135,7 @@ def re_register_wl_container(cmd, client, vault_name, resource_group_name, workl
                                                         operation_type='Reregister', source_resource_id=source_resource_id)
     param = ProtectionContainerResource(properties=properties)
 
+    # Trigger register and wait for completion
     result = sdk_no_wait(True, client.register,
                          vault_name, resource_group_name, fabric_name, container_name, param)
     return cust_help._track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name, container_name)
@@ -141,27 +149,22 @@ def unregister_wl_container(cmd, client, vault_name, resource_group_name, contai
             Please pass a native container name.
             """)
 
+    # Trigger unregister and wait for completion
     result = sdk_no_wait(True, client.unregister,
                          vault_name, resource_group_name, fabric_name, container_name)
     return cust_help._track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name, container_name)
 
 
-def show_wl_container(client, name, resource_group_name, vault_name, container_type, status="Registered"):
-    return client.get(vault_name, resource_group_name, fabric_name, name)
+def show_wl_container(cmd, name, resource_group_name, vault_name, container_type, status="Registered"):
+    return protection_containers_cf(cmd.cli_ctx).get(vault_name, resource_group_name, fabric_name, name)
 
 
 def list_wl_containers(client, resource_group_name, vault_name, container_type, status="Registered"):
     return cust_help._get_containers(client, container_type, status, resource_group_name, vault_name)
 
 
-def show_wl_item(client, resource_group_name, vault_name, container_name, name, workload_type):
-    if workload_type is None:
-        raise CLIError(
-            """
-            Workload type is required for Azure Workload.
-            """)
-
-    return client.get(vault_name, resource_group_name, fabric_name, container_name, name)
+def show_wl_item(cmd, resource_group_name, vault_name, container_name, name):
+    return protected_items_cf(cmd.cli_ctx).get(vault_name, resource_group_name, fabric_name, container_name, name)
 
 
 def list_wl_items(client, resource_group_name, vault_name, workload_type, container_name=None):
@@ -226,13 +229,13 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, contain
             The policy type should match with the workload being protected.
             """)
 
-    # Dynamically instantiating class based on item type
-    backup_item_type = item_uri.split(';')[0]
-    module = import_module("azure.mgmt.recoveryservicesbackup.models.azure_vm_workload_"+module_map[backup_item_type.lower()]+"_protected_item")
-    class_ = getattr(module, "AzureVmWorkload"+backup_item_type+"ProtectedItem")
+    # Update policy request
+    item = show_wl_item(cmd, resource_group_name, vault_name, container_name, item_name)
+    cust_help._validate_item(item)
+    item_properties = item.properties
+    item_properties.policy_id = policy.id
 
-    properties = class_(policy_id=policy.id)
-    param = ProtectedItemResource(properties=properties)
+    param = ProtectedItemResource(properties=item_properties)
 
     # Update policy
     result = sdk_no_wait(True, client.create_or_update,
@@ -268,20 +271,6 @@ def set_policy(client, resource_group_name, vault_name, policy, policy_name):
             """)
 
     policy_object = cust_help._get_policy_from_json(client, policy)
-    # retention_range_in_days = policy_object.properties.instant_rp_retention_range_in_days
-    # schedule_run_frequency = policy_object.properties.schedule_policy.schedule_run_frequency
-
-    # Validating range of days input
-    # if schedule_run_frequency == 'Weekly' and retention_range_in_days != 5:
-    #    raise CLIError(
-    #        """
-    #        Retention policy range must be equal to 5.
-    #        """)
-    # if schedule_run_frequency == 'Daily' and (retention_range_in_days > 5 or retention_range_in_days < 1):
-    #    raise CLIError(
-    #        """
-    #        Retention policy range must be between 1 to 5.
-    #        """)
 
     return client.create_or_update(vault_name, resource_group_name, policy_name, policy_object)
 
@@ -332,8 +321,7 @@ def list_protectable_items(cmd, client, resource_group_name, vault_name, workloa
         if cust_help._is_native_name(container_name):
             container_uri = container_name
         else:
-            container = show_wl_container(protection_containers_cf(cmd.cli_ctx),
-                                          container_name, resource_group_name, vault_name)
+            container = show_wl_container(cmd, container_name, resource_group_name, vault_name)
             cust_help._validate_container(container)
             container_uri = container.name
 
@@ -344,8 +332,8 @@ def list_protectable_items(cmd, client, resource_group_name, vault_name, workloa
 
 def show_wl_recovery_point(cmd, client, resource_group_name, vault_name, container_name, item_name, name,
                            workload_type, container_type="AzureWorkload"):
-    item = show_wl_item(protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name, container_name,
-                        item_name, workload_type)
+    item = show_wl_item(cmd, resource_group_name, vault_name, container_name,
+                        item_name)
     cust_help._validate_item(item)
 
     # Get container and item URIs
@@ -357,8 +345,8 @@ def show_wl_recovery_point(cmd, client, resource_group_name, vault_name, contain
 
 def list_wl_recovery_points(cmd, client, resource_group_name, vault_name, container_name, item_name, workload_type,
                             start_date=None, end_date=None, extended_info=None):
-    item = show_wl_item(protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name,
-                        container_name, item_name, workload_type)
+    item = show_wl_item(cmd, resource_group_name, vault_name,
+                        container_name, item_name)
     cust_help._validate_item(item)
 
     # Get container and item URIs
@@ -390,26 +378,30 @@ def list_wl_recovery_points(cmd, client, resource_group_name, vault_name, contai
 
 
 def enable_protection_for_azure_wl(cmd, client, resource_group_name, vault_name, policy_name, protectable_item):
+    # Get protectable item.
     protectable_item_object = cust_help._get_protectable_item_from_json(client, protectable_item)
     protectable_item_type = protectable_item_object.properties.protectable_item_type
-    if protectable_item_type.lower() not in ["sqldatabase", "sqlinstance", "hanadatabase", "hanainstance"]:
+    if protectable_item_type.lower() not in ["sqldatabase", "sqlinstance", "saphanadatabase", "saphanasystem"]:
         raise CLIError(
             """
             Protectable Item must be either of type SQLDataBase, HANADatabase, HANAInstance or SQLInstance.
             """)
+
     item_name = protectable_item_object.name
     container_name = protectable_item_object.id.split('/')[12]
-
     policy_object = show_wl_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name, policy_name)[0]
+    cust_help._validate_policy(policy_object)
     policy_id = policy_object.id
 
     # Dynamically instantiating class based on item type
     module = import_module("azure.mgmt.recoveryservicesbackup.models.azure_vm_workload_"+module_map[protectable_item_type.lower()]+"_protected_item")
-    class_ = getattr(module, "AzureVmWorkload"+protectable_item_type+"ProtectedItem")
+    class_ = getattr(module, "AzureVmWorkload"+attr_map[protectable_item_type.lower()]+"ProtectedItem")
 
+    # Construct enable protection request object
     properties = class_(backup_management_type='AzureWorkload', policy_id=policy_id, workload_type=protectable_item_type)
     param = ProtectionContainerResource(properties=properties)
 
+    # Trigger enable protection and wait for completion
     result = sdk_no_wait(True, client.create_or_update,
                          vault_name, resource_group_name, fabric_name, container_name, item_name, param)
     return cust_help._track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
@@ -447,7 +439,7 @@ def backup_now(cmd, client, resource_group_name, vault_name, container_name, ite
     if not cust_help._is_sql(backup_item_type) and enable_compression:
         raise CLIError(
             """
-            Enable compression is only applicable for SAPHanaDatabase item type.
+            Enable compression is not applicable for SAPHanaDatabase item type.
             """)
 
     if cust_help._is_hana(backup_item_type) and backup_type in ['Log', 'CopyOnlyFull']:
@@ -460,6 +452,7 @@ def backup_now(cmd, client, resource_group_name, vault_name, container_name, ite
                                             recovery_point_expiry_time_in_utc=retain_until)
     param = BackupRequestResource(properties=properties)
 
+    # Trigger backup and wait for completion
     result = sdk_no_wait(True, client.trigger,
                          vault_name, resource_group_name, fabric_name, container_uri, item_uri,
                          param)
@@ -501,7 +494,7 @@ def disable_protection(cmd, client, resource_group_name, vault_name, container_n
 
     # Dynamically instantiating class based on item type
     module = import_module("azure.mgmt.recoveryservicesbackup.models.azure_vm_workload_"+module_map[backup_item_type.lower()]+"_protected_item")
-    class_ = getattr(module, "AzureVmWorkload"+backup_item_type+"ProtectedItem")
+    class_ = getattr(module, "AzureVmWorkload"+attr_map[backup_item_type.lower()]+"ProtectedItem")
 
     properties = class_(protection_state='ProtectionStopped', policy_id='')
     param = ProtectedItemResource(properties=properties)
@@ -523,6 +516,7 @@ def auto_enable_for_azure_wl(cmd, client, resource_group_name, vault_name, polic
             """)
 
     policy_object = show_wl_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name, policy_name)[0]
+    cust_help._validate_policy(policy_object)
     policy_id = policy_object.id
 
     properties = AzureRecoveryServiceVaultProtectionIntent(backup_management_type='AzureWorkload', policy_id=policy_id, item_id=item_id)
@@ -530,7 +524,16 @@ def auto_enable_for_azure_wl(cmd, client, resource_group_name, vault_name, polic
 
     intent_object_name = str(uuid4())
 
-    return client.create_or_update(vault_name, resource_group_name, fabric_name, intent_object_name, param)
+    try:
+        client.create_or_update(vault_name, resource_group_name, fabric_name, intent_object_name, param)
+        return {
+            'status': True
+            }
+    except:
+        return {
+            'status': False
+            }
+
 
 
 def disable_auto_for_azure_wl(client, resource_group_name, vault_name, item_name):
@@ -549,7 +552,15 @@ def disable_auto_for_azure_wl(client, resource_group_name, vault_name, item_name
 
     intent_object_name = str(uuid4())
 
-    return client.delete(vault_name, resource_group_name, fabric_name, intent_object_name)
+    try:
+        client.delete(vault_name, resource_group_name, fabric_name, intent_object_name)
+        return {
+            'status': True
+            }
+    except:
+        return {
+            'status': False
+            }
 
 
 def list_workload_items(cmd, vault_name, resource_group_name, container_name, container_type="AzureWorkload", workload_type="SQLInstance"):
@@ -587,6 +598,7 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
     module = import_module("azure.mgmt.recoveryservicesbackup.models.azure_workload_"+restore_module_map[item_type.lower()]+"_restore_request")
     class_ = getattr(module, "AzureWorkload"+item_type+"RestoreRequest")
 
+    # Construct trigger restore request object
     trigger_restore_properties = class_(recovery_type=restore_mode)
     if restore_mode == 'AlternateLocation':
         setattr(trigger_restore_properties, 'source_resource_id', source_resource_id)
@@ -604,7 +616,7 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
         setattr(trigger_restore_properties, 'is_non_recoverable', False)
     trigger_restore_request = RestoreRequestResource(properties=trigger_restore_properties)
 
-    # Trigger restore
+    # Trigger restore and wait for completion
     result = sdk_no_wait(True, client.trigger,
                          vault_name, resource_group_name, fabric_name, container_uri, item_uri, recovery_point_id,
                          trigger_restore_request)
@@ -655,8 +667,8 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
                         'AlternateWorkloadRestore': 'AlternateLocation'}
     rp_name = rp_name if rp_name is not None else 'DefaultRangeRecoveryPoint'
 
-    item = show_wl_item(protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name, container_name, item_name,
-                        item_type)
+    item = show_wl_item(cmd, resource_group_name, vault_name, container_name, item_name)
+    cust_help._validate_item(item)
 
     if rp_name == 'DefaultRangeRecoveryPoint':
         recovery_points = list_wl_recovery_points(cmd, client, resource_group_name, vault_name, container_name, item_name, item_type,
@@ -675,7 +687,7 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
                                                 item_type)
 
     alternate_directory_paths = []
-    if ('sql' in item_type.lower() and restore_mode == 'AlternateWorkloadRestore'):
+    if 'sql' in item_type.lower() and restore_mode == 'AlternateWorkloadRestore':
         items = list_workload_items(cmd, vault_name, resource_group_name, container_name)
         for j in items:
             if j.properties.friendly_name == protectable_item_object.properties.friendly_name and j.properties.server_name == protectable_item_object.properties.server_name:

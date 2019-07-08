@@ -16,4 +16,4 @@ def datetime_type(string):
             return datetime.strptime(string, form)
         except ValueError:  # checks next format
             pass
-    raise ValueError("Input '{}' not valid. Valid example: 31-12-2017".format(string))
+    raise ValueError("Input '{}' not valid. Valid example: 31-12-2017, 31-12-2017-05:30:00".format(string))

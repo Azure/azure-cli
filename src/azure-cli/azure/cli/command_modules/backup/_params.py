@@ -9,7 +9,7 @@ from argcomplete.completers import FilesCompleter
 
 from knack.arguments import CLIArgumentType
 
-import azure.cli.core.commands.arm  # pylint: disable=unused-import
+# pylint: disable=unused-import
 from azure.cli.core.commands.parameters import \
     (get_resource_name_completion_list, file_type, get_three_state_flag,
      get_enum_type)

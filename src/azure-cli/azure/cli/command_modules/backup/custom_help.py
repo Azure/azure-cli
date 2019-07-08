@@ -30,7 +30,6 @@ from azure.cli.command_modules.backup._client_factory import (
 logger = get_logger(__name__)
 
 fabric_name = "Azure"
-default_policy_name = "DefaultPolicy"
 os_windows = 'Windows'
 os_linux = 'Linux'
 password_offset = 33
@@ -65,6 +64,10 @@ def _is_range_valid(start_date, end_date):
                     """
                     Start date must be earlier than end date.
                     """)
+
+
+def _get_resource_id(resource_id):
+    return "/".join(resource_id.split('/')[3:])
 
 
 def _get_target_path(type, path, logical_name, data_directory_paths):
