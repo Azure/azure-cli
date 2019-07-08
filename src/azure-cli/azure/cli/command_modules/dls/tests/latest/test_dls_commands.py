@@ -28,7 +28,6 @@ class DataLakeStoreFileAccessScenarioTest(ScenarioTest):
         self.kwargs.update({
             'dls': self.create_random_name('cliadls', 24),
             'loc': 'eastus2',
-            'rg': 'adls-cli-rg',
             'dir': 'adltestfolder01',
             'user_id': user_id,
             'acl_to_add': 'user:{}:rwx'.format(user_id),
@@ -149,7 +148,6 @@ class DataLakeStoreFileScenarioTest(ScenarioTest):
         self.kwargs.update({
             'dls': self.create_random_name('cliadls', 24),
             'loc': 'eastus2',
-            'rg': 'adls-cli-rg',
             'dir': local_folder,
             'local_folder': os.path.join(os.getcwd(), local_folder),
             'local_file': os.path.join(local_folder, 'sample_file.txt'),
@@ -313,7 +311,6 @@ class DataLakeStoreAccountScenarioTest(ScenarioTest):
         self.kwargs.update({
             'dls': self.create_random_name('cliadls', 24),
             'loc': 'eastus2',
-            'rg': 'adls-cli-rg'
         })
 
         # test create keyvault with default access policy set
