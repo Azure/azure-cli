@@ -77,8 +77,9 @@ Release History
 
 **SQL VM**
 
-* New optional paramenter to setup SQL management type on creation time of a sql vm. --sql-mgmt-type
-* Minor fixes on sql vm group
+* New optional paramenter to setup SQL management type on creation time of a SQL vm. --sql-mgmt-type
+* New optional parameter to upgrade SQL manageability on update of a SQL vm.
+* Minor fixes on SQL vm group that did not allow to update the key for storage accounts.
 
 **VM**
 
