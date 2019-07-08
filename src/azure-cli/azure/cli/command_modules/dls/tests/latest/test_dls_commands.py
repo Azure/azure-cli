@@ -119,7 +119,6 @@ class DataLakeStoreFileAccessScenarioTest(ScenarioTest):
         assert 3 == len(remove_result['entries'])
 
 
-# Convert back to ScenarioTest and re-record when #5175 is addressed
 class DataLakeStoreFileScenarioTest(ScenarioTest):
 
     def setUp(self):
