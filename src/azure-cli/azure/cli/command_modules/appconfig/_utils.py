@@ -25,9 +25,9 @@ def construct_connection_string(cmd, config_store_name):
                 return connection_string_template.format(endpoint, entry.id, entry.value)
     except Exception:
         raise CLIError(
-            'Cannot find the App Configuration store {}.'.format(config_store_name))
+            'Cannot find the App Configuration {}. Check if it exists in the subscription that logged in. '.format(config_store_name))
 
-    raise CLIError('Cannot find a read write access key for the App Configuration store {}'.format(
+    raise CLIError('Cannot find a read write access key for the App Configuration {}'.format(
         config_store_name))
 
 

@@ -5,7 +5,7 @@
 
 from enum import Enum
 import uuid
-import azure.cli.command_modules.appconfig.azconfig.constants as constants
+import azure.cli.command_modules.appconfig._azconfig.constants as constants
 
 
 # pylint: disable=too-few-public-methods

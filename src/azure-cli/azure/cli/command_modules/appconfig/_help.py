@@ -75,7 +75,7 @@ helps['appconfig credential regenerate'] = """
     examples:
         - name: Regenerate a read only access key for an App Configuration
           text:
-            az appconfig credential regenerate -g MyResourceGroup -n MyAppConfiguration --id ReadOnlyKeyId
+            az appconfig credential regenerate -g MyResourceGroup -n MyAppConfiguration --id 0-l0-s0:8ldbreMVH+d7EjaSUg3H
     """
 
 helps['appconfig kv'] = """
@@ -110,7 +110,7 @@ helps['appconfig kv export'] = """
             az appconfig kv export -n MyAppConfiguration -d appconfig --dest-name AnotherAppConfiguration
         - name: Export all keys with null label to an App Service appliaction.
           text:
-            az appconfig kv export -n MyAppConfiguration -s appservice -d appservice --appservice-account MyAppService
+            az appconfig kv export -n MyAppConfiguration -d appservice  --appservice-account MyAppService
     """
 
 helps['appconfig kv set'] = """
@@ -122,7 +122,7 @@ helps['appconfig kv set'] = """
             az appconfig kv set -n MyAppConfiguration --key color --label MyLabel --value red
         - name: Set a key with null label using connection string.
           text:
-            az appconfig kv set --connection-string MyConnectionString --key color --value red --tags key1=value1 key2=value2
+            az appconfig kv set --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --key color --value red --tags key1=value1 key2=value2
     """
 
 helps['appconfig kv delete'] = """
@@ -134,7 +134,7 @@ helps['appconfig kv delete'] = """
             az appconfig kv delete -n MyAppConfiguration --key color --label MyLabel --yes
         - name: Delete a key using connection string.
           text:
-            az appconfig kv delete --connection-string MyConnectionStringtionString --key color --label MyLabel
+            az appconfig kv delete --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --key color --label MyLabel
     """
 
 helps['appconfig kv show'] = """
@@ -146,7 +146,7 @@ helps['appconfig kv show'] = """
             az appconfig kv show -n MyAppConfiguration --key color --label MyLabel --datetime "2019-05-01T11:24:12Z"
         - name: Show a key-value using connection string with label
           text:
-            az appconfig kv show --connection-string MyConnectionString --key color --label MyLabel
+            az appconfig kv show --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --key color --label MyLabel
     """
 
 helps['appconfig kv list'] = """
@@ -158,13 +158,13 @@ helps['appconfig kv list'] = """
             az appconfig kv list -n MyAppConfiguration
         - name: List a specfic key for any label start with v1. using connection string.
           text:
-            az appconfig kv list --key color --connection-string MyConnectionString --label v1.*
+            az appconfig kv list --key color --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --label v1.*
         - name: List all keys with any labels and query only key, value and tags.
           text:
-            az appconfig kv list --connection-string MyConnectionString --fields key value tags --datetime "2019-05-01T11:24:12Z"
+            az appconfig kv list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --fields key value tags --datetime "2019-05-01T11:24:12Z"
         - name: List 150 key-values with any labels.
           text:
-            az appconfig kv list --connection-string MyConnectionString  --top 150
+            az appconfig kv list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx  --top 150
     """
 
 helps['appconfig revision'] = """
@@ -181,7 +181,7 @@ helps['appconfig revision list'] = """
             az appconfig revision list -n MyAppConfiguration --key color --label test
         - name: List revision history for key "color" with any labels using connection string
           text:
-            az appconfig revision list --connection-string MyConnectionString --key color --datetime "2019-05-01T11:24:12Z"
+            az appconfig revision list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --key color --datetime "2019-05-01T11:24:12Z"
     """
 
 helps['appconfig kv lock'] = """
@@ -193,7 +193,7 @@ helps['appconfig kv lock'] = """
             az appconfig kv lock -n MyAppConfiguration --key color --label test
         - name: Force locking a key-value using connection string.
           text:
-            az appconfig kv lock --connection-string MyConnectionString --key color --label test --yes
+            az appconfig kv lock --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --key color --label test --yes
     """
 
 helps['appconfig kv unlock'] = """
@@ -205,5 +205,5 @@ helps['appconfig kv unlock'] = """
             az appconfig kv unlock -n MyAppConfiguration --key color --label test
         - name: Force unlocking a key-value using connection string.
           text:
-            az appconfig kv unlock --connection-string MyConnectionString --key color --label test --yes
+            az appconfig kv unlock --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --key color --label test --yes
     """

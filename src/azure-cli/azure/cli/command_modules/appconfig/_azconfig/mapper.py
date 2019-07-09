@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import azure.cli.command_modules.appconfig.azconfig.models as models
+import azure.cli.command_modules.appconfig._azconfig.models as models
 
 
 def map_json_to_keyvalue(json_object):

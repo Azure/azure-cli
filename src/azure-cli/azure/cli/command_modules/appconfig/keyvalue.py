@@ -18,12 +18,13 @@ from knack.log import get_logger
 from knack.util import CLIError
 
 from ._utils import resolve_connection_string, user_confirmation
-from .azconfig.azconfig_client import AzconfigClient
-from .azconfig.constants import StatusCodes
-from .azconfig.exceptions import HTTPException
-from .azconfig.models import (KeyValue, ModifyKeyValueOptions,
-                              QueryKeyValueCollectionOptions,
-                              QueryKeyValueOptions)
+from ._azconfig.azconfig_client import AzconfigClient
+from ._azconfig.constants import StatusCodes
+from ._azconfig.exceptions import HTTPException
+from ._azconfig.models import (KeyValue,
+                               ModifyKeyValueOptions,
+                               QueryKeyValueCollectionOptions,
+                               QueryKeyValueOptions)
 
 logger = get_logger(__name__)
 

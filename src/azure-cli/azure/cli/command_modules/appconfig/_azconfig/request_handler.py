@@ -6,10 +6,10 @@
 # pylint: disable=too-few-public-methods
 
 import time
-import azure.cli.command_modules.appconfig.azconfig.constants as constants
-import azure.cli.command_modules.appconfig.azconfig.utils as utils
-import azure.cli.command_modules.appconfig.azconfig.http_logger as logger
-import azure.cli.command_modules.appconfig.azconfig.exceptions as exceptions
+import azure.cli.command_modules.appconfig._azconfig.constants as constants
+import azure.cli.command_modules.appconfig._azconfig.utils as utils
+import azure.cli.command_modules.appconfig._azconfig.http_logger as logger
+import azure.cli.command_modules.appconfig._azconfig.exceptions as exceptions
 
 
 class RequestHandler(object):

@@ -6,7 +6,8 @@
 from azure.cli.core.commands import CliCommandType
 
 from ._client_factory import cf_configstore, cf_configstore_operations
-from ._format import (configstore_credential_format, configstore_output_format,
+from ._format import (configstore_credential_format,
+                      configstore_output_format,
                       keyvalue_entry_format)
 
 

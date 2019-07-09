@@ -12,7 +12,7 @@ import urllib
 from datetime import datetime
 import six
 
-import azure.cli.command_modules.appconfig.azconfig.constants as constants
+import azure.cli.command_modules.appconfig._azconfig.constants as constants
 
 
 def get_endpoint_from_connection_string(connection_string):

@@ -7,14 +7,14 @@
 
 import json
 import requests
-import azure.cli.command_modules.appconfig.azconfig.keyvalue_iterable as iterable
-import azure.cli.command_modules.appconfig.azconfig.exceptions as exceptions
-import azure.cli.command_modules.appconfig.azconfig.constants as constants
-import azure.cli.command_modules.appconfig.azconfig.utils as utils
-import azure.cli.command_modules.appconfig.azconfig.models as models
-import azure.cli.command_modules.appconfig.azconfig.mapper as mapper
-import azure.cli.command_modules.appconfig.azconfig.request_message as request_message
-import azure.cli.command_modules.appconfig.azconfig.request_handler as handler
+import azure.cli.command_modules.appconfig._azconfig.keyvalue_iterable as iterable
+import azure.cli.command_modules.appconfig._azconfig.exceptions as exceptions
+import azure.cli.command_modules.appconfig._azconfig.constants as constants
+import azure.cli.command_modules.appconfig._azconfig.utils as utils
+import azure.cli.command_modules.appconfig._azconfig.models as models
+import azure.cli.command_modules.appconfig._azconfig.mapper as mapper
+import azure.cli.command_modules.appconfig._azconfig.request_message as request_message
+import azure.cli.command_modules.appconfig._azconfig.request_handler as handler
 
 
 class AzconfigClient(object):

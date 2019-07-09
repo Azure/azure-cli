@@ -24,9 +24,5 @@ def cf_configstore_operations(cli_ctx, *_):
     try:
         return get_appconfig_service_client(cli_ctx).operations
     except CLIError:
-        params = cli_ctx.data['safe_params']
-        has_valid_params = '--path' in params and '--format' in params and '--connection-string' in params
-        if cli_ctx.data['command'] == 'appconfig kv export' and has_valid_params:
-            logger.debug('Bypass az login for kv export command')
-        else:
-            raise
+        logger.debug('Trying to bypass az login.')
+        return None

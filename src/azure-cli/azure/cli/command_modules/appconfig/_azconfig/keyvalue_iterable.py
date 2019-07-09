@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import azure.cli.command_modules.appconfig.azconfig.execution_context as execution_context
+import azure.cli.command_modules.appconfig._azconfig.execution_context as execution_context
 
 # pylint: disable=too-few-public-methods
 

@@ -9,7 +9,7 @@ import re
 from knack.util import CLIError
 
 from ._utils import is_valid_connection_string, resolve_resource_group
-from .azconfig.models import QueryFields
+from ._azconfig.models import QueryFields
 
 
 def validate_datetime(namespace):
