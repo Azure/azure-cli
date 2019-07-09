@@ -16,7 +16,8 @@ from azure.mgmt.sqlvirtualmachine.models import (
     DiskConfigurationType,
     DayOfWeek,
     SqlVmGroupImageSku,
-    SqlImageSku
+    SqlImageSku,
+    SqlManagementMode
 )
 
 from azure.cli.core.commands.parameters import (
@@ -31,7 +32,8 @@ from ._validators import (
     validate_sqlvm_list,
     validate_load_balancer,
     validate_public_ip_address,
-    validate_subnet
+    validate_subnet,
+    validate_sqlmanagement
 )
 
 
@@ -158,6 +160,11 @@ def load_arguments(self, _):
         c.argument('expand',
                    help='Get the SQLIaaSExtension configuration settings.',
                    arg_type=get_enum_type(['*']))
+        c.argument('sql_management_mode',
+                   help='SQL Server management type. If NoAgent selected, please provide --image-sku and --offer-type.',
+                   options_list=['--sql-mgmt-type'],
+                   validator=validate_sqlmanagement,
+                   arg_type=get_enum_type(SqlManagementMode))
 
     with self.argument_context('sql vm', arg_group='SQL Server License') as c:
         c.argument('sql_server_license_type',
@@ -168,6 +175,9 @@ def load_arguments(self, _):
                    options_list=['--image-sku'],
                    help='SQL image sku.',
                    arg_type=get_enum_type(SqlImageSku))
+        c.argument('sql_image_offer',
+                   options_list=['--image-offer'],
+                   help='SQL image offer. Examples include SQL2008R2-WS2008, SQL2008-WS2008.')
 
     with self.argument_context('sql vm add-to-group') as c:
         c.argument('sql_virtual_machine_group_resource_id',
@@ -184,10 +194,18 @@ def load_arguments(self, _):
                    id_part='name',
                    help="Name of the SQL virtual machine.")
 
+    with self.argument_context('sql vm update') as c:
+        c.argument('sql_management_mode',
+                   help='SQL Server management type. Updates from LightWeight to Full.',
+                   options_list=['--sql-mgmt-type'],
+                   arg_type=get_enum_type(['Full']))
+        c.argument('prompt',
+                   options_list=['--yes', '-y'],
+                   help="Do not prompt for confirmation. Requires --sql-mgmt-type.")
+
     with self.argument_context('sql vm add-to-group', arg_group='WSFC Domain Credentials') as c:
         c.argument('cluster_bootstrap_account_password',
-                   options_list=['-b', '--bootstrap-acc-pwd',
-                                 c.deprecate(target='--boostrap-acc-pwd', redirect='--bootstrap-acc-pwd')],
+                   options_list=['-b', '--bootstrap-acc-pwd'],
                    help='Password for the cluster bootstrap account if provided in the SQL virtual machine group.')
         c.argument('cluster_operator_account_password',
                    options_list=['--operator-acc-pwd', '-p'],
