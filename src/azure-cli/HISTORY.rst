@@ -90,6 +90,11 @@ Release History
 
 * Document allowed values for sql db create --sample-name
 
+**SQL VM**
+
+* sql vm create/update: Added optional parameter `--sql-mgmt-type` to setup SQL management
+* Minor fixes on SQL vm group that did not allow to update the key for storage accounts.
+
 **VM**
 
 * vmss create: Fix bug where command returns an error message when run with `--no-wait`. The command succesfully sends

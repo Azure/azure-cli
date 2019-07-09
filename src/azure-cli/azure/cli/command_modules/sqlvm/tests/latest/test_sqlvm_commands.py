@@ -121,6 +121,7 @@ class SqlVmScenarioTest(ScenarioTest):
     def test_sqlvm_mgmt(self, resource_group, resource_group_location, sqlvm, storage_account):
 
         loc = 'westus'
+        self.cmd('storage account update -n {} -g {} --set kind=StorageV2'.format(storage_account, resource_group))
 
         sa = self.cmd('storage account show -n {} -g {}'
                       .format(storage_account, resource_group)).get_output_in_json()
@@ -128,13 +129,19 @@ class SqlVmScenarioTest(ScenarioTest):
         key = self.cmd('storage account keys list -n {} -g {}'
                        .format(storage_account, resource_group)).get_output_in_json()
 
+        # Assert customer cannot create a SQL vm with no agent and do not provide offer and sku
+        with self.assertRaisesRegexp(CLIError, "usage error: --sql-mgmt-type NoAgent --image-sku NAME --image-offer NAME"):
+            self.cmd('sql vm create -n {} -g {} -l {} --license-type {} --sql-mgmt-type {}'
+                     .format(sqlvm, resource_group, loc, 'PAYG', 'NoAgent'))
+
         # test create sqlvm with minimal required parameters
         sqlvm_1 = self.cmd('sql vm create -n {} -g {} -l {} --license-type {}'
                            .format(sqlvm, resource_group, loc, 'PAYG'),
                            checks=[
                                JMESPathCheck('name', sqlvm),
                                JMESPathCheck('location', loc),
-                               JMESPathCheck('sqlServerLicenseType', 'PAYG')
+                               JMESPathCheck('sqlServerLicenseType', 'PAYG'),
+                               JMESPathCheck('sqlManagement', 'LightWeight')
                            ]).get_output_in_json()
 
         # test list sqlvm should be 1
@@ -157,6 +164,15 @@ class SqlVmScenarioTest(ScenarioTest):
                      JMESPathCheck('name', sqlvm),
                      JMESPathCheck('id', sqlvm_1['id'])
                  ])
+
+        # test update sqlvm with management mode to make sure it updates to full.
+        self.cmd('sql vm update -n {} -g {} --sql-mgmt-type {} --yes'
+                 .format(sqlvm, resource_group, 'Full'),
+                 checks=[
+                     JMESPathCheck('name', sqlvm),
+                     JMESPathCheck('location', loc),
+                     JMESPathCheck('sqlManagement', 'Full')
+                 ]).get_output_in_json()
 
         # test license change
         self.cmd('sql vm update -n {} -g {} --license-type {}'
@@ -246,13 +262,14 @@ class SqlVmScenarioTest(ScenarioTest):
                  ])
 
         # test create sqlvm with sql connectivity settings
-        self.cmd('sql vm create -n {} -g {} -l {} --license-type {} --connectivity-type {} --port {} --sql-auth-update-username {} --sql-auth-update-pwd {}'
-                 .format(sqlvm3, resource_group, resource_group_location, 'PAYG', 'PUBLIC', 1433, 'sqladmin123', 'SecretPassword123'),
+        self.cmd('sql vm create -n {} -g {} -l {} --license-type {} --sql-mgmt-type {} --connectivity-type {} --port {} --sql-auth-update-username {} --sql-auth-update-pwd {}'
+                 .format(sqlvm3, resource_group, resource_group_location, 'PAYG', 'Full', 'PUBLIC', 1433, 'sqladmin123', 'SecretPassword123'),
                  checks=[
                      JMESPathCheck('name', sqlvm3),
                      JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('provisioningState', "Succeeded"),
-                     JMESPathCheck('sqlServerLicenseType', 'PAYG')
+                     JMESPathCheck('sqlServerLicenseType', 'PAYG'),
+                     JMESPathCheck('sqlManagement', 'Full')
                  ])
 
         # For allocation purposes, will delete the vms and re create them with different settings.
@@ -272,16 +289,19 @@ class SqlVmScenarioTest(ScenarioTest):
                  checks=NoneCheck())
 
         # test create sqlvm1 with auto patching
-        self.cmd('sql vm create -n {} -g {} -l {} --license-type {} --day-of-week {} --maintenance-window-duration {} --maintenance-window-start-hour {}'
-                 .format(sqlvm1, resource_group, resource_group_location, 'PAYG', 'Monday', 60, 22),
+        self.cmd('sql vm create -n {} -g {} -l {} --license-type {} --sql-mgmt-type {} --day-of-week {} --maintenance-window-duration {} --maintenance-window-start-hour {}'
+                 .format(sqlvm1, resource_group, resource_group_location, 'PAYG', 'Full', 'Monday', 60, 22),
                  checks=[
                      JMESPathCheck('name', sqlvm1),
                      JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('provisioningState', "Succeeded"),
-                     JMESPathCheck('sqlServerLicenseType', 'PAYG')
+                     JMESPathCheck('sqlServerLicenseType', 'PAYG'),
+                     JMESPathCheck('sqlManagement', 'Full')
                  ])
 
         # test create sqlvm1 with auto backup
+        self.cmd('storage account update -n {} -g {} --set kind=StorageV2'.format(storage_account, resource_group))
+
         sa = self.cmd('storage account show -n {} -g {}'
                       .format(storage_account, resource_group)).get_output_in_json()
 
@@ -289,23 +309,25 @@ class SqlVmScenarioTest(ScenarioTest):
                        .format(storage_account, resource_group)).get_output_in_json()
 
         self.cmd('sql vm create -n {} -g {} -l {} --license-type {} --backup-schedule-type {} --full-backup-frequency {} --full-backup-start-hour {} --full-backup-duration {} '
-                 '--sa-key {} --storage-account {} --retention-period {} --log-backup-frequency {}'
-                 .format(sqlvm2, resource_group, resource_group_location, 'PAYG', 'Manual', 'Weekly', 2, 2, key[0]['value'], sa['primaryEndpoints']['blob'], 30, 60),
+                 '--sa-key {} --storage-account {} --retention-period {} --log-backup-frequency {} --sql-mgmt-type {}'
+                 .format(sqlvm2, resource_group, resource_group_location, 'PAYG', 'Manual', 'Weekly', 2, 2, key[0]['value'], sa['primaryEndpoints']['blob'], 30, 60, 'Full'),
                  checks=[
                      JMESPathCheck('name', sqlvm2),
                      JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('provisioningState', "Succeeded"),
-                     JMESPathCheck('sqlServerLicenseType', 'PAYG')
+                     JMESPathCheck('sqlServerLicenseType', 'PAYG'),
+                     JMESPathCheck('sqlManagement', 'Full')
                  ])
 
         # test create sqlvm1 with R services on
-        self.cmd('sql vm create -n {} -g {} -l {} --license-type {} --enable-r-services {}'
-                 .format(sqlvm3, resource_group, resource_group_location, 'PAYG', True),
+        self.cmd('sql vm create -n {} -g {} -l {} --license-type {} --enable-r-services {} --sql-mgmt-type {}'
+                 .format(sqlvm3, resource_group, resource_group_location, 'PAYG', True, 'Full'),
                  checks=[
                      JMESPathCheck('name', sqlvm3),
                      JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('provisioningState', "Succeeded"),
-                     JMESPathCheck('sqlServerLicenseType', 'PAYG')
+                     JMESPathCheck('sqlServerLicenseType', 'PAYG'),
+                     JMESPathCheck('sqlManagement', 'Full')
                  ])
 
     @ResourceGroupPreparer(name_prefix='sqlvm_cli_test_license')
@@ -386,11 +408,15 @@ class SqlVmGroupScenarioTest(ScenarioTest):
         operator_acc = 'myvmadmin'
         sql_service_acc = 'sqlservice'
 
+        self.cmd('storage account update -n {} -g {} --set kind=StorageV2'.format(storage_account1, resource_group))
+
         sa_1 = self.cmd('storage account show -n {} -g {}'
                         .format(storage_account1, resource_group)).get_output_in_json()
 
         key_1 = self.cmd('storage account keys list -n {} -g {}'
                          .format(storage_account1, resource_group)).get_output_in_json()
+
+        self.cmd('storage account update -n {} -g {} --set kind=StorageV2'.format(storage_account2, resource_group))
 
         sa_2 = self.cmd('storage account show -n {} -g {}'
                         .format(storage_account2, resource_group)).get_output_in_json()
@@ -433,8 +459,8 @@ class SqlVmGroupScenarioTest(ScenarioTest):
                  ])
 
         # change the domain
-        self.cmd('sql vm group update -n {} -g {} -f {}'
-                 .format(name, resource_group, 'my' + domain),
+        self.cmd('sql vm group update -n {} -g {} -f {} -k {}'
+                 .format(name, resource_group, 'my' + domain, key_2[0]['value']),
                  checks=[
                      JMESPathCheck('name', name),
                      JMESPathCheck('location', resource_group_location),
@@ -442,8 +468,8 @@ class SqlVmGroupScenarioTest(ScenarioTest):
                  ])
 
         # change the operator account
-        self.cmd('sql vm group update -n {} -g {} -p {}'
-                 .format(name, resource_group, 'my' + operator_acc),
+        self.cmd('sql vm group update -n {} -g {} -p {} -k {}'
+                 .format(name, resource_group, 'my' + operator_acc, key_2[0]['value']),
                  checks=[
                      JMESPathCheck('name', name),
                      JMESPathCheck('location', resource_group_location),
@@ -485,6 +511,8 @@ class SqlVmAndGroupScenarioTest(ScenarioTest):
                          'https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/201-vm-domain-join-existing/azuredeploy.json',
                          parameters_string))
 
+        self.cmd('storage account update -n {} -g {} --set kind=StorageV2'.format(storage_account, resource_group))
+
         # Create the sqlvm group
         sa = self.cmd('storage account show -n {} -g {}'
                       .format(storage_account, resource_group)).get_output_in_json()
@@ -497,8 +525,8 @@ class SqlVmAndGroupScenarioTest(ScenarioTest):
                                       'domain.com', 'admin123', key[0]['value'], 'admin123', sa['primaryEndpoints']['blob'], 'admin123')).get_output_in_json()
 
         # test create sqlvm1
-        self.cmd('sql vm create -n {} -g {} -l {} --license-type {} --connectivity-type {} --port {} --sql-auth-update-pwd {} --sql-auth-update-username {}'
-                 .format(sqlvm1, resource_group, resource_group_location, 'PAYG', 'PRIVATE', 1433, 'admin123', 'SecretPassword123'),
+        self.cmd('sql vm create -n {} -g {} -l {} --license-type {} --connectivity-type {} --port {} --sql-auth-update-pwd {} --sql-auth-update-username {} --sql-mgmt-type {}'
+                 .format(sqlvm1, resource_group, resource_group_location, 'PAYG', 'PRIVATE', 1433, 'admin123', 'SecretPassword123', 'Full'),
                  checks=[
                      JMESPathCheck('name', sqlvm1),
                      JMESPathCheck('location', resource_group_location),
