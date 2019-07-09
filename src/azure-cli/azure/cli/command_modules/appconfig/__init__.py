@@ -12,10 +12,15 @@ class AppconfigCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
         from azure.cli.core.commands import CliCommandType
+        from azure.cli.core import ModExtensionSuppress
         configstore_custom = CliCommandType(
             operations_tmpl='azure.cli.command_modules.appconfig.custom#{}')
         super(AppconfigCommandsLoader, self).__init__(
-            cli_ctx=cli_ctx, custom_command_type=configstore_custom)
+            cli_ctx=cli_ctx,
+            suppress_extension=ModExtensionSuppress(__name__, 'appconfig', '0.5.0',
+                                                    reason='These commands are now in the CLI.',
+                                                    recommend_remove=True),
+            custom_command_type=configstore_custom)
 
     def load_command_table(self, args):
         from azure.cli.command_modules.appconfig.commands import load_command_table
