@@ -107,4 +107,4 @@ def validate_sqlmanagement(namespace):
     sql_mgmt_mode = namespace.sql_management_mode
 
     if (sql_mgmt_mode == "NoAgent" and (namespace.sql_image_sku is None or namespace.sql_image_offer is None)):
-        raise CLIError("incorrect usage: --sql-mgmt-type NoAgent --image-sku NAME --image-offer NAME")
+        raise CLIError("usage error: --sql-mgmt-type NoAgent --image-sku NAME --image-offer NAME")

@@ -177,7 +177,7 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(SqlImageSku))
         c.argument('sql_image_offer',
                    options_list=['--image-offer'],
-                   help='SQL image offer. Examples include SQL2008R2-WS2008R2, SQL2008R2-WS2008, SQL2008-WS2008, SQL2008-WS2008R2.')
+                   help='SQL image offer. Examples include SQL2008R2-WS2008, SQL2008-WS2008.')
 
     with self.argument_context('sql vm add-to-group') as c:
         c.argument('sql_virtual_machine_group_resource_id',
