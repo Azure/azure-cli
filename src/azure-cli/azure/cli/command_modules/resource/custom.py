@@ -288,11 +288,12 @@ def _deploy_arm_template_core(cli_ctx, resource_group_name,
 
     properties = DeploymentProperties(template=template_content, template_link=template_link,
                                       parameters=parameters, mode=mode, on_error_deployment=on_error_deployment)
+    #properties.template =  properties.template.replace('\r\n', '') json.loads(properties.template)#
 
     smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     if validate_only:
         return sdk_no_wait(no_wait, smc.deployments.validate, resource_group_name, deployment_name, properties)
-    return sdk_no_wait(no_wait, smc.deployments.create_or_update, resource_group_name, deployment_name, properties)
+    return sdk_no_wait(no_wait, smc.deployments.create_or_update, resource_group_name, deployment_name, properties, template_content)
 
 
 def _deploy_arm_template_subscription_scope(cli_ctx,
