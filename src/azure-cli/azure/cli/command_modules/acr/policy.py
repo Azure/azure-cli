@@ -4,19 +4,20 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import LongRunningOperation
-from ._utils import validate_managed_registry
+from ._utils import validate_premium_registry
 
 
-POLICIES_NOT_SUPPORTED = 'Policies are only supported for managed registries.'
+POLICIES_NOT_SUPPORTED = 'Policies are only supported for managed registries in Premium SKU.'
 
 
 def acr_config_content_trust_show(cmd,
-                                  client,
                                   registry_name,
                                   resource_group_name=None):
-    _, resource_group_name = validate_managed_registry(
+    registry, _ = validate_premium_registry(
         cmd, registry_name, resource_group_name, POLICIES_NOT_SUPPORTED)
-    return client.list_policies(resource_group_name, registry_name).trust_policy
+    policies = registry.policies
+    trust_policy = policies.trust_policy if policies else None
+    return trust_policy
 
 
 def acr_config_content_trust_update(cmd,
@@ -24,15 +25,20 @@ def acr_config_content_trust_update(cmd,
                                     registry_name,
                                     status=None,
                                     resource_group_name=None):
-    _, resource_group_name = validate_managed_registry(
+    registry, resource_group_name = validate_premium_registry(
         cmd, registry_name, resource_group_name, POLICIES_NOT_SUPPORTED)
 
-    trust_policy = client.list_policies(resource_group_name, registry_name).trust_policy
+    policies = registry.policies
 
     if status is not None:
-        trust_policy.status = status
+        policies = policies if policies else {}
+        policies.trust_policy = policies.trust_policy if policies.trust_policy else {}
+        policies.trust_policy.status = status
 
+    RegistryUpdateParameters = cmd.get_models('RegistryUpdateParameters')
+    parameters = RegistryUpdateParameters(policies=policies)
+    print(parameters.policies.trust_policy)
     updated_policies = LongRunningOperation(cmd.cli_ctx)(
-        client.update_policies(resource_group_name, registry_name, None, trust_policy)
+        client.update(resource_group_name, registry_name, parameters)
     )
-    return updated_policies.trust_policy
+    return updated_policies.policies.trust_policy

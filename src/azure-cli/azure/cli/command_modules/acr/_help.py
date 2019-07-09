@@ -95,9 +95,6 @@ examples:
   - name: Create a managed container registry with the Standard SKU.
     text: >
         az acr create -n MyRegistry -g MyResourceGroup --sku Standard
-  - name: Create an Azure Container Registry with a new storage account with the Classic SKU (Classic registries are being deprecated by March 2019).
-    text: >
-        az acr create -n MyRegistry -g MyResourceGroup --sku Classic
 """
 
 helps['acr credential'] = """
