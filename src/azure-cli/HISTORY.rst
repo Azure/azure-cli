@@ -67,7 +67,7 @@ Release History
 
 **Managed Services**
 
-* Introducing managed service command module in preview.
+* Added support for API version 2019-06-01 (GA)
 
 **Profile**
 * Suppress `--subscription` argument for logout command.
