@@ -137,3 +137,6 @@ def load_command_table(self, _):
                          client_factory=snapshots_mgmt_client_factory,
                          doc_string_source='azure.mgmt.netapp.models#Snapshot',
                          exception_handler=netappfiles_exception_handler)
+
+    with self.command_group('netappfiles', is_preview=True) as g:
+        pass
