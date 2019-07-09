@@ -2058,9 +2058,19 @@ def list_express_route_ports(cmd, resource_group_name=None):
 
 
 # region PrivateEndpoint
-def create_private_endpoint(cmd, resource_group_name, subnet, vnet_name=None, tags=None,
+def create_private_endpoint(cmd, resource_group_name, private_endpoint_name, subnet,
+                            virtual_network_name=None, tags=None, location=None,
                             private_link_service_connections=None, manual_private_link_service_connections=None):
-    pass
+    client = network_client_factory(cmd.cli_ctx).private_endpoints
+    PrivateEndpoint, Subnet = cmd.get_models('PrivateEndpoint', 'Subnet')
+    private_endpoint = PrivateEndpoint(
+        location=location,
+        tags=tags,
+        subnet=Subnet(id=subnet),
+        private_link_service_connections=private_link_service_connections,
+        manual_private_link_service_connections=manual_private_link_service_connections
+    )
+    return client.create_or_update(resource_group_name, private_endpoint_name, private_endpoint)
 
 
 def update_private_endpoint(instance):
@@ -2076,17 +2086,31 @@ def list_private_endpoints(cmd, resource_group_name=None):
 
 
 # region PrivateLinkService
-def create_private_link_service(cmd, resource_group_name, service_name, location=None, tags=None,
-                                load_balancer_frontend_ips=None,
-                                ip_configs=None, private_endpoint_connections=None, visibility=None,
-                                auto_approval=None, fqdns=None):
+def create_private_link_service(cmd, resource_group_name, service_name,
+                                private_ip_address=None, private_ip_allocation_method=None,
+                                private_ip_address_version=None,
+                                subnet=None, virtual_network_name=None, public_ip_address=None,
+                                location=None, tags=None,
+                                load_balancer_name=None, frontend_ip_configurations=None,
+                                visibility=None, auto_approval=None, fqdns=None):
     client = network_client_factory(cmd.cli_ctx).private_link_services
-    PrivateLinkService = cmd.get_models('PrivateLinkService')
+    FrontendIPConfiguration, PrivateLinkService, PrivateLinkServiceIpConfiguration, PublicIPAddress, Subnet = \
+        cmd.get_models('FrontendIPConfiguration', 'PrivateLinkService', 'PrivateLinkServiceIpConfiguration',
+                       'PublicIPAddress', 'Subnet')
+    ip_config = PrivateLinkServiceIpConfiguration(
+        name='{}_ipconfig'.format(service_name),
+        private_ip_address=private_ip_address,
+        private_ip_allocation_method=private_ip_allocation_method,
+        private_ip_address_version=private_ip_address_version,
+        subnet=subnet and Subnet(id=subnet),
+        public_ip_address=public_ip_address and PublicIPAddress(id=public_ip_address)
+    )
     link_service = PrivateLinkService(
         location=location,
-        load_balancer_frontend_ip_configurations=load_balancer_frontend_ips,
-        ip_configurations=ip_configs,
-        private_endpoint_connections=private_endpoint_connections,
+        load_balancer_frontend_ip_configurations=[
+            FrontendIPConfiguration(id=ip_config) for ip_config in frontend_ip_configurations
+        ],
+        ip_configurations=[ip_config],
         visbility=visibility,
         auto_approval=auto_approval,
         fqdns=fqdns
