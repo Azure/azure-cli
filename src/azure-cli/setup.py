@@ -127,7 +127,7 @@ DEPENDENCIES = [
     'colorama~=0.4.1',
     'cryptography>=2.3.1,<3.0.0',
     'fabric~=2.4',
-    'knack~=0.6.2',
+    'knack~=0.6,>=0.6.3',
     'mock~=2.0',
     'paramiko>=2.0.8,<3.0.0',
     'prompt_toolkit~=1.0,>=1.0.15',
