@@ -110,7 +110,7 @@ helps['appconfig kv export'] = """
             az appconfig kv export -n MyAppConfiguration -d appconfig --dest-name AnotherAppConfiguration
         - name: Export all keys with null label to an App Service appliaction.
           text:
-            az appconfig kv export -n MyAppConfiguration -s appservice --appservice-account MyAppService
+            az appconfig kv export -n MyAppConfiguration -s appservice -d appservice --appservice-account MyAppService
     """
 
 helps['appconfig kv set'] = """
@@ -158,7 +158,7 @@ helps['appconfig kv list'] = """
             az appconfig kv list -n MyAppConfiguration
         - name: List a specfic key for any label start with v1. using connection string.
           text:
-            az appconfig kv list --color --connection-string MyConnectionString --label v1.*
+            az appconfig kv list --key color --connection-string MyConnectionString --label v1.*
         - name: List all keys with any labels and query only key, value and tags.
           text:
             az appconfig kv list --connection-string MyConnectionString --fields key value tags --datetime "2019-05-01T11:24:12Z"

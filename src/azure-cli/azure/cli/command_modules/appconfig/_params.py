@@ -60,6 +60,9 @@ def load_arguments(self, _):
     with self.argument_context('appconfig credential regenerate') as c:
         c.argument('id_', options_list=['--id'], help='Id of the key to be regenerated. Can be found using az appconfig credential list command.')
 
+    with self.argument_context('appconfig credential list') as c:
+        c.argument('name', id_part=None)
+
     with self.argument_context('appconfig kv import') as c:
         c.argument('label', help="Imported KVs will be assigned with this label. If no label specified, will assign null label.")
         c.argument('prefix', help="This prefix will be appended to the front of imported keys.")
@@ -118,6 +121,7 @@ def load_arguments(self, _):
         c.argument('label', help="If no label specified, show entry with null label. Does NOT support filters like other commands")
 
     with self.argument_context('appconfig kv list') as c:
+        c.argument('name', id_part=None)
         c.argument('key', help='If no key specified, return all keys by default. Support star sign as filters, for instance abc* means keys with abc as prefix. Similarly, *abc and *abc* are also supported.')
         c.argument('label', help="If no label specified, list all labels. Support star sign as filters, for instance abc* means labels with abc as prefix. Similarly, *abc and *abc* are also supported.")
 
@@ -130,5 +134,6 @@ def load_arguments(self, _):
         c.argument('label', help="If no label specified, unlock entry with null label. Does NOT support filters like other commands")
 
     with self.argument_context('appconfig revision list') as c:
+        c.argument('name', id_part=None)
         c.argument('key', help='If no key specified, return all keys by default. Support star sign as filters, for instance abc* means keys with abc as prefix. Similarly, *abc and *abc* are also supported.')
         c.argument('label', help="If no label specified, list all labels. Support star sign as filters, for instance abc* means labels with abc as prefix. Similarly, *abc and *abc* are also supported.")
