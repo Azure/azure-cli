@@ -52,6 +52,18 @@ def get_asg_validator(loader, dest):
     return _validate_asg_name_or_id
 
 
+def get_subscription_list_validator(dest, model_class):
+
+    def _validate_subscription_list(cmd, namespace):
+        val = getattr(namespace, dest, None)
+        if not val:
+            return
+        model = cmd.get_models(model_class)
+        setattr(namespace, dest, model(subscriptions=val))
+
+    return _validate_subscription_list
+
+
 def get_vnet_validator(dest):
     from msrestazure.tools import is_valid_resource_id, resource_id
 
