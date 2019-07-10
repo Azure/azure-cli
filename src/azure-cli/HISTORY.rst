@@ -81,7 +81,8 @@ Release History
 * Fixed issue `storage blob service-properties update --set`.
 
 **VM**
-* Add new command group `vm host` to support dedicated hosts.
+
+* Add new command group `vm host` to support dedicated hosts. Expose `--host` and `--host-group` on `vm create`
 
 2.0.68
 ++++++

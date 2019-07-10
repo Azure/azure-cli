@@ -285,7 +285,7 @@ def load_arguments(self, _):
         c.argument('attach_data_disks', nargs='+', help='Attach existing data disks to the VM. Can use the name or ID of a managed disk or the URI to an unmanaged disk VHD.')
 
     with self.argument_context('vm create', arg_group='Dedicated Host', min_api='2019-03-01') as c:
-        c.argument('dedicated_host_group', options_list=['--host-group'],help="Name of the dedicated host group containing the dedicated host this VM will reside in.")
+        c.argument('dedicated_host_group', options_list=['--host-group'], help="Name of the dedicated host group containing the dedicated host this VM will reside in.")
         c.argument('dedicated_host', options_list=['--host'], help="Name or ID of the dedicated host this VM will reside in. If a name is specified, a host group must be specified via `--host-group`.")
 
     with self.argument_context('vm open-port') as c:
@@ -405,6 +405,8 @@ def load_arguments(self, _):
     with self.argument_context('vm host') as c:
         c.argument('host_group_name', options_list=['--host-group'], id_part='name', help="Name of the Dedicated Host Group")
         c.argument('host_name', name_arg_type, id_part='child_name_1', help="Name of the Dedicated Host")
+
+    with self.argument_context('vm host create') as c:
         c.argument('platform_fault_domain', options_list=['--platform-fault-domain', '-d'], type=int, choices=[0, 1, 2],
                    help="Fault domain of the host within a group.")
         c.argument('auto_replace_on_failure', options_list=['--auto-replace'], arg_type=get_three_state_flag(),
@@ -414,8 +416,13 @@ def load_arguments(self, _):
         c.argument('sku', arg_type=get_enum_type(['DSv3-Type1', 'ESv3-Type1', 'FSv2-Type2']),
                    help="Sku of the dedicated host.")
 
+    with self.argument_context('vm host list') as c:
+        c.argument('host_group_name', id_part=None)
+
     with self.argument_context('vm host group') as c:
         c.argument('host_group_name', name_arg_type, id_part='name', help="Name of the Dedicated Host Group")
+
+    with self.argument_context('vm host group create') as c:
         c.argument('platform_fault_domain_count', options_list=["--platform-fault-domain-count", "-c"], type=int,
                    choices=[1, 2, 3], help="Number of fault domains that the host group can span.")
         c.argument('zones', zone_type)

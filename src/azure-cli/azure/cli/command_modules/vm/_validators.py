@@ -591,6 +591,7 @@ def _validate_vm_create_dedicated_host(cmd, namespace):
 
         logger.info("Built dedicated host ID '%s' from host name and host group.", namespace.dedicated_host)
 
+
 def _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=False):
     from msrestazure.tools import is_valid_resource_id
     vnet = namespace.vnet_name
