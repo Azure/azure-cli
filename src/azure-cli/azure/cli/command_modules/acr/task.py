@@ -13,7 +13,7 @@ from ._utils import (
     validate_managed_registry,
     get_validate_platform,
     get_custom_registry_credentials,
-    get_yaml_and_values,
+    get_yaml_template,
     build_timers_info,
     remove_timer_trigger
 )
@@ -231,15 +231,13 @@ def create_task_step(context_path,
         else:
             raise CLIError("missing --file/-f argument")
     else:
-        yaml_template, values_content = get_yaml_and_values(
+        yaml_template = get_yaml_template(
             cmd_value, timeout, file)
         import base64
         EncodedTaskStep = cmd.get_models('EncodedTaskStep')
         step = EncodedTaskStep(
             encoded_task_content=base64.b64encode(
                 yaml_template.encode()).decode(),
-            encoded_values_content=base64.b64encode(
-                values_content.encode()).decode(),
             context_path=context_path,
             context_access_token=git_access_token,
             values=(set_value if set_value else []) + (set_secret if set_secret else [])

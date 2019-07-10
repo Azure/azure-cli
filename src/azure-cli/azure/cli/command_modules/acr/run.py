@@ -16,7 +16,7 @@ from ._utils import (
     validate_managed_registry,
     get_validate_platform,
     get_custom_registry_credentials,
-    get_yaml_and_values
+    get_yaml_template
 )
 from ._client_factory import cf_acr_registries_tasks
 from ._archive_utils import upload_source_code, check_remote_source_code
@@ -80,11 +80,10 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
             )
         )
     else:
-        yaml_template, values_content = get_yaml_and_values(cmd_value, timeout, file)
+        yaml_template = get_yaml_template(cmd_value, timeout, file)
         import base64
         request = EncodedTaskRunRequest(
             encoded_task_content=base64.b64encode(yaml_template.encode()).decode(),
-            encoded_values_content=base64.b64encode(values_content.encode()).decode(),
             values=(set_value if set_value else []) + (set_secret if set_secret else []),
             source_location=source_location,
             timeout=timeout,
