@@ -79,6 +79,7 @@ def load_arguments_sb(self, _):
         c.argument('status', arg_type=get_enum_type(['Active', 'Disabled', 'SendDisabled', 'ReceiveDisabled']), help='Enumerates the possible values for the status of a messaging entity.')
         c.argument('relay_type', arg_type=get_enum_type(['Http', 'NetTcp']), default='NetTcp', help='Relay type')
         c.argument('requires_client_authorization', arg_type=get_three_state_flag(), help='Indicates whether client authorization is required')
+        c.argument('requires_transport_security', arg_type=get_three_state_flag(), help='Indicates whether transport security is required')
         c.argument('user_metadata', help='Endpoint metadata')
 
     with self.argument_context('relay wcfrelay list') as c:
