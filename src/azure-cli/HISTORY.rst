@@ -21,6 +21,10 @@ Release History
 * When using --json-file option of az batch task create and running a container, Batch now supports executing the task in the container working directory or in the Batch task working directory. This is controlled by the WorkingDirectory property on TaskContainerSettings.
 * Fix error in --application-package-references option of `az batch pool create` where it would only work with defaults. Now it will properly accept specific versions as well.
 
+**Eventhubs**
+
+* Fix for issue #5824 - added validation for parameter --rights of authorizationrule commands
+
 **RDBMS**
 
 * Add optional parameter to specify replica SKU for create replica command.
