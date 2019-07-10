@@ -56,7 +56,7 @@ def cli_namespaceautho_update(instance, rights):
 
 # WCF Relay Region
 def cli_wcfrelay_create(client, resource_group_name, namespace_name, relay_name, relay_type,
-                        requires_client_authorization=None, user_metadata=None):
+                        requires_client_authorization=None, requires_transport_security=None, user_metadata=None):
 
     from azure.mgmt.relay.models import WcfRelay, Relaytype
 
@@ -70,6 +70,7 @@ def cli_wcfrelay_create(client, resource_group_name, namespace_name, relay_name,
     wcfrelay_params = WcfRelay(
         relay_type=set_relay_type,
         requires_client_authorization=requires_client_authorization,
+        requires_transport_security=requires_transport_security,
         user_metadata=user_metadata
     )
 
@@ -81,11 +82,12 @@ def cli_wcfrelay_create(client, resource_group_name, namespace_name, relay_name,
 
 
 def cli_wcfrelay_update(instance, relay_type=None,
-                        requires_client_authorization=None, user_metadata=None, status=None):
+                        requires_client_authorization=None, requires_transport_security=None, user_metadata=None, status=None):
 
     from azure.mgmt.relay.models import WcfRelay
     returnobj = WcfRelay(relay_type=instance.relay_type,
                          requires_client_authorization=instance.requires_client_authorization,
+                         requires_transport_security=instance.requires_transport_security,
                          user_metadata=instance.user_metadata)
 
     if relay_type:
@@ -93,6 +95,9 @@ def cli_wcfrelay_update(instance, relay_type=None,
 
     if requires_client_authorization:
         returnobj.requires_client_authorization = requires_client_authorization
+
+    if requires_transport_security:
+        returnobj.requires_transport_security = requires_transport_security
 
     if user_metadata:
         returnobj.user_metadata = user_metadata
@@ -115,7 +120,7 @@ def cli_hyco_create(client, resource_group_name, namespace_name, hybrid_connecti
         resource_group_name=resource_group_name,
         namespace_name=namespace_name,
         hybrid_connection_name=hybrid_connection_name,
-        parameters=hyco_params)
+        requires_client_authorization=requires_client_authorization, user_metadata=user_metadata )
 
 
 def cli_hyco_update(instance, requires_client_authorization=None, status=None, user_metadata=None):

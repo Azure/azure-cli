@@ -3,6 +3,11 @@
 Release History
 ===============
 
+**Relay**
+
+* Fixed issue #8775 : Cannot create hybrid connection with disabled client authroization
+* Added parameter "--requires-transport-security" to az relay wcfrelay create
+
 **Appservice**
 
 * restore the idempotency of "appservice plan create" and "webapp create"
