@@ -2618,7 +2618,7 @@ def update_image_version(instance, target_regions=None, replica_count=None):
     return instance
 # endregion
 
-
+# region proximity placement groups
 def create_proximity_placement_group(cmd, client, proximity_placement_group_name, resource_group_name,
                                      ppg_type=None, location=None, tags=None):
     from knack.arguments import CaseInsensitiveList
@@ -2643,4 +2643,37 @@ def list_proximity_placement_groups(client, resource_group_name=None):
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name=resource_group_name)
     return client.list_by_subscription()
+# endregion
+
+# region dedicated host
+def create_dedicated_host_group(cmd, client, host_group_name, resource_group_name, platform_fault_domain_count,
+                                location=None, zones=None, tags=None):
+    DedicatedHostGroup = cmd.get_models('DedicatedHostGroup')
+    location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
+
+    host_group_params = DedicatedHostGroup(location=location, platform_fault_domain_count=platform_fault_domain_count,
+                                           zones=zones, tags=tags)
+
+    return client.create_or_update(resource_group_name, host_group_name, parameters=host_group_params)
+
+
+def list_dedicated_host_groups(cmd, client, resource_group_name=None):
+    if resource_group_name:
+        return client.list_by_resource_group(resource_group_name)
+    return client.list_by_subscription()
+
+def create_dedicated_host(cmd, client, host_group_name, host_name, resource_group_name, platform_fault_domain,
+                          auto_replace_on_failure=None, license_type=None, sku=None,
+                          location=None, tags=None):
+    DedicatedHostType = cmd.get_models('DedicatedHost')
+    SkuType = cmd.get_models('Sku')
+
+    location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
+    sku = SkuType(name=sku)
+
+    host_params = DedicatedHostType(location=location, platform_fault_domain=platform_fault_domain,
+                                auto_replace_on_failure=auto_replace_on_failure, license_type=license_type, sku=sku)
+
+    return client.create_or_update(resource_group_name, host_group_name, host_name, parameters=host_params)
+
 # endregion

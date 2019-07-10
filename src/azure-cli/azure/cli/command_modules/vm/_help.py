@@ -1171,6 +1171,16 @@ examples:
 
 """
 
+helps['vm host'] = """
+type: group
+short-summary: Manage dedicated VM hosts
+"""
+
+helps['vm host group'] = """
+type: group
+short-summary: Manage dedicated VM host groups
+"""
+
 helps['vm identity'] = """
 type: group
 short-summary: manage service identities of a VM

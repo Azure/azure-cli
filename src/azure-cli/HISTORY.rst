@@ -80,6 +80,9 @@ Release History
 * Enable Files AADDS for storage account update.
 * Fixed issue `storage blob service-properties update --set`.
 
+**VM**
+* Add new command group `vm host` to support dedicated hosts.
+
 2.0.68
 ++++++
 **ACR**

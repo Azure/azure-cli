@@ -35,6 +35,7 @@ def load_arguments(self, _):
     SnapshotStorageAccountTypes = self.get_models('SnapshotStorageAccountTypes', operation_group='snapshots')
     UpgradeMode, CachingTypes, OperatingSystemTypes = self.get_models('UpgradeMode', 'CachingTypes', 'OperatingSystemTypes')
     HyperVGenerationTypes, HyperVGeneration = self.get_models('HyperVGenerationTypes', 'HyperVGeneration')
+    DedicatedHostLicenseTypes = self.get_models('DedicatedHostLicenseTypes')
 
     # REUSABLE ARGUMENT DEFINITIONS
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
@@ -394,6 +395,33 @@ def load_arguments(self, _):
 
     with self.argument_context('vm restart') as c:
         c.argument('force', action='store_true', help='Force the VM to restart by redeploying it. Use if the VM is unresponsive.')
+
+    with self.argument_context('vm host') as c:
+        # TODO support id parameters after setting up tests
+        c.argument('host_group_name', options_list=['--host-group'], help="Name of the Dedicated Host Group")
+        c.argument('host_name', name_arg_type, help="Name of the Dedicated Host")
+        c.argument('platform_fault_domain', options_list=['--platform-fault-domain', '-d'], type=int, choices=[0, 1, 2],
+                   help="Fault domain of the host within a group.")
+        c.argument('auto_replace_on_failure', options_list=['--auto-replace'], arg_type=get_three_state_flag(),
+                   help="Replace the host automatically if a failure occurs")
+        c.argument('license_type', arg_type=get_enum_type(DedicatedHostLicenseTypes),
+                   help="The software license type that will be applied to the VMs deployed on the dedicated host.")
+        c.argument('sku', arg_type=get_enum_type(['DSv3-Type1', 'ESv3-Type1', 'FSv2-Type2']),
+                   help="Sku of the dedicated host.")
+
+    with self.argument_context('vm host group') as c:
+        c.argument('host_group_name', name_arg_type, help="Name of the Dedicated Host Group")
+        c.argument('platform_fault_domain_count', options_list=["--platform-fault-domain-count", "-c"], type=int,
+                   choices=[1, 2, 3], help="Number of fault domains that the host group can span.")
+        c.argument('zones', zone_type)
+
+    for scope in ["vm host", "vm host group"]:
+        with self.argument_context("{} create".format(scope)) as c:
+            location_type = get_location_type(self.cli_ctx)
+            custom_location_msg = " Otherwise, location will default to the resource group's location"
+            custom_location_type = CLIArgumentType(overrides=location_type,
+                                                   help=location_type.settings["help"] + custom_location_msg)
+            c.argument('location', arg_type=custom_location_type)
     # endregion
 
     # region VMSS
