@@ -1252,7 +1252,7 @@ def sync_site_repo(cmd, resource_group_name, name, slot=None):
 def list_app_service_plans(cmd, resource_group_name=None):
     client = web_client_factory(cmd.cli_ctx)
     if resource_group_name is None:
-        plans = list(client.app_service_plans.list())
+        plans = list(client.app_service_plans.list(detailed=True))  # enables querying "numberOfSites"
     else:
         plans = list(client.app_service_plans.list_by_resource_group(resource_group_name))
     for plan in plans:
