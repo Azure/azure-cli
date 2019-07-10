@@ -81,8 +81,7 @@ def cli_wcfrelay_create(client, resource_group_name, namespace_name, relay_name,
         parameters=wcfrelay_params)
 
 
-def cli_wcfrelay_update(instance, relay_type=None,
-                        requires_client_authorization=None, requires_transport_security=None, user_metadata=None, status=None):
+def cli_wcfrelay_update(instance, relay_type=None, user_metadata=None, status=None):
 
     from azure.mgmt.relay.models import WcfRelay
     returnobj = WcfRelay(relay_type=instance.relay_type,
@@ -92,12 +91,6 @@ def cli_wcfrelay_update(instance, relay_type=None,
 
     if relay_type:
         returnobj.relay_type = relay_type
-
-    if requires_client_authorization:
-        returnobj.requires_client_authorization = requires_client_authorization
-
-    if requires_transport_security:
-        returnobj.requires_transport_security = requires_transport_security
 
     if user_metadata:
         returnobj.user_metadata = user_metadata

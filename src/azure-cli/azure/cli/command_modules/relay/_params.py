@@ -61,26 +61,15 @@ def load_arguments_sb(self, _):
     with self.argument_context('relay wcfrelay') as c:
         c.argument('relay_name', arg_type=name_type, id_part='child_name_1', completer=get_wcfrelay_command_completion_list, help='Name of WCF Relay')
 
-    # region - WCF Relay Create
-    for scope in ['relay wcfrelay show', 'relay wcfrelay delete']:
+    for scope in ['relay wcfrelay create', 'relay wcfrelay update']:
         with self.argument_context(scope) as c:
-            c.argument('relay_name', arg_type=name_type, id_part='child_name_1', completer=get_wcfrelay_command_completion_list, help='Name of WCF Relay')
+            c.argument('status', arg_type=get_enum_type(['Active', 'Disabled', 'SendDisabled', 'ReceiveDisabled']), help='Enumerates the possible values for the status of a messaging entity.')
+            c.argument('relay_type', arg_type=get_enum_type(['Http', 'NetTcp']), default='NetTcp', help='Relay type')
+            c.argument('user_metadata', help='Endpoint metadata')
 
     with self.argument_context('relay wcfrelay create') as c:
-        c.argument('relay_name', arg_type=name_type, id_part='child_name_1', help='Name of WCF Relay')
-        c.argument('status', arg_type=get_enum_type(['Active', 'Disabled', 'SendDisabled', 'ReceiveDisabled']), help='Enumerates the possible values for the status of a messaging entity.')
-        c.argument('relay_type', arg_type=get_enum_type(['Http', 'NetTcp']), default='NetTcp', help='Relay type')
         c.argument('requires_client_authorization', arg_type=get_three_state_flag(), help='Indicates whether client authorization is required')
         c.argument('requires_transport_security', arg_type=get_three_state_flag(), help='Indicates whether transport security is required')
-        c.argument('user_metadata', help='Endpoint metadata')
-
-    with self.argument_context('relay wcfrelay update') as c:
-        c.argument('relay_name', arg_type=name_type, id_part='child_name_1', help='Name of WCF Relay')
-        c.argument('status', arg_type=get_enum_type(['Active', 'Disabled', 'SendDisabled', 'ReceiveDisabled']), help='Enumerates the possible values for the status of a messaging entity.')
-        c.argument('relay_type', arg_type=get_enum_type(['Http', 'NetTcp']), default='NetTcp', help='Relay type')
-        c.argument('requires_client_authorization', arg_type=get_three_state_flag(), help='Indicates whether client authorization is required')
-        c.argument('requires_transport_security', arg_type=get_three_state_flag(), help='Indicates whether transport security is required')
-        c.argument('user_metadata', help='Endpoint metadata')
 
     with self.argument_context('relay wcfrelay list') as c:
         c.argument('namespace_name', id_part=None, options_list=['--namespace-name'], help='Name of Namespace')

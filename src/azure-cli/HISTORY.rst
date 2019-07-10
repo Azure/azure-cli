@@ -3,11 +3,6 @@
 Release History
 ===============
 
-**Relay**
-
-* Fixed issue #8775 : Cannot create hybrid connection with disabled client authroization
-* Added parameter "--requires-transport-security" to az relay wcfrelay create
-
 **Appservice**
 
 * az webapp identity commands will return a proper error message if ResourceGroupName or App name are invalid.
@@ -30,6 +25,11 @@ Release History
 
 * Add optional parameter to specify replica SKU for create replica command.
 * Fix the issue with CI test failure with creating MySQL replica.
+
+**Relay**
+
+* Fixed issue #8775 : Cannot create hybrid connection with disabled client authroization
+* Added parameter "--requires-transport-security" to az relay wcfrelay create
 
 **Storage**
 
