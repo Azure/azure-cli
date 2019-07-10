@@ -65,6 +65,7 @@ DEPENDENCIES = [
     'azure-keyvault~=1.1',
     'azure-mgmt-advisor>=2.0.1,<3.0.0',
     'azure-mgmt-applicationinsights~=0.1.1',
+    'azure-mgmt-appconfiguration>=0.1.0',
     'azure-mgmt-authorization~=0.52.0',
     'azure-mgmt-batch~=6.0',
     'azure-mgmt-batchai~=2.0',
@@ -146,6 +147,8 @@ DEPENDENCIES = [
     'vsts-cd-manager~=1.0.0,>=1.0.2',
     'websocket-client~=0.56.0',
     'xmltodict~=0.12',
+    'javaproperties==0.5.1',
+    'jsondiff==1.2.0'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
