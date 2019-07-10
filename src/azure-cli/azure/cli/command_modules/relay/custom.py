@@ -112,15 +112,12 @@ def cli_wcfrelay_update(instance, relay_type=None,
 def cli_hyco_create(client, resource_group_name, namespace_name, hybrid_connection_name,
                     requires_client_authorization=None, user_metadata=None):
     from azure.mgmt.relay.models import HybridConnection
-    hyco_params = HybridConnection(
-        requires_client_authorization=requires_client_authorization,
-        user_metadata=user_metadata
-    )
+
     return client.create_or_update(
         resource_group_name=resource_group_name,
         namespace_name=namespace_name,
         hybrid_connection_name=hybrid_connection_name,
-        requires_client_authorization=requires_client_authorization, user_metadata=user_metadata )
+        requires_client_authorization=requires_client_authorization, user_metadata=user_metadata)
 
 
 def cli_hyco_update(instance, requires_client_authorization=None, status=None, user_metadata=None):
