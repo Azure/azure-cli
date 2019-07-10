@@ -35,6 +35,10 @@ Release History
 * Fixed issue #8775 : Cannot create hybrid connection with disabled client authroization
 * Added parameter "--requires-transport-security" to az relay wcfrelay create
 
+**Servicebus**
+
+* Fix for issue #5824 - added validation for parameter --rights of authorizationrule commands
+
 **Storage**
 
 * Enable Files AADDS for storage account update.
