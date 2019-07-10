@@ -20,7 +20,7 @@ Release History
 
 **Eventhubs**
 
-* Fix for issue #5824 - added validation for parameter --rights of authorizationrule
+* Fix for issue #5824 - added validation for parameter --rights of authorizationrule commands
 
 **RDBMS**
 
