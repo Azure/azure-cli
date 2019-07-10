@@ -24,6 +24,10 @@ Release History
 * Add optional parameter to specify replica SKU for create replica command.
 * Fix the issue with CI test failure with creating MySQL replica.
 
+**Servicebus**
+
+* Fix for issue #5824 - added validation for parameter --rights of authorizationrule commands
+
 **Storage**
 
 * Enable Files AADDS for storage account update.
