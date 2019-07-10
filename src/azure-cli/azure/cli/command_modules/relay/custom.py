@@ -111,7 +111,6 @@ def cli_wcfrelay_update(instance, relay_type=None,
 # Hybrid Connection Region
 def cli_hyco_create(client, resource_group_name, namespace_name, hybrid_connection_name,
                     requires_client_authorization=None, user_metadata=None):
-    from azure.mgmt.relay.models import HybridConnection
 
     return client.create_or_update(
         resource_group_name=resource_group_name,
