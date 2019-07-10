@@ -110,9 +110,9 @@ def sqlvm_group_update(instance, domain_fqdn=None, cluster_operator_account=None
     if storage_account_url is not None:
         instance.wsfc_domain_profile.storage_account_url = storage_account_url
     if storage_account_key is not None:
-        instance.wsfc_domain_profile.storage_access_key = storage_account_key
+        instance.wsfc_domain_profile.storage_account_primary_key = storage_account_key
     if storage_account_url and not storage_account_key:
-        instance.wsfc_domain_profile.storage_access_key = prompt_pass('Storage Key: ', confirm=True)
+        instance.wsfc_domain_profile.storage_account_primary_key = prompt_pass('Storage Key: ', confirm=True)
     if file_share_witness_path is not None:
         instance.wsfc_domain_profile.file_share_witness_path = file_share_witness_path
     if ou_path is not None:
@@ -171,14 +171,14 @@ def aglistener_update(instance, sql_virtual_machine_instances=None):
 
 # pylint: disable=too-many-arguments, too-many-locals, line-too-long, too-many-boolean-expressions
 def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, sql_server_license_type,
-                 location=None, sql_image_sku=None, enable_auto_patching=None,
+                 location=None, sql_image_sku=None, enable_auto_patching=None, sql_management_mode="LightWeight",
                  day_of_week=None, maintenance_window_starting_hour=None, maintenance_window_duration=None,
                  enable_auto_backup=None, enable_encryption=False, retention_period=None, storage_account_url=None,
                  storage_access_key=None, backup_password=None, backup_system_dbs=False, backup_schedule_type=None,
                  full_backup_frequency=None, full_backup_start_time=None, full_backup_window_hours=None, log_backup_frequency=None,
                  enable_key_vault_credential=None, credential_name=None, azure_key_vault_url=None, service_principal_name=None,
                  service_principal_secret=None, connectivity_type=None, port=None, sql_auth_update_username=None,
-                 sql_auth_update_password=None, sql_workload_type=None, enable_r_services=None, tags=None):
+                 sql_auth_update_password=None, sql_workload_type=None, enable_r_services=None, tags=None, sql_image_offer=None):
     '''
     Creates a SQL virtual machine.
     '''
@@ -253,6 +253,8 @@ def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, sql
                                      virtual_machine_resource_id=virtual_machine_resource_id,
                                      sql_server_license_type=sql_server_license_type,
                                      sql_image_sku=sql_image_sku,
+                                     sql_management=sql_management_mode,
+                                     sql_image_offer=sql_image_offer,
                                      auto_patching_settings=auto_patching_object,
                                      auto_backup_settings=auto_backup_object,
                                      key_vault_credential_settings=keyvault_object,
@@ -269,8 +271,8 @@ def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, sql
 # pylint: disable=too-many-statements, line-too-long, too-many-boolean-expressions
 def sqlvm_update(instance, sql_server_license_type=None, sql_image_sku=None, enable_auto_patching=None,
                  day_of_week=None, maintenance_window_starting_hour=None, maintenance_window_duration=None,
-                 enable_auto_backup=None, enable_encryption=False, retention_period=None, storage_account_url=None,
-                 storage_access_key=None, backup_password=None, backup_system_dbs=False, backup_schedule_type=None,
+                 enable_auto_backup=None, enable_encryption=False, retention_period=None, storage_account_url=None, prompt=True,
+                 storage_access_key=None, backup_password=None, backup_system_dbs=False, backup_schedule_type=None, sql_management_mode=None,
                  full_backup_frequency=None, full_backup_start_time=None, full_backup_window_hours=None, log_backup_frequency=None,
                  enable_key_vault_credential=None, credential_name=None, azure_key_vault_url=None, service_principal_name=None,
                  service_principal_secret=None, connectivity_type=None, port=None, sql_workload_type=None, enable_r_services=None, tags=None):
@@ -283,6 +285,14 @@ def sqlvm_update(instance, sql_server_license_type=None, sql_image_sku=None, ena
         instance.sql_server_license_type = sql_server_license_type
     if sql_image_sku is not None:
         instance.sql_image_sku = sql_image_sku
+    if sql_management_mode is not None and instance.sql_management != "Full":
+        from knack.prompting import prompt_y_n
+        if not prompt:
+            instance.sql_management = sql_management_mode
+        else:
+            confirmation = prompt_y_n("Upgrading SQL manageability mode to Full will restart the SQL Server. Proceed?")
+            if confirmation:
+                instance.sql_management = sql_management_mode
 
     if (enable_auto_patching is not None or day_of_week is not None or maintenance_window_starting_hour is not None or maintenance_window_duration is not None):
 

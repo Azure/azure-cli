@@ -62,7 +62,7 @@ def application_package_reference_format(value):
     app_reference = value.split('#', 1)
     package = {'application_id': app_reference[0]}
     try:
-        package['version_name'] = app_reference[1]
+        package['version'] = app_reference[1]
     except IndexError:  # No specified version - ignore
         pass
     return package
