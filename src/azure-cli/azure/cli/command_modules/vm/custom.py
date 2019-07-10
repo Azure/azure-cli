@@ -517,7 +517,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               plan_promotion_code=None, license_type=None, assign_identity=None, identity_scope=None,
               identity_role='Contributor', identity_role_id=None, application_security_groups=None, zone=None,
               boot_diagnostics_storage=None, ultra_ssd_enabled=None, ephemeral_os_disk=None,
-              proximity_placement_group=None, aux_subscriptions=None):
+              proximity_placement_group=None, dedicated_host=None, dedicated_host_group=None, aux_subscriptions=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -637,7 +637,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         attach_os_disk=attach_os_disk, os_disk_size_gb=os_disk_size_gb, custom_data=custom_data, secrets=secrets,
         license_type=license_type, zone=zone, disk_info=disk_info,
         boot_diagnostics_storage_uri=boot_diagnostics_storage, ultra_ssd_enabled=ultra_ssd_enabled,
-        proximity_placement_group=proximity_placement_group, computer_name=computer_name)
+        proximity_placement_group=proximity_placement_group, computer_name=computer_name, dedicated_host=dedicated_host)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -2662,9 +2662,8 @@ def list_dedicated_host_groups(cmd, client, resource_group_name=None):
         return client.list_by_resource_group(resource_group_name)
     return client.list_by_subscription()
 
-def create_dedicated_host(cmd, client, host_group_name, host_name, resource_group_name, platform_fault_domain,
-                          auto_replace_on_failure=None, license_type=None, sku=None,
-                          location=None, tags=None):
+def create_dedicated_host(cmd, client, host_group_name, host_name, resource_group_name, platform_fault_domain, sku,
+                          auto_replace_on_failure=None, license_type=None, location=None, tags=None):
     DedicatedHostType = cmd.get_models('DedicatedHost')
     SkuType = cmd.get_models('Sku')
 
