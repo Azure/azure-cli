@@ -21,7 +21,7 @@ from knack.util import CLIError
 class DataLakeStoreFileAccessScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_adls_access')
-    def test_dls_file_access_mgmt(self, resource_group):
+    def test_dls_file_access_mgmt(self):
 
         user_id = '470c0ccf-c91a-4597-98cd-48507d2f1486'
 
@@ -118,13 +118,27 @@ class DataLakeStoreFileAccessScenarioTest(ScenarioTest):
         assert 3 == len(remove_result['entries'])
 
 
-# Convert back to ScenarioTest and re-record when #5175 is addressed
-class DataLakeStoreFileScenarioTest(LiveScenarioTest):
+class DataLakeStoreFileScenarioTest(ScenarioTest):
+
+    def setUp(self):
+        try:
+            import unittest.mock as mock
+        except ImportError:
+            import mock
+        import uuid
+
+        def const_uuid():
+            return uuid.UUID('{12345678-1234-5678-1234-567812345678}')
+
+        self.mp = mock.patch('uuid.uuid4', const_uuid)
+        self.mp.__enter__()
+        super(DataLakeStoreFileScenarioTest, self).setUp()
 
     def tearDown(self):
         local_folder = self.kwargs.get('local_folder', None)
         if local_folder and os.path.exists(local_folder):
             rmtree(local_folder)
+        self.mp.__exit__()
         return super(DataLakeStoreFileScenarioTest, self).tearDown()
 
     @ResourceGroupPreparer(name_prefix='cls_test_adls_file')
@@ -296,7 +310,7 @@ class DataLakeStoreAccountScenarioTest(ScenarioTest):
 
         self.kwargs.update({
             'dls': self.create_random_name('cliadls', 24),
-            'loc': 'eastus2'
+            'loc': 'eastus2',
         })
 
         # test create keyvault with default access policy set
