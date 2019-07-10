@@ -47,8 +47,13 @@ helps['batch account login'] = """
     short-summary: Log in to a Batch account through Azure Active Directory or Shared Key authentication.
 """
 
-helps['batch pool supported-images list'] = """
+helps['batch pool supported-images'] = """
     type: group
+    short-summary: Query information on VM images supported by Azure Batch service.
+"""
+
+helps['batch pool supported-images list'] = """
+    type: command
     short-summary: Lists all Virtual Machine Images supported by the Azure Batch service.
 """
 
