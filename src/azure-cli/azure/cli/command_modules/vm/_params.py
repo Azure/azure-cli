@@ -403,9 +403,8 @@ def load_arguments(self, _):
         c.argument('force', action='store_true', help='Force the VM to restart by redeploying it. Use if the VM is unresponsive.')
 
     with self.argument_context('vm host') as c:
-        # TODO support id parameters after setting up tests
-        c.argument('host_group_name', options_list=['--host-group'], help="Name of the Dedicated Host Group")
-        c.argument('host_name', name_arg_type, help="Name of the Dedicated Host")
+        c.argument('host_group_name', options_list=['--host-group'], id_part='name', help="Name of the Dedicated Host Group")
+        c.argument('host_name', name_arg_type, id_part='child_name_1', help="Name of the Dedicated Host")
         c.argument('platform_fault_domain', options_list=['--platform-fault-domain', '-d'], type=int, choices=[0, 1, 2],
                    help="Fault domain of the host within a group.")
         c.argument('auto_replace_on_failure', options_list=['--auto-replace'], arg_type=get_three_state_flag(),
@@ -416,10 +415,11 @@ def load_arguments(self, _):
                    help="Sku of the dedicated host.")
 
     with self.argument_context('vm host group') as c:
-        c.argument('host_group_name', name_arg_type, help="Name of the Dedicated Host Group")
+        c.argument('host_group_name', name_arg_type, id_part='name', help="Name of the Dedicated Host Group")
         c.argument('platform_fault_domain_count', options_list=["--platform-fault-domain-count", "-c"], type=int,
                    choices=[1, 2, 3], help="Number of fault domains that the host group can span.")
         c.argument('zones', zone_type)
+
 
     for scope in ["vm host", "vm host group"]:
         with self.argument_context("{} create".format(scope)) as c:
