@@ -18,6 +18,9 @@ Release History
 * When using --json-file option of az batch pool create network security rules blocking network access to a pool based on the source port of the traffic is now supported. This is done via the SourcePortRanges property on NetworkSecurityGroupRule.
 * When using --json-file option of az batch task create and running a container, Batch now supports executing the task in the container working directory or in the Batch task working directory. This is controlled by the WorkingDirectory property on TaskContainerSettings.
 
+**Eventhubs**
+
+* Fix for issue #5824 - added validation for parameter --rights of authorizationrule
 
 **RDBMS**
 
