@@ -3311,7 +3311,6 @@ class DedicatedHostScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded')
         ]).get_output_in_json()
 
-
         host_json = self.cmd('vm host show --name {host-name} --host-group {host-group} -g {rg}', checks=[
             self.check('name', '{host-name}'),
         ]).get_output_in_json()

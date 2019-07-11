@@ -427,7 +427,6 @@ def load_arguments(self, _):
                    choices=[1, 2, 3], help="Number of fault domains that the host group can span.")
         c.argument('zones', zone_type)
 
-
     for scope in ["vm host", "vm host group"]:
         with self.argument_context("{} create".format(scope)) as c:
             location_type = get_location_type(self.cli_ctx)
