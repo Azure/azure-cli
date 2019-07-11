@@ -360,6 +360,21 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('lease_break_period', type=int)
         c.argument('blob_name', arg_type=blob_name_type)
 
+    with self.argument_context('storage copy') as c:
+        c.argument('destination', options_list=['--destination', '-d'], help='The copy destination path/url. It can be a local path or url to Azure storage account coantainer')
+        for item in ['destination', 'source']:
+            c.argument('{}_if_modified_since'.format(item), arg_group='Pre-condition')
+            c.argument('{}_if_unmodified_since'.format(item), arg_group='Pre-condition')
+            c.argument('{}_if_match'.format(item), arg_group='Pre-condition')
+            c.argument('{}_if_none_match'.format(item), arg_group='Pre-condition')
+        c.argument('container_name', container_name_type, options_list=('--destination-container', '-c'))
+        c.argument('blob_name', blob_name_type, options_list=('--destination-blob', '-b'),
+                   help='Name of the destination blob. If the exists, it will be overwritten.')
+        c.argument('source_lease_id', arg_group='Copy Source')
+        
+        from azure.cli.command_modules.storage._validators import validate_source_uri
+        c.register_source_uri_arguments(validator=validate_source_uri)
+
     with self.argument_context('storage blob copy') as c:
         for item in ['destination', 'source']:
             c.argument('{}_if_modified_since'.format(item), arg_group='Pre-condition')

@@ -43,6 +43,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
             resource_type=resource_type
         )
 
+    with self.command_group('storage', custom_command_type=get_custom_sdk('azcopy', blob_data_service_factory)) as g:
+        g.storage_custom_command_oauth('copy', 'storage_copy')
+
     with self.command_group('storage account', storage_account_sdk, resource_type=ResourceType.MGMT_STORAGE,
                             custom_command_type=storage_account_custom_type) as g:
         g.command('check-name', 'check_name_availability')
