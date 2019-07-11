@@ -18,5 +18,6 @@ pushd ${REPO_ROOT} > /dev/null
 
 find src/ -name setup.py -type f | xargs -I {} dirname {} | grep -v azure-cli-testsdk | xargs pip install --no-deps
 pip install -r ./src/azure-cli/requirements.$(python ./scripts/get-python-version.py).$(uname).txt
+pip install ./privates/azure_mgmt_compute-6.0.0-py2.py3-none-any.whl
 
 popd > /dev/null
