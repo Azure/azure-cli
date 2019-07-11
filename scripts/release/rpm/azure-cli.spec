@@ -7,7 +7,7 @@
 %endif
 
 %if 0%{?rhel} && 0%{?rhel} < 8
-    %define python_cmd python2
+    %define python_cmd python
 %else
     %define python_cmd python3
 %endif
