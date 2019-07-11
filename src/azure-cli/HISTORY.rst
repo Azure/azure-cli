@@ -2,6 +2,8 @@
 
 Release History
 ===============
+2.0.69
+++++++
 
 **Appservice**
 
