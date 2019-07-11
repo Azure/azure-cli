@@ -179,8 +179,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('base_image_trigger_name', help="The name of the base image trigger.")
         c.argument('base_image_trigger_enabled', help="Indicates whether the base image trigger is enabled.", arg_type=get_three_state_flag())
         c.argument('base_image_trigger_type', help="The type of the auto trigger for base image dependency updates.", arg_type=get_enum_type(BaseImageTriggerType))
-        c.argument('update_trigger_endpoint', help="The full URL of the endpoint to receive base image update trigger notifications.")
-        c.argument('update_trigger_payload_type', help="Indicates whether to include metadata about the base image trigger in the payload alongwith the update trigger token, when a notification is sent.", arg_type=get_enum_type(UpdateTriggerPayloadType))
+        c.argument('update_trigger_endpoint', help="The full URL of the endpoint to receive base image update trigger notifications.", is_preview=True)
+        c.argument('update_trigger_payload_type', help="Indicates whether to include metadata about the base image trigger in the payload alongwith the update trigger token, when a notification is sent.", arg_type=get_enum_type(UpdateTriggerPayloadType), is_preview=True)
 
         # Run related parameters
         c.argument('top', help='Limit the number of latest runs in the results.')
@@ -195,7 +195,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('assign_identity', nargs='*', help="Assigns managed identities to the task. Use '[system]' to refer to the system-assigned identity or a resource ID to refer to a user-assigned identity.")
 
         # Update trigger token parameters
-        c.argument('update_trigger_token', help="The payload that will be passed back alongwith the base image trigger notification.")
+        c.argument('update_trigger_token', help="The payload that will be passed back alongwith the base image trigger notification.", is_preview=True)
 
     with self.argument_context('acr task create') as c:
         c.argument('task_name', completer=None)
