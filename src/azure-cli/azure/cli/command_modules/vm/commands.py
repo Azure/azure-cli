@@ -319,7 +319,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_dedicated_host')
         g.command('list', 'list_by_host_group')
         g.generic_update_command('update')
-        g.command('delete', 'delete')
+        g.command('delete', 'delete', confirmation=True)
 
     with self.command_group('vm host group', compute_dedicated_host_groups_sdk, client_factory=cf_dedicated_host_groups,
                             min_api='2019-03-01', is_preview=True) as g:
@@ -327,7 +327,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_dedicated_host_group')
         g.custom_command('list', 'list_dedicated_host_groups')
         g.generic_update_command('update')
-        g.command('delete', 'delete')
+        g.command('delete', 'delete', confirmation=True)
 
     with self.command_group('vmss', compute_vmss_sdk, operation_group='virtual_machine_scale_sets') as g:
         g.custom_command('identity assign', 'assign_vmss_identity', validator=process_assign_identity_namespace)

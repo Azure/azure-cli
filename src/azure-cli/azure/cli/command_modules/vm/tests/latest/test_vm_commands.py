@@ -3191,9 +3191,8 @@ class VMGalleryImage(ScenarioTest):
 
 # endregion
 
+
 # region ppg tests
-
-
 class ProximityPlacementGroupScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix="cli_test_ppg_cmds_")
@@ -3274,6 +3273,61 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
                 self.assertTrue(parsed_2[k2].startswith(rg_prefix))
             else:
                 self.assertEqual(parsed_1[k1], parsed_2[k2])
+# endregion
+
+
+# region dedicated host tests
+class DedicatedHostScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_dedicated_host_', location='westeurope')
+    def test_dedicated_host_e2e(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'host-group': 'my-host-group',
+            'host-name': 'my-host',
+            'vm-name': 'ded-host-vm'
+        })
+
+        # create resources
+        self.cmd('vm host group create -n {host-group} -c 3 -g {rg}', checks=[
+            self.check('name', '{host-group}'),
+            self.check('location', '{loc}'),
+            self.check('platformFaultDomainCount', 3)
+        ])
+
+        self.cmd('vm host create -n {host-name} --host-group {host-group} -d 2 -g {rg} --sku DSv3-Type1', checks=[
+            self.check('name', '{host-name}'),
+            self.check('location', '{loc}'),
+            self.check('platformFaultDomain', 2),
+            self.check('sku.name', 'DSv3-Type1')
+        ])
+
+        self.cmd('vm create -n {vm-name} --image debian -g {rg} --size Standard_D4s_v3 '
+                 ' --host-group {host-group} --host {host-name} --generate-ssh-keys')
+
+        # validate resources created successfully
+        vm_json = self.cmd('vm show -n {vm-name} -g {rg}', checks=[
+            self.check('name', '{vm-name}'),
+            self.check('provisioningState', 'Succeeded')
+        ]).get_output_in_json()
+
+
+        host_json = self.cmd('vm host show --name {host-name} --host-group {host-group} -g {rg}', checks=[
+            self.check('name', '{host-name}'),
+        ]).get_output_in_json()
+
+        host_group_json = self.cmd('vm host group show --name {host-group} -g {rg}', checks=[
+            self.check('name', '{host-group}'),
+        ]).get_output_in_json()
+
+        self.assertTrue(vm_json['host']['id'].lower(), host_json['id'].lower())
+        self.assertTrue(host_json['virtualMachines'][0]['id'].lower(), vm_json['id'].lower())
+        self.assertTrue(host_group_json['hosts'][0]['id'].lower(), host_json['id'].lower())
+
+        # delete resources (test vm host delete commands)
+        self.cmd('vm delete --name {vm-name} -g {rg} --yes')
+        self.cmd('vm host delete --name {host-name} --host-group {host-group} -g {rg} --yes')
+        self.cmd('vm host group delete --name {host-group} -g {rg} --yes')
 # endregion
 
 
