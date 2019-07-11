@@ -796,9 +796,15 @@ helps['acr task run'] = """
 type: command
 short-summary: Manually trigger a task that might otherwise be waiting for git commits or base image update triggers.
 examples:
-  - name: Trigger a task.
+  - name: Trigger a task run.
     text: >
         az acr task run -n MyTask -r MyRegistry
+  - name: Trigger a task run by overriding the context and file passed during Task create.
+    text: >
+        az acr task run -n MyTask -r MyRegistry -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile
+  - name: Trigger a task run by adding or overriding build arguments set during Task create.
+    text: |
+        az acr task run -n MyTask -r MyRegistry --arg DOCKER_CLI_BASE_IMAGE=docker:18.03.0-ce-git
 """
 
 helps['acr task show'] = """
