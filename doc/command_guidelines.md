@@ -6,13 +6,27 @@ Guidelines marked (*) only apply to command modules, not extensions.
 
 If in doubt, ask!
 
+[1. General Patterns](#general-patterns)
+
+[2. Command Naming and Behavior](#command-naming-and-behavior)
+
+[3. Argument Naming Conventions](#argument-naming-conventions)
+
+[4. Standard Command Types](#standard-command-types)
+
+[5. Non-standard Commands](#non-standard-commands)
+
+[6. Commands with Complex Types](#commands-with-complex-types)
+
+[7. Network Rule Commands](#network-rule-commands)
+
+[8. Coding Practices](#coding-practices)
+
 ## General Patterns
 
 - Be consistent with POSIX tools (support piping, work with grep, awk, jq, etc.)
 - Support tab completion for parameter names and values (e.g. resource names)
-- All commands, command group and arguments must have descriptions
-- You must provide command examples for non-trivial commands
-- All commands must support all output types (json, tsv, table)
+- Commands must support all output types (json, tsv, table)
 - Provide custom table outputs for commands that don't provide table output automatically
 - Commands must return an object, dictionary or `None` (do not string, Boolean, etc. types)
 - Command output must go to `stdout`, everything else to `stderr` (log/status/errors).
@@ -22,19 +36,14 @@ If in doubt, ask!
 ## Command Naming and Behavior
 
 - Commands must follow a "[noun] [noun] [verb]" pattern
-- Multi-word subgroups should be hyphenated
-e.g. `foo-resource` instead of `fooresource`
-- All command names should contain a verb
-e.g. `account get-connection-string` instead of `account connection-string`
+- Multi-word subgroups should be hyphenated (e.g. `foo-resource` instead of `fooresource`)
+- All command names should contain a verb (e.g. `account get-connection-string` instead of `account connection-string`)
 - For commands which maintain child collections, the follow pairings are acceptable.
   1. `CREATE`/`DELETE` (same as top level resources)
   2. `ADD`/`REMOVE`
-- Avoid hyphenated command names when moving the commands into a subgroup would eliminate the need.
-e.g. `database show` and `database get` instead of `show-database` and `get-database`
-- If a command subgroup would only have a single command, move it into the parent command group and hyphenate the name. This is common for commands which exist only to pull down cataloging information.
-e.g. `database list-sku-definitions` instead of `database sku-definitions list`
-- In general, avoid command subgroups that have no commands. This often happens at the first level of a command branch.
-e.g. `keyvault create` instead of `keyvault vault create` (where `keyvault` only has subgroups and adds unnecessary depth to the tree).
+- Avoid hyphenated command names when moving the commands into a subgroup would eliminate the need (e.g. `database show` and `database get` instead of `show-database` and `get-database`).
+- If a command subgroup would only have a single command, move it into the parent command group and hyphenate the name. This is common for commands which exist only to pull down cataloging information (e.g. `database list-sku-definitions` instead of `database sku-definitions list`).
+- In general, avoid command subgroups that have no commands. This often happens at the first level of a command branch. For example, `keyvault create` instead of `keyvault vault create` (where `keyvault` only has subgroups and adds unnecessary depth to the tree).
 <details>
   <summary>Click for a full example</summary>
   <p>
@@ -120,6 +129,12 @@ For commands that don't conform to one of the above-listed standard command patt
 
 - (*) Don't use single word verbs if they could cause confusion with the standard command types. For example, don't use `get` or `new` as these sound functionally the same as `show` and `create` respectively, leading to confusion as to what the expected behavior should be.
 - (*) Descriptive, hyphenated command names are often a better option than single verbs.
+
+## Commands with Complex Types
+
+Certain endpoints accept complex object that themselves contain other complex objects or collections of complex objects. Since this child resources lack endpoints of their own, it can often be difficult to craft CLI commands to manage such objects. The tendency is to simply accept a JSON blob for these arguments. **THIS PRACTICE IS UNACCEPTABLE.** Existing instances of JSON strings have demonstrably frustrated customers because (1) the required format is inadequately (if at all) conveyed, (2) inputting JSON strings on the command line is tedious and extremely difficult on certain shells, necessitating error-prone escaping and (3) parsing errors are difficult to troubleshoot.
+
+GUIDANCE HERE.
 
 ## Network Rule Commands
 
