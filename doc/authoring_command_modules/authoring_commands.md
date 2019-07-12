@@ -52,9 +52,11 @@ class MyCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
         from azure.cli.core.sdk.util import CliCommandType
+        from azure.cli.core.profiles._shared import MGMT_MYTYPE
         mymod_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.mymod.custom#{}')
+
         super(MyCommandsLoader, self).__init__(cli_ctx=cli_ctx,
-                                               min_profile='2017-03-10-profile',
+                                               resource_type=MGMT_MYTYPE,
                                                custom_command_type=mymod_custom)
 
     def load_command_table(self, args):
@@ -328,14 +330,6 @@ While kwargs are inherited from higher levels on the diagram, they can be overri
 
 Addtionally, you can see that kwargs registered on a command group *do not* carry over to argument contexts, so you must apply the kwargs in both places if necessary.
 
-****Commands Loader****
-
-_Special Kwargs_
-
-The following special kwargs are only interpretted by the command loader:
-- `min_profile` - Minimum profile which the module supports. If an older profile is used, the module will not be loaded.
-- `max_profile` - Maximum profile which the module supports. If a newer profile is used, the module will not be loaded.
-
 ****Command Group****
 
 _Special Kwargs_
@@ -349,6 +343,7 @@ The following special kwargs are supported by command group and its helper metho
 - `formatter_class` - Advanced. Accepts a custom class that derives from `argparse.HelpFormatter` to modify the help document generation.
 - `argument_loader` - Advanced. Accepts a callable that takes no parameters which will be used in place of the default argument loader.
 - `description_loader` - Advanced. Accepts a callable that takes no parameters which will be used in place of the default description loader.
+- `is_preview` - Accepts a boolean which denotes that this command group and, by implication, all commands and subgroups which fall under it, are in preview status. An informational message will be displayed in the help system and upon invocation to notify the user.        
 
 _General Kwargs_
 
@@ -370,6 +365,7 @@ The follow special kwargs are supported by argument context and its helper metho
 - `completer` - See section on [Tab Completion](#tab-completion)
 - `id_part` - See section on [Supporting the IDs Parameter](#supporting-the-ids-parameter).
 - `arg_group` - Groups arguments within this context under a group name or add an argument to the group. This group name is shown in the help for the command. For example if `arg_group` is "Network", all applicable arguments will be grouped under the heading "Network Arguments" in the help text for the command.
+- `is_preview` - Accepts a boolean which denotes that this argument is in preview status. An informational message will be displayed in the help system and upon invocation to notify the user.        
 
 Additionally, the following `kwargs`, supported by argparse, are supported as well:
 - `nargs` - See https://docs.python.org/3/library/argparse.html#nargs
