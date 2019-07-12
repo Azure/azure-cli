@@ -10,7 +10,7 @@ VOLUME_DEFAULT = "--service-level 'Premium' --usage-threshold 100"
 LOCATION = "westcentralus"
 
 # No tidy up of tests required. The resource group is automatically removed
-import pdb
+
 
 class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
     def setup_vnet(self, rg, vnet_name, subnet_name, ip_pre):
