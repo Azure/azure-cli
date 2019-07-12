@@ -87,6 +87,7 @@ def patch_pool(cmd, instance, size=None, service_level=None, tags=None):
     _update_mapper(instance, body, ['service_level', 'size', 'tags'])
     return body
 
+
 def create_volume(cmd, client, account_name, pool_name, volume_name, resource_group_name, location, creation_token, usage_threshold, vnet, subnet='default', service_level=None, protocol_types=None, tags=None):
     subs_id = get_subscription_id(cmd.cli_ctx)
     subnet_id = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/virtualNetworks/%s/subnets/%s" % (subs_id, resource_group_name, vnet, subnet)
@@ -100,6 +101,7 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
         tags=tags)
 
     return client.create_or_update(body, resource_group_name, account_name, pool_name, volume_name)
+
 
 # volume update
 def patch_volume(cmd, instance, usage_threshold=None, service_level=None, protocol_types=None, tags=None):
