@@ -211,7 +211,7 @@ def create_foo(cmd, client, resource_group_name, foo_name, policy_action, policy
 The corresponding rule create looks like:
 ```Python
 def create_foo_rule(cmd, client, resource_group_name, foo_name, rule_name, metric, operation, value):
-    from azure.cli.command_modules.network.custom import _upsert, _get_property
+    from azure.cli.commands import upsert_to_collection, get_property
     FooRule = cmd.get_models('FooRule')
     # get the parent object
     foo_obj = client.get(resource_group_name, foo_name)
@@ -222,11 +222,11 @@ def create_foo_rule(cmd, client, resource_group_name, foo_name, rule_name, metri
         value=value
     )
     # add the new child to the parent collection
-    _upsert(foo_obj, 'rules', new_rule, 'name')
+    upsert_to_collection(foo_obj, 'rules', new_rule, 'name')
     # update the parent object
     foo_obj = client.create_or_update(name, resource_group_name, foo_obj).result()
     # return the child object
-    return _get_property(foo_obj.rules, rule_name)
+    return get_property(foo_obj.rules, rule_name)
 ```
 
 The usage pattern of this implementation to create two rules would be:
@@ -338,7 +338,7 @@ def create_foo(cmd, client, resource_group_name, foo_name, policy_action, policy
     from azure.cli.core.commands import cached_get, cached_put
     Foo, Policy = cmd.get_models('Foo', 'Policy')
     foo_obj = Foo(
-        rules=[],  # if service fails, see: Overcoming Service Limitations
+        rules=[],
         policy=Policy(
             action=policy_action,
             values=policy_values
@@ -351,8 +351,7 @@ def create_foo(cmd, client, resource_group_name, foo_name, policy_action, policy
 The corresponding rule create looks like:
 ```Python
 def create_foo_rule(cmd, client, resource_group_name, foo_name, rule_name, metric, operation, value):
-    from azure.cli.core.commands import cached_put
-    from azure.cli.command_modules.network.custom import _upsert, _get_property
+    from azure.cli.core.commands import cached_put, upsert_to_colleciton, get_property
     FooRule = cmd.get_models('FooRule')
     # retrieves the object from the cache. On a miss, retrieves from Azure
     foo_obj = cached_get(cmd, client.get, resource_group_name, foo_name)
@@ -363,11 +362,11 @@ def create_foo_rule(cmd, client, resource_group_name, foo_name, rule_name, metri
         value=value
     )
     # add the new child to the parent collection
-    _upsert(foo_obj, 'rules', new_rule, 'name')
+    upsert_to_collection(foo_obj, 'rules', new_rule, 'name')
     # re-cache the parent with --defer or send to Azure
     foo_obj = cached_put(cmd, client.create_or_update, name, resource_group_name, foo_obj).result()
     # return the child object
-    return _get_property(foo_obj.rules, rule_name)
+    return get_property(foo_obj.rules, rule_name)
 ```
 
 The usage pattern of this implementation to create two rules would be:
