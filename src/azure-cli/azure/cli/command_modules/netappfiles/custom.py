@@ -102,6 +102,7 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
 
     return client.create_or_update(body, resource_group_name, account_name, pool_name, volume_name)
 
+
 # volume update
 def patch_volume(cmd, instance, usage_threshold=None, service_level=None, protocol_types=None, tags=None):
     params = VolumePatch(
