@@ -3,6 +3,13 @@
 Release History
 ===============
 
+**RBAC**
+
+* role update: search all assigned scopes for existing role definitions
+
+2.0.69
+++++++
+
 **Appservice**
 
 * az webapp identity commands will return a proper error message if ResourceGroupName or App name are invalid.
