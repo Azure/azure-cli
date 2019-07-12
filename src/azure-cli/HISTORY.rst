@@ -73,6 +73,7 @@ Release History
 
 **NetAppFiles**
 
+* Update for R4.5 version of the RP and API version 2019-06-01 including provision of protocol types.
 * Initial version relating to the R4 version of the RP.
 
 **Profile**
