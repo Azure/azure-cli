@@ -44,7 +44,7 @@ def list_role_definitions(cmd, name=None, resource_group_name=None, scope=None,
     definitions_client = _auth_client_factory(cmd.cli_ctx, scope).role_definitions
     scope = _build_role_scope(resource_group_name, scope,
                               definitions_client.config.subscription_id)
-    return _search_role_definitions(cmd.cli_ctx, definitions_client, name, scope, custom_role_only)
+    return _search_role_definitions(cmd.cli_ctx, definitions_client, name, [scope], custom_role_only)
 
 
 def create_role_definition(cmd, role_definition):
@@ -76,14 +76,14 @@ def _create_update_role_definition(cmd, role_definition, for_update):
             logger.warning('Role "id" is missing. Look for the role in the current subscription...')
         definitions_client = _auth_client_factory(cmd.cli_ctx, scope=role_resource_id).role_definitions
         scopes_in_definition = role_definition.get('assignableScopes', None)
-        scope = (scopes_in_definition[0] if scopes_in_definition else
-                 '/subscriptions/' + definitions_client.config.subscription_id)
+        scopes = (scopes_in_definition if scopes_in_definition else
+                  ['/subscriptions/' + definitions_client.config.subscription_id])
         if role_resource_id:
             from msrestazure.tools import parse_resource_id
             role_id = parse_resource_id(role_resource_id)['name']
             role_name = role_definition['roleName']
         else:
-            matched = _search_role_definitions(cmd.cli_ctx, definitions_client, role_definition['name'], scope)
+            matched = _search_role_definitions(cmd.cli_ctx, definitions_client, role_definition['name'], scopes)
             if len(matched) > 1:
                 raise CLIError('More than 2 definitions are found with the name of "{}"'.format(
                     role_definition['name']))
@@ -109,19 +109,22 @@ def delete_role_definition(cmd, name, resource_group_name=None, scope=None,
     definitions_client = _auth_client_factory(cmd.cli_ctx, scope).role_definitions
     scope = _build_role_scope(resource_group_name, scope,
                               definitions_client.config.subscription_id)
-    roles = _search_role_definitions(cmd.cli_ctx, definitions_client, name, scope, custom_role_only)
+    roles = _search_role_definitions(cmd.cli_ctx, definitions_client, name, [scope], custom_role_only)
     for r in roles:
         definitions_client.delete(role_definition_id=r.name, scope=scope)
 
 
-def _search_role_definitions(cli_ctx, definitions_client, name, scope, custom_role_only=False):
-    roles = list(definitions_client.list(scope))
-    worker = MultiAPIAdaptor(cli_ctx)
-    if name:
-        roles = [r for r in roles if r.name == name or worker.get_role_property(r, 'role_name') == name]
-    if custom_role_only:
-        roles = [r for r in roles if worker.get_role_property(r, 'role_type') == 'CustomRole']
-    return roles
+def _search_role_definitions(cli_ctx, definitions_client, name, scopes, custom_role_only=False):
+    for scope in scopes:
+        roles = list(definitions_client.list(scope))
+        worker = MultiAPIAdaptor(cli_ctx)
+        if name:
+            roles = [r for r in roles if r.name == name or worker.get_role_property(r, 'role_name') == name]
+        if custom_role_only:
+            roles = [r for r in roles if worker.get_role_property(r, 'role_type') == 'CustomRole']
+        if roles:
+            return roles
+    return []
 
 
 def create_role_assignment(cmd, role, assignee=None, assignee_object_id=None, resource_group_name=None,
