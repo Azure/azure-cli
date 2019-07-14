@@ -9,29 +9,23 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.core.profiles import ResourceType
 from azure.cli.command_modules.storage._client_factory import file_data_service_factory
 
-def storage_copy(cmd, client, source=None, destination=None, container_name=None, blob_name=None, copy_source=None,
-                  metadata=None, source_if_modified_since=None,
-                  source_if_unmodified_since=None, source_if_match=None,
-                  source_if_none_match=None, destination_if_modified_since=None,
-                  destination_if_unmodified_since=None, destination_if_match=None,
-                  destination_if_none_match=None, destination_lease_id=None,
-                  source_lease_id=None, timeout=None, requires_sync=None,recursive=None):
-    
-    # Figure out source and destination type
-    if source is not None:
-        full_source = get_url_with_sas(source)
-    elif 
-    if destination is not None:
-        full_destination = get_url_with_sas(destination)
-    azcopy = AzCopy()       
-    azcopy.copy(full_source, full_destination, flags)
-
+def storage_copy(cmd, client, source=None, destination=None, 
+                    blob_type=None, block_blob_tier=None, block_size_mb=None, cache_control=None,
+                    check_md5=None, content_disposition=None, cotent_encoding=None, cotent_language=None, content_type=None,
+                    exclude=None, exclude_blob_type=None, follow_symlinks=None, log_level=None, no_guess_minme_type=None,
+                    overwrite=None, page_blob_tier=None, preserve_last_modified_time=None, put_md5=None, recursive=None, 
+                    s2s_detect_source_changed=None, s2s_handle_invalid_metadata=None, s2s_preserve_access_tier=None, s2s_preserve_properties=None,
+                    cap_mbp=None, output_type=None,
+                    container_name=None, blob_name=None, destination_lease_id=None,
+                    metadata=None, timeout=None,
+                    source_if_modified_since=None, source_if_unmodified_since=None, source_if_match=None, source_if_none_match=None, 
+                    destination_if_modified_since=None, destination_if_unmodified_since=None, destination_if_match=None, destination_if_none_match=None, 
+                    copy_source=None, source_lease_id=None):
     def get_url_with_sas(source):
         import re
         storage_pattern = re.compile(r'https://(.*?)\.(blob|dfs|file).core.windows.net')
-        result = re.findall(storage_pattern)
-        sas_pattern = re.compile(r'?(.*?)')
-        if result is not None: # Azure storage account
+        result = re.findall(storage_pattern, source)
+        if result: # Azure storage account
             storage_info = result[0]
             storage_account = storage_info[0]
             storage_service = storage_info[1]
@@ -49,7 +43,16 @@ def storage_copy(cmd, client, source=None, destination=None, container_name=None
                 return _add_url_sas(source, creds.sas_token)
         else:
             return source
-
+    # Figure out source and destination type
+    if source is not None:
+        full_source = get_url_with_sas(source)
+    if destination is not None:
+        full_destination = get_url_with_sas(destination)
+    azcopy = AzCopy()
+    flags = []
+    if recursive is not None:
+        flags.append('--recursive')
+    azcopy.copy(full_source, full_destination, flags=flags)
 
 def storage_blob_copy(azcopy, source, destination, recursive=None):
     flags = []
