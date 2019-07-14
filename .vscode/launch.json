@@ -9,7 +9,7 @@
             "program": "${workspaceRoot}/src/azure-cli/azure/cli/__main__.py",
             "cwd": "${workspaceRoot}",
             "args": [
-                "--help"
+                "storage", "copy", "--account-name", "storageforcli", "--source", "..\\..\\source_sync.txt", "--destination", "https://storageforcli.blob.core.windows.net/test/dest_sync%20.txt"
             ],
             "console": "integratedTerminal",
             "debugOptions": [
@@ -28,7 +28,7 @@
             "program": "${workspaceRoot}/src/azure-cli/azure/cli/__main__.py",
             "cwd": "${workspaceRoot}",
             "args": [
-                "--help"
+                "storage", "blob", "sync", "--container", "test1", "--account-name", "storageforcli", "--source", "source_sync.txt", "-d",  "test.txt"
             ],
             "console": "externalTerminal",
             "debugOptions": [
