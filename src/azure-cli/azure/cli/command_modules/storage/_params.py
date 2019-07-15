@@ -360,6 +360,33 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('lease_break_period', type=int)
         c.argument('blob_name', arg_type=blob_name_type)
 
+    with self.argument_context('storage copy') as c:
+        c.argument('destination', options_list=['--destination', '-d'], help='The path/url of copy destination. It can be local path, \
+            an url to azure storage server. For more imformation, please refer to [link here]. \
+            If you provide destination parameter here, you do not need to provide arguments in copy \
+            destination arguments group and copy destination arguments will be deprecated  in future.')
+        c.argument('source', options_list=['--source', '-s'], help='The path/url of copy source. \
+            It can be local path, an url to azure storage server or AWS S3 buckets. For more imformation, please refer to [link here]. \
+            If you provide source parameter here, you do not need to provide arguments in copy source arguments group and copy source \
+            arguments will be deprecated  in future.')
+        for item in ['destination', 'source']:
+            c.argument('{}_if_modified_since'.format(item), arg_group='Pre-condition')
+            c.argument('{}_if_unmodified_since'.format(item), arg_group='Pre-condition')
+            c.argument('{}_if_match'.format(item), arg_group='Pre-condition')
+            c.argument('{}_if_none_match'.format(item), arg_group='Pre-condition')
+        c.argument('container_name', container_name_type, options_list=('--destination-container', '-c'), arg_group='Copy destination', 
+                    help='Name of the destination container. If the exists, it will be overwritten.')
+        c.argument('blob_name', blob_name_type, options_list=('--destination-blob', '-b'), arg_group='Copy destination',
+                    help='Name of the destination blob. If the exists, it will be overwritten.')
+        c.argument('destination_lease_id', arg_group='Copy destination',
+                    help='Name of the destination blob. If the exists, it will be overwritten.')
+        c.argument('source_lease_id', arg_group='Copy Source')
+        c.argument('source', arg_group='Copy Source')
+        c.argument('exclude', arg_group='Flags')
+
+        #from azure.cli.command_modules.storage._validators import validate_source_uri
+        #c.register_source_uri_arguments(validator=validate_source_uri)
+
     with self.argument_context('storage blob copy') as c:
         for item in ['destination', 'source']:
             c.argument('{}_if_modified_since'.format(item), arg_group='Pre-condition')
