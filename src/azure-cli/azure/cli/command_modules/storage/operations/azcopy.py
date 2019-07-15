@@ -7,9 +7,13 @@ from __future__ import print_function
 from ..azcopy.util import AzCopy, blob_client_auth_for_azcopy, file_client_auth_for_azcopy, login_auth_for_azcopy
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.profiles import ResourceType
-from azure.cli.command_modules.storage._client_factory import file_data_service_factory
+from azure.cli.command_modules.storage._client_factory import (blob_data_service_factory,
+                                                               page_blob_service_factory, file_data_service_factory,
+                                                               queue_data_service_factory, table_data_service_factory)
+from azure.cli.command_modules.storage._validators import _query_account_key
+from azure.cli.command_modules.storage.azcopy.util import _generate_sas_token
 
-def storage_copy(cmd, client, source=None, destination=None, 
+def storage_copy(cmd, client=None, source=None, destination=None, 
                     blob_type=None, block_blob_tier=None, block_size_mb=None, cache_control=None,
                     check_md5=None, content_disposition=None, cotent_encoding=None, cotent_language=None, content_type=None,
                     exclude=None, exclude_blob_type=None, follow_symlinks=None, log_level=None, no_guess_minme_type=None,
@@ -27,20 +31,24 @@ def storage_copy(cmd, client, source=None, destination=None,
         result = re.findall(storage_pattern, source)
         if result: # Azure storage account
             storage_info = result[0]
-            storage_account = storage_info[0]
-            storage_service = storage_info[1]
+            account_name = storage_info[0]
+            service = storage_info[1]
             if "?" in source: # sas token exists
                 return source
             else: # no sas token
-                if storage_service in ['blob', 'dfs']:
-                    creds=blob_client_auth_for_azcopy(cmd, client)
-                elif storage_service == 'file':
-                    file_client = CliCommandType(
-                        operations_tmpl='azure.multiapi.storage.file.fileservice#FileService.{}',
-                        client_factory=file_data_service_factory,
-                        resource_type=ResourceType.DATA_STORAGE)
-                    creds=file_client_auth_for_azcopy(cmd, file_client)
-                return _add_url_sas(source, creds.sas_token)
+                account_key = _query_account_key(cmd.cli_ctx, account_name)
+                if service in ['blob', 'dfs']:
+                    service = 'blob'
+                if service not in ['blob', 'file']:
+                    # error
+                    usage_string = \
+                        'Invalid usage: {}. Supply only one of the following argument sets to specify source:' \
+                        '\n\t   --container-name  --name' \
+                        '\n\tOR --share-name --path'
+                    raise ValueError(usage_string.format('Neither a valid blob or file source is specified'))
+                else:  
+                    sas_token = _generate_sas_token(cmd, account_name, account_key, service)
+                    return _add_url_sas(source, sas_token)
         else:
             return source
     # Figure out source and destination type
