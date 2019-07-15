@@ -3,6 +3,8 @@
 Release History
 ===============
 
+**AKS**                                                                                                                                                                                                                                                                         * Fixed an issue where terminating the browse command always tried to call an endpoint that is only available within cloud shell, resulting in a connection failure in other environments
+
 **Appservice**
 
 * az webapp identity commands will return a proper error message if ResourceGroupName or App name are invalid.
