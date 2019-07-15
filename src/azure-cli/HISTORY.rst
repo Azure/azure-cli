@@ -41,6 +41,10 @@ Release History
 
 * Fix for issue #5824 - added validation for parameter --rights of authorizationrule commands
 
+**SQL**
+
+* Improved error message when attempting to create a SQL resource which is not available in the specified region.
+
 **Storage**
 
 * Enable Files AADDS for storage account update.
