@@ -2,13 +2,25 @@
 
 Release History
 ===============
+* Fixed issue where `--subscription` would appear despite being suppressed on certain commands.
+
+2.0.68
+++++++
+* extension removal: surface io errors as warnings instead of verbose info
+
+2.0.67
+++++++
+* BREAKING CHANGE: `min_profile` kwarg is no longer supported. Use `resource_type` instead.
+
+2.0.66
+++++++
+* output: Fix bug where commands fail if `--output yaml` is used with `--query`
+
 2.0.65
 ++++++
 * auth: polish common AAD service errors with actionables to overcome
 * Fixed issue where the CLI would load extensions that were not compatible with its core version.
 * Fix issue if clouds.config is corrupt
-
-* output: Fix bug where commands fail if `--output yaml` is used with `--query`
 
 2.0.64
 ++++++

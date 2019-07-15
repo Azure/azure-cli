@@ -33,8 +33,10 @@ LABEL maintainer="Microsoft" \
 # jq - we include jq as a useful tool
 # pip wheel - required for CLI packaging
 # jmespath-terminal - we include jpterm as a useful tool
+# libintl and icu-libs - required by azure devops artifact (az extension add --name azure-devops)
 RUN apk add --no-cache bash openssh ca-certificates jq curl openssl git zip \
  && apk add --no-cache --virtual .build-deps gcc make openssl-dev libffi-dev musl-dev linux-headers \
+ && apk add --no-cache libintl icu-libs \
  && update-ca-certificates
 
 ARG JP_VERSION="0.1.3"
@@ -49,15 +51,7 @@ COPY . /azure-cli
 # 1. Build packages and store in tmp dir
 # 2. Install the cli and the other command modules that weren't included
 # 3. Temporary fix - install azure-nspkg to remove import of pkg_resources in azure/__init__.py (to improve performance)
-RUN /bin/bash -c 'TMP_PKG_DIR=$(mktemp -d); \
-    for d in src/azure-cli src/azure-cli-telemetry src/azure-cli-core src/azure-cli-nspkg src/azure-cli-command_modules-nspkg src/command_modules/azure-cli-*/; \
-    do cd $d; echo $d; python setup.py bdist_wheel -d $TMP_PKG_DIR; cd -; \
-    done; \
-    [ -d privates ] && cp privates/*.whl $TMP_PKG_DIR; \
-    all_modules=`find $TMP_PKG_DIR -name "*.whl"`; \
-    pip install --no-cache-dir $all_modules; \
-    pip install --no-cache-dir --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg; \
-    pip install --no-cache-dir --force-reinstall urllib3==1.24.2;' \
+RUN ./scripts/install_full.sh \
  && cat /azure-cli/az.completion > ~/.bashrc \
  && runDeps="$( \
     scanelf --needed --nobanner --recursive /usr/local \

@@ -11,7 +11,7 @@ import inspect
 import unittest
 
 from azure_devtools.scenario_tests import (IntegrationTestBase, ReplayableTest, SubscriptionRecordingProcessor,
-                                           OAuthRequestResponsesFilter, GeneralNameReplacer, LargeRequestBodyProcessor,
+                                           OAuthRequestResponsesFilter, LargeRequestBodyProcessor,
                                            LargeResponseBodyProcessor, LargeResponseBodyReplacer, RequestUrlNormalizer,
                                            live_only, DeploymentNameReplacer, patch_time_sleep_api, create_random_name)
 
@@ -21,7 +21,7 @@ from .patches import (patch_load_cached_subscriptions, patch_main_exception_hand
                       patch_retrieve_token_for_user, patch_long_run_operation_delay,
                       patch_progress_controller)
 from .exceptions import CliExecutionError
-from .utilities import find_recording_dir, StorageAccountKeyReplacer
+from .utilities import find_recording_dir, StorageAccountKeyReplacer, GraphClientPasswordReplacer, GeneralNameReplacer
 from .reverse_dependency import get_dummy_cli
 
 logger = logging.getLogger('azure.cli.testsdk')
@@ -78,7 +78,7 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
         self.name_replacer = GeneralNameReplacer()
         self.kwargs = {}
         self.test_guid_count = 0
-        self._processors_to_reset = [StorageAccountKeyReplacer()]
+        self._processors_to_reset = [StorageAccountKeyReplacer(), GraphClientPasswordReplacer()]
         default_recording_processors = [
             SubscriptionRecordingProcessor(MOCKED_SUBSCRIPTION_ID),
             OAuthRequestResponsesFilter(),

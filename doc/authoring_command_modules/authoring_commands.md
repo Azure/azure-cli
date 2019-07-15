@@ -38,6 +38,8 @@ The document provides instructions and guidelines on how to author individual co
 
 [17. Multi-API Aware Modules](#multi-api-aware-modules)
 
+[18. Preview Commands and Arguments](#preview-commands-and-arguments)
+
 Authoring Commands
 =============================
 
@@ -885,3 +887,48 @@ def my_test_command(cmd, ...):
 ```
 
 See earlier topics for other kwargs that can be used with multi-API idioms.
+
+## Preview Commands and Arguments
+
+The CLI has built-in support for marking commands, command groups and arguments as being in "preview" status. Preview items will appear with a warning in the help system or when invoked. Items marked preview can be changed, broken or removed at any time without following the deprecation process. 
+
+**Note that ANYTHING not marked "preview" is considered GA and thus a breaking change can only be enacted by following the deprecation mechanism (see earlier topic).**
+
+Items are marked Preview using the `is_preview=True` kwarg. See the following for examples:
+
+***Preview Command Group***
+```Python
+with self.command_group('test', test_sdk, is_preview=True) as g:
+  g.show_command('show', 'get')
+  ...
+```
+
+Additionally, since the command group is in preview then, by extension, all of the commands and arguments within it are in preview as well. No message will be displayed for implicitly in-preview arguments, but a warning will be displayed for implicitly in-preview commands.
+
+***Preview Command***
+```Python
+with self.command_group('test', test_sdk) as g:
+  g.command('show-parameters', 'get_params', is_preview=True)
+```
+
+This will declare just the command `test show-parameters` as being in preview. This command will appear with the `[Preview]` status tag when viewed in group help whereas other commands in the `test` group will not, indicating that only this command (and, by implication, its arguments) are in preview status.
+
+***Preview Argument***
+```Python
+with self.argument_context('test show-parameters') as c:
+  c.argument('cool_flag', help='Something cool new flag.', is_preview=True)
+```
+
+This will mark the argument `--cool-flag` on `test show-parameters` as being in preview, appearing with the `[Preview]` tag.
+
+***Preview Extensions***
+
+Extensions are marked as being in preview using an older mechanism in the `azext_metadata.json` file.
+
+```
+{
+    "azext.isPreview": true,
+}
+```
+
+It is recommended that, if an extension is in preview, that it also uses the above mechanisms to give the same level of visibility to in preview items.

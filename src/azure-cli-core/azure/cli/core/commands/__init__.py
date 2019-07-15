@@ -166,11 +166,13 @@ class CacheObject(object):
                 break
 
         doc_string = doc_string.replace('\r', '').replace('\n', ' ')
+        doc_string = re.sub(' +', ' ', doc_string)
         model_name_regex = re.compile(r':return: (.*that returns )?(?P<model>[a-zA-Z]*)')
         model_path_regex = re.compile(r':rtype:.*(?P<path>azure.mgmt[a-zA-Z0-9_\.]*)')
         try:
             self._model_name = model_name_regex.search(doc_string).group('model')
-            self._model_path = model_path_regex.search(doc_string).group('path').rsplit('.', 1)[0]
+            if not self._model_path:
+                self._model_path = model_path_regex.search(doc_string).group('path').rsplit('.', 1)[0]
         except AttributeError:
             return
 
@@ -208,6 +210,11 @@ class CacheObject(object):
     def result(self):
         module = import_module(self._model_path)
         model_cls = getattr(module, self._model_name)
+        # model_cls = self._cmd.get_models(self._model_type)
+        # todo: Remove temp work around!!!
+        if model_cls is None:
+            from azure.mgmt.imagebuilder.models import ImageTemplate
+            model_cls = ImageTemplate
         return model_cls.deserialize(self._payload)
 
     def prop_dict(self):
@@ -217,13 +224,13 @@ class CacheObject(object):
             'group': self._resource_group
         }
 
-    def __init__(self, cmd, payload, operation):
+    def __init__(self, cmd, payload, operation, model_path=None):
         self._cmd = cmd
         self._operation = operation
         self._resource_group = None
         self._resource_name = None
         self._model_name = None
-        self._model_path = None
+        self._model_path = model_path
         self._payload = payload
         self.last_saved = None
         self._resolve_model()
@@ -374,7 +381,10 @@ def cached_get(cmd_obj, operation, *args, **kwargs):
     if not cmd_obj.command_kwargs.get('supports_local_cache', False):
         return _get_operation()
 
-    cache_obj = CacheObject(cmd_obj, None, operation)
+    # allow overriding model path, e.g. for extensions
+    model_path = cmd_obj.command_kwargs.get('model_path', None)
+
+    cache_obj = CacheObject(cmd_obj, None, operation, model_path=model_path)
     try:
         cache_obj.load(args, kwargs)
         if _is_stale(cmd_obj.cli_ctx, cache_obj):
@@ -407,7 +417,10 @@ def cached_put(cmd_obj, operation, parameters, *args, **kwargs):
     if not use_cache:
         result = _put_operation()
 
-    cache_obj = CacheObject(cmd_obj, parameters.serialize(), operation)
+    # allow overriding model path, e.g. for extensions
+    model_path = cmd_obj.command_kwargs.get('model_path', None)
+
+    cache_obj = CacheObject(cmd_obj, parameters.serialize(), operation, model_path=model_path)
     if use_cache:
         cache_obj.save(args, kwargs)
         return cache_obj
@@ -431,7 +444,8 @@ class AzCliCommandInvoker(CommandInvoker):
                                   EVENT_INVOKER_CMD_TBL_LOADED, EVENT_INVOKER_PRE_PARSE_ARGS,
                                   EVENT_INVOKER_POST_PARSE_ARGS,
                                   EVENT_INVOKER_FILTER_RESULT)
-        from azure.cli.core.commands.events import EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE
+        from azure.cli.core.commands.events import (
+            EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE, EVENT_INVOKER_PRE_LOAD_ARGUMENTS, EVENT_INVOKER_POST_LOAD_ARGUMENTS)
 
         # TODO: Can't simply be invoked as an event because args are transformed
         args = _pre_command_table_create(self.cli_ctx, args)
@@ -480,7 +494,9 @@ class AzCliCommandInvoker(CommandInvoker):
 
         self.commands_loader.command_table = self.commands_loader.command_table  # update with the truncated table
         self.commands_loader.command_name = command
+        self.cli_ctx.raise_event(EVENT_INVOKER_PRE_LOAD_ARGUMENTS, commands_loader=self.commands_loader)
         self.commands_loader.load_arguments(command)
+        self.cli_ctx.raise_event(EVENT_INVOKER_POST_LOAD_ARGUMENTS, commands_loader=self.commands_loader)
         self.cli_ctx.raise_event(EVENT_INVOKER_POST_CMD_TBL_CREATE, commands_loader=self.commands_loader)
         self.parser.cli_ctx = self.cli_ctx
         self.parser.load_command_table(self.commands_loader)
@@ -506,6 +522,7 @@ class AzCliCommandInvoker(CommandInvoker):
 
         self.cli_ctx.raise_event(EVENT_INVOKER_PRE_PARSE_ARGS, args=args)
         parsed_args = self.parser.parse_args(args)
+
         self.cli_ctx.raise_event(EVENT_INVOKER_POST_PARSE_ARGS, command=parsed_args.command, args=parsed_args)
 
         # TODO: This fundamentally alters the way Knack.invocation works here. Cannot be customized
@@ -662,20 +679,20 @@ class AzCliCommandInvoker(CommandInvoker):
         previews = [] + getattr(parsed_args, '_argument_previews', [])
         if cmd.preview_info:
             previews.append(cmd.preview_info)
+        else:
+            # search for implicit command preview status
+            path_comps = cmd.name.split()[:-1]
+            implicit_preview_info = None
+            while path_comps and not implicit_preview_info:
+                implicit_preview_info = resolve_preview_info(self.cli_ctx, ' '.join(path_comps))
+                del path_comps[-1]
 
-        # search for implicit preview
-        path_comps = cmd.name.split()[:-1]
-        implicit_preview_info = None
-        while path_comps and not implicit_preview_info:
-            implicit_preview_info = resolve_preview_info(self.cli_ctx, ' '.join(path_comps))
-            del path_comps[-1]
-
-        if implicit_preview_info:
-            preview_kwargs = implicit_preview_info.__dict__.copy()
-            preview_kwargs['object_type'] = 'command'
-            del preview_kwargs['_get_tag']
-            del preview_kwargs['_get_message']
-            previews.append(ImplicitPreviewItem(**preview_kwargs))
+            if implicit_preview_info:
+                preview_kwargs = implicit_preview_info.__dict__.copy()
+                preview_kwargs['object_type'] = 'command'
+                del preview_kwargs['_get_tag']
+                del preview_kwargs['_get_message']
+                previews.append(ImplicitPreviewItem(**preview_kwargs))
 
         colorama.init()
         for d in deprecations:
@@ -876,18 +893,21 @@ class DeploymentOutputLongRunningOperation(LongRunningOperation):
         if isinstance(result, poller_classes()):
             # most deployment operations return a poller
             result = super(DeploymentOutputLongRunningOperation, self).__call__(result)
-            outputs = result.properties.outputs
+            outputs = None
+            try:
+                outputs = result.properties.outputs
+            except AttributeError:  # super.__call__ might return a ClientRawResponse
+                pass
             return {key: val['value'] for key, val in outputs.items()} if outputs else {}
         if isinstance(result, ClientRawResponse):
             # --no-wait returns a ClientRawResponse
-            return None
+            return {}
 
         # --validate returns a 'normal' response
         return result
 
 
 def _load_command_loader(loader, args, name, prefix):
-    from azure.cli.core.profiles import PROFILE_TYPE
     module = import_module(prefix + name)
     loader_cls = getattr(module, 'COMMAND_LOADER_CLS', None)
     command_table = {}
@@ -895,8 +915,7 @@ def _load_command_loader(loader, args, name, prefix):
     if loader_cls:
         command_loader = loader_cls(cli_ctx=loader.cli_ctx)
         loader.loaders.append(command_loader)  # This will be used by interactive
-        if command_loader.supported_api_version(min_api=command_loader.min_profile, max_api=command_loader.max_profile,
-                                                resource_type=PROFILE_TYPE):
+        if command_loader.supported_resource_type():
             command_table = command_loader.load_command_table(args)
             if command_table:
                 for cmd in list(command_table.keys()):
@@ -1239,7 +1258,8 @@ def register_cache_arguments(cli_ctx):
                     nargs='?',
                     action=CacheAction,
                     help='Temporarily store the object in the local cache instead of sending to Azure. '
-                         'Use `az cache` commands to view/clear.'
+                         'Use `az cache` commands to view/clear.',
+                    is_preview=True
                 )
 
     cli_ctx.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, add_cache_arguments)

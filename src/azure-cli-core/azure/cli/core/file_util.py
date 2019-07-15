@@ -49,29 +49,39 @@ def get_all_help(cli_ctx, skip=True):
 
 
 def create_invoker_and_load_cmds_and_args(cli_ctx):
-    from knack import events
+    from knack.events import (
+        EVENT_INVOKER_PRE_CMD_TBL_CREATE, EVENT_INVOKER_POST_CMD_TBL_CREATE)
     from azure.cli.core.commands import register_cache_arguments
     from azure.cli.core.commands.arm import register_global_subscription_argument, register_ids_argument
+    from azure.cli.core.commands.events import (
+        EVENT_INVOKER_PRE_LOAD_ARGUMENTS, EVENT_INVOKER_POST_LOAD_ARGUMENTS)
+    import time
+
+    start_time = time.time()
+
+    register_global_subscription_argument(cli_ctx)
+    register_ids_argument(cli_ctx)
+    register_cache_arguments(cli_ctx)
 
     invoker = cli_ctx.invocation_cls(cli_ctx=cli_ctx, commands_loader_cls=cli_ctx.commands_loader_cls,
                                      parser_cls=cli_ctx.parser_cls, help_cls=cli_ctx.help_cls)
     cli_ctx.invocation = invoker
     invoker.commands_loader.skip_applicability = True
+
+    cli_ctx.raise_event(EVENT_INVOKER_PRE_CMD_TBL_CREATE, args=[])
     invoker.commands_loader.load_command_table(None)
+    invoker.commands_loader.command_name = ''
 
-    # turn off applicability check for all loaders
-    for loaders in invoker.commands_loader.cmd_to_loader_map.values():
-        for loader in loaders:
-            loader.skip_applicability = True
+    cli_ctx.raise_event(EVENT_INVOKER_PRE_LOAD_ARGUMENTS, commands_loader=invoker.commands_loader)
+    invoker.commands_loader.load_arguments()
 
-    for command in invoker.commands_loader.command_table:
-        invoker.commands_loader.load_arguments(command)
-
-    register_global_subscription_argument(cli_ctx)
-    register_ids_argument(cli_ctx)  # global subscription must be registered first!
-    register_cache_arguments(cli_ctx)
-    cli_ctx.raise_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, commands_loader=invoker.commands_loader)
+    cli_ctx.raise_event(EVENT_INVOKER_POST_LOAD_ARGUMENTS, commands_loader=invoker.commands_loader)
+    cli_ctx.raise_event(EVENT_INVOKER_POST_CMD_TBL_CREATE, commands_loader=invoker.commands_loader)
+    invoker.parser.cli_ctx = cli_ctx
     invoker.parser.load_command_table(invoker.commands_loader)
+
+    end_time = time.time()
+    logger.info('Time to load entire command table: %.3f sec', end_time - start_time)
 
 
 def _store_parsers(parser, parser_keys, parser_values, sub_parser_keys, sub_parser_values):
