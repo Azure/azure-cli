@@ -29,6 +29,10 @@ Release History
 
 * Fix for issue #5824 - added validation for parameter --rights of authorizationrule commands
 
+**RBAC**
+
+* user: support update command
+
 **RDBMS**
 
 * Add optional parameter to specify replica SKU for create replica command.
