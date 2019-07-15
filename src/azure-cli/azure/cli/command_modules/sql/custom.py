@@ -153,7 +153,7 @@ def _assert_capability_available(capability):
     '''
     logger.debug('_assert_capability_available: %s', capability)
 
-    if not(is_available(capability.status)):
+    if not is_available(capability.status):
         raise CLIError(capability.reason)
 
 
@@ -530,10 +530,10 @@ def _find_db_sku_from_capabilities(cli_ctx, location, sku, allow_reset_family=Fa
     # to find a matching capability and copy the sku from there.
 
     # Get location capability
-    location_capability = _get_location_capability(cli_ctx, location, CapabilityGroup.supported_editions)
+    loc_capability = _get_location_capability(cli_ctx, location, CapabilityGroup.supported_editions)
 
     # Get default server version capability
-    server_version_capability = _get_default_server_version(location_capability)
+    server_version_capability = _get_default_server_version(loc_capability)
 
     # Find edition capability, based on requested sku properties
     edition_capability = _find_edition_capability(
@@ -1498,10 +1498,10 @@ def _find_elastic_pool_sku_from_capabilities(cli_ctx, location, sku, allow_reset
     # to find a matching capability and copy the sku from there.
 
     # Get location capability
-    location_capability = _get_location_capability(cli_ctx, location, CapabilityGroup.supported_elastic_pool_editions)
+    loc_capability = _get_location_capability(cli_ctx, location, CapabilityGroup.supported_elastic_pool_editions)
 
     # Get default server version capability
-    server_version_capability = _get_default_server_version(location_capability)
+    server_version_capability = _get_default_server_version(loc_capability)
 
     # Find edition capability, based on requested sku properties
     edition_capability = _find_edition_capability(sku, server_version_capability.supported_elastic_pool_editions)
@@ -2015,10 +2015,10 @@ def _find_managed_instance_sku_from_capabilities(cli_ctx, location, sku):
     # to find a matching capability and copy the sku from there.
 
     # Get location capability
-    location_capability = _get_location_capability(cli_ctx, location, CapabilityGroup.supported_managed_instance_versions)
+    loc_capability = _get_location_capability(cli_ctx, location, CapabilityGroup.supported_managed_instance_versions)
 
     # Get default server version capability
-    managed_instance_version_capability = _get_default_capability(location_capability.supported_managed_instance_versions)
+    managed_instance_version_capability = _get_default_capability(loc_capability.supported_managed_instance_versions)
 
     # Find edition capability, based on requested sku properties
     edition_capability = _find_edition_capability(sku, managed_instance_version_capability.supported_editions)
