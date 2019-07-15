@@ -36,6 +36,7 @@ Release History
 
 **Appservice**
 
+* Fixed issue where `az functionapp create` does not accept Standard_RAGRS storage account type.
 * az webapp identity commands will return a proper error message if ResourceGroupName or App name are invalid.
 * az webapp list fixed to return the correct value for numberOfSites if no ResourceGroup was provided.
 * restore the idempotency of "appservice plan create" and "webapp create"
