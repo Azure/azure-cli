@@ -127,7 +127,7 @@ def load_arguments(self, _):
         c.argument('force_change_password_next_login', arg_type=get_three_state_flag(), help='Require the user to change their password the next time they log in.')
         c.argument('account_enabled', arg_type=get_three_state_flag(), help='enable the user account')
         c.argument('password', help='user password')
-        c.argument('upn_or_object_id', options_list=['--id', '--upn-or-object-id'], help='The object ID or principal name of the user for which to get information')
+        c.argument('upn_or_object_id', options_list=['--id', c.deprecate(target='--upn-or-object-id', redirect='--id', hide=True)], help='The object ID or principal name of the user for which to get information')
 
     with self.argument_context('ad user get-member-groups') as c:
         c.argument('security_enabled_only', action='store_true',
