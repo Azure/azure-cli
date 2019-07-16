@@ -365,7 +365,7 @@ The following special kwargs are supported by command group and its helper metho
 - `formatter_class` - Advanced. Accepts a custom class that derives from `argparse.HelpFormatter` to modify the help document generation.
 - `argument_loader` - Advanced. Accepts a callable that takes no parameters which will be used in place of the default argument loader.
 - `description_loader` - Advanced. Accepts a callable that takes no parameters which will be used in place of the default description loader.
-- `is_preview` - Accepts a boolean which denotes that this command group and, by implication, all commands and subgroups which fall under it, are in preview status. An informational message will be displayed in the help system and upon invocation to notify the user.        
+- `is_preview` - See [Preview Commands and Arguments](https://github.com/Azure/azure-cli/blob/dev/doc/authoring_command_modules/authoring_commands.md#preview-commands-and-arguments)
 
 _General Kwargs_
 
