@@ -361,31 +361,26 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('blob_name', arg_type=blob_name_type)
 
     with self.argument_context('storage copy') as c:
-        c.argument('destination', options_list=['--destination', '-d'], help='The path/url of copy destination. It can be local path, \
-            an url to azure storage server. For more imformation, please refer to [link here]. \
+        c.argument('destination', options_list=['--destination', '-d'], help="The path/url of copy destination. \
+            It can be local path, an url to azure storage server. For more imformation, please refer to [link here]. \
             If you provide destination parameter here, you do not need to provide arguments in copy \
-            destination arguments group and copy destination arguments will be deprecated  in future.')
-        c.argument('source', options_list=['--source', '-s'], help='The path/url of copy source. \
+            destination arguments group and copy destination arguments will be deprecated  in future.")
+        c.argument('source', options_list=['--source', '-s'], help="The path/url of copy source. \
             It can be local path, an url to azure storage server or AWS S3 buckets. For more imformation, please refer to [link here]. \
             If you provide source parameter here, you do not need to provide arguments in copy source arguments group and copy source \
-            arguments will be deprecated  in future.')
+            arguments will be deprecated in future.")
         for item in ['destination', 'source']:
             c.argument('{}_if_modified_since'.format(item), arg_group='Pre-condition')
             c.argument('{}_if_unmodified_since'.format(item), arg_group='Pre-condition')
             c.argument('{}_if_match'.format(item), arg_group='Pre-condition')
             c.argument('{}_if_none_match'.format(item), arg_group='Pre-condition')
-        c.argument('container_name', container_name_type, options_list=('--destination-container', '-c'), arg_group='Copy destination', 
-                    help='Name of the destination container. If the exists, it will be overwritten.')
-        c.argument('blob_name', blob_name_type, options_list=('--destination-blob', '-b'), arg_group='Copy destination',
-                    help='Name of the destination blob. If the exists, it will be overwritten.')
-        c.argument('destination_lease_id', arg_group='Copy destination',
-                    help='Name of the destination blob. If the exists, it will be overwritten.')
-        c.argument('source_lease_id', arg_group='Copy Source')
-        c.argument('source', arg_group='Copy Source')
-        c.argument('exclude', arg_group='Flags')
-
-        #from azure.cli.command_modules.storage._validators import validate_source_uri
-        #c.register_source_uri_arguments(validator=validate_source_uri)
+            c.argument('{}_account_name'.format(item), arg_group='Copy {}'.format(item), help='Storage account name of copy {}'.format(item))
+            c.argument('{}_container_name'.format(item), arg_group='Copy {}'.format(item), help='Container name of copy {} storage account'.format(item))
+            c.argument('{}_blob_name'.format(item), arg_group='Copy {}'.format(item), help='Blob name of copy {} storage account'.format(item))  
+            c.argument('{}_share_name'.format(item), arg_group='Copy {}'.format(item), help='File share name of copy {} storage account'.format(item)) 
+        c.argument('recursive', action='store_true', help='look into sub-directories recursively when uploading from local file system.')
+        c.argument('put_md5', help='create an MD5 hash of each file, and save the hash as the Content-MD5 property of the destination blob/file.Only available when uploading.')
+        c.argument('check-md5', help='specifies how strictly MD5 hashes should be validated when downloading. Only available when downloading. Available options: NoCheck, LogOnly, FailIfDifferent, FailIfDifferentOrMissing. (default "FailIfDifferent")')
 
     with self.argument_context('storage blob copy') as c:
         for item in ['destination', 'source']:
