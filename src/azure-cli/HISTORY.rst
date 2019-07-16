@@ -5,7 +5,7 @@ Release History
 
 **ACR**
 
-* Fixed a regression in the `acr pack build` command.
+* Fixed issue #9952 (a regression in the `acr pack build` command).
 
 **RBAC**
 
