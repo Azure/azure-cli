@@ -2722,7 +2722,7 @@ class SqlManagedInstanceTransparentDataEncryptionScenarioTest(ScenarioTest):
         self.kwargs.update({
             'subnet_id': subnet['id']
         })
-        
+
         # create sql managed_instance
         managed_instance = self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
                                     '-u {admin_login} -p {admin_password} --subnet {subnet_id} --license-type {license_type} '
@@ -2744,12 +2744,12 @@ class SqlManagedInstanceTransparentDataEncryptionScenarioTest(ScenarioTest):
 
         # create database
         self.cmd('sql midb create -g {rg} --mi {managed_instance_name} -n {database_name} --collation {collation}',
-                    checks=[
-                        self.check('resourceGroup', '{rg}'),
-                        self.check('name', '{database_name}'),
-                        self.check('location', '{loc}'),
-                        self.check('collation', '{collation}'),
-                        self.check('status', 'Online')])
+                checks=[
+                    self.check('resourceGroup', '{rg}'),
+                    self.check('name', '{database_name}'),
+                    self.check('location', '{loc}'),
+                    self.check('collation', '{collation}'),
+                    self.check('status', 'Online')])
 
         self.kwargs.update({
             'mi_identity': managed_instance['identity']['principalId'],
@@ -2771,9 +2771,9 @@ class SqlManagedInstanceTransparentDataEncryptionScenarioTest(ScenarioTest):
 
         # add server key
         server_key_resp = self.cmd('sql mi key create -g {rg} --mi {managed_instance_name} -k {kid}',
-                                    checks=[
-                                        self.check('uri', '{kid}'),
-                                        self.check('serverKeyType', 'AzureKeyVault')])
+                                   checks=[
+                                       self.check('uri', '{kid}'),
+                                       self.check('serverKeyType', 'AzureKeyVault')])
 
         self.kwargs.update({
             'server_key_name': server_key_resp.get_output_in_json()['name'],
@@ -2781,46 +2781,46 @@ class SqlManagedInstanceTransparentDataEncryptionScenarioTest(ScenarioTest):
 
         # validate show key
         self.cmd('sql mi key show -g {rg} --mi {managed_instance_name} -k {kid}',
-                    checks=[
-                        self.check('uri', '{kid}'),
-                        self.check('serverKeyType', 'AzureKeyVault'),
-                        self.check('name', '{server_key_name}')])
-
+                 checks=[
+                     self.check('uri', '{kid}'),
+                     self.check('serverKeyType', 'AzureKeyVault'),
+                     self.check('name', '{server_key_name}')])
+ 
         # validate list key (should return 2 items)
         self.cmd('sql mi key list -g {rg} --mi {managed_instance_name}',
-                    checks=[JMESPathCheck('length(@)', 2)])
+                 checks=[JMESPathCheck('length(@)', 2)])
 
         # validate encryption protector is service managed via show
         self.cmd('sql mi tde-key show -g {rg} --mi {managed_instance_name}',
-                    checks=[
-                        self.check('serverKeyType', 'ServiceManaged'),
-                        self.check('serverKeyName', 'ServiceManaged')])
+                 checks=[
+                     self.check('serverKeyType', 'ServiceManaged'),
+                     self.check('serverKeyName', 'ServiceManaged')])
 
         # update encryption protector to akv key
         self.cmd('sql mi tde-key set -g {rg} --mi {managed_instance_name} -t AzureKeyVault -k {kid}',
-                    checks=[
-                        self.check('serverKeyType', 'AzureKeyVault'),
-                        self.check('serverKeyName', '{server_key_name}'),
-                        self.check('uri', '{kid}')])
+                 checks=[
+                     self.check('serverKeyType', 'AzureKeyVault'),
+                     self.check('serverKeyName', '{server_key_name}'),
+                     self.check('uri', '{kid}')])
 
         # validate encryption protector is akv via show
         self.cmd('sql mi tde-key show -g {rg} --mi {managed_instance_name}',
-                    checks=[
-                        self.check('serverKeyType', 'AzureKeyVault'),
-                        self.check('serverKeyName', '{server_key_name}'),
-                        self.check('uri', '{kid}')])
+                 checks=[
+                     self.check('serverKeyType', 'AzureKeyVault'),
+                     self.check('serverKeyName', '{server_key_name}'),
+                     self.check('uri', '{kid}')])
 
         # update encryption protector to service managed
         self.cmd('sql mi tde-key set -g {rg} --mi {managed_instance_name} -t ServiceManaged',
-                    checks=[
-                        self.check('serverKeyType', 'ServiceManaged'),
-                        self.check('serverKeyName', 'ServiceManaged')])
+                 checks=[
+                     self.check('serverKeyType', 'ServiceManaged'),
+                     self.check('serverKeyName', 'ServiceManaged')])
 
         # validate encryption protector is service managed via show
         self.cmd('sql mi tde-key show -g {rg} --mi {managed_instance_name}',
-                    checks=[
-                        self.check('serverKeyType', 'ServiceManaged'),
-                        self.check('serverKeyName', 'ServiceManaged')])
+                 checks=[
+                     self.check('serverKeyType', 'ServiceManaged'),
+                     self.check('serverKeyName', 'ServiceManaged')])
 
 
 class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
