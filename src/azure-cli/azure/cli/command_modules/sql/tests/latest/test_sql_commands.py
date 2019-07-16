@@ -2744,12 +2744,12 @@ class SqlManagedInstanceTransparentDataEncryptionScenarioTest(ScenarioTest):
 
         # create database
         self.cmd('sql midb create -g {rg} --mi {managed_instance_name} -n {database_name} --collation {collation}',
-                checks=[
-                    self.check('resourceGroup', '{rg}'),
-                    self.check('name', '{database_name}'),
-                    self.check('location', '{loc}'),
-                    self.check('collation', '{collation}'),
-                    self.check('status', 'Online')])
+                 checks=[
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('name', '{database_name}'),
+                     self.check('location', '{loc}'),
+                     self.check('collation', '{collation}'),
+                     self.check('status', 'Online')])
 
         self.kwargs.update({
             'mi_identity': managed_instance['identity']['principalId'],
@@ -2785,7 +2785,7 @@ class SqlManagedInstanceTransparentDataEncryptionScenarioTest(ScenarioTest):
                      self.check('uri', '{kid}'),
                      self.check('serverKeyType', 'AzureKeyVault'),
                      self.check('name', '{server_key_name}')])
- 
+
         # validate list key (should return 2 items)
         self.cmd('sql mi key list -g {rg} --mi {managed_instance_name}',
                  checks=[JMESPathCheck('length(@)', 2)])
