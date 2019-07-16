@@ -29,7 +29,7 @@ from azure.cli.core.util import get_file_json, shell_safe_json_parse
 from azure.graphrbac.models import (ApplicationCreateParameters, ApplicationUpdateParameters, AppRole,
                                     PasswordCredential, KeyCredential, UserCreateParameters, PasswordProfile,
                                     ServicePrincipalCreateParameters, RequiredResourceAccess, ResourceAccess,
-                                    GroupCreateParameters, CheckGroupMembershipParameters)
+                                    GroupCreateParameters, CheckGroupMembershipParameters, UserUpdateParameters)
 
 from ._client_factory import _auth_client_factory, _graph_client_factory
 from ._multi_api_adaptor import MultiAPIAdaptor
@@ -624,6 +624,18 @@ def create_user(client, user_principal_name, display_name, password,
                                      password=password,
                                      force_change_password_next_login=force_change_password_next_login))
     return client.create(param)
+
+
+def update_user(client, upn_or_object_id, display_name=None, force_change_password_next_login=None, password=None,
+                account_enabled=None, mail_nickname=None):
+    password_profile = None
+    if force_change_password_next_login is not None or password is not None:
+        password_profile = PasswordProfile(password=password,
+                                           force_change_password_next_login=force_change_password_next_login)
+
+    update_parameters = UserUpdateParameters(display_name=display_name, password_profile=password_profile,
+                                             account_enabled=account_enabled, mail_nickname=mail_nickname)
+    return client.update(upn_or_object_id=upn_or_object_id, parameters=update_parameters)
 
 
 def get_user_member_groups(cmd, upn_or_object_id, security_enabled_only=False):

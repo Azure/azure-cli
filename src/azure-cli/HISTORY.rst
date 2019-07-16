@@ -2,6 +2,12 @@
 
 Release History
 ===============
+
+**RBAC**
+
+* add "user update" command
+* deprecate "--upn-or-object-id" from user related commands and introduce "--id"
+
 2.0.69
 ++++++
 
