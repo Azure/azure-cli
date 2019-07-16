@@ -218,23 +218,31 @@ class CreateForRbacScenarioTest(ScenarioTest):
 class GraphGroupScenarioTest(ScenarioTest):
 
     def test_graph_group_scenario(self):
-
         account_info = self.cmd('account show').get_output_in_json()
         if account_info['user']['type'] == 'servicePrincipal':
             return  # this test delete users which are beyond a SP's capacity, so quit...
         upn = account_info['user']['name']
-
+        domain = upn.split('@', 1)[1]
         self.kwargs = {
             'user1': 'deleteme1',
             'user2': 'deleteme2',
-            'domain': upn.split('@', 1)[1],
+            'domain': domain,
+            'new_mail_nick_name': 'deleteme11',
             'group': 'deleteme_g',
             'pass': 'Test1234!!'
         }
+        self.recording_processors.append(AADGraphUserReplacer('@' + domain, '@example.com'))
         try:
             # create user1
             user1_result = self.cmd('ad user create --display-name {user1} --password {pass} --user-principal-name {user1}@{domain}').get_output_in_json()
             self.kwargs['user1_id'] = user1_result['objectId']
+
+            # update user1
+            self.cmd('ad user update --display-name {user1}_new --account-enabled false --id {user1}@{domain} --mail-nickname {new_mail_nick_name}')
+            user1_update_result = self.cmd('ad user show --upn-or-object-id {user1}@{domain}', checks=[self.check("displayName", '{user1}_new'),
+                                                                                                       self.check("accountEnabled", False)]).get_output_in_json()
+            self.kwargs['user1_id'] = user1_update_result['objectId']
+
             # create user2
             user2_result = self.cmd('ad user create --display-name {user2} --password {pass} --user-principal-name {user2}@{domain}').get_output_in_json()
             self.kwargs['user2_id'] = user2_result['objectId']
@@ -267,12 +275,15 @@ class GraphGroupScenarioTest(ScenarioTest):
             # check user1 memebership
             self.cmd('ad group member check -g {group} --member-id {user1_id}',
                      checks=self.check('value', True))
+
             # check user2 memebership
             self.cmd('ad group member check -g {group} --member-id {user2_id}',
-                     checks=self.check('value', True))            # list memebers
+                     checks=self.check('value', True))
+
             self.cmd('ad group member list -g {group}', checks=[
-                self.check("length([?displayName=='{user1}'])", 1),
+                self.check("length([?displayName=='{user1}_new'])", 1),
                 self.check("length([?displayName=='{user2}'])", 1),
+                self.check("length([?displayName=='{user1}'])", 0),
                 self.check("length([])", 2),
             ])
             # remove user1
