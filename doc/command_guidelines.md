@@ -42,7 +42,7 @@ If in doubt, ask!
   1. `CREATE`/`DELETE` (same as top level resources)
   2. `ADD`/`REMOVE`
 - Avoid hyphenated command names when moving the commands into a subgroup would eliminate the need (e.g. `database show` and `database get` instead of `show-database` and `get-database`).
-- If a command subgroup would only have a single command, move it into the parent command group and hyphenate the name. This is common for commands which exist only to pull down cataloging information (e.g. `database list-sku-definitions` instead of `database sku-definitions list`).
+- If a command subgroup would only have a single command, move it into the parent command group and hyphenate the name. This is common for commands which exist only to pull down cataloging information (e.g. `database list-sku-definitions` instead of `database sku-definitions list`). However, if you plan to add commands to this group in the future, then temporarily having a command group with a single command would make more sense. For example, if you only have `database list` but eventually plan to support `database create/update/...` then having a `database` group with a single command would be fine.
 - In general, avoid command subgroups that have no commands. This often happens at the first level of a command branch. For example, `keyvault create` instead of `keyvault vault create` (where `keyvault` only has subgroups and adds unnecessary depth to the tree).
 <details>
   <summary>Click for a full example</summary>

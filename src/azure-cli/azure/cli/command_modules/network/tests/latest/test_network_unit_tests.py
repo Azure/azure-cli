@@ -37,7 +37,7 @@ class TestNetworkUnitTests(unittest.TestCase):
         self.assertEqual(_get_nic_ip_config(nic, 'test2').value, '2')
 
     def test_network_upsert(self):
-        from azure.cli.commands import upsert_to_collection
+        from azure.cli.core.commands import upsert_to_collection
 
         obj1 = mock.MagicMock()
         obj1.key = 'object1'
