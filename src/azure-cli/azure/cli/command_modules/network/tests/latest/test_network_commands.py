@@ -2457,6 +2457,7 @@ class NetworkWatcherScenarioTest(ScenarioTest):
             'sa': storage_account
         })
 
+        self.cmd('network watcher configure -g {rg} --locations westus westus2 westcentralus eastus canadaeast --enabled')
         self.cmd('network nsg create -g {rg} -n {nsg}')
         self.cmd('network watcher flow-log configure -g {rg} --nsg {nsg} --enabled --retention 5 --storage-account {sa}')
 
