@@ -1090,6 +1090,7 @@ def _get_default_address_pool(cli_ctx, resource_group, balancer_name, balancer_t
     return values[0]
 
 
+# Client end hack per: https://github.com/Azure/azure-cli/issues/9943
 def _validate_vmss_single_placement_group(namespace):
     if namespace.zones or namespace.instance_count > 100:
         if namespace.single_placement_group is None:
