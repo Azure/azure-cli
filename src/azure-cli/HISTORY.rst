@@ -2,6 +2,11 @@
 
 Release History
 ===============
+
+unreleased
+++++++
+* New Cmdlets for Management.Sql that supports Managed instance key and managed instance TDE protector management
+
 2.0.69
 ++++++
 
