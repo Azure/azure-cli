@@ -2,6 +2,12 @@
 
 Release History
 ===============
+
+**RBAC**
+
+* add "user update" command
+* deprecate "--upn-or-object-id" from user related commands and introduce "--id"
+
 2.0.69
 ++++++
 
@@ -28,10 +34,6 @@ Release History
 **Eventhubs**
 
 * Fix for issue #5824 - added validation for parameter --rights of authorizationrule commands
-
-**RBAC**
-
-* user: support update command
 
 **RDBMS**
 
