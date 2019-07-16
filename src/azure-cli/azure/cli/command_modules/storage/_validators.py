@@ -1047,7 +1047,7 @@ def validate_azcopy_upload_destination_url(cmd, namespace):
     del namespace.destination_path
 
 
-def validate_azcopy_remove_url(cmd, namespace):
+def validate_azcopy_remove_arguments(cmd, namespace):
     usage_string = \
         'Invalid usage: {}. Supply only one of the following argument sets to specify source:' \
         '\n\t   --container-name  --name' \

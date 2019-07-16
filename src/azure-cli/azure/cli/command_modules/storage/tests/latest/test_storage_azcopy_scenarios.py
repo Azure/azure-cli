@@ -154,3 +154,39 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
             container, storage_account))
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 21))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_storage_file_azcopy_remove(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        s1 = self.create_share(account_info)
+        s2 = self.create_share(account_info)
+        d1 = 'dir1'
+        d2 = 'dir2'
+
+        self.storage_cmd('storage directory create --share-name {} -n {}', account_info, s1, d1)
+        self.storage_cmd('storage directory create --share-name {} -n {}', account_info, s2, d2)
+
+        local_file = self.create_temp_file(512, full_random=False)
+        src1_file = os.path.join(d1, 'source_file1.txt')
+        src2_file = os.path.join(d2, 'source_file2.txt')
+
+        self.storage_cmd('storage file upload -p "{}" --share-name {} --source "{}"', account_info,
+                         src1_file, s1, local_file)
+        self.storage_cmd('storage file exists -p "{}" -s {}', account_info, src1_file, s1) \
+            .assert_with_checks(JMESPathCheck('exists', True))
+
+        self.storage_cmd('storage remove --share-name {} -p "{}"',
+                         account_info, s1, src1_file)
+        self.storage_cmd('storage file exists -p "{}" -s {}', account_info, src1_file, s1) \
+            .assert_with_checks(JMESPathCheck('exists', False))
+
+        self.storage_cmd('storage file upload -p "{}" --share-name {} --source "{}"', account_info,
+                         src2_file, s2, local_file)
+        self.storage_cmd('storage file exists -p "{}" -s {}', account_info, src2_file, s2) \
+            .assert_with_checks(JMESPathCheck('exists', True))
+
+        self.storage_cmd('storage remove --share-name {} -p "{}"',
+                         account_info, s2, d2)
+        self.storage_cmd('storage file exists -p "{}" -s {}', account_info, src2_file, s2) \
+            .assert_with_checks(JMESPathCheck('exists', False))

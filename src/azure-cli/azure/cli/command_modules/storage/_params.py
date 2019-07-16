@@ -15,7 +15,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           storage_account_key_options, process_file_download_namespace, process_metric_update_namespace,
                           get_char_options_validator, validate_bypass, validate_encryption_source, validate_marker,
                           validate_storage_data_plane_list, validate_azcopy_upload_destination_url,
-                          validate_azcopy_remove_url, as_user_validator)
+                          validate_azcopy_remove_arguments, as_user_validator)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements
@@ -746,9 +746,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage remove') as c:
         from .completers import file_path_completer
 
-        c.extra('container_name', container_name_type)
-        c.extra('blob_name', options_list=('--name', '-n'), arg_type=blob_name_type,
-                validator=validate_azcopy_remove_url)
+        c.extra('container_name', container_name_type, validator=validate_azcopy_remove_arguments)
+        c.extra('blob_name', options_list=('--name', '-n'), arg_type=blob_name_type)
         c.extra('share_name', share_name_type, help='The file share name.')
         c.extra('path', options_list=('--path', '-p'),
                 help='The path to the file within the file share.',
