@@ -3,11 +3,11 @@ Onboarding Best Practices
 
 Reach out to `azpycli@microsoft.com` to get the process started. You'll be assigned a dev contact on the CLI team. Early and frequent communication with this contact is essential to ensuring a smooth onboarding.
 
-##Extension vs. Module
+## Extension vs. Module
 
 One of the key decisions you will need to make is whether to create your commands in a CLI module or an extension.
 
-####Extensions
+#### Extensions
 
 |                      PROS                      |                         CONS                         |
 |:----------------------------------------------:|:----------------------------------------------------:|
@@ -15,7 +15,7 @@ One of the key decisions you will need to make is whether to create your command
 | Higher velocity fixes possible                 | Can be broken by changes to the azure-cli-core       |
 | Experimental UX is permissible                 |                                                      |
 
-####CLI Modules
+#### CLI Modules
 
 |                                   PROS                                  |                                                                             CONS                                                                             |
 |:-----------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------------------------------------------------------:|
@@ -26,7 +26,7 @@ One of the key decisions you will need to make is whether to create your command
 - Note that if you are trying to get commands into the CLI out of step with the normal release cycle, extensions are your **only** option.
 - Because non-standard, experimental authoring patterns are permitted for extensions, simply trying to "move an extension into the CLI" is often **not** a trivial process and will necessitate a full review with higher scrutiny from the CLI team. Expect to need to make changes.
 
-##Initial Timeline and Milestones
+## Initial Timeline and Milestones
 
 - **Initial Kickoff:** Reach out to your contact on the CLI team. Set up a short 30 minute Teams call to discuss initial questions.
 
@@ -42,7 +42,7 @@ One of the key decisions you will need to make is whether to create your command
 
 - **1 week prior to desired release date:** Hopefully, PR is merged! Download the edge build and try it out. Submit follow-up PRs to address any small issues. Anything caught before release is not a breaking change!
 
-##Initial Pull Request Guidance
+## Initial Pull Request Guidance
 
 Reviewing a new command module is very difficult, so the PR shouldn't be the first time we see your module! Some important considerations for your initial PR:
 
@@ -55,11 +55,11 @@ Reviewing a new command module is very difficult, so the PR shouldn't be the fir
 If you and your CLI contact have been doing regular command reviews, the PR should merely be a formality. If you haven't been conducting regular reviews, the help output allows us to quickly identify holes and anti-patterns to get you on the right track.
 The help output is generally not needed if a command walkthrough has been conducted, but is often a helpful alternative for teams who are in a very different time zone such that scheduling a live review would be highly inconvenient.
 
-##Transition Paths
+## Transition Paths
 
 Nearly all new command modules or extensions begin life in Preview, but will eventually want to transition to being GA. The section describes the review requirements required for various transitions.
 
-####Preview Extension to GA Extension
+#### Preview Extension to GA Extension
 
 This is the easiest to accomplish.
 
@@ -67,14 +67,14 @@ This is the easiest to accomplish.
 - Existing command UX must be stable.
 - Author must acknowledge they will no longer be able to simply make breaking changes but will instead need to follow [deprecation mechanisms](https://github.com/Azure/azure-cli/blob/dev/doc/authoring_command_modules/authoring_commands.md#deprecating-commands-and-arguments).
 
-####Preview Extension to Preview Module
+#### Preview Extension to Preview Module
 
 Because extensions are permitted to try experimental things that may be antithetical to the CLI's conventions, it is not automatic that a preview extension can just transition to being a preview module.
 
 - Command review required.
 - Commands must conform to CLI standards and may no longer be permitted to do experimental things that they previously could as an extension.
 
-####Preview Extension/Module to GA Module
+#### Preview Extension/Module to GA Module
 
 This is a significant transition for any service.
 
@@ -85,7 +85,7 @@ This is a significant transition for any service.
 - Minor deficiencies which can be fixed through additive, non-breaking changes are permissible (for example, missing argument completers or missing generic update arguments).
 - Author must acknowledge they will no longer be able to simply make breaking changes but will instead need to follow [deprecation mechanisms](https://github.com/Azure/azure-cli/blob/dev/doc/authoring_command_modules/authoring_commands.md#deprecating-commands-and-arguments).
 
-####GA Extension to GA Module
+#### GA Extension to GA Module
 
 Because extensions are permitted to try experimental things that may be antithetical to the CLI's conventions, no benefit is afforded a GA extension in trying to become a module. In reality, the fact that the extension is GA can actually be more of a hindrance because any breaking changes that may be necessitated to conform with CLI standards will need to go through [deprecation mechanisms](https://github.com/Azure/azure-cli/blob/dev/doc/authoring_command_modules/.
 
