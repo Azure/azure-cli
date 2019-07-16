@@ -17,7 +17,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_mgmt(self, resource_group, location):
-        config_store_name = "MgmtTest"
+        config_store_name = self.create_random_name(prefix='MgmtTest', length=24)
 
         location = 'eastus'
         self.kwargs.update({
@@ -65,7 +65,7 @@ class AppConfigCredentialScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_credential(self, resource_group, location):
 
-        config_store_name = "CredentialTest"
+        config_store_name = self.create_random_name(prefix='CredentialTest', length=24)
 
         location = 'eastus'
 
@@ -96,7 +96,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_kv(self, resource_group, location):
-        config_store_name = "KVTest"
+        config_store_name = self.create_random_name(prefix='KVTest', length=24)
 
         location = 'eastus'
         self.kwargs.update({
@@ -186,7 +186,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_import_export(self, resource_group, location):
-        config_store_name = "ImportTest"
+        config_store_name = self.create_random_name(prefix='ImportTest', length=24)
 
         location = 'eastus'
         self.kwargs.update({
