@@ -4,14 +4,14 @@
 # --------------------------------------------------------------------------------------------
 import platform
 
-from prompt_toolkit.styles import style_from_dict  # pylint: disable=import-error
+from prompt_toolkit.styles import Style
 from pygments.token import Token  # pylint: disable=import-error
 
 
 def color_mapping(curr_completion, completion, prompt, command, subcommand,
                   param, text, line, example, toolbar):
 
-    return style_from_dict({
+    return Style.from_dict({
         # Completion colors
         Token.Menu.Completions.Completion.Current: curr_completion,
         Token.Menu.Completions.Completion: completion,

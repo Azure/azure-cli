@@ -15,7 +15,7 @@ from ._utils import (
     get_validate_platform,
     get_custom_registry_credentials
 )
-from ._client_factory import cf_acr_registries
+from ._client_factory import cf_acr_registries_tasks
 from .run import prepare_source_location
 
 PACK_TASK_YAML_FMT = '''version: v1.0.0
@@ -45,7 +45,7 @@ def acr_pack_build(cmd,  # pylint: disable=too-many-locals
                    auth_mode=None):
     registry, resource_group_name = get_registry_by_name(cmd.cli_ctx, registry_name)
 
-    client_registries = cf_acr_registries(cmd.cli_ctx)
+    client_registries = cf_acr_registries_tasks(cmd.cli_ctx)
     source_location = prepare_source_location(
         source_location, client_registries, registry_name, resource_group_name)
     if not source_location:
