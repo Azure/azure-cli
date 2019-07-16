@@ -7,6 +7,7 @@
 
 import json
 import os
+import time
 
 from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest)
 
@@ -163,13 +164,21 @@ class AppConfigKVScenarioTest(ScenarioTest):
         assert len(revisions) == 3
 
         # IN CLI, since we support delete by key/label filters, return is a list of deleted items
-        self.cmd('appconfig kv delete -n {config_store_name} --key {key} --label {label} -y',
+        deleted = self.cmd('appconfig kv delete -n {config_store_name} --key {key} --label {label} -y',
                  checks=[self.check('[0].key', entry_key),
                          self.check('[0].contentType', entry_content_type),
                          self.check('[0].value', updated_entry_value),
-                         self.check('[0].label', updated_label)])
+                         self.check('[0].label', updated_label)]).get_output_in_json()
+        deleted
+        #deleted_time = deleted[0].lastModified
 
-        # set key-value entry with connection string
+        #sleep a little over 1 second
+        time.sleep(1.1)
+
+        # set key-value entry with connection string, but to the original value
+        self.kwargs.update({
+            'value': entry_value
+        })
         credential_list = self.cmd(
             'appconfig credential list -n {config_store_name} -g {rg}').get_output_in_json()
         self.kwargs.update({
@@ -178,8 +187,9 @@ class AppConfigKVScenarioTest(ScenarioTest):
         self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} --content-type {content_type} --label {label} -y',
                  checks=[self.check('contentType', entry_content_type),
                          self.check('key', entry_key),
-                         self.check('value', updated_entry_value),
+                         self.check('value', entry_value),
                          self.check('label', updated_label)])
+
 
 
 class AppConfigImportExportScenarioTest(ScenarioTest):

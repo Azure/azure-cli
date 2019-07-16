@@ -1636,11 +1636,15 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json;
+      - application/json
       Accept-Encoding:
       - gzip, deflate
+      CommandName:
+      - appconfig kv set
       Connection:
       - keep-alive
+      ParameterSetName:
+      - --connection-string --key --value --content-type --label -y
       User-Agent:
       - AzconfigClient/0.0.1/CLI
       x-ms-content-sha256:
@@ -1651,7 +1655,7 @@ interactions:
     uri: https://kvtestzuxwhsektkzv7dytyj.azconfig.io/kv/Color?label=newlabel&fields=
   response:
     body:
-      string: ''
+      string: '{"value":[{"type":"Microsoft.AppConfiguration/configurationStores","properties":{"provisioningState":"Succeeded","creationDate":"2019-07-08T20:34:55+00:00","endpoint":"https://bariscag_appconfig.azconfig.io"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bariscagappconfig_rg/providers/Microsoft.AppConfiguration/configurationStores/bariscag_appconfig","name":"bariscag_appconfig","location":"westcentralus","tags":{}},{"type":"Microsoft.AppConfiguration/configurationStores","properties":{"provisioningState":"Succeeded","creationDate":"2019-01-24T22:46:57+00:00","endpoint":"https://hong-store.azconfig.io"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/defaultresourcegroup-eus/providers/Microsoft.AppConfiguration/configurationStores/hong-store","name":"hong-store","location":"eastus","tags":{}},{"type":"Microsoft.AppConfiguration/configurationStores","properties":{"provisioningState":"Succeeded","creationDate":"2019-07-16T22:46:30+00:00","endpoint":"https://kvtest.azconfig.io"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/kvtest","name":"KVTest","location":"eastus","tags":{}}],"nextLink":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/configurationStores?api-version=2019-02-01-preview&%24skiptoken=1Y%2fBSsQwFEX%2fJQyuTJOmgWJhkDJ0N87CVlzKS%2fqmhtIk5KVVHObfHXHjL7i8HM6Be2EeP%2fPR%2bZlYc2GvXT8cutPw3B5fetaw95wjNUIs4GHCBX0u4GtNWNiwCFoN2eRidsGT0LVWWiJyq0BzXdUVN1aO3IwKq9GArkstYgqbGzGReHI2BQrnXLQxHoI%2fu2lN8JMS9u%2fqc0hIjxAd327eje%2bVLB%2b4VFyWPCbcHH7c7Wh2cQgz%2br2B5MjC9AYx%2fpbYPevafvivh%2bYtI2V2vX4D"}'
     headers:
       access-control-allow-credentials:
       - 'true'
@@ -1732,7 +1736,7 @@ interactions:
       connection:
       - keep-alive
       content-type:
-      - application/vnd.microsoft.appconfig.kv+json; charset=utf-8
+      - application/json; charset=utf-8
       date:
       - Wed, 17 Jul 2019 17:29:38 GMT
       etag:
