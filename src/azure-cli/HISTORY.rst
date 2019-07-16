@@ -3,10 +3,6 @@
 Release History
 ===============
 
-unreleased
-++++++
-* New Cmdlets for Management.Sql that supports Managed instance key and managed instance TDE protector management
-
 2.0.69
 ++++++
 
@@ -14,6 +10,10 @@ unreleased
 
 * add "user update" command
 * deprecate "--upn-or-object-id" from user related commands and introduce "--id"
+
+**SQL**
+
+* New Cmdlets for Management.Sql that supports Managed instance key and managed instance TDE protector management
 
 2.0.69
 ++++++
