@@ -236,4 +236,4 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('ip_address', help='IPv4 address or CIDR range.')
 
     with self.argument_context('acr check-health') as c:
-        c.argument('ignore_errors', options_list=['--ignore-errors'], help='Ignore errors, displaying them only at the final', action='store_true', required=False)
+        c.argument('ignore_errors', options_list=['--ignore-errors'], help='Provide all health checks, even if errors are found', action='store_true', required=False)
