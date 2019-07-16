@@ -1438,8 +1438,8 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
         # Let command processing finish gracefully after the user presses [Ctrl+C]
         pass
     finally:
-        # TODO: Better error handling here.
-        requests.post('http://localhost:8888/closeport/8001')
+        if in_cloud_console():
+            requests.post('http://localhost:8888/closeport/8001')
 
 
 def _trim_nodepoolname(nodepool_name):

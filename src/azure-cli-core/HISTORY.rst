@@ -2,6 +2,8 @@
 
 Release History
 ===============
+2.0.69
+++++++
 * Fixed issue where `--subscription` would appear despite being suppressed on certain commands.
 
 2.0.68
