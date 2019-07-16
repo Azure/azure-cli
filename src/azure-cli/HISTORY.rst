@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**ACR**
+
+* Fixed issue #9952 (a regression in the `acr pack build` command).
+
 **RBAC**
 
 * add "user update" command
