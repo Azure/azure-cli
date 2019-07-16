@@ -131,8 +131,7 @@ def _get_cli_version():
     # working_set.by_key is a dictionary with component names as key
     cli_component_name = "azure-cli"
     cli_version = working_set.by_key[cli_component_name].version \
-        if cli_component_name in working_set.by_key else \
-            "not found"
+        if cli_component_name in working_set.by_key else "not found"
 
     print('ACR CLI version: {}'.format(cli_version))
 
