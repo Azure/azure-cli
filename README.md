@@ -157,23 +157,6 @@ You can easily install the latest Homebrew edge build with the following command
 brew install $(curl -Ls -o /dev/null -w %{url_effective} https://aka.ms/InstallAzureCliHomebrewEdge)
 ```
 
-Here's an example of installing edge dev builds with pip in a virtual environment.
-
-```bash
-$ virtualenv env
-$ . env/bin/activate
-$ pip install --pre azure-cli --extra-index-url https://azurecliprod.blob.core.windows.net/edge
-```
-
-To upgrade your current edge build pass the `--upgrade` option. The `--no-cache-dir` option is also recommended since
-the feed is frequently updated.
-
-```bash
-$ pip install --upgrade --pre azure-cli --extra-index-url https://azurecliprod.blob.core.windows.net/edge --no-cache-dir
-```
-
-The edge build is generated for each push to the `dev` branch as a part of the Travis CI build. The version of the edge build follows
-
 
 ## Developer Setup
 If you would like to setup a development environment and contribute to the CLI, see
