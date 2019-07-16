@@ -15,7 +15,7 @@ from ._errors import ErrorClass
 DOCKER_PULL_SUCCEEDED = "Downloaded newer image for {}"
 DOCKER_IMAGE_UP_TO_DATE = "Image is up to date for {}"
 IMAGE = "mcr.microsoft.com/mcr/hello-world:latest"
-FAQ_MESSAGE = "\nPlease refer to https://aka.ms/acr/faq for more information."
+FAQ_MESSAGE = "\nPlease refer to https://aka.ms/acr/health-check for more information."
 MIN_HELM_VERSION = "2.11.0"
 HELM_VERSION_REGEX = re.compile(r'SemVer:"v([.\d]+)"', re.I)
 
@@ -123,14 +123,15 @@ def _get_docker_status_and_version(ignore_errors, yes):
 
 # Get current CLI version
 def _get_cli_version():
-    acr_component_name = "azure-cli-acr"
-    acr_cli_version = "not found"
     from pkg_resources import working_set
-    for component in list(working_set):
-        if component.key == acr_component_name:
-            acr_cli_version = component.version
 
-    print('ACR CLI version: {}'.format(acr_cli_version))
+    # working_set.by_key is a dictionary with component names as key
+    cli_component_name = "azure-cli"
+    cli_version = working_set.by_key[cli_component_name].version \
+        if cli_component_name in working_set.by_key else \
+            "not found"
+
+    print('ACR CLI version: {}'.format(cli_version))
 
     return 0
 
