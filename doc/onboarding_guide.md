@@ -32,7 +32,7 @@ One of the key decisions you will need to make is whether to create your command
 
 - **Initial Review:** Create a few commands. Schedule a short 30 minute Teams screen-share to demo your commands. This is crucial! Teams have created entire modules using anti-patterns, resulting in comment-filled PRs and last-minute rework! A quick command review would have prevented this.
 
-- **During command authoring:** Run runs frequently to ensure you are staying on type of issues that will stall your build when you submit a PR. `azdev test <YOURMOD>`, `azdev style <YOURMOD>`, `azdev linter <YOURMOD>`.
+- **During command authoring:** Run checks frequently to ensure you are staying on top of issues that will stall your build when you submit a PR. Use commands like `azdev test <YOURMOD>`, `azdev style <YOURMOD>` and `azdev linter <YOURMOD>`.
 
 - **Periodic Command Review:** As practical.
 
