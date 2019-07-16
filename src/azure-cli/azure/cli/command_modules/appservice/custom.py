@@ -14,9 +14,11 @@ except ImportError:
     from urlparse import urlparse  # pylint: disable=import-error
 from binascii import hexlify
 from os import urandom
+import datetime
 import json
 import ssl
 import sys
+import uuid
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error, ungrouped-imports
 import OpenSSL.crypto
 from fabric import Connection
@@ -38,11 +40,13 @@ from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan, SiteC
                                    DeletedAppRestoreRequest, DefaultErrorResponseException,
                                    SnapshotRestoreRequest, SnapshotRecoverySource)
 from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient
+from azure.storage.blob import BlockBlobService, BlobPermissions
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_page_in_browser, get_json_object, \
     ConfiguredDefaultSetter
+from azure.cli.core.commands.client_factory import UA_AGENT
 
 from .tunnel import TunnelServer
 
@@ -273,6 +277,25 @@ def update_azure_storage_account(cmd, resource_group_name, name, custom_id, stor
     return result.properties
 
 
+def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, timeout=None, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    app = client.web_apps.get(resource_group_name, name)
+    parse_plan_id = parse_resource_id(app.server_farm_id)
+    plan_info = None
+    retry_delay = 10  # seconds
+    # We need to retry getting the plan because sometimes if the plan is created as part of function app,
+    # it can take a couple of tries before it gets the plan
+    for _ in range(5):
+        plan_info = client.app_service_plans.get(parse_plan_id['resource_group'],
+                                                 parse_plan_id['name'])
+        if plan_info is not None:
+            break
+        time.sleep(retry_delay)
+    if is_plan_consumption(plan_info) and app.reserved:
+        return upload_zip_to_storage(cmd, resource_group_name, name, src, slot)
+    return enable_zip_deploy(cmd, resource_group_name, name, src, timeout, slot)
+
+
 def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=None):
     logger.warning("Getting scm site credentials for zip deployment")
     user_name, password = _get_site_credential(cmd.cli_ctx, resource_group_name, name, slot)
@@ -284,6 +307,7 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     authorization = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
     headers = authorization
     headers['content-type'] = 'application/octet-stream'
+    headers['User-Agent'] = UA_AGENT
 
     import requests
     import os
@@ -297,6 +321,62 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     response = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
                                             authorization, timeout)
     return response
+
+
+def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
+    settings = get_app_settings(cmd, resource_group_name, name, slot)
+
+    storage_connection = None
+    for keyval in settings:
+        if keyval['name'] == 'AzureWebJobsStorage':
+            storage_connection = str(keyval['value'])
+
+    if storage_connection is None:
+        raise CLIError('Could not find a \'AzureWebJobsStorage\' application setting')
+
+    container_name = "function-releases"
+    blob_name = "{}-{}.zip".format(datetime.datetime.today().strftime('%Y%m%d%H%M%S'), str(uuid.uuid4()))
+
+    block_blob_service = BlockBlobService(connection_string=storage_connection)
+    if not block_blob_service.exists(container_name):
+        block_blob_service.create_container(container_name)
+
+    # https://gist.github.com/vladignatyev/06860ec2040cb497f0f3
+    def progress_callback(current, total):
+        total_length = 30
+        filled_length = int(round(total_length * current) / float(total))
+        percents = round(100.0 * current / float(total), 1)
+        progress_bar = '=' * filled_length + '-' * (total_length - filled_length)
+        progress_message = 'Uploading {} {}%'.format(progress_bar, percents)
+        cmd.cli_ctx.get_progress_controller().add(message=progress_message)
+
+    block_blob_service.create_blob_from_path(container_name, blob_name, src, validate_content=True,
+                                             progress_callback=progress_callback)
+
+    now = datetime.datetime.now()
+    blob_start = now - datetime.timedelta(minutes=10)
+    blob_end = now + datetime.timedelta(weeks=520)
+    blob_token = block_blob_service.generate_blob_shared_access_signature(container_name,
+                                                                          blob_name,
+                                                                          permission=BlobPermissions(read=True),
+                                                                          expiry=blob_end,
+                                                                          start=blob_start)
+
+    blob_uri = block_blob_service.make_blob_url(container_name, blob_name, sas_token=blob_token)
+    website_run_from_setting = "WEBSITE_RUN_FROM_PACKAGE={}".format(blob_uri)
+    update_app_settings(cmd, resource_group_name, name, settings=[website_run_from_setting])
+    client = web_client_factory(cmd.cli_ctx)
+
+    try:
+        logger.info('\nSyncing Triggers...')
+        if slot is not None:
+            client.web_apps.sync_function_triggers_slot(resource_group_name, name, slot)
+        else:
+            client.web_apps.sync_function_triggers(resource_group_name, name)
+    except CloudError as ce:
+        # This SDK function throws an error if Status Code is 200
+        if ce.status_code != 200:
+            raise ce
 
 
 def _generic_settings_operation(cli_ctx, resource_group_name, name, operation_name,
@@ -1022,12 +1102,6 @@ def create_functionapp_slot(cmd, resource_group_name, name, slot, configuration_
     location = site.location
     slot_def = Site(server_farm_id=site.server_farm_id, location=location)
 
-    slot_def.site_config = SiteConfig()
-
-    # function app slots need to have all the App Settings from the source
-    prodsite_appsettings = get_app_settings(cmd, resource_group_name, name)
-    slot_def.site_config.app_settings = prodsite_appsettings[:]
-
     poller = client.web_apps.create_or_update_slot(resource_group_name, name, slot_def, slot)
     result = LongRunningOperation(cmd.cli_ctx)(poller)
 
@@ -1102,37 +1176,36 @@ def config_source_control(cmd, resource_group_name, name, repo_url, repository_t
             raise CLIError(ex)
         logger.warning(status.status_message)
         return status
-    else:
-        non_vsts_params = [cd_app_type, app_working_dir, nodejs_task_runner, python_framework,
-                           python_version, cd_account_create, test, slot_swap]
-        if any(non_vsts_params):
-            raise CLIError('Following parameters are of no use when cd_project_url is None: ' +
-                           'cd_app_type, app_working_dir, nodejs_task_runner, python_framework,' +
-                           'python_version, cd_account_create, test, slot_swap')
-        from azure.mgmt.web.models import SiteSourceControl, SourceControl
-        if git_token:
-            sc = SourceControl(location=location, source_control_name='GitHub', token=git_token)
-            client.update_source_control('GitHub', sc)
+    non_vsts_params = [cd_app_type, app_working_dir, nodejs_task_runner, python_framework,
+                       python_version, cd_account_create, test, slot_swap]
+    if any(non_vsts_params):
+        raise CLIError('Following parameters are of no use when cd_project_url is None: ' +
+                       'cd_app_type, app_working_dir, nodejs_task_runner, python_framework,' +
+                       'python_version, cd_account_create, test, slot_swap')
+    from azure.mgmt.web.models import SiteSourceControl, SourceControl
+    if git_token:
+        sc = SourceControl(location=location, source_control_name='GitHub', token=git_token)
+        client.update_source_control('GitHub', sc)
 
-        source_control = SiteSourceControl(location=location, repo_url=repo_url, branch=branch,
-                                           is_manual_integration=manual_integration,
-                                           is_mercurial=(repository_type != 'git'))
+    source_control = SiteSourceControl(location=location, repo_url=repo_url, branch=branch,
+                                       is_manual_integration=manual_integration,
+                                       is_mercurial=(repository_type != 'git'))
 
-        # SCC config can fail if previous commands caused SCMSite shutdown, so retry here.
-        for i in range(5):
-            try:
-                poller = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
-                                                 'create_or_update_source_control',
-                                                 slot, source_control)
-                return LongRunningOperation(cmd.cli_ctx)(poller)
-            except Exception as ex:  # pylint: disable=broad-except
-                import re
-                ex = ex_handler_factory(no_throw=True)(ex)
-                # for non server errors(50x), just throw; otherwise retry 4 times
-                if i == 4 or not re.findall(r'\(50\d\)', str(ex)):
-                    raise
-                logger.warning('retrying %s/4', i + 1)
-                time.sleep(5)   # retry in a moment
+    # SCC config can fail if previous commands caused SCMSite shutdown, so retry here.
+    for i in range(5):
+        try:
+            poller = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
+                                             'create_or_update_source_control',
+                                             slot, source_control)
+            return LongRunningOperation(cmd.cli_ctx)(poller)
+        except Exception as ex:  # pylint: disable=broad-except
+            import re
+            ex = ex_handler_factory(no_throw=True)(ex)
+            # for non server errors(50x), just throw; otherwise retry 4 times
+            if i == 4 or not re.findall(r'\(50\d\)', str(ex)):
+                raise
+            logger.warning('retrying %s/4', i + 1)
+            time.sleep(5)   # retry in a moment
 
 
 def update_git_token(cmd, git_token=None):
@@ -1179,7 +1252,7 @@ def sync_site_repo(cmd, resource_group_name, name, slot=None):
 def list_app_service_plans(cmd, resource_group_name=None):
     client = web_client_factory(cmd.cli_ctx)
     if resource_group_name is None:
-        plans = list(client.app_service_plans.list())
+        plans = list(client.app_service_plans.list(detailed=True))  # enables querying "numberOfSites"
     else:
         plans = list(client.app_service_plans.list_by_resource_group(resource_group_name))
     for plan in plans:
@@ -1266,8 +1339,7 @@ def update_backup_schedule(cmd, resource_group_name, webapp_name, storage_accoun
     if backup_name and backup_name.lower().endswith('.zip'):
         backup_name = backup_name[:-4]
     if not backup_name:
-        from datetime import datetime
-        backup_name = '{0}_{1}'.format(webapp_name, datetime.utcnow().strftime('%Y%m%d%H%M'))
+        backup_name = '{0}_{1}'.format(webapp_name, datetime.datetime.utcnow().strftime('%Y%m%d%H%M'))
 
     try:
         configuration = _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp_name,
@@ -1358,21 +1430,20 @@ def restore_snapshot(cmd, resource_group_name, name, time, slot=None, restore_co
         if slot:
             return client.web_apps.restore_snapshot_slot(resource_group_name, name, request, slot)
         return client.web_apps.restore_snapshot(resource_group_name, name, request)
-    elif any([source_resource_group, source_name]):
+    if any([source_resource_group, source_name]):
         raise CLIError('usage error: --source-resource-group and --source-name must both be specified if one is used')
-    else:
-        # Overwrite app with its own snapshot
-        request = SnapshotRestoreRequest(overwrite=True, snapshot_time=time, recover_configuration=recover_config)
-        if slot:
-            return client.web_apps.restore_snapshot_slot(resource_group_name, name, request, slot)
-        return client.web_apps.restore_snapshot(resource_group_name, name, request)
+    # Overwrite app with its own snapshot
+    request = SnapshotRestoreRequest(overwrite=True, snapshot_time=time, recover_configuration=recover_config)
+    if slot:
+        return client.web_apps.restore_snapshot_slot(resource_group_name, name, request, slot)
+    return client.web_apps.restore_snapshot(resource_group_name, name, request)
 
 
 # pylint: disable=inconsistent-return-statements
 def _create_db_setting(db_name, db_type, db_connection_string):
     if all([db_name, db_type, db_connection_string]):
         return [DatabaseBackupSetting(database_type=db_type, name=db_name, connection_string=db_connection_string)]
-    elif any([db_name, db_type, db_connection_string]):
+    if any([db_name, db_type, db_connection_string]):
         raise CLIError('usage error: --db-name NAME --db-type TYPE --db-connection-string STRING')
 
 
@@ -1611,7 +1682,7 @@ def swap_slot(cmd, resource_group_name, webapp, slot, target_slot=None, action='
         poller = client.web_apps.swap_slot_slot(resource_group_name, webapp,
                                                 slot, (target_slot or 'production'), True)
         return poller
-    elif action == 'preview':
+    if action == 'preview':
         if target_slot is None:
             result = client.web_apps.apply_slot_config_to_production(resource_group_name,
                                                                      webapp, slot, True)
@@ -1619,13 +1690,12 @@ def swap_slot(cmd, resource_group_name, webapp, slot, target_slot=None, action='
             result = client.web_apps.apply_slot_configuration_slot(resource_group_name, webapp,
                                                                    slot, target_slot, True)
         return result
-    else:  # reset
-        # we will reset both source slot and target slot
-        if target_slot is None:
-            client.web_apps.reset_production_slot_config(resource_group_name, webapp)
-        else:
-            client.web_apps.reset_slot_configuration_slot(resource_group_name, webapp, target_slot)
-        return None
+    # we will reset both source slot and target slot
+    if target_slot is None:
+        client.web_apps.reset_production_slot_config(resource_group_name, webapp)
+    else:
+        client.web_apps.reset_slot_configuration_slot(resource_group_name, webapp, target_slot)
+    return None
 
 
 def delete_slot(cmd, resource_group_name, webapp, slot):
@@ -2018,7 +2088,7 @@ def validate_range_of_int_flag(flag_name, value, min_val, max_val):
 
 def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                     os_type=None, runtime=None, consumption_plan_location=None,
-                    app_insights=None, app_insights_key=None, deployment_source_url=None,
+                    app_insights=None, app_insights_key=None, disable_app_insights=None, deployment_source_url=None,
                     deployment_source_branch='master', deployment_local_git=None,
                     deployment_container_image_name=None, tags=None):
     # pylint: disable=too-many-statements, too-many-branches
@@ -2063,7 +2133,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
         if is_linux and runtime not in LINUX_RUNTIMES:
             raise CLIError("usage error: Currently supported runtimes (--runtime) in linux function apps are: {}."
                            .format(', '.join(LINUX_RUNTIMES)))
-        elif not is_linux and runtime not in WINDOWS_RUNTIMES:
+        if not is_linux and runtime not in WINDOWS_RUNTIMES:
             raise CLIError("usage error: Currently supported runtimes (--runtime) in windows function apps are: {}."
                            .format(', '.join(WINDOWS_RUNTIMES)))
         site_config.app_settings.append(NameValuePair(name='FUNCTIONS_WORKER_RUNTIME', value=runtime))
@@ -2112,6 +2182,8 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                                                       value=con_string))
         site_config.app_settings.append(NameValuePair(name='WEBSITE_CONTENTSHARE', value=name.lower()))
 
+    create_app_insights = False
+
     if app_insights_key is not None:
         site_config.app_settings.append(NameValuePair(name='APPINSIGHTS_INSTRUMENTATIONKEY',
                                                       value=app_insights_key))
@@ -2119,6 +2191,8 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
         instrumentation_key = get_app_insights_key(cmd.cli_ctx, resource_group_name, app_insights)
         site_config.app_settings.append(NameValuePair(name='APPINSIGHTS_INSTRUMENTATIONKEY',
                                                       value=instrumentation_key))
+    elif not disable_app_insights:
+        create_app_insights = True
 
     poller = client.web_apps.create_or_update(resource_group_name, name, functionapp_def)
     functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
@@ -2131,7 +2205,46 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
         _set_remote_or_local_git(cmd, functionapp, resource_group_name, name, deployment_source_url,
                                  deployment_source_branch, deployment_local_git)
 
+    if create_app_insights:
+        try:
+            try_create_application_insights(cmd, functionapp)
+        except Exception:  # pylint: disable=broad-except
+            logger.warning('Error while trying to create and configure an Application Insights for the Function App. '
+                           'Please use the Azure Portal to create and configure the Application Insights, if needed.')
+
     return functionapp
+
+
+def try_create_application_insights(cmd, functionapp):
+    creation_failed_warn = 'Unable to create the Application Insights for the Function App. ' \
+                           'Please use the Azure Portal to manually create and configure the Application Insights, ' \
+                           'if needed.'
+
+    ai_resource_group_name = functionapp.resource_group
+    ai_name = functionapp.name
+    ai_location = functionapp.location
+
+    app_insights_client = get_mgmt_service_client(cmd.cli_ctx, ApplicationInsightsManagementClient)
+    ai_properties = {
+        "name": ai_name,
+        "location": ai_location,
+        "kind": "web",
+        "properties": {
+            "Application_Type": "web"
+        }
+    }
+    appinsights = app_insights_client.components.create_or_update(ai_resource_group_name, ai_name, ai_properties)
+    if appinsights is None or appinsights.instrumentation_key is None:
+        logger.warning(creation_failed_warn)
+        return
+
+    # We make this success message as a warning to no interfere with regular JSON output in stdout
+    logger.warning('Application Insights \"%s\" was created for this Function App. '
+                   'You can visit https://portal.azure.com/#resource%s/overview to view your '
+                   'Application Insights component', appinsights.name, appinsights.id)
+
+    update_app_settings(cmd, functionapp.resource_group, functionapp.name,
+                        ['APPINSIGHTS_INSTRUMENTATIONKEY={}'.format(appinsights.instrumentation_key)])
 
 
 def _set_remote_or_local_git(cmd, webapp, resource_group_name, name, deployment_source_url=None,
@@ -2216,7 +2329,7 @@ def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, auth
             _configure_default_logging(cmd, rg_name, name)
             raise CLIError("""Zip deployment failed. {}. Please run the command az webapp log tail
                            -n {} -g {}""".format(res_dict, name, rg_name))
-        elif res_dict.get('status', 0) == 4:
+        if res_dict.get('status', 0) == 4:
             break
         if 'progress' in res_dict:
             logger.info(res_dict['progress'])  # show only in debug mode, customers seem to find this confusing
@@ -2297,7 +2410,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None,  # pylint: disable
         user = user.split('#', 1)[1]
     logger.info("UserPrefix to use '%s'", user)
     # if dir is empty, show a message in dry run
-    do_deployment = False if os.listdir(src_dir) == [] else True
+    do_deployment = not os.listdir(src_dir) == []
     _create_new_rg = True
     _create_new_asp = True
     _create_new_app = True
@@ -2333,7 +2446,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None,  # pylint: disable
     full_sku = get_sku_name(sku)
     location = set_location(cmd, sku, location)
     loc_name = location.replace(" ", "").lower()
-    is_linux = True if os_val == 'Linux' else False
+    is_linux = os_val == 'Linux'
 
     if resource_group_name is None:
         logger.info('Using default ResourceGroup value')
@@ -2644,11 +2757,10 @@ def ssh_webapp(cmd, resource_group_name, name, port=None, slot=None, timeout=Non
     import platform
     if platform.system() == "Windows":
         raise CLIError('webapp ssh is only supported on linux and mac')
-    else:
-        create_tunnel_and_session(cmd, resource_group_name, name, port=port, slot=slot, timeout=timeout)
+    create_tunnel_and_session(cmd, resource_group_name, name, port=port, slot=slot, timeout=timeout)
 
 
-def create_devops_build(
+def create_devops_pipeline(
         cmd,
         functionapp_name=None,
         organization_name=None,

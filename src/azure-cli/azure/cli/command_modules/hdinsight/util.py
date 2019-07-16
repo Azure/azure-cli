@@ -122,6 +122,8 @@ def validate_esp_cluster_create_params(esp,
             missing_params.append("--domain")
         if not cluster_admin_account:
             missing_params.append("--cluster-admin-account")
+        if not cluster_users_group_dns:
+            missing_params.append("--cluster-users-group-dns")
         if not assign_identity:
             missing_params.append("--assign-identity")
 
@@ -144,3 +146,19 @@ def validate_esp_cluster_create_params(esp,
         if esp_params:
             raise CLIError('the following params are required only '
                            'when --esp is specified: {}'.format(', '.join(esp_params)))
+
+
+def get_resource_id_by_name(cli_ctx, resource_type, resource_name):
+    from ._client_factory import cf_resources
+    from knack.util import CLIError
+
+    client = cf_resources(cli_ctx)
+    filter_str = "resourceType eq '{}' and name eq '{}'".format(resource_type, resource_name) if resource_type else None
+    resources = list(client.resources.list(filter=filter_str))
+    if not resources:
+        raise CLIError('Fails to retrieve any resource by name {}'.format(resource_name))
+    if len(resources) > 1:
+        raise CLIError('Found more than one resources by name {}. '
+                       'Please specify one of the following resource IDs explicitly:\n{}'
+                       .format(resource_name, '\n'.join([resource.id for resource in resources])))
+    return resources[0].id

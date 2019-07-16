@@ -2619,12 +2619,18 @@ def update_image_version(instance, target_regions=None, replica_count=None):
 # endregion
 
 
-# region Proximity Placement Group
 def create_proximity_placement_group(cmd, client, proximity_placement_group_name, resource_group_name,
                                      ppg_type=None, location=None, tags=None):
+    from knack.arguments import CaseInsensitiveList
+
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
 
-    ProximityPlacementGroup = cmd.get_models('ProximityPlacementGroup')
+    ProximityPlacementGroup, PPGType = cmd.get_models('ProximityPlacementGroup', 'ProximityPlacementGroupType')
+    choices = CaseInsensitiveList([x.value for x in PPGType])
+
+    if ppg_type and ppg_type not in choices:
+        logger.info("Valid choices: %s", str(choices))
+        raise CLIError("Usage error: invalid value for --type/-t")
 
     ppg_params = ProximityPlacementGroup(name=proximity_placement_group_name, proximity_placement_group_type=ppg_type,
                                          location=location, tags=(tags or {}))

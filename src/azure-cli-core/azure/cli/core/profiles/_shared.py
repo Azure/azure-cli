@@ -84,6 +84,8 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_SIGNALR = ('azure.mgmt.signalr', None)
     MGMT_SQL = ('azure.mgmt.sql', None)
     MGMT_SQLVM = ('azure.mgmt.sqlvirtualmachine', None)
+    MGMT_MANAGEDSERVICES = ('azure.mgmt.managedservices', None)
+    MGMT_NETAPPFILES = ('azure.mgmt.netappfiles', None)
 
     def __init__(self, import_prefix, client_name):
         """Constructor.
@@ -131,12 +133,14 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
         ResourceType.MGMT_NETWORK_DNS: '2018-05-01',
         ResourceType.MGMT_KEYVAULT: '2018-02-14',
-        ResourceType.MGMT_AUTHORIZATION: SDKProfile('2018-01-01-preview', {
-            'classic_administrators': '2015-06-01'
+        ResourceType.MGMT_AUTHORIZATION: SDKProfile('2018-09-01-preview', {
+            'classic_administrators': '2015-06-01',
+            'role_definitions': '2018-01-01-preview',
+            'provider_operations_metadata': '2018-01-01-preview'
         }),
-        ResourceType.MGMT_CONTAINERREGISTRY: '2019-04-01',
+        ResourceType.MGMT_CONTAINERREGISTRY: '2019-06-01-preview',
         ResourceType.DATA_KEYVAULT: '7.0',
-        ResourceType.DATA_STORAGE: '2018-03-28',
+        ResourceType.DATA_STORAGE: '2018-11-09',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
         ResourceType.MGMT_EVENTHUB: '2017-04-01'
     },
@@ -392,7 +396,7 @@ def supported_resource_type(api_profile, resource_type):
     if api_profile == 'latest' or resource_type is None:
         return True
     try:
-        return True if AZURE_API_PROFILES[api_profile][resource_type] else False
+        return bool(AZURE_API_PROFILES[api_profile][resource_type])
     except KeyError:
         return False
 

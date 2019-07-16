@@ -18,7 +18,7 @@ SKU_TIER_MAP = {'Basic': 'b', 'GeneralPurpose': 'gp', 'MemoryOptimized': 'mo'}
 
 def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_wait=False,
                    location=None, administrator_login=None, administrator_login_password=None, backup_retention=None,
-                   geo_redundant_backup=None, ssl_enforcement=None, storage_mb=None, tags=None, version=None):
+                   geo_redundant_backup=None, ssl_enforcement=None, storage_mb=None, tags=None, version=None, auto_grow='Enabled'):
     provider = 'Microsoft.DBforPostgreSQL'
     if isinstance(client, MySqlServersOperations):
         provider = 'Microsoft.DBforMySQL'
@@ -38,7 +38,8 @@ def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_w
                 storage_profile=mysql.models.StorageProfile(
                     backup_retention_days=backup_retention,
                     geo_redundant_backup=geo_redundant_backup,
-                    storage_mb=storage_mb)),
+                    storage_mb=storage_mb,
+                    storage_autogrow=auto_grow)),
             location=location,
             tags=tags)
     elif provider == 'Microsoft.DBforPostgreSQL':
@@ -53,7 +54,8 @@ def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_w
                 storage_profile=postgresql.models.StorageProfile(
                     backup_retention_days=backup_retention,
                     geo_redundant_backup=geo_redundant_backup,
-                    storage_mb=storage_mb)),
+                    storage_mb=storage_mb,
+                    storage_autogrow=auto_grow)),
             location=location,
             tags=tags)
     elif provider == 'Microsoft.DBforMariaDB':
@@ -68,7 +70,8 @@ def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_w
                 storage_profile=mariadb.models.StorageProfile(
                     backup_retention_days=backup_retention,
                     geo_redundant_backup=geo_redundant_backup,
-                    storage_mb=storage_mb)),
+                    storage_mb=storage_mb,
+                    storage_autogrow=auto_grow)),
             location=location,
             tags=tags)
 
@@ -202,8 +205,12 @@ def _server_georestore(cmd, client, resource_group_name, server_name, sku_name, 
 
 
 # Custom functions for server replica, will add PostgreSQL part after backend ready in future
-def _replica_create(cmd, client, resource_group_name, server_name, source_server, no_wait=False, location=None, **kwargs):
-    provider = 'Microsoft.DBForMySQL' if isinstance(client, MySqlServersOperations) else 'Microsoft.DBforPostgreSQL'
+def _replica_create(cmd, client, resource_group_name, server_name, source_server, no_wait=False, location=None, sku_name=None, **kwargs):
+    provider = 'Microsoft.DBforPostgreSQL'
+    if isinstance(client, MySqlServersOperations):
+        provider = 'Microsoft.DBforMySQL'
+    elif isinstance(client, MariaDBServersOperations):
+        provider = 'Microsoft.DBforMariaDB'
     # set source server id
     if not is_valid_resource_id(source_server):
         if len(source_server.split('/')) == 1:
@@ -224,18 +231,27 @@ def _replica_create(cmd, client, resource_group_name, server_name, source_server
     if location is None:
         location = source_server_object.location
 
+    if sku_name is None:
+        sku_name = source_server_object.sku.name
+
     parameters = None
-    if provider == 'Microsoft.DBForMySQL':
+    if provider == 'Microsoft.DBforMySQL':
         from azure.mgmt.rdbms import mysql
         parameters = mysql.models.ServerForCreate(
-            sku=mysql.models.Sku(name=source_server_object.sku.name),
+            sku=mysql.models.Sku(name=sku_name),
             properties=mysql.models.ServerPropertiesForReplica(source_server_id=source_server),
             location=location)
     elif provider == 'Microsoft.DBforPostgreSQL':
         from azure.mgmt.rdbms import postgresql
         parameters = postgresql.models.ServerForCreate(
-            sku=postgresql.models.Sku(name=source_server_object.sku.name),
+            sku=postgresql.models.Sku(name=sku_name),
             properties=postgresql.models.ServerPropertiesForReplica(source_server_id=source_server),
+            location=location)
+    elif provider == 'Microsoft.DBforMariaDB':
+        from azure.mgmt.rdbms import mariadb
+        parameters = mariadb.models.ServerForCreate(
+            sku=mariadb.models.Sku(name=sku_name),
+            properties=mariadb.models.ServerPropertiesForReplica(source_server_id=source_server),
             location=location)
 
     return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
@@ -266,7 +282,8 @@ def _server_update_custom_func(instance,
                                backup_retention=None,
                                administrator_login_password=None,
                                ssl_enforcement=None,
-                               tags=None):
+                               tags=None,
+                               auto_grow=None):
     from importlib import import_module
     server_module_path = instance.__module__
     module = import_module(server_module_path.replace('server', 'server_update_parameters'))
@@ -285,6 +302,9 @@ def _server_update_custom_func(instance,
 
     if backup_retention:
         instance.storage_profile.backup_retention_days = backup_retention
+
+    if auto_grow:
+        instance.storage_profile.storage_autogrow = auto_grow
 
     params = ServerUpdateParameters(sku=instance.sku,
                                     storage_profile=instance.storage_profile,

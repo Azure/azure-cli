@@ -142,10 +142,9 @@ def _acs_browse_internal(cmd, client, acs_info, resource_group_name, name, disab
        orchestrator_type == ContainerServiceOrchestratorTypes.kubernetes or \
        (acs_info.custom_profile and acs_info.custom_profile.orchestrator == 'kubernetes'):  # pylint: disable=no-member
         return k8s_browse(cmd, client, name, resource_group_name, disable_browser, ssh_key_file=ssh_key_file)
-    elif str(orchestrator_type).lower() == 'dcos' or orchestrator_type == ContainerServiceOrchestratorTypes.dcos:
+    if str(orchestrator_type).lower() == 'dcos' or orchestrator_type == ContainerServiceOrchestratorTypes.dcos:
         return _dcos_browse_internal(acs_info, disable_browser, ssh_key_file)
-    else:
-        raise CLIError('Unsupported orchestrator type {} for browse'.format(orchestrator_type))
+    raise CLIError('Unsupported orchestrator type {} for browse'.format(orchestrator_type))
 
 
 def k8s_browse(cmd, client, name, resource_group_name, disable_browser=False, ssh_key_file=None):
@@ -228,8 +227,6 @@ def _dcos_browse_internal(acs_info, disable_browser, ssh_key_file):
     finally:
         proxy.disable_http_proxy()
 
-    return
-
 
 def acs_install_cli(cmd, client, resource_group_name, name, install_location=None, client_version=None):
     acs_info = _get_acs_info(cmd.cli_ctx, name, resource_group_name)
@@ -239,10 +236,9 @@ def acs_install_cli(cmd, client, resource_group_name, name, install_location=Non
         kwargs['client_version'] = client_version
     if orchestrator_type == 'kubernetes':
         return k8s_install_cli(**kwargs)
-    elif orchestrator_type == 'dcos':
+    if orchestrator_type == 'dcos':
         return dcos_install_cli(**kwargs)
-    else:
-        raise CLIError('Unsupported orchestrator type {} for install-cli'.format(orchestrator_type))
+    raise CLIError('Unsupported orchestrator type {} for install-cli'.format(orchestrator_type))
 
 
 def _ssl_context():
@@ -1039,8 +1035,7 @@ def load_kubernetes_configuration(filename):
     except (IOError, OSError) as ex:
         if getattr(ex, 'errno', 0) == errno.ENOENT:
             raise CLIError('{} does not exist'.format(filename))
-        else:
-            raise
+        raise
     except (yaml.parser.ParserError, UnicodeDecodeError) as ex:
         raise CLIError('Error parsing {} ({})'.format(filename, str(ex)))
 
@@ -1330,7 +1325,7 @@ def _resolve_role_id(role, scope, definitions_client):
         role_defs = list(definitions_client.list(scope, "roleName eq '{}'".format(role)))
         if not role_defs:
             raise CLIError("Role '{}' doesn't exist.".format(role))
-        elif len(role_defs) > 1:
+        if len(role_defs) > 1:
             ids = [r.id for r in role_defs]
             err = "More than one role matches the given name '{}'. Please pick a value from '{}'"
             raise CLIError(err.format(role, ids))
@@ -1443,8 +1438,8 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
         # Let command processing finish gracefully after the user presses [Ctrl+C]
         pass
     finally:
-        # TODO: Better error handling here.
-        requests.post('http://localhost:8888/closeport/8001')
+        if in_cloud_console():
+            requests.post('http://localhost:8888/closeport/8001')
 
 
 def _trim_nodepoolname(nodepool_name):
@@ -1589,7 +1584,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         location=location, tags=tags,
         dns_prefix=dns_name_prefix,
         kubernetes_version=kubernetes_version,
-        enable_rbac=False if disable_rbac else True,
+        enable_rbac=not disable_rbac,
         agent_pool_profiles=[agent_pool_profile],
         linux_profile=linux_profile,
         service_principal_profile=service_principal_profile,
@@ -1693,12 +1688,11 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
 
     if not credentialResults:
         raise CLIError("No Kubernetes credentials found.")
-    else:
-        try:
-            kubeconfig = credentialResults.kubeconfigs[0].value.decode(encoding='UTF-8')
-            _print_or_merge_credentials(path, kubeconfig, overwrite_existing)
-        except (IndexError, ValueError):
-            raise CLIError("Fail to find kubeconfig file.")
+    try:
+        kubeconfig = credentialResults.kubeconfigs[0].value.decode(encoding='UTF-8')
+        _print_or_merge_credentials(path, kubeconfig, overwrite_existing)
+    except (IndexError, ValueError):
+        raise CLIError("Fail to find kubeconfig file.")
 
 
 ADDONS = {
@@ -2632,8 +2626,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
             raise CLIError('Please make sure your subscription is whitelisted to use this service. https://aka.ms/openshift/managed')  # pylint: disable=line-too-long
         if "No registered resource provider found for location" in ex.message:
             raise CLIError('Please make sure your subscription is whitelisted to use this service. https://aka.ms/openshift/managed')  # pylint: disable=line-too-long
-        else:
-            raise ex
+        raise ex
 
 
 def openshift_show(cmd, client, resource_group_name, name):

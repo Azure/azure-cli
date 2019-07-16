@@ -21,7 +21,7 @@ def validate_site_create(cmd, namespace):
     """Validate the SiteName that is being used to create is available
     This API requires that the RG is already created"""
     client = web_client_factory(cmd.cli_ctx)
-    if isinstance(namespace.name, str) and isinstance(namespace.resource_group_name, str)\
+    if isinstance(namespace.name, str) and isinstance(namespace.resource_group_name, str) \
             and isinstance(namespace.plan, str):
         resource_group_name = namespace.resource_group_name
         plan = namespace.plan
@@ -40,7 +40,7 @@ def validate_site_create(cmd, namespace):
             }
         }
         validation = client.validate(resource_group_name, validation_payload)
-        if validation.status.lower() == "failure":
+        if validation.status.lower() == "failure" and validation.error.code != 'SiteAlreadyExists':
             raise CLIError(validation.error.message)
 
 
@@ -69,5 +69,19 @@ def validate_asp_create(cmd, namespace):
             }
         }
         validation = client.validate(resource_group_name, validation_payload)
-        if validation.status.lower() == "failure":
+        if validation.status.lower() == "failure" and validation.error.code != 'ServerFarmAlreadyExists':
             raise CLIError(validation.error.message)
+
+
+def validate_app_exists_in_rg(cmd, namespace):
+    """Validate that the App/slot exists in the RG provided"""
+    client = web_client_factory(cmd.cli_ctx)
+    if isinstance(namespace.name, str) and isinstance(namespace.resource_group_name, str):
+        webapp = namespace.name
+        resource_group_name = namespace.resource_group_name
+        if isinstance(namespace.slot, str):
+            app = client.web_apps.get_slot(resource_group_name, webapp, namespace.slot, raw=True)
+        else:
+            app = client.web_apps.get(resource_group_name, webapp, None, raw=True)
+        if app.response.status_code != 200:
+            raise CLIError(app.response.text)

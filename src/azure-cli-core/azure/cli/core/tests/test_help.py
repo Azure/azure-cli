@@ -109,7 +109,7 @@ def create_invoker_and_load_cmds_and_args(cli_ctx):
     invoker.parser.load_command_table(invoker.commands_loader)
 
 
-# TODO update this CLASS to properly load all help...                                                                       .
+# TODO update this CLASS to properly load all help....
 class HelpTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

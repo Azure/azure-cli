@@ -388,7 +388,11 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         account_info = self.get_account_info(resource_group, storage_account)
 
         self.storage_cmd('storage blob service-properties show', account_info) \
-            .assert_with_checks(JMESPathCheck('staticWebsite.enabled', False))
+            .assert_with_checks(JMESPathCheck('staticWebsite.enabled', False),
+                                JMESPathCheck('hourMetrics.enabled', True),
+                                JMESPathCheck('minuteMetrics.enabled', False),
+                                JMESPathCheck('minuteMetrics.includeApis', None),
+                                JMESPathCheck('logging.delete', False))
 
         self.storage_cmd('storage blob service-properties update --static-website --index-document index.html '
                          '--404-document error.html', account_info)
@@ -396,12 +400,25 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage blob service-properties update --delete-retention --delete-retention-period 1',
                          account_info)
 
+        self.storage_cmd('storage blob service-properties update --set hourMetrics.enabled=false',
+                         account_info)
+
+        self.storage_cmd('storage blob service-properties update --set minuteMetrics.enabled=true minuteMetrics.includeApis=true',
+                         account_info)
+
+        self.storage_cmd('storage blob service-properties update --set logging.delete=true',
+                         account_info)
+
         self.storage_cmd('storage blob service-properties show', account_info) \
             .assert_with_checks(JMESPathCheck('staticWebsite.enabled', True),
                                 JMESPathCheck('staticWebsite.errorDocument_404Path', 'error.html'),
                                 JMESPathCheck('staticWebsite.indexDocument', 'index.html'),
                                 JMESPathCheck('deleteRetentionPolicy.enabled', True),
-                                JMESPathCheck('deleteRetentionPolicy.days', 1))
+                                JMESPathCheck('deleteRetentionPolicy.days', 1),
+                                JMESPathCheck('hourMetrics.enabled', False),
+                                JMESPathCheck('minuteMetrics.enabled', True),
+                                JMESPathCheck('minuteMetrics.includeApis', True),
+                                JMESPathCheck('logging.delete', True))
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
@@ -429,6 +446,35 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         self.assertTrue(blob_uri)
         self.assertIn('&sig=', blob_uri)
         self.assertTrue(blob_uri.startswith('"https://clitest000002.blob.core.windows.net/cont000003/blob000004?s'))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_storage_blob_generate_sas_as_user(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        c = self.create_container(account_info)
+        b = self.create_random_name('blob', 24)
+
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        blob_sas = self.cmd('storage blob generate-sas --account-name {} -n {} -c {} --expiry {} --permissions '
+                            'r --https-only --as-user --auth-mode login'.format(storage_account, b, c, expiry)).output
+        self.assertIn('&sig=', blob_sas)
+        self.assertIn('skoid=', blob_sas)
+        self.assertIn('sktid=', blob_sas)
+        self.assertIn('skt=', blob_sas)
+        self.assertIn('ske=', blob_sas)
+        self.assertIn('sks=', blob_sas)
+        self.assertIn('skv=', blob_sas)
+
+        container_sas = self.cmd('storage container generate-sas --account-name {} -n {} --expiry {} --permissions '
+                                 'r --https-only --as-user --auth-mode login'.format(storage_account, c, expiry)).output
+        self.assertIn('&sig=', container_sas)
+        self.assertIn('skoid=', container_sas)
+        self.assertIn('sktid=', container_sas)
+        self.assertIn('skt=', container_sas)
+        self.assertIn('ske=', container_sas)
+        self.assertIn('sks=', container_sas)
+        self.assertIn('skv=', container_sas)
+        self.assertIn('skv=', container_sas)
 
 
 if __name__ == '__main__':

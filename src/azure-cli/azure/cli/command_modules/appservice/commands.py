@@ -8,6 +8,7 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.core.util import empty_on_404
 
 from ._client_factory import cf_web_client, cf_plans, cf_webapps
+from ._validators import validate_app_exists_in_rg
 
 
 def output_slots_in_table(slots):
@@ -83,9 +84,9 @@ def load_command_table(self, _):
         g.custom_command('restart', 'restart_webapp')
         g.custom_command('browse', 'view_in_browser')
         g.custom_command('list-runtimes', 'list_runtimes')
-        g.custom_command('identity assign', 'assign_identity')
-        g.custom_show_command('identity show', 'show_identity')
-        g.custom_command('identity remove', 'remove_identity')
+        g.custom_command('identity assign', 'assign_identity', validator=validate_app_exists_in_rg)
+        g.custom_show_command('identity show', 'show_identity', validator=validate_app_exists_in_rg)
+        g.custom_command('identity remove', 'remove_identity', validator=validate_app_exists_in_rg)
         g.custom_command('create-remote-connection', 'create_tunnel', exception_handler=ex_handler_factory())
         g.generic_update_command('update', getter_name='get_webapp', setter_name='set_webapp', custom_func_name='update_webapp', command_type=appservice_custom)
 
@@ -250,7 +251,7 @@ def load_command_table(self, _):
 
     with self.command_group('functionapp deployment source') as g:
         g.custom_command('config-local-git', 'enable_local_git')
-        g.custom_command('config-zip', 'enable_zip_deploy')
+        g.custom_command('config-zip', 'enable_zip_deploy_functionapp')
         g.custom_command('config', 'config_source_control', exception_handler=ex_handler_factory())
         g.custom_command('sync', 'sync_site_repo')
         g.custom_show_command('show', 'show_source_control')
@@ -287,11 +288,8 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_container_settings')
         g.custom_show_command('show', 'show_container_settings_functionapp')
 
-    with self.command_group('functionapp devops-build') as g:
-        g.custom_command('create', 'create_devops_build')
-
     with self.command_group('functionapp devops-pipeline') as g:
-        g.custom_command('create', 'create_devops_build')
+        g.custom_command('create', 'create_devops_pipeline')
 
     with self.command_group('functionapp deployment slot') as g:
         g.custom_command('list', 'list_slots', table_transformer=output_slots_in_table)

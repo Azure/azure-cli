@@ -32,6 +32,7 @@ class WebappBasicE2ETest(ScenarioTest):
         plan = self.create_random_name(prefix='webapp-e2e-plan', length=24)
 
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
+        self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))  # test idempotency
         self.cmd('appservice plan list -g {}'.format(resource_group), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', plan),
@@ -49,6 +50,7 @@ class WebappBasicE2ETest(ScenarioTest):
             JMESPathCheck('name', webapp_name),
             JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
         ])
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan))  # test idempotency
         self.cmd('webapp list -g {}'.format(resource_group), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', webapp_name),
@@ -679,6 +681,7 @@ class WebappACRScenarioTest(ScenarioTest):
 class FunctionappACRScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='japanwest')
     @StorageAccountPreparer()
+    @AllowLargeResponse()
     def test_acr_integration_function_app(self, resource_group, storage_account):
         plan = self.create_random_name(prefix='acrtestplanfunction', length=24)
         functionapp = self.create_random_name(prefix='functionappacrtest', length=24)
@@ -1138,6 +1141,39 @@ class FunctionAppWithAppInsightsKey(ScenarioTest):
         ])
 
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
+
+
+class FunctionAppWithAppInsightsDefault(ScenarioTest):
+    @ResourceGroupPreparer(location='westus')
+    @StorageAccountPreparer()
+    def test_functionapp_with_default_app_insights(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name('functionappwithappinsights', 40)
+
+        self.cmd('functionapp create -g {} -n {} -c westus -s {} --os-type Windows'
+                 .format(resource_group, functionapp_name, storage_account)).assert_with_checks([
+                     JMESPathCheck('state', 'Running'),
+                     JMESPathCheck('name', functionapp_name),
+                     JMESPathCheck('kind', 'functionapp'),
+                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+        app_set = self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name)).get_output_in_json()
+        self.assertTrue('APPINSIGHTS_INSTRUMENTATIONKEY' in [kp['name'] for kp in app_set])
+
+    @ResourceGroupPreparer(location='westus')
+    @StorageAccountPreparer()
+    def test_functionapp_with_no_default_app_insights(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name('functionappwithappinsights', 40)
+
+        self.cmd('functionapp create -g {} -n {} -c centralus -s {} --os-type Windows --disable-app-insights'
+                 .format(resource_group, functionapp_name, storage_account)).assert_with_checks([
+                     JMESPathCheck('state', 'Running'),
+                     JMESPathCheck('name', functionapp_name),
+                     JMESPathCheck('kind', 'functionapp'),
+                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+        app_set = self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group,
+                                                                                    functionapp_name)).get_output_in_json()
+        self.assertTrue('APPINSIGHTS_INSTRUMENTATIONKEY' not in [kp['name'] for kp in app_set])
 
 
 class FunctionAppOnLinux(ScenarioTest):

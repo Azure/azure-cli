@@ -98,19 +98,19 @@ def _sku_filter(cmd, namespace):
 
 @Completer
 def sku_name_completer(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
-    names = set([x.name for x in _sku_filter(cmd, namespace)])
+    names = {x.name for x in _sku_filter(cmd, namespace)}
     return sorted(list(names))
 
 
 @Completer
 def kind_completer(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
-    kinds = set([x.kind for x in _sku_filter(cmd, namespace)])
+    kinds = {x.kind for x in _sku_filter(cmd, namespace)}
     return sorted(list(kinds))
 
 
 @Completer
 def location_completer(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
-    names = set([location for x in _sku_filter(cmd, namespace) for location in x.locations])
+    names = {location for x in _sku_filter(cmd, namespace) for location in x.locations}
     return [x.lower() for x in sorted(list(names))]
 
 

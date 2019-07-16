@@ -28,6 +28,79 @@ jobs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: metadata
 
+- job: VerifyLinuxRequirements
+  displayName: 'Verify src/azure-cli/requirements.*.Linux.txt'
+  condition: succeeded()
+  pool:
+    vmImage: 'ubuntu-16.04'
+
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3'
+    inputs:
+      versionSpec: 3.x
+
+  - bash: ./scripts/ci/dependency_check.sh
+    displayName: 'Verify src/azure-cli/requirements.py3.Linux.txt'
+
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 2'
+    inputs:
+      versionSpec: 2.x
+
+  - bash: ./scripts/ci/dependency_check.sh
+    displayName: 'Verify src/azure-cli/requirements.py2.Linux.txt'
+
+- job: VerifyDarwinRequirements
+  displayName: 'Verify src/azure-cli/requirements.*.Darwin.txt'
+  condition: succeeded()
+  pool:
+    vmImage: 'macOS-10.13'
+
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3'
+    inputs:
+      versionSpec: 3.x
+
+  - bash: ./scripts/ci/dependency_check.sh
+    displayName: 'Verify src/azure-cli/requirements.py3.Darwin.txt'
+
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 2'
+    inputs:
+      versionSpec: 2.x
+
+  - bash: ./scripts/ci/dependency_check.sh
+    displayName: 'Verify src/azure-cli/requirements.py2.Darwin.txt'
+
+- job: VerifyWindowsRequirements
+  displayName: 'Verify src/azure-cli/requirements.*.Windows.txt'
+  condition: succeeded()
+  pool:
+    vmImage: 'vs2017-win2016'
+
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3'
+    inputs:
+      versionSpec: 3.x
+
+  - task: BatchScript@1
+    inputs:
+      filename: ./scripts/ci/dependency_check.bat
+    displayName: 'Verify src/azure-cli/requirements.py3.Windows.txt'
+
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 2'
+    inputs:
+      versionSpec: 2.x
+
+  - task: BatchScript@1
+    inputs:
+      filename: ./scripts/ci/dependency_check.bat
+    displayName: 'Verify src/azure-cli/requirements.py2.Windows.txt'
+
 - job: VerifyVersions
   displayName: Verify Command Module Versions
   condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/release'), eq(variables['System.PullRequest.TargetBranch'], 'release')))
@@ -61,16 +134,6 @@ jobs:
       azdev verify history
 
     displayName: 'Verify History'
-
-  - bash: |
-      #!/usr/bin/env bash
-      . ./venv/bin/activate
-
-      set -ev
-
-      azdev cli check-versions
-    displayName: 'Verify Versions'
-    condition: succeededOrFailed() # This step should run regardless of whether or not history was found to be invalid.
 
 - job: BuildWindowsMSI
   displayName: Build Windows MSI
@@ -154,8 +217,6 @@ jobs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: docker
 
-
-
 - job: TestDockerImage
   displayName: Test Docker Image
 
@@ -191,7 +252,6 @@ jobs:
        docker run $IMAGE_NAME /bin/bash -c "time az self-test && time az --version && sleep 5"
     displayName: 'Bash Script'
 
-
 - job: BuildPythonWheel
   displayName: Build Python Wheels
 
@@ -218,8 +278,6 @@ jobs:
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: pypi
-
-
 
 - job: TestPythonWheel
   displayName: Test Python Wheels
@@ -270,7 +328,6 @@ jobs:
          /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION && az self-test && az --version && sleep 5"
 
     displayName: 'Test pip Install'
-
 
 - job: RunAutomationFullPython2
   displayName: Run Automation, Python 2
@@ -375,7 +432,6 @@ jobs:
     env:
       AZURE_CLI_TEST_TARGET_PROFILE: '2018-03-01'
 
-
 - job: BuildHomebrewFormula
   displayName: Build Homebrew Formula
 
@@ -433,8 +489,6 @@ jobs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: homebrew
 
-
-
 - job: TestHomebrewFormula
   displayName: Test Homebrew Formula
 
@@ -477,7 +531,6 @@ jobs:
 
     displayName: 'Bash Script'
 
-
 - job: BuildYumPackage
   displayName: Build Yum Package
 
@@ -498,8 +551,6 @@ jobs:
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: yum
-
-
 
 - job: TestYumPackage
   displayName: Test Yum Package
@@ -536,7 +587,6 @@ jobs:
        docker run --rm -v $SYSTEM_ARTIFACTSDIRECTORY/yum:/mnt/yum centos /bin/bash -c "yum --nogpgcheck localinstall /mnt/yum/$YUM_NAME -y && time az self-test && time az --version && sleep 5"
 
     displayName: 'Bash Script'
-
 
 - job: BuildUbuntuXenial
   displayName: Build Ubuntu Xenial Package
@@ -598,8 +648,6 @@ jobs:
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: ubuntu-trusty
-
-
 
 - job: BuildUbuntuBionic
   displayName: Build Ubuntu Bionic Package
@@ -663,7 +711,6 @@ jobs:
         TargetPath: $(Build.ArtifactStagingDirectory)
         ArtifactName: ubuntu-disco
 
-
 - job: BuildDebianJessie
   displayName: Build Debian Jessie Package
 
@@ -694,8 +741,6 @@ jobs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: debian-jessie
 
-
-
 - job: BuildDebianStretch
   displayName: Build Debian Stretch Package
 
@@ -725,8 +770,6 @@ jobs:
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: debian-stretch
-
-
 
 - job: TestLinuxPackages
   displayName: Test Linux Packages
@@ -861,4 +904,61 @@ jobs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: ubuntu-cosmic
 
+- job: CheckStyle
+  displayName: "Check CLI Style"
 
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.7'
+    inputs:
+      versionSpec: 3.7
+  - bash: |
+      . scripts/ci/install_azdev.sh
+      pip list
+      azdev style
+
+- job: CheckHeaders
+  displayName: "Check License, History, and DocMap"
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.6'
+    inputs:
+      versionSpec: 3.6
+  - bash: |
+      . scripts/ci/install_azdev.sh
+      azdev verify license
+      azdev verify history
+      azdev verify document-map
+
+- job: CheckLoadPerformance
+  displayName: "Check Module Load Performance"
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.6'
+    inputs:
+      versionSpec: 3.6
+  - bash: |
+      . scripts/ci/install_azdev.sh
+      azdev perf load-times
+
+- job: CheckLinter
+  displayName: "Check CLI Linter"
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.6'
+    inputs:
+      versionSpec: 3.6
+  - bash: |
+      . scripts/ci/install_azdev.sh
+      azdev linter --ci-exclusions

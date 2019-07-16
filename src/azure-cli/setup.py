@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.0.67"
+VERSION = "2.0.69"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -53,7 +53,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-batch~=6.0',
+    'azure-batch~=7.0',
     'azure-cli-command_modules-nspkg~=2.0',
     'azure-cli-core=={}'.format(VERSION),
     'azure-cli-nspkg~=3.0,>=3.0.3',
@@ -65,7 +65,8 @@ DEPENDENCIES = [
     'azure-keyvault~=1.1',
     'azure-mgmt-advisor>=2.0.1,<3.0.0',
     'azure-mgmt-applicationinsights~=0.1.1',
-    'azure-mgmt-authorization~=0.50.0',
+    'azure-mgmt-appconfiguration>=0.1.0',
+    'azure-mgmt-authorization~=0.52.0',
     'azure-mgmt-batch~=6.0',
     'azure-mgmt-batchai~=2.0',
     'azure-mgmt-billing~=0.2',
@@ -75,9 +76,9 @@ DEPENDENCIES = [
     'azure-mgmt-compute~=5.0',
     'azure-mgmt-consumption~=2.0',
     'azure-mgmt-containerinstance~=1.4',
-    'azure-mgmt-containerregistry~=2.8',
+    'azure-mgmt-containerregistry~=3.0.0rc4',
     'azure-mgmt-containerservice~=5.2',
-    'azure-mgmt-cosmosdb~=0.5.2',
+    'azure-mgmt-cosmosdb~=0.6.1',
     'azure-mgmt-datalake-analytics~=0.2.1',
     'azure-mgmt-datalake-store~=0.5.0',
     'azure-mgmt-datamigration~=0.1.0',
@@ -86,7 +87,7 @@ DEPENDENCIES = [
     'azure-mgmt-dns~=2.1',
     'azure-mgmt-eventgrid~=2.2',
     'azure-mgmt-eventhub~=2.6',
-    'azure-mgmt-hdinsight~=0.2.1',
+    'azure-mgmt-hdinsight~=1.1.0',
     'azure-mgmt-imagebuilder~=0.2.1',
     'azure-mgmt-iotcentral~=1.0',
     'azure-mgmt-iothub~=0.8.2',
@@ -94,6 +95,7 @@ DEPENDENCIES = [
     'azure-mgmt-keyvault~=1.1',
     'azure-mgmt-kusto~=0.3.0',
     'azure-mgmt-loganalytics~=0.2',
+    'azure-mgmt-managedservices~=1.0',
     'azure-mgmt-managementgroups~=0.1',
     'azure-mgmt-maps~=0.1.0',
     'azure-mgmt-marketplaceordering~=0.1',
@@ -101,6 +103,7 @@ DEPENDENCIES = [
     'azure-mgmt-monitor~=0.5.2',
     'azure-mgmt-msi~=0.2',
     'azure-mgmt-network~=3.0',
+    'azure-mgmt-netapp~=0.4.0',
     'azure-mgmt-policyinsights~=0.3.1',
     'azure-mgmt-privatedns~=0.1.0',
     'azure-mgmt-rdbms~=1.8',
@@ -108,7 +111,8 @@ DEPENDENCIES = [
     'azure-mgmt-recoveryservicesbackup~=0.1.2',
     'azure-mgmt-redis~=6.0',
     'azure-mgmt-relay~=0.1.0',
-    'azure-mgmt-reservations~=0.3.1',
+    # 'azure-mgmt-reservations~=0.3.1',
+    'azure-mgmt-reservations==0.3.1',  # TODO: Use requirements.txt instead of '==' #9781
     'azure-mgmt-resource~=2.1',
     'azure-mgmt-search~=2.0',
     'azure-mgmt-security~=0.1.0',
@@ -116,16 +120,16 @@ DEPENDENCIES = [
     'azure-mgmt-servicefabric~=0.2.0',
     'azure-mgmt-signalr~=0.1.1',
     'azure-mgmt-sql~=0.12',
-    'azure-mgmt-sqlvirtualmachine~=0.3.0',
-    'azure-mgmt-storage~=3.3',
+    'azure-mgmt-sqlvirtualmachine~=0.4.0',
+    'azure-mgmt-storage~=4.0',
     'azure-mgmt-trafficmanager~=0.51.0',
     'azure-mgmt-web~=0.42.0',
-    'azure-multiapi-storage~=0.2.3',
+    'azure-multiapi-storage~=0.2.4',
     'azure-storage-blob>=1.3.1,<2.0.0',
     'colorama~=0.4.1',
     'cryptography>=2.3.1,<3.0.0',
     'fabric~=2.4',
-    'knack~=0.6.2',
+    'knack~=0.6,>=0.6.3',
     'mock~=2.0',
     'paramiko>=2.0.8,<3.0.0',
     'prompt_toolkit~=1.0,>=1.0.15',
@@ -143,6 +147,8 @@ DEPENDENCIES = [
     'vsts-cd-manager~=1.0.0,>=1.0.2',
     'websocket-client~=0.56.0',
     'xmltodict~=0.12',
+    'javaproperties==0.5.1',
+    'jsondiff==1.2.0'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
@@ -168,5 +174,17 @@ setup(
     ],
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     install_requires=DEPENDENCIES,
+    package_data={
+        'azure.cli.core': ['auth_landing_pages/*.html'],
+        'azure.cli.command_modules.acr': ['*.json'],
+        'azure.cli.command_modules.botservice': ['*.json', '*.config'],
+        'azure.cli.command_modules.monitor.operations': ['autoscale-parameters-template.json'],
+        'azure.cli.command_modules.servicefabric': [
+            'template/windows/template.json',
+            'template/linux/template.json',
+            'template/windows/parameter.json',
+            'template/linux/parameter.json',
+        ],
+    },
     cmdclass=cmdclass
 )

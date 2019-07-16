@@ -408,33 +408,32 @@ def request_data_from_registry(http_method,
                 result = response.json()[result_index] if result_index else response.json()
                 next_link = response.headers['link'] if 'link' in response.headers else None
                 return result, next_link
-            elif response.status_code == 201 or response.status_code == 202:
+            if response.status_code == 201 or response.status_code == 202:
                 result = None
                 try:
                     result = response.json()[result_index] if result_index else response.json()
                 except ValueError as e:
                     logger.debug('Response is empty or is not a valid json. Exception: %s', str(e))
                 return result, None
-            elif response.status_code == 204:
+            if response.status_code == 204:
                 return None, None
-            elif response.status_code == 401:
+            if response.status_code == 401:
                 raise RegistryException(
                     parse_error_message('Authentication required.', response),
                     response.status_code)
-            elif response.status_code == 404:
+            if response.status_code == 404:
                 raise RegistryException(
                     parse_error_message('The requested data does not exist.', response),
                     response.status_code)
-            elif response.status_code == 405:
+            if response.status_code == 405:
                 raise RegistryException(
                     parse_error_message('This operation is not supported.', response),
                     response.status_code)
-            elif response.status_code == 409:
+            if response.status_code == 409:
                 raise RegistryException(
                     parse_error_message('Failed to request data due to a conflict.', response),
                     response.status_code)
-            else:
-                raise Exception(parse_error_message('Could not {} the requested data.'.format(http_method), response))
+            raise Exception(parse_error_message('Could not {} the requested data.'.format(http_method), response))
         except CLIError:
             raise
         except Exception as e:  # pylint: disable=broad-except

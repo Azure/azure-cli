@@ -76,7 +76,7 @@ def _validate_subnet(cli_ctx, subnet, vnet_name, resource_group_name):
 
     if subnet_is_id and not vnet_name:
         return subnet
-    elif subnet and not subnet_is_id and vnet_name:
+    if subnet and not subnet_is_id and vnet_name:
         from msrestazure.tools import resource_id
         from azure.cli.core.commands.client_factory import get_subscription_id
         return resource_id(
@@ -87,5 +87,4 @@ def _validate_subnet(cli_ctx, subnet, vnet_name, resource_group_name):
             name=vnet_name,
             child_type_1='subnets',
             child_name_1=subnet)
-    else:
-        raise CLIError('Usage error: [--subnet ID | --subnet NAME --vnet-name NAME]')
+    raise CLIError('Usage error: [--subnet ID | --subnet NAME --vnet-name NAME]')

@@ -43,12 +43,14 @@ class MultiAPIAdaptor(object):
             return client.create_or_update(role_definition_id=role_id, scope=scope, properties=role_configuration)
         return client.create_or_update(role_definition_id=role_id, scope=scope, role_definition=role_configuration)
 
-    def create_role_assignment(self, client, assignment_name, role_id, object_id, scope):
+    def create_role_assignment(self, client, assignment_name, role_id, object_id, scope, assignee_principal_type=None):
         RoleAssignmentCreateParameters = get_sdk(
             self.cli_ctx, ResourceType.MGMT_AUTHORIZATION,
             'RoleAssignmentProperties' if self.old_api else 'RoleAssignmentCreateParameters',
             mod='models', operation_group='role_assignments')
         parameters = RoleAssignmentCreateParameters(role_definition_id=role_id, principal_id=object_id)
+        if assignee_principal_type:
+            parameters.principal_type = assignee_principal_type
         return client.create(scope, assignment_name, parameters)
 
     def get_role_property(self, obj, property_name):

@@ -183,7 +183,7 @@ class KuduClient:  # pylint:disable=too-many-instance-attributes
             num_trials = num_trials + 1
             if res_dict.get('status', 0) == 3:
                 raise CLIError('Zip deployment failed.')
-            elif res_dict.get('status', 0) == 4:
+            if res_dict.get('status', 0) == 4:
                 break
             if 'progress' in res_dict:
                 self.__logger.debug(res_dict['progress'])

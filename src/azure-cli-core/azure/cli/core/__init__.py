@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from __future__ import print_function
 
-__version__ = "2.0.67"
+__version__ = "2.0.69"
 
 import os
 import sys
@@ -257,14 +257,22 @@ class MainCommandsLoader(CLICommandsLoader):
 
         return self.command_table
 
-    def load_arguments(self, command):
+    def load_arguments(self, command=None):
         from azure.cli.core.commands.parameters import resource_group_name_type, get_location_type, deployment_name_type
         from knack.arguments import ignore_type
 
-        command_loaders = self.cmd_to_loader_map.get(command, None)
+        # omit specific command to load everything
+        if command is None:
+            command_loaders = set()
+            for loaders in self.cmd_to_loader_map.values():
+                command_loaders = command_loaders.union(set(loaders))
+            logger.info('Applying %s command loaders...', len(command_loaders))
+        else:
+            command_loaders = self.cmd_to_loader_map.get(command, None)
 
         if command_loaders:
             for loader in command_loaders:
+
                 # register global args
                 with loader.argument_context('') as c:
                     c.argument('resource_group_name', resource_group_name_type)
@@ -272,9 +280,16 @@ class MainCommandsLoader(CLICommandsLoader):
                     c.argument('deployment_name', deployment_name_type)
                     c.argument('cmd', ignore_type)
 
-                loader.command_name = command
-                self.command_table[command].load_arguments()  # this loads the arguments via reflection
-                loader.load_arguments(command)  # this adds entries to the argument registries
+                if command is None:
+                    # load all arguments via reflection
+                    for cmd in loader.command_table.values():
+                        cmd.load_arguments()  # this loads the arguments via reflection
+                    loader.skip_applicability = True
+                    loader.load_arguments('')  # this adds entries to the argument registries
+                else:
+                    loader.command_name = command
+                    self.command_table[command].load_arguments()  # this loads the arguments via reflection
+                    loader.load_arguments(command)  # this adds entries to the argument registries
                 self.argument_registry.arguments.update(loader.argument_registry.arguments)
                 self.extra_argument_registry.update(loader.extra_argument_registry)
                 loader._update_command_definitions()  # pylint: disable=protected-access

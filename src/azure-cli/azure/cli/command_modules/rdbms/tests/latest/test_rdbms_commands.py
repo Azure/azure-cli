@@ -13,7 +13,8 @@ from azure.cli.testsdk import (
     JMESPathCheck,
     NoneCheck,
     ResourceGroupPreparer,
-    ScenarioTest)
+    ScenarioTest,
+    live_only)
 from azure.cli.testsdk.preparers import (
     AbstractPreparer,
     SingleValueReplacer)
@@ -531,13 +532,13 @@ class ReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-publ
         from time import sleep
         sleep(300)
         # test replica create
-        self.cmd('{} server replica create -g {} -n {} '
+        self.cmd('{} server replica create -g {} -n {} -l brazilsouth --sku-name GP_Gen5_4 '
                  '--source-server {}'
                  .format(database_engine, resource_group, replicas[0], result['id']),
                  checks=[
                      JMESPathCheck('name', replicas[0]),
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('sku.name', result['sku']['name']),
+                     JMESPathCheck('sku.name', 'GP_Gen5_4'),
                      JMESPathCheck('replicationRole', 'Replica'),
                      JMESPathCheck('masterServerId', result['id']),
                      JMESPathCheck('replicaCapacity', '0')])
@@ -561,7 +562,7 @@ class ReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-publ
                  checks=[
                      JMESPathCheck('name', replicas[0]),
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('sku.name', result['sku']['name']),
+                     JMESPathCheck('sku.name', 'GP_Gen5_4'),
                      JMESPathCheck('replicationRole', 'None'),
                      JMESPathCheck('masterServerId', ''),
                      JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
@@ -609,13 +610,13 @@ class ReplicationPostgreSqlMgmtScenarioTest(ScenarioTest):  # pylint: disable=to
 
     @ResourceGroupPreparer(parameter_name='resource_group')
     def test_postgrsql_basic_replica_mgmt(self, resource_group):
-        self._test_replica_mgmt(resource_group, 'B_Gen5_2', True)
+        self._test_replica_mgmt(resource_group, 'B_Gen5_2', 'B_Gen5_2', True)
 
     @ResourceGroupPreparer(parameter_name='resource_group')
     def test_postgrsql_general_purpose_replica_mgmt(self, resource_group):
-        self._test_replica_mgmt(resource_group, 'GP_Gen5_2', False)
+        self._test_replica_mgmt(resource_group, 'GP_Gen5_2', 'GP_Gen5_4', False)
 
-    def _test_replica_mgmt(self, resource_group, skuName, isBasicTier):
+    def _test_replica_mgmt(self, resource_group, skuName, testSkuName, isBasicTier):
         database_engine = 'postgres'
         server = self.create_random_name(SERVER_NAME_PREFIX, 32)
         replicas = [self.create_random_name('azuredbclirep1', SERVER_NAME_MAX_LENGTH),
@@ -649,13 +650,13 @@ class ReplicationPostgreSqlMgmtScenarioTest(ScenarioTest):  # pylint: disable=to
             sleep(120)
 
         # test replica create
-        self.cmd('{} server replica create -g {} -n {} '
+        self.cmd('{} server replica create -g {} -n {} -l brazilsouth --sku-name {} '
                  '--source-server {}'
-                 .format(database_engine, resource_group, replicas[0], result['id']),
+                 .format(database_engine, resource_group, replicas[0], testSkuName, result['id']),
                  checks=[
                      JMESPathCheck('name', replicas[0]),
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('sku.name', result['sku']['name']),
+                     JMESPathCheck('sku.name', testSkuName),
                      JMESPathCheck('replicationRole', 'Replica'),
                      JMESPathCheck('masterServerId', result['id']),
                      JMESPathCheck('replicaCapacity', '0')])
