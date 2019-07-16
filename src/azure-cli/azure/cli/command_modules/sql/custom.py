@@ -22,8 +22,6 @@ from azure.mgmt.sql.models import (
     FailoverGroupReadOnlyEndpoint,
     FailoverGroupReadWriteEndpoint,
     IdentityType,
-    ManagedInstanceEncryptionProtector,
-    ManagedInstanceKey,
     PartnerInfo,
     PerformanceLevelUnit,
     ReplicationRole,
@@ -2127,21 +2125,12 @@ def managed_instance_key_create(
 
     key_name = _get_server_key_name_from_uri(kid)
 
-    print (key_name)
-    print (kid)
-    print (ServerKeyType.azure_key_vault.value)
-
     return client.create_or_update(
         resource_group_name=resource_group_name,
         managed_instance_name=managed_instance_name,
         key_name=key_name,
         server_key_type=ServerKeyType.azure_key_vault.value,
         uri=kid
-        # TODO: delete
-        # parameters=ManagedInstanceKey(
-        #     server_key_type=ServerKeyType.azure_key_vault.value,
-        #     uri=kid
-        # )
     )
 
 
@@ -2203,8 +2192,8 @@ def managed_instance_encryption_protector_update(
     return client.create_or_update(
         resource_group_name=resource_group_name,
         managed_instance_name=managed_instance_name,
-            server_key_type=server_key_type,
-            server_key_name=key_name
+        server_key_type=server_key_type,
+        server_key_name=key_name
     )
 
 ###############################################
