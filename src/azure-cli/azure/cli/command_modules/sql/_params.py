@@ -164,13 +164,11 @@ managed_instance_param_type = CLIArgumentType(
     help='Name of the Azure SQL managed instance.')
 
 kid_param_type = CLIArgumentType(
-    'kid',
     options_list=['--kid', '-k'],
     help='The Azure Key Vault key identifier of the server key. An example key identifier is '
     '"https://YourVaultName.vault.azure.net/keys/YourKeyName/01234567890123456789012345678901"')
 
 server_key_type_param_type = CLIArgumentType(
-    'server_key_type',
     options_list=['--server-key-type', '-t'],
     help='The type of the server key',
     arg_type=get_enum_type(ServerKeyType))
