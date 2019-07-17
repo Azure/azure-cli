@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from __future__ import print_function
+
 import re
 import sys
 from knack.util import CLIError
@@ -129,10 +131,10 @@ def _get_cli_version():
     # working_set.by_key is a dictionary with component names as key
     cli_component_name = "azure-cli"
     if cli_component_name in working_set.by_key:
-        print('ACR CLI version: {}'.format(
+        print('Azure CLI version: {}'.format(
             working_set.by_key[cli_component_name].version))
     else:
-        print('ACR CLI version: not found', file=sys.stderr)
+        print('Azure CLI version: not found', file=sys.stderr)
 
     return 0
 
