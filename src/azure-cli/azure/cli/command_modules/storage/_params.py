@@ -376,11 +376,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.argument('{}_if_none_match'.format(item), arg_group='Pre-condition')
             c.argument('{}_account_name'.format(item), arg_group='Copy {}'.format(item), help='Storage account name of copy {}'.format(item))
             c.argument('{}_container_name'.format(item), arg_group='Copy {}'.format(item), help='Container name of copy {} storage account'.format(item))
-            c.argument('{}_blob_name'.format(item), arg_group='Copy {}'.format(item), help='Blob name of copy {} storage account'.format(item))  
-            c.argument('{}_share_name'.format(item), arg_group='Copy {}'.format(item), help='File share name of copy {} storage account'.format(item)) 
-        c.argument('recursive', action='store_true', help='look into sub-directories recursively when uploading from local file system.')
-        c.argument('put_md5', help='create an MD5 hash of each file, and save the hash as the Content-MD5 property of the destination blob/file.Only available when uploading.')
-        c.argument('check-md5', help='specifies how strictly MD5 hashes should be validated when downloading. Only available when downloading. Available options: NoCheck, LogOnly, FailIfDifferent, FailIfDifferentOrMissing. (default "FailIfDifferent")')
+            c.argument('{}_blob_name'.format(item), arg_group='Copy {}'.format(item), help='Blob name in blob container of copy {} storage account'.format(item))  
+            c.argument('{}_share_name'.format(item), arg_group='Copy {}'.format(item), help='File share name of copy {} storage account'.format(item))
+            c.argument('{}_file_path'.format(item), arg_group='Copy {}'.format(item), help='File path in file share of copy {} storage account'.format(item))  
+        c.argument('recursive', action='store_true', help='Look into sub-directories recursively when uploading from local file system.')
+        c.argument('put_md5', action='store_true', help='Create an MD5 hash of each file, and save the hash as the Content-MD5 property of the destination blob/file.Only available when uploading.')
+        c.argument('check-md5', help='Specify how strictly MD5 hashes should be validated when downloading. Only available when downloading. Available options: NoCheck, LogOnly, FailIfDifferent, FailIfDifferentOrMissing. (default "FailIfDifferent")')
 
     with self.argument_context('storage blob copy') as c:
         for item in ['destination', 'source']:
