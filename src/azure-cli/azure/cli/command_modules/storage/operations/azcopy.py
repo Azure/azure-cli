@@ -7,22 +7,33 @@ from __future__ import print_function
 from ..azcopy.util import AzCopy, blob_client_auth_for_azcopy, file_client_auth_for_azcopy, login_auth_for_azcopy
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.profiles import ResourceType
-from azure.cli.command_modules.storage._client_factory import (blob_data_service_factory,
-                                                               page_blob_service_factory, file_data_service_factory,
-                                                               queue_data_service_factory, table_data_service_factory)
+from azure.cli.command_modules.storage._client_factory import (blob_data_service_factory,file_data_service_factory)
 
 
 def storage_copy(cmd, client=None, source=None, destination=None, 
                     check_md5="FailIfDifferent", put_md5=None, recursive=None, 
-                    metadata=None, timeout=None, 
+                    metadata=None, timeout=None,
                     source_if_modified_since=None, source_if_unmodified_since=None, source_if_match=None, source_if_none_match=None, 
                     destination_if_modified_since=None, destination_if_unmodified_since=None, destination_if_match=None, destination_if_none_match=None,
                     source_account_name=None, source_container_name=None, source_blob_name=None, source_share_name=None,
-                    destination_account_name=None, destination_container_name=None, destination_blob_name=None, destination_share_name=None) :
-    def get_url_with_sas(source):
+                    destination_account_name=None, destination_container_name=None, destination_blob_name=None, destination_share_name=None):
+    def get_url_with_sas(url=None, account_name=None, container_name=None, blob_name=None, file_path=None):
         import re
+        import os
         from azure.cli.command_modules.storage._validators import _query_account_key
         from azure.cli.command_modules.storage.azcopy.util import _generate_sas_token
+        if url is not None:
+            source = url
+        elif account_name and container_name and blob_name:
+            client = blob_data_service_factory(cmd.cli_ctx, {'account_name': account_name})
+            source = client.make_blob_url(container_name, blob_name)
+        elif account_name and container_name and file_path:
+            account_key = _query_account_key(cmd.cli_ctx, account_name)
+            client = file_data_service_factory(cmd.cli_ctx, {'account_name': account_name, 'account_key': account_key})
+            dir_name, file_name = os.path.split(file_path) if file_path else (None, '')
+            dir_name = None if dir_name in ('', '.') else dir_name
+            source = client.make_file_url(container_name, dir_name, file_name)
+
         storage_pattern = re.compile(r'https://(.*?)\.(blob|dfs|file).core.windows.net')
         result = re.findall(storage_pattern, source)
         if result: # Azure storage account
@@ -48,16 +59,16 @@ def storage_copy(cmd, client=None, source=None, destination=None,
         else:
             return source
     # Figure out source and destination type
-    if source is not None:
-        full_source = get_url_with_sas(source)
-    if destination is not None:
-        full_destination = get_url_with_sas(destination)
+    full_source = get_url_with_sas(source, source_account_name, source_container_name, source_blob_name, source_share_name)
+    full_destination = get_url_with_sas(destination, destination_account_name, destination_container_name, destination_blob_name, destination_share_name)
+
     azcopy = AzCopy()
     flags = []
     if recursive is not None:
         flags.append('--recursive')
     if put_md5 is not None:
         flags.append('--put-md5')
+
     azcopy.copy(full_source, full_destination, flags=flags)
 
 def storage_blob_remove(cmd, client, target, recursive=None):
