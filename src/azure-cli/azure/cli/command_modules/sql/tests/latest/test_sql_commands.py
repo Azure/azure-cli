@@ -2684,7 +2684,9 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
 
 
 class SqlManagedInstanceTransparentDataEncryptionScenarioTest(ScenarioTest):
-
+    
+    # Remove when issue #9393 is fixed.
+    @live_only()
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
     def test_sql_mi_tdebyok(self, resource_group, resource_group_location):
 
