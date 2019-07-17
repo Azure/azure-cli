@@ -1176,6 +1176,41 @@ def load_arguments(self, _):
                    'for use with key management services like Azure KeyVault. '
                    'If identity is already assigned - do nothing.')
 
+    #####
+    #           sql managed instance key
+    #####
+    with self.argument_context('sql mi key') as c:
+        c.argument('managed_instance_name',
+                   arg_type=managed_instance_param_type)
+
+        c.argument('key_name',
+                   options_list=['--name', '-n'])
+
+        c.argument('kid',
+                   options_list=['--kid', '-k'],
+                   required=True,
+                   help='The Azure Key Vault key identifier of the server key. An example key identifier is '
+                   '"https://YourVaultName.vault.azure.net/keys/YourKeyName/01234567890123456789012345678901"')
+
+    #####
+    #           sql server tde-key
+    #####
+    with self.argument_context('sql mi tde-key') as c:
+        c.argument('managed_instance_name',
+                   arg_type=managed_instance_param_type)
+
+    with self.argument_context('sql mi tde-key set') as c:
+        c.argument('kid',
+                   options_list=['--kid', '-k'],
+                   help='The Azure Key Vault key identifier of the server key to be made encryption protector.'
+                   'An example key identifier is '
+                   '"https://YourVaultName.vault.azure.net/keys/YourKeyName/01234567890123456789012345678901"')
+
+        c.argument('server_key_type',
+                   options_list=['--server-key-type', '-t'],
+                   help='The type of the server key',
+                   arg_type=get_enum_type(ServerKeyType))
+
     ###############################################
     #                sql managed db               #
     ###############################################

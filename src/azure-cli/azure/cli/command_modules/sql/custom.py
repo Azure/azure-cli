@@ -2108,6 +2108,94 @@ def managed_instance_update(
 
     return instance
 
+
+#####
+#           sql managed instance key
+#####
+
+
+def managed_instance_key_create(
+        client,
+        resource_group_name,
+        managed_instance_name,
+        kid=None):
+    '''
+    Creates a managed instance key.
+    '''
+
+    key_name = _get_server_key_name_from_uri(kid)
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        managed_instance_name=managed_instance_name,
+        key_name=key_name,
+        server_key_type=ServerKeyType.azure_key_vault.value,
+        uri=kid
+    )
+
+
+def managed_instance_key_get(
+        client,
+        resource_group_name,
+        managed_instance_name,
+        kid):
+    '''
+    Gets a managed instance key.
+    '''
+
+    key_name = _get_server_key_name_from_uri(kid)
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        managed_instance_name=managed_instance_name,
+        key_name=key_name)
+
+
+def managed_instance_key_delete(
+        client,
+        resource_group_name,
+        managed_instance_name,
+        kid):
+    '''
+    Deletes a managed instance key.
+    '''
+
+    key_name = _get_server_key_name_from_uri(kid)
+
+    return client.delete(
+        resource_group_name=resource_group_name,
+        managed_instance_name=managed_instance_name,
+        key_name=key_name)
+
+#####
+#           sql managed instance encryption-protector
+#####
+
+
+def managed_instance_encryption_protector_update(
+        client,
+        resource_group_name,
+        managed_instance_name,
+        server_key_type,
+        kid=None):
+    '''
+    Updates a server encryption protector.
+    '''
+
+    if server_key_type == ServerKeyType.service_managed.value:
+        key_name = 'ServiceManaged'
+    else:
+        if kid is None:
+            raise CLIError('A uri must be provided if the server_key_type is AzureKeyVault.')
+        key_name = _get_server_key_name_from_uri(kid)
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        managed_instance_name=managed_instance_name,
+        server_key_type=server_key_type,
+        server_key_name=key_name
+    )
+
 ###############################################
 #                sql managed db               #
 ###############################################
