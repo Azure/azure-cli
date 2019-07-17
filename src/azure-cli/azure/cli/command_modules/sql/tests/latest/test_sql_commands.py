@@ -2684,7 +2684,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
 
 
 class SqlManagedInstanceTransparentDataEncryptionScenarioTest(ScenarioTest):
-    
+
     # Remove when issue #9393 is fixed.
     @live_only()
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
