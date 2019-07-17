@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**Network**
+
+* Fixed issue #9861. Remove `--ids` from the parameters.
+
 **ACR**
 
 * Fixed issue #9952 (a regression in the `acr pack build` command).
