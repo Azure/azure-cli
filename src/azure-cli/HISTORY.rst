@@ -104,6 +104,7 @@ Release History
 
 **NetAppFiles**
 
+* Volume create/update: Added new argument --protocol-types
 * Initial version relating to the R4 version of the RP.
 
 **Profile**
