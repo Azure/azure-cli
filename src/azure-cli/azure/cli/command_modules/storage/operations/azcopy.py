@@ -15,24 +15,29 @@ def storage_copy(cmd, client=None, source=None, destination=None,
                     metadata=None, timeout=None,
                     source_if_modified_since=None, source_if_unmodified_since=None, source_if_match=None, source_if_none_match=None, 
                     destination_if_modified_since=None, destination_if_unmodified_since=None, destination_if_match=None, destination_if_none_match=None,
-                    source_account_name=None, source_container_name=None, source_blob_name=None, source_share_name=None,
-                    destination_account_name=None, destination_container_name=None, destination_blob_name=None, destination_share_name=None):
-    def get_url_with_sas(url=None, account_name=None, container_name=None, blob_name=None, file_path=None):
+                    source_account_name=None, source_container_name=None, source_blob_name=None, source_share_name=None, source_file_path=None,
+                    destination_account_name=None, destination_container_name=None, destination_blob_name=None, destination_share_name=None, destination_file_path=None):
+    def get_url_with_sas(url=None, account_name=None, container_name=None, blob_name=None, share_name=None, file_path=None):
         import re
         import os
         from azure.cli.command_modules.storage._validators import _query_account_key
         from azure.cli.command_modules.storage.azcopy.util import _generate_sas_token
         if url is not None:
             source = url
-        elif account_name and container_name and blob_name:
-            client = blob_data_service_factory(cmd.cli_ctx, {'account_name': account_name})
-            source = client.make_blob_url(container_name, blob_name)
-        elif account_name and container_name and file_path:
-            account_key = _query_account_key(cmd.cli_ctx, account_name)
-            client = file_data_service_factory(cmd.cli_ctx, {'account_name': account_name, 'account_key': account_key})
-            dir_name, file_name = os.path.split(file_path) if file_path else (None, '')
-            dir_name = None if dir_name in ('', '.') else dir_name
-            source = client.make_file_url(container_name, dir_name, file_name)
+        elif account_name:
+            if container_name:
+                client = blob_data_service_factory(cmd.cli_ctx, {'account_name': account_name})
+                if blob_name is None:
+                    blob_name = ''
+                source = client.make_blob_url(container_name, blob_name)
+            elif share_name:
+                account_key = _query_account_key(cmd.cli_ctx, account_name)
+                client = file_data_service_factory(cmd.cli_ctx, {'account_name': account_name, 'account_key': account_key})
+                dir_name, file_name = os.path.split(file_path) if file_path else (None, '')
+                dir_name = None if dir_name in ('', '.') else dir_name
+                source = client.make_file_url(share_name, dir_name, file_name)
+        else:
+            raise ValueError('Not valid file')
 
         storage_pattern = re.compile(r'https://(.*?)\.(blob|dfs|file).core.windows.net')
         result = re.findall(storage_pattern, source)
@@ -59,8 +64,8 @@ def storage_copy(cmd, client=None, source=None, destination=None,
         else:
             return source
     # Figure out source and destination type
-    full_source = get_url_with_sas(source, source_account_name, source_container_name, source_blob_name, source_share_name)
-    full_destination = get_url_with_sas(destination, destination_account_name, destination_container_name, destination_blob_name, destination_share_name)
+    full_source = get_url_with_sas(source, source_account_name, source_container_name, source_blob_name, source_share_name, source_file_path)
+    full_destination = get_url_with_sas(destination, destination_account_name, destination_container_name, destination_blob_name, destination_share_name, destination_file_path)
 
     azcopy = AzCopy()
     flags = []
