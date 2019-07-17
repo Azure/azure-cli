@@ -300,3 +300,9 @@ def load_command_table(self, _):
 
     with self.command_group('postgres') as g:
         g.custom_command('get-access-token', '_get_access_token_for_service')
+
+    with self.command_group('mariadb') as g:
+        g.custom_command('get-access-token', '_get_access_token_for_service')
+
+    with self.command_group('mysql') as g:
+        g.custom_command('get-access-token', '_get_access_token_for_service')
