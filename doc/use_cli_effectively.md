@@ -151,5 +151,3 @@ If you are using az on a build machine, and multiple jobs can be run in parallel
 |--------------------------------|------------------------|
 | **AZURE_CONFIG_DIR**           | Global config directory for config files, logs and telemetry. If unspecified, defaults to `~/.azure`. |
 | **AZURE_EXTENSION_DIR**        | Extensions' installation directory. If unspecified, defaults to cliextensions directory within the global config directory. |
-| **AZURE_TEST_RUN_LIVE**        | If set to a truthy value (e.g. "True") runs tests live. |
-| **AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME, etc.**| Test preparer dev settings allow you to use existing resources when recording tests. See `/src/azure-cli-testsdk/azure/cli/testsdk/preparers.py` for more env vars and info. |
