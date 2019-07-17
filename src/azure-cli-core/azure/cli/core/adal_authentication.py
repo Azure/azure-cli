@@ -19,8 +19,7 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
         self._token_retriever = token_retriever
         self._external_tenant_token_retriever = external_tenant_token_retriever
 
-    def signed_session(self, session=None):  # pylint: disable=arguments-differ
-        session = session or super(AdalAuthentication, self).signed_session()
+    def fetch_tokens(self):
         external_tenant_tokens = None
         try:
             scheme, token, _ = self._token_retriever()
@@ -46,6 +45,12 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
             raise CLIError(err)
         except requests.exceptions.ConnectionError as err:
             raise CLIError('Please ensure you have network connection. Error detail: ' + str(err))
+
+        return (scheme, token, external_tenant_tokens)
+
+    def signed_session(self, session=None):  # pylint: disable=arguments-differ
+        session = session or super(AdalAuthentication, self).signed_session()
+        scheme, token, external_tenant_tokens = self.fetch_tokens()
 
         header = "{} {}".format(scheme, token)
         session.headers['Authorization'] = header

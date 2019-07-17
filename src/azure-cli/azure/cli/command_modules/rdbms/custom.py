@@ -7,6 +7,7 @@
 
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
+from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.mgmt.rdbms.mysql.operations.servers_operations import ServersOperations as MySqlServersOperations
@@ -425,3 +426,12 @@ def _server_list_custom_func(client, resource_group_name=None):
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
     return client.list()
+
+# Custom function to retrieve access token
+def _get_access_token_for_service(cmd):
+    profile = Profile(cli_ctx=cmd.cli_ctx)
+    #auth, _, _ = profile.get_login_credentials()
+    auth, _, _ = profile.get_login_credentials(
+            resource=cmd.cli_ctx.cloud.endpoints.ossrdbms_resource_id)
+    _, token, _ = auth.fetch_tokens()
+    print(token)
