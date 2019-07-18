@@ -77,7 +77,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
     @StorageAccountPreparer(parameter_name='account_1')
     @StorageAccountPreparer(parameter_name='account_2')
     @StorageTestFilesPreparer()
-    def test_storage_blob_copy(self, account_1, account_2, test_dir):
+    def test_storage_blob_copy_url(self, account_1, account_2, test_dir):
         container_1 = self.create_container(account_1)
         container_2 = self.create_container(account_2)
         account_url_1 = 'https://{}.blob.core.windows.net'.format(account_1)
@@ -86,5 +86,45 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         container_url_2 = '{}/{}'.format(account_url_2, container_2)
         # Upload single file
         self.cmd('storage copy -s "{}" -d "{}"'.format(
-            test_dir/readme, container_url_1))
-       
+            'aaa', container_url_1))
+        # Upload an entire directory
+        self.cmd('storage copy -s "{}" -d "{}" --recursive'.format(
+            test_dir, container_url_1))
+        # Upload a set of files using wild cards
+        self.cmd('storage copy -s "{}" -d "{}" --recursive'.format(
+            test_dir/file*, container_url_1))
+        # Download a single file 
+
+        # Download an entire directory
+
+        # Download a set of files
+
+        # Copy a single blob to another blob
+
+        # Copy an entire directory from blob virtual directory to another blob virtual directory 
+
+        # Copy an entire account data from blob account to another blob account
+
+        # Copy a single object from S3 with access key to blob
+
+        # Copy an entire directory from S3 with access key to blob virtual directory
+
+        # Copy all buckets in S3 service with access key to blob account
+
+        # Copy all buckets in a S3 region with access key to blob account
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='account_1')
+    @StorageAccountPreparer(parameter_name='account_2')
+    @StorageTestFilesPreparer()
+    def test_storage_blob_copy_account(self, account_1, account_2, test_dir):
+        container_1 = self.create_container(account_1)
+        container_2 = self.create_container(account_2)
+        account_url_1 = 'https://{}.blob.core.windows.net'.format(account_1)
+        account_url_2 = 'https://{}.blob.core.windows.net'.format(account_2)
+        container_url_1 = '{}/{}'.format(account_url_1, container_1)
+        container_url_2 = '{}/{}'.format(account_url_2, container_2)
+        # Upload single file
+        self.cmd('storage copy -s "{}" -d "{}"'.format(
+            'aaa', container_url_1), checks=JMESPathCheck('length(@)', 30))
+          

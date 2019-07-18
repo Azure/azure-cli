@@ -24,8 +24,8 @@ def storage_copy(cmd, client=None, source=None, destination=None,
         from azure.cli.command_modules.storage.azcopy.util import _generate_sas_token
         if url is not None:
             source = url
-            if source.startswith('https://s3.amazonaws.com'):
-                return source
+            storage_pattern = re.compile(r'https://(.*?)\.(blob|dfs|file).core.windows.net')
+            result = re.findall(storage_pattern, source)
         elif account_name:
             if container_name:
                 client = blob_data_service_factory(cmd.cli_ctx, {'account_name': account_name})
@@ -41,8 +41,6 @@ def storage_copy(cmd, client=None, source=None, destination=None,
         else:
             raise ValueError('Not valid file')
 
-        storage_pattern = re.compile(r'https://(.*?)\.(blob|dfs|file).core.windows.net')
-        result = re.findall(storage_pattern, source)
         if result: # Azure storage account
             storage_info = result[0]
             account_name = storage_info[0]
