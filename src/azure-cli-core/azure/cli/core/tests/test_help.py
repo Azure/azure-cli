@@ -109,7 +109,7 @@ def create_invoker_and_load_cmds_and_args(cli_ctx):
     invoker.parser.load_command_table(invoker.commands_loader)
 
 
-# TODO update this CLASS to properly load all help...                                                                       .
+# TODO update this CLASS to properly load all help....
 class HelpTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -546,17 +546,6 @@ class TestHelpSupportedProfiles(unittest.TestCase):
 
         del ex_dict['supported-profiles']
         del ex_dict['unsupported-profiles']
-
-        ex_dict['min_profile'] = "2017-03-09-profile"
-        # Assert that an help authoring exception is raised when min_profile is used.
-        with self.assertRaises(HelpAuthoringException):
-            mock_help_file._should_include_example(ex_dict)
-
-        del ex_dict['min_profile']
-        ex_dict['max_profile'] = "latest"
-        # Assert that an help authoring exception is raised when max_profile is used.
-        with self.assertRaises(HelpAuthoringException):
-            mock_help_file._should_include_example(ex_dict)
 
     def test_example_supported_profiles(self):
         from azure.cli.core._help import CliHelpFile

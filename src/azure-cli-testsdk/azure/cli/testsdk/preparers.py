@@ -24,6 +24,10 @@ class NoTrafficRecordingPreparer(AbstractPreparer):
         super(NoTrafficRecordingPreparer, self).__init__(disable_recording=True, *args, **kwargs)
 
     def live_only_execute(self, cli_ctx, command, expect_failure=False):
+        # call AbstractPreparer.moniker to make resource counts and self.resource_moniker consistent between live and
+        # play-back. see SingleValueReplacer.process_request and ScenarioTest.create_random_name
+        _ = self.moniker
+
         try:
             if self.test_class_instance.in_recording:
                 return self._raw_execute(cli_ctx, command, expect_failure)
