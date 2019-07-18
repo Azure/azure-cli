@@ -6,6 +6,7 @@ Release History
 **ACR**
 
 * Fixed issue #9952 (a regression in the `acr pack build` command).
+* Removed the default builder image name in `acr pack build`.
 
 **RBAC**
 

@@ -17,7 +17,7 @@ TASK_RESOURCE_ID_TEMPLATE = '/subscriptions/{sub_id}/resourceGroups/{rg}/provide
 
 ACR_TASK_YAML_DEFAULT_NAME = 'acb.yaml'
 
-ORYX_PACK_BUILDER_IMAGE = 'mcr.microsoft.com/oryx/pack-builder:stable'
+ACR_CACHED_BUILDER_IMAGES = ('cloudfoundry/cnb:bionic',)
 
 
 def get_classic_sku(cmd):
