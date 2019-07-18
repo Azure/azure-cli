@@ -37,7 +37,7 @@ class TestNetworkUnitTests(unittest.TestCase):
         self.assertEqual(_get_nic_ip_config(nic, 'test2').value, '2')
 
     def test_network_upsert(self):
-        from azure.cli.command_modules.network.custom import _upsert
+        from azure.cli.core.commands import upsert_to_collection
 
         obj1 = mock.MagicMock()
         obj1.key = 'object1'
@@ -50,7 +50,7 @@ class TestNetworkUnitTests(unittest.TestCase):
         # 1 - verify upsert to a null collection
         parent_with_null_collection = mock.MagicMock()
         parent_with_null_collection.collection = None
-        _upsert(parent_with_null_collection, 'collection', obj1, 'key')
+        upsert_to_collection(parent_with_null_collection, 'collection', obj1, 'key')
         result = parent_with_null_collection.collection
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0].value, 'cat')
@@ -58,20 +58,20 @@ class TestNetworkUnitTests(unittest.TestCase):
         # 2 - verify upsert to an empty collection
         parent_with_empty_collection = mock.MagicMock()
         parent_with_empty_collection.collection = []
-        _upsert(parent_with_empty_collection, 'collection', obj1, 'key')
+        upsert_to_collection(parent_with_empty_collection, 'collection', obj1, 'key')
         result = parent_with_empty_collection.collection
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0].value, 'cat')
 
         # 3 - verify can add more than one
-        _upsert(parent_with_empty_collection, 'collection', obj2, 'key')
+        upsert_to_collection(parent_with_empty_collection, 'collection', obj2, 'key')
         result = parent_with_empty_collection.collection
         self.assertEqual(len(result), 2)
         self.assertEqual(result[1].value, 'dog')
 
         # 4 - verify update to existing collection
         obj2.value = 'noodle'
-        _upsert(parent_with_empty_collection, 'collection', obj2, 'key')
+        upsert_to_collection(parent_with_empty_collection, 'collection', obj2, 'key')
         result = parent_with_empty_collection.collection
         self.assertEqual(len(result), 2)
         self.assertEqual(result[1].value, 'noodle')

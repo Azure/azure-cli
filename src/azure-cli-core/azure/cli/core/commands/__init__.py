@@ -435,6 +435,31 @@ def cached_put(cmd_obj, operation, parameters, *args, **kwargs):
     return result
 
 
+def upsert_to_collection(parent, collection_name, obj_to_add, key_name, warn=True):
+
+    if not getattr(parent, collection_name, None):
+        setattr(parent, collection_name, [])
+    collection = getattr(parent, collection_name, None)
+
+    value = getattr(obj_to_add, key_name)
+    if value is None:
+        raise CLIError(
+            "Unable to resolve a value for key '{}' with which to match.".format(key_name))
+    match = next((x for x in collection if getattr(x, key_name, None) == value), None)
+    if match:
+        if warn:
+            logger.warning("Item '%s' already exists. Replacing with new values.", value)
+        collection.remove(match)
+    collection.append(obj_to_add)
+
+
+def get_property(items, name):
+    result = next((x for x in items if x.name.lower() == name.lower()), None)
+    if not result:
+        raise CLIError("Property '{}' does not exist".format(name))
+    return result
+
+
 # pylint: disable=too-few-public-methods
 class AzCliCommandInvoker(CommandInvoker):
 
