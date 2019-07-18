@@ -20,6 +20,12 @@ Release History
 
 * New Cmdlets for Management.Sql that supports Managed instance key and managed instance TDE protector management
 
+**VM**
+
+* list-skus: use newer api-version to output zone details
+* vmss create: restore client end defaults to False for "--single-placement-group"
+* snapshot/disk create: expose ZRS storage skus   
+
 2.0.69
 ++++++
 
