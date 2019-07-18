@@ -77,31 +77,6 @@ demo32111vm             Windows
 dcos-master-39DB807E-0  Linux
 ```
 
-#### Creating a VM
-The following block creates a new resource group in the 'westus' region, then creates a new Ubuntu VM.  We automatically provide a series of smart defaults, such as setting up SSH with your  `~/.ssh/id_rsa.pub` key.  For more details, try `az vm create -h`.
-
-```bash
-$ az group create -l westus -n MyGroup
-Name     Location
--------  ----------
-MyGroup  westus
-
-$ az vm create -g MyGroup -n MyVM --image ubuntults
-MacAddress         ResourceGroup    PublicIpAddress    PrivateIpAddress
------------------  ---------------  -----------------  ------------------
-00-0D-3A-30-B2-D7  MyGroup          52.160.111.118     10.0.0.4
-
-$ ssh 52.160.111.118
-Welcome to Ubuntu 14.04.4 LTS (GNU/Linux 3.19.0-65-generic x86_64)
-
-System information as of Thu Sep 15 20:47:31 UTC 2016
-
-System load: 0.39              Memory usage: 2%   Processes:       80
-Usage of /:  39.6% of 1.94GB   Swap usage:   0%   Users logged in: 0
-
-jasonsha@MyVM:~$
-```
-
 #### Exit Codes
 For scripting purposes, we output certain exit codes for differing scenarios.
 
@@ -159,8 +134,12 @@ brew install $(curl -Ls -o /dev/null -w %{url_effective} https://aka.ms/InstallA
 
 
 ## Developer Setup
-If you would like to setup a development environment and contribute to the CLI, see
-[Configuring Your Machine](https://github.com/Azure/azure-cli/blob/dev/doc/configuring_your_machine.md).
+
+If you would like to setup a development environment and contribute to the CLI, see:
+
+[Configuring Your Machine](https://github.com/Azure/azure-cli/blob/dev/doc/configuring_your_machine.md)
+
+[Authoring Command Modules](https://github.com/Azure/azure-cli/tree/dev/doc/authoring_command_modules)
 
 ## Contribute Code
 
@@ -170,7 +149,3 @@ For more information see the [Code of Conduct FAQ](https://opensource.microsoft.
 
 If you would like to become an active contributor to this project please
 follow the instructions provided in [Microsoft Azure Projects Contribution Guidelines](http://azure.github.io/guidelines.html).
-
-## Automation
-
-- [How to write scenario based VCR test](https://github.com/Azure/azure-cli/blob/dev/doc/authoring_tests.md)
