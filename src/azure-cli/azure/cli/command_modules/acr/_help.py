@@ -299,7 +299,7 @@ short-summary: Queues a quick build task that builds an app and pushes it into a
 examples:
   - name: Queue a build for the current directory with the default Oryx-based buildpack.
     text: >
-        az acr pack build -r MyRegistry -t {{.Run.Registry}}/node-app:{{.Run.ID}} .
+        az acr pack build -r MyRegistry -t {{.Run.Registry}}/node-app:{{.Run.ID}} --builder cloudfoundry/cnb:bionic .
 """
 
 helps['acr replication'] = """
