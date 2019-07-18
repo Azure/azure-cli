@@ -33,7 +33,7 @@ def get_current_profile():
 
 def main(args):
     if get_extensions():
-        raise SystemExit("Extensions are installed. Please uninstall them to generate core CLI docs.")
+        raise SystemExit("Extensions are installed. Please uninstall them before re-running this script.")
 
     output_dir = args.output_dir if args.output_dir else "_build"
     output_dir = os.path.abspath(output_dir)
