@@ -73,13 +73,13 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 0))
 
-    @StorageAccountPreparer(parameter_name='storageforcli')
-    @StorageAccountPreparer(parameter_name='clicreate')
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='account_1')
+    @StorageAccountPreparer(parameter_name='account_2')
     @StorageTestFilesPreparer()
-    def test_storage_copy_sync(self, storageforcli, clicreate, test_dir):
-        storage_account, _ = storage_account_info
-        container = self.create_container(storage_account_info)
-
+    def test_storage_copy(self, account_1, account_2, test_dir):
+        container_1 = self.create_container(account_1)
+        container_2 = self.create_container(account_2)
         # sync directory
         self.cmd('storage blob sync -s "{}" -c {} --account-name {}'.format(
             test_dir, container, storage_account))
