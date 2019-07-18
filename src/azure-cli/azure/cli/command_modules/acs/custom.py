@@ -2065,25 +2065,15 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
         "chinanorth2": "chinaeast2"
     }
 
-    rg_location = _get_rg_location(cmd.cli_ctx, resource_group_name)
-    default_region_name = "eastus"
-    default_region_code = "EUS"
-    workspace_region = default_region_name
-    workspace_region_code = default_region_code
+    rg_location = _get_rg_location(cmd.cli_ctx, resource_group_name)    
     cloud_name = cmd.cli_ctx.cloud.name
 
     if cloud_name.lower() == 'azurecloud':
-        workspace_region = AzureCloudRegionToOmsRegionMap[
-            rg_location] if AzureCloudRegionToOmsRegionMap[rg_location] else default_region_name
-        workspace_region_code = AzureCloudLocationToOmsRegionCodeMap[
-            workspace_region] if AzureCloudLocationToOmsRegionCodeMap[workspace_region] else default_region_code
-    elif cloud_name.lower() == 'azurechinacloud':
-        default_region_name = "chinaeast2"
-        default_region_code = "EAST2"
-        workspace_region = AzureChinaRegionToOmsRegionMap[
-            rg_location] if AzureChinaRegionToOmsRegionMap[rg_location] else default_region_name
-        workspace_region_code = AzureChinaLocationToOmsRegionCodeMap[
-            workspace_region] if AzureChinaLocationToOmsRegionCodeMap[workspace_region] else default_region_code
+        workspace_region = AzureCloudRegionToOmsRegionMap.get(rg_location, "eastus")
+        workspace_region_code = AzureCloudLocationToOmsRegionCodeMap.get(workspace_region, "EUS")
+    elif cloud_name.lower() == 'azurechinacloud':        
+        workspace_region = AzureChinaRegionToOmsRegionMap.get(rg_location, "chinaeast2")
+        workspace_region_code = AzureChinaLocationToOmsRegionCodeMap.get(workspace_region, "EAST2")
     else:
         logger.error("AKS Monitoring addon not supported in cloud : %s", cloud_name)
 
