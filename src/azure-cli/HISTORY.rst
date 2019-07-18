@@ -3,13 +3,13 @@
 Release History
 ===============
 
-**Network**
-
-* Fixed issue #9861. Remove `--ids` from the parameters.
-
 **ACR**
 
 * Fixed issue #9952 (a regression in the `acr pack build` command).
+
+**Network**
+
+* network nic ip-config add: Fixes #9861 where --ids was inadvertently exposed but did not work.
 
 **RBAC**
 
