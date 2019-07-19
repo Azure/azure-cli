@@ -7,6 +7,9 @@ Release History
 
 * Fixed issue #9952 (a regression in the `acr pack build` command).
 
+**Appservice**
+* az webapp config ssl support to show a message if a resource is not found
+
 **Network**
 
 * network nic ip-config add: Fixes #9861 where --ids was inadvertently exposed but did not work.
