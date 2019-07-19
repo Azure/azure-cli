@@ -25,15 +25,18 @@ fabric_name = "Azure"
 
 # Mapping of workload type
 workload_type_map = {'MSSQL': 'SQLDataBase',
-                     'SAPHANA': 'SAPHanaDatabase'}
+                     'SAPHANA': 'SAPHanaDatabase',
+                     'SAPASE': 'SAPAseDatabase'}
 
 # Mapping of module name
 module_map = {'sqldatabase': 'sql_database',
-              'saphanadatabase': 'sap_hana_database'}
+              'saphanadatabase': 'sap_hana_database',
+              'sapasedatabase': 'sap_ase_database'}
 
 # Mapping of attribute name
 attr_map = {'sqldatabase': 'SQLDatabase',
-            'saphanadatabase': 'SAPHanaDatabase'}
+            'saphanadatabase': 'SAPHanaDatabase',
+            'sapasedatabase': 'SAPAseDatabase'}
 
 
 def show_wl_policy(client, resource_group_name, vault_name, name):
@@ -156,6 +159,13 @@ def unregister_wl_container(cmd, client, vault_name, resource_group_name, contai
 
 
 def show_wl_container(cmd, name, resource_group_name, vault_name, container_type, status="Registered"):
+    if not cust_help._is_native_name(name):
+        raise CLIError(
+            """
+            Container name passed cannot be a friendly name.
+            Please pass a native container name.
+            """)
+
     return protection_containers_cf(cmd.cli_ctx).get(vault_name, resource_group_name, fabric_name, name)
 
 
@@ -164,6 +174,13 @@ def list_wl_containers(client, resource_group_name, vault_name, container_type, 
 
 
 def show_wl_item(cmd, resource_group_name, vault_name, container_name, name):
+    if not cust_help._is_native_name(container_name):
+        raise CLIError(
+            """
+            Container name passed cannot be a friendly name.
+            Please pass a native container name.
+            """)
+
     return protected_items_cf(cmd.cli_ctx).get(vault_name, resource_group_name, fabric_name, container_name, name)
 
 
@@ -359,6 +376,7 @@ def list_wl_recovery_points(cmd, client, resource_group_name, vault_name, contai
         cust_help._is_range_valid(query_start_date, query_end_date)
 
     filter_string = cust_help._get_filter_string({
+        'restorePointQueryType': 'Full',
         'startDate': query_start_date,
         'endDate': query_end_date
         })
@@ -394,8 +412,8 @@ def enable_protection_for_azure_wl(cmd, client, resource_group_name, vault_name,
     policy_id = policy_object.id
 
     # Dynamically instantiating class based on item type
-    module = import_module("azure.mgmt.recoveryservicesbackup.models.azure_vm_workload_"+module_map[protectable_item_type.lower()]+"_protected_item")
-    class_ = getattr(module, "AzureVmWorkload"+attr_map[protectable_item_type.lower()]+"ProtectedItem")
+    module_ = import_module("azure.mgmt.recoveryservicesbackup.models.azure_vm_workload_"+module_map[protectable_item_type.lower()]+"_protected_item")
+    class_ = getattr(module_, "AzureVmWorkload"+attr_map[protectable_item_type.lower()]+"ProtectedItem")
 
     # Construct enable protection request object
     properties = class_(backup_management_type='AzureWorkload', policy_id=policy_id, workload_type=protectable_item_type)
@@ -493,8 +511,8 @@ def disable_protection(cmd, client, resource_group_name, vault_name, container_n
         return cust_help._track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
     # Dynamically instantiating class based on item type
-    module = import_module("azure.mgmt.recoveryservicesbackup.models.azure_vm_workload_"+module_map[backup_item_type.lower()]+"_protected_item")
-    class_ = getattr(module, "AzureVmWorkload"+attr_map[backup_item_type.lower()]+"ProtectedItem")
+    module_ = import_module("azure.mgmt.recoveryservicesbackup.models.azure_vm_workload_"+module_map[backup_item_type.lower()]+"_protected_item")
+    class_ = getattr(module_, "AzureVmWorkload"+attr_map[backup_item_type.lower()]+"ProtectedItem")
 
     properties = class_(protection_state='ProtectionStopped', policy_id='')
     param = ProtectedItemResource(properties=properties)
@@ -595,8 +613,8 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
         item_type = item_type + 'PointInTime'
 
     # Dynamically instantiating class based on item type
-    module = import_module("azure.mgmt.recoveryservicesbackup.models.azure_workload_"+restore_module_map[item_type.lower()]+"_restore_request")
-    class_ = getattr(module, "AzureWorkload"+item_type+"RestoreRequest")
+    module_ = import_module("azure.mgmt.recoveryservicesbackup.models.azure_workload_"+restore_module_map[item_type.lower()]+"_restore_request")
+    class_ = getattr(module_, "AzureWorkload"+item_type+"RestoreRequest")
 
     # Construct trigger restore request object
     trigger_restore_properties = class_(recovery_type=restore_mode)
@@ -689,11 +707,11 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
     alternate_directory_paths = []
     if 'sql' in item_type.lower() and restore_mode == 'AlternateWorkloadRestore':
         items = list_workload_items(cmd, vault_name, resource_group_name, container_name)
-        for j in items:
-            if j.properties.friendly_name == protectable_item_object.properties.friendly_name and j.properties.server_name == protectable_item_object.properties.server_name:
-                for i in recovery_point.properties.extended_info.data_directory_paths:
-                    alternate_directory_paths.append((i.type, i.path, i.logical_name, cust_help._get_target_path(i.type, i.path, i.logical_name, 
-                                                                                                                 j.properties.data_directory_paths)))
+        for item in items:
+            if item.properties.friendly_name == protectable_item_object.properties.friendly_name and item.properties.server_name == protectable_item_object.properties.server_name:
+                for path in recovery_point.properties.extended_info.data_directory_paths:
+                    alternate_directory_paths.append((path.type, path.path, path.logical_name, cust_help._get_target_path(path.type, path.path, path.logical_name, 
+                                                                                                                          item.properties.data_directory_paths)))
 
     return json.dumps({
         'restore_mode': restore_mode_map[restore_mode],

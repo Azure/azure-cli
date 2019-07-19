@@ -29,7 +29,7 @@ policy_name_type = CLIArgumentType(help='Name of the backup policy.', options_li
 job_name_type = CLIArgumentType(help='Name of the job.', options_list=['--name', '-n'])
 rp_name_type = CLIArgumentType(help='Name of the recovery point.', options_list=['--rp-name', '-r'])
 backup_management_type = CLIArgumentType(help='Name of the backup management type.', arg_type=get_enum_type(['AzureWorkload', 'AzureIaasVM']), options_list=['--backup-management-type', '-bmt'])
-wl_type = CLIArgumentType(help='Name of the workload type.', arg_type=get_enum_type(['MSSQL', 'SAPHANA']), options_list=['--workload-type', '-wt'])
+wl_type = CLIArgumentType(help='Name of the workload type.', arg_type=get_enum_type(['MSSQL', 'SAPHANA', 'SAPASE']), options_list=['--workload-type', '-wt'])
 
 
 # pylint: disable=too-many-statements
@@ -209,13 +209,11 @@ def load_arguments(self, _):
     with self.argument_context('backup job wait') as c:
         c.argument('timeout', type=int, help='Maximum time, in seconds, to wait before aborting.')
 
-    with self.argument_context('backup recoveryconfig') as c:
+    with self.argument_context('backup recoveryconfig show') as c:
         c.argument('vault_name', vault_name_type, id_part='name')
         c.argument('container_name', container_name_type)
         c.argument('item_name', item_name_type)
         c.argument('restore_mode', arg_type=get_enum_type(['OriginalWorkloadRestore', 'AlternateWorkloadRestore']), options_list=['--restore-mode', '-m'])
-
-    with self.argument_context('backup recoveryconfig show') as c:
         c.argument('rp_name', rp_name_type)
         c.argument('target_item', type=file_type, help='JSON encoded protectable item definition.', completer=FilesCompleter(), options_list=['--target-item', '-ti'])
         c.argument('log_point_in_time', options_list=['--log-point-in-time', '-lp'])

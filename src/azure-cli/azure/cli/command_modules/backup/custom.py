@@ -536,14 +536,6 @@ def _is_native_name(name):
     return ";" in name
 
 
-def _is_range_valid(start_date, end_date):
-    if start_date > end_date:
-        raise CLIError(
-                    """
-                    Start date must be earlier than end date.
-                    """)
-
-
 def _get_containers(client, container_type, status, resource_group_name, vault_name, container_name=None):
     filter_dict = {
         'backupManagementType': container_type,
