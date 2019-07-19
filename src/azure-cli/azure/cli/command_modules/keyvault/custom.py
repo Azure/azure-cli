@@ -934,7 +934,7 @@ def update_certificate_issuer(client, vault_base_url, issuer_name, provider_name
         set_value = value if value is not None else getattr(obj, prop, None)
         if set_value is None and not nullable:
             raise CLIError("property '{}' cannot be cleared".format(prop))
-        elif not set_value and nullable:
+        if not set_value and nullable:
             set_value = None
         setattr(obj, prop, set_value)
 

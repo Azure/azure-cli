@@ -20,7 +20,7 @@ def _normalize_sku(sku):
     sku = sku.upper()
     if sku == 'FREE':
         return 'F1'
-    elif sku == 'SHARED':
+    if sku == 'SHARED':
         return 'D1'
     return sku
 

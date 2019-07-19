@@ -35,13 +35,12 @@ def _get_proxy_instance():
     os_platform = platform.system()
     if os_platform == 'Darwin':
         return MacProxy()
-    elif os_platform == 'Windows':
+    if os_platform == 'Windows':
         from .win_proxy import WinProxy
         return WinProxy()
-    elif os_platform == 'Linux':
+    if os_platform == 'Linux':
         return LinuxProxy()
-    else:
-        raise NotImplementedError('Not implemented yet for {}'.format(os_platform))
+    raise NotImplementedError('Not implemented yet for {}'.format(os_platform))
 
 
 class Proxy(object):
@@ -57,14 +56,12 @@ class Proxy(object):
         """
         Sets the HTTP proxy
         """
-        pass
 
     @abstractmethod
     def disable_http_proxy(self):
         """
         Disables the HTTP proxy
         """
-        pass
 
 
 class LinuxProxy(Proxy):

@@ -44,7 +44,6 @@ class VstsContinuousDeliveryProvider(object):
         To be Implemented
         """
         # TODO: this would be called by appservice web source-control delete
-        pass
 
     def _update_progress(self, current, total, status):
         if total:

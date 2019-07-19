@@ -1090,6 +1090,13 @@ def _get_default_address_pool(cli_ctx, resource_group, balancer_name, balancer_t
     return values[0]
 
 
+# Client end hack per: https://github.com/Azure/azure-cli/issues/9943
+def _validate_vmss_single_placement_group(namespace):
+    if namespace.zones or namespace.instance_count > 100:
+        if namespace.single_placement_group is None:
+            namespace.single_placement_group = False
+
+
 def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
     from msrestazure.azure_exceptions import CloudError
     from msrestazure.tools import parse_resource_id
@@ -1228,6 +1235,7 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=True)
     _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=True)
 
+    _validate_vmss_single_placement_group(namespace)
     _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace)
     _validate_vmss_create_subnet(namespace)
     _validate_vmss_create_public_ip(cmd, namespace)

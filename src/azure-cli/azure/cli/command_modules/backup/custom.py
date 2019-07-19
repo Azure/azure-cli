@@ -588,7 +588,7 @@ def _get_disable_protection_request(item):
 def _get_vm_item_properties_from_vm_type(vm_type):
     if vm_type == 'Microsoft.Compute/virtualMachines':
         return AzureIaaSComputeVMProtectedItem()
-    elif vm_type == 'Microsoft.ClassicCompute/virtualMachines':
+    if vm_type == 'Microsoft.ClassicCompute/virtualMachines':
         return AzureIaaSClassicComputeVMProtectedItem()
 
 
@@ -596,7 +596,7 @@ def _get_vm_item_properties_from_vm_type(vm_type):
 def _get_vm_item_properties_from_vm_id(vm_id):
     if 'Microsoft.Compute/virtualMachines' in vm_id:
         return AzureIaaSComputeVMProtectedItem()
-    elif 'Microsoft.ClassicCompute/virtualMachines' in vm_id:
+    if 'Microsoft.ClassicCompute/virtualMachines' in vm_id:
         return AzureIaaSClassicComputeVMProtectedItem()
 
 
@@ -750,7 +750,7 @@ def _track_refresh_operation(cli_ctx, result, vault_name, resource_group):
 
 
 def _job_in_progress(job_status):
-    return job_status == JobStatus.in_progress.value or job_status == JobStatus.cancelling.value
+    return job_status in (JobStatus.in_progress.value, JobStatus.cancelling.value)
 
 # List Utilities
 
@@ -762,7 +762,7 @@ def _get_list_from_paged_response(obj_list):
 def _get_none_one_or_many(obj_list):
     if not obj_list:
         return None
-    elif len(obj_list) == 1:
+    if len(obj_list) == 1:
         return obj_list[0]
     return obj_list
 

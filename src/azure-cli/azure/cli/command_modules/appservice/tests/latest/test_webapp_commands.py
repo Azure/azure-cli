@@ -681,6 +681,7 @@ class WebappACRScenarioTest(ScenarioTest):
 class FunctionappACRScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='japanwest')
     @StorageAccountPreparer()
+    @AllowLargeResponse()
     def test_acr_integration_function_app(self, resource_group, storage_account):
         plan = self.create_random_name(prefix='acrtestplanfunction', length=24)
         functionapp = self.create_random_name(prefix='functionappacrtest', length=24)

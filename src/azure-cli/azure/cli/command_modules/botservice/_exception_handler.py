@@ -16,15 +16,14 @@ def bot_exception_handler(ex):
             ex.error.error.message
         )
         raise CLIError(message)
-    elif isinstance(ex, CloudError) and ex.status_code == 404:
+    if isinstance(ex, CloudError) and ex.status_code == 404:
         return None
-    elif isinstance(ex, ClientRequestError):
+    if isinstance(ex, ClientRequestError):
         message = 'Error occurred in sending request. Please file an issue on {0}'.format(
             'https://github.com/Microsoft/botbuilder-tools/issues'
         )
         raise CLIError(message)
-    else:
-        message = 'Unknown error during execution. Please file an issue on {0}'.format(
-            'https://github.com/Microsoft/botbuilder-tools/issues'
-        )
-        raise CLIError(message)
+    message = 'Unknown error during execution. Please file an issue on {0}'.format(
+        'https://github.com/Microsoft/botbuilder-tools/issues'
+    )
+    raise CLIError(message)

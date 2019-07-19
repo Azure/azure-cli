@@ -252,8 +252,7 @@ def _get_resource(client, resource_group_name, *subresources):
     except CloudError as ex:
         if ex.error.error == "NotFound" or ex.error.error == "ResourceNotFound":
             return None
-        else:
-            raise
+        raise
 
 
 def _get_vnet_network_profile(cmd, location, resource_group_name, vnet, vnet_address_prefix, subnet, subnet_address_prefix):
@@ -355,7 +354,7 @@ def _get_diagnostics_from_workspace(cli_ctx, log_analytics_workspace):
     log_analytics_client = cf_log_analytics(cli_ctx)
 
     for workspace in log_analytics_client.list():
-        if log_analytics_workspace == workspace.name or log_analytics_workspace == workspace.customer_id:
+        if log_analytics_workspace in (workspace.name, workspace.customer_id):
             keys = log_analytics_client.get_shared_keys(
                 parse_resource_id(workspace.id)['resource_group'], workspace.name)
 
@@ -530,7 +529,7 @@ def _create_ip_address(ip_address, ports, protocol, dns_name_label, network_prof
     if (ip_address and ip_address.lower() == 'public') or dns_name_label:
         return IpAddress(ports=[Port(protocol=protocol, port=p) for p in ports],
                          dns_name_label=dns_name_label, type=ContainerGroupIpAddressType.public)
-    elif network_profile:
+    if network_profile:
         return IpAddress(ports=[Port(protocol=protocol, port=p) for p in ports],
                          type=ContainerGroupIpAddressType.private)
 

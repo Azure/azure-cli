@@ -121,12 +121,10 @@ def cli_cosmosdb_update(client,
                 virtual_network_rules is not None or \
                 enable_multiple_write_locations is not None:
             raise CLIError("Cannot set capabilities and update properties at the same time. {0}".format(locations))
-
-        else:
-            async_docdb_create = client.patch(resource_group_name, account_name, tags=tags, capabilities=capabilities)
-            docdb_account = async_docdb_create.result()
-            docdb_account = client.get(resource_group_name, account_name)
-            return docdb_account
+        async_docdb_create = client.patch(resource_group_name, account_name, tags=tags, capabilities=capabilities)
+        docdb_account = async_docdb_create.result()
+        docdb_account = client.get(resource_group_name, account_name)
+        return docdb_account
 
     # Workaround until PATCH support for all properties
     # pylint: disable=too-many-boolean-expressions

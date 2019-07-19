@@ -30,7 +30,9 @@ from azure.cli.command_modules.vm._image_builder import ScriptType
 # pylint: disable=too-many-statements, too-many-branches, too-many-locals
 def load_arguments(self, _):
     # Model imports
-    StorageAccountTypes, DiskStorageAccountTypes, SnapshotStorageAccountTypes = self.get_models('StorageAccountTypes', 'DiskStorageAccountTypes', 'SnapshotStorageAccountTypes')
+    StorageAccountTypes = self.get_models('StorageAccountTypes')
+    DiskStorageAccountTypes = self.get_models('DiskStorageAccountTypes,', operation_group='disks')
+    SnapshotStorageAccountTypes = self.get_models('SnapshotStorageAccountTypes', operation_group='snapshots')
     UpgradeMode, CachingTypes, OperatingSystemTypes = self.get_models('UpgradeMode', 'CachingTypes', 'OperatingSystemTypes')
     HyperVGenerationTypes, HyperVGeneration = self.get_models('HyperVGenerationTypes', 'HyperVGeneration')
 

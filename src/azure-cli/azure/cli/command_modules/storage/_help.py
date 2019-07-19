@@ -549,6 +549,7 @@ examples:
 
 helps['storage container generate-sas'] = """
 type: command
+short-summary: Generate a SAS token for a storage container.
 examples:
   - name: Generate a sas token for blob container and use it to upload a blob.
     text: |

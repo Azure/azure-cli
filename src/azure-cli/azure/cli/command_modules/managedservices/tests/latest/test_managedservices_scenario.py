@@ -5,7 +5,9 @@
 
 from azure.cli.testsdk import ScenarioTest, record_only
 
-# ManagedServices RP is in a preview state. And we have to allow subscriptions to be able to use the functionality.
+# ManagedServices RP has not been released to GA yet.
+# It is expected to be released during the week of 7/15/2019.
+# Until then we have to allow subscriptions to be able to use the functionality.
 # We could have used the CLI test subscription but it had locks on it, which is not supported by the RP yet.
 # So for the time being, tests are being marked record_only
 
@@ -14,7 +16,7 @@ tenant_id = 'bab3375b-6197-4a15-a44b-16c41faa91d7'
 principal_id = 'd6f6c88a-5b7a-455e-ba40-ce146d4d3671'
 role_definition_id = 'acdd72a7-3385-48ef-bd42-f606fba81ae7'
 definition_id = 'afee244e-9a4d-41c9-a64d-8d7fc7124717'
-msp_sub_id = '38bd4bef-41ff-45b5-b3af-d03e55a4ca15'
+msp_sub_id = '002b3477-bfbf-4402-b377-6003168b75d3'
 assignment_id = 'b61427a6-974b-4987-a4cc-007a11ec8396'
 
 
