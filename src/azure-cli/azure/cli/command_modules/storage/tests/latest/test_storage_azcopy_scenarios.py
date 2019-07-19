@@ -84,6 +84,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         account_url_2 = 'https://{}.blob.core.windows.net'.format(account_2)
         container_url_1 = '{}/{}'.format(account_url_1, container_1)
         container_url_2 = '{}/{}'.format(account_url_2, container_2)
+        
         # Upload single file
         self.cmd('storage copy -s "{}" -d "{}"'.format(
             'aaa', container_url_1))
@@ -94,25 +95,35 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.cmd('storage copy -s "{}" -d "{}" --recursive'.format(
             test_dir/file*, container_url_1))
         # Download a single file 
-
+        self.cmd('storage copy -s "{}" -d "{}"'.format(
+            test_dir/file*, container_url_1))
         # Download an entire directory
-
+        self.cmd('storage copy -s "{}" -d "{}" --recursive'.format(
+            test_dir/file*, container_url_1))
         # Download a set of files
-
+        self.cmd('storage copy -s "{}" -d "{}" --recursive'.format(
+            test_dir/file*, container_url_1))
         # Copy a single blob to another blob
-
+        self.cmd('storage copy -s "{}" -d "{}" --recursive'.format(
+            test_dir/file*, container_url_1))
         # Copy an entire directory from blob virtual directory to another blob virtual directory 
-
+        self.cmd('storage copy -s "{}" -d "{}" --recursive'.format(
+            test_dir/file*, container_url_1))
         # Copy an entire account data from blob account to another blob account
-
+        self.cmd('storage copy -s "{}" -d "{}" --recursive'.format(
+            test_dir/file*, container_url_1))
         # Copy a single object from S3 with access key to blob
-
+        self.cmd('storage copy -s "{}" -d "{}" --recursive'.format(
+            test_dir/file*, container_url_1))
         # Copy an entire directory from S3 with access key to blob virtual directory
-
+        self.cmd('storage copy -s "{}" -d "{}" --recursive'.format(
+            test_dir/file*, container_url_1))
         # Copy all buckets in S3 service with access key to blob account
-
+        self.cmd('storage copy -s "{}" -d "{}" --recursive'.format(
+            test_dir/file*, container_url_1))
         # Copy all buckets in a S3 region with access key to blob account
-
+        self.cmd('storage copy -s "{}" -d "{}" --recursive'.format(
+            test_dir/file*, container_url_1))
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='account_1')
     @StorageAccountPreparer(parameter_name='account_2')
