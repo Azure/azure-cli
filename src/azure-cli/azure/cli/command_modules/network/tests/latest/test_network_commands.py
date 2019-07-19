@@ -255,6 +255,7 @@ class NetworkAppGatewayAuthCertScenario(ScenarioTest):
         self.cmd('network application-gateway show -g {rg} -n {gateway}',
                  checks=self.check('length(backendHttpSettingsCollection[1].authenticationCertificates)', 2))
 
+
 class NetworkAppGatewayTrustedRootCertScenario(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_ag_root_cert')
