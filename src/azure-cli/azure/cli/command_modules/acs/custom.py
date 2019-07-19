@@ -2065,13 +2065,13 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
         "chinanorth2": "chinaeast2"
     }
 
-    rg_location = _get_rg_location(cmd.cli_ctx, resource_group_name)    
+    rg_location = _get_rg_location(cmd.cli_ctx, resource_group_name)
     cloud_name = cmd.cli_ctx.cloud.name
 
     if cloud_name.lower() == 'azurecloud':
         workspace_region = AzureCloudRegionToOmsRegionMap.get(rg_location, "eastus")
         workspace_region_code = AzureCloudLocationToOmsRegionCodeMap.get(workspace_region, "EUS")
-    elif cloud_name.lower() == 'azurechinacloud':        
+    elif cloud_name.lower() == 'azurechinacloud':
         workspace_region = AzureChinaRegionToOmsRegionMap.get(rg_location, "chinaeast2")
         workspace_region_code = AzureChinaLocationToOmsRegionCodeMap.get(workspace_region, "EAST2")
     else:
