@@ -1447,6 +1447,8 @@ class NetworkNicAppGatewayScenarioTest(ScenarioTest):
             'subnet1': 'subnet1',
             'subnet2': 'subnet2',
             'ip': 'ip1',
+            'lb': 'lb1',
+            'bap': 'bap1',
             'pool1': 'appGatewayBackendPool',
             'pool2': 'bepool2',
             'config1': 'ipconfig1',
@@ -1458,12 +1460,15 @@ class NetworkNicAppGatewayScenarioTest(ScenarioTest):
         self.cmd('network application-gateway create -g {rg} -n {ag} --vnet-name {vnet} --subnet {subnet1} --no-wait')
         self.cmd('network application-gateway wait -g {rg} -n {ag} --exists --timeout 120')
         self.cmd('network application-gateway address-pool create -g {rg} --gateway-name {ag} -n {pool2} --no-wait')
+        self.cmd('network lb create -g {rg} -n {lb}')
+        self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n {bap}')
         self.cmd('network nic create -g {rg} -n {nic} --subnet {subnet2} --vnet-name {vnet} --gateway-name {ag} --app-gateway-address-pools {pool1}',
                  checks=self.check('length(NewNIC.ipConfigurations[0].applicationGatewayBackendAddressPools)', 1))
         with self.assertRaisesRegexp(CloudError, 'not supported for secondary IpConfigurations'):
             self.cmd('network nic ip-config create -g {rg} --nic-name {nic} -n {config2} --subnet {subnet2} --vnet-name {vnet} --gateway-name {ag} --app-gateway-address-pools {pool2}')
         self.cmd('network nic ip-config update -g {rg} --nic-name {nic} -n {config1} --gateway-name {ag} --app-gateway-address-pools {pool1} {pool2}',
                  checks=self.check('length(applicationGatewayBackendAddressPools)', 2))
+        self.cmd('az network nic ip-config address-pool add -g {rg} --nic-name {nic} --lb-name {lb} --address-pool {bap} --ip-config-name {config1}')
 
 
 class NetworkNicSubresourceScenarioTest(ScenarioTest):
