@@ -13,6 +13,7 @@ import time
 import chardet
 import javaproperties
 import yaml
+from itertools import chain
 from jsondiff import JsonDiffer
 from knack.log import get_logger
 from knack.util import CLIError
@@ -377,6 +378,67 @@ def list_key(cmd,
         raise CLIError(str(exception))
 
 
+def restore_key(cmd,
+             datetime,
+             key=None,
+             name=None,
+             label=None,
+             no_deletes=False,
+             connection_string=None,
+             yes=False):
+    
+    current_retry = 0
+    max_retry = 3
+    retry_interval = 1
+
+    connection_string = resolve_connection_string(cmd, name, connection_string)
+    azconfig_client = AzconfigClient(connection_string)
+
+    query_option_then = QueryKeyValueCollectionOptions(key_filter=key,
+                                                  label_filter=QueryKeyValueCollectionOptions.empty_label if label is not None and not label else label,
+                                                  query_datetime=datetime)
+    query_option_now = QueryKeyValueCollectionOptions(key_filter=key,
+                                                  label_filter=QueryKeyValueCollectionOptions.empty_label if label is not None and not label else label)
+
+    try:
+        restore_keyvalues = azconfig_client.get_keyvalues(query_option_then)
+        current_keyvalues = azconfig_client.get_keyvalues(query_option_now)
+        kvs_to_restore, kvs_to_modify, kvs_to_delete = __compare_kvs_for_restore(restore_keyvalues, current_keyvalues, no_deletes)
+
+        if not yes:
+            need_change = __print_restore_preview(kvs_to_restore, kvs_to_modify, kvs_to_delete)
+            if need_change is False:
+                return
+        
+        for kv in chain(kvs_to_restore, kvs_to_modify):
+            success = None
+            while success is None and current_retry <= max_retry:
+                try:
+                    success = azconfig_client.set_keyvalue(kv, ModifyKeyValueOptions())
+                except HTTPException as exception:
+                    if current_retry < max_retry and exception.status == StatusCodes.PRECONDITION_FAILED:
+                        logger.debug('Retrying setting %s times with exception: concurrent setting operations', current_retry + 1)
+                        current_retry += 1
+                        time.sleep(retry_interval)
+                    else:
+                        raise CLIError(str(exception))
+        current_retry = 0
+        for kv in kvs_to_delete:
+            success = None
+            while success is None and current_retry <= max_retry:
+                try:
+                    success = azconfig_client.delete_keyvalue(kv, ModifyKeyValueOptions())
+                except HTTPException as exception:
+                    if current_retry < max_retry and exception.status == StatusCodes.PRECONDITION_FAILED:
+                        logger.debug('Retrying deleting %s times with exception: concurrent setting operations', current_retry + 1)
+                        current_retry += 1
+                        time.sleep(retry_interval)
+                    else:
+                        raise CLIError(str(exception))
+    except Exception as exception:
+        raise CLIError(str(exception))
+
+
 def list_revision(cmd,
                   key=None,
                   fields=None,
@@ -420,6 +482,28 @@ def list_revision(cmd,
     except Exception as exception:
         raise CLIError(str(exception))
 
+
+def __compare_kvs_for_restore(restore_kvs, current_kvs, no_deletes):
+    # compares two lists and find those that are new or changed in the restore_kvs
+    # optionally (delete == True) find the new ones in current_kvs for deletion
+    dict_current_kvs = {(kv.key, kv.label) : (kv.value, kv.content_type, kv.locked, kv.tags) for kv in current_kvs}
+    kvs_to_restore = []
+    kvs_to_modify = []
+    kvs_to_delete = []
+    for entry in restore_kvs:
+        current_tuple = dict_current_kvs.get((entry.key, entry.label), None)
+        if current_tuple == None:
+            kvs_to_restore.append(entry)
+        elif current_tuple != (entry.value, entry.content_type, entry.locked, entry.tags):
+            kvs_to_modify.append(entry)
+    
+    if not no_deletes:
+        set_restore_kvs = {(kv.key, kv.label) for kv in restore_kvs}
+        for entry in current_kvs:
+            if (entry.key, entry.label) not in set_restore_kvs:
+                kvs_to_delete.append(entry)
+
+    return kvs_to_restore, kvs_to_modify, kvs_to_delete
 
 # File <-> List of KeyValue object
 
@@ -643,6 +727,32 @@ def __print_preview(old_json, new_json):
     user_confirmation(confirmation_message)
     return True
 
+def __print_restore_preview(kvs_to_restore, kvs_to_modify, kvs_to_delete):
+    print('\n---------------- Preview (Beta) ----------------')
+    if len(kvs_to_restore) + len(kvs_to_modify) + len(kvs_to_delete) == 0:
+        print('\nNo records matching found to be restored. No changes will be made.')
+        return False
+
+    # format result printing
+    if len(kvs_to_restore) > 0:
+        print('\nAdding:')
+        for kv in kvs_to_restore:
+            print(kv)
+
+    if len(kvs_to_modify) > 0:
+        print('\nUpdating:')
+        for kv in kvs_to_modify:
+            print(kv)
+    
+    if len(kvs_to_delete) > 0:
+        print('\nDeleting:')
+        for kv in kvs_to_delete:
+            print(kv)
+
+    print("")  # printing an empty line for formatting purpose
+    confirmation_message = "Do you want to continue? \n"
+    user_confirmation(confirmation_message)
+    return True
 
 def __flatten_key_value(key, value, flattened_data, depth, separator):
     if depth > 1:

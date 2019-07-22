@@ -169,16 +169,19 @@ class AppConfigKVScenarioTest(ScenarioTest):
                          self.check('[0].contentType', entry_content_type),
                          self.check('[0].value', updated_entry_value),
                          self.check('[0].label', updated_label)]).get_output_in_json()
-        deleted
-        #deleted_time = deleted[0].lastModified
+        
+        deleted_time = deleted[0]['lastModified']
 
         #sleep a little over 1 second
         time.sleep(1.1)
 
         # set key-value entry with connection string, but to the original value
+        # take a note of the deleted_time
         self.kwargs.update({
-            'value': entry_value
+            'value': entry_value,
+            'timestamp' : _format_datetime(deleted_time)
         })
+
         credential_list = self.cmd(
             'appconfig credential list -n {config_store_name} -g {rg}').get_output_in_json()
         self.kwargs.update({
@@ -190,6 +193,14 @@ class AppConfigKVScenarioTest(ScenarioTest):
                          self.check('value', entry_value),
                          self.check('label', updated_label)])
 
+        print ( _format_datetime(deleted_time))
+        #now restore to last modified
+        self.cmd('appconfig kv restore -n {config_store_name} --key {key} --label {label} --datetime {timestamp} -y')
+        self.cmd('appconfig kv list -n {config_store_name} --key {key} --label {label}',
+                 checks=[self.check('[0].contentType', entry_content_type),
+                         self.check('[0].key', entry_key),
+                         self.check('[0].value', updated_entry_value),
+                         self.check('[0].label', updated_label)])
 
 
 class AppConfigImportExportScenarioTest(ScenarioTest):
@@ -236,3 +247,11 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
 
 def _create_config_store(test, kwargs):
     test.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc}')
+
+def _format_datetime(date_string):
+    from dateutil.parser import parse
+    try:
+        return parse(date_string).strftime("%Y-%m-%dT%H:%M:%SZ")
+    except ValueError:
+        logger.debug("Unable to parse date_string '%s'", date_string)
+        return date_string or ' '
