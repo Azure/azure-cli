@@ -5,6 +5,7 @@
 
 # pylint: disable=line-too-long
 
+from azure.cli.core.api import get_subscription_id_list
 from azure.cli.core.commands.parameters import (
     get_resource_name_completion_list,
     tags_type, get_location_type,
@@ -62,6 +63,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
         with self.argument_context('{} server wait'.format(command_group)) as c:
             c.ignore('created', 'deleted', 'updated')
+
+        with self.argument_context('{} get-access-token'.format(command_group)) as c:
+            c.argument('subscription', options_list=['--subscription', '-s'], arg_group='', help='Name or ID of subscription.', completer=get_subscription_id_list)
+            c.ignore('_subscription')  # hide global subscription parameter
 
     _complex_params('mariadb')
     _complex_params('mysql')

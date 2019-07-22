@@ -429,9 +429,16 @@ def _server_list_custom_func(client, resource_group_name=None):
 
 
 # Custom function to retrieve access token
-def _get_access_token_for_service(cmd):
+def _get_access_token_for_rdbms(cmd, subscription=None):
+    '''
+    get AAD token to access RDBMS service
+    '''
     profile = Profile(cli_ctx=cmd.cli_ctx)
-    auth, _, _ = profile.get_login_credentials(
-        resource=cmd.cli_ctx.cloud.endpoints.ossrdbms_resource_id)
-    _, token, _ = auth.fetch_tokens()
-    print(token)
+    creds, subscription, tenant = profile.get_raw_token(subscription=subscription, resource=cmd.cli_ctx.cloud.endpoints.ossrdbms_resource_id)
+    return {
+        'tokenType': creds[0],
+        'accessToken': creds[1],
+        'expiresOn': creds[2].get('expiresOn', 'N/A'),
+        'subscription': subscription,
+        'tenant': tenant
+    }

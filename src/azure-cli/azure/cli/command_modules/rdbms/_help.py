@@ -880,25 +880,37 @@ examples:
 """
 
 helps['postgres get-access-token'] = """
-type: command
-short-summary: Get AAD access token for logged in user to access Azure database for PostgreSQL.
-examples:
-  - name: Get AAD access token for logged in user to access Azure database for PostgreSQL.
-    text: az postgres get-access-token
+    type: command
+    short-summary: Get a token for utilities to access Azure database for PostgreSQL.
+    long-summary: >
+        Equivalent to "az account get-access-token --resource <ossrdbmsResourceId from az cloud show>".
+        The token will be valid for at least 5 minutes with the maximum at 60 minutes.
+        If the subscription argument isn't specified, the current account is used.
+    examples:
+      - name: Get a token for utilities to access Azure database for PostgreSQL.
+        text: az postgres get-access-token
 """
 
 helps['mysql get-access-token'] = """
-type: command
-short-summary: Get AAD access token for logged in user to access Azure database for MySQL.
-examples:
-  - name: Get AAD access token for logged in user to access Azure database for MySQL.
-    text: az mysql get-access-token
+    type: command
+    short-summary: Get a token for utilities to access Azure database for MySQL.
+    long-summary: >
+        Equivalent to "az account get-access-token --resource <ossrdbmsResourceId from az cloud show>".
+        The token will be valid for at least 5 minutes with the maximum at 60 minutes.
+        If the subscription argument isn't specified, the current account is used.
+    examples:
+      - name: Get a token for utilities to access Azure database for MySQL.
+        text: az mysql get-access-token
 """
 
 helps['mariadb get-access-token'] = """
-type: command
-short-summary: Get AAD access token for logged in user to access Azure database for MariaDB.
-examples:
-  - name: Get AAD access token for logged in user to access Azure database for MariaDB.
-    text: az mariadb get-access-token
+    type: command
+    short-summary: Get a token for utilities to access Azure database for MariaDB.
+    long-summary: >
+        Equivalent to "az account get-access-token --resource <ossrdbmsResourceId from az cloud show>".
+        The token will be valid for at least 5 minutes with the maximum at 60 minutes.
+        If the subscription argument isn't specified, the current account is used.
+    examples:
+      - name: Get a token for utilities to access Azure database for MariaDB.
+        text: az mariadb get-access-token
 """
