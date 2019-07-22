@@ -878,3 +878,27 @@ examples:
   - name: List log files for 'testsvr' less than 30Kb in size.
     text: az postgres server-logs list -g testgroup -s testsvr --max-file-size 30
 """
+
+helps['postgres get-access-token'] = """
+type: command
+short-summary: Get AAD access token for logged in user to access Azure database for PostgreSQL.
+examples:
+  - name: Get AAD access token for logged in user to access Azure database for PostgreSQL.
+    text: az postgres get-access-token
+"""
+
+helps['mysql get-access-token'] = """
+type: command
+short-summary: Get AAD access token for logged in user to access Azure database for MySQL.
+examples:
+  - name: Get AAD access token for logged in user to access Azure database for MySQL.
+    text: az mysql get-access-token
+"""
+
+helps['mariadb get-access-token'] = """
+type: command
+short-summary: Get AAD access token for logged in user to access Azure database for MariaDB.
+examples:
+  - name: Get AAD access token for logged in user to access Azure database for MariaDB.
+    text: az mariadb get-access-token
+"""

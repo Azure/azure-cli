@@ -431,6 +431,6 @@ def _server_list_custom_func(client, resource_group_name=None):
 def _get_access_token_for_service(cmd):
     profile = Profile(cli_ctx=cmd.cli_ctx)
     auth, _, _ = profile.get_login_credentials(
-            resource=cmd.cli_ctx.cloud.endpoints.ossrdbms_resource_id)
+        resource=cmd.cli_ctx.cloud.endpoints.ossrdbms_resource_id)
     _, token, _ = auth.fetch_tokens()
     print(token)
