@@ -1067,7 +1067,7 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='azurecli-functionapp-c-e2e-ragrs', location='westus')
     @StorageAccountPreparer(sku='Standard_RAGRS')
-    def test_functionapp_e2e_ragrs_storage(self, resource_group, storage_account):
+    def test_functionapp_consumption_ragrs_storage_e2e(self, resource_group, storage_account):
         functionapp_name = self.create_random_name('functionappconsumption', 40)
 
         self.cmd('functionapp create -g {} -n {} -c westus -s {}'
@@ -1076,16 +1076,9 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
                      JMESPathCheck('name', functionapp_name),
                      JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
 
-        self.cmd('functionapp list -g {}'.format(resource_group), checks=[
-            JMESPathCheck('[0].kind', 'functionapp'),
-            JMESPathCheck('[0].name', functionapp_name)
-        ])
         self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
             JMESPathCheck('kind', 'functionapp'),
             JMESPathCheck('name', functionapp_name)
-        ])
-        self.cmd('functionapp update -g {} -n {} --set clientAffinityEnabled=true'.format(resource_group, functionapp_name), checks=[
-            self.check('clientAffinityEnabled', True)
         ])
 
 
