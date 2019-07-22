@@ -427,6 +427,7 @@ def _server_list_custom_func(client, resource_group_name=None):
         return client.list_by_resource_group(resource_group_name)
     return client.list()
 
+
 # Custom function to retrieve access token
 def _get_access_token_for_service(cmd):
     profile = Profile(cli_ctx=cmd.cli_ctx)
