@@ -12,6 +12,8 @@ Release History
 **Core**
 
 * Fixed issue where `--subscription` would appear despite being not applicable.
+* Separated fetch_tokens from signed_session in AdalAuthentication to allow commands to fetch access tokens.
+* Added ossrdbms-aad resource names to cloud.py.
 
 **BATCH**
 
@@ -25,6 +27,7 @@ Release History
 
 * Add optional parameter to specify replica SKU for create replica command.
 * Fix the issue with CI test failure with creating MySQL replica.
+* Add get-access-token command for use with PostgreSQL and MySQL AAD support.
 
 **Storage**
 

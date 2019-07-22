@@ -3,6 +3,8 @@
 Release History
 ===============
 * Fixed issue where `--subscription` would appear despite being suppressed on certain commands.
+* Separated fetch_tokens from signed_session in AdalAuthentication to allow commands to fetch access tokens.
+* Added ossrdbms-aad resource names to cloud.py.
 
 2.0.68
 ++++++
