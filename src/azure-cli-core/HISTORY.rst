@@ -3,7 +3,7 @@
 Release History
 ===============
 * Fixed issue where `--subscription` would appear despite being suppressed on certain commands.
-* Added ossrdbmsEndpointId to cloud.py.
+* Added ossrdbmsResourceId to cloud.py.
 
 2.0.68
 ++++++

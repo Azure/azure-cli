@@ -12,7 +12,7 @@ Release History
 **Core**
 
 * Fixed issue where `--subscription` would appear despite being not applicable.
-* Added ossrdbmsEndpointId to cloud.py.
+* Added ossrdbmsResourceId to cloud.py.
 
 **BATCH**
 
