@@ -98,4 +98,3 @@ def is_valid_connection_string(connection_string):
             return False
         return True
     return False
-
