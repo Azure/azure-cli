@@ -214,8 +214,9 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
     try:
         challenge = requests.get(url, verify=(not should_disable_connection_verify()))
         if challenge.status_code in [403]:
-            raise CLIError("Looks like you don't have access to registry '{}'. "
-                           "Are firewalls and virtual networks enabled?".format(login_server))
+            raise CLIError("Looks like you don't have access to registry '{}'. ".format(login_server) +
+                           "To see configured firewall rules, run" +
+                           " 'az acr show --query networkRuleSet --name {}'".format(registry_name))
     except RequestException as e:
         logger.debug("Could not connect to registry login server. Exception: %s", str(e))
         if resource_not_found:
