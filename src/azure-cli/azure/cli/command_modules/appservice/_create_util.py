@@ -121,7 +121,19 @@ def get_lang_from_content(src_path):
     runtime_details_dict = dict.fromkeys(['language', 'file_loc', 'default_sku'])
     package_json_file = os.path.join(src_path, 'package.json')
     package_python_file = os.path.join(src_path, 'requirements.txt')
-    package_netlang_glob = glob.glob("**/*.csproj", recursive=True)
+    package_netcore_file = ""
+    static_html_file = ""
+
+    import fnmatch
+    for _dirpath, _dirnames, files in os.walk(src_path):
+        for file in files:
+            if fnmatch.fnmatch(file, "*.csproj"):
+                package_netcore_file = os.path.join(src_path, file)
+                break
+            if fnmatch.fnmatch(file, "*.html"):
+                static_html_file = os.path.join(src_path, file)
+                break
+
     static_html_file = glob.glob("**/*.html", recursive=True)
     if os.path.isfile(package_python_file):
         runtime_details_dict['language'] = PYTHON_RUNTIME_NAME
@@ -131,15 +143,14 @@ def get_lang_from_content(src_path):
         runtime_details_dict['language'] = NODE_RUNTIME_NAME
         runtime_details_dict['file_loc'] = package_json_file if os.path.isfile(package_json_file) else ''
         runtime_details_dict['default_sku'] = LINUX_SKU_DEFAULT
-    elif package_netlang_glob:
-        package_netcore_file = os.path.join(src_path, package_netlang_glob[0])
+    elif package_netcore_file:
         runtime_lang = detect_dotnet_lang(package_netcore_file)
         runtime_details_dict['language'] = runtime_lang
         runtime_details_dict['file_loc'] = package_netcore_file
         runtime_details_dict['default_sku'] = 'F1'
     elif static_html_file:
         runtime_details_dict['language'] = STATIC_RUNTIME_NAME
-        runtime_details_dict['file_loc'] = static_html_file[0]
+        runtime_details_dict['file_loc'] = static_html_file
         runtime_details_dict['default_sku'] = 'F1'
     return runtime_details_dict
 
@@ -203,8 +214,11 @@ def parse_node_version(file_path):
                 # remove the string ~ or  > that sometimes exists in version value
                 c = non_decimal.sub('', value_detected)
                 # reduce the version to '6.0' from '6.0.0'
-                num_array = c.split('.')
-                num = num_array[0] + "." + num_array[1]
+                if '.' in c:  # handle version set as 4 instead of 4.0
+                    num_array = c.split('.')
+                    num = num_array[0] + "." + num_array[1]
+                else:
+                    num = c + ".0"
                 version_detected.append(num)
     return version_detected or ['0.0']
 
