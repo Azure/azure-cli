@@ -14,6 +14,10 @@ def list_apim(client, resource_group_name=None):
         return client.api_management_service.list_by_resource_group(resource_group_name)
     return client.api_management_service.list()
 
+def get_apim(client, resource_group_name, name):
+    """Show details of an APIM instance """
+    return client.get(resource_group_name, name)
+
 def update_apim(cmd, instance, tags=None):
     with cmd.update_context(instance) as c:
         c.set_param('tags', tags)
