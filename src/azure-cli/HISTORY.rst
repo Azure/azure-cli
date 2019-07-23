@@ -13,6 +13,29 @@ Release History
 * Fixed issue where `az functionapp create` does not accept Standard_RAGRS storage account type.
 * Fixed an issue where az webapp up would fail if run using older versions of python
 
+**HDInsight**
+
+* BREAKING CHANGE: create: change --storage-default-container to --storage-container and --storage-default-filesystem to --storage-filesystem
+* BREAKING CHANGE: application create: 1. make --name/-n represent application name and have a separate --cluster-name argument
+* BREAKING CHANGE: application create: 2. change --application-type to --type and -t
+* BREAKING CHANGE: application create: 3. --marketplace-identifier to --marketplace-id
+* BREAKING CHANGE: application create: 4. rename --https-endpoint-access-mode to --https-access-mode and --https-endpoint-destination-port to --https-destination-port
+* BREAKING CHANGE: application create: 5. remove --https-endpoint-location, --https-endpoint-public-port, --ssh-endpoint-destination-port, --ssh-endpoint-location and --ssh-endpoint-public-port 
+* BREAKING CHANGE: application create: 6. remove default value from –edgenode-size 
+* BREAKING CHANGE: resize: rename --target-instance-count to --workernode-count/-c
+* BREAKING CHANGE: script-action: 1. use --cluster-name represent cluster name
+* BREAKING CHANGE: script-action: 2. change script-execution-id to execution-id
+* BREAKING CHANGE: script-action: 3. change command name from "show" to "show-execution-details"
+* BREAKING CHANGE: script-action execute: 1. make --name/-n represent the script action name and have a separate --cluster-name 
+* BREAKING CHANGE: script-action execute: 2. make roles space separated
+* BREAKING CHANGE: script-action delete: make --name/-n represent the script action name and have a separate --cluster-name
+* BREAKING CHANGE: script-action list: remove --persisted parameter
+* create: make --cluster-configurations accept input from a local JSON file
+* script-action list-execution-history: add the command to list the execution history for all script action executions
+* monitor enable: 1. make --workspace accept Log Analytics workspace ID
+* monitor enable: 2. add --primary-key for workspace certificate
+* Add more examples and update description for help message
+
 **Network**
 
 * network nic ip-config add: Fixes #9861 where --ids was inadvertently exposed but did not work.
