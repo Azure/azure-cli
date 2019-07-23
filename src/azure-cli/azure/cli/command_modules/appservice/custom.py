@@ -77,7 +77,8 @@ logger = get_logger(__name__)
 
 def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_file=None,  # pylint: disable=too-many-statements
                   deployment_container_image_name=None, deployment_source_url=None, deployment_source_branch='master',
-                  deployment_local_git=None, multicontainer_config_type=None, multicontainer_config_file=None,
+                  deployment_local_git=None, docker_registry_server_password=None, docker_registry_server_url=None,
+                  docker_registry_server_user=None, multicontainer_config_type=None, multicontainer_config_file=None,
                   tags=None):
     if deployment_source_url and deployment_local_git:
         raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
@@ -153,6 +154,9 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                              deployment_source_branch, deployment_local_git)
 
     _fill_ftp_publishing_url(cmd, webapp, resource_group_name, name)
+
+    update_container_settings(cmd, resource_group_name, name, docker_registry_server_url, deployment_container_image_name, 
+                              docker_registry_server_user, docker_registry_server_password=docker_registry_server_password)
 
     return webapp
 

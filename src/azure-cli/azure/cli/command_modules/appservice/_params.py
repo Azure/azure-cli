@@ -87,6 +87,9 @@ def load_arguments(self, _):
     with self.argument_context('webapp create') as c:
         c.argument('name', options_list=['--name', '-n'], help='name of the new web app', validator=validate_site_create)
         c.argument('startup_file', help="Linux only. The web's startup file")
+        c.argument('docker_registry_server_url', options_list=['--docker-registry-server-url'], help='the container registry server url')
+        c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user'], help='the container registry server username')
+        c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password'], help='the container registry server password')
         c.argument('multicontainer_config_type', options_list=['--multicontainer-config-type'], help="Linux only.", arg_type=get_enum_type(MULTI_CONTAINER_TYPES))
         c.argument('multicontainer_config_file', options_list=['--multicontainer-config-file'], help="Linux only. Config file for multicontainer apps. (local or remote)")
         c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework|Version, e.g. \"PHP|5.6\". Use 'az webapp list-runtimes' for available list")  # TODO ADD completer
