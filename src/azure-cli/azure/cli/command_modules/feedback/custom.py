@@ -753,8 +753,8 @@ def _prompt_issue(recent_command_list):
     if can_launch_browser():
         open_page_in_browser(url)
     else:
-        print('No browser is available for CLI to submit an issue. You can copy&paste the url'
-              ' below in a browser to submit.\n\n{}\n\n'.format(url))
+        print("There isn't an available browser to create an issue draft. You can copy and paste the url"
+              " below in a browser to submit.\n\n{}\n\n".format(url))
 
     return True
 
