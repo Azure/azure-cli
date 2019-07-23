@@ -183,10 +183,10 @@ def load_arguments(self, _):
         c.argument('marketplace_identifier', options_list=['--marketplace-id'],
                    help='The marketplace identifier.')
         c.argument('https_endpoint_access_mode', arg_group='HTTPS Endpoint',
-                   options_list=['--https-access-mode'],
+                   options_list=['--access-mode'],
                    help='The access mode for the application.')
         c.argument('https_endpoint_destination_port', arg_group='HTTPS Endpoint',
-                   options_list=['--https-destination-port'],
+                   options_list=['--destination-port'],
                    help='The destination port to connect to.')
         c.argument('sub_domain_suffix', arg_group='HTTPS Endpoint', help='The subdomain suffix of the application.')
         c.argument('disable_gateway_auth', arg_group='HTTPS Endpoint', arg_type=get_three_state_flag(),

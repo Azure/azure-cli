@@ -19,7 +19,7 @@ Release History
 * BREAKING CHANGE: application create: 1. make --name/-n represent application name and have a separate --cluster-name argument
 * BREAKING CHANGE: application create: 2. change --application-type to --type and -t
 * BREAKING CHANGE: application create: 3. --marketplace-identifier to --marketplace-id
-* BREAKING CHANGE: application create: 4. rename --https-endpoint-access-mode to --https-access-mode and --https-endpoint-destination-port to --https-destination-port
+* BREAKING CHANGE: application create: 4. rename --https-endpoint-access-mode to --access-mode and --https-endpoint-destination-port to --destination-port
 * BREAKING CHANGE: application create: 5. remove --https-endpoint-location, --https-endpoint-public-port, --ssh-endpoint-destination-port, --ssh-endpoint-location and --ssh-endpoint-public-port 
 * BREAKING CHANGE: application create: 6. remove default value from –edgenode-size 
 * BREAKING CHANGE: resize: rename --target-instance-count to --workernode-count/-c
