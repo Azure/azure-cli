@@ -379,14 +379,13 @@ def list_key(cmd,
 
 
 def restore_key(cmd,
-             datetime,
-             key=None,
-             name=None,
-             label=None,
-             no_deletes=False,
-             connection_string=None,
-             yes=False):
-    
+                datetime,
+                key=None,
+                name=None,
+                label=None,
+                no_deletes=False,
+                connection_string=None,
+                yes=False):
     current_retry = 0
     max_retry = 3
     retry_interval = 1
@@ -395,10 +394,10 @@ def restore_key(cmd,
     azconfig_client = AzconfigClient(connection_string)
 
     query_option_then = QueryKeyValueCollectionOptions(key_filter=key,
-                                                  label_filter=QueryKeyValueCollectionOptions.empty_label if label is not None and not label else label,
-                                                  query_datetime=datetime)
+                                                       label_filter=QueryKeyValueCollectionOptions.empty_label if label is not None and not label else label,
+                                                       query_datetime=datetime)
     query_option_now = QueryKeyValueCollectionOptions(key_filter=key,
-                                                  label_filter=QueryKeyValueCollectionOptions.empty_label if label is not None and not label else label)
+                                                      label_filter=QueryKeyValueCollectionOptions.empty_label if label is not None and not label else label)
 
     try:
         restore_keyvalues = azconfig_client.get_keyvalues(query_option_then)
@@ -409,7 +408,7 @@ def restore_key(cmd,
             need_change = __print_restore_preview(kvs_to_restore, kvs_to_modify, kvs_to_delete)
             if need_change is False:
                 return
-        
+
         for kv in chain(kvs_to_restore, kvs_to_modify):
             success = None
             while success is None and current_retry <= max_retry:
@@ -486,17 +485,17 @@ def list_revision(cmd,
 def __compare_kvs_for_restore(restore_kvs, current_kvs, no_deletes):
     # compares two lists and find those that are new or changed in the restore_kvs
     # optionally (delete == True) find the new ones in current_kvs for deletion
-    dict_current_kvs = {(kv.key, kv.label) : (kv.value, kv.content_type, kv.locked, kv.tags) for kv in current_kvs}
+    dict_current_kvs = {(kv.key, kv.label): (kv.value, kv.content_type, kv.locked, kv.tags) for kv in current_kvs}
     kvs_to_restore = []
     kvs_to_modify = []
     kvs_to_delete = []
     for entry in restore_kvs:
         current_tuple = dict_current_kvs.get((entry.key, entry.label), None)
-        if current_tuple == None:
+        if current_tuple is None:
             kvs_to_restore.append(entry)
         elif current_tuple != (entry.value, entry.content_type, entry.locked, entry.tags):
             kvs_to_modify.append(entry)
-    
+
     if not no_deletes:
         set_restore_kvs = {(kv.key, kv.label) for kv in restore_kvs}
         for entry in current_kvs:
@@ -727,6 +726,7 @@ def __print_preview(old_json, new_json):
     user_confirmation(confirmation_message)
     return True
 
+
 def __print_restore_preview(kvs_to_restore, kvs_to_modify, kvs_to_delete):
     print('\n---------------- Preview (Beta) ----------------')
     if len(kvs_to_restore) + len(kvs_to_modify) + len(kvs_to_delete) == 0:
@@ -734,17 +734,17 @@ def __print_restore_preview(kvs_to_restore, kvs_to_modify, kvs_to_delete):
         return False
 
     # format result printing
-    if len(kvs_to_restore) > 0:
+    if kvs_to_restore:
         print('\nAdding:')
         for kv in kvs_to_restore:
             print(kv)
 
-    if len(kvs_to_modify) > 0:
+    if kvs_to_modify:
         print('\nUpdating:')
         for kv in kvs_to_modify:
             print(kv)
-    
-    if len(kvs_to_delete) > 0:
+
+    if kvs_to_delete:
         print('\nDeleting:')
         for kv in kvs_to_delete:
             print(kv)
@@ -753,6 +753,7 @@ def __print_restore_preview(kvs_to_restore, kvs_to_modify, kvs_to_delete):
     confirmation_message = "Do you want to continue? \n"
     user_confirmation(confirmation_message)
     return True
+
 
 def __flatten_key_value(key, value, flattened_data, depth, separator):
     if depth > 1:

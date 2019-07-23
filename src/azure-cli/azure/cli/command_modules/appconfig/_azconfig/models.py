@@ -51,6 +51,7 @@ class KeyValue(object):
                "\nLast Modified: " + self.last_modified + \
                "\nTags: " + '{!s}'.format(self.tags)
 
+
 class QueryFields(Enum):
     KEY = 0x001
     LABEL = 0x002
