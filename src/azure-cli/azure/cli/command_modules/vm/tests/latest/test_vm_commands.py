@@ -1588,6 +1588,16 @@ class VMDiskAttachDetachTest(ScenarioTest):
             self.check('diskMbpsReadWrite', 10)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli-test-std_zrs', location='eastus2')
+    def test_vm_disk_create_with_standard_zrs_sku(self, resource_group):
+        self.kwargs.update({
+            'disk1': 'd1',
+            'snapshot1': 's1'
+        })
+        self.cmd('disk create -g {rg} -n {disk1} --size-gb 4')
+        self.cmd('snapshot create -g {rg} -n {snapshot1} --source {disk1} --sku Standard_ZRS',
+                 checks=self.check('sku.name', 'Standard_ZRS'))
+
     @ResourceGroupPreparer(name_prefix='cli-test-ultrassd', location='eastus2')
     def test_vmss_ultra_ssd_storage_sku(self, resource_group):
 

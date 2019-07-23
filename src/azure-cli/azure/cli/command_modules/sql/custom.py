@@ -50,7 +50,6 @@ logger = get_logger(__name__)
 ###############################################
 
 
-# Determines server location
 def _get_server_location(cli_ctx, server_name, resource_group_name):
     '''
     Returns the location (i.e. Azure region) that the specified server is in.
@@ -63,7 +62,6 @@ def _get_server_location(cli_ctx, server_name, resource_group_name):
         resource_group_name=resource_group_name).location
 
 
-# Determines managed instance location
 def _get_managed_instance_location(cli_ctx, managed_instance_name, resource_group_name):
     '''
     Returns the location (i.e. Azure region) that the specified managed instance is in.
@@ -74,6 +72,17 @@ def _get_managed_instance_location(cli_ctx, managed_instance_name, resource_grou
     return managed_instance_client.get(
         managed_instance_name=managed_instance_name,
         resource_group_name=resource_group_name).location
+
+
+def _get_location_capability(cli_ctx, location, group):
+    '''
+    Gets the location capability for a location and verifies that it is available.
+    '''
+
+    capabilities_client = get_sql_capabilities_operations(cli_ctx, None)
+    location_capability = capabilities_client.list_by_location(location, group)
+    _assert_capability_available(location_capability)
+    return location_capability
 
 
 def _any_sku_values_specified(sku):
@@ -95,27 +104,57 @@ def _get_default_server_version(location_capabilities):
 
     If there is no default or available server version, falls back to
     server version 12.0 in order to maintain compatibility with older
-    Azure CLI releases.
+    Azure CLI releases (2.0.25 and earlier).
     '''
     server_versions = location_capabilities.supported_server_versions
 
-    try:
-        # Try behavior from azure-cli-sql 2.0.26: get default
-        return _get_default_capability(server_versions)
-    except StopIteration:
-        # No default or available version found.
-        # Fall back to behaviour from azure-cli-sql 2.0.25 and earlier: get version 12.0
-        return next(sv for sv in server_versions if sv.name == "12.0")
+    def is_v12(capability):
+        return capability.name == "12.0"
+
+    return _get_default_capability(server_versions, fallback_predicate=is_v12)
 
 
-def _get_default_capability(capabilities):
+def _get_default_capability(capabilities, fallback_predicate=None):
     '''
     Gets the first capability in the collection that has 'default' status.
     If none have 'default' status, gets the first capability that has 'available' status.
     '''
+    logger.debug('_get_default_capability: %s', capabilities)
 
-    return (next((c for c in capabilities if c.status == CapabilityStatus.default), None) or
-            next(c for c in capabilities if c.status == CapabilityStatus.available))
+    # Get default capability
+    r = next((c for c in capabilities if c.status == CapabilityStatus.default), None)
+    if r:
+        logger.debug('_get_default_capability found default: %s', r)
+        return r
+
+    # No default capability, so fallback to first available capability
+    r = next((c for c in capabilities if c.status == CapabilityStatus.available), None)
+    if r:
+        logger.debug('_get_default_capability found available: %s', r)
+        return r
+
+    # No available capability, so use custom fallback
+    if fallback_predicate:
+        logger.debug('_get_default_capability using fallback')
+        r = next((c for c in capabilities if fallback_predicate(c)), None)
+        if r:
+            logger.debug('_get_default_capability found fallback: %s', r)
+            return r
+
+    # No custom fallback, so we have to throw an error.
+    logger.debug('_get_default_capability failed')
+    raise CLIError('Provisioning is restricted in this region. Please choose a different region.')
+
+
+def _assert_capability_available(capability):
+    '''
+    Asserts that the capability is available (or default). Throws CLIError if the
+    capability is unavailable.
+    '''
+    logger.debug('_assert_capability_available: %s', capability)
+
+    if not is_available(capability.status):
+        raise CLIError(capability.reason)
 
 
 def is_available(status):
@@ -143,15 +182,16 @@ def _find_edition_capability(sku, supported_editions):
 
     (Note: tier and edition mean the same thing.)
     '''
+    logger.debug('_find_edition_capability: %s; %s', sku, supported_editions)
 
     if sku.tier:
         # Find requested edition capability
         try:
             return next(e for e in supported_editions if e.name == sku.tier)
         except StopIteration:
-            candiate_tiers = [e.name for e in supported_editions]
+            candidate_editions = [e.name for e in supported_editions]
             raise CLIError('Could not find tier ''{}''. Supported tiers are: {}'.format(
-                sku.tier, candiate_tiers
+                sku.tier, candidate_editions
             ))
     else:
         # Find default edition capability
@@ -165,11 +205,12 @@ def _find_family_capability(sku, supported_families):
 
     If the edition has no family specified, returns the default family.
     '''
+    logger.debug('_find_family_capability: %s; %s', sku, supported_families)
 
     if sku.family:
-        # Find requested edition capability
+        # Find requested family capability
         try:
-            return next(e for e in supported_families if e.name == sku.family)
+            return next(f for f in supported_families if f.name == sku.family)
         except StopIteration:
             candidate_families = [e.name for e in supported_families]
             raise CLIError('Could not find family ''{}''. Supported families are: {}'.format(
@@ -190,7 +231,8 @@ def _find_performance_level_capability(sku, supported_service_level_objectives, 
     objective.
     '''
 
-    logger.debug('_find_performance_level_capability input: %s, allow_reset_family: %s', sku, allow_reset_family)
+    logger.debug('_find_performance_level_capability: %s, %s, allow_reset_family: %s',
+                 sku, supported_service_level_objectives, allow_reset_family)
 
     if sku.capacity:
         try:
@@ -487,10 +529,11 @@ def _find_db_sku_from_capabilities(cli_ctx, location, sku, allow_reset_family=Fa
     # Some properties of sku are specified, but not name. Use the requested properties
     # to find a matching capability and copy the sku from there.
 
+    # Get location capability
+    loc_capability = _get_location_capability(cli_ctx, location, CapabilityGroup.supported_editions)
+
     # Get default server version capability
-    capabilities_client = get_sql_capabilities_operations(cli_ctx, None)
-    capabilities = capabilities_client.list_by_location(location, CapabilityGroup.supported_editions)
-    server_version_capability = _get_default_server_version(capabilities)
+    server_version_capability = _get_default_server_version(loc_capability)
 
     # Find edition capability, based on requested sku properties
     edition_capability = _find_edition_capability(
@@ -1454,10 +1497,11 @@ def _find_elastic_pool_sku_from_capabilities(cli_ctx, location, sku, allow_reset
     # Some properties of sku are specified, but not name. Use the requested properties
     # to find a matching capability and copy the sku from there.
 
+    # Get location capability
+    loc_capability = _get_location_capability(cli_ctx, location, CapabilityGroup.supported_elastic_pool_editions)
+
     # Get default server version capability
-    capabilities_client = get_sql_capabilities_operations(cli_ctx, None)
-    capabilities = capabilities_client.list_by_location(location, CapabilityGroup.supported_elastic_pool_editions)
-    server_version_capability = _get_default_server_version(capabilities)
+    server_version_capability = _get_default_server_version(loc_capability)
 
     # Find edition capability, based on requested sku properties
     edition_capability = _find_edition_capability(sku, server_version_capability.supported_elastic_pool_editions)
@@ -1970,10 +2014,11 @@ def _find_managed_instance_sku_from_capabilities(cli_ctx, location, sku):
     # Some properties of sku are specified, but not name. Use the requested properties
     # to find a matching capability and copy the sku from there.
 
+    # Get location capability
+    loc_capability = _get_location_capability(cli_ctx, location, CapabilityGroup.supported_managed_instance_versions)
+
     # Get default server version capability
-    capabilities_client = get_sql_capabilities_operations(cli_ctx, None)
-    capabilities = capabilities_client.list_by_location(location, CapabilityGroup.supported_managed_instance_versions)
-    managed_instance_version_capability = _get_default_capability(capabilities.supported_managed_instance_versions)
+    managed_instance_version_capability = _get_default_capability(loc_capability.supported_managed_instance_versions)
 
     # Find edition capability, based on requested sku properties
     edition_capability = _find_edition_capability(sku, managed_instance_version_capability.supported_editions)
@@ -2062,6 +2107,94 @@ def managed_instance_update(
         instance.public_data_endpoint_enabled = public_data_endpoint_enabled
 
     return instance
+
+
+#####
+#           sql managed instance key
+#####
+
+
+def managed_instance_key_create(
+        client,
+        resource_group_name,
+        managed_instance_name,
+        kid=None):
+    '''
+    Creates a managed instance key.
+    '''
+
+    key_name = _get_server_key_name_from_uri(kid)
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        managed_instance_name=managed_instance_name,
+        key_name=key_name,
+        server_key_type=ServerKeyType.azure_key_vault.value,
+        uri=kid
+    )
+
+
+def managed_instance_key_get(
+        client,
+        resource_group_name,
+        managed_instance_name,
+        kid):
+    '''
+    Gets a managed instance key.
+    '''
+
+    key_name = _get_server_key_name_from_uri(kid)
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        managed_instance_name=managed_instance_name,
+        key_name=key_name)
+
+
+def managed_instance_key_delete(
+        client,
+        resource_group_name,
+        managed_instance_name,
+        kid):
+    '''
+    Deletes a managed instance key.
+    '''
+
+    key_name = _get_server_key_name_from_uri(kid)
+
+    return client.delete(
+        resource_group_name=resource_group_name,
+        managed_instance_name=managed_instance_name,
+        key_name=key_name)
+
+#####
+#           sql managed instance encryption-protector
+#####
+
+
+def managed_instance_encryption_protector_update(
+        client,
+        resource_group_name,
+        managed_instance_name,
+        server_key_type,
+        kid=None):
+    '''
+    Updates a server encryption protector.
+    '''
+
+    if server_key_type == ServerKeyType.service_managed.value:
+        key_name = 'ServiceManaged'
+    else:
+        if kid is None:
+            raise CLIError('A uri must be provided if the server_key_type is AzureKeyVault.')
+        key_name = _get_server_key_name_from_uri(kid)
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        managed_instance_name=managed_instance_name,
+        server_key_type=server_key_type,
+        server_key_name=key_name
+    )
 
 ###############################################
 #                sql managed db               #

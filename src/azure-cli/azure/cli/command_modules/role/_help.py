@@ -467,6 +467,11 @@ type: command
 short-summary: List Azure Active Directory users.
 """
 
+helps['ad user update'] = """
+type: command
+short-summary: Update Azure Active Directory users.
+"""
+
 helps['identity'] = """
 type: group
 short-summary: Managed Service Identities

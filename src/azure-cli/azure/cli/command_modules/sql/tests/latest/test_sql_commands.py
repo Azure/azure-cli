@@ -2683,6 +2683,148 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                  expect_failure=True)
 
 
+class SqlManagedInstanceTransparentDataEncryptionScenarioTest(ScenarioTest):
+
+    # Remove when issue #9393 is fixed.
+    @live_only()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
+    def test_sql_mi_tdebyok(self, resource_group, resource_group_location):
+
+        resource_prefix = 'sqltdebyok'
+
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'vnet_name': 'vcCliTestVnet',
+            'subnet_name': 'vcCliTestSubnet',
+            'route_table_name': 'vcCliTestRouteTable',
+            'route_name_default': 'default',
+            'route_name_subnet_to_vnet_local': 'subnet_to_vnet_local',
+            'managed_instance_name': self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length),
+            'database_name': self.create_random_name(resource_prefix, 20),
+            'vault_name': self.create_random_name(resource_prefix, 24),
+            'admin_login': 'admin123',
+            'admin_password': 'SecretPassword123',
+            'license_type': 'LicenseIncluded',
+            'v_cores': 8,
+            'storage_size_in_gb': '32',
+            'edition': 'GeneralPurpose',
+            'family': 'Gen5',
+            'collation': "Serbian_Cyrillic_100_CS_AS",
+            'proxy_override': "Proxy"
+        })
+
+        # Create and prepare VNet and subnet for new virtual cluster
+        self.cmd('network route-table create -g {rg} -n {route_table_name}')
+        self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_default} --next-hop-type Internet --address-prefix 0.0.0.0/0')
+        self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_subnet_to_vnet_local} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
+        self.cmd('network vnet create -g {rg} -n {vnet_name} --location {loc} --address-prefix 10.0.0.0/16')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name}')
+        subnet = self.cmd('network vnet subnet show -g {rg} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
+
+        self.kwargs.update({
+            'subnet_id': subnet['id']
+        })
+
+        # create sql managed_instance
+        managed_instance = self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
+                                    '-u {admin_login} -p {admin_password} --subnet {subnet_id} --license-type {license_type} '
+                                    '--capacity {v_cores} --storage {storage_size_in_gb} --edition {edition} --family {family} '
+                                    '--collation {collation} --proxy-override {proxy_override} --public-data-endpoint-enabled --assign-identity',
+                                    checks=[
+                                        self.check('name', '{managed_instance_name}'),
+                                        self.check('resourceGroup', '{rg}'),
+                                        self.check('administratorLogin', '{admin_login}'),
+                                        self.check('vCores', '{v_cores}'),
+                                        self.check('storageSizeInGb', '{storage_size_in_gb}'),
+                                        self.check('licenseType', '{license_type}'),
+                                        self.check('sku.tier', '{edition}'),
+                                        self.check('sku.family', '{family}'),
+                                        self.check('sku.capacity', '{v_cores}'),
+                                        self.check('collation', '{collation}'),
+                                        self.check('proxyOverride', '{proxy_override}'),
+                                        self.check('publicDataEndpointEnabled', 'True')]).get_output_in_json()
+
+        # create database
+        self.cmd('sql midb create -g {rg} --mi {managed_instance_name} -n {database_name} --collation {collation}',
+                 checks=[
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('name', '{database_name}'),
+                     self.check('location', '{loc}'),
+                     self.check('collation', '{collation}'),
+                     self.check('status', 'Online')])
+
+        self.kwargs.update({
+            'mi_identity': managed_instance['identity']['principalId'],
+            'vault_name': self.create_random_name(resource_prefix, 24),
+            'key_name': self.create_random_name(resource_prefix, 32),
+        })
+
+        # create vault and acl server identity
+
+        self.cmd('keyvault create -g {rg} -n {vault_name} --enable-soft-delete true')
+        self.cmd('keyvault set-policy -g {rg} -n {vault_name} --object-id {mi_identity} --key-permissions wrapKey unwrapKey get list')
+
+        # create key
+        key_resp = self.cmd('keyvault key create -n {key_name} -p software --vault-name {vault_name}').get_output_in_json()
+
+        self.kwargs.update({
+            'kid': key_resp['key']['kid'],
+        })
+
+        # add server key
+        server_key_resp = self.cmd('sql mi key create -g {rg} --mi {managed_instance_name} -k {kid}',
+                                   checks=[
+                                       self.check('uri', '{kid}'),
+                                       self.check('serverKeyType', 'AzureKeyVault')])
+
+        self.kwargs.update({
+            'server_key_name': server_key_resp.get_output_in_json()['name'],
+        })
+
+        # validate show key
+        self.cmd('sql mi key show -g {rg} --mi {managed_instance_name} -k {kid}',
+                 checks=[
+                     self.check('uri', '{kid}'),
+                     self.check('serverKeyType', 'AzureKeyVault'),
+                     self.check('name', '{server_key_name}')])
+
+        # validate list key (should return 2 items)
+        self.cmd('sql mi key list -g {rg} --mi {managed_instance_name}',
+                 checks=[JMESPathCheck('length(@)', 2)])
+
+        # validate encryption protector is service managed via show
+        self.cmd('sql mi tde-key show -g {rg} --mi {managed_instance_name}',
+                 checks=[
+                     self.check('serverKeyType', 'ServiceManaged'),
+                     self.check('serverKeyName', 'ServiceManaged')])
+
+        # update encryption protector to akv key
+        self.cmd('sql mi tde-key set -g {rg} --mi {managed_instance_name} -t AzureKeyVault -k {kid}',
+                 checks=[
+                     self.check('serverKeyType', 'AzureKeyVault'),
+                     self.check('serverKeyName', '{server_key_name}'),
+                     self.check('uri', '{kid}')])
+
+        # validate encryption protector is akv via show
+        self.cmd('sql mi tde-key show -g {rg} --mi {managed_instance_name}',
+                 checks=[
+                     self.check('serverKeyType', 'AzureKeyVault'),
+                     self.check('serverKeyName', '{server_key_name}'),
+                     self.check('uri', '{kid}')])
+
+        # update encryption protector to service managed
+        self.cmd('sql mi tde-key set -g {rg} --mi {managed_instance_name} -t ServiceManaged',
+                 checks=[
+                     self.check('serverKeyType', 'ServiceManaged'),
+                     self.check('serverKeyName', 'ServiceManaged')])
+
+        # validate encryption protector is service managed via show
+        self.cmd('sql mi tde-key show -g {rg} --mi {managed_instance_name}',
+                 checks=[
+                     self.check('serverKeyType', 'ServiceManaged'),
+                     self.check('serverKeyName', 'ServiceManaged')])
+
+
 class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
 
     @record_only()
