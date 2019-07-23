@@ -7,4 +7,5 @@ def cf_apim(cli_ctx, *_):
 
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.apimanagement import ApiManagementClient
+
     return get_mgmt_service_client(cli_ctx, ApiManagementClient)

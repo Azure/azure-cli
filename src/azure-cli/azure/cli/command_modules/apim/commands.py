@@ -7,13 +7,11 @@
 from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.apim._client_factory import cf_apim
 
+apim_sdk = CliCommandType(
+    operations_tmpl='azure.mgmt.apimanagement.operations#ApiManagementServiceOperations.{}',
+    client_factory=cf_apim)
 
 def load_command_table(self, _):
-
-    apim_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.apimanagement.operations#ApiManagementOperations.{}',
-        client_factory=cf_apim)
-
 
     with self.command_group('apim', apim_sdk, client_factory=cf_apim) as g:
         g.custom_command('create', 'create_apim')

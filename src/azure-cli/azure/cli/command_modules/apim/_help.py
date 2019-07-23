@@ -9,30 +9,30 @@ from knack.help_files import helps  # pylint: disable=unused-import
 
 helps['apim'] = """
     type: group
-    short-summary: Commands to manage Apims.
+    short-summary: Commands to manage API Management service instance.
 """
 
 helps['apim create'] = """
     type: command
-    short-summary: Create a Apim.
+    short-summary: Create an APIM instance.
 """
 
 helps['apim list'] = """
     type: command
-    short-summary: List Apims.
+    short-summary: List APIM instances.
 """
 
 helps['apim delete'] = """
     type: command
-    short-summary: Delete a Apim.
+    short-summary: Delete an APIM instance.
 """
 
 helps['apim show'] = """
     type: command
-    short-summary: Show details of a Apim.
+    short-summary: Show details of an APIM instance.
 """
 
 helps['apim update'] = """
     type: command
-    short-summary: Update a Apim.
+    short-summary: Update an APIM instance.
 """
