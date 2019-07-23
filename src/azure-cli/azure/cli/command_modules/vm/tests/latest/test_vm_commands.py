@@ -3298,13 +3298,13 @@ class DedicatedHostScenarioTest(ScenarioTest):
 
         self.cmd('vm host create -n {host-name} --host-group {host-group} -d 2 -g {rg} '
                  '--sku DSv3-Type1 --auto-replace false --tags "bar=baz" ', checks=[
-                    self.check('name', '{host-name}'),
-                    self.check('location', '{loc}'),
-                    self.check('platformFaultDomain', 2),
-                    self.check('sku.name', 'DSv3-Type1'),
-                    self.check('autoReplaceOnFailure', False),
-                    self.check('tags.bar', 'baz')
-        ])
+                     self.check('name', '{host-name}'),
+                     self.check('location', '{loc}'),
+                     self.check('platformFaultDomain', 2),
+                     self.check('sku.name', 'DSv3-Type1'),
+                     self.check('autoReplaceOnFailure', False),
+                     self.check('tags.bar', 'baz')
+                 ])
 
         self.cmd('vm create -n {vm-name} --image debian -g {rg} --size Standard_D4s_v3 '
                  ' --host-group {host-group} --host {host-name} --generate-ssh-keys')
