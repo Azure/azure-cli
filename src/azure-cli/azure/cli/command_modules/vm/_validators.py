@@ -563,7 +563,7 @@ def _validate_vm_create_dedicated_host(cmd, namespace):
     # if this is a valid dedicated host resource id return
     if is_valid_resource_id(namespace.dedicated_host):
         if namespace.dedicated_host_group is not None:
-            logger.info("Ignoring `--host-group` as `--host` is a valid resource id.")
+            logger.warning("Ignoring `--host-group` as `--host` is a valid resource id.")
         return
 
     # otherwise this should just be a dedicated host name. If host group provided, build resource id

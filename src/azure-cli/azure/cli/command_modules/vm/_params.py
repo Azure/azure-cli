@@ -405,6 +405,7 @@ def load_arguments(self, _):
     with self.argument_context('vm host') as c:
         c.argument('host_group_name', options_list=['--host-group'], id_part='name', help="Name of the Dedicated Host Group")
         c.argument('host_name', name_arg_type, id_part='child_name_1', help="Name of the Dedicated Host")
+        c.ignore('expand')
 
     with self.argument_context('vm host create') as c:
         c.argument('platform_fault_domain', options_list=['--platform-fault-domain', '-d'], type=int, choices=[0, 1, 2],

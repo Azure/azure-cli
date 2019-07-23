@@ -1200,6 +1200,18 @@ type: command
 short-summary: Get the details of a dedicated host.
 """
 
+helps['vm host get-instance-view'] = """
+type: command
+short-summary: Get instance information about a dedicated host.
+examples:
+  - name: Get instance view information of a dedicated host.
+    text: az vm host get-instance-view --host-group my-host-group --name my-host -g ova-test
+
+  - name: Get instance views for all dedicated hosts in a host group.
+    text: >
+        az vm host get-instance-view --ids $(az vm host list -g ova-test --host-group my-host-group --query "[].id" -o tsv)
+"""
+
 helps['vm host update'] = """
 type: command
 short-summary: Update a dedicated host.

@@ -28,7 +28,8 @@ Release History
 
 * list-skus: use newer api-version to output zone details
 * vmss create: restore client end defaults to False for "--single-placement-group"
-* snapshot/disk create: expose ZRS storage skus   
+* snapshot/disk create: expose ZRS storage skus
+* Add new command group `vm host` to support dedicated hosts. Expose `--host` and `--host-group` on `vm create`
 
 2.0.69
 ++++++
@@ -79,10 +80,6 @@ Release History
 
 * Enable Files AADDS for storage account update.
 * Fixed issue `storage blob service-properties update --set`.
-
-**VM**
-
-* Add new command group `vm host` to support dedicated hosts. Expose `--host` and `--host-group` on `vm create`
 
 2.0.68
 ++++++

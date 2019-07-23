@@ -316,6 +316,7 @@ def load_command_table(self, _):
     with self.command_group('vm host', compute_dedicated_host_sdk, client_factory=cf_dedicated_hosts,
                             min_api='2019-03-01', is_preview=True) as g:
         g.show_command('show', 'get')
+        g.custom_command('get-instance-view', 'get_dedicated_host_instance_view')
         g.custom_command('create', 'create_dedicated_host')
         g.command('list', 'list_by_host_group')
         g.generic_update_command('update')

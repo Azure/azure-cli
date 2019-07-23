@@ -2679,4 +2679,7 @@ def create_dedicated_host(cmd, client, host_group_name, host_name, resource_grou
 
     return client.create_or_update(resource_group_name, host_group_name, host_name, parameters=host_params)
 
+def get_dedicated_host_instance_view(client, host_group_name, host_name, resource_group_name):
+    return client.get(resource_group_name, host_group_name, host_name, expand="instanceView")
+
 # endregion
