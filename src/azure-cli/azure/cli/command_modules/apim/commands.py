@@ -23,6 +23,10 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'get_apim') # TODO: implement custom table formatter
         g.generic_update_command('update', setter_name='update', custom_func_name='update_apim')
 
+
+    with self.command_group('apim api', apim_sdk, client_factory=cf_apim) as g:
+        g.custom_command('list', 'list_apim_api')
+
     with self.command_group('apim', is_preview=True):
         pass
 

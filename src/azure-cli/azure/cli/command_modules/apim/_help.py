@@ -41,3 +41,8 @@ helps['apim update'] = """
     type: command
     short-summary: Update an API Management serviceaz  instance.
 """
+
+helps['apim api list'] = """
+    type: command
+    short-summary: List API's for a service instance.
+"""

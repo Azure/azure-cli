@@ -54,3 +54,10 @@ def update_apim(cmd, instance, tags=None):
     with cmd.update_context(instance) as c:
         c.set_param('tags', tags)
     return instance
+
+# API Operations
+def list_apim_api(client, service_name, resource_group_name=None):
+    """List all APis for the given service instance. """
+    if resource_group_name:
+        return client.api.list_by_service(resource_group_name, service_name)
+    return client.api.list_by_service()
