@@ -10,6 +10,7 @@ def create_apim(cmd, client, resource_group_name, apimanamagement, location=None
     raise CLIError('TODO: Implement `apim create`')
 
 def list_apim(client, resource_group_name=None):
+    """List all APIM instances.  Resource group is optional """
     if resource_group_name:
         return client.api_management_service.list_by_resource_group(resource_group_name)
     return client.api_management_service.list()
