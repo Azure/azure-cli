@@ -9,22 +9,22 @@ from knack.help_files import helps  # pylint: disable=unused-import
 
 helps['apim'] = """
     type: group
-    short-summary: Commands to manage API Management service instance.
+    short-summary: Commands to manage Azure API Management service instance.
 """
 
 helps['apim create'] = """
     type: command
-    short-summary: Create an APIM instance.
+    short-summary: Create an API Management service instance.
 """
 
 helps['apim list'] = """
     type: command
-    short-summary: List APIM instances.
+    short-summary: List API Management service instances.
 """
 
 helps['apim delete'] = """
     type: command
-    short-summary: Delete an APIM instance.
+    short-summary: Delete an API Management service instance.
 """
 
 helps['apim show'] = """
@@ -34,5 +34,5 @@ helps['apim show'] = """
 
 helps['apim update'] = """
     type: command
-    short-summary: Update an APIM instance.
+    short-summary: Update an API Management serviceaz  instance.
 """

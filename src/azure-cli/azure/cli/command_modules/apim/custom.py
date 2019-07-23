@@ -9,10 +9,10 @@ from knack.util import CLIError
 def create_apim(cmd, client, resource_group_name, apimanamagement, location=None, tags=None):
     raise CLIError('TODO: Implement `apim create`')
 
-
-def list_apim(cmd, client, resource_group_name=None):
-    raise CLIError('TODO: Implement `apim list`')
-
+def list_apim(client, resource_group_name=None):
+    if resource_group_name:
+        return client.api_management_service.list_by_resource_group(resource_group_name)
+    return client.api_management_service.list()
 
 def update_apim(cmd, instance, tags=None):
     with cmd.update_context(instance) as c:
