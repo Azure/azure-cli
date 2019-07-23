@@ -3359,7 +3359,6 @@ class DedicatedHostScenarioTest(ScenarioTest):
                      self.check('tags.bar', 'baz')
                  ])
 
-
         result = self.cmd('vm host get-instance-view --host-group {host-group} --name {host-name} -g {rg}', checks=[
             self.check('name', '{host-name}'),
         ]).get_output_in_json()
