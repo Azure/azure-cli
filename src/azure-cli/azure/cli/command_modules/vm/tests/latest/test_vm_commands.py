@@ -3289,17 +3289,21 @@ class DedicatedHostScenarioTest(ScenarioTest):
         })
 
         # create resources
-        self.cmd('vm host group create -n {host-group} -c 3 -g {rg}', checks=[
+        self.cmd('vm host group create -n {host-group} -c 3 -g {rg} --tags "foo=bar"', checks=[
             self.check('name', '{host-group}'),
             self.check('location', '{loc}'),
-            self.check('platformFaultDomainCount', 3)
+            self.check('platformFaultDomainCount', 3),
+            self.check('tags.foo', 'bar')
         ])
 
-        self.cmd('vm host create -n {host-name} --host-group {host-group} -d 2 -g {rg} --sku DSv3-Type1', checks=[
+        self.cmd('vm host create -n {host-name} --host-group {host-group} -d 2 -g {rg} '
+                 '--sku DSv3-Type1 --auto-replace false --tags "bar=baz" ', checks=[
             self.check('name', '{host-name}'),
             self.check('location', '{loc}'),
             self.check('platformFaultDomain', 2),
-            self.check('sku.name', 'DSv3-Type1')
+            self.check('sku.name', 'DSv3-Type1'),
+            self.check('autoReplaceOnFailure', False),
+            self.check('tags.bar', 'baz')
         ])
 
         self.cmd('vm create -n {vm-name} --image debian -g {rg} --size Standard_D4s_v3 '
