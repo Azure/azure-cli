@@ -79,6 +79,7 @@ Release History
 
 * Enable Files AADDS for storage account update.
 * Fixed issue `storage blob service-properties update --set`.
+* `storage remove`: add remove command for storage
 
 2.0.68
 ++++++
