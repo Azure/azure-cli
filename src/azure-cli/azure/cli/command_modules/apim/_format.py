@@ -18,9 +18,21 @@ def _service_format_group(item):
         ('RESOURCE GROUP', _get_value(item, 'resourceGroup')),
         ('LOCATION', _get_value(item, 'location')),
         ('GATEWAY', _get_value(item, 'gatewayUrl')),
-        ('VIPS', _get_value(item, 'publicIpAddresses')),
-        ('SKU', _get_value(item, 'sku', 'name'))
+        ('IP ADDR', _get_value(item, 'publicIpAddresses')),
+        ('STATUS', _service_status(_get_value(item, 'provisioningState'))),
+        ('TIER', _get_value(item, 'sku', 'name'))
     ])
+
+def _service_status(argument):
+    d = {
+        'activating': 'Activating',
+        'created': 'Activating',
+        'failed': 'Error',
+        'stopped': 'Stopped',
+        'succeeded': 'Online',
+        'updating': 'Updating'
+    }
+    return d.get(argument.lower(), argument)
 
 def _get_value(item, *args):
     """Get a nested value from a dict.
