@@ -10,6 +10,7 @@ Release History
 **ACR**
 
 * Fixed issue #9952 (a regression in the `acr pack build` command).
+* Removed the default builder image name in `acr pack build`.
 
 **Appservice**
 * az webapp config ssl support to show a message if a resource is not found
@@ -83,6 +84,7 @@ Release History
 
 * Enable Files AADDS for storage account update.
 * Fixed issue `storage blob service-properties update --set`.
+* `storage remove`: add remove command for storage
 
 2.0.68
 ++++++
