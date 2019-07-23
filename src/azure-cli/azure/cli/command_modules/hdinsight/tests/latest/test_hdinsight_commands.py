@@ -111,7 +111,7 @@ class HDInsightClusterTests(ScenarioTest):
         })
 
         # create an application and wait for completion
-        self.cmd('az hdinsight application create -g {rg} -n {app} --cluster-name {cluster} '
+        self.cmd('az hdinsight application create -g {rg} -n {app} --cluster-name {cluster} --edgenode-size Standard_D3_v2 '
                  '--script-uri {script_uri} --script-action-name {script_action} --script-parameters {script_params}')
         self.cmd('az hdinsight application wait --created -n {app} -g {rg} --cluster-name {cluster}')
 

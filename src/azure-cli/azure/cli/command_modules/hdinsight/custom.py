@@ -322,7 +322,7 @@ def _get_rg_location(ctx, resource_group_name, subscription_id=None):
 
 # pylint: disable=unused-argument
 def create_hdi_application(cmd, client, resource_group_name, cluster_name, application_name,
-                           script_uri, script_action_name, script_parameters=None, edgenode_size=None,
+                           script_uri, script_action_name, edgenode_size, script_parameters=None,
                            ssh_username='sshuser', ssh_password=None, ssh_public_key=None,
                            marketplace_identifier=None, application_type='CustomApplication', tags=None,
                            https_endpoint_access_mode='WebPage', https_endpoint_destination_port=8080,
