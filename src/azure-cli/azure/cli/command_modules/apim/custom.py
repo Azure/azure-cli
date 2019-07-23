@@ -50,6 +50,14 @@ def get_apim(client, resource_group_name, name):
     """Show details of an APIM instance """
     return client.api_management_service.get(resource_group_name, name)
 
+def check_name_availability(client,  name):
+    """checks to see if a service name is available to use """
+    return client.api_management_service.check_name_availability(name)
+
+def apim_backup(client, resource_group_name, name):
+    """back up an API Management service to the configured storage account """
+    return client.api_management_service.backup(resource_group_name, name)
+
 # API Operations
 def list_apim_api(client, resource_group_name, service_name):
     """List all APis for the given service instance. """
