@@ -2118,13 +2118,15 @@ def create_private_link_service(cmd, resource_group_name, service_name,
     return client.create_or_update(resource_group_name, service_name, link_service)
 
 
-def update_private_link_service(instance, cmd, tags=None, load_balancer_frontend_ips=None,
+def update_private_link_service(instance, cmd, tags=None, frontend_ip_configurations=None, load_balancer_name=None,
                                 ip_configs=None, private_endpoint_connections=None, visibility=None,
                                 auto_approval=None, fqdns=None):
     with cmd.update_context(instance) as c:
         c.set_param('tags', tags)
-        c.set_param('load_balancer_frontend_ip_configurations', load_balancer_frontend_ips)
-        c.set_param('ip_configurations', ip_configs)
+        c.set_param('load_balancer_frontend_ip_configurations', [
+            FrontendIPConfiguration(id=ip_config) for ip_config in frontend_ip_configurations
+        ])
+        c.set_param('ip_configurations', ip_configs) #TODO: Implement
         c.set_param('private_endpoint_connections', private_endpoint_connections)
         c.set_param('visibility', visibility)
         c.set_param('auto_approval', auto_approval)

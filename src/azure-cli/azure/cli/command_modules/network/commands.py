@@ -177,7 +177,7 @@ def load_command_table(self, _):
     network_private_link_service_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#PrivateLinkServicesOperations.{}',
         client_factory=cf_private_link_services,
-        min_api='2018-02-01'
+        min_api='2018-04-01'
     )
 
     network_lb_sdk = CliCommandType(
@@ -583,16 +583,17 @@ def load_command_table(self, _):
 
     # region PrivateEndpoint
     with self.command_group('network private-endpoint', network_private_endpoint_sdk) as g:
-        g.custom_command('create', 'create_private_endpoint', min_api='2018-02-01', is_preview=True)
-        g.command('delete', 'delete', min_api='2018-02-01', is_preview=True)
+        g.custom_command('create', 'create_private_endpoint', min_api='2018-04-01', is_preview=True)
+        g.command('delete', 'delete', min_api='2018-04-01', is_preview=True)
         g.custom_command('list', 'list_private_endpoints')
         g.show_command('show')
-        g.generic_update_command('update', custom_func_name='update_private_endpoint', is_preview=True, min_api='2018-02-01')
+        g.generic_update_command('update', custom_func_name='update_private_endpoint', is_preview=True, min_api='2018-04-01')
         g.command(
             'list-types', 'list',
             operations_tmpl='azure.mgmt.network.operations#AvailablePrivateEndpointTypesOperations.{}',
             client_factory=cf_private_endpoint_types,
-            is_preview=True
+            is_preview=True,
+            min_api='2018-04-01'
         )
     # endregion
 
