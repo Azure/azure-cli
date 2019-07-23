@@ -53,6 +53,9 @@ def storage_copy(cmd, client=None, source=None, destination=None,
                 dir_name = None if dir_name in ('', '.') else dir_name
                 source = client.make_file_url(share, dir_name, file_name)
                 service = 'file'
+            else: # Only support account trandfer for blob
+                source = 'https://{}.blob.core.windows.net'.format(account_name)
+                service = 'blob'
         elif local_path is not None:
             return local_path
         else:

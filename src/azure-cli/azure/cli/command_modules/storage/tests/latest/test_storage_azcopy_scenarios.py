@@ -164,37 +164,37 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
 
         import os
         # Upload a single file
-        self.cmd('storage copy --source-local-path {} --destination-account-name {} --destination-container {}'.format(
+        self.cmd('storage copy --source-local-path "{}" --destination-account-name {} --destination-container {}'.format(
             os.path.join(test_dir, 'readme'), first_account, first_container))
         self.cmd('storage blob list -c {} --account-name {}'
             .format(first_container, first_account), checks=JMESPathCheck('length(@)', 1))
 
         # Upload entire directory
-        self.cmd('storage copy --source-local-path {} --destination-account-name {} --destination-container {}'.format(
+        self.cmd('storage copy --source-local-path "{}" --destination-account-name {} --destination-container {} --recursive'.format(
             os.path.join(test_dir, 'apple'), first_account, first_container))
         self.cmd('storage blob list -c {} --account-name {}'.format(
             first_container, first_account), checks=JMESPathCheck('length(@)', 11))
 
         # Upload a set of files
-        self.cmd('storage copy --source-local-path {} --destination-account-name {} --destination-container {}'.format(
+        self.cmd('storage copy --source-local-path "{}" --destination-account-name {} --destination-container {} --recursive'.format(
             os.path.join(test_dir, 'butter/file_*'), first_account, first_container))
         self.cmd('storage blob list -c {} --account-name {}'.format(
             first_container, first_account), checks=JMESPathCheck('length(@)', 21))
 
         local_folder = self.create_temp_dir()
         # Download a single file
-        self.cmd('storage copy --source-account-name {} --source-container {} --source-blob {} --destination-local-path {}'.format(
+        self.cmd('storage copy --source-account-name {} --source-container {} --source-blob {} --destination-local-path "{}"'.format(
             first_account, first_container, 'readme', local_folder))
         self.assertEqual(1, sum(len(f) for r, d, f in os.walk(local_folder)))
           
         # Download entire directory 
-        self.cmd('storage copy --source-account-name {} --source-container {} --source-blob {} --destination-local-path {} --recursive'.format(
+        self.cmd('storage copy --source-account-name {} --source-container {} --source-blob {} --destination-local-path "{}" --recursive'.format(
             first_account, first_container, 'apple/', local_folder))
         self.assertEqual(1, sum(len(d) for r, d, f in os.walk(local_folder)))
         self.assertEqual(11, sum(len(f) for r, d, f in os.walk(local_folder)))
 
         # Download a set of files
-        self.cmd('storage copy --source-account-name {} --source-container {} --source-blob {} --destination-local-path {} --recursive'.format(
+        self.cmd('storage copy --source-account-name {} --source-container {} --source-blob {} --destination-local-path "{}" --recursive'.format(
             first_account, first_container, 'file*', local_folder))
         self.assertEqual(1, sum(len(d) for r, d, f in os.walk(local_folder)))
         self.assertEqual(21, sum(len(f) for r, d, f in os.walk(local_folder)))
