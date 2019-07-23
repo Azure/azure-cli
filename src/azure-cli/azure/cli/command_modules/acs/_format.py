@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from collections import OrderedDict
- # pylint: disable=import-error
+# pylint: disable=import-error
 from jmespath import compile as compile_jmes, Options
 # pylint: disable=import-error
 from jmespath import functions
@@ -55,6 +55,7 @@ def aks_upgrades_table_format(result):
     """Format get-upgrades results as a summary for display with "-o table"."""
 
     preview = {}
+
     def find_preview_versions(versions_bag):
         for upgrade in versions_bag.get('upgrades', []):
             if upgrade.get('isPreview', False):
@@ -78,6 +79,7 @@ def aks_versions_table_format(result):
     """Format get-versions results as a summary for display with "-o table"."""
 
     preview = {}
+
     def find_preview_versions():
         for orchestrator in result.get('orchestrators', []):
             if orchestrator.get('isPreview', False):
