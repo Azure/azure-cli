@@ -89,8 +89,8 @@ def login_auth_for_azcopy(cmd):
     return AzCopyCredentials(token_info=token_info)
 
 
-def blob_client_auth_for_azcopy(cmd, blob_client):
-    azcopy_creds = storage_client_auth_for_azcopy(cmd, blob_client, 'blob')
+def client_auth_for_azcopy(cmd, client, service='blob'):
+    azcopy_creds = storage_client_auth_for_azcopy(cmd, client, service)
     if azcopy_creds is not None:
         return azcopy_creds
 
