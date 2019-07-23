@@ -78,7 +78,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
     @StorageAccountPreparer(parameter_name='first_account')
     @StorageAccountPreparer(parameter_name='second_account')
     @StorageTestFilesPreparer()
-    def test_storage_copy_blob_url(self, resource_group, first_account, second_account, test_dir):
+    def test_storage_azcopy_blob_url(self, resource_group, first_account, second_account, test_dir):
         
         first_account_info = self.get_account_info(resource_group, first_account)
         second_account_info = self.get_account_info(resource_group, second_account)
@@ -154,7 +154,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
     @StorageAccountPreparer(parameter_name='first_account')
     @StorageAccountPreparer(parameter_name='second_account')
     @StorageTestFilesPreparer()
-    def test_storage_copy_blob_account(self, resource_group, first_account, second_account, test_dir):
+    def test_storage_azcopy_blob_account(self, resource_group, first_account, second_account, test_dir):
         
         first_account_info = self.get_account_info(resource_group, first_account)
         second_account_info = self.get_account_info(resource_group, second_account)
@@ -218,3 +218,108 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
             .format(second_account), checks=JMESPathCheck('length(@)', 2))
         self.cmd('storage blob list -c {} --account-name {}'
             .format(first_container, second_account), checks=JMESPathCheck('length(@)', 21))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='first_account')
+    @StorageAccountPreparer(parameter_name='second_account')
+    @StorageTestFilesPreparer()
+    def test_storage_azcopy_file_url(self, resource_group, first_account, second_account, test_dir):
+        
+        first_account_info = self.get_account_info(resource_group, first_account)
+        second_account_info = self.get_account_info(resource_group, second_account)
+        
+        first_share = self.create_share(first_account_info)
+        second_share = self.create_share(second_account_info)
+        
+        first_account_url = 'https://{}.file.core.windows.net'.format(first_account)
+        second_account_url = 'https://{}.file.core.windows.net'.format(second_account)
+
+        first_share_url = '{}/{}'.format(first_account_url, first_share)
+        second_share_url = '{}/{}'.format(second_account_url, second_share)
+
+        import os
+        # Upload a single file
+        self.cmd('storage copy -s "{}" -d "{}"'.format(
+            os.path.join(test_dir, 'readme'), first_share_url))
+        self.cmd('storage file list -s {} --account-name {}'
+            .format(first_share, first_account), checks=JMESPathCheck('length(@)', 1))
+
+        # Upload entire directory
+        self.cmd('storage copy -s "{}" -d "{}" --recursive'.format(
+            os.path.join(test_dir, 'apple'), first_share_url))
+        self.cmd('storage file list -s {} --account-name {}'.format(
+            first_share, first_account), checks=JMESPathCheck('length(@)', 2))
+
+        # Upload a set of files
+        self.cmd('storage copy -s "{}" -d "{}" --recursive'.format(
+            os.path.join(test_dir, 'butter/file_*'), first_share_url))
+        self.cmd('storage file list -s {} --account-name {}'.format(
+            first_share, first_account), checks=JMESPathCheck('length(@)', 12))
+
+        local_folder = self.create_temp_dir()
+        # Download a single file
+        self.cmd('storage copy -s "{}" -d "{}"'.format(
+            '{}/readme'.format(first_share_url), local_folder))
+        self.assertEqual(1, sum(len(f) for r, d, f in os.walk(local_folder)))
+          
+        # Download entire directory 
+        self.cmd('storage copy -s "{}" -d "{}" --recursive'.format(
+            '{}/apple'.format(first_share_url), local_folder))
+        self.assertEqual(1, sum(len(d) for r, d, f in os.walk(local_folder)))
+        self.assertEqual(11, sum(len(f) for r, d, f in os.walk(local_folder)))
+
+        # Download a set of files
+        self.cmd('storage copy -s "{}" -d "{}" --recursive'.format(
+            '{}/file*'.format(first_share_url), local_folder))
+        self.assertEqual(1, sum(len(d) for r, d, f in os.walk(local_folder)))
+        self.assertEqual(21, sum(len(f) for r, d, f in os.walk(local_folder)))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='first_account')
+    @StorageAccountPreparer(parameter_name='second_account')
+    @StorageTestFilesPreparer()
+    def test_storage_azcopy_file_account(self, resource_group, first_account, second_account, test_dir):
+        
+        first_account_info = self.get_account_info(resource_group, first_account)
+        second_account_info = self.get_account_info(resource_group, second_account)
+        
+        first_share = self.create_share(first_account_info)
+        second_share = self.create_share(second_account_info)
+
+        import os
+        # Upload a single file
+        self.cmd('storage copy --source-local-path "{}" --destination-account-name {} --destination-share {}'.format(
+            os.path.join(test_dir, 'readme'), first_account, first_share))
+        self.cmd('storage file list -s {} --account-name {}'
+            .format(first_share, first_account), checks=JMESPathCheck('length(@)', 1))
+
+        # Upload entire directory
+        self.cmd('storage copy --source-local-path "{}" --destination-account-name {} --destination-share {} --recursive'.format(
+            os.path.join(test_dir, 'apple'), first_account, first_share))
+        self.cmd('storage file list -s {} --account-name {}'.format(
+            first_share, first_account), checks=JMESPathCheck('length(@)', 2))
+
+        # Upload a set of files
+        self.cmd('storage copy --source-local-path "{}" --destination-account-name {} --destination-share {} --recursive'.format(
+            os.path.join(test_dir, 'butter/file_*'), first_account, first_share))
+        self.cmd('storage file list -s {} --account-name {}'.format(
+            first_share, first_account), checks=JMESPathCheck('length(@)', 12))
+
+        local_folder = self.create_temp_dir()
+        # Download a single file
+        self.cmd('storage copy --source-account-name {} --source-share {} --source-file-path {} --destination-local-path "{}"'.format(
+            first_account, first_share, 'readme', local_folder))
+        self.assertEqual(1, sum(len(f) for r, d, f in os.walk(local_folder)))
+          
+        # Download entire directory 
+        self.cmd('storage copy --source-account-name {} --source-share {} --source-file-path {} --destination-local-path "{}" --recursive'.format(
+            first_account, first_share, 'apple', local_folder))
+        self.assertEqual(1, sum(len(d) for r, d, f in os.walk(local_folder)))
+        self.assertEqual(11, sum(len(f) for r, d, f in os.walk(local_folder)))
+
+        # Download a set of files
+        self.cmd('storage copy --source-account-name {} --source-share {} --source-file-path {} --destination-local-path "{}" --recursive'.format(
+            first_account, first_share, 'file*', local_folder))
+        self.assertEqual(1, sum(len(d) for r, d, f in os.walk(local_folder)))
+        self.assertEqual(21, sum(len(f) for r, d, f in os.walk(local_folder)))
+

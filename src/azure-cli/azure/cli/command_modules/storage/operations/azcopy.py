@@ -17,19 +17,18 @@ def storage_copy(cmd, client=None, source=None, destination=None,
                     destination_if_modified_since=None, destination_if_unmodified_since=None, destination_if_match=None, destination_if_none_match=None,
                     source_account_name=None, source_container=None, source_blob=None, source_share=None, source_file_path=None, source_local_path=None,
                     destination_account_name=None, destination_container=None, destination_blob=None, destination_share=None, destination_file_path=None, destination_local_path=None):
-    def get_url_with_sas(url, account_name, container, blob, share, file_path, local_path):
+    def get_url_with_sas(source, account_name, container, blob, share, file_path, local_path):
         import re
         import os
         from azure.cli.command_modules.storage._validators import _query_account_key
         from azure.cli.command_modules.storage.azcopy.util import _generate_sas_token
 
-        if url is not None:
-            source = url
+        if source is not None:
             if "?" in source: # sas token exists
                 return source
             storage_pattern = re.compile(r'https://(.*?)\.(blob|dfs|file).core.windows.net')
             result = re.findall(storage_pattern, source)
-            if result: # Azure storage account
+            if result: # source is URL
                 storage_info = result[0]
                 account_name = storage_info[0]
                 if storage_info[1] in ['blob', 'dfs']:
@@ -39,6 +38,8 @@ def storage_copy(cmd, client=None, source=None, destination=None,
                 else:
                     raise ValueError('Not supported service type')
                 account_key = _query_account_key(cmd.cli_ctx, account_name)
+            else: # source is path
+                return source
         elif account_name:
             account_key = _query_account_key(cmd.cli_ctx, account_name)
             if container:
