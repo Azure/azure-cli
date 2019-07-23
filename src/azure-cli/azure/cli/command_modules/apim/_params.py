@@ -31,7 +31,7 @@ def load_arguments(self, _):
         c.argument('sku', arg_type=get_enum_type(SKU_TYPES), help='The sku of the api management instance')
         c.argument('capacity', type=int, validator=validate_capacity, help='The number of units of the api management instance')
         c.argument('enable_client_certificate', arg_type=get_three_state_flag(), help='meant to be used for Consumption SKU Service. This enforces a client certificate to be presented on each request to the gateway. This also enables the ability to authenticate the certificate in the policy on the gateway')
-
+        
     for subgroup in ['api', 'product']:
         with self.argument_context('apim {}'.format(subgroup)) as c:
             c.argument('service_name', options_list=['--service-name', '-sn'])
