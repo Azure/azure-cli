@@ -380,7 +380,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.assertNotEqual(current['startTask']['commandLine'], updated['startTask']['commandLine'])
 
         # test list node agent skus
-        self.batch_cmd('batch pool node-agent-skus list')
+        self.batch_cmd('batch pool supported-images list')
 
         # test delete iaas pool
         self.batch_cmd('batch pool delete --pool-id {pool_i} --yes')

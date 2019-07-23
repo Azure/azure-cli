@@ -277,17 +277,17 @@ def list_pool_node_counts_table_format(result):
     return table_output
 
 
-def list_node_agent_skus_table_format(result):
+def list_supported_images_table_format(result):
     """Format account list node agent skus result as a table."""
     table_output = []
     for item in result:
-        for ref in item['verifiedImageReferences']:
-            table_row = OrderedDict()
-            table_row['OS Type'] = item['osType']
-            table_row['Node Agent Sku'] = item['id']
-            table_row['Publisher'] = ref['publisher']
-            table_row['Offer'] = ref['offer']
-            table_row['Sku'] = ref['sku']
-            table_row['Version'] = ref['version']
-            table_output.append(table_row)
+        table_row = OrderedDict()
+        table_row['OS Type'] = item['osType']
+        table_row['Node Agent Sku'] = item['nodeAgentSkuId']
+        table_row['Publisher'] = item['imageReference']['publisher']
+        table_row['Offer'] = item['imageReference']['offer']
+        table_row['Sku'] = item['imageReference']['sku']
+        table_row['Version'] = item['imageReference']['version']
+        table_row['VerificationType'] = item['verificationType']
+        table_output.append(table_row)
     return table_output

@@ -441,8 +441,7 @@ def _parse_image_name(image, allow_digest=False):
     if allow_digest:
         raise CLIError("The name of the image to delete may include a tag in the"
                        " format 'name:tag' or digest in the format 'name@digest'.")
-    else:
-        raise CLIError("The name of the image may include a tag in the format 'name:tag'.")
+    raise CLIError("The name of the image may include a tag in the format 'name:tag'.")
 
 
 def _delete_manifest_confirmation(login_server,

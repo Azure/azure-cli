@@ -7,7 +7,7 @@ from azure.cli.core.decorators import Completer
 
 
 @Completer
-def load_node_agent_skus(cmd, prefix, namespace):  # pylint: disable=unused-argument
+def load_supported_images(cmd, prefix, namespace):  # pylint: disable=unused-argument
     from msrest.exceptions import ClientRequestError
     from azure.batch.models import BatchErrorException
     from azure.cli.command_modules.batch._client_factory import account_client_factory
@@ -18,14 +18,13 @@ def load_node_agent_skus(cmd, prefix, namespace):  # pylint: disable=unused-argu
     client_creds['account_endpoint'] = cmd.cli_ctx.config.get('batch', 'endpoint', None)
     try:
         client = account_client_factory(cmd.cli_ctx, client_creds)
-        skus = client.list_node_agent_skus()
+        skus = client.list_supported_images()
         for sku in skus:
-            for image in sku['verifiedImageReferences']:
-                all_images.append("{}:{}:{}:{}".format(
-                    image['publisher'],
-                    image['offer'],
-                    image['sku'],
-                    image['version']))
+            all_images.append("{}:{}:{}:{}".format(
+                sku.image_reference['publisher'],
+                sku.image_reference['offer'],
+                sku.image_reference['sku'],
+                sku.image_reference['version']))
         return all_images
     except (ClientRequestError, BatchErrorException):
         return []

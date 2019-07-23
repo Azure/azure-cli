@@ -22,7 +22,7 @@ name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME')
 # pylint: disable=too-many-statements
 def load_arguments(self, _):
     with self.argument_context('ad') as c:
-        c.argument('_subscription')  # hide global subscription param
+        c.ignore('_subscription')  # hide global subscription param
         c.argument('owner_object_id', help="owner's object id")
         c.argument('show_mine', action='store_true', help='list entities owned by the current user')
         c.argument('include_all', options_list='--all', action='store_true',
@@ -125,12 +125,11 @@ def load_arguments(self, _):
     with self.argument_context('ad user') as c:
         c.argument('mail_nickname', help='mail alias. Defaults to user principal name')
         c.argument('force_change_password_next_login', arg_type=get_three_state_flag(), help='Require the user to change their password the next time they log in.')
-
-    with self.argument_context('ad user') as c:
-        c.argument('password', help='User password.')
+        c.argument('account_enabled', arg_type=get_three_state_flag(), help='enable the user account')
+        c.argument('password', help='user password')
+        c.argument('upn_or_object_id', options_list=['--id', c.deprecate(target='--upn-or-object-id', redirect='--id', hide=True)], help='The object ID or principal name of the user for which to get information')
 
     with self.argument_context('ad user get-member-groups') as c:
-        c.argument('upn_or_object_id', help='The object ID or principal name of the user for which to get information')
         c.argument('security_enabled_only', action='store_true',
                    help='If true, only membership in security-enabled groups should be checked. Otherwise, membership in all groups should be checked.')
 

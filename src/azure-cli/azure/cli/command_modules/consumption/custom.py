@@ -26,9 +26,9 @@ def cli_consumption_list_usage(client, billing_period_name=None, top=None, inclu
 
     if billing_period_name and top:
         return list(client.list_by_billing_period(billing_period_name, expand=expand, filter=filter_expression, top=top).advance_page())
-    elif billing_period_name and not top:
+    if billing_period_name and not top:
         return list(client.list_by_billing_period(billing_period_name, expand=expand, filter=filter_expression))
-    elif not billing_period_name and top:
+    if not billing_period_name and top:
         return list(client.list(expand=expand, filter=filter_expression, top=top).advance_page())
     return client.list(expand=expand, filter=filter_expression)
 
@@ -84,9 +84,9 @@ def cli_consumption_list_marketplace(client, billing_period_name=None, start_dat
 
     if billing_period_name and top:
         return list(client.list_by_billing_period(billing_period_name, filter=filter_expression, top=top).advance_page())
-    elif billing_period_name and not top:
+    if billing_period_name and not top:
         return list(client.list_by_billing_period(billing_period_name, filter=filter_expression))
-    elif not billing_period_name and top:
+    if not billing_period_name and top:
         return list(client.list(filter=filter_expression, top=top).advance_page())
     return client.list(filter=filter_expression)
 
