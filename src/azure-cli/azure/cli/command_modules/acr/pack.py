@@ -8,7 +8,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
 
-from ._constants import ORYX_PACK_BUILDER_IMAGE
+from ._constants import ACR_CACHED_BUILDER_IMAGES
 from ._stream_utils import stream_logs
 from ._utils import (
     get_registry_by_name,
@@ -34,7 +34,7 @@ def acr_pack_build(cmd,  # pylint: disable=too-many-locals
                    registry_name,
                    image_name,
                    source_location,
-                   builder=ORYX_PACK_BUILDER_IMAGE,
+                   builder,
                    pull=False,
                    no_format=False,
                    no_logs=False,
@@ -56,8 +56,8 @@ def acr_pack_build(cmd,  # pylint: disable=too-many-locals
     if platform_os != OS.linux.value.lower():
         raise CLIError('Building with Buildpacks is only supported on Linux.')
 
-    if builder != ORYX_PACK_BUILDER_IMAGE and not pull:
-        logger.warning('Using a non-default builder image; `--pull` is probably needed as well')
+    if builder not in ACR_CACHED_BUILDER_IMAGES and not pull:
+        logger.warning('Using a non-cached builder image; `--pull` is probably needed as well')
 
     registry_prefixes = '{{.Run.Registry}}/', registry.login_server + '/'
     # If the image name doesn't have any required prefix, add it
