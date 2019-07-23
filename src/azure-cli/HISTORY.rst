@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**AppConfig**
+
+* Added "appconfig kv restore" command.
+
 **ACR**
 
 * Fixed issue #9952 (a regression in the `acr pack build` command).
