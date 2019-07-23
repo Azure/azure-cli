@@ -19,6 +19,7 @@ def load_arguments(self, _):
     from azure.cli.core.commands.validators import get_default_location_from_resource_group
 
     with self.argument_context('apim') as c:
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
         c.argument('tags', tags_type)
         #c.argument('service_name', options_list=['--name', '-n'], help="The name of the api management service instance.")
         c.argument('name', options_list=['--name', '-n'], help="The name of the api management service instance", id_part='name')

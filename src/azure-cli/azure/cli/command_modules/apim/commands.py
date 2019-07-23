@@ -5,28 +5,23 @@
 
 # pylint: disable=line-too-long
 from azure.cli.core.commands import CliCommandType
-
-from ._format import (
-    service_output_format
-)
-from azure.cli.command_modules.apim._client_factory import cf_apim
+from azure.cli.command_modules.apim._format import (service_output_format)
+from azure.cli.command_modules.apim._client_factory import (cf_apim, cf_service)
 
 apim_sdk = CliCommandType(
     operations_tmpl='azure.mgmt.apimanagement.operations#ApiManagementServiceOperations.{}',
-    client_factory=cf_apim)
+    client_factory=cf_service
+)
 
 def load_command_table(self, _):
-    with self.command_group('apim', apim_sdk, client_factory=cf_apim) as g:
+    with self.command_group('apim', apim_sdk) as g:
         g.custom_command('create', 'create_apim', supports_no_wait=True)
-        g.command('delete', 'delete')
+        g.command('delete', 'delete', confirmation=True)
         g.custom_command('list', 'list_apim', table_transformer=service_output_format)
-        g.custom_show_command('show', 'get_apim', table_transformer=service_output_format) 
-        g.custom_command('update', 'create_apim', supports_no_wait=True)
-        g.custom_command('check-name-availability', 'check_name_availability', supports_no_wait=True)
-        g.custom_command('backup', 'apim_backup', supports_no_wait=True)
+        g.custom_show_command('show', 'get_apim') # TODO: implement custom table formatter
+        g.generic_update_command('update', setter_name='update', custom_func_name='update_apim')
 
-
-    with self.command_group('apim api', apim_sdk, client_factory=cf_apim) as g:
+    with self.command_group('apim api', apim_sdk) as g:
         g.custom_command('list', 'list_apim_api')
 
     with self.command_group('apim', is_preview=True):
