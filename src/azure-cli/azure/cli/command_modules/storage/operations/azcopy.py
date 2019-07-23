@@ -15,57 +15,55 @@ def storage_copy(cmd, client=None, source=None, destination=None,
                     metadata=None, timeout=None,
                     source_if_modified_since=None, source_if_unmodified_since=None, source_if_match=None, source_if_none_match=None, 
                     destination_if_modified_since=None, destination_if_unmodified_since=None, destination_if_match=None, destination_if_none_match=None,
-                    source_account_name=None, source_container_name=None, source_blob_name=None, source_share_name=None, source_file_path=None,
-                    destination_account_name=None, destination_container_name=None, destination_blob_name=None, destination_share_name=None, destination_file_path=None):
-    def get_url_with_sas(url=None, account_name=None, container_name=None, blob_name=None, share_name=None, file_path=None):
+                    source_account_name=None, source_container=None, source_blob=None, source_share=None, source_file_path=None, source_local_path=None,
+                    destination_account_name=None, destination_container=None, destination_blob=None, destination_share=None, destination_file_path=None, destination_local_path=None):
+    def get_url_with_sas(url, account_name, container, blob, share, file_path, local_path):
         import re
         import os
         from azure.cli.command_modules.storage._validators import _query_account_key
         from azure.cli.command_modules.storage.azcopy.util import _generate_sas_token
+
         if url is not None:
             source = url
+            if "?" in source: # sas token exists
+                return source
             storage_pattern = re.compile(r'https://(.*?)\.(blob|dfs|file).core.windows.net')
             result = re.findall(storage_pattern, source)
-        elif account_name:
-            if container_name:
-                client = blob_data_service_factory(cmd.cli_ctx, {'account_name': account_name})
-                if blob_name is None:
-                    blob_name = ''
-                source = client.make_blob_url(container_name, blob_name)
-            elif share_name:
+            if result: # Azure storage account
+                storage_info = result[0]
+                account_name = storage_info[0]
+                if storage_info[1] in ['blob', 'dfs']:
+                    service = 'blob'
+                elif storage_info[1] in ['file']:
+                    service = 'file'
+                else:
+                    raise ValueError('Not supported service type')
                 account_key = _query_account_key(cmd.cli_ctx, account_name)
+        elif account_name:
+            account_key = _query_account_key(cmd.cli_ctx, account_name)
+            if container:
+                client = blob_data_service_factory(cmd.cli_ctx, {'account_name': account_name})
+                if blob is None:
+                    blob = ''
+                source = client.make_blob_url(container, blob)
+                service = 'blob'
+            elif share:
                 client = file_data_service_factory(cmd.cli_ctx, {'account_name': account_name, 'account_key': account_key})
                 dir_name, file_name = os.path.split(file_path) if file_path else (None, '')
                 dir_name = None if dir_name in ('', '.') else dir_name
-                source = client.make_file_url(share_name, dir_name, file_name)
+                source = client.make_file_url(share, dir_name, file_name)
+                service = 'file'
+        elif local_path is not None:
+            return local_path
         else:
             raise ValueError('Not valid file')
+        
+        sas_token = _generate_sas_token(cmd, account_name, account_key, service)
+        return _add_url_sas(source, sas_token)
 
-        if result: # Azure storage account
-            storage_info = result[0]
-            account_name = storage_info[0]
-            service = storage_info[1]
-            if "?" in source: # sas token exists
-                return source
-            else: # no sas token
-                account_key = _query_account_key(cmd.cli_ctx, account_name)
-                if service in ['blob', 'dfs']:
-                    service = 'blob'
-                if service not in ['blob', 'file']:
-                    # error
-                    usage_string = \
-                        'Invalid usage: {}. Supply only one of the following argument sets to specify source:' \
-                        '\n\t   --container-name  --name' \
-                        '\n\tOR --share-name --path'
-                    raise ValueError(usage_string.format('Neither a valid blob or file source is specified'))
-                else:
-                    sas_token = _generate_sas_token(cmd, account_name, account_key, service)
-                    return _add_url_sas(source, sas_token)
-        else:
-            return source
     # Figure out source and destination type
-    full_source = get_url_with_sas(source, source_account_name, source_container_name, source_blob_name, source_share_name, source_file_path)
-    full_destination = get_url_with_sas(destination, destination_account_name, destination_container_name, destination_blob_name, destination_share_name, destination_file_path)
+    full_source = get_url_with_sas(source, source_account_name, source_container, source_blob, source_share, source_file_path, source_local_path)
+    full_destination = get_url_with_sas(destination, destination_account_name, destination_container, destination_blob, destination_share, destination_file_path, destination_local_path)
 
     azcopy = AzCopy()
     flags = []

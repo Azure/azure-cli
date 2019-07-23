@@ -10,6 +10,7 @@ from ..storage_test_util import StorageScenarioMixin, StorageTestFilesPreparer
 
 
 class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
+    test_resources_count = 0
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     @StorageTestFilesPreparer()
@@ -74,68 +75,146 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
             container, storage_account), checks=JMESPathCheck('length(@)', 0))
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer(parameter_name='account_1')
-    @StorageAccountPreparer(parameter_name='account_2')
+    @StorageAccountPreparer(parameter_name='first_account')
+    @StorageAccountPreparer(parameter_name='second_account')
     @StorageTestFilesPreparer()
-    def test_storage_blob_copy_url(self, account_1, account_2, test_dir):
-        container_1 = self.create_container(account_1)
-        container_2 = self.create_container(account_2)
-        account_url_1 = 'https://{}.blob.core.windows.net'.format(account_1)
-        account_url_2 = 'https://{}.blob.core.windows.net'.format(account_2)
-        container_url_1 = '{}/{}'.format(account_url_1, container_1)
-        container_url_2 = '{}/{}'.format(account_url_2, container_2)
+    def test_storage_copy_blob_url(self, resource_group, first_account, second_account, test_dir):
         
-        # Upload single file
+        first_account_info = self.get_account_info(resource_group, first_account)
+        second_account_info = self.get_account_info(resource_group, second_account)
+        
+        first_container = self.create_container(first_account_info)
+        second_container = self.create_container(second_account_info)
+        
+        first_account_url = 'https://{}.blob.core.windows.net'.format(first_account)
+        second_account_url = 'https://{}.blob.core.windows.net'.format(second_account)
+
+        first_container_url = '{}/{}'.format(first_account_url, first_container)
+        second_container_url = '{}/{}'.format(second_account_url, second_container)
+
+        import os
+        # Upload a single file
         self.cmd('storage copy -s "{}" -d "{}"'.format(
-            'aaa', container_url_1))
-        # Upload an entire directory
+            os.path.join(test_dir, 'readme'), first_container_url))
+        self.cmd('storage blob list -c {} --account-name {}'
+            .format(first_container, first_account), checks=JMESPathCheck('length(@)', 1))
+
+        # Upload entire directory
         self.cmd('storage copy -s "{}" -d "{}" --recursive'.format(
-            test_dir, container_url_1))
-        # Upload a set of files using wild cards
+            os.path.join(test_dir, 'apple'), first_container_url))
+        self.cmd('storage blob list -c {} --account-name {}'.format(
+            first_container, first_account), checks=JMESPathCheck('length(@)', 11))
+
+        # Upload a set of files
         self.cmd('storage copy -s "{}" -d "{}" --recursive'.format(
-            test_dir/file*, container_url_1))
-        # Download a single file 
+            os.path.join(test_dir, 'butter/file_*'), first_container_url))
+        self.cmd('storage blob list -c {} --account-name {}'.format(
+            first_container, first_account), checks=JMESPathCheck('length(@)', 21))
+
+        local_folder = self.create_temp_dir()
+        # Download a single file
         self.cmd('storage copy -s "{}" -d "{}"'.format(
-            test_dir/file*, container_url_1))
-        # Download an entire directory
+            '{}/readme'.format(first_container_url), local_folder))
+        self.assertEqual(1, sum(len(f) for r, d, f in os.walk(local_folder)))
+          
+        # Download entire directory 
         self.cmd('storage copy -s "{}" -d "{}" --recursive'.format(
-            test_dir/file*, container_url_1))
+            '{}/apple'.format(first_container_url), local_folder))
+        self.assertEqual(1, sum(len(d) for r, d, f in os.walk(local_folder)))
+        self.assertEqual(11, sum(len(f) for r, d, f in os.walk(local_folder)))
+
         # Download a set of files
         self.cmd('storage copy -s "{}" -d "{}" --recursive'.format(
-            test_dir/file*, container_url_1))
-        # Copy a single blob to another blob
-        self.cmd('storage copy -s "{}" -d "{}" --recursive'.format(
-            test_dir/file*, container_url_1))
-        # Copy an entire directory from blob virtual directory to another blob virtual directory 
-        self.cmd('storage copy -s "{}" -d "{}" --recursive'.format(
-            test_dir/file*, container_url_1))
-        # Copy an entire account data from blob account to another blob account
-        self.cmd('storage copy -s "{}" -d "{}" --recursive'.format(
-            test_dir/file*, container_url_1))
-        # Copy a single object from S3 with access key to blob
-        self.cmd('storage copy -s "{}" -d "{}" --recursive'.format(
-            test_dir/file*, container_url_1))
-        # Copy an entire directory from S3 with access key to blob virtual directory
-        self.cmd('storage copy -s "{}" -d "{}" --recursive'.format(
-            test_dir/file*, container_url_1))
-        # Copy all buckets in S3 service with access key to blob account
-        self.cmd('storage copy -s "{}" -d "{}" --recursive'.format(
-            test_dir/file*, container_url_1))
-        # Copy all buckets in a S3 region with access key to blob account
-        self.cmd('storage copy -s "{}" -d "{}" --recursive'.format(
-            test_dir/file*, container_url_1))
-    @ResourceGroupPreparer()
-    @StorageAccountPreparer(parameter_name='account_1')
-    @StorageAccountPreparer(parameter_name='account_2')
-    @StorageTestFilesPreparer()
-    def test_storage_blob_copy_account(self, account_1, account_2, test_dir):
-        container_1 = self.create_container(account_1)
-        container_2 = self.create_container(account_2)
-        account_url_1 = 'https://{}.blob.core.windows.net'.format(account_1)
-        account_url_2 = 'https://{}.blob.core.windows.net'.format(account_2)
-        container_url_1 = '{}/{}'.format(account_url_1, container_1)
-        container_url_2 = '{}/{}'.format(account_url_2, container_2)
-        # Upload single file
+            '{}/file*'.format(first_container_url), local_folder))
+        self.assertEqual(1, sum(len(d) for r, d, f in os.walk(local_folder)))
+        self.assertEqual(21, sum(len(f) for r, d, f in os.walk(local_folder)))
+
+
+        # Copy a single blob to another single blob
         self.cmd('storage copy -s "{}" -d "{}"'.format(
-            'aaa', container_url_1), checks=JMESPathCheck('length(@)', 30))
+            '{}/readme'.format(first_container_url), second_container_url))
+        self.cmd('storage blob list -c {} --account-name {}'
+            .format(second_container, second_account), checks=JMESPathCheck('length(@)', 1))
+
+        # Copy an entire directory from blob virtual directory to another blob virtual directory
+        self.cmd('storage copy -s "{}" -d "{}" --recursive'.format(
+            '{}/apple'.format(first_container_url), second_container_url))
+        self.cmd('storage blob list -c {} --account-name {}'
+            .format(second_container, second_account), checks=JMESPathCheck('length(@)', 11))
+
+        # Copy an entire storage account data to another blob account
+        self.cmd('storage copy -s "{}" -d "{}" --recursive'.format(
+            first_account_url, second_account_url))
+        self.cmd('storage container list --account-name {}'
+            .format(second_account), checks=JMESPathCheck('length(@)', 2))
+        self.cmd('storage blob list -c {} --account-name {}'
+            .format(first_container, second_account), checks=JMESPathCheck('length(@)', 21))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='first_account')
+    @StorageAccountPreparer(parameter_name='second_account')
+    @StorageTestFilesPreparer()
+    def test_storage_copy_blob_account(self, resource_group, first_account, second_account, test_dir):
+        
+        first_account_info = self.get_account_info(resource_group, first_account)
+        second_account_info = self.get_account_info(resource_group, second_account)
+        
+        first_container = self.create_container(first_account_info)
+        second_container = self.create_container(second_account_info)
+
+        import os
+        # Upload a single file
+        self.cmd('storage copy --source-local-path {} --destination-account-name {} --destination-container {}'.format(
+            os.path.join(test_dir, 'readme'), first_account, first_container))
+        self.cmd('storage blob list -c {} --account-name {}'
+            .format(first_container, first_account), checks=JMESPathCheck('length(@)', 1))
+
+        # Upload entire directory
+        self.cmd('storage copy --source-local-path {} --destination-account-name {} --destination-container {}'.format(
+            os.path.join(test_dir, 'apple'), first_account, first_container))
+        self.cmd('storage blob list -c {} --account-name {}'.format(
+            first_container, first_account), checks=JMESPathCheck('length(@)', 11))
+
+        # Upload a set of files
+        self.cmd('storage copy --source-local-path {} --destination-account-name {} --destination-container {}'.format(
+            os.path.join(test_dir, 'butter/file_*'), first_account, first_container))
+        self.cmd('storage blob list -c {} --account-name {}'.format(
+            first_container, first_account), checks=JMESPathCheck('length(@)', 21))
+
+        local_folder = self.create_temp_dir()
+        # Download a single file
+        self.cmd('storage copy --source-account-name {} --source-container {} --source-blob {} --destination-local-path {}'.format(
+            first_account, first_container, 'readme', local_folder))
+        self.assertEqual(1, sum(len(f) for r, d, f in os.walk(local_folder)))
           
+        # Download entire directory 
+        self.cmd('storage copy --source-account-name {} --source-container {} --source-blob {} --destination-local-path {} --recursive'.format(
+            first_account, first_container, 'apple/', local_folder))
+        self.assertEqual(1, sum(len(d) for r, d, f in os.walk(local_folder)))
+        self.assertEqual(11, sum(len(f) for r, d, f in os.walk(local_folder)))
+
+        # Download a set of files
+        self.cmd('storage copy --source-account-name {} --source-container {} --source-blob {} --destination-local-path {} --recursive'.format(
+            first_account, first_container, 'file*', local_folder))
+        self.assertEqual(1, sum(len(d) for r, d, f in os.walk(local_folder)))
+        self.assertEqual(21, sum(len(f) for r, d, f in os.walk(local_folder)))
+
+        # Copy a single blob to another single blob
+        self.cmd('storage copy --source-account-name {} --source-container {} --source-blob {} --destination-account-name {} --destination-container {}'.format(
+            first_account, first_container, 'readme', second_account, second_container))
+        self.cmd('storage blob list -c {} --account-name {}'
+            .format(second_container, second_account), checks=JMESPathCheck('length(@)', 1))
+
+        # Copy an entire directory from blob virtual directory to another blob virtual directory
+        self.cmd('storage copy --source-account-name {} --source-container {} --source-blob {} --destination-account-name {} --destination-container {} --recursive'.format(
+            first_account, first_container, 'apple', second_account, second_container))
+        self.cmd('storage blob list -c {} --account-name {}'
+            .format(second_container, second_account), checks=JMESPathCheck('length(@)', 11))
+
+        # Copy an entire storage account data to another blob account
+        self.cmd('storage copy --source-account-name {} --destination-account-name {} --recursive'.format(
+            first_account, second_account))
+        self.cmd('storage container list --account-name {}'
+            .format(second_account), checks=JMESPathCheck('length(@)', 2))
+        self.cmd('storage blob list -c {} --account-name {}'
+            .format(first_container, second_account), checks=JMESPathCheck('length(@)', 21))
