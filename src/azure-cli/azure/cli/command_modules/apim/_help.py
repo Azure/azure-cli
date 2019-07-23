@@ -15,6 +15,11 @@ helps['apim'] = """
 helps['apim create'] = """
     type: command
     short-summary: Create an API Management service instance.
+
+examples:
+  - name: Create a Developer tier API Management instance
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
+    text: az apim create --name MyApim -g MyResourceGroup -l eastus --sku Developer --publisher-email email@mydomain.com --enable-client-certificate true
 """
 
 helps['apim list'] = """

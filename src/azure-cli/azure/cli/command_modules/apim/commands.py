@@ -13,7 +13,7 @@ apim_sdk = CliCommandType(
 
 def load_command_table(self, _):
     with self.command_group('apim', apim_sdk, client_factory=cf_apim) as g:
-        g.custom_command('create', 'create_apim')
+        g.custom_command('create', 'create_apim', supports_no_wait=True)
         g.command('delete', 'delete')
         g.custom_command('list', 'list_apim')
         g.custom_show_command('show', 'get_apim') # TODO: implement custom table formatter

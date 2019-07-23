@@ -4,10 +4,41 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.util import CLIError
+from azure.cli.core.util import sdk_no_wait
+from azure.mgmt.apimanagement.models import ApiManagementServiceResource
 
+def create_apim(cmd, client, 
+    resource_group_name, 
+    name, 
+    publisher_email,
+    sku,
+    capacity=1,
+    enable_client_certificate=False,
+    publisher_name=None,
+    location=None, 
+    tags=None,
+    no_wait=False):
 
-def create_apim(cmd, client, resource_group_name, apimanamagement, location=None, tags=None):
-    raise CLIError('TODO: Implement `apim create`')
+    resource = {
+        'location': location,
+        'notification_sender_email': publisher_email,
+        'publisher_email': publisher_email,
+        'publisher_name': publisher_email,
+        'sku': {
+            'name': sku,
+            'capacity': capacity
+        },
+        'enable_client_certificate': enable_client_certificate,
+        'tags': tags
+    }
+
+    cms = client.api_management_service
+
+    return sdk_no_wait(no_wait, cms.create_or_update, 
+        resource_group_name = resource_group_name, 
+        service_name = name, 
+        parameters = resource
+        )
 
 def list_apim(client, resource_group_name=None):
     if resource_group_name:
@@ -16,7 +47,7 @@ def list_apim(client, resource_group_name=None):
 
 def get_apim(client, resource_group_name, name):
     """Show details of an APIM instance """
-    return client.get(resource_group_name, name)
+    return client.api_management_service.get(resource_group_name, name)
 
 def update_apim(cmd, instance, tags=None):
     with cmd.update_context(instance) as c:
