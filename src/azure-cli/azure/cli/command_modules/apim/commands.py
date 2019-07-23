@@ -15,9 +15,9 @@ def load_command_table(self, _):
 
     with self.command_group('apim', apim_sdk, client_factory=cf_apim) as g:
         g.custom_command('create', 'create_apim')
-        #g.command('delete', 'delete')
+        g.command('delete', 'delete')
         g.custom_command('list', 'list_apim')
-        #g.show_command('show', 'get')
+        g.show_command('show', 'get')
         g.generic_update_command('update', setter_name='update', custom_func_name='update_apim')
 
 
