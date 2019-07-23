@@ -162,3 +162,30 @@ def get_resource_id_by_name(cli_ctx, resource_type, resource_name):
                        'Please specify one of the following resource IDs explicitly:\n{}'
                        .format(resource_name, '\n'.join([resource.id for resource in resources])))
     return resources[0].id
+
+
+def process_cluster_configurations(cluster_configurations):
+    from azure.cli.core.util import get_file_json, shell_safe_json_parse
+    from knack.util import CLIError
+    import os
+
+    def _try_parse_json_object(value):
+        try:
+            parsed = shell_safe_json_parse(value)
+            return parsed.get('configurations', parsed)
+        except Exception:  # pylint: disable=broad-except
+            return None
+
+    def _try_load_file_object(value):
+        if os.path.isfile(value):
+            parsed = get_file_json(value, throw_on_empty=False)
+            return parsed.get('configurations', parsed)
+        return None
+
+    config_obj = _try_load_file_object(cluster_configurations)
+    if config_obj is None:
+        config_obj = _try_parse_json_object(cluster_configurations)
+    if config_obj is None:
+        raise CLIError('Unable to parse cluster configurations: {}'.format(cluster_configurations))
+
+    return config_obj
