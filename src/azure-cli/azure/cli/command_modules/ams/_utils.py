@@ -10,6 +10,8 @@ import re
 import json
 import isodate
 
+iso8601pattern = re.compile("^P(?!$)(\\d+Y)?(\\d+M)?(\\d+W)?(\\d+D)?(T(?=\\d)(\\d+H)?(\\d+M)?(\\d+.)?(\\d+S)?)?$")
+
 
 def _gen_guid():
     return uuid.uuid4()
@@ -24,11 +26,13 @@ def _is_guid(guid):
     return False
 
 
-def parse_iso_duration(str_duration):
-    iso_duration_format_value = None
+def parse_duration(str_duration):
     if str_duration:
-        iso_duration_format_value = isodate.duration_isoformat(parse_timedelta(str_duration))
-    return iso_duration_format_value
+        if iso8601pattern.match(str_duration):
+            return isodate.parse_duration(str_duration)
+
+        return parse_timedelta(str_duration)
+    return None
 
 
 def parse_timedelta(str_duration):
