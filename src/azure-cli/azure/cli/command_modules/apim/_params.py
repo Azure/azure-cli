@@ -21,7 +21,6 @@ def load_arguments(self, _):
     with self.argument_context('apim') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
         c.argument('tags', tags_type)
-        #c.argument('service_name', options_list=['--name', '-n'], help="The name of the api management service instance.")
         c.argument('name', options_list=['--name', '-n'], help="The name of the api management service instance", id_part='name')
         c.argument('location', validator=get_default_location_from_resource_group)
 
