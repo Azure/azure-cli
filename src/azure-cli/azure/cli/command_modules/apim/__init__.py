@@ -12,10 +12,10 @@ class ApimCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
         from azure.cli.core.commands import CliCommandType
-        from azure.cli.command_modules.apim._client_factory import cf_apim
+        from azure.cli.command_modules.apim._client_factory import _apim_client_factory
         apim_custom = CliCommandType(
             operations_tmpl='azure.cli.command_modules.apim.custom#{}',
-            client_factory=cf_apim)
+            client_factory=_apim_client_factory)
         super(ApimCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                   custom_command_type=apim_custom)
 
