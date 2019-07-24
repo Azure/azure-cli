@@ -25,7 +25,9 @@ class NoTrafficRecordingPreparer(AbstractPreparer):
 
     def live_only_execute(self, cli_ctx, command, expect_failure=False):
         # call AbstractPreparer.moniker to make resource counts and self.resource_moniker consistent between live and
-        # play-back. see SingleValueReplacer.process_request and ScenarioTest.create_random_name
+        # play-back. see SingleValueReplacer.process_request, AbstractPreparer.__call__._preparer_wrapper
+        # and ScenarioTest.create_random_name. This is so that when self.create_random_name is called for the
+        # first time during live or playback, it would have the same value.
         _ = self.moniker
 
         try:
