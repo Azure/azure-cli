@@ -9,7 +9,7 @@ from knack.help_files import helps  # pylint: disable=unused-import
 
 helps['apim'] = """
     type: group
-    short-summary: Commands to manage Azure API Management service instance.
+    short-summary: Manage Azure API Management services.
 """
 
 helps['apim create'] = """
