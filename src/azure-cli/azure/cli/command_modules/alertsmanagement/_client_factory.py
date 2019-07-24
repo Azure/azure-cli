@@ -11,5 +11,4 @@ def alerts_mgmt_client_factory(cli_ctx, kwargs):
 def smart_groups_mgmt_client_factory(cli_ctx, kwargs):
     return cf_alertsmanagement(cli_ctx, **kwargs).smart_groups
 
-import azure_sdk_for_python 
-
+#TODO: add client factory for action rules
