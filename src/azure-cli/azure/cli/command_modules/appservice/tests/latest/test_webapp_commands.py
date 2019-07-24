@@ -1577,6 +1577,43 @@ class WebappWindowsContainerBasicE2ETest(ScenarioTest):
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name)).assert_with_checks([
             JMESPathCheck('alwaysOn', False)])
 
+class WebappHybridConnection(ScenarioTest):
+    @AllowLargeResponse()
+    @ResourceGroupPreparer()
+    def test_webapp_hybridconnectionE2E(self, resource_group):
+        webapp_name = self.create_random_name('hcwebapp', 24)
+        plan = self.create_random_name('hcplan', 24)
+        namespace_name = self.create_random_name('hcnamespace', 24)
+        hyco_name = self.create_random_name('hcname', 24)
+        um = "[{{\\\"key\\\":\\\"endpoint\\\",\\\"value\\\":\\\"vmsq1:80\\\"}}]"
+
+        self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan))
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan))
+        self.cmd('relay namespace create -g {} --name {}'.format(resource_group, namespace_name))
+        self.cmd('relay hyco create -g {} --namespace-name {} --name {} --user-metadata {}'.format(resource_group, namespace_name, hyco_name, um))
+        self.cmd('webapp hybrid-connection add -g {} -n {} --namespace {} --hybrid-connection {}'.format(resource_group, webapp_name, namespace_name, hyco_name))
+        self.cmd('webapp hybrid-connection list -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', hyco_name),
+
+        ])
+        self.cmd('webapp hybrid-connection remove -g {} -n {} --namespace {} --hybrid-connection {}'.format(resource_group, webapp_name, namespace_name, hyco_name))
+        self.cmd('webapp hybrid-connection list -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('length(@)', 0)
+        ])
+
+class WebappSwift(ScenarioTest):
+    @AllowLargeResponse
+    @ResourceGroupPreparer()
+    def test_webapp_swiftE2E(self, resource_group):
+        webapp_name = self.create_random_name('swiftwebapp', 24)
+        plan = self.create_random_name('swiftplan', 24)
+        subnet_name = self.create_random_name('swiftsubnet', 24)
+        vnet_name = self.create_random_name('swiftname', 24)
+
+        self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(resoruce_group, vnet_name, subnet_name))
+        self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan))
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan))
 
 if __name__ == '__main__':
     unittest.main()
