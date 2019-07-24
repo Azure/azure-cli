@@ -40,6 +40,11 @@ def create_apim(cmd, client,
         parameters = resource
         )
 
+def update_apim(client, resource_group_name, name):
+    """Show details of an APIM instance """
+    return client.api_management_service.get(resource_group_name, name)
+
+
 def list_apim(client, resource_group_name=None):
     """List all APIM instances.  Resource group is optional """
     if resource_group_name:
