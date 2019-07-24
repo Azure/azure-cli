@@ -17,7 +17,7 @@ type: command
 short-summary: Create an API Management service instance.
 
 examples:
-    - name: Create a Developer tier API Management instance.
+    - name: Create a Developer tier API Management service.
       text: |-
         az apim create --name MyApim -g MyResourceGroup -l eastus --sku Developer \\
             --publisher-email emailmydomain.com --enable-client-certificate true
@@ -29,8 +29,12 @@ helps['apim list'] = """
 """
 
 helps['apim delete'] = """
-    type: command
-    short-summary: Delete an API Management service instance.
+type: command
+short-summary: Deletes an API Management service.
+examples:
+  - name: Delete an API Management service.
+    text: >
+        az apim delete -n MyApim -g MyResourceGroup
 """
 
 helps['apim show'] = """
