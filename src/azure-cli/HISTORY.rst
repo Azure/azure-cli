@@ -15,26 +15,24 @@ Release History
 
 **HDInsight**
 
-* BREAKING CHANGE: create: change --storage-default-container to --storage-container and --storage-default-filesystem to --storage-filesystem
-* BREAKING CHANGE: application create: 1. make --name/-n represent application name and have a separate --cluster-name argument
-* BREAKING CHANGE: application create: 2. change --application-type to --type and -t
-* BREAKING CHANGE: application create: 3. --marketplace-identifier to --marketplace-id
-* BREAKING CHANGE: application create: 4. rename --https-endpoint-access-mode to --access-mode and --https-endpoint-destination-port to --destination-port
-* BREAKING CHANGE: application create: 5. remove --https-endpoint-location, --https-endpoint-public-port, --ssh-endpoint-destination-port, --ssh-endpoint-location and --ssh-endpoint-public-port 
-* BREAKING CHANGE: application create: 6. remove default value from –edgenode-size and make it a required parameter
-* BREAKING CHANGE: resize: rename --target-instance-count to --workernode-count/-c
-* BREAKING CHANGE: script-action: 1. use --cluster-name represent cluster name
-* BREAKING CHANGE: script-action: 2. change script-execution-id to execution-id
-* BREAKING CHANGE: script-action: 3. change command name from "show" to "show-execution-details"
-* BREAKING CHANGE: script-action execute: 1. make --name/-n represent the script action name and have a separate --cluster-name 
-* BREAKING CHANGE: script-action execute: 2. make roles space separated
-* BREAKING CHANGE: script-action delete: make --name/-n represent the script action name and have a separate --cluster-name
-* BREAKING CHANGE: script-action list: remove --persisted parameter
-* create: make --cluster-configurations accept input from a local JSON file
-* script-action list-execution-history: add the command to list the execution history for all script action executions
-* monitor enable: 1. make --workspace accept Log Analytics workspace ID
-* monitor enable: 2. add --primary-key for workspace certificate
-* Add more examples and update description for help message
+* BREAKING CHANGE: create: Renamed --storage-default-container to --storage-container and --storage-default-filesystem to --storage-filesystem
+* BREAKING CHANGE: application create: 1. Changed the --name/-n argument represent the application name instead of the cluster name and added a separate --cluster-name argument
+* BREAKING CHANGE: application create: 2. Renamed --application-type to --type/-t
+* BREAKING CHANGE: application create: 3. Renamed --marketplace-identifier to --marketplace-id
+* BREAKING CHANGE: application create: 4. Renamed --https-endpoint-access-mode to --access-mode and --https-endpoint-destination-port to --destination-port
+* BREAKING CHANGE: application create: 5. Removed --https-endpoint-location, --https-endpoint-public-port, --ssh-endpoint-destination-port, --ssh-endpoint-location and --ssh-endpoint-public-port
+* BREAKING CHANGE: application create: 6. Removed the default value from –edgenode-size  and make it a required parameter
+* BREAKING CHANGE: resize: Renamed --target-instance-count to --workernode-count/-c
+* BREAKING CHANGE: script-action : 1. Changed --name/-n to represent the name of the script action and added the --cluster-name argument to represent the cluster name
+* BREAKING CHANGE: script-action: 2. Changed script-execution-id to execution-id
+* BREAKING CHANGE: script-action: 3. Renamed the "show" command to "show-execution-details"
+* BREAKING CHANGE: script-action execute: Made parameters for the --roles argument space separated instead of comma separated
+* BREAKING CHANGE: script-action list: Removed the --persisted parameter
+* create: Enabled the --cluster-configurations argument to accept a path to a local JSON file or a JSON string as the parameter
+* script-action list-execution-history: Added this command to list the execution history for all script action executions
+* monitor enable: 1. Enabled the --workspace argument to accept a Log Analytics workspace ID or workspace name as the parameter
+* monitor enable: 2. Added the --primary-key argument, which is needed if a workspace ID is provided as the parameter 
+* Added more examples and updated descriptions for help messages
 
 **Network**
 
