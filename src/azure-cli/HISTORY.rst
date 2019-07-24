@@ -11,6 +11,7 @@ Release History
 **Appservice**
 * az webapp config ssl support to show a message if a resource is not found
 * Fixed issue where `az functionapp create` does not accept Standard_RAGRS storage account type.
+* Fixed an issue where az webapp up would fail if run using older versions of python
 
 **Network**
 
