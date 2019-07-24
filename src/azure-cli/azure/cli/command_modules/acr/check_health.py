@@ -8,12 +8,14 @@ from __future__ import print_function
 import re
 import sys
 from knack.util import CLIError
+from knack.log import get_logger
 from .custom import get_docker_command
 from ._docker_utils import _get_aad_token
 from .helm import get_helm_command
 from ._utils import get_registry_by_name
 from ._errors import ErrorClass
 
+logger = get_logger(__name__)
 
 DOCKER_PULL_SUCCEEDED = "Downloaded newer image for {}"
 DOCKER_IMAGE_UP_TO_DATE = "Image is up to date for {}"
@@ -25,21 +27,15 @@ HELM_VERSION_REGEX = re.compile(r'SemVer:"v([.\d]+)"', re.I)
 
 # Utilities functions
 def print_pass(message):
-    from colorama import Fore, Style, init
-    init()
-    print(str(message) + " : " + Fore.GREEN + "OK" + Style.RESET_ALL)
+    logger.info("%s : OK", message)
 
 
 def print_warning(message):
-    from colorama import Fore, Style, init
-    init()
-    print(Fore.YELLOW + str(message) + Style.RESET_ALL)
+    logger.warning(message)
 
 
 def print_error(message):
-    from colorama import Fore, Style, init
-    init()
-    print(Fore.RED + str(message) + Style.RESET_ALL)
+    logger.error(message)
 
 
 def _handle_error(error, ignore_errors):
