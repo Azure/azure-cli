@@ -132,43 +132,57 @@ class ApplicationSetScenarioTest(ScenarioTest):
                 }
             ])
         })
-
+        app_id = None
         # create app through general option
         self.cmd('ad app create --display-name {name} --homepage {app} --identifier-uris {app}',
                  checks=self.check('identifierUris[0]', '{app}'))
 
         # set app password
         result = self.cmd('ad app credential reset --id {app} --append --password "test" --years 2').get_output_in_json()
-        self.assertTrue(result['appId'])
+        app_id = result['appId']
+        self.assertTrue(app_id)
 
-        # show/list app
-        self.cmd('ad app show --id {app}',
-                 checks=self.check('identifierUris[0]', '{app}'))
-        self.cmd('ad app list --display-name {name}', checks=[
-            self.check('[0].identifierUris[0]', '{app}'),
-            self.check('length([*])', 1)
-        ])
+        try:
+            # show/list app
+            self.cmd('ad app show --id {app}',
+                     checks=self.check('identifierUris[0]', '{app}'))
+            self.cmd('ad app list --display-name {name}', checks=[
+                self.check('[0].identifierUris[0]', '{app}'),
+                self.check('length([*])', 1)
+            ])
 
-        # update app
-        self.kwargs['reply_uri'] = "http://azureclitest-replyuri"
-        self.cmd('ad app update --id {app} --reply-urls {reply_uri}')
-        self.cmd('ad app show --id {app}',
-                 checks=self.check('replyUrls[0]', '{reply_uri}'))
+            # update app
+            self.kwargs['reply_uri'] = "http://azureclitest-replyuri"
+            self.kwargs['reply_uri2'] = "http://azureclitest-replyuri2"
+            self.cmd('ad app update --id {app} --reply-urls {reply_uri}')
+            self.cmd('ad app show --id {app}',
+                     checks=self.check('replyUrls[0]', '{reply_uri}'))
+            self.cmd('ad app update --id {app} --add replyUrls {reply_uri2}')
+            self.cmd('ad app show --id {app}', checks=self.check('length(replyUrls)', 2))
+            self.cmd('ad app update --id {app} --remove replyUrls 1')
+            self.cmd('ad app show --id {app}', checks=[
+                self.check('length(replyUrls)', 1),
+                self.check('replyUrls[0]', '{reply_uri2}')
+            ])
 
-        # invoke generic update
-        self.cmd('ad app update --id {app} --set oauth2AllowUrlPathMatching=true')
-        self.cmd('ad app show --id {app}',
-                 checks=self.check('oauth2AllowUrlPathMatching', True))
+            # invoke generic update
+            self.cmd('ad app update --id {app} --set oauth2AllowUrlPathMatching=true')
+            self.cmd('ad app show --id {app}',
+                     checks=self.check('oauth2AllowUrlPathMatching', True))
 
-        # update app_roles
-        self.cmd("ad app update --id {app} --app-roles '{app_roles}'")
-        self.cmd('ad app show --id {app}',
-                 checks=self.check('length(appRoles)', 1))
+            # update app_roles
+            self.cmd("ad app update --id {app} --app-roles '{app_roles}'")
+            self.cmd('ad app show --id {app}',
+                     checks=self.check('length(appRoles)', 1))
 
-        # delete app
-        self.cmd('ad app delete --id {app}')
-        self.cmd('ad app list --identifier-uri {app}',
-                 checks=self.is_empty())
+            # delete app
+            self.cmd('ad app delete --id {app}')
+            app_id = None
+            self.cmd('ad app list --identifier-uri {app}',
+                     checks=self.is_empty())
+        finally:
+            if app_id:
+                self.cmd("ad app delete --id " + app_id)
 
 
 class CreateForRbacScenarioTest(ScenarioTest):
