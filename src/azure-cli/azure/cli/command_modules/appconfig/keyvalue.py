@@ -390,7 +390,7 @@ def restore_key(cmd,
     connection_string = resolve_connection_string(cmd, name, connection_string)
     azconfig_client = AzconfigClient(connection_string)
 
-    if label=='':
+    if label == '':
         label = QueryKeyValueCollectionOptions.empty_label
 
     query_option_then = QueryKeyValueCollectionOptions(key_filter=key,
