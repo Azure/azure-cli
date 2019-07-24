@@ -407,19 +407,26 @@ def restore_key(cmd,
         if not yes:
             need_change = __print_restore_preview(kvs_to_restore, kvs_to_modify, kvs_to_delete)
             if need_change is False:
+                logger.debug('Canceling the restore operation based on user selection.')
                 return
+
+        keys_to_restore = len(kvs_to_restore) + len(kvs_to_modify) + len(kvs_to_delete)
+        restored_so_far = 0
 
         for kv in chain(kvs_to_restore, kvs_to_modify):
             success = None
             while success is None and current_retry <= max_retry:
                 try:
                     success = azconfig_client.set_keyvalue(kv, ModifyKeyValueOptions())
+                    restored_so_far += 1
                 except HTTPException as exception:
                     if current_retry < max_retry and exception.status == StatusCodes.PRECONDITION_FAILED:
                         logger.debug('Retrying setting %s times with exception: concurrent setting operations', current_retry + 1)
                         current_retry += 1
                         time.sleep(retry_interval)
                     else:
+                        logger.error('Exceeded maximum retry settings while setting the keyvalue:%s', kv)
+                        logger.error('Failed after restoring %d out of %d keys', restored_so_far, keys_to_restore)
                         raise CLIError(str(exception))
         current_retry = 0
         for kv in kvs_to_delete:
@@ -427,13 +434,18 @@ def restore_key(cmd,
             while success is None and current_retry <= max_retry:
                 try:
                     success = azconfig_client.delete_keyvalue(kv, ModifyKeyValueOptions())
+                    restored_so_far += 1
                 except HTTPException as exception:
                     if current_retry < max_retry and exception.status == StatusCodes.PRECONDITION_FAILED:
                         logger.debug('Retrying deleting %s times with exception: concurrent setting operations', current_retry + 1)
                         current_retry += 1
                         time.sleep(retry_interval)
                     else:
+                        logger.error('Exceeded maximum retry settings while deleting the keyvalue:%s', kv)
+                        logger.error('Failed after restoring %d out of %d keys', restored_so_far, keys_to_restore)
                         raise CLIError(str(exception))
+
+        logger.debug ('Successfully restored %d out of %d keys', restored_so_far, keys_to_restore)
     except Exception as exception:
         raise CLIError(str(exception))
 
