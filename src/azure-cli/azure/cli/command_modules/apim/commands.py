@@ -18,7 +18,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_apim', supports_no_wait=True)
         g.custom_show_command('show', 'get_apim', table_transformer=service_output_format) 
         g.custom_command('list', 'list_apim', table_transformer=service_output_format)
-        g.command('delete', 'delete', confirmation=True)
+        g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
         g.generic_update_command('update', setter_name='update', custom_func_name='update_apim')
         
         g.custom_command('check-name', 'check_name_availability')
