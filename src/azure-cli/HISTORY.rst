@@ -26,6 +26,10 @@ Release History
 * vmss create: restore client end defaults to False for "--single-placement-group"
 * snapshot/disk create: expose ZRS storage skus   
 
+**Storage**
+
+* `storage copy`: add copy command for storage
+
 2.0.69
 ++++++
 
