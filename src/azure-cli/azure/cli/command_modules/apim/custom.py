@@ -5,33 +5,39 @@
 
 from knack.util import CLIError
 from azure.cli.core.util import sdk_no_wait
-from azure.mgmt.apimanagement.models import ApiManagementServiceResource
+from azure.mgmt.apimanagement.models import (ApiManagementServiceResource, ApiManagementServiceIdentity, 
+                                                                                       ApiManagementServiceSkuProperties)
+from azure.mgmt.apimanagement.models.api_management_client_enums import (VirtualNetworkType, SkuType)
 
 #Service Operations
 def create_apim(cmd, client, 
-    resource_group_name, 
-    name, 
-    publisher_email,
-    sku,
-    capacity=1,
-    enable_client_certificate=False,
-    publisher_name=None,
-    location=None, 
-    tags=None,
-    no_wait=False):
+        resource_group_name, 
+        name, 
+        publisher_email,
+        sku_name=SkuType.developer.value,
+        sku_capacity=1,
+        virtual_network_type=VirtualNetworkType.external.value,
+        enable_managed_identity=False,
+        enable_client_certificate=True,
+        publisher_name=None,
+        location=None, 
+        tags=None,
+        no_wait=False
+    ):
 
-    resource = {
-        'location': location,
-        'notification_sender_email': publisher_email,
-        'publisher_email': publisher_email,
-        'publisher_name': publisher_email,
-        'sku': {
-            'name': sku,
-            'capacity': capacity
-        },
-        'enable_client_certificate': enable_client_certificate,
-        'tags': tags
-    }
+    resource = ApiManagementServiceResource(
+        location = location,
+        notification_sender_email =publisher_email,
+        publisher_email = publisher_email,
+        publisher_name = publisher_name,
+        sku = ApiManagementServiceSkuProperties(name = sku_name, capacity = sku_capacity),
+        enable_client_certificate = enable_client_certificate,
+        virtual_network_type = VirtualNetworkType(virtual_network_type),
+        tags = tags
+    )
+
+    if (enable_managed_identity):
+        resource['identity'] = ApiManagementServiceIdentity(type="SystemAssigned")
 
     cms = client.api_management_service
 
@@ -41,9 +47,44 @@ def create_apim(cmd, client,
         parameters = resource
         )
 
-def update_apim(client, resource_group_name, name):
-    """Show details of an APIM instance """
-    return client.api_management_service.get(resource_group_name, name)
+def update_apim(instance,
+        publisher_email=None,
+        sku_name=None,
+        sku_capacity=None,
+        virtual_network_type=None,
+        publisher_name=None,
+        enable_managed_identity=None,
+        enable_client_certificate=None,
+        tags=None):
+    
+    if publisher_email is not None:
+        instance.publisher_email = publisher_email
+
+    if sku_name is not None:
+        instance.sku.name = sku_name
+
+    if sku_capacity is not None:
+        instance.sku.capacity = sku_capacity
+
+    if virtual_network_type is not None:
+        instance.virtual_network_type = virtual_network_type
+
+    if publisher_email is not None:
+        instance.publisher_email = publisher_email
+    
+    if publisher_name is not None:
+        instance.publisher_name = publisher_name
+    
+    if not enable_managed_identity:
+        instance.identity = None
+    else:
+        if instance.identity is None:
+            instance.identity = ApiManagementServiceIdentity(type="SystemAssigned")
+    
+    if enable_client_certificate is not None:
+        instance.enable_client_certificate = enable_client_certificate
+
+    return instance
 
 def list_apim(client, resource_group_name=None):
     """List all APIM instances.  Resource group is optional """
@@ -63,11 +104,16 @@ def apim_backup(client, resource_group_name, name):
     """back up an API Management service to the configured storage account """
     return client.api_management_service.backup(resource_group_name, name)
 
-def apim_apply_network_configuration_updates(client, resource_group_name, name):
+def apim_apply_network_configuration_updates(client, resource_group_name, name, location=None):
     """back up an API Management service to the configured storage account """
-    return client.api_management_service.apply_network_configuration_updates(resource_group_name, name)
+    properties = {}
+    if (location is not None):
+        properties['location'] = location
+
+    return client.api_management_service.apply_network_configuration_updates(resource_group_name, name, properties)
 
 # API Operations
+
 def list_apim_api(client, resource_group_name, service_name):
     """List all APis for the given service instance """
     return client.api.list_by_service(resource_group_name, service_name)
