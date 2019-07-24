@@ -22,7 +22,7 @@ def load_arguments(self, _):
         c.argument('resource_group_name', arg_type=resource_group_name_type)
         c.argument('tags', tags_type)
         c.argument('name', options_list=['--name', '-n'], help="The name of the api management service instance", id_part='name')
-        c.argument('location', validator=get_default_location_from_resource_group)
+        c.argument('location', validator=get_default_location_from_resource_group),
 
     with self.argument_context('apim create') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
