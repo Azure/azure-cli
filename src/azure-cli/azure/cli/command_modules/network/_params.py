@@ -252,6 +252,7 @@ def load_arguments(self, _):
         c.argument('timeout', help='Request timeout in seconds.')
         c.argument('probe', help='Name or ID of the probe to associate with the HTTP settings.', completer=get_ag_subresource_completion_list('probes'))
         c.argument('auth_certs', nargs='+', min_api='2016-09-01', help='Space-separated list of authentication certificates (names or IDs) to associate with the HTTP settings.')
+        c.argument('root_certs', nargs='+', min_api='2019-04-01', help='Space-separated list of trusted root certificates (names or IDs) to associate with the HTTP settings. --host-name or --host-name-from-backend-pool is required when this field is set.')
 
     with self.argument_context('network application-gateway probe') as c:
         c.argument('host', help='The name of the host to send the probe.')

@@ -256,6 +256,31 @@ class NetworkAppGatewayAuthCertScenario(ScenarioTest):
                  checks=self.check('length(backendHttpSettingsCollection[1].authenticationCertificates)', 2))
 
 
+class NetworkAppGatewayTrustedRootCertScenario(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_root_cert')
+    def test_network_ag_root_cert(self, resource_group):
+        self.kwargs.update({
+            'gateway': 'ag1',
+            'cert1': 'cert1',
+            'cert1_file': os.path.join(TEST_DIR, 'test-root-cert.cer'),
+            'cert2': 'cert2',
+            'cert2_file': os.path.join(TEST_DIR, 'test-root-cert-2.cer'),
+            'settings': 'https_settings',
+            'ip1': 'myip1'
+        })
+        self.cmd('network public-ip create -g {rg} -n {ip1} --sku Standard')
+        self.cmd('network application-gateway create -g {rg} -n {gateway} --sku Standard_v2 --public-ip-address {ip1}')
+        self.cmd('network application-gateway wait -g {rg} -n {gateway} --exists')
+        self.cmd('network application-gateway root-cert create -g {rg} --gateway-name {gateway} -n {cert1} --cert-file "{cert1_file}"')
+        self.cmd('network application-gateway root-cert create -g {rg} --gateway-name {gateway} -n {cert2} --cert-file "{cert2_file}"')
+        self.cmd('network application-gateway http-settings create -g {rg} --gateway-name {gateway} -n {settings} --root-certs {cert1} {cert2} --host-name-from-backend-pool true --no-wait --port 443 --protocol https')
+        self.cmd('network application-gateway http-settings update -g {rg} --gateway-name {gateway} -n {settings} --root-certs {cert2} {cert1} --no-wait')
+        self.cmd('network application-gateway show -g {rg} -n {gateway}',
+                 checks=self.check('length(backendHttpSettingsCollection[1].trustedRootCertificates)', 2))
+        self.cmd('network application-gateway http-settings update -g {rg} --gateway-name {gateway} -n {settings} --no-wait')
+
+
 class NetworkAppGatewayRedirectConfigScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_ag_basic')
