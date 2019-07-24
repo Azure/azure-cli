@@ -16,15 +16,15 @@ Release History
 **HDInsight**
 
 * BREAKING CHANGE: create: Renamed --storage-default-container to --storage-container and --storage-default-filesystem to --storage-filesystem
-* BREAKING CHANGE: application create: 1. Changed the --name/-n argument represent the application name instead of the cluster name and added a separate --cluster-name argument
+* BREAKING CHANGE: application create: 1. Changed the --name/-n argument to represent the application name instead of the cluster name and added a separate --cluster-name argument
 * BREAKING CHANGE: application create: 2. Renamed --application-type to --type/-t
 * BREAKING CHANGE: application create: 3. Renamed --marketplace-identifier to --marketplace-id
 * BREAKING CHANGE: application create: 4. Renamed --https-endpoint-access-mode to --access-mode and --https-endpoint-destination-port to --destination-port
 * BREAKING CHANGE: application create: 5. Removed --https-endpoint-location, --https-endpoint-public-port, --ssh-endpoint-destination-port, --ssh-endpoint-location and --ssh-endpoint-public-port
-* BREAKING CHANGE: application create: 6. Removed the default value from –edgenode-size  and make it a required parameter
+* BREAKING CHANGE: application create: 6. Made --edgenode-size a required parameter
 * BREAKING CHANGE: resize: Renamed --target-instance-count to --workernode-count/-c
 * BREAKING CHANGE: script-action : 1. Changed --name/-n to represent the name of the script action and added the --cluster-name argument to represent the cluster name
-* BREAKING CHANGE: script-action: 2. Changed script-execution-id to execution-id
+* BREAKING CHANGE: script-action: 2. Changed --script-execution-id to --execution-id
 * BREAKING CHANGE: script-action: 3. Renamed the "show" command to "show-execution-details"
 * BREAKING CHANGE: script-action execute: Made parameters for the --roles argument space separated instead of comma separated
 * BREAKING CHANGE: script-action list: Removed the --persisted parameter
