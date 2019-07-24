@@ -88,15 +88,21 @@ helps['hdinsight application create'] = """
           text: |-
               az hdinsight application create -g MyResourceGroup -n MyApplication \\
               --cluster-name MyCluster \\
-              --edgenode-size Standard_D3_v2 \\
               --script-uri https://hdiconfigactions.blob.core.windows.net/linuxhueconfigactionv02/install-hue-uber-v02.sh \\
               --script-action-name MyScriptAction \\
-              --script-parameters "-version latest -port 20000"
+              --script-parameters '"-version latest -port 20000"'
+        - name: Create an application with a script URI and specified edge node size.
+          text: |-
+              az hdinsight application create -g MyResourceGroup -n MyApplication \\
+              --cluster-name MyCluster \\
+              --script-uri https://hdiconfigactions.blob.core.windows.net/linuxhueconfigactionv02/install-hue-uber-v02.sh \\
+              --script-action-name MyScriptAction \\
+              --script-parameters "-version latest -port 20000" \\
+              --edgenode-size Standard_D4_v2
         - name: Create an application with HTTPS Endpoint.
           text: |-
               az hdinsight application create -g MyResourceGroup -n MyApplication \\
               --cluster-name MyCluster \\
-              --edgenode-size Standard_D3_v2 \\
               --script-uri https://hdiconfigactions.blob.core.windows.net/linuxhueconfigactionv02/install-hue-uber-v02.sh \\
               --script-action-name MyScriptAction \\
               --script-parameters "-version latest -port 20000" \\

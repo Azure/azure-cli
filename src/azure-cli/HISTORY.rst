@@ -21,7 +21,6 @@ Release History
 * BREAKING CHANGE: application create: 3. Renamed --marketplace-identifier to --marketplace-id
 * BREAKING CHANGE: application create: 4. Renamed --https-endpoint-access-mode to --access-mode and --https-endpoint-destination-port to --destination-port
 * BREAKING CHANGE: application create: 5. Removed --https-endpoint-location, --https-endpoint-public-port, --ssh-endpoint-destination-port, --ssh-endpoint-location and --ssh-endpoint-public-port
-* BREAKING CHANGE: application create: 6. Made --edgenode-size a required parameter
 * BREAKING CHANGE: resize: Renamed --target-instance-count to --workernode-count/-c
 * BREAKING CHANGE: script-action : 1. Changed --name/-n to represent the name of the script action and added the --cluster-name argument to represent the cluster name
 * BREAKING CHANGE: script-action: 2. Changed --script-execution-id to --execution-id
