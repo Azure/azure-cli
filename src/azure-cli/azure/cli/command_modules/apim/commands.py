@@ -28,7 +28,7 @@ def load_command_table(self, _):
         g.generic_update_command('update', custom_func_name='update_apim', getter_name='update_apim_getter', setter_name='update_apim_setter')
         g.custom_command('check-name', 'check_name_availability')
         g.custom_command('backup', 'apim_backup', supports_no_wait=True)
-        g.custom_command('apply-vnet-updates', 'apim_apply_network_configuration_updates', supports_no_wait=True)
+        g.custom_command('apply-network-updates', 'apim_apply_network_configuration_updates', supports_no_wait=True)
 
     with self.command_group('apim api', api_sdk) as g:
         g.custom_command('list', 'list_apim_api')

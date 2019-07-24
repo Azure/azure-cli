@@ -79,9 +79,13 @@ def apim_backup(client, resource_group_name, name):
     """back up an API Management service to the configured storage account """
     return client.api_management_service.backup(resource_group_name, name)
 
-def apim_apply_network_configuration_updates(client, resource_group_name, name):
+def apim_apply_network_configuration_updates(client, resource_group_name, name, location=None):
     """back up an API Management service to the configured storage account """
-    return client.api_management_service.apply_network_configuration_updates(resource_group_name, name)
+    properties = {}
+    if (location is not None):
+        properties['location'] = location
+
+    return client.api_management_service.apply_network_configuration_updates(resource_group_name, name, properties)
 
 # API Operations
 
