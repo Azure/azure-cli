@@ -185,7 +185,7 @@ def _check_health_environment(ignore_errors, yes):
 
 # Checks for the connectivity
 # Check DNS lookup and access to challenge endpoint
-def _get_registry_status(login_server, ignore_errors):
+def _get_registry_status(login_server, registry_name, ignore_errors):
     import socket
 
     registry_ip = ""
@@ -208,7 +208,7 @@ def _get_registry_status(login_server, ignore_errors):
 
     if challenge.status_code == 403:
         from ._errors import CONNECTIVITY_FORBIDDEN_ERROR
-        _handle_error(CONNECTIVITY_FORBIDDEN_ERROR.format_error_message(login_server), ignore_errors)
+        _handle_error(CONNECTIVITY_FORBIDDEN_ERROR.format_error_message(login_server, registry_name), ignore_errors)
         return False
     return True
 
@@ -271,7 +271,7 @@ def _check_health_connectivity(cmd, registry_name, ignore_errors):
 
         login_server = registry_name + suffix
 
-    status_validated = _get_registry_status(login_server, ignore_errors)
+    status_validated = _get_registry_status(login_server, registry_name, ignore_errors)
     if status_validated:
         _get_endpoint_and_token_status(cmd, login_server, ignore_errors)
 
