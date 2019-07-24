@@ -28,7 +28,7 @@ def create_apim(cmd, client,
         location = location,
         notification_sender_email =publisher_email,
         publisher_email = publisher_email,
-        publisher_name = publisher_email,
+        publisher_name = publisher_name,
         sku = ApiManagementServiceSkuProperties(name = sku_name, capacity = sku_capacity),
         enable_client_certificate = enable_client_certificate,
         virtual_network_type = VirtualNetworkType(virtual_network_type),
@@ -46,20 +46,44 @@ def create_apim(cmd, client,
         parameters = resource
         )
 
-def update_apim(instance, start_ip_address=None, end_ip_address=None):
-    #TODO: implement
+def update_apim(instance,
+        publisher_email=None,
+        sku_name=None,
+        sku_capacity=None,
+        virtual_network_type=None,
+        publisher_name=None,
+        enable_managed_identity=None,
+        enable_client_certificate=None,
+        tags=None):
+    
+    if publisher_email is not None:
+        instance.publisher_email = publisher_email
+
+    if sku_name is not None:
+        instance.sku.name = sku_name
+
+    if sku_capacity is not None:
+        instance.sku.capacity = sku_capacity
+
+    if virtual_network_type is not None:
+        instance.virtual_network_type = virtual_network_type
+
+    if publisher_email is not None:
+        instance.publisher_email = publisher_email
+    
+    if publisher_name is not None:
+        instance.publisher_name = publisher_name
+    
+    if not enable_managed_identity:
+        instance.identity = None
+    else:
+        if instance.identity is None:
+            instance.identity = ApiManagementServiceIdentity(type="SystemAssigned")
+    
+    if enable_client_certificate is not None:
+        instance.enable_client_certificate = enable_client_certificate
+
     return instance
-
-def update_apim_getter(client, resource_group_name, name):
-    return client.api_management_service.get(resource_group_name, name)
-
-def update_apim_setter(client, resource_group_name, server_name, firewall_rule_name, parameters):
-    return client.create_or_update(
-        resource_group_name,
-        server_name,
-        firewall_rule_name,
-        parameters.start_ip_address,
-        parameters.end_ip_address)
 
 def list_apim(client, resource_group_name=None):
     """List all APIM instances.  Resource group is optional """
