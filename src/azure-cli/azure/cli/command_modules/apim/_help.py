@@ -15,12 +15,20 @@ helps['apim'] = """
 helps['apim create'] = """
 type: command
 short-summary: Create an API Management service instance.
-
+parameters: 
+    -   name: --name -n
+        type: string
+        short-summary: unique name of the service instance to be created
+        long-summary: |
+            The name must be globally unique since it will be included as the gateway
+            hostname like' https://my-api-servicename.azure-api.net'.  See examples.
 examples:
     - name: Create a Developer tier API Management service.
       text: |-
         az apim create --name MyApim -g MyResourceGroup -l eastus --sku Developer \\
-            --publisher-email emailmydomain.com --enable-client-certificate true
+            --publisher-email email@mydomain.com --enable-client-certificate true
+    - name: Check name availability before creating a new service.
+      text: az apim check-name -n my-desired-servicename
 """
 
 helps['apim list'] = """
