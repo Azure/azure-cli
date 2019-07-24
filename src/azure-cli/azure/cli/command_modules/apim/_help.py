@@ -49,7 +49,7 @@ helps['apim update'] = """
 
 helps['apim api list'] = """
     type: command
-    short-summary: List API's for a service instance.
+    short-summary: List all API's for a service instance.
 """
 
 helps['apim backup'] = """
