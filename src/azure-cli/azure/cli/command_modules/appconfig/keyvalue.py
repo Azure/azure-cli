@@ -445,7 +445,7 @@ def restore_key(cmd,
                         logger.error('Failed after restoring %d out of %d keys', restored_so_far, keys_to_restore)
                         raise CLIError(str(exception))
 
-        logger.debug ('Successfully restored %d out of %d keys', restored_so_far, keys_to_restore)
+        logger.debug('Successfully restored %d out of %d keys', restored_so_far, keys_to_restore)
     except Exception as exception:
         raise CLIError(str(exception))
 
