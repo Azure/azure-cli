@@ -966,10 +966,14 @@ def update_application(instance, display_name=None, homepage=None,  # pylint: di
     if app_roles:
         app_patch_param.app_roles = _build_app_roles(app_roles)
 
-    app_patch_param.available_to_other_tenants = available_to_other_tenants
-    app_patch_param.oauth2_allow_implicit_flow = oauth2_allow_implicit_flow
-    app_patch_param.identifier_uris = identifier_uris
-    app_patch_param.reply_urls = reply_urls
+    if available_to_other_tenants is not None:
+        app_patch_param.available_to_other_tenants = available_to_other_tenants
+    if oauth2_allow_implicit_flow is not None:
+        app_patch_param.oauth2_allow_implicit_flow = oauth2_allow_implicit_flow
+    if identifier_uris is not None:
+        app_patch_param.identifier_uris = identifier_uris
+    if reply_urls is not None:
+        app_patch_param.reply_urls = reply_urls
 
     return app_patch_param
 
