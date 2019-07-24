@@ -386,18 +386,18 @@ def restore_key(cmd,
                 no_deletes=False,
                 connection_string=None,
                 yes=False):
-    current_retry = 0
-    max_retry = 3
-    retry_interval = 1
 
     connection_string = resolve_connection_string(cmd, name, connection_string)
     azconfig_client = AzconfigClient(connection_string)
 
+    if label=='':
+        label = QueryKeyValueCollectionOptions.empty_label
+
     query_option_then = QueryKeyValueCollectionOptions(key_filter=key,
-                                                       label_filter=QueryKeyValueCollectionOptions.empty_label if label is not None and not label else label,
+                                                       label_filter=label,
                                                        query_datetime=datetime)
     query_option_now = QueryKeyValueCollectionOptions(key_filter=key,
-                                                      label_filter=QueryKeyValueCollectionOptions.empty_label if label is not None and not label else label)
+                                                      label_filter=label)
 
     try:
         restore_keyvalues = azconfig_client.get_keyvalues(query_option_then)
@@ -414,36 +414,21 @@ def restore_key(cmd,
         restored_so_far = 0
 
         for kv in chain(kvs_to_restore, kvs_to_modify):
-            success = None
-            while success is None and current_retry <= max_retry:
-                try:
-                    success = azconfig_client.set_keyvalue(kv, ModifyKeyValueOptions())
-                    restored_so_far += 1
-                except HTTPException as exception:
-                    if current_retry < max_retry and exception.status == StatusCodes.PRECONDITION_FAILED:
-                        logger.debug('Retrying setting %s times with exception: concurrent setting operations', current_retry + 1)
-                        current_retry += 1
-                        time.sleep(retry_interval)
-                    else:
-                        logger.error('Exceeded maximum retry settings while setting the keyvalue:%s', kv)
-                        logger.error('Failed after restoring %d out of %d keys', restored_so_far, keys_to_restore)
-                        raise CLIError(str(exception))
-        current_retry = 0
+            try:
+                azconfig_client.set_keyvalue(kv, ModifyKeyValueOptions())
+                restored_so_far += 1
+            except HTTPException as exception:
+                logger.error('Error while setting the keyvalue:%s', kv)
+                logger.error('Failed after restoring %d out of %d keys', restored_so_far, keys_to_restore)
+                raise CLIError(str(exception))
         for kv in kvs_to_delete:
-            success = None
-            while success is None and current_retry <= max_retry:
-                try:
-                    success = azconfig_client.delete_keyvalue(kv, ModifyKeyValueOptions())
-                    restored_so_far += 1
-                except HTTPException as exception:
-                    if current_retry < max_retry and exception.status == StatusCodes.PRECONDITION_FAILED:
-                        logger.debug('Retrying deleting %s times with exception: concurrent setting operations', current_retry + 1)
-                        current_retry += 1
-                        time.sleep(retry_interval)
-                    else:
-                        logger.error('Exceeded maximum retry settings while deleting the keyvalue:%s', kv)
-                        logger.error('Failed after restoring %d out of %d keys', restored_so_far, keys_to_restore)
-                        raise CLIError(str(exception))
+            try:
+                azconfig_client.delete_keyvalue(kv, ModifyKeyValueOptions())
+                restored_so_far += 1
+            except HTTPException as exception:
+                logger.error('Error while setting the keyvalue:%s', kv)
+                logger.error('Failed after restoring %d out of %d keys', restored_so_far, keys_to_restore)
+                raise CLIError(str(exception))
 
         logger.debug('Successfully restored %d out of %d keys', restored_so_far, keys_to_restore)
     except Exception as exception:
