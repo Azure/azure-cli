@@ -75,6 +75,30 @@ class NetworkPrivateEndpoints(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_network_private_endpoints')
     def test_network_private_endpoints(self, resource_group):
 
+        self.kwargs.update({
+            'lb': 'lb1',
+            'sku': 'standard',
+            'location': 'eastus2',
+            'ip': 'pubip1'
+        })
+
+        self.cmd('network private-endpoint list-types -l {location}')
+
+        self.cmd('network private-endpoint create')
+        # unable to create resource so we can only verify the commands don't fail (or fail expectedly)
+        self.cmd('network private-endpoint list')
+        self.cmd('network private-endpoint list -g {rg}')
+
+        # system code 3 for 'not found'
+        with self.assertRaisesRegexp(SystemExit, '3'):
+            self.cmd('network private-endpoint show -g {rg} -n dummy')
+
+
+class NetworkPrivateLinkService(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_network_private_link_service')
+    def test_network_private_link_service(self, resource_group):
+
         # unable to create resource so we can only verify the commands don't fail (or fail expectedly)
         self.cmd('network private-endpoint list')
         self.cmd('network private-endpoint list -g {rg}')

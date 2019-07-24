@@ -2059,21 +2059,36 @@ def list_express_route_ports(cmd, resource_group_name=None):
 
 # region PrivateEndpoint
 def create_private_endpoint(cmd, resource_group_name, private_endpoint_name, subnet,
+                            private_connection_resource_id, group_ids=None,
                             virtual_network_name=None, tags=None, location=None,
-                            private_link_service_connections=None, manual_private_link_service_connections=None):
+                            request_message=None, munual_request=None):
     client = network_client_factory(cmd.cli_ctx).private_endpoints
-    PrivateEndpoint, Subnet = cmd.get_models('PrivateEndpoint', 'Subnet')
+    PrivateEndpoint, Subnet, PrivateLinkServiceConnection = cmd.get_models('PrivateEndpoint', 'Subnet', 'PrivateLinkServiceConnection')
+    private_link_service_connection = PrivateLinkServiceConnection(private_link_service_id=private_connection_resource_id,
+                                                                   group_ids=group_ids,
+                                                                   request_message=request_message)
     private_endpoint = PrivateEndpoint(
         location=location,
         tags=tags,
-        subnet=Subnet(id=subnet),
-        private_link_service_connections=private_link_service_connections,
-        manual_private_link_service_connections=manual_private_link_service_connections
+        subnet=Subnet(id=subnet)
     )
+
+    if munual_request:
+        private_endpoint.manual_private_link_service_connections = [private_link_service_connection]
+    else:
+        private_endpoint.private_link_service_connections = [private_link_service_connection]
+
     return client.create_or_update(resource_group_name, private_endpoint_name, private_endpoint)
 
 
-def update_private_endpoint(instance):
+def update_private_endpoint(instance, cmd, subnet=None,
+                            virtual_network_name=None, tags=None,
+                            private_connection_resource_id=None, group_ids=None, request_message=None,
+                            munual_request=None):
+    PrivateEndpoint, Subnet, PrivateLinkServiceConnection = cmd.get_models('PrivateEndpoint', 'Subnet', 'PrivateLinkServiceConnection')
+    with cmd.update_context(instance) as c:
+        c.set_param('tags', tags)
+        c.set_param('subnet', Subnet(id=subnet))
     return instance
 
 
@@ -2113,7 +2128,8 @@ def create_private_link_service(cmd, resource_group_name, service_name,
         ip_configurations=[ip_config],
         visbility=visibility,
         auto_approval=auto_approval,
-        fqdns=fqdns
+        fqdns=fqdns,
+        tags=tags
     )
     return client.create_or_update(resource_group_name, service_name, link_service)
 
@@ -2143,7 +2159,18 @@ def list_private_link_services(cmd, resource_group_name=None):
 
 def update_private_endpoint_connection(cmd, resource_group_name, service_name, pe_connection_name,
                                        connection_status, description=None, action_required=None):
-    raise CLIError('TODO: Implement')
+    client = network_client_factory(cmd.cli_ctx).private_link_services
+    PrivateEndpointConnection, PrivateLinkServiceConnectionState  = cmd.get_models('PrivateEndpointConnection', 
+                                                                                   'PrivateLinkServiceConnectionState')
+    connection_state = PrivateLinkServiceConnectionState(
+        status=connection_status,
+        description=description,
+        action_required=action_required
+    )
+    private_endpoint_connection = PrivateEndpointConnection(
+        private_link_service_connection_state=connection_state
+    )
+    return client.update_private_endpoint_connection(resource_group_name, service_name, pe_connection_name, private_endpoint_connection)
 # endregion
 
 
