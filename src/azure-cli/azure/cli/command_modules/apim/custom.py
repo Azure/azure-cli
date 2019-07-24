@@ -7,6 +7,7 @@ from knack.util import CLIError
 from azure.cli.core.util import sdk_no_wait
 from azure.mgmt.apimanagement.models import ApiManagementServiceResource
 
+#Service Operations
 def create_apim(cmd, client, 
     resource_group_name, 
     name, 
@@ -44,7 +45,6 @@ def update_apim(client, resource_group_name, name):
     """Show details of an APIM instance """
     return client.api_management_service.get(resource_group_name, name)
 
-
 def list_apim(client, resource_group_name=None):
     """List all APIM instances.  Resource group is optional """
     if resource_group_name:
@@ -55,7 +55,7 @@ def get_apim(client, resource_group_name, name):
     """Show details of an APIM instance """
     return client.api_management_service.get(resource_group_name, name)
 
-def check_name_availability(client,  name):
+def check_name_availability(client, name):
     """checks to see if a service name is available to use """
     return client.api_management_service.check_name_availability(name)
 
