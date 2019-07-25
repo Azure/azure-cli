@@ -27,20 +27,14 @@ HELM_VERSION_REGEX = re.compile(r'SemVer:"v([.\d]+)"', re.I)
 
 # Utilities functions
 def print_pass(message):
-    logger.info("%s : OK", message)
-
-
-def print_warning(message):
-    logger.warning(message)
-
-
-def print_error(message):
-    logger.error(message)
+    from colorama import Fore, Style, init
+    init()
+    print(str(message) + " : " + Fore.GREEN + "OK" + Style.RESET_ALL, file=sys.stderr)
 
 
 def _handle_error(error, ignore_errors):
     if ignore_errors:
-        print_error(error.get_error_message())
+        logger.error(error.get_error_message())
     else:
         raise CLIError(error.get_error_message(FAQ_MESSAGE))
 
@@ -86,7 +80,7 @@ def _get_docker_status_and_version(ignore_errors, yes):
         docker_daemon_available = False
 
     if docker_daemon_available:
-        print("Docker daemon status: available")
+        print("Docker daemon status: available", file=sys.stderr)
 
     # Docker version check
     output, warning, stderr = _subprocess_communicate([docker_command, "--version"])
@@ -94,8 +88,8 @@ def _get_docker_status_and_version(ignore_errors, yes):
         _handle_error(DOCKER_VERSION_ERROR.append_error_message(stderr), ignore_errors)
     else:
         if warning:
-            print_warning(warning)
-        print("Docker version: {}".format(output))
+            logger.warning(warning)
+        print("Docker version: {}".format(output), file=sys.stderr)
 
     # Docker pull check - only if docker daemon is available
     if docker_daemon_available:
@@ -103,7 +97,7 @@ def _get_docker_status_and_version(ignore_errors, yes):
             from knack.prompting import prompt_y_n
             confirmation = prompt_y_n("This will pull the image {}. Proceed?".format(IMAGE))
             if not confirmation:
-                print_warning("Skipping pull check.")
+                logger.warning("Skipping pull check.")
                 return
 
         output, warning, stderr = _subprocess_communicate([docker_command, "pull", IMAGE])
@@ -112,7 +106,7 @@ def _get_docker_status_and_version(ignore_errors, yes):
             _handle_error(DOCKER_PULL_ERROR.append_error_message(stderr), ignore_errors)
         else:
             if warning:
-                print_warning(warning)
+                logger.warning(warning)
             if output.find(DOCKER_PULL_SUCCEEDED.format(IMAGE)) != -1 or \
                output.find(DOCKER_IMAGE_UP_TO_DATE.format(IMAGE)) != -1:
                 print_pass("Docker pull of '{}'".format(IMAGE))
@@ -126,13 +120,12 @@ def _get_cli_version():
 
     # working_set.by_key is a dictionary with component names as key
     cli_component_name = "azure-cli"
-    if cli_component_name in working_set.by_key:
-        print('Azure CLI version: {}'.format(
-            working_set.by_key[cli_component_name].version))
-    else:
-        print('Azure CLI version: not found', file=sys.stderr)
+    cli_version = "not found"
 
-    return 0
+    if cli_component_name in working_set.by_key:
+        cli_version = working_set.by_key[cli_component_name].version
+
+    print('Azure CLI version: {}'.format(cli_version), file=sys.stderr)
 
 
 # Get helm versions
@@ -155,14 +148,14 @@ def _get_helm_version(ignore_errors):
         return
 
     if warning:
-        print_warning(warning)
+        logger.warning(warning)
 
     # Retrieve the helm version if regex pattern is found
     match_obj = HELM_VERSION_REGEX.search(output)
     if match_obj:
         output = match_obj.group(1)
 
-    print("Helm version: {}".format(output))
+    print("Helm version: {}".format(output), file=sys.stderr)
 
     # Display an error message if the current helm version < min required version
     if match_obj and LooseVersion(output) < LooseVersion(MIN_HELM_VERSION):
@@ -175,7 +168,7 @@ def _get_helm_version(ignore_errors):
 def _check_health_environment(ignore_errors, yes):
     from azure.cli.core.util import in_cloud_console
     if in_cloud_console():
-        print_warning("Environment checks are not supported in Azure Cloud Shell.")
+        logger.warning("Environment checks are not supported in Azure Cloud Shell.")
         return
 
     _get_docker_status_and_version(ignore_errors, yes)
@@ -254,7 +247,7 @@ def _get_endpoint_and_token_status(cmd, login_server, ignore_errors):
 
 def _check_health_connectivity(cmd, registry_name, ignore_errors):
     if registry_name is None:
-        print_warning("Registry name must be provided to check connectivity.")
+        logger.warning("Registry name must be provided to check connectivity.")
         return
 
     try:
@@ -284,4 +277,4 @@ def acr_check_health(cmd,  # pylint: disable useless-return
 
     _check_health_environment(ignore_errors, yes)
     _check_health_connectivity(cmd, registry_name, ignore_errors)
-    print(FAQ_MESSAGE)
+    print(FAQ_MESSAGE, file=sys.stderr)
