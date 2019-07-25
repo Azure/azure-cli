@@ -49,6 +49,7 @@ class KeyValue(object):
                "\nLabel: " + (self.label if self.label else '') + \
                "\netag: " + self.etag + \
                "\nLast Modified: " + self.last_modified + \
+               "\nContent Type: " + self.content_type + \
                "\nTags: " + '{!s}'.format(self.tags)
 
 
