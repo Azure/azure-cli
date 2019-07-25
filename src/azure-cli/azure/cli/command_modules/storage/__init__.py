@@ -176,10 +176,10 @@ class StorageCommandGroup(AzCommandGroup):
                 message = """
 You do not have the required permissions needed to perform this operation.
 Depending on your operation, you may need to be assigned one of the following roles:
-    "Storage Blob Data Contributor (Preview)"
-    "Storage Blob Data Reader (Preview)"
-    "Storage Queue Data Contributor (Preview)"
-    "Storage Queue Data Reader (Preview)"
+    "Storage Blob Data Contributor"
+    "Storage Blob Data Reader"
+    "Storage Queue Data Contributor"
+    "Storage Queue Data Reader"
 
 If you want to use the old authentication method and allow querying for the right account key, please use the "--auth-mode" parameter and "key" value.
                 """
