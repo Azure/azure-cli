@@ -339,7 +339,11 @@ def get_content_setting_validator(settings_class, update, guess_from_file=None):
         return class_type.__module__ + "." + class_type.__class__.__name__
 
     def validator(cmd, namespace):
-        t_file_content_settings = cmd.get_models('file.models#ContentSettings')
+        t_base_blob_service, t_file_service, t_blob_content_settings, t_file_content_settings = cmd.get_models(
+            'blob.baseblobservice#BaseBlobService',
+            'file#FileService',
+            'blob.models#ContentSettings',
+            'file.models#ContentSettings')
 
         # must run certain validators first for an update
         if update:
@@ -347,6 +351,31 @@ def get_content_setting_validator(settings_class, update, guess_from_file=None):
         if update and _class_name(settings_class) == _class_name(t_file_content_settings):
             get_file_path_validator()(namespace)
         ns = vars(namespace)
+        clear_content_settings = ns.pop('clear_content_settings')
+
+        # retrieve the existing object properties for an update
+        if update and not clear_content_settings:
+            account = ns.get('account_name')
+            key = ns.get('account_key')
+            cs = ns.get('connection_string')
+            sas = ns.get('sas_token')
+            if _class_name(settings_class) == _class_name(t_blob_content_settings):
+                client = get_storage_data_service_client(cmd.cli_ctx,
+                                                         t_base_blob_service,
+                                                         account,
+                                                         key,
+                                                         cs,
+                                                         sas)
+                container = ns.get('container_name')
+                blob = ns.get('blob_name')
+                lease_id = ns.get('lease_id')
+                props = client.get_blob_properties(container, blob, lease_id=lease_id).properties.content_settings
+            elif _class_name(settings_class) == _class_name(t_file_content_settings):
+                client = get_storage_data_service_client(cmd.cli_ctx, t_file_service, account, key, cs, sas)
+                share = ns.get('share_name')
+                directory = ns.get('directory_name')
+                filename = ns.get('file_name')
+                props = client.get_file_properties(share, directory, filename).properties.content_settings
 
         # create new properties
         new_props = settings_class(
@@ -358,8 +387,16 @@ def get_content_setting_validator(settings_class, update, guess_from_file=None):
             cache_control=ns.pop('content_cache_control', None)
         )
 
-        if not update and guess_from_file:
-            new_props = guess_content_type(ns[guess_from_file], new_props, settings_class)
+        # if update, fill in any None values with existing
+        if update:
+            if not clear_content_settings:
+                for attr in ['content_type', 'content_disposition', 'content_encoding', 'content_language', 'content_md5',
+                            'cache_control']:
+                    if getattr(new_props, attr) is None:
+                        setattr(new_props, attr, getattr(props, attr))
+        else:
+            if guess_from_file:
+                new_props = guess_content_type(ns[guess_from_file], new_props, settings_class)
 
         ns['content_settings'] = new_props
 
