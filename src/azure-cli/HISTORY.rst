@@ -28,6 +28,11 @@ Release History
 
 * New Cmdlets for Management.Sql that supports Managed instance key and managed instance TDE protector management
 
+**Storage**
+
+* `storage remove`: add remove command for storage
+* Fixed issue `storage blob update`.
+
 **VM**
 
 * list-skus: use newer api-version to output zone details
@@ -84,8 +89,6 @@ Release History
 
 * Enable Files AADDS for storage account update.
 * Fixed issue `storage blob service-properties update --set`.
-* `storage remove`: add remove command for storage
-* Fixed issue `storage blob update`.
 
 2.0.68
 ++++++
