@@ -19,9 +19,9 @@ type: group
 short-summary: Manage Azure IoT Hub Device Provisioning Service.
 """
 
-helps['iot digitaltwin'] = """
+helps['iot pnp'] = """
 type: group
-short-summary: Manage DigitalTwin repositories and repository access keys.
+short-summary: Manage IoT Plug and Play repositories and repository access keys.
 """
 
 helps['iot dps access-policy'] = """
@@ -708,111 +708,111 @@ examples:
         az iot hub manual-failover -n myhub --fr "West US"
 """
 
-helps['iot digitaltwin repository'] = """
+helps['iot pnp repository'] = """
 type: group
-short-summary: Manage DigitalTwin repositories.
+short-summary: Manage IoT Plug and Play repositories.
 """
 
-helps['iot digitaltwin repository create'] = """
+helps['iot pnp repository create'] = """
 type: command
-short-summary: Create a DigitalTwin repository.
+short-summary: Create an IoT Plug and Play repository.
 examples:
-  - name: Create a new DigitalTwin repository "myrepo"
+  - name: Create a new IoT Plug and Play repository "myrepo"
     text: >
-        az iot digitaltwin repository create -e "https://provider.azureiotrepository-test.com" -n myrepo
+        az iot pnp repository create -n myrepo
 """
 
-helps['iot digitaltwin repository list'] = """
+helps['iot pnp repository list'] = """
 type: command
-short-summary: List DigitalTwin repositories.
+short-summary: List IoT Plug and Play repositories.
 examples:
-  - name: List DigitalTwin repositories.
+  - name: List IoT Plug and Play repositories.
     text: >
-        az iot digitaltwin repository list -e "https://provider.azureiotrepository-test.com"
+        az iot pnp repository list
 """
 
-helps['iot digitaltwin repository show'] = """
+helps['iot pnp repository show'] = """
 type: command
-short-summary: Gets the details for a DigitalTwin repository.
+short-summary: Gets the details for an IoT Plug and Play repository.
 examples:
-  - name: Gets the details for a DigitalTwin repository.
+  - name: Gets the details for an IoT Plug and Play repository.
     text: >
-        az iot digitaltwin repository show -e "https://provider.azureiotrepository-test.com" -r aaaabbbb11112222aaaabbbb1111222
+        az iot pnp repository show -r aaaabbbb11112222aaaabbbb1111222
 """
 
-helps['iot digitaltwin repository delete'] = """
+helps['iot pnp repository delete'] = """
 type: command
-short-summary: Delete a DigitalTwin repository.
+short-summary: Delete an IoT Plug and Play repository.
 examples:
-  - name: Delete a DigitalTwin repository.
+  - name: Delete an IoT Plug and Play repository.
     text: >
-        az iot digitaltwin repository delete -e "https://provider.azureiotrepository-test.com" -r aaaabbbb11112222aaaabbbb1111222
+        az iot pnp repository delete -r aaaabbbb11112222aaaabbbb1111222
 """
 
-helps['iot digitaltwin repository update'] = """
+helps['iot pnp repository update'] = """
 type: command
-short-summary: Update a DigitalTwin repository.
+short-summary: Update an IoT Plug and Play repository.
 examples:
-  - name: Update a DigitalTwin repository.
+  - name: Update an IoT Plug and Play repository.
     text: >
-        az iot digitaltwin repository update -e "https://provider.azureiotrepository-test.com" -r aaaabbbb11112222aaaabbbb1111222 -n updatedreponame
+        az iot pnp repository update -r aaaabbbb11112222aaaabbbb1111222 -n updatedreponame
 """
 
-helps['iot digitaltwin repository get-provision-status'] = """
+helps['iot pnp repository get-provision-status'] = """
 type: command
-short-summary: Returns the DigitalTwin repository provisioning status.
+short-summary: Returns the IoT Plug and Play repository provisioning status.
 examples:
-  - name: Returns the DigitalTwin repository provisioning status.
+  - name: Returns the IoT Plug and Play repository provisioning status.
     text: >
-        az iot digitaltwin repository get-provision-status -e "https://provider.azureiotrepository-test.com" -r aaaabbbb11112222aaaabbbb1111222 -s aaaabbbb11112222aaaabbbb1111333
+        az iot pnp repository get-provision-status -r aaaabbbb11112222aaaabbbb1111222 -s aaaabbbb11112222aaaabbbb1111333
 """
 
-helps['iot digitaltwin key'] = """
+helps['iot pnp key'] = """
 type: group
-short-summary: Manage access keys to a DigitalTwin repository.
+short-summary: Manage access keys to an IoT Plug and Play repository.
 """
 
-helps['iot digitaltwin key create'] = """
+helps['iot pnp key create'] = """
 type: command
 short-summary: Create a key for the given repository.
 examples:
   - name: Create a key for the given repository.
     text: >
-        az iot digitaltwin key create -e "https://provider.azureiotrepository-test.com" -r aaaabbbb11112222aaaabbbb1111222 --role Reader
+        az iot pnp key create -r aaaabbbb11112222aaaabbbb1111222 --role Reader
 """
 
-helps['iot digitaltwin key list'] = """
+helps['iot pnp key list'] = """
 type: command
 short-summary: List repository's keys.
 examples:
   - name: List repository's keys.
     text: >
-        az iot digitaltwin key list -e "https://provider.azureiotrepository-test.com" -r aaaabbbb11112222aaaabbbb1111222
+        az iot pnp key list -r aaaabbbb11112222aaaabbbb1111222
 """
 
-helps['iot digitaltwin key show'] = """
+helps['iot pnp key show'] = """
 type: command
 short-summary: Get the details of a repository key.
 examples:
   - name: Get the details of a repository key.
     text: >
-        az iot digitaltwin key show -e "https://provider.azureiotrepository-test.com" -r aaaabbbb11112222aaaabbbb1111222 -k 12345
+        az iot pnp key show -r aaaabbbb11112222aaaabbbb1111222 -k 12345
 """
 
-helps['iot digitaltwin key delete'] = """
+helps['iot pnp key delete'] = """
 type: command
 short-summary: Delete a key from the given repository.
 examples:
   - name: Delete a key from the given repository.
     text: >
-        az iot digitaltwin key delete -e "https://provider.azureiotrepository-test.com" -r aaaabbbb11112222aaaabbbb1111222 -k 12345
+        az iot pnp key delete -r aaaabbbb11112222aaaabbbb1111222 -k 12345
 """
 
-helps['iot digitaltwin key update'] = """
+helps['iot pnp key update'] = """
 type: command
 short-summary: Update the key for the given repository.
 examples:
   - name: Update the key for the given repository.
     text: >
-        az iot digitaltwin key update -e "https://provider.azureiotrepository-test.com" -r aaaabbbb11112222aaaabbbb1111222 -k 12345 --role admin
+        az iot pnp key update -r aaaabbbb11112222aaaabbbb1111222 -k 12345 --role admin
 """
