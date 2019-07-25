@@ -46,7 +46,3 @@ def load_arguments(self, _):
         c.argument('sku_name', arg_type=get_enum_type(SKU_TYPES), help='The sku of the api management instance')
         c.argument('sku_capacity', type=int, validator=validate_capacity, help='The number of deployed units of the SKU.')
         c.argument('enable_managed_identity', arg_type=get_three_state_flag(), help='Create a managed identity for the API Management service to access other Azure resources.')
-           
-    for subgroup in ['api', 'product']:
-        with self.argument_context('apim {}'.format(subgroup)) as c:
-            c.argument('service_name', options_list=['--service-name', '-sn'])

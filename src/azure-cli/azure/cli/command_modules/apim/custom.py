@@ -111,9 +111,3 @@ def apim_apply_network_configuration_updates(client, resource_group_name, name, 
         properties['location'] = location
 
     return client.api_management_service.apply_network_configuration_updates(resource_group_name, name, properties)
-
-# API Operations
-
-def list_apim_api(client, resource_group_name, service_name):
-    """List all APis for the given service instance """
-    return client.api.list_by_service(resource_group_name, service_name)
