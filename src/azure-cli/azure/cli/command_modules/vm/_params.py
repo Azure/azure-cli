@@ -91,7 +91,7 @@ def load_arguments(self, _):
         with self.argument_context(scope) as c:
             c.ignore('source_blob_uri', 'source_disk', 'source_snapshot')
             c.argument('source_storage_account_id', help='used when source blob is in a different subscription')
-            c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GB. Max size: 4095 GB (certain preview disks can be larger).', type=int)
+            c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GiB. Max size: 4095 GiB (certain preview disks can be larger).', type=int)
             c.argument('duration_in_seconds', help='Time duration in seconds until the SAS access expires', type=int)
             if self.supported_api_version(min_api='2018-09-30', operation_group='disks'):
                 c.argument('access_level', arg_type=get_enum_type(['Read', 'Write']), default='Read', help='access level')
@@ -270,7 +270,7 @@ def load_arguments(self, _):
     with self.argument_context('vm create') as c:
         c.argument('name', name_arg_type, validator=_resource_not_exists(self.cli_ctx, 'Microsoft.Compute/virtualMachines'))
         c.argument('vm_name', name_arg_type, id_part=None, help='Name of the virtual machine.', completer=None)
-        c.argument('os_disk_size_gb', type=int, help='the size of the os disk in GB', arg_group='Storage')
+        c.argument('os_disk_size_gb', type=int, help='the size of the os disk in GiB', arg_group='Storage')
         c.argument('availability_set', help='Name or ID of an existing availability set to add the VM to. None by default.')
         c.argument('nsg', help='The name to use when creating a new Network Security Group (default) or referencing an existing one. Can also reference an existing NSG by ID or specify "" for none.', arg_group='Network')
         c.argument('nsg_rule', help='NSG rule to create when creating a new NSG. Defaults to open ports for allowing RDP on Windows and allowing SSH on Linux.', arg_group='Network', arg_type=get_enum_type(['RDP', 'SSH']))
@@ -309,7 +309,7 @@ def load_arguments(self, _):
         c.argument('vm_name', options_list=['--vm-name'], id_part=None, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines'))
         c.argument('new', action='store_true', help='create a new disk')
         c.argument('sku', arg_type=disk_sku, help='Underlying storage SKU')
-        c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GB. Max size: 4095 GB (certain preview disks can be larger).', type=int)
+        c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GiB. Max size: 4095 GiB (certain preview disks can be larger).', type=int)
         c.argument('lun', type=int, help='0-based logical unit number (LUN). Max value depends on the Virtual Machine size.')
 
     with self.argument_context('vm disk attach') as c:
@@ -376,7 +376,7 @@ def load_arguments(self, _):
 
     with self.argument_context('vm unmanaged-disk attach') as c:
         c.argument('disk_name', options_list=['--name', '-n'], help='The data disk name.')
-        c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GB. Max size: 4095 GB (certain preview disks can be larger).', type=int)
+        c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GiB. Max size: 4095 GiB (certain preview disks can be larger).', type=int)
 
     with self.argument_context('vm unmanaged-disk detach') as c:
         c.argument('disk_name', options_list=['--name', '-n'], help='The data disk name.')
@@ -517,7 +517,7 @@ def load_arguments(self, _):
         new_vmss_name_type = CLIArgumentType(overrides=vmss_name_type, options_list=options_list)
 
         c.argument('lun', type=int, help='0-based logical unit number (LUN). Max value depends on the Virtual Machine instance size.')
-        c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GB. Max size: 4095 GB (certain preview disks can be larger).', type=int)
+        c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GiB. Max size: 4095 GiB (certain preview disks can be larger).', type=int)
         c.argument('vmss_name', new_vmss_name_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'))
         c.argument('disk', validator=validate_vmss_disk, help='existing disk name or ID to attach or detach from VM instances',
                    min_api='2017-12-01', completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
@@ -613,7 +613,7 @@ def load_arguments(self, _):
             c.argument('storage_container_name', help="Only applicable when used with `--use-unmanaged-disk`. Name of the storage container for the VM OS disk. Default: vhds")
             c.ignore('os_publisher', 'os_offer', 'os_sku', 'os_version', 'storage_profile')
             c.argument('use_unmanaged_disk', action='store_true', help='Do not use managed disk to persist VM')
-            c.argument('data_disk_sizes_gb', nargs='+', type=int, help='space-separated empty managed data disk sizes in GB to create')
+            c.argument('data_disk_sizes_gb', nargs='+', type=int, help='space-separated empty managed data disk sizes in GiB to create')
             c.ignore('disk_info', 'storage_account_type', 'public_ip_address_type', 'nsg_type', 'nic_type', 'vnet_type', 'load_balancer_type', 'app_gateway_type')
             c.argument('os_caching', options_list=[self.deprecate(target='--storage-caching', redirect='--os-disk-caching', hide=True), '--os-disk-caching'], help='Storage caching type for the VM OS disk. Default: ReadWrite', arg_type=get_enum_type(CachingTypes))
             c.argument('data_caching', options_list=['--data-disk-caching'], nargs='+',

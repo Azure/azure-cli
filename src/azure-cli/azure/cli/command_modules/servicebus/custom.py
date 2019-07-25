@@ -535,9 +535,9 @@ def cli_returnnsdetails(cmd, resource_group_name, namespace_name, max_size_in_me
     nsclient = get_mgmt_service_client(cmd.cli_ctx, ServiceBusManagementClient).namespaces
     getnamespace = nsclient.get(resource_group_name=resource_group_name, namespace_name=namespace_name)
     if getnamespace.sku.name == 'Standard' and max_size_in_megabytes not in [1024, 2048, 3072, 4096, 5120]:
-        raise CLIError('--max-size on Standard sku namespace only supports upto [1024, 2048, 3072, 4096, 5120] GB')
+        raise CLIError('--max-size on Standard sku namespace only supports upto [1024, 2048, 3072, 4096, 5120] GiB')
 
     if getnamespace.sku.name == 'Premium' and max_size_in_megabytes not in [1024, 2048, 3072, 4096, 5120, 10240, 20480,
                                                                             40960, 81920]:
         raise CLIError(
-            '--max-size on Premium sku namespace only supports upto [1024, 2048, 3072, 4096, 5120, 10240, 20480, 40960, 81920] GB')
+            '--max-size on Premium sku namespace only supports upto [1024, 2048, 3072, 4096, 5120, 10240, 20480, 40960, 81920] GiB')

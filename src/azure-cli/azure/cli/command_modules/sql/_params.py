@@ -180,7 +180,7 @@ storage_param_type = CLIArgumentType(
                                                                     MB=1.0 / 1024,
                                                                     GB=1,
                                                                     TB=1024)),
-    help='The storage size. If no unit is specified, defaults to gigabytes (GB).',
+    help='The storage size. If no unit is specified, defaults to gibibytes (GB). The use of GB vs GiB is legacy.',
     validator=validate_managed_instance_storage_size)
 
 db_service_objective_examples = 'Basic, S0, P1, GP_Gen4_1, BC_Gen5_2.'
@@ -1085,7 +1085,7 @@ def load_arguments(self, _):
                    options_list=['--storage'],
                    arg_type=storage_param_type,
                    help='The storage size of the managed instance. '
-                   'Storage size must be specified in increments of 32 GB')
+                   'Storage size must be specified in increments of 32 GiB')
 
         c.argument('license_type',
                    arg_type=get_enum_type(DatabaseLicenseType),

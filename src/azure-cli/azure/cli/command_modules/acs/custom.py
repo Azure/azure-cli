@@ -744,7 +744,7 @@ def acs_create(cmd, client, resource_group_name, deployment_name, name, ssh_key_
     :type master_profile: dict
     :param master_vm_size: The size of master pool Virtual Machine
     :type master_vm_size: str
-    :param master_osdisk_size: The osDisk size in GB of master pool Virtual Machine
+    :param master_osdisk_size: The osDisk size in GiB of master pool Virtual Machine
     :type master_osdisk_size: int
     :param master_count: The number of masters for the cluster.
     :type master_count: int
@@ -757,7 +757,7 @@ def acs_create(cmd, client, resource_group_name, deployment_name, name, ssh_key_
     :type agent_profiles: dict
     :param agent_vm_size: The size of the Virtual Machine.
     :type agent_vm_size: str
-    :param agent_osdisk_size: The osDisk size in GB of agent pool Virtual Machine
+    :param agent_osdisk_size: The osDisk size in GiB of agent pool Virtual Machine
     :type agent_osdisk_size: int
     :param agent_vnet_subnet_id: The vnet subnet id for master pool
     :type agent_vnet_subnet_id: str

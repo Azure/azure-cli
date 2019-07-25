@@ -93,7 +93,7 @@ def load_arguments(self, _):
         c.argument('generate_ssh_keys', action='store_true', validator=validate_create_parameters,
                    help='Generate SSH public and private key files if missing')
         c.argument('master_osdisk_size', type=int,
-                   help=_get_feature_in_preview_message() + 'The disk size for master pool vms. Unit in GB. Default: corresponding vmsize disk size')
+                   help=_get_feature_in_preview_message() + 'The disk size for master pool vms. Unit in GiB. Default: corresponding vmsize disk size')
         c.argument('master_vnet_subnet_id', type=str,
                    help=_get_feature_in_preview_message() + 'The custom vnet subnet id. Note agent need to used the same vnet if master set. Default: ""')
         c.argument('master_first_consecutive_static_ip', type=str,
@@ -105,7 +105,7 @@ def load_arguments(self, _):
         c.argument('agent_vm_size', completer=get_vm_size_completion_list,
                    help='Set the default size for agent pools vms.')
         c.argument('agent_osdisk_size', type=int,
-                   help=_get_feature_in_preview_message() + 'Set the default disk size for agent pools vms. Unit in GB. Default: corresponding vmsize disk size')
+                   help=_get_feature_in_preview_message() + 'Set the default disk size for agent pools vms. Unit in GiB. Default: corresponding vmsize disk size')
         c.argument('agent_vnet_subnet_id', type=str,
                    help=_get_feature_in_preview_message() + 'Set the default custom vnet subnet id for agent pools. Note agent need to used the same vnet if master set. Default: ""')
         c.argument('agent_ports', type=validate_list_of_integers,

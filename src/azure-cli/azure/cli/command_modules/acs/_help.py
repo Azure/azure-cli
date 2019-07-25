@@ -201,7 +201,7 @@ parameters:
     short-summary: Number of nodes in the Kubernetes node pool. After creating a cluster, you can change the size of its node pool with `az aks scale`.
   - name: --node-osdisk-size
     type: int
-    short-summary: Size in GB of the OS disk for each node in the node pool. Minimum 30 GB.
+    short-summary: Size in GiB of the OS disk for each node in the node pool. Minimum 30 GiB.
   - name: --kubernetes-version -k
     type: string
     short-summary: Version of Kubernetes to use for creating the cluster, such as "1.11.8" or "1.12.6".

@@ -85,7 +85,7 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(['standard_lrs', 'premium_lrs']),
                    help='The type of storage account that will be used for the data disks: standard_lrs or premium_lrs')
         c.argument('workernode_data_disk_size', arg_group='Node',
-                   help='The size of the data disk in GB, e.g. 1023.')
+                   help='The size of the data disk in GiB, e.g. 1023.')
         c.argument('zookeepernode_size', arg_type=node_size_type)
         c.argument('edgenode_size', arg_type=node_size_type)
         c.argument('workernode_count', options_list=['--size', '-s'], arg_group='Node',

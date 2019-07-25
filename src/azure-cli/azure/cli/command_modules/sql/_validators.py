@@ -112,4 +112,4 @@ def validate_managed_instance_storage_size(namespace):
     if (not namespace.storage_size_in_gb) or (namespace.storage_size_in_gb and namespace.storage_size_in_gb % 32 == 0):
         pass
     else:
-        raise CLIError('incorrect usage: --storage must be specified in increments of 32 GB')
+        raise CLIError('incorrect usage: --storage must be specified in increments of 32 GiB')

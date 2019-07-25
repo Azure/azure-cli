@@ -1320,7 +1320,7 @@ def validate_vmss_disk(cmd, namespace):
         namespace.disk = _get_resource_id(cmd.cli_ctx, namespace.disk,
                                           namespace.resource_group_name, 'disks', 'Microsoft.Compute')
     if bool(namespace.disk) == bool(namespace.size_gb):
-        raise CLIError('usage error: --disk EXIST_DISK --instance-id ID | --size-gb GB')
+        raise CLIError('usage error: --disk EXIST_DISK --instance-id ID | --size-gb GiB')
     if bool(namespace.disk) != bool(namespace.instance_id):
         raise CLIError('usage error: --disk EXIST_DISK --instance-id ID')
 
