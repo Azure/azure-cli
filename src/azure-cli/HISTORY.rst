@@ -17,6 +17,7 @@ Release History
 
 * network nic ip-config add: Fixes #9861 where --ids was inadvertently exposed but did not work.
 * network application-gateway http-settings create/update: Fixes #9604. Add `--root-certs` to support user associate trusted root certificates with the HTTP settings.*
+* network dns record-set ns create: Fixes #9965. Support --subscription again by moving the supression into lower scope.*
 
 **RBAC**
 
