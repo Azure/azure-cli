@@ -678,6 +678,25 @@ def __serialize_kv_list_to_comparable_json_object(keyvalues, level):
     return res
 
 
+def __serialize_kv_list_to_comparable_json_list(keyvalues):
+    res = []
+    for kv in keyvalues:
+        # value
+        kv_json = {'key': kv.key,
+                   'value': kv.value,
+                   'label': kv.label,
+                   'last modified': kv.last_modified,
+                   'content type': kv.content_type}
+        # tags
+        tag_json = {}
+        if kv.tags:
+            for tag_k, tag_v in kv.tags.items():
+                tag_json[tag_k] = tag_v
+        kv_json['tags'] = tag_json
+        res.append(kv_json)
+    return res
+
+
 def __print_preview(old_json, new_json):
     print('\n---------------- Preview (Beta) ----------------')
     if not new_json:
@@ -733,18 +752,15 @@ def __print_restore_preview(kvs_to_restore, kvs_to_modify, kvs_to_delete):
     # format result printing
     if kvs_to_restore:
         print('\nAdding:')
-        for kv in kvs_to_restore:
-            print(kv)
+        print(json.dumps(__serialize_kv_list_to_comparable_json_list(kvs_to_restore), indent=2))
 
     if kvs_to_modify:
         print('\nUpdating:')
-        for kv in kvs_to_modify:
-            print(kv)
+        print(json.dumps(__serialize_kv_list_to_comparable_json_list(kvs_to_modify), indent=2))
 
     if kvs_to_delete:
         print('\nDeleting:')
-        for kv in kvs_to_delete:
-            print(kv)
+        print(json.dumps(__serialize_kv_list_to_comparable_json_list(kvs_to_delete), indent=2))
 
     print("")  # printing an empty line for formatting purpose
     confirmation_message = "Do you want to continue? \n"
