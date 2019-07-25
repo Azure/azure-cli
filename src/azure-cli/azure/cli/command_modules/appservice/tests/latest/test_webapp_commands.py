@@ -681,6 +681,7 @@ class WebappACRScenarioTest(ScenarioTest):
 class FunctionappACRScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='japanwest')
     @StorageAccountPreparer()
+    @AllowLargeResponse()
     def test_acr_integration_function_app(self, resource_group, storage_account):
         plan = self.create_random_name(prefix='acrtestplanfunction', length=24)
         functionapp = self.create_random_name(prefix='functionappacrtest', length=24)
@@ -1063,6 +1064,22 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
         ])
 
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
+
+    @ResourceGroupPreparer(name_prefix='azurecli-functionapp-c-e2e-ragrs', location='westus')
+    @StorageAccountPreparer(sku='Standard_RAGRS')
+    def test_functionapp_consumption_ragrs_storage_e2e(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name('functionappconsumption', 40)
+
+        self.cmd('functionapp create -g {} -n {} -c westus -s {}'
+                 .format(resource_group, functionapp_name, storage_account)).assert_with_checks([
+                     JMESPathCheck('state', 'Running'),
+                     JMESPathCheck('name', functionapp_name),
+                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+        self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheck('kind', 'functionapp'),
+            JMESPathCheck('name', functionapp_name)
+        ])
 
 
 class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):

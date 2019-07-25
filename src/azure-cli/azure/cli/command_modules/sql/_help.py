@@ -588,3 +588,27 @@ helps['sql virtual-cluster delete'] = """
         - name: Delete a virtual cluster
           text: az sql virtual-cluster delete -g mygroup -n mycluster
     """
+helps['sql mi key'] = """
+    type: group
+    short-summary: Manage a SQL Instance's keys.
+    """
+helps['sql mi key create'] = """
+    type: command
+    short-summary: Creates a SQL Instance key.
+    """
+helps['sql mi key show'] = """
+    type: command
+    short-summary: Shows a SQL Instance key.
+    """
+helps['sql mi key delete'] = """
+    type: command
+    short-summary: Deletes a SQL Instance key.
+    """
+helps['sql mi tde-key'] = """
+    type: group
+    short-summary: Manage a SQL Instance's encryption protector.
+    """
+helps['sql mi tde-key set'] = """
+    type: command
+    short-summary: Sets the SQL Instance's encryption protector.
+    """

@@ -254,12 +254,14 @@ helps['netappfiles volume create'] = """
           short-summary: The vnet for the volume
         - name: --subnet
           short-summary: The subnet. If omitted 'default' will be used
+        - name: --protocol-types
+          short-summary: Space seperated list of protocols that the volume can use
         - name: --tags
           short-summary: Space-separated tags in `key[=value]` format
     examples:
         - name: Create an ANF volume
           text: >
-            az netappfiles volume create -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname -l westus2 --service-level premium --usage-threshold 100 --creation-token "unique-file-path" --vnet myvnet --subnet mysubnet
+            az netappfiles volume create -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname -l westus2 --service-level premium --usage-threshold 100 --creation-token "unique-file-path" --vnet myvnet --subnet mysubnet --protocol-types NFSv3 NFSv4
 """
 
 helps['netappfiles volume update'] = """

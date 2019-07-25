@@ -1001,6 +1001,27 @@ type: group
 short-summary: Manage shared access policies for a storage queue.
 """
 
+helps['storage remove'] = """
+type: command
+short-summary: Delete blobs or files from Azure Storage.
+long-summary: To delete blobs, both the source must either be public or be authenticated by using a shared access signature.
+examples:
+  - name: Remove a single blob.
+    text: az storage remove -c MyContainer -n MyBlob
+  - name: Remove an entire virtual directory.
+    text: az storage remove -c MyContainer -n path/to/directory --recursive
+  - name: Remove only the top blobs inside a virtual directory but not its sub-directories.
+    text: az storage remove -c MyContainer -n path/to/directory
+  - name: Remove a subset of blobs in a virtual directory (For example, only jpg and pdf files, or if the blob name is "exactName").
+    text: az storage remove -c MyContainer -n path/to/directory --recursive --include "*.jpg;*.pdf;exactName"
+  - name: Remove an entire virtual directory but exclude certain blobs from the scope (For example, every blob that starts with foo or ends with bar).
+    text: az storage remove -c MyContainer -n path/to/directory --recursive --include "foo*;*bar"
+  - name: Remove a single file.
+    text: az storage remove -s MyShare -p MyFile
+  - name: Remove an entire directory.
+    text: az storage remove -s MyShare -p path/to/directory --recursive
+"""
+
 helps['storage share'] = """
 type: group
 short-summary: Manage file shares.

@@ -14,7 +14,8 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_table_payload_format, validate_key, add_progress_callback, process_resource_group,
                           storage_account_key_options, process_file_download_namespace, process_metric_update_namespace,
                           get_char_options_validator, validate_bypass, validate_encryption_source, validate_marker,
-                          validate_storage_data_plane_list, validate_azcopy_upload_destination_url, as_user_validator)
+                          validate_storage_data_plane_list, validate_azcopy_upload_destination_url,
+                          validate_azcopy_remove_arguments, as_user_validator)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements
@@ -111,6 +112,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('tags', tags_type)
         c.argument('custom_domain', help='User domain assigned to the storage account. Name is the CNAME source.')
         c.argument('sku', help='The storage account SKU.', arg_type=get_enum_type(t_sku_name, default='standard_ragrs'))
+        c.argument('enable_files_aadds', arg_type=get_three_state_flag(), min_api='2018-11-01',
+                   help='Enable the identity based authentication settings for Azure Files.')
 
     with self.argument_context('storage account update') as c:
         c.register_common_storage_account_options()
@@ -741,6 +744,23 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('queue_name', queue_name_type)
         c.argument('message_id', options_list='--id')
         c.argument('content', type=unicode_string, help='Message content, up to 64KB in size.')
+
+    with self.argument_context('storage remove') as c:
+        from .completers import file_path_completer
+
+        c.extra('container_name', container_name_type, validator=validate_azcopy_remove_arguments)
+        c.extra('blob_name', options_list=('--name', '-n'), arg_type=blob_name_type)
+        c.extra('share_name', share_name_type, help='The file share name.')
+        c.extra('path', options_list=('--path', '-p'),
+                help='The path to the file within the file share.',
+                completer=file_path_completer)
+        c.argument('exclude', help='Exclude files whose name matches the pattern list.')
+        c.argument('include', help='Only include files whose name matches the pattern list.')
+        c.argument('recursive', options_list=['--recursive', '-r'], action='store_true',
+                   help='Look into sub-directories recursively when deleting between directories.')
+        c.ignore('destination')
+        c.ignore('service')
+        c.ignore('target')
 
     with self.argument_context('storage table') as c:
         c.argument('table_name', table_name_type, options_list=('--name', '-n'))

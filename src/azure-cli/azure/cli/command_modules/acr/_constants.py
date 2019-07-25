@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# pylint: disable=line-too-long
 
 STORAGE_RESOURCE_TYPE = 'Microsoft.Storage/storageAccounts'
 
@@ -12,10 +13,11 @@ REPLICATION_RESOURCE_TYPE = REGISTRY_RESOURCE_TYPE + '/replications'
 
 TASK_RESOURCE_TYPE = REGISTRY_RESOURCE_TYPE + '/tasks'
 TASK_VALID_VSTS_URLS = ['visualstudio.com', 'dev.azure.com']
+TASK_RESOURCE_ID_TEMPLATE = '/subscriptions/{sub_id}/resourceGroups/{rg}/providers/Microsoft.ContainerRegistry/registries/{reg}/tasks/{name}'
 
 ACR_TASK_YAML_DEFAULT_NAME = 'acb.yaml'
 
-ORYX_PACK_BUILDER_IMAGE = 'mcr.microsoft.com/oryx/pack-builder:stable'
+ACR_CACHED_BUILDER_IMAGES = ('cloudfoundry/cnb:bionic',)
 
 
 def get_classic_sku(cmd):

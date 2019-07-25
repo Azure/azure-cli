@@ -229,7 +229,7 @@ def load_arguments(self, _):
 
     for item in ['create', 'set-attributes', 'import']:
         with self.argument_context('keyvault certificate ' + item) as c:
-            c.argument('certificate_policy', options_list=['--policy', '-p'], help='JSON encoded policy defintion. Use @{file} to load from a file.', type=get_json_object)
+            c.argument('certificate_policy', options_list=['--policy', '-p'], help='JSON encoded policy defintion. Use @{file} to load from a file(e.g. @my_policy.json).', type=get_json_object)
 
     with self.argument_context('keyvault certificate import') as c:
         c.argument('certificate_data', options_list=['--file', '-f'], completer=FilesCompleter(), help='PKCS12 file or PEM file containing the certificate and private key.', type=certificate_type)

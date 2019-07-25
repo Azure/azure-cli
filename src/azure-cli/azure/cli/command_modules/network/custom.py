@@ -14,12 +14,11 @@ from knack.log import get_logger
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 
 # pylint: disable=no-self-use,no-member,too-many-lines,unused-argument
-from azure.cli.core.commands import cached_get, cached_put
+from azure.cli.core.commands import cached_get, cached_put, upsert_to_collection, get_property
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 
 from azure.cli.core.util import CLIError, sdk_no_wait, find_child_item, find_child_collection
 from azure.cli.command_modules.network._client_factory import network_client_factory
-from azure.cli.command_modules.network._util import _get_property
 
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
@@ -34,32 +33,6 @@ def _log_pprint_template(template):
     logger.info('==== BEGIN TEMPLATE ====')
     logger.info(json.dumps(template, indent=2))
     logger.info('==== END TEMPLATE ====')
-
-
-def _get_from_collection(collection, value, key_name):
-    match = next((x for x in collection if getattr(x, key_name, None) == value), None)
-    if not match:
-        raise CLIError("Item '{}' not found.".format(value))
-    return match
-
-
-def _upsert(parent, collection_name, obj_to_add, key_name, warn=True):
-
-    if not getattr(parent, collection_name, None):
-        setattr(parent, collection_name, [])
-    collection = getattr(parent, collection_name, None)
-
-    value = getattr(obj_to_add, key_name)
-    if value is None:
-        raise CLIError(
-            "Unable to resolve a value for key '{}' with which to match.".format(key_name))
-    match = next((x for x in collection if getattr(x, key_name, None) == value), None)
-    if match:
-        if warn:
-            logger.warning("Item '%s' already exists. Replacing with new values.", value)
-        collection.remove(match)
-
-    collection.append(obj_to_add)
 
 
 def _get_default_name(balancer, property_name, option_name):
@@ -267,7 +240,7 @@ def create_ag_authentication_certificate(cmd, resource_group_name, application_g
     ncf = network_client_factory(cmd.cli_ctx).application_gateways
     ag = ncf.get(resource_group_name, application_gateway_name)
     new_cert = AuthCert(data=cert_data, name=item_name)
-    _upsert(ag, 'authentication_certificates', new_cert, 'name')
+    upsert_to_collection(ag, 'authentication_certificates', new_cert, 'name')
     return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag)
 
 
@@ -282,7 +255,7 @@ def create_ag_backend_address_pool(cmd, resource_group_name, application_gateway
     ncf = network_client_factory(cmd.cli_ctx)
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     new_pool = ApplicationGatewayBackendAddressPool(name=item_name, backend_addresses=servers)
-    _upsert(ag, 'backend_address_pools', new_pool, 'name')
+    upsert_to_collection(ag, 'backend_address_pools', new_pool, 'name')
     return sdk_no_wait(no_wait, ncf.application_gateways.create_or_update,
                        resource_group_name, application_gateway_name, ag)
 
@@ -311,7 +284,7 @@ def create_ag_frontend_ip_configuration(cmd, resource_group_name, application_ga
             private_ip_address=private_ip_address if private_ip_address else None,
             private_ip_allocation_method='Static' if private_ip_address else 'Dynamic',
             subnet=SubResource(id=subnet))
-    _upsert(ag, 'frontend_ip_configurations', new_config, 'name')
+    upsert_to_collection(ag, 'frontend_ip_configurations', new_config, 'name')
     return sdk_no_wait(no_wait, ncf.application_gateways.create_or_update,
                        resource_group_name, application_gateway_name, ag)
 
@@ -336,7 +309,7 @@ def create_ag_frontend_port(cmd, resource_group_name, application_gateway_name, 
     ncf = network_client_factory(cmd.cli_ctx)
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     new_port = ApplicationGatewayFrontendPort(name=item_name, port=port)
-    _upsert(ag, 'frontend_ports', new_port, 'name')
+    upsert_to_collection(ag, 'frontend_ports', new_port, 'name')
     return sdk_no_wait(no_wait, ncf.application_gateways.create_or_update,
                        resource_group_name, application_gateway_name, ag)
 
@@ -363,7 +336,7 @@ def create_ag_http_listener(cmd, resource_group_name, application_gateway_name, 
         require_server_name_indication=True if ssl_cert and host_name else None,
         protocol='https' if ssl_cert else 'http',
         ssl_certificate=SubResource(id=ssl_cert) if ssl_cert else None)
-    _upsert(ag, 'http_listeners', new_listener, 'name')
+    upsert_to_collection(ag, 'http_listeners', new_listener, 'name')
     return sdk_no_wait(no_wait, ncf.application_gateways.create_or_update,
                        resource_group_name, application_gateway_name, ag)
 
@@ -393,7 +366,7 @@ def create_ag_backend_http_settings_collection(cmd, resource_group_name, applica
                                                no_wait=False, connection_draining_timeout=0,
                                                host_name=None, host_name_from_backend_pool=None,
                                                affinity_cookie_name=None, enable_probe=None, path=None,
-                                               auth_certs=None):
+                                               auth_certs=None, root_certs=None):
     ApplicationGatewayBackendHttpSettings, ApplicationGatewayConnectionDraining, SubResource = cmd.get_models(
         'ApplicationGatewayBackendHttpSettings', 'ApplicationGatewayConnectionDraining', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
@@ -417,7 +390,9 @@ def create_ag_backend_http_settings_collection(cmd, resource_group_name, applica
         new_settings.affinity_cookie_name = affinity_cookie_name
         new_settings.probe_enabled = enable_probe
         new_settings.path = path
-    _upsert(ag, 'backend_http_settings_collection', new_settings, 'name')
+    if cmd.supported_api_version(min_api='2019-04-01'):
+        new_settings.trusted_root_certificates = [SubResource(id=x) for x in root_certs or []]
+    upsert_to_collection(ag, 'backend_http_settings_collection', new_settings, 'name')
     return sdk_no_wait(no_wait, ncf.application_gateways.create_or_update,
                        resource_group_name, application_gateway_name, ag)
 
@@ -427,12 +402,16 @@ def update_ag_backend_http_settings_collection(cmd, instance, parent, item_name,
                                                connection_draining_timeout=None,
                                                host_name=None, host_name_from_backend_pool=None,
                                                affinity_cookie_name=None, enable_probe=None, path=None,
-                                               auth_certs=None):
+                                               auth_certs=None, root_certs=None):
     SubResource = cmd.get_models('SubResource')
     if auth_certs == "":
         instance.authentication_certificates = None
     elif auth_certs is not None:
         instance.authentication_certificates = [SubResource(id=x) for x in auth_certs]
+    if root_certs == "":
+        instance.trusted_root_certificates = None
+    elif root_certs is not None:
+        instance.trusted_root_certificates = [SubResource(id=x) for x in root_certs]
     if port is not None:
         instance.port = port
     if probe is not None:
@@ -475,7 +454,7 @@ def create_ag_redirect_configuration(cmd, resource_group_name, application_gatew
         target_url=target_url,
         include_path=include_path,
         include_query_string=include_query_string)
-    _upsert(ag, 'redirect_configurations', new_config, 'name')
+    upsert_to_collection(ag, 'redirect_configurations', new_config, 'name')
     return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag)
 
 
@@ -504,7 +483,7 @@ def create_ag_rewrite_rule_set(cmd, resource_group_name, application_gateway_nam
     ncf = network_client_factory(cmd.cli_ctx).application_gateways
     ag = ncf.get(resource_group_name, application_gateway_name)
     new_set = ApplicationGatewayRewriteRuleSet(name=item_name)
-    _upsert(ag, 'rewrite_rule_sets', new_set, 'name')
+    upsert_to_collection(ag, 'rewrite_rule_sets', new_set, 'name')
     if no_wait:
         return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag)
     parent = sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag).result()
@@ -534,7 +513,7 @@ def create_ag_rewrite_rule(cmd, resource_group_name, application_gateway_name, r
             response_header_configurations=response_headers
         )
     )
-    _upsert(rule_set, 'rewrite_rules', new_rule, 'name')
+    upsert_to_collection(rule_set, 'rewrite_rules', new_rule, 'name')
     if no_wait:
         return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag)
     parent = sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag).result()
@@ -587,7 +566,7 @@ def create_ag_rewrite_rule_condition(cmd, resource_group_name, application_gatew
         ignore_case=ignore_case,
         negate=negate
     )
-    _upsert(rule, 'conditions', new_condition, 'variable')
+    upsert_to_collection(rule, 'conditions', new_condition, 'variable')
     if no_wait:
         return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag)
     parent = sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag).result()
@@ -650,7 +629,7 @@ def create_ag_probe(cmd, resource_group_name, application_gateway_name, item_nam
         new_probe.min_servers = min_servers
         new_probe.match = ProbeMatchCriteria(body=match_body, status_codes=match_status_codes)
 
-    _upsert(ag, 'probes', new_probe, 'name')
+    upsert_to_collection(ag, 'probes', new_probe, 'name')
     return sdk_no_wait(no_wait, ncf.application_gateways.create_or_update,
                        resource_group_name, application_gateway_name, ag)
 
@@ -707,7 +686,7 @@ def create_ag_request_routing_rule(cmd, resource_group_name, application_gateway
         url_path_map=SubResource(id=url_path_map) if url_path_map else None)
     if cmd.supported_api_version(min_api='2017-06-01'):
         new_rule.redirect_configuration = SubResource(id=redirect_config) if redirect_config else None
-    _upsert(ag, 'request_routing_rules', new_rule, 'name')
+    upsert_to_collection(ag, 'request_routing_rules', new_rule, 'name')
     return sdk_no_wait(no_wait, ncf.application_gateways.create_or_update,
                        resource_group_name, application_gateway_name, ag)
 
@@ -738,7 +717,7 @@ def create_ag_ssl_certificate(cmd, resource_group_name, application_gateway_name
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     new_cert = ApplicationGatewaySslCertificate(
         name=item_name, data=cert_data, password=cert_password)
-    _upsert(ag, 'ssl_certificates', new_cert, 'name')
+    upsert_to_collection(ag, 'ssl_certificates', new_cert, 'name')
     return sdk_no_wait(no_wait, ncf.application_gateways.create_or_update,
                        resource_group_name, application_gateway_name, ag)
 
@@ -794,7 +773,7 @@ def create_ag_trusted_root_certificate(cmd, resource_group_name, application_gat
     ag = ncf.get(resource_group_name, application_gateway_name)
     root_cert = ApplicationGatewayTrustedRootCertificate(name=item_name, data=cert_data,
                                                          keyvault_secret_id=keyvault_secret)
-    _upsert(ag, 'trusted_root_certificates', root_cert, 'name')
+    upsert_to_collection(ag, 'trusted_root_certificates', root_cert, 'name')
     return sdk_no_wait(no_wait, ncf.create_or_update,
                        resource_group_name, application_gateway_name, ag)
 
@@ -843,7 +822,7 @@ def create_ag_url_path_map(cmd, resource_group_name, application_gateway_name, i
         new_map.default_redirect_configuration = new_rule.redirect_configuration
 
     new_map.path_rules.append(new_rule)
-    _upsert(ag, 'url_path_maps', new_map, 'name')
+    upsert_to_collection(ag, 'url_path_maps', new_map, 'name')
     return sdk_no_wait(no_wait, ncf.application_gateways.create_or_update,
                        resource_group_name, application_gateway_name, ag)
 
@@ -890,7 +869,7 @@ def create_ag_url_path_map_rule(cmd, resource_group_name, application_gateway_na
         default_redirect = SubResource(id=url_map.default_redirect_configuration.id) \
             if url_map.default_redirect_configuration else None
         new_rule.redirect_configuration = SubResource(id=redirect_config) if redirect_config else default_redirect
-    _upsert(url_map, 'path_rules', new_rule, 'name')
+    upsert_to_collection(url_map, 'path_rules', new_rule, 'name')
     return sdk_no_wait(no_wait, ncf.application_gateways.create_or_update,
                        resource_group_name, application_gateway_name, ag)
 
@@ -1037,7 +1016,7 @@ def create_ag_waf_rule(cmd, client, resource_group_name, policy_name, rule_name,
         priority=priority,
         rule_type=rule_type
     )
-    _upsert(waf_policy, 'custom_rules', new_rule, 'name')
+    upsert_to_collection(waf_policy, 'custom_rules', new_rule, 'name')
     parent = client.create_or_update(resource_group_name, policy_name, waf_policy)
     return find_child_item(parent, rule_name, path='custom_rules', key_path='name')
 
@@ -1082,7 +1061,7 @@ def add_ag_waf_rule_match_cond(cmd, client, resource_group_name, policy_name, ru
         transforms=transforms
     )
     rule.match_conditions.append(new_cond)
-    _upsert(waf_policy, 'custom_rules', rule, 'name', warn=False)
+    upsert_to_collection(waf_policy, 'custom_rules', rule, 'name', warn=False)
     client.create_or_update(resource_group_name, policy_name, waf_policy)
     return new_cond
 
@@ -2172,7 +2151,7 @@ def create_lb_inbound_nat_rule(
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
     if not frontend_ip_name:
         frontend_ip_name = _get_default_name(lb, 'frontend_ip_configurations', '--frontend-ip-name')
-    frontend_ip = _get_property(lb.frontend_ip_configurations, frontend_ip_name)  # pylint: disable=no-member
+    frontend_ip = get_property(lb.frontend_ip_configurations, frontend_ip_name)  # pylint: disable=no-member
     new_rule = InboundNatRule(
         name=item_name, protocol=protocol,
         frontend_port=frontend_port, backend_port=backend_port,
@@ -2180,9 +2159,9 @@ def create_lb_inbound_nat_rule(
         enable_floating_ip=floating_ip,
         idle_timeout_in_minutes=idle_timeout,
         enable_tcp_reset=enable_tcp_reset)
-    _upsert(lb, 'inbound_nat_rules', new_rule, 'name')
+    upsert_to_collection(lb, 'inbound_nat_rules', new_rule, 'name')
     poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
-    return _get_property(poller.result().inbound_nat_rules, item_name)
+    return get_property(poller.result().inbound_nat_rules, item_name)
 
 
 def set_lb_inbound_nat_rule(
@@ -2190,7 +2169,7 @@ def set_lb_inbound_nat_rule(
         frontend_ip_name=None, backend_port=None, floating_ip=None, idle_timeout=None, enable_tcp_reset=None):
     if frontend_ip_name:
         instance.frontend_ip_configuration = \
-            _get_property(parent.frontend_ip_configurations, frontend_ip_name)
+            get_property(parent.frontend_ip_configurations, frontend_ip_name)
 
     if enable_tcp_reset is not None:
         instance.enable_tcp_reset = enable_tcp_reset
@@ -2214,7 +2193,7 @@ def create_lb_inbound_nat_pool(
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
     if not frontend_ip_name:
         frontend_ip_name = _get_default_name(lb, 'frontend_ip_configurations', '--frontend-ip-name')
-    frontend_ip = _get_property(lb.frontend_ip_configurations, frontend_ip_name) \
+    frontend_ip = get_property(lb.frontend_ip_configurations, frontend_ip_name) \
         if frontend_ip_name else None
     new_pool = InboundNatPool(
         name=item_name,
@@ -2226,9 +2205,9 @@ def create_lb_inbound_nat_pool(
         enable_tcp_reset=enable_tcp_reset,
         enable_floating_ip=floating_ip,
         idle_timeout_in_minutes=idle_timeout)
-    _upsert(lb, 'inbound_nat_pools', new_pool, 'name')
+    upsert_to_collection(lb, 'inbound_nat_pools', new_pool, 'name')
     poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
-    return _get_property(poller.result().inbound_nat_pools, item_name)
+    return get_property(poller.result().inbound_nat_pools, item_name)
 
 
 def set_lb_inbound_nat_pool(
@@ -2250,7 +2229,7 @@ def set_lb_inbound_nat_pool(
         instance.frontend_ip_configuration = None
     elif frontend_ip_name is not None:
         instance.frontend_ip_configuration = \
-            _get_property(parent.frontend_ip_configurations, frontend_ip_name)
+            get_property(parent.frontend_ip_configurations, frontend_ip_name)
 
     return parent
 
@@ -2278,9 +2257,9 @@ def create_lb_frontend_ip_configuration(
     if zone and cmd.supported_api_version(min_api='2017-06-01'):
         new_config.zones = zone
 
-    _upsert(lb, 'frontend_ip_configurations', new_config, 'name')
+    upsert_to_collection(lb, 'frontend_ip_configurations', new_config, 'name')
     poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
-    return _get_property(poller.result().frontend_ip_configurations, item_name)
+    return get_property(poller.result().frontend_ip_configurations, item_name)
 
 
 def set_lb_frontend_ip_configuration(
@@ -2316,9 +2295,9 @@ def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
     ncf = network_client_factory(cmd.cli_ctx)
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
     new_pool = BackendAddressPool(name=item_name)
-    _upsert(lb, 'backend_address_pools', new_pool, 'name')
+    upsert_to_collection(lb, 'backend_address_pools', new_pool, 'name')
     poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
-    return _get_property(poller.result().backend_address_pools, item_name)
+    return get_property(poller.result().backend_address_pools, item_name)
 
 
 def create_lb_outbound_rule(cmd, resource_group_name, load_balancer_name, item_name,
@@ -2333,9 +2312,9 @@ def create_lb_outbound_rule(cmd, resource_group_name, load_balancer_name, item_n
         frontend_ip_configurations=[SubResource(id=x) for x in frontend_ip_configurations]
         if frontend_ip_configurations else None,
         allocated_outbound_ports=outbound_ports, name=item_name)
-    _upsert(lb, 'outbound_rules', rule, 'name')
+    upsert_to_collection(lb, 'outbound_rules', rule, 'name')
     poller = client.create_or_update(resource_group_name, load_balancer_name, lb)
-    return _get_property(poller.result().outbound_rules, item_name)
+    return get_property(poller.result().outbound_rules, item_name)
 
 
 def set_lb_outbound_rule(instance, cmd, parent, item_name, protocol=None, outbound_ports=None,
@@ -2362,9 +2341,9 @@ def create_lb_probe(cmd, resource_group_name, load_balancer_name, item_name, pro
     new_probe = Probe(
         protocol=protocol, port=port, interval_in_seconds=interval, number_of_probes=threshold,
         request_path=path, name=item_name)
-    _upsert(lb, 'probes', new_probe, 'name')
+    upsert_to_collection(lb, 'probes', new_probe, 'name')
     poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
-    return _get_property(poller.result().probes, item_name)
+    return get_property(poller.result().probes, item_name)
 
 
 def set_lb_probe(cmd, instance, parent, item_name, protocol=None, port=None,
@@ -2395,19 +2374,19 @@ def create_lb_rule(
         protocol=protocol,
         frontend_port=frontend_port,
         backend_port=backend_port,
-        frontend_ip_configuration=_get_property(lb.frontend_ip_configurations,
-                                                frontend_ip_name),
-        backend_address_pool=_get_property(lb.backend_address_pools,
-                                           backend_address_pool_name),
-        probe=_get_property(lb.probes, probe_name) if probe_name else None,
+        frontend_ip_configuration=get_property(lb.frontend_ip_configurations,
+                                               frontend_ip_name),
+        backend_address_pool=get_property(lb.backend_address_pools,
+                                          backend_address_pool_name),
+        probe=get_property(lb.probes, probe_name) if probe_name else None,
         load_distribution=load_distribution,
         enable_floating_ip=floating_ip,
         idle_timeout_in_minutes=idle_timeout,
         enable_tcp_reset=enable_tcp_reset,
         disable_outbound_snat=disable_outbound_snat)
-    _upsert(lb, 'load_balancing_rules', new_rule, 'name')
+    upsert_to_collection(lb, 'load_balancing_rules', new_rule, 'name')
     poller = cached_put(cmd, ncf.load_balancers.create_or_update, lb, resource_group_name, load_balancer_name)
-    return _get_property(poller.result().load_balancing_rules, item_name)
+    return get_property(poller.result().load_balancing_rules, item_name)
 
 
 def set_lb_rule(
@@ -2427,16 +2406,16 @@ def set_lb_rule(
 
     if frontend_ip_name is not None:
         instance.frontend_ip_configuration = \
-            _get_property(parent.frontend_ip_configurations, frontend_ip_name)
+            get_property(parent.frontend_ip_configurations, frontend_ip_name)
 
     if backend_address_pool_name is not None:
         instance.backend_address_pool = \
-            _get_property(parent.backend_address_pools, backend_address_pool_name)
+            get_property(parent.backend_address_pools, backend_address_pool_name)
 
     if probe_name == '':
         instance.probe = None
     elif probe_name is not None:
-        instance.probe = _get_property(parent.probes, probe_name)
+        instance.probe = get_property(parent.probes, probe_name)
 
     return parent
 # endregion
@@ -2612,10 +2591,10 @@ def create_nic_ip_config(cmd, resource_group_name, network_interface_name, ip_co
 
     new_config = NetworkInterfaceIPConfiguration(**new_config_args)
 
-    _upsert(nic, 'ip_configurations', new_config, 'name')
+    upsert_to_collection(nic, 'ip_configurations', new_config, 'name')
     poller = ncf.network_interfaces.create_or_update(
         resource_group_name, network_interface_name, nic)
-    return _get_property(poller.result().ip_configurations, ip_config_name)
+    return get_property(poller.result().ip_configurations, ip_config_name)
 
 
 def set_nic_ip_config(cmd, instance, parent, ip_config_name, subnet=None,
@@ -2699,15 +2678,15 @@ def add_nic_ip_config_address_pool(
     nic = client.get(resource_group_name, network_interface_name)
     ip_config = _get_nic_ip_config(nic, ip_config_name)
     if load_balancer_name:
-        _upsert(ip_config, 'load_balancer_backend_address_pools',
-                BackendAddressPool(id=backend_address_pool),
-                'id')
+        upsert_to_collection(ip_config, 'load_balancer_backend_address_pools',
+                             BackendAddressPool(id=backend_address_pool),
+                             'id')
     elif application_gateway_name:
-        _upsert(ip_config, 'application_gateway_backend_address_pools',
-                BackendAddressPool(id=backend_address_pool),
-                'id')
+        upsert_to_collection(ip_config, 'application_gateway_backend_address_pools',
+                             BackendAddressPool(id=backend_address_pool),
+                             'id')
     poller = client.create_or_update(resource_group_name, network_interface_name, nic)
-    return _get_property(poller.result().ip_configurations, ip_config_name)
+    return get_property(poller.result().ip_configurations, ip_config_name)
 
 
 def remove_nic_ip_config_address_pool(
@@ -2724,7 +2703,7 @@ def remove_nic_ip_config_address_pool(
                       x.id != backend_address_pool]
         ip_config.application_gateway_backend_address_pools = keep_items
     poller = client.create_or_update(resource_group_name, network_interface_name, nic)
-    return _get_property(poller.result().ip_configurations, ip_config_name)
+    return get_property(poller.result().ip_configurations, ip_config_name)
 
 
 def add_nic_ip_config_inbound_nat_rule(
@@ -2734,11 +2713,11 @@ def add_nic_ip_config_inbound_nat_rule(
     client = network_client_factory(cmd.cli_ctx).network_interfaces
     nic = client.get(resource_group_name, network_interface_name)
     ip_config = _get_nic_ip_config(nic, ip_config_name)
-    _upsert(ip_config, 'load_balancer_inbound_nat_rules',
-            InboundNatRule(id=inbound_nat_rule),
-            'id')
+    upsert_to_collection(ip_config, 'load_balancer_inbound_nat_rules',
+                         InboundNatRule(id=inbound_nat_rule),
+                         'id')
     poller = client.create_or_update(resource_group_name, network_interface_name, nic)
-    return _get_property(poller.result().ip_configurations, ip_config_name)
+    return get_property(poller.result().ip_configurations, ip_config_name)
 
 
 def remove_nic_ip_config_inbound_nat_rule(
@@ -2751,7 +2730,7 @@ def remove_nic_ip_config_inbound_nat_rule(
         [x for x in ip_config.load_balancer_inbound_nat_rules if x.id != inbound_nat_rule]
     ip_config.load_balancer_inbound_nat_rules = keep_items
     poller = client.create_or_update(resource_group_name, network_interface_name, nic)
-    return _get_property(poller.result().ip_configurations, ip_config_name)
+    return get_property(poller.result().ip_configurations, ip_config_name)
 # endregion
 
 
@@ -3661,10 +3640,10 @@ def create_subnet(cmd, resource_group_name, virtual_network_name, subnet_name,
         subnet.delegations = delegations
 
     vnet = cached_get(cmd, ncf.virtual_networks.get, resource_group_name, virtual_network_name)
-    _upsert(vnet, 'subnets', subnet, 'name')
+    upsert_to_collection(vnet, 'subnets', subnet, 'name')
     vnet = cached_put(
         cmd, ncf.virtual_networks.create_or_update, vnet, resource_group_name, virtual_network_name).result()
-    return _get_property(vnet.subnets, subnet_name)
+    return get_property(vnet.subnets, subnet_name)
 
 
 def update_subnet(cmd, instance, resource_group_name, address_prefix=None, network_security_group=None,
@@ -3775,7 +3754,7 @@ def create_vnet_gateway_root_cert(cmd, resource_group_name, gateway_name, public
         config.vpn_client_root_certificates = []
 
     cert = VpnClientRootCertificate(name=cert_name, public_cert_data=public_cert_data)
-    _upsert(config, 'vpn_client_root_certificates', cert, 'name')
+    upsert_to_collection(config, 'vpn_client_root_certificates', cert, 'name')
     return ncf.create_or_update(resource_group_name, gateway_name, gateway)
 
 
@@ -3798,7 +3777,7 @@ def create_vnet_gateway_revoked_cert(cmd, resource_group_name, gateway_name, thu
     config, gateway, ncf = _prep_cert_create(cmd, gateway_name, resource_group_name)
 
     cert = VpnClientRevokedCertificate(name=cert_name, thumbprint=thumbprint)
-    _upsert(config, 'vpn_client_revoked_certificates', cert, 'name')
+    upsert_to_collection(config, 'vpn_client_revoked_certificates', cert, 'name')
     return ncf.create_or_update(resource_group_name, gateway_name, gateway)
 
 

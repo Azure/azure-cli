@@ -16,6 +16,7 @@ def load_arguments(self, _):
     with self.argument_context('netappfiles') as c:
         c.argument('resource_group', resource_group_name_type)
         c.argument('tags', arg_type=tags_type)
+        c.argument('protocol_types', arg_type=tags_type)
         c.argument('account_name', account_name_type)
         c.argument('pool_name', pool_name_type)
         c.argument('volume_name', volume_name_type)
