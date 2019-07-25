@@ -42,7 +42,7 @@ class ApimScenarioTest(ScenarioTest):
 
         self.cmd('apim create --name {service_name} -g {rg} -l {rg_loc} --sku-name {sku_name} --publisher-email {publisher_email} --publisher-name {publisher_name} --enable-client-certificate {enable_cert}' ,
                  checks=[self.check('name', '{service_name}'),
-                         self.check('location', '{rg_loc}'),
+                         self.check('location', '{rg_loc_displayName}'),
                          self.check('sku.name', '{sku_name}'),
                          self.check('provisioningState', 'Succeeded'),
                          self.check('publisherEmail', '{publisher_email}')])
