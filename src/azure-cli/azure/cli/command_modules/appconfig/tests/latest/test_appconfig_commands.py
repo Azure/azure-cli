@@ -193,7 +193,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
                          self.check('value', entry_value),
                          self.check('label', updated_label)])
 
-        # Now restore to last modified
+        # Now restore to last modified and ensure that we find updated_entry_value
         self.cmd('appconfig kv restore -n {config_store_name} --key {key} --label {label} --datetime {timestamp} -y')
         self.cmd('appconfig kv list -n {config_store_name} --key {key} --label {label}',
                  checks=[self.check('[0].contentType', entry_content_type),
