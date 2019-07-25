@@ -47,6 +47,7 @@ Release History
 **AppService**
 
 * az webapp webjob continuous group commands were failing for slots
+* fixes an issue where `az webapp deployment container config` displayed the wrong Docker CI/CD webhook URL for some apps
 
 **BotService**
 
