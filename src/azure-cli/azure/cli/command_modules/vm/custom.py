@@ -517,7 +517,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               plan_promotion_code=None, license_type=None, assign_identity=None, identity_scope=None,
               identity_role='Contributor', identity_role_id=None, application_security_groups=None, zone=None,
               boot_diagnostics_storage=None, ultra_ssd_enabled=None, ephemeral_os_disk=None,
-              proximity_placement_group=None, aux_subscriptions=None):
+              proximity_placement_group=None, dedicated_host=None, dedicated_host_group=None, aux_subscriptions=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -637,7 +637,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         attach_os_disk=attach_os_disk, os_disk_size_gb=os_disk_size_gb, custom_data=custom_data, secrets=secrets,
         license_type=license_type, zone=zone, disk_info=disk_info,
         boot_diagnostics_storage_uri=boot_diagnostics_storage, ultra_ssd_enabled=ultra_ssd_enabled,
-        proximity_placement_group=proximity_placement_group, computer_name=computer_name)
+        proximity_placement_group=proximity_placement_group, computer_name=computer_name, dedicated_host=dedicated_host)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -2619,6 +2619,7 @@ def update_image_version(instance, target_regions=None, replica_count=None):
 # endregion
 
 
+# region proximity placement groups
 def create_proximity_placement_group(cmd, client, proximity_placement_group_name, resource_group_name,
                                      ppg_type=None, location=None, tags=None):
     from knack.arguments import CaseInsensitiveList
@@ -2643,4 +2644,43 @@ def list_proximity_placement_groups(client, resource_group_name=None):
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name=resource_group_name)
     return client.list_by_subscription()
+# endregion
+
+
+# region dedicated host
+def create_dedicated_host_group(cmd, client, host_group_name, resource_group_name, platform_fault_domain_count=None,
+                                location=None, zones=None, tags=None):
+    DedicatedHostGroup = cmd.get_models('DedicatedHostGroup')
+    location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
+
+    host_group_params = DedicatedHostGroup(location=location, platform_fault_domain_count=platform_fault_domain_count,
+                                           zones=zones, tags=tags)
+
+    return client.create_or_update(resource_group_name, host_group_name, parameters=host_group_params)
+
+
+def list_dedicated_host_groups(cmd, client, resource_group_name=None):
+    if resource_group_name:
+        return client.list_by_resource_group(resource_group_name)
+    return client.list_by_subscription()
+
+
+def create_dedicated_host(cmd, client, host_group_name, host_name, resource_group_name, sku, platform_fault_domain=None,
+                          auto_replace_on_failure=None, license_type=None, location=None, tags=None):
+    DedicatedHostType = cmd.get_models('DedicatedHost')
+    SkuType = cmd.get_models('Sku')
+
+    location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
+    sku = SkuType(name=sku)
+
+    host_params = DedicatedHostType(location=location, platform_fault_domain=platform_fault_domain,
+                                    auto_replace_on_failure=auto_replace_on_failure, license_type=license_type,
+                                    sku=sku, tags=tags)
+
+    return client.create_or_update(resource_group_name, host_group_name, host_name, parameters=host_params)
+
+
+def get_dedicated_host_instance_view(client, host_group_name, host_name, resource_group_name):
+    return client.get(resource_group_name, host_group_name, host_name, expand="instanceView")
+
 # endregion

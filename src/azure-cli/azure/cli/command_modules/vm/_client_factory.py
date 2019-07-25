@@ -100,3 +100,11 @@ def cf_gallery_image_versions(cli_ctx, _):
 
 def cf_proximity_placement_groups(cli_ctx, _):
     return _compute_client_factory(cli_ctx).proximity_placement_groups
+
+
+def cf_dedicated_hosts(cli_ctx, _):
+    return _compute_client_factory(cli_ctx).dedicated_hosts
+
+
+def cf_dedicated_host_groups(cli_ctx, _):
+    return _compute_client_factory(cli_ctx).dedicated_host_groups

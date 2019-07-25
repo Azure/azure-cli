@@ -18,7 +18,6 @@ def create(cmd, client, resource_group_name, account_name, live_event_name, stre
                                          LiveEventEncoding, LiveEventInputAccessControl, IPAccessControl)
     from azure.cli.command_modules.ams._client_factory import (get_mediaservices_client)
 
-    encoding_type = 'Basic' if encoding_type == 'Standard' else encoding_type
     allowed_ips = []
     if ips[0] == 'AllowAll':
         ips = ['0.0.0.0/0']

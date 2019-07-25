@@ -68,6 +68,10 @@ def get_sql_encryption_protectors_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).encryption_protectors
 
 
+def get_sql_managed_instance_encryption_protectors_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).managed_instance_encryption_protectors
+
+
 def get_sql_failover_groups_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).failover_groups
 
@@ -102,6 +106,10 @@ def get_sql_server_dns_aliases_operations(cli_ctx, _):
 
 def get_sql_server_keys_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).server_keys
+
+
+def get_sql_managed_instance_keys_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).managed_instance_keys
 
 
 def get_sql_servers_operations(cli_ctx, _):

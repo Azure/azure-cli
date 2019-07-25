@@ -252,6 +252,7 @@ def load_arguments(self, _):
         c.argument('timeout', help='Request timeout in seconds.')
         c.argument('probe', help='Name or ID of the probe to associate with the HTTP settings.', completer=get_ag_subresource_completion_list('probes'))
         c.argument('auth_certs', nargs='+', min_api='2016-09-01', help='Space-separated list of authentication certificates (names or IDs) to associate with the HTTP settings.')
+        c.argument('root_certs', nargs='+', min_api='2019-04-01', help='Space-separated list of trusted root certificates (names or IDs) to associate with the HTTP settings. --host-name or --host-name-from-backend-pool is required when this field is set.')
 
     with self.argument_context('network application-gateway probe') as c:
         c.argument('host', help='The name of the host to send the probe.')
@@ -478,6 +479,8 @@ def load_arguments(self, _):
 
     with self.argument_context('network dns record-set ns') as c:
         c.argument('dname', options_list=['--nsdname', '-d'], help='Name server domain name.')
+
+    with self.argument_context('network dns record-set ns add-record') as c:
         c.argument('subscription_id', options_list=['--subscriptionid', '-s'], help='Subscription id to add name server record')
         c.ignore('_subscription')
 
@@ -765,7 +768,7 @@ def load_arguments(self, _):
 
     with self.argument_context('network nic ip-config address-pool') as c:
         c.argument('load_balancer_name', options_list='--lb-name', help='The name of the load balancer containing the address pool (Omit if suppying an address pool ID).', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'))
-        c.argument('application_gateway_name', app_gateway_name_type, help='The name of an application gateway containing the address pool (Omit if suppying an address pool ID).')
+        c.argument('application_gateway_name', app_gateway_name_type, help='The name of an application gateway containing the address pool (Omit if suppying an address pool ID).', id_part=None)
         c.argument('backend_address_pool', options_list='--address-pool', help='The name or ID of an existing backend address pool.', validator=validate_address_pool_name_or_id)
 
     with self.argument_context('network nic ip-config inbound-nat-rule') as c:
@@ -774,11 +777,7 @@ def load_arguments(self, _):
 
     for item in ['address-pool', 'inbound-nat-rule']:
         with self.argument_context('network nic ip-config {}'.format(item)) as c:
-            c.argument('ip_config_name', options_list=['--ip-config-name', '-n'], metavar='IP_CONFIG_NAME', help='The name of the IP configuration.', id_part='child_name_1')
-            c.argument('network_interface_name', nic_type)
-
-    for item in ['address-pool', 'inbound-nat-rule']:
-        with self.argument_context('network nic ip-config {} remove'.format(item)) as c:
+            c.argument('ip_config_name', options_list=['--ip-config-name', '-n'], metavar='IP_CONFIG_NAME', help='The name of the IP configuration.', id_part=None)
             c.argument('network_interface_name', nic_type, id_part=None)
 
     # endregion

@@ -132,43 +132,57 @@ class ApplicationSetScenarioTest(ScenarioTest):
                 }
             ])
         })
-
+        app_id = None
         # create app through general option
         self.cmd('ad app create --display-name {name} --homepage {app} --identifier-uris {app}',
                  checks=self.check('identifierUris[0]', '{app}'))
 
         # set app password
         result = self.cmd('ad app credential reset --id {app} --append --password "test" --years 2').get_output_in_json()
-        self.assertTrue(result['appId'])
+        app_id = result['appId']
+        self.assertTrue(app_id)
 
-        # show/list app
-        self.cmd('ad app show --id {app}',
-                 checks=self.check('identifierUris[0]', '{app}'))
-        self.cmd('ad app list --display-name {name}', checks=[
-            self.check('[0].identifierUris[0]', '{app}'),
-            self.check('length([*])', 1)
-        ])
+        try:
+            # show/list app
+            self.cmd('ad app show --id {app}',
+                     checks=self.check('identifierUris[0]', '{app}'))
+            self.cmd('ad app list --display-name {name}', checks=[
+                self.check('[0].identifierUris[0]', '{app}'),
+                self.check('length([*])', 1)
+            ])
 
-        # update app
-        self.kwargs['reply_uri'] = "http://azureclitest-replyuri"
-        self.cmd('ad app update --id {app} --reply-urls {reply_uri}')
-        self.cmd('ad app show --id {app}',
-                 checks=self.check('replyUrls[0]', '{reply_uri}'))
+            # update app
+            self.kwargs['reply_uri'] = "http://azureclitest-replyuri"
+            self.kwargs['reply_uri2'] = "http://azureclitest-replyuri2"
+            self.cmd('ad app update --id {app} --reply-urls {reply_uri}')
+            self.cmd('ad app show --id {app}',
+                     checks=self.check('replyUrls[0]', '{reply_uri}'))
+            self.cmd('ad app update --id {app} --add replyUrls {reply_uri2}')
+            self.cmd('ad app show --id {app}', checks=self.check('length(replyUrls)', 2))
+            self.cmd('ad app update --id {app} --remove replyUrls 1')
+            self.cmd('ad app show --id {app}', checks=[
+                self.check('length(replyUrls)', 1),
+                self.check('replyUrls[0]', '{reply_uri2}')
+            ])
 
-        # invoke generic update
-        self.cmd('ad app update --id {app} --set oauth2AllowUrlPathMatching=true')
-        self.cmd('ad app show --id {app}',
-                 checks=self.check('oauth2AllowUrlPathMatching', True))
+            # invoke generic update
+            self.cmd('ad app update --id {app} --set oauth2AllowUrlPathMatching=true')
+            self.cmd('ad app show --id {app}',
+                     checks=self.check('oauth2AllowUrlPathMatching', True))
 
-        # update app_roles
-        self.cmd("ad app update --id {app} --app-roles '{app_roles}'")
-        self.cmd('ad app show --id {app}',
-                 checks=self.check('length(appRoles)', 1))
+            # update app_roles
+            self.cmd("ad app update --id {app} --app-roles '{app_roles}'")
+            self.cmd('ad app show --id {app}',
+                     checks=self.check('length(appRoles)', 1))
 
-        # delete app
-        self.cmd('ad app delete --id {app}')
-        self.cmd('ad app list --identifier-uri {app}',
-                 checks=self.is_empty())
+            # delete app
+            self.cmd('ad app delete --id {app}')
+            app_id = None
+            self.cmd('ad app list --identifier-uri {app}',
+                     checks=self.is_empty())
+        finally:
+            if app_id:
+                self.cmd("ad app delete --id " + app_id)
 
 
 class CreateForRbacScenarioTest(ScenarioTest):
@@ -218,23 +232,31 @@ class CreateForRbacScenarioTest(ScenarioTest):
 class GraphGroupScenarioTest(ScenarioTest):
 
     def test_graph_group_scenario(self):
-
         account_info = self.cmd('account show').get_output_in_json()
         if account_info['user']['type'] == 'servicePrincipal':
             return  # this test delete users which are beyond a SP's capacity, so quit...
         upn = account_info['user']['name']
-
+        domain = upn.split('@', 1)[1]
         self.kwargs = {
             'user1': 'deleteme1',
             'user2': 'deleteme2',
-            'domain': upn.split('@', 1)[1],
+            'domain': domain,
+            'new_mail_nick_name': 'deleteme11',
             'group': 'deleteme_g',
             'pass': 'Test1234!!'
         }
+        self.recording_processors.append(AADGraphUserReplacer('@' + domain, '@example.com'))
         try:
             # create user1
             user1_result = self.cmd('ad user create --display-name {user1} --password {pass} --user-principal-name {user1}@{domain}').get_output_in_json()
             self.kwargs['user1_id'] = user1_result['objectId']
+
+            # update user1
+            self.cmd('ad user update --display-name {user1}_new --account-enabled false --id {user1}@{domain} --mail-nickname {new_mail_nick_name}')
+            user1_update_result = self.cmd('ad user show --upn-or-object-id {user1}@{domain}', checks=[self.check("displayName", '{user1}_new'),
+                                                                                                       self.check("accountEnabled", False)]).get_output_in_json()
+            self.kwargs['user1_id'] = user1_update_result['objectId']
+
             # create user2
             user2_result = self.cmd('ad user create --display-name {user2} --password {pass} --user-principal-name {user2}@{domain}').get_output_in_json()
             self.kwargs['user2_id'] = user2_result['objectId']
@@ -267,12 +289,15 @@ class GraphGroupScenarioTest(ScenarioTest):
             # check user1 memebership
             self.cmd('ad group member check -g {group} --member-id {user1_id}',
                      checks=self.check('value', True))
+
             # check user2 memebership
             self.cmd('ad group member check -g {group} --member-id {user2_id}',
-                     checks=self.check('value', True))            # list memebers
+                     checks=self.check('value', True))
+
             self.cmd('ad group member list -g {group}', checks=[
-                self.check("length([?displayName=='{user1}'])", 1),
+                self.check("length([?displayName=='{user1}_new'])", 1),
                 self.check("length([?displayName=='{user2}'])", 1),
+                self.check("length([?displayName=='{user1}'])", 0),
                 self.check("length([])", 2),
             ])
             # remove user1
