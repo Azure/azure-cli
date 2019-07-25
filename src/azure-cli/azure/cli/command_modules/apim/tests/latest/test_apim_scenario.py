@@ -45,56 +45,66 @@ class ApimScenarioTest(ScenarioTest):
                          self.check('location', '{rg_loc_displayName}'),
                          self.check('sku.name', '{sku_name}'),
                          self.check('provisioningState', 'Succeeded'),
+                         self.check('enableClientCertificate', '{enable_cert}'),
+                         self.check('publisherName', '{publisher_name}'),
                          self.check('publisherEmail', '{publisher_email}')])
 
         self.cmd('apim check-name -n {service_name}',
                  checks=[self.check('nameAvailable', False),
                          self.check('reason', 'AlreadyExists')])
 
-        #TODO: add update test, set a tag and then check for it in apim show below
+        self.cmd('apim update -n {service_name} -g {rg} --publisher-name Fabrikam --set publisherEmail=publisher@fabrikam.com',
+                 checks=[self.check('publisherName', 'Fabrikam'),
+                         self.check('publisherEmail', 'publisher@fabrikam.com')])
 
         count = len(self.cmd('apim list').get_output_in_json())
+        self.assertTrue(count, 1)
 
         self.cmd('apim show - {rg} -n {service_name}', checks=[
+            #recheck properties from create
             self.check('name', '{service_name}'),
-            self.check('resourceGroup', '{rg}')
+            self.check('location', '{rg_loc_displayName}'),
+            self.check('sku.name', '{sku_name}'),
+            #recheck properties from update
+            self.check('publisherName', 'Fabrikam'),
+            self.check('publisherEmail', 'publisher@fabrikam.com')
         ])
 
         self.cmd('apim delete -g {rg} -n {service_name}')
         final_count = len(self.cmd('apim list').get_output_in_json())
-        self.assertTrue(final_count, count - 1)
+        self.assertTrue(final_count, 0)
 
-KNOWN_LOCS = {'eastasia': 'EastAsia',
-'southeastasia': 'SoutheastAsia',
-'centralus': 'CentralUS',
-'eastus': 'EastUS',
-'eastus2': 'EastUS2',
-'westus': 'WestUS',
-'northcentralus': 'NorthCentralUS',
-'southcentralus': 'SouthCentralUS',
-'northeurope': 'NorthEurope',
-'westeurope': 'WestEurope',
-'japanwest': 'JapanWest',
-'japaneast': 'JapanEast',
-'brazilsouth': 'BrazilSouth',
-'australiaeast': 'AustraliaEast',
-'australiasoutheast': 'AustraliaSoutheast',
-'southindia': 'SouthIndia',
-'centralindia': 'CentralIndia',
-'westindia': 'WestIndia',
-'canadacentral': 'CanadaCentral',
-'canadaeast': 'CanadaEast',
-'uksouth': 'UKSouth',
-'ukwest': 'UKWest',
-'westcentralus': 'WestCentralUS',
-'westus2': 'WestUS2',
-'koreacentral': 'KoreaCentral',
-'koreasouth': 'KoreaSouth',
-'francecentral': 'FranceCentral',
-'francesouth': 'FranceSouth',
-'australiacentral': 'AustraliaCentral',
-'australiacentral2': 'AustraliaCentral2',
-'uaecentral': 'UAECentral',
-'uaenorth': 'UAENorth',
-'southafricanorth': 'SouthAfricaNorth',
-'southafricawest': 'SouthAfricaWest'}
+KNOWN_LOCS = {'eastasia': 'East Asia',
+'southeastasia': 'Southeast Asia',
+'centralus': 'Central US',
+'eastus': 'East US',
+'eastus2': 'East US 2',
+'westus': 'West US',
+'northcentralus': 'North Central US',
+'southcentralus': 'South Central US',
+'northeurope': 'North Europe',
+'westeurope': 'West Europe',
+'japanwest': 'Japan West',
+'japaneast': 'Japan East',
+'brazilsouth': 'Brazil South',
+'australiaeast': 'Australia East',
+'australiasoutheast': 'Australia Southeast',
+'southindia': 'South India',
+'centralindia': 'Central India',
+'westindia': 'West India',
+'canadacentral': 'Canada Central',
+'canadaeast': 'Canada East',
+'uksouth': 'UK South',
+'ukwest': 'UK West',
+'westcentralus': 'West Central US',
+'westus2': 'West US 2',
+'koreacentral': 'Korea Central',
+'koreasouth': 'Korea South',
+'francecentral': 'France Central',
+'francesouth': 'France South',
+'australiacentral': 'Australia Central',
+'australiacentral2': 'Australia Central 2',
+'uaecentral': 'UAE Central',
+'uaenorth': 'UAE North',
+'southafricanorth': 'South Africa North',
+'southafricawest': 'South Africa West'}
