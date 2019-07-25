@@ -112,6 +112,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('tags', tags_type)
         c.argument('custom_domain', help='User domain assigned to the storage account. Name is the CNAME source.')
         c.argument('sku', help='The storage account SKU.', arg_type=get_enum_type(t_sku_name, default='standard_ragrs'))
+        c.argument('enable_files_aadds', arg_type=get_three_state_flag(), min_api='2018-11-01',
+                   help='Enable the identity based authentication settings for Azure Files.')
 
     with self.argument_context('storage account update') as c:
         c.register_common_storage_account_options()
