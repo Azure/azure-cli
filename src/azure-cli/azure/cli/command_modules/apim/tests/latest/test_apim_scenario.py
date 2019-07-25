@@ -45,7 +45,8 @@ class ApimScenarioTest(ScenarioTest):
                          self.check('location', '{rg_loc_displayName}'),
                          self.check('sku.name', '{sku_name}'),
                          self.check('provisioningState', 'Succeeded'),
-                         self.check('enableClientCertificate', '{enable_cert}'),
+                         #expect None for Developer sku, even though requested value was True - only works with Consumption sku
+                         self.check('enableClientCertificate', None),
                          self.check('publisherName', '{publisher_name}'),
                          self.check('publisherEmail', '{publisher_email}')])
 
