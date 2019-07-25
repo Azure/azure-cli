@@ -351,7 +351,7 @@ def get_content_setting_validator(settings_class, update, guess_from_file=None):
         if update and _class_name(settings_class) == _class_name(t_file_content_settings):
             get_file_path_validator()(namespace)
         ns = vars(namespace)
-        clear_content_settings = ns.pop('clear_content_settings')
+        clear_content_settings = ns.pop('clear_content_settings', False)
 
         # retrieve the existing object properties for an update
         if update and not clear_content_settings:
