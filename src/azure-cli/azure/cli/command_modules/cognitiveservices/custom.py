@@ -8,7 +8,8 @@ from knack.util import CLIError
 from knack.log import get_logger
 
 from azure.cli.command_modules.cognitiveservices._client_factory import cf_accounts, cf_resource_skus
-from azure.mgmt.cognitiveservices.models import CognitiveServicesAccountCreateParameters, Sku
+from azure.mgmt.cognitiveservices.models import CognitiveServicesAccountCreateParameters, Sku,\
+    VirtualNetworkRule, IpRule, NetworkRuleSet
 
 logger = get_logger(__name__)
 
@@ -63,10 +64,11 @@ def list_skus(cmd, kind=None, location=None, resource_group_name=None, account_n
 
 
 def create(
-        client, resource_group_name, account_name, sku_name, kind, location, tags=None, api_properties=None, yes=None):
+        client, resource_group_name, account_name, sku_name, kind, location, custom_domain=None,
+        tags=None, api_properties=None, yes=None):
 
     terms = 'Notice\nMicrosoft will use data you send to Bing Search Services'\
-        ' or the Translator Speech API to improve Microsoft products and services.'\
+        ' to improve Microsoft products and services.'\
         'Where you send personal data to these Cognitive Services, you are responsible '\
         'for obtaining sufficient consent from the data subjects.'\
         'The General Privacy and Security Terms in the Online Services Terms '\
@@ -79,24 +81,104 @@ def create(
         ' Services deployments (https://docs.microsoft.com/en-us/azure/cognitive-servic'\
         'es/cognitive-services-apis-create-account).'
     hint = '\nPlease select'
-    if yes:
-        logger.warning(terms)
-    else:
-        logger.warning(terms)
-        option = prompt_y_n(hint)
-        if not option:
-            raise CLIError('Operation cancelled.')
+    import re
+    pattern = re.compile("^[Bb]ing\\..*$")
+    if pattern.match(kind):
+        if yes:
+            logger.warning(terms)
+        else:
+            logger.warning(terms)
+            option = prompt_y_n(hint)
+            if not option:
+                raise CLIError('Operation cancelled.')
     sku = Sku(name=sku_name)
 
-    if api_properties is None:
-        properties = {}
-    else:
-        properties = {"apiProperties": api_properties}
+    properties = {}
+
+    if api_properties is not None:
+        properties["apiProperties"] = api_properties
+
+    if custom_domain is not None and len(custom_domain) > 0:
+        properties["customSubDomainName"] = custom_domain
+
     params = CognitiveServicesAccountCreateParameters(sku=sku, kind=kind, location=location,
                                                       properties=properties, tags=tags)
     return client.create(resource_group_name, account_name, params)
 
 
-def update(client, resource_group_name, account_name, sku_name=None, tags=None):
+def update(client, resource_group_name, account_name, sku_name=None, custom_domain=None,
+           tags=None, api_properties=None):
+
+    if sku_name is None:
+        sa = client.get_properties(resource_group_name, account_name)
+        sku_name = sa.sku.name
+
     sku = Sku(name=sku_name)
-    return client.update(resource_group_name, account_name, sku, tags)
+
+    properties = {}
+
+    if api_properties is not None:
+        properties["apiProperties"] = api_properties
+
+    if custom_domain is not None and len(custom_domain) > 0:
+        properties["customSubDomainName"] = custom_domain
+
+    return client.update(resource_group_name, account_name, sku, tags, properties)
+
+
+def default_network_acls():
+    rules = NetworkRuleSet()
+    rules.default_action = 'Deny'
+    rules.ip_rules = []
+    rules.virtual_network_rules = []
+    return rules
+
+
+def list_network_rules(client, resource_group_name, account_name):
+    sa = client.get_properties(resource_group_name, account_name)
+    rules = sa.network_acls
+    if rules is None:
+        rules = default_network_acls()
+    delattr(rules, 'bypass')
+    delattr(rules, 'default_action')
+    return rules
+
+
+def add_network_rule(client, resource_group_name, account_name, subnet=None,
+                     vnet_name=None, ip_address=None):  # pylint: disable=unused-argument
+    sa = client.get_properties(resource_group_name, account_name)
+    rules = sa.network_acls
+    if rules is None:
+        rules = default_network_acls()
+
+    if subnet:
+        from msrestazure.tools import is_valid_resource_id
+        if not is_valid_resource_id(subnet):
+            from knack.util import CLIError
+            raise CLIError("Expected fully qualified resource ID: got '{}'".format(subnet))
+
+        if not rules.virtual_network_rules:
+            rules.virtual_network_rules = []
+        rules.virtual_network_rules.append(VirtualNetworkRule(id=subnet, ignore_missing_vnet_service_endpoint=True))
+    if ip_address:
+        if not rules.ip_rules:
+            rules.ip_rules = []
+        rules.ip_rules.append(IpRule(value=ip_address))
+
+    return client.update(resource_group_name, account_name, properties={"networkAcls": rules})
+
+
+def remove_network_rule(cmd, client, resource_group_name, account_name, ip_address=None, subnet=None,
+                        vnet_name=None):  # pylint: disable=unused-argument
+    sa = client.get_properties(resource_group_name, account_name)
+    rules = sa.network_acls
+    if rules is None:
+        rules = default_network_acls()
+
+    if subnet:
+        rules.virtual_network_rules = [x for x in rules.virtual_network_rules
+                                       if not x.id.endswith(subnet)]
+    if ip_address:
+        rules.ip_rules = [x for x in rules.ip_rules if x.value != ip_address]
+
+    return client.update(resource_group_name, account_name, properties={"networkAcls": rules})
