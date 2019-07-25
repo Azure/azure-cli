@@ -45,24 +45,34 @@ class ApimScenarioTest(ScenarioTest):
                          self.check('location', '{rg_loc_displayName}'),
                          self.check('sku.name', '{sku_name}'),
                          self.check('provisioningState', 'Succeeded'),
+                         self.check('enableClientCertificate', '{enable_cert}'),
+                         self.check('publisherName', '{publisher_name}'),
                          self.check('publisherEmail', '{publisher_email}')])
 
         self.cmd('apim check-name -n {service_name}',
                  checks=[self.check('nameAvailable', False),
                          self.check('reason', 'AlreadyExists')])
 
-        #TODO: add update test, set a tag and then check for it in apim show below
+        self.cmd('apim update -n {service_name} -g {rg} --publisher-name Fabrikam --set publisherEmail=publisher@fabrikam.com',
+                 checks=[self.check('publisherName', 'Fabrikam'),
+                         self.check('publisherEmail', 'publisher@fabrikam.com')])
 
         count = len(self.cmd('apim list').get_output_in_json())
+        self.assertTrue(count, 1)
 
         self.cmd('apim show - {rg} -n {service_name}', checks=[
+            #recheck properties from create
             self.check('name', '{service_name}'),
-            self.check('resourceGroup', '{rg}')
+            self.check('location', '{rg_loc_displayName}'),
+            self.check('sku.name', '{sku_name}'),
+            #recheck properties from update
+            self.check('publisherName', 'Fabrikam'),
+            self.check('publisherEmail', 'publisher@fabrikam.com')
         ])
 
         self.cmd('apim delete -g {rg} -n {service_name}')
         final_count = len(self.cmd('apim list').get_output_in_json())
-        self.assertTrue(final_count, count - 1)
+        self.assertTrue(final_count, 0)
 
 KNOWN_LOCS = {'eastasia': 'EastAsia',
 'southeastasia': 'SoutheastAsia',
