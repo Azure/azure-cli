@@ -16,7 +16,7 @@ def create_apim(cmd, client,
         publisher_email,
         sku_name=SkuType.developer.value,
         sku_capacity=1,
-        virtual_network_type=VirtualNetworkType.external.value,
+        virtual_network_type=VirtualNetworkType.none.value,
         enable_managed_identity=False,
         enable_client_certificate=True,
         publisher_name=None,
@@ -38,6 +38,9 @@ def create_apim(cmd, client,
 
     if (enable_managed_identity):
         resource['identity'] = ApiManagementServiceIdentity(type="SystemAssigned")
+
+    if (resource.sku.name == SkuType.consumption.value):
+        resource.sku.capacity = None
 
     cms = client.api_management_service
 
