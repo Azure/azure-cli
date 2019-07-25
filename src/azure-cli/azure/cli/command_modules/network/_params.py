@@ -873,8 +873,8 @@ def load_arguments(self, _):
             c.argument('watcher_name', ignore_type, validator=get_network_watcher_from_vm)
             c.ignore('location')
             c.ignore('watcher_rg')
-            c.argument('vm', help='Name or ID of the VM to target.')
-            c.argument('resource_group_name', help='Name of the resource group the target VM is in. Do not use when supplying VM ID.')
+            c.argument('vm', help='Name or ID of the VM to target. If the name of the VM is provided, the --resource_group_name is required.')
+            c.argument('resource_group_name', help='Name of the resource group the target VM is in. Required when you provide the name of vm or the name of the nic.')
             c.argument('nic', help='Name or ID of the NIC resource to test. If the VM has multiple NICs and IP forwarding is enabled on any of them, this parameter is required.')
 
     with self.argument_context('network watcher test-connectivity') as c:
