@@ -91,7 +91,7 @@ def load_arguments(self, _):
         with self.argument_context(scope) as c:
             c.ignore('source_blob_uri', 'source_disk', 'source_snapshot')
             c.argument('source_storage_account_id', help='used when source blob is in a different subscription')
-            c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GiB. Max size: 4095 GiB (certain preview disks can be larger).', type=int)
+            c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GiB. Max size: 32767 GiB (certain preview disks can be larger).', type=int)
             c.argument('duration_in_seconds', help='Time duration in seconds until the SAS access expires', type=int)
             if self.supported_api_version(min_api='2018-09-30', operation_group='disks'):
                 c.argument('access_level', arg_type=get_enum_type(['Read', 'Write']), default='Read', help='access level')
@@ -309,7 +309,7 @@ def load_arguments(self, _):
         c.argument('vm_name', options_list=['--vm-name'], id_part=None, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines'))
         c.argument('new', action='store_true', help='create a new disk')
         c.argument('sku', arg_type=disk_sku, help='Underlying storage SKU')
-        c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GiB. Max size: 4095 GiB (certain preview disks can be larger).', type=int)
+        c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GiB. Max size: 32767 GiB (certain preview disks can be larger).', type=int)
         c.argument('lun', type=int, help='0-based logical unit number (LUN). Max value depends on the Virtual Machine size.')
 
     with self.argument_context('vm disk attach') as c:
@@ -376,7 +376,7 @@ def load_arguments(self, _):
 
     with self.argument_context('vm unmanaged-disk attach') as c:
         c.argument('disk_name', options_list=['--name', '-n'], help='The data disk name.')
-        c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GiB. Max size: 4095 GiB (certain preview disks can be larger).', type=int)
+        c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GiB. Max size: 32767 GiB (certain preview disks can be larger).', type=int)
 
     with self.argument_context('vm unmanaged-disk detach') as c:
         c.argument('disk_name', options_list=['--name', '-n'], help='The data disk name.')
@@ -517,7 +517,7 @@ def load_arguments(self, _):
         new_vmss_name_type = CLIArgumentType(overrides=vmss_name_type, options_list=options_list)
 
         c.argument('lun', type=int, help='0-based logical unit number (LUN). Max value depends on the Virtual Machine instance size.')
-        c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GiB. Max size: 4095 GiB (certain preview disks can be larger).', type=int)
+        c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GiB. Max size: 32767 GiB (certain preview disks can be larger).', type=int)
         c.argument('vmss_name', new_vmss_name_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'))
         c.argument('disk', validator=validate_vmss_disk, help='existing disk name or ID to attach or detach from VM instances',
                    min_api='2017-12-01', completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
