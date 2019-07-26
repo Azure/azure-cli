@@ -10,9 +10,10 @@ from azure.cli.command_modules.storage._client_factory import storage_client_fac
 from azure.cli.core.util import get_file_json, shell_safe_json_parse
 
 
+# pylint: disable=too-many-locals
 def create_storage_account(cmd, resource_group_name, account_name, sku=None, location=None, kind=None,
                            tags=None, custom_domain=None, encryption_services=None, access_tier=None, https_only=None,
-                           bypass=None, default_action=None, assign_identity=False):
+                           enable_files_aadds=None, bypass=None, default_action=None, assign_identity=False):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
@@ -28,6 +29,10 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         params.identity = Identity()
     if https_only:
         params.enable_https_traffic_only = https_only
+    if enable_files_aadds is not None:
+        AzureFilesIdentityBasedAuthentication = cmd.get_models('AzureFilesIdentityBasedAuthentication')
+        params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
+            directory_service_options='AADDS' if enable_files_aadds else 'None')
 
     if NetworkRuleSet and (bypass or default_action):
         if bypass and not default_action:

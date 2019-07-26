@@ -76,7 +76,7 @@ CONNECTIVITY_DNS_ERROR = ErrorClass(
 
 CONNECTIVITY_FORBIDDEN_ERROR = ErrorClass(
     "CONNECTIVITY_FORBIDDEN_ERROR",
-    "Looks like you don't have access to registry '{}'. Are firewalls and virtual networks enabled?"
+    "Looks like you don't have access to registry '{}'. To see configured firewall rules, run 'az acr show --query networkRuleSet --name {}'"
 )
 
 

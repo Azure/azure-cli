@@ -366,7 +366,7 @@ def create_ag_backend_http_settings_collection(cmd, resource_group_name, applica
                                                no_wait=False, connection_draining_timeout=0,
                                                host_name=None, host_name_from_backend_pool=None,
                                                affinity_cookie_name=None, enable_probe=None, path=None,
-                                               auth_certs=None):
+                                               auth_certs=None, root_certs=None):
     ApplicationGatewayBackendHttpSettings, ApplicationGatewayConnectionDraining, SubResource = cmd.get_models(
         'ApplicationGatewayBackendHttpSettings', 'ApplicationGatewayConnectionDraining', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
@@ -390,6 +390,8 @@ def create_ag_backend_http_settings_collection(cmd, resource_group_name, applica
         new_settings.affinity_cookie_name = affinity_cookie_name
         new_settings.probe_enabled = enable_probe
         new_settings.path = path
+    if cmd.supported_api_version(min_api='2019-04-01'):
+        new_settings.trusted_root_certificates = [SubResource(id=x) for x in root_certs or []]
     upsert_to_collection(ag, 'backend_http_settings_collection', new_settings, 'name')
     return sdk_no_wait(no_wait, ncf.application_gateways.create_or_update,
                        resource_group_name, application_gateway_name, ag)
@@ -400,12 +402,16 @@ def update_ag_backend_http_settings_collection(cmd, instance, parent, item_name,
                                                connection_draining_timeout=None,
                                                host_name=None, host_name_from_backend_pool=None,
                                                affinity_cookie_name=None, enable_probe=None, path=None,
-                                               auth_certs=None):
+                                               auth_certs=None, root_certs=None):
     SubResource = cmd.get_models('SubResource')
     if auth_certs == "":
         instance.authentication_certificates = None
     elif auth_certs is not None:
         instance.authentication_certificates = [SubResource(id=x) for x in auth_certs]
+    if root_certs == "":
+        instance.trusted_root_certificates = None
+    elif root_certs is not None:
+        instance.trusted_root_certificates = [SubResource(id=x) for x in root_certs]
     if port is not None:
         instance.port = port
     if probe is not None:
@@ -3017,14 +3023,24 @@ def check_nw_ip_flow(cmd, client, vm, watcher_rg, watcher_name, direction, proto
                      resource_group_name=None, nic=None, location=None):
     VerificationIPFlowParameters = cmd.get_models('VerificationIPFlowParameters')
 
-    local_ip_address, local_port = local.split(':')
-    remote_ip_address, remote_port = remote.split(':')
+    try:
+        local_ip_address, local_port = local.split(':')
+        remote_ip_address, remote_port = remote.split(':')
+    except:
+        raise CLIError("usage error: the format of the '--local' and '--remote' should be like x.x.x.x:port")
+
     if not is_valid_resource_id(vm):
+        if not resource_group_name:
+            raise CLIError("usage error: --vm NAME --resource-group NAME | --vm ID")
+
         vm = resource_id(
             subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
             namespace='Microsoft.Compute', type='virtualMachines', name=vm)
 
     if nic and not is_valid_resource_id(nic):
+        if not resource_group_name:
+            raise CLIError("usage error: --nic NAME --resource-group NAME | --nic ID")
+
         nic = resource_id(
             subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
             namespace='Microsoft.Network', type='networkInterfaces', name=nic)
