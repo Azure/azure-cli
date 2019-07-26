@@ -2386,7 +2386,7 @@ examples:
   - name: Create a basic load balancer.
     text: >
         az network lb create -g MyResourceGroup -n MyLb --sku Basic
-  - name: Create a basic internal load balancer on a specific virtual network and subnet.
+  - name: Create a basic load balancer on a specific virtual network and subnet. If a virtual network with the same name is found in the same resource group, the load balancer will utilize this virtual network.  If one is not found a new one will be created.
     text: >
         az network lb create -g MyResourceGroup -n MyLb --sku Basic --vnet-name MyVnet --subnet MySubnet
   - name: Create a basic load balancer on a subnet of a pre-existing virtual network.
