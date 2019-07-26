@@ -55,14 +55,9 @@ helps['apim update'] = """
     short-summary: Update an API Management serviceaz  instance.
 """
 
-helps['apim api list'] = """
-    type: command
-    short-summary: List all API's for a service instance.
-"""
-
 helps['apim backup'] = """
     type: command
     short-summary: Creates a backup of the API Management service to the given Azure
         Storage Account. This is long running operation and could take several
-        minutes to complete.
+        minutes to complete.az
 """
