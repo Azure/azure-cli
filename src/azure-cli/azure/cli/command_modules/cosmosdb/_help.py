@@ -268,33 +268,33 @@ short-summary: Delete the SQL container under an Azure Cosmos DB SQL database.
 """
 
 # SQL database throughput
-helps['cosmosdb sql database-throughput'] = """
+helps['cosmosdb sql database throughput'] = """
 type: group
 short-summary: Manage Azure Cosmos DB SQL database throughput.
 """
 
-helps['cosmosdb sql database-throughput show'] = """
+helps['cosmosdb sql database throughput show'] = """
 type: command
 short-summary: Get the throughput of the SQL database.
 """
 
-helps['cosmosdb sql database-throughput update'] = """
+helps['cosmosdb sql database throughput update'] = """
 type: command
 short-summary: Update the throughput of the SQL database.
 """
 
 # SQL container throughput
-helps['cosmosdb sql container-throughput'] = """
+helps['cosmosdb sql container throughput'] = """
 type: group
 short-summary: Manage Azure Cosmos DB SQL container throughput.
 """
 
-helps['cosmosdb sql container-throughput show'] = """
+helps['cosmosdb sql container throughput show'] = """
 type: command
 short-summary: Get the throughput of the SQL container.
 """
 
-helps['cosmosdb sql container-throughput update'] = """
+helps['cosmosdb sql container throughput update'] = """
 type: command
 short-summary: Update the throughput of the SQL container.
 """
@@ -362,33 +362,33 @@ short-summary: Delete the MongoDB collection under an Azure Cosmos DB MongoDB da
 """
 
 # MongoDB database throughput
-helps['cosmosdb mongodb database-throughput'] = """
+helps['cosmosdb mongodb database throughput'] = """
 type: group
 short-summary: Manage Azure Cosmos DB MongoDB database throughput.
 """
 
-helps['cosmosdb mongodb database-throughput show'] = """
+helps['cosmosdb mongodb database throughput show'] = """
 type: command
 short-summary: Get the throughput of the MongoDB database.
 """
 
-helps['cosmosdb mongodb database-throughput update'] = """
+helps['cosmosdb mongodb database throughput update'] = """
 type: command
 short-summary: Update the throughput of the MongoDB database.
 """
 
 # MongoDB collection throughput
-helps['cosmosdb mongodb collection-throughput'] = """
+helps['cosmosdb mongodb collection throughput'] = """
 type: group
 short-summary: Manage Azure Cosmos DB MongoDB collection throughput.
 """
 
-helps['cosmosdb mongodb collection-throughput show'] = """
+helps['cosmosdb mongodb collection throughput show'] = """
 type: command
 short-summary: Get the throughput of the MongoDB collection.
 """
 
-helps['cosmosdb mongodb collection-throughput update'] = """
+helps['cosmosdb mongodb collection throughput update'] = """
 type: command
 short-summary: Update the throughput of the MongoDB collection.
 """
@@ -456,33 +456,33 @@ short-summary: Delete the Cassandra table under an Azure Cosmos DB Cassandra key
 """
 
 # Cassandra keyspace throughput
-helps['cosmosdb cassandra keyspace-throughput'] = """
+helps['cosmosdb cassandra keyspace throughput'] = """
 type: group
 short-summary: Manage Azure Cosmos DB Cassandra keyspace throughput.
 """
 
-helps['cosmosdb cassandra keyspace-throughput show'] = """
+helps['cosmosdb cassandra keyspace throughput show'] = """
 type: command
 short-summary: Get the throughput of the Cassandra keyspace.
 """
 
-helps['cosmosdb cassandra keyspace-throughput update'] = """
+helps['cosmosdb cassandra keyspace throughput update'] = """
 type: command
 short-summary: Update the throughput of the Cassandra keyspace.
 """
 
 # Cassandra table throughput
-helps['cosmosdb cassandra table-throughput'] = """
+helps['cosmosdb cassandra table throughput'] = """
 type: group
 short-summary: Manage Azure Cosmos DB Cassandra table throughput.
 """
 
-helps['cosmosdb cassandra table-throughput show'] = """
+helps['cosmosdb cassandra table throughput show'] = """
 type: command
 short-summary: Get the throughput of the Cassandra table.
 """
 
-helps['cosmosdb cassandra table-throughput update'] = """
+helps['cosmosdb cassandra table throughput update'] = """
 type: command
 short-summary: Update the throughput of the Cassandra table.
 """
@@ -550,33 +550,33 @@ short-summary: Delete the Gremlin graph under an Azure Cosmos DB Gremlin databas
 """
 
 # Gremlin database throughput
-helps['cosmosdb gremlin database-throughput'] = """
+helps['cosmosdb gremlin database throughput'] = """
 type: group
 short-summary: Manage Azure Cosmos DB Gremlin database throughput.
 """
 
-helps['cosmosdb gremlin database-throughput show'] = """
+helps['cosmosdb gremlin database throughput show'] = """
 type: command
 short-summary: Get the throughput of the Gremlin database.
 """
 
-helps['cosmosdb gremlin database-throughput update'] = """
+helps['cosmosdb gremlin database throughput update'] = """
 type: command
 short-summary: Update the throughput of the Gremlin database.
 """
 
 # Gremlin graph throughput
-helps['cosmosdb gremlin graph-throughput'] = """
+helps['cosmosdb gremlin graph throughput'] = """
 type: group
 short-summary: Manage Azure Cosmos DB Gremlin graph throughput.
 """
 
-helps['cosmosdb gremlin graph-throughput show'] = """
+helps['cosmosdb gremlin graph throughput show'] = """
 type: command
 short-summary: Get the throughput of the Gremlin graph.
 """
 
-helps['cosmosdb gremlin graph-throughput update'] = """
+helps['cosmosdb gremlin graph throughput update'] = """
 type: command
 short-summary: Update the throughput of the Gremlin graph.
 """

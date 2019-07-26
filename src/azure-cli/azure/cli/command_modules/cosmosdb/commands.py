@@ -107,35 +107,35 @@ def load_command_table(self, _):
         g.command('delete', 'delete_table')
 
     # Offer throughput
-    with self.command_group('cosmosdb sql database-throughput', cosmosdb_sdk, client_factory=cf_db_accounts) as g:
+    with self.command_group('cosmosdb sql database throughput', cosmosdb_sdk, client_factory=cf_db_accounts) as g:
         g.command('show', 'get_sql_database_throughput')
         g.custom_command('update', 'cli_cosmosdb_sql_database_throughput_update')
 
-    with self.command_group('cosmosdb sql container-throughput', cosmosdb_sdk, client_factory=cf_db_accounts) as g:
+    with self.command_group('cosmosdb sql container throughput', cosmosdb_sdk, client_factory=cf_db_accounts) as g:
         g.command('show', 'get_sql_container_throughput')
         g.custom_command('update', 'cli_cosmosdb_sql_container_throughput_update')
 
-    with self.command_group('cosmosdb mongodb database-throughput', cosmosdb_sdk, client_factory=cf_db_accounts) as g:
+    with self.command_group('cosmosdb mongodb database throughput', cosmosdb_sdk, client_factory=cf_db_accounts) as g:
         g.command('show', 'get_mongo_db_database_throughput')
         g.custom_command('update', 'cli_cosmosdb_mongodb_database_throughput_update')
 
-    with self.command_group('cosmosdb mongodb collection-throughput', cosmosdb_sdk, client_factory=cf_db_accounts) as g:
+    with self.command_group('cosmosdb mongodb collection throughput', cosmosdb_sdk, client_factory=cf_db_accounts) as g:
         g.command('show', 'get_mongo_db_collection_throughput')
         g.custom_command('update', 'cli_cosmosdb_mongodb_collection_throughput_update')
 
-    with self.command_group('cosmosdb cassandra keyspace-throughput', cosmosdb_sdk, client_factory=cf_db_accounts) as g:
+    with self.command_group('cosmosdb cassandra keyspace throughput', cosmosdb_sdk, client_factory=cf_db_accounts) as g:
         g.command('show', 'get_cassandra_keyspace_throughput')
         g.custom_command('update', 'cli_cosmosdb_cassandra_keyspace_throughput_update')
 
-    with self.command_group('cosmosdb cassandra table-throughput', cosmosdb_sdk, client_factory=cf_db_accounts) as g:
+    with self.command_group('cosmosdb cassandra table throughput', cosmosdb_sdk, client_factory=cf_db_accounts) as g:
         g.command('show', 'get_cassandra_table_throughput')
         g.custom_command('update', 'cli_cosmosdb_cassandra_table_throughput_update')
 
-    with self.command_group('cosmosdb gremlin database-throughput', cosmosdb_sdk, client_factory=cf_db_accounts) as g:
+    with self.command_group('cosmosdb gremlin database throughput', cosmosdb_sdk, client_factory=cf_db_accounts) as g:
         g.command('show', 'get_gremlin_database_throughput')
         g.custom_command('update', 'cli_cosmosdb_gremlin_database_throughput_update')
 
-    with self.command_group('cosmosdb gremlin graph-throughput', cosmosdb_sdk, client_factory=cf_db_accounts) as g:
+    with self.command_group('cosmosdb gremlin graph throughput', cosmosdb_sdk, client_factory=cf_db_accounts) as g:
         g.command('show', 'get_gremlin_graph_throughput')
         g.custom_command('update', 'cli_cosmosdb_gremlin_graph_throughput_update')
 
