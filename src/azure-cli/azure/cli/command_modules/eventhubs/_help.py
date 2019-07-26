@@ -80,7 +80,7 @@ helps['eventhubs namespace create'] = """
     examples:
         - name: Creates a new namespace.
           text: az eventhubs namespace create --resource-group myresourcegroup --name mynamespace --location westus
-           --tags tag1=value1 tag2=value2 --sku Standard --enable-auto-inflate False --maximum-throughput-units 30
+           --tags tag1=value1 tag2=value2 --sku Standard --enable-auto-inflate --maximum-throughput-units 20
 """
 
 helps['eventhubs namespace update'] = """
