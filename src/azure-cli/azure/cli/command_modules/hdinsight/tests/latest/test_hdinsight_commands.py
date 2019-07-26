@@ -203,7 +203,7 @@ class HDInsightClusterTests(ScenarioTest):
 
         # execute script actions, and persist on success.
         self.cmd('az hdinsight script-action execute -g {rg} -n {script_action} '
-                 '--cluster-name {cluster} --script-uri {script_uri} --roles {head_node},{worker_node} --persist-on-success')
+                 '--cluster-name {cluster} --script-uri {script_uri} --roles {head_node} {worker_node} --persist-on-success')
 
         # list script actions and validate script is persisted.
         roles = [self.kwargs['head_node'], self.kwargs['worker_node']]
@@ -244,7 +244,7 @@ class HDInsightClusterTests(ScenarioTest):
 
         # execute script actions, but don't persist on success.
         self.cmd('az hdinsight script-action execute -g {rg} --cluster-name {cluster} '
-                 '--name {script_action_1} --script-uri {script_uri} --roles {head_node},{worker_node}')
+                 '--name {script_action_1} --script-uri {script_uri} --roles {head_node} {worker_node}')
 
         # list script action history and validate the new script also appears.
         script_actions = self.cmd('az hdinsight script-action list-execution-history -g {rg} --cluster-name {cluster}', checks=[
