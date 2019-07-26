@@ -9,8 +9,10 @@ from knack.log import get_logger
 
 logger = get_logger(__name__)
 
+
 def service_output_format(result):
     return _output_format(result, _service_format_group)
+
 
 def _service_format_group(item):
     return OrderedDict([
@@ -25,6 +27,7 @@ def _service_format_group(item):
         ('UNITS', _get_value_as_str(item, 'sku', 'capacity'))
     ])
 
+
 def _service_status(argument):
     d = {
         'activating': 'Activating',
@@ -35,6 +38,7 @@ def _service_status(argument):
         'updating': 'Updating'
     }
     return d.get(argument.lower(), argument)
+
 
 def _get_value_as_str(item, *args):
     """Get a nested value from a dict.
@@ -47,6 +51,7 @@ def _get_value_as_str(item, *args):
     except (KeyError, TypeError, IndexError):
         return ' '
 
+
 def _get_value_as_object(item, *args):
     """Get a nested value from a dict.
     :param dict item: The dict object
@@ -58,11 +63,13 @@ def _get_value_as_object(item, *args):
     except (KeyError, TypeError, IndexError):
         return ' '
 
+
 def _output_format(result, format_group):
     if 'value' in result and isinstance(result['value'], list):
         result = result['value']
     obj_list = result if isinstance(result, list) else [result]
     return [format_group(item) for item in obj_list]
+
 
 def transform_string_array(item):
     return ','.join(item)

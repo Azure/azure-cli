@@ -3,26 +3,21 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long
 from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.apim._format import (service_output_format)
-from azure.cli.command_modules.apim._client_factory import (cf_api, cf_service)
+from azure.cli.command_modules.apim._client_factory import (cf_service)
+
 
 def load_command_table(self, _):
-
     service_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.apimanagement.operations#ApiManagementServiceOperations.{}',
         client_factory=cf_service
     )
 
-    api_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.apimanagement.operations#ApiOperations.{}',
-        client_factory=cf_api
-    )
-
-    with self.command_group('apim', service_sdk,  is_preview=True) as g:
+    # pylint: disable=line-too-long
+    with self.command_group('apim', service_sdk, is_preview=True) as g:
         g.custom_command('create', 'create_apim', supports_no_wait=True, table_transformer=service_output_format)
-        g.custom_show_command('show', 'get_apim', table_transformer=service_output_format) 
+        g.custom_show_command('show', 'get_apim', table_transformer=service_output_format)
         g.custom_command('list', 'list_apim', table_transformer=service_output_format)
         g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
         g.generic_update_command('update', custom_func_name='update_apim', getter_name='get', setter_name='create_or_update', supports_no_wait=True)

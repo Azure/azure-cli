@@ -6,6 +6,7 @@
 from azure.cli.core import AzCommandsLoader
 from azure.cli.command_modules.apim._help import helps  # pylint: disable=unused-import
 
+
 class ApimCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
@@ -13,13 +14,10 @@ class ApimCommandsLoader(AzCommandsLoader):
         from azure.cli.core.profiles import ResourceType
         from azure.cli.command_modules.apim._client_factory import cf_apim
 
-        apim_custom = CliCommandType(
-            operations_tmpl='azure.cli.command_modules.apim.custom#{}',
-            client_factory=cf_apim)
+        apim_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.apim.custom#{}', client_factory=cf_apim)
 
-        super(ApimCommandsLoader, self).__init__(cli_ctx=cli_ctx, 
-                        custom_command_type=apim_custom, 
-                        resource_type=ResourceType.MGMT_APIMANAGEMENT)
+        super(ApimCommandsLoader, self).__init__(cli_ctx=cli_ctx, custom_command_type=apim_custom,
+                                                 resource_type=ResourceType.MGMT_APIMANAGEMENT)
 
     def load_command_table(self, args):
         from azure.cli.command_modules.apim.commands import load_command_table

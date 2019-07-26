@@ -15,7 +15,7 @@ helps['apim'] = """
 helps['apim create'] = """
 type: command
 short-summary: Create an API Management service instance.
-parameters: 
+parameters:
     -   name: --name -n
         type: string
         short-summary: unique name of the service instance to be created
@@ -66,4 +66,3 @@ helps['apim backup'] = """
         Storage Account. This is long running operation and could take several
         minutes to complete.
 """
-
