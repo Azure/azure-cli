@@ -383,7 +383,6 @@ def restore_key(cmd,
                 key=None,
                 name=None,
                 label=None,
-                no_deletes=False,
                 connection_string=None,
                 yes=False):
 
@@ -402,7 +401,7 @@ def restore_key(cmd,
     try:
         restore_keyvalues = azconfig_client.get_keyvalues(query_option_then)
         current_keyvalues = azconfig_client.get_keyvalues(query_option_now)
-        kvs_to_restore, kvs_to_modify, kvs_to_delete = __compare_kvs_for_restore(restore_keyvalues, current_keyvalues, no_deletes)
+        kvs_to_restore, kvs_to_modify, kvs_to_delete = __compare_kvs_for_restore(restore_keyvalues, current_keyvalues)
 
         if not yes:
             need_change = __print_restore_preview(kvs_to_restore, kvs_to_modify, kvs_to_delete)
@@ -479,7 +478,7 @@ def list_revision(cmd,
         raise CLIError(str(exception))
 
 
-def __compare_kvs_for_restore(restore_kvs, current_kvs, no_deletes):
+def __compare_kvs_for_restore(restore_kvs, current_kvs):
     # compares two lists and find those that are new or changed in the restore_kvs
     # optionally (delete == True) find the new ones in current_kvs for deletion
     dict_current_kvs = {(kv.key, kv.label): (kv.value, kv.content_type, kv.locked, kv.tags) for kv in current_kvs}
@@ -493,11 +492,10 @@ def __compare_kvs_for_restore(restore_kvs, current_kvs, no_deletes):
         elif current_tuple != (entry.value, entry.content_type, entry.locked, entry.tags):
             kvs_to_modify.append(entry)
 
-    if not no_deletes:
-        set_restore_kvs = {(kv.key, kv.label) for kv in restore_kvs}
-        for entry in current_kvs:
-            if (entry.key, entry.label) not in set_restore_kvs:
-                kvs_to_delete.append(entry)
+    set_restore_kvs = {(kv.key, kv.label) for kv in restore_kvs}
+    for entry in current_kvs:
+        if (entry.key, entry.label) not in set_restore_kvs:
+            kvs_to_delete.append(entry)
 
     return kvs_to_restore, kvs_to_modify, kvs_to_delete
 

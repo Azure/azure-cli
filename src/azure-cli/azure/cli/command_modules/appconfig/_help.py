@@ -177,9 +177,6 @@ helps['appconfig kv restore'] = """
         - name: Restore a specific key for any label start with v1. using connection string to a specific point in time.
           text:
             az appconfig kv restore --key color --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --label v1.* --datetime "2019-05-01T11:24:12Z"
-        - name: Restore all keys with any labels to a specific point in time but do not delete keys that were created after that time.
-          text:
-            az appconfig kv restore -n MyAppConfiguration --datetime "2019-05-01T11:24:12Z" --no-deletes
     """
 
 helps['appconfig revision'] = """

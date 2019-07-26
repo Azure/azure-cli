@@ -129,7 +129,6 @@ def load_arguments(self, _):
         c.argument('name', id_part=None)
         c.argument('key', help='If no key specified, restore all keys by default. Support star sign as filters, for instance abc* means keys with abc as prefix. Similarly, *abc and *abc* are also supported.')
         c.argument('label', help="If no label specified, restore all key-value pairs with all labels. Support star sign as filters, for instance abc* means labels with abc as prefix. Similarly, *abc and *abc* are also supported.")
-        c.argument('no_deletes', help="Only allow modifying existing keys or creating new ones. Existing keys that match the filter in the current configuration will not be deleted.")
 
     with self.argument_context('appconfig kv lock') as c:
         c.argument('key', help='Key to be locked.')
