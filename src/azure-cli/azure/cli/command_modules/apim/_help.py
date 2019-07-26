@@ -25,10 +25,11 @@ parameters:
 examples:
     - name: Create a Developer tier API Management service.
       text: |-
-        az apim create --name MyApim -g MyResourceGroup -l eastus --sku Developer \\
-            --publisher-email email@mydomain.com --enable-client-certificate true
-    - name: Check name availability before creating a new service.
-      text: az apim check-name -n my-desired-servicename
+        az apim create --name MyApim -g MyResourceGroup -l eastus --publisher-email email@mydomain.com --publisher-name Microsoft
+    - name: Create a Consumption tier API Management service.
+      text: |-
+        az apim create --name MyApim -g MyResourceGroup -l eastus --sku-name Consumption --enable-client-certificate \\
+            --publisher-email email@mydomain.com --publisher-name Microsoft
 """
 
 helps['apim list'] = """
