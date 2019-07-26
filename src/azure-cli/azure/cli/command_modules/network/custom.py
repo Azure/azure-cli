@@ -3031,7 +3031,7 @@ def check_nw_ip_flow(cmd, client, vm, watcher_rg, watcher_name, direction, proto
 
     if not is_valid_resource_id(vm):
         if not resource_group_name:
-            raise CLIError("usage error: '--resource-group' required when use the name of the vm.")
+            raise CLIError("usage error: --vm NAME --resource-group NAME | --vm ID")
 
         vm = resource_id(
             subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
@@ -3039,7 +3039,7 @@ def check_nw_ip_flow(cmd, client, vm, watcher_rg, watcher_name, direction, proto
 
     if nic and not is_valid_resource_id(nic):
         if not resource_group_name:
-            raise CLIError("usage error: '--resource-group' required when use the name of the nic.")
+            raise CLIError("usage error: --nic NAME --resource-group NAME | --nic ID")
 
         nic = resource_id(
             subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
