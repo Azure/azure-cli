@@ -18,6 +18,14 @@ from azure.cli.command_modules.cosmosdb._validators import (
 from azure.cli.command_modules.cosmosdb.actions import (
     CreateLocation)
 
+SQL_GREMLIN_INDEXING_POLICY_EXAMPLE = """--idx "{\\"indexingMode\\": \\"consistent\\", \\"includedPaths\\": [{\\"path\\": \\"/*\\", \\"indexes\\": [{\\"dataType\\": \\"String\\", \\"kind\\": \\"Range\\"}]}], \\"excludedPaths\\": [{ \\"path\\": \\"/headquarters/employees/?\\"}]}"
+"""
+
+MONGODB_INDEXES_EXAMPLE = """--idx "[{\\"key\\": {\\"keys\\": [\\"_ts\\"]},\\"options\\": {\\"expireAfterSeconds\\": 1000}}, {\\"key\\": {\\"keys\\": [\\"user_id\\", \\"user_address\\"]}, \\"options\\": {\\"unique\\": \\"true\\"}}]"
+"""
+
+CASSANDRA_SCHEMA_EXAMPLE = """--schema "{\\"columns\\": [{\\"name\\": \\"columnA\\",\\"type\\": \\"uuid\\"}, {\\"name\\": \\"columnB\\",\\"type\\": \\"Ascii\\"}],\\"partitionKeys\\": [{\\"name\\": \\"columnA\\"}]}"
+"""
 
 def load_arguments(self, _):
 
@@ -78,127 +86,116 @@ def load_arguments(self, _):
         c.argument('throughput', type=int, help='Offer Throughput (RU/s)')
 
 # SQL database
-    with self.argument_context('cosmosdb sql database create') as c:
-        c.argument('account_name', options_list=['-a'], help="Database account name")
-        c.argument('database_name', options_list=['-n'], help="Database name")
+    with self.argument_context('cosmosdb sql database') as c:
+        c.argument('account_name', options_list=['--account', '-a'], help="Cosmosdb account name", id_part=None)
+        c.argument('database_name', options_list=['--database', '-n'], help="Database name")
         c.argument('throughput', help='Offer Throughput (RU/s). Default value is 400')
-
-    with self.argument_context('cosmosdb sql database list') as c:
-        c.argument('account_name', options_list=['-a'], help="Database account name")
-
-    with self.argument_context('cosmosdb sql database show') as c:
-        c.argument('account_name', options_list=['-a'], help="Database account name")
-        c.argument('database_name', options_list=['-n'], help="Database name")
-
-    with self.argument_context('cosmosdb sql database delete') as c:
-        c.argument('account_name', options_list=['-a'], help="Database account name")
-        c.argument('database_name', options_list=['-n'], help="Database name")
 
 # SQL container
     with self.argument_context('cosmosdb sql container') as c:
-        c.argument('account_name', options_list=['-a'], help="Database account name")
-        c.argument('database_name', options_list=['-d'], help="Database name")
-        c.argument('container_name', options_list=['-n'], help="Container name")
+        c.argument('account_name', options_list=['--account', '-a'], help="Cosmosdb account name", id_part=None)
+        c.argument('database_name', options_list=['--database', '-d'], help="Database name")
+        c.argument('container_name', options_list=['--container', '-n'], help="Container name")
         c.argument('partition_key_path', options_list=['--part'], help='Partition Key Path, e.g., \'/properties/name\'')
-        c.argument('default_ttl', options_list=['--ttl'], type=int, help='Default TTL')
-        c.argument('indexing_policy', options_list=['--idx'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Indexing Policy, you can enter it as a string or as a file, e.g., --indexing-policy @policy-file.json)')
+        c.argument('default_ttl', options_list=['--ttl'], type=int, help='Default TTL (https://docs.microsoft.com/en-us/azure/cosmos-db/time-to-live)')
+        c.argument('indexing_policy', options_list=['--idx'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Indexing Policy, you can enter it as a string or as a file, e.g., --idx @policy-file.json or' + SQL_GREMLIN_INDEXING_POLICY_EXAMPLE)
         c.argument('throughput', help='Offer Throughput (RU/s). Default value is 400')
 
 # MongDB
     with self.argument_context('cosmosdb mongodb database') as c:
-        c.argument('account_name', options_list=['-a'], help="Database account name")
-        c.argument('database_name', options_list=['-n'], help="Database name")
+        c.argument('account_name', options_list=['--account', '-a'], help="Cosmosdb account name", id_part=None)
+        c.argument('database_name', options_list=['--database', '-n'], help="Database name")
         c.argument('throughput', help='Offer Throughput (RU/s). Default value is 400')
 
     with self.argument_context('cosmosdb mongodb collection') as c:
-        c.argument('account_name', options_list=['-a'], help="Database account name")
-        c.argument('database_name', options_list=['-d'], help="Database name")
-        c.argument('collection_name', options_list=['-n'], help="Collection name")
-        c.argument('shard_key_path', options_list=['--shard'], help="Sharding key path")
-        c.argument('indexes', options_list=['--idx'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Indexes, you can enter it as a string or as a file, e.g., --indexes @indexes-file.json)')
+        c.argument('account_name', options_list=['--account', '-a'], help="Cosmosdb account name", id_part=None)
+        c.argument('database_name', options_list=['--database', '-d'], help="Database name")
+        c.argument('collection_name', options_list=['--collection', '-n'], help="Collection name")
+        c.argument('shard_key_path', options_list=['--shard'], help="Sharding key path.")
+        c.argument('indexes', options_list=['--idx'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Indexes, you can enter it as a string or as a file, e.g., --idx @indexes-file.json or ' + MONGODB_INDEXES_EXAMPLE)
         c.argument('throughput', help='Offer Throughput (RU/s). Default value is 400')
 
 # Cassandra
     with self.argument_context('cosmosdb cassandra keyspace') as c:
-        c.argument('account_name', options_list=['-a'], help="Database account name")
-        c.argument('keyspace_name', options_list=['-n'], help="Keyspace name")
+        c.argument('account_name', options_list=['--account', '-a'], help="Cosmosdb account name", id_part=None)
+        c.argument('keyspace_name', options_list=['--keyspace', '-n'], help="Keyspace name")
         c.argument('throughput', help='Offer Throughput (RU/s). Default value is 400')
 
     with self.argument_context('cosmosdb cassandra table') as c:
-        c.argument('account_name', options_list=['-a'], help="Database account name")
-        c.argument('keyspace_name', options_list=['-k'], help="Keyspace name")
-        c.argument('table_name', options_list=['-n'], help="Table name")
-        c.argument('default_ttl', options_list=['--ttl'], type=int, help='Default TTL')
-        c.argument('schema', type=shell_safe_json_parse, completer=FilesCompleter(), help='Schema, you can enter it as a string or as a file, e.g., --schema @schema-file.json)')
+        c.argument('account_name', options_list=['--account', '-a'], help="Cosmosdb account name", id_part=None)
+        c.argument('keyspace_name', options_list=['--keyspace', '-k'], help="Keyspace name")
+        c.argument('table_name', options_list=['--table', '-n'], help="Table name")
+        c.argument('default_ttl', options_list=['--ttl'], type=int, help='Default TTL (https://docs.microsoft.com/en-us/azure/cosmos-db/time-to-live)')
+        c.argument('schema', type=shell_safe_json_parse, completer=FilesCompleter(), help='Schema, you can enter it as a string or as a file, e.g., --schema @schema-file.json or ' + CASSANDRA_SCHEMA_EXAMPLE)
         c.argument('throughput', help='Offer Throughput (RU/s). Default value is 400')
 
 # Gremlin
     with self.argument_context('cosmosdb gremlin database') as c:
-        c.argument('account_name', options_list=['-a'], help="Database account name")
-        c.argument('database_name', options_list=['-n'], help="Database name")
+        c.argument('account_name', options_list=['--account', '-a'], help="Cosmosdb account name", id_part=None)
+        c.argument('database_name', options_list=['--database', '-n'], help="Database name")
         c.argument('throughput', help='Offer Throughput (RU/s). Default value is 400')
 
     with self.argument_context('cosmosdb gremlin graph') as c:
-        c.argument('account_name', options_list=['-a'], help="Database account name")
-        c.argument('database_name', options_list=['-d'], help="Database name")
-        c.argument('graph_name', options_list=['-n'], help="Graph name")
+        c.argument('account_name', options_list=['--account', '-a'], help="Cosmosdb account name", id_part=None)
+        c.argument('database_name', options_list=['--database', '-d'], help="Database name")
+        c.argument('graph_name', options_list=['--graph', '-n'], help="Graph name")
         c.argument('partition_key_path', options_list=['--part'], help='Partition Key Path, e.g., \'/properties/name\'')
-        c.argument('default_ttl', options_list=['--ttl'], type=int, help='Default TTL')
-        c.argument('indexing_policy', options_list=['--idx'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Indexing Policy, you can enter it as a string or as a file, e.g., --indexing-policy @policy-file.json)')
+        c.argument('default_ttl', options_list=['--ttl'], type=int, help='Default TTL (https://docs.microsoft.com/en-us/azure/cosmos-db/time-to-live)')
+        c.argument('indexing_policy', options_list=['--idx'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Indexing Policy, you can enter it as a string or as a file, e.g., --idx @policy-file.json or ' + SQL_GREMLIN_INDEXING_POLICY_EXAMPLE)
         c.argument('throughput', help='Offer Throughput (RU/s). Default value is 400')
 
 # Table
     with self.argument_context('cosmosdb table') as c:
-        c.argument('account_name', options_list=['-a'], help="Database account name")
-        c.argument('table_name', options_list=['-n'], help="Table name")
+        c.argument('account_name', options_list=['--account', '-a'], help="Cosmosdb account name", id_part=None)
+        c.argument('table_name', options_list=['--table', '-n'], help="Table name")
         c.argument('throughput', help='Offer Throughput (RU/s). Default value is 400')
 
 # Throughput
-    with self.argument_context('cosmosdb sql database-throughput') as c:
-        c.argument('account_name', options_list=['-a'], help="Database account name")
-        c.argument('database_name', options_list=['-n'], help="Database name")
-        c.argument('throughput', type=int, help='Offer Throughput (RU/s). Default value is 400')
+    with self.argument_context('cosmosdb sql database throughput') as c:
+        c.argument('account_name', options_list=['--account', '-a'], help="Cosmosdb account name", id_part=None)
+        c.argument('database_name', options_list=['--database', '-n'], help="Database name")
+        c.argument('throughput', type=int, help='Offer Throughput (RU/s).')
 
-    with self.argument_context('cosmosdb sql container-throughput') as c:
-        c.argument('account_name', options_list=['-a'], help="Database account name")
-        c.argument('database_name', options_list=['-d'], help="Database name")
-        c.argument('container_name', options_list=['-n'], help="Container name")
-        c.argument('throughput', type=int, help='Offer Throughput (RU/s). Default value is 400')
+    with self.argument_context('cosmosdb sql container throughput') as c:
+        c.argument('account_name', options_list=['--account', '-a'], help="Cosmosdb account name", id_part=None)
+        c.argument('database_name', options_list=['--database', '-d'], help="Database name")
+        c.argument('container_name', options_list=['--container', '-n'], help="Container name")
+        c.argument('throughput', type=int, help='Offer Throughput (RU/s).')
 
-    with self.argument_context('cosmosdb mongodb database-throughput') as c:
-        c.argument('account_name', options_list=['-a'], help="Database account name")
-        c.argument('database_name', options_list=['-n'], help="Database name")
-        c.argument('throughput', type=int, help='Offer Throughput (RU/s). Default value is 400')
+    with self.argument_context('cosmosdb mongodb database throughput') as c:
+        c.argument('account_name', options_list=['--account', '-a'], help="Cosmosdb account name", id_part=None)
+        c.argument('database_name', options_list=['--database', '-n'], help="Database name")
+        c.argument('throughput', type=int, help='Offer Throughput (RU/s).')
 
-    with self.argument_context('cosmosdb mongodb collection-throughput') as c:
-        c.argument('account_name', options_list=['-a'], help="Database account name")
-        c.argument('database_name', options_list=['-d'], help="Database name")
-        c.argument('collection_name', options_list=['-n'], help="Collection name")
-        c.argument('throughput', type=int, help='Offer Throughput (RU/s). Default value is 400')
+    with self.argument_context('cosmosdb mongodb collection throughput') as c:
+        c.argument('account_name', options_list=['--account', '-a'], help="Cosmosdb account name", id_part=None)
+        c.argument('database_name', options_list=['--database', '-d'], help="Database name")
+        c.argument('collection_name', options_list=['--collection', '-n'], help="Collection name")
+        c.argument('throughput', type=int, help='Offer Throughput (RU/s).')
 
-    with self.argument_context('cosmosdb cassandra keyspace-throughput') as c:
-        c.argument('account_name', options_list=['-a'], help="Database account name")
-        c.argument('keyspace_name', options_list=['-n'], help="Keyspace name")
-        c.argument('throughput', type=int, help='Offer Throughput (RU/s). Default value is 400')
+    with self.argument_context('cosmosdb cassandra keyspace throughput') as c:
+        c.argument('account_name', options_list=['--account', '-a'], help="Cosmosdb account name", id_part=None)
+        c.argument('keyspace_name', options_list=['--keyspace', '-n'], help="Keyspace name")
+        c.argument('throughput', type=int, help='Offer Throughput (RU/s).')
 
-    with self.argument_context('cosmosdb cassandra table-throughput') as c:
-        c.argument('account_name', options_list=['-a'], help="Database account name")
-        c.argument('keyspace_name', options_list=['-k'], help="Keyspace name")
-        c.argument('table_name', options_list=['-n'], help="Table name")
-        c.argument('throughput', type=int, help='Offer Throughput (RU/s). Default value is 400')
+    with self.argument_context('cosmosdb cassandra table throughput') as c:
+        c.argument('account_name', options_list=['--account', '-a'], help="Cosmosdb account name", id_part=None)
+        c.argument('keyspace_name', options_list=['--keyspace', '-k'], help="Keyspace name")
+        c.argument('table_name', options_list=['--table', '-n'], help="Table name")
+        c.argument('throughput', type=int, help='Offer Throughput (RU/s).')
 
-    with self.argument_context('cosmosdb gremlin database-throughput') as c:
-        c.argument('account_name', options_list=['-a'], help="Database account name")
-        c.argument('database_name', options_list=['-n'], help="Database name")
-        c.argument('throughput', type=int, help='Offer Throughput (RU/s). Default value is 400')
+    with self.argument_context('cosmosdb gremlin database throughput') as c:
+        c.argument('account_name', options_list=['--account', '-a'], help="Cosmosdb account name", id_part=None)
+        c.argument('database_name', options_list=['--database', '-n'], help="Database name")
+        c.argument('throughput', type=int, help='Offer Throughput (RU/s).')
 
-    with self.argument_context('cosmosdb gremlin graph-throughput') as c:
-        c.argument('account_name', options_list=['-a'], help="Database account name")
-        c.argument('database_name', options_list=['-d'], help="Database name")
-        c.argument('graph_name', options_list=['-n'], help="Grapth name")
-        c.argument('throughput', type=int, help='Offer Throughput (RU/s). Default value is 400')
+    with self.argument_context('cosmosdb gremlin graph throughput') as c:
+        c.argument('account_name', options_list=['--account', '-a'], help="Cosmosdb account name", id_part=None)
+        c.argument('database_name', options_list=['--database', '-d'], help="Database name")
+        c.argument('graph_name', options_list=['--graph', '-n'], help="Grapth name")
+        c.argument('throughput', type=int, help='Offer Throughput (RU/s).')
 
     with self.argument_context('cosmosdb table throughput') as c:
-        c.argument('account_name', options_list=['-a'], help="Database account name")
-        c.argument('table_name', options_list=['-n'], help="Table name")
-        c.argument('throughput', type=int, help='Offer Throughput (RU/s). Default value is 400')
+        c.argument('account_name', options_list=['--account', '-a'], help="Cosmosdb account name", id_part=None)
+        c.argument('table_name', options_list=['--table', '-n'], help="Table name")
+        c.argument('throughput', type=int, help='Offer Throughput (RU/s).')
