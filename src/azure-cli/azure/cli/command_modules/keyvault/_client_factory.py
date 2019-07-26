@@ -38,8 +38,9 @@ def keyvault_data_plane_factory(cli_ctx, _):
 
     client = KeyVaultClient(KeyVaultAuthentication(get_token), api_version=version)
 
-    # HACK, work around the fact that KeyVault library does't take confiuration object on constructor 
+    # HACK, work around the fact that KeyVault library does't take confiuration object on constructor
     # which could be used to turn off the verifiaction. Remove this once we migrate to new data plane library
+    # pylint: disable=protected-access
     if hasattr(client, '_client') and hasattr(client._client, 'config'):
         verify = not should_disable_connection_verify()
         client._client.config.connection.verify = verify
