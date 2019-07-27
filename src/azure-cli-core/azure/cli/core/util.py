@@ -29,7 +29,7 @@ def handle_exception(ex):
 
     with CommandLoggerContext(logger):
         if isinstance(ex, JMESPathTypeError):
-            logger.error("\nIncorrect value for `--query`:\n%s", ex)
+            logger.error("\nInvalid jmespath query supplied for `--query`:\n%s", ex)
             logger.error("To learn more about --query, please visit: https://docs.microsoft.com/en-us/cli/azure/query-azure-cli?view=azure-cli-latest")
             return 1
         if isinstance(ex, (CLIError, CloudError)):
