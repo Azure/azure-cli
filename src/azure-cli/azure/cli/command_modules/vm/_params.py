@@ -408,8 +408,8 @@ def load_arguments(self, _):
         c.ignore('expand')
 
     with self.argument_context('vm host create') as c:
-        c.argument('platform_fault_domain', options_list=['--platform-fault-domain', '-d'], type=int, choices=[0, 1, 2],
-                   help="Fault domain of the host within a group.")
+        c.argument('platform_fault_domain', options_list=['--platform-fault-domain', '-d'], type=int,
+                   help="Fault domain of the host within a group. Allowed values: 0, 1, 2")
         c.argument('auto_replace_on_failure', options_list=['--auto-replace'], arg_type=get_three_state_flag(),
                    help="Replace the host automatically if a failure occurs")
         c.argument('license_type', arg_type=get_enum_type(DedicatedHostLicenseTypes),
@@ -425,7 +425,7 @@ def load_arguments(self, _):
 
     with self.argument_context('vm host group create') as c:
         c.argument('platform_fault_domain_count', options_list=["--platform-fault-domain-count", "-c"], type=int,
-                   choices=[1, 2, 3], help="Number of fault domains that the host group can span.")
+                   help="Number of fault domains that the host group can span. Allowed values: 1, 2, 3")
         c.argument('zones', zone_type)
 
     for scope in ["vm host", "vm host group"]:
