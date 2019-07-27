@@ -22,12 +22,16 @@ COMPONENT_PREFIX = 'azure-cli-'
 
 def handle_exception(ex):
     # For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
+    from jmespath.exceptions import JMESPathTypeError
     from msrestazure.azure_exceptions import CloudError
     from msrest.exceptions import HttpOperationError, ValidationError, ClientRequestError
     from azure.cli.core.azlogging import CommandLoggerContext
 
     with CommandLoggerContext(logger):
-
+        if isinstance(ex, JMESPathTypeError):
+            logger.error("\nIncorrect value for `--query`:\n%s", ex)
+            logger.error("To learn more about --query, please visit: https://docs.microsoft.com/en-us/cli/azure/query-azure-cli?view=azure-cli-latest")
+            return 1
         if isinstance(ex, (CLIError, CloudError)):
             logger.error(ex.args[0])
             return ex.args[1] if len(ex.args) >= 2 else 1
