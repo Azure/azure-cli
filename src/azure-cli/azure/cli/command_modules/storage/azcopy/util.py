@@ -116,6 +116,7 @@ def storage_client_auth_for_azcopy(cmd, client, service):
         return AzCopyCredentials(sas_token=sas_token)
     return None
 
+
 def _unserialize_non_msi_token_payload(token_info):
     import jwt  # pylint: disable=import-error
 
