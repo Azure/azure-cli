@@ -600,6 +600,44 @@ type: group
 short-summary: Manage container stored access policies.
 """
 
+helps['storage copy'] = """
+type: command
+short-summary: Copy source data to or from Azure storage. 
+long-summary: Copy source data to or from Azure storage. 
+examples:
+examples:
+  - name: Upload a single file using container name and blob name. 
+    text: az storage copy -s "/path/to/file.txt" --destination-account-name  myStorageAccountName "https://[account].blob.core.windows.net/[container]/[path/to/blob]"
+  - name: Upload a single file using url. 
+    text: az storage copy -s "/path/to/file.txt" -d "https://[account].blob.core.windows.net/[container]/[path/to/blob]"
+  - name: Upload a single file with MD5 hash of the file content and save it as the blob's Content-MD5 property.
+    text: az storage copy -s "/path/to/file.txt" -d "https://[account].blob.core.windows.net/[container]/[path/to/blob]" --put-md5
+  - name: Upload an entire directory.
+    text: az storage copy -s "/path/to/dir" -d "https://[account].blob.core.windows.net/[container]/[path/to/directory]" --recursive
+  - name: Upload a set of files using wildcards.
+    text: az storage copy -s "/path/*foo/*bar/*.pdf" -d "https://[account].blob.core.windows.net/[container]/[path/to/directory]"
+  - name: Upload files and directories using wildcards.
+    text: az storage copy -s "/path/*foo/*bar*" -d "https://[account].blob.core.windows.net/[container]/[path/to/directory]" --recursive
+  - name: Download a single file.
+    text: az storage copy -s "https://[account].blob.core.windows.net/[container]/[path/to/blob]" -d "/path/to/file.txt"
+  - name: Download an entire directory.
+    text: az storage copy -s "https://[account].blob.core.windows.net/[container]/[path/to/directory]" -d "/path/to/dir" --recursive
+  - name: Download a set of files using wildcards.
+    text: az storage copy -s "https://[account].blob.core.windows.net/[container]/foo*" -d "/path/to/dir" --recursive
+  - name: Copy a single blob to another blob.
+    text: az storage copy -s "https://[srcaccount].blob.core.windows.net/[container]/[path/to/blob]" -d "https://[destaccount].blob.core.windows.net/[container]/[path/to/blob]"
+  - name: Copy an entire account data from blob account to another blob account.
+    text: az storage copy -s "https://[srcaccount].blob.core.windows.net" -d "https://[destaccount].blob.core.windows.net" --recursive
+  - name: Copy a single object from S3 with access key to blob.
+    text: az storage copy -s "https://s3.amazonaws.com/[bucket]/[object]" -d "https://[destaccount].blob.core.windows.net/[container]/[path/to/blob]"
+  - name: Copy an entire directory from S3 with access key to blob virtual directory.
+    text: az storage copy -s "https://s3.amazonaws.com/[bucket]/[folder]" -d "https://[destaccount].blob.core.windows.net/[container]/[path/to/directory]" --recursive
+  - name: Copy all buckets in S3 service with access key to blob account.
+    text: az storage copy -s "https://s3.amazonaws.com/" -d "https://[destaccount].blob.core.windows.net" --recursive
+  - name: Copy all buckets in a S3 region with access key to blob account.
+    text: az storage copy -s "https://s3-[region].amazonaws.com/" -d "https://[destaccount].blob.core.windows.net" --recursive
+"""
+
 helps['storage cors'] = """
 type: group
 short-summary: Manage storage service Cross-Origin Resource Sharing (CORS).

@@ -102,6 +102,18 @@ def client_auth_for_azcopy(cmd, client, service='blob'):
         raise Exception('MSI auth not yet supported.')
     return AzCopyCredentials(token_info=token_info)
 
+def file_client_auth_for_azcopy(cmd, file_client):
+    azcopy_creds = storage_client_auth_for_azcopy(cmd, file_client, 'file')
+    if azcopy_creds is not None:
+        return azcopy_creds
+
+    # oauth mode
+    token_info = Profile(cli_ctx=cmd.cli_ctx).get_raw_token(resource=STORAGE_RESOURCE_ENDPOINT)[0][2]
+    try:
+        token_info = _unserialize_non_msi_token_payload(token_info)
+    except KeyError:  # unserialized MSI token payload
+        raise Exception('MSI auth not yet supported.')
+    return AzCopyCredentials(token_info=token_info)
 
 def storage_client_auth_for_azcopy(cmd, client, service):
     if service not in SERVICES:
@@ -109,7 +121,7 @@ def storage_client_auth_for_azcopy(cmd, client, service):
 
     if client.sas_token:
         return AzCopyCredentials(sas_token=client.sas_token)
-
+                   
     # if account key provided, generate a sas token
     if client.account_key:
         sas_token = _generate_sas_token(cmd, client.account_name, client.account_key, service)

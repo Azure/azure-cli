@@ -40,6 +40,10 @@ Release History
 * snapshot/disk create: expose ZRS storage skus
 * Add new command group `vm host` to support dedicated hosts. Expose `--host` and `--host-group` on `vm create`
 
+**Storage**
+
+* `storage copy`: add copy command for storage
+
 2.0.69
 ++++++
 
