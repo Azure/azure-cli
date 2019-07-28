@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from __future__ import print_function
-from ..azcopy.util import AzCopy, blob_client_auth_for_azcopy, file_client_auth_for_azcopy, login_auth_for_azcopy
+from ..azcopy.util import AzCopy, client_auth_for_azcopy, login_auth_for_azcopy
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.profiles import ResourceType
 from azure.cli.command_modules.storage._client_factory import (blob_data_service_factory,file_data_service_factory)
@@ -78,8 +78,11 @@ def storage_copy(cmd, client=None, source=None, destination=None,
 
     azcopy.copy(full_source, full_destination, flags=flags)
 
-def storage_blob_remove(cmd, client, target, recursive=None):
-    azcopy = _azcopy_blob_client(cmd, client)
+def storage_remove(cmd, client, service, target, exclude=None, include=None, recursive=None):
+    if service == 'file':
+        azcopy = _azcopy_file_client(cmd, client)
+    else:
+        azcopy = _azcopy_blob_client(cmd, client)
     flags = []
     if recursive is not None:
         flags.append('--recursive')
