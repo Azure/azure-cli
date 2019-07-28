@@ -123,7 +123,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
             container, storage_account))
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 41))
-        
+
         self.cmd('storage remove -c {} -n butter --account-name {} --exclude "file_1"'.format(
             container, storage_account))
         self.cmd('storage blob list -c {} --account-name {}'.format(
