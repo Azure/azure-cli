@@ -86,6 +86,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_SQLVM = ('azure.mgmt.sqlvirtualmachine', None)
     MGMT_MANAGEDSERVICES = ('azure.mgmt.managedservices', None)
     MGMT_NETAPPFILES = ('azure.mgmt.netappfiles', None)
+    MGMT_ALERTSMANAGEMENT = ('azure.mgmt.alertsmanagement', None)
 
     def __init__(self, import_prefix, client_name):
         """Constructor.
