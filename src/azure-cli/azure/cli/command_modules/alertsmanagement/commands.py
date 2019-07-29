@@ -13,14 +13,14 @@ def load_command_table(self, _):
     )
 
     alertsmanagement_smart_group_util = CliCommandType(
-        operations_tmpl='azure.mgmt.alertsmanagement.operations#SmartGroupOperations.{}',
+        operations_tmpl='azure.mgmt.alertsmanagement.operations#SmartGroupsOperations.{}',
         client_factory=smart_groups_mgmt_client_factory,
         exception_handler=alertsmanagement_exception_handler
     )
 
     with self.command_group('alertsmanagement alert', alertsmanagement_alert_util, client_factory=alerts_mgmt_client_factory) as g:
         g.command('list', 'get_all')
-        g.command('list-summary', 'get_history')
+        g.command('list-summary', 'get_summary')
         g.show_command('show', 'get_by_id')
         g.show_command('show-history', 'get_history')
 
@@ -29,5 +29,9 @@ def load_command_table(self, _):
         g.show_command('show', 'get_by_id')
         g.show_command('show-history', 'get_history')
 
-
-
+    with self.command_group('alertsmanagement action-rule', alertsmanagement_action_rule_util, client_factory=action_rule_mgmt_client_factory) as g:
+        g.command('list', 'list_by_subscription')
+        g.show_command('show', 'get_by_name')
+        g.command('delete', 'delete')
+        g.command('set', 'create_update')
+        g.command('update', 'update')

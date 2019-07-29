@@ -1,20 +1,20 @@
 from knack.arguments import CLIArgumentType
 
 def load_arguments(self, _):
-    target_resource_arg_type = CLIArgumentType(options_list=['--target-resource'], id_part='????????', help='Filter by target resource id', metavar='TARGET_RESOURCE')
-    target_resource_type_arg_type = CLIArgumentType(options_list=['--target-resource-type'], id_part='????????', help='Filter by target resource type', metavar='TARGET_RESOURCE_TYPE')
-    target_resource_group_arg_type = CLIArgumentType(options_list=['--target-resource-group'], id_part='????????', help='Filter by resource group', metavar='TARGET_RESOURCE_GROUP')
-    monitor_service_arg_type = CLIArgumentType(options_list=['--monitor-service'], id_part='????????', help='Filter by target resource', metavar='MONITOR_SERVICE')
-    monitor_condition_arg_type = CLIArgumentType(options_list=['--monitor-condition'], id_part='????????', help='Filter by monitor condition. Supported values – Fired, Resolved', metavar='MONITOR_CONDITION')
-    severity_arg_type = CLIArgumentType(options_list=['--severity'], id_part='????????', help='Filter by severity. Supported values – Sev0, Sev1, Sev2, Sev3, Sev4', metavar='SEVERITY')
-    state_arg_type = CLIArgumentType(options_list=['--state'], id_part='????????', help='Filter by alert state. Supported values - New, Acknowledged, Closed', metavar='STATE')
-    alert_rule_arg_type = CLIArgumentType(options_list=['--alert-rule'], id_part='????????', help='Filter by alert rule Id', metavar='ALERT_RULE')
-    smart_group_ID_arg_type = CLIArgumentType(options_list=['--smart-group-id'], id_part='????????', help='Filter by smart group Id', metavar='SMART_GROUP_ID')
-    sortby_arg_type = CLIArgumentType(options_list=['--sort-by'], id_part='????????', help='Sort the results by parameter. Supported values – name, severity, alertState, monitorCondition, targetResource, targetResourceName, targetResourceGroup, targetResourceType, startDateTime, lastModifiedDateTime', metavar='SORT_BY')
-    sort_order_arg_type = CLIArgumentType(options_list=['--sort-order'], id_part='????????', help='Sorting order. Supported values – asc, desc', metavar='SORT_ORDER')
-    time_range_arg_type = CLIArgumentType(options_list=['--time-range'], id_part='????????', help='Supported time range values – 1h, 1d, 7d, 30d (Default is 1d)', metavar='TIME_RANGE')
-    custom_time_range_arg_type = CLIArgumentType(options_list=['--custom-time-range'], id_part='????????', help='Supported format - <start-time>/<end-time> where time is in ISO-8601 format', metavar='CUSTOM_TIME_RANGE')
-    resource_group_name_arg_type = CLIArgumentType(options_list=['--resource-group-name'], id_part='????????', help='Resource group in which action rule reside', metavar='RESOURCE_GROUP_NAME')
+    target_resource_arg_type = CLIArgumentType(options_list=['--target-resource'], help='Filter by target resource id', metavar='TARGET_RESOURCE')
+    target_resource_type_arg_type = CLIArgumentType(options_list=['--target-resource-type'], help='Filter by target resource type', metavar='TARGET_RESOURCE_TYPE')
+    target_resource_group_arg_type = CLIArgumentType(options_list=['--target-resource-group'], help='Filter by resource group', metavar='TARGET_RESOURCE_GROUP')
+    monitor_service_arg_type = CLIArgumentType(options_list=['--monitor-service'], help='Filter by target resource', metavar='MONITOR_SERVICE')
+    monitor_condition_arg_type = CLIArgumentType(options_list=['--monitor-condition'], help='Filter by monitor condition. Supported values – Fired, Resolved', metavar='MONITOR_CONDITION')
+    severity_arg_type = CLIArgumentType(options_list=['--severity'], help='Filter by severity. Supported values – Sev0, Sev1, Sev2, Sev3, Sev4', metavar='SEVERITY')
+    state_arg_type = CLIArgumentType(options_list=['--state'], help='Filter by alert state. Supported values - New, Acknowledged, Closed', metavar='STATE')
+    alert_rule_arg_type = CLIArgumentType(options_list=['--alert-rule'], help='Filter by alert rule Id', metavar='ALERT_RULE')
+    smart_group_id_arg_type = CLIArgumentType(options_list=['--smart-group-id'], help='Filter by smart group Id', metavar='SMART_GROUP_ID')
+    sortby_arg_type = CLIArgumentType(options_list=['--sort-by'], help='Sort the results by parameter. Supported values – name, severity, alertState, monitorCondition, targetResource, targetResourceName, targetResourceGroup, targetResourceType, startDateTime, lastModifiedDateTime', metavar='SORT_BY')
+    sort_order_arg_type = CLIArgumentType(options_list=['--sort-order'], help='Sorting order. Supported values – asc, desc', metavar='SORT_ORDER')
+    time_range_arg_type = CLIArgumentType(options_list=['--time-range'], help='Supported time range values – 1h, 1d, 7d, 30d (Default is 1d)', metavar='TIME_RANGE')
+    custom_time_range_arg_type = CLIArgumentType(options_list=['--custom-time-range'], help='Supported format - <start-time>/<end-time> where time is in ISO-8601 format', metavar='CUSTOM_TIME_RANGE')
+    resource_group_name_arg_type = CLIArgumentType(options_list=['--resource-group-name'], help='Resource group in which action rule reside', metavar='RESOURCE_GROUP_NAME')
 
 
     with self.argument_context('alertsmanagement alert list') as c:
@@ -26,7 +26,7 @@ def load_arguments(self, _):
         c.argument('severity', severity_arg_type, required=False)
         c.argument('state', state_arg_type, required=False)
         c.argument('alert_rule', alert_rule_arg_type, required=False)
-        c.argument('smart_group_ID', smart_group_ID_arg_type, required=False)
+        c.argument('smart_group_id', smart_group_id_arg_type, required=False)
         c.argument('include_context', options_list=['--include-context'], required=False, help='Include Context in response. Supported values – true, false')
         c.argument('include_egress_config', options_list=['--include-egress-config'], required=False, help='Include Egress config in response. Supported values – true, false')
         c.argument('page_count', options_list=['--page-count'], required=False, help='Number of alerts returned at once.')
@@ -62,10 +62,10 @@ def load_arguments(self, _):
         c.argument('time_range', time_range_arg_type, required=False)
         
     with self.argument_context('alertsmanagement  smart-group show') as c:
-        c.argument('smart_group_ID', smart_group_ID_arg_type, required=True)
+        c.argument('smart_group_ID', smart_group_id_arg_type, required=True)
 
     with self.argument_context('alertsmanagement  smart-group show-history') as c:
-        c.argument('smart_group_ID', smart_group_ID_arg_type, required=True)
+        c.argument('smart_group_ID', smart_group_id_arg_type, required=True)
 
     with self.argument_context('alertsmanagement action-rule list') as c:
         c.argument('resource_group_name', resource_group_name_arg_type, required=False)
@@ -94,7 +94,7 @@ def load_arguments(self, _):
         c.argument('state', state_arg_type, required=True)
 
     with self.argument_context('alertsmanagement smart-group update-state') as c:
-        c.argument('smart_group_ID', smart_group_ID_arg_type, required=True)
+        c.argument('smart_group_id', smart_group_id_arg_type, required=True)
         c.argument('state', state_arg_type, required=True)
 
     with self.argument_context('alertsmanagement action-rule update') as c:

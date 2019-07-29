@@ -8,7 +8,7 @@ from azure.cli.testsdk import ScenarioTest, record_only
 class AzureAlertsManagementAlertScenarioTest(ScenarioTest):
 
     @record_only()
-    def test_state_change(self):
+    def test_alert_changestate(self):
         # Get latest alert
         latest_alerts = self.cmd('alertsmanagement alert list --state New --time-range 1h')
         latest_alert = latest_alerts[0]
@@ -23,7 +23,7 @@ class AzureAlertsManagementAlertScenarioTest(ScenarioTest):
         alert = self.cmd('alertsmanagement alert update-state --alert-id id --state old_state')
 
     @record_only()
-    def test_get_summary(self):
+    def test_alert_getsummary(self):
         summary = self.cmd('alertsmanagement alert list-summary --group-by severity,alertstate')
 
         self.assertEqual("severity", summary.properties['groupedby'])
@@ -34,7 +34,7 @@ class AzureAlertsManagementAlertScenarioTest(ScenarioTest):
             self.assertNotNull(item['count'])
 
     @record_only()
-    def test_get_filter(self):
+    def test_alert_getfilter(self):
         severity_filter = "Sev3"
         monitor_service_filter = "Platform"
         alerts = self.cmd('alertsmanagement alert list --severity severity_filter --monitor-service monitor_service_filter')

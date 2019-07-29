@@ -11,4 +11,5 @@ def alerts_mgmt_client_factory(cli_ctx, kwargs):
 def smart_groups_mgmt_client_factory(cli_ctx, kwargs):
     return cf_alertsmanagement(cli_ctx, **kwargs).smart_groups
 
-#TODO: add client factory for action rules
+def action_rule_mgmt_client_factory(cli_ctx, kwargs):
+    return cf_alertsmanagement(cli_ctx, **kwargs).action_rules
