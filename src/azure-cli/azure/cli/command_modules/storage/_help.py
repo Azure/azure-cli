@@ -614,7 +614,7 @@ examples:
   - name: Upload an entire directory to Azure Blob using url.
     text: az storage copy -s "/path/to/dir" -d "https://[account].blob.core.windows.net/[container]/[path/to/directory]" --recursive
   - name: Upload an entire directory to Azure Blob using account name and container name.
-    text: az storage copy --source-local-path "/path/to/dir" --destination-account-name mystorageaccount --destination-container mycontainer" --recursive    
+    text: az storage copy --source-local-path "/path/to/dir" --destination-account-name mystorageaccount --destination-container mycontainer" --recursive
   - name: Upload a set of files to Azure Blob using wildcards with url.
     text: az storage copy -s "/path/*foo/*bar/*.pdf" -d "https://[account].blob.core.windows.net/[container]/[path/to/directory]"
   - name: Upload a set of files to Azure Blob using wildcards with account name and container name.
