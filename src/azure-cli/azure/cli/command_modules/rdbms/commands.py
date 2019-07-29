@@ -297,12 +297,3 @@ def load_command_table(self, _):
         g.command('delete', 'delete', confirmation=True)
         g.show_command('show', 'get')
         g.command('list', 'list_by_server')
-
-    with self.command_group('postgres') as g:
-        g.custom_command('get-access-token', '_get_access_token_for_rdbms')
-
-    with self.command_group('mariadb') as g:
-        g.custom_command('get-access-token', '_get_access_token_for_rdbms')
-
-    with self.command_group('mysql') as g:
-        g.custom_command('get-access-token', '_get_access_token_for_rdbms')

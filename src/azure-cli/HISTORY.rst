@@ -21,12 +21,15 @@ Release History
 * When using --json-file option of az batch pool create network security rules blocking network access to a pool based on the source port of the traffic is now supported. This is done via the SourcePortRanges property on NetworkSecurityGroupRule.
 * When using --json-file option of az batch task create and running a container, Batch now supports executing the task in the container working directory or in the Batch task working directory. This is controlled by the WorkingDirectory property on TaskContainerSettings.
 
+**Profile**
+
+* Add optional parameter to specify replica SKU for create replica command.
+* Add get-access-token --resource-type enum for convenience of getting access tokens for well-known services.
 
 **RDBMS**
 
 * Add optional parameter to specify replica SKU for create replica command.
 * Fix the issue with CI test failure with creating MySQL replica.
-* Add get-access-token command for use with PostgreSQL and MySQL AAD support.
 
 **Storage**
 

@@ -7,7 +7,6 @@
 
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
-from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.mgmt.rdbms.mysql.operations.servers_operations import ServersOperations as MySqlServersOperations
@@ -426,19 +425,3 @@ def _server_list_custom_func(client, resource_group_name=None):
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
     return client.list()
-
-
-# Custom function to retrieve access token
-def _get_access_token_for_rdbms(cmd, subscription=None):
-    '''
-    get AAD token to access RDBMS service
-    '''
-    profile = Profile(cli_ctx=cmd.cli_ctx)
-    creds, subscription, tenant = profile.get_raw_token(subscription=subscription, resource=cmd.cli_ctx.cloud.endpoints.ossrdbms_resource_id)
-    return {
-        'tokenType': creds[0],
-        'accessToken': creds[1],
-        'expiresOn': creds[2].get('expiresOn', 'N/A'),
-        'subscription': subscription,
-        'tenant': tenant
-    }
