@@ -180,6 +180,7 @@ def _check_health_environment(ignore_errors, yes):
 # Check DNS lookup and access to challenge endpoint
 def _get_registry_status(login_server, registry_name, ignore_errors):
     import socket
+    from requests.exceptions import SSLError
 
     registry_ip = ""
 
@@ -197,9 +198,14 @@ def _get_registry_status(login_server, registry_name, ignore_errors):
 
     import requests
     from azure.cli.core.util import should_disable_connection_verify
-    challenge = requests.get('https://' + login_server + '/v2/', verify=(not should_disable_connection_verify()))
 
-    if challenge.status_code == 403:
+    ssl_error_occured = False
+    try:
+        challenge = requests.get('https://' + login_server + '/v2/', verify=(not should_disable_connection_verify()))
+    except SSLError:
+        ssl_error_occured = True
+
+    if ssl_error_occured or challenge.status_code == 403:
         from ._errors import CONNECTIVITY_FORBIDDEN_ERROR
         _handle_error(CONNECTIVITY_FORBIDDEN_ERROR.format_error_message(login_server, registry_name), ignore_errors)
         return False
