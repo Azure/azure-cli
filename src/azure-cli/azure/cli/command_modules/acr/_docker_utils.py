@@ -216,7 +216,8 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
         if challenge.status_code in [403]:
             raise CLIError("Looks like you don't have access to registry '{}'. ".format(login_server) +
                            "To see configured firewall rules, run" +
-                           " 'az acr show --query networkRuleSet --name {}'".format(registry_name))
+                           " 'az acr show --query networkRuleSet --name {}'. ".format(registry_name) +
+                           "Details: https://docs.microsoft.com/en-us/azure/container-registry/container-registry-health-error-reference#connectivity_forbidden_error")  # pylint: disable=line-too-long
     except RequestException as e:
         logger.debug("Could not connect to registry login server. Exception: %s", str(e))
         if resource_not_found:
