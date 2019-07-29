@@ -109,7 +109,7 @@ def storage_client_auth_for_azcopy(cmd, client, service):
 
     if client.sas_token:
         return AzCopyCredentials(sas_token=client.sas_token)
-                   
+
     # if account key provided, generate a sas token
     if client.account_key:
         sas_token = _generate_sas_token(cmd, client.account_name, client.account_key, service)

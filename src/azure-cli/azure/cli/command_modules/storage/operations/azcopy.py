@@ -7,16 +7,16 @@ from __future__ import print_function
 from ..azcopy.util import AzCopy, client_auth_for_azcopy, login_auth_for_azcopy
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.profiles import ResourceType
-from azure.cli.command_modules.storage._client_factory import (blob_data_service_factory,file_data_service_factory)
+from azure.cli.command_modules.storage._client_factory import blob_data_service_factory, file_data_service_factory
 
 
-def storage_copy(cmd, client=None, source=None, destination=None, 
-                    check_md5="FailIfDifferent", put_md5=None, recursive=None, 
-                    metadata=None, timeout=None,
-                    source_if_modified_since=None, source_if_unmodified_since=None, source_if_match=None, source_if_none_match=None, 
-                    destination_if_modified_since=None, destination_if_unmodified_since=None, destination_if_match=None, destination_if_none_match=None,
-                    source_account_name=None, source_container=None, source_blob=None, source_share=None, source_file_path=None, source_local_path=None,
-                    destination_account_name=None, destination_container=None, destination_blob=None, destination_share=None, destination_file_path=None, destination_local_path=None):
+def storage_copy(cmd, client=None, source=None, destination=None,
+                 check_md5="FailIfDifferent", put_md5=None, recursive=None,
+                 metadata=None, timeout=None,
+                 source_if_modified_since=None, source_if_unmodified_since=None, source_if_match=None, source_if_none_match=None,
+                 destination_if_modified_since=None, destination_if_unmodified_since=None, destination_if_match=None, destination_if_none_match=None,
+                 source_account_name=None, source_container=None, source_blob=None, source_share=None, source_file_path=None, source_local_path=None,
+                 destination_account_name=None, destination_container=None, destination_blob=None, destination_share=None, destination_file_path=None, destination_local_path=None):
     def get_url_with_sas(source, account_name, container, blob, share, file_path, local_path):
         import re
         import os
@@ -24,11 +24,11 @@ def storage_copy(cmd, client=None, source=None, destination=None,
         from azure.cli.command_modules.storage.azcopy.util import _generate_sas_token
 
         if source is not None:
-            if "?" in source: # sas token exists
+            if "?" in source:  # sas token exists
                 return source
             storage_pattern = re.compile(r'https://(.*?)\.(blob|dfs|file).core.windows.net')
             result = re.findall(storage_pattern, source)
-            if result: # source is URL
+            if result:   # source is URL
                 storage_info = result[0]
                 account_name = storage_info[0]
                 if storage_info[1] in ['blob', 'dfs']:
@@ -38,7 +38,7 @@ def storage_copy(cmd, client=None, source=None, destination=None,
                 else:
                     raise ValueError('Not supported service type')
                 account_key = _query_account_key(cmd.cli_ctx, account_name)
-            else: # source is path
+            else:   # source is path
                 return source
         elif account_name:
             account_key = _query_account_key(cmd.cli_ctx, account_name)
@@ -54,14 +54,14 @@ def storage_copy(cmd, client=None, source=None, destination=None,
                 dir_name = None if dir_name in ('', '.') else dir_name
                 source = client.make_file_url(share, dir_name, file_name)
                 service = 'file'
-            else: # Only support account trandfer for blob
+            else:  # Only support account trandfer for blob
                 source = 'https://{}.blob.core.windows.net'.format(account_name)
                 service = 'blob'
         elif local_path is not None:
             return local_path
         else:
             raise ValueError('Not valid file')
-        
+
         sas_token = _generate_sas_token(cmd, account_name, account_key, service)
         return _add_url_sas(source, sas_token)
 
@@ -77,6 +77,7 @@ def storage_copy(cmd, client=None, source=None, destination=None,
         flags.append('--put-md5')
 
     azcopy.copy(full_source, full_destination, flags=flags)
+
 
 def storage_remove(cmd, client, service, target, exclude=None, include=None, recursive=None):
     if service == 'file':

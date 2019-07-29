@@ -602,13 +602,13 @@ short-summary: Manage container stored access policies.
 
 helps['storage copy'] = """
 type: command
-short-summary: Copy source data to or from Azure storage. 
-long-summary: Copy source data to or from Azure storage. 
+short-summary: Copy source data to or from Azure storage.
+long-summary: Copy source data to or from Azure storage.
 examples:
 examples:
-  - name: Upload a single file using container name and blob name. 
+  - name: Upload a single file using container name and blob name.
     text: az storage copy -s "/path/to/file.txt" --destination-account-name  myStorageAccountName "https://[account].blob.core.windows.net/[container]/[path/to/blob]"
-  - name: Upload a single file using url. 
+  - name: Upload a single file using url.
     text: az storage copy -s "/path/to/file.txt" -d "https://[account].blob.core.windows.net/[container]/[path/to/blob]"
   - name: Upload a single file with MD5 hash of the file content and save it as the blob's Content-MD5 property.
     text: az storage copy -s "/path/to/file.txt" -d "https://[account].blob.core.windows.net/[container]/[path/to/blob]" --put-md5
