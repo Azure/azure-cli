@@ -65,7 +65,7 @@ helps['lab vm create'] = """
                 - name: --disk-type
                   short-summary: Storage type to use for virtual machine.
                 - name: --expiration-date
-                  short-summary: The expiration date in UTC(YYYY-mm-dd) for the VM.
+                  short-summary: The expiration date in UTC(yyyy-MM-ddTHH:mm:ss) for the VM.
                 - name: --generate-ssh-keys
                   short-summary: Generate SSH public and private key files if missing.
             examples:
