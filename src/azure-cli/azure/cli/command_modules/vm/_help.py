@@ -1171,6 +1171,83 @@ examples:
 
 """
 
+helps['vm host'] = """
+type: group
+short-summary: Manage Dedicated Hosts for Virtual Machines
+"""
+
+helps['vm host create'] = """
+type: command
+short-summary: Create a dedicated host.
+examples:
+  - name: Create a dedicated host. Ensure it auto replaces on failure
+    text: |-
+        az vm host create --host-group my-host-group --name my-host --platform-fault-domain 2 \\
+            --auto-replace --resource-group my-resource-group --sku DSv3-Type1
+  - name: Create a dedicated host in the 'east asia' region. Don't auto replace on failure.
+    text: |-
+        az vm host create --host-group my-host-group --name my-host --platform-fault-domain 0 \\
+            --auto-replace false --resource-group my-resource-group --sku ESv3-Type1 --location eastasia
+"""
+
+helps['vm host list'] = """
+type: command
+short-summary: List dedicated hosts.
+"""
+
+helps['vm host show'] = """
+type: command
+short-summary: Get the details of a dedicated host.
+"""
+
+helps['vm host get-instance-view'] = """
+type: command
+short-summary: Get instance information about a dedicated host.
+examples:
+  - name: Get instance view information of a dedicated host.
+    text: az vm host get-instance-view --host-group my-host-group --name my-host -g ova-test
+
+  - name: Get instance views for all dedicated hosts in a host group.
+    text: >
+        az vm host get-instance-view --ids $(az vm host list -g ova-test --host-group my-host-group --query "[].id" -o tsv)
+"""
+
+helps['vm host update'] = """
+type: command
+short-summary: Update a dedicated host.
+examples:
+  - name: Update the 'autoReplaceOnFailure' field of a dedicated host.
+    text: |-
+        az vm host update --host-group my-host-group --name my-host \\
+            --resource-group my-resource-group --set autoReplaceOnFailure=True
+"""
+
+helps['vm host group'] = """
+type: group
+short-summary: Manage Dedicated Host Groups
+"""
+
+helps['vm host group create'] = """
+type: command
+short-summary: Create a dedicated host group.
+"""
+
+helps['vm host group list'] = """
+type: command
+short-summary: List dedicated host groups.
+long-summary: Lists dedicated host groups by subscription. If resource group is specified, lists dedicated host groups by resource group.
+"""
+
+helps['vm host group show'] = """
+type: command
+short-summary: Get the details of a dedicated host group.
+"""
+
+helps['vm host group update'] = """
+type: command
+short-summary: Update a dedicated host group.
+"""
+
 helps['vm identity'] = """
 type: group
 short-summary: manage service identities of a VM

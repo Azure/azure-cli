@@ -11,10 +11,14 @@ Release History
 **Appservice**
 * az webapp config ssl support to show a message if a resource is not found
 * Fixed issue where `az functionapp create` does not accept Standard_RAGRS storage account type.
+* Fixed an issue where az webapp up would fail if run using older versions of python
 
 **Network**
 
 * network nic ip-config add: Fixes #9861 where --ids was inadvertently exposed but did not work.
+* network application-gateway http-settings create/update: Fixes #9604. Add `--root-certs` to support user associate trusted root certificates with the HTTP settings.
+* network dns record-set ns create: Fixes #9965. Support --subscription again by moving the supression into lower scope.
+* network watcher test-ip-flow: Fixes #9845. Fixes #9844. Correct the error messages and help message for the `--vm` and `--nic` arguments. Only providing the name of the vm or nic without `--resource-group` will raise CLI usage error.
 
 **RBAC**
 
@@ -25,11 +29,17 @@ Release History
 
 * New Cmdlets for Management.Sql that supports Managed instance key and managed instance TDE protector management
 
+**Storage**
+
+* `storage remove`: add remove command for storage
+* Fixed issue `storage blob update`.
+
 **VM**
 
 * list-skus: use newer api-version to output zone details
 * vmss create: restore client end defaults to False for "--single-placement-group"
-* snapshot/disk create: expose ZRS storage skus   
+* snapshot/disk create: expose ZRS storage skus
+* Add new command group `vm host` to support dedicated hosts. Expose `--host` and `--host-group` on `vm create`
 
 2.0.69
 ++++++
@@ -80,7 +90,6 @@ Release History
 
 * Enable Files AADDS for storage account update.
 * Fixed issue `storage blob service-properties update --set`.
-* `storage remove`: add remove command for storage
 
 2.0.68
 ++++++
