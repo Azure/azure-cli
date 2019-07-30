@@ -17,6 +17,8 @@ def keyvault_client_vaults_factory(cli_ctx, _):
 def keyvault_data_plane_factory(cli_ctx, _):
     from azure.keyvault import KeyVaultAuthentication, KeyVaultClient
     from azure.cli.core.profiles import ResourceType, get_api_version
+    from azure.cli.core.util import should_disable_connection_verify
+
     version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT))
 
     def get_token(server, resource, scope):  # pylint: disable=unused-argument
@@ -34,4 +36,17 @@ def keyvault_data_plane_factory(cli_ctx, _):
                     "Credentials have expired due to inactivity. Please run 'az login'")
             raise CLIError(err)
 
-    return KeyVaultClient(KeyVaultAuthentication(get_token), api_version=version)
+    client = KeyVaultClient(KeyVaultAuthentication(get_token), api_version=version)
+
+    # HACK, work around the fact that KeyVault library does't take confiuration object on constructor
+    # which could be used to turn off the verifiaction. Remove this once we migrate to new data plane library
+    # pylint: disable=protected-access
+    if hasattr(client, '_client') and hasattr(client._client, 'config'):
+        verify = not should_disable_connection_verify()
+        client._client.config.connection.verify = verify
+    else:
+        from knack.log import get_logger
+        logger = get_logger(__name__)
+        logger.info('Could not find the configuration object to turn off the verification if needed')
+
+    return client
