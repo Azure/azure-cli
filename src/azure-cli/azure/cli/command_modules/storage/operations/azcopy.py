@@ -33,7 +33,7 @@ def storage_copy(cmd, source=None,
         if source is not None:
             if "?" in source:  # sas token exists
                 return source
-            storage_pattern = re.compile(r'https://(.*?)\.(blob|dfs|file).%s'%storage_endpoint)
+            storage_pattern = re.compile(r'https://(.*?)\.(blob|dfs|file).%s' % storage_endpoint)
             result = re.findall(storage_pattern, source)
             if result:   # source is URL
                 storage_info = result[0]
