@@ -139,7 +139,9 @@ def add_export_policy_rule(cmd, instance, allowed_clients, rule_index, unix_read
     volume_export_policy = VolumePropertiesExportPolicy(rules=rules)
 
     params = VolumePatch(
-        export_policy=volume_export_policy)
+        export_policy=volume_export_policy,
+        service_level=instance.service_level,
+        usage_threshold=instance.usage_threshold)
     _update_mapper(instance, params, ['export_policy'])
     return params
 

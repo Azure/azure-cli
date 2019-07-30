@@ -8,6 +8,7 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 POOL_DEFAULT = "--service-level 'Premium' --size 4"
 VOLUME_DEFAULT = "--service-level 'Premium' --usage-threshold 100"
 LOCATION = "westcentralus"
+GIB_SCALE = 1024 * 1024 * 1024
 
 # No tidy up of tests required. The resource group is automatically removed
 
@@ -21,7 +22,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         subs = self.cmd("az account show").get_output_in_json()
         return subs['id']
 
-    def create_volume(self, account_name, pool_name, volume_name1, rg, tags=None, volume_name2=None, protocols=None):
+    def create_volume(self, account_name, pool_name, volume_name1, rg, tags=None, volume_name2=None, protocols=None, pool_payload=POOL_DEFAULT, volume_payload=VOLUME_DEFAULT):
         vnet_name = self.create_random_name(prefix='cli-vnet-', length=24)
         creation_token = volume_name1
         subnet_name = self.create_random_name(prefix='cli-subnet-', length=16)
@@ -30,8 +31,8 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
 
         self.setup_vnet(rg, vnet_name, subnet_name, '10.12.0.0')
         self.cmd("az netappfiles account create -g %s -a '%s' -l %s" % (rg, account_name, LOCATION)).get_output_in_json()
-        self.cmd("az netappfiles pool create -g %s -a %s -p %s -l %s %s %s" % (rg, account_name, pool_name, LOCATION, POOL_DEFAULT, tag)).get_output_in_json()
-        volume1 = self.cmd("az netappfiles volume create --resource-group %s --account-name %s --pool-name %s --volume-name %s -l %s %s --creation-token %s --vnet %s --subnet %s %s %s" % (rg, account_name, pool_name, volume_name1, LOCATION, VOLUME_DEFAULT, creation_token, vnet_name, subnet_name, protocol_types, tag)).get_output_in_json()
+        self.cmd("az netappfiles pool create -g %s -a %s -p %s -l %s %s %s" % (rg, account_name, pool_name, LOCATION, pool_payload, tag)).get_output_in_json()
+        volume1 = self.cmd("az netappfiles volume create --resource-group %s --account-name %s --pool-name %s --volume-name %s -l %s %s --creation-token %s --vnet %s --subnet %s %s %s" % (rg, account_name, pool_name, volume_name1, LOCATION, volume_payload, creation_token, vnet_name, subnet_name, protocol_types, tag)).get_output_in_json()
 
         if volume_name2:
             creation_token = volume_name2
@@ -163,3 +164,29 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         vol_with_export_policy = self.cmd("netappfiles volume export-policy remove -g {rg} -a %s -p %s -v %s --rule-index 2" % (account_name, pool_name, volume_name)).get_output_in_json()
         assert vol_with_export_policy['name'] == account_name + '/' + pool_name + '/' + volume_name
         assert len(vol_with_export_policy['exportPolicy']['rules']) == 2
+
+    @ResourceGroupPreparer(name_prefix='cli_tests_rg')
+    def test_export_policy_non_default(self):
+        # tests that adding export policy works with non-default service level/usage threshold
+        account_name = self.create_random_name(prefix='cli-acc-', length=24)
+        pool_name = self.create_random_name(prefix='cli-pool-', length=24)
+        volume_name = self.create_random_name(prefix='cli-vol-', length=24)
+        pool_payload = "--service-level 'Standard' --size 8"
+        volume_payload = "--service-level 'Standard' --usage-threshold 200"
+
+        volume = self.create_volume(account_name, pool_name, volume_name, '{rg}', pool_payload=pool_payload, volume_payload=volume_payload)
+        assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
+        # check the specified volume properties
+        assert volume['usageThreshold'] == 200 * GIB_SCALE
+        assert volume['serviceLevel'] == "Standard"
+
+        # now add an export policy
+        # there is already one default rule present
+        vol_with_export_policy = self.cmd("netappfiles volume export-policy add -g {rg} -a %s -p %s -v %s --allowed-clients '1.2.3.0/24' --rule-index 3 --unix-read-only true --unix-read-write false --cifs false --nfsv3 true --nfsv4 false" % (account_name, pool_name, volume_name)).get_output_in_json()
+        assert vol_with_export_policy['name'] == account_name + '/' + pool_name + '/' + volume_name
+        assert vol_with_export_policy['exportPolicy']['rules'][0]['allowedClients'] == '1.2.3.0/24'
+        assert vol_with_export_policy['exportPolicy']['rules'][0]['ruleIndex'] == 3
+        assert vol_with_export_policy['exportPolicy']['rules'][0]['cifs'] is False
+        # and recheck the other properties are unchanged
+        assert volume['usageThreshold'] == 200 * GIB_SCALE
+        assert volume['serviceLevel'] == "Standard"
