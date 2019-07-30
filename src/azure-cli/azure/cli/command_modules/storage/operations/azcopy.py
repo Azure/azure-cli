@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from __future__ import print_function
-from ..azcopy.util import AzCopy, blob_client_auth_for_azcopy, login_auth_for_azcopy
+from ..azcopy.util import AzCopy, client_auth_for_azcopy, login_auth_for_azcopy
 
 
 def storage_blob_copy(azcopy, source, destination, recursive=None):
@@ -14,21 +14,18 @@ def storage_blob_copy(azcopy, source, destination, recursive=None):
     azcopy.copy(source, destination, flags=flags)
 
 
-def storage_blob_upload(cmd, client, source, destination, recursive=None):
-    azcopy = _azcopy_blob_client(cmd, client)
-    storage_blob_copy(azcopy, source, _add_url_sas(destination, azcopy.creds.sas_token), recursive=recursive)
-
-
-def storage_blob_download(cmd, client, source, destination, recursive=None):
-    azcopy = _azcopy_blob_client(cmd, client)
-    storage_blob_copy(azcopy, _add_url_sas(source, azcopy.creds.sas_token), destination, recursive=recursive)
-
-
-def storage_blob_remove(cmd, client, target, recursive=None):
-    azcopy = _azcopy_blob_client(cmd, client)
+def storage_remove(cmd, client, service, target, exclude=None, include=None, recursive=None):
+    if service == 'file':
+        azcopy = _azcopy_file_client(cmd, client)
+    else:
+        azcopy = _azcopy_blob_client(cmd, client)
     flags = []
     if recursive is not None:
         flags.append('--recursive')
+    if include is not None:
+        flags.append('--include=' + include)
+    if exclude is not None:
+        flags.append('--exclude=' + exclude)
     azcopy.remove(_add_url_sas(target, azcopy.creds.sas_token), flags=flags)
 
 
@@ -51,7 +48,11 @@ def _add_url_sas(url, sas):
 
 
 def _azcopy_blob_client(cmd, client):
-    return AzCopy(creds=blob_client_auth_for_azcopy(cmd, client))
+    return AzCopy(creds=client_auth_for_azcopy(cmd, client))
+
+
+def _azcopy_file_client(cmd, client):
+    return AzCopy(creds=client_auth_for_azcopy(cmd, client, service='file'))
 
 
 def _azcopy_login_client(cmd):

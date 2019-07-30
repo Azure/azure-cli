@@ -163,6 +163,16 @@ managed_instance_param_type = CLIArgumentType(
     options_list=['--managed-instance', '--mi'],
     help='Name of the Azure SQL managed instance.')
 
+kid_param_type = CLIArgumentType(
+    options_list=['--kid', '-k'],
+    help='The Azure Key Vault key identifier of the server key. An example key identifier is '
+    '"https://YourVaultName.vault.azure.net/keys/YourKeyName/01234567890123456789012345678901"')
+
+server_key_type_param_type = CLIArgumentType(
+    options_list=['--server-key-type', '-t'],
+    help='The type of the server key',
+    arg_type=get_enum_type(ServerKeyType))
+
 storage_param_type = CLIArgumentType(
     options_list=['--storage'],
     type=SizeWithUnitConverter('GB', result_type=int, unit_map=dict(B=1.0 / (1024 * 1024 * 1024),
@@ -1008,10 +1018,8 @@ def load_arguments(self, _):
                    options_list=['--name', '-n'])
 
         c.argument('kid',
-                   options_list=['--kid', '-k'],
-                   required=True,
-                   help='The Azure Key Vault key identifier of the server key. An example key identifier is '
-                   '"https://YourVaultName.vault.azure.net/keys/YourKeyName/01234567890123456789012345678901"')
+                   arg_type=kid_param_type,
+                   required=True)
 
     #####
     #           sql server tde-key
@@ -1022,15 +1030,10 @@ def load_arguments(self, _):
 
     with self.argument_context('sql server tde-key set') as c:
         c.argument('kid',
-                   options_list=['--kid', '-k'],
-                   help='The Azure Key Vault key identifier of the server key to be made encryption protector.'
-                   'An example key identifier is '
-                   '"https://YourVaultName.vault.azure.net/keys/YourKeyName/01234567890123456789012345678901"')
+                   arg_type=kid_param_type)
 
         c.argument('server_key_type',
-                   options_list=['--server-key-type', '-t'],
-                   help='The type of the server key',
-                   arg_type=get_enum_type(ServerKeyType))
+                   arg_type=server_key_type_param_type)
 
     #####
     #           sql server vnet-rule
@@ -1175,6 +1178,34 @@ def load_arguments(self, _):
                    help='Generate and assign an Azure Active Directory Identity for this managed instance '
                    'for use with key management services like Azure KeyVault. '
                    'If identity is already assigned - do nothing.')
+
+    #####
+    #           sql managed instance key
+    #####
+    with self.argument_context('sql mi key') as c:
+        c.argument('managed_instance_name',
+                   arg_type=managed_instance_param_type)
+
+        c.argument('key_name',
+                   options_list=['--name', '-n'])
+
+        c.argument('kid',
+                   arg_type=kid_param_type,
+                   required=True,)
+
+    #####
+    #           sql server tde-key
+    #####
+    with self.argument_context('sql mi tde-key') as c:
+        c.argument('managed_instance_name',
+                   arg_type=managed_instance_param_type)
+
+    with self.argument_context('sql mi tde-key set') as c:
+        c.argument('kid',
+                   arg_type=kid_param_type)
+
+        c.argument('server_key_type',
+                   arg_type=server_key_type_param_type)
 
     ###############################################
     #                sql managed db               #

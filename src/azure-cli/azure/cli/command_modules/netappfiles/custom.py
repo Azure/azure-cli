@@ -8,6 +8,7 @@
 from knack.log import get_logger
 from azure.mgmt.netapp.models import ActiveDirectory, NetAppAccount, NetAppAccountPatch, CapacityPool, CapacityPoolPatch, Volume, VolumePatch, VolumePropertiesExportPolicy, ExportPolicyRule, Snapshot
 from azure.cli.core.commands.client_factory import get_subscription_id
+from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
 logger = get_logger(__name__)
 
@@ -88,8 +89,19 @@ def patch_pool(cmd, instance, size=None, service_level=None, tags=None):
     return body
 
 
-def create_volume(cmd, client, account_name, pool_name, volume_name, resource_group_name, location, creation_token, usage_threshold, vnet, subnet='default', service_level=None, tags=None):
+def create_volume(cmd, client, account_name, pool_name, volume_name, resource_group_name, location, creation_token, usage_threshold, vnet, subnet='default', service_level=None, protocol_types=None, tags=None):
     subs_id = get_subscription_id(cmd.cli_ctx)
+
+    # determine vnet - supplied value can be name or ARM resource Id
+    if is_valid_resource_id(vnet):
+        resource_parts = parse_resource_id(vnet)
+        vnet = resource_parts['resource_name']
+
+    # determine subnet - supplied value can be name or ARM reource Id
+    if is_valid_resource_id(subnet):
+        resource_parts = parse_resource_id(subnet)
+        subnet = resource_parts['resource_name']
+
     subnet_id = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/virtualNetworks/%s/subnets/%s" % (subs_id, resource_group_name, vnet, subnet)
     body = Volume(
         usage_threshold=int(usage_threshold) * gib_scale,
@@ -97,16 +109,18 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
         service_level=service_level,
         location=location,
         subnet_id=subnet_id,
+        protocol_types=protocol_types,
         tags=tags)
 
     return client.create_or_update(body, resource_group_name, account_name, pool_name, volume_name)
 
 
 # volume update
-def patch_volume(cmd, instance, usage_threshold=None, service_level=None, tags=None):
+def patch_volume(cmd, instance, usage_threshold=None, service_level=None, protocol_types=None, tags=None):
     params = VolumePatch(
         usage_threshold=None if usage_threshold is None else int(usage_threshold) * gib_scale,
         service_level=service_level,
+        protocol_types=protocol_types,
         tags=tags)
     _update_mapper(instance, params, ['service_level', 'usage_threshold', 'tags'])
     return params

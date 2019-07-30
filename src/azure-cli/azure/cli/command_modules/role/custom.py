@@ -966,10 +966,14 @@ def update_application(instance, display_name=None, homepage=None,  # pylint: di
     if app_roles:
         app_patch_param.app_roles = _build_app_roles(app_roles)
 
-    app_patch_param.available_to_other_tenants = available_to_other_tenants
-    app_patch_param.oauth2_allow_implicit_flow = oauth2_allow_implicit_flow
-    app_patch_param.identifier_uris = identifier_uris
-    app_patch_param.reply_urls = reply_urls
+    if available_to_other_tenants is not None:
+        app_patch_param.available_to_other_tenants = available_to_other_tenants
+    if oauth2_allow_implicit_flow is not None:
+        app_patch_param.oauth2_allow_implicit_flow = oauth2_allow_implicit_flow
+    if identifier_uris is not None:
+        app_patch_param.identifier_uris = identifier_uris
+    if reply_urls is not None:
+        app_patch_param.reply_urls = reply_urls
 
     return app_patch_param
 
@@ -1325,6 +1329,7 @@ def create_service_principal_for_rbac(
     # retry while server replication is done
     if not skip_assignment:
         for scope in scopes:
+            logger.warning('Creating a role assignment under the scope of "%s"', scope)
             for l in range(0, _RETRY_TIMES):
                 try:
                     _create_role_assignment(cmd.cli_ctx, role, sp_oid, None, scope, resolve_assignee=False)
@@ -1332,17 +1337,17 @@ def create_service_principal_for_rbac(
                 except Exception as ex:
                     if l < _RETRY_TIMES and ' does not exist in the directory ' in str(ex):
                         time.sleep(5)
-                        logger.warning('Retrying role assignment creation: %s/%s', l + 1,
+                        logger.warning('  Retrying role assignment creation: %s/%s', l + 1,
                                        _RETRY_TIMES)
                         continue
                     elif _error_caused_by_role_assignment_exists(ex):
-                        logger.warning('Role assignment already exits.\n')
+                        logger.warning('  Role assignment already exits.\n')
                         break
                     else:
                         # dump out history for diagnoses
-                        logger.warning('Role assignment creation failed.\n')
+                        logger.warning('  Role assignment creation failed.\n')
                         if getattr(ex, 'response', None) is not None:
-                            logger.warning('role assignment response headers: %s\n',
+                            logger.warning('  role assignment response headers: %s\n',
                                            ex.response.headers)  # pylint: disable=no-member
                     raise
 

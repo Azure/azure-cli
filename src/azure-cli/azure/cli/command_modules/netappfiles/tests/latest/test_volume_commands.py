@@ -7,7 +7,7 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 
 POOL_DEFAULT = "--service-level 'Premium' --size 4"
 VOLUME_DEFAULT = "--service-level 'Premium' --usage-threshold 100"
-LOCATION = "eastus2"
+LOCATION = "westcentralus"
 
 # No tidy up of tests required. The resource group is automatically removed
 
@@ -21,16 +21,17 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         subs = self.cmd("az account show").get_output_in_json()
         return subs['id']
 
-    def create_volume(self, account_name, pool_name, volume_name1, rg, tags=None, volume_name2=None):
+    def create_volume(self, account_name, pool_name, volume_name1, rg, tags=None, volume_name2=None, protocols=None):
         vnet_name = self.create_random_name(prefix='cli-vnet-', length=24)
         creation_token = volume_name1
         subnet_name = self.create_random_name(prefix='cli-subnet-', length=16)
         tag = "--tags %s" % tags if tags is not None else ""
+        protocol_types = "--protocol-types %s" % protocols if protocols is not None else ""
 
         self.setup_vnet(rg, vnet_name, subnet_name, '10.12.0.0')
         self.cmd("az netappfiles account create -g %s -a '%s' -l %s" % (rg, account_name, LOCATION)).get_output_in_json()
         self.cmd("az netappfiles pool create -g %s -a %s -p %s -l %s %s %s" % (rg, account_name, pool_name, LOCATION, POOL_DEFAULT, tag)).get_output_in_json()
-        volume1 = self.cmd("az netappfiles volume create --resource-group %s --account-name %s --pool-name %s --volume-name %s -l %s %s --creation-token %s --vnet %s --subnet %s %s" % (rg, account_name, pool_name, volume_name1, LOCATION, VOLUME_DEFAULT, creation_token, vnet_name, subnet_name, tag)).get_output_in_json()
+        volume1 = self.cmd("az netappfiles volume create --resource-group %s --account-name %s --pool-name %s --volume-name %s -l %s %s --creation-token %s --vnet %s --subnet %s %s %s" % (rg, account_name, pool_name, volume_name1, LOCATION, VOLUME_DEFAULT, creation_token, vnet_name, subnet_name, protocol_types, tag)).get_output_in_json()
 
         if volume_name2:
             creation_token = volume_name2
@@ -45,7 +46,9 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         volume_name = self.create_random_name(prefix='cli-vol-', length=24)
         tags = "Tag1=Value1 Tag2=Value2"
 
-        volume = self.create_volume(account_name, pool_name, volume_name, '{rg}', tags)
+        protocol_types = "NFSv3 NFSv4"
+
+        volume = self.create_volume(account_name, pool_name, volume_name, '{rg}', tags=tags, protocols=protocol_types)
         assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
         assert volume['tags']['Tag1'] == 'Value1'
         assert volume['tags']['Tag2'] == 'Value2'
@@ -53,6 +56,12 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         assert volume['exportPolicy']['rules'][0]['allowedClients'] == '0.0.0.0/0'
         assert not volume['exportPolicy']['rules'][0]['cifs']
         assert volume['exportPolicy']['rules'][0]['ruleIndex'] == 1
+        # check a mount target is present
+        assert len(volume['mountTargets']) == 1
+        # specified protocol type
+        assert len(volume['protocolTypes']) == 2
+        assert volume['protocolTypes'][0] == 'NFSv3'
+        assert volume['protocolTypes'][1] == 'NFSv4'
 
         volume_list = self.cmd("netappfiles volume list --resource-group {rg} --account-name %s --pool-name %s" % (account_name, pool_name)).get_output_in_json()
         assert len(volume_list) == 1
@@ -68,7 +77,8 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         volume_name1 = self.create_random_name(prefix='cli-vol-', length=24)
         volume_name2 = self.create_random_name(prefix='cli-vol-', length=24)
         tags = "Tag1=Value1"
-        self.create_volume(account_name, pool_name, volume_name1, '{rg}', tags, volume_name2)
+
+        self.create_volume(account_name, pool_name, volume_name1, '{rg}', tags=tags, volume_name2=volume_name2)
 
         volume_list = self.cmd("netappfiles volume list --resource-group {rg} -a '%s' -p '%s'" % (account_name, pool_name)).get_output_in_json()
         assert len(volume_list) == 2
@@ -84,8 +94,12 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         volume_name = self.create_random_name(prefix='cli-vol-', length=24)
         tags = "Tag2=Value1"
 
-        volume = self.create_volume(account_name, pool_name, volume_name, '{rg}', tags)
+        protocol_types = "NFSv4"
+        volume = self.create_volume(account_name, pool_name, volume_name, '{rg}', tags=tags, protocols=protocol_types)
         assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
+        # specified protocol type
+        assert len(volume['protocolTypes']) == 1
+        assert volume['protocolTypes'][0] == 'NFSv4'
 
         volume = self.cmd("az netappfiles volume show --resource-group {rg} -a %s -p %s -v %s" % (account_name, pool_name, volume_name)).get_output_in_json()
         assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
@@ -103,6 +117,9 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
 
         volume = self.create_volume(account_name, pool_name, volume_name, '{rg}')
         assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
+        # default protocol type
+        assert len(volume['protocolTypes']) == 1
+        assert volume['protocolTypes'][0] == 'NFSv3'
 
         volume = self.cmd("az netappfiles volume update --resource-group {rg} -a %s -p %s -v %s --tags %s --service-level 'Standard'" % (account_name, pool_name, volume_name, tags)).get_output_in_json()
         assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name

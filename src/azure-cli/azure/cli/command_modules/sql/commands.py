@@ -36,6 +36,8 @@ from ._util import (
     get_sql_failover_groups_operations,
     get_sql_firewall_rules_operations,
     get_sql_managed_databases_operations,
+    get_sql_managed_instance_encryption_protectors_operations,
+    get_sql_managed_instance_keys_operations,
     get_sql_managed_instances_operations,
     get_sql_replication_links_operations,
     get_sql_restorable_dropped_databases_operations,
@@ -465,6 +467,30 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.custom_command('list', 'managed_instance_list')
         g.generic_update_command('update', custom_func_name='managed_instance_update', supports_no_wait=True)
+
+    managed_instance_keys_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#ManagedInstanceKeysOperations.{}',
+        client_factory=get_sql_managed_instance_keys_operations)
+
+    with self.command_group('sql mi key',
+                            managed_instance_keys_operations,
+                            client_factory=get_sql_managed_instance_keys_operations) as g:
+
+        g.custom_command('create', 'managed_instance_key_create')
+        g.custom_command('delete', 'managed_instance_key_delete')
+        g.custom_show_command('show', 'managed_instance_key_get')
+        g.command('list', 'list_by_instance')
+
+    managed_instance_encryption_protectors_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#ManagedInstanceEncryptionProtectorsOperations.{}',
+        client_factory=get_sql_managed_instance_encryption_protectors_operations)
+
+    with self.command_group('sql mi tde-key',
+                            managed_instance_encryption_protectors_operations,
+                            client_factory=get_sql_managed_instance_encryption_protectors_operations) as g:
+
+        g.show_command('show', 'get')
+        g.custom_command('set', 'managed_instance_encryption_protector_update')
 
     ###############################################
     #                sql managed db               #

@@ -20,7 +20,7 @@ from azure.cli.command_modules.vm._completers import (
     get_urn_aliases_completion_list, get_vm_size_completion_list, get_vm_run_command_completion_list)
 from azure.cli.command_modules.vm._validators import (
     validate_nsg_name, validate_vm_nics, validate_vm_nic, validate_vm_disk, validate_vmss_disk,
-    validate_asg_names_or_ids, validate_keyvault, validate_proximity_placement_group,
+    validate_asg_names_or_ids, validate_keyvault, _validate_proximity_placement_group,
     process_gallery_image_version_namespace)
 
 from azure.cli.command_modules.vm._vm_utils import MSI_LOCAL_ID
@@ -30,9 +30,12 @@ from azure.cli.command_modules.vm._image_builder import ScriptType
 # pylint: disable=too-many-statements, too-many-branches, too-many-locals
 def load_arguments(self, _):
     # Model imports
-    StorageAccountTypes, DiskStorageAccountTypes, SnapshotStorageAccountTypes = self.get_models('StorageAccountTypes', 'DiskStorageAccountTypes', 'SnapshotStorageAccountTypes')
+    StorageAccountTypes = self.get_models('StorageAccountTypes')
+    DiskStorageAccountTypes = self.get_models('DiskStorageAccountTypes,', operation_group='disks')
+    SnapshotStorageAccountTypes = self.get_models('SnapshotStorageAccountTypes', operation_group='snapshots')
     UpgradeMode, CachingTypes, OperatingSystemTypes = self.get_models('UpgradeMode', 'CachingTypes', 'OperatingSystemTypes')
     HyperVGenerationTypes, HyperVGeneration = self.get_models('HyperVGenerationTypes', 'HyperVGeneration')
+    DedicatedHostLicenseTypes = self.get_models('DedicatedHostLicenseTypes')
 
     # REUSABLE ARGUMENT DEFINITIONS
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
@@ -268,8 +271,6 @@ def load_arguments(self, _):
         c.argument('name', name_arg_type, validator=_resource_not_exists(self.cli_ctx, 'Microsoft.Compute/virtualMachines'))
         c.argument('vm_name', name_arg_type, id_part=None, help='Name of the virtual machine.', completer=None)
         c.argument('os_disk_size_gb', type=int, help='the size of the os disk in GB', arg_group='Storage')
-        c.argument('attach_os_disk', help='Attach an existing OS disk to the VM. Can use the name or ID of a managed disk or the URI to an unmanaged disk VHD.')
-        c.argument('attach_data_disks', nargs='+', help='Attach existing data disks to the VM. Can use the name or ID of a managed disk or the URI to an unmanaged disk VHD.')
         c.argument('availability_set', help='Name or ID of an existing availability set to add the VM to. None by default.')
         c.argument('nsg', help='The name to use when creating a new Network Security Group (default) or referencing an existing one. Can also reference an existing NSG by ID or specify "" for none.', arg_group='Network')
         c.argument('nsg_rule', help='NSG rule to create when creating a new NSG. Defaults to open ports for allowing RDP on Windows and allowing SSH on Linux.', arg_group='Network', arg_type=get_enum_type(['RDP', 'SSH']))
@@ -278,6 +279,14 @@ def load_arguments(self, _):
                    help='pre-existing storage account name or its blob uri to capture boot diagnostics. Its sku should be one of Standard_GRS, Standard_LRS and Standard_RAGRS')
         c.argument('accelerated_networking', resource_type=ResourceType.MGMT_NETWORK, min_api='2016-09-01', arg_type=get_three_state_flag(), arg_group='Network',
                    help="enable accelerated networking. Unless specified, CLI will enable it based on machine image and size")
+
+    with self.argument_context('vm create', arg_group='Storage') as c:
+        c.argument('attach_os_disk', help='Attach an existing OS disk to the VM. Can use the name or ID of a managed disk or the URI to an unmanaged disk VHD.')
+        c.argument('attach_data_disks', nargs='+', help='Attach existing data disks to the VM. Can use the name or ID of a managed disk or the URI to an unmanaged disk VHD.')
+
+    with self.argument_context('vm create', arg_group='Dedicated Host', min_api='2019-03-01') as c:
+        c.argument('dedicated_host_group', options_list=['--host-group'], help="Name of the dedicated host group containing the dedicated host this VM will reside in.")
+        c.argument('dedicated_host', options_list=['--host'], help="Name or ID of the dedicated host this VM will reside in. If a name is specified, a host group must be specified via `--host-group`.")
 
     with self.argument_context('vm open-port') as c:
         c.argument('vm_name', name_arg_type, help='The name of the virtual machine to open inbound traffic on.')
@@ -392,6 +401,40 @@ def load_arguments(self, _):
 
     with self.argument_context('vm restart') as c:
         c.argument('force', action='store_true', help='Force the VM to restart by redeploying it. Use if the VM is unresponsive.')
+
+    with self.argument_context('vm host') as c:
+        c.argument('host_group_name', options_list=['--host-group'], id_part='name', help="Name of the Dedicated Host Group")
+        c.argument('host_name', name_arg_type, id_part='child_name_1', help="Name of the Dedicated Host")
+        c.ignore('expand')
+
+    with self.argument_context('vm host create') as c:
+        c.argument('platform_fault_domain', options_list=['--platform-fault-domain', '-d'], type=int, choices=[0, 1, 2],
+                   help="Fault domain of the host within a group.")
+        c.argument('auto_replace_on_failure', options_list=['--auto-replace'], arg_type=get_three_state_flag(),
+                   help="Replace the host automatically if a failure occurs")
+        c.argument('license_type', arg_type=get_enum_type(DedicatedHostLicenseTypes),
+                   help="The software license type that will be applied to the VMs deployed on the dedicated host.")
+        c.argument('sku', arg_type=get_enum_type(['DSv3-Type1', 'ESv3-Type1', 'FSv2-Type2']),
+                   help="Sku of the dedicated host.")
+
+    with self.argument_context('vm host list') as c:
+        c.argument('host_group_name', id_part=None)
+
+    with self.argument_context('vm host group') as c:
+        c.argument('host_group_name', name_arg_type, id_part='name', help="Name of the Dedicated Host Group")
+
+    with self.argument_context('vm host group create') as c:
+        c.argument('platform_fault_domain_count', options_list=["--platform-fault-domain-count", "-c"], type=int,
+                   choices=[1, 2, 3], help="Number of fault domains that the host group can span.")
+        c.argument('zones', zone_type)
+
+    for scope in ["vm host", "vm host group"]:
+        with self.argument_context("{} create".format(scope)) as c:
+            location_type = get_location_type(self.cli_ctx)
+            custom_location_msg = " Otherwise, location will default to the resource group's location"
+            custom_location_type = CLIArgumentType(overrides=location_type,
+                                                   help=location_type.settings["help"] + custom_location_msg)
+            c.argument('location', arg_type=custom_location_type)
     # endregion
 
     # region VMSS
@@ -734,5 +777,5 @@ def load_arguments(self, _):
     for scope, item in [('vm create', 'VM'), ('vmss create', 'VMSS'), ('vm availability-set create', 'availability set')]:
         with self.argument_context(scope, min_api='2018-04-01') as c:
             c.argument('proximity_placement_group', options_list=['--ppg'], help="The name or ID of the proximity placement group the {} should be associated with.".format(item),
-                       validator=validate_proximity_placement_group)    # only availability set does not have a command level validator, so this should be added.
+                       validator=_validate_proximity_placement_group)    # only availability set does not have a command level validator, so this should be added.
     # endregion

@@ -10,13 +10,6 @@ from azure.cli.core.util import sdk_no_wait
 from ._client_factory import network_client_factory
 
 
-def _get_property(items, name):
-    result = next((x for x in items if x.name.lower() == name.lower()), None)
-    if not result:
-        raise CLIError("Property '{}' does not exist".format(name))
-    return result
-
-
 def list_network_resource_property(resource, prop):
     """ Factory method for creating list functions. """
 
