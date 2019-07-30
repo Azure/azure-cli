@@ -677,11 +677,11 @@ def cli_cosmosdb_cassandra_table_throughput_update(client,
                                                    throughput):
     """Update an Azure Cosmos DB Cassandra table throughput"""
     throughput_resource = ThroughputResource(throughput=throughput)
-    return client.update_mongo_db_collection_throughput(resource_group_name,
-                                                        account_name,
-                                                        keyspace_name,
-                                                        table_name,
-                                                        throughput_resource)
+    return client.update_cassandra_table_throughput(resource_group_name,
+                                                    account_name,
+                                                    keyspace_name,
+                                                    table_name,
+                                                    throughput_resource)
 
 
 def cli_cosmosdb_gremlin_database_throughput_update(client,
