@@ -8,7 +8,7 @@ from azure.cli.testsdk import ScenarioTest, record_only
 class AzureAlertsManagementSmartGroupScenarioTest(ScenarioTest):
 
     @record_only()
-    def test_state_change(self):
+    def test_smartgroup_changestate(self):
         # Get latest alert
         latest_sgs = self.cmd('alertsmanagement smart-group list --time-range 1h')
         latest_sg = latest_sgs[0]
