@@ -68,7 +68,7 @@ def validate_keyvault(cmd, namespace):
                                           'vaults', 'Microsoft.KeyVault')
 
 
-def validate_proximity_placement_group(cmd, namespace):
+def _validate_proximity_placement_group(cmd, namespace):
     from msrestazure.tools import parse_resource_id
 
     if namespace.proximity_placement_group:
@@ -550,6 +550,46 @@ def _validate_vm_create_availability_set(cmd, namespace):
             type='availabilitySets',
             name=name)
         logger.debug("adding to specified availability set '%s'", namespace.availability_set)
+
+
+def _validate_vm_create_dedicated_host(cmd, namespace):
+    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    # handle incorrect usage
+    if namespace.dedicated_host_group and namespace.dedicated_host is None:
+        raise CLIError("incorrect usage: --host ID | --host-group  NAME --host NAME")
+
+    # if this is a valid dedicated host resource id return
+    if is_valid_resource_id(namespace.dedicated_host):
+        if namespace.dedicated_host_group is not None:
+            logger.warning("Ignoring `--host-group` as `--host` is a valid resource id.")
+        return
+
+    # otherwise this should just be a dedicated host name. If host group provided, build resource id
+    if namespace.dedicated_host:
+        if namespace.dedicated_host_group is None:
+            raise CLIError("incorrect usage: --host ID | --host-group  NAME --host NAME")
+
+        host_name = namespace.dedicated_host
+        rg = namespace.resource_group_name
+        host_group_name = namespace.dedicated_host_group
+
+        if not check_existence(cmd.cli_ctx, host_name, rg, 'Microsoft.Compute', 'hosts',
+                               parent_name=host_group_name, parent_type='hostGroups'):
+            raise CLIError("The dedicated host '{}' in host group '{}' and resource group '{}' does not exist."
+                           .format(host_name, host_group_name, rg))
+
+        namespace.dedicated_host = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=rg,
+            namespace='Microsoft.Compute',
+            type='hostGroups',
+            name=host_group_name,
+            child_type_1="hosts",
+            child_name_1=host_name)
+
+        logger.info("Built dedicated host ID '%s' from host name and host group.", namespace.dedicated_host)
 
 
 def _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=False):
@@ -1060,7 +1100,9 @@ def process_vm_create_namespace(cmd, namespace):
     _validate_vm_create_nics(cmd, namespace)
     _validate_vm_vmss_accelerated_networking(cmd.cli_ctx, namespace)
     _validate_vm_vmss_create_auth(namespace)
-    validate_proximity_placement_group(cmd, namespace)
+
+    _validate_proximity_placement_group(cmd, namespace)
+    _validate_vm_create_dedicated_host(cmd, namespace)
 
     if namespace.secrets:
         _validate_secrets(namespace.secrets, namespace.os_type)
@@ -1069,6 +1111,7 @@ def process_vm_create_namespace(cmd, namespace):
     _validate_vm_vmss_msi(cmd, namespace)
     if namespace.boot_diagnostics_storage:
         namespace.boot_diagnostics_storage = get_storage_blob_uri(cmd.cli_ctx, namespace.boot_diagnostics_storage)
+
 # endregion
 
 
@@ -1088,6 +1131,13 @@ def _get_default_address_pool(cli_ctx, resource_group, balancer_name, balancer_t
         raise CLIError("No existing values found for '{0}'. Create one first and try "
                        "again.".format(option_name))
     return values[0]
+
+
+# Client end hack per: https://github.com/Azure/azure-cli/issues/9943
+def _validate_vmss_single_placement_group(namespace):
+    if namespace.zones or namespace.instance_count > 100:
+        if namespace.single_placement_group is None:
+            namespace.single_placement_group = False
 
 
 def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
@@ -1228,6 +1278,7 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=True)
     _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=True)
 
+    _validate_vmss_single_placement_group(namespace)
     _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace)
     _validate_vmss_create_subnet(namespace)
     _validate_vmss_create_public_ip(cmd, namespace)
@@ -1235,7 +1286,7 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_vm_vmss_accelerated_networking(cmd.cli_ctx, namespace)
     _validate_vm_vmss_create_auth(namespace)
     _validate_vm_vmss_msi(cmd, namespace)
-    validate_proximity_placement_group(cmd, namespace)
+    _validate_proximity_placement_group(cmd, namespace)
 
     if namespace.secrets:
         _validate_secrets(namespace.secrets, namespace.os_type)

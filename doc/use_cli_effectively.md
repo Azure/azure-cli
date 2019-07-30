@@ -116,7 +116,7 @@ For clarity, Bash scripts are used inline. Windows batch or PowerScript examples
 If you are using az on a build machine, and multiple jobs can be run in parallel, then there is a risk that the login tokens are shared between two build jobs is the jobs run as the same OS user.  To avoid mix ups like this, set AZURE_CONFIG_DIR to a directory where the login tokens should be stored.  It could be a randomly created folder, or just the name of the jenkins workspace, like this ```AZURE_CONFIG_DIR=.```
 
 ## Appendix
-   ### Windows batch scripts for saving to variables and using it later 
+### Windows batch scripts for saving to variables and using it later
        
        ECHO OFF
        SETLOCAL
@@ -125,12 +125,12 @@ If you are using az on a build machine, and multiple jobs can be run in parallel
        )
        az vm stop --ids %vm_ids% :: CLI stops all VMs in parallel 
 
-   ### Windows PowerShell scrips for saving to variables and using it later 
+### Windows PowerShell scrips for saving to variables and using it later
 
        $vm_ids=(az vm list -d -g my_rg --query "[?powerState=='VM running'].id" -o tsv)
        az vm stop --ids $vm_ids # CLI stops all VMs in parallel 
 
-   ### Windows batch scripts to loop through a list
+### Windows batch scripts to loop through a list
        ECHO OFF
        SETLOCAL
        FOR /F "tokens=* USEBACKQ" %%F IN (`az vm list -d -g my_rg --query "[?powerState=='VM running'].id" -o tsv`) DO (
@@ -138,9 +138,16 @@ If you are using az on a build machine, and multiple jobs can be run in parallel
            az vm stop --ids %%F
        )
 
-   ### Windows PowerShell scrips to loop through a list
+### Windows PowerShell scrips to loop through a list
        $vm_ids=(az vm list -d -g my_rg --query "[?powerState=='VM running'].id" -o tsv)
        foreach ($vm_id in $vm_ids) {
            Write-Output "Stopping $vm_id"
            az vm stop --ids $vm_id
        }
+
+### CLI Environment Variables
+
+|  Environment Variable          | Description            |
+|--------------------------------|------------------------|
+| **AZURE_CONFIG_DIR**           | Global config directory for config files, logs and telemetry. If unspecified, defaults to `~/.azure`. |
+| **AZURE_EXTENSION_DIR**        | Extensions' installation directory. If unspecified, defaults to cliextensions directory within the global config directory. |

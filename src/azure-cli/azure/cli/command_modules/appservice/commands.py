@@ -8,7 +8,7 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.core.util import empty_on_404
 
 from ._client_factory import cf_web_client, cf_plans, cf_webapps
-from ._validators import validate_app_exists_in_rg
+from ._validators import validate_app_exists_in_rg, validate_app_or_slot_exists_in_rg
 
 
 def output_slots_in_table(slots):
@@ -84,9 +84,9 @@ def load_command_table(self, _):
         g.custom_command('restart', 'restart_webapp')
         g.custom_command('browse', 'view_in_browser')
         g.custom_command('list-runtimes', 'list_runtimes')
-        g.custom_command('identity assign', 'assign_identity', validator=validate_app_exists_in_rg)
-        g.custom_show_command('identity show', 'show_identity', validator=validate_app_exists_in_rg)
-        g.custom_command('identity remove', 'remove_identity', validator=validate_app_exists_in_rg)
+        g.custom_command('identity assign', 'assign_identity', validator=validate_app_or_slot_exists_in_rg)
+        g.custom_show_command('identity show', 'show_identity', validator=validate_app_or_slot_exists_in_rg)
+        g.custom_command('identity remove', 'remove_identity', validator=validate_app_or_slot_exists_in_rg)
         g.custom_command('create-remote-connection', 'create_tunnel', exception_handler=ex_handler_factory())
         g.generic_update_command('update', getter_name='get_webapp', setter_name='set_webapp', custom_func_name='update_webapp', command_type=appservice_custom)
 
@@ -132,11 +132,11 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_container_settings')
 
     with self.command_group('webapp config ssl') as g:
-        g.custom_command('upload', 'upload_ssl_cert', exception_handler=ex_handler_factory())
-        g.custom_command('list', 'list_ssl_certs')
-        g.custom_command('bind', 'bind_ssl_cert', exception_handler=ex_handler_factory())
-        g.custom_command('unbind', 'unbind_ssl_cert')
-        g.custom_command('delete', 'delete_ssl_cert')
+        g.custom_command('upload', 'upload_ssl_cert', validator=validate_app_exists_in_rg)
+        g.custom_command('list', 'list_ssl_certs', exception_handler=ex_handler_factory())
+        g.custom_command('bind', 'bind_ssl_cert', exception_handler=ex_handler_factory(), validator=validate_app_or_slot_exists_in_rg)
+        g.custom_command('unbind', 'unbind_ssl_cert', validator=validate_app_or_slot_exists_in_rg)
+        g.custom_command('delete', 'delete_ssl_cert', exception_handler=ex_handler_factory())
 
     with self.command_group('webapp config backup') as g:
         g.custom_command('list', 'list_backups')

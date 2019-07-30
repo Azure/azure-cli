@@ -175,6 +175,7 @@ class LiveScenarioTest(IntegrationTestBase, CheckerMixin, unittest.TestCase):
         super(LiveScenarioTest, self).__init__(method_name)
         self.cli_ctx = get_dummy_cli()
         self.kwargs = {}
+        self.test_resources_count = 0
 
     def cmd(self, command, checks=None, expect_failure=False):
         command = self._apply_kwargs(command)

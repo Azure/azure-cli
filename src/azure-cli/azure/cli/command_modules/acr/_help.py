@@ -293,15 +293,6 @@ type: group
 short-summary: Manage Azure Container Registry Tasks that use Cloud Native Buildpacks.
 """
 
-helps['acr pack build'] = """
-type: command
-short-summary: Queues a quick build task that builds an app and pushes it into an Azure Container Registry.
-examples:
-  - name: Queue a build for the current directory with the default Oryx-based buildpack.
-    text: >
-        az acr pack build -r MyRegistry -t {{.Run.Registry}}/node-app:{{.Run.ID}} .
-"""
-
 helps['acr replication'] = """
 type: group
 short-summary: Manage geo-replicated regions of Azure Container Registries.
@@ -471,9 +462,9 @@ helps['acr pack build'] = """
 type: command
 short-summary: Queues a quick build task that builds an app and pushes it into an Azure Container Registry.
 examples:
-  - name: Queue a build for the current directory with the default Oryx-based buildpack.
-    text: az acr pack build -r MyRegistry -t {{.Run.Registry}}/node-app:{{.Run.ID}} .
-  - name: Queue a build for the given GitHub repository with Heroku's buildpacks.
+  - name: Queue a build for the current directory with the CloudFoundry builder.
+    text: az acr pack build -r MyRegistry -t {{.Run.Registry}}/node-app:{{.Run.ID}} --builder cloudfoundry/cnb:bionic .
+  - name: Queue a build for the given GitHub repository with the Heroku builder.
     text: az acr pack build -r MyRegistry -t {{.Run.Registry}}/node-app:{{.Run.ID}} --pull --builder heroku/buildpacks:18 https://github.com/Azure-Samples/nodejs-docs-hello-world.git
 """
 
@@ -796,9 +787,15 @@ helps['acr task run'] = """
 type: command
 short-summary: Manually trigger a task that might otherwise be waiting for git commits or base image update triggers.
 examples:
-  - name: Trigger a task.
+  - name: Trigger a task run.
     text: >
         az acr task run -n MyTask -r MyRegistry
+  - name: Trigger a task run by overriding the context and file passed during Task create.
+    text: >
+        az acr task run -n MyTask -r MyRegistry -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile
+  - name: Trigger a task run by adding or overriding build arguments set during Task create.
+    text: |
+        az acr task run -n MyTask -r MyRegistry --arg DOCKER_CLI_BASE_IMAGE=docker:18.03.0-ce-git
 """
 
 helps['acr task show'] = """

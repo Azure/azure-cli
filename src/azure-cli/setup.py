@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.0.68"
+VERSION = "2.0.69"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -65,6 +65,7 @@ DEPENDENCIES = [
     'azure-keyvault~=1.1',
     'azure-mgmt-advisor>=2.0.1,<3.0.0',
     'azure-mgmt-applicationinsights~=0.1.1',
+    'azure-mgmt-appconfiguration>=0.1.0',
     'azure-mgmt-authorization~=0.52.0',
     'azure-mgmt-batch~=6.0',
     'azure-mgmt-batchai~=2.0',
@@ -72,10 +73,10 @@ DEPENDENCIES = [
     'azure-mgmt-botservice~=0.2.0',
     'azure-mgmt-cdn~=3.1',
     'azure-mgmt-cognitiveservices~=3.0',
-    'azure-mgmt-compute~=5.0',
+    'azure-mgmt-compute~=6.0',
     'azure-mgmt-consumption~=2.0',
     'azure-mgmt-containerinstance~=1.4',
-    'azure-mgmt-containerregistry~=3.0.0rc2',
+    'azure-mgmt-containerregistry~=3.0.0rc4',
     'azure-mgmt-containerservice~=5.2',
     'azure-mgmt-cosmosdb~=0.6.1',
     'azure-mgmt-datalake-analytics~=0.2.1',
@@ -94,7 +95,7 @@ DEPENDENCIES = [
     'azure-mgmt-keyvault~=1.1',
     'azure-mgmt-kusto~=0.3.0',
     'azure-mgmt-loganalytics~=0.2',
-    'azure-mgmt-managedservices~=0.1',
+    'azure-mgmt-managedservices~=1.0',
     'azure-mgmt-managementgroups~=0.1',
     'azure-mgmt-maps~=0.1.0',
     'azure-mgmt-marketplaceordering~=0.1',
@@ -102,7 +103,7 @@ DEPENDENCIES = [
     'azure-mgmt-monitor~=0.5.2',
     'azure-mgmt-msi~=0.2',
     'azure-mgmt-network~=3.0',
-    'azure-mgmt-netapp~=0.4.0',
+    'azure-mgmt-netapp~=0.5.0',
     'azure-mgmt-policyinsights~=0.3.1',
     'azure-mgmt-privatedns~=0.1.0',
     'azure-mgmt-rdbms~=1.8',
@@ -131,7 +132,7 @@ DEPENDENCIES = [
     'knack~=0.6,>=0.6.3',
     'mock~=2.0',
     'paramiko>=2.0.8,<3.0.0',
-    'prompt_toolkit~=1.0,>=1.0.15',
+    'prompt_toolkit~=2.0',
     'pydocumentdb>=2.0.1,<3.0.0',
     'pygments~=2.4',
     'pyOpenSSL>=17.1.0',
@@ -146,6 +147,8 @@ DEPENDENCIES = [
     'vsts-cd-manager~=1.0.0,>=1.0.2',
     'websocket-client~=0.56.0',
     'xmltodict~=0.12',
+    'javaproperties==0.5.1',
+    'jsondiff==1.2.0'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:

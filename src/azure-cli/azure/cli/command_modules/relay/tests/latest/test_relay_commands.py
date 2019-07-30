@@ -207,7 +207,7 @@ class RelayNamespaceCURDScenarioTest(ScenarioTest):
 
         # Create WCFRelay
         self.cmd(
-            'relay wcfrelay create --resource-group {rg} --namespace-name {namespacename} --name {wcfrelayname} --relay-type {relaytype}',
+            'relay wcfrelay create --resource-group {rg} --namespace-name {namespacename} --name {wcfrelayname} --relay-type {relaytype} --requires-transport-security false --requires-client-authorization false',
             checks=[self.check('name', self.kwargs['wcfrelayname'])])
 
         # Get WCFRelay

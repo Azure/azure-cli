@@ -9,7 +9,9 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_key_value_pairs
 from azure.cli.core.profiles import ResourceType, get_sdk
 
-from azure.cli.command_modules.storage._client_factory import get_storage_data_service_client, blob_data_service_factory
+from azure.cli.command_modules.storage._client_factory import (get_storage_data_service_client,
+                                                               blob_data_service_factory,
+                                                               file_data_service_factory)
 from azure.cli.command_modules.storage.util import glob_files_locally, guess_content_type
 from azure.cli.command_modules.storage.sdkutil import get_table_data_type
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url
@@ -349,9 +351,10 @@ def get_content_setting_validator(settings_class, update, guess_from_file=None):
         if update and _class_name(settings_class) == _class_name(t_file_content_settings):
             get_file_path_validator()(namespace)
         ns = vars(namespace)
+        clear_content_settings = ns.pop('clear_content_settings', False)
 
         # retrieve the existing object properties for an update
-        if update:
+        if update and not clear_content_settings:
             account = ns.get('account_name')
             key = ns.get('account_key')
             cs = ns.get('connection_string')
@@ -386,10 +389,11 @@ def get_content_setting_validator(settings_class, update, guess_from_file=None):
 
         # if update, fill in any None values with existing
         if update:
-            for attr in ['content_type', 'content_disposition', 'content_encoding', 'content_language', 'content_md5',
-                         'cache_control']:
-                if getattr(new_props, attr) is None:
-                    setattr(new_props, attr, getattr(props, attr))
+            if not clear_content_settings:
+                for attr in ['content_type', 'content_disposition', 'content_encoding', 'content_language',
+                             'content_md5', 'cache_control']:
+                    if getattr(new_props, attr) is None:
+                        setattr(new_props, attr, getattr(props, attr))
         else:
             if guess_from_file:
                 new_props = guess_content_type(ns[guess_from_file], new_props, settings_class)
@@ -1043,6 +1047,50 @@ def validate_azcopy_upload_destination_url(cmd, namespace):
     namespace.destination = url
     del namespace.destination_container
     del namespace.destination_path
+
+
+def validate_azcopy_remove_arguments(cmd, namespace):
+    usage_string = \
+        'Invalid usage: {}. Supply only one of the following argument sets to specify source:' \
+        '\n\t   --container-name  --name' \
+        '\n\tOR --share-name --path'
+
+    ns = vars(namespace)
+
+    # source as blob
+    container = ns.pop('container_name', None)
+    blob = ns.pop('blob_name', None)
+
+    # source as file
+    share = ns.pop('share_name', None)
+    path = ns.pop('path', None)
+
+    # ensure either a file or blob source is specified
+    valid_blob = container and blob and not share and not path
+    valid_file = share and path and not container and not blob
+
+    if not valid_blob and not valid_file:
+        raise ValueError(usage_string.format('Neither a valid blob or file source is specified'))
+    if valid_blob and valid_file:
+        raise ValueError(usage_string.format('Ambiguous parameters, both blob and file sources are '
+                                             'specified'))
+    if valid_blob:
+        client = blob_data_service_factory(cmd.cli_ctx, {
+            'account_name': namespace.account_name})
+        url = client.make_blob_url(container, blob)
+        namespace.service = 'blob'
+        namespace.target = url
+
+    if valid_file:
+        import os
+        client = file_data_service_factory(cmd.cli_ctx, {
+            'account_name': namespace.account_name,
+            'account_key': namespace.account_key})
+        dir_name, file_name = os.path.split(path) if path else (None, '')
+        dir_name = None if dir_name in ('', '.') else dir_name
+        url = client.make_file_url(share, dir_name, file_name)
+        namespace.service = 'file'
+        namespace.target = url
 
 
 def as_user_validator(namespace):

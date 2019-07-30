@@ -13,9 +13,10 @@ from ._utils import (
     validate_managed_registry,
     get_validate_platform,
     get_custom_registry_credentials,
-    get_yaml_and_values,
+    get_yaml_template,
     build_timers_info,
-    remove_timer_trigger
+    remove_timer_trigger,
+    get_task_id_from_task_name
 )
 from ._stream_utils import stream_logs
 
@@ -62,6 +63,8 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     base_image_trigger_name='defaultBaseimageTriggerName',
                     base_image_trigger_enabled=True,
                     base_image_trigger_type='Runtime',
+                    update_trigger_endpoint=None,
+                    update_trigger_payload_type='Default',
                     resource_group_name=None,
                     assign_identity=None,
                     target=None,
@@ -144,7 +147,9 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
         base_image_trigger = BaseImageTrigger(
             base_image_trigger_type=base_image_trigger_type,
             status=TriggerStatus.enabled.value if base_image_trigger_enabled else TriggerStatus.disabled.value,
-            name=base_image_trigger_name
+            name=base_image_trigger_name,
+            update_trigger_endpoint=update_trigger_endpoint,
+            update_trigger_payload_type=update_trigger_payload_type
         )
 
     platform_os, platform_arch, platform_variant = get_validate_platform(cmd, platform)
@@ -231,15 +236,13 @@ def create_task_step(context_path,
         else:
             raise CLIError("missing --file/-f argument")
     else:
-        yaml_template, values_content = get_yaml_and_values(
+        yaml_template = get_yaml_template(
             cmd_value, timeout, file)
         import base64
         EncodedTaskStep = cmd.get_models('EncodedTaskStep')
         step = EncodedTaskStep(
             encoded_task_content=base64.b64encode(
                 yaml_template.encode()).decode(),
-            encoded_values_content=base64.b64encode(
-                values_content.encode()).decode(),
             context_path=context_path,
             context_access_token=git_access_token,
             values=(set_value if set_value else []) + (set_secret if set_secret else [])
@@ -306,6 +309,8 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
                     set_secret=None,
                     base_image_trigger_enabled=None,
                     base_image_trigger_type=None,
+                    update_trigger_endpoint=None,
+                    update_trigger_payload_type=None,
                     target=None,
                     auth_mode=None):
     _, resource_group_name = validate_managed_registry(
@@ -413,7 +418,9 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
             base_image_trigger_update_params = BaseImageTriggerUpdateParameters(
                 base_image_trigger_type=base_image_trigger_type,
                 status=base_image_status,
-                name=base_image_trigger.name if base_image_trigger else "defaultBaseimageTriggerName"
+                name=base_image_trigger.name if base_image_trigger else "defaultBaseimageTriggerName",
+                update_trigger_endpoint=update_trigger_endpoint,
+                update_trigger_payload_type=update_trigger_payload_type
             )
 
     platform_os, platform_arch, platform_variant = None, None, None
@@ -744,12 +751,18 @@ def acr_task_update_run(cmd,
                          is_archive_enabled=is_archive_enabled)
 
 
-def acr_task_run(cmd,
+def acr_task_run(cmd,  # pylint: disable=too-many-locals
                  client,  # cf_acr_runs
                  task_name,
                  registry_name,
                  set_value=None,
                  set_secret=None,
+                 file=None,
+                 context_path=None,
+                 arg=None,
+                 secret_arg=None,
+                 target=None,
+                 update_trigger_token=None,
                  no_logs=False,
                  no_wait=False,
                  resource_group_name=None):
@@ -758,15 +771,28 @@ def acr_task_run(cmd,
 
     from ._client_factory import cf_acr_registries_tasks
     client_registries = cf_acr_registries_tasks(cmd.cli_ctx)
-    TaskRunRequest = cmd.get_models('TaskRunRequest')
+    TaskRunRequest, OverrideTaskStepProperties = cmd.get_models('TaskRunRequest', 'OverrideTaskStepProperties')
 
+    import base64
+    if update_trigger_token:
+        update_trigger_token = base64.b64encode(update_trigger_token.encode()).decode()
+
+    task_id = get_task_id_from_task_name(cmd.cli_ctx, resource_group_name, registry_name, task_name)
+    override_task_step_properties = OverrideTaskStepProperties(
+        context_path=context_path,
+        file=file,
+        arguments=(arg if arg else []) + (secret_arg if secret_arg else []),
+        target=target,
+        values=(set_value if set_value else []) + (set_secret if set_secret else []),
+        update_trigger_token=update_trigger_token
+    )
     queued_run = LongRunningOperation(cmd.cli_ctx)(
         client_registries.schedule_run(
             resource_group_name,
             registry_name,
             TaskRunRequest(
-                task_name=task_name,
-                values=(set_value if set_value else []) + (set_secret if set_secret else [])
+                task_id=task_id,
+                override_task_step_properties=override_task_step_properties
             )
         )
     )

@@ -29,7 +29,7 @@ from azure.cli.core.util import get_file_json, shell_safe_json_parse
 from azure.graphrbac.models import (ApplicationCreateParameters, ApplicationUpdateParameters, AppRole,
                                     PasswordCredential, KeyCredential, UserCreateParameters, PasswordProfile,
                                     ServicePrincipalCreateParameters, RequiredResourceAccess, ResourceAccess,
-                                    GroupCreateParameters, CheckGroupMembershipParameters)
+                                    GroupCreateParameters, CheckGroupMembershipParameters, UserUpdateParameters)
 
 from ._client_factory import _auth_client_factory, _graph_client_factory
 from ._multi_api_adaptor import MultiAPIAdaptor
@@ -44,7 +44,7 @@ def list_role_definitions(cmd, name=None, resource_group_name=None, scope=None,
     definitions_client = _auth_client_factory(cmd.cli_ctx, scope).role_definitions
     scope = _build_role_scope(resource_group_name, scope,
                               definitions_client.config.subscription_id)
-    return _search_role_definitions(cmd.cli_ctx, definitions_client, name, scope, custom_role_only)
+    return _search_role_definitions(cmd.cli_ctx, definitions_client, name, [scope], custom_role_only)
 
 
 def create_role_definition(cmd, role_definition):
@@ -76,14 +76,14 @@ def _create_update_role_definition(cmd, role_definition, for_update):
             logger.warning('Role "id" is missing. Look for the role in the current subscription...')
         definitions_client = _auth_client_factory(cmd.cli_ctx, scope=role_resource_id).role_definitions
         scopes_in_definition = role_definition.get('assignableScopes', None)
-        scope = (scopes_in_definition[0] if scopes_in_definition else
-                 '/subscriptions/' + definitions_client.config.subscription_id)
+        scopes = (scopes_in_definition if scopes_in_definition else
+                  ['/subscriptions/' + definitions_client.config.subscription_id])
         if role_resource_id:
             from msrestazure.tools import parse_resource_id
             role_id = parse_resource_id(role_resource_id)['name']
             role_name = role_definition['roleName']
         else:
-            matched = _search_role_definitions(cmd.cli_ctx, definitions_client, role_definition['name'], scope)
+            matched = _search_role_definitions(cmd.cli_ctx, definitions_client, role_definition['name'], scopes)
             if len(matched) > 1:
                 raise CLIError('More than 2 definitions are found with the name of "{}"'.format(
                     role_definition['name']))
@@ -109,19 +109,22 @@ def delete_role_definition(cmd, name, resource_group_name=None, scope=None,
     definitions_client = _auth_client_factory(cmd.cli_ctx, scope).role_definitions
     scope = _build_role_scope(resource_group_name, scope,
                               definitions_client.config.subscription_id)
-    roles = _search_role_definitions(cmd.cli_ctx, definitions_client, name, scope, custom_role_only)
+    roles = _search_role_definitions(cmd.cli_ctx, definitions_client, name, [scope], custom_role_only)
     for r in roles:
         definitions_client.delete(role_definition_id=r.name, scope=scope)
 
 
-def _search_role_definitions(cli_ctx, definitions_client, name, scope, custom_role_only=False):
-    roles = list(definitions_client.list(scope))
-    worker = MultiAPIAdaptor(cli_ctx)
-    if name:
-        roles = [r for r in roles if r.name == name or worker.get_role_property(r, 'role_name') == name]
-    if custom_role_only:
-        roles = [r for r in roles if worker.get_role_property(r, 'role_type') == 'CustomRole']
-    return roles
+def _search_role_definitions(cli_ctx, definitions_client, name, scopes, custom_role_only=False):
+    for scope in scopes:
+        roles = list(definitions_client.list(scope))
+        worker = MultiAPIAdaptor(cli_ctx)
+        if name:
+            roles = [r for r in roles if r.name == name or worker.get_role_property(r, 'role_name') == name]
+        if custom_role_only:
+            roles = [r for r in roles if worker.get_role_property(r, 'role_type') == 'CustomRole']
+        if roles:
+            return roles
+    return []
 
 
 def create_role_assignment(cmd, role, assignee=None, assignee_object_id=None, resource_group_name=None,
@@ -623,6 +626,18 @@ def create_user(client, user_principal_name, display_name, password,
     return client.create(param)
 
 
+def update_user(client, upn_or_object_id, display_name=None, force_change_password_next_login=None, password=None,
+                account_enabled=None, mail_nickname=None):
+    password_profile = None
+    if force_change_password_next_login is not None or password is not None:
+        password_profile = PasswordProfile(password=password,
+                                           force_change_password_next_login=force_change_password_next_login)
+
+    update_parameters = UserUpdateParameters(display_name=display_name, password_profile=password_profile,
+                                             account_enabled=account_enabled, mail_nickname=mail_nickname)
+    return client.update(upn_or_object_id=upn_or_object_id, parameters=update_parameters)
+
+
 def get_user_member_groups(cmd, upn_or_object_id, security_enabled_only=False):
     graph_client = _graph_client_factory(cmd.cli_ctx)
     if not _is_guid(upn_or_object_id):
@@ -951,10 +966,14 @@ def update_application(instance, display_name=None, homepage=None,  # pylint: di
     if app_roles:
         app_patch_param.app_roles = _build_app_roles(app_roles)
 
-    app_patch_param.available_to_other_tenants = available_to_other_tenants
-    app_patch_param.oauth2_allow_implicit_flow = oauth2_allow_implicit_flow
-    app_patch_param.identifier_uris = identifier_uris
-    app_patch_param.reply_urls = reply_urls
+    if available_to_other_tenants is not None:
+        app_patch_param.available_to_other_tenants = available_to_other_tenants
+    if oauth2_allow_implicit_flow is not None:
+        app_patch_param.oauth2_allow_implicit_flow = oauth2_allow_implicit_flow
+    if identifier_uris is not None:
+        app_patch_param.identifier_uris = identifier_uris
+    if reply_urls is not None:
+        app_patch_param.reply_urls = reply_urls
 
     return app_patch_param
 
@@ -1310,6 +1329,7 @@ def create_service_principal_for_rbac(
     # retry while server replication is done
     if not skip_assignment:
         for scope in scopes:
+            logger.warning('Creating a role assignment under the scope of "%s"', scope)
             for l in range(0, _RETRY_TIMES):
                 try:
                     _create_role_assignment(cmd.cli_ctx, role, sp_oid, None, scope, resolve_assignee=False)
@@ -1317,17 +1337,17 @@ def create_service_principal_for_rbac(
                 except Exception as ex:
                     if l < _RETRY_TIMES and ' does not exist in the directory ' in str(ex):
                         time.sleep(5)
-                        logger.warning('Retrying role assignment creation: %s/%s', l + 1,
+                        logger.warning('  Retrying role assignment creation: %s/%s', l + 1,
                                        _RETRY_TIMES)
                         continue
                     elif _error_caused_by_role_assignment_exists(ex):
-                        logger.warning('Role assignment already exits.\n')
+                        logger.warning('  Role assignment already exits.\n')
                         break
                     else:
                         # dump out history for diagnoses
-                        logger.warning('Role assignment creation failed.\n')
+                        logger.warning('  Role assignment creation failed.\n')
                         if getattr(ex, 'response', None) is not None:
-                            logger.warning('role assignment response headers: %s\n',
+                            logger.warning('  role assignment response headers: %s\n',
                                            ex.response.headers)  # pylint: disable=no-member
                     raise
 

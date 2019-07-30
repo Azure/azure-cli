@@ -1588,6 +1588,16 @@ class VMDiskAttachDetachTest(ScenarioTest):
             self.check('diskMbpsReadWrite', 10)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli-test-std_zrs', location='eastus2')
+    def test_vm_disk_create_with_standard_zrs_sku(self, resource_group):
+        self.kwargs.update({
+            'disk1': 'd1',
+            'snapshot1': 's1'
+        })
+        self.cmd('disk create -g {rg} -n {disk1} --size-gb 4')
+        self.cmd('snapshot create -g {rg} -n {snapshot1} --source {disk1} --sku Standard_ZRS',
+                 checks=self.check('sku.name', 'Standard_ZRS'))
+
     @ResourceGroupPreparer(name_prefix='cli-test-ultrassd', location='eastus2')
     def test_vmss_ultra_ssd_storage_sku(self, resource_group):
 
@@ -3181,9 +3191,8 @@ class VMGalleryImage(ScenarioTest):
 
 # endregion
 
+
 # region ppg tests
-
-
 class ProximityPlacementGroupScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix="cli_test_ppg_cmds_")
@@ -3264,6 +3273,99 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
                 self.assertTrue(parsed_2[k2].startswith(rg_prefix))
             else:
                 self.assertEqual(parsed_1[k1], parsed_2[k2])
+# endregion
+
+
+# region dedicated host tests
+class DedicatedHostScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_dedicated_host_', location='westeurope')
+    def test_dedicated_host_e2e(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'host-group': 'my-host-group',
+            'host-name': 'my-host',
+            'vm-name': 'ded-host-vm'
+        })
+
+        # create resources
+        self.cmd('vm host group create -n {host-group} -c 3 -g {rg} --tags "foo=bar"', checks=[
+            self.check('name', '{host-group}'),
+            self.check('location', '{loc}'),
+            self.check('platformFaultDomainCount', 3),
+            self.check('tags.foo', 'bar')
+        ])
+
+        self.cmd('vm host create -n {host-name} --host-group {host-group} -d 2 -g {rg} '
+                 '--sku DSv3-Type1 --auto-replace false --tags "bar=baz" ', checks=[
+                     self.check('name', '{host-name}'),
+                     self.check('location', '{loc}'),
+                     self.check('platformFaultDomain', 2),
+                     self.check('sku.name', 'DSv3-Type1'),
+                     self.check('autoReplaceOnFailure', False),
+                     self.check('tags.bar', 'baz')
+                 ])
+
+        self.cmd('vm create -n {vm-name} --image debian -g {rg} --size Standard_D4s_v3 '
+                 ' --host-group {host-group} --host {host-name} --generate-ssh-keys')
+
+        # validate resources created successfully
+        vm_json = self.cmd('vm show -n {vm-name} -g {rg}', checks=[
+            self.check('name', '{vm-name}'),
+            self.check('provisioningState', 'Succeeded')
+        ]).get_output_in_json()
+
+        host_json = self.cmd('vm host show --name {host-name} --host-group {host-group} -g {rg}', checks=[
+            self.check('name', '{host-name}'),
+        ]).get_output_in_json()
+
+        host_group_json = self.cmd('vm host group show --name {host-group} -g {rg}', checks=[
+            self.check('name', '{host-group}'),
+        ]).get_output_in_json()
+
+        self.assertTrue(vm_json['host']['id'].lower(), host_json['id'].lower())
+        self.assertTrue(host_json['virtualMachines'][0]['id'].lower(), vm_json['id'].lower())
+        self.assertTrue(host_group_json['hosts'][0]['id'].lower(), host_json['id'].lower())
+
+        # delete resources (test vm host delete commands)
+        self.cmd('vm delete --name {vm-name} -g {rg} --yes')
+        self.cmd('vm host delete --name {host-name} --host-group {host-group} -g {rg} --yes')
+        self.cmd('vm host group delete --name {host-group} -g {rg} --yes')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_dedicated_host_', location='westeurope')
+    def test_dedicated_host_get_instance_view(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'host-group': 'my-host-group',
+            'host-name': 'my-host',
+            'vm-name': 'ded-host-vm'
+        })
+
+        # create resources
+        self.cmd('vm host group create -n {host-group} -c 3 -g {rg} --tags "foo=bar"', checks=[
+            self.check('name', '{host-group}'),
+            self.check('location', '{loc}'),
+            self.check('platformFaultDomainCount', 3),
+            self.check('tags.foo', 'bar')
+        ])
+
+        self.cmd('vm host create -n {host-name} --host-group {host-group} -d 2 -g {rg} '
+                 '--sku DSv3-Type1 --auto-replace false --tags "bar=baz" ', checks=[
+                     self.check('name', '{host-name}'),
+                     self.check('location', '{loc}'),
+                     self.check('platformFaultDomain', 2),
+                     self.check('sku.name', 'DSv3-Type1'),
+                     self.check('autoReplaceOnFailure', False),
+                     self.check('tags.bar', 'baz')
+                 ])
+
+        result = self.cmd('vm host get-instance-view --host-group {host-group} --name {host-name} -g {rg}', checks=[
+            self.check('name', '{host-name}'),
+        ]).get_output_in_json()
+
+        instance_view = result["instanceView"]
+        self.assertTrue(instance_view["assetId"])
+        self.assertTrue(instance_view["availableCapacity"])
 # endregion
 
 

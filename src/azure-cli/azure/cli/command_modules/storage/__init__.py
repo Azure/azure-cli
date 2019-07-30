@@ -52,6 +52,7 @@ class StorageArgumentContext(AzArgumentContext):
 
     def register_content_settings_argument(self, settings_class, update, arg_group=None, guess_from_file=None):
         from azure.cli.command_modules.storage._validators import get_content_setting_validator
+        from azure.cli.core.commands.parameters import get_three_state_flag
 
         self.ignore('content_settings')
         self.extra('content_type', default=None, help='The content MIME type.', arg_group=arg_group,
@@ -63,6 +64,13 @@ class StorageArgumentContext(AzArgumentContext):
                         'used to attach additional metadata.')
         self.extra('content_cache_control', default=None, help='The cache control string.', arg_group=arg_group)
         self.extra('content_md5', default=None, help='The content\'s MD5 hash.', arg_group=arg_group)
+        if update:
+            self.extra('clear_content_settings', help='If this flag is set, then if any one or more of the '
+                       'following properties (--content-cache-control, --content-disposition, --content-encoding, '
+                       '--content-language, --content-md5, --content-type) is set, then all of these properties are '
+                       'set together. If a value is not provided for a given property when at least one of the '
+                       'properties listed below is set, then that property will be cleared.',
+                       arg_type=get_three_state_flag())
 
     def register_path_argument(self, default_file_param=None, options_list=None):
         from ._validators import get_file_path_validator
@@ -168,10 +176,10 @@ class StorageCommandGroup(AzCommandGroup):
                 message = """
 You do not have the required permissions needed to perform this operation.
 Depending on your operation, you may need to be assigned one of the following roles:
-    "Storage Blob Data Contributor (Preview)"
-    "Storage Blob Data Reader (Preview)"
-    "Storage Queue Data Contributor (Preview)"
-    "Storage Queue Data Reader (Preview)"
+    "Storage Blob Data Contributor"
+    "Storage Blob Data Reader"
+    "Storage Queue Data Contributor"
+    "Storage Queue Data Reader"
 
 If you want to use the old authentication method and allow querying for the right account key, please use the "--auth-mode" parameter and "key" value.
                 """

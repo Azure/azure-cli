@@ -33,6 +33,11 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         client_factory=cloud_storage_account_service_factory
     )
 
+    block_blob_sdk = CliCommandType(
+        operations_tmpl='azure.multiapi.storage.blob.blockblobservice#BlockBlobService.{}',
+        client_factory=blob_data_service_factory,
+        resource_type=ResourceType.DATA_STORAGE)
+
     def get_custom_sdk(custom_module, client_factory, resource_type=ResourceType.DATA_STORAGE):
         """Returns a CliCommandType instance with specified operation template based on the given custom module name.
         This is useful when the command is not defined in the default 'custom' module but instead in a module under
@@ -42,6 +47,10 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
             client_factory=client_factory,
             resource_type=resource_type
         )
+
+    with self.command_group('storage', command_type=block_blob_sdk,
+                            custom_command_type=get_custom_sdk('azcopy', blob_data_service_factory)) as g:
+        g.storage_custom_command_oauth('remove', 'storage_remove')
 
     with self.command_group('storage account', storage_account_sdk, resource_type=ResourceType.MGMT_STORAGE,
                             custom_command_type=storage_account_custom_type) as g:
@@ -101,11 +110,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command('show', 'get_metrics',
                           table_transformer=transform_metrics_list_output,
                           exception_handler=show_exception_handler)
-
-    block_blob_sdk = CliCommandType(
-        operations_tmpl='azure.multiapi.storage.blob.blockblobservice#BlockBlobService.{}',
-        client_factory=blob_data_service_factory,
-        resource_type=ResourceType.DATA_STORAGE)
 
     base_blob_sdk = CliCommandType(
         operations_tmpl='azure.multiapi.storage.blob.baseblobservice#BaseBlobService.{}',
