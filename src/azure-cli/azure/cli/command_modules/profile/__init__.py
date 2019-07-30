@@ -12,6 +12,7 @@ import azure.cli.command_modules.profile._help  # pylint: disable=unused-import
 
 cloud_resource_types = ["oss-rdbms", "arm", "aad-graph", "ms-graph", "batch", "media", "data-lake"]
 
+
 class ProfileCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
