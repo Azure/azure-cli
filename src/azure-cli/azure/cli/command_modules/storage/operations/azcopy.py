@@ -29,11 +29,11 @@ def storage_copy(cmd, source=None,
         import os
         from azure.cli.command_modules.storage._validators import _query_account_key
         from azure.cli.command_modules.storage.azcopy.util import _generate_sas_token
-
+        storage_endpoint = cmd.cli_ctx.cloud.suffixes.storage_endpoint
         if source is not None:
             if "?" in source:  # sas token exists
                 return source
-            storage_pattern = re.compile(r'https://(.*?)\.(blob|dfs|file).core.windows.net')
+            storage_pattern = re.compile(r'https://(.*?)\.(blob|dfs|file).%s'%storage_endpoint)
             result = re.findall(storage_pattern, source)
             if result:   # source is URL
                 storage_info = result[0]
