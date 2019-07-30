@@ -799,6 +799,19 @@ examples:
                 "effect": "deny"
             }
         }'
+  - name: Create a policy definition with mode. The mode 'Indexed' indicates the policy should be evaluated only for resource types that support tags and location. 
+    text: |
+        az policy definition create --name TagsPolicyDefinition --subscription 'MySubscription' --mode Indexed --rules '{
+            "if":
+            {
+                "field": "tags",
+                "exists": "false"
+            },
+            "then":
+            {
+                "effect": "deny"
+            }
+        }'
 """
 
 helps['policy definition delete'] = """
