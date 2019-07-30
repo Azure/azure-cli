@@ -24,7 +24,7 @@ Release History
 **Profile**
 
 * Add optional parameter to specify replica SKU for create replica command.
-* Add get-access-token --resource-type enum for convenience of getting access tokens for well-known services.
+* Add get-access-token --resource-type enum for convenience of getting access tokens for well-known resources.
 
 **RDBMS**
 
