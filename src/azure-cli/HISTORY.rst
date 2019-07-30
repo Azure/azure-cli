@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**Policy**
+
+* Support for Policy new API version 2019-01-01
+
 **RBAC**
 
 * add "user update" command
