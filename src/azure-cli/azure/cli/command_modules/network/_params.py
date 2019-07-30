@@ -643,8 +643,16 @@ def load_arguments(self, _):
         c.argument('virtual_network_name', options_list='--vnet-name')
 
     with self.argument_context('network private-link-service connection') as c:
+        c.argument('service_name', service_name, id_part=None)
+        c.argument('pe_connection_name', help='Name of the private endpoint connection.', options_list=['--name', '-n'])
+        c.argument('action_required', help='A message indicating if changes on the service provider require any updates on the consumer.')
+        c.argument('description', help='The reason for approval/rejection of the connection.')
+        c.argument('connection_status', help='Indicates whether the connection has been Approved/Rejected/Removed by the owner of the service.', arg_type=get_enum_type(['Approved', 'Rejected', 'Removed']))
+
+    with self.argument_context('network private-link-service ip-configs') as c:
         c.argument('service_name', service_name)
-        c.argument('pe_connection_name', help='Name of the private endpoint connection.', id_part='child_name_1', options_list=['--name', '-n'])
+        c.argument('ip_config_name', help='Name of the ip configuration.', options_list=['--name', '-n'])
+        c.argument('virtual_network_name', id_part=None)
     # endregion
 
     # region LoadBalancers

@@ -2113,7 +2113,7 @@ def create_private_link_service(cmd, resource_group_name, service_name,
         cmd.get_models('FrontendIPConfiguration', 'PrivateLinkService', 'PrivateLinkServiceIpConfiguration',
                        'PublicIPAddress', 'Subnet')
     ip_config = PrivateLinkServiceIpConfiguration(
-        name='{}_ipconfig'.format(service_name),
+        name='{}_ipconfig_0'.format(service_name),
         private_ip_address=private_ip_address,
         private_ip_allocation_method=private_ip_allocation_method,
         private_ip_address_version=private_ip_address_version,
@@ -2122,7 +2122,7 @@ def create_private_link_service(cmd, resource_group_name, service_name,
     )
     link_service = PrivateLinkService(
         location=location,
-        load_balancer_frontend_ip_configurations=[
+        load_balancer_frontend_ip_configurations=frontend_ip_configurations and [
             FrontendIPConfiguration(id=ip_config) for ip_config in frontend_ip_configurations
         ],
         ip_configurations=[ip_config],
@@ -2135,15 +2135,12 @@ def create_private_link_service(cmd, resource_group_name, service_name,
 
 
 def update_private_link_service(instance, cmd, tags=None, frontend_ip_configurations=None, load_balancer_name=None,
-                                ip_configs=None, private_endpoint_connections=None, visibility=None,
-                                auto_approval=None, fqdns=None):
+                                visibility=None, auto_approval=None, fqdns=None):
     with cmd.update_context(instance) as c:
         c.set_param('tags', tags)
         c.set_param('load_balancer_frontend_ip_configurations', [
             FrontendIPConfiguration(id=ip_config) for ip_config in frontend_ip_configurations
         ])
-        c.set_param('ip_configurations', ip_configs) #TODO: Implement
-        c.set_param('private_endpoint_connections', private_endpoint_connections)
         c.set_param('visibility', visibility)
         c.set_param('auto_approval', auto_approval)
         c.set_param('fqdns', fqdns)
@@ -2171,6 +2168,44 @@ def update_private_endpoint_connection(cmd, resource_group_name, service_name, p
         private_link_service_connection_state=connection_state
     )
     return client.update_private_endpoint_connection(resource_group_name, service_name, pe_connection_name, private_endpoint_connection)
+
+def add_private_link_services_ipconfig(cmd, resource_group_name, service_name,
+                                       private_ip_address=None, private_ip_allocation_method=None,
+                                       private_ip_address_version=None,
+                                       subnet=None, virtual_network_name=None, public_ip_address=None):
+    client = network_client_factory(cmd.cli_ctx).private_link_services
+    PrivateLinkServiceIpConfiguration, PublicIPAddress, Subnet = cmd.get_models('PrivateLinkServiceIpConfiguration', 'PublicIPAddress', 'Subnet')
+    link_service = client.get(resource_group_name, service_name)
+    if link_service is None:
+        raise CLIError("Private link service should be existed. Please create it first.")
+    ip_name_index = len(link_service.ip_configurations)
+    ip_config = PrivateLinkServiceIpConfiguration(
+        name='{0}_ipconfig_{1}'.format(service_name, ip_name_index),
+        private_ip_address=private_ip_address,
+        private_ip_allocation_method=private_ip_allocation_method,
+        private_ip_address_version=private_ip_address_version,
+        subnet=subnet and Subnet(id=subnet),
+        public_ip_address=public_ip_address and PublicIPAddress(id=public_ip_address)
+    )
+    link_service.ip_configurations.append(ip_config)
+    return client.create_or_update(resource_group_name, service_name, link_service)
+
+def remove_private_link_services_ipconfig(cmd, resource_group_name, service_name, ip_config_name):
+    client = network_client_factory(cmd.cli_ctx).private_link_services
+    link_service = client.get(resource_group_name, service_name)
+    if link_service is None:
+        raise CLIError("Private link service should be existed. Please create it first.")
+    ip_config = None
+    for item in link_service.ip_configurations:
+        if item.name == ip_config_name:
+            ip_config = item
+            break
+    if ip_config is None:
+        logger.warning("{0} ip configuration doesn't exist".format(ip_config_name))
+        return link_service
+    else:
+        link_service.ip_configurations.remove(ip_config)
+        return client.create_or_update(resource_group_name, service_name, link_service)
 # endregion
 
 

@@ -84,7 +84,6 @@ class NetworkPrivateEndpoints(ScenarioTest):
 
         self.cmd('network private-endpoint list-types -l {location}')
 
-        self.cmd('network private-endpoint create')
         # unable to create resource so we can only verify the commands don't fail (or fail expectedly)
         self.cmd('network private-endpoint list')
         self.cmd('network private-endpoint list -g {rg}')
@@ -103,9 +102,19 @@ class NetworkPrivateLinkService(ScenarioTest):
         self.cmd('network private-endpoint list')
         self.cmd('network private-endpoint list -g {rg}')
 
-        # system code 3 for 'not found'
-        with self.assertRaisesRegexp(SystemExit, '3'):
-            self.cmd('network private-endpoint show -g {rg} -n dummy')
+        self.kwargs.update({
+            'lb': 'lb1',
+            'sku': 'standard',
+            'vnet': 'vnet1',
+            'subnet1': 'subnet1',
+            'subnet2': 'subnet2',
+            'location': 'eastus2',
+            'ip': 'pubip1',
+            'lks1': 'lks1',
+            'lks2': 'lks2'
+        })
+
+        self.cmd('network private-link-service create -g {rg} -n {lks1}')
 
 
 class NetworkLoadBalancerWithZone(ScenarioTest):
