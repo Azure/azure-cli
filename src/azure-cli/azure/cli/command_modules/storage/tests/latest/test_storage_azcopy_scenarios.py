@@ -11,7 +11,7 @@ from ..storage_test_util import StorageScenarioMixin, StorageTestFilesPreparer
 
 class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
 
-    test_resources_count = 0
+    #test_resources_count = 0
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     @StorageTestFilesPreparer()
