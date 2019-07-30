@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**Policy**
+
+* Support for Policy new API version 2019-01-01
+
 **keyvault**
 
 * Fix the bug in secret set command that igores the expires argument
