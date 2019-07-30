@@ -608,6 +608,10 @@ def load_command_table(self, _):
     with self.command_group('network private-link-service connection', network_private_link_service_sdk) as g:
         g.command('delete', 'delete_private_endpoint_connection')
         g.custom_command('update', 'update_private_endpoint_connection')
+
+    with self.command_group('network private-link-service ip-configs', network_private_link_service_sdk) as g:
+        g.custom_command('add', 'add_private_link_services_ipconfig')
+        g.custom_command('remove', 'remove_private_link_services_ipconfig')
     # endregion
 
     # region LoadBalancers

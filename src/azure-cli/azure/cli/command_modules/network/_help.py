@@ -3261,6 +3261,21 @@ type: command
 short-summary: Update a private link service endpoint connection.
 """
 
+helps['network private-link-service ip-configs'] = """
+type: group
+short-summary: Manage private link service ip configurations.
+"""
+
+helps['network private-link-service ip-configs add'] = """
+type: command
+short-summary: Add an ip configuration into a private link service.
+"""
+
+helps['network private-link-service ip-configs remove'] = """
+type: command
+short-summary: Remove an ip configuration from a private link service.
+"""
+
 helps['network profile'] = """
 type: group
 short-summary: Manage network profiles.
