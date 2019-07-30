@@ -218,6 +218,7 @@ class AppServiceLogTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_download_linux_web_log(self, resource_group):
         import zipfile
+
         webapp_name = self.create_random_name(prefix='webapp-linux-log', length=24)
         plan = self.create_random_name(prefix='linux-log', length=24)
         self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
@@ -563,49 +564,49 @@ class LinuxWebappScenarioTest(ScenarioTest):
         self.assertEqual(result2, [])
 
 
-# class LinuxWebappSSHScenarioTest(ScenarioTest):
-#    @ResourceGroupPreparer(location='japanwest')
-#    def test_linux_webapp_ssh(self, resource_group):
-#        runtime = 'node|8.11'
-#        plan = self.create_random_name(prefix='webapp-ssh-plan', length=24)
-#        webapp = self.create_random_name(prefix='webapp-ssh', length=24)
-#        self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan))
-#        self.cmd('webapp create -g {} -n {} --plan {} --runtime {}'.format(resource_group, webapp, plan, runtime))
-#        time.sleep(30)
-#        requests.get('http://{}.azurewebsites.net'.format(webapp), timeout=240)
-#        time.sleep(30)
-#        self.cmd('webapp ssh -g {} -n {} --timeout 5'.format(resource_group, webapp))
-#        time.sleep(30)
+class LinuxWebappSSHScenarioTest(ScenarioTest):
+   @ResourceGroupPreparer(location='japanwest')
+   def test_linux_webapp_ssh(self, resource_group):
+       runtime = 'node|8.11'
+       plan = self.create_random_name(prefix='webapp-ssh-plan', length=24)
+       webapp = self.create_random_name(prefix='webapp-ssh', length=24)
+       self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan))
+       self.cmd('webapp create -g {} -n {} --plan {} --runtime {}'.format(resource_group, webapp, plan, runtime))
+       time.sleep(30)
+       requests.get('http://{}.azurewebsites.net'.format(webapp), timeout=240)
+       time.sleep(30)
+       self.cmd('webapp ssh -g {} -n {} --timeout 5'.format(resource_group, webapp))
+       time.sleep(30)
 
 
 # takes too long to make a ASE, use a premade one
-# @live_only()
-# class LinuxASESSHScenarioTest(ScenarioTest):
-#    def test_linux_ASE_ssh(self):
-#        sub = '"Ranjith Linux Test Sub"'
-#        resource_group = 'cli-ase-ssh-test'
-#        ase = 'cli-ase-ssh-test'
-#        webapp = 'cli-ase-ssh-test'
-#        time.sleep(30)
-#        requests.get('http://{}.{}.p.azurewebsites.net/'.format(webapp, ase), timeout=240)
-#        time.sleep(30)
-#        self.cmd('webapp ssh -g {} -n {} --subscription {} --timeout 5'.format(resource_group, webapp, sub))
-#        time.sleep(30)
+@live_only()
+class LinuxASESSHScenarioTest(ScenarioTest):
+   def test_linux_ASE_ssh(self):
+       sub = '"Ranjith Linux Test Sub"'
+       resource_group = 'cli-ase-ssh-test'
+       ase = 'cli-ase-ssh-test'
+       webapp = 'cli-ase-ssh-test'
+       time.sleep(30)
+       requests.get('http://{}.{}.p.azurewebsites.net/'.format(webapp, ase), timeout=240)
+       time.sleep(30)
+       self.cmd('webapp ssh -g {} -n {} --subscription {} --timeout 5'.format(resource_group, webapp, sub))
+       time.sleep(30)
 
 
-# class LinuxWebappRemoteSSHScenarioTest(ScenarioTest):
-#    @ResourceGroupPreparer(location='japanwest')
-#    def test_linux_webapp_remote_ssh(self, resource_group):
-#        runtime = 'node|8.11'
-#        plan = self.create_random_name(prefix='webapp-remote-ssh-plan', length=40)
-#        webapp = self.create_random_name(prefix='webapp-remote-ssh', length=40)
-#        self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan))
-#        self.cmd('webapp create -g {} -n {} --plan {} --runtime {}'.format(resource_group, webapp, plan, runtime))
-#        time.sleep(30)
-#        requests.get('http://{}.azurewebsites.net'.format(webapp), timeout=240)
-#        time.sleep(30)
-#        self.cmd('webapp create-remote-connection -g {} -n {} --timeout 5'.format(resource_group, webapp))
-#        time.sleep(30)
+class LinuxWebappRemoteSSHScenarioTest(ScenarioTest):
+   @ResourceGroupPreparer(location='japanwest')
+   def test_linux_webapp_remote_ssh(self, resource_group):
+       runtime = 'node|8.11'
+       plan = self.create_random_name(prefix='webapp-remote-ssh-plan', length=40)
+       webapp = self.create_random_name(prefix='webapp-remote-ssh', length=40)
+       self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan))
+       self.cmd('webapp create -g {} -n {} --plan {} --runtime {}'.format(resource_group, webapp, plan, runtime))
+       time.sleep(30)
+       requests.get('http://{}.azurewebsites.net'.format(webapp), timeout=240)
+       time.sleep(30)
+       self.cmd('webapp create-remote-connection -g {} -n {} --timeout 5'.format(resource_group, webapp))
+       time.sleep(30)
 
 
 class LinuxWebappRemoteDebugScenarioTest(ScenarioTest):
