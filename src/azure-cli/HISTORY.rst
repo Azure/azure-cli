@@ -67,6 +67,10 @@ Release History
 * Fixed issue where `az functionapp create` does not accept Standard_RAGRS storage account type.
 * Fixed an issue where az webapp up would fail if run using older versions of python
 
+**Monitor**
+
+* `metrics alert create`: Allow '/' character in namespace name to support custom metrics.
+
 **Network**
 
 * network nic ip-config add: Fixes #9861 where --ids was inadvertently exposed but did not work.

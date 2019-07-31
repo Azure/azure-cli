@@ -45,6 +45,7 @@ class MetricAlertConditionValidator(MetricAlertConditionListener):
     # Exit a parse tree produced by MetricAlertConditionParser#namespace.
     def exitNamespace(self, ctx):
         self.parameters['metric_namespace'] = ctx.getText().strip()
+        print(self.parameters['metric_namespace'])
 
     # Exit a parse tree produced by MetricAlertConditionParser#metric.
     def exitMetric(self, ctx):
