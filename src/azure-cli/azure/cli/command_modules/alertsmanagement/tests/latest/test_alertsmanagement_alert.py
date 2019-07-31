@@ -5,6 +5,7 @@
 
 from azure.cli.testsdk import ScenarioTest, record_only
 
+
 class AzureAlertsManagementAlertScenarioTest(ScenarioTest):
 
     def test_alert_changestate(self):
