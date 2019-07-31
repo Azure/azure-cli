@@ -98,7 +98,14 @@ SEC_CERTIFICATE_URL_VALUE = "secCertificateUrlValue"
 os_dic = {'WindowsServer2012R2Datacenter': '2012-R2-Datacenter',
           'UbuntuServer1604': '16.04-LTS',
           'WindowsServer2016DatacenterwithContainers': '2016-Datacenter-with-Containers',
-          'WindowsServer2016Datacenter': '2016-Datacenter'}
+          'WindowsServer2016Datacenter': '2016-Datacenter',
+          'WindowsServer1709': "Datacenter-Core-1709-smalldisk",
+          'WindowsServer1709withContainers': "Datacenter-Core-1709-with-Containers-smalldisk",
+          'WindowsServer1803withContainers': "Datacenter-Core-1803-with-Containers-smalldisk",
+          'WindowsServer1809withContainers': "Datacenter-Core-1809-with-Containers-smalldisk",
+          'WindowsServer2019Datacenter': "2019-Datacenter",
+          'WindowsServer2019DatacenterwithContainers': "2019-Datacenter-Core-with-Containers"
+         }
 
 
 def list_cluster(client, resource_group_name=None):
@@ -1576,6 +1583,7 @@ def _create_self_signed_key_vault_certificate(cli_ctx, vault_base_url, certifica
 
     pem_output_folder = None
     if certificate_output_folder is not None:
+        os.makedirs(certificate_output_folder, exist_ok=True)
         pem_output_folder = os.path.join(
             certificate_output_folder, certificate_name + '.pem')
         pfx_output_folder = os.path.join(
@@ -1789,6 +1797,8 @@ def _set_parameters_for_default_template(cluster_location,
     parameters['durabilityLevel']['value'] = durability_level
     parameters['vmSku']['value'] = vm_sku
     parameters['vmImageSku']['value'] = os_type
+    if "Datacenter-Core-1709" in os_type:
+        parameters['vmImageOffer']['value'] = 'WindowsServerSemiAnnual'
     return parameters
 
 
@@ -1824,12 +1834,9 @@ def _set_parameters_for_customize_template(cmd,
         parameters[CERTIFICATE_THUMBPRINT]['value'] = result[2]
         output_file = result[3]
     else:
-        if SOURCE_VAULT_VALUE not in parameters and CERTIFICATE_THUMBPRINT not in parameters and CERTIFICATE_URL_VALUE not in parameters:
-            logger.info(
-                'Primary certificate parameters are not present in parameters file')
-        else:
-            raise CLIError('The primary certificate parameters names in the parameters file should be specified with' + '\'sourceVaultValue\',\'certificateThumbprint\',\'certificateUrlValue\',' +
-                           'if the secondary certificate parameters are specified in the parameters file, the parameters names should be specified with' + '\'secSourceVaultValue\',\'secCertificateThumbprint\',\'secCertificateUrlValue\'')
+        logger.info('Primary certificate parameters are not present in parameters file')
+        raise CLIError('The primary certificate parameters names in the parameters file should be specified with' + '\'sourceVaultValue\',\'certificateThumbprint\',\'certificateUrlValue\',' +
+                       'if the secondary certificate parameters are specified in the parameters file, the parameters names should be specified with' + '\'secSourceVaultValue\',\'secCertificateThumbprint\',\'secCertificateUrlValue\'')
 
     if SEC_SOURCE_VAULT_VALUE in parameters and SEC_CERTIFICATE_THUMBPRINT in parameters and SEC_CERTIFICATE_URL_VALUE in parameters:
         logger.info('Found secondary certificate parameters in parameters file')
