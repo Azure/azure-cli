@@ -6,7 +6,7 @@ def cf_alertsmanagement(cli_ctx, **_):
 
 
 def alerts_mgmt_client_factory(cli_ctx, kwargs):
-    return cf_alertsmanagement(cli_ctx, **kwargs).alerts 
+    return cf_alertsmanagement(cli_ctx, **kwargs).alerts
 
 
 def smart_groups_mgmt_client_factory(cli_ctx, kwargs):
@@ -14,5 +14,4 @@ def smart_groups_mgmt_client_factory(cli_ctx, kwargs):
 
 
 def action_rules_mgmt_client_factory(cli_ctx, kwargs):
-    client = cf_alertsmanagement(cli_ctx, **kwargs).action_rules
-    return client
+    return cf_alertsmanagement(cli_ctx, **kwargs).action_rules

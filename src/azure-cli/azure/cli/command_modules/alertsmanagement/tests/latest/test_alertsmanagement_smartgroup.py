@@ -5,7 +5,9 @@
 
 from azure.cli.testsdk import ScenarioTest, record_only
 
+
 class AzureAlertsManagementSmartGroupScenarioTest(ScenarioTest):
+
 
     def test_smartgroup_changestate(self):
         # Get latest smart group
