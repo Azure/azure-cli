@@ -21,7 +21,7 @@ You will likely also need to add the path to your JDK bin directory to your PATH
 
 1. Make updates to the `MetricAlertCondition.g4` grammar file.
 2. Test your changes by entering a condition expression in a file called `test.txt` and running `run_test.bat`. This will open a GUI where you can visually see how your expression will be parsed--useful in identifying problems with your grammar.
-3. Once you are happy with the grammar changes, run `build_python.bat` to update the generated Python classes.
+3. Once you are happy with the grammar changes, run `build_python.bat` to update the generated Python classes. Add the license header to the three generated files.
 4. Add a test to cover your new scenario.
 5. Update the `MetricAlertConditionValidator.py` file until your test passes.
 6. Clean up the unneeded Java files `del *.class *.java *.tokens *.interp test.txt`
