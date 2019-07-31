@@ -2,6 +2,11 @@
 
 Release History
 ===============
+
+**CognitiveServices**
+
+* add "cognitiveservices account network-rule" commands.
+
 2.0.70
 ++++++
 
