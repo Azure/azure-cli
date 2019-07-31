@@ -104,8 +104,7 @@ os_dic = {'WindowsServer2012R2Datacenter': '2012-R2-Datacenter',
           'WindowsServer1803withContainers': "Datacenter-Core-1803-with-Containers-smalldisk",
           'WindowsServer1809withContainers': "Datacenter-Core-1809-with-Containers-smalldisk",
           'WindowsServer2019Datacenter': "2019-Datacenter",
-          'WindowsServer2019DatacenterwithContainers': "2019-Datacenter-Core-with-Containers"
-         }
+          'WindowsServer2019DatacenterwithContainers': "2019-Datacenter-Core-with-Containers"}
 
 
 def list_cluster(client, resource_group_name=None):
