@@ -173,7 +173,7 @@ def remove_network_rule(cmd, client, resource_group_name, account_name, ip_addre
     sa = client.get_properties(resource_group_name, account_name)
     rules = sa.network_acls
     if rules is None:
-        rules = default_network_acls()
+        return
 
     if subnet:
         rules.virtual_network_rules = [x for x in rules.virtual_network_rules
