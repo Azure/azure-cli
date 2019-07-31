@@ -2101,12 +2101,11 @@ def list_private_endpoints(cmd, resource_group_name=None):
 
 
 # region PrivateLinkService
-def create_private_link_service(cmd, resource_group_name, service_name,
+def create_private_link_service(cmd, resource_group_name, service_name, subnet, frontend_ip_configurations,
                                 private_ip_address=None, private_ip_allocation_method=None,
                                 private_ip_address_version=None,
-                                subnet=None, virtual_network_name=None, public_ip_address=None,
-                                location=None, tags=None,
-                                load_balancer_name=None, frontend_ip_configurations=None,
+                                virtual_network_name=None, public_ip_address=None,
+                                location=None, tags=None, load_balancer_name=None,
                                 visibility=None, auto_approval=None, fqdns=None):
     client = network_client_factory(cmd.cli_ctx).private_link_services
     FrontendIPConfiguration, PrivateLinkService, PrivateLinkServiceIpConfiguration, PublicIPAddress, Subnet = \
@@ -2136,6 +2135,9 @@ def create_private_link_service(cmd, resource_group_name, service_name,
 
 def update_private_link_service(instance, cmd, tags=None, frontend_ip_configurations=None, load_balancer_name=None,
                                 visibility=None, auto_approval=None, fqdns=None):
+    FrontendIPConfiguration, PrivateLinkService, PrivateLinkServiceIpConfiguration, PublicIPAddress, Subnet = \
+        cmd.get_models('FrontendIPConfiguration', 'PrivateLinkService', 'PrivateLinkServiceIpConfiguration',
+                       'PublicIPAddress', 'Subnet')
     with cmd.update_context(instance) as c:
         c.set_param('tags', tags)
         c.set_param('load_balancer_frontend_ip_configurations', [
@@ -3801,7 +3803,8 @@ def create_subnet(cmd, resource_group_name, virtual_network_name, subnet_name,
 
 def update_subnet(cmd, instance, resource_group_name, address_prefix=None, network_security_group=None,
                   route_table=None, service_endpoints=None, delegations=None, nat_gateway=None,
-                  service_endpoint_policy=None):
+                  service_endpoint_policy=None, private_endpoint_network_policies=None,
+                  private_link_service_network_policies=None):
     NetworkSecurityGroup, ServiceEndpoint, SubResource = cmd.get_models(
         'NetworkSecurityGroup', 'ServiceEndpointPropertiesFormat', 'SubResource')
 
@@ -3840,6 +3843,12 @@ def update_subnet(cmd, instance, resource_group_name, address_prefix=None, netwo
 
     if delegations:
         instance.delegations = delegations
+
+    if private_endpoint_network_policies is not None:
+        instance.private_endpoint_network_policies = private_endpoint_network_policies
+
+    if private_link_service_network_policies is not None:
+        instance.private_link_service_network_policies = private_link_service_network_policies
 
     return instance
 
