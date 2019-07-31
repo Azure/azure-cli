@@ -99,7 +99,7 @@ def load_arguments(self, _):
         c.argument('container_name', options_list=['--container', '-n'], help="Container name")
         c.argument('partition_key_path', options_list=['--part'], help='Partition Key Path, e.g., \'/properties/name\'')
         c.argument('default_ttl', options_list=['--ttl'], type=int, help='Default TTL (https://docs.microsoft.com/en-us/azure/cosmos-db/time-to-live)')
-        c.argument('indexing_policy', options_list=['--idx'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Indexing Policy, you can enter it as a string or as a file, e.g., --idx @policy-file.json or' + SQL_GREMLIN_INDEXING_POLICY_EXAMPLE)
+        c.argument('indexing_policy', options_list=['--idx'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Indexing Policy, you can enter it as a string or as a file, e.g., --idx @policy-file.json or ' + SQL_GREMLIN_INDEXING_POLICY_EXAMPLE)
         c.argument('throughput', help='Offer Throughput (RU/s). Default value is 400')
 
 # MongDB
