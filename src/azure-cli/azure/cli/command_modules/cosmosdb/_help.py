@@ -245,6 +245,10 @@ short-summary: Manage Azure Cosmos DB SQL containers.
 helps['cosmosdb sql container create'] = """
 type: command
 short-summary: Create an SQL container under an Azure Cosmos DB SQL database.
+examples:
+  - name: Create an Azure Cosmos DB SQL container.
+    text: az cosmosdb sql container create -g MyResourceGroup -a MyAccount -d MyDatabase -n MyContainer --part "/my/path" --idx @policy-file.json --ttl 1000 --throughput "700"
+    crafted: true
 """
 
 helps['cosmosdb sql container update'] = """
@@ -339,6 +343,10 @@ short-summary: Manage Azure Cosmos DB MongoDB collections.
 helps['cosmosdb mongodb collection create'] = """
 type: command
 short-summary: Create an MongoDB collection under an Azure Cosmos DB MongoDB database.
+examples:
+  - name: Create an Azure Cosmos DB MongoDB collection.
+    text: az cosmosdb mongodb collection create -g MyResourceGroup -a MyAccount -d MyDatabase -n MyCollection --shard "ShardingKey" --idx @indexes-file.json --throughput "500"
+    crafted: true
 """
 
 helps['cosmosdb mongodb collection update'] = """
@@ -433,6 +441,10 @@ short-summary: Manage Azure Cosmos DB Cassandra tables.
 helps['cosmosdb cassandra table create'] = """
 type: command
 short-summary: Create an Cassandra table under an Azure Cosmos DB Cassandra keyspace.
+examples:
+  - name: Create an Azure Cosmos DB Cassandra table.
+    text: az cosmosdb cassandra table create -g MyResourceGroup -a MyAccount -k MyKeyspace -n MyTable --schema @indexes-file.json --throughput "500" --ttl 1000
+    crafted: true
 """
 
 helps['cosmosdb cassandra table update'] = """
@@ -527,6 +539,10 @@ short-summary: Manage Azure Cosmos DB Gremlin graphs.
 helps['cosmosdb gremlin graph create'] = """
 type: command
 short-summary: Create an Gremlin graph under an Azure Cosmos DB Gremlin database.
+examples:
+  - name: Create an Azure Cosmos DB Gremlin graph.
+    text: az cosmosdb gremlin graph create -g MyResourceGroup -a MyAccount -d MyDatabase -n MyGraph --part "/my/path" --idx @policy-file.json --ttl 1000 --throughput "700"
+    crafted: true
 """
 
 helps['cosmosdb gremlin graph update'] = """
@@ -608,6 +624,11 @@ short-summary: Delete the Table under an Azure Cosmos DB database account.
 """
 
 # Table throughput
+helps['cosmosdb table throughput'] = """
+type: group
+short-summary: Manage Azure Cosmos DB Table throughput.
+"""
+
 helps['cosmosdb table throughput show'] = """
 type: command
 short-summary: Get the throughput of the Table.
