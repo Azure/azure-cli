@@ -2140,7 +2140,7 @@ def update_private_link_service(instance, cmd, tags=None, frontend_ip_configurat
                        'PublicIPAddress', 'Subnet')
     with cmd.update_context(instance) as c:
         c.set_param('tags', tags)
-        c.set_param('load_balancer_frontend_ip_configurations', [
+        c.set_param('load_balancer_frontend_ip_configurations', frontend_ip_configurations and [
             FrontendIPConfiguration(id=ip_config) for ip_config in frontend_ip_configurations
         ])
         c.set_param('visibility', visibility)
