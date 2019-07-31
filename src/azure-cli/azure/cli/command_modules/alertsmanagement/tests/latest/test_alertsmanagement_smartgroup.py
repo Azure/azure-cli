@@ -5,7 +5,9 @@
 
 from azure.cli.testsdk import ScenarioTest, record_only
 
+
 class AzureAlertsManagementSmartGroupScenarioTest(ScenarioTest):
+
 
     @record_only()
     def test_smartgroup_changestate(self):
@@ -19,5 +21,5 @@ class AzureAlertsManagementSmartGroupScenarioTest(ScenarioTest):
         updated_sg = self.cmd('alertsmanagement smart-group update-state --smart-group-id id --state new_state')
         self.assertEqual(new_state, updated_sg['state'])
 
-	    # Revert the state change operation
+        # Revert the state change operation
         sg = self.cmd('alertsmanagement alert update-state --smart-group-id id --state old_state')

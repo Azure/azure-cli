@@ -5,6 +5,7 @@
 
 from azure.cli.testsdk import ScenarioTest, record_only
 
+
 class AzureAlertsManagementAlertScenarioTest(ScenarioTest):
 
     @record_only()
@@ -19,7 +20,7 @@ class AzureAlertsManagementAlertScenarioTest(ScenarioTest):
         updated_alert = self.cmd('alertsmanagement alert update-state --alert-id id --state new_state')
         self.assertEqual(new_state, updated_alert['state'])
 
-	    # Revert the state change operation
+        # Revert the state change operation
         alert = self.cmd('alertsmanagement alert update-state --alert-id id --state old_state')
 
     @record_only()
