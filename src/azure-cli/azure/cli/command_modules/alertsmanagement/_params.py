@@ -44,7 +44,7 @@ def load_arguments(self, _):
         c.argument('include_smart_groups_count', options_list=['--include-smart-groups-count'], required=False, help='Supported values - true or false')
         c.argument('target_resource', target_resource_arg_type, required=False)
         c.argument('target_resource_type', target_resource_type_arg_type, required=False)
-        c.argument('target_resource_group', options_list=['-target-resource-group'], required=False, help='Filter by resource group')
+        c.argument('target_resource_group', options_list=['--target-resource-group'], required=False, help='Filter by resource group')
         c.argument('monitor_service', monitor_service_arg_type, required=False)
         c.argument('monitor_condition', monitor_condition_arg_type, required=False)
         c.argument('severity',severity_arg_type, required=False)
@@ -62,10 +62,10 @@ def load_arguments(self, _):
         c.argument('time_range', time_range_arg_type, required=False)
         
     with self.argument_context('alertsmanagement  smart-group show') as c:
-        c.argument('smart_group_ID', smart_group_id_arg_type, required=True)
+        c.argument('smart_group_id', smart_group_id_arg_type, required=True)
 
     with self.argument_context('alertsmanagement  smart-group show-history') as c:
-        c.argument('smart_group_ID', smart_group_id_arg_type, required=True)
+        c.argument('smart_group_id', smart_group_id_arg_type, required=True)
 
     with self.argument_context('alertsmanagement action-rule list') as c:
         c.argument('resource_group_name', resource_group_name_arg_type, required=False)
@@ -78,7 +78,8 @@ def load_arguments(self, _):
         c.argument('description', options_list=['--description'], required=False, help='Gets all actions rules in a subscription filter by description')
         c.argument('alert_rule', alert_rule_arg_type, required=False)
         c.argument('action_group', options_list=['--action-group'], required=False, help='Gets all actions rules in a subscription filter by action group')
-        c.argument('name', options_list=['--name'], required=False, help='Gets all actions rules in a subscription filter by action rule name')
+        c.argument('name', options_list=['--name'], required=False, 
+                   help='Gets all actions rules in a subscription filter by action rule name')
 
     with self.argument_context('alertsmanagement action-rule show') as c:
         c.argument('resource_group_name', resource_group_name_arg_type, required=True)
@@ -91,11 +92,11 @@ def load_arguments(self, _):
 
     with self.argument_context('alertsmanagement alert update-state') as c:
         c.argument('alert_id', options_list=['--alert-id'], required=True, help='Id of alert to be updated')
-        c.argument('state', state_arg_type, required=True)
+        c.argument('new_state', state_arg_type, required=True)
 
     with self.argument_context('alertsmanagement smart-group update-state') as c:
         c.argument('smart_group_id', smart_group_id_arg_type, required=True)
-        c.argument('state', state_arg_type, required=True)
+        c.argument('new_state', state_arg_type, required=True)
 
     with self.argument_context('alertsmanagement action-rule update') as c:
         c.argument('resource_group_name', resource_group_name_arg_type, required=True)

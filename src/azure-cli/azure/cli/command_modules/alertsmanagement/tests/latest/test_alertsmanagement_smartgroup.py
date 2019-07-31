@@ -7,17 +7,22 @@ from azure.cli.testsdk import ScenarioTest, record_only
 
 class AzureAlertsManagementSmartGroupScenarioTest(ScenarioTest):
 
-    @record_only()
     def test_smartgroup_changestate(self):
-        # Get latest alert
-        latest_sgs = self.cmd('alertsmanagement smart-group list --time-range 1h')
-        latest_sg = latest_sgs[0]
+        # Get latest smart group
+        latest_sgs = self.cmd('alertsmanagement smart-group list --time-range 1h').get_output_in_json()
 
-        old_state = latest_sg['state']
-        new_state = "Closed"
-        id = latest_sg['id']
-        updated_sg = self.cmd('alertsmanagement smart-group update-state --smart-group-id id --state new_state')
-        self.assertEqual(new_state, updated_sg['state'])
+        if len(latest_sgs['value']) > 0:
+            latest_sg = latest_sgs['value'][0]
 
-	    # Revert the state change operation
-        sg = self.cmd('alertsmanagement alert update-state --smart-group-id id --state old_state')
+            # State update operation
+            old_state = latest_sg['smartGroupState']
+            new_state = "Closed"
+            id = latest_sg['id'].split('/').pop()
+            updated_sg = self.cmd('alertsmanagement smart-group update-state --smart-group-id {} --state {}'
+                              .format(id, new_state)).get_output_in_json()
+
+            self.assertEqual(new_state, updated_sg['smartGroupState'])
+
+	        # Revert the state change operation
+            updated_sg = self.cmd('alertsmanagement smart-group update-state --smart-group-id {} --state {}'
+                              .format(id, old_state)).get_output_in_json()
