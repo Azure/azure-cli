@@ -104,17 +104,40 @@ class NetworkPrivateLinkService(ScenarioTest):
 
         self.kwargs.update({
             'lb': 'lb1',
-            'sku': 'standard',
+            'sku': 'Standard',
             'vnet': 'vnet1',
             'subnet1': 'subnet1',
             'subnet2': 'subnet2',
             'location': 'eastus2',
             'ip': 'pubip1',
             'lks1': 'lks1',
-            'lks2': 'lks2'
+            'lks2': 'lks2',
+            'sub1': '00000000-0000-0000-0000-000000000000'
         })
 
-        self.cmd('network private-link-service create -g {rg} -n {lks1}')
+        self.cmd('network vnet create -g {rg} -n {vnet1} --subnet-name {subnet1} -l {location}')
+        self.cmd('network lb create -g {rg} -l {location} -n {lb} --public-ip-zone {zone} --public-ip-address {ip} --sku {sku}')
+        self.cmd('network vnet subnet update -g {rg} -n {subnet1} --vnet-name {vnet} --private-link-service-network-policies Disabled')
+        self.cmd('network vnet subnet create -g {rg} -n {subnet2} --vnet-name {vnet}')
+        self.cmd('network vnet subnet update -g {rg} -n {subnet2} --vnet-name {vnet} --private-link-service-network-policies Disabled')
+        self.cmd('network private-link-service create -g {rg} -n {lks1} --vnet-name {vnet} --subnet {subnet1} --lb-name {lb} --lb-frontend-ip-configs LoadBalancerFrontEnd', checks=[
+            self.check('type', 'Microsoft.Network/privateLinkServices'),
+            self.check('length(ipConfigurations)', 1),
+            self.check('length(loadBalancerFrontendIpConfigurations)', 1)
+        ])
+        self.cmd('network private-link-service update -g {rg} -n {lks1} --visibility {sub1} {sub1} --auto-approval {sub1} {sub1}', checks=[
+            self.check('length(visibility.subscriptions)', 2),
+            self.check('length(autoApproval.subscriptions)', 2)
+        ])
+        self.cmd('network private-link-service list', checks=[
+            self.check('length(@)', 1),
+            self.check('@[0].type', 'Microsoft.Network/privateLinkServices')
+        ])
+        self.cmd('network private-link-service show -g {rg} -n {lks1}', checks=[
+            self.check('type', 'Microsoft.Network/privateLinkServices'),
+            self.check('length(ipConfigurations)', 1),
+            self.check('length(loadBalancerFrontendIpConfigurations)', 1)
+        ])
 
 
 class NetworkLoadBalancerWithZone(ScenarioTest):
