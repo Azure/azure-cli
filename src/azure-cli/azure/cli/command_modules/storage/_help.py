@@ -603,7 +603,6 @@ short-summary: Manage container stored access policies.
 helps['storage copy'] = """
 type: command
 short-summary: Copy files or directories to or from Azure storage.
-long-summary: Copy files or directories to or from Azure storage.
 examples:
   - name: Upload a single file to Azure Blob using url.
     text: az storage copy -s /path/to/file.txt -d https://[account].blob.core.windows.net/[container]/[path/to/blob]
