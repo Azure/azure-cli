@@ -361,6 +361,68 @@ def update_ag_http_listener(cmd, instance, parent, item_name, frontend_ip=None, 
     return parent
 
 
+def set_ag_identity(cmd, resource_group_name, application_gateway_name,
+                    no_wait=False, identity_type=None, user_assigned_identity=None,
+                    client_id=None, principal_id=None):
+    ncf = network_client_factory(cmd.cli_ctx).application_gateways
+    ag = ncf.get(resource_group_name, application_gateway_name)
+    ManagedServiceIdentity, ManagedServiceIdentityUserAssignedIdentitiesValue = \
+        cmd.get_models('ManagedServiceIdentity', 'ManagedServiceIdentityUserAssignedIdentitiesValue')
+    user_assigned_indentity_instance = ManagedServiceIdentityUserAssignedIdentitiesValue(
+        client_id=client_id,
+        principal_id=principal_id
+    )
+    user_assigned_identities_instance = dict()
+    if user_assigned_identity is not None:
+        user_assigned_identities_instance[user_assigned_identity] = user_assigned_indentity_instance
+    else:
+        user_assigned_identities_instance = None
+    identity_instance = ManagedServiceIdentity(
+        type=identity_type,
+        user_assigned_identities=user_assigned_identities_instance
+    )
+    ag.identity = identity_instance
+
+    return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag)
+
+
+def add_ag_identity(cmd, resource_group_name, application_gateway_name,
+                    no_wait=False, user_assigned_identity=None,
+                    client_id=None, principal_id=None):
+    ncf = network_client_factory(cmd.cli_ctx).application_gateways
+    ag = ncf.get(resource_group_name, application_gateway_name)
+    if ag.identity is None:
+        raise CLIError("Please first use 'az network application-gateway identity set` to init the identity.")
+    ManagedServiceIdentityUserAssignedIdentitiesValue = \
+        cmd.get_models('ManagedServiceIdentityUserAssignedIdentitiesValue')
+    user_assigned_indentity_instance = ManagedServiceIdentityUserAssignedIdentitiesValue(
+        client_id=client_id,
+        principal_id=principal_id
+    )
+    if ag.identity.user_assigned_identities is not None:
+        ag.identity.user_assigned_identities[user_assigned_identity] = user_assigned_indentity_instance
+    else:
+        logger.warning("This command will be ignored. Please check the type of the identity.")
+
+    return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag)
+
+
+def remove_ag_identity(cmd, resource_group_name, application_gateway_name,
+                       no_wait=False, user_assigned_identity=None):
+    ncf = network_client_factory(cmd.cli_ctx).application_gateways
+    ag = ncf.get(resource_group_name, application_gateway_name)
+    if ag.identity is None:
+        raise CLIError("Please first use 'az network application-gateway identity set` to init the identity.")
+    if ag.identity.user_assigned_identities is not None:
+        value = ag.identity.user_assigned_identities.pop(user_assigned_identity, None)
+        if not value:
+            logger.warning("This identity doesn't exist. Please check the value of --user-assigned-identity.")
+    else:
+        logger.warning("This command will be ignored. Please check the type of the identity.")
+
+    return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag)
+
+
 def create_ag_backend_http_settings_collection(cmd, resource_group_name, application_gateway_name, item_name, port,
                                                probe=None, protocol='http', cookie_based_affinity=None, timeout=None,
                                                no_wait=False, connection_draining_timeout=0,

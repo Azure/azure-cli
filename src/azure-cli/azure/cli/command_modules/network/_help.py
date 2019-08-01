@@ -336,6 +336,26 @@ examples:
             -n MyHttpSettings --probe MyNewProbe
 """
 
+helps['network application-gateway identity'] = """
+type: group
+short-summary: Manage the identity information
+"""
+
+helps['network application-gateway identity set'] = """
+type: command
+short-summary: Set the property of identity
+"""
+
+helps['network application-gateway identity add'] = """
+type: command
+short-summary: Add an user assigned identity
+"""
+
+helps['network application-gateway identity remove'] = """
+type: command
+short-summary: Remove an user assigned identity
+"""
+
 helps['network application-gateway list'] = """
 type: command
 short-summary: List application gateways.

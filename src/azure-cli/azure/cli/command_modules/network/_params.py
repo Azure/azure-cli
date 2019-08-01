@@ -32,7 +32,7 @@ from azure.cli.command_modules.network._validators import (
     WafConfigExclusionAction, validate_express_route_peering, validate_virtual_hub,
     validate_express_route_port, bandwidth_validator_factory,
     get_header_configuration_validator, validate_nat_gateway, validate_match_variables,
-    validate_waf_policy, get_subscription_list_validator, validate_frontend_ip_configs)
+    validate_waf_policy, get_subscription_list_validator, validate_frontend_ip_configs, validate_application_gateway_identity)
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 from azure.cli.command_modules.network._completers import (
     subnet_completion_list, get_lb_subresource_completion_list, get_ag_subresource_completion_list,
@@ -357,6 +357,11 @@ def load_arguments(self, _):
     with self.argument_context('network application-gateway rule', min_api='2017-06-01') as c:
         c.argument('redirect_config', help='The name or ID of the redirect configuration to use with the created rule.')
 
+    with self.argument_context('network application-gateway identity', min_api='2019-04-01') as c:
+        c.argument('identity_type', help="The type of identity used for the resource.", arg_type=get_enum_type(['SystemAssigned', 'UserAssigned', 'None']))
+        c.argument('user_assigned_identity', help="Name or ID of the ManagedIdentity Resource", validator=validate_application_gateway_identity)
+        c.argument('principal_id', help='The principal id of user assigned identity.')
+        c.argument('client_id', help='The client id of user assigned identity.')
     # endregion
 
     # region ApplicationGatewayWAFPolicies

@@ -263,6 +263,22 @@ def validate_dns_record_type(namespace):
             return
 
 
+def validate_application_gateway_identity(cmd, namespace):
+    from msrestazure.tools import is_valid_resource_id, resource_id
+
+    if not namespace.user_assigned_identity:
+        return
+
+    if not is_valid_resource_id(namespace.user_assigned_identity):
+        namespace.user_assigned_identity = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=namespace.resource_group_name,
+            namespace='Microsoft.ManagedIdentity',
+            type='userAssignedIdentities',
+            name=namespace.user_assigned_identity
+        )
+
+
 def validate_express_route_peering(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, resource_id
     circuit = namespace.circuit_name

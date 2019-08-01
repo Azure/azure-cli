@@ -428,6 +428,9 @@ def load_command_table(self, _):
         g.custom_command('set', 'set_ag_waf_config_2016_09_01', max_api='2016-09-01', supports_no_wait=True)
         g.custom_show_command('show', 'show_ag_waf_config')
         g.custom_command('list-rule-sets', 'list_ag_waf_rule_sets', min_api='2017-03-01', client_factory=cf_application_gateways, table_transformer=transform_waf_rule_sets_table_output)
+
+    with self.command_group('network application-gateway identity') as g:
+        g.custom_command('set', 'set_ag_identity', command_type=network_ag_sdk, supports_no_wait=True)
     # endregion
 
     # region ApplicationGatewayWAFPolicy
