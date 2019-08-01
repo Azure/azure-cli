@@ -7,6 +7,10 @@ Release History
 
 * add "cognitiveservices account network-rule" commands.
 
+**Profile**
+
+* Add get-access-token --resource-type enum for convenience of getting access tokens for well-known resources.
+
 2.0.70
 ++++++
 
@@ -62,6 +66,7 @@ Release History
 **Core**
 
 * Fixed issue where `--subscription` would appear despite being not applicable.
+* Added ossrdbmsResourceId to cloud.py.
 
 **BATCH**
 

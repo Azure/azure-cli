@@ -5,9 +5,12 @@
 
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.commands import CliCommandType
+from azure.cli.core.commands.parameters import get_enum_type
 
 from azure.cli.command_modules.profile._format import transform_account_list
 import azure.cli.command_modules.profile._help  # pylint: disable=unused-import
+
+cloud_resource_types = ["oss-rdbms", "arm", "aad-graph", "ms-graph", "batch", "media", "data-lake"]
 
 
 class ProfileCommandsLoader(AzCommandsLoader):
@@ -68,6 +71,9 @@ class ProfileCommandsLoader(AzCommandsLoader):
 
         with self.argument_context('account show') as c:
             c.argument('show_auth_for_sdk', options_list=['--sdk-auth'], action='store_true', help='Output result to a file compatible with Azure SDK auth. Only applicable when authenticating with a Service Principal.')
+
+        with self.argument_context('account get-access-token') as c:
+            c.argument('resource_type', get_enum_type(cloud_resource_types), options_list=['--resource-type'], arg_group='', help='Type of well-known resource.')
 
 
 COMMAND_LOADER_CLS = ProfileCommandsLoader
