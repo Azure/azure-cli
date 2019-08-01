@@ -122,17 +122,17 @@ helps['hdinsight monitor'] = """
 
 helps['hdinsight monitor enable'] = """
     type: command
-    short-summary: Enables the Azure Monitor logs integration on an HDInsight cluster.
+    short-summary: Enable the Azure Monitor logs integration on an HDInsight cluster.
 """
 
 helps['hdinsight monitor disable'] = """
     type: command
-    short-summary: Disables the Azure Monitor logs integration on an HDInsight cluster.
+    short-summary: Disable the Azure Monitor logs integration on an HDInsight cluster.
 """
 
 helps['hdinsight monitor show'] = """
     type: command
-    short-summary: Gets the status of Azure Monitor logs integration on an HDInsight cluster.
+    short-summary: Get the status of Azure Monitor logs integration on an HDInsight cluster.
 """
 
 helps['hdinsight script-action'] = """
@@ -142,7 +142,7 @@ helps['hdinsight script-action'] = """
 
 helps['hdinsight script-action execute'] = """
     type: command
-    short-summary: Executes script actions on the specified HDInsight cluster.
+    short-summary: Execute script actions on the specified HDInsight cluster.
     examples:
         - name: Execute a script action and persist on success.
           text: |-
