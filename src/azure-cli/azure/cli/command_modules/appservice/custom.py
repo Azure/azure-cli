@@ -6,6 +6,7 @@
 from __future__ import print_function
 import threading
 import time
+import ast
 
 
 try:
@@ -36,11 +37,16 @@ from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan, SiteC
                                    SkuDescription, SslState, HostNameBinding, NameValuePair,
                                    BackupRequest, DatabaseBackupSetting, BackupSchedule,
                                    RestoreRequest, FrequencyUnit, Certificate, HostNameSslState,
-                                   RampUpRule, UnauthenticatedClientAction, ManagedServiceIdentity,
-                                   DeletedAppRestoreRequest, DefaultErrorResponseException,
-                                   SnapshotRestoreRequest, SnapshotRecoverySource)
+                                   HybridConnection, RampUpRule, UnauthenticatedClientAction,
+                                   ManagedServiceIdentity, DeletedAppRestoreRequest,
+                                   DefaultErrorResponseException, SnapshotRestoreRequest,
+                                   SnapshotRecoverySource, SwiftVirtualNetwork)
 from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient
+from azure.mgmt.relay.models import AccessRights
+from azure.cli.command_modules.relay._client_factory import hycos_mgmt_client_factory, namespaces_mgmt_client_factory
 from azure.storage.blob import BlockBlobService, BlobPermissions
+from azure.cli.command_modules.network._client_factory import network_client_factory
+from azure.mgmt.network.models import Subnet, Delegation
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation

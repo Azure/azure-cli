@@ -14,7 +14,7 @@ from azure.mgmt.web.models import DatabaseType, ConnectionStringType, BuiltInAut
 
 from ._completers import get_hostname_completion_list
 
-from ._validators import validate_timeout_value, validate_site_create, validate_asp_create
+from ._validators import validate_timeout_value, validate_site_create, validate_asp_create, validate_add_vnet
 
 
 AUTH_TYPES = {
