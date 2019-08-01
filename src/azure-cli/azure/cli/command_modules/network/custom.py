@@ -2082,9 +2082,7 @@ def create_private_endpoint(cmd, resource_group_name, private_endpoint_name, sub
 
 
 def update_private_endpoint(instance, cmd, subnet=None,
-                            virtual_network_name=None, tags=None,
-                            private_connection_resource_id=None, group_ids=None, request_message=None,
-                            munual_request=None):
+                            virtual_network_name=None, tags=None, request_message=None):
     PrivateEndpoint, Subnet, PrivateLinkServiceConnection = cmd.get_models('PrivateEndpoint', 'Subnet', 'PrivateLinkServiceConnection')
     with cmd.update_context(instance) as c:
         c.set_param('tags', tags)
