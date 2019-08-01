@@ -88,9 +88,7 @@ class NetworkPrivateEndpoints(ScenarioTest):
         self.cmd('network private-endpoint list')
         self.cmd('network private-endpoint list -g {rg}')
 
-        # system code 3 for 'not found'
-        with self.assertRaisesRegexp(SystemExit, '3'):
-            self.cmd('network private-endpoint show -g {rg} -n dummy')
+        self.cmd
 
 
 class NetworkPrivateLinkService(ScenarioTest):
