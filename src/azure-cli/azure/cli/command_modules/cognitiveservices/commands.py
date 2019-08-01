@@ -5,7 +5,7 @@
 
 from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.cognitiveservices._client_factory import cf_accounts, cf_resource_skus
-from azure.cli.core.profiles import ResourceType
+
 
 def load_command_table(self, _):
     mgmt_type = CliCommandType(

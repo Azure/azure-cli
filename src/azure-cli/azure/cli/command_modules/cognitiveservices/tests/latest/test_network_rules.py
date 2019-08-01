@@ -10,7 +10,7 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 
 class CognitiveServicesNetworkRulesTests(ScenarioTest):
     @ResourceGroupPreparer()
-    def test_cognitiveservices_create_network_rules(self, resource_group):
+    def test_cognitiveservices_network_rules(self, resource_group):
         sname = self.create_random_name(prefix='cs_cli_test_', length=16)
         customdomain = self.create_random_name(prefix='csclitest', length=16)
 
@@ -62,8 +62,8 @@ class CognitiveServicesNetworkRulesTests(ScenarioTest):
         self.assertEqual(rules['ipRules'][1]['value'], "100.0.0.0/24")
         self.assertEqual(rules['virtualNetworkRules'][0]['id'], subnet1['id'])
 
-        self.cmd('az cognitiveservices account network-rule add -n {sname} -g {rg} --subnet ' + subnet2['name']
-                 + ' --vnet-name {vnetname}')
+        self.cmd('az cognitiveservices account network-rule add -n {sname} -g {rg} --subnet ' + subnet2['name'] +
+                 ' --vnet-name {vnetname}')
         rules = self.cmd('az cognitiveservices account network-rule list -n {sname} -g {rg}').get_output_in_json()
         self.assertEqual(len(rules['ipRules']), 2)
         self.assertEqual(len(rules['virtualNetworkRules']), 2)
@@ -93,8 +93,15 @@ class CognitiveServicesNetworkRulesTests(ScenarioTest):
         self.assertEqual(len(rules['virtualNetworkRules']), 1)
         self.assertEqual(rules['virtualNetworkRules'][0]['id'], subnet2['id'])
 
-        self.cmd('az cognitiveservices account network-rule remove -n {sname} -g {rg} --subnet ' + subnet2['name']
-                 + ' --vnet-name {vnetname}')
+        self.cmd('az cognitiveservices account network-rule remove -n {sname} -g {rg} --subnet ' + subnet2['name'] +
+                 ' --vnet-name {vnetname}')
+        rules = self.cmd('az cognitiveservices account network-rule list -n {sname} -g {rg}').get_output_in_json()
+        self.assertEqual(len(rules['ipRules']), 0)
+        self.assertEqual(len(rules['virtualNetworkRules']), 0)
+
+        # Remove something doesn't exists in rules
+        self.cmd('az cognitiveservices account network-rule remove -n {sname} -g {rg} --subnet ' + subnet2['name'] +
+                 ' --vnet-name {vnetname}')
         rules = self.cmd('az cognitiveservices account network-rule list -n {sname} -g {rg}').get_output_in_json()
         self.assertEqual(len(rules['ipRules']), 0)
         self.assertEqual(len(rules['virtualNetworkRules']), 0)

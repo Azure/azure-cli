@@ -55,7 +55,5 @@ class CognitiveServicesCustomDomainTests(ScenarioTest):
         self.assertEqual(ret.exit_code, 0)
 
 
-
-
 if __name__ == '__main__':
     unittest.main()

@@ -158,4 +158,3 @@ def load_arguments(self, _):
         c.argument('ip_address', help='IPv4 address or CIDR range.')
         c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
         c.argument('vnet_name', help='Name of a virtual network.', validator=_validate_subnet)
-

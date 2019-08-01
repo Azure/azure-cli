@@ -98,7 +98,7 @@ def create(
     if api_properties is not None:
         properties["apiProperties"] = api_properties
 
-    if custom_domain is not None and len(custom_domain) > 0:
+    if custom_domain:
         properties["customSubDomainName"] = custom_domain
 
     params = CognitiveServicesAccountCreateParameters(sku=sku, kind=kind, location=location,
@@ -120,7 +120,7 @@ def update(client, resource_group_name, account_name, sku_name=None, custom_doma
     if api_properties is not None:
         properties["apiProperties"] = api_properties
 
-    if custom_domain is not None and len(custom_domain) > 0:
+    if custom_domain:
         properties["customSubDomainName"] = custom_domain
 
     return client.update(resource_group_name, account_name, sku, tags, properties)
@@ -154,7 +154,6 @@ def add_network_rule(client, resource_group_name, account_name, subnet=None,
     if subnet:
         from msrestazure.tools import is_valid_resource_id
         if not is_valid_resource_id(subnet):
-            from knack.util import CLIError
             raise CLIError("Expected fully qualified resource ID: got '{}'".format(subnet))
 
         if not rules.virtual_network_rules:
@@ -168,12 +167,13 @@ def add_network_rule(client, resource_group_name, account_name, subnet=None,
     return client.update(resource_group_name, account_name, properties={"networkAcls": rules})
 
 
-def remove_network_rule(cmd, client, resource_group_name, account_name, ip_address=None, subnet=None,
+def remove_network_rule(client, resource_group_name, account_name, ip_address=None, subnet=None,
                         vnet_name=None):  # pylint: disable=unused-argument
     sa = client.get_properties(resource_group_name, account_name)
     rules = sa.network_acls
     if rules is None:
-        return
+        # nothing to update, but return the object
+        return client.update(resource_group_name, account_name)
 
     if subnet:
         rules.virtual_network_rules = [x for x in rules.virtual_network_rules
