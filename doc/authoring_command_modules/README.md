@@ -212,7 +212,6 @@ e.g.:
 Release History
 ===============
 
-0.0.3
 +++++
 * This is my customer-facing change.
 
