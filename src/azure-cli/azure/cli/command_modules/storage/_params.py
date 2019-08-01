@@ -373,26 +373,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             If you provide source parameter here, you do not need to provide arguments in copy source arguments group and copy source \
             arguments will be deprecated in future.")
         for item in ['destination', 'source']:
-            c.argument('{}_if_modified_since'.format(item), arg_group='Pre-condition', help='A DateTime value. \
-                        Azure expects the date value passed in to be UTC. If timezone is included, any non-UTC \
-                        datetimes will be converted to UTC. If a date is passed in without timezone info, \
-                        it is assumed to be UTC. Specify this conditional header to copy the blob only if the \
-                        source blob has been modified since the specified date/time.')
-            c.argument('{}_if_unmodified_since'.format(item), arg_group='Pre-condition', help='A DateTime value. \
-                        Azure expects the date value passed in to be UTC. If timezone is included, any non-UTC \
-                        datetimes will be converted to UTC. If a date is passed in without timezone info, \
-                        it is assumed to be UTC. Specify this conditional header to copy the blob only if \
-                        the source blob has not been modified since the specified date/time.')
-            c.argument('{}_if_match'.format(item), arg_group='Pre-condition', help='An ETag value, \
-                        or the wildcard character (*). Specify this conditional header to copy the \
-                        source blob only if its ETag matches the value specified. \
-                        If the ETag values do not match, the Blob service returns status code 412 (Precondition Failed). \
-                        This header cannot be specified if the source is an Azure File.')
-            c.argument('{}_if_none_match'.format(item), arg_group='Pre-condition', help='An ETag value, \
-                        or the wildcard character (*). Specify this conditional header to copy the blob only \
-                        if its ETag does not match the value specified. If the values are identical, \
-                        the Blob service returns status code 412 (Precondition Failed). \
-                        This header cannot be specified if the source is an Azure File.')
             c.argument('{}_account_name'.format(item), arg_group='Copy {}'.format(item),
                        help='Storage account name of copy {}'.format(item))
             c.argument('{}_container'.format(item), arg_group='Copy {}'.format(item),
