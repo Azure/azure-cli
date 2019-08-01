@@ -2,11 +2,6 @@
 
 Release History
 ===============
-2.0.71
-++++++
-* Added CRUD commands for CosmosDB SQL, MongoDB, Cassandra, Gremlin and Table APIs' resources
-  and resource throughput
-
 2.0.70
 ++++++
 
