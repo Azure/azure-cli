@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=all
+
 # Generated from MetricAlertCondition.g4 by ANTLR 4.7.2
 # encoding: utf-8
 from __future__ import print_function
@@ -25,7 +27,7 @@ def serializedATN():
         buf.write(u"\3\n\3\n\3\13\3\13\3\13\3\f\3\f\3\f\3\r\3\r\3\r\3\16")
         buf.write(u"\3\16\3\16\3\17\3\17\3\17\3\17\7\17t\n\17\f\17\16\17")
         buf.write(u"w\13\17\3\20\6\20z\n\20\r\20\16\20{\3\20\2\2\21\2\4\6")
-        buf.write(u"\b\n\f\16\20\22\24\26\30\32\34\36\2\b\4\2\4\4\26\26\5")
+        buf.write(u"\b\n\f\16\20\22\24\26\30\32\34\36\2\b\4\2\3\4\26\26\5")
         buf.write(u"\2\3\b\24\24\26\26\4\2\t\t\r\r\3\2\16\17\4\2\t\t\20\20")
         buf.write(u"\7\2\3\3\n\13\22\22\24\24\26\26\2w\2 \3\2\2\2\4@\3\2")
         buf.write(u"\2\2\6D\3\2\2\2\bI\3\2\2\2\nM\3\2\2\2\fP\3\2\2\2\16R")
@@ -352,20 +354,22 @@ class MetricAlertConditionParser ( Parser ):
             self.enterOuterAlt(localctx, 1)
             self.state = 66 
             self._errHandler.sync(self)
-            _la = self._input.LA(1)
-            while True:
-                self.state = 65
-                _la = self._input.LA(1)
-                if not(_la==MetricAlertConditionParser.T__1 or _la==MetricAlertConditionParser.WORD):
-                    self._errHandler.recoverInline(self)
+            _alt = 1
+            while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
+                if _alt == 1:
+                    self.state = 65
+                    _la = self._input.LA(1)
+                    if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << MetricAlertConditionParser.T__0) | (1 << MetricAlertConditionParser.T__1) | (1 << MetricAlertConditionParser.WORD))) != 0)):
+                        self._errHandler.recoverInline(self)
+                    else:
+                        self._errHandler.reportMatch(self)
+                        self.consume()
+
                 else:
-                    self._errHandler.reportMatch(self)
-                    self.consume()
+                    raise NoViableAltException(self)
                 self.state = 68 
                 self._errHandler.sync(self)
-                _la = self._input.LA(1)
-                if not (_la==MetricAlertConditionParser.T__1 or _la==MetricAlertConditionParser.WORD):
-                    break
+                _alt = self._interp.adaptivePredict(self._input,4,self._ctx)
 
         except RecognitionException as re:
             localctx.exception = re

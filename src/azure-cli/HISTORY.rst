@@ -69,7 +69,7 @@ Release History
 
 **Monitor**
 
-* `metrics alert create`: Allow '/' character in namespace name to support custom metrics.
+* `metrics alert create`: Allow '/' and '.' characters in namespace name to support custom metrics.
 
 **Network**
 

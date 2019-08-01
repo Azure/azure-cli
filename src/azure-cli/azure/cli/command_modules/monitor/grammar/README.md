@@ -25,4 +25,4 @@ You will likely also need to add the path to your JDK bin directory to your PATH
 4. Add a test to cover your new scenario.
 5. Update the `MetricAlertConditionValidator.py` file until your test passes.
 6. Clean up the unneeded Java files `del *.class *.java *.tokens *.interp test.txt`
-7. Open a PR.
+7. Open a PR. License headers and pylint annotations will be removed during autogeneration, so you will need to reverse those lines.

@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=all
+
 # Generated from MetricAlertCondition.g4 by ANTLR 4.7.2
 # encoding: utf-8
 from __future__ import print_function
