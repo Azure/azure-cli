@@ -7,6 +7,10 @@ Release History
 
 * Add get-access-token --resource-type enum for convenience of getting access tokens for well-known resources.
 
+**Core**
+
+* `--query`: properly handle type errors caused by invalid JMESPath queries.
+
 2.0.70
 ++++++
 
