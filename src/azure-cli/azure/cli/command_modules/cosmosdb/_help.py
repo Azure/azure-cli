@@ -228,7 +228,7 @@ short-summary: List the SQL databases under an Azure Cosmos DB database account.
 
 helps['cosmosdb sql database show'] = """
 type: command
-short-summary: Get the SQL database under an Azure Cosmos DB database account.
+short-summary: Show the details/properties of a SQL database under an Azure Cosmos DB database account.
 """
 
 helps['cosmosdb sql database delete'] = """
@@ -263,7 +263,7 @@ short-summary: List the SQL containers under an Azure Cosmos DB SQL database.
 
 helps['cosmosdb sql container show'] = """
 type: command
-short-summary: Get the SQL container under an Azure Cosmos DB SQL database.
+short-summary: Show the details/properties of a SQL container under an Azure Cosmos DB SQL database.
 """
 
 helps['cosmosdb sql container delete'] = """
@@ -326,7 +326,7 @@ short-summary: List the MongoDB databases under an Azure Cosmos DB database acco
 
 helps['cosmosdb mongodb database show'] = """
 type: command
-short-summary: Get the MongoDB database under an Azure Cosmos DB database account.
+short-summary: Show the details/properties of a MongoDB database under an Azure Cosmos DB database account.
 """
 
 helps['cosmosdb mongodb database delete'] = """
@@ -361,7 +361,7 @@ short-summary: List the MongoDB collections under an Azure Cosmos DB MongoDB dat
 
 helps['cosmosdb mongodb collection show'] = """
 type: command
-short-summary: Get the MongoDB collection under an Azure Cosmos DB MongoDB database.
+short-summary: Show the details/properties of a MongoDB collection under an Azure Cosmos DB MongoDB database.
 """
 
 helps['cosmosdb mongodb collection delete'] = """
@@ -424,7 +424,7 @@ short-summary: List the Cassandra keyspaces under an Azure Cosmos DB database ac
 
 helps['cosmosdb cassandra keyspace show'] = """
 type: command
-short-summary: Get the Cassandra keyspace under an Azure Cosmos DB database account.
+short-summary: Show the details/properties of a Cassandra keyspace under an Azure Cosmos DB database account.
 """
 
 helps['cosmosdb cassandra keyspace delete'] = """
@@ -459,7 +459,7 @@ short-summary: List the Cassandra tables under an Azure Cosmos DB Cassandra keys
 
 helps['cosmosdb cassandra table show'] = """
 type: command
-short-summary: Get the Cassandra table under an Azure Cosmos DB Cassandra keyspace.
+short-summary: Show the details/properties of a Cassandra table under an Azure Cosmos DB Cassandra keyspace.
 """
 
 helps['cosmosdb cassandra table delete'] = """
@@ -522,7 +522,7 @@ short-summary: List the Gremlin databases under an Azure Cosmos DB database acco
 
 helps['cosmosdb gremlin database show'] = """
 type: command
-short-summary: Get the Gremlin database under an Azure Cosmos DB database account.
+short-summary: Show the details/properties of a Gremlin database under an Azure Cosmos DB database account.
 """
 
 helps['cosmosdb gremlin database delete'] = """
@@ -557,7 +557,7 @@ short-summary: List the Gremlin graphs under an Azure Cosmos DB Gremlin database
 
 helps['cosmosdb gremlin graph show'] = """
 type: command
-short-summary: Get the Gremlin graph under an Azure Cosmos DB Gremlin database.
+short-summary: Show the details/properties of a Gremlin graph under an Azure Cosmos DB Gremlin database.
 """
 
 helps['cosmosdb gremlin graph delete'] = """
@@ -615,7 +615,7 @@ short-summary: List the Tables under an Azure Cosmos DB database account.
 
 helps['cosmosdb table show'] = """
 type: command
-short-summary: Get the Table under an Azure Cosmos DB database account.
+short-summary: Show the details/properties of a Table under an Azure Cosmos DB database account.
 """
 
 helps['cosmosdb table delete'] = """
