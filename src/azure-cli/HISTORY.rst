@@ -69,6 +69,11 @@ Release History
 * snapshot/disk create: expose ZRS storage skus
 * Add new command group `vm host` to support dedicated hosts. Expose `--host` and `--host-group` on `vm create`
 
+**ServiceFabric**
+
+* Fix for issue #6112 - added all supported os version for sf cluster create
+* Fix for issue #6536 - primary certificate validation bug
+
 2.0.69
 ++++++
 
