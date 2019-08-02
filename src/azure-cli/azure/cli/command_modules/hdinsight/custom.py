@@ -31,7 +31,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
                    encryption_vault_uri=None, encryption_key_name=None, encryption_key_version=None,
                    encryption_algorithm='RSA-OAEP', esp=False, no_validation_timeout=False):
     from .util import build_identities_info, build_virtual_network_profile, parse_domain_name, \
-        get_storage_account_endpoint, validate_esp_cluster_create_params, process_cluster_configurations
+        get_storage_account_endpoint, validate_esp_cluster_create_params
     from azure.mgmt.hdinsight.models import ClusterCreateParametersExtended, ClusterCreateProperties, OSType, \
         ClusterDefinition, ComputeProfile, HardwareProfile, Role, OsProfile, LinuxOperatingSystemProfile, \
         StorageProfile, StorageAccount, DataDisksGroups, SecurityProfile, \
@@ -52,9 +52,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
     location = location or _get_rg_location(cmd.cli_ctx, resource_group_name)
 
     # Format dictionary/free-form arguments
-    if cluster_configurations:
-        cluster_configurations = process_cluster_configurations(cluster_configurations)
-    else:
+    if not cluster_configurations:
         cluster_configurations = dict()
 
     if component_version:

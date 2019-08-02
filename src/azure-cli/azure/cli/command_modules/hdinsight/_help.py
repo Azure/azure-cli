@@ -57,7 +57,7 @@ helps['hdinsight create'] = """
               az hdinsight create -t spark -g MyResourceGroup -n MyCluster \\
               -p "HttpPassword1234!" \\
               --storage-account MyStorageAccount \\
-              --cluster-configuration config.json
+              --cluster-configuration @config.json
 """
 
 helps['hdinsight list'] = """
