@@ -98,7 +98,7 @@ def load_arguments(self, _):
         c.argument('database_name', options_list=['--database', '-d'], help="Database name")
         c.argument('container_name', options_list=['--container', '-n'], help="Container name")
         c.argument('partition_key_path', options_list=['--partition-key-path', '-p'], help='Partition Key Path, e.g., \'/address/zipcode\'')
-        c.argument('default_ttl', options_list=['--ttl'], type=int, help='Default TTL (https://docs.microsoft.com/en-us/azure/cosmos-db/time-to-live)')
+        c.argument('default_ttl', options_list=['--ttl'], type=int, help='Default TTL. If the value is missing or set to "-1", items don’t expire. If the value is set to "n", items will expire "n" seconds after last modified time.')
         c.argument('indexing_policy', options_list=['--idx'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Indexing Policy, you can enter it as a string or as a file, e.g., --idx @policy-file.json or ' + SQL_GREMLIN_INDEXING_POLICY_EXAMPLE)
         c.argument('throughput', help='The throughput of SQL container (RU/s). Default value is 400')
 
@@ -126,7 +126,7 @@ def load_arguments(self, _):
         c.argument('account_name', options_list=['--account', '-a'], help="Cosmosdb account name", id_part=None)
         c.argument('keyspace_name', options_list=['--keyspace', '-k'], help="Keyspace name")
         c.argument('table_name', options_list=['--table', '-n'], help="Table name")
-        c.argument('default_ttl', options_list=['--ttl'], type=int, help='Default TTL (https://docs.microsoft.com/en-us/azure/cosmos-db/time-to-live)')
+        c.argument('default_ttl', options_list=['--ttl'], type=int, help='Default TTL. If the value is missing or set to "-1", items don’t expire. If the value is set to "n", items will expire "n" seconds after last modified time.')
         c.argument('schema', type=shell_safe_json_parse, completer=FilesCompleter(), help='Schema, you can enter it as a string or as a file, e.g., --schema @schema-file.json or ' + CASSANDRA_SCHEMA_EXAMPLE)
         c.argument('throughput', help='The throughput of Cassandra table (RU/s). Default value is 400')
 
@@ -141,7 +141,7 @@ def load_arguments(self, _):
         c.argument('database_name', options_list=['--database', '-d'], help="Database name")
         c.argument('graph_name', options_list=['--graph', '-n'], help="Graph name")
         c.argument('partition_key_path', options_list=['--partition-key-path', '-p'], help='Partition Key Path, e.g., \'/address/zipcode\'')
-        c.argument('default_ttl', options_list=['--ttl'], type=int, help='Default TTL (https://docs.microsoft.com/en-us/azure/cosmos-db/time-to-live)')
+        c.argument('default_ttl', options_list=['--ttl'], type=int, help='Default TTL. If the value is missing or set to "-1", items don’t expire. If the value is set to "n", items will expire "n" seconds after last modified time.')
         c.argument('indexing_policy', options_list=['--idx'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Indexing Policy, you can enter it as a string or as a file, e.g., --idx @policy-file.json or ' + SQL_GREMLIN_INDEXING_POLICY_EXAMPLE)
         c.argument('throughput', help='The throughput of Gremlin graph (RU/s). Default value is 400')
 
