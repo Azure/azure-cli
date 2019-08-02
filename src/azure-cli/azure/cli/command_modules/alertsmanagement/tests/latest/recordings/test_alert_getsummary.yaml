@@ -1,0 +1,51 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - alertsmanagement alert list-summary
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --group-by
+      User-Agent:
+      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-alertsmanagement/0.2.0rc2
+        Azure-SDK-For-Python AZURECLI/2.0.69
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AlertsManagement/alertsSummary?groupby=severity%2Calertstate&api-version=2019-05-05-preview
+  response:
+    body:
+      string: '{"properties":{"groupedby":"severity","total":2199,"values":[{"name":"Sev0","count":0,"groupedby":"alertState","values":[{"name":"New","count":0},{"name":"Acknowledged","count":0},{"name":"Closed","count":0}]},{"name":"Sev1","count":383,"groupedby":"alertState","values":[{"name":"New","count":383},{"name":"Acknowledged","count":0},{"name":"Closed","count":0}]},{"name":"Sev2","count":40,"groupedby":"alertState","values":[{"name":"New","count":40},{"name":"Acknowledged","count":0},{"name":"Closed","count":0}]},{"name":"Sev3","count":421,"groupedby":"alertState","values":[{"name":"New","count":421},{"name":"Acknowledged","count":0},{"name":"Closed","count":0}]},{"name":"Sev4","count":1355,"groupedby":"alertState","values":[{"name":"New","count":1354},{"name":"Acknowledged","count":0},{"name":"Closed","count":1}]}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AlertsManagement/alertsSummary/current","type":"Microsoft.AlertsManagement/alertsSummary","name":"current"}'
+    headers:
+      cache-control:
+      - no-store, no-cache
+      content-length:
+      - '1009'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 02 Aug 2019 09:59:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '996'
+    status:
+      code: 200
+      message: OK
+version: 1

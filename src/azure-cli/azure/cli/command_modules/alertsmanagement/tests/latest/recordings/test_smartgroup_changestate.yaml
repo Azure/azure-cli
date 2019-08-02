@@ -1,0 +1,157 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - alertsmanagement smart-group list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --time-range
+      User-Agent:
+      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-alertsmanagement/0.2.0rc2
+        Azure-SDK-For-Python AZURECLI/2.0.69
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AlertsManagement/smartGroups?timeRange=1h&api-version=2019-05-05-preview
+  response:
+    body:
+      string: '{"value":[{"properties":{"alertsCount":8,"smartGroupState":"New","severity":"Sev4","startDateTime":"2019-08-02T09:03:29.0641311Z","lastModifiedDateTime":"2019-08-02T09:14:47.8591246Z","lastAlertAddedDateTime":"2019-08-02T09:14:47.8591246Z","lastModifiedUserName":"System","resources":[{"name":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.alertsmanagement/smartgroups/ee07fa2b-2ce7-4c65-8c03-aabb00cc037c","count":8}],"resourceTypes":[{"name":"microsoft.alertsmanagement/smartgroups","count":8}],"resourceGroups":[],"monitorSources":[{"name":"ActivityLog
+        Administrative","count":2}],"monitorConditions":[{"name":"Fired","count":8}],"alertStates":[{"name":"New","count":8}],"alertSeverities":[{"name":"Sev4","count":2}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AlertsManagement/smartGroups/5a5b6b1d-d4a1-4c75-9af5-d48a93144630","type":"Microsoft.AlertsManagement/smartGroups","name":"SubWithoutAG"},{"properties":{"alertsCount":576,"smartGroupState":"New","severity":"Sev4","startDateTime":"2019-08-01T13:54:47.9354644Z","lastModifiedDateTime":"2019-08-02T09:14:25.0201327Z","lastAlertAddedDateTime":"2019-08-02T09:14:25.0201327Z","lastModifiedUserName":"System","resources":[{"name":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/alertslab/providers/microsoft.apimanagement/service/aig-test","count":288},{"name":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/alertslab/providers/microsoft.apimanagement/service/aig-test/users/1","count":288}],"resourceTypes":[{"name":"microsoft.apimanagement/service","count":576}],"resourceGroups":[{"name":"alertslab","count":576}],"monitorSources":[{"name":"ActivityLog
+        Administrative","count":560}],"monitorConditions":[{"name":"Fired","count":576}],"alertStates":[{"name":"New","count":576}],"alertSeverities":[{"name":"Sev4","count":560}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AlertsManagement/smartGroups/ee07fa2b-2ce7-4c65-8c03-aabb00cc037c","type":"Microsoft.AlertsManagement/smartGroups","name":"SubWithoutAG"}]}'
+    headers:
+      cache-control:
+      - no-store, no-cache
+      content-length:
+      - '2105'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 02 Aug 2019 09:59:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '998'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - alertsmanagement smart-group update-state
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --smart-group-id --state
+      User-Agent:
+      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-alertsmanagement/0.2.0rc2
+        Azure-SDK-For-Python AZURECLI/2.0.69
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AlertsManagement/smartGroups/5a5b6b1d-d4a1-4c75-9af5-d48a93144630/changeState?api-version=2019-05-05-preview&newState=Closed
+  response:
+    body:
+      string: '{"properties":{"alertsCount":8,"smartGroupState":"Closed","severity":"Sev4","startDateTime":"2019-08-02T09:03:29.0641311Z","lastModifiedDateTime":"2019-08-02T09:59:10.6297723Z","lastAlertAddedDateTime":"2019-08-02T09:14:47.8591246Z","lastModifiedUserName":"mahja@microsoft.com","resources":[{"name":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.alertsmanagement/smartgroups/ee07fa2b-2ce7-4c65-8c03-aabb00cc037c","count":8}],"resourceTypes":[{"name":"microsoft.alertsmanagement/smartgroups","count":8}],"resourceGroups":[],"monitorSources":[{"name":"ActivityLog
+        Administrative","count":2}],"monitorConditions":[{"name":"Fired","count":8}],"alertStates":[{"name":"New","count":8}],"alertSeverities":[{"name":"Sev4","count":2}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AlertsManagement/smartGroups/5a5b6b1d-d4a1-4c75-9af5-d48a93144630","type":"Microsoft.AlertsManagement/smartGroups","name":"SubWithoutAG"}'
+    headers:
+      cache-control:
+      - no-store, no-cache
+      content-length:
+      - '968'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 02 Aug 2019 09:59:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - alertsmanagement smart-group update-state
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --smart-group-id --state
+      User-Agent:
+      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-alertsmanagement/0.2.0rc2
+        Azure-SDK-For-Python AZURECLI/2.0.69
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AlertsManagement/smartGroups/5a5b6b1d-d4a1-4c75-9af5-d48a93144630/changeState?api-version=2019-05-05-preview&newState=New
+  response:
+    body:
+      string: '{"properties":{"alertsCount":8,"smartGroupState":"New","severity":"Sev4","startDateTime":"2019-08-02T09:03:29.0641311Z","lastModifiedDateTime":"2019-08-02T09:59:12.2704422Z","lastAlertAddedDateTime":"2019-08-02T09:14:47.8591246Z","lastModifiedUserName":"mahja@microsoft.com","resources":[{"name":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.alertsmanagement/smartgroups/ee07fa2b-2ce7-4c65-8c03-aabb00cc037c","count":8}],"resourceTypes":[{"name":"microsoft.alertsmanagement/smartgroups","count":8}],"resourceGroups":[],"monitorSources":[{"name":"ActivityLog
+        Administrative","count":2}],"monitorConditions":[{"name":"Fired","count":8}],"alertStates":[{"name":"New","count":8}],"alertSeverities":[{"name":"Sev4","count":2}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AlertsManagement/smartGroups/5a5b6b1d-d4a1-4c75-9af5-d48a93144630","type":"Microsoft.AlertsManagement/smartGroups","name":"SubWithoutAG"}'
+    headers:
+      cache-control:
+      - no-store, no-cache
+      content-length:
+      - '965'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 02 Aug 2019 09:59:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1196'
+    status:
+      code: 200
+      message: OK
+version: 1

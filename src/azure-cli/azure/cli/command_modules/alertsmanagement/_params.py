@@ -46,7 +46,7 @@ def load_arguments(self, _):
         c.argument('monitor_service', monitor_service_arg_type, required=False)
         c.argument('monitor_condition', monitor_condition_arg_type, required=False)
         c.argument('severity', severity_arg_type, required=False)
-        c.argument('state', state_arg_type, required=False)
+        c.argument('alert_state', state_arg_type, required=False)
         c.argument('alert_rule', alert_rule_arg_type, required=False)
         c.argument('smart_group_id', smart_group_id_arg_type, required=False)
         c.argument('include_context', options_list=['--include-context'], required=False,

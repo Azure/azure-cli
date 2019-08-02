@@ -13,8 +13,8 @@ class AzureAlertsManagementSmartGroupScenarioTest(ScenarioTest):
         # Get latest smart group
         latest_sgs = self.cmd('alertsmanagement smart-group list --time-range 1h').get_output_in_json()
 
-        if len(latest_sgs['value']) > 0:
-            latest_sg = latest_sgs['value'][0]
+        if len(latest_sgs) > 0:
+            latest_sg = latest_sgs[0]
 
             # State update operation
             old_state = latest_sg['smartGroupState']
@@ -23,7 +23,7 @@ class AzureAlertsManagementSmartGroupScenarioTest(ScenarioTest):
             updated_sg = self.cmd('alertsmanagement smart-group update-state --smart-group-id {} --state {}'
                               .format(id, new_state)).get_output_in_json()
 
-            self.assertEqual(new_state, updated_sg['smartGroupState'])
+            self.check(new_state, updated_sg['smartGroupState'])
 
 	        # Revert the state change operation
             updated_sg = self.cmd('alertsmanagement smart-group update-state --smart-group-id {} --state {}'
