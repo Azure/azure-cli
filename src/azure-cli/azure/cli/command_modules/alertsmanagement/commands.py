@@ -29,12 +29,14 @@ def load_command_table(self, _):
                             client_factory=alerts_mgmt_client_factory) as g:
         g.command('list', 'get_all')
         g.command('list-summary', 'get_summary')
+        g.command('update-state', 'change_state')
         g.show_command('show', 'get_by_id')
         g.show_command('show-history', 'get_history')
 
     with self.command_group('alertsmanagement smart-group', alertsmanagement_smart_group_util,
                             client_factory=smart_groups_mgmt_client_factory) as g:
         g.command('list', 'get_all')
+        g.command('update-state', 'change_state')
         g.show_command('show', 'get_by_id')
         g.show_command('show-history', 'get_history')
 
