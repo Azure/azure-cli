@@ -418,7 +418,7 @@ class CosmosDBTests(ScenarioTest):
         self.cmd('az cosmosdb create -n {acc} -g {rg}')
         self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
 
-        container_create = self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {ctn_name} --part {part} --ttl {ttl}').get_output_in_json()
+        container_create = self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {ctn_name} -p {part} --ttl {ttl}').get_output_in_json()
         assert container_create["sqlContainerId"] == ctn_name
         assert container_create["partitionKey"]["paths"][0] == partition_key
         assert container_create["defaultTtl"] == default_ttl
@@ -659,7 +659,7 @@ class CosmosDBTests(ScenarioTest):
         db_througput_update = self.cmd('az cosmosdb sql database throughput update -g {rg} -a {acc} -n {db_name} --throughput {tp2}').get_output_in_json()
         assert db_througput_update["throughput"] == tp2
 
-        self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {ctn_name} --part {part} --throughput {tp1}')
+        self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {ctn_name} -p {part} --throughput {tp1}')
         ctn_throughput_show = self.cmd('az cosmosdb sql container throughput show -g {rg} -a {acc} -d {db_name} -n {ctn_name}').get_output_in_json()
         assert ctn_throughput_show["throughput"] == tp1
 
@@ -751,7 +751,7 @@ class CosmosDBTests(ScenarioTest):
             'az cosmosdb gremlin database throughput update -g {rg} -a {acc} -n {db_name} --throughput {tp2}').get_output_in_json()
         assert db_througput_update["throughput"] == tp2
 
-        self.cmd('az cosmosdb gremlin graph create -g {rg} -a {acc} -d {db_name} -n {gp_name} --part {part} --throughput {tp1}')
+        self.cmd('az cosmosdb gremlin graph create -g {rg} -a {acc} -d {db_name} -n {gp_name} -p {part} --throughput {tp1}')
         col_throughput_show = self.cmd(
             'az cosmosdb gremlin graph throughput show -g {rg} -a {acc} -d {db_name} -n {gp_name}').get_output_in_json()
         assert col_throughput_show["throughput"] == tp1
