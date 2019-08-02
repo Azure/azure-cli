@@ -45,5 +45,5 @@ def load_command_table(self, _):
         g.command('list', 'cli_alertsmanagement_list_by_subscription')
         g.show_command('show', 'get_by_name')
         g.command('delete', 'delete')
-        g.command('set', 'create_update')
+        g.command('set', 'cli_alertsmanagement_set')
         g.command('update', 'update')

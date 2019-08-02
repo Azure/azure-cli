@@ -130,7 +130,7 @@ def load_arguments(self, _):
         c.argument('description_condition', options_list=['--description-condition'], required=False, help='Expected format - {<operation>:<comma separated list of values>} For eg. Contains:Test Alert')
         c.argument('alert_context_condition', options_list=['--alert-context-condition'], required=False, help='Expected format - {<operation>:<comma separated list of values>} For eg. Contains:smartgroups')
         c.argument('action_rule_type', options_list=['--action-rule-type'], required=True, help='Action rule Type')
-        c.argument('action_rule_type', options_list=['--reccurence-type'], required=True, help='Specifies the duration when the suppression should be applied')
+        c.argument('reccurence_type', options_list=['--reccurence-type'], required=True, help='Specifies the duration when the suppression should be applied')
         c.argument('suppression_start_time', options_list=['--suppression-start-time'], required=False, help='Suppression Start Time. Format 12/09/2018 06:00:00 Should be mentioned in case of Reccurent Supression Schedule - Once, Daily, Weekly or Monthly')
         c.argument('suppression_end_time', options_list=['--suppression-end-time'], required=False, help='Suppression Start Time. Format 12/09/2018 06:00:00 Should be mentioned in case of Reccurent Supression Schedule - Once, Daily, Weekly or Monthly')
         c.argument('reccurent_value', options_list=['--reccurent-value'], required=False, help='Specifies the duration when the suppression should be applied')

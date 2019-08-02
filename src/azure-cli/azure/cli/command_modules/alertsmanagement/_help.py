@@ -5,7 +5,7 @@ from knack.help_files import helps  # pylint: disable=unused-import
 
 helps['alertsmanagement'] = """
 type: group
-short-summary: Manage alerts, smart-groups and action-rules for Azure Monitor
+short-summary: Manage alerts, smart-groups and action-rules for Azure Monitor.
 """
 
 helps['alertsmanagement alert'] = """
