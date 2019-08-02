@@ -1,7 +1,9 @@
 .. :changelog:
 
 Release History
-===============
+
+**ARM**
+* Update azure-mgmt-resource package to use 3.1.0, which utilizes API version 2019-05-10, allowing copy count to be zero.
 
 **ACR**
 
@@ -118,7 +120,6 @@ Release History
 **Kubernetes**
 
 * Use https if dashboard container port is using https 
-
 
 2.0.70
 ++++++
