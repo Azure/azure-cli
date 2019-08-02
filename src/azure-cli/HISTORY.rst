@@ -168,6 +168,10 @@ Release History
 **Profile**
 * Suppress `--subscription` argument for logout command.
 
+**IoT**
+
+* Support for IoT Hub message enrichments
+
 **RBAC**
 
 * [BREAKING CHANGE] create-for-rbac: remove --password
