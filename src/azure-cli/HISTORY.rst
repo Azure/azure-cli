@@ -7,6 +7,10 @@ Release History
 
 * add "cognitiveservices account network-rule" commands.
 
+**interactive**
+
+* Fix a loading error on 2.0.70
+
 **Profile**
 
 * Add get-access-token --resource-type enum for convenience of getting access tokens for well-known resources.
