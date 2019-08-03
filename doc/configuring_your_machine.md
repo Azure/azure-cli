@@ -17,7 +17,7 @@ The Azure Python CLI projects sources are located on GitHub (https://github.com/
 
 ## Configuring your IDE
 #### Visual Studio (Windows only)
-1. Both VS 2015 and 2017 support Python development, but VS 2015 is more relible, particular on the intellisense and "Test Explorer". VS 2019 is being actively improved, and we will recommend it here once the evalution result is promising.  
+1. Both VS 2015 and 2017 support Python development, but VS 2015 is more relible, particular on the intellisense and "Test Explorer". VS 2019's Python support is being actively improved, and we will recommend it here once the evalution result is promising.  
 2. Steps to setup VS 2015:
 
    - You can install VS 2015 from https://visualstudio.microsoft.com/vs/older-downloads/
