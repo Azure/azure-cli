@@ -128,3 +128,41 @@ helps['cognitiveservices account keys list'] = """
         - name: Get current resource keys.
           text: az cognitiveservices account keys list --name myresource -g cognitive-services-resource-group
 """
+
+helps['cognitiveservices account network-rule'] = """
+type: group
+short-summary: Manage network rules.
+"""
+
+helps['cognitiveservices account network-rule add'] = """
+type: command
+short-summary: Add a network rule.
+long-summary: >
+    Rules can be created for an IPv4 address, address range (CIDR format), or a virtual network subnet.
+examples:
+  - name: Create a rule to allow a specific address-range.
+    text: az cognitiveservices account network-rule add -g myRg --name MyAccount --ip-address 23.45.1.0/24
+  - name: Create a rule to allow access for a subnet.
+    text: az cognitiveservices account network-rule add -g myRg --name MyAccount --vnet myvnet --subnet mysubnet
+"""
+
+helps['cognitiveservices account network-rule list'] = """
+type: command
+short-summary: List network rules.
+examples:
+  - name: List network rules.
+    text: az cognitiveservices account network-rule list --name MyAccount --resource-group MyResourceGroup
+    crafted: true
+"""
+
+helps['cognitiveservices account network-rule remove'] = """
+type: command
+short-summary: Remove a network rule.
+examples:
+  - name: Remove a network rule.
+    text: az cognitiveservices account network-rule remove --name MyAccount --resource-group MyResourceGroup --subnet mysubnet
+    crafted: true
+  - name: Remove a network rule.
+    text: az cognitiveservices account network-rule remove --name MyAccount --ip-address 23.45.1.0/24 --resource-group MyResourceGroup
+    crafted: true
+"""

@@ -2,6 +2,14 @@
 
 Release History
 ===============
+* Added ossrdbmsResourceId to cloud.py.
+* properly handle type errors caused by invalid JMESPath queries in core.util.handle_exception
+* `--query`: properly handle type errors caused by invalid JMESPath queries.
+
+2.0.70
+++++++
+* no changes
+
 2.0.69
 ++++++
 * Fixed issue where `--subscription` would appear despite being suppressed on certain commands.

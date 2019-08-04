@@ -7,8 +7,6 @@ from knack.log import get_logger
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
 from azure.cli.core.util import sdk_no_wait
-from ._client_factory import cf_hdinsight_script_actions, cf_hdinsight_script_execution_history
-
 
 logger = get_logger(__name__)
 
@@ -54,14 +52,9 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
     location = location or _get_rg_location(cmd.cli_ctx, resource_group_name)
 
     # Format dictionary/free-form arguments
-    if cluster_configurations:
-        import json
-        try:
-            cluster_configurations = json.loads(cluster_configurations)
-        except ValueError as ex:
-            raise CLIError('The cluster_configurations argument must be valid JSON. Error: {}'.format(str(ex)))
-    else:
+    if not cluster_configurations:
         cluster_configurations = dict()
+
     if component_version:
         # See validator
         component_version = {c: v for c, v in [version.split('=') for version in component_version]}
@@ -330,15 +323,13 @@ def create_hdi_application(cmd, client, resource_group_name, cluster_name, appli
                            script_uri, script_action_name, script_parameters=None, edgenode_size='Standard_D3_V2',
                            ssh_username='sshuser', ssh_password=None, ssh_public_key=None,
                            marketplace_identifier=None, application_type='CustomApplication', tags=None,
-                           https_endpoint_access_mode=None, https_endpoint_location=None,
-                           https_endpoint_destination_port=8080, https_endpoint_public_port=443,
+                           https_endpoint_access_mode='WebPage', https_endpoint_destination_port=8080,
                            sub_domain_suffix=None, disable_gateway_auth=None,
-                           ssh_endpoint_location=None, ssh_endpoint_destination_port=22, ssh_endpoint_public_port=22,
                            vnet_name=None, subnet=None, no_validation_timeout=False):
     from .util import build_virtual_network_profile
     from azure.mgmt.hdinsight.models import Application, ApplicationProperties, ComputeProfile, RuntimeScriptAction, \
         Role, LinuxOperatingSystemProfile, HardwareProfile, \
-        ApplicationGetHttpsEndpoint, ApplicationGetEndpoint, OsProfile
+        ApplicationGetHttpsEndpoint, OsProfile, SshProfile, SshPublicKey
 
     # Specify virtual network profile only when network arguments are provided
     virtual_network_profile = subnet and build_virtual_network_profile(subnet)
@@ -347,7 +338,11 @@ def create_hdi_application(cmd, client, resource_group_name, cluster_name, appli
         linux_operating_system_profile=LinuxOperatingSystemProfile(
             username=ssh_username,
             password=ssh_password,
-            ssh_public_key=ssh_public_key
+            ssh_profile=ssh_public_key and SshProfile(
+                public_keys=[SshPublicKey(
+                    certificate_data=ssh_public_key
+                )]
+            )
         )
     )
 
@@ -362,30 +357,14 @@ def create_hdi_application(cmd, client, resource_group_name, cluster_name, appli
     ]
 
     # Validate network profile parameters
-    if not _all_or_none(https_endpoint_access_mode, https_endpoint_location):
-        raise CLIError('Either both the https endpoint location and access mode should be specified, '
-                       'or neither should be.')
-
     https_endpoints = []
-    if https_endpoint_location:
+    if sub_domain_suffix:
         https_endpoints.append(
             ApplicationGetHttpsEndpoint(
                 access_modes=[https_endpoint_access_mode],
-                location=https_endpoint_location,
                 destination_port=https_endpoint_destination_port,
-                public_port=https_endpoint_public_port,
                 sub_domain_suffix=sub_domain_suffix,
                 disable_gateway_auth=disable_gateway_auth
-            )
-        )
-
-    ssh_endpoints = []
-    if ssh_endpoint_location:
-        ssh_endpoints.append(
-            ApplicationGetEndpoint(
-                location=ssh_endpoint_location,
-                destination_port=ssh_endpoint_destination_port,
-                public_port=ssh_endpoint_public_port
             )
         )
 
@@ -402,7 +381,6 @@ def create_hdi_application(cmd, client, resource_group_name, cluster_name, appli
             )
         ],
         https_endpoints=https_endpoints,
-        ssh_endpoints=ssh_endpoints,
         application_type=application_type,
         marketplace_identifier=marketplace_identifier,
     )
@@ -416,28 +394,40 @@ def create_hdi_application(cmd, client, resource_group_name, cluster_name, appli
 
 
 # pylint: disable=unused-argument
-def enable_hdi_monitoring(cmd, client, resource_group_name, cluster_name, workspace, no_validation_timeout=False):
+def enable_hdi_monitoring(cmd, client, resource_group_name, cluster_name, workspace,
+                          primary_key=None, workspace_type='resource_id', no_validation_timeout=False):
     from msrestazure.tools import parse_resource_id
     from ._client_factory import cf_log_analytics
 
-    parsed_workspace = parse_resource_id(workspace)
-    workspace_resource_group_name = parsed_workspace['resource_group']
-    workspace_name = parsed_workspace['resource_name']
+    if workspace_type != 'resource_id' and not primary_key:
+        raise CLIError('primary key is required when workspace ID is provided')
 
-    log_analytics_client = cf_log_analytics(cmd.cli_ctx)
-    log_analytics_workspace = log_analytics_client.workspaces.get(workspace_resource_group_name, workspace_name)
-    if not log_analytics_workspace:
-        raise CLIError('Fails to retrieve workspace by {}'.format(workspace))
+    workspace_id = workspace
+    if workspace_type == 'resource_id':
+        parsed_workspace = parse_resource_id(workspace)
+        workspace_resource_group_name = parsed_workspace['resource_group']
+        workspace_name = parsed_workspace['resource_name']
 
-    shared_keys = log_analytics_client.workspaces.get_shared_keys(workspace_resource_group_name, workspace_name)
-    if not shared_keys:
-        raise CLIError('Fails to retrieve shared key for workspace {}'.format(log_analytics_workspace))
+        log_analytics_client = cf_log_analytics(cmd.cli_ctx)
+        log_analytics_workspace = log_analytics_client.workspaces.get(workspace_resource_group_name, workspace_name)
+        if not log_analytics_workspace:
+            raise CLIError('Fails to retrieve workspace by {}'.format(workspace))
+
+        # Only retrieve primary key when not provided
+        if not primary_key:
+            shared_keys = log_analytics_client.workspaces.get_shared_keys(workspace_resource_group_name, workspace_name)
+            if not shared_keys:
+                raise CLIError('Fails to retrieve shared key for workspace {}'.format(log_analytics_workspace))
+
+            primary_key = shared_keys.primary_shared_key
+
+        workspace_id = log_analytics_workspace.customer_id
 
     return client.enable_monitoring(
         resource_group_name,
         cluster_name,
-        log_analytics_workspace.customer_id,
-        shared_keys.primary_shared_key)
+        workspace_id,
+        primary_key)
 
 
 # pylint: disable=unused-argument
@@ -451,17 +441,8 @@ def execute_hdi_script_action(cmd, client, resource_group_name, cluster_name,
             name=script_action_name,
             uri=script_uri,
             parameters=script_parameters,
-            roles=roles.split(',')
+            roles=roles
         )
     ]
 
     return client.execute_script_actions(resource_group_name, cluster_name, persist_on_success, script_actions_params)
-
-
-def list_hdi_script_actions(cmd, resource_group_name, cluster_name, persisted=False):
-    if persisted:
-        client = cf_hdinsight_script_actions(cmd.cli_ctx)
-    else:
-        client = cf_hdinsight_script_execution_history(cmd.cli_ctx)
-
-    return client.list_by_cluster(resource_group_name, cluster_name)

@@ -643,6 +643,51 @@ examples:
         --endpoint-name {endpointName}
 """
 
+helps['iot hub message-enrichment'] = """
+type: group
+short-summary: Manage message enrichments for endpoints of an IoT Hub.
+"""
+
+helps['iot hub message-enrichment create'] = """
+type: command
+short-summary: Create a message enrichment for chosen endpoints in your IoT Hub
+long-summary: Create a message enrichment for chosen endpoints in your IoT Hub
+examples:
+  - name: Create a message enrichment of {"key":"value"} for the "events" endpoint in your IoT Hub
+    text: >
+      az iot hub message-enrichment create --key key --value value --endpoints events -n {iothub_name}
+"""
+
+helps['iot hub message-enrichment update'] = """
+type: command
+short-summary: Update a message enrichment in your IoT hub (by key)
+long-summary: Update a message enrichment in your IoT hub (by key)
+examples:
+  - name: Update a message enrichment in your IoT hub to apply to a new set of endpoints
+    text: >
+      az iot hub message-enrichment update --key {key} --value {value} --endpoints NewEndpoint1 NewEndpoint2 -n {iothub_name}
+"""
+
+helps['iot hub message-enrichment delete'] = """
+type: command
+short-summary: Delete a message enrichment in your IoT hub (by key)
+long-summary: Delete a message enrichment in your IoT hub (by key)
+examples:
+  - name: Delete a message enrichment with key 'test' from your IoT Hub
+    text: >
+      az iot hub message-enrichment delete --key test -n {iothub_name}
+"""
+
+helps['iot hub message-enrichment list'] = """
+type: command
+short-summary: Get information on all message enrichments for your IoT Hub
+long-summary: Get information on all message enrichments for your IoT Hub
+examples:
+  - name: List all message enrichments for your IoT Hub
+    text: >
+      az iot hub message-enrichment list -n {iothub_name}
+"""
+
 helps['iot hub show'] = """
 type: command
 short-summary: Get the details of an IoT hub.
