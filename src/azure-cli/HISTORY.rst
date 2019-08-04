@@ -19,6 +19,10 @@ Release History
 
 * `--query`: properly handle type errors caused by invalid JMESPath queries.
 
+**Storage**
+
+* `storage copy`: add copy command for storage
+
 2.0.70
 ++++++
 
