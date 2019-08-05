@@ -1401,13 +1401,14 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
     # TODO: need to add an --admin option?
     aks_get_credentials(cmd, client, resource_group_name, name, admin=False, path=browse_path)
 
+    # Change to https if RBAC is enabled
     protocol = 'http'
 
     # find the dashboard pod's name
     try:
         dashboard_pod = subprocess.check_output(
-            ["kubectl", "get", "pods", "--kubeconfig", browse_path, "--namespace", "kube-system", "--output", "name",
-             "--selector", "k8s-app=kubernetes-dashboard"],
+            ["kubectl", "get", "pods", "--kubeconfig", browse_path, "--namespace", "kube-system", 
+            "--output", "name", "--selector", "k8s-app=kubernetes-dashboard"],
             universal_newlines=True)
     except subprocess.CalledProcessError as err:
         raise CLIError('Could not find dashboard pod: {}'.format(err))
@@ -1417,9 +1418,8 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
     else:
         raise CLIError("Couldn't find the Kubernetes dashboard pod.")
 
-    # Find the port
+    # Find the port 
     try:
-        # output format: b"'{port}'"
         dashboard_port = subprocess.check_output(
             ["kubectl", "get", "pods", "--kubeconfig", browse_path, "--namespace", "kube-system",
              "--selector", "k8s-app=kubernetes-dashboard",
@@ -1428,6 +1428,7 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
     except subprocess.CalledProcessError as err:
         raise CLIError('Could not find dashboard port: {}'.format(err))
     if dashboard_port:
+        # output format: b"'{port}'"
         dashboard_port = int((dashboard_port.decode('utf-8').replace("'", "")))
         if dashboard_port == 8443:
             protocol = 'https'
