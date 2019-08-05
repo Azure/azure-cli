@@ -1407,8 +1407,8 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
     # find the dashboard pod's name
     try:
         dashboard_pod = subprocess.check_output(
-            ["kubectl", "get", "pods", "--kubeconfig", browse_path, "--namespace", "kube-system", 
-            "--output", "name", "--selector", "k8s-app=kubernetes-dashboard"],
+            ["kubectl", "get", "pods", "--kubeconfig", browse_path, "--namespace", "kube-system",
+             "--output", "name", "--selector", "k8s-app=kubernetes-dashboard"],
             universal_newlines=True)
     except subprocess.CalledProcessError as err:
         raise CLIError('Could not find dashboard pod: {}'.format(err))
@@ -1418,7 +1418,7 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
     else:
         raise CLIError("Couldn't find the Kubernetes dashboard pod.")
 
-    # Find the port 
+    # Find the port
     try:
         dashboard_port = subprocess.check_output(
             ["kubectl", "get", "pods", "--kubeconfig", browse_path, "--namespace", "kube-system",
