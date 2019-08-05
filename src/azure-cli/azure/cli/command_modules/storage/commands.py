@@ -51,10 +51,10 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('storage', command_type=block_blob_sdk,
                             custom_command_type=get_custom_sdk('azcopy', blob_data_service_factory)) as g:
-        g.storage_custom_command_oauth('remove', 'storage_remove')
+        g.storage_custom_command_oauth('remove', 'storage_remove', is_preview=True)
 
     with self.command_group('storage', custom_command_type=get_custom_sdk('azcopy', None)) as g:
-        g.custom_command('copy', 'storage_copy')
+        g.custom_command('copy', 'storage_copy', is_preview=True)
 
     with self.command_group('storage account', storage_account_sdk, resource_type=ResourceType.MGMT_STORAGE,
                             custom_command_type=storage_account_custom_type) as g:
@@ -213,7 +213,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('storage blob', command_type=block_blob_sdk,
                             custom_command_type=get_custom_sdk('azcopy', blob_data_service_factory)) as g:
-        g.storage_custom_command_oauth('sync', 'storage_blob_sync')
+        g.storage_custom_command_oauth('sync', 'storage_blob_sync', is_preview=True)
 
     with self.command_group('storage container', command_type=block_blob_sdk,
                             custom_command_type=get_custom_sdk('blob', blob_data_service_factory)) as g:
