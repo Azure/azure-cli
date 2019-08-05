@@ -14,6 +14,15 @@ from azure.cli.core.util import in_cloud_console
 
 logger = get_logger(__name__)
 
+cloud_resource_type_mappings = {
+    "oss-rdbms": "ossrdbms_resource_id",
+    "arm": "active_directory_resource_id",
+    "aad-graph": "active_directory_graph_resource_id",
+    "ms-graph": "microsoft_gragh_resource_id",
+    "batch": "batch_resource_id",
+    "media": "media_resource_id",
+    "data-lake": "active_directory_data_lake_resource_id"
+}
 
 _CLOUD_CONSOLE_LOGOUT_WARNING = ("Logout successful. Re-login to your initial Cloud Shell identity with"
                                  " 'az login --identity'. Login with a new identity with 'az login'.")
@@ -50,13 +59,18 @@ def show_subscription(cmd, subscription=None, show_auth_for_sdk=None):
     print(json.dumps(profile.get_sp_auth_info(subscription), indent=2))
 
 
-def get_access_token(cmd, subscription=None, resource=None):
+def get_access_token(cmd, subscription=None, resource=None, resource_type=None):
     '''
     get AAD token to access to a specified resource
     :param resource: Azure resource endpoints. Default to Azure Resource Manager
+    :param resource-type: Name of Azure resource endpoints. Can be used instead of resource.
     Use 'az cloud show' command for other Azure resources
     '''
-    resource = (resource or cmd.cli_ctx.cloud.endpoints.active_directory_resource_id)
+    if resource is None and resource_type is not None:
+        endpoints_attr_name = cloud_resource_type_mappings[resource_type]
+        resource = getattr(cmd.cli_ctx.cloud.endpoints, endpoints_attr_name)
+    else:
+        resource = (resource or cmd.cli_ctx.cloud.endpoints.active_directory_resource_id)
     profile = Profile(cli_ctx=cmd.cli_ctx)
     creds, subscription, tenant = profile.get_raw_token(subscription=subscription, resource=resource)
     return {

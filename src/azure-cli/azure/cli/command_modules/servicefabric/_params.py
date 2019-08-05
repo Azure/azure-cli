@@ -31,7 +31,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('vm_os', arg_type=get_enum_type(['WindowsServer2012R2Datacenter',
                                                     'WindowsServer2016Datacenter',
                                                     'WindowsServer2016DatacenterwithContainers',
-                                                    'UbuntuServer1604']),
+                                                    'UbuntuServer1604',
+                                                    'WindowsServer1709',
+                                                    'WindowsServer1709withContainers',
+                                                    'WindowsServer1803withContainers',
+                                                    'WindowsServer1809withContainers',
+                                                    'WindowsServer2019Datacenter',
+                                                    'WindowsServer2019DatacenterwithContainers']),
                    default='WindowsServer2016Datacenter', options_list=['--vm-os', '--os'],
                    help='The Operating System of the VMs that make up the cluster.')
         c.argument('node_type', help='the Node type name.')

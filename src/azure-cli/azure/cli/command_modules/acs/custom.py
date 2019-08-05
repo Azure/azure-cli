@@ -1001,7 +1001,7 @@ def _k8s_get_credentials_internal(name, acs_info, path, ssh_key_file, overwrite_
 
 
 def _handle_merge(existing, addition, key, replace):
-    if not addition[key]:
+    if not addition.get(key, False):
         return
     if existing[key] is None:
         existing[key] = addition[key]
@@ -1009,6 +1009,8 @@ def _handle_merge(existing, addition, key, replace):
 
     for i in addition[key]:
         for j in existing[key]:
+            if not i.get('name', False) or not j.get('name', False):
+                continue
             if i['name'] == j['name']:
                 if replace or i == j:
                     existing[key].remove(j)
@@ -2070,6 +2072,12 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
 
     workspace_region = "eastus"
     workspace_region_code = "EUS"
+
+    # sanity check that locations and clouds match.
+    if ((cloud_name.lower() == 'azurecloud' and AzureChinaRegionToOmsRegionMap.get(rg_location, False)) or
+            (cloud_name.lower() == 'azurechinacloud' and AzureCloudRegionToOmsRegionMap.get(rg_location, False))):
+        raise CLIError('Wrong cloud ({}) setting for region {}, please use "az cloud set ..."'.format(
+            cloud_name.lower(), rg_location))
 
     if cloud_name.lower() == 'azurecloud':
         workspace_region = AzureCloudRegionToOmsRegionMap.get(rg_location, "eastus")

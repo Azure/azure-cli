@@ -2,6 +2,58 @@
 
 Release History
 ===============
+
+**CognitiveServices**
+
+* add "cognitiveservices account network-rule" commands.
+
+**HDInsight**
+
+* BREAKING CHANGE:
+    create:
+        - Renamed --storage-default-container to --storage-container and --storage-default-filesystem to --storage-filesystem
+    application create: 
+        - Changed the --name/-n argument to represent the application name instead of the cluster name and added a separate --cluster-name argument
+        - Renamed --application-type to --type/-t
+        - Renamed --marketplace-identifier to --marketplace-id
+        - Renamed --https-endpoint-access-mode to --access-mode and --https-endpoint-destination-port to --destination-port
+        - Removed --https-endpoint-location, --https-endpoint-public-port, --ssh-endpoint-destination-port, --ssh-endpoint-location and --ssh-endpoint-public-port
+    resize:
+        - Renamed --target-instance-count to --workernode-count/-c
+    script-action
+        - Changed --name/-n to represent the name of the script action and added the --cluster-name argument to represent the cluster name
+        - Changed --script-execution-id to --execution-id
+        - Renamed the "show" command to "show-execution-details"
+    script-action execute:
+        - Made parameters for the --roles argument space separated instead of comma separated
+    script-action list:
+        - Removed the --persisted parameter
+* create:
+    Enabled the --cluster-configurations argument to accept a path to a local JSON file or a JSON string as the parameter
+* script-action list-execution-history:
+    Added this command to list the execution history for all script action executions
+* monitor enable:
+    Enabled the --workspace argument to accept a Log Analytics workspace ID or workspace name as the parameter
+    Added the --primary-key argument, which is needed if a workspace ID is provided as the parameter 
+* Added more examples and updated descriptions for help messages
+
+**interactive**
+
+* Fix a loading error on 2.0.70
+
+**Profile**
+
+* Add get-access-token --resource-type enum for convenience of getting access tokens for well-known resources.
+
+**ServiceFabric**
+
+* Fix for issue #6112 - added all supported os version for sf cluster create
+* Fix for issue #6536 - primary certificate validation bug
+
+**Storage**
+
+* `storage copy`: add copy command for storage
+
 2.0.70
 ++++++
 
@@ -14,6 +66,10 @@ Release History
 * az webapp config ssl support to show a message if a resource is not found
 * Fixed issue where `az functionapp create` does not accept Standard_RAGRS storage account type.
 * Fixed an issue where az webapp up would fail if run using older versions of python
+
+**Monitor**
+
+* `metrics alert create`: Allow '/' and '.' characters in namespace name to support custom metrics.
 
 **Network**
 
@@ -61,6 +117,7 @@ Release History
 **Core**
 
 * Fixed issue where `--subscription` would appear despite being not applicable.
+* Added ossrdbmsResourceId to cloud.py.
 
 **BATCH**
 
@@ -144,6 +201,10 @@ Release History
 
 **Profile**
 * Suppress `--subscription` argument for logout command.
+
+**IoT**
+
+* Support for IoT Hub message enrichments
 
 **RBAC**
 

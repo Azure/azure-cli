@@ -285,8 +285,8 @@ def load_arguments(self, _):
         c.argument('attach_data_disks', nargs='+', help='Attach existing data disks to the VM. Can use the name or ID of a managed disk or the URI to an unmanaged disk VHD.')
 
     with self.argument_context('vm create', arg_group='Dedicated Host', min_api='2019-03-01') as c:
-        c.argument('dedicated_host_group', options_list=['--host-group'], help="Name of the dedicated host group containing the dedicated host this VM will reside in.")
-        c.argument('dedicated_host', options_list=['--host'], help="Name or ID of the dedicated host this VM will reside in. If a name is specified, a host group must be specified via `--host-group`.")
+        c.argument('dedicated_host_group', options_list=['--host-group'], is_preview=True, help="Name of the dedicated host group containing the dedicated host this VM will reside in.")
+        c.argument('dedicated_host', options_list=['--host'], is_preview=True, help="Name or ID of the dedicated host this VM will reside in. If a name is specified, a host group must be specified via `--host-group`.")
 
     with self.argument_context('vm open-port') as c:
         c.argument('vm_name', name_arg_type, help='The name of the virtual machine to open inbound traffic on.')
@@ -408,8 +408,8 @@ def load_arguments(self, _):
         c.ignore('expand')
 
     with self.argument_context('vm host create') as c:
-        c.argument('platform_fault_domain', options_list=['--platform-fault-domain', '-d'], type=int, choices=[0, 1, 2],
-                   help="Fault domain of the host within a group.")
+        c.argument('platform_fault_domain', options_list=['--platform-fault-domain', '-d'], type=int,
+                   help="Fault domain of the host within a group. Allowed values: 0, 1, 2")
         c.argument('auto_replace_on_failure', options_list=['--auto-replace'], arg_type=get_three_state_flag(),
                    help="Replace the host automatically if a failure occurs")
         c.argument('license_type', arg_type=get_enum_type(DedicatedHostLicenseTypes),
@@ -425,7 +425,7 @@ def load_arguments(self, _):
 
     with self.argument_context('vm host group create') as c:
         c.argument('platform_fault_domain_count', options_list=["--platform-fault-domain-count", "-c"], type=int,
-                   choices=[1, 2, 3], help="Number of fault domains that the host group can span.")
+                   help="Number of fault domains that the host group can span. Allowed values: 1, 2, 3")
         c.argument('zones', zone_type)
 
     for scope in ["vm host", "vm host group"]:
