@@ -894,7 +894,7 @@ class PolicyScenarioTest(ScenarioTest):
         cmd = self.cmdstring('policy definition delete -n {dpn}', management_group, subscription)
         self.cmd(cmd)
         time.sleep(10)
-        
+
         # ensure the policy is gone when run live.
         cmd = self.cmdstring('policy definition list', management_group, subscription)
         self.cmd(cmd, checks=self.check("length([?name=='{pn}'])", 0))
