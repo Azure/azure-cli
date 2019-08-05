@@ -201,7 +201,7 @@ Submitting Pull Requests
 
 ### Modify Change Log
 
-Modify the `HISTORY.rst` for any customer-facing changes. If a module has changed at all since a previous release so that a version bump is required, it is fine to add a generic entry that says "* Minor fixes.".
+Modify the `HISTORY.rst` for any customer-facing changes. 
 
 This will be the release notes for the next release.
 
@@ -212,7 +212,8 @@ e.g.:
 Release History
 ===============
 
-+++++
+**<command module>**
+
 * This is my customer-facing change.
 
 0.0.2
