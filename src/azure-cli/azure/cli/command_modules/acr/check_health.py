@@ -182,7 +182,7 @@ def _get_registry_status(login_server, registry_name, ignore_errors):
     import socket
     from requests.exceptions import SSLError
 
-    registry_ip = ""
+    registry_ip = None
 
     try:
         registry_ip = socket.gethostbyname(login_server)
@@ -199,13 +199,14 @@ def _get_registry_status(login_server, registry_name, ignore_errors):
     import requests
     from azure.cli.core.util import should_disable_connection_verify
 
-    ssl_error_occured = False
     try:
         challenge = requests.get('https://' + login_server + '/v2/', verify=(not should_disable_connection_verify()))
     except SSLError:
-        ssl_error_occured = True
+        from ._errors import CONNECTIVITY_SSL_ERROR
+        _handle_error(CONNECTIVITY_SSL_ERROR.format_error_message(login_server), ignore_errors)
+        return False
 
-    if ssl_error_occured or challenge.status_code == 403:
+    if challenge.status_code == 403:
         from ._errors import CONNECTIVITY_FORBIDDEN_ERROR
         _handle_error(CONNECTIVITY_FORBIDDEN_ERROR.format_error_message(login_server, registry_name), ignore_errors)
         return False
