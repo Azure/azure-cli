@@ -7,6 +7,10 @@ Release History
 
 * add "cognitiveservices account network-rule" commands.
 
+**Cosmos DB**
+
+* remove warning when updating multiple write locations
+
 **HDInsight**
 
 * BREAKING CHANGE:
@@ -53,6 +57,10 @@ Release History
 **Storage**
 
 * `storage copy`: add copy command for storage
+
+**Cosmos DB**
+
+* Added CRUD commands for CosmosDB SQL, MongoDB, Cassandra, Gremlin and Table resources and resource's throughput.
 
 2.0.70
 ++++++
