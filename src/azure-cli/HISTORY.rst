@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**Policy**
+
+* Support for Policy new API version 2019-01-01
+
 **CognitiveServices**
 
 * add "cognitiveservices account network-rule" commands.
@@ -85,10 +89,6 @@ Release History
 * network application-gateway http-settings create/update: Fixes #9604. Add `--root-certs` to support user associate trusted root certificates with the HTTP settings.
 * network dns record-set ns create: Fixes #9965. Support --subscription again by moving the supression into lower scope.
 * network watcher test-ip-flow: Fixes #9845. Fixes #9844. Correct the error messages and help message for the `--vm` and `--nic` arguments. Only providing the name of the vm or nic without `--resource-group` will raise CLI usage error.
-
-**Policy**
-
-* Support for Policy new API version 2019-01-01
 
 **RBAC**
 
