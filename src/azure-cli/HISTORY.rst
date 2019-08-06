@@ -7,6 +7,13 @@ Release History
 
 * az webapp webjob continuous group commands were failing for slots
 
+**BotService**
+
+* BREAKING CHANGE:
+    create:
+        - Removed support for creating v3 SDK bots
+        - Remove `az bot publish` example when creating a Web App bot
+
 **CognitiveServices**
 
 * add "cognitiveservices account network-rule" commands.
