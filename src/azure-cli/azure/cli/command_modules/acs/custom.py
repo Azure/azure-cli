@@ -1401,7 +1401,7 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
     # TODO: need to add an --admin option?
     aks_get_credentials(cmd, client, resource_group_name, name, admin=False, path=browse_path)
 
-    # Change to https if RBAC is enabled
+    # Change to https if dashboard container is using https
     protocol = 'http'
 
     # find the dashboard pod's name

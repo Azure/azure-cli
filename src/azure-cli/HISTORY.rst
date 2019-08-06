@@ -2,6 +2,7 @@
 
 Release History
 ===============
+<<<<<<< HEAD
 
 **CognitiveServices**
 
@@ -65,6 +66,8 @@ Release History
 ##Kubernetes**
 
 * Use https if dashboard container port is using https 
+
+=======
 
 2.0.70
 ++++++
