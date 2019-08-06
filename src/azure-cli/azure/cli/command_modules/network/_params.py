@@ -359,7 +359,7 @@ def load_arguments(self, _):
 
     with self.argument_context('network application-gateway identity', min_api='2019-04-01') as c:
         c.argument('identity_type', help="The type of identity used for the resource.", arg_type=get_enum_type(['SystemAssigned', 'UserAssigned', 'None']))
-        c.argument('user_assigned_identity', help="Name or ID of the ManagedIdentity Resource", validator=validate_application_gateway_identity)
+        c.argument('user_assigned_identity', options_list=['--identity'], help="Name or ID of the ManagedIdentity Resource", validator=validate_application_gateway_identity)
         c.argument('principal_id', help='The principal id of user assigned identity.')
         c.argument('client_id', help='The client id of user assigned identity.')
     # endregion

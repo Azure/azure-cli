@@ -341,9 +341,19 @@ type: group
 short-summary: Manage the identity information
 """
 
-helps['network application-gateway identity set'] = """
+helps['network application-gateway identity assign'] = """
 type: command
-short-summary: Set the property of identity
+short-summary: Assign a managed service identity to the application-gateway
+"""
+
+helps['network application-gateway identity remove'] = """
+type: command
+short-summary: Remove a managed service identity to the application-gateway
+"""
+
+helps['network application-gateway identity show'] = """
+type: command
+short-summary: Show a managed service identity of the application-gateway
 """
 
 helps['network application-gateway list'] = """
