@@ -44,13 +44,15 @@ def load_command_table(self, _):
         g.custom_command('list', 'cli_cosmosdb_list')
 
     # SQL api
-    with self.command_group('cosmosdb sql database', cosmosdb_sdk, client_factory=cf_db_accounts, is_preview=True) as g:
+    with self.command_group('cosmosdb sql', is_preview=True):
+        pass
+    with self.command_group('cosmosdb sql database', cosmosdb_sdk, client_factory=cf_db_accounts) as g:
         g.custom_command('create', 'cli_cosmosdb_sql_database_create')
         g.command('list', 'list_sql_databases')
         g.command('show', 'get_sql_database')
         g.command('delete', 'delete_sql_database')
 
-    with self.command_group('cosmosdb sql container', cosmosdb_sdk, client_factory=cf_db_accounts, is_preview=True) as g:
+    with self.command_group('cosmosdb sql container', cosmosdb_sdk, client_factory=cf_db_accounts) as g:
         g.custom_command('create', 'cli_cosmosdb_sql_container_create')
         g.custom_command('update', 'cli_cosmosdb_sql_container_update')
         g.command('list', 'list_sql_containers')
@@ -58,13 +60,15 @@ def load_command_table(self, _):
         g.command('delete', 'delete_sql_container')
 
     # MongoDB api
-    with self.command_group('cosmosdb mongodb database', cosmosdb_sdk, client_factory=cf_db_accounts, is_preview=True) as g:
+    with self.command_group('cosmosdb mongodb', is_preview=True):
+        pass
+    with self.command_group('cosmosdb mongodb database', cosmosdb_sdk, client_factory=cf_db_accounts) as g:
         g.custom_command('create', 'cli_cosmosdb_mongodb_database_create')
         g.command('list', 'list_mongo_db_databases')
         g.command('show', 'get_mongo_db_database')
         g.command('delete', 'delete_mongo_db_database')
 
-    with self.command_group('cosmosdb mongodb collection', cosmosdb_sdk, client_factory=cf_db_accounts, is_preview=True) as g:
+    with self.command_group('cosmosdb mongodb collection', cosmosdb_sdk, client_factory=cf_db_accounts) as g:
         g.custom_command('create', 'cli_cosmosdb_mongodb_collection_create')
         g.custom_command('update', 'cli_cosmosdb_mongodb_collection_update')
         g.command('list', 'list_mongo_db_collections')
@@ -72,13 +76,15 @@ def load_command_table(self, _):
         g.command('delete', 'delete_mongo_db_collection')
 
     # Cassandra api
-    with self.command_group('cosmosdb cassandra keyspace', cosmosdb_sdk, client_factory=cf_db_accounts, is_preview=True) as g:
+    with self.command_group('cosmosdb cassandra', is_preview=True):
+        pass
+    with self.command_group('cosmosdb cassandra keyspace', cosmosdb_sdk, client_factory=cf_db_accounts) as g:
         g.custom_command('create', 'cli_cosmosdb_cassandra_keyspace_create')
         g.command('list', 'list_cassandra_keyspaces')
         g.command('show', 'get_cassandra_keyspace')
         g.command('delete', 'delete_cassandra_keyspace')
 
-    with self.command_group('cosmosdb cassandra table', cosmosdb_sdk, client_factory=cf_db_accounts, is_preview=True) as g:
+    with self.command_group('cosmosdb cassandra table', cosmosdb_sdk, client_factory=cf_db_accounts) as g:
         g.custom_command('create', 'cli_cosmosdb_cassandra_table_create')
         g.custom_command('update', 'cli_cosmosdb_cassandra_table_update')
         g.command('list', 'list_cassandra_tables')
@@ -86,13 +92,15 @@ def load_command_table(self, _):
         g.command('delete', 'delete_cassandra_table')
 
     # Gremlin api
-    with self.command_group('cosmosdb gremlin database', cosmosdb_sdk, client_factory=cf_db_accounts, is_preview=True) as g:
+    with self.command_group('cosmosdb gremlin', is_preview=True):
+        pass
+    with self.command_group('cosmosdb gremlin database', cosmosdb_sdk, client_factory=cf_db_accounts) as g:
         g.custom_command('create', 'cli_cosmosdb_gremlin_database_create')
         g.command('list', 'list_gremlin_databases')
         g.command('show', 'get_gremlin_database')
         g.command('delete', 'delete_gremlin_database')
 
-    with self.command_group('cosmosdb gremlin graph', cosmosdb_sdk, client_factory=cf_db_accounts, is_preview=True) as g:
+    with self.command_group('cosmosdb gremlin graph', cosmosdb_sdk, client_factory=cf_db_accounts) as g:
         g.custom_command('create', 'cli_cosmosdb_gremlin_graph_create')
         g.custom_command('update', 'cli_cosmosdb_gremlin_graph_update')
         g.command('list', 'list_gremlin_graphs')
