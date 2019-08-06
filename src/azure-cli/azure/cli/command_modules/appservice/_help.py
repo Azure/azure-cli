@@ -1553,7 +1553,7 @@ type: command
 short sumamry: list the hybrid-connections on a webapp
 examples:
   - name: list the hybrid-connections on a webapp
-    text: az webapp list hybrid-connection -g MyResourceGroup -n MyWebapp -s [slot]
+    text: az webapp hybrid-connection list -g MyResourceGroup -n MyWebapp -s [slot]
 """
 
 helps['webapp hybrid-connection add'] = """
@@ -1561,7 +1561,7 @@ type: command
 short sumamry: add a hybrid-connection to a webapp
 examples:
   - name: add a hybrid-connection to a webapp
-    text: az webapp add hybrid-connection -g MyResourceGroup -n MyWebapp --namespace [HybridConnectionNamespace] --hybrid-connection [HybridConnectionName] -s [slot]
+    text: az webapp hybrid-connection add -g MyResourceGroup -n MyWebapp --namespace [HybridConnectionNamespace] --hybrid-connection [HybridConnectionName] -s [slot]
 """
 
 helps['webapp hybrid-connection remove'] = """
@@ -1569,7 +1569,7 @@ type: command
 short sumamry: remove a hybrid-connection from a webapp
 examples:
   - name: remove a hybrid-connection from a webapp
-    text: az webapp remove hybrid-connection -g MyResourceGroup -n MyWebapp --namespace [HybridConnectionNamespace] --hybrid-connection [HybridConnectionName] -s [slot]
+    text: az webapp hybrid-connection remove  -g MyResourceGroup -n MyWebapp --namespace [HybridConnectionNamespace] --hybrid-connection [HybridConnectionName] -s [slot]
 """
 
 helps['functionapp hybrid-connection'] = """
@@ -1582,7 +1582,7 @@ type: command
 short sumamry: list the hybrid-connections on a functionapp
 examples:
   - name: list the hybrid-connections on a functionapp
-    text: az functionapp list hybrid-connection -g MyResourceGroup -n MyWebapp -s [slot]
+    text: az functionapp hybrid-connection list -g MyResourceGroup -n MyWebapp -s [slot]
 """
 
 helps['functionapp hybrid-connection add'] = """
@@ -1590,7 +1590,7 @@ type: command
 short sumamry: add a hybrid-connection to a functionapp
 examples:
   - name: add a hybrid-connection to a functionapp
-    text: az functionapp add hybrid-connection -g MyResourceGroup -n MyWebapp --namespace [HybridConnectionNamespace] --hybrid-connection [HybridConnectionName] -s [slot]
+    text: az functionapp hybrid-connection add -g MyResourceGroup -n MyWebapp --namespace [HybridConnectionNamespace] --hybrid-connection [HybridConnectionName] -s [slot]
 """
 
 helps['functionapp hybrid-connection remove'] = """
@@ -1598,7 +1598,7 @@ type: command
 short sumamry: remove a hybrid-connection from a functionapp
 examples:
   - name: remove a hybrid-connection from a functionapp
-    text: az functionapp remove hybrid-connection -g MyResourceGroup -n MyWebapp --namespace [HybridConnectionNamespace] --hybrid-connection [HybridConnectionName] -s [slot]
+    text: az functionapp hybrid-connection remove -g MyResourceGroup -n MyWebapp --namespace [HybridConnectionNamespace] --hybrid-connection [HybridConnectionName] -s [slot]
 """
 
 helps['appservice hybrid-connection set-key'] = """
