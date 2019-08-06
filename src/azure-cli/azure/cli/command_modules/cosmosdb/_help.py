@@ -204,3 +204,437 @@ examples:
     text: az cosmosdb keys list --name MyCosmosDBDatabaseAccount --resource-group MyResourceGroup --subscription MySubscription
     crafted: true
 """
+
+helps['cosmosdb sql'] = """
+type: group
+short-summary: Manage SQL resources of Azure Cosmos DB account.
+"""
+
+# SQL database
+helps['cosmosdb sql database'] = """
+type: group
+short-summary: Manage Azure Cosmos DB SQL databases.
+"""
+
+helps['cosmosdb sql database create'] = """
+type: command
+short-summary: Create an SQL database under an Azure Cosmos DB account.
+"""
+
+helps['cosmosdb sql database list'] = """
+type: command
+short-summary: List the SQL databases under an Azure Cosmos DB account.
+"""
+
+helps['cosmosdb sql database show'] = """
+type: command
+short-summary: Show the details of a SQL database under an Azure Cosmos DB account.
+"""
+
+helps['cosmosdb sql database delete'] = """
+type: command
+short-summary: Delete the SQL database under an Azure Cosmos DB account.
+"""
+
+# SQL container
+helps['cosmosdb sql container'] = """
+type: group
+short-summary: Manage Azure Cosmos DB SQL containers.
+"""
+
+helps['cosmosdb sql container create'] = """
+type: command
+short-summary: Create an SQL container under an Azure Cosmos DB SQL database.
+examples:
+  - name: Create an Azure Cosmos DB SQL container.
+    text: az cosmosdb sql container create -g MyResourceGroup -a MyAccount -d MyDatabase -n MyContainer --part "/my/path" --idx @policy-file.json --ttl 1000 --throughput "700"
+    crafted: true
+"""
+
+helps['cosmosdb sql container update'] = """
+type: command
+short-summary: Update an SQL container under an Azure Cosmos DB SQL database.
+"""
+
+helps['cosmosdb sql container list'] = """
+type: command
+short-summary: List the SQL containers under an Azure Cosmos DB SQL database.
+"""
+
+helps['cosmosdb sql container show'] = """
+type: command
+short-summary: Show the details of a SQL container under an Azure Cosmos DB SQL database.
+"""
+
+helps['cosmosdb sql container delete'] = """
+type: command
+short-summary: Delete the SQL container under an Azure Cosmos DB SQL database.
+"""
+
+# SQL database throughput
+helps['cosmosdb sql database throughput'] = """
+type: group
+short-summary: Manage throughput of SQL database under an Azure Cosmos DB account.
+"""
+
+helps['cosmosdb sql database throughput show'] = """
+type: command
+short-summary: Get the throughput of the SQL database under an Azure Cosmos DB account.
+"""
+
+helps['cosmosdb sql database throughput update'] = """
+type: command
+short-summary: Update the throughput of the SQL database under an Azure Cosmos DB account.
+"""
+
+# SQL container throughput
+helps['cosmosdb sql container throughput'] = """
+type: group
+short-summary: Manage throughput of SQL container under an Azure Cosmos DB account.
+"""
+
+helps['cosmosdb sql container throughput show'] = """
+type: command
+short-summary: Get the throughput of the SQL container under an Azure Cosmos DB SQL database.
+"""
+
+helps['cosmosdb sql container throughput update'] = """
+type: command
+short-summary: Update the throughput of the SQL container under an Azure Cosmos DB SQL database.
+"""
+
+helps['cosmosdb mongodb'] = """
+type: group
+short-summary: Manage MongoDB resources of Azure Cosmos DB account.
+"""
+
+# MongoDB database
+helps['cosmosdb mongodb database'] = """
+type: group
+short-summary: Manage Azure Cosmos DB MongoDB databases.
+"""
+
+helps['cosmosdb mongodb database create'] = """
+type: command
+short-summary: Create an MongoDB database under an Azure Cosmos DB account.
+"""
+
+helps['cosmosdb mongodb database list'] = """
+type: command
+short-summary: List the MongoDB databases under an Azure Cosmos DB account.
+"""
+
+helps['cosmosdb mongodb database show'] = """
+type: command
+short-summary: Show the details of a MongoDB database under an Azure Cosmos DB account.
+"""
+
+helps['cosmosdb mongodb database delete'] = """
+type: command
+short-summary: Delete the MongoDB database under an Azure Cosmos DB account.
+"""
+
+# MongoDB collection
+helps['cosmosdb mongodb collection'] = """
+type: group
+short-summary: Manage Azure Cosmos DB MongoDB collections.
+"""
+
+helps['cosmosdb mongodb collection create'] = """
+type: command
+short-summary: Create an MongoDB collection under an Azure Cosmos DB MongoDB database.
+examples:
+  - name: Create an Azure Cosmos DB MongoDB collection.
+    text: az cosmosdb mongodb collection create -g MyResourceGroup -a MyAccount -d MyDatabase -n MyCollection --shard "ShardingKey" --idx @indexes-file.json --throughput "500"
+    crafted: true
+"""
+
+helps['cosmosdb mongodb collection update'] = """
+type: command
+short-summary: Update an MongoDB collection under an Azure Cosmos DB MongoDB database.
+"""
+
+helps['cosmosdb mongodb collection list'] = """
+type: command
+short-summary: List the MongoDB collections under an Azure Cosmos DB MongoDB database.
+"""
+
+helps['cosmosdb mongodb collection show'] = """
+type: command
+short-summary: Show the details of a MongoDB collection under an Azure Cosmos DB MongoDB database.
+"""
+
+helps['cosmosdb mongodb collection delete'] = """
+type: command
+short-summary: Delete the MongoDB collection under an Azure Cosmos DB MongoDB database.
+"""
+
+# MongoDB database throughput
+helps['cosmosdb mongodb database throughput'] = """
+type: group
+short-summary: Manage throughput of MongoDB database under an Azure Cosmos DB account.
+"""
+
+helps['cosmosdb mongodb database throughput show'] = """
+type: command
+short-summary: Get the throughput of the MongoDB database under an Azure Cosmos DB account.
+"""
+
+helps['cosmosdb mongodb database throughput update'] = """
+type: command
+short-summary: Update the throughput of the MongoDB database under an Azure Cosmos DB account.
+"""
+
+# MongoDB collection throughput
+helps['cosmosdb mongodb collection throughput'] = """
+type: group
+short-summary: Manage throughput of MongoDB collection under an Azure Cosmos DB account.
+"""
+
+helps['cosmosdb mongodb collection throughput show'] = """
+type: command
+short-summary: Get the throughput of the MongoDB collection under an Azure Cosmos DB MongoDB database.
+"""
+
+helps['cosmosdb mongodb collection throughput update'] = """
+type: command
+short-summary: Update the throughput of the MongoDB collection under an Azure Cosmos DB MongoDB database.
+"""
+
+helps['cosmosdb cassandra'] = """
+type: group
+short-summary: Manage Cassandra resources of Azure Cosmos DB account.
+"""
+
+# Cassandra keyspace
+helps['cosmosdb cassandra keyspace'] = """
+type: group
+short-summary: Manage Azure Cosmos DB Cassandra keyspaces.
+"""
+
+helps['cosmosdb cassandra keyspace create'] = """
+type: command
+short-summary: Create an Cassandra keyspace under an Azure Cosmos DB account.
+"""
+
+helps['cosmosdb cassandra keyspace list'] = """
+type: command
+short-summary: List the Cassandra keyspaces under an Azure Cosmos DB account.
+"""
+
+helps['cosmosdb cassandra keyspace show'] = """
+type: command
+short-summary: Show the details of a Cassandra keyspace under an Azure Cosmos DB account.
+"""
+
+helps['cosmosdb cassandra keyspace delete'] = """
+type: command
+short-summary: Delete the Cassandra keyspace under an Azure Cosmos DB account.
+"""
+
+# Cassandra table
+helps['cosmosdb cassandra table'] = """
+type: group
+short-summary: Manage Azure Cosmos DB Cassandra tables.
+"""
+
+helps['cosmosdb cassandra table create'] = """
+type: command
+short-summary: Create an Cassandra table under an Azure Cosmos DB Cassandra keyspace.
+examples:
+  - name: Create an Azure Cosmos DB Cassandra table.
+    text: az cosmosdb cassandra table create -g MyResourceGroup -a MyAccount -k MyKeyspace -n MyTable --schema @indexes-file.json --throughput "500" --ttl 1000
+    crafted: true
+"""
+
+helps['cosmosdb cassandra table update'] = """
+type: command
+short-summary: Update an Cassandra table under an Azure Cosmos DB Cassandra keyspace.
+"""
+
+helps['cosmosdb cassandra table list'] = """
+type: command
+short-summary: List the Cassandra tables under an Azure Cosmos DB Cassandra keyspace.
+"""
+
+helps['cosmosdb cassandra table show'] = """
+type: command
+short-summary: Show the details of a Cassandra table under an Azure Cosmos DB Cassandra keyspace.
+"""
+
+helps['cosmosdb cassandra table delete'] = """
+type: command
+short-summary: Delete the Cassandra table under an Azure Cosmos DB Cassandra keyspace.
+"""
+
+# Cassandra keyspace throughput
+helps['cosmosdb cassandra keyspace throughput'] = """
+type: group
+short-summary: Manage throughput of Cassandra keyspace under an Azure Cosmos DB account.
+"""
+
+helps['cosmosdb cassandra keyspace throughput show'] = """
+type: command
+short-summary: Get the throughput of the Cassandra keyspace under an Azure Cosmos DB account.
+"""
+
+helps['cosmosdb cassandra keyspace throughput update'] = """
+type: command
+short-summary: Update the throughput of the Cassandra keyspace under an Azure Cosmos DB account.
+"""
+
+# Cassandra table throughput
+helps['cosmosdb cassandra table throughput'] = """
+type: group
+short-summary: Manage throughput of Cassandra table under an Azure Cosmos DB account.
+"""
+
+helps['cosmosdb cassandra table throughput show'] = """
+type: command
+short-summary: Get the throughput of the Cassandra table under an Azure Cosmos DB Cassandra keyspace.
+"""
+
+helps['cosmosdb cassandra table throughput update'] = """
+type: command
+short-summary: Update the throughput of the Cassandra table under an Azure Cosmos DB Cassandra keyspace.
+"""
+
+helps['cosmosdb gremlin'] = """
+type: group
+short-summary: Manage Gremlin resources of Azure Cosmos DB account.
+"""
+
+# Gremlin database
+helps['cosmosdb gremlin database'] = """
+type: group
+short-summary: Manage Azure Cosmos DB Gremlin databases.
+"""
+
+helps['cosmosdb gremlin database create'] = """
+type: command
+short-summary: Create an Gremlin database under an Azure Cosmos DB account.
+"""
+
+helps['cosmosdb gremlin database list'] = """
+type: command
+short-summary: List the Gremlin databases under an Azure Cosmos DB account.
+"""
+
+helps['cosmosdb gremlin database show'] = """
+type: command
+short-summary: Show the details of a Gremlin database under an Azure Cosmos DB account.
+"""
+
+helps['cosmosdb gremlin database delete'] = """
+type: command
+short-summary: Delete the Gremlin database under an Azure Cosmos DB account.
+"""
+
+# Gremlin graph
+helps['cosmosdb gremlin graph'] = """
+type: group
+short-summary: Manage Azure Cosmos DB Gremlin graphs.
+"""
+
+helps['cosmosdb gremlin graph create'] = """
+type: command
+short-summary: Create an Gremlin graph under an Azure Cosmos DB Gremlin database.
+examples:
+  - name: Create an Azure Cosmos DB Gremlin graph.
+    text: az cosmosdb gremlin graph create -g MyResourceGroup -a MyAccount -d MyDatabase -n MyGraph --part "/my/path" --idx @policy-file.json --ttl 1000 --throughput "700"
+    crafted: true
+"""
+
+helps['cosmosdb gremlin graph update'] = """
+type: command
+short-summary: Update an Gremlin graph under an Azure Cosmos DB Gremlin database.
+"""
+
+helps['cosmosdb gremlin graph list'] = """
+type: command
+short-summary: List the Gremlin graphs under an Azure Cosmos DB Gremlin database.
+"""
+
+helps['cosmosdb gremlin graph show'] = """
+type: command
+short-summary: Show the details of a Gremlin graph under an Azure Cosmos DB Gremlin database.
+"""
+
+helps['cosmosdb gremlin graph delete'] = """
+type: command
+short-summary: Delete the Gremlin graph under an Azure Cosmos DB Gremlin database.
+"""
+
+# Gremlin database throughput
+helps['cosmosdb gremlin database throughput'] = """
+type: group
+short-summary: Manage throughput of Gremlin database under an Azure Cosmos DB account.
+"""
+
+helps['cosmosdb gremlin database throughput show'] = """
+type: command
+short-summary: Get the throughput of the Gremlin database under an Azure Cosmos DB account.
+"""
+
+helps['cosmosdb gremlin database throughput update'] = """
+type: command
+short-summary: Update the throughput of the Gremlin database under an Azure Cosmos DB account.
+"""
+
+# Gremlin graph throughput
+helps['cosmosdb gremlin graph throughput'] = """
+type: group
+short-summary: Manage throughput of Gremlin graph under an Azure Cosmos DB account.
+"""
+
+helps['cosmosdb gremlin graph throughput show'] = """
+type: command
+short-summary: Get the throughput of the Gremlin graph under an Azure Cosmos DB Gremlin database.
+"""
+
+helps['cosmosdb gremlin graph throughput update'] = """
+type: command
+short-summary: Update the throughput of the Gremlin graph under an Azure Cosmos DB Gremlin database.
+"""
+
+# Table
+helps['cosmosdb table'] = """
+type: group
+short-summary: Manage Table resources of Azure Cosmos DB account.
+"""
+
+helps['cosmosdb table create'] = """
+type: command
+short-summary: Create an Table under an Azure Cosmos DB account.
+"""
+
+helps['cosmosdb table list'] = """
+type: command
+short-summary: List the Tables under an Azure Cosmos DB account.
+"""
+
+helps['cosmosdb table show'] = """
+type: command
+short-summary: Show the details of a Table under an Azure Cosmos DB account.
+"""
+
+helps['cosmosdb table delete'] = """
+type: command
+short-summary: Delete the Table under an Azure Cosmos DB account.
+"""
+
+# Table throughput
+helps['cosmosdb table throughput'] = """
+type: group
+short-summary: Manage throughput of Table under an Azure Cosmos DB account.
+"""
+
+helps['cosmosdb table throughput show'] = """
+type: command
+short-summary: Get the throughput of the Table under an Azure Cosmos DB account.
+"""
+
+helps['cosmosdb table throughput update'] = """
+type: command
+short-summary: Update the throughput of the Table under an Azure Cosmos DB account.
+"""
