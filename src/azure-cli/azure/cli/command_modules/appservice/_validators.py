@@ -96,7 +96,7 @@ def validate_app_exists_in_rg(cmd, namespace):
 
 
 def validate_add_vnet(cmd, namespace):
-    resource_group_name = namespace.resource_group
+    resource_group_name = namespace.resource_group_name
     from azure.cli.command_modules.network._client_factory import network_client_factory
     vnet_client = network_client_factory(cmd.cli_ctx)
     list_all_vnets = vnet_client.virtual_networks.list_all()
@@ -112,7 +112,8 @@ def validate_add_vnet(cmd, namespace):
 
     from ._appservice_utils import _generic_site_operation
     webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
-    webapp_loc = webapp.location
+    # converting geo region to geo location
+    webapp_loc = webapp.location.lower().replace(" ", "")
 
     if vnet_loc != webapp_loc:
         raise CLIError("The app and the vnet resources are in different locations. \

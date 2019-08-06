@@ -1578,7 +1578,7 @@ class WebappWindowsContainerBasicE2ETest(ScenarioTest):
             JMESPathCheck('alwaysOn', False)])
 
 
-class WebappHybridConnection(ScenarioTest):
+class WebappNetworkConnectionTests(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer()
     def test_webapp_hybridconnectionE2E(self, resource_group):
@@ -1595,26 +1595,33 @@ class WebappHybridConnection(ScenarioTest):
         self.cmd('webapp hybrid-connection add -g {} -n {} --namespace {} --hybrid-connection {}'.format(resource_group, webapp_name, namespace_name, hyco_name))
         self.cmd('webapp hybrid-connection list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('length(@)', 1),
-            JMESPathCheck('[0].name', hyco_name),
+            JMESPathCheck('[0].name', hyco_name)
         ])
         self.cmd('webapp hybrid-connection remove -g {} -n {} --namespace {} --hybrid-connection {}'.format(resource_group, webapp_name, namespace_name, hyco_name))
         self.cmd('webapp hybrid-connection list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('length(@)', 0)
         ])
 
-
-class WebappSwift(ScenarioTest):
-    @AllowLargeResponse
     @ResourceGroupPreparer()
-    def test_webapp_vnetintegrationE2E(self, resource_group):
+    def test_webapp_vnetE2E(self, resource_group):
         webapp_name = self.create_random_name('swiftwebapp', 24)
         plan = self.create_random_name('swiftplan', 24)
         subnet_name = self.create_random_name('swiftsubnet', 24)
         vnet_name = self.create_random_name('swiftname', 24)
 
-        self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24 --debug'.format(resource_group, vnet_name, subnet_name))
+        self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(resource_group, vnet_name, subnet_name))
         self.cmd('appservice plan create -g {} -n {} --sku S1 --debug'.format(resource_group, plan))
         self.cmd('webapp create -g {} -n {} --plan {} --debug'.format(resource_group, webapp_name, plan))
+        self.cmd('webapp vnet-integration add -g {} -n {} --vnet {} --subnet {} --debug'.format(resource_group, webapp_name, vnet_name, subnet_name))
+        self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', subnet_name)
+        ])
+        self.cmd('webapp vnet-integration remove -g {} -n {}'.format(resource_group, webapp_name))
+        self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('length(@)', 0)
+        ])
+
 
 
 if __name__ == '__main__':
