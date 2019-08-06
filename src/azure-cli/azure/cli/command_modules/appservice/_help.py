@@ -1601,12 +1601,22 @@ examples:
     text: az functionapp hybrid-connection remove -g MyResourceGroup -n MyWebapp --namespace [HybridConnectionNamespace] --hybrid-connection [HybridConnectionName] -s [slot]
 """
 
+helps['appservice hybrid-connection'] = """
+type: group
+short summary: set the key that all apps in an appservice plan use to connect to the hybrid-connections in that appservice plan
+"""
+
 helps['appservice hybrid-connection set-key'] = """
 type: command
 short summary: set the key that all apps in an appservice plan use to connect to the hybrid-connections in that appservice plan
 examples:
   - name:  set the key that all apps in an appservice plan use to connect to the hybrid-connections in that appservice plan
     text: az appservice hybrid-connection set-key -g MyResourceGroup --plan MyAppServicePlan --namespace [HybridConectionNamespace] --hybrid-connection [HybridConnectionName] --key-type ["primary"/"secondary"]
+"""
+
+helps['appservice plan vnet-integration'] = """
+type: group
+short summary: list the virtual network integrations used in an appservice plan
 """
 
 helps['appservice plan vnet-integration list'] = """
