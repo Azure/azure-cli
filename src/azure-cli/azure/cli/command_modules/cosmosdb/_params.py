@@ -159,7 +159,7 @@ def load_arguments(self, _):
 
     with self.argument_context('cosmosdb sql container throughput') as c:
         c.argument('account_name', options_list=['--account-name', '-a'], help="Cosmosdb account name", id_part=None)
-        c.argument('database_name', options_list=['--database', '-d'], help="Database name")
+        c.argument('database_name', options_list=['--database-name', '-d'], help="Database name")
         c.argument('container_name', options_list=['--name', '-n'], help="Container name")
         c.argument('throughput', type=int, help='The throughput of SQL container (RU/s).')
 
@@ -170,7 +170,7 @@ def load_arguments(self, _):
 
     with self.argument_context('cosmosdb mongodb collection throughput') as c:
         c.argument('account_name', options_list=['--account-name', '-a'], help="Cosmosdb account name", id_part=None)
-        c.argument('database_name', options_list=['--database', '-d'], help="Database name")
+        c.argument('database_name', options_list=['--database-name', '-d'], help="Database name")
         c.argument('collection_name', options_list=['--name', '-n'], help="Collection name")
         c.argument('throughput', type=int, help='The throughput of MongoDB collection (RU/s).')
 
@@ -181,7 +181,7 @@ def load_arguments(self, _):
 
     with self.argument_context('cosmosdb cassandra table throughput') as c:
         c.argument('account_name', options_list=['--account-name', '-a'], help="Cosmosdb account name", id_part=None)
-        c.argument('keyspace_name', options_list=['--keyspace', '-k'], help="Keyspace name")
+        c.argument('keyspace_name', options_list=['--keyspace-name', '-k'], help="Keyspace name")
         c.argument('table_name', options_list=['--name', '-n'], help="Table name")
         c.argument('throughput', type=int, help='The throughput of Cassandra table (RU/s).')
 
@@ -192,7 +192,7 @@ def load_arguments(self, _):
 
     with self.argument_context('cosmosdb gremlin graph throughput') as c:
         c.argument('account_name', options_list=['--account-name', '-a'], help="Cosmosdb account name", id_part=None)
-        c.argument('database_name', options_list=['--database', '-d'], help="Database name")
+        c.argument('database_name', options_list=['--database-name', '-d'], help="Database name")
         c.argument('graph_name', options_list=['--name', '-n'], help="Grapth name")
         c.argument('throughput', type=int, help='The throughput Gremlin graph (RU/s).')
 
