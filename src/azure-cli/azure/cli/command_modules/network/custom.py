@@ -2061,7 +2061,7 @@ def list_express_route_ports(cmd, resource_group_name=None):
 def create_private_endpoint(cmd, resource_group_name, private_endpoint_name, subnet,
                             private_connection_resource_id, group_ids=None,
                             virtual_network_name=None, tags=None, location=None,
-                            request_message=None, munual_request=None):
+                            request_message=None, manual_request=None):
     client = network_client_factory(cmd.cli_ctx).private_endpoints
     PrivateEndpoint, Subnet, PrivateLinkServiceConnection = cmd.get_models('PrivateEndpoint', 'Subnet', 'PrivateLinkServiceConnection')
     private_link_service_connection = PrivateLinkServiceConnection(private_link_service_id=private_connection_resource_id,
@@ -2073,7 +2073,7 @@ def create_private_endpoint(cmd, resource_group_name, private_endpoint_name, sub
         subnet=Subnet(id=subnet)
     )
 
-    if munual_request:
+    if manual_request:
         private_endpoint.manual_private_link_service_connections = [private_link_service_connection]
     else:
         private_endpoint.private_link_service_connections = [private_link_service_connection]
