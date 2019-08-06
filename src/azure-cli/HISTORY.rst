@@ -54,6 +54,10 @@ Release History
 
 * `storage copy`: add copy command for storage
 
+**Cosmos DB**
+
+* Added CRUD commands for CosmosDB SQL, MongoDB, Cassandra, Gremlin and Table resources and resource's throughput.
+
 2.0.70
 ++++++
 
