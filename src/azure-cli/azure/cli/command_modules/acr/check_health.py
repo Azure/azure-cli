@@ -180,7 +180,6 @@ def _check_health_environment(ignore_errors, yes):
 # Check DNS lookup and access to challenge endpoint
 def _get_registry_status(login_server, registry_name, ignore_errors):
     import socket
-    from requests.exceptions import SSLError
 
     registry_ip = None
 
@@ -197,6 +196,7 @@ def _get_registry_status(login_server, registry_name, ignore_errors):
     print_pass("DNS lookup to {} at IP {}".format(login_server, registry_ip))
 
     import requests
+    from requests.exceptions import SSLError
     from azure.cli.core.util import should_disable_connection_verify
 
     try:
