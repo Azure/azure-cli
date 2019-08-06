@@ -373,3 +373,45 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
 
         self.assertIn('azureFilesIdentityBasedAuthentication', result)
         self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'AADDS')
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_storage_account_revoke_delegation_keys(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        container = self.create_container(account_info)
+        local_file = self.create_temp_file(128, full_random=False)
+        blob_name = self.create_random_name('blob', 16)
+
+        from datetime import datetime, timedelta
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        self.kwargs.update({
+            'expiry': expiry,
+            'account': storage_account,
+            'container': container,
+            'local_file': local_file,
+            'blob': blob_name
+        })
+
+        # test sas-token for a container
+        container_sas = self.cmd('storage container generate-sas --account-name {storage_account} -n {container} --expiry {expiry} --permissions '
+                                 'r --https-only --as-user --auth-mode login -otsv').output.strip()
+        self.kwargs['container_sas'] = container_sas
+        self.cmd('storage blob upload -c {container} -f "{local_file}" -n {blob} '
+                 '--account-name {account} --sas-token "{container_sas}"')
+
+        # test sas-token for a file
+        blob_sas = self.cmd('storage blob generate-sas --account-name {} -n {} -c {} --expiry {} --permissions '
+                            'r --https-only --as-user --auth-mode login -otsv'.format(storage_account, blob_name, container, expiry)).output.strip()
+        # sas = self.cmd('storage blob generate-sas -c {container} -n {blob} --account-name {account} --https-only '
+        #                '--permissions acdrw --expiry {expiry} -otsv').output.strip()
+        self.kwargs['blob_sas'] = blob_sas
+        self.cmd('storage blob show -c {container} -n {blob} --account-name {account} --sas-token {blob_sas}') \
+            .assert_with_checks(JMESPathCheck('name', blob_name))
+
+        self.cmd('storage account revoke-delegation-keys -n {storage_account} -g {resource_group}')
+
+        self.cmd('storage blob show -c {container} -n {blob} --account-name {account} --sas-token {blob_sas}') 
+
+
+
+
