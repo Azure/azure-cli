@@ -385,6 +385,7 @@ def assign_ag_identity(cmd, resource_group_name, application_gateway_name,
 
     return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag)
 
+
 def add_ag_identity(cmd, resource_group_name, application_gateway_name,
                     no_wait=False, user_assigned_identity=None,
                     client_id=None, principal_id=None):
@@ -415,12 +416,14 @@ def remove_ag_identity(cmd, resource_group_name, application_gateway_name, no_wa
 
     return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag)
 
+
 def show_ag_identity(cmd, resource_group_name, application_gateway_name):
     ncf = network_client_factory(cmd.cli_ctx).application_gateways
     ag = ncf.get(resource_group_name, application_gateway_name)
     if ag.identity is None:
         raise CLIError("Please first use 'az network application-gateway identity assign` to init the identity.")
     return ag.identity
+
 
 def create_ag_backend_http_settings_collection(cmd, resource_group_name, application_gateway_name, item_name, port,
                                                probe=None, protocol='http', cookie_based_affinity=None, timeout=None,
