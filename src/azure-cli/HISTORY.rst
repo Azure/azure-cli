@@ -7,6 +7,10 @@ Release History
 
 * add "cognitiveservices account network-rule" commands.
 
+**Cosmos DB**
+
+* remove warning when updating multiple write locations
+
 **HDInsight**
 
 * BREAKING CHANGE:
