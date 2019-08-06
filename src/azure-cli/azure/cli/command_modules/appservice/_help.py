@@ -1544,8 +1544,8 @@ helps['webapp create-remote-connection'] = """
 """
 
 helps['webapp hybrid-connection'] = """
-  type: group
-  short summary: methods that list, add and remove hybrid-connections from webapps
+type: group
+short summary: methods that list, add and remove hybrid-connections from webapps
 """
 
 helps['webapp hybrid-connection list'] = """
@@ -1573,8 +1573,8 @@ examples:
 """
 
 helps['functionapp hybrid-connection'] = """
-  type: group
-  short summary: methods that list, add and remove hybrid-connections from functionapp
+type: group
+short summary: methods that list, add and remove hybrid-connections from functionapp
 """
 
 helps['functionapp hybrid-connection list'] = """
