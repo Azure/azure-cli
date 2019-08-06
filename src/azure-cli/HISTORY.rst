@@ -17,6 +17,7 @@ Release History
 **AppService**
 
 * az webapp webjob continuous group commands were failing for slots
+* az webapp up detects env folder and removes it from compressed file used for deployment
 
 **BotService**
 
