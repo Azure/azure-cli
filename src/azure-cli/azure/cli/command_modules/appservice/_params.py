@@ -379,7 +379,7 @@ def load_arguments(self, _):
         c.argument('hybrid_connection', help="Hybrid connection name")
         c.argument('key_type', help="Which key (primary or secondary) should be used")
 
-    with self.argument_context('appservice plan vnet-integration list') as c:
+    with self.argument_context('appservice vnet-integration list') as c:
         c.argument('plan', help="AppService plan")
         c.argument('resource_group', arg_type=resource_group_name_type)
 
