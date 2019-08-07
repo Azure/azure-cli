@@ -49,6 +49,10 @@ Release History
 
 * Fix a loading error on 2.0.70
 
+**Network**
+
+* az network dns record-set cname delete: Fixes #10166. Support `--yes` argument to align the behavior with other dns type. 
+
 **Profile**
 
 * Add get-access-token --resource-type enum for convenience of getting access tokens for well-known resources.
