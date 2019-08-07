@@ -13,7 +13,7 @@ from azure_devtools.scenario_tests import AllowLargeResponse
 
 
 @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-12-01')
-class StorageAccountTests(StorageScenarioMixin, ScenarioTest, RoleScenarioTest):
+class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2017-06-01')
     @ResourceGroupPreparer(name_prefix='cli_test_storage_service_endpoints')
     @StorageAccountPreparer()
@@ -121,8 +121,8 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest, RoleScenarioTest):
 
         self.cmd('storage account show-connection-string -g {} -n {} --protocol http'.format(
             resource_group, name), checks=[
-                JMESPathCheck("contains(connectionString, 'https')", False),
-                JMESPathCheck("contains(connectionString, '{}')".format(name), True)])
+            JMESPathCheck("contains(connectionString, 'https')", False),
+            JMESPathCheck("contains(connectionString, '{}')".format(name), True)])
 
         self.cmd('storage account update -g {} -n {} --tags foo=bar cat'
                  .format(resource_group, name),
@@ -377,10 +377,15 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest, RoleScenarioTest):
         self.assertIn('azureFilesIdentityBasedAuthentication', result)
         self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'AADDS')
 
-    @AllowLargeResponse()
+
+@api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
+class RevokeStorageAccountTests(StorageScenarioMixin, RoleScenarioTest):
     @ResourceGroupPreparer()
+    @AllowLargeResponse()
     @StorageAccountPreparer()
     def test_storage_account_revoke_delegation_keys(self, resource_group, storage_account):
+        if self.run_under_service_principal():
+            return  # this test delete users which are beyond a SP's capacity, so quit...
         from datetime import datetime, timedelta
         import time
         import mock
