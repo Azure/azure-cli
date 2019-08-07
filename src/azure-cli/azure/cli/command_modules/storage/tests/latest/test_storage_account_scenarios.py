@@ -6,11 +6,14 @@ from azure.cli.testsdk import (ScenarioTest, JMESPathCheck, ResourceGroupPrepare
                                StorageAccountPreparer, api_version_constraint, live_only)
 from azure.cli.core.profiles import ResourceType
 from ..storage_test_util import StorageScenarioMixin
+from azure.cli.command_modules.role.tests.latest.test_role import RoleScenarioTest
 from knack.util import CLIError
+from datetime import datetime, timedelta
+from azure_devtools.scenario_tests import AllowLargeResponse
 
 
 @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-12-01')
-class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
+class StorageAccountTests(StorageScenarioMixin, ScenarioTest, RoleScenarioTest):
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2017-06-01')
     @ResourceGroupPreparer(name_prefix='cli_test_storage_service_endpoints')
     @StorageAccountPreparer()
@@ -374,44 +377,51 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.assertIn('azureFilesIdentityBasedAuthentication', result)
         self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'AADDS')
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     def test_storage_account_revoke_delegation_keys(self, resource_group, storage_account):
-        account_info = self.get_account_info(resource_group, storage_account)
-        container = self.create_container(account_info)
-        local_file = self.create_temp_file(128, full_random=False)
-        blob_name = self.create_random_name('blob', 16)
-
         from datetime import datetime, timedelta
+        import time
+        import mock
+        account_info = self.get_account_info(resource_group, storage_account)
+        c = self.create_container(account_info)
+        b = self.create_random_name('blob', 24)
+        local_file = self.create_temp_file(128, full_random=False)
+
         expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
         self.kwargs.update({
             'expiry': expiry,
             'account': storage_account,
-            'container': container,
+            'container': c,
             'local_file': local_file,
-            'blob': blob_name
+            'blob': b,
+            'rg': resource_group
         })
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            user = self.create_random_name('testuser', 15)
+            self.kwargs['upn'] = user + '@azuresdkteam.onmicrosoft.com'
+            result = self.cmd(
+                'ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}')
+            time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
 
-        # test sas-token for a container
-        container_sas = self.cmd('storage container generate-sas --account-name {storage_account} -n {container} --expiry {expiry} --permissions '
-                                 'r --https-only --as-user --auth-mode login -otsv').output.strip()
-        self.kwargs['container_sas'] = container_sas
-        self.cmd('storage blob upload -c {container} -f "{local_file}" -n {blob} '
-                 '--account-name {account} --sas-token "{container_sas}"')
+        result = self.cmd('storage account show -n {account} -g {rg}').get_output_in_json()
+        self.kwargs['sc_id'] = result['id']
+        self.cmd('role assignment create --assignee {upn} --role contributor --scope {sc_id}')
+        self.cmd('role assignment list --assignee {upn} --role contributor --scope {sc_id}',
+                 checks=self.check("length([])", 1))
 
-        # test sas-token for a file
         blob_sas = self.cmd('storage blob generate-sas --account-name {} -n {} -c {} --expiry {} --permissions '
-                            'r --https-only --as-user --auth-mode login -otsv'.format(storage_account, blob_name, container, expiry)).output.strip()
-        # sas = self.cmd('storage blob generate-sas -c {container} -n {blob} --account-name {account} --https-only '
-        #                '--permissions acdrw --expiry {expiry} -otsv').output.strip()
+                            'r --https-only --as-user --auth-mode login -otsv'.format(storage_account, b, c,
+                                                                                      expiry)).output
+        container_sas = self.cmd('storage container generate-sas --account-name {} -n {} --expiry {} --permissions '
+                                 'r --https-only --as-user --auth-mode login -otsv'.format(storage_account, c,
+                                                                                           expiry)).output
+        self.kwargs['container_sas'] = container_sas
         self.kwargs['blob_sas'] = blob_sas
         self.cmd('storage blob show -c {container} -n {blob} --account-name {account} --sas-token {blob_sas}') \
-            .assert_with_checks(JMESPathCheck('name', blob_name))
+            .assert_with_checks(JMESPathCheck('name', b))
 
         self.cmd('storage account revoke-delegation-keys -n {storage_account} -g {resource_group}')
 
-        self.cmd('storage blob show -c {container} -n {blob} --account-name {account} --sas-token {blob_sas}') 
-
-
-
-
+        self.cmd('storage blob show -c {container} -n {blob} --account-name {account} --sas-token {blob_sas}')
