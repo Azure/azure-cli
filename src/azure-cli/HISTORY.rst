@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**AppService**
+
+* az webapp webjob continuous group commands were failing for slots
+
 **CognitiveServices**
 
 * add "cognitiveservices account network-rule" commands.
