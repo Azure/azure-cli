@@ -432,6 +432,7 @@ examples:
 helps['storage blob sync'] = """
 type: command
 short-summary: Sync blobs recursively to a storage blob container.
+long-summary: Sync command depends on Azcopy, which only works for 64-bit Operating System now. We will support 32-bit Operating System soon.
 examples:
   - name: Sync a single blob to a container.
     text: az storage blob sync -c MyContainer --account-name MyStorageAccount -s "path/to/file" -d NewBlob
@@ -603,6 +604,7 @@ short-summary: Manage container stored access policies.
 helps['storage copy'] = """
 type: command
 short-summary: Copy files or directories to or from Azure storage.
+long-summary: Copy command depends on Azcopy, which only works for 64-bit Operating System now. We will support 32-bit Operating System soon.
 examples:
   - name: Upload a single file to Azure Blob using url.
     text: az storage copy -s /path/to/file.txt -d https://[account].blob.core.windows.net/[container]/[path/to/blob]
@@ -1066,7 +1068,7 @@ short-summary: Manage shared access policies for a storage queue.
 helps['storage remove'] = """
 type: command
 short-summary: Delete blobs or files from Azure Storage.
-long-summary: To delete blobs, both the source must either be public or be authenticated by using a shared access signature.
+long-summary: To delete blobs, both the source must either be public or be authenticated by using a shared access signature. Remove command depends on Azcopy, which only works for 64-bit Operating System now. We will support 32-bit Operating System soon.
 examples:
   - name: Remove a single blob.
     text: az storage remove -c MyContainer -n MyBlob
