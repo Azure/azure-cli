@@ -1383,6 +1383,7 @@ def subnet_role_assignment_exists(cli_ctx, scope):
     return False
 
 
+# pylint: disable=too-many-statements
 def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
                listen_address='127.0.0.1', listen_port='8001'):
     if not which('kubectl'):
