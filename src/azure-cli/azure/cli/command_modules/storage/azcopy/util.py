@@ -36,8 +36,6 @@ class AzCopy(object):
                 os.makedirs(install_dir)
             base_url = 'https://azcopyvnext.azureedge.net/release20190423/azcopy_{}_amd64_10.1.0.{}'
             if self.system == 'Windows':
-                if platform.machine() != 'AMD64':
-                    raise CLIError('Azcopy (windows {}) does not exist.'.format(platform.machine()))
                 file_url = base_url.format('windows', 'zip')
             elif self.system == 'Linux':
                 file_url = base_url.format('linux', 'tar.gz')
