@@ -1427,13 +1427,13 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
         dashboard_port = int((dashboard_port.decode('utf-8').replace("'", "")))
     except subprocess.CalledProcessError as err:
         raise CLIError('Could not find dashboard port: {}'.format(err))
-  
+
     # use https if dashboard container is using https
     if dashboard_port == 8443:
         protocol = 'https'
     else:
         protocol = 'http'
-    
+
     proxy_url = '{0}://{1}:{2}/'.format(protocol, listen_address, listen_port)
     # launch kubectl port-forward locally to access the remote dashboard
     if in_cloud_console():
