@@ -1402,9 +1402,6 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
     # TODO: need to add an --admin option?
     aks_get_credentials(cmd, client, resource_group_name, name, admin=False, path=browse_path)
 
-    # Change to https if dashboard container is using https
-    protocol = 'http'
-
     # find the dashboard pod's name
     try:
         dashboard_pod = subprocess.check_output(
@@ -1419,23 +1416,24 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
     else:
         raise CLIError("Couldn't find the Kubernetes dashboard pod.")
 
-    # Find the port
+    # find the port
     try:
         dashboard_port = subprocess.check_output(
             ["kubectl", "get", "pods", "--kubeconfig", browse_path, "--namespace", "kube-system",
              "--selector", "k8s-app=kubernetes-dashboard",
              "--output", "jsonpath='{.items[0].spec.containers[0].ports[0].containerPort}'"]
         )
-    except subprocess.CalledProcessError as err:
-        raise CLIError('Could not find dashboard port: {}'.format(err))
-    if dashboard_port:
         # output format: b"'{port}'"
         dashboard_port = int((dashboard_port.decode('utf-8').replace("'", "")))
-        if dashboard_port == 8443:
-            protocol = 'https'
+    except subprocess.CalledProcessError as err:
+        raise CLIError('Could not find dashboard port: {}'.format(err))
+  
+    # use https if dashboard container is using https
+    if dashboard_port == 8443:
+        protocol = 'https'
     else:
-        raise CLIError('Could not find the Kubernetes dashboard port')
-
+        protocol = 'http'
+    
     proxy_url = '{0}://{1}:{2}/'.format(protocol, listen_address, listen_port)
     # launch kubectl port-forward locally to access the remote dashboard
     if in_cloud_console():
