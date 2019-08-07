@@ -42,8 +42,8 @@ def load_command_table(self, _):
 
     with self.command_group('alertsmanagement action-rule', alertsmanagement_action_rule_util,
                             client_factory=action_rules_mgmt_client_factory) as g:
-        g.command('list', 'cli_alertsmanagement_list_by_subscription')
+        g.custom_command('list', 'cli_alertsmanagement_list_actionrule')
         g.show_command('show', 'get_by_name')
         g.command('delete', 'delete')
-        g.command('set', 'cli_alertsmanagement_set')
+        g.custom_command('set', 'cli_alertsmanagement_set_actionrule')
         g.command('update', 'update')
