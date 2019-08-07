@@ -1603,7 +1603,7 @@ examples:
 
 helps['appservice hybrid-connection'] = """
 type: group
-short summary: set the key that all apps in an appservice plan use to connect to the hybrid-connections in that appservice plan
+short summary: a method that sets the key a hybrid-connection uses
 """
 
 helps['appservice hybrid-connection set-key'] = """
@@ -1614,17 +1614,17 @@ examples:
     text: az appservice hybrid-connection set-key -g MyResourceGroup --plan MyAppServicePlan --namespace [HybridConectionNamespace] --hybrid-connection [HybridConnectionName] --key-type ["primary"/"secondary"]
 """
 
-helps['appservice plan vnet-integration'] = """
+helps['appservice vnet-integration'] = """
 type: group
-short summary: list the virtual network integrations used in an appservice plan
+short summary: a method that lists the virtual network integrations used in an appservice plan
 """
 
-helps['appservice plan vnet-integration list'] = """
+helps['appservice vnet-integration list'] = """
 type: command
 short summary: list the virtual network integrations used in an appservice plan
 examples:
   - name: list the virtual network integrations used in an appservice plan
-    text: az appservice plan vnet-integration list -g MyResourceGroup --plan MyAppServicePlan
+    text: az appservice vnet-integration list -g MyResourceGroup --plan MyAppServicePlan
 """
 
 helps['webapp vnet-integration'] = """

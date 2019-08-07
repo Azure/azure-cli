@@ -233,11 +233,11 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_app_service_plans')
         g.show_command('show', 'get')
         g.generic_update_command('update', custom_func_name='update_app_service_plan', setter_arg_name='app_service_plan')
-        g.custom_command('vnet-integration list', 'appservice_list_vnet', is_preview=True)
-    with self.command_group('appservice plan vnet-integration', is_preview=True) as g:
-        g.custom_command('list', 'appservice_list_vnet')
     with self.command_group('appservice') as g:
         g.custom_command('list-locations', 'list_locations', transform=transform_list_location_output)
+
+    with self.command_group('appservice vnet-integration', is_preview=True) as g:
+        g.custom_command('list', 'appservice_list_vnet')
 
     with self.command_group('functionapp') as g:
         g.custom_command('create', 'create_function', exception_handler=ex_handler_factory())
