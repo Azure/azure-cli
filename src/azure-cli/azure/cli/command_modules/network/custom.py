@@ -2059,14 +2059,17 @@ def list_express_route_ports(cmd, resource_group_name=None):
 
 # region PrivateEndpoint
 def create_private_endpoint(cmd, resource_group_name, private_endpoint_name, subnet,
-                            private_connection_resource_id, group_ids=None,
+                            private_connection_resource_id, connection_name, group_ids=None,
                             virtual_network_name=None, tags=None, location=None,
                             request_message=None, manual_request=None):
     client = network_client_factory(cmd.cli_ctx).private_endpoints
-    PrivateEndpoint, Subnet, PrivateLinkServiceConnection = cmd.get_models('PrivateEndpoint', 'Subnet', 'PrivateLinkServiceConnection')
+    PrivateEndpoint, Subnet, PrivateLinkServiceConnection = cmd.get_models('PrivateEndpoint',
+                                                                           'Subnet',
+                                                                           'PrivateLinkServiceConnection')
     private_link_service_connection = PrivateLinkServiceConnection(private_link_service_id=private_connection_resource_id,
                                                                    group_ids=group_ids,
-                                                                   request_message=request_message)
+                                                                   request_message=request_message,
+                                                                   name=connection_name)
     private_endpoint = PrivateEndpoint(
         location=location,
         tags=tags,
@@ -2081,12 +2084,16 @@ def create_private_endpoint(cmd, resource_group_name, private_endpoint_name, sub
     return client.create_or_update(resource_group_name, private_endpoint_name, private_endpoint)
 
 
-def update_private_endpoint(instance, cmd, subnet=None,
-                            virtual_network_name=None, tags=None, request_message=None):
-    PrivateEndpoint, Subnet, PrivateLinkServiceConnection = cmd.get_models('PrivateEndpoint', 'Subnet', 'PrivateLinkServiceConnection')
+def update_private_endpoint(instance, cmd, tags=None, request_message=None):
     with cmd.update_context(instance) as c:
         c.set_param('tags', tags)
-        c.set_param('subnet', Subnet(id=subnet))
+
+    if request_message is not None:
+        if instance.private_link_service_connections:
+            instance.private_link_service_connections[0].request_message = request_message
+        else:
+            instance.manual_private_link_service_connections[0].request_message = request_message
+
     return instance
 
 

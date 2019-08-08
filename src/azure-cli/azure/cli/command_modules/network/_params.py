@@ -613,12 +613,13 @@ def load_arguments(self, _):
     with self.argument_context('network private-endpoint') as c:
         c.argument('private_endpoint_name', private_endpoint_name, options_list=['--name', '-n'])
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
-        c.argument('subnet', validator=get_subnet_validator(), help='Name or ID of an existing subnet. If name is specified, also specify --vnet-name.')
-        c.argument('virtual_network_name', help='The virtual network (VNet) associated with the subnet (Omit if supplying a subnet id).', metavar='')
+        c.argument('subnet', validator=get_subnet_validator(), help='Name or ID of an existing subnet. If name is specified, also specify --vnet-name.', id_part=None)
+        c.argument('virtual_network_name', help='The virtual network (VNet) associated with the subnet (Omit if supplying a subnet id).', metavar='', id_part=None)
         c.argument('private_connection_resource_id', help='The resource id of which private enpoint connect to')
         c.argument('group_ids', nargs='+', help='The ID(s) of the group(s) obtained from the remote resource that this private endpoint should connect to. You can use "az network private-resource show to obtain the list of group ids."')
         c.argument('request_message', help='A message passed to the owner of the remote resource with this connection request. Restricted to 140 chars.')
         c.argument('manual_request', help='Use manual request to establish the connection', arg_type=get_three_state_flag())
+        c.argument('connection_name', help='Name of the private link service connection.')
         c.ignore('expand')
     # endregion
 
