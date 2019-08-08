@@ -77,6 +77,12 @@ Release History
 
 * Added CRUD commands for CosmosDB SQL, MongoDB, Cassandra, Gremlin and Table resources and resource's throughput.
 
+**Kubernetes**
+
+* Use https if dashboard container port is using https 
+
+=======
+
 2.0.70
 ++++++
 
