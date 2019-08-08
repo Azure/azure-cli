@@ -1264,12 +1264,15 @@ def create_service_principal_for_rbac(
     sp_oid = None
     _RETRY_TIMES = 36
     app_display_name, existing_sps = None, None
-    if name and '://' not in name:
-        prefix = "http://"
-        app_display_name = name
-        logger.warning('Changing "%s" to a valid URI of "%s%s", which is the required format'
-                       ' used for service principal names', name, prefix, name)
-        name = prefix + name  # normalize be a valid graph service principal name
+    if name:
+        if '://' not in name:
+            prefix = "http://"
+            app_display_name = name
+            logger.warning('Changing "%s" to a valid URI of "%s%s", which is the required format'
+                           ' used for service principal names', name, prefix, name)
+            name = prefix + name  # normalize be a valid graph service principal name
+        else:
+            app_display_name = name.split('://', 1)[-1]
 
     if name:
         query_exp = 'servicePrincipalNames/any(x:x eq \'{}\')'.format(name)

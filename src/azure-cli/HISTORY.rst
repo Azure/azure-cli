@@ -3,9 +3,17 @@
 Release History
 ===============
 
+**New Release Start ====
+  
 **keyvault**
 
 * Fix the bug in secret set command that igores the expires argument
+
+**RBAC**
+
+* derive service principal's display name from name in the create-for-rbac command
+
+**New Release Section End ===
 
 **AppService**
 
