@@ -43,8 +43,10 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
                 raise CLIError("Configuration of your account was changed. {}".format(
                     "Please run 'az login'" if not in_cloud_console() else ''))
             if 'AADSTS50173' in err:
-                raise CLIError("The provided grant has expired due to it being revoked. You might have changed or reset the password. {}".format(
-                    "Please clear browser's cookies and run 'az login'" if not in_cloud_console() else ''))
+                raise CLIError("The credential data used by CLI has been expired because you might have changed or "
+                               "reset the password. {}".format(
+                                   "Please clear browser's cookies and run 'az login'"
+                                   if not in_cloud_console() else ''))
 
             raise CLIError(err)
         except requests.exceptions.ConnectionError as err:
