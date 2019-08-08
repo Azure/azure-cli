@@ -7,10 +7,6 @@ Release History
 
 * Fix the bug in secret set command that igores the expires argument
 
-
-2.0.71
-++++++
-
 **AppService**
 
 * az webapp webjob continuous group commands were failing for slots
