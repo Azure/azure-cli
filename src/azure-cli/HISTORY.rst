@@ -19,11 +19,12 @@ Release History
 
 **CognitiveServices**
 
-* add "cognitiveservices account network-rule" commands.
+* Add "cognitiveservices account network-rule" commands.
 
 **Cosmos DB**
 
-* remove warning when updating multiple write locations
+* Remove warning when updating multiple write locations
+* Add CRUD commands for CosmosDB SQL, MongoDB, Cassandra, Gremlin and Table resources and resource's throughput.
 
 **HDInsight**
 
@@ -75,10 +76,6 @@ Release History
 **Storage**
 
 * `storage copy`: add copy command for storage
-
-**Cosmos DB**
-
-* Added CRUD commands for CosmosDB SQL, MongoDB, Cassandra, Gremlin and Table resources and resource's throughput.
 
 **Kubernetes**
 
