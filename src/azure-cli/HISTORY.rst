@@ -3,6 +3,9 @@
 Release History
 ===============
 
+2.0.71
+++++++
+
 **AppService**
 
 * az webapp webjob continuous group commands were failing for slots
