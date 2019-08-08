@@ -412,21 +412,19 @@ class RevokeStorageAccountTests(StorageScenarioMixin, RoleScenarioTest):
 
         result = self.cmd('storage account show -n {account} -g {rg}').get_output_in_json()
         self.kwargs['sc_id'] = result['id']
-        self.cmd('role assignment create --assignee {upn} --role contributor --scope {sc_id}')
-        self.cmd('role assignment list --assignee {upn} --role contributor --scope {sc_id}',
-                 checks=self.check("length([])", 1))
-
-        blob_sas = self.cmd('storage blob generate-sas --account-name {} -n {} -c {} --expiry {} --permissions '
-                            'r --https-only --as-user --auth-mode login -otsv'.format(storage_account, b, c,
-                                                                                      expiry)).output
-        container_sas = self.cmd('storage container generate-sas --account-name {} -n {} --expiry {} --permissions '
-                                 'r --https-only --as-user --auth-mode login -otsv'.format(storage_account, c,
-                                                                                           expiry)).output
+        self.cmd('role assignment create --assignee {upn} --role "Storage Blob Data Contributor" --scope {sc_id}')
+        container_sas = self.cmd('storage blob generate-sas --account-name {account} -n {blob} -c {container} --expiry {expiry} --permissions '
+                                 'rw --https-only --as-user --auth-mode login -otsv').output
         self.kwargs['container_sas'] = container_sas
+        self.cmd('storage blob upload -c {container} -n {blob} -f "{local_file}" --account-name {account} --sas-token {container_sas}')
+
+        blob_sas = self.cmd('storage blob generate-sas --account-name {account} -n {blob} -c {container} --expiry {expiry} --permissions '
+                            'r --https-only --as-user --auth-mode login -otsv').output
         self.kwargs['blob_sas'] = blob_sas
         self.cmd('storage blob show -c {container} -n {blob} --account-name {account} --sas-token {blob_sas}') \
             .assert_with_checks(JMESPathCheck('name', b))
 
-        self.cmd('storage account revoke-delegation-keys -n {storage_account} -g {resource_group}')
+        self.cmd('storage account revoke-delegation-keys -n {account} -g {rg}')
 
-        self.cmd('storage blob show -c {container} -n {blob} --account-name {account} --sas-token {blob_sas}')
+        with self.assertRaisesRegex(TypeError, "'CommandResultItem' object is not iterable"):
+            self.cmd('storage blob show -c {container} -n {blob} --account-name {account} --sas-token {blob_sas}')
