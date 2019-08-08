@@ -11,10 +11,9 @@ def iot_hub_service_factory(cli_ctx, *_):
 
 
 def resource_service_factory(cli_ctx, **_):
-    from azure.mgmt.resource import ResourceManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, ResourceManagementClient)
-
+    from azure.cli.core.profiles import ResourceType
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
 
 def iot_service_provisioning_factory(cli_ctx, *_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
