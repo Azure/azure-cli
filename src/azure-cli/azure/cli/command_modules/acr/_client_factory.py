@@ -11,8 +11,8 @@ VERSION_2019_06_01_PREVIEW = "2019-06-01-preview"
 
 def get_arm_service_client(cli_ctx):
     """Returns the client for managing ARM resources. """
-    from azure.mgmt.resource import ResourceManagementClient
-    return get_mgmt_service_client(cli_ctx, ResourceManagementClient)
+    from azure.cli.core.profiles import ResourceType
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
 
 
 def get_storage_service_client(cli_ctx):

@@ -74,9 +74,10 @@ def cli_cosmosdb_create(cmd, client,
                                                max_staleness_prefix=max_staleness_prefix,
                                                max_interval_in_seconds=max_interval)
 
-    from azure.mgmt.resource import ResourceManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    resource_client = get_mgmt_service_client(cmd.cli_ctx, ResourceManagementClient)
+    from azure.cli.core.profiles import ResourceType
+    resource_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+
     rg = resource_client.resource_groups.get(resource_group_name)
     resource_group_location = rg.location  # pylint: disable=no-member
 

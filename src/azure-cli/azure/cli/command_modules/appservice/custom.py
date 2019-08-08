@@ -1474,8 +1474,8 @@ def _parse_frequency(frequency):
 
 
 def _get_location_from_resource_group(cli_ctx, resource_group_name):
-    from azure.mgmt.resource import ResourceManagementClient
-    client = get_mgmt_service_client(cli_ctx, ResourceManagementClient)
+    from azure.cli.core.profiles import ResourceType
+    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     group = client.resource_groups.get(resource_group_name)
     return group.location
 
@@ -1488,8 +1488,8 @@ def _get_location_from_webapp(client, resource_group_name, webapp):
 
 
 def _get_deleted_apps_locations(cli_ctx):
-    from azure.mgmt.resource import ResourceManagementClient
-    client = get_mgmt_service_client(cli_ctx, ResourceManagementClient)
+    from azure.cli.core.profiles import ResourceType
+    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     web_provider = client.providers.get('Microsoft.Web')
     del_sites_resource = next((x for x in web_provider.resource_types if x.resource_type == 'deletedSites'), None)
     if del_sites_resource:
