@@ -429,7 +429,7 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_ag_waf_config')
         g.custom_command('list-rule-sets', 'list_ag_waf_rule_sets', min_api='2017-03-01', client_factory=cf_application_gateways, table_transformer=transform_waf_rule_sets_table_output)
 
-    with self.command_group('network application-gateway identity', command_type=network_ag_sdk) as g:
+    with self.command_group('network application-gateway identity', command_type=network_ag_sdk, min_api='2018-12-01') as g:
         g.custom_command('assign', 'assign_ag_identity', supports_no_wait=True)
         g.custom_command('remove', 'remove_ag_identity', supports_no_wait=True)
         g.custom_show_command('show', 'show_ag_identity')

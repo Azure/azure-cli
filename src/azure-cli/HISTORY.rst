@@ -152,7 +152,12 @@ Fix #10286: Unable to delete network rules.
 
 **Network**
 
+<<<<<<< HEAD
 * az network dns record-set cname delete: Fixes #10166. Support `--yes` argument to align the behavior with other dns type. 
+=======
+* network application-gateway identity: Fixes #10073 and #8244 Add support for setting identity in application-gateway.
+* network application-gateway ssl-cert: Fixes #8244. Add support for setting key vault id in application-gateway ssl-cert.
+>>>>>>> support keyvaultsecretid
 
 **Profile**
 
