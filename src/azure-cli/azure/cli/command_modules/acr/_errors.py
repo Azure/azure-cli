@@ -104,6 +104,12 @@ CONNECTIVITY_ACCESS_TOKEN_ERROR = ErrorClass(
 )
 
 
+CONNECTIVITY_SSL_ERROR = ErrorClass(
+    "CONNECTIVITY_SSL_ERROR",
+    "Unable to establish a secure connection to the registry '{}'. Are you using a proxy server?"
+)
+
+
 # GENERAL ERRORS
 LOGIN_SERVER_ERROR = ErrorClass(
     "LOGIN_SERVER_ERROR",
