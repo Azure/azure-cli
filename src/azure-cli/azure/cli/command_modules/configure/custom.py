@@ -52,7 +52,7 @@ def _config_env_public_azure(cli_ctx, _):
     from adal.adal_error import AdalError
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.cli.core._profile import Profile
-    from azure.cli.core.profile import ResourceType
+    from azure.cli.core.profiles import ResourceType
     # Determine if user logged in
 
     try:

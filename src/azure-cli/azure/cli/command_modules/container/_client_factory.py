@@ -33,6 +33,7 @@ def cf_resource(cli_ctx):
     from azure.cli.core.profiles import ResourceType
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
 
+
 def get_auth_management_client(cli_ctx, scope=None, **_):
     import re
     from azure.cli.core.profiles import ResourceType
