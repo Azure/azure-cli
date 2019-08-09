@@ -3,7 +3,7 @@
 Release History
 ===============
 
-**New Release Start ====
+**=== New Release Start ===**
   
 **keyvault**
 
@@ -13,7 +13,8 @@ Release History
 
 * derive service principal's display name from name in the create-for-rbac command
 
-**New Release Section End ===
+**=== New Release Section End ===**
+
 
 **AppService**
 
