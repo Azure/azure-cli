@@ -940,7 +940,9 @@ def load_service_principals(config_path):
 
 def _invoke_deployment(cli_ctx, resource_group_name, deployment_name, template, parameters, validate, no_wait,
                        subscription_id=None):
-    from azure.mgmt.resource.resources.models import DeploymentProperties
+
+    from azure.cli.core.profiles import ResourceType, get_sdk
+    DeploymentProperties = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'models', 'DeploymentProperties')
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
     from azure.cli.core.profiles import ResourceType
     smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
