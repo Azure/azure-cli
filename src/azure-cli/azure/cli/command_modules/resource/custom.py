@@ -1745,7 +1745,8 @@ def update_lock(cmd, lock_name=None, resource_group=None, resource_provider_name
 # region ResourceLinks
 def create_resource_link(cmd, link_id, target_id, notes=None):
     links_client = _resource_links_client_factory(cmd.cli_ctx).resource_links
-    ResourceLinkProperties = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_LINKS,'ResourceLinkProperties', mod='models')
+    ResourceLinkProperties = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_LINKS,
+                                     'ResourceLinkProperties', mod='models')
     properties = ResourceLinkProperties(target_id=target_id, notes=notes)
     links_client.create_or_update(link_id, properties)
 
@@ -1753,7 +1754,8 @@ def create_resource_link(cmd, link_id, target_id, notes=None):
 def update_resource_link(cmd, link_id, target_id=None, notes=None):
     links_client = _resource_links_client_factory(cmd.cli_ctx).resource_links
     params = links_client.get(link_id)
-    ResourceLinkProperties = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_LINKS,'ResourceLinkProperties', mod='models')
+    ResourceLinkProperties = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_LINKS,
+                                     'ResourceLinkProperties', mod='models')
     properties = ResourceLinkProperties(
         target_id=target_id if target_id is not None else params.properties.target_id,
         # pylint: disable=no-member
