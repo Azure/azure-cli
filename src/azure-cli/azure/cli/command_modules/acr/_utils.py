@@ -153,7 +153,7 @@ def arm_deploy_template_new_storage(cli_ctx,
     from azure.cli.core.util import get_file_json
     import os
 
-    DeploymentProperties = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'models', 'DeploymentProperties')
+    DeploymentProperties = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'DeploymentProperties', mod='models')
     parameters = _parameters(
         registry_name=registry_name,
         location=location,
@@ -192,7 +192,7 @@ def arm_deploy_template_existing_storage(cli_ctx,
     from azure.cli.core.util import get_file_json
     import os
 
-    DeploymentProperties = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'models', 'DeploymentProperties')
+    DeploymentProperties = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'DeploymentProperties', mod='models')
 
     storage_account_id = get_resource_id_by_storage_account_name(
         cli_ctx, storage_account_name)

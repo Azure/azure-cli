@@ -21,7 +21,6 @@ from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
 
 from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
-from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.mgmt.resource.resources.models import GenericResource
 
 from azure.cli.core.parser import IncorrectUsageError
@@ -1667,7 +1666,7 @@ def create_lock(cmd, lock_name, level,
     :param notes: Notes about this lock.
     :type notes: str
     """
-    ManagementLockObject = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_LOCKS, 'models', 'ManagementLockObject')
+    ManagementLockObject = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_LOCKS, 'ManagementLockObject', mod='models')
     parameters = ManagementLockObject(level=level, notes=notes, name=lock_name)
 
     lock_client = _resource_lock_client_factory(cmd.cli_ctx)
@@ -1746,7 +1745,7 @@ def update_lock(cmd, lock_name=None, resource_group=None, resource_provider_name
 # region ResourceLinks
 def create_resource_link(cmd, link_id, target_id, notes=None):
     links_client = _resource_links_client_factory(cmd.cli_ctx).resource_links
-    ResourceLinkProperties = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_LINKS, 'models', 'ResourceLinkProperties')
+    ResourceLinkProperties = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_LINKS,'ResourceLinkProperties', mod='models')
     properties = ResourceLinkProperties(target_id=target_id, notes=notes)
     links_client.create_or_update(link_id, properties)
 
@@ -1754,7 +1753,7 @@ def create_resource_link(cmd, link_id, target_id, notes=None):
 def update_resource_link(cmd, link_id, target_id=None, notes=None):
     links_client = _resource_links_client_factory(cmd.cli_ctx).resource_links
     params = links_client.get(link_id)
-    ResourceLinkProperties = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_LINKS, 'models', 'ResourceLinkProperties')
+    ResourceLinkProperties = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_LINKS,'ResourceLinkProperties', mod='models')
     properties = ResourceLinkProperties(
         target_id=target_id if target_id is not None else params.properties.target_id,
         # pylint: disable=no-member

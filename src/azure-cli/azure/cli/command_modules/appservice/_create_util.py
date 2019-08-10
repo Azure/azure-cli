@@ -76,7 +76,7 @@ def get_runtime_version_details(file_path, lang_name):
 def create_resource_group(cmd, rg_name, location):
     from azure.cli.core.profiles import ResourceType, get_sdk
     rcf = _resource_client_factory(cmd.cli_ctx)
-    ResourceGroup = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'models', 'ResourceGroup')
+    ResourceGroup = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'ResourceGroup', mod='models')
     rg_params = ResourceGroup(location=location)
     return rcf.resource_groups.create_or_update(rg_name, rg_params)
 

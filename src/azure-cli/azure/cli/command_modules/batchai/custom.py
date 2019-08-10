@@ -523,8 +523,7 @@ def _configure_auto_storage(cli_ctx, location):
     :param str location: location for the auto-storage account.
     :return (str, str): a tuple with auto storage account name and key.
     """
-    from azure.cli.core.profiles import ResourceType, get_sdk
-    ResourceGroup = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'models', 'ResourceGroup')
+    ResourceGroup = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'ResourceGroup', mod='models')
     BlockBlobService, FileService = get_sdk(cli_ctx, ResourceType.DATA_STORAGE,
                                             'blob#BlockBlobService', 'file#FileService')
     resource_group = _get_auto_storage_resource_group()
