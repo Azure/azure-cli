@@ -3,10 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from azure.cli.testsdk import (ScenarioTest, JMESPathCheck, ResourceGroupPreparer,
-                               StorageAccountPreparer, api_version_constraint, live_only)
+                               StorageAccountPreparer, api_version_constraint, live_only, LiveScenarioTest)
 from azure.cli.core.profiles import ResourceType
 from ..storage_test_util import StorageScenarioMixin
-from azure.cli.command_modules.role.tests.latest.test_role import RoleScenarioTest
 from knack.util import CLIError
 from datetime import datetime, timedelta
 from azure_devtools.scenario_tests import AllowLargeResponse
@@ -378,23 +377,27 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'AADDS')
 
 
+class RoleScenarioTest(LiveScenarioTest):
+    def run_under_service_principal(self):
+        account_info = self.cmd('account show').get_output_in_json()
+        return account_info['user']['type'] == 'servicePrincipal'
+
+
 @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
-class RevokeStorageAccountTests(StorageScenarioMixin, RoleScenarioTest):
+class RevokeStorageAccountTests(StorageScenarioMixin, RoleScenarioTest, LiveScenarioTest):
     @ResourceGroupPreparer()
-    @AllowLargeResponse()
     @StorageAccountPreparer()
     def test_storage_account_revoke_delegation_keys(self, resource_group, storage_account):
         if self.run_under_service_principal():
             return  # this test delete users which are beyond a SP's capacity, so quit...
         from datetime import datetime, timedelta
         import time
-        import mock
+
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
         account_info = self.get_account_info(resource_group, storage_account)
         c = self.create_container(account_info)
         b = self.create_random_name('blob', 24)
         local_file = self.create_temp_file(128, full_random=False)
-
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
         self.kwargs.update({
             'expiry': expiry,
             'account': storage_account,
@@ -403,16 +406,16 @@ class RevokeStorageAccountTests(StorageScenarioMixin, RoleScenarioTest):
             'blob': b,
             'rg': resource_group
         })
-        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
-            user = self.create_random_name('testuser', 15)
-            self.kwargs['upn'] = user + '@azuresdkteam.onmicrosoft.com'
-            result = self.cmd(
-                'ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}')
-            time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
-
         result = self.cmd('storage account show -n {account} -g {rg}').get_output_in_json()
         self.kwargs['sc_id'] = result['id']
+
+        user = self.create_random_name('testuser', 15)
+        self.kwargs['upn'] = user + '@azuresdkteam.onmicrosoft.com'
+        self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}')
+        time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
+
         self.cmd('role assignment create --assignee {upn} --role "Storage Blob Data Contributor" --scope {sc_id}')
+
         container_sas = self.cmd('storage blob generate-sas --account-name {account} -n {blob} -c {container} --expiry {expiry} --permissions '
                                  'rw --https-only --as-user --auth-mode login -otsv').output
         self.kwargs['container_sas'] = container_sas
@@ -425,6 +428,6 @@ class RevokeStorageAccountTests(StorageScenarioMixin, RoleScenarioTest):
             .assert_with_checks(JMESPathCheck('name', b))
 
         self.cmd('storage account revoke-delegation-keys -n {account} -g {rg}')
+        time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
 
-        with self.assertRaisesRegex(TypeError, "'CommandResultItem' object is not iterable"):
-            self.cmd('storage blob show -c {container} -n {blob} --account-name {account} --sas-token {blob_sas}')
+        self.cmd('storage blob show -c {container} -n {blob} --account-name {account} --sas-token {blob_sas}', expect_failure=True)
