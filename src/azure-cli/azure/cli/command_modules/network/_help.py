@@ -338,22 +338,22 @@ examples:
 
 helps['network application-gateway identity'] = """
 type: group
-short-summary: Manage the identity information
+short-summary: Manage the managed service identity of an application gateway.
 """
 
 helps['network application-gateway identity assign'] = """
 type: command
-short-summary: Assign a managed service identity to the application-gateway
+short-summary: Assign a managed service identity to an application-gateway
 """
 
 helps['network application-gateway identity remove'] = """
 type: command
-short-summary: Remove a managed service identity to the application-gateway
+short-summary: Remove the managed service identity of an application-gateway
 """
 
 helps['network application-gateway identity show'] = """
 type: command
-short-summary: Show a managed service identity of the application-gateway
+short-summary: Show the managed service identity of an application-gateway
 """
 
 helps['network application-gateway list'] = """

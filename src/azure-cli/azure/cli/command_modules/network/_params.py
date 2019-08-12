@@ -364,6 +364,7 @@ def load_arguments(self, _):
         c.argument('user_assigned_identity', options_list=['--identity'], help="Name or ID of the ManagedIdentity Resource", validator=validate_application_gateway_identity)
         c.argument('principal_id', help='The principal id of user assigned identity.')
         c.argument('client_id', help='The client id of user assigned identity.')
+        c.argument('application_gateway_name', app_gateway_name_type)
     # endregion
 
     # region ApplicationGatewayWAFPolicies

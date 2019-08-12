@@ -385,7 +385,7 @@ def assign_ag_identity(cmd, resource_group_name, application_gateway_name,
 
     return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag)
 
-
+# Unused due to service limitation.
 def add_ag_identity(cmd, resource_group_name, application_gateway_name,
                     no_wait=False, user_assigned_identity=None,
                     client_id=None, principal_id=None):
