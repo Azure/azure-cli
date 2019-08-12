@@ -41,7 +41,8 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
                                        cookie_based_affinity, http_settings_protocol, http_settings_port,
                                        http_listener_protocol, routing_rule_type, public_ip_id, subnet_id,
                                        connection_draining_timeout, enable_http2, min_capacity, zones,
-                                       custom_error_pages, firewall_policy, max_capacity):
+                                       custom_error_pages, firewall_policy, max_capacity, identity_type,
+                                       user_assigned_identity, client_id, principal_id):
 
     # set the default names
     frontend_ip_name = 'appGatewayFrontendIP'
@@ -182,6 +183,20 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
     }
     if cmd.supported_api_version(min_api='2018-08-01'):
         ag.update({'zones': zones})
+    if identity_type and cmd.supported_api_version(min_api='2018-12-01'):
+        ag.update(
+            {
+                "identity": {
+                    "type": identity_type,
+                    "userAssignedIdentities": {
+                        user_assigned_identity: {
+                            "principalId": principal_id,
+                            "clientId": client_id
+                        }
+                    }
+                }
+            }
+        )
     return ag
 
 
