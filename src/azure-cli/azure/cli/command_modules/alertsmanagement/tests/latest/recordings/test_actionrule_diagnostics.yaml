@@ -1,0 +1,166 @@
+interactions:
+- request:
+    body: '{"location": "Global", "tags": {}, "properties": {"scope": {"scopeType":
+      "ResourceGroup", "values": ["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alertslab",
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Test-VMs"]},
+      "conditions": {}, "description": "Test description", "status": "Enabled", "type":
+      "Diagnostics"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - alertsmanagement action-rule set
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '359'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --resource-group-name --name --scope --severity-condition --monitor-condition
+        --description --status --action-rule-type
+      User-Agent:
+      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-alertsmanagement/0.2.0rc2
+        Azure-SDK-For-Python AZURECLI/2.0.69
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AlertsManagement/actionRules/test-diagnostics-actionrule?api-version=2019-05-05-preview
+  response:
+    body:
+      string: '{"properties":{"status":"Enabled","type":"Diagnostics","scope":{"scopeType":"ResourceGroup","values":["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alertslab","/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Test-VMs"]},"description":"Test
+        description","createdAt":"2019-08-12T06:31:04.3672722Z","createdBy":"mahja@microsoft.com","lastModifiedAt":"2019-08-12T06:31:04.3672722Z","lastModifiedBy":"mahja@microsoft.com"},"location":"Global","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AlertsManagement/actionRules/test-diagnostics-actionrule","type":"Microsoft.AlertsManagement/actionRules","name":"test-diagnostics-actionrule"}'
+    headers:
+      cache-control:
+      - no-store, no-cache
+      content-length:
+      - '791'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Aug 2019 06:31:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"status": "Disabled"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - alertsmanagement action-rule update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '38'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --resource-group-name --name --status
+      User-Agent:
+      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-alertsmanagement/0.2.0rc2
+        Azure-SDK-For-Python AZURECLI/2.0.69
+      accept-language:
+      - en-US
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AlertsManagement/actionRules/test-diagnostics-actionrule?api-version=2019-05-05-preview
+  response:
+    body:
+      string: '{"properties":{"status":"Disabled","type":"Diagnostics","scope":{"scopeType":"ResourceGroup","values":["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alertslab","/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Test-VMs"]},"description":"Test
+        description","createdAt":"2019-08-12T06:31:04.3672722Z","createdBy":"mahja@microsoft.com","lastModifiedAt":"2019-08-12T06:31:06.3129607Z","lastModifiedBy":"mahja@microsoft.com"},"location":"Global","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AlertsManagement/actionRules/test-diagnostics-actionrule","type":"Microsoft.AlertsManagement/actionRules","name":"test-diagnostics-actionrule"}'
+    headers:
+      cache-control:
+      - no-store, no-cache
+      content-length:
+      - '792'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Aug 2019 06:31:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - alertsmanagement action-rule delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --resource-group-name --name
+      User-Agent:
+      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-alertsmanagement/0.2.0rc2
+        Azure-SDK-For-Python AZURECLI/2.0.69
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AlertsManagement/actionRules/test-diagnostics-actionrule?api-version=2019-05-05-preview
+  response:
+    body:
+      string: 'true'
+    headers:
+      cache-control:
+      - no-store, no-cache
+      content-length:
+      - '4'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Aug 2019 06:31:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 200
+      message: OK
+version: 1

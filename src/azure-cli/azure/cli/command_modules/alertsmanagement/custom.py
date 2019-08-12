@@ -74,7 +74,6 @@ def cli_alertsmanagement_set_actionrule(client, resource_group_name,
             )
 
     if action_rule_type == 'Suppression' and recurrence_type != None:
-        print (type(recurrence_values))
         config = SuppressionConfig(recurrence_type = recurrence_type)
         if recurrence_type != 'Always':
             config.schedule = SuppressionSchedule(
@@ -119,7 +118,7 @@ def cli_alertsmanagement_set_actionrule(client, resource_group_name,
                 )
             )
 
-    client.create_update(resource_group_name, name, action_rule)
+    return client.create_update(resource_group_name, name, action_rule)
 
 
 def parse_conditions(severity_condition=None,

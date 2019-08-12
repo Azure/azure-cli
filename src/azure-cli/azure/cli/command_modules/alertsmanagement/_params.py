@@ -147,7 +147,7 @@ def load_arguments(self, _):
 
     with self.argument_context('alertsmanagement action-rule update') as c:
         c.argument('resource_group_name', resource_group_name_arg_type, required=True)
-        c.argument('name', options_list=['--name'], required=True, help='Unique name of action rule to be updated')
+        c.argument('action_rule_name', options_list=['--name'], required=True, help='Unique name of action rule to be updated')
         c.argument('patch', options_list=['--patch'], required=True, help='changes to be made in rule')
 
     with self.argument_context('alertsmanagement action-rule delete') as c:
