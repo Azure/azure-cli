@@ -113,7 +113,7 @@ def load_arguments(self, _):
 
     with self.argument_context('alertsmanagement action-rule show') as c:
         c.argument('resource_group_name', resource_group_name_arg_type, required=True)
-        c.argument('name', options_list=['--name'], required=True, help='Name of action rule')
+        c.argument('action_rule_name', options_list=['--name'], required=True, help='Name of action rule')
 
     # TODO: Check for expected formats in help in few parameters
     with self.argument_context('alertsmanagement action-rule set') as c:
@@ -130,11 +130,11 @@ def load_arguments(self, _):
         c.argument('description_condition', options_list=['--description-condition'], required=False, help='Expected format - {<operation>:<comma separated list of values>} For eg. Contains:Test Alert')
         c.argument('alert_context_condition', options_list=['--alert-context-condition'], required=False, help='Expected format - {<operation>:<comma separated list of values>} For eg. Contains:smartgroups')
         c.argument('action_rule_type', options_list=['--action-rule-type'], required=True, help='Action rule Type')
-        c.argument('reccurence_type', options_list=['--reccurence-type'], required=True, help='Specifies the duration when the suppression should be applied')
+        c.argument('recurrence_type', options_list=['--recurrence-type'], required=False, help='Specifies the duration when the suppression should be applied')
         c.argument('suppression_start_time', options_list=['--suppression-start-time'], required=False, help='Suppression Start Time. Format 12/09/2018 06:00:00 Should be mentioned in case of Reccurent Supression Schedule - Once, Daily, Weekly or Monthly')
         c.argument('suppression_end_time', options_list=['--suppression-end-time'], required=False, help='Suppression Start Time. Format 12/09/2018 06:00:00 Should be mentioned in case of Reccurent Supression Schedule - Once, Daily, Weekly or Monthly')
-        c.argument('reccurent_value', options_list=['--reccurent-value'], required=False, help='Specifies the duration when the suppression should be applied')
-        c.argument('action_group_id', options_list=['--action-group-id'], required=True, help='Action Group Id which is to be notified')
+        c.argument('recurrence_values', options_list=['--recurrence-values'], required=False, help='Specifies the duration when the suppression should be applied')
+        c.argument('action_group_id', options_list=['--action-group-id'], required=False, help='Action Group Id which is to be notified')
 
 
     with self.argument_context('alertsmanagement alert update-state') as c:
@@ -147,9 +147,9 @@ def load_arguments(self, _):
 
     with self.argument_context('alertsmanagement action-rule update') as c:
         c.argument('resource_group_name', resource_group_name_arg_type, required=True)
-        c.argument('name', options_list=['--name'], required=True, help='Unique name of action rule to be updated')
+        c.argument('action_rule_name', options_list=['--name'], required=True, help='Unique name of action rule to be updated')
         c.argument('patch', options_list=['--patch'], required=True, help='changes to be made in rule')
 
     with self.argument_context('alertsmanagement action-rule delete') as c:
         c.argument('resource_group_name', resource_group_name_arg_type, required=True)
-        c.argument('name', options_list=['--name'], required=True, help='Unique name of action rule to be deleted')
+        c.argument('action_rule_name', options_list=['--name'], required=True, help='Unique name of action rule to be deleted')
