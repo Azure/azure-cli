@@ -1399,7 +1399,6 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
                        'by running "az aks enable-addons --addons kube-dashboard".')
 
     _, browse_path = tempfile.mkstemp()
-    # TODO: need to add an --admin option?
     aks_get_credentials(cmd, client, resource_group_name, name, admin=False, path=browse_path)
 
     # find the dashboard pod's name
