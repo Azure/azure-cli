@@ -2237,7 +2237,7 @@ def set_lb_inbound_nat_pool(
 def create_lb_frontend_ip_configuration(
         cmd, resource_group_name, load_balancer_name, item_name, public_ip_address=None,
         public_ip_prefix=None, subnet=None, virtual_network_name=None, private_ip_address=None,
-        private_ip_address_allocation=None, zone=None):
+        private_ip_address_version=None, private_ip_address_allocation=None, zone=None):
     FrontendIPConfiguration, SubResource, Subnet = cmd.get_models(
         'FrontendIPConfiguration', 'SubResource', 'Subnet')
     ncf = network_client_factory(cmd.cli_ctx)
@@ -2249,6 +2249,7 @@ def create_lb_frontend_ip_configuration(
     new_config = FrontendIPConfiguration(
         name=item_name,
         private_ip_address=private_ip_address,
+        private_ip_address_version=private_ip_address_version,
         private_ip_allocation_method=private_ip_address_allocation,
         public_ip_address=SubResource(id=public_ip_address) if public_ip_address else None,
         public_ip_prefix=SubResource(id=public_ip_prefix) if public_ip_prefix else None,
@@ -2264,15 +2265,19 @@ def create_lb_frontend_ip_configuration(
 
 def set_lb_frontend_ip_configuration(
         cmd, instance, parent, item_name, private_ip_address=None,
-        private_ip_address_allocation=None, public_ip_address=None, subnet=None,
-        virtual_network_name=None, public_ip_prefix=None):
+        private_ip_address_allocation=None, private_ip_address_version=None, public_ip_address=None,
+        subnet=None, virtual_network_name=None, public_ip_prefix=None):
     PublicIPAddress, Subnet, SubResource = cmd.get_models('PublicIPAddress', 'Subnet', 'SubResource')
     if private_ip_address == '':
         instance.private_ip_allocation_method = 'dynamic'
         instance.private_ip_address = None
+        if cmd.supported_api_version(min_api='2019-04-01'):
+            instance.private_ip_address_version = 'ipv4'
     elif private_ip_address is not None:
         instance.private_ip_allocation_method = 'static'
         instance.private_ip_address = private_ip_address
+        if private_ip_address_version is not None:
+            instance.private_ip_address_version = private_ip_address_version
 
     if subnet == '':
         instance.subnet = None

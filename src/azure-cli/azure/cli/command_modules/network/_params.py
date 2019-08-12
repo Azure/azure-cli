@@ -668,6 +668,7 @@ def load_arguments(self, _):
 
     with self.argument_context('network lb frontend-ip') as c:
         c.argument('zone', zone_type, min_api='2017-06-01')
+        c.argument('private_ip_address_version', min_api='2019-04-01', help='The private IP address version to use.', default=IPVersion.ipv4.value if IPVersion else '')
 
     for item in ['create', 'update']:
         with self.argument_context('network lb frontend-ip {}'.format(item)) as c:
