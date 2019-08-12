@@ -27,7 +27,14 @@ def load_command_table(self, _):
         g.command('delete', 'signalr_delete')
         g.command('list', 'signalr_list')
         g.command('show', 'signalr_show', exception_handler=empty_on_404)
+        g.command('restart', 'signalr_restart', exception_handler=empty_on_404)
+        g.command('update', 'signalr_update', exception_handler=empty_on_404)
 
     with self.command_group('signalr key', signalr_key_utils) as g:
         g.command('list', 'signalr_key_list')
         g.command('renew', 'signalr_key_renew')
+
+    with self.command_group('signalr cors', signalr_cors_utils) as g:
+        g.command('add', signalr_cors_add)
+        g.command('remove', signalr_cors_remove)
+        g.command('list', signalr_cors_list)

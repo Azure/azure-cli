@@ -35,7 +35,7 @@ helps['signalr create'] = """
     examples:
         - name: Create a SignalR Service with the Basic SKU.
           text: >
-            az signalr create -n MySignalR -g MyResourceGroup --sku Standard_S1 --unit-count 1
+            az signalr create -n MySignalR -g MyResourceGroup --sku Standard_S1 --unit-count 1 --service-node serverless
 """
 
 helps['signalr delete'] = """
@@ -54,6 +54,24 @@ helps['signalr show'] = """
         - name: Get the sku for a SignalR Service.
           text: >
             az signalr show -n MySignalR -g MyResourceGroup --query sku
+"""
+
+helps['signalr update'] = """
+    type: command
+    short-summary: Update an existing SignalR Service.
+    examples:
+        - name: Update unit count to scale the service.
+          text: >
+            az signalr update -n MySignalR -g MyResourceGroup --unit-count 50
+"""
+
+helps['signalr restart'] = """
+    type: command
+    short-summary: Restart an existing SignalR Service.
+    examples:
+        - name: Restart a SignalR Service instance.
+          text: >
+            az signalr restart -n MySignalR -g MyResourceGroup
 """
 
 helps['signalr key list'] = """
