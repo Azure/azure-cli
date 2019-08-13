@@ -11,8 +11,7 @@ import azure.cli.command_modules.signalr._help  # pylint: disable=unused-import
 class SignalRCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
-        super(SignalRCommandsLoader, self).__init__(cli_ctx=cli_ctx,
-                                                    min_profile='2017-03-10-profile')
+        super(SignalRCommandsLoader, self).__init__(cli_ctx=cli_ctx)
 
     def load_command_table(self, args):
         from .commands import load_command_table
