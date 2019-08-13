@@ -20,4 +20,5 @@ class AlertsManagementCommandsLoader(AzCommandsLoader):
         from azure.cli.command_modules.alertsmanagement._params import load_arguments
         load_arguments(self, command)
 
+
 COMMAND_LOADER_CLS = AlertsManagementCommandsLoader

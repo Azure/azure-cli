@@ -5,13 +5,14 @@
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, record_only
 
+
 class AzureAlertsManagementActionRuleScenarioTest(ScenarioTest):
 
     def test_actionrule_getfilter(self):
         severity_filter = "Sev3"
         monitor_service_filter = "Platform"
 
-        actionrules = self.cmd('alertsmanagement action-rule list --severity {} --monitor-service {}'.format(severity_filter, monitor_service_filter)).get_output_in_json()
+        self.cmd('alertsmanagement action-rule list --severity {} --monitor-service {}'.format(severity_filter, monitor_service_filter))
 
     @ResourceGroupPreparer(location='eastus')
     def test_actionrule_suppression(self, resource_group):

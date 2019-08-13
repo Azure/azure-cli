@@ -1,62 +1,73 @@
-from azure.mgmt.alertsmanagement.models import (ActionRule, ActionGroup, Suppression, Diagnostics, Scope, Conditions, Condition, SuppressionConfig, SuppressionSchedule, ScopeType)
+from azure.mgmt.alertsmanagement.models import (ActionRule,
+                                                ActionGroup,
+                                                Suppression,
+                                                Diagnostics,
+                                                Scope,
+                                                Conditions,
+                                                SuppressionConfig,
+                                                SuppressionSchedule,
+                                                )
+from knack.util import CLIError
 
 
 def cli_alertsmanagement_list_actionrule(client, resource_group_name=None,
-                                        target_resource_group=None,
-                                        target_resource_type=None,
-                                        target_resource=None,
-                                        severity=None,
-                                        monitor_service=None,
-                                        impacted_scope=None,
-                                        description=None,
-                                        alert_rule_id=None,
-                                        action_group=None,
-                                        name=None):
+                                         target_resource_group=None,
+                                         target_resource_type=None,
+                                         target_resource=None,
+                                         severity=None,
+                                         monitor_service=None,
+                                         impacted_scope=None,
+                                         description=None,
+                                         alert_rule_id=None,
+                                         action_group=None,
+                                         name=None):
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name,
-                                            target_resource_group,
-                                            target_resource_type,
-                                            target_resource,
-                                            severity,
-                                            monitor_service,
-                                            impacted_scope,
-                                            description,
-                                            alert_rule_id,
-                                            action_group,
-                                            name)
+                                             target_resource_group,
+                                             target_resource_type,
+                                             target_resource,
+                                             severity,
+                                             monitor_service,
+                                             impacted_scope,
+                                             description,
+                                             alert_rule_id,
+                                             action_group,
+                                             name)
     return client.list_by_subscription(target_resource_group,
-                                        target_resource_type,
-                                        target_resource,
-                                        severity,
-                                        monitor_service,
-                                        impacted_scope,
-                                        description,
-                                        alert_rule_id,
-                                        action_group,
-                                        name)
+                                       target_resource_type,
+                                       target_resource,
+                                       severity,
+                                       monitor_service,
+                                       impacted_scope,
+                                       description,
+                                       alert_rule_id,
+                                       action_group,
+                                       name)
 
-def cli_alertsmanagement_set_actionrule(client, resource_group_name,
-                             name,
-                             status,
-                             scope,
-                             action_rule_type,
-                             recurrence_type,
-                             action_group_id,
-                             description=None,
-                             severity_condition=None,
-                             monitor_service_condition=None,
-                             monitor_condition=None,
-                             target_resource_type_condition=None,
-                             alert_ruleId_condition=None,
-                             description_condition=None,
-                             alert_context_condition=None,
-                             suppression_start_time=None,
-                             suppression_end_time=None,
-                             recurrence_values=None):
-    
+
+def cli_alertsmanagement_set_actionrule(client,
+                                        resource_group_name,
+                                        name,
+                                        status,
+                                        scope,
+                                        action_rule_type,
+                                        recurrence_type,
+                                        action_group_id,
+                                        description=None,
+                                        severity_condition=None,
+                                        monitor_service_condition=None,
+                                        monitor_condition=None,
+                                        target_resource_type_condition=None,
+                                        alert_ruleId_condition=None,
+                                        description_condition=None,
+                                        alert_context_condition=None,
+                                        suppression_start_time=None,
+                                        suppression_end_time=None,
+                                        recurrence_values=None):
+
     action_rule = ActionRule(location="Global", tags={})
 
-    if action_rule_type == 'ActionGroup' and action_group_id != None:
+    if action_rule_type == 'ActionGroup' and action_group_id is not None:
         action_rule = ActionRule(
             location="Global",
             tags={},
@@ -68,43 +79,43 @@ def cli_alertsmanagement_set_actionrule(client, resource_group_name,
                                                                alert_ruleId_condition,
                                                                description_condition,
                                                                alert_context_condition),
-                                   action_group_id = action_group_id,
+                                   action_group_id=action_group_id,
                                    description=description,
-                                   status = status)
-            )
+                                   status=status)
+        )
 
-    if action_rule_type == 'Suppression' and recurrence_type != None:
-        config = SuppressionConfig(recurrence_type = recurrence_type)
+    if action_rule_type == 'Suppression' and recurrence_type is not None:
+        config = SuppressionConfig(recurrence_type=recurrence_type)
         if recurrence_type != 'Always':
             config.schedule = SuppressionSchedule(
-                start_date = suppression_start_time.split(' ')[0],
-                end_date = suppression_end_time.split(' ')[0],
-                start_time = suppression_start_time.split(' ')[1],
-                end_time = suppression_end_time.split(' ')[1])
-        
-            if len(recurrence_values) > 0:
+                start_date=suppression_start_time.split(' ')[0],
+                end_date=suppression_end_time.split(' ')[0],
+                start_time=suppression_start_time.split(' ')[1],
+                end_time=suppression_end_time.split(' ')[1])
+
+            if recurrence_values:
                 config.schedule.recurrence_values = recurrence_values.split(',')
-        
+
         action_rule = ActionRule(
-        location="Global",
-        tags={},
-        properties=Suppression(scope=parse_scope(scope),
-                                conditions=parse_conditions(severity_condition,
-                                                            monitor_service_condition,
-                                                            monitor_condition,
-                                                            target_resource_type_condition,
-                                                            alert_ruleId_condition,
-                                                            description_condition,
-                                                            alert_context_condition),
-                                description=description,
-                                status = status,
-                                suppression_config = config)
+            location="Global",
+            tags={},
+            properties=Suppression(scope=parse_scope(scope),
+                                   conditions=parse_conditions(severity_condition,
+                                                               monitor_service_condition,
+                                                               monitor_condition,
+                                                               target_resource_type_condition,
+                                                               alert_ruleId_condition,
+                                                               description_condition,
+                                                               alert_context_condition),
+                                   description=description,
+                                   status=status,
+                                   suppression_config=config)
         )
 
     if action_rule_type == 'Diagnostics':
         action_rule = ActionRule(
             location="Global",
-            tags = {},
+            tags={},
             properties=Diagnostics(scope=parse_scope(scope),
                                    conditions=parse_conditions(severity_condition,
                                                                monitor_service_condition,
@@ -113,63 +124,62 @@ def cli_alertsmanagement_set_actionrule(client, resource_group_name,
                                                                alert_ruleId_condition,
                                                                description_condition,
                                                                alert_context_condition),
-                description=description,
-                status=status
-                )
-            )
+                                   description=description,
+                                   status=status)
+        )
 
     return client.create_update(resource_group_name, name, action_rule)
 
 
 def parse_conditions(severity_condition=None,
-                             monitor_service_condition=None,
-                             monitor_condition=None,
-                             target_resource_type_condition=None,
-                             alert_ruleId_condition=None,
-                             description_condition=None,
-                             alert_context_condition=None):
+                     monitor_service_condition=None,
+                     monitor_condition=None,
+                     target_resource_type_condition=None,
+                     alert_ruleId_condition=None,
+                     description_condition=None,
+                     alert_context_condition=None):
     conditions = Conditions()
-    if severity_condition != None:
+    if severity_condition is not None:
         conditions.Severity = Conditions(
-            operatorProperty = severity_condition.split(':')[0],
-             values = severity_condition.split(':')[1].split(',')
-            )
+            operatorProperty=severity_condition.split(':')[0],
+            values=severity_condition.split(':')[1].split(',')
+        )
 
-    if monitor_service_condition != None:
+    if monitor_service_condition is not None:
         conditions.MonitorService = Conditions(
-            operatorProperty = monitor_service_condition.split(':')[0],
-             values = monitor_service_condition.split(':')[1].split(',')
-            )
+            operatorProperty=monitor_service_condition.split(':')[0],
+            values=monitor_service_condition.split(':')[1].split(',')
+        )
 
-    if monitor_condition != None:
-        conditions.MonitorCondition  = Conditions(
-            operatorProperty = monitor_condition.split(':')[0],
-             values = monitor_condition.split(':')[1].split(',')
-            )
-
-    if target_resource_type_condition != None:
+    if monitor_condition is not None:
         conditions.MonitorCondition = Conditions(
-            operatorProperty = target_resource_type_condition.split(':')[0],
-             values = target_resource_type_condition.split(':')[1].split(',')
-            )
+            operatorProperty=monitor_condition.split(':')[0],
+            values=monitor_condition.split(':')[1].split(',')
+        )
 
-    if description_condition != None:
+    if target_resource_type_condition is not None:
+        conditions.MonitorCondition = Conditions(
+            operatorProperty=target_resource_type_condition.split(':')[0],
+            values=target_resource_type_condition.split(':')[1].split(',')
+        )
+
+    if description_condition is not None:
         conditions.Description = Conditions(
-            operatorProperty = description_condition.split(':')[0],
-             values = description_condition.split(':')[1].split(',')
-            )
+            operatorProperty=description_condition.split(':')[0],
+            values=description_condition.split(':')[1].split(',')
+        )
 
-    if alert_ruleId_condition != None:
+    if alert_ruleId_condition is not None:
         conditions.AlertRuleId = Conditions(
-            operatorProperty = alert_ruleId_condition.split(':')[0],
-             values = alert_ruleId_condition.split(':')[1].split(',')
-            )
+            operatorProperty=alert_ruleId_condition.split(':')[0],
+            values=alert_ruleId_condition.split(':')[1].split(',')
+        )
 
-    if alert_context_condition != None:
+    if alert_context_condition is not None:
         conditions.AlertContext = Conditions(
-            operatorProperty = alert_context_condition.split(':')[0],
-             values = alert_context_condition.split(':')[1].split(',')
-            )
+            operatorProperty=alert_context_condition.split(':')[0],
+            values=alert_context_condition.split(':')[1].split(',')
+        )
 
     return conditions
 
@@ -177,29 +187,31 @@ def parse_conditions(severity_condition=None,
 def parse_scope(scope):
     scope_values = scope.split(',')
     return Scope(
-        scope_type = determine_scope_type_list(scope_values),
-        values = scope_values
-        )
+        scope_type=determine_scope_type_list(scope_values),
+        values=scope_values
+    )
 
 
 def determine_scope_type_list(scope_values):
-    if scope_values == None or len(scope_values) == 0:
-        raise TypeError()
-    else:
+    if not (scope_values is None or not scope_values):
         scope_type = determine_scope_type_string(scope_values[0])
         for value in scope_values:
             current = determine_scope_type_string(value)
             if current != scope_type:
-                raise TypeError()
-    
+                raise CLIError('Scope can either be list of Resource or ResourceGroup exclusively.')
         return scope_type
+    else:
+        raise CLIError('Scope cannot be empty.')
 
 
 def determine_scope_type_string(value):
     tokens = value.split('/')
+    scope_type = None
     if len(tokens) == 5:
-        return "ResourceGroup"
-    if len(tokens) >= 9:
-        return "Resource"
+        scope_type = "ResourceGroup"
+    elif len(tokens) >= 9:
+        scope_type = "Resource"
     else:
-        raise TypeError()
+        raise CLIError('Scope is neither Resource or ResourceGroup type')
+
+    return scope_type

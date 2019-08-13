@@ -20,13 +20,13 @@ class AzureAlertsManagementAlertScenarioTest(ScenarioTest):
             new_state = "Closed"
             id = latest_alert['id'].split('/').pop()
             updated_alert = self.cmd('alertsmanagement alert update-state --alert-id {} --state {}'
-                              .format(id, new_state)).get_output_in_json()
+                                     .format(id, new_state)).get_output_in_json()
 
             self.check(new_state, updated_alert['properties']['essentials']['alertState'])
 
-	        # Revert the state change operation
+            # Revert the state change operation
             updated_alert = self.cmd('alertsmanagement alert update-state --alert-id {} --state {}'
-                              .format(id, old_state)).get_output_in_json()
+                                     .format(id, old_state)).get_output_in_json()
 
     def test_alert_getsummary(self):
         group_by = "severity,alertstate"

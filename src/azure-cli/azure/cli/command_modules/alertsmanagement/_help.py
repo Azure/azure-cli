@@ -1,7 +1,6 @@
 from knack.help_files import helps  # pylint: disable=unused-import
 # pylint: disable=line-too-long, too-many-lines
 
-# TODO: Change 1.summary of command groups 3.Add description for alert list-summary
 
 helps['alertsmanagement'] = """
 type: group
@@ -90,10 +89,10 @@ parameters:
     text: >
         az alertsmanagement alert show --alert-id "afbf1b3a-0a6c-4f19-9c9b-644ccd7b1529"
 """
-# TODO: Add examples
+
 helps['alertsmanagement alert list-summary'] = """
 type: command
-short-summary: Get alerts list
+short-summary: Get alerts list summary
 long-summary: >
     Get list of alerts with optional filters as parameters.
 parameters:
@@ -136,8 +135,7 @@ parameters:
 examples:
   - name: Create a custom domain within an endpoint and profile.
     text: >
-        az cdn custom-domain create -g group --endpoint-name endpoint --profile-name profile \\
-            -n domain-name --hostname www.example.com
+         az alertsmanagement alert list-summary --group-by "severity,alertstate" --state "Active"
 """
 
 helps['alertsmanagement alert show-history'] = """
@@ -299,7 +297,7 @@ examples:
     text: >
         az alertsmanagement action-rule list --resource-group-name "test-rg" --name "Test-Action-Rule"
 """
-# TODO: Add examples
+
 helps['alertsmanagement action-rule show'] = """
 type: command
 short-summary: Get alerts list
@@ -315,10 +313,9 @@ parameters:
 examples:
   - name: Create a custom domain within an endpoint and profile.
     text: >
-        az cdn custom-domain create -g group --endpoint-name endpoint --profile-name profile \\
-            -n domain-name --hostname www.example.com
+        az alertsmanagement action-rule show --resource-group-name "test-rg" --name "Test-AR"
 """
-# TODO: Command example mismatch
+
 helps['alertsmanagement action-rule set'] = """
 type: command
 short-summary: Create or update an action rule.
@@ -330,16 +327,61 @@ parameters:
     short-summary: Resource group in which action rule reside.
   - name: --name
     type: string
-    short-summary: Gets all actions rules in a subscription filter by action rule name.
-  - name: --alert-rule
+    short-summary: Action Rule Name.
+  - name: --description
     type: string
-    short-summary: Filter by alert rule Id.
+    short-summary: Description Actions rules in a subscription.
+  - name: --status
+    type: string
+    short-summary: Status of Action Rule
+  - name: --scope
+    type: string
+    short-summary: Comma separated list of values
+  - name: --severity-condition
+    type: string
+    short-summary: Expected format - {<operation>:<comma separated list of values>}
+  - name: --monitor-service-condition
+    type: string
+    short-summary: Expected format - {<operation>:<comma separated list of values>}
+  - name: --monitor-condition
+    type: string
+    short-summary: Supported values – Fired, Resolved
+  - name: --target-resource-type-condition
+    type: string
+    short-summary: Expected format - {<operation>:<comma separated list of values>}
+  - name: --alert-ruleId-condition
+    type: string
+    short-summary: Expected format - {<operation>:<comma separated list of values>} For eg. Equals:ARM_ID_1,ARM_ID_2
+  - name: --description-condition
+    type: string
+    short-summary: Expected format - {<operation>:<comma separated list of values>} For eg. Contains:Test Alert
+  - name: --alert-context-condition
+    type: string
+    short-summary: Expected format - {<operation>:<comma separated list of values>} For eg. Contains:smartgroups
+  - name: --action-rule-type
+    type: string
+    short-summary: Action rule Type.
+  - name: --recurrence-type
+    type: string
+    short-summary: Specifies the duration when the suppression should be applied.
+  - name: --suppression-start-time
+    type: string
+    short-summary: Suppression Start Time. Format 12/09/2018 06:00:00 Should be mentioned in case of Reccurent Supression Schedule - Once, Daily, Weekly or Monthly
+  - name: --suppression-end-time
+    type: string
+    short-summary: Suppression End Time. Format 12/09/2018 06:00:00 Should be mentioned in case of Reccurent Supression Schedule - Once, Daily, Weekly or Monthly
+  - name: --recurrence-values
+    type: string
+    short-summary: Reccurent values, if applicable. In case of Weekly - 1,3,5 In case of Monthly - 16,24,28
+  - name: --action-group-id
+    type: string
+    short-summary: Action Group Id which is to be notified
 examples:
   - name: Create a custom domain within an endpoint and profile.
     text: >
-        az alertsmanagement action-rule set --resource-group-name "test-rg" --name "Test-AR" -Scope "/subscriptions/dd91de05-d791-4ceb-b6dc-988682dc7d72/resourceGroups/alertslab","/subscriptions/dd91de05-d791-4ceb-b6dc-988682dc7d72/resourceGroups/Test-VMs" -SeverityCondition "Equals:Sev0,Sev1" -MonitorCondition "NotEquals:Resolved" -Description "Test description" -Status "Enabled" -ActionRuleType "Suppression" -ReccurenceType "Weekly" -SuppressionStartTime "06/26/2018 06:00:00" -SuppressionEndTime "07/27/2018 06:00:00" -ReccurentValue 1,4,6
+        az alertsmanagement action-rule set --resource-group-name "test-rg" --name "Test-AR" --scope "/subscriptions/dd91de05-d791-4ceb-b6dc-988682dc7d72/resourceGroups/alertslab","/subscriptions/dd91de05-d791-4ceb-b6dc-988682dc7d72/resourceGroups/Test-VMs" --severity-condition "Equals:Sev0,Sev1" --monitor-condition "NotEquals:Resolved" --description "Test description" --status "Enabled" --action-rule-type "Suppression" --recurrence-type "Weekly" --suppression-start-time "06/26/2018 06:00:00" --suppression-end-time "07/27/2018 06:00:00" --recurrence-values 1,4,6
 """
-# TODO: Add patch parameter to the example
+# TODO: Add patch(required=True) parameter to the example
 helps['alertsmanagement action-rule update'] = """
 type: command
 short-summary: Updates action rule properties.
@@ -358,7 +400,7 @@ parameters:
 examples:
   - name: Create a custom domain within an endpoint and profile.
     text: >
-        az alertsmanagement action-rule update --resource-group-name "test-rg" --name "Test-ActionRule" -Status "Disabled"
+        az alertsmanagement action-rule update --resource-group-name "test-rg" --name "Test-ActionRule" --status "Disabled"
 """
 
 helps['alertsmanagement action-rule delete'] = """
@@ -376,5 +418,5 @@ parameters:
 examples:
   - name: Create a custom domain within an endpoint and profile.
     text: >
-        alertsmanagement action-rule delete --resource-group-name "test-rg" -Name --name
+        alertsmanagement action-rule delete --resource-group-name "test-rg" --name "ActionRuleName"
 """

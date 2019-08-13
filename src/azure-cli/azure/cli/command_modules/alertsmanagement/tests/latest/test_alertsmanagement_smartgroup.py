@@ -8,7 +8,6 @@ from azure.cli.testsdk import ScenarioTest, record_only
 
 class AzureAlertsManagementSmartGroupScenarioTest(ScenarioTest):
 
-
     def test_smartgroup_changestate(self):
         # Get latest smart group
         latest_sgs = self.cmd('alertsmanagement smart-group list --time-range 1h').get_output_in_json()
@@ -21,10 +20,10 @@ class AzureAlertsManagementSmartGroupScenarioTest(ScenarioTest):
             new_state = "Closed"
             id = latest_sg['id'].split('/').pop()
             updated_sg = self.cmd('alertsmanagement smart-group update-state --smart-group-id {} --state {}'
-                              .format(id, new_state)).get_output_in_json()
+                                  .format(id, new_state)).get_output_in_json()
 
             self.check(new_state, updated_sg['smartGroupState'])
 
-	        # Revert the state change operation
+            # Revert the state change operation
             updated_sg = self.cmd('alertsmanagement smart-group update-state --smart-group-id {} --state {}'
-                              .format(id, old_state)).get_output_in_json()
+                                  .format(id, old_state)).get_output_in_json()
