@@ -381,7 +381,7 @@ examples:
     text: >
         az alertsmanagement action-rule set --resource-group-name "test-rg" --name "Test-AR" --scope "/subscriptions/dd91de05-d791-4ceb-b6dc-988682dc7d72/resourceGroups/alertslab","/subscriptions/dd91de05-d791-4ceb-b6dc-988682dc7d72/resourceGroups/Test-VMs" --severity-condition "Equals:Sev0,Sev1" --monitor-condition "NotEquals:Resolved" --description "Test description" --status "Enabled" --action-rule-type "Suppression" --recurrence-type "Weekly" --suppression-start-time "06/26/2018 06:00:00" --suppression-end-time "07/27/2018 06:00:00" --recurrence-values 1,4,6
 """
-# TODO: Add patch(required=True) parameter to the example
+# TODO: Check for tag help statement
 helps['alertsmanagement action-rule update'] = """
 type: command
 short-summary: Updates action rule properties.
@@ -394,9 +394,12 @@ parameters:
   - name: --name
     type: string
     short-summary: Gets all actions rules in a subscription filter by action rule name.
-  - name: --patch
+ - name: --status
     type: string
-    short-summary: changes to be made in rule.
+    short-summary: Status of Action Rule
+  - name: --tag
+    type: string
+    short-summary: Temp summary
 examples:
   - name: Create a custom domain within an endpoint and profile.
     text: >
