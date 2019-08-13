@@ -25,7 +25,7 @@ class ProgressViewBase(object):
 
     def clear(self):
         """ resets the view to neutral """
-        pass
+        pass  # pylint: disable=unnecessary-pass
 
 
 class ProgressReporter(object):

@@ -7,12 +7,12 @@ import os
 from pprint import pformat
 from six.moves import configparser
 
+from azure.cli.core.profiles import API_PROFILES
+from azure.cli.core._config import GLOBAL_CONFIG_DIR
+
 from knack.log import get_logger
 from knack.util import CLIError
 from knack.config import get_config_parser
-
-from azure.cli.core.profiles import API_PROFILES
-from azure.cli.core._config import GLOBAL_CONFIG_DIR
 
 logger = get_logger(__name__)
 
@@ -60,8 +60,11 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many
                  active_directory=None,
                  active_directory_resource_id=None,
                  active_directory_graph_resource_id=None,
+                 microsoft_graph_resource_id=None,
                  active_directory_data_lake_resource_id=None,
-                 vm_image_alias_doc=None):
+                 vm_image_alias_doc=None,
+                 media_resource_id=None,
+                 ossrdbms_resource_id=None):
         # Attribute names are significant. They are used when storing/retrieving clouds from config
         self.management = management
         self.resource_manager = resource_manager
@@ -71,8 +74,11 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many
         self.active_directory = active_directory
         self.active_directory_resource_id = active_directory_resource_id
         self.active_directory_graph_resource_id = active_directory_graph_resource_id
+        self.microsoft_graph_resource_id = microsoft_graph_resource_id
         self.active_directory_data_lake_resource_id = active_directory_data_lake_resource_id
         self.vm_image_alias_doc = vm_image_alias_doc
+        self.media_resource_id = media_resource_id
+        self.ossrdbms_resource_id = ossrdbms_resource_id
 
     def has_endpoint_set(self, endpoint_name):
         try:
@@ -158,8 +164,11 @@ AZURE_PUBLIC_CLOUD = Cloud(
         active_directory='https://login.microsoftonline.com',
         active_directory_resource_id='https://management.core.windows.net/',
         active_directory_graph_resource_id='https://graph.windows.net/',
+        microsoft_graph_resource_id='https://graph.microsoft.com/',
         active_directory_data_lake_resource_id='https://datalake.azure.net/',
-        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json'),  # pylint: disable=line-too-long
+        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json',  # pylint: disable=line-too-long
+        media_resource_id='https://rest.media.azure.net',
+        ossrdbms_resource_id='https://ossrdbms-aad.database.windows.net'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.windows.net',
         keyvault_dns='.vault.azure.net',
@@ -179,7 +188,10 @@ AZURE_CHINA_CLOUD = Cloud(
         active_directory='https://login.chinacloudapi.cn',
         active_directory_resource_id='https://management.core.chinacloudapi.cn/',
         active_directory_graph_resource_id='https://graph.chinacloudapi.cn/',
-        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json'),  # pylint: disable=line-too-long
+        microsoft_graph_resource_id='https://microsoftgraph.chinacloudapi.cn',
+        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json',  # pylint: disable=line-too-long
+        media_resource_id='https://rest.media.chinacloudapi.cn',
+        ossrdbms_resource_id='https://ossrdbms-aad.database.chinacloudapi.cn'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.chinacloudapi.cn',
         keyvault_dns='.vault.azure.cn',
@@ -197,7 +209,10 @@ AZURE_US_GOV_CLOUD = Cloud(
         active_directory='https://login.microsoftonline.us',
         active_directory_resource_id='https://management.core.usgovcloudapi.net/',
         active_directory_graph_resource_id='https://graph.windows.net/',
-        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json'),   # pylint: disable=line-too-long
+        microsoft_graph_resource_id='https://graph.microsoft.us/',
+        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json',  # pylint: disable=line-too-long
+        media_resource_id='https://rest.media.usgovcloudapi.net',
+        ossrdbms_resource_id='https://ossrdbms-aad.database.usgovcloudapi.net'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.usgovcloudapi.net',
         keyvault_dns='.vault.usgovcloudapi.net',
@@ -215,7 +230,10 @@ AZURE_GERMAN_CLOUD = Cloud(
         active_directory='https://login.microsoftonline.de',
         active_directory_resource_id='https://management.core.cloudapi.de/',
         active_directory_graph_resource_id='https://graph.cloudapi.de/',
-        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json'),  # pylint: disable=line-too-long
+        microsoft_graph_resource_id='https://graph.microsoft.de',
+        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json',  # pylint: disable=line-too-long
+        media_resource_id='https://rest.media.cloudapi.de',
+        ossrdbms_resource_id='https://ossrdbms-aad.database.cloudapi.de'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.cloudapi.de',
         keyvault_dns='.vault.microsoftazure.de',
@@ -227,11 +245,12 @@ KNOWN_CLOUDS = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE
 
 def _set_active_cloud(cli_ctx, cloud_name):
     cli_ctx.config.set_value('cloud', 'name', cloud_name)
+    cli_ctx.cloud = get_cloud(cli_ctx, cloud_name)
 
 
 def get_active_cloud_name(cli_ctx):
     try:
-        return cli_ctx.config.config_parser.get('cloud', 'name')
+        return cli_ctx.config.get('cloud', 'name')
     except (configparser.NoOptionError, configparser.NoSectionError):
         _set_active_cloud(cli_ctx, AZURE_PUBLIC_CLOUD.name)
         return AZURE_PUBLIC_CLOUD.name
@@ -250,13 +269,21 @@ def get_custom_clouds(cli_ctx):
     return [c for c in get_clouds(cli_ctx) if c.name not in known_cloud_names]
 
 
+def _get_cloud_name(cli_ctx, cloud_name):
+    return next((x.name for x in get_clouds(cli_ctx) if x.name.lower() == cloud_name.lower()), cloud_name)
+
+
 def get_clouds(cli_ctx):
     clouds = []
     config = get_config_parser()
     # Start off with known clouds and apply config file on top of current config
     for c in KNOWN_CLOUDS:
         _config_add_cloud(config, c)
-    config.read(CLOUD_CONFIG_FILE)
+    try:
+        config.read(CLOUD_CONFIG_FILE)
+    except configparser.MissingSectionHeaderError:
+        os.remove(CLOUD_CONFIG_FILE)
+        logger.warning("'%s' is in bad format and has been removed.", CLOUD_CONFIG_FILE)
     for section in config.sections():
         c = Cloud(section)
         for option in config.options(section):

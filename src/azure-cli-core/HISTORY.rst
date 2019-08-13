@@ -2,10 +2,122 @@
 
 Release History
 ===============
+* Added ossrdbmsResourceId to cloud.py.
+* properly handle type errors caused by invalid JMESPath queries in core.util.handle_exception
+* `--query`: properly handle type errors caused by invalid JMESPath queries.
+
+2.0.71
+++++++
+* no changes
+
+2.0.70
+++++++
+* no changes
+
+2.0.69
+++++++
+* Fixed issue where `--subscription` would appear despite being suppressed on certain commands.
+
+2.0.68
+++++++
+* extension removal: surface io errors as warnings instead of verbose info
+
+2.0.67
+++++++
+* BREAKING CHANGE: `min_profile` kwarg is no longer supported. Use `resource_type` instead.
+
+2.0.66
+++++++
+* output: Fix bug where commands fail if `--output yaml` is used with `--query`
+
+2.0.65
+++++++
+* auth: polish common AAD service errors with actionables to overcome
+* Fixed issue where the CLI would load extensions that were not compatible with its core version.
+* Fix issue if clouds.config is corrupt
+
+2.0.64
+++++++
+* Upgrade to knack 0.6.1
+
+2.0.63
+++++++
+* Minor fixes
+
+2.0.62
+++++++
+* Fix issue where some extensions showed a version of "Unknown" and could not be updated.
+
+2.0.61
+++++++
+* Fix issues with dev extension incompatibility.
+* Error handling now points customers to issues page.
+
+2.0.60
+++++++
+* cloud set: fix a bogus error about subscription not found
+
+2.0.59
+++++++
+* Fix issue where in some instances using `--subscription NAME` would throw an exception.
+
+2.0.58
+++++++
+* `az --version` now displays a notification if you have packages that can be updated.
+* Fixes regression where `--ids` could no longer be used with JSON output.
+
+2.0.57
+++++++
+* Hot fix for issue 8399_.
+
+.. _8399: https://github.com/Azure/azure-cli/issues/8399
+
+2.0.56
+++++++
+* auth: enable tenant level account for managed service identity
+
+2.0.55
+++++++
+* `--output`: Introduce 'none' as an output format option.
+
+2.0.54
+++++++
+* Minor fixes
+
+2.0.53
+++++++
+* Minor fixes
+
+2.0.52
+++++++
+* core: support cross tenant resource provisioning for multi-tenant service principal
+* Fix bug where ids piped from a command with tsv output is improperly parsed.
+
+2.0.51
+++++++
+* msi login: do not reuse subscription name for identity info
+
+2.0.50
+++++++
+* auth: support service principal sn+issuer auth
+
+2.0.49
+++++++
+* Fix issue with `--ids` where `--subscription` would take precedence over the subscription in `--ids`.
+  Adding explicit warnings when name parameters would be ignored by use of `--ids`.
+
+2.0.48
+++++++
+* Fix Homebrew.
+
+2.0.47
+++++++
+* Introduces generic behavior to handle "Bad Request" errors.
 
 2.0.46
 ++++++
-* Minor fixes.
+* Fixed issue where `az vm create --generate-ssh-keys` overwrites private key
+  file if public key file is missing. (#4725, #6780)
 
 2.0.45
 ++++++
@@ -20,7 +132,7 @@ Release History
 
 2.0.43
 ++++++
-* Comnsuming mult api azure.mgmt.azutorization package for stack support
+* Consuming mult api azure.mgmt.authorization package for stack support
 * Minor fixes
 
 2.0.42

@@ -4,7 +4,7 @@ Help authoring for commands is done in a number of places, all of which are cont
 
 ## YAML Help Authoring ##
 
-The YAML syntax is described [here](http://www.yaml.org/spec/1.2/spec.html "here").
+If you're not familiar with YAML, see the [YAML specification](http://www.yaml.org/spec/1.2/spec.html).
 
 To override help for a given command:
 
@@ -12,10 +12,19 @@ To override help for a given command:
 	1. Search code base for "account clear".
 	2. Search result: src/command_modules/azure-cli-**profile**/azure/cli/command_modules/**profile**/commands.py.
 	3. Result shows "account clear" is in the "profile" module.
-2. Using the module name, find the YAML help file which follows the path pattern:
-	1.  src/command_modules/azure-cli-**[module name]**/azure/cli/command_modules/**[module name]**/_help.py.
+2. Using the module name, find the YAML help file which follows the path pattern.:
+	1.  src/command_modules/azure-cli-**[module name]**/azure/cli/command_modules/**[module name]**/_help.py<br>
+	    **or** <br>
+	    src/command_modules/azure-cli-**[module name]**/azure/cli/command_modules/**[module name]**/help.yaml
 	2.  If the file doesn't exist, it can be created.
 3.  Find or create a help entry with the name of the command/group you want to document.  See example below.
+
+
+>  ###Notes: <br>
+>  1. If using **_help.py** files for help authoring, the command module's **\_\_init\_\_.py** file must import the **_help.py** file. i.e: <br>
+>    `import azure.cli.command_modules.examplemod._help` <br>
+>  2. The Help Authoring System now supports **help.yaml** files. Eventually, **_help.py** files will be replaced by **help.yaml**.
+
 
 ### Example YAML help file, _help.py ###
 
@@ -25,7 +34,7 @@ To override help for a given command:
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-from azure.cli.help_files import helps
+from knack.help_files import helps
 
 #pylint: disable=line-too-long
 
@@ -91,16 +100,16 @@ Command help starts with its raw SDK docstring text, if available.  Non-SDK comm
 
 Here are the layers of Project Az help, with each layer overriding the layer below it:
 
-| Help Display   |
-|----------------|
-| YAML Authoring |
-| Code Specified |
-| Docstring      |
-| SDK Text       |
+| Help Display                  |
+|-------------------------------|
+| YAML Authoring via *_help.py* |
+| Code Specified                |
+| Docstring                     |
+| SDK Text                      |
 
 ## Page titles for command groups ##
 
-Page titles for your command groups as generated from the source are simply the command syntax, "az vm", but we use friendly titles on the published pages - "Virtual machines - az vm". To do that, ee add the friendly part of the page title to [titlemapping.json](https://github.com/Azure/azure-docs-cli-python/blob/master/titleMapping.json) in the azure-docs-cli-python repo. When you add a new command group, make sure to update the mapping.
+Page titles for your command groups as generated from the source are simply the command syntax, "az vm", but we use friendly titles on the published pages - "Virtual machines - az vm". To do that, ee add the friendly part of the page title to [titlemapping.json](https://github.com/Azure/azure-docs-cli/blob/master/titleMapping.json) in the azure-docs-cli repo. When you add a new command group, make sure to update the mapping.
 
 ## Profile specific help ##
 
@@ -118,24 +127,28 @@ In your YAML files, the same `short-summary` and `long-summary` is used for all 
 
 For the command parameters section, any parameters not used by a profile will be ignored and not displayed.
 
-For command examples, you optionally specify the profile the example is for with the `min_profile` and `max_profile` options.
+For command examples, you can optionally specify the profile the example is for with the `supported-profiles` and `unsupported-profiles` fields.
 
-Here's a samply for `storage account create`:  
-The first example is only supported on the profile `latest` and above whilst the second example if only supported on `2017-03-09-profile` and below.
+Here's a demonstration for `storage account create`:
+The first example is only supported on the `latest` and `2018-03-01-hybrid` profiles whilst the second example is only supported on `2017-03-09-profile`.
+
+### _help.py
 
 ```
     examples:
         - name: Create a storage account MyStorageAccount in resource group MyResourceGroup in the West US region with locally redundant storage.
           text: az storage account create -n MyStorageAccount -g MyResourceGroup -l westus --sku Standard_LRS
-          min_profile: latest
+          unsupported-profiles: 2017-03-09-profile
+          # alternatively 
+          # supported-profiles: latest, 2018-03-01-hybrid
         - name: Create a storage account MyStorageAccount in resource group MyResourceGroup in the West US region with locally redundant storage.
           text: az storage account create -n MyStorageAccount -g MyResourceGroup -l westus --account-type Standard_LRS
-          max_profile: 2017-03-09-profile
+          supported-profiles: 2017-03-09-profile
 ```
 
 Here is how this looks in CLI `--help`:
 
-On profile `latest`.
+On profiles `latest` and `2018-03-01-hybrid`.
 ```
 Examples
     Create a storage account MyStorageAccount in resource group MyResourceGroup in the West US
@@ -161,4 +174,4 @@ https://docs.microsoft.com/en-us/cli/azure/reference-index
 
 If you are not satisfied with the heading that is automatically provided, please create a PR to update the following file:
 
-https://github.com/Azure/azure-docs-cli-python/blob/master/titleMapping.json
+https://github.com/Azure/azure-docs-cli/blob/master/titleMapping.json

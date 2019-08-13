@@ -16,9 +16,9 @@ NUM_RUNS = 3
 DEFAULT_THRESHOLD = 10
 # explicit thresholds that deviate from the default
 THRESHOLDS = {
-    'network': 25,
-    'vm': 25,
-    'batch': 25,
+    'network': 30,
+    'vm': 30,
+    'batch': 30,
     'storage': 50,
     TOTAL: 300
 }

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -ev
 
 for TOX_FILE in $(find src -name tox.ini); do
     pwd

@@ -3,6 +3,8 @@ Authoring Command Modules
 
 The document provides instructions and guidelines on how to author command modules. For other help, please see the following:
 
+**On-boarding Guide**:<br>https://github.com/Azure/azure-cli/blob/dev/doc/onboarding_guide.md
+
 **Module Authoring**:<br>You are here!
 
 **Command Authoring**:<br>https://github.com/Azure/azure-cli/blob/dev/doc/authoring_command_modules/authoring_commands.md
@@ -13,6 +15,7 @@ The document provides instructions and guidelines on how to author command modul
 
 **Test Authoring**:<br>https://github.com/Azure/azure-cli/blob/dev/doc/authoring_tests.md
 
+**Generating Documentation**:<br>https://review.docs.microsoft.com/en-us/help/onboard/admin/reference/cli/azure-cli-ci?branch=master#documenting-a-new-azure-cli-module
 
 <a name="heading_set_up"></a>Set Up
 ------

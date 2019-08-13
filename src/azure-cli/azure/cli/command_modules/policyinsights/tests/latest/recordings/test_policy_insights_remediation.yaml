@@ -1,0 +1,1535 @@
+interactions:
+- request:
+    body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
+      "date": "2019-06-17T19:03:48Z"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '110'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --location --name --tag
+      User-Agent:
+      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001?api-version=2018-05-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001","name":"cli_test_remediation000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-06-17T19:03:48Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '384'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Jun 2019 19:03:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"sku": {"name": "Standard_LRS"}, "kind": "Storage", "location": "westus"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '74'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g -l --sku
+      User-Agent:
+      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        azure-mgmt-storage/3.3.0 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.Storage/storageAccounts/cliremediation000002?api-version=2019-04-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      content-type:
+      - text/plain; charset=utf-8
+      date:
+      - Mon, 17 Jun 2019 19:03:50 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/387c51dd-4c29-4fed-81a7-8728857c6b41?monitor=true&api-version=2019-04-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l --sku
+      User-Agent:
+      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        azure-mgmt-storage/3.3.0 Azure-SDK-For-Python AZURECLI/2.0.66
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/387c51dd-4c29-4fed-81a7-8728857c6b41?monitor=true&api-version=2019-04-01
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.Storage/storageAccounts/cliremediation000002","name":"cliremediation000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"minimumTlsVersion":"TLS1_2","allowBlobPublicAccess":false,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2019-06-17T19:03:50.4060414Z"},"blob":{"enabled":true,"lastEnabledTime":"2019-06-17T19:03:50.4060414Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2019-06-17T19:03:50.2810232Z","primaryEndpoints":{"blob":"https://cliremediation000002.blob.core.windows.net/","queue":"https://cliremediation000002.queue.core.windows.net/","table":"https://cliremediation000002.table.core.windows.net/","file":"https://cliremediation000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1227'
+      content-type:
+      - application/json
+      date:
+      - Mon, 17 Jun 2019 19:04:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account keys list
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g --query -o
+      User-Agent:
+      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        azure-mgmt-storage/3.3.0 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.Storage/storageAccounts/cliremediation000002/listKeys?api-version=2019-04-01
+  response:
+    body:
+      string: '{"keys":[{"keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '288'
+      content-type:
+      - application/json
+      date:
+      - Mon, 17 Jun 2019 19:04:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy assignment create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --policy -n
+      User-Agent:
+      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        policyclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d?api-version=2018-05-01
+  response:
+    body:
+      string: '{"error":{"code":"PolicyDefinitionNotFound","message":"The policy definition
+        ''06a78e20-9358-41c9-923c-fb736d382a4d'' could not be found."}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '138'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Jun 2019 19:04:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy assignment create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --policy -n
+      User-Agent:
+      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        policyclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d?api-version=2018-05-01
+  response:
+    body:
+      string: '{"properties":{"displayName":"Audit VMs that do not use managed disks","policyType":"BuiltIn","mode":"All","description":"This
+        policy audits VMs that do not use managed disks","metadata":{"category":"Compute"},"parameters":{},"policyRule":{"if":{"anyOf":[{"allOf":[{"field":"type","equals":"Microsoft.Compute/virtualMachines"},{"field":"Microsoft.Compute/virtualMachines/osDisk.uri","exists":"True"}]},{"allOf":[{"field":"type","equals":"Microsoft.Compute/VirtualMachineScaleSets"},{"anyOf":[{"field":"Microsoft.Compute/VirtualMachineScaleSets/osDisk.vhdContainers","exists":"True"},{"field":"Microsoft.Compute/VirtualMachineScaleSets/osdisk.imageUrl","exists":"True"}]}]}]},"then":{"effect":"audit"}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","type":"Microsoft.Authorization/policyDefinitions","name":"06a78e20-9358-41c9-923c-fb736d382a4d"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '897'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Jun 2019 19:04:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d",
+      "scope": "/subscriptions/00000000-0000-0000-0000-000000000000"}, "sku": {"name":
+      "A0", "tier": "Free"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy assignment create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '234'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --policy -n
+      User-Agent:
+      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        policyclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000003?api-version=2018-05-01
+  response:
+    body:
+      string: '{"sku":{"name":"A0","tier":"Free"},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","metadata":{"createdBy":"2262dfe7-375f-4597-a47c-2766489ecbe7","createdOn":"2019-06-17T19:04:10.3756615Z","updatedBy":null,"updatedOn":null}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000003","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-policy-assignment000003"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '619'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Jun 2019 19:04:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy remediation create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -a
+      User-Agent:
+      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        policyclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments?api-version=2018-05-01
+  response:
+    body:
+      string: '{"value":[{"sku":{"name":"A0","tier":"Free"},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","metadata":{"createdBy":"2262dfe7-375f-4597-a47c-2766489ecbe7","createdOn":"2019-06-17T19:04:10.3756615Z","updatedBy":null,"updatedOn":null}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000003","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-policy-assignment000003"},{"sku":{"name":"A1","tier":"Standard"},"properties":{"displayName":"ASC
+        Default (subscription: 0b1f6471-1bf0-4dda-aec3-cb9272f09590)","policyDefinitionId":"/providers/Microsoft.Authorization/policySetDefinitions/1f3afdf9-d0c9-4c3d-847f-89da613e70a8","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","parameters":{"diagnosticsLogsInServiceFabricMonitoringEffect":{"value":"AuditIfNotExists"},"systemUpdatesMonitoringEffect":{"value":"AuditIfNotExists"},"systemConfigurationsMonitoringEffect":{"value":"AuditIfNotExists"},"endpointProtectionMonitoringEffect":{"value":"AuditIfNotExists"},"diskEncryptionMonitoringEffect":{"value":"AuditIfNotExists"},"networkSecurityGroupsMonitoringEffect":{"value":"AuditIfNotExists"},"webApplicationFirewallMonitoringEffect":{"value":"AuditIfNotExists"},"sqlAuditingMonitoringEffect":{"value":"AuditIfNotExists"},"sqlEncryptionMonitoringEffect":{"value":"AuditIfNotExists"},"nextGenerationFirewallMonitoringEffect":{"value":"AuditIfNotExists"},"vulnerabilityAssesmentMonitoringEffect":{"value":"AuditIfNotExists"},"storageEncryptionMonitoringEffect":{"value":"Audit"},"jitNetworkAccessMonitoringEffect":{"value":"AuditIfNotExists"},"adaptiveApplicationControlsMonitoringEffect":{"value":"AuditIfNotExists"},"identityDesignateLessThanOwnersMonitoringEffect":{"value":"AuditIfNotExists"},"identityDesignateMoreThanOneOwnerMonitoringEffect":{"value":"AuditIfNotExists"},"identityEnableMFAForOwnerPermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"identityEnableMFAForWritePermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"identityEnableMFAForReadPermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"identityRemoveDeprecatedAccountWithOwnerPermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"identityRemoveDeprecatedAccountMonitoringEffect":{"value":"AuditIfNotExists"},"identityRemoveExternalAccountWithOwnerPermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"identityRemoveExternalAccountWithWritePermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"identityRemoveExternalAccountWithReadPermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"secureTransferToStorageAccountMonitoringEffect":{"value":"Audit"},"aadAuthenticationInSqlServerMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInRedisCacheMonitoringEffect":{"value":"Audit"},"clusterProtectionLevelInServiceFabricMonitoringEffect":{"value":"Audit"},"aadAuthenticationInServiceFabricMonitoringEffect":{"value":"Audit"},"diagnosticsLogsInServiceBusMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInDataLakeAnalyticsMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInDataLakeStoreMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInBatchAccountMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInEventHubMonitoringEffect":{"value":"AuditIfNotExists"},"metricAlertsInBatchAccountMonitoringEffect":{"value":"AuditIfNotExists"},"namespaceAuthorizationRulesInServiceBusMonitoringEffect":{"value":"Audit"},"disableUnrestrictedNetworkToStorageAccountMonitoringEffect":{"value":"Audit"},"classicComputeVMsMonitoringEffect":{"value":"Audit"},"classicStorageAccountsMonitoringEffect":{"value":"Audit"},"sqlDbVulnerabilityAssesmentMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInKeyVaultMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInStreamAnalyticsMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInSearchServiceMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInLogicAppsMonitoringEffect":{"value":"AuditIfNotExists"}},"description":"This
+        policy assignment was automatically created by Azure Security Center","metadata":{"assignedBy":"Security
+        Center"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/SecurityCenterBuiltIn","type":"Microsoft.Authorization/policyAssignments","name":"SecurityCenterBuiltIn"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '4572'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Jun 2019 19:04:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: 'b''{"properties": {"policyAssignmentId": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000003"}}'''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy remediation create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '186'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g -a
+      User-Agent:
+      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        azure-mgmt-policyinsights/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.PolicyInsights/remediations/azurecli-test-remediation000004?api-version=2018-07-01-preview
+  response:
+    body:
+      string: '{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Succeeded","createdOn":"2019-06-17T19:04:12.197504Z","lastUpdatedOn":"2019-06-17T19:04:12.2600598Z","deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '731'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Jun 2019 19:04:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
+      - '599'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy remediation show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        azure-mgmt-policyinsights/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.PolicyInsights/remediations/azurecli-test-remediation000004?api-version=2018-07-01-preview
+  response:
+    body:
+      string: '{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Succeeded","createdOn":"2019-06-17T19:04:12.197504Z","lastUpdatedOn":"2019-06-17T19:04:12.2600598Z","deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '731'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Jun 2019 19:04:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
+      - '599'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy remediation list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g
+      User-Agent:
+      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        azure-mgmt-policyinsights/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.PolicyInsights/remediations?api-version=2018-07-01-preview
+  response:
+    body:
+      string: '{"value":[{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Succeeded","createdOn":"2019-06-17T19:04:12.197504Z","lastUpdatedOn":"2019-06-17T19:04:12.2600598Z","deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '743'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Jun 2019 19:04:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
+      - '599'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy remediation deployment list
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        azure-mgmt-policyinsights/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.PolicyInsights/remediations/azurecli-test-remediation000004/listDeployments?api-version=2018-07-01-preview
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Jun 2019 19:04:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
+      - '599'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy remediation delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        azure-mgmt-policyinsights/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.PolicyInsights/remediations/azurecli-test-remediation000004?api-version=2018-07-01-preview
+  response:
+    body:
+      string: '{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Succeeded","createdOn":"2019-06-17T19:04:12.197504Z","lastUpdatedOn":"2019-06-17T19:04:12.2600598Z","deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '731'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Jun 2019 19:04:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
+      - '599'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy remediation list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g
+      User-Agent:
+      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        azure-mgmt-policyinsights/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.PolicyInsights/remediations?api-version=2018-07-01-preview
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Jun 2019 19:04:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
+      - '598'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy remediation create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -a --location-filters
+      User-Agent:
+      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        policyclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments?api-version=2018-05-01
+  response:
+    body:
+      string: '{"value":[{"sku":{"name":"A0","tier":"Free"},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","metadata":{"createdBy":"2262dfe7-375f-4597-a47c-2766489ecbe7","createdOn":"2019-06-17T19:04:10.3756615Z","updatedBy":null,"updatedOn":null}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000003","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-policy-assignment000003"},{"sku":{"name":"A1","tier":"Standard"},"properties":{"displayName":"ASC
+        Default (subscription: 0b1f6471-1bf0-4dda-aec3-cb9272f09590)","policyDefinitionId":"/providers/Microsoft.Authorization/policySetDefinitions/1f3afdf9-d0c9-4c3d-847f-89da613e70a8","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","parameters":{"diagnosticsLogsInServiceFabricMonitoringEffect":{"value":"AuditIfNotExists"},"systemUpdatesMonitoringEffect":{"value":"AuditIfNotExists"},"systemConfigurationsMonitoringEffect":{"value":"AuditIfNotExists"},"endpointProtectionMonitoringEffect":{"value":"AuditIfNotExists"},"diskEncryptionMonitoringEffect":{"value":"AuditIfNotExists"},"networkSecurityGroupsMonitoringEffect":{"value":"AuditIfNotExists"},"webApplicationFirewallMonitoringEffect":{"value":"AuditIfNotExists"},"sqlAuditingMonitoringEffect":{"value":"AuditIfNotExists"},"sqlEncryptionMonitoringEffect":{"value":"AuditIfNotExists"},"nextGenerationFirewallMonitoringEffect":{"value":"AuditIfNotExists"},"vulnerabilityAssesmentMonitoringEffect":{"value":"AuditIfNotExists"},"storageEncryptionMonitoringEffect":{"value":"Audit"},"jitNetworkAccessMonitoringEffect":{"value":"AuditIfNotExists"},"adaptiveApplicationControlsMonitoringEffect":{"value":"AuditIfNotExists"},"identityDesignateLessThanOwnersMonitoringEffect":{"value":"AuditIfNotExists"},"identityDesignateMoreThanOneOwnerMonitoringEffect":{"value":"AuditIfNotExists"},"identityEnableMFAForOwnerPermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"identityEnableMFAForWritePermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"identityEnableMFAForReadPermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"identityRemoveDeprecatedAccountWithOwnerPermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"identityRemoveDeprecatedAccountMonitoringEffect":{"value":"AuditIfNotExists"},"identityRemoveExternalAccountWithOwnerPermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"identityRemoveExternalAccountWithWritePermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"identityRemoveExternalAccountWithReadPermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"secureTransferToStorageAccountMonitoringEffect":{"value":"Audit"},"aadAuthenticationInSqlServerMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInRedisCacheMonitoringEffect":{"value":"Audit"},"clusterProtectionLevelInServiceFabricMonitoringEffect":{"value":"Audit"},"aadAuthenticationInServiceFabricMonitoringEffect":{"value":"Audit"},"diagnosticsLogsInServiceBusMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInDataLakeAnalyticsMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInDataLakeStoreMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInBatchAccountMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInEventHubMonitoringEffect":{"value":"AuditIfNotExists"},"metricAlertsInBatchAccountMonitoringEffect":{"value":"AuditIfNotExists"},"namespaceAuthorizationRulesInServiceBusMonitoringEffect":{"value":"Audit"},"disableUnrestrictedNetworkToStorageAccountMonitoringEffect":{"value":"Audit"},"classicComputeVMsMonitoringEffect":{"value":"Audit"},"classicStorageAccountsMonitoringEffect":{"value":"Audit"},"sqlDbVulnerabilityAssesmentMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInKeyVaultMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInStreamAnalyticsMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInSearchServiceMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInLogicAppsMonitoringEffect":{"value":"AuditIfNotExists"}},"description":"This
+        policy assignment was automatically created by Azure Security Center","metadata":{"assignedBy":"Security
+        Center"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/SecurityCenterBuiltIn","type":"Microsoft.Authorization/policyAssignments","name":"SecurityCenterBuiltIn"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '4572'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Jun 2019 19:04:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: 'b''{"properties": {"policyAssignmentId": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000003",
+      "filters": {"locations": ["westus"]}}}'''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy remediation create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '224'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -a --location-filters
+      User-Agent:
+      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        azure-mgmt-policyinsights/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/remediations/azurecli-test-remediation000004?api-version=2018-07-01-preview
+  response:
+    body:
+      string: '{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Succeeded","createdOn":"2019-06-17T19:04:17.8659993Z","lastUpdatedOn":"2019-06-17T19:04:17.928526Z","filters":{"locations":["westus"]},"deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '675'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Jun 2019 19:04:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
+      - '599'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy remediation show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n
+      User-Agent:
+      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        azure-mgmt-policyinsights/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/remediations/azurecli-test-remediation000004?api-version=2018-07-01-preview
+  response:
+    body:
+      string: '{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Succeeded","createdOn":"2019-06-17T19:04:17.8659993Z","lastUpdatedOn":"2019-06-17T19:04:17.928526Z","filters":{"locations":["westus"]},"deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '675'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Jun 2019 19:04:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
+      - '598'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy remediation list
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        azure-mgmt-policyinsights/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/remediations?api-version=2018-07-01-preview
+  response:
+    body:
+      string: '{"value":[{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Succeeded","createdOn":"2019-06-17T19:04:17.8659993Z","lastUpdatedOn":"2019-06-17T19:04:17.928526Z","filters":{"locations":["westus"]},"deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '687'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Jun 2019 19:04:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
+      - '598'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy remediation deployment list
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n
+      User-Agent:
+      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        azure-mgmt-policyinsights/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/remediations/azurecli-test-remediation000004/listDeployments?api-version=2018-07-01-preview
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Jun 2019 19:04:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
+      - '597'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy remediation delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n
+      User-Agent:
+      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        azure-mgmt-policyinsights/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/remediations/azurecli-test-remediation000004?api-version=2018-07-01-preview
+  response:
+    body:
+      string: '{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Succeeded","createdOn":"2019-06-17T19:04:17.8659993Z","lastUpdatedOn":"2019-06-17T19:04:17.928526Z","filters":{"locations":["westus"]},"deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '675'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Jun 2019 19:04:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
+      - '596'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy remediation list
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        azure-mgmt-policyinsights/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/remediations?api-version=2018-07-01-preview
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Jun 2019 19:04:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
+      - '598'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy remediation create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -a -g --namespace --resource-type --resource
+      User-Agent:
+      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        policyclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments?api-version=2018-05-01
+  response:
+    body:
+      string: '{"value":[{"sku":{"name":"A0","tier":"Free"},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","metadata":{"createdBy":"2262dfe7-375f-4597-a47c-2766489ecbe7","createdOn":"2019-06-17T19:04:10.3756615Z","updatedBy":null,"updatedOn":null}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000003","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-policy-assignment000003"},{"sku":{"name":"A1","tier":"Standard"},"properties":{"displayName":"ASC
+        Default (subscription: 0b1f6471-1bf0-4dda-aec3-cb9272f09590)","policyDefinitionId":"/providers/Microsoft.Authorization/policySetDefinitions/1f3afdf9-d0c9-4c3d-847f-89da613e70a8","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","parameters":{"diagnosticsLogsInServiceFabricMonitoringEffect":{"value":"AuditIfNotExists"},"systemUpdatesMonitoringEffect":{"value":"AuditIfNotExists"},"systemConfigurationsMonitoringEffect":{"value":"AuditIfNotExists"},"endpointProtectionMonitoringEffect":{"value":"AuditIfNotExists"},"diskEncryptionMonitoringEffect":{"value":"AuditIfNotExists"},"networkSecurityGroupsMonitoringEffect":{"value":"AuditIfNotExists"},"webApplicationFirewallMonitoringEffect":{"value":"AuditIfNotExists"},"sqlAuditingMonitoringEffect":{"value":"AuditIfNotExists"},"sqlEncryptionMonitoringEffect":{"value":"AuditIfNotExists"},"nextGenerationFirewallMonitoringEffect":{"value":"AuditIfNotExists"},"vulnerabilityAssesmentMonitoringEffect":{"value":"AuditIfNotExists"},"storageEncryptionMonitoringEffect":{"value":"Audit"},"jitNetworkAccessMonitoringEffect":{"value":"AuditIfNotExists"},"adaptiveApplicationControlsMonitoringEffect":{"value":"AuditIfNotExists"},"identityDesignateLessThanOwnersMonitoringEffect":{"value":"AuditIfNotExists"},"identityDesignateMoreThanOneOwnerMonitoringEffect":{"value":"AuditIfNotExists"},"identityEnableMFAForOwnerPermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"identityEnableMFAForWritePermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"identityEnableMFAForReadPermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"identityRemoveDeprecatedAccountWithOwnerPermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"identityRemoveDeprecatedAccountMonitoringEffect":{"value":"AuditIfNotExists"},"identityRemoveExternalAccountWithOwnerPermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"identityRemoveExternalAccountWithWritePermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"identityRemoveExternalAccountWithReadPermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"secureTransferToStorageAccountMonitoringEffect":{"value":"Audit"},"aadAuthenticationInSqlServerMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInRedisCacheMonitoringEffect":{"value":"Audit"},"clusterProtectionLevelInServiceFabricMonitoringEffect":{"value":"Audit"},"aadAuthenticationInServiceFabricMonitoringEffect":{"value":"Audit"},"diagnosticsLogsInServiceBusMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInDataLakeAnalyticsMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInDataLakeStoreMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInBatchAccountMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInEventHubMonitoringEffect":{"value":"AuditIfNotExists"},"metricAlertsInBatchAccountMonitoringEffect":{"value":"AuditIfNotExists"},"namespaceAuthorizationRulesInServiceBusMonitoringEffect":{"value":"Audit"},"disableUnrestrictedNetworkToStorageAccountMonitoringEffect":{"value":"Audit"},"classicComputeVMsMonitoringEffect":{"value":"Audit"},"classicStorageAccountsMonitoringEffect":{"value":"Audit"},"sqlDbVulnerabilityAssesmentMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInKeyVaultMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInStreamAnalyticsMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInSearchServiceMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInLogicAppsMonitoringEffect":{"value":"AuditIfNotExists"}},"description":"This
+        policy assignment was automatically created by Azure Security Center","metadata":{"assignedBy":"Security
+        Center"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/SecurityCenterBuiltIn","type":"Microsoft.Authorization/policyAssignments","name":"SecurityCenterBuiltIn"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '4572'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Jun 2019 19:04:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: 'b''{"properties": {"policyAssignmentId": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000003"}}'''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy remediation create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '186'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -a -g --namespace --resource-type --resource
+      User-Agent:
+      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        azure-mgmt-policyinsights/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.Storage/storageAccounts/cliremediation000002/providers/Microsoft.PolicyInsights/remediations/azurecli-test-remediation000004?api-version=2018-07-01-preview
+  response:
+    body:
+      string: '{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Succeeded","createdOn":"2019-06-17T19:04:23.3422093Z","lastUpdatedOn":"2019-06-17T19:04:23.4047456Z","deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001/providers/microsoft.storage/storageaccounts/cliremediation000002/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '801'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Jun 2019 19:04:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
+      - '595'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy remediation show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --namespace --resource-type --resource
+      User-Agent:
+      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        azure-mgmt-policyinsights/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.Storage/storageAccounts/cliremediation000002/providers/Microsoft.PolicyInsights/remediations/azurecli-test-remediation000004?api-version=2018-07-01-preview
+  response:
+    body:
+      string: '{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Succeeded","createdOn":"2019-06-17T19:04:23.3422093Z","lastUpdatedOn":"2019-06-17T19:04:23.4047456Z","deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001/providers/microsoft.storage/storageaccounts/cliremediation000002/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '801'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Jun 2019 19:04:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
+      - '597'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy remediation list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --namespace --resource-type --resource
+      User-Agent:
+      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        azure-mgmt-policyinsights/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.Storage/storageAccounts/cliremediation000002/providers/Microsoft.PolicyInsights/remediations?api-version=2018-07-01-preview
+  response:
+    body:
+      string: '{"value":[{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Succeeded","createdOn":"2019-06-17T19:04:23.3422093Z","lastUpdatedOn":"2019-06-17T19:04:23.4047456Z","deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001/providers/microsoft.storage/storageaccounts/cliremediation000002/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '813'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Jun 2019 19:04:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
+      - '598'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy remediation deployment list
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g --namespace --resource-type --resource
+      User-Agent:
+      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        azure-mgmt-policyinsights/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.Storage/storageAccounts/cliremediation000002/providers/Microsoft.PolicyInsights/remediations/azurecli-test-remediation000004/listDeployments?api-version=2018-07-01-preview
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Jun 2019 19:04:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
+      - '598'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy remediation delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g --namespace --resource-type --resource
+      User-Agent:
+      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        azure-mgmt-policyinsights/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.Storage/storageAccounts/cliremediation000002/providers/Microsoft.PolicyInsights/remediations/azurecli-test-remediation000004?api-version=2018-07-01-preview
+  response:
+    body:
+      string: '{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Succeeded","createdOn":"2019-06-17T19:04:23.3422093Z","lastUpdatedOn":"2019-06-17T19:04:23.4047456Z","deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001/providers/microsoft.storage/storageaccounts/cliremediation000002/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '801'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Jun 2019 19:04:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
+      - '597'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy remediation list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --namespace --resource-type --resource
+      User-Agent:
+      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        azure-mgmt-policyinsights/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.Storage/storageAccounts/cliremediation000002/providers/Microsoft.PolicyInsights/remediations?api-version=2018-07-01-preview
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Jun 2019 19:04:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
+      - '597'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy assignment delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n
+      User-Agent:
+      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        policyclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000003?api-version=2018-05-01
+  response:
+    body:
+      string: '{"sku":{"name":"A0","tier":"Free"},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","metadata":{"createdBy":"2262dfe7-375f-4597-a47c-2766489ecbe7","createdOn":"2019-06-17T19:04:10.3756615Z","updatedBy":null,"updatedOn":null}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000003","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-policy-assignment000003"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '619'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Jun 2019 19:04:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --name --yes --no-wait
+      User-Agent:
+      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001?api-version=2018-05-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Mon, 17 Jun 2019 19:04:29 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGUkVNRURJQVRJT05JWk5WQUFYSUdHT0w1NlRIQUJMS0VCWXxBMDA4OTgwRDQ2OEVCMDcxLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 202
+      message: Accepted
+version: 1

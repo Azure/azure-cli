@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.0.46"
+VERSION = "2.0.71"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -48,45 +48,33 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3.4',
     'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
     'License :: OSI Approved :: MIT License',
 ]
 
-# TODO These dependencies should be updated to reflect only what this package needs
 DEPENDENCIES = [
-    'adal>=1.0.2',
-    'argcomplete>=1.8.0',
+    'adal~=1.2',
+    'argcomplete~=1.8',
     'azure-cli-telemetry',
     'colorama>=0.3.9',
-    'humanfriendly>=4.7',
+    'humanfriendly~=4.7',
     'jmespath',
-    'knack==0.4.2',
+    'knack~=0.6.2',
     'msrest>=0.4.4',
     'msrestazure>=0.4.25',
-    'paramiko>=2.0.8',
-    'pip',
-    'pygments',
+    'paramiko>=2.0.8,<3.0.0',
     'PyJWT',
     'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
-    'pyyaml~=3.13',
-    'requests',
+    'pyyaml',
+    'requests~=2.20',
     'six',
-    'tabulate>=0.7.7,<=0.8.2',
     'wheel==0.30.0',
-    'azure-mgmt-resource==2.0.0'
+    'azure-mgmt-resource~=2.1',
 ]
 
-if sys.version_info < (3, 4):
-    DEPENDENCIES.append('enum34')
-
-if sys.version_info < (2, 7, 9):
-    DEPENDENCIES.append('pyopenssl')
-    DEPENDENCIES.append('ndg-httpsclient')
-    DEPENDENCIES.append('pyasn1')
-
-if sys.version_info < (3, 0):
-    DEPENDENCIES.append('antlr4-python2-runtime')
-else:
-    DEPENDENCIES.append('antlr4-python3-runtime')
+TESTS_REQUIRE = [
+    'mock'
+]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
     README = f.read()
@@ -109,10 +97,19 @@ setup(
         'azure.cli',
         'azure.cli.core',
         'azure.cli.core.commands',
-        'azure.cli.core.extensions',
+        'azure.cli.core.extension',
         'azure.cli.core.profiles',
     ],
     install_requires=DEPENDENCIES,
+    extras_require={
+        ":python_version<'3.4'": ['enum34'],
+        ":python_version<'2.7.9'": ['pyopenssl', 'ndg-httpsclient', 'pyasn1'],
+        ':python_version<"3.0"': ['futures'],
+        ":python_version<'3.0'": ['antlr4-python2-runtime'],
+        ":python_version>='3.0'": ['antlr4-python3-runtime'],
+        "test": TESTS_REQUIRE,
+    },
+    tests_require=TESTS_REQUIRE,
     package_data={'azure.cli.core': ['auth_landing_pages/*.html']},
     cmdclass=cmdclass
 )

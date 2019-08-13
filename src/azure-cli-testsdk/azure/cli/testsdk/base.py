@@ -11,7 +11,7 @@ import inspect
 import unittest
 
 from azure_devtools.scenario_tests import (IntegrationTestBase, ReplayableTest, SubscriptionRecordingProcessor,
-                                           OAuthRequestResponsesFilter, GeneralNameReplacer, LargeRequestBodyProcessor,
+                                           OAuthRequestResponsesFilter, LargeRequestBodyProcessor,
                                            LargeResponseBodyProcessor, LargeResponseBodyReplacer, RequestUrlNormalizer,
                                            live_only, DeploymentNameReplacer, patch_time_sleep_api, create_random_name)
 
@@ -21,7 +21,7 @@ from .patches import (patch_load_cached_subscriptions, patch_main_exception_hand
                       patch_retrieve_token_for_user, patch_long_run_operation_delay,
                       patch_progress_controller)
 from .exceptions import CliExecutionError
-from .utilities import find_recording_dir
+from .utilities import find_recording_dir, StorageAccountKeyReplacer, GraphClientPasswordReplacer, GeneralNameReplacer
 from .reverse_dependency import get_dummy_cli
 
 logger = logging.getLogger('azure.cli.testsdk')
@@ -78,6 +78,7 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
         self.name_replacer = GeneralNameReplacer()
         self.kwargs = {}
         self.test_guid_count = 0
+        self._processors_to_reset = [StorageAccountKeyReplacer(), GraphClientPasswordReplacer()]
         default_recording_processors = [
             SubscriptionRecordingProcessor(MOCKED_SUBSCRIPTION_ID),
             OAuthRequestResponsesFilter(),
@@ -86,7 +87,7 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
             DeploymentNameReplacer(),
             RequestUrlNormalizer(),
             self.name_replacer
-        ]
+        ] + self._processors_to_reset
 
         default_replay_processors = [
             LargeResponseBodyReplacer(),
@@ -123,6 +124,11 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
             recording_dir=find_recording_dir(inspect.getfile(self.__class__)),
             recording_name=recording_name
         )
+
+    def tearDown(self):
+        for processor in self._processors_to_reset:
+            processor.reset()
+        super(ScenarioTest, self).tearDown()
 
     def create_random_name(self, prefix, length):
         self.test_resources_count += 1
@@ -169,6 +175,7 @@ class LiveScenarioTest(IntegrationTestBase, CheckerMixin, unittest.TestCase):
         super(LiveScenarioTest, self).__init__(method_name)
         self.cli_ctx = get_dummy_cli()
         self.kwargs = {}
+        self.test_resources_count = 0
 
     def cmd(self, command, checks=None, expect_failure=False):
         command = self._apply_kwargs(command)
@@ -183,6 +190,7 @@ class ExecutionResult(object):
         self.output = ''
         self.applog = ''
         self.command_coverage = {}
+        cli_ctx.data['_cache'] = None
 
         if os.environ.get(ENV_COMMAND_COVERAGE, None):
             with open(COVERAGE_FILE, 'a') as coverage_file:
@@ -197,7 +205,7 @@ class ExecutionResult(object):
             logger.error('Command "%s" => %d. (It did not fail as expected). %s\n', command,
                          self.exit_code, log_val)
             raise AssertionError('The command did not fail as it was expected.')
-        elif not expect_failure and self.exit_code != 0:
+        if not expect_failure and self.exit_code != 0:
             logger.error('Command "%s" => %d. %s\n', command, self.exit_code, log_val)
             raise AssertionError('The command failed. Exit code: {}'.format(self.exit_code))
 

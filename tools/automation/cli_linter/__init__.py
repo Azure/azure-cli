@@ -45,21 +45,23 @@ def main(args):
     # load yaml help
     help_file_entries = {}
     for entry_name, help_yaml in helps.items():
-        help_entry = yaml.load(help_yaml)
+        help_entry = yaml.safe_load(help_yaml)
         help_file_entries[entry_name] = help_entry
 
     if not args.rule_types_to_run:
         args.rule_types_to_run = ['params', 'commands', 'command_groups', 'help_entries']
 
     # find rule exclusions and pass to linter manager
-    from ..utilities.path import get_command_modules_paths
+    from ..utilities.path import get_command_modules_paths, get_extensions_paths
     exclusions = {}
     command_modules_paths = get_command_modules_paths()
-    for _, path in command_modules_paths:
-        exclusion_path = os.path.join(path, 'linter_exclusions.yml')
-        if os.path.isfile(exclusion_path):
-            mod_exclusions = yaml.load(open(exclusion_path))
-            exclusions.update(mod_exclusions)
+    extension_paths = get_extensions_paths()
+    for gen in (command_modules_paths, extension_paths):
+        for _, path in gen:
+            exclusion_path = os.path.join(path, 'linter_exclusions.yml')
+            if os.path.isfile(exclusion_path):
+                mod_exclusions = yaml.safe_load(open(exclusion_path))
+                exclusions.update(mod_exclusions)
 
     # only run linter on modules and extensions specified
     if args.modules or args.extensions:

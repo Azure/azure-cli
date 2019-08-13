@@ -11,15 +11,15 @@ import difflib
 import argparse
 import argcomplete
 
-from knack.deprecation import Deprecated
-from knack.log import get_logger
-from knack.parser import CLICommandParser
-from knack.util import CLIError
-
 import azure.cli.core.telemetry as telemetry
+from azure.cli.core.azlogging import CommandLoggerContext
 from azure.cli.core.extension import get_extension
 from azure.cli.core.commands import ExtensionCommandSource
 from azure.cli.core.commands.events import EVENT_INVOKER_ON_TAB_COMPLETION
+
+from knack.log import get_logger
+from knack.parser import CLICommandParser
+from knack.util import CLIError
 
 logger = get_logger(__name__)
 
@@ -28,7 +28,7 @@ class IncorrectUsageError(CLIError):
     '''Raised when a command is incorrectly used and the usage should be
     displayed to the user.
     '''
-    pass
+    pass  # pylint: disable=unnecessary-pass
 
 
 class AzCompletionFinder(argcomplete.CompletionFinder):
@@ -118,6 +118,7 @@ class AzCliCommandParser(CLICommandParser):
                         command_name, ex.args[0].dest, ex.message))  # pylint: disable=no-member
                 param.completer = arg.completer
                 param.deprecate_info = arg.deprecate_info
+                param.preview_info = arg.preview_info
             command_parser.set_defaults(
                 func=metadata,
                 command=command_name,
@@ -133,7 +134,8 @@ class AzCliCommandParser(CLICommandParser):
     def error(self, message):
         telemetry.set_user_fault('parse error: {}'.format(message))
         args = {'prog': self.prog, 'message': message}
-        logger.error('%(prog)s: error: %(message)s', args)
+        with CommandLoggerContext(logger):
+            logger.error('%(prog)s: error: %(message)s', args)
         self.print_usage(sys.stderr)
         self.exit(2)
 
@@ -173,7 +175,8 @@ class AzCliCommandParser(CLICommandParser):
                 error_msg = "{prog}: '{value}' is not a valid value for '{param}'. See '{prog} --help'.".format(
                     prog=self.prog, value=value, param=parameter)
             telemetry.set_user_fault(error_msg)
-            logger.error(error_msg)
+            with CommandLoggerContext(logger):
+                logger.error(error_msg)
             candidates = difflib.get_close_matches(value, action.choices, cutoff=0.7)
             if candidates:
                 print_args = {
@@ -186,36 +189,3 @@ class AzCliCommandParser(CLICommandParser):
                 print(suggestion_msg, file=sys.stderr)
 
             self.exit(2)
-
-    @staticmethod
-    def _add_argument(obj, arg):
-        """ Only pass valid argparse kwargs to argparse.ArgumentParser.add_argument """
-        from knack.parser import ARGPARSE_SUPPORTED_KWARGS
-
-        argparse_options = {name: value for name, value in arg.options.items() if name in ARGPARSE_SUPPORTED_KWARGS}
-        if arg.options_list:
-
-            scrubbed_options_list = []
-            for item in arg.options_list:
-
-                if isinstance(item, Deprecated):
-                    # don't add expired options to the parser
-                    if item.expired():
-                        continue
-
-                    class _DeprecatedOption(str):
-                        def __new__(cls, *args, **kwargs):
-                            instance = str.__new__(cls, *args, **kwargs)
-                            return instance
-
-                    option = _DeprecatedOption(item.target)
-                    setattr(option, 'deprecate_info', item)
-                    item = option
-                scrubbed_options_list.append(item)
-            return obj.add_argument(*scrubbed_options_list, **argparse_options)
-        else:
-            if 'required' in argparse_options:
-                del argparse_options['required']
-            if 'metavar' not in argparse_options:
-                argparse_options['metavar'] = '<{}>'.format(argparse_options['dest'].upper())
-            return obj.add_argument(**argparse_options)

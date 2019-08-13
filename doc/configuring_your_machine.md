@@ -6,56 +6,33 @@ The Azure Python CLI projects sources are located on GitHub (https://github.com/
 -    Create pull requests against the https://github.com/azure/azure-cli repository to get your code changes merged into the project repository.
 
 ## Preparing your machine
-1. Install Python 3.5.x or higher from http://python.org. Please note that the version of Python that comes preinstalled on OSX is 2.7.
-2. Clone your repository and check out the [`dev`](https://github.com/Azure/azure-cli/tree/dev) branch.
-3. Create a new virtual environment “env” for Python in the root of your clone. You can do this by running:
+1. Azdev is a tool to simplify the process of developing for CLI command modules and extensions. Follow the steps here: https://github.com/Azure/azure-cli-dev-tools#setting-up-your-development-environment
+2. Setup tab completion (OSX/Ubuntu ONLY).
 
-  #### Windows
-  ```BatchFile
-  python -m venv <clone root>\env
-  ```
-  #### OSX/Ubuntu (bash)
-  ```Shell
-  python -m venv <clone root>/env
-  ```
-4. Activate the env virtual environment by running:
+    Open Bash or zsh window and run:
 
-  #### Windows
-  ```BatchFile
-  <clone root>\env\scripts\activate.bat
-  ```
-  #### OSX/Ubuntu (bash)
-  ```Shell
-  . <clone root>/env/bin/activate
-  ```
-
-5. Install the dependencies and load the command modules as local packages using pip.
-  ```Shell
-  python scripts/dev_setup.py
-  ```
-6. Add `<clone root>\src` to your PYTHONPATH environment variable:
-
-  #### Windows
-  ```BatchFile
-  set PYTHONPATH=<clone root>\src;%PYTHONPATH%
-  ```
-  #### OSX/Ubuntu (bash)
-  ```Shell
-  export PYTHONPATH=<clone root>/src:${PYTHONPATH}
-  ```
-7. Setup tab completion (OSX/Ubuntu ONLY).
-
-  Open Bash or zsh window and run:
-
-  ```Shell
-  source <clone root>/src/azure-cli/az.completion.sh
-  ```
+    ```Shell
+    source <clone root>/src/azure-cli/az.completion.sh
+    ```
 
 ## Configuring your IDE
 #### Visual Studio (Windows only)
-1. Install Python Tools for Visual Studio. As of 2/18/2016, the current version (PTVS 2.2) can be found at http://microsoft.github.io/PTVS/.
-2. Open the `azure-cli.pyproj` project
-You should now be able to launch your project by pressing F5/start debugging
+1. Both VS 2015 and 2017 support Python development, but VS 2015 is more relible, particular on the intellisense and "Test Explorer". VS 2019's Python support is being actively improved, and we will recommend it here once the evalution result is promising.  
+2. Steps to setup VS 2015:
+
+   - You can install VS 2015 from https://visualstudio.microsoft.com/vs/older-downloads/
+   - Click menu "View->Other Windows->Python Environment" and create a new one by pointing to a local installed Python like 3.7.0.
+   - Click menu "File->New Project", and in the dialog select "Python->From Existing Python Code". This will create a project from your local clone.
+   - Go through the wizard
+   - Once the project gets populated in the solution explorer, for better IDE performance, exlude folders not interested such as "bin", "build_scripts", "doc", etc. For ther same performance reason, under \<root\>\src\azure-cli\azure\cli\command_modules exlude all unrelated command modules.
+   - In solution explorer, right click "Python Environments", and invoke "Add Virtual Environment".
+   - Save the new project and solution.
+   - Back to the command prompt, activate the virtual environment by running "env\scripts\activate".
+   - Run "pip install azdev"
+   - Run "azdev setup -c"
+   - Run "pip install ptvsd==2.2.0". This is to enable unit test executing & debugging through "Test Explorer"
+   - Back to the VS IDE, you are all set
+
 
 #### Visual Studio Code (Any platform)
 Experimental steps – still haven’t been able to get virtual environments to work well with VSCode
@@ -89,28 +66,13 @@ The repo has a `launch.json` file that will launch the version of Python that is
   ```
 
 ## Running Tests and Checking Code Style
-#### Command line
-  Running the `dev_setup.py` file will install `azdev`, a CLI that performs useful tasks for Azure CLI developers such as executing  CLI tests, CLI linter, and style checking.
 
-##### Windows/OSX/Ubuntu:
+#### Azdev CLI
+To run tests or check style from the command line, use the `azdev` tool. For more information, visit: https://github.com/Azure/azure-cli-dev-tools
 
-  For a list of available `azdev` commands:
-  ```
-  azdev --help
-  ```
+Tests: `azdev test mymodule`
 
-  To run the CLI tests:
-  ```
-  azdev test [-h] [--series] [--live] [--src-file SRC_FILE]
-                  [--dest-file DEST_FILE] [--ci] [--discover]
-                  [--profile PROFILE]
-                  [tests [tests ...]]
-  ```
-
-  To check the CLI and command modules for style errors:
-  ```
-  azdev style [-h] [--ci] [--pep8] [--pylint] [--module MODULES]
-  ```
+Style checkers: `azdev style mymodule` and `azdev linter mymodule`
 
 #### Visual Studio Code
   Click on the Debug icon in the Activity Bar on the side of Visual Studio Code, and select `Azdev Scripts` from the drop down menu. To execute `azdev` commands via Visual Studio Code, you will need to press the gear icon beside the drop down menu and modify the `args` field in `launch.json`. Make sure that any modification of `launch.json` is not included in your pull requests.
