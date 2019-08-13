@@ -14,7 +14,7 @@ from azure.mgmt.web.models import DatabaseType, ConnectionStringType, BuiltInAut
 
 from ._completers import get_hostname_completion_list
 
-from ._validators import validate_timeout_value, validate_site_create, validate_asp_create
+from ._validators import validate_timeout_value, validate_site_create, validate_asp_create, validate_add_vnet
 
 
 AUTH_TYPES = {
@@ -361,6 +361,28 @@ def load_arguments(self, _):
         c.argument('microsoft_account_client_secret', arg_group='Microsoft', help='AAD V2 Application client secret')
         c.argument('microsoft_account_oauth_scopes', nargs='+', help="One or more Microsoft authentification scopes (space-delimited).", arg_group='Microsoft')
 
+    with self.argument_context('webapp hybrid-connection') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('slot', help="the name of the slot. Default to the productions slot if not specified")
+        c.argument('namespace', help="Hybrid connection namespace")
+        c.argument('hybrid_connection', help="Hybrid connection name")
+
+    with self.argument_context('functionapp hybrid-connection') as c:
+        c.argument('name', id_part=None)
+        c.argument('slot', help="the name of the slot. Default to the productions slot if not specified")
+        c.argument('namespace', help="Hybrid connection namespace")
+        c.argument('hybrid_connection', help="Hybrid connection name")
+
+    with self.argument_context('appservice hybrid-connection set-key') as c:
+        c.argument('plan', help="AppService plan")
+        c.argument('namespace', help="Hybrid connection namespace")
+        c.argument('hybrid_connection', help="Hybrid connection name")
+        c.argument('key_type', help="Which key (primary or secondary) should be used")
+
+    with self.argument_context('appservice vnet-integration list') as c:
+        c.argument('plan', help="AppService plan")
+        c.argument('resource_group', arg_type=resource_group_name_type)
+
     with self.argument_context('webapp up') as c:
         c.argument('name', arg_type=webapp_name_arg_type)
         c.argument('resource_group_name', arg_type=resource_group_name_type)
@@ -382,6 +404,18 @@ def load_arguments(self, _):
         c.argument('port', options_list=['--port', '-p'],
                    help='Port for the remote connection. Default: Random available port', type=int)
         c.argument('timeout', options_list=['--timeout', '-t'], help='timeout in seconds. Defaults to none', type=int)
+
+    with self.argument_context('webapp vnet-integration') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('slot', help="the name of the slot. Default to the productions slot if not specified")
+        c.argument('vnet', help="Vnet name", validator=validate_add_vnet)
+        c.argument('subnet', help="Subnet name")
+
+    with self.argument_context('functionapp vnet-integration') as c:
+        c.argument('name', arg_type=name_arg_type, id_part=None)
+        c.argument('slot', help="the name of the slot. Default to the productions slot if not specified")
+        c.argument('vnet', help="Vnet name", validator=validate_add_vnet)
+        c.argument('subnet', help="Subnet name")
 
     with self.argument_context('functionapp') as c:
         c.ignore('app_instance')

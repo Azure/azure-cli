@@ -7,6 +7,92 @@ Release History
 
 * Added "appconfig kv restore" command.
 
+**keyvault**
+
+* Fix the bug in secret set command that igores the expires argument
+
+2.0.71
+++++++
+
+**AppService**
+
+* az webapp webjob continuous group commands were failing for slots
+
+**BotService**
+
+* BREAKING CHANGE:
+    create:
+        - Removed support for creating v3 SDK bots
+        - Remove `az bot publish` example when creating a Web App bot
+
+**CognitiveServices**
+
+* Add "cognitiveservices account network-rule" commands.
+
+**Cosmos DB**
+
+* Remove warning when updating multiple write locations
+* Add CRUD commands for CosmosDB SQL, MongoDB, Cassandra, Gremlin and Table resources and resource's throughput.
+
+**HDInsight**
+
+* BREAKING CHANGE:
+    create:
+        - Renamed --storage-default-container to --storage-container and --storage-default-filesystem to --storage-filesystem
+    application create: 
+        - Changed the --name/-n argument to represent the application name instead of the cluster name and added a separate --cluster-name argument
+        - Renamed --application-type to --type/-t
+        - Renamed --marketplace-identifier to --marketplace-id
+        - Renamed --https-endpoint-access-mode to --access-mode and --https-endpoint-destination-port to --destination-port
+        - Removed --https-endpoint-location, --https-endpoint-public-port, --ssh-endpoint-destination-port, --ssh-endpoint-location and --ssh-endpoint-public-port
+    resize:
+        - Renamed --target-instance-count to --workernode-count/-c
+    script-action
+        - Changed --name/-n to represent the name of the script action and added the --cluster-name argument to represent the cluster name
+        - Changed --script-execution-id to --execution-id
+        - Renamed the "show" command to "show-execution-details"
+    script-action execute:
+        - Made parameters for the --roles argument space separated instead of comma separated
+    script-action list:
+        - Removed the --persisted parameter
+* create:
+    Enabled the --cluster-configurations argument to accept a path to a local JSON file or a JSON string as the parameter
+* script-action list-execution-history:
+    Added this command to list the execution history for all script action executions
+* monitor enable:
+    Enabled the --workspace argument to accept a Log Analytics workspace ID or workspace name as the parameter
+    Added the --primary-key argument, which is needed if a workspace ID is provided as the parameter 
+* Added more examples and updated descriptions for help messages
+
+**interactive**
+
+* Fix a loading error on 2.0.70
+
+**Network**
+
+* az network dns record-set cname delete: Fixes #10166. Support `--yes` argument to align the behavior with other dns type. 
+
+**Profile**
+
+* Add get-access-token --resource-type enum for convenience of getting access tokens for well-known resources.
+
+**ServiceFabric**
+
+* Fix for issue #6112 - added all supported os version for sf cluster create
+* Fix for issue #6536 - primary certificate validation bug
+
+**Storage**
+
+* `storage copy`: add copy command for storage
+
+**Kubernetes**
+
+* Use https if dashboard container port is using https 
+
+
+2.0.70
+++++++
+
 **ACR**
 
 * Fixed issue #9952 (a regression in the `acr pack build` command).
@@ -15,10 +101,18 @@ Release History
 **Appservice**
 * az webapp config ssl support to show a message if a resource is not found
 * Fixed issue where `az functionapp create` does not accept Standard_RAGRS storage account type.
+* Fixed an issue where az webapp up would fail if run using older versions of python
+
+**Monitor**
+
+* `metrics alert create`: Allow '/' and '.' characters in namespace name to support custom metrics.
 
 **Network**
 
 * network nic ip-config add: Fixes #9861 where --ids was inadvertently exposed but did not work.
+* network application-gateway http-settings create/update: Fixes #9604. Add `--root-certs` to support user associate trusted root certificates with the HTTP settings.
+* network dns record-set ns create: Fixes #9965. Support --subscription again by moving the supression into lower scope.
+* network watcher test-ip-flow: Fixes #9845. Fixes #9844. Correct the error messages and help message for the `--vm` and `--nic` arguments. Only providing the name of the vm or nic without `--resource-group` will raise CLI usage error.
 
 **RBAC**
 
@@ -29,11 +123,17 @@ Release History
 
 * New Cmdlets for Management.Sql that supports Managed instance key and managed instance TDE protector management
 
+**Storage**
+
+* `storage remove`: add remove command for storage
+* Fixed issue `storage blob update`.
+
 **VM**
 
 * list-skus: use newer api-version to output zone details
 * vmss create: restore client end defaults to False for "--single-placement-group"
-* snapshot/disk create: expose ZRS storage skus   
+* snapshot/disk create: expose ZRS storage skus
+* Add new command group `vm host` to support dedicated hosts. Expose `--host` and `--host-group` on `vm create`
 
 2.0.69
 ++++++
@@ -49,6 +149,7 @@ Release History
 **Core**
 
 * Fixed issue where `--subscription` would appear despite being not applicable.
+* Added ossrdbmsResourceId to cloud.py.
 
 **BATCH**
 
@@ -84,7 +185,6 @@ Release History
 
 * Enable Files AADDS for storage account update.
 * Fixed issue `storage blob service-properties update --set`.
-* `storage remove`: add remove command for storage
 
 2.0.68
 ++++++
@@ -133,6 +233,10 @@ Release History
 
 **Profile**
 * Suppress `--subscription` argument for logout command.
+
+**IoT**
+
+* Support for IoT Hub message enrichments
 
 **RBAC**
 

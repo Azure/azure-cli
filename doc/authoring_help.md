@@ -4,7 +4,7 @@ Help authoring for commands is done in a number of places, all of which are cont
 
 ## YAML Help Authoring ##
 
-The YAML syntax is described [here](http://www.yaml.org/spec/1.2/spec.html "here").
+If you're not familiar with YAML, see the [YAML specification](http://www.yaml.org/spec/1.2/spec.html).
 
 To override help for a given command:
 

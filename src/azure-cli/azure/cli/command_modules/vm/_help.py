@@ -1171,6 +1171,83 @@ examples:
 
 """
 
+helps['vm host'] = """
+type: group
+short-summary: Manage Dedicated Hosts for Virtual Machines
+"""
+
+helps['vm host create'] = """
+type: command
+short-summary: Create a dedicated host.
+examples:
+  - name: Create a dedicated host. Ensure it auto replaces on failure
+    text: |-
+        az vm host create --host-group my-host-group --name my-host --platform-fault-domain 2 \\
+            --auto-replace --resource-group my-resource-group --sku DSv3-Type1
+  - name: Create a dedicated host in the 'east asia' region. Don't auto replace on failure.
+    text: |-
+        az vm host create --host-group my-host-group --name my-host --platform-fault-domain 0 \\
+            --auto-replace false --resource-group my-resource-group --sku ESv3-Type1 --location eastasia
+"""
+
+helps['vm host list'] = """
+type: command
+short-summary: List dedicated hosts.
+"""
+
+helps['vm host show'] = """
+type: command
+short-summary: Get the details of a dedicated host.
+"""
+
+helps['vm host get-instance-view'] = """
+type: command
+short-summary: Get instance information about a dedicated host.
+examples:
+  - name: Get instance view information of a dedicated host.
+    text: az vm host get-instance-view --host-group my-host-group --name my-host -g my-rg
+
+  - name: Get instance views for all dedicated hosts in a host group.
+    text: >
+        az vm host get-instance-view --ids $(az vm host list -g my-rg --host-group my-host-group --query "[].id" -o tsv)
+"""
+
+helps['vm host update'] = """
+type: command
+short-summary: Update a dedicated host.
+examples:
+  - name: Update the 'autoReplaceOnFailure' field of a dedicated host.
+    text: |-
+        az vm host update --host-group my-host-group --name my-host \\
+            --resource-group my-resource-group --set autoReplaceOnFailure=True
+"""
+
+helps['vm host group'] = """
+type: group
+short-summary: Manage Dedicated Host Groups
+"""
+
+helps['vm host group create'] = """
+type: command
+short-summary: Create a dedicated host group.
+"""
+
+helps['vm host group list'] = """
+type: command
+short-summary: List dedicated host groups.
+long-summary: Lists dedicated host groups by subscription. If resource group is specified, lists dedicated host groups by resource group.
+"""
+
+helps['vm host group show'] = """
+type: command
+short-summary: Get the details of a dedicated host group.
+"""
+
+helps['vm host group update'] = """
+type: command
+short-summary: Update a dedicated host group.
+"""
+
 helps['vm identity'] = """
 type: group
 short-summary: manage service identities of a VM
@@ -1501,7 +1578,7 @@ examples:
     text: az vm run-command invoke -g MyResourceGroup -n MyVm --command-id RunShellScript --scripts 'echo $1 $2' --parameters hello world
   - name: Run powershell script on a windows VM with parameters. Script supplied inline. Be wary of single-quoting in CMD.exe.
     text: |-
-        az vm run-command invoke  --command-id RunPowerShellScript -n tosin-win-vm -g ova-test \\
+        az vm run-command invoke  --command-id RunPowerShellScript --name win-vm -g my-resource-group  \\
             --scripts 'param([string]$arg1,[string]$arg2)' \\
             'Write-Host This is a sample script with parameters $arg1 and $arg2' \\
             --parameters 'arg1=somefoo' 'arg2=somebar'
@@ -1514,7 +1591,7 @@ examples:
         #   )
         #   Write-Host This is a sample script with parameters $arg1 and $arg2
 
-        az vm run-command invoke  --command-id RunPowerShellScript -n tosin-win-vm -g ova-test \\
+        az vm run-command invoke  --command-id RunPowerShellScript --name win-vm -g my-resource-group \\
             --scripts @script.ps1 --parameters "arg1=somefoo" "arg2=somebar"
 """
 
@@ -2131,12 +2208,12 @@ examples:
     text: az vmss run-command invoke -g MyResourceGroup -n MyVMSS --command-id RunShellScript \\ --instance-id 4 --scripts 'echo $1 $2' --parameters hello world
   - name: 'Invoke command on all VMSS instances using the VMSS instance resource IDs. Note: "@-" expands to stdin.'
     text: |-
-        az vmss list-instances -n MyVMSS -g ova-test --query "[].id" --output tsv | \\
+        az vmss list-instances -n MyVMSS -g my-rg --query "[].id" --output tsv | \\
         az vmss run-command invoke --scripts 'echo $1 $2' --parameters hello world  \\
             --command-id RunShellScript --ids @-
   - name: Run powershell script on a windows VMSS instance with parameters. Script supplied inline. Be wary of single-quoting in CMD.exe.
     text: |-
-        az vmss run-command invoke  --command-id RunPowerShellScript -n tosin-win-vm -g ova-test \\
+        az vmss run-command invoke  --command-id RunPowerShellScript --name win-vm -g my-resource-group \\
             --scripts 'param([string]$arg1,[string]$arg2)' \\
             'Write-Host This is a sample script with parameters $arg1 and $arg2' \\
             --parameters 'arg1=somefoo' 'arg2=somebar' --instance-id 2
@@ -2149,7 +2226,7 @@ examples:
         #   )
         #   Write-Host This is a sample script with parameters $arg1 and $arg2
 
-        az vmss run-command invoke  --command-id RunPowerShellScript -n tosin-win-vm -g ova-test \\
+        az vmss run-command invoke  --command-id RunPowerShellScript --name win-vm -g my-resource-group \\
             --scripts @script.ps1 --parameters "arg1=somefoo" "arg2=somebar" --instance-id 5
 """
 

@@ -96,6 +96,27 @@ def _sku_filter(cmd, namespace):
     return [x for x in cf_resource_skus(cmd.cli_ctx).list() if _filter_sku(x)]
 
 
+def _validate_subnet(cmd, namespace):
+    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    subnet = namespace.subnet
+    subnet_is_id = is_valid_resource_id(subnet)
+    vnet = namespace.vnet_name
+
+    if (subnet_is_id and not vnet) or (not subnet and not vnet):
+        return
+    if subnet and not subnet_is_id and vnet:
+        namespace.subnet = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=namespace.resource_group_name,
+            namespace='Microsoft.Network',
+            type='virtualNetworks',
+            name=vnet,
+            child_type_1='subnets',
+            child_name_1=subnet)
+
+
 @Completer
 def sku_name_completer(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
     names = {x.name for x in _sku_filter(cmd, namespace)}
@@ -121,13 +142,19 @@ def load_arguments(self, _):
         c.argument('location', arg_type=get_location_type(self.cli_ctx),
                    completer=location_completer)
         c.argument('resource_group_name', arg_type=resource_group_name_type)
-        c.argument('sku_name', options_list=['--sku'], help='the Sku of cognitive services account',
+        c.argument('sku_name', options_list=['--sku'], help='Name of the Sku of cognitive services account',
                    completer=sku_name_completer)
         c.argument('kind', help='the API name of cognitive services account',
                    completer=kind_completer)
         c.argument('tags', tags_type)
         c.argument('key_name', required=True, help='Key name to generate', choices=['key1', 'key2'])
         c.argument('api_properties', api_properties_type)
+        c.argument('custom_domain', help='User domain assigned to the account. Name is the CNAME source.')
 
     with self.argument_context('cognitiveservices account create') as c:
         c.argument('yes', action='store_true', help='Do not prompt for terms confirmation')
+
+    with self.argument_context('cognitiveservices account network-rule') as c:
+        c.argument('ip_address', help='IPv4 address or CIDR range.')
+        c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
+        c.argument('vnet_name', help='Name of a virtual network.', validator=_validate_subnet)

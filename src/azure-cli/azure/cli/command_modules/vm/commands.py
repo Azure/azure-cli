@@ -11,7 +11,8 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set, c
                                                           cf_images, cf_run_commands,
                                                           cf_rolling_upgrade_commands, cf_galleries,
                                                           cf_gallery_images, cf_gallery_image_versions,
-                                                          cf_proximity_placement_groups)
+                                                          cf_proximity_placement_groups,
+                                                          cf_dedicated_hosts, cf_dedicated_host_groups)
 from azure.cli.command_modules.vm._format import (
     transform_ip_addresses, transform_vm, transform_vm_create_output, transform_vm_usage_list, transform_vm_list,
     transform_sku_for_table_output, transform_disk_show_table_output, transform_extension_show_table_output,
@@ -142,7 +143,17 @@ def load_command_table(self, _):
     )
 
     compute_proximity_placement_groups_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#ProximityPlacementGroupsOperations.{}'
+        operations_tmpl='azure.mgmt.compute.operations#ProximityPlacementGroupsOperations.{}',
+    )
+
+    compute_dedicated_host_sdk = CliCommandType(
+        operations_tmpl="azure.mgmt.compute.operations#DedicatedHostsOperations.{}",
+        client_factory=cf_dedicated_hosts,
+    )
+
+    compute_dedicated_host_groups_sdk = CliCommandType(
+        operations_tmpl="azure.mgmt.compute.operations#DedicatedHostGroupsOperations.{}",
+        client_factory=cf_dedicated_host_groups,
     )
 
     image_builder_image_templates_sdk = CliCommandType(
@@ -301,6 +312,23 @@ def load_command_table(self, _):
         g.custom_command('update', 'set_user')
         g.custom_command('delete', 'delete_user')
         g.custom_command('reset-ssh', 'reset_linux_ssh')
+
+    with self.command_group('vm host', compute_dedicated_host_sdk, client_factory=cf_dedicated_hosts,
+                            min_api='2019-03-01', is_preview=True) as g:
+        g.show_command('show', 'get')
+        g.custom_command('get-instance-view', 'get_dedicated_host_instance_view')
+        g.custom_command('create', 'create_dedicated_host')
+        g.command('list', 'list_by_host_group')
+        g.generic_update_command('update')
+        g.command('delete', 'delete', confirmation=True)
+
+    with self.command_group('vm host group', compute_dedicated_host_groups_sdk, client_factory=cf_dedicated_host_groups,
+                            min_api='2019-03-01', is_preview=True) as g:
+        g.show_command('show', 'get')
+        g.custom_command('create', 'create_dedicated_host_group')
+        g.custom_command('list', 'list_dedicated_host_groups')
+        g.generic_update_command('update')
+        g.command('delete', 'delete', confirmation=True)
 
     with self.command_group('vmss', compute_vmss_sdk, operation_group='virtual_machine_scale_sets') as g:
         g.custom_command('identity assign', 'assign_vmss_identity', validator=process_assign_identity_namespace)

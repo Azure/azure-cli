@@ -15,11 +15,11 @@ from knack.log import get_logger
 from msrest.paging import Paged
 from msrestazure.tools import parse_resource_id, is_valid_resource_id
 
-from azure.mgmt.recoveryservices.models import Vault, VaultProperties, Sku, SkuName, BackupStorageConfig
+from azure.mgmt.recoveryservices.models import Vault, VaultProperties, Sku, SkuName
 from azure.mgmt.recoveryservicesbackup.models import ProtectedItemResource, AzureIaaSComputeVMProtectedItem, \
     AzureIaaSClassicComputeVMProtectedItem, ProtectionState, IaasVMBackupRequest, BackupRequestResource, \
     IaasVMRestoreRequest, RestoreRequestResource, BackupManagementType, WorkloadType, OperationStatusValues, \
-    JobStatus, ILRRequestResource, IaasVMILRRegistrationRequest
+    JobStatus, ILRRequestResource, IaasVMILRRegistrationRequest, BackupResourceConfig, BackupResourceConfigResource
 
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.command_modules.backup._client_factory import (
@@ -39,10 +39,10 @@ password_length = 15
 
 
 def create_vault(client, vault_name, resource_group_name, location):
-    vault_sku = Sku(SkuName.standard)
+    vault_sku = Sku(name=SkuName.standard)
     vault_properties = VaultProperties()
 
-    vault = Vault(location, sku=vault_sku, properties=vault_properties)
+    vault = Vault(location=location, sku=vault_sku, properties=vault_properties)
     return client.create_or_update(resource_group_name, vault_name, vault)
 
 
@@ -86,8 +86,9 @@ def list_vaults(client, resource_group_name=None):
 
 
 def set_backup_properties(client, vault_name, resource_group_name, backup_storage_redundancy):
-    backup_storage_config = BackupStorageConfig(storage_model_type=backup_storage_redundancy)
-    client.update(resource_group_name, vault_name, backup_storage_config)
+    backup_storage_config = BackupResourceConfig(storage_model_type=backup_storage_redundancy)
+    backup_storage_config_resource = BackupResourceConfigResource(properties=backup_storage_config)
+    client.update(vault_name, resource_group_name, backup_storage_config_resource)
 
 
 def get_default_policy_for_vm(client, resource_group_name, vault_name):

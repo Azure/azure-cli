@@ -16,6 +16,7 @@ from azure.mgmt.iothub.models import (IotHubSku,
                                       SharedAccessSignatureAuthorizationRule,
                                       IotHubProperties,
                                       EventHubProperties,
+                                      EnrichmentProperties,
                                       RoutingEventHubProperties,
                                       RoutingServiceBusQueueEndpointProperties,
                                       RoutingServiceBusTopicEndpointProperties,
@@ -36,8 +37,8 @@ from azure.mgmt.iothubprovisioningservices.models import (ProvisioningServiceDes
 from azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.iot_hub_device_client import IotHubDeviceClient
 from azure.cli.command_modules.iot.sas_token_auth import SasTokenAuthentication
 from azure.cli.command_modules.iot.shared import EndpointType, EncodingFormat, RenewKeyType
-
-from ._client_factory import resource_service_factory, get_digitaltwin_client
+from ._constants import PNP_ENDPOINT
+from ._client_factory import resource_service_factory, get_pnp_client
 from ._utils import open_certificate, get_auth_header, generateKey
 
 
@@ -731,6 +732,43 @@ def iot_hub_route_test(client, hub_name, route_name=None, source_type=None, body
     return client.iot_hub_resource.test_all_routes(test_all_routes_input, hub_name, resource_group_name)
 
 
+def iot_message_enrichment_create(client, hub_name, key, value, endpoints, resource_group_name=None):
+    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
+    hub = iot_hub_get(client, hub_name, resource_group_name)
+    if hub.properties.routing.enrichments is None:
+        hub.properties.routing.enrichments = []
+    hub.properties.routing.enrichments.append(EnrichmentProperties(key=key, value=value, endpoint_names=endpoints))
+    return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
+
+
+def iot_message_enrichment_update(client, hub_name, key, value, endpoints, resource_group_name=None):
+    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
+    hub = iot_hub_get(client, hub_name, resource_group_name)
+    to_update = next((endpoint for endpoint in hub.properties.routing.enrichments if endpoint.key == key), None)
+    if to_update:
+        to_update.key = key
+        to_update.value = value
+        to_update.endpoint_names = endpoints
+        return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
+    raise CLIError('No message enrichment with that key exists')
+
+
+def iot_message_enrichment_delete(client, hub_name, key, resource_group_name=None):
+    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
+    hub = iot_hub_get(client, hub_name, resource_group_name)
+    to_remove = next((endpoint for endpoint in hub.properties.routing.enrichments if endpoint.key == key), None)
+    if to_remove:
+        hub.properties.routing.enrichments.remove(to_remove)
+        return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
+    raise CLIError('No message enrichment with that key exists')
+
+
+def iot_message_enrichment_list(client, hub_name, resource_group_name=None):
+    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
+    hub = iot_hub_get(client, hub_name, resource_group_name)
+    return hub.properties.routing.enrichments
+
+
 def iot_hub_devicestream_show(client, hub_name, resource_group_name=None):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     hub = iot_hub_get(client, hub_name, resource_group_name)
@@ -745,74 +783,74 @@ def iot_hub_manual_failover(cmd, client, hub_name, failover_region, resource_gro
     return iot_hub_get(client, hub_name, resource_group_name)
 
 
-def digitaltwin_create_repository(cmd, client, repo_endpoint, repo_name):
-    return _digitaltwin_create_update_repository(cmd, client, repo_endpoint, repo_name)
+def pnp_create_repository(cmd, client, repo_name, repo_endpoint=PNP_ENDPOINT):
+    return _pnp_create_update_repository(cmd, client, repo_endpoint, repo_name)
 
 
-def digitaltwin_update_repository(cmd, client, repo_endpoint, repo_id, repo_name):
-    return _digitaltwin_create_update_repository(cmd, client, repo_endpoint, repo_name, repo_id)
+def pnp_update_repository(cmd, client, repo_id, repo_name, repo_endpoint=PNP_ENDPOINT):
+    return _pnp_create_update_repository(cmd, client, repo_endpoint, repo_name, repo_id)
 
 
-def digitaltwin_list_repository(cmd, client, repo_endpoint):
+def pnp_list_repository(cmd, client, repo_endpoint=PNP_ENDPOINT):
     headers = get_auth_header(cmd)
-    return get_digitaltwin_client(repo_endpoint).get_repositories_async(api_version=client.api_version, custom_headers=headers)
+    return get_pnp_client(repo_endpoint).get_repositories_async(api_version=client.api_version, custom_headers=headers)
 
 
-def digitaltwin_get_repository(cmd, client, repo_endpoint, repo_id):
+def pnp_get_repository(cmd, client, repo_id, repo_endpoint=PNP_ENDPOINT):
     headers = get_auth_header(cmd)
-    return get_digitaltwin_client(repo_endpoint).get_repository_async(repo_id, api_version=client.api_version, custom_headers=headers)
+    return get_pnp_client(repo_endpoint).get_repository_async(repo_id, api_version=client.api_version, custom_headers=headers)
 
 
-def digitaltwin_delete_repository(cmd, client, repo_endpoint, repo_id):
+def pnp_delete_repository(cmd, client, repo_id, repo_endpoint=PNP_ENDPOINT):
     headers = get_auth_header(cmd)
-    return get_digitaltwin_client(repo_endpoint).delete_repository_async(repo_id, api_version=client.api_version, custom_headers=headers)
+    return get_pnp_client(repo_endpoint).delete_repository_async(repo_id, api_version=client.api_version, custom_headers=headers)
 
 
-def digitaltwin_track_provision_status(cmd, client, repo_endpoint, repo_id, track_id):
+def pnp_track_provision_status(cmd, client, repo_id, track_id, repo_endpoint=PNP_ENDPOINT):
     headers = get_auth_header(cmd)
-    return get_digitaltwin_client(repo_endpoint).get_provision_status(repo_id, track_id, api_version=client.api_version, custom_headers=headers)
+    return get_pnp_client(repo_endpoint).get_provision_status(repo_id, track_id, api_version=client.api_version, custom_headers=headers)
 
 
-def digitaltwin_create_key(cmd, client, repo_endpoint, repo_id, user_role):
-    return _digitaltwin_create_update_authkeys(cmd, client, repo_endpoint, repo_id, user_role)
+def pnp_create_key(cmd, client, repo_id, user_role, repo_endpoint=PNP_ENDPOINT):
+    return _pnp_create_update_authkeys(cmd, client, repo_endpoint, repo_id, user_role)
 
 
-def digitaltwin_update_key(cmd, client, repo_endpoint, repo_id, key_id, user_role):
-    return _digitaltwin_create_update_authkeys(cmd, client, repo_endpoint, repo_id, user_role, key_id)
+def pnp_update_key(cmd, client, repo_id, key_id, user_role, repo_endpoint=PNP_ENDPOINT):
+    return _pnp_create_update_authkeys(cmd, client, repo_endpoint, repo_id, user_role, key_id)
 
 
-def digitaltwin_list_key(cmd, client, repo_endpoint, repo_id):
+def pnp_list_key(cmd, client, repo_id, repo_endpoint=PNP_ENDPOINT):
     headers = get_auth_header(cmd)
-    return get_digitaltwin_client(repo_endpoint).get_keys_async(repository_id=repo_id, api_version=client.api_version, custom_headers=headers)
+    return get_pnp_client(repo_endpoint).get_keys_async(repository_id=repo_id, api_version=client.api_version, custom_headers=headers)
 
 
-def digitaltwin_get_key(cmd, client, repo_endpoint, repo_id, key_id):
+def pnp_get_key(cmd, client, repo_id, key_id, repo_endpoint=PNP_ENDPOINT):
     headers = get_auth_header(cmd)
-    return get_digitaltwin_client(repo_endpoint).get_key_async(repo_id, key_id, api_version=client.api_version, custom_headers=headers)
+    return get_pnp_client(repo_endpoint).get_key_async(repo_id, key_id, api_version=client.api_version, custom_headers=headers)
 
 
-def digitaltwin_delete_key(cmd, client, repo_endpoint, repo_id, key_id):
+def pnp_delete_key(cmd, client, repo_id, key_id, repo_endpoint=PNP_ENDPOINT):
     headers = get_auth_header(cmd)
-    return get_digitaltwin_client(repo_endpoint).delete_key_async(key_id, repo_id, api_version=client.api_version, custom_headers=headers)
+    return get_pnp_client(repo_endpoint).delete_key_async(key_id, repo_id, api_version=client.api_version, custom_headers=headers)
 
 
-def _digitaltwin_create_update_repository(cmd, client, repo_endpoint, repo_name, repo_id=None):
+def _pnp_create_update_repository(cmd, client, repo_endpoint, repo_name, repo_id=None):
     from .digitaltwinrepositoryprovisioningservice.models import RepositoryUpsertRequestProperties
     headers = get_auth_header(cmd)
     repositoryUpsertRequestProperties = RepositoryUpsertRequestProperties(id=repo_id, name=repo_name)
-    return get_digitaltwin_client(repo_endpoint).create_or_update_repository_async(api_version=client.api_version,
-                                                                                   properties=repositoryUpsertRequestProperties,
-                                                                                   custom_headers=headers)
+    return get_pnp_client(repo_endpoint).create_or_update_repository_async(api_version=client.api_version,
+                                                                           properties=repositoryUpsertRequestProperties,
+                                                                           custom_headers=headers)
 
 
-def _digitaltwin_create_update_authkeys(cmd, client, repo_endpoint, repo_id, user_role, key_id=None):
+def _pnp_create_update_authkeys(cmd, client, repo_endpoint, repo_id, user_role, key_id=None):
     from .digitaltwinrepositoryprovisioningservice.models import RepositoryKeyRequestProperties
     headers = get_auth_header(cmd)
     repositoryKeyRequestProperties = RepositoryKeyRequestProperties(id=key_id, user_role=user_role)
-    return get_digitaltwin_client(repo_endpoint).create_or_update_key_async(repository_id=repo_id,
-                                                                            api_version=client.api_version,
-                                                                            properties=repositoryKeyRequestProperties,
-                                                                            custom_headers=headers)
+    return get_pnp_client(repo_endpoint).create_or_update_key_async(repository_id=repo_id,
+                                                                    api_version=client.api_version,
+                                                                    properties=repositoryKeyRequestProperties,
+                                                                    custom_headers=headers)
 
 
 def _get_device_client(client, resource_group_name, hub_name, device_id):
