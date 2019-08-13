@@ -18,7 +18,7 @@ from jsondiff import JsonDiffer
 from knack.log import get_logger
 from knack.util import CLIError
 
-from ._utils import resolve_connection_string, user_confirmation
+from ._utils import resolve_connection_string, user_confirmation, error_print
 from ._azconfig.azconfig_client import AzconfigClient
 from ._azconfig.constants import StatusCodes
 from ._azconfig.exceptions import HTTPException
@@ -696,9 +696,9 @@ def __serialize_kv_list_to_comparable_json_list(keyvalues):
 
 
 def __print_preview(old_json, new_json):
-    print('\n---------------- Preview (Beta) ----------------')
+    error_print('\n---------------- Preview (Beta) ----------------')
     if not new_json:
-        print('\nSource configuration is empty. No changes will be made.')
+        error_print('\nSource configuration is empty. No changes will be made.')
         return False
 
     # perform diff operation
@@ -709,7 +709,7 @@ def __print_preview(old_json, new_json):
     res = differ.diff(old_json, new_json)
     keys = str(res.keys())
     if res == {} or (('update' not in keys) and ('insert' not in keys)):
-        print('\nTarget configuration already contains all key-values in source. No changes will be made.')
+        error_print('\nTarget configuration already contains all key-values in source. No changes will be made.')
         return False
 
     # format result printing
@@ -717,14 +717,14 @@ def __print_preview(old_json, new_json):
         if action.label == 'delete':
             continue  # we do not delete KVs while importing/exporting
         elif action.label == 'insert':
-            print('\nAdding:')
+            error_print('\nAdding:')
             for key, adding in changes.items():
                 record = {'key': key}
                 for attribute, value in adding.items():
                     record[str(attribute)] = str(value)
-                print(json.dumps(record))
+                error_print(json.dumps(record))
         elif action.label == 'update':
-            print('\nUpdating:')
+            error_print('\nUpdating:')
             for key, updates in changes.items():
                 updates = list(updates.values())[0]
                 attributes = list(updates.keys())
@@ -733,34 +733,34 @@ def __print_preview(old_json, new_json):
                 for attribute in attributes:
                     old_record[attribute] = old_json[key][attribute]
                     new_record[attribute] = new_json[key][attribute]
-                print('- ' + json.dumps(old_record))
-                print('+ ' + json.dumps(new_record))
-    print("")  # printing an empty line for formatting purpose
+                error_print('- ' + json.dumps(old_record))
+                error_print('+ ' + json.dumps(new_record))
+    error_print("")  # printing an empty line for formatting purpose
     confirmation_message = "Do you want to continue? \n"
     user_confirmation(confirmation_message)
     return True
 
 
 def __print_restore_preview(kvs_to_restore, kvs_to_modify, kvs_to_delete):
-    print('\n---------------- Preview (Beta) ----------------')
+    error_print('\n---------------- Preview (Beta) ----------------')
     if len(kvs_to_restore) + len(kvs_to_modify) + len(kvs_to_delete) == 0:
-        print('\nNo records matching found to be restored. No changes will be made.')
+        error_print('\nNo records matching found to be restored. No changes will be made.')
         return False
 
     # format result printing
     if kvs_to_restore:
-        print('\nAdding:')
-        print(json.dumps(__serialize_kv_list_to_comparable_json_list(kvs_to_restore), indent=2))
+        error_print('\nAdding:')
+        error_print(json.dumps(__serialize_kv_list_to_comparable_json_list(kvs_to_restore), indent=2))
 
     if kvs_to_modify:
-        print('\nUpdating:')
-        print(json.dumps(__serialize_kv_list_to_comparable_json_list(kvs_to_modify), indent=2))
+        error_print('\nUpdating:')
+        error_print(json.dumps(__serialize_kv_list_to_comparable_json_list(kvs_to_modify), indent=2))
 
     if kvs_to_delete:
-        print('\nDeleting:')
-        print(json.dumps(__serialize_kv_list_to_comparable_json_list(kvs_to_delete), indent=2))
+        error_print('\nDeleting:')
+        error_print(json.dumps(__serialize_kv_list_to_comparable_json_list(kvs_to_delete), indent=2))
 
-    print("")  # printing an empty line for formatting purpose
+    error_print("")  # printing an empty line for formatting purpose
     confirmation_message = "Do you want to continue? \n"
     user_confirmation(confirmation_message)
     return True
