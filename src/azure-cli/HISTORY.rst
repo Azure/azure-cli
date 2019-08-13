@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**keyvault**
+
+* Fix the bug in secret set command that igores the expires argument
+
 2.0.71
 ++++++
 
@@ -81,7 +85,6 @@ Release History
 
 * Use https if dashboard container port is using https 
 
-=======
 
 2.0.70
 ++++++
