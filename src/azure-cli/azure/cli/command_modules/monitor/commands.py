@@ -12,7 +12,7 @@ def load_command_table(self, _):
     from ._client_factory import (
         cf_alert_rules, cf_metric_def, cf_alert_rule_incidents, cf_log_profiles, cf_autoscale,
         cf_diagnostics, cf_activity_log, cf_action_groups, cf_activity_log_alerts, cf_event_categories,
-        cf_metric_alerts)
+        cf_metric_alerts, cf_log_alerts)
     from ._exception_handler import monitor_exception_handler, missing_resource_handler
     from .transformers import (action_group_list_table)
     from .validators import process_autoscale_create_namespace
@@ -79,6 +79,16 @@ def load_command_table(self, _):
     diagnostics_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.operations.diagnostics_settings#{}',
         client_factory=cf_diagnostics,
+        exception_handler=monitor_exception_handler)
+
+    log_alerts_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.monitor.operations#ScheduledQueryRulesOperations.{}',
+        client_factory=cf_log_alerts,
+        exception_handler=monitor_exception_handler)
+
+    log_alert_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.monitor.operations.log_alert#{}',
+        client_factory=cf_log_alerts,
         exception_handler=monitor_exception_handler)
 
     log_profiles_sdk = CliCommandType(
@@ -180,6 +190,13 @@ def load_command_table(self, _):
     with self.command_group('monitor diagnostic-settings categories', diagnostics_categories_sdk) as g:
         g.show_command('show', 'get')
         g.command('list', 'list')
+    
+    with self.command_group('monitor log alert', log_alerts_sdk, custom_command_type=log_alert_custom) as g:
+        g.custom_command('create', 'create_log_alert')
+        g.command('delete', 'delete', exception_handler=missing_resource_handler)
+        g.show_command('show', 'get', exception_handler=missing_resource_handler)
+        g.custom_command('list', 'list_log_alert')
+        g.generic_update_command('update', custom_func_name='update', setter_arg_name='parameters')
 
     with self.command_group('monitor log-profiles', log_profiles_sdk, custom_command_type=log_profiles_custom) as g:
         g.custom_command('create', 'create_log_profile_operations')

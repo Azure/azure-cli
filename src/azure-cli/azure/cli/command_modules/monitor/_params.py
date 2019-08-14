@@ -331,3 +331,66 @@ def load_arguments(self, _):
     with self.argument_context('monitor activity-log alert scope remove') as c:
         c.argument('scopes', options_list=['--scope', '-s'], nargs='+')
     # endregion
+
+    # region LogAlerts
+    with self.argument_context('monitor log alert') as c:
+        c.argument('rule_name', options_list=['--name', '-n'], id_part='name')
+
+    with self.argument_context('monitor log alert create') as c:
+        c.argument('location')
+        c.argument('disable', action='store_true')
+
+    with self.argument_context('monitor log alert create', arg_group='Schedule') as c:
+        c.argument('frequency')
+        c.argument('timeWindow')
+
+    with self.argument_context('monitor log alert create', arg_group='Source') as c:
+        c.argument('dataSourceId')
+        c.argument('alertQuery')
+        c.argument('queryType')
+        c.argument('authorizedResources', nargs='+')
+
+    with self.argument_context('monitor log alert create', arg_group='Action') as c:
+        c.argument('severity')
+        c.argument('throttling')
+        c.argument('thresholdOperator')
+        c.argument('threshold')
+        c.argument('metricColumn')
+        c.argument('metricTriggerType')
+        c.argument('metricThresholdOperator')
+        c.argument('metricThreshold')
+        c.argument('actionGroup', nargs='+')
+        c.argument('customWebhookPayload')
+        c.argument('emailSubject')
+
+    with self.argument_context('monitor log alert update') as c:
+        c.argument('enabled', arg_type=get_three_state_flag())
+
+    with self.argument_context('monitor log alert update', arg_group='Schedule') as c:
+        c.argument('frequency')
+        c.argument('timeWindow')
+
+    with self.argument_context('monitor log alert update', arg_group='Source') as c:
+        c.argument('alertQuery')
+        c.argument('resetAuthorizedResources', nargs='+')
+        c.argument('addAuthorizedResources', nargs='+')
+        c.argument('removeAuthorizedResources', nargs='+')
+
+    with self.argument_context('monitor log alert update', arg_group='Action') as c:
+        c.argument('severity')
+        c.argument('throttling')
+        c.argument('thresholdOperator')
+        c.argument('threshold')
+        c.argument('resetMetricTrigger', action='store_true')
+        c.argument('metricColumn')
+        c.argument('metricTriggerType')
+        c.argument('metricThresholdOperator')
+        c.argument('metricThreshold')
+        c.argument('resetActionGroup', action='store_true')
+        c.argument('addActionGroups', nargs='+')
+        c.argument('removeActionGroups', nargs='+')
+        c.argument('resetCustomWebhookPayload', action='store_true')
+        c.argument('customWebhookPayload')
+        c.argument('resetEmailSubject', action='store_true')
+        c.argument('emailSubject')
+    # endregion
