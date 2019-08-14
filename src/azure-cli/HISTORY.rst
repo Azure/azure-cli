@@ -10,6 +10,9 @@ Release History
 **RBAC**
 
 * Fix #10151 - `az ad app update --homepage` not updating homepage.
+**Storage**
+
+* Add `revoke-delegation-keys` command for storage account
 
 **ServiceFabric**
 
