@@ -423,7 +423,7 @@ parameters:
     type: string
     short-summary: Action Rule name
 examples:
-  - name: Deletes a action rule 
+  - name: Deletes a action rule
     text: >
         alertsmanagement action-rule delete --resource-group-name "test-rg" --name "ActionRuleName"
 """
