@@ -1,10 +1,14 @@
-from knack.help_files import helps  # pylint: disable=unused-import
-# pylint: disable=line-too-long, too-many-lines
+# coding=utf-8
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
 
+from knack.help_files import helps
 
 helps['alertsmanagement'] = """
-type: group
-short-summary: Manage alerts, smart-groups and action-rules for Azure Monitor.
+    type: group
+    short-summary: Manage alerts, smart-groups and action-rules for Azure Monitor.
 """
 
 helps['alertsmanagement alert'] = """
@@ -32,7 +36,7 @@ parameters:
     short-summary: Filter on monitor service.
   - name: --severity
     type: string
-    short-summary: Filter by severity. Supported values : Sev0, Sev1, Sev2, Sev3, Sev4
+    short-summary: Filter by severity. Supported values - Sev0, Sev1, Sev2, Sev3, Sev4
   - name: --state
     type: string
     short-summary: Filter by alert state. Supported values - New, Acknowledged, Closed.
@@ -44,22 +48,22 @@ parameters:
     short-summary: Filter by smart group Id.
   - name: --include-context
     type: boolean
-    short-summary: Include Context in response. Supported values : true, false.
+    short-summary: Include Context in response. Supported values - true, false.
   - name: --include-egress-config
     type: boolean
-    short-summary: Include Egress config in response. Supported values : true, false.
+    short-summary: Include Egress config in response. Supported values - true, false.
   - name: --page-count
     type: string
-    short-summary: Number of alerts returned at once..
+    short-summary: Number of alerts returned at once.
   - name: --sort-by
     type: string
-    short-summary: Sort the results by parameter. Supported values : name, severity, alertState, monitorCondition, targetResource, targetResourceName, targetResourceGroup, targetResourceType, startDateTime, lastModifiedDateTime.
+    short-summary: Sort the results by parameter. Supported values - name, severity, alertState, monitorCondition, targetResource, targetResourceName, targetResourceGroup, targetResourceType, startDateTime, lastModifiedDateTime.
   - name: --sort-order
     type: string
-    short-summary: Sorting order. Supported values : asc, desc.
+    short-summary: Sorting order. Supported values - asc, desc.
   - name: --time-range
     type: string
-    short-summary: Supported time range values : 1h, 1d, 7d, 30d (Default is 1d).
+    short-summary: Supported time range values - 1h, 1d, 7d, 30d (Default is 1d).
   - name: --custom-time-range
     type: string
     short-summary: Supported format - <start-time>/<end-time> where time is in ISO-8601 format.
@@ -68,7 +72,7 @@ parameters:
     short-summary: Project the required fields out of essentials. Expected input is comma-separated.
   - name: --monitor-condition
     type: string
-    short-summary: Filter by monitor condition. Supported values : Fired, Resolved.
+    short-summary: Filter by monitor condition. Supported values - Fired, Resolved.
 examples:
   - name: Create a custom domain within an endpoint and profile.
     text: >
@@ -84,7 +88,7 @@ parameters:
   - name: --alert-id
     type: string
     short-summary: Alert Id to be fetched.
-  examples:
+examples:
   - name: Create a custom domain within an endpoint and profile.
     text: >
         az alertsmanagement alert show --alert-id "afbf1b3a-0a6c-4f19-9c9b-644ccd7b1529"
@@ -98,7 +102,7 @@ long-summary: >
 parameters:
   - name: --group-by
     type: string
-    short-summary: Supported values : severity, alertState, monitorCondition, monitorService, signalType, alertRule.
+    short-summary: Supported values - severity, alertState, monitorCondition, monitorService, signalType, alertRule.
   - name: --include-smart-groups-count
     type: string
     short-summary: Supported values - true or false
@@ -116,7 +120,7 @@ parameters:
     short-summary: Filter on monitor service.
   - name: --severity
     type: string
-    short-summary: Filter by severity. Supported values : Sev0, Sev1, Sev2, Sev3, Sev4
+    short-summary: Filter by severity. Supported values - Sev0, Sev1, Sev2, Sev3, Sev4
   - name: --state
     type: string
     short-summary: Filter by alert state. Supported values - New, Acknowledged, Closed.
@@ -125,13 +129,13 @@ parameters:
     short-summary: Filter by alert rule Id.
   - name: --time-range
     type: string
-    short-summary: Supported time range values : 1h, 1d, 7d, 30d (Default is 1d).
+    short-summary: Supported time range values - 1h, 1d, 7d, 30d (Default is 1d).
   - name: --custom-time-range
     type: string
     short-summary: Supported format - <start-time>/<end-time> where time is in ISO-8601 format.
   - name: --monitor-condition
     type: string
-    short-summary: Filter by monitor condition. Supported values : Fired, Resolved.
+    short-summary: Filter by monitor condition. Supported values - Fired, Resolved.
 examples:
   - name: Create a custom domain within an endpoint and profile.
     text: >
@@ -165,7 +169,7 @@ parameters:
   - name: --state
     type: string
     short-summary: Filter by alert state. Supported values - New, Acknowledged, Closed.
-  examples:
+examples:
   - name: Create a custom domain within an endpoint and profile.
     text: >
         az alertsmanagement alert update-state --alert-id "afbf1b3a-0a6c-4f19-9c9b-644ccd7b1529" --state "Closed"
@@ -184,13 +188,13 @@ long-summary: >
 parameters:
   - name: --time-range
     type: string
-    short-summary: Supported time range values : 1h, 1d, 7d, 30d (Default is 1d).
+    short-summary: Supported time range values - 1h, 1d, 7d, 30d (Default is 1d).
   - name: --sort-by
     type: string
-    short-summary: Sort the results by parameter. Supported values : name, severity, alertState, monitorCondition, targetResource, targetResourceName, targetResourceGroup, targetResourceType, startDateTime, lastModifiedDateTime.
+    short-summary: Sort the results by parameter. Supported values - name, severity, alertState, monitorCondition, targetResource, targetResourceName, targetResourceGroup, targetResourceType, startDateTime, lastModifiedDateTime.
   - name: --sort-order
     type: string
-    short-summary: Sorting order. Supported values : asc, desc.
+    short-summary: Sorting order. Supported values - asc, desc.
 examples:
   - name: Create a custom domain within an endpoint and profile.
     text: >
@@ -221,7 +225,7 @@ parameters:
   - name: --smart-group-id
     type: string
     short-summary: Id of the smart group to be fetched.
-  examples:
+examples:
   - name: Create a custom domain within an endpoint and profile.
     text: >
         az alertsmanagement smart-group show-history --smart-group-id "afbf1b3a-0a6c-4f19-9c9b-644ccd7b1529"
@@ -239,7 +243,7 @@ parameters:
   - name: --state
     type: string
     short-summary: Filter by alert state. Supported values - New, Acknowledged, Closed.
-  examples:
+examples:
   - name: Create a custom domain within an endpoint and profile.
     text: >
         az alertsmanagement smart-group update-state --smart-group-id "afbf1b3a-0a6c-4f19-9c9b-644ccd7b1529" --state "Acknowledged"
@@ -273,7 +277,7 @@ parameters:
     short-summary: Filter on monitor service.
   - name: --severity
     type: string
-    short-summary: Filter by severity. Supported values : Sev0, Sev1, Sev2, Sev3, Sev4
+    short-summary: Filter by severity. Supported values - Sev0, Sev1, Sev2, Sev3, Sev4
   - name: --alert-rule
     type: string
     short-summary: Filter by alert rule Id.
@@ -381,7 +385,7 @@ examples:
     text: >
         az alertsmanagement action-rule set --resource-group-name "test-rg" --name "Test-AR" --scope "/subscriptions/dd91de05-d791-4ceb-b6dc-988682dc7d72/resourceGroups/alertslab","/subscriptions/dd91de05-d791-4ceb-b6dc-988682dc7d72/resourceGroups/Test-VMs" --severity-condition "Equals:Sev0,Sev1" --monitor-condition "NotEquals:Resolved" --description "Test description" --status "Enabled" --action-rule-type "Suppression" --recurrence-type "Weekly" --suppression-start-time "06/26/2018 06:00:00" --suppression-end-time "07/27/2018 06:00:00" --recurrence-values 1,4,6
 """
-# TODO: Check for tag help statement
+
 helps['alertsmanagement action-rule update'] = """
 type: command
 short-summary: Updates action rule properties.
@@ -399,7 +403,7 @@ parameters:
     short-summary: Status of Action Rule
   - name: --tag
     type: string
-    short-summary: Temp summary
+    short-summary: List of Azure Resource Tag
 examples:
   - name: Create a custom domain within an endpoint and profile.
     text: >
