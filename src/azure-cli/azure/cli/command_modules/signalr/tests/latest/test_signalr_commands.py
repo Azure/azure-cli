@@ -102,12 +102,12 @@ class AzureSignalRServiceScenarioTest(ScenarioTest):
         # Test CORS operations
         self.cmd('az signalr cors remove -n {signalr_name} -g {rg} --allowed-origins {allowed_origins}', checks=[
             self.check('cors.allowedOrigins[0]', '*')
-            ])
+        ])
 
         self.cmd('az signalr cors add -n {signalr_name} -g {rg} --allowed-origins {added_allowed_origins}', checks=[
             self.check('cors.allowedOrigins[0]', '*'),
             self.check('cors.allowedOrigins[1]', '{added_allowed_origins}')
-            ])
+        ])
 
         # Test key list
         self.cmd('az signalr key list -n {signalr_name} -g {rg}', checks=[

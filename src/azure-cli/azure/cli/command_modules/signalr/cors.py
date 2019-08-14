@@ -4,12 +4,12 @@
 # --------------------------------------------------------------------------------------------
 
 
-from azure.mgmt.signalr.models import (KeyType, SignalRCorsSettings, SignalRUpdateParameters, SignalRCreateOrUpdateProperties)
-from .custom import signalr_update_custom
+from azure.mgmt.signalr.models import (SignalRCorsSettings, SignalRUpdateParameters, SignalRCreateOrUpdateProperties)
 
 
 def signalr_cors_list(client, resource_group_name, signalr_name):
     return _get_cors_details(client, resource_group_name, signalr_name)
+
 
 def signalr_cors_add(client, resource_group_name, signalr_name, allowed_origins):
     cors = _get_cors_details(client, resource_group_name, signalr_name)
@@ -19,6 +19,7 @@ def signalr_cors_add(client, resource_group_name, signalr_name, allowed_origins)
     parameters = SignalRUpdateParameters(properties=SignalRCreateOrUpdateProperties(cors=cors))
 
     return client.update(resource_group_name, signalr_name, parameters)
+
 
 def signalr_cors_remove(client, resource_group_name, signalr_name, allowed_origins):
     cors = _get_cors_details(client, resource_group_name, signalr_name)
@@ -30,6 +31,7 @@ def signalr_cors_remove(client, resource_group_name, signalr_name, allowed_origi
     parameters = SignalRUpdateParameters(properties=SignalRCreateOrUpdateProperties(cors=cors))
 
     return client.update(resource_group_name, signalr_name, parameters)
+
 
 def _get_cors_details(client, resource_group_name, signalr_name):
     resource = client.get(resource_group_name, signalr_name)
