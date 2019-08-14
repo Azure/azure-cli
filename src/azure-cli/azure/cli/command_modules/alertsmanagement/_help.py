@@ -74,7 +74,7 @@ parameters:
     type: string
     short-summary: Filter by monitor condition. Supported values - Fired, Resolved.
 examples:
-  - name: Create a custom domain within an endpoint and profile.
+  - name: Get a list of alerts filtered on severity, monitor-condition and context.
     text: >
         az alertsmanagement alert list --severity "Sev2" --monitor-condition "Fired" --include-context true
 """
@@ -89,7 +89,7 @@ parameters:
     type: string
     short-summary: Alert Id to be fetched.
 examples:
-  - name: Create a custom domain within an endpoint and profile.
+  - name: Get an alert by its alert-id.
     text: >
         az alertsmanagement alert show --alert-id "afbf1b3a-0a6c-4f19-9c9b-644ccd7b1529"
 """
@@ -137,7 +137,7 @@ parameters:
     type: string
     short-summary: Filter by monitor condition. Supported values - Fired, Resolved.
 examples:
-  - name: Create a custom domain within an endpoint and profile.
+  - name: Get alerts list summary using state and group-by parameters
     text: >
          az alertsmanagement alert list-summary --group-by "severity,alertstate" --state "Active"
 """
@@ -152,7 +152,7 @@ parameters:
     type: string
     short-summary: Unique identifier of Alert.
 examples:
-  - name: Create a custom domain within an endpoint and profile.
+  - name: Get Alert History information for an alert-id
     text: >
         az alertsmanagement alert show-history --alert-id "afbf1b3a-0a6c-4f19-9c9b-644ccd7b1529"
 """
@@ -170,7 +170,7 @@ parameters:
     type: string
     short-summary: Filter by alert state. Supported values - New, Acknowledged, Closed.
 examples:
-  - name: Create a custom domain within an endpoint and profile.
+  - name: Updates alert state.
     text: >
         az alertsmanagement alert update-state --alert-id "afbf1b3a-0a6c-4f19-9c9b-644ccd7b1529" --state "Closed"
 """
@@ -196,7 +196,7 @@ parameters:
     type: string
     short-summary: Sorting order. Supported values - asc, desc.
 examples:
-  - name: Create a custom domain within an endpoint and profile.
+  - name:  Gets Smart Groups list with time-range as a filter.
     text: >
          az alertsmanagement smart-group list --time-range "1h"
 """
@@ -211,7 +211,7 @@ parameters:
     type: string
     short-summary: Id of the smart group to be fetched.
 examples:
-  - name: Create a custom domain within an endpoint and profile.
+  - name: Gets Smart Group for a smart-group Id.
     text: >
         az alertsmanagement smart-group show --smart-group-id "afbf1b3a-0a6c-4f19-9c9b-644ccd7b1529"
 """
@@ -226,7 +226,7 @@ parameters:
     type: string
     short-summary: Id of the smart group to be fetched.
 examples:
-  - name: Create a custom domain within an endpoint and profile.
+  - name: Gets history for a smart-group using smart-group-id.
     text: >
         az alertsmanagement smart-group show-history --smart-group-id "afbf1b3a-0a6c-4f19-9c9b-644ccd7b1529"
 """
@@ -244,7 +244,7 @@ parameters:
     type: string
     short-summary: Filter by alert state. Supported values - New, Acknowledged, Closed.
 examples:
-  - name: Create a custom domain within an endpoint and profile.
+  - name: Updates smart group state to the state passed as parameter
     text: >
         az alertsmanagement smart-group update-state --smart-group-id "afbf1b3a-0a6c-4f19-9c9b-644ccd7b1529" --state "Acknowledged"
 """
@@ -294,19 +294,19 @@ parameters:
     type: string
     short-summary: Gets all actions rules in a subscription filter by action rule name.
 examples:
-  - name: Create a custom domain within an endpoint and profile.
+  - name: Get Action Rules Information filtered resource-group-name, severity, monitor-service.
     text: >
         az alertsmanagement action-rule list --resource-group-name "test-rg" --severity "Sev2" --monitor-service "Platform"
-  - name: Create a custom domain within an endpoint and profile.
+  - name: Get Action Rules Information filtered resource-group-name and name.
     text: >
         az alertsmanagement action-rule list --resource-group-name "test-rg" --name "Test-Action-Rule"
 """
 
 helps['alertsmanagement action-rule show'] = """
 type: command
-short-summary: Get alerts list
+short-summary: Get action-rule based on parameters
 long-summary: >
-    Get list of alerts with optional filters as parameters.
+    Get action-rule based on parameters
 parameters:
   - name: --resource-group-name
     type: string
@@ -315,7 +315,7 @@ parameters:
     type: string
     short-summary: Gets all actions rules in a subscription filter by action rule name.
 examples:
-  - name: Create a custom domain within an endpoint and profile.
+  - name: Get action-rule based on resource-group-name and name of action-rule.
     text: >
         az alertsmanagement action-rule show --resource-group-name "test-rg" --name "Test-AR"
 """
@@ -381,7 +381,7 @@ parameters:
     type: string
     short-summary: Action Group Id which is to be notified
 examples:
-  - name: Create a custom domain within an endpoint and profile.
+  - name: Set action-rule on various parameters.
     text: >
         az alertsmanagement action-rule set --resource-group-name "test-rg" --name "Test-AR" --scope "/subscriptions/dd91de05-d791-4ceb-b6dc-988682dc7d72/resourceGroups/alertslab","/subscriptions/dd91de05-d791-4ceb-b6dc-988682dc7d72/resourceGroups/Test-VMs" --severity-condition "Equals:Sev0,Sev1" --monitor-condition "NotEquals:Resolved" --description "Test description" --status "Enabled" --action-rule-type "Suppression" --recurrence-type "Weekly" --suppression-start-time "06/26/2018 06:00:00" --suppression-end-time "07/27/2018 06:00:00" --recurrence-values 1,4,6
 """
@@ -405,7 +405,7 @@ parameters:
     type: string
     short-summary: List of Azure Resource Tag
 examples:
-  - name: Create a custom domain within an endpoint and profile.
+  - name: Update status of action rule.
     text: >
         az alertsmanagement action-rule update --resource-group-name "test-rg" --name "Test-ActionRule" --status "Disabled"
 """
@@ -421,9 +421,9 @@ parameters:
     short-summary: Resource group in which action rule reside.
   - name: --name
     type: string
-    short-summary: Gets all actions rules in a subscription filter by action rule name.
+    short-summary: Action Rule name
 examples:
-  - name: Create a custom domain within an endpoint and profile.
+  - name: Deletes a action rule 
     text: >
         alertsmanagement action-rule delete --resource-group-name "test-rg" --name "ActionRuleName"
 """
