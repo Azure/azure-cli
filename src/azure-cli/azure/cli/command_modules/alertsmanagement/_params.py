@@ -93,7 +93,7 @@ def load_arguments(self, _):
         c.argument('alert_id', options_list=['--alert-id'], required=True, help='Id of the alert to fetch it’s history')
 
     with self.argument_context('alertsmanagement smart-group list') as c:
-        c.argument('sortby', sortby_arg_type, required=False)
+        c.argument('sort_by', sortby_arg_type, required=False)
         c.argument('sort_order', sort_order_arg_type, required=False)
         c.argument('time_range', time_range_arg_type, required=False)
 
