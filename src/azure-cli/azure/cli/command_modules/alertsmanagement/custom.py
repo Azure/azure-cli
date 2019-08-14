@@ -138,8 +138,7 @@ def cli_alertsmanagement_update_actionrule(client,
                                            tags=None):
     if status is None and tags is None:
         raise CLIError("Invalid input parameters-At least one of the properties 'status' or 'tags' need to be passed.")
-    else:
-        return client.update(resource_group_name, name, status, tags)
+    return client.update(resource_group_name, name, status, tags)
 
 
 def parse_conditions(severity_condition=None,
@@ -204,15 +203,14 @@ def parse_scope(scope):
 
 
 def determine_scope_type_list(scope_values):
-    if not (scope_values is None or not scope_values):
-        scope_type = determine_scope_type_string(scope_values[0])
-        for value in scope_values:
-            current = determine_scope_type_string(value)
-            if current != scope_type:
-                raise CLIError('Scope can either be list of Resource or ResourceGroup exclusively.')
-        return scope_type
-    else:
-        raise CLIError('Scope cannot be empty.')
+    if (scope_values is None or not scope_values):
+        raise CLIError('Scope cannot be null or empty.')
+    scope_type = determine_scope_type_string(scope_values[0])
+    for value in scope_values:
+        current = determine_scope_type_string(value)
+        if current != scope_type:
+            raise CLIError('Scope can either be list of Resource or ResourceGroup exclusively.')
+    return scope_type
 
 
 def determine_scope_type_string(value):
