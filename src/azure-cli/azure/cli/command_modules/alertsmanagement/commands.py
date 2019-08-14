@@ -46,4 +46,4 @@ def load_command_table(self, _):
         g.show_command('show', 'get_by_name')
         g.command('delete', 'delete')
         g.custom_command('set', 'cli_alertsmanagement_set_actionrule')
-        g.command('update', 'update')
+        g.custom_command('update', 'cli_alertsmanagement_update_actionrule')

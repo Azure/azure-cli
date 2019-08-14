@@ -2,6 +2,7 @@ from azure.cli.core import AzCommandsLoader
 
 import azure.cli.command_modules.alertsmanagement._help  # pylint: disable=unused-import
 
+
 class AlertsManagementCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):

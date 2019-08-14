@@ -173,8 +173,8 @@ def load_arguments(self, _):
         c.argument('resource_group_name', resource_group_name_arg_type, required=True)
         c.argument('action_rule_name', options_list=['--name'], required=True,
                    help='Unique name of action rule to be updated')
-        c.argument('status', options_list=['--status'], required=True, help='Status of Action Rule')
-        c.argument('tag', options_list=['--tag'], required=False, help='List of Azure Resource Tag')
+        c.argument('status', options_list=['--status'], required=False, help='Status of Action Rule')
+        c.argument('tags', options_list=['--tags'], required=False, help='List of Azure Resource Tag')
 
     with self.argument_context('alertsmanagement action-rule delete') as c:
         c.argument('resource_group_name', resource_group_name_arg_type, required=True)

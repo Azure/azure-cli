@@ -130,6 +130,15 @@ def cli_alertsmanagement_set_actionrule(client,
 
     return client.create_update(resource_group_name, name, action_rule)
 
+def cli_alertsmanagement_update_actionrule(client,
+                                        resource_group_name,
+                                        name,
+                                        status=None,
+                                        tags=None):
+    if status is None and tags is None:
+        raise CLIError("Invalid input parameters-At least one of the properties 'status' or 'tags' need to be passed.")
+    else:
+        return client.update(resource_group_name, name, status, tags)
 
 def parse_conditions(severity_condition=None,
                      monitor_service_condition=None,

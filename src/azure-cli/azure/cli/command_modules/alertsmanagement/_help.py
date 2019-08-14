@@ -102,7 +102,7 @@ long-summary: >
 parameters:
   - name: --group-by
     type: string
-    short-summary: Supported values - severity, alertState, monitorCondition, monitorService, signalType, alertRule.
+    short-summary: Supported values - severity, alertState, monitorCondition, monitorService, signalType, alertRule. Complex summarization is also supported for any two field like "severity,alertstate"
   - name: --include-smart-groups-count
     type: string
     short-summary: Supported values - true or false
@@ -151,7 +151,7 @@ parameters:
   - name: --alert-id
     type: string
     short-summary: Unique identifier of Alert.
-  examples:
+examples:
   - name: Create a custom domain within an endpoint and profile.
     text: >
         az alertsmanagement alert show-history --alert-id "afbf1b3a-0a6c-4f19-9c9b-644ccd7b1529"
@@ -210,7 +210,7 @@ parameters:
   - name: --smart-group-id
     type: string
     short-summary: Id of the smart group to be fetched.
-  examples:
+examples:
   - name: Create a custom domain within an endpoint and profile.
     text: >
         az alertsmanagement smart-group show --smart-group-id "afbf1b3a-0a6c-4f19-9c9b-644ccd7b1529"
@@ -398,10 +398,10 @@ parameters:
   - name: --name
     type: string
     short-summary: Gets all actions rules in a subscription filter by action rule name.
- - name: --status
+  - name: --status
     type: string
     short-summary: Status of Action Rule
-  - name: --tag
+  - name: --tags
     type: string
     short-summary: List of Azure Resource Tag
 examples:
