@@ -81,7 +81,7 @@ class NetworkPrivateEndpoints(ScenarioTest):
             'vnet': 'vnet1',
             'subnet1': 'subnet1',
             'subnet2': 'subnet2',
-            'location': 'eastus2',
+            'location': 'centralus',
             'ip': 'pubip1',
             'lks1': 'lks1',
             'lks2': 'lks2',
@@ -89,12 +89,12 @@ class NetworkPrivateEndpoints(ScenarioTest):
         })
 
         # Create PLS
-        self.cmd('network vnet create -g {rg} -n {vnet1} --subnet-name {subnet1} -l {location}')
-        self.cmd('network lb create -g {rg} -l {location} -n {lb} --public-ip-zone {zone} --public-ip-address {ip} --sku {sku}')
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet1} -l {location}')
+        self.cmd('network lb create -g {rg} -l {location} -n {lb} --public-ip-address {ip} --sku {sku}')
         self.cmd('network vnet subnet update -g {rg} -n {subnet1} --vnet-name {vnet} --private-link-service-network-policies Disabled')
-        self.cmd('network vnet subnet create -g {rg} -n {subnet2} --vnet-name {vnet}')
+        self.cmd('network vnet subnet create -g {rg} -n {subnet2} --vnet-name {vnet} --address-prefixes 10.0.2.0/24')
         self.cmd('network vnet subnet update -g {rg} -n {subnet2} --vnet-name {vnet} --private-endpoint-network-policies Disabled')
-        pls1 = self.cmd('network private-link-service create -g {rg} -n {lks1} --vnet-name {vnet} --subnet {subnet1} --lb-name {lb} --lb-frontend-ip-configs LoadBalancerFrontEnd', checks=[
+        pls1 = self.cmd('network private-link-service create -g {rg} -n {lks1} --vnet-name {vnet} --subnet {subnet1} --lb-name {lb} --lb-frontend-ip-configs LoadBalancerFrontEnd -l {location}', checks=[
             self.check('type', 'Microsoft.Network/privateLinkServices'),
             self.check('length(ipConfigurations)', 1),
             self.check('length(loadBalancerFrontendIpConfigurations)', 1)
@@ -102,13 +102,13 @@ class NetworkPrivateEndpoints(ScenarioTest):
         self.kwargs['pls_id'] = pls1['id']
         self.cmd('network private-endpoint list-types -l {location}')
 
-        self.cmd('network private-endpoint create -g {rg} -name {pe} --vnet-name {vnet} --subnet {subnet2} --private-connection-resource-id {pls_id} --connection-name tttt',
-            self.check('name', self.kwargs['pe'],
-            self.check('provisioningState', 'Succeeded'))
-        )
+        self.cmd('network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet2} --private-connection-resource-id {pls_id} --connection-name tttt -l {location}', checks=[
+            self.check('name', 'pe1'),
+            self.check('provisioningState', 'Succeeded')
+        ])
 
-        self.cmd('network private-endpoint update -g {rg} -name {pe} --request-message "This is a test"',
-            self.check('privateLinkServiceConnections.requestMessage', 'This is a test')
+        self.cmd('network private-endpoint update -g {rg} -n {pe} --request-message "test"',
+            self.check('privateLinkServiceConnections[0].requestMessage', 'test')
         )
 
         self.cmd('network private-endpoint list')
@@ -116,7 +116,7 @@ class NetworkPrivateEndpoints(ScenarioTest):
             self.check('length(@)', 1)
         )
 
-        pe_connection_name = self.cmd('network private-link-service show -g {rg} -n {pe}').get_output_in_json()['privateEndpointConnections'][0]['name']
+        pe_connection_name = self.cmd('network private-link-service show -g {rg} -n {lks1}').get_output_in_json()['privateEndpointConnections'][0]['name']
         self.kwargs['pe_connect'] = pe_connection_name
         self.cmd('network private-link-service connection update -g {rg} -n {pe_connect} --service-name {lks1} --connection-status Rejected')
         self.cmd('network private-endpoint show -g {rg} -n {pe}',
@@ -144,19 +144,19 @@ class NetworkPrivateLinkService(ScenarioTest):
             'vnet': 'vnet1',
             'subnet1': 'subnet1',
             'subnet2': 'subnet2',
-            'location': 'eastus2',
+            'location': 'centralus',
             'ip': 'pubip1',
             'lks1': 'lks1',
             'lks2': 'lks2',
             'sub1': '00000000-0000-0000-0000-000000000000'
         })
 
-        self.cmd('network vnet create -g {rg} -n {vnet1} --subnet-name {subnet1} -l {location}')
-        self.cmd('network lb create -g {rg} -l {location} -n {lb} --public-ip-zone {zone} --public-ip-address {ip} --sku {sku}')
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet1} -l {location}')
+        self.cmd('network lb create -g {rg} -l {location} -n {lb} --public-ip-address {ip} --sku {sku}')
         self.cmd('network vnet subnet update -g {rg} -n {subnet1} --vnet-name {vnet} --private-link-service-network-policies Disabled')
-        self.cmd('network vnet subnet create -g {rg} -n {subnet2} --vnet-name {vnet}')
-        self.cmd('network vnet subnet update -g {rg} -n {subnet2} --vnet-name {vnet} --private-link-service-network-policies Disabled')
-        self.cmd('network private-link-service create -g {rg} -n {lks1} --vnet-name {vnet} --subnet {subnet1} --lb-name {lb} --lb-frontend-ip-configs LoadBalancerFrontEnd', checks=[
+        self.cmd('network vnet subnet create -g {rg} -n {subnet2} --vnet-name {vnet} --address-prefixes 10.0.2.0/24')
+        self.cmd('network vnet subnet update -g {rg} -n {subnet2} --vnet-name {vnet} --private-endpoint-network-policies Disabled')
+        self.cmd('network private-link-service create -g {rg} -n {lks1} --vnet-name {vnet} --subnet {subnet1} --lb-name {lb} --lb-frontend-ip-configs LoadBalancerFrontEnd -l {location}', checks=[
             self.check('type', 'Microsoft.Network/privateLinkServices'),
             self.check('length(ipConfigurations)', 1),
             self.check('length(loadBalancerFrontendIpConfigurations)', 1)
@@ -166,7 +166,7 @@ class NetworkPrivateLinkService(ScenarioTest):
             self.check('length(visibility.subscriptions)', 2),
             self.check('length(autoApproval.subscriptions)', 2)
         ])
-        self.cmd('network private-link-service list', checks=[
+        self.cmd('network private-link-service list -g {rg}', checks=[
             self.check('length(@)', 1),
             self.check('@[0].type', 'Microsoft.Network/privateLinkServices')
         ])
@@ -175,6 +175,8 @@ class NetworkPrivateLinkService(ScenarioTest):
             self.check('length(ipConfigurations)', 1),
             self.check('length(loadBalancerFrontendIpConfigurations)', 1)
         ])
+
+        self.cmd('network private-link-service delete -g {rg} -n {lks1}')
 
 
 class NetworkLoadBalancerWithZone(ScenarioTest):
