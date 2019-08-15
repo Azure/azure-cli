@@ -974,6 +974,8 @@ def update_application(instance, display_name=None, homepage=None,  # pylint: di
         app_patch_param.identifier_uris = identifier_uris
     if reply_urls is not None:
         app_patch_param.reply_urls = reply_urls
+    if homepage is not None:
+        app_patch_param.homepage = homepage
 
     return app_patch_param
 
