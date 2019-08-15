@@ -177,7 +177,7 @@ def load_command_table(self, _):
     network_private_link_service_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#PrivateLinkServicesOperations.{}',
         client_factory=cf_private_link_services,
-        min_api='2018-04-01'
+        min_api='2019-04-01'
     )
 
     network_lb_sdk = CliCommandType(
