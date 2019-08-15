@@ -11,6 +11,12 @@ Release History
 
 * Fix #10151 - `az ad app update --homepage` not updating homepage.
 
+**ServiceFabric**
+
+* Fix for issues #7145,  #7880 and #7889 - fix for key vault and cert issues when creating a cluster.
+* Fix for issue #7130 - fix add cert command. Using the cluster resource group when the key vault resource group is not specified.
+* Fix for issue #9711 - fix command 'cluster setting set' command. Using named parameters for SettingsSectionDescription constructor.
+
 2.0.71
 ++++++
 
