@@ -3194,6 +3194,9 @@ short-summary: Manage private endpoints.
 helps['network private-endpoint create'] = """
 type: command
 short-summary: Create a private endpoint.
+examples:
+  - name: Create a private endpoint.
+    text: az network network private-endpoint create -g MyResourceGroup -n MyPE --vnet-name MyVnetName --subnet MySubnet --private-connection-resource-id MyPLSId --connection-name tttt -l centralus
 """
 
 helps['network private-endpoint delete'] = """
@@ -3214,6 +3217,9 @@ short-summary: Get the details of a private endpoint.
 helps['network private-endpoint update'] = """
 type: command
 short-summary: Update a private endpoint.
+examples:
+  - name: Update a private endpoint.
+    text: az network network private-endpoint create -g MyResourceGroup -n MyPE --request-message "test" --tags mytag=hello
 """
 
 helps['network private-link-service'] = """
@@ -3224,6 +3230,9 @@ short-summary: Manage private link services.
 helps['network private-link-service create'] = """
 type: command
 short-summary: Create a private link service.
+examples:
+  - name: Create a private link service
+    text: az network private-link-service create -g MyResourceGroup -n MyPLSName --vnet-name MyVnetName --subnet MySubnet --lb-name MyLBName --lb-frontend-ip-configs LoadBalancerFrontEnd -l centralus
 """
 
 helps['network private-link-service delete'] = """
@@ -3244,6 +3253,9 @@ short-summary: Get the details of a private link service.
 helps['network private-link-service update'] = """
 type: command
 short-summary: Update a private link service.
+examples:
+  - name: Update a private link service
+    text: az network private-link-service update -g MyResourceGroup -n MyPLSName --visibility SubId1 SubId2 --auto-approval SubId1 SubId2
 """
 
 helps['network private-link-service connection'] = """
@@ -3259,21 +3271,9 @@ short-summary: Delete a private link service endpoint connection.
 helps['network private-link-service connection update'] = """
 type: command
 short-summary: Update a private link service endpoint connection.
-"""
-
-helps['network private-link-service ip-configs'] = """
-type: group
-short-summary: Manage private link service ip configurations.
-"""
-
-helps['network private-link-service ip-configs add'] = """
-type: command
-short-summary: Add an ip configuration into a private link service.
-"""
-
-helps['network private-link-service ip-configs remove'] = """
-type: command
-short-summary: Remove an ip configuration from a private link service.
+examples:
+  - name: Update the endpoint connections status of private link service
+    text: az network private-link-service connection update -g MyResourceGroup -n tttt.f072a430-2d82-4470-ab30-d23fcfee58d1 --service-name MyPLSName --connection-status Rejected
 """
 
 helps['network profile'] = """
