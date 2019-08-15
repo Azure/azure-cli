@@ -10,7 +10,7 @@ from knack.help_files import helps  # pylint: disable=unused-import
 helps['deploymentmanager'] = """
     type: group
     short-summary: Create and manage rollouts for your service.
-    long-summary: To deploy your service across many regions and make sure it is running as expected in each region, you can use deployment manager to coordinate a staged rollout of the service. For more details, visit https://docs.microsoft.com/en-us/azure/azure-resource-manager/deployment-manager-overview
+    long-summary: To deploy your service across many regions and make sure it is running as expected in each region, you can use deployment manager to coordinate a staged rollout of the service. For more details, visit https://docs.microsoft.com/azure/azure-resource-manager/deployment-manager-overview
 """
 
 helps['deploymentmanager artifact-source'] = """

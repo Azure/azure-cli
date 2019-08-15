@@ -38,8 +38,8 @@ helps['maps account create'] = """
           short-summary: Accept the Terms of Service, and do not prompt for confirmation.
           long-summary: |
               By creating an Azure Maps account, you agree that you have read and agree to the
-              License (https://azure.microsoft.com/en-us/support/legal/) and
-              Privacy Statement (https://privacy.microsoft.com/en-us/privacystatement).
+              License (https://azure.microsoft.com/support/legal/) and
+              Privacy Statement (https://privacy.microsoft.com/privacystatement).
 
 """
 

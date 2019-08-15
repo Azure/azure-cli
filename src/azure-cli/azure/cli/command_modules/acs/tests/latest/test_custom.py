@@ -563,7 +563,7 @@ class AcsCustomCommandTest(unittest.TestCase):
 
         # assert we handled such error
         self.assertTrue(
-            'https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal' in str(context.exception))
+            'https://docs.microsoft.com/azure/azure-resource-manager/resource-group-create-service-principal-portal' in str(context.exception))
 
     @mock.patch('azure.cli.command_modules.acs.custom._get_rg_location', return_value='eastus')
     @mock.patch('azure.cli.command_modules.acs.custom.cf_resource_groups', autospec=True)
