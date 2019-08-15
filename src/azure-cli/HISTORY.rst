@@ -15,6 +15,12 @@ Release History
 
 * Fix the bug in secret set command that igores the expires argument
 
+**Network**
+
+* az network private-endpoint create/update/list-types: Fixes #9474. Support create/update/list-types for private endpoint
+* az network private-link-service: Fixes #9475. Onboard commands for private link service
+* az network vnet subnet update: Support updating status through `--private-endpoint-network-policies` and `--private-link-service-network-policies` 
+
 **RBAC**
 
 * Fix #10151 - `az ad app update --homepage` not updating homepage.
