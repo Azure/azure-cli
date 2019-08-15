@@ -1129,7 +1129,7 @@ def _create_certificate(cmd,
         vault = _safe_get_vault(cli_ctx, vault_resource_group_name, vault_name)
 
         if certificate_file is not None:
-            if (vault is None):
+            if vault is None:
                 logger.info("Creating key vault")
                 vault = _create_keyvault(
                     cmd, cli_ctx, vault_resource_group_name, vault_name, location, enabled_for_deployment=True).result()
@@ -1145,7 +1145,7 @@ def _create_certificate(cmd,
                 base64.b64encode(result.x509_thumbprint))
 
         else:
-            if (vault is None):
+            if vault is None:
                 logger.info("Creating key vault")
                 if cmd.supported_api_version(resource_type=ResourceType.MGMT_KEYVAULT, min_api='2018-02-14'):
                     vault = _create_keyvault(
@@ -1354,6 +1354,7 @@ def _get_vault_uri_and_resource_group_name(cli_ctx, vault):
     vault_uri = v.properties.vault_uri
     return vault_uri, vault_resource_group_name
 
+
 def _safe_get_vault(cli_ctx, resource_group_name, vault_name):
     key_vault_client = keyvault_client_factory(cli_ctx).vaults
     try:
@@ -1363,6 +1364,7 @@ def _safe_get_vault(cli_ctx, resource_group_name, vault_name):
         if ex.error.error == 'ResourceNotFound':
             return None
         raise
+
 
 def _asn1_to_iso8601(asn1_date):
     import dateutil.parser
