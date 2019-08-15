@@ -7,6 +7,10 @@ Release History
 
 * Fix the bug in secret set command that igores the expires argument
 
+**RBAC**
+
+* Fix #10151 - `az ad app update --homepage` not updating homepage.
+
 2.0.71
 ++++++
 
