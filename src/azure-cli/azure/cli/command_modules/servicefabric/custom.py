@@ -143,7 +143,7 @@ def new_cluster(cmd,
     if secret_identifier:
         if certificate_output_folder or certificate_file or certificate_output_folder or vault_resource_group_name or certificate_password:
             raise CLIError(
-                '\'--certificate-output-folder\' , \'--certificate-file\', \'certificate_output_folder\', \'vault_resource_group_name\', \'certificate_password\' can not be specified,' +
+                '\'--certificate-output-folder\' , \'--certificate-file\', \'certificate_output_folder\', \'vault_resource_group_name\', \'certificate_password\' can not be specified, ' +
                 'when \'--secret-identifier\' is specified')
     if parameter_file or template_file:
         if parameter_file is None or template_file is None:
@@ -165,7 +165,7 @@ def new_cluster(cmd,
     if vm_user_name is None:
         vm_user_name = DEFAULT_ADMIN_USER_NAME
 
-    rg = _get_resource_group_name(cli_ctx, resource_group_name)
+    rg = _get_resource_group_by_name(cli_ctx, resource_group_name)
     if rg is None:
         _create_resource_group_name(cli_ctx, resource_group_name, location)
 
@@ -782,7 +782,7 @@ def add_cluster_node_type(cmd,
 
     subnet_name = "subnet_{}".format(1)
     network_client = network_client_factory(cli_ctx)
-    location = _get_resource_group_name(cli_ctx, resource_group_name).location
+    location = _get_resource_group_by_name(cli_ctx, resource_group_name).location
     virtual_network = list(
         network_client.virtual_networks.list(resource_group_name))[0]
     subnets = list(network_client.subnets.list(
@@ -1100,7 +1100,7 @@ def _create_certificate(cmd,
                                     secret_identifier)
 
     output_file = None
-    rg = _get_resource_group_name(cli_ctx, resource_group_name)
+    rg = _get_resource_group_by_name(cli_ctx, resource_group_name)
     location = rg.location
 
     vault_id = None
@@ -1118,12 +1118,21 @@ def _create_certificate(cmd,
         secret_url = secret_identifier
 
     else:
-        if certificate_file is not None:
-            vault_name = _get_vault_name(resource_group_name, vault_name)
-            logger.info("Creating key vault")
+        if vault_resource_group_name is None:
+            logger.info("vault_resource_group_name not set, using %s.", resource_group_name)
+            vault_resource_group_name = resource_group_name
 
-            vault = _create_keyvault(
-                cmd, cli_ctx, vault_resource_group_name, vault_name, location, enabled_for_deployment=True).result()
+        if vault_name is None:
+            logger.info("vault_name not set using '%s' as vault name.", vault_resource_group_name)
+            vault_name = vault_resource_group_name
+
+        vault = _safe_get_vault(cli_ctx, vault_resource_group_name, vault_name)
+
+        if certificate_file is not None:
+            if (vault is None):
+                logger.info("Creating key vault")
+                vault = _create_keyvault(
+                    cmd, cli_ctx, vault_resource_group_name, vault_name, location, enabled_for_deployment=True).result()
             vault_uri = vault.properties.vault_uri
             certificate_name = _get_certificate_name(resource_group_name)
             logger.info("Import certificate")
@@ -1136,20 +1145,16 @@ def _create_certificate(cmd,
                 base64.b64encode(result.x509_thumbprint))
 
         else:
-            if vault_resource_group_name is None:
-                vault_resource_group_name = resource_group_name
-            if vault_name is None:
-                vault_name = resource_group_name
-
-            logger.info("Creating key vault")
-            if cmd.supported_api_version(resource_type=ResourceType.MGMT_KEYVAULT, min_api='2018-02-14'):
-                vault = _create_keyvault(
-                    cmd, cli_ctx, vault_resource_group_name, vault_name, location, enabled_for_deployment=True).result()
-            else:
-                vault = _create_keyvault(
-                    cmd, cli_ctx, vault_resource_group_name, vault_name, location, enabled_for_deployment=True)
-            logger.info("Wait for key vault ready")
-            time.sleep(20)
+            if (vault is None):
+                logger.info("Creating key vault")
+                if cmd.supported_api_version(resource_type=ResourceType.MGMT_KEYVAULT, min_api='2018-02-14'):
+                    vault = _create_keyvault(
+                        cmd, cli_ctx, vault_resource_group_name, vault_name, location, enabled_for_deployment=True).result()
+                else:
+                    vault = _create_keyvault(
+                        cmd, cli_ctx, vault_resource_group_name, vault_name, location, enabled_for_deployment=True)
+                logger.info("Wait for key vault ready")
+                time.sleep(20)
             vault_uri = vault.properties.vault_uri
             certificate_name = _get_certificate_name(resource_group_name)
 
@@ -1215,7 +1220,7 @@ def _add_cert_to_all_vmss(cli_ctx, resource_group_name, vault_id, secret_url):
         t.join()
 
 
-def _get_resource_group_name(cli_ctx, resource_group_name):
+def _get_resource_group_by_name(cli_ctx, resource_group_name):
     try:
         resouce_client = resource_client_factory(cli_ctx).resource_groups
         return resouce_client.get(resource_group_name)
@@ -1282,10 +1287,10 @@ def _dict_to_fabric_settings(setting_dict):
     if setting_dict and any(setting_dict):
         for k, v in setting_dict.items():
             parameters = []
-            setting_des = SettingsSectionDescription(k, parameters)
+            setting_des = SettingsSectionDescription(name=k, parameters=parameters)
             for kk, vv in v.items():
                 setting_des.parameters.append(
-                    SettingsParameterDescription(kk, vv))
+                    SettingsParameterDescription(name=kk, value=vv))
             if setting_des.parameters and any(setting_des.parameters):
                 settings.append(setting_des)
     return settings
@@ -1336,8 +1341,10 @@ def _get_vault_from_secret_identifier(cli_ctx, secret_identifier):
     vault_name = urlparse(secret_identifier).hostname.split('.')[0]
     vaults = key_vault_client.list()
     if vaults is not None:
-        vault = [v for v in vaults if v.name == vault_name]
-        return vault[0]
+        vault = [v for v in vaults if v.name.lower() == vault_name.lower()]
+        if vault:
+            return vault[0]
+    raise CLIError("Unable to find vault with name '{}'. Please make sure the secret identifier '{}' is correct.".format(vault_name, secret_identifier))
 
 
 def _get_vault_uri_and_resource_group_name(cli_ctx, vault):
@@ -1347,6 +1354,15 @@ def _get_vault_uri_and_resource_group_name(cli_ctx, vault):
     vault_uri = v.properties.vault_uri
     return vault_uri, vault_resource_group_name
 
+def _safe_get_vault(cli_ctx, resource_group_name, vault_name):
+    key_vault_client = keyvault_client_factory(cli_ctx).vaults
+    try:
+        vault = key_vault_client.get(resource_group_name, vault_name)
+        return vault
+    except CloudError as ex:
+        if ex.error.error == 'ResourceNotFound':
+            return None
+        raise
 
 def _asn1_to_iso8601(asn1_date):
     import dateutil.parser
