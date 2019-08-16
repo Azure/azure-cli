@@ -4,9 +4,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.help_files import helps
+from knack.help_files import helps  # pylint: disable=unused-import
 # pylint: disable=line-too-long, too-many-lines
-
 
 helps['iot'] = """
 type: group
@@ -19,23 +18,9 @@ type: group
 short-summary: Manage Azure IoT Hub Device Provisioning Service.
 """
 
-helps['iot pnp'] = """
-type: group
-short-summary: Manage IoT Plug and Play repositories and repository access keys.
-"""
-
 helps['iot dps access-policy'] = """
 type: group
 short-summary: Manage Azure IoT Hub Device Provisioning Service access policies.
-"""
-
-helps['iot dps access-policy create'] = """
-type: command
-short-summary: Create a new shared access policy in an Azure IoT Hub device provisioning service.
-examples:
-  - name: Create a new shared access policy in an Azure IoT Hub device provisioning service with EnrollmentRead right
-    text: >
-        az iot dps access-policy create --dps-name MyDps --resource-group MyResourceGroup --name MyPolicy --rights EnrollmentRead
 """
 
 helps['iot dps access-policy delete'] = """
@@ -77,18 +62,6 @@ examples:
 helps['iot dps certificate'] = """
 type: group
 short-summary: Manage Azure IoT Hub Device Provisioning Service certificates.
-"""
-
-helps['iot dps certificate create'] = """
-type: command
-short-summary: Create/upload an Azure IoT Hub Device Provisioning Service certificate.
-examples:
-  - name: Upload a CA certificate PEM file to an Azure IoT Hub device provisioning service.
-    text: >
-        az iot dps certificate create --dps-name MyDps --resource-group MyResourceGroup --name MyCertificate --path /certificates/Certificate.pem
-  - name: Upload a CA certificate CER file to an Azure IoT Hub device provisioning service.
-    text: >
-        az iot dps certificate create --dps-name MyDps --resource-group MyResourceGroup --name MyCertificate --path /certificates/Certificate.cer
 """
 
 helps['iot dps certificate delete'] = """
@@ -151,19 +124,6 @@ examples:
         az iot dps certificate verify --dps-name MyDps --resource-group MyResourceGroup --name MyCertificate --path /certificates/Verification.pem --etag AAAAAAAAAAA=
 """
 
-helps['iot dps create'] = """
-type: command
-short-summary: Create an Azure IoT Hub device provisioning service.
-long-summary: For an introduction to Azure IoT Hub Device Provisioning Service, see https://docs.microsoft.com/en-us/azure/iot-dps/about-iot-dps
-examples:
-  - name: Create an Azure IoT Hub device provisioning service with the standard pricing tier S1, in the region of the resource group.
-    text: >
-        az iot dps create --name MyDps --resource-group MyResourceGroup
-  - name: Create an Azure IoT Hub device provisioning service with the standard pricing tier S1, in the 'eastus' region.
-    text: >
-        az iot dps create --name MyDps --resource-group MyResourceGroup --location eastus
-"""
-
 helps['iot dps delete'] = """
 type: command
 short-summary: Delete an Azure IoT Hub device provisioning service.
@@ -176,18 +136,6 @@ examples:
 helps['iot dps linked-hub'] = """
 type: group
 short-summary: Manage Azure IoT Hub Device Provisioning Service linked IoT hubs.
-"""
-
-helps['iot dps linked-hub create'] = """
-type: command
-short-summary: Create a linked IoT hub in an Azure IoT Hub device provisioning service.
-examples:
-  - name: Create a linked IoT hub in an Azure IoT Hub device provisioning service
-    text: >
-        az iot dps linked-hub create --dps-name MyDps --resource-group MyResourceGroup --connection-string HostName=test.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=XNBhoasdfhqRlgGnasdfhivtshcwh4bJwe7c0RIGuWsirW0= --location westus
-  - name: Create a linked IoT hub in an Azure IoT Hub device provisioning service which applies allocation weight and weight being 10
-    text: >
-        az iot dps linked-hub create --dps-name MyDps --resource-group MyResourceGroup --connection-string HostName=test.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=XNBhoasdfhqRlgGnasdfhivtshcwh4bJwe7c0RIGuWsirW0= --location westus --allocation-weight 10 --apply-allocation-policy True
 """
 
 helps['iot dps linked-hub delete'] = """
@@ -266,19 +214,6 @@ type: group
 short-summary: Manage IoT Hub certificates.
 """
 
-helps['iot hub certificate create'] = """
-type: command
-short-summary: Create/upload an Azure IoT Hub certificate.
-long-summary: For a detailed explanation of CA certificates in Azure IoT Hub, see https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-x509ca-overview
-examples:
-  - name: Uploads a CA certificate PEM file to an IoT hub.
-    text: >
-        az iot hub certificate create --hub-name MyIotHub --name MyCertificate --path /certificates/Certificate.pem
-  - name: Uploads a CA certificate CER file to an IoT hub.
-    text: >
-        az iot hub certificate create --hub-name MyIotHub --name MyCertificate --path /certificates/Certificate.cer
-"""
-
 helps['iot hub certificate delete'] = """
 type: command
 short-summary: Deletes an Azure IoT Hub certificate.
@@ -347,18 +282,6 @@ type: group
 short-summary: Manage the event hub consumer groups of an IoT hub.
 """
 
-helps['iot hub consumer-group create'] = """
-type: command
-short-summary: Create an event hub consumer group.
-examples:
-  - name: Create a consumer group 'cg1' in the default event hub endpoint.
-    text: >
-        az iot hub consumer-group create --hub-name MyIotHub --name cg1
-  - name: Create a consumer group `cg1` in the operation monitoring event hub endpoint `operationsMonitoringEvents`.
-    text: >
-        az iot hub consumer-group create --hub-name MyIotHub --event-hub-name operationsMonitoringEvents --name cg1
-"""
-
 helps['iot hub consumer-group delete'] = """
 type: command
 short-summary: Delete an event hub consumer group.
@@ -372,19 +295,6 @@ short-summary: List event hub consumer groups.
 helps['iot hub consumer-group show'] = """
 type: command
 short-summary: Get the details for an event hub consumer group.
-"""
-
-helps['iot hub create'] = """
-type: command
-short-summary: Create an Azure IoT hub.
-long-summary: For an introduction to Azure IoT Hub, see https://docs.microsoft.com/azure/iot-hub/
-examples:
-  - name: Create an IoT Hub with the free pricing tier F1, in the region of the resource group.
-    text: >
-        az iot hub create --resource-group MyResourceGroup --name MyIotHub
-  - name: Create an IoT Hub with the standard pricing tier S1 and 4 partitions, in the 'westus' region.
-    text: >
-        az iot hub create --resource-group MyResourceGroup --name MyIotHub --sku S1 --location westus --partition-count 4
 """
 
 helps['iot hub delete'] = """
@@ -456,18 +366,53 @@ type: command
 short-summary: List available pricing tiers.
 """
 
+helps['iot hub manual-failover'] = """
+type: command
+short-summary: Initiate a manual failover for the IoT Hub to the geo-paired disaster recovery region.
+examples:
+  - name: This fails over “myhub” from East US to West US.
+    text: >
+        az iot hub manual-failover -n myhub --fr "West US"
+"""
+
+helps['iot hub message-enrichment'] = """
+type: group
+short-summary: Manage message enrichments for endpoints of an IoT Hub.
+"""
+
+helps['iot hub message-enrichment delete'] = """
+type: command
+short-summary: Delete a message enrichment in your IoT hub (by key)
+long-summary: Delete a message enrichment in your IoT hub (by key)
+examples:
+  - name: Delete a message enrichment with key 'test' from your IoT Hub
+    text: >
+        az iot hub message-enrichment delete --key test -n {iothub_name}
+"""
+
+helps['iot hub message-enrichment list'] = """
+type: command
+short-summary: Get information on all message enrichments for your IoT Hub
+long-summary: Get information on all message enrichments for your IoT Hub
+examples:
+  - name: List all message enrichments for your IoT Hub
+    text: >
+        az iot hub message-enrichment list -n {iothub_name}
+"""
+
+helps['iot hub message-enrichment update'] = """
+type: command
+short-summary: Update a message enrichment in your IoT hub (by key)
+long-summary: Update a message enrichment in your IoT hub (by key)
+examples:
+  - name: Update a message enrichment in your IoT hub to apply to a new set of endpoints
+    text: >
+        az iot hub message-enrichment update --key {key} --value {value} --endpoints NewEndpoint1 NewEndpoint2 -n {iothub_name}
+"""
+
 helps['iot hub policy'] = """
 type: group
 short-summary: Manage shared access policies of an IoT hub.
-"""
-
-helps['iot hub policy create'] = """
-type: command
-short-summary: Create a new shared access policy in an IoT hub.
-examples:
-  - name: Create a new shared access policy.
-    text: >
-        az iot hub policy create --hub-name MyIotHub --name new-policy --permissions RegistryWrite ServiceConnect DeviceConnect
 """
 
 helps['iot hub policy delete'] = """
@@ -484,15 +429,6 @@ examples:
     crafted: true
 """
 
-helps['iot hub policy show'] = """
-type: command
-short-summary: Get the details of a shared access policy of an IoT hub.
-examples:
-  - name: Get the details of a shared access policy of an IoT hub. (autogenerated)
-    text: az iot hub policy show --hub-name MyHub --name MySharedAccessPolicy
-    crafted: true
-"""
-
 helps['iot hub policy renew-key'] = """
 type: command
 short-summary: Regenerate keys of a shared access policy of an IoT hub.
@@ -502,22 +438,18 @@ examples:
     crafted: true
 """
 
+helps['iot hub policy show'] = """
+type: command
+short-summary: Get the details of a shared access policy of an IoT hub.
+examples:
+  - name: Get the details of a shared access policy of an IoT hub. (autogenerated)
+    text: az iot hub policy show --hub-name MyHub --name MySharedAccessPolicy
+    crafted: true
+"""
+
 helps['iot hub route'] = """
 type: group
 short-summary: Manage routes of an IoT hub.
-"""
-
-helps['iot hub route create'] = """
-type: command
-short-summary: Create a route in IoT Hub.
-long-summary: Create a route to send specific data source and condition to a desired endpoint.
-examples:
-  - name: Create a new route "R1".
-    text: >
-        az iot hub route create -g MyResourceGroup --hub-name MyIotHub --endpoint-name E2 --source-type DeviceMessages --route-name R1
-  - name: Create a new route "R1" with all parameters.
-    text: >
-        az iot hub route create -g MyResourceGroup --hub-name MyIotHub --endpoint-name E2 --source-type DeviceMessages --route-name R1 --condition true --enabled true
 """
 
 helps['iot hub route delete'] = """
@@ -587,22 +519,6 @@ type: group
 short-summary: Manage custom endpoints of an IoT hub.
 """
 
-helps['iot hub routing-endpoint create'] = """
-type: command
-short-summary: Add an endpoint to your IoT Hub.
-long-summary: Create a new custom endpoint in your IoT Hub.
-examples:
-  - name: Add a new endpoint "E2" of type EventHub to "MyIotHub" IoT Hub.
-    text: >
-        az iot hub routing-endpoint create --resource-group MyResourceGroup --hub-name MyIotHub --endpoint-name E2 --endpoint-type eventhub --endpoint-resource-group {ResourceGroup} --endpoint-subscription-id {SubscriptionId} --connection-string {ConnectionString}
-  - name: Add a new endpoint "S1" of type AzureStorageContainer to "MyIotHub" IoT Hub.
-    text: |
-        az iot hub routing-endpoint create --resource-group MyResourceGroup --hub-name MyIotHub \\
-        --endpoint-name S1 --endpoint-type azurestoragecontainer --endpoint-resource-group "[Resource Group]" \\
-        --endpoint-subscription-id {SubscriptionId} --connection-string {ConnectionString} \\
-        --container-name {ContainerName}
-"""
-
 helps['iot hub routing-endpoint delete'] = """
 type: command
 short-summary: Delete all or mentioned endpoint for your IoT Hub.
@@ -641,51 +557,6 @@ examples:
     text: |
         az iot hub routing-endpoint show --resource-group MyResourceGroup --hub-name MyIotHub \\
         --endpoint-name {endpointName}
-"""
-
-helps['iot hub message-enrichment'] = """
-type: group
-short-summary: Manage message enrichments for endpoints of an IoT Hub.
-"""
-
-helps['iot hub message-enrichment create'] = """
-type: command
-short-summary: Create a message enrichment for chosen endpoints in your IoT Hub
-long-summary: Create a message enrichment for chosen endpoints in your IoT Hub
-examples:
-  - name: Create a message enrichment of {"key":"value"} for the "events" endpoint in your IoT Hub
-    text: >
-      az iot hub message-enrichment create --key key --value value --endpoints events -n {iothub_name}
-"""
-
-helps['iot hub message-enrichment update'] = """
-type: command
-short-summary: Update a message enrichment in your IoT hub (by key)
-long-summary: Update a message enrichment in your IoT hub (by key)
-examples:
-  - name: Update a message enrichment in your IoT hub to apply to a new set of endpoints
-    text: >
-      az iot hub message-enrichment update --key {key} --value {value} --endpoints NewEndpoint1 NewEndpoint2 -n {iothub_name}
-"""
-
-helps['iot hub message-enrichment delete'] = """
-type: command
-short-summary: Delete a message enrichment in your IoT hub (by key)
-long-summary: Delete a message enrichment in your IoT hub (by key)
-examples:
-  - name: Delete a message enrichment with key 'test' from your IoT Hub
-    text: >
-      az iot hub message-enrichment delete --key test -n {iothub_name}
-"""
-
-helps['iot hub message-enrichment list'] = """
-type: command
-short-summary: Get information on all message enrichments for your IoT Hub
-long-summary: Get information on all message enrichments for your IoT Hub
-examples:
-  - name: List all message enrichments for your IoT Hub
-    text: >
-      az iot hub message-enrichment list -n {iothub_name}
 """
 
 helps['iot hub show'] = """
@@ -744,72 +615,9 @@ examples:
         az iot hub update --name MyIotHub --add properties.ipFilterRules filter_name=test-rule action=Accept ip_mask=127.0.0.0/31
 """
 
-helps['iot hub manual-failover'] = """
-type: command
-short-summary: Initiate a manual failover for the IoT Hub to the geo-paired disaster recovery region.
-examples:
-  - name: This fails over â€œmyhubâ€ from East US to West US.
-    text: >
-        az iot hub manual-failover -n myhub --fr "West US"
-"""
-
-helps['iot pnp repository'] = """
+helps['iot pnp'] = """
 type: group
-short-summary: Manage IoT Plug and Play repositories.
-"""
-
-helps['iot pnp repository create'] = """
-type: command
-short-summary: Create an IoT Plug and Play repository.
-examples:
-  - name: Create a new IoT Plug and Play repository "myrepo"
-    text: >
-        az iot pnp repository create -n myrepo
-"""
-
-helps['iot pnp repository list'] = """
-type: command
-short-summary: List IoT Plug and Play repositories.
-examples:
-  - name: List IoT Plug and Play repositories.
-    text: >
-        az iot pnp repository list
-"""
-
-helps['iot pnp repository show'] = """
-type: command
-short-summary: Gets the details for an IoT Plug and Play repository.
-examples:
-  - name: Gets the details for an IoT Plug and Play repository.
-    text: >
-        az iot pnp repository show -r aaaabbbb11112222aaaabbbb1111222
-"""
-
-helps['iot pnp repository delete'] = """
-type: command
-short-summary: Delete an IoT Plug and Play repository.
-examples:
-  - name: Delete an IoT Plug and Play repository.
-    text: >
-        az iot pnp repository delete -r aaaabbbb11112222aaaabbbb1111222
-"""
-
-helps['iot pnp repository update'] = """
-type: command
-short-summary: Update an IoT Plug and Play repository.
-examples:
-  - name: Update an IoT Plug and Play repository.
-    text: >
-        az iot pnp repository update -r aaaabbbb11112222aaaabbbb1111222 -n updatedreponame
-"""
-
-helps['iot pnp repository get-provision-status'] = """
-type: command
-short-summary: Returns the IoT Plug and Play repository provisioning status.
-examples:
-  - name: Returns the IoT Plug and Play repository provisioning status.
-    text: >
-        az iot pnp repository get-provision-status -r aaaabbbb11112222aaaabbbb1111222 -s aaaabbbb11112222aaaabbbb1111333
+short-summary: Manage IoT Plug and Play repositories and repository access keys.
 """
 
 helps['iot pnp key'] = """
@@ -817,13 +625,13 @@ type: group
 short-summary: Manage access keys to an IoT Plug and Play repository.
 """
 
-helps['iot pnp key create'] = """
+helps['iot pnp key delete'] = """
 type: command
-short-summary: Create a key for the given repository.
+short-summary: Delete a key from the given repository.
 examples:
-  - name: Create a key for the given repository.
+  - name: Delete a key from the given repository.
     text: >
-        az iot pnp key create -r aaaabbbb11112222aaaabbbb1111222 --role Reader
+        az iot pnp key delete -r aaaabbbb11112222aaaabbbb1111222 -k 12345
 """
 
 helps['iot pnp key list'] = """
@@ -844,15 +652,6 @@ examples:
         az iot pnp key show -r aaaabbbb11112222aaaabbbb1111222 -k 12345
 """
 
-helps['iot pnp key delete'] = """
-type: command
-short-summary: Delete a key from the given repository.
-examples:
-  - name: Delete a key from the given repository.
-    text: >
-        az iot pnp key delete -r aaaabbbb11112222aaaabbbb1111222 -k 12345
-"""
-
 helps['iot pnp key update'] = """
 type: command
 short-summary: Update the key for the given repository.
@@ -860,4 +659,54 @@ examples:
   - name: Update the key for the given repository.
     text: >
         az iot pnp key update -r aaaabbbb11112222aaaabbbb1111222 -k 12345 --role admin
+"""
+
+helps['iot pnp repository'] = """
+type: group
+short-summary: Manage IoT Plug and Play repositories.
+"""
+
+helps['iot pnp repository delete'] = """
+type: command
+short-summary: Delete an IoT Plug and Play repository.
+examples:
+  - name: Delete an IoT Plug and Play repository.
+    text: >
+        az iot pnp repository delete -r aaaabbbb11112222aaaabbbb1111222
+"""
+
+helps['iot pnp repository get-provision-status'] = """
+type: command
+short-summary: Returns the IoT Plug and Play repository provisioning status.
+examples:
+  - name: Returns the IoT Plug and Play repository provisioning status.
+    text: >
+        az iot pnp repository get-provision-status -r aaaabbbb11112222aaaabbbb1111222 -s aaaabbbb11112222aaaabbbb1111333
+"""
+
+helps['iot pnp repository list'] = """
+type: command
+short-summary: List IoT Plug and Play repositories.
+examples:
+  - name: List IoT Plug and Play repositories.
+    text: >
+        az iot pnp repository list
+"""
+
+helps['iot pnp repository show'] = """
+type: command
+short-summary: Gets the details for an IoT Plug and Play repository.
+examples:
+  - name: Gets the details for an IoT Plug and Play repository.
+    text: >
+        az iot pnp repository show -r aaaabbbb11112222aaaabbbb1111222
+"""
+
+helps['iot pnp repository update'] = """
+type: command
+short-summary: Update an IoT Plug and Play repository.
+examples:
+  - name: Update an IoT Plug and Play repository.
+    text: >
+        az iot pnp repository update -r aaaabbbb11112222aaaabbbb1111222 -n updatedreponame
 """

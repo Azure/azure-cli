@@ -4,7 +4,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.help_files import helps
+from knack.help_files import helps  # pylint: disable=unused-import
 # pylint: disable=line-too-long, too-many-lines
 
 helps['mariadb'] = """
@@ -15,16 +15,6 @@ short-summary: Manage Azure Database for MariaDB servers.
 helps['mariadb db'] = """
 type: group
 short-summary: Manage MariaDB databases on a server.
-"""
-
-helps['mariadb db create'] = """
-type: command
-short-summary: Create a MariaDB database.
-examples:
-  - name: Create database 'testdb' in the server 'testsvr' with the default parameters.
-    text: az mariadb db create -g testgroup -s testsvr -n testdb
-  - name: Create database 'testdb' in server 'testsvr' with a given character set and collation rules.
-    text: az mariadb db create -g testgroup -s testsvr -n testdb --charset {valid_charset} --collation {valid_collation}
 """
 
 helps['mariadb db delete'] = """
@@ -81,16 +71,6 @@ type: command
 short-summary: Get the configuration for a server."
 """
 
-helps['mariadb server create'] = """
-type: command
-short-summary: Create a server.
-examples:
-  - name: Create a MariaDB server in North Europe with sku GP_Gen5_2 (General Purpose, Gen 5 hardware, 2 vCores).
-    text: az mariadb server create -l northeurope -g testgroup -n testsvr -u username -p password \\ --sku-name GP_Gen5_2
-  - name: Create a MariaDB server with all paramaters set.
-    text: az mariadb server create -l northeurope -g testgroup -n testsvr -u username -p password \\ --sku-name B_Gen5_1 --ssl-enforcement Disabled \\ --backup-retention 10 --geo-redundant-backup Enabled --storage-size 51200 --tags "key=value" --version {server-version}
-"""
-
 helps['mariadb server delete'] = """
 type: command
 short-summary: Delete a server.
@@ -102,16 +82,6 @@ examples:
 helps['mariadb server firewall-rule'] = """
 type: group
 short-summary: Manage firewall rules for a server.
-"""
-
-helps['mariadb server firewall-rule create'] = """
-type: command
-short-summary: Create a new firewall rule for a server.
-examples:
-  - name: Create a firewall rule allowing connections from a specific IP address.
-    text: az mariadb server firewall-rule create -g testgroup -s testsvr -n allowip --start-ip-address 107.46.14.221 --end-ip-address 107.46.14.221
-  - name: Create a firewall rule allowing connections from an IP address range.
-    text: az mariadb server firewall-rule create -g testgroup -s testsvr -n allowiprange --start-ip-address 107.46.14.0 --end-ip-address 107.46.14.221
 """
 
 helps['mariadb server firewall-rule delete'] = """
@@ -167,18 +137,6 @@ examples:
 helps['mariadb server replica'] = """
 type: group
 short-summary: Manage read replicas.
-"""
-
-helps['mariadb server replica create'] = """
-type: command
-short-summary: Create a read replica for a server.
-examples:
-  - name: Create a read replica 'testreplsvr' for 'testsvr'.
-    text: az mariadb server replica create -n testreplsvr -g testgroup -s testsvr
-  - name: Create a read replica 'testreplsvr' for 'testsvr2', where 'testreplsvr' is in a different resource group.
-    text: |
-        az mariadb server replica create -n testreplsvr -g testgroup \\
-            -s "/subscriptions/${SubID}/resourceGroups/${ResourceGroup}/providers/Microsoft.DBforMariaDB/servers/testsvr2"
 """
 
 helps['mariadb server replica list'] = """
@@ -242,16 +200,6 @@ type: group
 short-summary: Manage a server's virtual network rules.
 """
 
-helps['mariadb server vnet-rule create'] = """
-type: command
-short-summary: Create a virtual network rule to allows access to a MariaDB server.
-examples:
-  - name: Create a virtual network rule by providing the subnet id.
-    text: az mariadb server vnet-rule create -g testgroup -s testsvr -n vnetRuleName --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/vnetName/subnets/subnetName
-  - name: Create a vnet rule by providing the vnet and subnet name. The subnet id is created by taking the resource group name and subscription id of the server.
-    text: az mariadb server vnet-rule create -g testgroup -s testsvr -n vnetRuleName --subnet subnetName --vnet-name vnetName
-"""
-
 helps['mariadb server vnet-rule update'] = """
 type: command
 short-summary: Update a virtual network rule.
@@ -295,16 +243,6 @@ short-summary: Manage Azure Database for MySQL servers.
 helps['mysql db'] = """
 type: group
 short-summary: Manage MySQL databases on a server.
-"""
-
-helps['mysql db create'] = """
-type: command
-short-summary: Create a MySQL database.
-examples:
-  - name: Create database 'testdb' in the server 'testsvr' with the default parameters.
-    text: az mysql db create -g testgroup -s testsvr -n testdb
-  - name: Create database 'testdb' in server 'testsvr' with a given character set and collation rules.
-    text: az mysql db create -g testgroup -s testsvr -n testdb --charset {valid_charset} --collation {valid_collation}
 """
 
 helps['mysql db delete'] = """
@@ -369,16 +307,6 @@ examples:
     crafted: true
 """
 
-helps['mysql server create'] = """
-type: command
-short-summary: Create a server.
-examples:
-  - name: Create a MySQL server in North Europe with sku GP_Gen5_2 (General Purpose, Gen 5 hardware, 2 vCores).
-    text: az mysql server create -l northeurope -g testgroup -n testsvr -u username -p password \\ --sku-name GP_Gen5_2
-  - name: Create a MySQL server with all paramaters set.
-    text: az mysql server create -l northeurope -g testgroup -n testsvr -u username -p password \\ --sku-name B_Gen5_1 --ssl-enforcement Disabled \\ --backup-retention 10 --geo-redundant-backup Enabled --storage-size 51200 --tags "key=value" --version {server-version}
-"""
-
 helps['mysql server delete'] = """
 type: command
 short-summary: Delete a server.
@@ -390,16 +318,6 @@ examples:
 helps['mysql server firewall-rule'] = """
 type: group
 short-summary: Manage firewall rules for a server.
-"""
-
-helps['mysql server firewall-rule create'] = """
-type: command
-short-summary: Create a new firewall rule for a server.
-examples:
-  - name: Create a firewall rule allowing connections from a specific IP address.
-    text: az mysql server firewall-rule create -g testgroup -s testsvr -n allowip --start-ip-address 107.46.14.221 --end-ip-address 107.46.14.221
-  - name: Create a firewall rule allowing connections from an IP address range.
-    text: az mysql server firewall-rule create -g testgroup -s testsvr -n allowiprange --start-ip-address 107.46.14.0 --end-ip-address 107.46.14.221
 """
 
 helps['mysql server firewall-rule delete'] = """
@@ -465,18 +383,6 @@ type: group
 short-summary: Manage read replicas.
 """
 
-helps['mysql server replica create'] = """
-type: command
-short-summary: Create a read replica for a server.
-examples:
-  - name: Create a read replica 'testreplsvr' for 'testsvr'.
-    text: az mysql server replica create -n testreplsvr -g testgroup -s testsvr
-  - name: Create a read replica 'testreplsvr' for 'testsvr2', where 'testreplsvr' is in a different resource group.
-    text: |
-        az mysql server replica create -n testreplsvr -g testgroup \\
-            -s "/subscriptions/${SubID}/resourceGroups/${ResourceGroup}/providers/Microsoft.DBforMySQL/servers/testsvr2"
-"""
-
 helps['mysql server replica list'] = """
 type: command
 short-summary: List all read replicas for a given server.
@@ -538,16 +444,6 @@ type: group
 short-summary: Manage a server's virtual network rules.
 """
 
-helps['mysql server vnet-rule create'] = """
-type: command
-short-summary: Create a virtual network rule to allows access to a MySQL server.
-examples:
-  - name: Create a virtual network rule by providing the subnet id.
-    text: az mysql server vnet-rule create -g testgroup -s testsvr -n vnetRuleName --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/vnetName/subnets/subnetName
-  - name: Create a vnet rule by providing the vnet and subnet name. The subnet id is created by taking the resource group name and subscription id of the server.
-    text: az mysql server vnet-rule create -g testgroup -s testsvr -n vnetRuleName --subnet subnetName --vnet-name vnetName
-"""
-
 helps['mysql server vnet-rule update'] = """
 type: command
 short-summary: Update a virtual network rule.
@@ -591,16 +487,6 @@ short-summary: Manage Azure Database for PostgreSQL servers.
 helps['postgres db'] = """
 type: group
 short-summary: Manage PostgreSQL databases on a server.
-"""
-
-helps['postgres db create'] = """
-type: command
-short-summary: Create a PostgreSQL database.
-examples:
-  - name: Create database 'testdb' in the server 'testsvr' with the default parameters.
-    text: az postgres db create -g testgroup -s testsvr -n testdb
-  - name: Create database 'testdb' in server 'testsvr' with a given character set and collation rules.
-    text: az postgres db create -g testgroup -s testsvr -n testdb --charset {valid_charset} --collation {valid_collation}
 """
 
 helps['postgres db delete'] = """
@@ -661,16 +547,6 @@ type: command
 short-summary: Get the configuration for a server."
 """
 
-helps['postgres server create'] = """
-type: command
-short-summary: Create a server.
-examples:
-  - name: Create a PostgreSQL server in North Europe with sku GP_Gen5_2 (General Purpose, Gen 5 hardware, 2 vCores).
-    text: az postgres server create -l northeurope -g testgroup -n testsvr -u username -p password \\ --sku-name GP_Gen5_2
-  - name: Create a PostgreSQL server with all paramaters set.
-    text: az postgres server create -l northeurope -g testgroup -n testsvr -u username -p password \\ --sku-name B_Gen5_1 --ssl-enforcement Disabled \\ --backup-retention 10 --geo-redundant-backup Enabled --storage-size 51200 --tags "key=value" --version {server-version}
-"""
-
 helps['postgres server delete'] = """
 type: command
 short-summary: Delete a server.
@@ -682,16 +558,6 @@ examples:
 helps['postgres server firewall-rule'] = """
 type: group
 short-summary: Manage firewall rules for a server.
-"""
-
-helps['postgres server firewall-rule create'] = """
-type: command
-short-summary: Create a new firewall rule for a server.
-examples:
-  - name: Create a firewall rule allowing connections from a specific IP address.
-    text: az postgres server firewall-rule create -g testgroup -s testsvr -n allowip --start-ip-address 107.46.14.221 --end-ip-address 107.46.14.221
-  - name: Create a firewall rule allowing connections from an IP address range.
-    text: az postgres server firewall-rule create -g testgroup -s testsvr -n allowiprange --start-ip-address 107.46.14.0 --end-ip-address 107.46.14.221
 """
 
 helps['postgres server firewall-rule delete'] = """
@@ -761,18 +627,6 @@ type: group
 short-summary: Manage read replicas.
 """
 
-helps['postgres server replica create'] = """
-type: command
-short-summary: Create a read replica for a server.
-examples:
-  - name: Create a read replica 'testreplsvr' for 'testsvr'.
-    text: az postgres server replica create -n testreplsvr -g testgroup -s testsvr
-  - name: Create a read replica 'testreplsvr' for 'testsvr2', where 'testreplsvr' is in a different resource group.
-    text: |
-        az postgres server replica create -n testreplsvr -g testgroup \\
-            -s "/subscriptions/${SubID}/resourceGroups/${ResourceGroup}/providers/Microsoft.DBforPostgreSQL/servers/testsvr2"
-"""
-
 helps['postgres server replica list'] = """
 type: command
 short-summary: List all read replicas for a given server.
@@ -832,16 +686,6 @@ examples:
 helps['postgres server vnet-rule'] = """
 type: group
 short-summary: Manage a server's virtual network rules.
-"""
-
-helps['postgres server vnet-rule create'] = """
-type: command
-short-summary: Create a virtual network rule to allows access to a PostgreSQL server.
-examples:
-  - name: Create a virtual network rule by providing the subnet id.
-    text: az postgres server vnet-rule create -g testgroup -s testsvr -n vnetRuleName --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/vnetName/subnets/subnetName
-  - name: Create a vnet rule by providing the vnet and subnet name. The subnet id is created by taking the resource group name and subscription id of the server.
-    text: az postgres server vnet-rule create -g testgroup -s testsvr -n vnetRuleName --subnet subnetName --vnet-name vnetName
 """
 
 helps['postgres server vnet-rule update'] = """

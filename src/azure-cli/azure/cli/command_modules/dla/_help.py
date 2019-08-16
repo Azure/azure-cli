@@ -4,7 +4,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.help_files import helps
+from knack.help_files import helps  # pylint: disable=unused-import
 # pylint: disable=line-too-long, too-many-lines
 
 helps['dla'] = """
@@ -37,27 +37,6 @@ type: group
 short-summary: Manage Data Lake Analytics account compute policies.
 """
 
-helps['dla account compute-policy create'] = """
-type: command
-short-summary: Create a compute policy in the Data Lake Analytics account.
-parameters:
-  - name: --max-dop-per-job
-    type: int
-    short-summary: The maximum degree of parallelism allowed per job for this policy. At least one of `--min-priority-per-job` and `--max-dop-per-job` must be specified.
-  - name: --min-priority-per-job
-    type: int
-    short-summary: The minimum priority allowed per job for this policy. At least one of `--min-priority-per-job` and `--max-dop-per-job` must be specified.
-  - name: --compute-policy-name
-    type: string
-    short-summary: The name of the compute policy to create.
-  - name: --object-id
-    type: string
-    short-summary: The Azure Active Directory object ID of the user, group, or service principal to apply the policy to.
-  - name: --object-type
-    type: string
-    short-summary: The Azure Active Directory object type associated with the supplied object ID.
-"""
-
 helps['dla account compute-policy delete'] = """
 type: command
 short-summary: Delete a compute policy in a Data Lake Analytics account.
@@ -88,24 +67,6 @@ parameters:
     short-summary: The name of the compute policy to update.
 """
 
-helps['dla account create'] = """
-type: command
-short-summary: Create a Data Lake Analytics account.
-parameters:
-  - name: --default-data-lake-store
-    type: string
-    short-summary: The default Data Lake Store account to associate with the created account.
-  - name: --max-degree-of-parallelism
-    type: int
-    short-summary: The maximum degree of parallelism for this account.
-  - name: --max-job-count
-    type: int
-    short-summary: The maximum number of concurrent jobs for this account.
-  - name: --query-store-retention
-    type: int
-    short-summary: The number of days to retain job metadata.
-"""
-
 helps['dla account data-lake-store'] = """
 type: group
 short-summary: Manage links between Data Lake Analytics and Data Lake Store accounts.
@@ -119,21 +80,6 @@ short-summary: Delete a Data Lake Analytics account.
 helps['dla account firewall'] = """
 type: group
 short-summary: Manage Data Lake Analytics account firewall rules.
-"""
-
-helps['dla account firewall create'] = """
-type: command
-short-summary: Create a firewall rule in a Data Lake Analytics account.
-parameters:
-  - name: --end-ip-address
-    type: string
-    short-summary: The end of the valid IP range for the firewall rule.
-  - name: --start-ip-address
-    type: string
-    short-summary: The start of the valid IP range for the firewall rule.
-  - name: --firewall-rule-name
-    type: string
-    short-summary: The name of the firewall rule.
 """
 
 helps['dla account firewall delete'] = """
@@ -200,21 +146,6 @@ short-summary: Manage Data Lake Analytics catalog assemblies.
 helps['dla catalog credential'] = """
 type: group
 short-summary: Manage Data Lake Analytics catalog credentials.
-"""
-
-helps['dla catalog credential create'] = """
-type: command
-short-summary: Create a new catalog credential for use with an external data source.
-parameters:
-  - name: --credential-name
-    type: string
-    short-summary: The name of the credential.
-  - name: --database-name
-    type: string
-    short-summary: The name of the database in which to create the credential.
-  - name: --user-name
-    type: string
-    short-summary: The user name that will be used when authenticating with this credential.
 """
 
 helps['dla catalog credential delete'] = """
