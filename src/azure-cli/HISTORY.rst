@@ -25,6 +25,10 @@ Release History
 
 * Add `revoke-delegation-keys` command for storage account
 
+**Network**
+
+* az network lb create/frontend-ip create: Fixes #10018. Support `--private-ip-address-version` argument to create IPv6 based private-ip-address 
+
 2.0.71
 ++++++
 
