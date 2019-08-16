@@ -107,21 +107,21 @@ class NetworkPrivateEndpoints(ScenarioTest):
             self.check('provisioningState', 'Succeeded')
         ])
 
-        self.cmd('network private-endpoint update -g {rg} -n {pe} --request-message "test"',
+        self.cmd('network private-endpoint update -g {rg} -n {pe} --request-message "test"', checks=[
             self.check('privateLinkServiceConnections[0].requestMessage', 'test')
-        )
+        ])
 
         self.cmd('network private-endpoint list')
-        self.cmd('network private-endpoint list -g {rg}',
+        self.cmd('network private-endpoint list -g {rg}', checks=[
             self.check('length(@)', 1)
-        )
+        ])
 
         pe_connection_name = self.cmd('network private-link-service show -g {rg} -n {lks1}').get_output_in_json()['privateEndpointConnections'][0]['name']
         self.kwargs['pe_connect'] = pe_connection_name
         self.cmd('network private-link-service connection update -g {rg} -n {pe_connect} --service-name {lks1} --connection-status Rejected')
-        self.cmd('network private-endpoint show -g {rg} -n {pe}',
+        self.cmd('network private-endpoint show -g {rg} -n {pe}', checks=[
             self.check('privateLinkServiceConnections[0].privateLinkServiceConnectionState.status', 'Rejected')
-        )
+        ])
         self.cmd('network private-link-service connection delete -g {rg} -n {pe_connect} --service-name {lks1}')
         self.cmd('network private-link-service show -g {rg} -n {lks1}', checks=[
             self.check('length(privateEndpointConnections)', 0)
