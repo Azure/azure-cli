@@ -1163,8 +1163,6 @@ class NetworkLoadBalancerIpConfigScenarioTest(ScenarioTest):
         self.cmd('network lb frontend-ip update -g {rg} --lb-name lb2 -n ipconfig2 --subnet subnet2 --vnet-name vnet1 --private-ip-address 10.0.1.100')
         self.cmd('network lb frontend-ip show -g {rg} --lb-name lb2 -n ipconfig2',
                  checks=self.check("subnet.contains(id, 'subnet2')", True))
-        # Test frontend IP configuration for private-ip-address-version
-        self.cmd('network lb frontend-ip create -g {rg} --lb-name lb2 -n ipconfig5 --vnet-name vnet1 --subnet subnet1 --private-ip-address 2001:db8:1234:0000:0000:0000:0000:0000 --private-ip-address-version IPv6')
 
 
 class NetworkLoadBalancerOutboundRulesScenarioTest(ScenarioTest):
