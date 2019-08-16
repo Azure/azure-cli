@@ -17,9 +17,9 @@ Release History
 
 **Network**
 
-* az network private-endpoint create/update/list-types: Fixes #9474. Support create/update/list-types for private endpoint
-* az network private-link-service: Fixes #9475. Onboard commands for private link service
-* az network vnet subnet update: Support updating status through `--private-endpoint-network-policies` and `--private-link-service-network-policies` 
+* az network private-endpoint create/update/list-types: Fixes #9474. Support create/update/list-types commands for private endpoint.
+* az network private-link-service: Fixes #9475. Onboard commands for private link service.
+* az network vnet subnet update: Support `--private-endpoint-network-policies` and `--private-link-service-network-policies` arguments for update command.
 
 **RBAC**
 
