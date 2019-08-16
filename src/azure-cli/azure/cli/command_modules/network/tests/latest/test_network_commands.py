@@ -134,7 +134,7 @@ class NetworkLoadBalancerWithZone(ScenarioTest):
         ])
 
         self.cmd('network lb create -g {rg} -n {lb3} --sku Standard -l westcentralus --privated-ip-address-version IPv6', checks=[
-            self.check('loadBalancer.frontendIPConfigurations.properties.privateIPAddressVersion','IPv6')
+            self.check('loadBalancer.frontendIPConfigurations.properties.privateIPAddressVersion', 'IPv6')
         ])
 
 

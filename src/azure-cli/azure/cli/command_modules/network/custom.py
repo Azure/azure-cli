@@ -2273,12 +2273,12 @@ def set_lb_frontend_ip_configuration(
         instance.private_ip_allocation_method = 'dynamic'
         instance.private_ip_address = None
         # Doesn't support update operation for now
-        #if cmd.supported_api_version(min_api='2019-04-01'):
+        # if cmd.supported_api_version(min_api='2019-04-01'):
         #    instance.private_ip_address_version = private_ip_address_version
     elif private_ip_address is not None:
         instance.private_ip_allocation_method = 'static'
         instance.private_ip_address = private_ip_address
-        #if cmd.supported_api_version(min_api='2019-04-01'):
+        # if cmd.supported_api_version(min_api='2019-04-01'):
         #    instance.private_ip_address_version = private_ip_address_version
 
     if subnet == '':

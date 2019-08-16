@@ -176,7 +176,8 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
 
 
 def build_load_balancer_resource(cmd, name, location, tags, backend_pool_name, frontend_ip_name, public_ip_id,
-                                 subnet_id, private_ip_address, private_ip_allocation, sku, frontend_ip_zone, private_ip_address_version):
+                                 subnet_id, private_ip_address, private_ip_allocation,
+                                 sku, frontend_ip_zone, private_ip_address_version):
     frontend_ip_config = _build_frontend_ip_config(cmd, frontend_ip_name, public_ip_id, subnet_id, private_ip_address,
                                                    private_ip_allocation, frontend_ip_zone, private_ip_address_version)
 
