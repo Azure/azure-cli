@@ -3196,7 +3196,7 @@ type: command
 short-summary: Create a private endpoint.
 examples:
   - name: Create a private endpoint.
-    text: az network network private-endpoint create -g MyResourceGroup -n MyPE --vnet-name MyVnetName --subnet MySubnet --private-connection-resource-id MyPLSId --connection-name tttt -l centralus
+    text: az network private-endpoint create -g MyResourceGroup -n MyPE --vnet-name MyVnetName --subnet MySubnet --private-connection-resource-id MyPLSId --connection-name tttt -l centralus
 """
 
 helps['network private-endpoint delete'] = """
@@ -3219,7 +3219,7 @@ type: command
 short-summary: Update a private endpoint.
 examples:
   - name: Update a private endpoint.
-    text: az network network private-endpoint create -g MyResourceGroup -n MyPE --request-message "test" --tags mytag=hello
+    text: az network private-endpoint update -g MyResourceGroup -n MyPE --request-message "test" --tags mytag=hello
 """
 
 helps['network private-link-service'] = """
