@@ -2265,19 +2265,20 @@ def create_lb_frontend_ip_configuration(
 
 def set_lb_frontend_ip_configuration(
         cmd, instance, parent, item_name, private_ip_address=None,
-        private_ip_address_allocation=None, private_ip_address_version=None, public_ip_address=None,
+        private_ip_address_allocation=None, public_ip_address=None,
         subnet=None, virtual_network_name=None, public_ip_prefix=None):
     PublicIPAddress, Subnet, SubResource = cmd.get_models('PublicIPAddress', 'Subnet', 'SubResource')
-    if private_ip_address == '':
+    if not private_ip_address:
         instance.private_ip_allocation_method = 'dynamic'
         instance.private_ip_address = None
-        if cmd.supported_api_version(min_api='2019-04-01'):
-            instance.private_ip_address_version = private_ip_address_version
+        # Doesn't support update operation for now
+        #if cmd.supported_api_version(min_api='2019-04-01'):
+        #    instance.private_ip_address_version = private_ip_address_version
     elif private_ip_address is not None:
         instance.private_ip_allocation_method = 'static'
         instance.private_ip_address = private_ip_address
-        if cmd.supported_api_version(min_api='2019-04-01'):
-            instance.private_ip_address_version = private_ip_address_version
+        #if cmd.supported_api_version(min_api='2019-04-01'):
+        #    instance.private_ip_address_version = private_ip_address_version
 
     if subnet == '':
         instance.subnet = None
