@@ -91,8 +91,8 @@ class NetworkLoadBalancerWithZone(ScenarioTest):
 
         self.kwargs.update({
             'lb': 'lb1',
-            'lb2': 'lb2',
-            'lb3': 'lb3',
+            'lb2': 'lb4',
+            'lb3': 'lb5',
             'zone': '2',
             'location': 'eastus2',
             'ip': 'pubip1',
@@ -133,8 +133,8 @@ class NetworkLoadBalancerWithZone(ScenarioTest):
             self.check('provisioningState', 'Succeeded')
         ])
 
-        self.cmd('network lb create -g {rg} -n {lb3} --sku Standard -l westcentralus --privated-ip-address-version IPv6', checks=[
-            self.check('loadBalancer.frontendIPConfigurations.properties.privateIPAddressVersion', 'IPv6')
+        self.cmd('network lb create -g {rg} -n {lb3} --sku Standard -l westcentralus --private-ip-address-version IPv6', checks=[
+            self.check('loadBalancer.frontendIPConfigurations[0].properties.privateIPAddressVersion', 'IPv6')
         ])
 
 
