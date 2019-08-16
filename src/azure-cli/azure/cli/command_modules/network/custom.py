@@ -2066,10 +2066,10 @@ def create_private_endpoint(cmd, resource_group_name, private_endpoint_name, sub
     PrivateEndpoint, Subnet, PrivateLinkServiceConnection = cmd.get_models('PrivateEndpoint',
                                                                            'Subnet',
                                                                            'PrivateLinkServiceConnection')
-    private_link_service_connection = PrivateLinkServiceConnection(private_link_service_id=private_connection_resource_id,
-                                                                   group_ids=group_ids,
-                                                                   request_message=request_message,
-                                                                   name=connection_name)
+    pls_connection = PrivateLinkServiceConnection(private_link_service_id=private_connection_resource_id,
+                                                  group_ids=group_ids,
+                                                  request_message=request_message,
+                                                  name=connection_name)
     private_endpoint = PrivateEndpoint(
         location=location,
         tags=tags,
@@ -2077,9 +2077,9 @@ def create_private_endpoint(cmd, resource_group_name, private_endpoint_name, sub
     )
 
     if manual_request:
-        private_endpoint.manual_private_link_service_connections = [private_link_service_connection]
+        private_endpoint.manual_private_link_service_connections = [pls_connection]
     else:
-        private_endpoint.private_link_service_connections = [private_link_service_connection]
+        private_endpoint.private_link_service_connections = [pls_connection]
 
     return client.create_or_update(resource_group_name, private_endpoint_name, private_endpoint)
 
@@ -2140,9 +2140,7 @@ def create_private_link_service(cmd, resource_group_name, service_name, subnet, 
 
 def update_private_link_service(instance, cmd, tags=None, frontend_ip_configurations=None, load_balancer_name=None,
                                 visibility=None, auto_approval=None, fqdns=None):
-    FrontendIPConfiguration, PrivateLinkService, PrivateLinkServiceIpConfiguration, PublicIPAddress, Subnet = \
-        cmd.get_models('FrontendIPConfiguration', 'PrivateLinkService', 'PrivateLinkServiceIpConfiguration',
-                       'PublicIPAddress', 'Subnet')
+    FrontendIPConfiguration = cmd.get_models('FrontendIPConfiguration')
     with cmd.update_context(instance) as c:
         c.set_param('tags', tags)
         c.set_param('load_balancer_frontend_ip_configurations', frontend_ip_configurations and [
@@ -2164,24 +2162,27 @@ def list_private_link_services(cmd, resource_group_name=None):
 def update_private_endpoint_connection(cmd, resource_group_name, service_name, pe_connection_name,
                                        connection_status, description=None, action_required=None):
     client = network_client_factory(cmd.cli_ctx).private_link_services
-    PrivateEndpointConnection, PrivateLinkServiceConnectionState  = cmd.get_models('PrivateEndpointConnection', 
-                                                                                   'PrivateLinkServiceConnectionState')
+    PrivateEndpointConnection, PrivateLinkServiceConnectionState = cmd.get_models('PrivateEndpointConnection',
+                                                                                  'PrivateLinkServiceConnectionState')
     connection_state = PrivateLinkServiceConnectionState(
         status=connection_status,
         description=description,
         action_required=action_required
     )
-    private_endpoint_connection = PrivateEndpointConnection(
+    pe_connection = PrivateEndpointConnection(
         private_link_service_connection_state=connection_state
     )
-    return client.update_private_endpoint_connection(resource_group_name, service_name, pe_connection_name, private_endpoint_connection)
+    return client.update_private_endpoint_connection(resource_group_name, service_name, pe_connection_name, pe_connection)  # pylint: disable=line-too-long
+
 
 def add_private_link_services_ipconfig(cmd, resource_group_name, service_name,
                                        private_ip_address=None, private_ip_allocation_method=None,
                                        private_ip_address_version=None,
                                        subnet=None, virtual_network_name=None, public_ip_address=None):
     client = network_client_factory(cmd.cli_ctx).private_link_services
-    PrivateLinkServiceIpConfiguration, PublicIPAddress, Subnet = cmd.get_models('PrivateLinkServiceIpConfiguration', 'PublicIPAddress', 'Subnet')
+    PrivateLinkServiceIpConfiguration, PublicIPAddress, Subnet = cmd.get_models('PrivateLinkServiceIpConfiguration',
+                                                                                'PublicIPAddress',
+                                                                                'Subnet')
     link_service = client.get(resource_group_name, service_name)
     if link_service is None:
         raise CLIError("Private link service should be existed. Please create it first.")
@@ -2197,6 +2198,7 @@ def add_private_link_services_ipconfig(cmd, resource_group_name, service_name,
     link_service.ip_configurations.append(ip_config)
     return client.create_or_update(resource_group_name, service_name, link_service)
 
+
 def remove_private_link_services_ipconfig(cmd, resource_group_name, service_name, ip_config_name):
     client = network_client_factory(cmd.cli_ctx).private_link_services
     link_service = client.get(resource_group_name, service_name)
@@ -2207,8 +2209,8 @@ def remove_private_link_services_ipconfig(cmd, resource_group_name, service_name
         if item.name == ip_config_name:
             ip_config = item
             break
-    if ip_config is None:
-        logger.warning("{0} ip configuration doesn't exist".format(ip_config_name))
+    if ip_config is None:  # pylint: disable=no-else-return
+        logger.warning("%s ip configuration doesn't exist", ip_config_name)
         return link_service
     else:
         link_service.ip_configurations.remove(ip_config)
