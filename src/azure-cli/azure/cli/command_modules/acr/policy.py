@@ -31,13 +31,14 @@ def acr_config_content_trust_update(cmd,
     policies = registry.policies
 
     if status is not None:
-        policies = policies if policies else {}
-        policies.trust_policy = policies.trust_policy if policies.trust_policy else {}
+        Policy = cmd.get_models('Policy')
+        policies = policies if policies else Policy()
+        TrustPolicy = cmd.get_models('TrustPolicy')
+        policies.trust_policy = policies.trust_policy if policies.trust_policy else TrustPolicy()
         policies.trust_policy.status = status
 
     RegistryUpdateParameters = cmd.get_models('RegistryUpdateParameters')
     parameters = RegistryUpdateParameters(policies=policies)
-    print(parameters.policies.trust_policy)
     updated_policies = LongRunningOperation(cmd.cli_ctx)(
         client.update(resource_group_name, registry_name, parameters)
     )
