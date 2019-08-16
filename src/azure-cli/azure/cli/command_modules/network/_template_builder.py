@@ -5,7 +5,7 @@
 
 
 def _build_frontend_ip_config(cmd, name, public_ip_id=None, subnet_id=None, private_ip_address=None,
-                              private_ip_allocation=None, zone=None):
+                              private_ip_allocation=None, zone=None, private_ip_address_version=None):
     frontend_ip_config = {
         'name': name
     }
@@ -27,6 +27,9 @@ def _build_frontend_ip_config(cmd, name, public_ip_id=None, subnet_id=None, priv
 
     if zone and cmd.supported_api_version(min_api='2017-06-01'):
         frontend_ip_config['zones'] = zone
+
+    if private_ip_address_version and cmd.supported_api_version(min_api='2019-04-01'):
+        frontend_ip_config['properties']['privateIPAddressVersion'] = private_ip_address_version
 
     return frontend_ip_config
 
@@ -173,9 +176,9 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
 
 
 def build_load_balancer_resource(cmd, name, location, tags, backend_pool_name, frontend_ip_name, public_ip_id,
-                                 subnet_id, private_ip_address, private_ip_allocation, sku, frontend_ip_zone):
+                                 subnet_id, private_ip_address, private_ip_allocation, sku, frontend_ip_zone, private_ip_address_version):
     frontend_ip_config = _build_frontend_ip_config(cmd, frontend_ip_name, public_ip_id, subnet_id, private_ip_address,
-                                                   private_ip_allocation, frontend_ip_zone)
+                                                   private_ip_allocation, frontend_ip_zone, private_ip_address_version)
 
     lb_properties = {
         'backendAddressPools': [
