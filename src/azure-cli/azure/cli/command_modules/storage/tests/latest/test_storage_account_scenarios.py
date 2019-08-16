@@ -385,7 +385,7 @@ class RoleScenarioTest(LiveScenarioTest):
 
 @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
 class RevokeStorageAccountTests(StorageScenarioMixin, RoleScenarioTest, LiveScenarioTest):
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(name_prefix='cli_storage_revoke_keys')
     @StorageAccountPreparer()
     def test_storage_account_revoke_delegation_keys(self, resource_group, storage_account):
         if self.run_under_service_principal():
