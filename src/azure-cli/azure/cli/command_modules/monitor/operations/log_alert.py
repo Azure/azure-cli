@@ -20,7 +20,7 @@ def create_log_alert(cmd, client, resource_group_name, rule_name, location, freq
 
     if _get_alert_settings(client, resource_group_name, rule_name, throw_if_missing=False):
         raise CLIError('The log alert rule {} already exists in resource group {}.'.format(rule_name,
-                                                                                      resource_group_name))
+                                                                                           resource_group_name))
 
     if metricThreshold or metricColumn or metricTriggerType or metricThresholdOperator:
         metricTrigger = LogMetricTrigger(metric_trigger_type=metricTriggerType, metric_column=metricColumn,
@@ -133,7 +133,8 @@ def update_metric_trigger(instance, metricColumn=None, metricTriggerType=None, m
             if metricThreshold:
                 instance.action.trigger.metric_trigger.threshold = metricThreshold
         else:
-            instance.action.trigger.metric_trigger = LogMetricTrigger(metric_trigger_type=metricTriggerType, metric_column=metricColumn,
+            instance.action.trigger.metric_trigger = LogMetricTrigger(metric_trigger_type=metricTriggerType,
+                                                                      metric_column=metricColumn,
                                                                       threshold_operator=metricThresholdOperator,
                                                                       threshold=metricThreshold)
 
@@ -164,15 +165,17 @@ def update_action_group(cmd, instance, resource_group, resetActionGroup=None, ad
         from knack.util import CLIError
         if instance.action.azns_action.action_group is None:
             raise CLIError('Error in removing action group. There are no action groups attached to alert rule.')
-        else:
-            for actionGroup in removeActionGroups:
-                match = next(
-                    (x for x in instance.action.azns_action.action_group if actionGroup.lower() == x.lower()), None
-                )
-                if match:
-                    instance.action.azns_action.action_group.remove(actionGroup)
-                else:
-                    raise CLIError('Error in removing action group. Action group "{}" is not attached to alert rule.'.format(actionGroup))
+
+        for actionGroup in removeActionGroups:
+            match = next(
+                (x for x in instance.action.azns_action.action_group if actionGroup.lower() == x.lower()), None
+            )
+            if match:
+                instance.action.azns_action.action_group.remove(actionGroup)
+            else:
+                raise CLIError(
+                    'Error in removing action group. Action group "{}" is not attached to alert rule.'
+                    .format(actionGroup))
 
     return instance
 
@@ -196,17 +199,19 @@ def update_authorized_resources(instance, resetAuthorizedResources=None, addAuth
     if removeAuthorizedResources:
         from knack.util import CLIError
         if instance.source.authorized_resources is None:
-            raise CLIError('Error in removing authorized resource. There are no authorized resources attached to alert rule.')
-        else:
-            for authorizedResources in removeAuthorizedResources:
-                match = next(
-                    (x for x in instance.source.authorized_resources if authorizedResources.lower() == x.lower()), None
-                )
-                if match:
-                    instance.source.authorized_resources.remove(authorizedResources)
-                else:
-                    raise CLIError('Error in removing authorized resource. Authorized resource "{}" is not attached to alert rule.'
-                                   .format(authorizedResources))
+            raise CLIError(
+                'Error in removing authorized resource. There are no authorized resources attached to alert rule.')
+
+        for authorizedResources in removeAuthorizedResources:
+            match = next(
+                (x for x in instance.source.authorized_resources if authorizedResources.lower() == x.lower()), None
+            )
+            if match:
+                instance.source.authorized_resources.remove(authorizedResources)
+            else:
+                raise CLIError(
+                    'Error in removing authorized resource. Authorized resource "{}" is not attached to alert rule.'
+                    .format(authorizedResources))   
 
     return instance
 
@@ -245,6 +250,6 @@ def _get_alert_settings(client, resource_group_name, rule_name, throw_if_missing
         if ex.response.status_code == 404:
             if throw_if_missing:
                 raise CLIError('Can\'t find log alert rule {} in resource group {}.'.format(rule_name,
-                                                                                       resource_group_name))
+                                                                                            resource_group_name))
             return None
         raise CLIError(ex.message)

@@ -372,7 +372,7 @@ def load_arguments(self, _):
 
     with self.argument_context('monitor log alert update', arg_group='Source') as c:
         c.argument('alertQuery')
-        c.argument('resetAuthorizedResources', nargs='+')
+        c.argument('resetAuthorizedResources', action='store_true')
         c.argument('addAuthorizedResources', nargs='+')
         c.argument('removeAuthorizedResources', nargs='+')
 

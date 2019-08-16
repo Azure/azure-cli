@@ -1025,8 +1025,7 @@ examples:
   - name: Create a metric measurement log alert rule with throttling, description and tags.
     text: >
         az monitor log alert create -n {AlertName} -g {ResourceGroup} -l {Location} --description {Description} --tags [key1=value1 key2=value2 ..]\\
-          --severity {Severity} --threshold {Threshold} --thresholdOperator {ThresholdOperator} --metricColumn {MetricColumn} --metricThreshold {MetricThreshold} --metricThresholdOperator {MetricThresholdOperator} 
-          --metricTriggerType {metricTriggerType} --throttling {throttling} \\
+          --severity {Severity} --threshold {Threshold} --thresholdOperator {ThresholdOperator} --metricColumn {MetricColumn} --metricThreshold {MetricThreshold} --metricThresholdOperator {MetricThresholdOperator} --metricTriggerType {metricTriggerType} --throttling {throttling} \\
           --frequency {Frequency} --timeWindow {TimeWindow} \\
           --alertQuery {AlertQuery} --dataSourceId /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/microsoft.operationalinsights/workspaces/{Workspace} --queryType ResultCount \\
 """
@@ -1038,6 +1037,8 @@ parameters:
     short-summary: Update description for the log alert rule.
   - name: --tags
     short-summary: Overwrite tags of an alert rule. Space-separated tags in 'key[=value]' format. Use "" to clear existing tags.
+  - name: --enabled
+    short-summary: Enable/disable log alert rule.
   - name: --frequency
     short-summary: Update frequency (in minutes) at which rule condition should be evaluated.
   - name: --timeWindow
