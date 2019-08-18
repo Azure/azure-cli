@@ -144,6 +144,16 @@ examples:
     crafted: true
 """
 
+helps['storage account revoke-delegation-keys'] = """
+type: command
+short-summary: Revoke all user delegation keys for a storage account.
+examples:
+  - name: Revoke all user delegation keys for a storage account by resource ID.
+    text: az storage account revoke-delegation-keys --ids /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Storage/storageAccounts/{StorageAccount}
+  - name: Revoke all user delegation keys for a storage account 'MyStorageAccount' in resource group 'MyResourceGroup' in the West US region with locally redundant storage.
+    text: az storage account revoke-delegation-keys -n MyStorageAccount -g MyResourceGroup
+"""
+
 helps['storage account show'] = """
 type: command
 short-summary: Show storage account properties.

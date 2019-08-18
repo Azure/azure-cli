@@ -17,6 +17,10 @@ Release History
 * Fix for issue #7130 - fix add cert command. Using the cluster resource group when the key vault resource group is not specified.
 * Fix for issue #9711 - fix command 'cluster setting set' command. Using named parameters for SettingsSectionDescription constructor.
 
+**Storage**
+
+* Add `revoke-delegation-keys` command for storage account
+
 2.0.71
 ++++++
 
