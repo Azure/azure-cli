@@ -11,6 +11,14 @@ Release History
 
 * az webapp up detects env folder and removes it from compressed file used for deployment
 
+**Batch**
+
+* Added the optional argument `--public-ips` to the command `az batch pool create`. This argument takes a space separated list of Public IP ARM resource ids to use  when allocating VMs in the pool. If not specified Batch will use its default behavior of automatically allocating Public IPs as needed
+* Expanded `--json-file` capabilities of `az batch pool create` to allow for specifying MountConfigurations for file system mounts (see https://docs.microsoft.com/en-us/rest/api/batchservice/pool/add#request-body for structure)
+* Expanded `--image` capabilities to support Shared Image Galleries images. Similar to the commands support for Managed Images, to use a Shared Image Gallery image simply use the ARM ID as the value to the argument.
+* [BREAKING] When not specified, the default value for `--start-task-wait-for-success` on `az batch pool create` is now true (was false).
+* [BREAKING] The default value for Scope on AutoUserSpecification is now always Pool (was Task on Windows nodes, Pool on Linux nodes). This argument is not exposed via the commandline, but can be set in the `--json-file` arguments.
+
 **keyvault**
 
 * Fix the bug in secret set command that igores the expires argument
