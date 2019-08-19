@@ -16,11 +16,12 @@ from azure.cli.core.commands.parameters import \
 
 from azure.cli.command_modules.batch._completers import load_supported_images
 from azure.cli.command_modules.batch._validators import \
-    (application_enabled, datetime_format, storage_account_id, metadata_item_format,
-     application_package_reference_format, validate_pool_resize_parameters,
-     certificate_reference_format, validate_json_file, validate_cert_file, keyvault_id,
-     environment_setting_format, validate_cert_settings, resource_file_format,
-     validate_client_parameters)
+    (application_enabled, application_package_reference_format,
+     certificate_reference_format, datetime_format, environment_setting_format,
+     keyvault_id, metadata_item_format, resource_file_format,
+     storage_account_id, validate_cert_file, validate_cert_settings,
+     validate_client_parameters, validate_json_file,
+     validate_pool_resize_parameters)
 
 
 # pylint: disable=line-too-long, too-many-statements
@@ -122,6 +123,9 @@ def load_arguments(self, _):
         c.argument('auto_scale_formula', help='A formula for the desired number of compute nodes in the pool. The formula is checked for validity before the pool is created. If the formula is not valid, the Batch service rejects the request with detailed error information. For more information about specifying this formula, see https://azure.microsoft.com/documentation/articles/batch-automatic-scaling/.')
         c.extra('image', completer=load_supported_images, arg_group="Pool: Virtual Machine Configuration",
                 help="OS image reference. This can be either 'publisher:offer:sku[:version]' format, or a fully qualified ARM image id of the form '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.Compute/images/{imageName}'. If 'publisher:offer:sku[:version]' format, version is optional and if omitted latest will be used. Valid values can be retrieved via 'az batch pool supported-images list'. For example: 'MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:latest'")
+        c.extra('public_ips', nargs='+', arg_group="Pool: Network Configuration",
+                help="Space separated list of public IPs (resource ID) which the Batch service will use when provisioning Compute Nodes. If not specified Batch will automatically allocate publicIP's internally. Each element of this collection is of the form:"
+                     " /subscriptions/{subscription}/resourceGroups/{group}/providers/Microsoft.Network/publicIPAddresses/{ip}.")
 
     with self.argument_context('batch certificate') as c:
         c.argument('thumbprint', help='The certificate thumbprint.')

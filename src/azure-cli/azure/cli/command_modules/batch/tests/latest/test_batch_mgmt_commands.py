@@ -19,13 +19,15 @@ from azure.cli.core.profiles import ResourceType, get_sdk
 class BatchMgmtScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
     @ResourceGroupPreparer(location='northeurope')
-    def test_batch_account_cmd(self, resource_group):
+    def test_batch_general_arm_cmd(self, resource_group):
 
         self.kwargs.update({
             'rg': resource_group,
             'str_n': 'clibatchteststorage1',
             'loc': 'northeurope',
-            'acc': 'clibatchtest1'
+            'acc': 'clibatchtest1',
+            'ip': resource_group + 'ip',
+            'poolname': 'batch_account_cmd_pool'
         })
 
         # test create storage account with default set
@@ -76,6 +78,21 @@ class BatchMgmtScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance
         self.assertEqual(self.cli_ctx.config.get('batch', 'account'), self.kwargs['acc'])
         self.assertEqual(self.cli_ctx.config.get('batch', 'access_key'), keys2.get_output_in_json()['primary'])
 
+        # Test create and add Public IP
+        ipId1 = self.cmd('network public-ip create --name {ip}1 --resource-group {rg}').assert_with_checks([
+            self.check('publicIp.name', '{ip}1'),
+        ]).get_output_in_json()['publicIp']['id']
+        ipId2 = self.cmd('network public-ip create --name {ip}2 --resource-group {rg}').assert_with_checks([
+            self.check('publicIp.name', '{ip}2'),
+        ]).get_output_in_json()['publicIp']['id']
+        self.kwargs['ipId1'] = ipId1
+        self.kwargs['ipId2'] = ipId2
+        self.cmd('batch pool create --id {poolname} --image "Canonical:UbuntuServer:16.04.0-LTS" --vm-size STANDARD_D1_V2 '
+                 '--node-agent-sku-id "batch.node.ubuntu 16.04" --public-ips "{ipId1} {ipId2}"').assert_with_checks(self.is_empty())
+        self.cmd('batch pool show --pool-id {poolname}').assert_with_checks([
+            self.check('networkConfiguration.publicIps', self.kwargs['ipId1']),
+            self.check('networkConfiguration.publicIps', self.kwargs['ipId2']),
+        ])
         # test batch account delete
         self.cmd('batch account delete -g {rg} -n {acc} --yes')
         self.cmd('batch account list -g {rg}').assert_with_checks(self.is_empty())
@@ -123,7 +140,7 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):  # pylint: disable=too-ma
 
         self.cmd('batch application package create -g {rg} -n {acc} --application-name {app}'
                  ' --version {app_p} --package-file "{app_f}"').assert_with_checks([
-                     self.check('name', '{app}'),
+                     self.check('name', '{app_p}'),
                      self.check('storageUrl != null', True),
                      self.check('state', 'Active')])
 
@@ -132,7 +149,7 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):  # pylint: disable=too-ma
 
         self.cmd('batch application package show -g {rg} -n {acc} '
                  '--application-name {app} --version {app_p}').assert_with_checks([
-                     self.check('name', '{app}'),
+                     self.check('name', '{app_p}'),
                      self.check('format', 'zip'),
                      self.check('state', 'Active')])
 
