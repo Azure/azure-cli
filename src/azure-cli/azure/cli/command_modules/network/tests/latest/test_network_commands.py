@@ -96,8 +96,8 @@ class NetworkPrivateEndpoints(ScenarioTest):
         self.cmd('network vnet subnet update -g {rg} -n {subnet2} --vnet-name {vnet} --private-endpoint-network-policies Disabled')
         pls1 = self.cmd('network private-link-service create -g {rg} -n {lks1} --vnet-name {vnet} --subnet {subnet1} --lb-name {lb} --lb-frontend-ip-configs LoadBalancerFrontEnd -l {location}', checks=[
             self.check('type', 'Microsoft.Network/privateLinkServices'),
-            self.check('length(ipConfigurations)', 1),
-            self.check('length(loadBalancerFrontendIpConfigurations)', 1)
+            self.check('provisioningState', 'Succeeded'),
+            self.check('name', self.kwargs['lks1'])
         ]).get_output_in_json()
         self.kwargs['pls_id'] = pls1['id']
         self.cmd('network private-endpoint list-types -l {location}')
