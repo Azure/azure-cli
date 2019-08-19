@@ -40,7 +40,7 @@ helps['signalr create'] = """
     examples:
         - name: Create a SignalR Service with the Standard SKU and serverless mode.
           text: >
-            az signalr create -n MySignalR -g MyResourceGroup --sku Standard_S1 --unit-count 1 --service-node Serverless
+            az signalr create -n MySignalR -g MyResourceGroup --sku Standard_S1 --unit-count 1 --service-mode Serverless
 """
 
 helps['signalr delete'] = """
