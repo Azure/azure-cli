@@ -32,14 +32,13 @@ def zip_contents_from_dir(dirPath, lang):
     with zipfile.ZipFile("{}".format(zip_file_path), "w", zipfile.ZIP_DEFLATED) as zf:
         for dirname, subdirs, files in os.walk(dirPath):
             # skip node_modules folder for Node apps,
-            # since zip_deployment will perfom the build operation
-            if lang.lower() == NODE_RUNTIME_NAME and 'node_modules' in subdirs:
-                subdirs.remove('node_modules')
+            # since zip_deployment will perform the build operation
+            if lang.lower() == NODE_RUNTIME_NAME:
+                subdirs[:] = [d for d in subdirs if 'node_modules' not in d]
             elif lang.lower() == NETCORE_RUNTIME_NAME:
-                if 'bin' in subdirs:
-                    subdirs.remove('bin')
-                elif 'obj' in subdirs:
-                    subdirs.remove('obj')
+                subdirs[:] = [d for d in subdirs if d not in ['obj', 'bin']]
+            elif lang.lower() == PYTHON_RUNTIME_NAME:
+                subdirs[:] = [d for d in subdirs if 'env' not in d]  # Ignores dir that contain env
             for filename in files:
                 absname = os.path.abspath(os.path.join(dirname, filename))
                 arcname = absname[len(abs_src) + 1:]

@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**AppService**
+
+* az webapp up detects env folder and removes it from compressed file used for deployment
+
 **keyvault**
 
 * Fix the bug in secret set command that igores the expires argument
