@@ -1170,8 +1170,8 @@ def load_arguments(self, _):
         c.argument('service_endpoints', nargs='+', min_api='2017-06-01')
         c.argument('service_endpoint_policy', nargs='+', min_api='2018-07-01', help='Space-separated list of names or IDs of service endpoint policies to apply.', validator=validate_service_endpoint_policy)
         c.argument('delegations', nargs='+', min_api='2017-08-01', help='Space-separated list of services to whom the subnet should be delegated. (e.g. Microsoft.Sql/servers)', validator=validate_delegations)
-        c.argument('private_endpoint_network_policies', arg_type=get_enum_type(['Enabled', 'Disabled']), min_api='2019-04-01', help='Enable or Disable private endpoint on the subnet.')
-        c.argument('private_link_service_network_policies', arg_type=get_enum_type(['Enabled', 'Disabled']), min_api='2019-04-01', help='Enable or Disable private link service on the subnet.')
+        c.argument('disable_private_endpoint_network_policies', arg_type=get_three_state_flag(positive_label='Disabled', negative_label='Enabled'), min_api='2019-04-01', help='Disable private endpoint network policies on the subnet.')
+        c.argument('disable_private_link_service_network_policies', arg_type=get_three_state_flag(positive_label='Disabled', negative_label='Enabled'), min_api='2019-04-01', help='Disable private link service network policies on the subnet.')
 
     with self.argument_context('network vnet subnet update') as c:
         c.argument('network_security_group', validator=get_nsg_validator(), help='Name or ID of a network security group (NSG). Use empty string "" to detach it.')

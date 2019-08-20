@@ -3196,7 +3196,7 @@ type: command
 short-summary: Create a private endpoint.
 examples:
   - name: Create a private endpoint.
-    text: az network private-endpoint create -g MyResourceGroup -n MyPE --vnet-name MyVnetName --subnet MySubnet --private-connection-resource-id MyPLSId --connection-name tttt -l centralus
+    text: az network private-endpoint create -g MyResourceGroup -n MyPE --vnet-name MyVnetName --subnet MySubnet --private-connection-resource-id ""/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.Network/privateLinkServices/MyPLS"" --connection-name tttt -l centralus
 """
 
 helps['network private-endpoint delete'] = """
@@ -3271,9 +3271,13 @@ short-summary: Delete a private link service endpoint connection.
 helps['network private-link-service connection update'] = """
 type: command
 short-summary: Update a private link service endpoint connection.
+long-summary: >
+    To update the connection status, the name of the connection should be provided.
+    Please obtain this name by running 'az network private-link-service show -g MyResourceGroup -n MyPLSName'.
+    The connection name is under the 'privateEndpointConnections' filed.
 examples:
   - name: Update the endpoint connections status of private link service
-    text: az network private-link-service connection update -g MyResourceGroup -n tttt.f072a430-2d82-4470-ab30-d23fcfee58d1 --service-name MyPLSName --connection-status Rejected
+    text: az network private-link-service connection update -g MyResourceGroup -n MyEndpointName.f072a430-2d82-4470-ab30-d23fcfee58d1 --service-name MyPLSName --connection-status Rejected
 """
 
 helps['network profile'] = """

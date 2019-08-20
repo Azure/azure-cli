@@ -91,9 +91,9 @@ class NetworkPrivateEndpoints(ScenarioTest):
         # Create PLS
         self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet1} -l {location}')
         self.cmd('network lb create -g {rg} -l {location} -n {lb} --public-ip-address {ip} --sku {sku}')
-        self.cmd('network vnet subnet update -g {rg} -n {subnet1} --vnet-name {vnet} --private-link-service-network-policies Disabled')
+        self.cmd('network vnet subnet update -g {rg} -n {subnet1} --vnet-name {vnet} --disable-private-endpoint-network-policies')
         self.cmd('network vnet subnet create -g {rg} -n {subnet2} --vnet-name {vnet} --address-prefixes 10.0.2.0/24')
-        self.cmd('network vnet subnet update -g {rg} -n {subnet2} --vnet-name {vnet} --private-endpoint-network-policies Disabled')
+        self.cmd('network vnet subnet update -g {rg} -n {subnet2} --vnet-name {vnet} --disable-private-endpoint-network-policies')
         pls1 = self.cmd('network private-link-service create -g {rg} -n {lks1} --vnet-name {vnet} --subnet {subnet1} --lb-name {lb} --lb-frontend-ip-configs LoadBalancerFrontEnd -l {location}', checks=[
             self.check('type', 'Microsoft.Network/privateLinkServices'),
             self.check('provisioningState', 'Succeeded'),
@@ -153,9 +153,9 @@ class NetworkPrivateLinkService(ScenarioTest):
 
         self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet1} -l {location}')
         self.cmd('network lb create -g {rg} -l {location} -n {lb} --public-ip-address {ip} --sku {sku}')
-        self.cmd('network vnet subnet update -g {rg} -n {subnet1} --vnet-name {vnet} --private-link-service-network-policies Disabled')
+        self.cmd('network vnet subnet update -g {rg} -n {subnet1} --vnet-name {vnet} --disable-private-endpoint-network-policies')
         self.cmd('network vnet subnet create -g {rg} -n {subnet2} --vnet-name {vnet} --address-prefixes 10.0.2.0/24')
-        self.cmd('network vnet subnet update -g {rg} -n {subnet2} --vnet-name {vnet} --private-endpoint-network-policies Disabled')
+        self.cmd('network vnet subnet update -g {rg} -n {subnet2} --vnet-name {vnet} --disable-private-endpoint-network-policies')
         self.cmd('network private-link-service create -g {rg} -n {lks1} --vnet-name {vnet} --subnet {subnet1} --lb-name {lb} --lb-frontend-ip-configs LoadBalancerFrontEnd -l {location}', checks=[
             self.check('type', 'Microsoft.Network/privateLinkServices'),
             self.check('length(ipConfigurations)', 1),

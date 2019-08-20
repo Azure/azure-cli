@@ -3816,8 +3816,8 @@ def create_subnet(cmd, resource_group_name, virtual_network_name, subnet_name,
 
 def update_subnet(cmd, instance, resource_group_name, address_prefix=None, network_security_group=None,
                   route_table=None, service_endpoints=None, delegations=None, nat_gateway=None,
-                  service_endpoint_policy=None, private_endpoint_network_policies=None,
-                  private_link_service_network_policies=None):
+                  service_endpoint_policy=None, disable_private_endpoint_network_policies=None,
+                  disable_private_link_service_network_policies=None):
     NetworkSecurityGroup, ServiceEndpoint, SubResource = cmd.get_models(
         'NetworkSecurityGroup', 'ServiceEndpointPropertiesFormat', 'SubResource')
 
@@ -3857,11 +3857,11 @@ def update_subnet(cmd, instance, resource_group_name, address_prefix=None, netwo
     if delegations:
         instance.delegations = delegations
 
-    if private_endpoint_network_policies is not None:
-        instance.private_endpoint_network_policies = private_endpoint_network_policies
+    if disable_private_endpoint_network_policies is not None:
+        instance.private_endpoint_network_policies = disable_private_endpoint_network_policies
 
-    if private_link_service_network_policies is not None:
-        instance.private_link_service_network_policies = private_link_service_network_policies
+    if disable_private_link_service_network_policies is not None:
+        instance.private_link_service_network_policies = disable_private_link_service_network_policies
 
     return instance
 
