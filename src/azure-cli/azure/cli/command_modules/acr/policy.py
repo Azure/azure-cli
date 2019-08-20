@@ -16,7 +16,7 @@ def acr_config_content_trust_show(cmd,
     registry, _ = validate_premium_registry(
         cmd, registry_name, resource_group_name, POLICIES_NOT_SUPPORTED)
     policies = registry.policies
-    trust_policy = policies.trust_policy if policies else None
+    trust_policy = policies.trust_policy if policies else {}
     return trust_policy
 
 

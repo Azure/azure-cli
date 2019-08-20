@@ -10,7 +10,6 @@ from azure.cli.core.commands.parameters import get_resources_in_subscription
 
 from ._constants import (
     REGISTRY_RESOURCE_TYPE,
-    STORAGE_RESOURCE_TYPE,
     TASK_RESOURCE_ID_TEMPLATE,
     ACR_TASK_YAML_DEFAULT_NAME,
     get_classic_sku,
@@ -80,15 +79,6 @@ def get_resource_group_name_by_registry_name(cli_ctx, registry_name,
         resource_group_name = _get_resource_group_name_by_resource_id(
             arm_resource.id)
     return resource_group_name
-
-
-def get_resource_id_by_storage_account_name(cli_ctx, storage_account_name):
-    """Returns the resource id for the storage account.
-    :param str storage_account_name: The name of storage account
-    """
-    arm_resource = _arm_get_resource_by_name(
-        cli_ctx, storage_account_name, STORAGE_RESOURCE_TYPE)
-    return arm_resource.id
 
 
 def get_registry_by_name(cli_ctx, registry_name, resource_group_name=None):
