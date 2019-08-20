@@ -8,12 +8,13 @@ from knack.log import get_logger
 logger = get_logger(__name__)
 
 
-def create_log_alert(cmd, client, resource_group_name, rule_name, location, frequency, timeWindow,
-                     dataSourceId, alertQuery, queryType,
-                     severity, thresholdOperator, threshold, throttling=None,
-                     metricColumn=None, metricTriggerType=None, metricThresholdOperator=None, metricThreshold=None,
-                     actionGroup=None, customWebhookPayload=None, emailSubject=None,
-                     authorizedResources=None, description=None, tags=None, disable=False):
+def create_log_alert( # pylint: disable=too-many-locals
+        cmd, client, resource_group_name, rule_name, location, frequency, timeWindow,
+        dataSourceId, alertQuery, queryType,
+        severity, thresholdOperator, threshold, throttling=None,
+        metricColumn=None, metricTriggerType=None, metricThresholdOperator=None, metricThreshold=None,
+        actionGroup=None, customWebhookPayload=None, emailSubject=None,
+        authorizedResources=None, description=None, tags=None, disable=False):
     from azure.mgmt.monitor.models import (LogSearchRuleResource, Schedule, Source,
                                            TriggerCondition, AlertingAction, AzNsActionGroup, LogMetricTrigger)
     from knack.util import CLIError
@@ -53,14 +54,15 @@ def list_log_alert(client, resource_group_name=None):
     return client.list_by_subscription()
 
 
-def update(cmd, instance, resource_group_name, enabled=None, tags=None, description=None, frequency=None,
-           timeWindow=None, alertQuery=None, severity=None,
-           thresholdOperator=None, threshold=None, throttling=None,
-           metricColumn=None, metricTriggerType=None, metricThresholdOperator=None, metricThreshold=None,
-           resetActionGroup=None, addActionGroups=None, removeActionGroups=None,
-           customWebhookPayload=None, emailSubject=None, resetEmailSubject=None,
-           resetCustomWebhookPayload=None, resetMetricTrigger=None, resetAuthorizedResources=None,
-           addAuthorizedResources=None, removeAuthorizedResources=None):
+def update( # pylint: disable=too-many-locals
+        cmd, instance, resource_group_name, enabled=None, tags=None, description=None, frequency=None,
+        timeWindow=None, alertQuery=None, severity=None,
+        thresholdOperator=None, threshold=None, throttling=None,
+        metricColumn=None, metricTriggerType=None, metricThresholdOperator=None, metricThreshold=None,
+        resetActionGroup=None, addActionGroups=None, removeActionGroups=None,
+        customWebhookPayload=None, emailSubject=None, resetEmailSubject=None,
+        resetCustomWebhookPayload=None, resetMetricTrigger=None, resetAuthorizedResources=None,
+        addAuthorizedResources=None, removeAuthorizedResources=None):
     # --tags "" is set as tags={}. Used for clearing tags.
     if tags or tags == {}:
         instance.tags = tags
@@ -211,7 +213,7 @@ def update_authorized_resources(instance, resetAuthorizedResources=None, addAuth
             else:
                 raise CLIError(
                     'Error in removing authorized resource. Authorized resource "{}" is not attached to alert rule.'
-                    .format(authorizedResources))   
+                    .format(authorizedResources))
 
     return instance
 
