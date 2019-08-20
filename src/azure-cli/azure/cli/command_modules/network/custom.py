@@ -2074,7 +2074,8 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
                          public_ip_dns_name=None, subnet=None, subnet_address_prefix='10.0.0.0/24',
                          virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
                          public_ip_address_type=None, subnet_type=None, validate=False,
-                         no_wait=False, sku=None, frontend_ip_zone=None, public_ip_zone=None):
+                         no_wait=False, sku=None, frontend_ip_zone=None, public_ip_zone=None,
+                         private_ip_address_version=None):
     from azure.cli.core.util import random_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.network._template_builder import (
@@ -2125,7 +2126,7 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
     load_balancer_resource = build_load_balancer_resource(
         cmd, load_balancer_name, location, tags, backend_pool_name, frontend_ip_name,
         public_ip_id, subnet_id, private_ip_address, private_ip_allocation, sku,
-        frontend_ip_zone)
+        frontend_ip_zone, private_ip_address_version)
     load_balancer_resource['dependsOn'] = lb_dependencies
     master_template.add_resource(load_balancer_resource)
     master_template.add_output('loadBalancer', load_balancer_name, output_type='object')
@@ -2237,7 +2238,7 @@ def set_lb_inbound_nat_pool(
 def create_lb_frontend_ip_configuration(
         cmd, resource_group_name, load_balancer_name, item_name, public_ip_address=None,
         public_ip_prefix=None, subnet=None, virtual_network_name=None, private_ip_address=None,
-        private_ip_address_allocation=None, zone=None):
+        private_ip_address_version=None, private_ip_address_allocation=None, zone=None):
     FrontendIPConfiguration, SubResource, Subnet = cmd.get_models(
         'FrontendIPConfiguration', 'SubResource', 'Subnet')
     ncf = network_client_factory(cmd.cli_ctx)
@@ -2249,6 +2250,7 @@ def create_lb_frontend_ip_configuration(
     new_config = FrontendIPConfiguration(
         name=item_name,
         private_ip_address=private_ip_address,
+        private_ip_address_version=private_ip_address_version,
         private_ip_allocation_method=private_ip_address_allocation,
         public_ip_address=SubResource(id=public_ip_address) if public_ip_address else None,
         public_ip_prefix=SubResource(id=public_ip_prefix) if public_ip_prefix else None,
@@ -2264,15 +2266,19 @@ def create_lb_frontend_ip_configuration(
 
 def set_lb_frontend_ip_configuration(
         cmd, instance, parent, item_name, private_ip_address=None,
-        private_ip_address_allocation=None, public_ip_address=None, subnet=None,
-        virtual_network_name=None, public_ip_prefix=None):
+        private_ip_address_allocation=None, public_ip_address=None,
+        subnet=None, virtual_network_name=None, public_ip_prefix=None):
     PublicIPAddress, Subnet, SubResource = cmd.get_models('PublicIPAddress', 'Subnet', 'SubResource')
-    if private_ip_address == '':
+    if not private_ip_address:
         instance.private_ip_allocation_method = 'dynamic'
         instance.private_ip_address = None
     elif private_ip_address is not None:
         instance.private_ip_allocation_method = 'static'
         instance.private_ip_address = private_ip_address
+
+    # Doesn't support update operation for now
+    # if cmd.supported_api_version(min_api='2019-04-01'):
+    #    instance.private_ip_address_version = private_ip_address_version
 
     if subnet == '':
         instance.subnet = None

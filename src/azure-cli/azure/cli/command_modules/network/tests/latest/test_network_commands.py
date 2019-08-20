@@ -91,9 +91,12 @@ class NetworkLoadBalancerWithZone(ScenarioTest):
 
         self.kwargs.update({
             'lb': 'lb1',
+            'lb2': 'lb4',
+            'lb3': 'lb5',
             'zone': '2',
             'location': 'eastus2',
-            'ip': 'pubip1'
+            'ip': 'pubip1',
+            'ip2': 'pubip2'
         })
 
         # LB with public ip
@@ -119,6 +122,19 @@ class NetworkLoadBalancerWithZone(ScenarioTest):
         # add a second frontend ip configuration
         self.cmd('network lb frontend-ip create -g {rg} --lb-name {lb} -n LoadBalancerFrontEnd2 -z {zone}  --vnet-name vnet1 --subnet subnet1', checks=[
             self.check("zones", [self.kwargs['zone']])
+        ])
+
+        # test for private-ip-address-version
+        self.cmd('network lb create -g {rg} -n {lb2} -l westcentralus --sku Standard')
+        self.cmd('network public-ip create -n {ip2} -g {rg} -l westcentralus --sku Standard --allocation-method Static --version IPv6')
+        self.cmd('network lb frontend-ip create --lb-name {lb2} -n ipv6 -g {rg} --private-ip-address-version IPv6 --public-ip-address {ip2}', checks=[
+            self.check('name', 'ipv6'),
+            self.check('privateIpAddressVersion', 'IPv6'),
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('network lb create -g {rg} -n {lb3} --sku Standard -l westcentralus --private-ip-address-version IPv6', checks=[
+            self.check('loadBalancer.frontendIPConfigurations[0].properties.privateIPAddressVersion', 'IPv6')
         ])
 
 
