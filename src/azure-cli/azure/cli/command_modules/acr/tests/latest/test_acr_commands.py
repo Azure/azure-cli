@@ -21,7 +21,7 @@ class AcrCommandsTests(ScenarioTest):
                                     self.check('location', location),
                                     self.check('adminUserEnabled', False)]).get_output_in_json()
 
-        if registry['sku']['name'] == 'Standard':
+        if registry['sku']['name'] == 'Premium':
             self.cmd('acr show-usage -n {} -g {}'.format(registry_name, resource_group))
 
         # enable admin user
@@ -31,6 +31,13 @@ class AcrCommandsTests(ScenarioTest):
                          self.check('tags', {'cat': '', 'foo': 'bar'}),
                          self.check('adminUserEnabled', True),
                          self.check('provisioningState', 'Succeeded')])
+
+        # test content-trust
+        self.cmd('acr config content-trust update -n {} --status enabled'.format(registry_name),
+                 checks=[self.check('status', "enabled")])
+
+        self.cmd('acr config content-trust show -n {}'.format(registry_name),
+                 checks=[self.check('status', "enabled")])
 
         # test credential module
         credential = self.cmd(
@@ -83,15 +90,15 @@ class AcrCommandsTests(ScenarioTest):
         self.kwargs.update({
             'registry_name': registry_name,
             'rg_loc': resource_group_location,
-            'sku': 'Standard'
+            'sku': 'Premium'
         })
 
         self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku}',
                  checks=[self.check('name', '{registry_name}'),
                          self.check('location', '{rg_loc}'),
                          self.check('adminUserEnabled', False),
-                         self.check('sku.name', 'Standard'),
-                         self.check('sku.tier', 'Standard'),
+                         self.check('sku.name', 'Premium'),
+                         self.check('sku.tier', 'Premium'),
                          self.check('provisioningState', 'Succeeded')])
 
         self._core_registry_scenario(registry_name, resource_group, resource_group_location)
