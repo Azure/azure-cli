@@ -7,9 +7,35 @@ Release History
 
 * Added "appconfig kv restore" command.
 
+**AppService**
+
+* Fixed az webapp webjob continuous start command when specifying a slot.
+
+**AppService**
+
+* az webapp up detects env folder and removes it from compressed file used for deployment
+
 **keyvault**
 
 * Fix the bug in secret set command that igores the expires argument
+
+**RBAC**
+
+* Fix #10151 - `az ad app update --homepage` not updating homepage.
+
+**ServiceFabric**
+
+* Fix for issues #7145,  #7880 and #7889 - fix for key vault and cert issues when creating a cluster.
+* Fix for issue #7130 - fix add cert command. Using the cluster resource group when the key vault resource group is not specified.
+* Fix for issue #9711 - fix command 'cluster setting set' command. Using named parameters for SettingsSectionDescription constructor.
+
+**Storage**
+
+* Add `revoke-delegation-keys` command for storage account
+
+**Network**
+
+* az network lb create/frontend-ip create: Fixes #10018. Support `--private-ip-address-version` argument to create IPv6 based private-ip-address 
 
 2.0.71
 ++++++

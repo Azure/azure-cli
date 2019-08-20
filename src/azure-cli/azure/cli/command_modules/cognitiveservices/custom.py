@@ -75,10 +75,10 @@ def create(
         'do not apply to these Cognitive Services.'\
         'Please refer to the Microsoft Cognitive Services section in the Online '\
         'Services Terms'\
-        ' (https://www.microsoft.com/en-us/Licensing/product-licensing/products.aspx)'\
+        ' (https://www.microsoft.com/Licensing/product-licensing/products.aspx)'\
         ' for details.'\
         'Microsoft offers policy controls that may be used to disable new Cognitive'\
-        ' Services deployments (https://docs.microsoft.com/en-us/azure/cognitive-servic'\
+        ' Services deployments (https://docs.microsoft.com/azure/cognitive-servic'\
         'es/cognitive-services-apis-create-account).'
     hint = '\nPlease select'
     import re
