@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**ACR**
+
+* Move to 2019-05-01 api-version for ACR resources.
+
 **AppService**
 
 * az webapp up detects env folder and removes it from compressed file used for deployment
