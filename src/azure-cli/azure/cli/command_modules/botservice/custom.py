@@ -96,7 +96,7 @@ def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, pa
     except Exception as e:
         logger.debug(e)
         raise CLIError("--appid must be a valid GUID from a Microsoft Azure AD Application Registration. See "
-                       "https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app for "
+                       "https://docs.microsoft.com/azure/active-directory/develop/quickstart-register-app for "
                        "more information on App Registrations. See 'az bot create --help' for more CLI information.")
     if not password:
         raise CLIError("--password cannot have a length of 0. This value is used to authorize calls to your bot. See "

@@ -228,7 +228,7 @@ def _parse_clear_tracks_json(clear_tracks):
         except TypeError as ex:
             errorMessage = 'For further information on how to build the JSON ' \
                 'containing a list of TrackSelection, please refer to ' \
-                'https://docs.microsoft.com/en-us/rest/api/media/streamingpolicies/create#trackselection'
+                'https://docs.microsoft.com/rest/api/media/streamingpolicies/create#trackselection'
             raise CLIError('{}. {}'.format(str(ex), errorMessage))
     return clear_tracks_result
 

@@ -36,7 +36,7 @@ helps['lab vm create'] = """
                     Use `az lab formula` with the `--export-artifacts` flag to export and update artifacts, then pass
                     the results via the `--artifacts` argument.
                 - name: --size
-                  short-summary: 'The size of the VM to be created. See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info.'
+                  short-summary: 'The size of the VM to be created. See https://azure.microsoft.com/pricing/details/virtual-machines/ for size info.'
                 - name: --admin-username
                   short-summary: Username for the VM admin.
                 - name: --admin-password
