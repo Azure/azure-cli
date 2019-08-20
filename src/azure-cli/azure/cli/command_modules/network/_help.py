@@ -4029,6 +4029,8 @@ examples:
     text: az network vnet subnet update -g MyResourceGroup -n MySubnet --vnet-name MyVNet --network-security-group MyNsg
   - name: Update subnet with NAT gateway.
     text: az network vnet subnet update -n MySubnet --vnet-name MyVnet -g MyResourceGroup --nat-gateway MyNatGateway --address-prefixes "10.0.0.0/21"
+  - name: Disable the private endpoint network policies
+    text: az network vnet subnet update -n MySubnet --vnet-name MyVnet -g MyResourceGroup --disable-private-endpoint-network-policies
 """
 
 helps['network vnet update'] = """
