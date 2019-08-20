@@ -642,6 +642,7 @@ def load_arguments(self, _):
         c.argument('floating_ip', help='Enable floating IP.', arg_type=get_three_state_flag())
         c.argument('idle_timeout', help='Idle timeout in minutes.', type=int)
         c.argument('protocol', help='Network transport protocol.', arg_type=get_enum_type(TransportProtocol))
+        c.argument('private_ip_address_version', min_api='2019-04-01', help='The private IP address version to use.', default=IPVersion.ipv4.value if IPVersion else '')
         for item in ['backend_pool_name', 'backend_address_pool_name']:
             c.argument(item, options_list='--backend-pool-name', help='The name of the backend address pool.', completer=get_lb_subresource_completion_list('backend_address_pools'))
 
