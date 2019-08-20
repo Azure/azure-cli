@@ -2116,7 +2116,7 @@ def create_private_link_service(cmd, resource_group_name, service_name, subnet, 
     FrontendIPConfiguration, PrivateLinkService, PrivateLinkServiceIpConfiguration, PublicIPAddress, Subnet = \
         cmd.get_models('FrontendIPConfiguration', 'PrivateLinkService', 'PrivateLinkServiceIpConfiguration',
                        'PublicIPAddress', 'Subnet')
-    ip_config = PrivateLinkServiceIpConfiguration(
+    pls_ip_config = PrivateLinkServiceIpConfiguration(
         name='{}_ipconfig_0'.format(service_name),
         private_ip_address=private_ip_address,
         private_ip_allocation_method=private_ip_allocation_method,
@@ -2129,7 +2129,7 @@ def create_private_link_service(cmd, resource_group_name, service_name, subnet, 
         load_balancer_frontend_ip_configurations=frontend_ip_configurations and [
             FrontendIPConfiguration(id=ip_config) for ip_config in frontend_ip_configurations
         ],
-        ip_configurations=[ip_config],
+        ip_configurations=[pls_ip_config],
         visbility=visibility,
         auto_approval=auto_approval,
         fqdns=fqdns,
