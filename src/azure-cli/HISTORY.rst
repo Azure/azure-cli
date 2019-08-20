@@ -3,6 +3,11 @@
 Release History
 ===============
 
+**ACR**
+
+* Move to 2019-05-01 api-version, which follows replace semantics for ACR resource creation.
+* Breaking change: Classic SKU no longer supported.
+
 **AppService**
 
 * Fixed az webapp webjob continuous start command when specifying a slot.
