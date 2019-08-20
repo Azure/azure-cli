@@ -1206,7 +1206,7 @@ def create_application(client, display_name, homepage, identifier_uris,
         return client.create(app_create_param)
     except GraphErrorException as ex:
         if 'insufficient privileges' in str(ex).lower():
-            link = 'https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
+            link = 'https://docs.microsoft.com/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
             raise CLIError("Directory permission is needed for the current user to register the application. "
                            "For how to configure, please refer '{}'. Original error: {}".format(link, ex))
         raise
@@ -1229,7 +1229,7 @@ def update_application(client, object_id, display_name, homepage, identifier_uri
         return
     except GraphErrorException as ex:
         if 'insufficient privileges' in str(ex).lower():
-            link = 'https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
+            link = 'https://docs.microsoft.com/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
             raise CLIError("Directory permission is needed for the current user to register the application. "
                            "For how to configure, please refer '{}'. Original error: {}".format(link, ex))
         raise
