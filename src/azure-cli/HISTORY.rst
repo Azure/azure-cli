@@ -5,6 +5,10 @@ Release History
 
 **AppService**
 
+* Fixed az webapp webjob continuous start command when specifying a slot.
+
+**AppService**
+
 * az webapp up detects env folder and removes it from compressed file used for deployment
 
 **keyvault**
