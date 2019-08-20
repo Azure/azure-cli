@@ -123,9 +123,6 @@ def load_arguments(self, _):
         c.argument('auto_scale_formula', help='A formula for the desired number of compute nodes in the pool. The formula is checked for validity before the pool is created. If the formula is not valid, the Batch service rejects the request with detailed error information. For more information about specifying this formula, see https://azure.microsoft.com/documentation/articles/batch-automatic-scaling/.')
         c.extra('image', completer=load_supported_images, arg_group="Pool: Virtual Machine Configuration",
                 help="OS image reference. This can be either 'publisher:offer:sku[:version]' format, or a fully qualified ARM image id of the form '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.Compute/images/{imageName}'. If 'publisher:offer:sku[:version]' format, version is optional and if omitted latest will be used. Valid values can be retrieved via 'az batch pool supported-images list'. For example: 'MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:latest'")
-        c.extra('public_ips', nargs='+', arg_group="Pool: Network Configuration",
-                help="Space separated list of public IPs (resource ID) which the Batch service will use when provisioning Compute Nodes. If not specified Batch will automatically allocate publicIP's internally. Each element of this collection is of the form:"
-                     " /subscriptions/{subscription}/resourceGroups/{group}/providers/Microsoft.Network/publicIPAddresses/{ip}.")
 
     with self.argument_context('batch certificate') as c:
         c.argument('thumbprint', help='The certificate thumbprint.')
