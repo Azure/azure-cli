@@ -9,10 +9,9 @@ logger = get_logger(__name__)
 
 
 def _get_resource_group_location(cli_ctx, resource_group_name):
-    from azure.mgmt.resource import ResourceManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-
-    client = get_mgmt_service_client(cli_ctx, ResourceManagementClient)
+    from azure.cli.core.profiles import ResourceType
+    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     # pylint: disable=no-member
     return client.resource_groups.get(resource_group_name).location
 

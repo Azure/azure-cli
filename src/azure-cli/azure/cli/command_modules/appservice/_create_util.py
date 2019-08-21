@@ -6,7 +6,6 @@
 import os
 import zipfile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.mgmt.resource.resources.models import ResourceGroup
 from ._constants import (NETCORE_VERSION_DEFAULT, NETCORE_VERSIONS, NODE_VERSION_DEFAULT,
                          NODE_VERSIONS, NETCORE_RUNTIME_NAME, NODE_RUNTIME_NAME, DOTNET_RUNTIME_NAME,
                          DOTNET_VERSION_DEFAULT, DOTNET_VERSIONS, STATIC_RUNTIME_NAME,
@@ -74,7 +73,9 @@ def get_runtime_version_details(file_path, lang_name):
 
 
 def create_resource_group(cmd, rg_name, location):
+    from azure.cli.core.profiles import ResourceType, get_sdk
     rcf = _resource_client_factory(cmd.cli_ctx)
+    ResourceGroup = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'ResourceGroup', mod='models')
     rg_params = ResourceGroup(location=location)
     return rcf.resource_groups.create_or_update(rg_name, rg_params)
 

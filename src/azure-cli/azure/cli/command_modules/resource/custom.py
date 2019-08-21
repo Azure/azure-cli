@@ -23,9 +23,6 @@ from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
 from azure.mgmt.resource.resources.models import GenericResource
 
-from azure.mgmt.resource.locks.models import ManagementLockObject
-from azure.mgmt.resource.links.models import ResourceLinkProperties
-
 from azure.cli.core.parser import IncorrectUsageError
 from azure.cli.core.util import get_file_json, shell_safe_json_parse, sdk_no_wait
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -1669,6 +1666,7 @@ def create_lock(cmd, lock_name, level,
     :param notes: Notes about this lock.
     :type notes: str
     """
+    ManagementLockObject = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_LOCKS, 'ManagementLockObject', mod='models')
     parameters = ManagementLockObject(level=level, notes=notes, name=lock_name)
 
     lock_client = _resource_lock_client_factory(cmd.cli_ctx)
@@ -1747,6 +1745,8 @@ def update_lock(cmd, lock_name=None, resource_group=None, resource_provider_name
 # region ResourceLinks
 def create_resource_link(cmd, link_id, target_id, notes=None):
     links_client = _resource_links_client_factory(cmd.cli_ctx).resource_links
+    ResourceLinkProperties = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_LINKS,
+                                     'ResourceLinkProperties', mod='models')
     properties = ResourceLinkProperties(target_id=target_id, notes=notes)
     links_client.create_or_update(link_id, properties)
 
@@ -1754,6 +1754,8 @@ def create_resource_link(cmd, link_id, target_id, notes=None):
 def update_resource_link(cmd, link_id, target_id=None, notes=None):
     links_client = _resource_links_client_factory(cmd.cli_ctx).resource_links
     params = links_client.get(link_id)
+    ResourceLinkProperties = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_LINKS,
+                                     'ResourceLinkProperties', mod='models')
     properties = ResourceLinkProperties(
         target_id=target_id if target_id is not None else params.properties.target_id,
         # pylint: disable=no-member
