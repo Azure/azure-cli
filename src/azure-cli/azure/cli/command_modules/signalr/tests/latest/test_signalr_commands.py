@@ -18,11 +18,11 @@ class AzureSignalRServiceScenarioTest(ScenarioTest):
         tags_key = 'key'
         tags_val = 'value'
         service_mode = 'Classic'
-        allowed_origins = ['http://example1.com']
+        allowed_origins = ['http://example1.com', 'http://example2.com']
         updated_sku = 'Free_F1'
         updated_tags_val = 'value2'
         update_service_mode = 'Serverless'
-        added_allowed_origins = 'http://example3.com'
+        added_allowed_origins = ['http://example3.com', 'http://example4.com']
 
         self.kwargs.update({
             'location': location,
@@ -31,11 +31,11 @@ class AzureSignalRServiceScenarioTest(ScenarioTest):
             'unit_count': unit_count,
             'tags': '{}={}'.format(tags_key, tags_val),
             'service_mode': service_mode,
-            'allowed_origins': ''.join(allowed_origins),
+            'allowed_origins': ' '.join(allowed_origins),
             'updated_sku': updated_sku,
             'updated_tags': '{}={}'.format(tags_key, updated_tags_val),
             'update_service_mode': update_service_mode,
-            'added_allowed_origins': added_allowed_origins,
+            'added_allowed_origins': ' '.join(added_allowed_origins),
         })
 
         # Test create
@@ -105,8 +105,7 @@ class AzureSignalRServiceScenarioTest(ScenarioTest):
         ])
 
         self.cmd('az signalr cors add -n {signalr_name} -g {rg} --allowed-origins {added_allowed_origins}', checks=[
-            self.check('cors.allowedOrigins[0]', '*'),
-            self.check('cors.allowedOrigins[1]', '{added_allowed_origins}')
+            self.check('cors.allowedOrigins', ['*'] + added_allowed_origins)
         ])
 
         # Test key list

@@ -102,23 +102,23 @@ helps['signalr key renew'] = """
 
 helps['signalr cors add'] = """
     type: command
-    short-summary: Add allowed origions to a SignalR Service
+    short-summary: Add allowed origins to a SignalR Service
     examples:
-        - name: Add a list of allowed origions to a SignalR Service
+        - name: Add a list of allowed origins to a SignalR Service
           text: >
             az signalr cors add -n MySignalR -g MyResourceGroup --allowed-origins "http://example1.com" "https://example2.com"
 """
 
 helps['signalr cors list'] = """
     type: command
-    short-summary: List allowed origions of a SignalR Service
+    short-summary: List allowed origins of a SignalR Service
 """
 
 helps['signalr cors remove'] = """
     type: command
-    short-summary: Remove allowed origions from a SignalR Service
+    short-summary: Remove allowed origins from a SignalR Service
     examples:
-        - name: Remove a list of allowed origions from a SignalR Service
+        - name: Remove a list of allowed origins from a SignalR Service
           text: >
             az signalr cors remove -n MySignalR -g MyResourceGroup --allowed-origins "http://example1.com" "https://example2.com"
 """
