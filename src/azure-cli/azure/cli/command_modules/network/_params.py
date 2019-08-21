@@ -32,7 +32,8 @@ from azure.cli.command_modules.network._validators import (
     WafConfigExclusionAction, validate_express_route_peering, validate_virtual_hub,
     validate_express_route_port, bandwidth_validator_factory,
     get_header_configuration_validator, validate_nat_gateway, validate_match_variables,
-    validate_waf_policy, get_subscription_list_validator, validate_frontend_ip_configs, validate_application_gateway_identity)
+    validate_waf_policy, get_subscription_list_validator, validate_frontend_ip_configs,
+    validate_application_gateway_identity)
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 from azure.cli.command_modules.network._completers import (
     subnet_completion_list, get_lb_subresource_completion_list, get_ag_subresource_completion_list,
@@ -111,9 +112,7 @@ def load_arguments(self, _):
 
     with self.argument_context('network application-gateway', arg_group='Identity') as c:
         c.argument('identity_type', help="The type of identity used for the resource.", arg_type=get_enum_type(['SystemAssigned', 'UserAssigned', 'None']))
-        c.argument('user_assigned_identity', options_list=['--identity'], help="Name or ID of the ManagedIdentity Resource", validator=validate_application_gateway_identity)
-        c.argument('principal_id', help='The principal id of user assigned identity.')
-        c.argument('client_id', help='The client id of user assigned identity.')
+        c.argument('user_assigned_identity', options_list='--identity', help="Name or ID of the ManagedIdentity Resource", validator=validate_application_gateway_identity)
 
     with self.argument_context('network application-gateway', arg_group='Network') as c:
         c.argument('virtual_network_name', virtual_network_name_type)
@@ -144,7 +143,7 @@ def load_arguments(self, _):
         c.argument('cert_password', help='The certificate password')
         c.argument('http_settings_port', help='The HTTP settings port.')
         c.argument('servers', ag_servers_type)
-        c.argument('key_vault_secret_id', help="Secret Id of (base-64 encoded unencrypted pfx) 'Secret' or 'Certificate' object stored in Azure KeyVault.", is_preview=True)
+        c.argument('key_vault_secret_id', help="Secret Id of (base-64 encoded unencrypted pfx) 'Secret' or 'Certificate' object stored in Azure KeyVault. You need enable soft delete for keyvault to use this feature.", is_preview=True)
 
     with self.argument_context('network application-gateway update', arg_group=None) as c:
         c.argument('sku', default=None)

@@ -133,8 +133,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
                                public_ip_address_type=None, subnet_type=None, validate=False,
                                connection_draining_timeout=0, enable_http2=None, min_capacity=None, zones=None,
                                custom_error_pages=None, firewall_policy=None, max_capacity=None,
-                               identity_type=None, user_assigned_identity=None,
-                               client_id=None, principal_id=None):
+                               identity_type=None, user_assigned_identity=None):
     from azure.cli.core.util import random_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.network._template_builder import (
@@ -186,7 +185,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
         http_settings_cookie_based_affinity, http_settings_protocol, http_settings_port,
         http_listener_protocol, routing_rule_type, public_ip_id, subnet_id,
         connection_draining_timeout, enable_http2, min_capacity, zones, custom_error_pages,
-        firewall_policy, max_capacity, identity_type, user_assigned_identity, client_id, principal_id)
+        firewall_policy, max_capacity, identity_type, user_assigned_identity)
     app_gateway_resource['dependsOn'] = ag_dependencies
     master_template.add_variable(
         'appGwID',
@@ -364,21 +363,17 @@ def update_ag_http_listener(cmd, instance, parent, item_name, frontend_ip=None, 
 
 
 def assign_ag_identity(cmd, resource_group_name, application_gateway_name,
-                       no_wait=False, identity_type=None, user_assigned_identity=None,
-                       client_id=None, principal_id=None):
+                       identity_type, user_assigned_identity, no_wait=False):
     ncf = network_client_factory(cmd.cli_ctx).application_gateways
     ag = ncf.get(resource_group_name, application_gateway_name)
     ManagedServiceIdentity, ManagedServiceIdentityUserAssignedIdentitiesValue = \
         cmd.get_models('ManagedServiceIdentity', 'ManagedServiceIdentityUserAssignedIdentitiesValue')
-    user_assigned_indentity_instance = ManagedServiceIdentityUserAssignedIdentitiesValue(
-        client_id=client_id,
-        principal_id=principal_id
-    )
+    user_assigned_indentity_instance = ManagedServiceIdentityUserAssignedIdentitiesValue()
+
     user_assigned_identities_instance = dict()
-    if user_assigned_identity is not None:
-        user_assigned_identities_instance[user_assigned_identity] = user_assigned_indentity_instance
-    else:
-        user_assigned_identities_instance = None
+
+    user_assigned_identities_instance[user_assigned_identity] = user_assigned_indentity_instance
+
     identity_instance = ManagedServiceIdentity(
         type=identity_type,
         user_assigned_identities=user_assigned_identities_instance
