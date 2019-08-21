@@ -16,6 +16,10 @@ Release History
 
 * az webapp up detects env folder and removes it from compressed file used for deployment
 
+**Backup**
+
+* Added Support for managed disk restore, InstantRP
+
 **keyvault**
 
 * Fix the bug in secret set command that igores the expires argument
