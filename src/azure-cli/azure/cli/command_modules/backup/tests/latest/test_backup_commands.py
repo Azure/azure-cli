@@ -414,18 +414,18 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertTrue(protection_check == '')
 
     @ResourceGroupPreparer()
-    @ResourceGroupPreparer(parameter_name="target_rg")
+    @ResourceGroupPreparer(parameter_name="TargetRg")
     @VaultPreparer()
     @VMPreparer()
     @ItemPreparer()
     @RPPreparer()
     @StorageAccountPreparer()
-    def test_backup_restore(self, resource_group, target_rg, vault_name, vm_name, storage_account):
+    def test_backup_restore(self, resource_group, TargetRg, vault_name, vm_name, storage_account):
 
         self.kwargs.update({
             'vault': vault_name,
             'vm': vm_name,
-            'target_rg': target_rg,
+            'target_rg': TargetRg,
             'rg' : resource_group,
         })
         self.kwargs['rp'] = self.cmd('backup recoverypoint list -g {rg} -v {vault} -c {vm} -i {vm} --query [0].name').get_output_in_json()
