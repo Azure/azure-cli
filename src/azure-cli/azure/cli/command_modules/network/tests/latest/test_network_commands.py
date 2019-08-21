@@ -75,13 +75,108 @@ class NetworkPrivateEndpoints(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_network_private_endpoints')
     def test_network_private_endpoints(self, resource_group):
 
+        self.kwargs.update({
+            'lb': 'lb1',
+            'sku': 'Standard',
+            'vnet': 'vnet1',
+            'subnet1': 'subnet1',
+            'subnet2': 'subnet2',
+            'location': 'centralus',
+            'ip': 'pubip1',
+            'lks1': 'lks1',
+            'lks2': 'lks2',
+            'pe': 'pe1'
+        })
+
+        # Create PLS
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet1} -l {location}')
+        self.cmd('network lb create -g {rg} -l {location} -n {lb} --public-ip-address {ip} --sku {sku}')
+        self.cmd('network vnet subnet update -g {rg} -n {subnet1} --vnet-name {vnet} --disable-private-endpoint-network-policies')
+        self.cmd('network vnet subnet create -g {rg} -n {subnet2} --vnet-name {vnet} --address-prefixes 10.0.2.0/24')
+        self.cmd('network vnet subnet update -g {rg} -n {subnet2} --vnet-name {vnet} --disable-private-endpoint-network-policies')
+        pls1 = self.cmd('network private-link-service create -g {rg} -n {lks1} --vnet-name {vnet} --subnet {subnet1} --lb-name {lb} --lb-frontend-ip-configs LoadBalancerFrontEnd -l {location}', checks=[
+            self.check('type', 'Microsoft.Network/privateLinkServices'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('name', self.kwargs['lks1'])
+        ]).get_output_in_json()
+        self.kwargs['pls_id'] = pls1['id']
+        self.cmd('network private-endpoint list-types -l {location}')
+
+        self.cmd('network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet2} --private-connection-resource-id {pls_id} --connection-name tttt -l {location}', checks=[
+            self.check('name', 'pe1'),
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('network private-endpoint update -g {rg} -n {pe} --request-message "test"', checks=[
+            self.check('privateLinkServiceConnections[0].requestMessage', 'test')
+        ])
+
+        self.cmd('network private-endpoint list')
+        self.cmd('network private-endpoint list -g {rg}', checks=[
+            self.check('length(@)', 1)
+        ])
+
+        pe_connection_name = self.cmd('network private-link-service show -g {rg} -n {lks1}').get_output_in_json()['privateEndpointConnections'][0]['name']
+        self.kwargs['pe_connect'] = pe_connection_name
+        self.cmd('network private-link-service connection update -g {rg} -n {pe_connect} --service-name {lks1} --connection-status Rejected')
+        self.cmd('network private-endpoint show -g {rg} -n {pe}', checks=[
+            self.check('privateLinkServiceConnections[0].privateLinkServiceConnectionState.status', 'Rejected')
+        ])
+        self.cmd('network private-link-service connection delete -g {rg} -n {pe_connect} --service-name {lks1}')
+        self.cmd('network private-link-service show -g {rg} -n {lks1}', checks=[
+            self.check('length(privateEndpointConnections)', 0)
+        ])
+        self.cmd('network private-endpoint delete -g {rg} -n {pe}')
+
+
+class NetworkPrivateLinkService(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_network_private_link_service')
+    def test_network_private_link_service(self, resource_group):
+
         # unable to create resource so we can only verify the commands don't fail (or fail expectedly)
         self.cmd('network private-endpoint list')
         self.cmd('network private-endpoint list -g {rg}')
 
-        # system code 3 for 'not found'
-        with self.assertRaisesRegexp(SystemExit, '3'):
-            self.cmd('network private-endpoint show -g {rg} -n dummy')
+        self.kwargs.update({
+            'lb': 'lb1',
+            'sku': 'Standard',
+            'vnet': 'vnet1',
+            'subnet1': 'subnet1',
+            'subnet2': 'subnet2',
+            'location': 'centralus',
+            'ip': 'pubip1',
+            'lks1': 'lks1',
+            'lks2': 'lks2',
+            'sub1': '00000000-0000-0000-0000-000000000000'
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet1} -l {location}')
+        self.cmd('network lb create -g {rg} -l {location} -n {lb} --public-ip-address {ip} --sku {sku}')
+        self.cmd('network vnet subnet update -g {rg} -n {subnet1} --vnet-name {vnet} --disable-private-endpoint-network-policies')
+        self.cmd('network vnet subnet create -g {rg} -n {subnet2} --vnet-name {vnet} --address-prefixes 10.0.2.0/24')
+        self.cmd('network vnet subnet update -g {rg} -n {subnet2} --vnet-name {vnet} --disable-private-endpoint-network-policies')
+        self.cmd('network private-link-service create -g {rg} -n {lks1} --vnet-name {vnet} --subnet {subnet1} --lb-name {lb} --lb-frontend-ip-configs LoadBalancerFrontEnd -l {location}', checks=[
+            self.check('type', 'Microsoft.Network/privateLinkServices'),
+            self.check('length(ipConfigurations)', 1),
+            self.check('length(loadBalancerFrontendIpConfigurations)', 1)
+        ])
+
+        self.cmd('network private-link-service update -g {rg} -n {lks1} --visibility {sub1} {sub1} --auto-approval {sub1} {sub1}', checks=[
+            self.check('length(visibility.subscriptions)', 2),
+            self.check('length(autoApproval.subscriptions)', 2)
+        ])
+        self.cmd('network private-link-service list -g {rg}', checks=[
+            self.check('length(@)', 1),
+            self.check('@[0].type', 'Microsoft.Network/privateLinkServices')
+        ])
+        self.cmd('network private-link-service show -g {rg} -n {lks1}', checks=[
+            self.check('type', 'Microsoft.Network/privateLinkServices'),
+            self.check('length(ipConfigurations)', 1),
+            self.check('length(loadBalancerFrontendIpConfigurations)', 1)
+        ])
+
+        self.cmd('network private-link-service delete -g {rg} -n {lks1}')
 
 
 class NetworkLoadBalancerWithZone(ScenarioTest):
