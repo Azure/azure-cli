@@ -178,18 +178,16 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @ResourceGroupPreparer()
     @VaultPreparer()
     @PolicyPreparer(parameter_name='policy1')
-    @PolicyPreparer(parameter_name='policy2')
-    @PolicyPreparer(parameter_name='policy4', instant_rp_days="3")
+    @PolicyPreparer(parameter_name='policy2', instant_rp_days="3")
     @VMPreparer(parameter_name='vm1')
     @VMPreparer(parameter_name='vm2')
     @ItemPreparer(vm_parameter_name='vm1')
     @ItemPreparer(vm_parameter_name='vm2')
-    def test_backup_policy(self, resource_group, vault_name, policy1, policy2, policy4, vm1, vm2):
+    def test_backup_policy(self, resource_group, vault_name, policy1, policy2, vm1, vm2):
 
         self.kwargs.update({
             'policy1': policy1,
             'policy2': policy2,
-            'policy4': policy4,
             'policy3': self.create_random_name('clitest-policy', 24),
             'default': 'DefaultPolicy',
             'vault': vault_name,
@@ -203,7 +201,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ]).get_output_in_json()
 
         self.cmd('backup policy list -g {rg} -v {vault}', checks=[
-            self.check("length(@)", 5),
+            self.check("length(@)", 4),
             self.check("length([?name == '{default}'])", 1),
             self.check("length([?name == '{policy1}'])", 1),
             self.check("length([?name == '{policy2}'])", 1)
@@ -224,7 +222,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
         self.cmd('backup policy list -g {rg} -v {vault}', checks=[
-            self.check("length(@)", 6),
+            self.check("length(@)", 5),
             self.check("length([?name == '{default}'])", 1),
             self.check("length([?name == '{policy1}'])", 1),
             self.check("length([?name == '{policy2}'])", 1),
@@ -234,13 +232,13 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup policy delete -g {rg} -v {vault} -n {policy3}')
 
         self.cmd('backup policy list -g {rg} -v {vault}', checks=[
-            self.check("length(@)", 5),
+            self.check("length(@)", 4),
             self.check("length([?name == '{default}'])", 1),
             self.check("length([?name == '{policy1}'])", 1),
             self.check("length([?name == '{policy2}'])", 1)
         ])
 
-        self.kwargs['policy4_json'] = self.cmd('backup policy show -g {rg} -v {vault} -n {policy4}').get_output_in_json()
+        self.kwargs['policy4_json'] = self.cmd('backup policy show -g {rg} -v {vault} -n {policy2}').get_output_in_json()
         self.assertEqual(self.kwargs['policy4_json']['properties']['instantRpRetentionRangeInDays'], 3)
 
     @ResourceGroupPreparer()
