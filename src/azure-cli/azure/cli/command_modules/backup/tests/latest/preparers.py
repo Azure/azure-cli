@@ -183,7 +183,7 @@ class ItemPreparer(AbstractPreparer, SingleValueReplacer):
 class PolicyPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='clitest-item', parameter_name='policy_name', vault_parameter_name='vault_name',
                  resource_group_parameter_name='resource_group',
-                 dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_POLICY_NAME', instant_rp_days=None):
+                 instant_rp_days=None):
         super(PolicyPreparer, self).__init__(name_prefix, 24)
         from azure.cli.core.mock import DummyCli
         self.cli_ctx = DummyCli()
@@ -192,7 +192,7 @@ class PolicyPreparer(AbstractPreparer, SingleValueReplacer):
         self.resource_group_parameter_name = resource_group_parameter_name
         self.vault = None
         self.vault_parameter_name = vault_parameter_name
-        self.dev_setting_value = os.environ.get(dev_setting_name, None)
+        self.dev_setting_value = os.environ.get('AZURE_CLI_TEST_DEV_BACKUP_POLICY_NAME', None)
         self.instant_rp_days = instant_rp_days
 
     def create_resource(self, name, **kwargs):
