@@ -179,15 +179,17 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @VaultPreparer()
     @PolicyPreparer(parameter_name='policy1')
     @PolicyPreparer(parameter_name='policy2')
+    @PolicyPreparer(parameter_name='policy4', instant_rp_days="3")
     @VMPreparer(parameter_name='vm1')
     @VMPreparer(parameter_name='vm2')
     @ItemPreparer(vm_parameter_name='vm1')
     @ItemPreparer(vm_parameter_name='vm2')
-    def test_backup_policy(self, resource_group, vault_name, policy1, policy2, vm1, vm2):
+    def test_backup_policy(self, resource_group, vault_name, policy1, policy2, policy4, vm1, vm2):
 
         self.kwargs.update({
             'policy1': policy1,
             'policy2': policy2,
+            'policy4': policy4,
             'policy3': self.create_random_name('clitest-policy', 24),
             'default': 'DefaultPolicy',
             'vault': vault_name,
@@ -201,7 +203,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ]).get_output_in_json()
 
         self.cmd('backup policy list -g {rg} -v {vault}', checks=[
-            self.check("length(@)", 4),
+            self.check("length(@)", 5),
             self.check("length([?name == '{default}'])", 1),
             self.check("length([?name == '{policy1}'])", 1),
             self.check("length([?name == '{policy2}'])", 1)
@@ -222,7 +224,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
         self.cmd('backup policy list -g {rg} -v {vault}', checks=[
-            self.check("length(@)", 5),
+            self.check("length(@)", 6),
             self.check("length([?name == '{default}'])", 1),
             self.check("length([?name == '{policy1}'])", 1),
             self.check("length([?name == '{policy2}'])", 1),
@@ -232,11 +234,14 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup policy delete -g {rg} -v {vault} -n {policy3}')
 
         self.cmd('backup policy list -g {rg} -v {vault}', checks=[
-            self.check("length(@)", 4),
+            self.check("length(@)", 5),
             self.check("length([?name == '{default}'])", 1),
             self.check("length([?name == '{policy1}'])", 1),
             self.check("length([?name == '{policy2}'])", 1)
         ])
+
+        self.kwargs['policy4_json'] = self.cmd('backup policy show -g {rg} -v {vault} -n {policy4}').get_output_in_json()
+        self.assertEqual(self.kwargs['policy4_json']['properties']['instantRpRetentionRangeInDays'], 3)
 
     @ResourceGroupPreparer()
     @VaultPreparer()
@@ -409,16 +414,19 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertTrue(protection_check == '')
 
     @ResourceGroupPreparer()
+    @ResourceGroupPreparer(parameter_name="target_rg")
     @VaultPreparer()
     @VMPreparer()
     @ItemPreparer()
     @RPPreparer()
     @StorageAccountPreparer()
-    def test_backup_restore(self, resource_group, vault_name, vm_name, storage_account):
+    def test_backup_restore(self, resource_group, target_rg, vault_name, vm_name, storage_account):
 
         self.kwargs.update({
             'vault': vault_name,
-            'vm': vm_name
+            'vm': vm_name,
+            'target_rg': target_rg,
+            'rg' : resource_group,
         })
         self.kwargs['rp'] = self.cmd('backup recoverypoint list -g {rg} -v {vault} -c {vm} -i {vm} --query [0].name').get_output_in_json()
 
@@ -426,7 +434,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup restore restore-disks -g {rg} -v {vault} -c {vm} -i {vm} -r {rp} --storage-account {sa} --restore-to-staging-storage-account false', expect_failure=True)
 
         # Trigger Restore
-        trigger_restore_job_json = self.cmd('backup restore restore-disks -g {rg} -v {vault} -c {vm} -i {vm} -r {rp} --storage-account {sa} --restore-to-staging-storage-account', checks=[
+        trigger_restore_job_json = self.cmd('backup restore restore-disks -g {rg} -v {vault} -c {vm} -i {vm} -r {rp} -t {target_rg} --storage-account {sa} --restore-to-staging-storage-account', checks=[
             self.check("properties.entityFriendlyName", '{vm}'),
             self.check("properties.operation", "Restore"),
             self.check("properties.status", "InProgress"),
