@@ -1,7 +1,52 @@
 interactions:
 - request:
-    body: '{"sku": {"name": "Basic"}, "properties": {"adminUserEnabled": true}, "location":
-      "centralus"}'
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --admin-enabled -g -n --sku
+      User-Agent:
+      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 resourcemanagementclient/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.71
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"japanwest","tags":{"date":"2019-08-21T22:50:16Z","cause":"automation","product":"azurecli"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '387'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 21 Aug 2019 22:50:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"sku": {"name": "Basic"}, "location": "japanwest", "properties": {"adminUserEnabled":
+      true}}'
     headers:
       Accept:
       - application/json
@@ -18,24 +63,24 @@ interactions:
       ParameterSetName:
       - --admin-enabled -g -n --sku
       User-Agent:
-      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-containerregistry/3.0.0rc4
+      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-containerregistry/3.0.0rc5
         Azure-SDK-For-Python AZURECLI/2.0.71
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/functionappacrtest000004?api-version=2017-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/functionappacrtest000004?api-version=2019-05-01
   response:
     body:
-      string: '{"sku":{"name":"Basic","tier":"Basic"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/functionappacrtest000004","name":"functionappacrtest000004","location":"centralus","tags":{},"properties":{"loginServer":"functionappacrtest000004.azurecr.io","creationDate":"2019-08-21T19:00:25.6958171Z","provisioningState":"Succeeded","adminUserEnabled":true}}'
+      string: '{"sku":{"name":"Basic","tier":"Basic"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/functionappacrtest000004","name":"functionappacrtest000004","location":"japanwest","tags":{},"properties":{"loginServer":"functionappacrtest000004.azurecr.io","creationDate":"2019-08-21T22:50:50.2455525Z","provisioningState":"Succeeded","adminUserEnabled":true,"policies":{}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '547'
+      - '561'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 21 Aug 2019 19:00:29 GMT
+      - Wed, 21 Aug 2019 22:50:54 GMT
       expires:
       - '-1'
       pragma:
@@ -56,8 +101,53 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "centralus", "type": "Microsoft.Web/serverfarms", "properties":
-      {"capacity": 1, "skuName": "S1", "needLinuxWorkers": true}, "name": "acrtestplanfunction000003"}'
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appservice plan create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --sku --is-linux
+      User-Agent:
+      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 resourcemanagementclient/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.71
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"japanwest","tags":{"date":"2019-08-21T22:50:16Z","cause":"automation","product":"azurecli"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '387'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 21 Aug 2019 22:50:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"type": "Microsoft.Web/serverfarms", "location": "japanwest", "properties":
+      {"capacity": 1, "needLinuxWorkers": true, "skuName": "S1"}, "name": "acrtestplanfunction000003"}'
     headers:
       Accept:
       - application/json
@@ -74,7 +164,7 @@ interactions:
       ParameterSetName:
       - -g -n --sku --is-linux
       User-Agent:
-      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
+      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
         Azure-SDK-For-Python AZURECLI/2.0.71
       accept-language:
       - en-US
@@ -91,7 +181,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 21 Aug 2019 19:00:30 GMT
+      - Wed, 21 Aug 2019 22:50:56 GMT
       expires:
       - '-1'
       pragma:
@@ -116,8 +206,54 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"sku": {"capacity": 1, "tier": "STANDARD", "name": "S1"}, "properties":
-      {"isXenon": false, "perSiteScaling": false, "reserved": true}, "location": "centralus"}'
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appservice plan create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --sku --is-linux
+      User-Agent:
+      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 resourcemanagementclient/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.71
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"japanwest","tags":{"date":"2019-08-21T22:50:16Z","cause":"automation","product":"azurecli"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '387'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 21 Aug 2019 22:50:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"sku": {"tier": "STANDARD", "capacity": 1, "name": "S1"}, "location":
+      "japanwest", "properties": {"perSiteScaling": false, "reserved": true, "isXenon":
+      false}}'
     headers:
       Accept:
       - application/json
@@ -134,7 +270,7 @@ interactions:
       ParameterSetName:
       - -g -n --sku --is-linux
       User-Agent:
-      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
+      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
         Azure-SDK-For-Python AZURECLI/2.0.71
       accept-language:
       - en-US
@@ -142,9 +278,9 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/acrtestplanfunction000003?api-version=2018-02-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/acrtestplanfunction000003","name":"acrtestplanfunction000003","type":"Microsoft.Web/serverfarms","kind":"linux","location":"Central
-        US","properties":{"serverFarmId":4662,"name":"acrtestplanfunction000003","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-CentralUSwebspace","subscription":"798436ab-a054-4fbf-ba01-f9f8cce4e65f","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"Central
-        US","perSiteScaling":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"linux","resourceGroup":"clitest.rg000001","reserved":true,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-dm1-157_4662","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/acrtestplanfunction000003","name":"acrtestplanfunction000003","type":"Microsoft.Web/serverfarms","kind":"linux","location":"Japan
+        West","properties":{"serverFarmId":4832,"name":"acrtestplanfunction000003","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-JapanWestwebspace","subscription":"798436ab-a054-4fbf-ba01-f9f8cce4e65f","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"Japan
+        West","perSiteScaling":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"linux","resourceGroup":"clitest.rg000001","reserved":true,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-os1-009_4832","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'
     headers:
       cache-control:
       - no-cache
@@ -153,7 +289,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 21 Aug 2019 19:00:39 GMT
+      - Wed, 21 Aug 2019 22:51:15 GMT
       expires:
       - '-1'
       pragma:
@@ -191,7 +327,7 @@ interactions:
       ParameterSetName:
       - -g -n -s --plan --runtime
       User-Agent:
-      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
+      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
         Azure-SDK-For-Python AZURECLI/2.0.71
       accept-language:
       - en-US
@@ -199,9 +335,9 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/acrtestplanfunction000003?api-version=2018-02-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/acrtestplanfunction000003","name":"acrtestplanfunction000003","type":"Microsoft.Web/serverfarms","kind":"linux","location":"Central
-        US","properties":{"serverFarmId":4662,"name":"acrtestplanfunction000003","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-CentralUSwebspace","subscription":"798436ab-a054-4fbf-ba01-f9f8cce4e65f","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"Central
-        US","perSiteScaling":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"linux","resourceGroup":"clitest.rg000001","reserved":true,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-dm1-157_4662","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/acrtestplanfunction000003","name":"acrtestplanfunction000003","type":"Microsoft.Web/serverfarms","kind":"linux","location":"Japan
+        West","properties":{"serverFarmId":4832,"name":"acrtestplanfunction000003","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-JapanWestwebspace","subscription":"798436ab-a054-4fbf-ba01-f9f8cce4e65f","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"Japan
+        West","perSiteScaling":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"linux","resourceGroup":"clitest.rg000001","reserved":true,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-os1-009_4832","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'
     headers:
       cache-control:
       - no-cache
@@ -210,7 +346,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 21 Aug 2019 19:00:41 GMT
+      - Wed, 21 Aug 2019 22:51:17 GMT
       expires:
       - '-1'
       pragma:
@@ -246,7 +382,7 @@ interactions:
       ParameterSetName:
       - -g -n -s --plan --runtime
       User-Agent:
-      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-storage/4.0.0
+      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-storage/4.0.0
         Azure-SDK-For-Python AZURECLI/2.0.71
       accept-language:
       - en-US
@@ -254,7 +390,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2019-04-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2019-08-21T19:00:03.8118453Z"},"blob":{"enabled":true,"lastEnabledTime":"2019-08-21T19:00:03.8118453Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2019-08-21T19:00:03.7649510Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2019-08-21T22:50:27.3829019Z"},"blob":{"enabled":true,"lastEnabledTime":"2019-08-21T22:50:27.3829019Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2019-08-21T22:50:27.3204191Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'
     headers:
       cache-control:
       - no-cache
@@ -263,7 +399,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 21 Aug 2019 19:00:40 GMT
+      - Wed, 21 Aug 2019 22:51:17 GMT
       expires:
       - '-1'
       pragma:
@@ -297,7 +433,7 @@ interactions:
       ParameterSetName:
       - -g -n -s --plan --runtime
       User-Agent:
-      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-storage/4.0.0
+      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-storage/4.0.0
         Azure-SDK-For-Python AZURECLI/2.0.71
       accept-language:
       - en-US
@@ -314,7 +450,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 21 Aug 2019 19:00:40 GMT
+      - Wed, 21 Aug 2019 22:51:17 GMT
       expires:
       - '-1'
       pragma:
@@ -335,17 +471,17 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: 'b''{"location": "Central US", "properties": {"hyperV": false, "siteConfig":
-      {"http20Enabled": true, "netFrameworkVersion": "v4.6", "alwaysOn": true, "linuxFxVersion":
-      "DOCKER|mcr.microsoft.com/azure-functions/node:2.0-node8-appservice", "appSettings":
-      [{"value": "node", "name": "FUNCTIONS_WORKER_RUNTIME"}, {"value": "~2", "name":
-      "FUNCTIONS_EXTENSION_VERSION"}, {"value": "A673403F2875FAB29ED3B365BC1D1C6DFADE2CD0AD030E27FC99853DC82D2499",
+    body: 'b''{"location": "Japan West", "properties": {"hyperV": false, "isXenon":
+      false, "siteConfig": {"localMySqlEnabled": false, "alwaysOn": true, "netFrameworkVersion":
+      "v4.6", "http20Enabled": true, "appSettings": [{"value": "node", "name": "FUNCTIONS_WORKER_RUNTIME"},
+      {"value": "~2", "name": "FUNCTIONS_EXTENSION_VERSION"}, {"value": "055CD1D53D8A22B441442963A869BAEF72C22707D986EC083ADEFF50B4B47F3D",
       "name": "MACHINEKEY_DecryptionKey"}, {"value": "true", "name": "WEBSITES_ENABLE_APP_SERVICE_STORAGE"},
       {"value": "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==",
       "name": "AzureWebJobsStorage"}, {"value": "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==",
       "name": "AzureWebJobsDashboard"}, {"value": "10.14.1", "name": "WEBSITE_NODE_DEFAULT_VERSION"}],
-      "localMySqlEnabled": false}, "isXenon": false, "serverFarmId": "acrtestplanfunction000003",
-      "scmSiteAlsoStopped": false, "reserved": true}, "kind": "functionapp,linux"}'''
+      "linuxFxVersion": "DOCKER|mcr.microsoft.com/azure-functions/node:2.0-node8-appservice"},
+      "serverFarmId": "acrtestplanfunction000003", "scmSiteAlsoStopped": false, "reserved":
+      true}, "kind": "functionapp,linux"}'''
     headers:
       Accept:
       - application/json
@@ -362,7 +498,7 @@ interactions:
       ParameterSetName:
       - -g -n -s --plan --runtime
       User-Agent:
-      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
+      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
         Azure-SDK-For-Python AZURECLI/2.0.71
       accept-language:
       - en-US
@@ -370,19 +506,19 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004?api-version=2018-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004","name":"functionappacrtest000004","type":"Microsoft.Web/sites","kind":"functionapp,linux,container","location":"Central
-        US","properties":{"name":"functionappacrtest000004","state":"Running","hostNames":["functionappacrtest000004.azurewebsites.net"],"webSpace":"clitest.rg000001-CentralUSwebspace","selfLink":"https://waws-prod-dm1-157.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-CentralUSwebspace/sites/functionappacrtest000004","repositorySiteName":"functionappacrtest000004","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["functionappacrtest000004.azurewebsites.net","functionappacrtest000004.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":"DOCKER|mcr.microsoft.com/azure-functions/node:2.0-node8-appservice"},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"functionappacrtest000004.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"functionappacrtest000004.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/acrtestplanfunction000003","reserved":true,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-08-21T19:00:43.9566667","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"functionappacrtest000004","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":false,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"functionapp,linux,container","inboundIpAddress":"13.89.172.4","possibleInboundIpAddresses":"13.89.172.4","outboundIpAddresses":"13.89.172.4,40.122.169.200,104.208.27.4,40.122.42.64,23.99.130.19","possibleOutboundIpAddresses":"13.89.172.4,40.122.169.200,104.208.27.4,40.122.42.64,23.99.130.19,13.67.176.18,104.208.28.216,40.122.168.112,40.122.169.80,23.99.159.248","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-dm1-157","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"functionappacrtest000004.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":null}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004","name":"functionappacrtest000004","type":"Microsoft.Web/sites","kind":"functionapp,linux,container","location":"Japan
+        West","properties":{"name":"functionappacrtest000004","state":"Running","hostNames":["functionappacrtest000004.azurewebsites.net"],"webSpace":"clitest.rg000001-JapanWestwebspace","selfLink":"https://waws-prod-os1-009.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-JapanWestwebspace/sites/functionappacrtest000004","repositorySiteName":"functionappacrtest000004","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["functionappacrtest000004.azurewebsites.net","functionappacrtest000004.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":"DOCKER|mcr.microsoft.com/azure-functions/node:2.0-node8-appservice"},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"functionappacrtest000004.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"functionappacrtest000004.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/acrtestplanfunction000003","reserved":true,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-08-21T22:51:22.5","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"functionappacrtest000004","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":false,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"functionapp,linux,container","inboundIpAddress":"104.215.58.230","possibleInboundIpAddresses":"104.215.58.230","outboundIpAddresses":"104.215.58.230,104.215.53.202,104.215.62.87,104.215.51.91,104.215.63.211","possibleOutboundIpAddresses":"104.215.58.230,104.215.53.202,104.215.62.87,104.215.51.91,104.215.63.211,13.73.235.66,104.215.11.91","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-os1-009","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"functionappacrtest000004.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3607'
+      - '3577'
       content-type:
       - application/json
       date:
-      - Wed, 21 Aug 2019 19:01:01 GMT
+      - Wed, 21 Aug 2019 22:51:40 GMT
       etag:
-      - '"1D55852BC18C480"'
+      - '"1D55872F48D13A0"'
       expires:
       - '-1'
       pragma:
@@ -407,7 +543,7 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "Central US", "properties": {"Application_Type": "web"}, "kind":
+    body: '{"properties": {"Application_Type": "web"}, "location": "Japan West", "kind":
       "web"}'
     headers:
       Accept:
@@ -425,7 +561,7 @@ interactions:
       ParameterSetName:
       - -g -n -s --plan --runtime
       User-Agent:
-      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-applicationinsights/0.1.1
+      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-applicationinsights/0.1.1
         Azure-SDK-For-Python AZURECLI/2.0.71
       accept-language:
       - en-US
@@ -433,166 +569,32 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/functionappacrtest000004?api-version=2015-05-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/functionappacrtest000004","name":"functionappacrtest000004","type":"microsoft.insights/components","location":"centralus","tags":{},"kind":"web","etag":"\"67007301-0000-0300-0000-5d5d94f20000\"","properties":{"Ver":"v2","ApplicationId":"functionappacrtest000004","AppId":"aafde1ab-91ae-4118-955e-1703f57858f5","Application_Type":"web","Flow_Type":null,"Request_Source":null,"InstrumentationKey":"06ab1aa1-83b7-48bf-9d2c-8d938dac2b50","Name":"functionappacrtest000004","CreationDate":"2019-08-21T19:01:05.8576726+00:00","TenantId":"798436ab-a054-4fbf-ba01-f9f8cce4e65f","provisioningState":"Succeeded","SamplingPercentage":null}}'
+      string: '{"error":{"code":"MissingRegistrationForLocation","message":"The subscription
+        is not registered for the resource type ''components'' in the location ''Japan
+        West''. Please re-register for this provider in order to have access to this
+        location."}}'
     headers:
-      access-control-expose-headers:
-      - Request-Context
       cache-control:
       - no-cache
       content-length:
-      - '818'
+      - '242'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 21 Aug 2019 19:01:10 GMT
+      - Wed, 21 Aug 2019 22:51:40 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      request-context:
-      - appId=cid-v1:920e14b1-13f3-461a-a4bb-b4fe6f1a4525
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-      x-powered-by:
-      - ASP.NET
+      x-ms-failure-cause:
+      - gateway
     status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - functionapp create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - -g -n -s --plan --runtime
-      User-Agent:
-      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
-        Azure-SDK-For-Python AZURECLI/2.0.71
-      accept-language:
-      - en-US
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/appsettings/list?api-version=2018-11-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"Central
-        US","properties":{"FUNCTIONS_WORKER_RUNTIME":"node","FUNCTIONS_EXTENSION_VERSION":"~2","MACHINEKEY_DecryptionKey":"A673403F2875FAB29ED3B365BC1D1C6DFADE2CD0AD030E27FC99853DC82D2499","WEBSITES_ENABLE_APP_SERVICE_STORAGE":"true","AzureWebJobsStorage":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","AzureWebJobsDashboard":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","WEBSITE_NODE_DEFAULT_VERSION":"10.14.1"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1020'
-      content-type:
-      - application/json
-      date:
-      - Wed, 21 Aug 2019 19:01:11 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11999'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: 'b''{"properties": {"AzureWebJobsStorage": "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==",
-      "FUNCTIONS_WORKER_RUNTIME": "node", "MACHINEKEY_DecryptionKey": "A673403F2875FAB29ED3B365BC1D1C6DFADE2CD0AD030E27FC99853DC82D2499",
-      "FUNCTIONS_EXTENSION_VERSION": "~2", "WEBSITE_NODE_DEFAULT_VERSION": "10.14.1",
-      "AzureWebJobsDashboard": "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==",
-      "WEBSITES_ENABLE_APP_SERVICE_STORAGE": "true", "APPINSIGHTS_INSTRUMENTATIONKEY":
-      "06ab1aa1-83b7-48bf-9d2c-8d938dac2b50"}, "kind": "<class \''str\''>"}'''
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - functionapp create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '828'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -g -n -s --plan --runtime
-      User-Agent:
-      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
-        Azure-SDK-For-Python AZURECLI/2.0.71
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/appsettings?api-version=2018-11-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"Central
-        US","properties":{"AzureWebJobsStorage":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","FUNCTIONS_WORKER_RUNTIME":"node","MACHINEKEY_DecryptionKey":"A673403F2875FAB29ED3B365BC1D1C6DFADE2CD0AD030E27FC99853DC82D2499","FUNCTIONS_EXTENSION_VERSION":"~2","WEBSITE_NODE_DEFAULT_VERSION":"10.14.1","AzureWebJobsDashboard":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","WEBSITES_ENABLE_APP_SERVICE_STORAGE":"true","APPINSIGHTS_INSTRUMENTATIONKEY":"06ab1aa1-83b7-48bf-9d2c-8d938dac2b50"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1092'
-      content-type:
-      - application/json
-      date:
-      - Wed, 21 Aug 2019 19:01:12 GMT
-      etag:
-      - '"1D55852CD064380"'
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
+      code: 409
+      message: Conflict
 - request:
     body: null
     headers:
@@ -607,24 +609,24 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-containerregistry/3.0.0rc4
+      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-containerregistry/3.0.0rc5
         Azure-SDK-For-Python AZURECLI/2.0.71
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/functionappacrtest000004?api-version=2017-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/functionappacrtest000004?api-version=2019-05-01
   response:
     body:
-      string: '{"sku":{"name":"Basic","tier":"Basic"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/functionappacrtest000004","name":"functionappacrtest000004","location":"centralus","tags":{},"properties":{"loginServer":"functionappacrtest000004.azurecr.io","creationDate":"2019-08-21T19:00:25.6958171Z","provisioningState":"Succeeded","adminUserEnabled":true}}'
+      string: '{"sku":{"name":"Basic","tier":"Basic"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/functionappacrtest000004","name":"functionappacrtest000004","location":"japanwest","tags":{},"properties":{"loginServer":"functionappacrtest000004.azurecr.io","creationDate":"2019-08-21T22:50:50.2455525Z","provisioningState":"Succeeded","adminUserEnabled":true,"policies":{}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '547'
+      - '561'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 21 Aug 2019 19:01:14 GMT
+      - Wed, 21 Aug 2019 22:51:42 GMT
       expires:
       - '-1'
       pragma:
@@ -658,15 +660,15 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-containerregistry/3.0.0rc4
+      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-containerregistry/3.0.0rc5
         Azure-SDK-For-Python AZURECLI/2.0.71
       accept-language:
       - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/functionappacrtest000004/listCredentials?api-version=2017-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/functionappacrtest000004/listCredentials?api-version=2019-05-01
   response:
     body:
-      string: '{"username":"functionappacrtest000004","passwords":[{"name":"password","value":"uoQgN1Ob/c4jlPUK7c+9kTdJ7wxQAETa"},{"name":"password2","value":"IkLFFoFAX4Cym2b6z7buXxkXr0L8gq/Y"}]}'
+      string: '{"username":"functionappacrtest000004","passwords":[{"name":"password","value":"61R60o+vwtOON4DVHoCZAwrQPWcBNby+"},{"name":"password2","value":"RTOUN1bzY=IoSGNDOWZX2XLEA0AjSYay"}]}'
     headers:
       cache-control:
       - no-cache
@@ -675,7 +677,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 21 Aug 2019 19:01:14 GMT
+      - Wed, 21 Aug 2019 22:51:43 GMT
       expires:
       - '-1'
       pragma:
@@ -709,15 +711,15 @@ interactions:
       ParameterSetName:
       - -g -n --docker-custom-image-name --docker-registry-server-url
       User-Agent:
-      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 resourcemanagementclient/2.2.0
+      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 resourcemanagementclient/2.2.0
         Azure-SDK-For-Python AZURECLI/2.0.71
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?api-version=2018-05-01&$filter=resourceType%20eq%20%27Microsoft.ContainerRegistry%2Fregistries%27
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.ContainerRegistry%2Fregistries%27&api-version=2018-05-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/functionappacrtest000004","name":"functionappacrtest000004","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Basic","tier":"Basic"},"location":"centralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/nicking/providers/Microsoft.ContainerRegistry/registries/nicksacr","name":"nicksacr","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Standard","tier":"Standard"},"location":"westus2","tags":{}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/functionappacrtest000004","name":"functionappacrtest000004","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Basic","tier":"Basic"},"location":"japanwest","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/nicking/providers/Microsoft.ContainerRegistry/registries/nicksacr","name":"nicksacr","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Standard","tier":"Standard"},"location":"westus2","tags":{}}]}'
     headers:
       cache-control:
       - no-cache
@@ -726,7 +728,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 21 Aug 2019 19:01:14 GMT
+      - Wed, 21 Aug 2019 22:51:43 GMT
       expires:
       - '-1'
       pragma:
@@ -754,24 +756,24 @@ interactions:
       ParameterSetName:
       - -g -n --docker-custom-image-name --docker-registry-server-url
       User-Agent:
-      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-containerregistry/3.0.0rc4
+      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-containerregistry/3.0.0rc5
         Azure-SDK-For-Python AZURECLI/2.0.71
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/functionappacrtest000004?api-version=2017-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/functionappacrtest000004?api-version=2019-05-01
   response:
     body:
-      string: '{"sku":{"name":"Basic","tier":"Basic"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/functionappacrtest000004","name":"functionappacrtest000004","location":"centralus","tags":{},"properties":{"loginServer":"functionappacrtest000004.azurecr.io","creationDate":"2019-08-21T19:00:25.6958171Z","provisioningState":"Succeeded","adminUserEnabled":true}}'
+      string: '{"sku":{"name":"Basic","tier":"Basic"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/functionappacrtest000004","name":"functionappacrtest000004","location":"japanwest","tags":{},"properties":{"loginServer":"functionappacrtest000004.azurecr.io","creationDate":"2019-08-21T22:50:50.2455525Z","provisioningState":"Succeeded","adminUserEnabled":true,"policies":{}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '547'
+      - '561'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 21 Aug 2019 19:01:15 GMT
+      - Wed, 21 Aug 2019 22:51:45 GMT
       expires:
       - '-1'
       pragma:
@@ -805,15 +807,15 @@ interactions:
       ParameterSetName:
       - -g -n --docker-custom-image-name --docker-registry-server-url
       User-Agent:
-      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-containerregistry/3.0.0rc4
+      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-containerregistry/3.0.0rc5
         Azure-SDK-For-Python AZURECLI/2.0.71
       accept-language:
       - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/functionappacrtest000004/listCredentials?api-version=2017-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/functionappacrtest000004/listCredentials?api-version=2019-05-01
   response:
     body:
-      string: '{"username":"functionappacrtest000004","passwords":[{"name":"password","value":"uoQgN1Ob/c4jlPUK7c+9kTdJ7wxQAETa"},{"name":"password2","value":"IkLFFoFAX4Cym2b6z7buXxkXr0L8gq/Y"}]}'
+      string: '{"username":"functionappacrtest000004","passwords":[{"name":"password","value":"61R60o+vwtOON4DVHoCZAwrQPWcBNby+"},{"name":"password2","value":"RTOUN1bzY=IoSGNDOWZX2XLEA0AjSYay"}]}'
     headers:
       cache-control:
       - no-cache
@@ -822,7 +824,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 21 Aug 2019 19:01:15 GMT
+      - Wed, 21 Aug 2019 22:51:45 GMT
       expires:
       - '-1'
       pragma:
@@ -856,7 +858,7 @@ interactions:
       ParameterSetName:
       - -g -n --docker-custom-image-name --docker-registry-server-url
       User-Agent:
-      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
+      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
         Azure-SDK-For-Python AZURECLI/2.0.71
       accept-language:
       - en-US
@@ -864,19 +866,19 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004?api-version=2018-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004","name":"functionappacrtest000004","type":"Microsoft.Web/sites","kind":"functionapp,linux,container","location":"Central
-        US","properties":{"name":"functionappacrtest000004","state":"Running","hostNames":["functionappacrtest000004.azurewebsites.net"],"webSpace":"clitest.rg000001-CentralUSwebspace","selfLink":"https://waws-prod-dm1-157.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-CentralUSwebspace/sites/functionappacrtest000004","repositorySiteName":"functionappacrtest000004","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["functionappacrtest000004.azurewebsites.net","functionappacrtest000004.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":"DOCKER|mcr.microsoft.com/azure-functions/node:2.0-node8-appservice"},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"functionappacrtest000004.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"functionappacrtest000004.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/acrtestplanfunction000003","reserved":true,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-08-21T19:01:12.76","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"functionappacrtest000004","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":false,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"functionapp,linux,container","inboundIpAddress":"13.89.172.4","possibleInboundIpAddresses":"13.89.172.4","outboundIpAddresses":"13.89.172.4,40.122.169.200,104.208.27.4,40.122.42.64,23.99.130.19","possibleOutboundIpAddresses":"13.89.172.4,40.122.169.200,104.208.27.4,40.122.42.64,23.99.130.19,13.67.176.18,104.208.28.216,40.122.168.112,40.122.169.80,23.99.159.248","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-dm1-157","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"functionappacrtest000004.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":[]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004","name":"functionappacrtest000004","type":"Microsoft.Web/sites","kind":"functionapp,linux,container","location":"Japan
+        West","properties":{"name":"functionappacrtest000004","state":"Running","hostNames":["functionappacrtest000004.azurewebsites.net"],"webSpace":"clitest.rg000001-JapanWestwebspace","selfLink":"https://waws-prod-os1-009.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-JapanWestwebspace/sites/functionappacrtest000004","repositorySiteName":"functionappacrtest000004","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["functionappacrtest000004.azurewebsites.net","functionappacrtest000004.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":"DOCKER|mcr.microsoft.com/azure-functions/node:2.0-node8-appservice"},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"functionappacrtest000004.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"functionappacrtest000004.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/acrtestplanfunction000003","reserved":true,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-08-21T22:51:22.97","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"functionappacrtest000004","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":false,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"functionapp,linux,container","inboundIpAddress":"104.215.58.230","possibleInboundIpAddresses":"104.215.58.230","outboundIpAddresses":"104.215.58.230,104.215.53.202,104.215.62.87,104.215.51.91,104.215.63.211","possibleOutboundIpAddresses":"104.215.58.230,104.215.53.202,104.215.62.87,104.215.51.91,104.215.63.211,13.73.235.66,104.215.11.91","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-os1-009","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"functionappacrtest000004.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":[]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3600'
+      - '3576'
       content-type:
       - application/json
       date:
-      - Wed, 21 Aug 2019 19:01:16 GMT
+      - Wed, 21 Aug 2019 22:51:47 GMT
       etag:
-      - '"1D55852CD064380"'
+      - '"1D55872F48D13A0"'
       expires:
       - '-1'
       pragma:
@@ -912,7 +914,7 @@ interactions:
       ParameterSetName:
       - -g -n --docker-custom-image-name --docker-registry-server-url
       User-Agent:
-      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
+      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
         Azure-SDK-For-Python AZURECLI/2.0.71
       accept-language:
       - en-US
@@ -920,8 +922,8 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/web?api-version=2018-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/web","name":"functionappacrtest000004","type":"Microsoft.Web/sites/config","location":"Central
-        US","properties":{"numberOfWorkers":1,"defaultDocuments":["Default.htm","Default.html","Default.asp","index.htm","index.html","iisstart.htm","default.aspx","index.php"],"netFrameworkVersion":"v4.0","phpVersion":"","pythonVersion":"","nodeVersion":"","linuxFxVersion":"DOCKER|mcr.microsoft.com/azure-functions/node:2.0-node8-appservice","windowsFxVersion":null,"requestTracingEnabled":false,"remoteDebuggingEnabled":false,"remoteDebuggingVersion":null,"httpLoggingEnabled":false,"azureMonitorLogCategories":null,"logsDirectorySizeLimit":35,"detailedErrorLoggingEnabled":false,"publishingUsername":"$functionappacrtest000004","publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":"None","use32BitWorkerProcess":true,"webSocketsEnabled":false,"alwaysOn":true,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":"","managedPipelineMode":"Integrated","virtualApplications":[{"virtualPath":"/","physicalPath":"site\\wwwroot","preloadEnabled":true,"virtualDirectories":null}],"winAuthAdminState":0,"winAuthTenantState":0,"customAppPoolIdentityAdminState":false,"customAppPoolIdentityTenantState":false,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":"LeastRequests","routingRules":[],"experiments":{"rampUpRules":[]},"limits":null,"autoHealEnabled":false,"autoHealRules":null,"tracingOptions":null,"vnetName":"","siteAuthEnabled":false,"siteAuthSettings":{"enabled":null,"unauthenticatedClientAction":null,"tokenStoreEnabled":null,"allowedExternalRedirectUrls":null,"defaultProvider":null,"clientId":null,"clientSecret":null,"clientSecretCertificateThumbprint":null,"issuer":null,"allowedAudiences":null,"additionalLoginParams":null,"isAadAutoProvisioned":false,"googleClientId":null,"googleClientSecret":null,"googleOAuthScopes":null,"facebookAppId":null,"facebookAppSecret":null,"facebookOAuthScopes":null,"twitterConsumerKey":null,"twitterConsumerSecret":null,"microsoftAccountClientId":null,"microsoftAccountClientSecret":null,"microsoftAccountOAuthScopes":null},"cors":{"allowedOrigins":["https://functions.azure.com","https://functions-staging.azure.com","https://functions-next.azure.com"],"supportCredentials":false},"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":false,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/web","name":"functionappacrtest000004","type":"Microsoft.Web/sites/config","location":"Japan
+        West","properties":{"numberOfWorkers":1,"defaultDocuments":["Default.htm","Default.html","Default.asp","index.htm","index.html","iisstart.htm","default.aspx","index.php"],"netFrameworkVersion":"v4.0","phpVersion":"","pythonVersion":"","nodeVersion":"","linuxFxVersion":"DOCKER|mcr.microsoft.com/azure-functions/node:2.0-node8-appservice","windowsFxVersion":null,"requestTracingEnabled":false,"remoteDebuggingEnabled":false,"remoteDebuggingVersion":null,"httpLoggingEnabled":false,"azureMonitorLogCategories":null,"logsDirectorySizeLimit":35,"detailedErrorLoggingEnabled":false,"publishingUsername":"$functionappacrtest000004","publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":"None","use32BitWorkerProcess":true,"webSocketsEnabled":false,"alwaysOn":true,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":"","managedPipelineMode":"Integrated","virtualApplications":[{"virtualPath":"/","physicalPath":"site\\wwwroot","preloadEnabled":true,"virtualDirectories":null}],"winAuthAdminState":0,"winAuthTenantState":0,"customAppPoolIdentityAdminState":false,"customAppPoolIdentityTenantState":false,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":"LeastRequests","routingRules":[],"experiments":{"rampUpRules":[]},"limits":null,"autoHealEnabled":false,"autoHealRules":null,"tracingOptions":null,"vnetName":"","siteAuthEnabled":false,"siteAuthSettings":{"enabled":null,"unauthenticatedClientAction":null,"tokenStoreEnabled":null,"allowedExternalRedirectUrls":null,"defaultProvider":null,"clientId":null,"clientSecret":null,"clientSecretCertificateThumbprint":null,"issuer":null,"allowedAudiences":null,"additionalLoginParams":null,"isAadAutoProvisioned":false,"googleClientId":null,"googleClientSecret":null,"googleOAuthScopes":null,"facebookAppId":null,"facebookAppSecret":null,"facebookOAuthScopes":null,"twitterConsumerKey":null,"twitterConsumerSecret":null,"microsoftAccountClientId":null,"microsoftAccountClientSecret":null,"microsoftAccountOAuthScopes":null},"cors":{"allowedOrigins":["https://functions.azure.com","https://functions-staging.azure.com","https://functions-next.azure.com"],"supportCredentials":false},"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":false,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
         all","description":"Allow all access"}],"scmIpSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
         all","description":"Allow all access"}],"scmIpSecurityRestrictionsUseMain":false,"http20Enabled":true,"minTlsVersion":"1.2","ftpsState":"AllAllowed","reservedInstanceCount":0,"preWarmedInstanceCount":null,"healthCheckPath":null,"fileChangeAuditEnabled":false}}'
     headers:
@@ -932,7 +934,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 21 Aug 2019 19:01:17 GMT
+      - Wed, 21 Aug 2019 22:51:48 GMT
       expires:
       - '-1'
       pragma:
@@ -970,7 +972,7 @@ interactions:
       ParameterSetName:
       - -g -n --docker-custom-image-name --docker-registry-server-url
       User-Agent:
-      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
+      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
         Azure-SDK-For-Python AZURECLI/2.0.71
       accept-language:
       - en-US
@@ -978,17 +980,17 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/appsettings/list?api-version=2018-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"Central
-        US","properties":{"AzureWebJobsStorage":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","FUNCTIONS_WORKER_RUNTIME":"node","MACHINEKEY_DecryptionKey":"A673403F2875FAB29ED3B365BC1D1C6DFADE2CD0AD030E27FC99853DC82D2499","FUNCTIONS_EXTENSION_VERSION":"~2","WEBSITE_NODE_DEFAULT_VERSION":"10.14.1","AzureWebJobsDashboard":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","WEBSITES_ENABLE_APP_SERVICE_STORAGE":"true","APPINSIGHTS_INSTRUMENTATIONKEY":"06ab1aa1-83b7-48bf-9d2c-8d938dac2b50"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"Japan
+        West","properties":{"FUNCTIONS_WORKER_RUNTIME":"node","FUNCTIONS_EXTENSION_VERSION":"~2","MACHINEKEY_DecryptionKey":"055CD1D53D8A22B441442963A869BAEF72C22707D986EC083ADEFF50B4B47F3D","WEBSITES_ENABLE_APP_SERVICE_STORAGE":"true","AzureWebJobsStorage":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","AzureWebJobsDashboard":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","WEBSITE_NODE_DEFAULT_VERSION":"10.14.1"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1092'
+      - '1020'
       content-type:
       - application/json
       date:
-      - Wed, 21 Aug 2019 19:01:18 GMT
+      - Wed, 21 Aug 2019 22:51:49 GMT
       expires:
       - '-1'
       pragma:
@@ -1013,12 +1015,11 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: 'b''{"properties": {"AzureWebJobsStorage": "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==",
-      "FUNCTIONS_WORKER_RUNTIME": "node", "MACHINEKEY_DecryptionKey": "A673403F2875FAB29ED3B365BC1D1C6DFADE2CD0AD030E27FC99853DC82D2499",
-      "FUNCTIONS_EXTENSION_VERSION": "~2", "WEBSITE_NODE_DEFAULT_VERSION": "10.14.1",
-      "APPINSIGHTS_INSTRUMENTATIONKEY": "06ab1aa1-83b7-48bf-9d2c-8d938dac2b50", "WEBSITES_ENABLE_APP_SERVICE_STORAGE":
-      "false", "AzureWebJobsDashboard": "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey=="},
-      "kind": "<class \''str\''>"}'''
+    body: 'b''{"properties": {"AzureWebJobsDashboard": "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==",
+      "AzureWebJobsStorage": "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==",
+      "WEBSITE_NODE_DEFAULT_VERSION": "10.14.1", "MACHINEKEY_DecryptionKey": "055CD1D53D8A22B441442963A869BAEF72C22707D986EC083ADEFF50B4B47F3D",
+      "WEBSITES_ENABLE_APP_SERVICE_STORAGE": "false", "FUNCTIONS_WORKER_RUNTIME":
+      "node", "FUNCTIONS_EXTENSION_VERSION": "~2"}, "kind": "<class \''str\''>"}'''
     headers:
       Accept:
       - application/json
@@ -1029,13 +1030,13 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '829'
+      - '755'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -g -n --docker-custom-image-name --docker-registry-server-url
       User-Agent:
-      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
+      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
         Azure-SDK-For-Python AZURECLI/2.0.71
       accept-language:
       - en-US
@@ -1043,19 +1044,19 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/appsettings?api-version=2018-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"Central
-        US","properties":{"AzureWebJobsStorage":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","FUNCTIONS_WORKER_RUNTIME":"node","MACHINEKEY_DecryptionKey":"A673403F2875FAB29ED3B365BC1D1C6DFADE2CD0AD030E27FC99853DC82D2499","FUNCTIONS_EXTENSION_VERSION":"~2","WEBSITE_NODE_DEFAULT_VERSION":"10.14.1","APPINSIGHTS_INSTRUMENTATIONKEY":"06ab1aa1-83b7-48bf-9d2c-8d938dac2b50","WEBSITES_ENABLE_APP_SERVICE_STORAGE":"false","AzureWebJobsDashboard":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey=="}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"Japan
+        West","properties":{"AzureWebJobsDashboard":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","AzureWebJobsStorage":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","WEBSITE_NODE_DEFAULT_VERSION":"10.14.1","MACHINEKEY_DecryptionKey":"055CD1D53D8A22B441442963A869BAEF72C22707D986EC083ADEFF50B4B47F3D","WEBSITES_ENABLE_APP_SERVICE_STORAGE":"false","FUNCTIONS_WORKER_RUNTIME":"node","FUNCTIONS_EXTENSION_VERSION":"~2"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1093'
+      - '1021'
       content-type:
       - application/json
       date:
-      - Wed, 21 Aug 2019 19:01:19 GMT
+      - Wed, 21 Aug 2019 22:51:51 GMT
       etag:
-      - '"1D55852D0D85A20"'
+      - '"1D55873053E0BD5"'
       expires:
       - '-1'
       pragma:
@@ -1080,24 +1081,25 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"cors": {"supportCredentials": false, "allowedOrigins":
-      ["https://functions.azure.com", "https://functions-staging.azure.com", "https://functions-next.azure.com"]},
-      "use32BitWorkerProcess": true, "scmIpSecurityRestrictionsUseMain": false, "reservedInstanceCount":
-      0, "httpLoggingEnabled": false, "ftpsState": "AllAllowed", "webSocketsEnabled":
-      false, "appCommandLine": "", "managedPipelineMode": "Integrated", "experiments":
-      {"rampUpRules": []}, "nodeVersion": "", "ipSecurityRestrictions": [{"ipAddress":
-      "Any", "description": "Allow all access", "priority": 1, "name": "Allow all",
-      "action": "Allow"}], "logsDirectorySizeLimit": 35, "linuxFxVersion": "DOCKER|functionappacrtest000004.azurecr.io/image-name:latest",
-      "remoteDebuggingEnabled": false, "http20Enabled": true, "requestTracingEnabled":
-      false, "defaultDocuments": ["Default.htm", "Default.html", "Default.asp", "index.htm",
-      "index.html", "iisstart.htm", "default.aspx", "index.php"], "publishingUsername":
-      "$functionappacrtest000004", "pythonVersion": "", "virtualApplications": [{"physicalPath":
-      "site\\wwwroot", "preloadEnabled": true, "virtualPath": "/"}], "scmType": "None",
-      "autoHealEnabled": false, "netFrameworkVersion": "v4.0", "scmIpSecurityRestrictions":
-      [{"ipAddress": "Any", "description": "Allow all access", "priority": 1, "name":
-      "Allow all", "action": "Allow"}], "numberOfWorkers": 1, "alwaysOn": true, "detailedErrorLoggingEnabled":
-      false, "loadBalancing": "LeastRequests", "localMySqlEnabled": false, "phpVersion":
-      "", "minTlsVersion": "1.2", "vnetName": ""}}'
+    body: '{"properties": {"defaultDocuments": ["Default.htm", "Default.html", "Default.asp",
+      "index.htm", "index.html", "iisstart.htm", "default.aspx", "index.php"], "pythonVersion":
+      "", "httpLoggingEnabled": false, "appCommandLine": "", "vnetName": "", "scmType":
+      "None", "detailedErrorLoggingEnabled": false, "autoHealEnabled": false, "logsDirectorySizeLimit":
+      35, "scmIpSecurityRestrictions": [{"priority": 1, "description": "Allow all
+      access", "ipAddress": "Any", "action": "Allow", "name": "Allow all"}], "phpVersion":
+      "", "loadBalancing": "LeastRequests", "webSocketsEnabled": false, "linuxFxVersion":
+      "DOCKER|functionappacrtest000004.azurecr.io/image-name:latest", "nodeVersion":
+      "", "virtualApplications": [{"physicalPath": "site\\wwwroot", "preloadEnabled":
+      true, "virtualPath": "/"}], "localMySqlEnabled": false, "alwaysOn": true, "netFrameworkVersion":
+      "v4.0", "cors": {"supportCredentials": false, "allowedOrigins": ["https://functions.azure.com",
+      "https://functions-staging.azure.com", "https://functions-next.azure.com"]},
+      "reservedInstanceCount": 0, "minTlsVersion": "1.2", "experiments": {"rampUpRules":
+      []}, "ipSecurityRestrictions": [{"priority": 1, "description": "Allow all access",
+      "ipAddress": "Any", "action": "Allow", "name": "Allow all"}], "managedPipelineMode":
+      "Integrated", "numberOfWorkers": 1, "scmIpSecurityRestrictionsUseMain": false,
+      "use32BitWorkerProcess": true, "ftpsState": "AllAllowed", "http20Enabled": true,
+      "publishingUsername": "$functionappacrtest000004", "requestTracingEnabled":
+      false, "remoteDebuggingEnabled": false}}'
     headers:
       Accept:
       - application/json
@@ -1114,7 +1116,7 @@ interactions:
       ParameterSetName:
       - -g -n --docker-custom-image-name --docker-registry-server-url
       User-Agent:
-      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
+      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
         Azure-SDK-For-Python AZURECLI/2.0.71
       accept-language:
       - en-US
@@ -1122,8 +1124,8 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/web?api-version=2018-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004","name":"functionappacrtest000004","type":"Microsoft.Web/sites","location":"Central
-        US","properties":{"numberOfWorkers":1,"defaultDocuments":["Default.htm","Default.html","Default.asp","index.htm","index.html","iisstart.htm","default.aspx","index.php"],"netFrameworkVersion":"v4.0","phpVersion":"","pythonVersion":"","nodeVersion":"","linuxFxVersion":"DOCKER|functionappacrtest000004.azurecr.io/image-name:latest","windowsFxVersion":null,"requestTracingEnabled":false,"remoteDebuggingEnabled":false,"remoteDebuggingVersion":"VS2017","httpLoggingEnabled":false,"azureMonitorLogCategories":null,"logsDirectorySizeLimit":35,"detailedErrorLoggingEnabled":false,"publishingUsername":"$functionappacrtest000004","publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":"None","use32BitWorkerProcess":true,"webSocketsEnabled":false,"alwaysOn":true,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":"","managedPipelineMode":"Integrated","virtualApplications":[{"virtualPath":"/","physicalPath":"site\\wwwroot","preloadEnabled":true,"virtualDirectories":null}],"winAuthAdminState":0,"winAuthTenantState":0,"customAppPoolIdentityAdminState":false,"customAppPoolIdentityTenantState":false,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":"LeastRequests","routingRules":[],"experiments":{"rampUpRules":[]},"limits":null,"autoHealEnabled":false,"autoHealRules":null,"tracingOptions":null,"vnetName":"","siteAuthEnabled":false,"siteAuthSettings":{"enabled":null,"unauthenticatedClientAction":null,"tokenStoreEnabled":null,"allowedExternalRedirectUrls":null,"defaultProvider":null,"clientId":null,"clientSecret":null,"clientSecretCertificateThumbprint":null,"issuer":null,"allowedAudiences":null,"additionalLoginParams":null,"isAadAutoProvisioned":false,"googleClientId":null,"googleClientSecret":null,"googleOAuthScopes":null,"facebookAppId":null,"facebookAppSecret":null,"facebookOAuthScopes":null,"twitterConsumerKey":null,"twitterConsumerSecret":null,"microsoftAccountClientId":null,"microsoftAccountClientSecret":null,"microsoftAccountOAuthScopes":null},"cors":{"allowedOrigins":["https://functions.azure.com","https://functions-staging.azure.com","https://functions-next.azure.com"],"supportCredentials":false},"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":false,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004","name":"functionappacrtest000004","type":"Microsoft.Web/sites","location":"Japan
+        West","properties":{"numberOfWorkers":1,"defaultDocuments":["Default.htm","Default.html","Default.asp","index.htm","index.html","iisstart.htm","default.aspx","index.php"],"netFrameworkVersion":"v4.0","phpVersion":"","pythonVersion":"","nodeVersion":"","linuxFxVersion":"DOCKER|functionappacrtest000004.azurecr.io/image-name:latest","windowsFxVersion":null,"requestTracingEnabled":false,"remoteDebuggingEnabled":false,"remoteDebuggingVersion":"VS2017","httpLoggingEnabled":false,"azureMonitorLogCategories":null,"logsDirectorySizeLimit":35,"detailedErrorLoggingEnabled":false,"publishingUsername":"$functionappacrtest000004","publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":"None","use32BitWorkerProcess":true,"webSocketsEnabled":false,"alwaysOn":true,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":"","managedPipelineMode":"Integrated","virtualApplications":[{"virtualPath":"/","physicalPath":"site\\wwwroot","preloadEnabled":true,"virtualDirectories":null}],"winAuthAdminState":0,"winAuthTenantState":0,"customAppPoolIdentityAdminState":false,"customAppPoolIdentityTenantState":false,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":"LeastRequests","routingRules":[],"experiments":{"rampUpRules":[]},"limits":null,"autoHealEnabled":false,"autoHealRules":null,"tracingOptions":null,"vnetName":"","siteAuthEnabled":false,"siteAuthSettings":{"enabled":null,"unauthenticatedClientAction":null,"tokenStoreEnabled":null,"allowedExternalRedirectUrls":null,"defaultProvider":null,"clientId":null,"clientSecret":null,"clientSecretCertificateThumbprint":null,"issuer":null,"allowedAudiences":null,"additionalLoginParams":null,"isAadAutoProvisioned":false,"googleClientId":null,"googleClientSecret":null,"googleOAuthScopes":null,"facebookAppId":null,"facebookAppSecret":null,"facebookOAuthScopes":null,"twitterConsumerKey":null,"twitterConsumerSecret":null,"microsoftAccountClientId":null,"microsoftAccountClientSecret":null,"microsoftAccountOAuthScopes":null},"cors":{"allowedOrigins":["https://functions.azure.com","https://functions-staging.azure.com","https://functions-next.azure.com"],"supportCredentials":false},"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":false,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
         all","description":"Allow all access"}],"scmIpSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
         all","description":"Allow all access"}],"scmIpSecurityRestrictionsUseMain":false,"http20Enabled":true,"minTlsVersion":"1.2","ftpsState":"AllAllowed","reservedInstanceCount":0,"preWarmedInstanceCount":null,"healthCheckPath":null,"fileChangeAuditEnabled":false}}'
     headers:
@@ -1134,9 +1136,9 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 21 Aug 2019 19:01:22 GMT
+      - Wed, 21 Aug 2019 22:51:55 GMT
       etag:
-      - '"1D55852D0D85A20"'
+      - '"1D55873053E0BD5"'
       expires:
       - '-1'
       pragma:
@@ -1176,7 +1178,7 @@ interactions:
       ParameterSetName:
       - -g -n --docker-custom-image-name --docker-registry-server-url
       User-Agent:
-      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
+      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
         Azure-SDK-For-Python AZURECLI/2.0.71
       accept-language:
       - en-US
@@ -1184,17 +1186,17 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/appsettings/list?api-version=2018-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"Central
-        US","properties":{"AzureWebJobsStorage":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","FUNCTIONS_WORKER_RUNTIME":"node","MACHINEKEY_DecryptionKey":"A673403F2875FAB29ED3B365BC1D1C6DFADE2CD0AD030E27FC99853DC82D2499","FUNCTIONS_EXTENSION_VERSION":"~2","WEBSITE_NODE_DEFAULT_VERSION":"10.14.1","APPINSIGHTS_INSTRUMENTATIONKEY":"06ab1aa1-83b7-48bf-9d2c-8d938dac2b50","WEBSITES_ENABLE_APP_SERVICE_STORAGE":"false","AzureWebJobsDashboard":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey=="}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"Japan
+        West","properties":{"AzureWebJobsDashboard":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","AzureWebJobsStorage":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","WEBSITE_NODE_DEFAULT_VERSION":"10.14.1","MACHINEKEY_DecryptionKey":"055CD1D53D8A22B441442963A869BAEF72C22707D986EC083ADEFF50B4B47F3D","WEBSITES_ENABLE_APP_SERVICE_STORAGE":"false","FUNCTIONS_WORKER_RUNTIME":"node","FUNCTIONS_EXTENSION_VERSION":"~2"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1093'
+      - '1021'
       content-type:
       - application/json
       date:
-      - Wed, 21 Aug 2019 19:01:22 GMT
+      - Wed, 21 Aug 2019 22:51:57 GMT
       expires:
       - '-1'
       pragma:
@@ -1219,14 +1221,13 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: 'b''{"properties": {"AzureWebJobsStorage": "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==",
-      "DOCKER_REGISTRY_SERVER_PASSWORD": "uoQgN1Ob/c4jlPUK7c+9kTdJ7wxQAETa", "FUNCTIONS_WORKER_RUNTIME":
-      "node", "MACHINEKEY_DecryptionKey": "A673403F2875FAB29ED3B365BC1D1C6DFADE2CD0AD030E27FC99853DC82D2499",
-      "FUNCTIONS_EXTENSION_VERSION": "~2", "WEBSITE_NODE_DEFAULT_VERSION": "10.14.1",
-      "DOCKER_REGISTRY_SERVER_USERNAME": "functionappacrtest000004", "DOCKER_REGISTRY_SERVER_URL":
-      "https://functionappacrtest000004.azurecr.io", "WEBSITES_ENABLE_APP_SERVICE_STORAGE":
-      "false", "AzureWebJobsDashboard": "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==",
-      "APPINSIGHTS_INSTRUMENTATIONKEY": "06ab1aa1-83b7-48bf-9d2c-8d938dac2b50"}, "kind":
+    body: 'b''{"properties": {"AzureWebJobsDashboard": "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==",
+      "DOCKER_REGISTRY_SERVER_USERNAME": "functionappacrtest000004", "AzureWebJobsStorage":
+      "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==",
+      "WEBSITE_NODE_DEFAULT_VERSION": "10.14.1", "MACHINEKEY_DecryptionKey": "055CD1D53D8A22B441442963A869BAEF72C22707D986EC083ADEFF50B4B47F3D",
+      "DOCKER_REGISTRY_SERVER_PASSWORD": "61R60o+vwtOON4DVHoCZAwrQPWcBNby+", "WEBSITES_ENABLE_APP_SERVICE_STORAGE":
+      "false", "DOCKER_REGISTRY_SERVER_URL": "https://functionappacrtest000004.azurecr.io",
+      "FUNCTIONS_WORKER_RUNTIME": "node", "FUNCTIONS_EXTENSION_VERSION": "~2"}, "kind":
       "<class \''str\''>"}'''
     headers:
       Accept:
@@ -1238,13 +1239,13 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1040'
+      - '966'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -g -n --docker-custom-image-name --docker-registry-server-url
       User-Agent:
-      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
+      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
         Azure-SDK-For-Python AZURECLI/2.0.71
       accept-language:
       - en-US
@@ -1252,19 +1253,19 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/appsettings?api-version=2018-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"Central
-        US","properties":{"AzureWebJobsStorage":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","DOCKER_REGISTRY_SERVER_PASSWORD":"uoQgN1Ob/c4jlPUK7c+9kTdJ7wxQAETa","FUNCTIONS_WORKER_RUNTIME":"node","MACHINEKEY_DecryptionKey":"A673403F2875FAB29ED3B365BC1D1C6DFADE2CD0AD030E27FC99853DC82D2499","FUNCTIONS_EXTENSION_VERSION":"~2","WEBSITE_NODE_DEFAULT_VERSION":"10.14.1","DOCKER_REGISTRY_SERVER_USERNAME":"functionappacrtest000004","DOCKER_REGISTRY_SERVER_URL":"https://functionappacrtest000004.azurecr.io","WEBSITES_ENABLE_APP_SERVICE_STORAGE":"false","AzureWebJobsDashboard":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","APPINSIGHTS_INSTRUMENTATIONKEY":"06ab1aa1-83b7-48bf-9d2c-8d938dac2b50"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"Japan
+        West","properties":{"AzureWebJobsDashboard":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","DOCKER_REGISTRY_SERVER_USERNAME":"functionappacrtest000004","AzureWebJobsStorage":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","WEBSITE_NODE_DEFAULT_VERSION":"10.14.1","MACHINEKEY_DecryptionKey":"055CD1D53D8A22B441442963A869BAEF72C22707D986EC083ADEFF50B4B47F3D","DOCKER_REGISTRY_SERVER_PASSWORD":"61R60o+vwtOON4DVHoCZAwrQPWcBNby+","WEBSITES_ENABLE_APP_SERVICE_STORAGE":"false","DOCKER_REGISTRY_SERVER_URL":"https://functionappacrtest000004.azurecr.io","FUNCTIONS_WORKER_RUNTIME":"node","FUNCTIONS_EXTENSION_VERSION":"~2"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1298'
+      - '1226'
       content-type:
       - application/json
       date:
-      - Wed, 21 Aug 2019 19:01:25 GMT
+      - Wed, 21 Aug 2019 22:51:59 GMT
       etag:
-      - '"1D55852D3B7D360"'
+      - '"1D558730A783DF5"'
       expires:
       - '-1'
       pragma:
@@ -1304,7 +1305,7 @@ interactions:
       ParameterSetName:
       - -g -n --docker-custom-image-name --docker-registry-server-url
       User-Agent:
-      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
+      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
         Azure-SDK-For-Python AZURECLI/2.0.71
       accept-language:
       - en-US
@@ -1312,17 +1313,17 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/appsettings/list?api-version=2018-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"Central
-        US","properties":{"AzureWebJobsStorage":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","DOCKER_REGISTRY_SERVER_PASSWORD":"uoQgN1Ob/c4jlPUK7c+9kTdJ7wxQAETa","FUNCTIONS_WORKER_RUNTIME":"node","MACHINEKEY_DecryptionKey":"A673403F2875FAB29ED3B365BC1D1C6DFADE2CD0AD030E27FC99853DC82D2499","FUNCTIONS_EXTENSION_VERSION":"~2","WEBSITE_NODE_DEFAULT_VERSION":"10.14.1","DOCKER_REGISTRY_SERVER_USERNAME":"functionappacrtest000004","DOCKER_REGISTRY_SERVER_URL":"https://functionappacrtest000004.azurecr.io","WEBSITES_ENABLE_APP_SERVICE_STORAGE":"false","AzureWebJobsDashboard":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","APPINSIGHTS_INSTRUMENTATIONKEY":"06ab1aa1-83b7-48bf-9d2c-8d938dac2b50"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"Japan
+        West","properties":{"AzureWebJobsDashboard":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","DOCKER_REGISTRY_SERVER_USERNAME":"functionappacrtest000004","AzureWebJobsStorage":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","WEBSITE_NODE_DEFAULT_VERSION":"10.14.1","MACHINEKEY_DecryptionKey":"055CD1D53D8A22B441442963A869BAEF72C22707D986EC083ADEFF50B4B47F3D","DOCKER_REGISTRY_SERVER_PASSWORD":"61R60o+vwtOON4DVHoCZAwrQPWcBNby+","WEBSITES_ENABLE_APP_SERVICE_STORAGE":"false","DOCKER_REGISTRY_SERVER_URL":"https://functionappacrtest000004.azurecr.io","FUNCTIONS_WORKER_RUNTIME":"node","FUNCTIONS_EXTENSION_VERSION":"~2"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1298'
+      - '1226'
       content-type:
       - application/json
       date:
-      - Wed, 21 Aug 2019 19:01:25 GMT
+      - Wed, 21 Aug 2019 22:52:01 GMT
       expires:
       - '-1'
       pragma:
@@ -1360,7 +1361,7 @@ interactions:
       ParameterSetName:
       - -g -n --docker-custom-image-name --docker-registry-server-url
       User-Agent:
-      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
+      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
         Azure-SDK-For-Python AZURECLI/2.0.71
       accept-language:
       - en-US
@@ -1368,8 +1369,8 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/slotConfigNames?api-version=2018-11-01
   response:
     body:
-      string: '{"id":null,"name":"functionappacrtest000004","type":"Microsoft.Web/sites","location":"Central
-        US","properties":{"connectionStringNames":null,"appSettingNames":null,"azureStorageConfigNames":null}}'
+      string: '{"id":null,"name":"functionappacrtest000004","type":"Microsoft.Web/sites","location":"Japan
+        West","properties":{"connectionStringNames":null,"appSettingNames":null,"azureStorageConfigNames":null}}'
     headers:
       cache-control:
       - no-cache
@@ -1378,7 +1379,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 21 Aug 2019 19:01:25 GMT
+      - Wed, 21 Aug 2019 22:52:02 GMT
       expires:
       - '-1'
       pragma:
@@ -1414,7 +1415,7 @@ interactions:
       ParameterSetName:
       - -g -n --docker-custom-image-name --docker-registry-server-url
       User-Agent:
-      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
+      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
         Azure-SDK-For-Python AZURECLI/2.0.71
       accept-language:
       - en-US
@@ -1422,8 +1423,8 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/web?api-version=2018-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/web","name":"functionappacrtest000004","type":"Microsoft.Web/sites/config","location":"Central
-        US","properties":{"numberOfWorkers":1,"defaultDocuments":["Default.htm","Default.html","Default.asp","index.htm","index.html","iisstart.htm","default.aspx","index.php"],"netFrameworkVersion":"v4.0","phpVersion":"","pythonVersion":"","nodeVersion":"","linuxFxVersion":"DOCKER|functionappacrtest000004.azurecr.io/image-name:latest","windowsFxVersion":null,"requestTracingEnabled":false,"remoteDebuggingEnabled":false,"remoteDebuggingVersion":"VS2017","httpLoggingEnabled":false,"azureMonitorLogCategories":null,"logsDirectorySizeLimit":35,"detailedErrorLoggingEnabled":false,"publishingUsername":"$functionappacrtest000004","publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":"None","use32BitWorkerProcess":true,"webSocketsEnabled":false,"alwaysOn":true,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":"","managedPipelineMode":"Integrated","virtualApplications":[{"virtualPath":"/","physicalPath":"site\\wwwroot","preloadEnabled":true,"virtualDirectories":null}],"winAuthAdminState":0,"winAuthTenantState":0,"customAppPoolIdentityAdminState":false,"customAppPoolIdentityTenantState":false,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":"LeastRequests","routingRules":[],"experiments":{"rampUpRules":[]},"limits":null,"autoHealEnabled":false,"autoHealRules":null,"tracingOptions":null,"vnetName":"","siteAuthEnabled":false,"siteAuthSettings":{"enabled":null,"unauthenticatedClientAction":null,"tokenStoreEnabled":null,"allowedExternalRedirectUrls":null,"defaultProvider":null,"clientId":null,"clientSecret":null,"clientSecretCertificateThumbprint":null,"issuer":null,"allowedAudiences":null,"additionalLoginParams":null,"isAadAutoProvisioned":false,"googleClientId":null,"googleClientSecret":null,"googleOAuthScopes":null,"facebookAppId":null,"facebookAppSecret":null,"facebookOAuthScopes":null,"twitterConsumerKey":null,"twitterConsumerSecret":null,"microsoftAccountClientId":null,"microsoftAccountClientSecret":null,"microsoftAccountOAuthScopes":null},"cors":{"allowedOrigins":["https://functions.azure.com","https://functions-staging.azure.com","https://functions-next.azure.com"],"supportCredentials":false},"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":false,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/web","name":"functionappacrtest000004","type":"Microsoft.Web/sites/config","location":"Japan
+        West","properties":{"numberOfWorkers":1,"defaultDocuments":["Default.htm","Default.html","Default.asp","index.htm","index.html","iisstart.htm","default.aspx","index.php"],"netFrameworkVersion":"v4.0","phpVersion":"","pythonVersion":"","nodeVersion":"","linuxFxVersion":"DOCKER|functionappacrtest000004.azurecr.io/image-name:latest","windowsFxVersion":null,"requestTracingEnabled":false,"remoteDebuggingEnabled":false,"remoteDebuggingVersion":"VS2017","httpLoggingEnabled":false,"azureMonitorLogCategories":null,"logsDirectorySizeLimit":35,"detailedErrorLoggingEnabled":false,"publishingUsername":"$functionappacrtest000004","publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":"None","use32BitWorkerProcess":true,"webSocketsEnabled":false,"alwaysOn":true,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":"","managedPipelineMode":"Integrated","virtualApplications":[{"virtualPath":"/","physicalPath":"site\\wwwroot","preloadEnabled":true,"virtualDirectories":null}],"winAuthAdminState":0,"winAuthTenantState":0,"customAppPoolIdentityAdminState":false,"customAppPoolIdentityTenantState":false,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":"LeastRequests","routingRules":[],"experiments":{"rampUpRules":[]},"limits":null,"autoHealEnabled":false,"autoHealRules":null,"tracingOptions":null,"vnetName":"","siteAuthEnabled":false,"siteAuthSettings":{"enabled":null,"unauthenticatedClientAction":null,"tokenStoreEnabled":null,"allowedExternalRedirectUrls":null,"defaultProvider":null,"clientId":null,"clientSecret":null,"clientSecretCertificateThumbprint":null,"issuer":null,"allowedAudiences":null,"additionalLoginParams":null,"isAadAutoProvisioned":false,"googleClientId":null,"googleClientSecret":null,"googleOAuthScopes":null,"facebookAppId":null,"facebookAppSecret":null,"facebookOAuthScopes":null,"twitterConsumerKey":null,"twitterConsumerSecret":null,"microsoftAccountClientId":null,"microsoftAccountClientSecret":null,"microsoftAccountOAuthScopes":null},"cors":{"allowedOrigins":["https://functions.azure.com","https://functions-staging.azure.com","https://functions-next.azure.com"],"supportCredentials":false},"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":false,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
         all","description":"Allow all access"}],"scmIpSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
         all","description":"Allow all access"}],"scmIpSecurityRestrictionsUseMain":false,"http20Enabled":true,"minTlsVersion":"1.2","ftpsState":"AllAllowed","reservedInstanceCount":0,"preWarmedInstanceCount":null,"healthCheckPath":null,"fileChangeAuditEnabled":false}}'
     headers:
@@ -1434,7 +1435,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 21 Aug 2019 19:01:25 GMT
+      - Wed, 21 Aug 2019 22:52:03 GMT
       expires:
       - '-1'
       pragma:
@@ -1472,7 +1473,7 @@ interactions:
       ParameterSetName:
       - -g -n --enable-cd
       User-Agent:
-      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
+      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
         Azure-SDK-For-Python AZURECLI/2.0.71
       accept-language:
       - en-US
@@ -1480,17 +1481,17 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/appsettings/list?api-version=2018-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"Central
-        US","properties":{"AzureWebJobsStorage":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","DOCKER_REGISTRY_SERVER_PASSWORD":"uoQgN1Ob/c4jlPUK7c+9kTdJ7wxQAETa","FUNCTIONS_WORKER_RUNTIME":"node","MACHINEKEY_DecryptionKey":"A673403F2875FAB29ED3B365BC1D1C6DFADE2CD0AD030E27FC99853DC82D2499","FUNCTIONS_EXTENSION_VERSION":"~2","WEBSITE_NODE_DEFAULT_VERSION":"10.14.1","DOCKER_REGISTRY_SERVER_USERNAME":"functionappacrtest000004","DOCKER_REGISTRY_SERVER_URL":"https://functionappacrtest000004.azurecr.io","WEBSITES_ENABLE_APP_SERVICE_STORAGE":"false","AzureWebJobsDashboard":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","APPINSIGHTS_INSTRUMENTATIONKEY":"06ab1aa1-83b7-48bf-9d2c-8d938dac2b50"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"Japan
+        West","properties":{"AzureWebJobsDashboard":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","DOCKER_REGISTRY_SERVER_USERNAME":"functionappacrtest000004","AzureWebJobsStorage":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","WEBSITE_NODE_DEFAULT_VERSION":"10.14.1","MACHINEKEY_DecryptionKey":"055CD1D53D8A22B441442963A869BAEF72C22707D986EC083ADEFF50B4B47F3D","DOCKER_REGISTRY_SERVER_PASSWORD":"61R60o+vwtOON4DVHoCZAwrQPWcBNby+","WEBSITES_ENABLE_APP_SERVICE_STORAGE":"false","DOCKER_REGISTRY_SERVER_URL":"https://functionappacrtest000004.azurecr.io","FUNCTIONS_WORKER_RUNTIME":"node","FUNCTIONS_EXTENSION_VERSION":"~2"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1298'
+      - '1226'
       content-type:
       - application/json
       date:
-      - Wed, 21 Aug 2019 19:01:27 GMT
+      - Wed, 21 Aug 2019 22:52:05 GMT
       expires:
       - '-1'
       pragma:
@@ -1515,15 +1516,14 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: 'b''{"properties": {"AzureWebJobsStorage": "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==",
-      "DOCKER_ENABLE_CI": "true", "MACHINEKEY_DecryptionKey": "A673403F2875FAB29ED3B365BC1D1C6DFADE2CD0AD030E27FC99853DC82D2499",
-      "WEBSITE_NODE_DEFAULT_VERSION": "10.14.1", "DOCKER_REGISTRY_SERVER_URL": "https://functionappacrtest000004.azurecr.io",
-      "AzureWebJobsDashboard": "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==",
-      "DOCKER_REGISTRY_SERVER_PASSWORD": "uoQgN1Ob/c4jlPUK7c+9kTdJ7wxQAETa", "FUNCTIONS_WORKER_RUNTIME":
-      "node", "FUNCTIONS_EXTENSION_VERSION": "~2", "DOCKER_REGISTRY_SERVER_USERNAME":
-      "functionappacrtest000004", "WEBSITES_ENABLE_APP_SERVICE_STORAGE": "false",
-      "APPINSIGHTS_INSTRUMENTATIONKEY": "06ab1aa1-83b7-48bf-9d2c-8d938dac2b50"}, "kind":
-      "<class \''str\''>"}'''
+    body: 'b''{"properties": {"AzureWebJobsDashboard": "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==",
+      "DOCKER_REGISTRY_SERVER_USERNAME": "functionappacrtest000004", "AzureWebJobsStorage":
+      "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==",
+      "WEBSITE_NODE_DEFAULT_VERSION": "10.14.1", "MACHINEKEY_DecryptionKey": "055CD1D53D8A22B441442963A869BAEF72C22707D986EC083ADEFF50B4B47F3D",
+      "DOCKER_REGISTRY_SERVER_PASSWORD": "61R60o+vwtOON4DVHoCZAwrQPWcBNby+", "DOCKER_REGISTRY_SERVER_URL":
+      "https://functionappacrtest000004.azurecr.io", "WEBSITES_ENABLE_APP_SERVICE_STORAGE":
+      "false", "FUNCTIONS_WORKER_RUNTIME": "node", "DOCKER_ENABLE_CI": "true", "FUNCTIONS_EXTENSION_VERSION":
+      "~2"}, "kind": "<class \''str\''>"}'''
     headers:
       Accept:
       - application/json
@@ -1534,13 +1534,13 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1068'
+      - '994'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -g -n --enable-cd
       User-Agent:
-      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
+      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
         Azure-SDK-For-Python AZURECLI/2.0.71
       accept-language:
       - en-US
@@ -1548,19 +1548,19 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/appsettings?api-version=2018-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"Central
-        US","properties":{"AzureWebJobsStorage":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","DOCKER_ENABLE_CI":"true","MACHINEKEY_DecryptionKey":"A673403F2875FAB29ED3B365BC1D1C6DFADE2CD0AD030E27FC99853DC82D2499","WEBSITE_NODE_DEFAULT_VERSION":"10.14.1","DOCKER_REGISTRY_SERVER_URL":"https://functionappacrtest000004.azurecr.io","AzureWebJobsDashboard":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","DOCKER_REGISTRY_SERVER_PASSWORD":"uoQgN1Ob/c4jlPUK7c+9kTdJ7wxQAETa","FUNCTIONS_WORKER_RUNTIME":"node","FUNCTIONS_EXTENSION_VERSION":"~2","DOCKER_REGISTRY_SERVER_USERNAME":"functionappacrtest000004","WEBSITES_ENABLE_APP_SERVICE_STORAGE":"false","APPINSIGHTS_INSTRUMENTATIONKEY":"06ab1aa1-83b7-48bf-9d2c-8d938dac2b50"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"Japan
+        West","properties":{"AzureWebJobsDashboard":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","DOCKER_REGISTRY_SERVER_USERNAME":"functionappacrtest000004","AzureWebJobsStorage":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","WEBSITE_NODE_DEFAULT_VERSION":"10.14.1","MACHINEKEY_DecryptionKey":"055CD1D53D8A22B441442963A869BAEF72C22707D986EC083ADEFF50B4B47F3D","DOCKER_REGISTRY_SERVER_PASSWORD":"61R60o+vwtOON4DVHoCZAwrQPWcBNby+","DOCKER_REGISTRY_SERVER_URL":"https://functionappacrtest000004.azurecr.io","WEBSITES_ENABLE_APP_SERVICE_STORAGE":"false","FUNCTIONS_WORKER_RUNTIME":"node","DOCKER_ENABLE_CI":"true","FUNCTIONS_EXTENSION_VERSION":"~2"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1324'
+      - '1252'
       content-type:
       - application/json
       date:
-      - Wed, 21 Aug 2019 19:01:28 GMT
+      - Wed, 21 Aug 2019 22:52:08 GMT
       etag:
-      - '"1D55852D66903AB"'
+      - '"1D558730EF22D55"'
       expires:
       - '-1'
       pragma:
@@ -1600,7 +1600,7 @@ interactions:
       ParameterSetName:
       - -g -n --enable-cd
       User-Agent:
-      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
+      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
         Azure-SDK-For-Python AZURECLI/2.0.71
       accept-language:
       - en-US
@@ -1608,17 +1608,17 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/appsettings/list?api-version=2018-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"Central
-        US","properties":{"AzureWebJobsStorage":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","DOCKER_ENABLE_CI":"true","MACHINEKEY_DecryptionKey":"A673403F2875FAB29ED3B365BC1D1C6DFADE2CD0AD030E27FC99853DC82D2499","WEBSITE_NODE_DEFAULT_VERSION":"10.14.1","DOCKER_REGISTRY_SERVER_URL":"https://functionappacrtest000004.azurecr.io","AzureWebJobsDashboard":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","DOCKER_REGISTRY_SERVER_PASSWORD":"uoQgN1Ob/c4jlPUK7c+9kTdJ7wxQAETa","FUNCTIONS_WORKER_RUNTIME":"node","FUNCTIONS_EXTENSION_VERSION":"~2","DOCKER_REGISTRY_SERVER_USERNAME":"functionappacrtest000004","WEBSITES_ENABLE_APP_SERVICE_STORAGE":"false","APPINSIGHTS_INSTRUMENTATIONKEY":"06ab1aa1-83b7-48bf-9d2c-8d938dac2b50"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"Japan
+        West","properties":{"AzureWebJobsDashboard":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","DOCKER_REGISTRY_SERVER_USERNAME":"functionappacrtest000004","AzureWebJobsStorage":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","WEBSITE_NODE_DEFAULT_VERSION":"10.14.1","MACHINEKEY_DecryptionKey":"055CD1D53D8A22B441442963A869BAEF72C22707D986EC083ADEFF50B4B47F3D","DOCKER_REGISTRY_SERVER_PASSWORD":"61R60o+vwtOON4DVHoCZAwrQPWcBNby+","DOCKER_REGISTRY_SERVER_URL":"https://functionappacrtest000004.azurecr.io","WEBSITES_ENABLE_APP_SERVICE_STORAGE":"false","FUNCTIONS_WORKER_RUNTIME":"node","DOCKER_ENABLE_CI":"true","FUNCTIONS_EXTENSION_VERSION":"~2"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1324'
+      - '1252'
       content-type:
       - application/json
       date:
-      - Wed, 21 Aug 2019 19:01:29 GMT
+      - Wed, 21 Aug 2019 22:52:08 GMT
       expires:
       - '-1'
       pragma:
@@ -1656,7 +1656,7 @@ interactions:
       ParameterSetName:
       - -g -n --enable-cd
       User-Agent:
-      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
+      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
         Azure-SDK-For-Python AZURECLI/2.0.71
       accept-language:
       - en-US
@@ -1664,8 +1664,8 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/slotConfigNames?api-version=2018-11-01
   response:
     body:
-      string: '{"id":null,"name":"functionappacrtest000004","type":"Microsoft.Web/sites","location":"Central
-        US","properties":{"connectionStringNames":null,"appSettingNames":null,"azureStorageConfigNames":null}}'
+      string: '{"id":null,"name":"functionappacrtest000004","type":"Microsoft.Web/sites","location":"Japan
+        West","properties":{"connectionStringNames":null,"appSettingNames":null,"azureStorageConfigNames":null}}'
     headers:
       cache-control:
       - no-cache
@@ -1674,7 +1674,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 21 Aug 2019 19:01:30 GMT
+      - Wed, 21 Aug 2019 22:52:10 GMT
       expires:
       - '-1'
       pragma:
@@ -1712,7 +1712,7 @@ interactions:
       ParameterSetName:
       - -g -n --enable-cd
       User-Agent:
-      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
+      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
         Azure-SDK-For-Python AZURECLI/2.0.71
       accept-language:
       - en-US
@@ -1720,8 +1720,8 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/publishingcredentials/list?api-version=2018-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/publishingcredentials/$functionappacrtest000004","name":"functionappacrtest000004","type":"Microsoft.Web/sites/publishingcredentials","location":"Central
-        US","properties":{"name":null,"publishingUserName":"$functionappacrtest000004","publishingPassword":"4oe7FsZYjmvp3wphpEJxQrEJbNaM1YqDr5Npew0SvT7uKplED0ZBqoc3zvFx","publishingPasswordHash":null,"publishingPasswordHashSalt":null,"metadata":null,"isDeleted":false,"scmUri":"https://$functionappacrtest000004:4oe7FsZYjmvp3wphpEJxQrEJbNaM1YqDr5Npew0SvT7uKplED0ZBqoc3zvFx@functionappacrtest000004.scm.azurewebsites.net"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/publishingcredentials/$functionappacrtest000004","name":"functionappacrtest000004","type":"Microsoft.Web/sites/publishingcredentials","location":"Japan
+        West","properties":{"name":null,"publishingUserName":"$functionappacrtest000004","publishingPassword":"eZYxgcnJ2YjgXLaelwHFr0ZPDdKplcDT46mjLjWdEmJscZnvKzxxKJvtPBoE","publishingPasswordHash":null,"publishingPasswordHashSalt":null,"metadata":null,"isDeleted":false,"scmUri":"https://$functionappacrtest000004:eZYxgcnJ2YjgXLaelwHFr0ZPDdKplcDT46mjLjWdEmJscZnvKzxxKJvtPBoE@functionappacrtest000004.scm.azurewebsites.net"}}'
     headers:
       cache-control:
       - no-cache
@@ -1730,7 +1730,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 21 Aug 2019 19:01:31 GMT
+      - Wed, 21 Aug 2019 22:52:11 GMT
       expires:
       - '-1'
       pragma:
@@ -1748,7 +1748,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11998'
+      - '11999'
       x-powered-by:
       - ASP.NET
     status:
@@ -1770,7 +1770,7 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
+      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
         Azure-SDK-For-Python AZURECLI/2.0.71
       accept-language:
       - en-US
@@ -1778,17 +1778,17 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/appsettings/list?api-version=2018-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"Central
-        US","properties":{"AzureWebJobsStorage":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","DOCKER_ENABLE_CI":"true","MACHINEKEY_DecryptionKey":"A673403F2875FAB29ED3B365BC1D1C6DFADE2CD0AD030E27FC99853DC82D2499","WEBSITE_NODE_DEFAULT_VERSION":"10.14.1","DOCKER_REGISTRY_SERVER_URL":"https://functionappacrtest000004.azurecr.io","AzureWebJobsDashboard":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","DOCKER_REGISTRY_SERVER_PASSWORD":"uoQgN1Ob/c4jlPUK7c+9kTdJ7wxQAETa","FUNCTIONS_WORKER_RUNTIME":"node","FUNCTIONS_EXTENSION_VERSION":"~2","DOCKER_REGISTRY_SERVER_USERNAME":"functionappacrtest000004","WEBSITES_ENABLE_APP_SERVICE_STORAGE":"false","APPINSIGHTS_INSTRUMENTATIONKEY":"06ab1aa1-83b7-48bf-9d2c-8d938dac2b50"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"Japan
+        West","properties":{"AzureWebJobsDashboard":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","DOCKER_REGISTRY_SERVER_USERNAME":"functionappacrtest000004","AzureWebJobsStorage":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","WEBSITE_NODE_DEFAULT_VERSION":"10.14.1","MACHINEKEY_DecryptionKey":"055CD1D53D8A22B441442963A869BAEF72C22707D986EC083ADEFF50B4B47F3D","DOCKER_REGISTRY_SERVER_PASSWORD":"61R60o+vwtOON4DVHoCZAwrQPWcBNby+","DOCKER_REGISTRY_SERVER_URL":"https://functionappacrtest000004.azurecr.io","WEBSITES_ENABLE_APP_SERVICE_STORAGE":"false","FUNCTIONS_WORKER_RUNTIME":"node","DOCKER_ENABLE_CI":"true","FUNCTIONS_EXTENSION_VERSION":"~2"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1324'
+      - '1252'
       content-type:
       - application/json
       date:
-      - Wed, 21 Aug 2019 19:01:31 GMT
+      - Wed, 21 Aug 2019 22:52:13 GMT
       expires:
       - '-1'
       pragma:
@@ -1806,7 +1806,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11998'
+      - '11999'
       x-powered-by:
       - ASP.NET
     status:
@@ -1826,7 +1826,7 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
+      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
         Azure-SDK-For-Python AZURECLI/2.0.71
       accept-language:
       - en-US
@@ -1834,8 +1834,8 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/slotConfigNames?api-version=2018-11-01
   response:
     body:
-      string: '{"id":null,"name":"functionappacrtest000004","type":"Microsoft.Web/sites","location":"Central
-        US","properties":{"connectionStringNames":null,"appSettingNames":null,"azureStorageConfigNames":null}}'
+      string: '{"id":null,"name":"functionappacrtest000004","type":"Microsoft.Web/sites","location":"Japan
+        West","properties":{"connectionStringNames":null,"appSettingNames":null,"azureStorageConfigNames":null}}'
     headers:
       cache-control:
       - no-cache
@@ -1844,7 +1844,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 21 Aug 2019 19:01:31 GMT
+      - Wed, 21 Aug 2019 22:52:15 GMT
       expires:
       - '-1'
       pragma:
@@ -1882,7 +1882,7 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
+      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
         Azure-SDK-For-Python AZURECLI/2.0.71
       accept-language:
       - en-US
@@ -1890,8 +1890,8 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/config/publishingcredentials/list?api-version=2018-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/publishingcredentials/$functionappacrtest000004","name":"functionappacrtest000004","type":"Microsoft.Web/sites/publishingcredentials","location":"Central
-        US","properties":{"name":null,"publishingUserName":"$functionappacrtest000004","publishingPassword":"4oe7FsZYjmvp3wphpEJxQrEJbNaM1YqDr5Npew0SvT7uKplED0ZBqoc3zvFx","publishingPasswordHash":null,"publishingPasswordHashSalt":null,"metadata":null,"isDeleted":false,"scmUri":"https://$functionappacrtest000004:4oe7FsZYjmvp3wphpEJxQrEJbNaM1YqDr5Npew0SvT7uKplED0ZBqoc3zvFx@functionappacrtest000004.scm.azurewebsites.net"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappacrtest000004/publishingcredentials/$functionappacrtest000004","name":"functionappacrtest000004","type":"Microsoft.Web/sites/publishingcredentials","location":"Japan
+        West","properties":{"name":null,"publishingUserName":"$functionappacrtest000004","publishingPassword":"eZYxgcnJ2YjgXLaelwHFr0ZPDdKplcDT46mjLjWdEmJscZnvKzxxKJvtPBoE","publishingPasswordHash":null,"publishingPasswordHashSalt":null,"metadata":null,"isDeleted":false,"scmUri":"https://$functionappacrtest000004:eZYxgcnJ2YjgXLaelwHFr0ZPDdKplcDT46mjLjWdEmJscZnvKzxxKJvtPBoE@functionappacrtest000004.scm.azurewebsites.net"}}'
     headers:
       cache-control:
       - no-cache
@@ -1900,7 +1900,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 21 Aug 2019 19:01:32 GMT
+      - Wed, 21 Aug 2019 22:52:15 GMT
       expires:
       - '-1'
       pragma:
@@ -1940,7 +1940,7 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
+      - python/3.5.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
         Azure-SDK-For-Python AZURECLI/2.0.71
       accept-language:
       - en-US
@@ -1955,9 +1955,9 @@ interactions:
       content-length:
       - '0'
       date:
-      - Wed, 21 Aug 2019 19:01:37 GMT
+      - Wed, 21 Aug 2019 22:52:22 GMT
       etag:
-      - '"1D55852D66903AB"'
+      - '"1D558730EF22D55"'
       expires:
       - '-1'
       pragma:
