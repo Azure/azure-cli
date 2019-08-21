@@ -426,7 +426,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'vault': vault_name,
             'vm': vm_name,
             'target_rg': TargetRg,
-            'rg' : resource_group,
+            'rg': resource_group
         })
         self.kwargs['rp'] = self.cmd('backup recoverypoint list -g {rg} -v {vault} -c {vm} -i {vm} --query [0].name').get_output_in_json()
 
