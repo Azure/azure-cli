@@ -4,8 +4,6 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long
 
-STORAGE_RESOURCE_TYPE = 'Microsoft.Storage/storageAccounts'
-
 ACR_RESOURCE_PROVIDER = 'Microsoft.ContainerRegistry'
 REGISTRY_RESOURCE_TYPE = ACR_RESOURCE_PROVIDER + '/registries'
 WEBHOOK_RESOURCE_TYPE = REGISTRY_RESOURCE_TYPE + '/webhooks'

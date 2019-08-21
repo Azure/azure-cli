@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.0.70"
+VERSION = "2.0.71"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -76,9 +76,9 @@ DEPENDENCIES = [
     'azure-mgmt-compute~=6.0',
     'azure-mgmt-consumption~=2.0',
     'azure-mgmt-containerinstance~=1.4',
-    'azure-mgmt-containerregistry~=3.0.0rc4',
+    'azure-mgmt-containerregistry~=3.0.0rc5',
     'azure-mgmt-containerservice~=5.2',
-    'azure-mgmt-cosmosdb~=0.6.1',
+    'azure-mgmt-cosmosdb~=0.7.0',
     'azure-mgmt-datalake-analytics~=0.2.1',
     'azure-mgmt-datalake-store~=0.5.0',
     'azure-mgmt-datamigration~=0.1.0',
@@ -102,13 +102,13 @@ DEPENDENCIES = [
     'azure-mgmt-media~=1.1,>=1.1.1',
     'azure-mgmt-monitor~=0.5.2',
     'azure-mgmt-msi~=0.2',
-    'azure-mgmt-network~=3.0',
+    'azure-mgmt-network~=4.0',
     'azure-mgmt-netapp~=0.5.0',
     'azure-mgmt-policyinsights~=0.3.1',
     'azure-mgmt-privatedns~=0.1.0',
     'azure-mgmt-rdbms~=1.8',
-    'azure-mgmt-recoveryservices~=0.1.1',
-    'azure-mgmt-recoveryservicesbackup~=0.1.2',
+    'azure-mgmt-recoveryservices~=0.4.0',
+    'azure-mgmt-recoveryservicesbackup~=0.4.0',
     'azure-mgmt-redis~=6.0',
     'azure-mgmt-relay~=0.1.0',
     # 'azure-mgmt-reservations~=0.3.1',
@@ -132,7 +132,6 @@ DEPENDENCIES = [
     'knack~=0.6,>=0.6.3',
     'mock~=2.0',
     'paramiko>=2.0.8,<3.0.0',
-    'prompt_toolkit~=2.0',
     'pydocumentdb>=2.0.1,<3.0.0',
     'pygments~=2.4',
     'pyOpenSSL>=17.1.0',

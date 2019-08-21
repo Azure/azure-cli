@@ -48,7 +48,7 @@ def process_certificate_cancel_namespace(namespace):
     namespace.cancellation_requested = True
 
 
-def process_secret_set_namespace(namespace):
+def process_secret_set_namespace(cmd, namespace):
     validate_tags(namespace)
 
     content = namespace.value
@@ -60,6 +60,16 @@ def process_secret_set_namespace(namespace):
 
     if (content and file_path) or (not content and not file_path):
         raise use_error
+
+    from azure.cli.core.profiles import ResourceType
+    SecretAttributes = cmd.get_models('SecretAttributes', resource_type=ResourceType.DATA_KEYVAULT)
+    namespace.secret_attributes = SecretAttributes()
+    if namespace.expires:
+        namespace.secret_attributes.expires = namespace.expires
+    if namespace.disabled:
+        namespace.secret_attributes.enabled = not namespace.disabled
+    if namespace.not_before:
+        namespace.secret_attributes.not_before = namespace.not_before
 
     encoding = encoding or 'utf-8'
     if file_path:

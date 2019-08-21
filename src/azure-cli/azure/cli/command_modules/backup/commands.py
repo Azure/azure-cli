@@ -23,14 +23,14 @@ def load_command_table(self, _):
         client_factory=vaults_cf)
 
     backup_storage_config_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.recoveryservices.operations#BackupStorageConfigsOperations.{}',
+        operations_tmpl='azure.mgmt.recoveryservicesbackup.operations.backup_resource_storage_configs_operations#BackupResourceStorageConfigsOperations.{}',
         client_factory=vaults_cf)
 
     with self.command_group('backup vault', backup_vaults_sdk, client_factory=vaults_cf) as g:
         g.custom_command('create', 'create_vault')
         g.show_command('show', 'get')
         g.custom_command('list', 'list_vaults')
-        g.show_command('backup-properties show', 'get', command_type=backup_storage_config_sdk)
+        g.show_command('backup-properties show', 'get', command_type=backup_storage_config_sdk, client_factory=backup_storage_configs_cf)
         g.custom_command('backup-properties set', 'set_backup_properties', client_factory=backup_storage_configs_cf)
         g.custom_command('delete', 'delete_vault', confirmation=True)
 

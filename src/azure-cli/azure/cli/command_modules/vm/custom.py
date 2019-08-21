@@ -1965,7 +1965,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
         lb_resource['dependsOn'] = lb_dependencies
         master_template.add_resource(lb_resource)
 
-        # Per https://docs.microsoft.com/en-us/azure/load-balancer/load-balancer-standard-overview#nsg
+        # Per https://docs.microsoft.com/azure/load-balancer/load-balancer-standard-overview#nsg
         if load_balancer_sku and load_balancer_sku.lower() == 'standard' and nsg is None:
             nsg_name = '{}NSG'.format(vmss_name)
             master_template.add_resource(build_nsg_resource(

@@ -3,17 +3,122 @@
 Release History
 ===============
 
+**ACR**
+
+* Move to 2019-05-01 api-version, which follows replace semantics for ACR resource creation.
+* Breaking change: Classic SKU no longer supported.
+
+**AppService**
+
+* Fixed az webapp webjob continuous start command when specifying a slot.
+
+**AppService**
+
+* az webapp up detects env folder and removes it from compressed file used for deployment
+
+**keyvault**
+
+* Fix the bug in secret set command that igores the expires argument
+
+**Network**
+
+* az network lb create/frontend-ip create: Fixes #10018. Support `--private-ip-address-version` argument to create IPv6 based private-ip-address 
+* az network private-endpoint create/update/list-types: Fixes #9474. Support create/update/list-types commands for private endpoint.
+* az network private-link-service: Fixes #9475. Onboard commands for private link service.
+* az network vnet subnet update: Support `--private-endpoint-network-policies` and `--private-link-service-network-policies` arguments for update command.
+
+**RBAC**
+
+* Fix #10151 - `az ad app update --homepage` not updating homepage.
+
+**ServiceFabric**
+
+* Fix for issues #7145,  #7880 and #7889 - fix for key vault and cert issues when creating a cluster.
+* Fix for issue #7130 - fix add cert command. Using the cluster resource group when the key vault resource group is not specified.
+* Fix for issue #9711 - fix command 'cluster setting set' command. Using named parameters for SettingsSectionDescription constructor.
+
+**Storage**
+
+* Add `revoke-delegation-keys` command for storage account
+
+2.0.71
+++++++
+
+**AppService**
+
+* az webapp webjob continuous group commands were failing for slots
+
+**BotService**
+
+* BREAKING CHANGE:
+    create:
+        - Removed support for creating v3 SDK bots
+        - Remove `az bot publish` example when creating a Web App bot
+
 **CognitiveServices**
 
-* add "cognitiveservices account network-rule" commands.
+* Add "cognitiveservices account network-rule" commands.
+
+**Cosmos DB**
+
+* Remove warning when updating multiple write locations
+* Add CRUD commands for CosmosDB SQL, MongoDB, Cassandra, Gremlin and Table resources and resource's throughput.
+
+**HDInsight**
+
+* BREAKING CHANGE:
+    create:
+        - Renamed --storage-default-container to --storage-container and --storage-default-filesystem to --storage-filesystem
+    application create: 
+        - Changed the --name/-n argument to represent the application name instead of the cluster name and added a separate --cluster-name argument
+        - Renamed --application-type to --type/-t
+        - Renamed --marketplace-identifier to --marketplace-id
+        - Renamed --https-endpoint-access-mode to --access-mode and --https-endpoint-destination-port to --destination-port
+        - Removed --https-endpoint-location, --https-endpoint-public-port, --ssh-endpoint-destination-port, --ssh-endpoint-location and --ssh-endpoint-public-port
+    resize:
+        - Renamed --target-instance-count to --workernode-count/-c
+    script-action
+        - Changed --name/-n to represent the name of the script action and added the --cluster-name argument to represent the cluster name
+        - Changed --script-execution-id to --execution-id
+        - Renamed the "show" command to "show-execution-details"
+    script-action execute:
+        - Made parameters for the --roles argument space separated instead of comma separated
+    script-action list:
+        - Removed the --persisted parameter
+* create:
+    Enabled the --cluster-configurations argument to accept a path to a local JSON file or a JSON string as the parameter
+* script-action list-execution-history:
+    Added this command to list the execution history for all script action executions
+* monitor enable:
+    Enabled the --workspace argument to accept a Log Analytics workspace ID or workspace name as the parameter
+    Added the --primary-key argument, which is needed if a workspace ID is provided as the parameter 
+* Added more examples and updated descriptions for help messages
+
+**interactive**
+
+* Fix a loading error on 2.0.70
+
+**Network**
+
+* az network dns record-set cname delete: Fixes #10166. Support `--yes` argument to align the behavior with other dns type. 
 
 **Profile**
 
 * Add get-access-token --resource-type enum for convenience of getting access tokens for well-known resources.
 
-**Core**
+**ServiceFabric**
 
-* `--query`: properly handle type errors caused by invalid JMESPath queries.
+* Fix for issue #6112 - added all supported os version for sf cluster create
+* Fix for issue #6536 - primary certificate validation bug
+
+**Storage**
+
+* `storage copy`: add copy command for storage
+
+**Kubernetes**
+
+* Use https if dashboard container port is using https 
+
 
 2.0.70
 ++++++
@@ -27,6 +132,10 @@ Release History
 * az webapp config ssl support to show a message if a resource is not found
 * Fixed issue where `az functionapp create` does not accept Standard_RAGRS storage account type.
 * Fixed an issue where az webapp up would fail if run using older versions of python
+
+**Monitor**
+
+* `metrics alert create`: Allow '/' and '.' characters in namespace name to support custom metrics.
 
 **Network**
 
@@ -154,6 +263,10 @@ Release History
 
 **Profile**
 * Suppress `--subscription` argument for logout command.
+
+**IoT**
+
+* Support for IoT Hub message enrichments
 
 **RBAC**
 

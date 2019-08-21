@@ -91,7 +91,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('if_match')
         c.argument('if_none_match')
 
-    for item in ['delete', 'show', 'update', 'show-connection-string', 'keys', 'network-rule']:
+    for item in ['delete', 'show', 'update', 'show-connection-string', 'keys', 'network-rule', 'revoke-delegation-keys']:  # pylint: disable=line-too-long
         with self.argument_context('storage account {}'.format(item)) as c:
             c.argument('account_name', acct_name_type, options_list=['--name', '-n'])
             c.argument('resource_group_name', required=False, validator=process_resource_group)
@@ -164,7 +164,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage account management-policy create') as c:
         c.argument('policy', type=file_type, completer=FilesCompleter(),
                    help='The Storage Account ManagementPolicies Rules, in JSON format. See more details in: '
-                        'https://docs.microsoft.com/en-us/azure/storage/common/storage-lifecycle-managment-concepts.')
+                        'https://docs.microsoft.com/azure/storage/common/storage-lifecycle-managment-concepts.')
         c.argument('account_name', help='The name of the storage account within the specified resource group.')
 
     with self.argument_context('storage account management-policy update') as c:
@@ -362,6 +362,33 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('lease_duration', type=int)
         c.argument('lease_break_period', type=int)
         c.argument('blob_name', arg_type=blob_name_type)
+
+    with self.argument_context('storage copy') as c:
+        c.argument('destination', options_list=['--destination', '-d'], help="The path/url of copy destination. \
+            It can be local path, an url to azure storage server. For more imformation, please refer to [link here]. \
+            If you provide destination parameter here, you do not need to provide arguments in copy \
+            destination arguments group and copy destination arguments will be deprecated  in future.")
+        c.argument('source', options_list=['--source', '-s'], help="The path/url of copy source. \
+            It can be local path, an url to azure storage server or AWS S3 buckets. For more imformation, please refer to [link here]. \
+            If you provide source parameter here, you do not need to provide arguments in copy source arguments group and copy source \
+            arguments will be deprecated in future.")
+        for item in ['destination', 'source']:
+            c.argument('{}_account_name'.format(item), arg_group='Copy {}'.format(item),
+                       help='Storage account name of copy {}'.format(item))
+            c.argument('{}_container'.format(item), arg_group='Copy {}'.format(item),
+                       help='Container name of copy {} storage account'.format(item))
+            c.argument('{}_blob'.format(item), arg_group='Copy {}'.format(item),
+                       help='Blob name in blob container of copy {} storage account'.format(item))
+            c.argument('{}_share'.format(item), arg_group='Copy {}'.format(item),
+                       help='File share name of copy {} storage account'.format(item))
+            c.argument('{}_file_path'.format(item), arg_group='Copy {}'.format(item),
+                       help='File path in file share of copy {} storage account'.format(item))
+            c.argument('{}_local_path'.format(item), arg_group='Copy {}'.format(item),
+                       help='Local file path')
+        c.argument('recursive', action='store_true', help='Look into sub-directories \
+                    recursively when uploading from local file system.')
+        c.argument('put_md5', action='store_true', help='Create an MD5 hash of each file, and save the hash \
+                    as the Content-MD5 property of the destination blob/file.Only available when uploading.')
 
     with self.argument_context('storage blob copy') as c:
         for item in ['destination', 'source']:

@@ -943,7 +943,7 @@ class WebappSSLCertTest(ScenarioTest):
         plan = self.create_random_name(prefix='ssl-test-plan', length=24)
         webapp_name = self.create_random_name(prefix='web-ssl-test', length=20)
         # Cert Generated using
-        # https://docs.microsoft.com/en-us/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
+        # https://docs.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
         pfx_file = os.path.join(TEST_DIR, 'server.pfx')
         cert_password = 'test'
         cert_thumbprint = '9E9735C45C792B03B3FFCCA614852B32EE71AD6B'
@@ -1576,6 +1576,51 @@ class WebappWindowsContainerBasicE2ETest(ScenarioTest):
         # verify alwaysOn
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name)).assert_with_checks([
             JMESPathCheck('alwaysOn', False)])
+
+
+class WebappNetworkConnectionTests(ScenarioTest):
+    @AllowLargeResponse()
+    @ResourceGroupPreparer()
+    def test_webapp_hybridconnectionE2E(self, resource_group):
+        webapp_name = self.create_random_name('hcwebapp', 24)
+        plan = self.create_random_name('hcplan', 24)
+        namespace_name = self.create_random_name('hcnamespace', 24)
+        hyco_name = self.create_random_name('hcname', 24)
+        um = "[{{\\\"key\\\":\\\"endpoint\\\",\\\"value\\\":\\\"vmsq1:80\\\"}}]"
+
+        self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan))
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan))
+        self.cmd('relay namespace create -g {} --name {}'.format(resource_group, namespace_name))
+        self.cmd('relay hyco create -g {} --namespace-name {} --name {} --user-metadata {}'.format(resource_group, namespace_name, hyco_name, um))
+        self.cmd('webapp hybrid-connection add -g {} -n {} --namespace {} --hybrid-connection {}'.format(resource_group, webapp_name, namespace_name, hyco_name))
+        self.cmd('webapp hybrid-connection list -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', hyco_name)
+        ])
+        self.cmd('webapp hybrid-connection remove -g {} -n {} --namespace {} --hybrid-connection {}'.format(resource_group, webapp_name, namespace_name, hyco_name))
+        self.cmd('webapp hybrid-connection list -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('length(@)', 0)
+        ])
+
+    @ResourceGroupPreparer()
+    def test_webapp_vnetE2E(self, resource_group):
+        webapp_name = self.create_random_name('swiftwebapp', 24)
+        plan = self.create_random_name('swiftplan', 24)
+        subnet_name = self.create_random_name('swiftsubnet', 24)
+        vnet_name = self.create_random_name('swiftname', 24)
+
+        self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(resource_group, vnet_name, subnet_name))
+        self.cmd('appservice plan create -g {} -n {} --sku S1 --debug'.format(resource_group, plan))
+        self.cmd('webapp create -g {} -n {} --plan {} --debug'.format(resource_group, webapp_name, plan))
+        self.cmd('webapp vnet-integration add -g {} -n {} --vnet {} --subnet {} --debug'.format(resource_group, webapp_name, vnet_name, subnet_name))
+        self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', subnet_name)
+        ])
+        self.cmd('webapp vnet-integration remove -g {} -n {}'.format(resource_group, webapp_name))
+        self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('length(@)', 0)
+        ])
 
 
 if __name__ == '__main__':

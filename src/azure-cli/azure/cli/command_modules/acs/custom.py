@@ -1042,9 +1042,15 @@ def load_kubernetes_configuration(filename):
         raise CLIError('Error parsing {} ({})'.format(filename, str(ex)))
 
 
-def merge_kubernetes_configurations(existing_file, addition_file, replace):
+def merge_kubernetes_configurations(existing_file, addition_file, replace, context_name=None):
     existing = load_kubernetes_configuration(existing_file)
     addition = load_kubernetes_configuration(addition_file)
+
+    if context_name is not None:
+        addition['contexts'][0]['name'] = context_name
+        addition['contexts'][0]['context']['cluster'] = context_name
+        addition['clusters'][0]['name'] = context_name
+        addition['current-context'] = context_name
 
     # rename the admin context so it doesn't overwrite the user context
     for ctx in addition.get('contexts', []):
@@ -1200,7 +1206,7 @@ def create_application(client, display_name, homepage, identifier_uris,
         return client.create(app_create_param)
     except GraphErrorException as ex:
         if 'insufficient privileges' in str(ex).lower():
-            link = 'https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
+            link = 'https://docs.microsoft.com/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
             raise CLIError("Directory permission is needed for the current user to register the application. "
                            "For how to configure, please refer '{}'. Original error: {}".format(link, ex))
         raise
@@ -1223,7 +1229,7 @@ def update_application(client, object_id, display_name, homepage, identifier_uri
         return
     except GraphErrorException as ex:
         if 'insufficient privileges' in str(ex).lower():
-            link = 'https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
+            link = 'https://docs.microsoft.com/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
             raise CLIError("Directory permission is needed for the current user to register the application. "
                            "For how to configure, please refer '{}'. Original error: {}".format(link, ex))
         raise
@@ -1377,6 +1383,7 @@ def subnet_role_assignment_exists(cli_ctx, scope):
     return False
 
 
+# pylint: disable=too-many-statements
 def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
                listen_address='127.0.0.1', listen_port='8001'):
     if not which('kubectl'):
@@ -1391,15 +1398,14 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
                        'To use "az aks browse" first enable the add-on\n'
                        'by running "az aks enable-addons --addons kube-dashboard".')
 
-    proxy_url = 'http://{0}:{1}/'.format(listen_address, listen_port)
     _, browse_path = tempfile.mkstemp()
-    # TODO: need to add an --admin option?
     aks_get_credentials(cmd, client, resource_group_name, name, admin=False, path=browse_path)
+
     # find the dashboard pod's name
     try:
         dashboard_pod = subprocess.check_output(
-            ["kubectl", "get", "pods", "--kubeconfig", browse_path, "--namespace", "kube-system", "--output", "name",
-             "--selector", "k8s-app=kubernetes-dashboard"],
+            ["kubectl", "get", "pods", "--kubeconfig", browse_path, "--namespace", "kube-system",
+             "--output", "name", "--selector", "k8s-app=kubernetes-dashboard"],
             universal_newlines=True)
     except subprocess.CalledProcessError as err:
         raise CLIError('Could not find dashboard pod: {}'.format(err))
@@ -1408,6 +1414,26 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
         dashboard_pod = str(dashboard_pod).split('/')[-1].strip()
     else:
         raise CLIError("Couldn't find the Kubernetes dashboard pod.")
+
+    # find the port
+    try:
+        dashboard_port = subprocess.check_output(
+            ["kubectl", "get", "pods", "--kubeconfig", browse_path, "--namespace", "kube-system",
+             "--selector", "k8s-app=kubernetes-dashboard",
+             "--output", "jsonpath='{.items[0].spec.containers[0].ports[0].containerPort}'"]
+        )
+        # output format: b"'{port}'"
+        dashboard_port = int((dashboard_port.decode('utf-8').replace("'", "")))
+    except subprocess.CalledProcessError as err:
+        raise CLIError('Could not find dashboard port: {}'.format(err))
+
+    # use https if dashboard container is using https
+    if dashboard_port == 8443:
+        protocol = 'https'
+    else:
+        protocol = 'http'
+
+    proxy_url = '{0}://{1}:{2}/'.format(protocol, listen_address, listen_port)
     # launch kubectl port-forward locally to access the remote dashboard
     if in_cloud_console():
         # TODO: better error handling here.
@@ -1428,14 +1454,14 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
         try:
             subprocess.check_output(["kubectl", "--kubeconfig", browse_path, "--namespace", "kube-system",
                                      "port-forward", "--address", listen_address, dashboard_pod,
-                                     "{0}:9090".format(listen_port)], stderr=subprocess.STDOUT)
+                                     "{0}:{1}".format(listen_port, dashboard_port)], stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as err:
             if err.output.find(b'unknown flag: --address'):
                 if listen_address != '127.0.0.1':
                     logger.warning('"--address" is only supported in kubectl v1.13 and later.')
                     logger.warning('The "--listen-address" argument will be ignored.')
                 subprocess.call(["kubectl", "--kubeconfig", browse_path, "--namespace", "kube-system",
-                                 "port-forward", dashboard_pod, "{0}:9090".format(listen_port)])
+                                 "port-forward", dashboard_pod, "{0}:{1}".format(listen_port, dashboard_port)])
     except KeyboardInterrupt:
         # Let command processing finish gracefully after the user presses [Ctrl+C]
         pass
@@ -1681,7 +1707,7 @@ def aks_get_versions(cmd, client, location):
 
 def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
                         path=os.path.join(os.path.expanduser('~'), '.kube', 'config'),
-                        overwrite_existing=False):
+                        overwrite_existing=False, context_name=None):
     credentialResults = None
     if admin:
         credentialResults = client.list_cluster_admin_credentials(resource_group_name, name)
@@ -1692,7 +1718,7 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
         raise CLIError("No Kubernetes credentials found.")
     try:
         kubeconfig = credentialResults.kubeconfigs[0].value.decode(encoding='UTF-8')
-        _print_or_merge_credentials(path, kubeconfig, overwrite_existing)
+        _print_or_merge_credentials(path, kubeconfig, overwrite_existing, context_name)
     except (IndexError, ValueError):
         raise CLIError("Fail to find kubeconfig file.")
 
@@ -2073,6 +2099,12 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
     workspace_region = "eastus"
     workspace_region_code = "EUS"
 
+    # sanity check that locations and clouds match.
+    if ((cloud_name.lower() == 'azurecloud' and AzureChinaRegionToOmsRegionMap.get(rg_location, False)) or
+            (cloud_name.lower() == 'azurechinacloud' and AzureCloudRegionToOmsRegionMap.get(rg_location, False))):
+        raise CLIError('Wrong cloud ({}) setting for region {}, please use "az cloud set ..."'.format(
+            cloud_name.lower(), rg_location))
+
     if cloud_name.lower() == 'azurecloud':
         workspace_region = AzureCloudRegionToOmsRegionMap.get(rg_location, "eastus")
         workspace_region_code = AzureCloudLocationToOmsRegionCodeMap.get(workspace_region, "EUS")
@@ -2387,7 +2419,7 @@ def _get_rg_location(ctx, resource_group_name, subscription_id=None):
     return rg.location
 
 
-def _print_or_merge_credentials(path, kubeconfig, overwrite_existing):
+def _print_or_merge_credentials(path, kubeconfig, overwrite_existing, context_name):
     """Merge an unencrypted kubeconfig into the file at the specified path, or print it to
     stdout if the path is "-".
     """
@@ -2414,7 +2446,7 @@ def _print_or_merge_credentials(path, kubeconfig, overwrite_existing):
     try:
         additional_file.write(kubeconfig)
         additional_file.flush()
-        merge_kubernetes_configurations(path, temp_path, overwrite_existing)
+        merge_kubernetes_configurations(path, temp_path, overwrite_existing, context_name)
     except yaml.YAMLError as ex:
         logger.warning('Failed to merge credentials to kube config file: %s', ex)
     finally:

@@ -31,7 +31,7 @@ def handle_exception(ex):  # pylint: disable=too-many-return-statements
         if isinstance(ex, JMESPathTypeError):
             logger.error("\nInvalid jmespath query supplied for `--query`:\n%s", ex)
             logger.error("To learn more about --query, please visit: "
-                         "https://docs.microsoft.com/en-us/cli/azure/query-azure-cli?view=azure-cli-latest")
+                         "https://docs.microsoft.com/cli/azure/query-azure-cli?view=azure-cli-latest")
             return 1
         if isinstance(ex, (CLIError, CloudError)):
             logger.error(ex.args[0])

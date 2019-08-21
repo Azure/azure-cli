@@ -42,7 +42,7 @@ using NPM, upgrade with `npm upgrade -g azure-cli`.  If you used an installer,
 we recommend downloading the latest installer to upgrade.
 
 To install the latest Azure CLI, follow the steps for your preferred platform or
-environment in our [Installation Guide](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli).
+environment in our [Installation Guide](https://docs.microsoft.com/cli/azure/install-azure-cli).
 
 Once installed, you run `az configure` and follow the steps to setup your default output format.  
 
