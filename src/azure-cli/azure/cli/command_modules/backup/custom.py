@@ -114,16 +114,21 @@ def list_associated_items_for_policy(client, resource_group_name, vault_name, na
 def set_policy(client, resource_group_name, vault_name, policy):
     policy_object = _get_policy_from_json(client, policy)
 
+
+    error_message = "For SnapshotRetentionRangeInDays, the minimum value is 1 and"\
+                    "maximum is 5. For weekly backup policies, the only allowed value is 5 "\
+                    ". Please set the value accordingly."
+
     if policy_object.properties.schedule_policy.schedule_run_frequency == "Weekly":
         if policy_object.properties.instant_rp_retention_range_in_days is not None:
             if policy_object.properties.instant_rp_retention_range_in_days != 5:
-                logger.error("InstantRpRetentionRangeInDays value for weekly policy should be 5")
+                logger.error(error_message)
         else:
             policy_object.properties.instant_rp_retention_range_in_days = 5
     else:
         if policy_object.properties.instant_rp_retention_range_in_days is not None:
             if not 1 <= policy_object.properties.instant_rp_retention_range_in_days <= 5:
-                logger.error("InstantRpRetentionRangeInDays value should be between 1 and 5")
+                logger.error(error_message)
         else:
             policy_object.properties.instant_rp_retention_range_in_days = 2
     return client.create_or_update(vault_name, resource_group_name, policy_object.name, policy_object)
@@ -355,7 +360,7 @@ def _should_use_original_storage_account(recovery_point, restore_to_staging_stor
 
 
 def restore_disks(cmd, client, resource_group_name, vault_name, container_name, item_name, rp_name, storage_account,
-                 target_rg=None,restore_to_staging_storage_account=None):
+                 TargetRg=None,restore_to_staging_storage_account=None):
     item = show_item(cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name, container_name,
                      item_name, "AzureIaasVM", "VM")
     _validate_item(item)
@@ -383,7 +388,7 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
     _storage_account_id = _get_storage_account_id(cmd.cli_ctx, sa_name, sa_rg)
     _source_resource_id = item.properties.source_resource_id
     if recovery_point.properties.is_managed_virtual_machine:
-        target_rg_id = '/'.join( _source_resource_id.split('/')[:4]) + "/" + target_rg
+        target_rg_id = '/'.join( _source_resource_id.split('/')[:4]) + "/" + TargetRg
         trigger_restore_properties = IaasVMRestoreRequest(create_new_cloud_service=True,
                                                           recovery_point_id=rp_name,
                                                           recovery_type='RestoreDisks',
