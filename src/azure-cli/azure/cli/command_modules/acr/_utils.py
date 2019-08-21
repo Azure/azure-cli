@@ -114,7 +114,7 @@ def get_registry_from_name_or_login_server(cli_ctx, login_server, registry_name=
             "More than one registries were found by %s.", login_server)
     return None
 
-  
+
 def validate_managed_registry(cmd, registry_name, resource_group_name=None, message=None):
     """Raise CLIError if the registry in not in Managed SKU.
     :param str registry_name: The name of container registry
