@@ -3,6 +3,11 @@
 Release History
 ===============
 
+**ACR**
+
+* Move to 2019-05-01 api-version, which follows replace semantics for ACR resource creation.
+* Breaking change: Classic SKU no longer supported.
+
 **AppConfig**
 
 * Added "appconfig kv restore" command.
@@ -19,6 +24,13 @@ Release History
 
 * Fix the bug in secret set command that igores the expires argument
 
+**Network**
+
+* az network lb create/frontend-ip create: Fixes #10018. Support `--private-ip-address-version` argument to create IPv6 based private-ip-address 
+* az network private-endpoint create/update/list-types: Fixes #9474. Support create/update/list-types commands for private endpoint.
+* az network private-link-service: Fixes #9475. Onboard commands for private link service.
+* az network vnet subnet update: Support `--private-endpoint-network-policies` and `--private-link-service-network-policies` arguments for update command.
+
 **RBAC**
 
 * Fix #10151 - `az ad app update --homepage` not updating homepage.
@@ -32,10 +44,6 @@ Release History
 **Storage**
 
 * Add `revoke-delegation-keys` command for storage account
-
-**Network**
-
-* az network lb create/frontend-ip create: Fixes #10018. Support `--private-ip-address-version` argument to create IPv6 based private-ip-address 
 
 2.0.71
 ++++++

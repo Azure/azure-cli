@@ -95,9 +95,6 @@ examples:
   - name: Create a managed container registry with the Standard SKU.
     text: >
         az acr create -n MyRegistry -g MyResourceGroup --sku Standard
-  - name: Create an Azure Container Registry with a new storage account with the Classic SKU (Classic registries are being deprecated by March 2019).
-    text: >
-        az acr create -n MyRegistry -g MyResourceGroup --sku Classic
 """
 
 helps['acr credential'] = """
@@ -851,9 +848,6 @@ examples:
   - name: Update tags for an Azure Container Registry.
     text: >
         az acr update -n MyRegistry --tags key1=value1 key2=value2
-  - name: Update the storage account for an Azure Container Registry (Classic Registries are being deprecated as of March 2019).
-    text: >
-        az acr update -n MyRegistry --storage-account-name MyStorageAccount
   - name: Enable the administrator user account for an Azure Container Registry.
     text: >
         az acr update -n MyRegistry --admin-enabled true
