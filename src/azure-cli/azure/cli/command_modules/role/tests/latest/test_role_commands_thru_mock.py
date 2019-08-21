@@ -284,7 +284,7 @@ class TestRoleMocked(unittest.TestCase):
             create_service_principal_for_rbac(cmd, 'will-fail', skip_assignment=True)
 
         # assert we handled such error
-        self.assertTrue('https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal' in str(context.exception))
+        self.assertTrue('https://docs.microsoft.com/azure/azure-resource-manager/resource-group-create-service-principal-portal' in str(context.exception))
 
     @mock.patch('azure.cli.command_modules.role.custom._auth_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.role.custom._graph_client_factory', autospec=True)

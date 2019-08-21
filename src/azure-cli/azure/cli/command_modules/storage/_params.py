@@ -91,7 +91,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('if_match')
         c.argument('if_none_match')
 
-    for item in ['delete', 'show', 'update', 'show-connection-string', 'keys', 'network-rule']:
+    for item in ['delete', 'show', 'update', 'show-connection-string', 'keys', 'network-rule', 'revoke-delegation-keys']:  # pylint: disable=line-too-long
         with self.argument_context('storage account {}'.format(item)) as c:
             c.argument('account_name', acct_name_type, options_list=['--name', '-n'])
             c.argument('resource_group_name', required=False, validator=process_resource_group)
@@ -164,7 +164,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage account management-policy create') as c:
         c.argument('policy', type=file_type, completer=FilesCompleter(),
                    help='The Storage Account ManagementPolicies Rules, in JSON format. See more details in: '
-                        'https://docs.microsoft.com/en-us/azure/storage/common/storage-lifecycle-managment-concepts.')
+                        'https://docs.microsoft.com/azure/storage/common/storage-lifecycle-managment-concepts.')
         c.argument('account_name', help='The name of the storage account within the specified resource group.')
 
     with self.argument_context('storage account management-policy update') as c:
