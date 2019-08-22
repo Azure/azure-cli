@@ -48,17 +48,17 @@ examples:
 
 helps['apim show'] = """
     type: command
-    short-summary: Show details of an APIM instance.
+    short-summary: Show details of an API Management service instance.
 """
 
 helps['apim update'] = """
     type: command
-    short-summary: Update an API Management serviceaz  instance.
+    short-summary: Update an API Management service instance.
 """
 
 helps['apim backup'] = """
     type: command
     short-summary: Creates a backup of the API Management service to the given Azure
         Storage Account. This is long running operation and could take several
-        minutes to complete.az
+        minutes to complete.
 """
