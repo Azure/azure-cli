@@ -959,45 +959,45 @@ parameters:
     short-summary: Space-separated tags in 'key[=value]' format.
   - name: --frequency
     short-summary: Frequency (in minutes) at which rule condition should be evaluated.
-  - name: --timeWindow
+  - name: --time-window
     short-summary: Time window (in minutes) for which data needs to be fetched for query (should be greater than or equal to frequencyInMinutes).
     long-summary: >
       This argument overrules any time command (like ago) used in alert query.
-  - name: --alertQuery
+  - name: --alert-query
     short-summary: Log search query. Required for action type - AlertingAction.
     long-summary: >
       Valid Azure Monitor log search query that will be executed at stated frequency with data for configured timeWindow.
-  - name: --dataSourceId
+  - name: --data-source-id
     short-summary: The resource uri over which log search query is to be run.
-  - name: --queryType
+  - name: --query-type
     short-summary: Set value = ResultCount.
-  - name: --authorizedResources
+  - name: --authorized-resources
     short-summary: List of Resource referred into query.
   - name: --severity
     short-summary: Severity of the alert from 0 (low) to 4 (high).
   - name: --threshold
     short-summary: Result or count threshold based on which rule should be triggered.
-  - name: --thresholdOperator
+  - name: --threshold-operator
     short-summary: Evaluation operation for rule. Supported Values = GreaterThan, LessThan.
-  - name: --actionGroup
+  - name: --action-group
     short-summary: Azure Action Group reference.
-  - name: --customWebhookPayload
+  - name: --custom-webhook-payload
     short-summary: Custom payload to be sent for all webhook URI in Azure action group(s). Input must be valid JSON.
-  - name: --emailSubject
+  - name: --email-subject
     short-summary: Custom subject override for all email ids in all Azure action group(s) associated with the alert rule.
-  - name: --metricColumn
+  - name: --metric-column
     short-summary: Evaluation of metric on a particular column.
     long-summary: >
       Specify the field to be used to aggregate-on and use as dimension for metric measurement log alert rule
-  - name: --metricThreshold
+  - name: --metric-threshold
     short-summary: The threshold of the metric trigger.
     long-summary: >
       Theshold is compared with numeric value in AggregatedValue field, used to trigger for metric measurement log alert rule.
-  - name: --metricThresholdOperator
+  - name: --metric-threshold-operator
     short-summary: Result Condition Evaluation criteria. Supported Values = GreaterThan, LessThan, Equal.
     long-summary: >
       This argument is needed only for metric measurement log alert rule.
-  - name: --metricTriggerType
+  - name: --metric-trigger-type
     short-summary: Metric Trigger Type. Supported Values = Consecutive, Total.
     long-summary: >
       This argument is needed only for metric measurement log alert rule.
@@ -1007,27 +1007,27 @@ examples:
   - name: Create a log alert rule
     text: >
         az monitor log alert create -n {AlertName} -g {ResourceGroup} -l {Location} \\
-          --severity {Severity} --threshold {Threshold} --thresholdOperator {ThresholdOperator} \\
-          --frequency {Frequency} --timeWindow {TimeWindow} \\
-          --alertQuery {AlertQuery} --dataSourceId /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/microsoft.operationalinsights/workspaces/{Workspace} --queryType ResultCount \\
+          --severity {Severity} --threshold {Threshold} --threshold-operator {ThresholdOperator} \\
+          --frequency {Frequency} --time-window {TimeWindow} \\
+          --alert-query {AlertQuery} --data-source-id /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/microsoft.operationalinsights/workspaces/{Workspace} --query-type ResultCount \\
   - name: Create a log alert rule with customization of email subject and webhook JSON payload.
     text: >
         az monitor log alert create -n {AlertName} -g {ResourceGroup} -l {Location} \\
-          --severity {Severity} --threshold {Threshold} --thresholdOperator {ThresholdOperator} --actionGroup [ActionGroup1 ActionGroup2..] --customWebhookPayload {CustomWebhookPayload} --emailSubject {EmailSubject} \\
-          --frequency {Frequency} --timeWindow {TimeWindow} \\
-          --alertQuery {AlertQuery} --dataSourceId /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/microsoft.operationalinsights/workspaces/{Workspace} --queryType ResultCount \\
+          --severity {Severity} --threshold {Threshold} --threshold-operator {ThresholdOperator} --action-group [ActionGroup1 ActionGroup2..] --custom-webhook-payload {CustomWebhookPayload} --email-subject {EmailSubject} \\
+          --frequency {Frequency} --time-window {TimeWindow} \\
+          --alert-query {AlertQuery} --data-source-id /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/microsoft.operationalinsights/workspaces/{Workspace} --query-type ResultCount \\
   - name: Create a log alert rule which is initially disabled.
     text: >
         az monitor log alert create -n {AlertName} -g {ResourceGroup} -l {Location} --disable \\
-          --severity {severity} --threshold {threshold} --thresholdOperator {thresholdOperator} \\
-          --frequency {frequency} --timeWindow {timeWindow} \\
-          --alertQuery {alertQuery} --dataSourceId /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/microsoft.operationalinsights/workspaces/{Workspace} --queryType ResultCount \\
+          --severity {severity} --threshold {threshold} --threshold-operator {thresholdOperator} \\
+          --frequency {frequency} --time-window {timeWindow} \\
+          --alert-query {alertQuery} --data-source-id /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/microsoft.operationalinsights/workspaces/{Workspace} --query-type ResultCount \\
   - name: Create a metric measurement log alert rule with throttling, description and tags.
     text: >
         az monitor log alert create -n {AlertName} -g {ResourceGroup} -l {Location} --description {Description} --tags [key1=value1 key2=value2 ..]\\
-          --severity {Severity} --threshold {Threshold} --thresholdOperator {ThresholdOperator} --metricColumn {MetricColumn} --metricThreshold {MetricThreshold} --metricThresholdOperator {MetricThresholdOperator} --metricTriggerType {metricTriggerType} --throttling {throttling} \\
-          --frequency {Frequency} --timeWindow {TimeWindow} \\
-          --alertQuery {AlertQuery} --dataSourceId /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/microsoft.operationalinsights/workspaces/{Workspace} --queryType ResultCount \\
+          --severity {Severity} --threshold {Threshold} --threshold-operator {ThresholdOperator} --metric-column {MetricColumn} --metric-threshold {MetricThreshold} --metric-threshold-operator {MetricThresholdOperator} --metric-trigger-type {metricTriggerType} --throttling {throttling} \\
+          --frequency {Frequency} --time-window {TimeWindow} \\
+          --alert-query {AlertQuery} --data-source-id /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/microsoft.operationalinsights/workspaces/{Workspace} --query-type ResultCount \\
 """
 helps['monitor log alert update'] = """
 type: command
@@ -1041,17 +1041,17 @@ parameters:
     short-summary: Enable/disable log alert rule.
   - name: --frequency
     short-summary: Update frequency (in minutes) at which rule condition should be evaluated.
-  - name: --timeWindow
+  - name: --time-window
     short-summary: Update time window (in minutes) for which data needs to be fetched for query (should be greater than or equal to frequencyInMinutes).
-  - name: --alertQuery
+  - name: --alert-query
     short-summary: Update the log search query.
     long-summary: >
       Valid Azure Monitor log search query that will be executed at stated frequency with data for configured timeWindow.
-  - name: --addAuthorizedResources
+  - name: --add-authorized-resources
     short-summary: Add authorized resources to alert rule.
-  - name: --removeAuthorizedResources
+  - name: --remove-authorized-resources
     short-summary: Remove authorized resources from alert rule.
-  - name: --resetAuthorizedResources
+  - name: --reset-authorized-resources
     short-summary: Set authorized resources to null for alert rule.
   - name: --severity
     short-summary: Update severity of the alert. Values supported from 0 (low) to 4 (high).
@@ -1059,33 +1059,33 @@ parameters:
     short-summary: Update threshold for alert rule.
     long-summary: >
       Result or count threshold based on which rule should be triggered.
-  - name: --thresholdOperator
+  - name: --threshold-operator
     short-summary: Update threshold operator for alert rule.
     long-summary: >
       Evaluation operation for rule. Supported Values = GreaterThan, LessThan.
-  - name: --addActionGroups
+  - name: --add-action-groups
     short-summary: Add action groups to alert rule. Supported values = Array of Names of action group, ARM resource IDs of action groups.
-  - name: --removeActionGroups
+  - name: --remove-action-groups
     short-summary: Remove action groups from alert. Supported values = Array of Names of action group, ARM resource IDs of action groups.
-  - name: --resetActionGroup
+  - name: --reset-action-group
     short-summary: Set action group to null for alert rule.
-  - name: --customWebhookPayload
+  - name: --custom-webhook-payload
     short-summary: Update custom payload to be sent for all webhook URI in Azure action group. Input must be valid JSON.
-  - name: --resetCustomWebhookPayload
+  - name: --reset-custom-webhook-payload
     short-summary: Set custom webhook payload to default.
-  - name: --emailSubject
+  - name: --email-subject
     short-summary: Update custom subject override for all email ids in all Azure action group(s) associated with the alert rule.
-  - name: --resetEmailSubject
+  - name: --reset-email-subject
     short-summary: Set email subject to default for all email ids in all Azure action group(s) associated with the alert rule.
-  - name: --metricColumn
+  - name: --metric-column
     short-summary: Update column for evaluation of metric for metric measurement log alert rule.
-  - name: --metricThreshold
+  - name: --metric-threshold
     short-summary: Update the threshold for metric measurement log alert rule.
-  - name: --metricThresholdOperator
+  - name: --metric-threshold-operator
     short-summary: Update threshold operator for metric measurement log alert rule. Supported Values = GreaterThan, LessThan, Equal.
-  - name: --metricTriggerType
+  - name: --metric-trigger-type
     short-summary: Update trigger type for metric measurement log alert rule. Supported Values = Consecutive, Total.
-  - name: --resetMetricTrigger
+  - name: --reset-metric-trigger
     short-summary: Reset metric trigger to null for log alert rule.
   - name: --throttling
     short-summary: Update time (in minutes) for which Alerts should be throttled or suppressed.
@@ -1093,23 +1093,23 @@ examples:
   - name: Update parameters of an alert rule.
     text: >
         az monitor log alert update -n {AlertName} -g {ResourceGroup} --description {Description} --tags [key1=value1 key2=value2 ...]\\
-          --severity {Severity} --threshold {Threshold} --thresholdOperator {ThresholdOperator} --customWebhookPayload {CustomWebhookPayload} --emailSubject {EmailSubject}
-          --metricColumn {MetricColumn} --metricThreshold {MetricThreshold} --metricThresholdOperator {MetricThresholdOperator} --metricTriggerType {MetricTriggerType} --throttling {Throttling} \\
-          --frequency {Frequency} --timeWindow {TimeWindow} \\
-          --alertQuery {AlertQuery} \\
+          --severity {Severity} --threshold {Threshold} --threshold-operator {ThresholdOperator} --custom-webhook-payload {CustomWebhookPayload} --email-subject {EmailSubject}
+          --metric-column {MetricColumn} --metric-threshold {MetricThreshold} --metric-threshold-operator {MetricThresholdOperator} --metric-trigger-type {MetricTriggerType} --throttling {Throttling} \\
+          --frequency {Frequency} --time-window {TimeWindow} \\
+          --alert-query {AlertQuery} \\
   - name: Update action groups and authorized resorce of an alert rule.
     text: >
         az monitor log alert update -n {AlertName} -g {ResourceGroup} \\
-          --addActionGroup [ActionGroup1 ActionGroup2..] --removeActionGroup [ActionGroup1 ActionGroup2..] \\
-          --addAuthorizedResources [AuthorizedResource1 AuthorizedResource2..] --removeAuthorizedResources [AuthorizedResource1 AuthorizedResource2..] \\
+          --add-action-groups [ActionGroup1 ActionGroup2..] --remove-action-groups [ActionGroup1 ActionGroup2..] \\
+          --add-authorized-resources [AuthorizedResource1 AuthorizedResource2..] --remove-authorized-resources [AuthorizedResource1 AuthorizedResource2..] \\
   - name: Disable an alert rule.
     text: >
         az monitor log alert update -n {AlertName} -g {ResourceGroup} --enable false
   - name: Reset action group, email subject, custom webhook payload, metricTrigger and authorized resorce of an alert rule.
     text: >
         az monitor log alert update -n {AlertName} -g {ResourceGroup} \\
-          --resetActionGroup --resetCustomWebhookPayload --resetEmailSubject --resetMetricTrigger \\
-          --resetAuthorizedResources \\
+          --reset-action-group --reset-custom-webhook-payload --reset-email-subject --reset-metric-trigger \\
+          --reset-authorized-resources \\
 """
 
 helps['monitor log alert list'] = """
@@ -1124,10 +1124,10 @@ parameters:
 
 helps['monitor log alert delete'] = """
 type: command
-short-summary: Deletes a log alert rule.
+short-summary: Delete log alert rule.
 """
 
 helps['monitor log alert show'] = """
 type: command
-short-summary: Gets a log alert rule.
+short-summary: Get log alert rule.
 """

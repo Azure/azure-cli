@@ -9,12 +9,12 @@ logger = get_logger(__name__)
 
 
 def create_log_alert(  # pylint: disable=too-many-locals
-        cmd, client, resource_group_name, rule_name, location, frequency, timeWindow,
-        dataSourceId, alertQuery, queryType,
-        severity, thresholdOperator, threshold, throttling=None,
-        metricColumn=None, metricTriggerType=None, metricThresholdOperator=None, metricThreshold=None,
-        actionGroup=None, customWebhookPayload=None, emailSubject=None,
-        authorizedResources=None, description=None, tags=None, disable=False):
+        cmd, client, resource_group_name, rule_name, location, frequency, time_window,
+        data_source_id, alert_query, query_type,
+        severity, threshold_operator, threshold, throttling=None,
+        metric_column=None, metric_trigger_type=None, metric_threshold_operator=None, metric_threshold=None,
+        action_group=None, custom_webhook_payload=None, email_subject=None,
+        authorized_resources=None, description=None, tags=None, disable=False):
     from azure.mgmt.monitor.models import (LogSearchRuleResource, Schedule, Source,
                                            TriggerCondition, AlertingAction, AzNsActionGroup, LogMetricTrigger)
     from knack.util import CLIError
@@ -23,27 +23,27 @@ def create_log_alert(  # pylint: disable=too-many-locals
         raise CLIError('The log alert rule {} already exists in resource group {}.'.format(rule_name,
                                                                                            resource_group_name))
 
-    if metricThreshold or metricColumn or metricTriggerType or metricThresholdOperator:
-        metricTrigger = LogMetricTrigger(metric_trigger_type=metricTriggerType, metric_column=metricColumn,
-                                         threshold_operator=metricThresholdOperator, threshold=metricThreshold)
-        trigger = TriggerCondition(threshold_operator=thresholdOperator,
-                                   threshold=threshold, metric_trigger=metricTrigger)
+    if metric_threshold or metric_column or metric_trigger_type or metric_threshold_operator:
+        metric_trigger = LogMetricTrigger(metric_trigger_type=metric_trigger_type, metric_column=metric_column,
+                                          threshold_operator=metric_threshold_operator, threshold=metric_threshold)
+        trigger = TriggerCondition(threshold_operator=threshold_operator,
+                                   threshold=threshold, metric_trigger=metric_trigger)
     else:
-        trigger = TriggerCondition(threshold_operator=thresholdOperator, threshold=threshold)
+        trigger = TriggerCondition(threshold_operator=threshold_operator, threshold=threshold)
 
-    if actionGroup:
-        actionGroup = _normalize_names(cmd.cli_ctx, actionGroup, resource_group_name, 'microsoft.insights',
-                                       'actionGroups')
+    if action_group:
+        action_group = _normalize_names(cmd.cli_ctx, action_group, resource_group_name, 'microsoft.insights',
+                                        'actionGroups')
 
     action = AlertingAction(severity=severity, trigger=trigger, throttling_in_min=throttling,
-                            azns_action=AzNsActionGroup(action_group=actionGroup, email_subject=emailSubject,
-                                                        custom_webhook_payload=customWebhookPayload))
+                            azns_action=AzNsActionGroup(action_group=action_group, email_subject=email_subject,
+                                                        custom_webhook_payload=custom_webhook_payload))
 
     settings = LogSearchRuleResource(location=location, tags=tags, description=description, enabled=not disable,
-                                     source=Source(query_type=queryType, data_source_id=dataSourceId,
-                                                   query=alertQuery, authorized_resources=authorizedResources),
+                                     source=Source(query_type=query_type, data_source_id=data_source_id,
+                                                   query=alert_query, authorized_resources=authorized_resources),
                                      schedule=Schedule(frequency_in_minutes=frequency,
-                                                       time_window_in_minutes=timeWindow), action=action)
+                                                       time_window_in_minutes=time_window), action=action)
     return client.create_or_update(resource_group_name, rule_name, settings)
 
 
@@ -56,13 +56,13 @@ def list_log_alert(client, resource_group_name=None):
 
 def update(  # pylint: disable=too-many-locals
         cmd, instance, resource_group_name, enabled=None, tags=None, description=None, frequency=None,
-        timeWindow=None, alertQuery=None, severity=None,
-        thresholdOperator=None, threshold=None, throttling=None,
-        metricColumn=None, metricTriggerType=None, metricThresholdOperator=None, metricThreshold=None,
-        resetActionGroup=None, addActionGroups=None, removeActionGroups=None,
-        customWebhookPayload=None, emailSubject=None, resetEmailSubject=None,
-        resetCustomWebhookPayload=None, resetMetricTrigger=None, resetAuthorizedResources=None,
-        addAuthorizedResources=None, removeAuthorizedResources=None):
+        time_window=None, alert_query=None, severity=None,
+        threshold_operator=None, threshold=None, throttling=None,
+        metric_column=None, metric_trigger_type=None, metric_threshold_operator=None, metric_threshold=None,
+        reset_action_group=None, add_action_groups=None, remove_action_groups=None,
+        custom_webhook_payload=None, email_subject=None, reset_email_subject=None,
+        reset_custom_webhook_payload=None, reset_metric_trigger=None, reset_authorized_resources=None,
+        add_authorized_resources=None, remove_authorized_resources=None):
     # --tags "" is set as tags={}. Used for clearing tags.
     if tags or tags == {}:
         instance.tags = tags
@@ -73,11 +73,11 @@ def update(  # pylint: disable=too-many-locals
     if frequency:
         instance.schedule.frequency_in_minutes = frequency
 
-    if timeWindow:
-        instance.schedule.time_window_in_minutes = timeWindow
+    if time_window:
+        instance.schedule.time_window_in_minutes = time_window
 
-    if alertQuery:
-        instance.source.query = alertQuery
+    if alert_query:
+        instance.source.query = alert_query
 
     if severity:
         instance.action.severity = severity
@@ -85,8 +85,8 @@ def update(  # pylint: disable=too-many-locals
     if throttling:
         instance.action.throttling_in_min = throttling
 
-    if thresholdOperator:
-        instance.action.trigger.threshold_operator = thresholdOperator
+    if threshold_operator:
+        instance.action.trigger.threshold_operator = threshold_operator
 
     if threshold:
         instance.action.trigger.threshold = threshold
@@ -94,126 +94,126 @@ def update(  # pylint: disable=too-many-locals
     if enabled is not None:
         instance.enabled = enabled
 
-    if customWebhookPayload:
-        instance.action.azns_action.custom_webhook_payload = customWebhookPayload
-    elif resetCustomWebhookPayload:
+    if custom_webhook_payload:
+        instance.action.azns_action.custom_webhook_payload = custom_webhook_payload
+    elif reset_custom_webhook_payload:
         instance.action.azns_action.custom_webhook_payload = None
 
-    if emailSubject:
-        instance.action.azns_action.email_subject = emailSubject
-    elif resetEmailSubject:
+    if email_subject:
+        instance.action.azns_action.email_subject = email_subject
+    elif reset_email_subject:
         instance.action.azns_action.email_subject = None
 
-    instance = update_action_group(cmd, instance, resource_group_name, resetActionGroup, addActionGroups,
-                                   removeActionGroups)
+    instance = update_action_group(cmd, instance, resource_group_name, reset_action_group, add_action_groups,
+                                   remove_action_groups)
 
-    instance = update_metric_trigger(instance, metricColumn, metricTriggerType,
-                                     metricThresholdOperator, metricThreshold, resetMetricTrigger)
+    instance = update_metric_trigger(instance, metric_column, metric_trigger_type,
+                                     metric_threshold_operator, metric_threshold, reset_metric_trigger)
 
-    instance = update_authorized_resources(instance, resetAuthorizedResources, addAuthorizedResources,
-                                           removeAuthorizedResources)
+    instance = update_authorized_resources(instance, reset_authorized_resources, add_authorized_resources,
+                                           remove_authorized_resources)
 
     return instance
 
 
-def update_metric_trigger(instance, metricColumn=None, metricTriggerType=None, metricThresholdOperator=None,
-                          metricThreshold=None, resetMetricTrigger=None):
+def update_metric_trigger(instance, metric_column=None, metric_trigger_type=None, metric_threshold_operator=None,
+                          metric_threshold=None, reset_metric_trigger=None):
     from azure.mgmt.monitor.models import LogMetricTrigger
-    if resetMetricTrigger:
+    if reset_metric_trigger:
         instance.action.trigger.metric_trigger = None
-    elif metricTriggerType or metricColumn or metricThresholdOperator or metricThreshold:
+    elif metric_trigger_type or metric_column or metric_threshold_operator or metric_threshold:
         if instance.action.trigger.metric_trigger is not None:
-            if metricColumn:
-                instance.action.trigger.metric_trigger.metric_column = metricColumn
+            if metric_column:
+                instance.action.trigger.metric_trigger.metric_column = metric_column
 
-            if metricTriggerType:
-                instance.action.trigger.metric_trigger.metric_trigger_type = metricTriggerType
+            if metric_trigger_type:
+                instance.action.trigger.metric_trigger.metric_trigger_type = metric_trigger_type
 
-            if metricThresholdOperator:
-                instance.action.trigger.metric_trigger.threshold_operator = metricThresholdOperator
+            if metric_threshold_operator:
+                instance.action.trigger.metric_trigger.threshold_operator = metric_threshold_operator
 
-            if metricThreshold:
-                instance.action.trigger.metric_trigger.threshold = metricThreshold
+            if metric_threshold:
+                instance.action.trigger.metric_trigger.threshold = metric_threshold
         else:
-            instance.action.trigger.metric_trigger = LogMetricTrigger(metric_trigger_type=metricTriggerType,
-                                                                      metric_column=metricColumn,
-                                                                      threshold_operator=metricThresholdOperator,
-                                                                      threshold=metricThreshold)
+            instance.action.trigger.metric_trigger = LogMetricTrigger(metric_trigger_type=metric_trigger_type,
+                                                                      metric_column=metric_column,
+                                                                      threshold_operator=metric_threshold_operator,
+                                                                      threshold=metric_threshold)
 
     return instance
 
 
-def update_action_group(cmd, instance, resource_group, resetActionGroup=None, addActionGroups=None,
-                        removeActionGroups=None):
-    if resetActionGroup:
+def update_action_group(cmd, instance, resource_group, reset_action_group=None, add_action_groups=None,
+                        remove_action_groups=None):
+    if reset_action_group:
         instance.action.azns_action.action_group = None
 
-    if addActionGroups:
-        addActionGroups = _normalize_names(cmd.cli_ctx, addActionGroups, resource_group, 'microsoft.insights',
-                                           'actionGroups')
+    if add_action_groups:
+        add_action_groups = _normalize_names(cmd.cli_ctx, add_action_groups, resource_group, 'microsoft.insights',
+                                             'actionGroups')
         if instance.action.azns_action.action_group is None:
-            instance.action.azns_action.action_group = addActionGroups
+            instance.action.azns_action.action_group = add_action_groups
         else:
-            for actionGroup in addActionGroups:
+            for action_group in add_action_groups:
                 match = next(
-                    (x for x in instance.action.azns_action.action_group if actionGroup.lower() == x.lower()), None
+                    (x for x in instance.action.azns_action.action_group if action_group.lower() == x.lower()), None
                 )
                 if not match:
-                    instance.action.azns_action.action_group.append(actionGroup)
+                    instance.action.azns_action.action_group.append(action_group)
 
-    if removeActionGroups:
-        removeActionGroups = _normalize_names(cmd.cli_ctx, removeActionGroups, resource_group, 'microsoft.insights',
-                                              'actionGroups')
+    if remove_action_groups:
+        remove_action_groups = _normalize_names(cmd.cli_ctx, remove_action_groups, resource_group, 'microsoft.insights',
+                                                'actionGroups')
         from knack.util import CLIError
         if instance.action.azns_action.action_group is None:
             raise CLIError('Error in removing action group. There are no action groups attached to alert rule.')
 
-        for actionGroup in removeActionGroups:
+        for action_group in remove_action_groups:
             match = next(
-                (x for x in instance.action.azns_action.action_group if actionGroup.lower() == x.lower()), None
+                (x for x in instance.action.azns_action.action_group if action_group.lower() == x.lower()), None
             )
             if match:
-                instance.action.azns_action.action_group.remove(actionGroup)
+                instance.action.azns_action.action_group.remove(action_group)
             else:
                 raise CLIError(
                     'Error in removing action group. Action group "{}" is not attached to alert rule.'
-                    .format(actionGroup))
+                    .format(action_group))
 
     return instance
 
 
-def update_authorized_resources(instance, resetAuthorizedResources=None, addAuthorizedResources=None,
-                                removeAuthorizedResources=None):
-    if resetAuthorizedResources:
+def update_authorized_resources(instance, reset_authorized_resources=None, add_authorized_resources=None,
+                                remove_authorized_resources=None):
+    if reset_authorized_resources:
         instance.source.authorized_resources = None
 
-    if addAuthorizedResources:
+    if add_authorized_resources:
         if instance.source.authorized_resources is None:
-            instance.source.authorized_resources = addAuthorizedResources
+            instance.source.authorized_resources = add_authorized_resources
         else:
-            for authorizedResources in addAuthorizedResources:
+            for authorized_resources in add_authorized_resources:
                 match = next(
-                    (x for x in instance.source.authorized_resources if authorizedResources.lower() == x.lower()), None
+                    (x for x in instance.source.authorized_resources if authorized_resources.lower() == x.lower()), None
                 )
                 if not match:
-                    instance.source.authorized_resources.append(authorizedResources)
+                    instance.source.authorized_resources.append(authorized_resources)
 
-    if removeAuthorizedResources:
+    if remove_authorized_resources:
         from knack.util import CLIError
         if instance.source.authorized_resources is None:
             raise CLIError(
                 'Error in removing authorized resource. There are no authorized resources attached to alert rule.')
 
-        for authorizedResources in removeAuthorizedResources:
+        for authorized_resources in remove_authorized_resources:
             match = next(
-                (x for x in instance.source.authorized_resources if authorizedResources.lower() == x.lower()), None
+                (x for x in instance.source.authorized_resources if authorized_resources.lower() == x.lower()), None
             )
             if match:
-                instance.source.authorized_resources.remove(authorizedResources)
+                instance.source.authorized_resources.remove(authorized_resources)
             else:
                 raise CLIError(
                     'Error in removing authorized resource. Authorized resource "{}" is not attached to alert rule.'
-                    .format(authorizedResources))
+                    .format(authorized_resources))
 
     return instance
 
