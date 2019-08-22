@@ -8,6 +8,10 @@ Release History
 * Move to 2019-05-01 api-version, which follows replace semantics for ACR resource creation.
 * Breaking change: Classic SKU no longer supported.
 
+**API Management**
+
+* Introduced initial impementation of API Management preview commands (az apim)
+
 **AppConfig**
 
 * Added "appconfig kv restore" command.
@@ -41,6 +45,13 @@ Release History
 * Fix for issue #7130 - fix add cert command. Using the cluster resource group when the key vault resource group is not specified.
 * Fix for issue #9711 - fix command 'cluster setting set' command. Using named parameters for SettingsSectionDescription constructor.
 
+**SignalR**
+
+* signalr cors: New command to manage SignalR CORS
+* az signalr create: --service-mode: new service mode argument
+* signalr restart: new command to restart the service
+* signalr update: new command to update the service
+
 **Storage**
 
 * Add `revoke-delegation-keys` command for storage account
@@ -51,6 +62,7 @@ Release History
 **AppService**
 
 * az webapp webjob continuous group commands were failing for slots
+* fixes an issue where `az webapp deployment container config` displayed the wrong Docker CI/CD webhook URL for some apps
 
 **BotService**
 
