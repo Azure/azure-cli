@@ -12,6 +12,10 @@ Release History
 
 * Introduced initial impementation of API Management preview commands (az apim)
 
+**AppConfig**
+
+* Added "appconfig kv restore" command.
+
 **AppService**
 
 * Fixed az webapp webjob continuous start command when specifying a slot.
