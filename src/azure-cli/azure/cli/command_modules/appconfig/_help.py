@@ -167,6 +167,18 @@ helps['appconfig kv list'] = """
             az appconfig kv list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx  --top 150
     """
 
+helps['appconfig kv restore'] = """
+    type: command
+    short-summary: Restore key-values.
+    examples:
+        - name: Restore all key-values to a specific point in time.
+          text:
+            az appconfig kv restore -n MyAppConfiguration --datetime "2019-05-01T11:24:12Z"
+        - name: Restore a specific key for any label start with v1. using connection string to a specific point in time.
+          text:
+            az appconfig kv restore --key color --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --label v1.* --datetime "2019-05-01T11:24:12Z"
+    """
+
 helps['appconfig revision'] = """
     type: group
     short-summary: Manage revisions for key-values stored in an App Configuration.
