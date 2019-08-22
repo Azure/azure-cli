@@ -54,7 +54,7 @@ def list_log_alert(client, resource_group_name=None):
     return client.list_by_subscription()
 
 
-def update(  # pylint: disable=too-many-locals
+def update_log_alert(  # pylint: disable=too-many-locals
         cmd, instance, resource_group_name, enabled=None, tags=None, description=None, frequency=None,
         time_window=None, alert_query=None, severity=None,
         threshold_operator=None, threshold=None, throttling=None,

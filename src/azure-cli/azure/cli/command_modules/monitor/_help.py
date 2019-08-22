@@ -974,13 +974,13 @@ parameters:
   - name: --authorized-resources
     short-summary: List of Resource referred into query.
   - name: --severity
-    short-summary: Severity of the alert from 0 (low) to 4 (high).
+    short-summary: Severity of the alert.
   - name: --threshold
     short-summary: Result or count threshold based on which rule should be triggered.
   - name: --threshold-operator
-    short-summary: Evaluation operation for rule. Supported Values = GreaterThan, LessThan.
+    short-summary: Evaluation operation for rule.
   - name: --action-group
-    short-summary: Azure Action Group reference.
+    short-summary: Azure Action Group reference. Allowed values = Array of Names of action group, ARM resource IDs of action groups.
   - name: --custom-webhook-payload
     short-summary: Custom payload to be sent for all webhook URI in Azure action group(s). Input must be valid JSON.
   - name: --email-subject
@@ -994,11 +994,11 @@ parameters:
     long-summary: >
       Theshold is compared with numeric value in AggregatedValue field, used to trigger for metric measurement log alert rule.
   - name: --metric-threshold-operator
-    short-summary: Result Condition Evaluation criteria. Supported Values = GreaterThan, LessThan, Equal.
+    short-summary: Result Condition Evaluation criteria
     long-summary: >
       This argument is needed only for metric measurement log alert rule.
   - name: --metric-trigger-type
-    short-summary: Metric Trigger Type. Supported Values = Consecutive, Total.
+    short-summary: Metric Trigger Type.
     long-summary: >
       This argument is needed only for metric measurement log alert rule.
   - name: --throttling
@@ -1054,15 +1054,13 @@ parameters:
   - name: --reset-authorized-resources
     short-summary: Set authorized resources to null for alert rule.
   - name: --severity
-    short-summary: Update severity of the alert. Values supported from 0 (low) to 4 (high).
+    short-summary: Update severity of the alert.
   - name: --threshold
     short-summary: Update threshold for alert rule.
     long-summary: >
       Result or count threshold based on which rule should be triggered.
   - name: --threshold-operator
     short-summary: Update threshold operator for alert rule.
-    long-summary: >
-      Evaluation operation for rule. Supported Values = GreaterThan, LessThan.
   - name: --add-action-groups
     short-summary: Add action groups to alert rule. Supported values = Array of Names of action group, ARM resource IDs of action groups.
   - name: --remove-action-groups
@@ -1082,9 +1080,9 @@ parameters:
   - name: --metric-threshold
     short-summary: Update the threshold for metric measurement log alert rule.
   - name: --metric-threshold-operator
-    short-summary: Update threshold operator for metric measurement log alert rule. Supported Values = GreaterThan, LessThan, Equal.
+    short-summary: Update threshold operator for metric measurement log alert rule.
   - name: --metric-trigger-type
-    short-summary: Update trigger type for metric measurement log alert rule. Supported Values = Consecutive, Total.
+    short-summary: Update trigger type for metric measurement log alert rule.
   - name: --reset-metric-trigger
     short-summary: Reset metric trigger to null for log alert rule.
   - name: --throttling

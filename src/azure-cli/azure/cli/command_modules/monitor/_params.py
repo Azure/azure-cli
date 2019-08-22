@@ -23,7 +23,7 @@ from knack.arguments import CLIArgumentType
 
 # pylint: disable=line-too-long, too-many-statements
 def load_arguments(self, _):
-    from azure.mgmt.monitor.models import ConditionOperator, TimeAggregationOperator, EventData
+    from azure.mgmt.monitor.models import ConditionOperator, TimeAggregationOperator, EventData, AlertSeverity, MetricTriggerType, ConditionalOperator
 
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
     webhook_prop_type = CLIArgumentType(validator=process_webhook_prop, nargs='*')
@@ -351,13 +351,13 @@ def load_arguments(self, _):
         c.argument('authorized_resources', nargs='+')
 
     with self.argument_context('monitor log alert create', arg_group='Action') as c:
-        c.argument('severity')
+        c.argument('severity', arg_type=get_enum_type(AlertSeverity))
         c.argument('throttling')
-        c.argument('threshold_operator')
+        c.argument('threshold_operator', arg_type=get_enum_type(ConditionalOperator))
         c.argument('threshold')
         c.argument('metric_column')
-        c.argument('metric_trigger_type')
-        c.argument('metric_threshold_operator')
+        c.argument('metric_trigger_type', arg_type=get_enum_type(MetricTriggerType))
+        c.argument('metric_threshold_operator', arg_type=get_enum_type(ConditionalOperator))
         c.argument('metric_threshold')
         c.argument('action_group', nargs='+')
         c.argument('custom_webhook_payload')
@@ -377,14 +377,14 @@ def load_arguments(self, _):
         c.argument('remove_authorized_resources', nargs='+')
 
     with self.argument_context('monitor log alert update', arg_group='Action') as c:
-        c.argument('severity')
+        c.argument('severity', arg_type=get_enum_type(AlertSeverity))
         c.argument('throttling')
-        c.argument('threshold_operator')
+        c.argument('threshold_operator', arg_type=get_enum_type(ConditionalOperator))
         c.argument('threshold')
         c.argument('reset_metric_trigger', action='store_true')
         c.argument('metric_column')
-        c.argument('metric_trigger_type')
-        c.argument('metric_threshold_operator')
+        c.argument('metric_trigger_type', arg_type=get_enum_type(MetricTriggerType))
+        c.argument('metric_threshold_operator', arg_type=get_enum_type(ConditionalOperator))
         c.argument('metric_threshold')
         c.argument('reset_action_group', action='store_true')
         c.argument('add_action_groups', nargs='+')

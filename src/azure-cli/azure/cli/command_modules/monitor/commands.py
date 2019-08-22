@@ -196,7 +196,7 @@ def load_command_table(self, _):
         g.command('delete', 'delete', exception_handler=missing_resource_handler)
         g.show_command('show', 'get', exception_handler=missing_resource_handler)
         g.custom_command('list', 'list_log_alert')
-        g.generic_update_command('update', custom_func_name='update', setter_arg_name='parameters')
+        g.generic_update_command('update', custom_func_name='update_log_alert', setter_arg_name='parameters')
 
     with self.command_group('monitor log-profiles', log_profiles_sdk, custom_command_type=log_profiles_custom) as g:
         g.custom_command('create', 'create_log_profile_operations')
