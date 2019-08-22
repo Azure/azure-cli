@@ -1580,13 +1580,10 @@ def show_container_cd_url(cmd, resource_group_name, name, slot=None):
     cd_settings['DOCKER_ENABLE_CI'] = docker_enabled
 
     if docker_enabled:
-        profiles = list_publish_profiles(cmd, resource_group_name, name, slot)
-        for profile in profiles:
-            if profile['publishMethod'] == 'MSDeploy':
-                scmUrl = profile['publishUrl'].replace(":443", "")
-                cd_url = 'https://' + profile['userName'] + ':' + profile['userPWD'] + '@' + scmUrl + '/docker/hook'
-                cd_settings['CI_CD_URL'] = cd_url
-                break
+        credentials = list_publishing_credentials(cmd, resource_group_name, name, slot)
+        if credentials:
+            cd_url = credentials.scm_uri + '/docker/hook'
+            cd_settings['CI_CD_URL'] = cd_url
     else:
         cd_settings['CI_CD_URL'] = ''
 
