@@ -17,17 +17,29 @@ class AzureSignalRServiceScenarioTest(ScenarioTest):
         location = 'eastus'
         tags_key = 'key'
         tags_val = 'value'
+        service_mode = 'Classic'
+        allowed_origins = ['http://example1.com', 'http://example2.com']
+        updated_sku = 'Free_F1'
+        updated_tags_val = 'value2'
+        update_service_mode = 'Serverless'
+        added_allowed_origins = ['http://example3.com', 'http://example4.com']
 
         self.kwargs.update({
             'location': location,
             'signalr_name': signalr_name,
             'sku': sku,
             'unit_count': unit_count,
-            'tags': '{}={}'.format(tags_key, tags_val)
+            'tags': '{}={}'.format(tags_key, tags_val),
+            'service_mode': service_mode,
+            'allowed_origins': ' '.join(allowed_origins),
+            'updated_sku': updated_sku,
+            'updated_tags': '{}={}'.format(tags_key, updated_tags_val),
+            'update_service_mode': update_service_mode,
+            'added_allowed_origins': ' '.join(added_allowed_origins),
         })
 
         # Test create
-        self.cmd('az signalr create -n {signalr_name} -g {rg} --sku {sku} --unit-count {unit_count} -l {location} --tags {tags}',
+        self.cmd('az signalr create -n {signalr_name} -g {rg} --sku {sku} --unit-count {unit_count} -l {location} --tags {tags} --service-mode {service_mode} --allowed-origins {allowed_origins}',
                  checks=[
                      self.check('name', '{signalr_name}'),
                      self.check('location', '{location}'),
@@ -35,6 +47,8 @@ class AzureSignalRServiceScenarioTest(ScenarioTest):
                      self.check('sku.name', '{sku}'),
                      self.check('sku.capacity', '{unit_count}'),
                      self.check('tags.{}'.format(tags_key), tags_val),
+                     self.check('features[0].value', '{service_mode}'),
+                     self.check('cors.allowedOrigins', allowed_origins),
                      self.exists('hostName'),
                      self.exists('publicPort'),
                      self.exists('serverPort'),
@@ -47,10 +61,12 @@ class AzureSignalRServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded'),
             self.check('sku.name', '{sku}'),
             self.check('sku.capacity', '{unit_count}'),
+            self.check('features[0].value', '{service_mode}'),
+            self.check('cors.allowedOrigins', allowed_origins),
             self.exists('hostName'),
             self.exists('publicPort'),
             self.exists('serverPort'),
-            self.exists('externalIp')
+            self.exists('externalIp'),
         ])
 
         # Test list
@@ -60,10 +76,36 @@ class AzureSignalRServiceScenarioTest(ScenarioTest):
             self.check('[0].provisioningState', 'Succeeded'),
             self.check('[0].sku.name', '{sku}'),
             self.check('[0].sku.capacity', '{unit_count}'),
+            self.check('[0].features[0].value', '{service_mode}'),
+            self.check('[0].cors.allowedOrigins', allowed_origins),
             self.exists('[0].hostName'),
             self.exists('[0].publicPort'),
             self.exists('[0].serverPort'),
             self.exists('[0].externalIp')
+        ])
+
+        # Test update
+        self.cmd('az signalr update -n {signalr_name} -g {rg} --sku {updated_sku} --tags {updated_tags} --service-mode {update_service_mode}',
+                 checks=[
+                     self.check('name', '{signalr_name}'),
+                     self.check('location', '{location}'),
+                     self.check('provisioningState', 'Succeeded'),
+                     self.check('sku.name', '{updated_sku}'),
+                     self.check('tags.{}'.format(tags_key), updated_tags_val),
+                     self.check('features[0].value', '{update_service_mode}'),
+                     self.check('cors.allowedOrigins', allowed_origins),
+                     self.exists('hostName'),
+                     self.exists('publicPort'),
+                     self.exists('serverPort'),
+                 ])
+
+        # Test CORS operations
+        self.cmd('az signalr cors remove -n {signalr_name} -g {rg} --allowed-origins {allowed_origins}', checks=[
+            self.check('cors.allowedOrigins[0]', '*')
+        ])
+
+        self.cmd('az signalr cors add -n {signalr_name} -g {rg} --allowed-origins {added_allowed_origins}', checks=[
+            self.check('cors.allowedOrigins', ['*'] + added_allowed_origins)
         ])
 
         # Test key list

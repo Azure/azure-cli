@@ -5,6 +5,7 @@
 # --------------------------------------------------------------------------------------------
 
 
+from knack.log import get_logger
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.commands.parameters import (
     resource_group_name_type,
@@ -13,11 +14,11 @@ from azure.cli.core.commands.parameters import (
     tags_type
 )
 
-from knack.log import get_logger
 
 from ._constants import (
     SIGNALR_RESOURCE_TYPE,
-    SIGNALR_KEY_TYPE
+    SIGNALR_KEY_TYPE,
+    SIGNALR_SERVICE_MODE_TYPE
 )
 
 
@@ -38,6 +39,20 @@ def load_arguments(self, _):
     with self.argument_context('signalr create') as c:
         c.argument('sku', help='The sku name of the signalr service. E.g. Standard_S1')
         c.argument('unit_count', help='The number of signalr service unit count', type=int)
+        c.argument('service_mode', help='The service mode which signalr service will be working on', choices=SIGNALR_SERVICE_MODE_TYPE)
+        c.argument('allowed_origins', options_list=['--allowed-origins', '-a'], nargs='*', help='space separated origins that should be allowed to make cross-origin calls (for example: http://example.com:12345). To allow all, use "*"')
+
+    with self.argument_context('signalr update') as c:
+        c.argument('sku', help='The sku name of the signalr service. E.g. Standard_S1')
+        c.argument('unit_count', help='The number of signalr service unit count', type=int)
+        c.argument('service_mode', help='The service mode which signalr service will be working on', choices=SIGNALR_SERVICE_MODE_TYPE)
+        c.argument('allowed_origins', options_list=['--allowed-origins', '-a'], nargs='*', help='space separated origins that should be allowed to make cross-origin calls (for example: http://example.com:12345). To allow all, use "*"')
 
     with self.argument_context('signalr key renew') as c:
         c.argument('key_type', help='The name of access key to regenerate', choices=SIGNALR_KEY_TYPE)
+
+    with self.argument_context('signalr cors add') as c:
+        c.argument('allowed_origins', options_list=['--allowed-origins', '-a'], nargs='*', help='space separated origins that should be allowed to make cross-origin calls (for example: http://example.com:12345). To allow all, use "*"')
+
+    with self.argument_context('signalr cors remove') as c:
+        c.argument('allowed_origins', options_list=['--allowed-origins', '-a'], nargs='*', help='space separated origins that should be allowed to make cross-origin calls (for example: http://example.com:12345). To allow all, use "*"')
