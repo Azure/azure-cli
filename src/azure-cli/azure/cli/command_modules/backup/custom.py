@@ -387,24 +387,17 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
     sa_name, sa_rg = _get_resource_name_and_rg(resource_group_name, storage_account)
     _storage_account_id = _get_storage_account_id(cmd.cli_ctx, sa_name, sa_rg)
     _source_resource_id = item.properties.source_resource_id
-    if recovery_point.properties.is_managed_virtual_machine:
+    target_rg_id = None
+    if recovery_point.properties.is_managed_virtual_machine and TargetRg is not None:
         target_rg_id = '/'.join(_source_resource_id.split('/')[:4]) + "/" + TargetRg
-        trigger_restore_properties = IaasVMRestoreRequest(create_new_cloud_service=True,
-                                                          recovery_point_id=rp_name,
-                                                          recovery_type='RestoreDisks',
-                                                          region=vault_location,
-                                                          storage_account_id=_storage_account_id,
-                                                          source_resource_id=_source_resource_id,
-                                                          original_storage_account_option=use_original_storage_account,
-                                                          target_resource_group_id=target_rg_id)
-    else:
-        trigger_restore_properties = IaasVMRestoreRequest(create_new_cloud_service=True,
-                                                          recovery_point_id=rp_name,
-                                                          recovery_type='RestoreDisks',
-                                                          region=vault_location,
-                                                          storage_account_id=_storage_account_id,
-                                                          source_resource_id=_source_resource_id,
-                                                          original_storage_account_option=use_original_storage_account)
+    trigger_restore_properties = IaasVMRestoreRequest(create_new_cloud_service=True,
+                                                      recovery_point_id=rp_name,
+                                                      recovery_type='RestoreDisks',
+                                                      region=vault_location,
+                                                      storage_account_id=_storage_account_id,
+                                                      source_resource_id=_source_resource_id,
+                                                      target_resource_group_id=target_rg_id,
+                                                      original_storage_account_option=use_original_storage_account)
     trigger_restore_request = RestoreRequestResource(properties=trigger_restore_properties)
 
     # Trigger restore
