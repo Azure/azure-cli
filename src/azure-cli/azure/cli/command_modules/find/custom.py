@@ -23,6 +23,7 @@ WAIT_MESSAGE = ['Finding examples...']
 
 EXTENSION_NAME = 'find'
 
+
 def process_query(cli_term):
     print(random.choice(WAIT_MESSAGE), file=sys.stderr)
     response = call_aladdin_service(cli_term)
@@ -51,9 +52,10 @@ def process_query(cli_term):
             current_snippet = current_snippet.replace('```', '').replace(current_title, '').strip()
             current_snippet = re.sub(r'\[.*\]', '', current_snippet).strip()
             print(style_message(current_title))
-            print(current_snippet + '\n') 
+            print(current_snippet + '\n')
         if hasPrunedAnswer:
             print(style_message("More commands and examples are available in the latest version of the CLI. Please update for the best experience.\n"))
+
 
 def style_message(msg):
     if should_enable_styling():
@@ -63,6 +65,7 @@ def style_message(msg):
             pass
     return msg
 
+
 def should_enable_styling():
     try:
         # Style if tty stream is available
@@ -71,6 +74,7 @@ def should_enable_styling():
     except AttributeError:
         pass
     return False
+
 
 def call_aladdin_service(query):
     client_request_id = ''
@@ -83,6 +87,14 @@ def call_aladdin_service(query):
     installation_id = telemetry_core._get_installation_id()  # pylint: disable=protected-access
     version = str(parse_version(core_version))
 
+    context = {
+        "sessionId": session_id,
+        "subscriptionId": subscription_id,
+        "clientRequestId": client_request_id,
+        "installationId": installation_id,
+        "versionNumber": version
+    }
+
     api_url = 'https://aladdin.microsoft.com/api/v1.0/examples'
     headers = {'Content-Type': 'application/json'}
 
@@ -91,7 +103,7 @@ def call_aladdin_service(query):
         params={
             'query': query,
             'clientType': 'AzureCli',
-            'context': f'{{"sessionId": "{session_id}", "subscriptionId": "{subscription_id}", "clientRequestId": "{client_request_id}", "installationId": "{installation_id}", "versionNumber": "{version}"}}'
+            'context': json.dumps(context)
         },
         headers=headers)
 
