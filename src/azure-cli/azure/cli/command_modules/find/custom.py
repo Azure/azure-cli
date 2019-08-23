@@ -54,7 +54,8 @@ def process_query(cli_term):
             print(style_message(current_title))
             print(current_snippet + '\n')
         if hasPrunedAnswer:
-            print(style_message("More commands and examples are available in the latest version of the CLI. Please update for the best experience.\n"))
+            print(style_message("More commands and examples are available in the latest version of the CLI. "
+                                "Please update for the best experience.\n"))
 
 
 def style_message(msg):
