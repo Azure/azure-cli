@@ -214,7 +214,7 @@ class BotTests(ScenarioTest):
         })
 
         expected_error = "--appid must be a valid GUID from a Microsoft Azure AD Application Registration. See " \
-                         "https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app " \
+                         "https://docs.microsoft.com/azure/active-directory/develop/quickstart-register-app " \
                          "for more information on App Registrations. See 'az bot create --help' for more CLI " \
                          "information."
         try:
@@ -261,7 +261,7 @@ class BotTests(ScenarioTest):
             raise AssertionError('should have thrown an error for empty string passwords.')
 
     "--appid must be a valid GUID from a Microsoft Azure AD Application Registration. See "
-    "https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app for"
+    "https://docs.microsoft.com/azure/active-directory/develop/quickstart-register-app for"
     " more information on App Registrations. See 'az bot create --help' for more CLI information."
 
     @ResourceGroupPreparer(random_name_length=20)

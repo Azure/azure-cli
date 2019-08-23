@@ -3,22 +3,67 @@
 Release History
 ===============
 
-**=== New Release Start ===**
-  
+**ACR**
+
+* Move to 2019-05-01 api-version, which follows replace semantics for ACR resource creation.
+* Breaking change: Classic SKU no longer supported.
+
+**API Management**
+
+* Introduced initial impementation of API Management preview commands (az apim)
+
+**AppConfig**
+
+* Added "appconfig kv restore" command.
+
+**AppService**
+
+* Fixed az webapp webjob continuous start command when specifying a slot.
+
+**AppService**
+
+* az webapp up detects env folder and removes it from compressed file used for deployment
+
 **keyvault**
 
 * Fix the bug in secret set command that igores the expires argument
 
+**Network**
+
+* az network lb create/frontend-ip create: Fixes #10018. Support `--private-ip-address-version` argument to create IPv6 based private-ip-address 
+* az network private-endpoint create/update/list-types: Fixes #9474. Support create/update/list-types commands for private endpoint.
+* az network private-link-service: Fixes #9475. Onboard commands for private link service.
+* az network vnet subnet update: Support `--private-endpoint-network-policies` and `--private-link-service-network-policies` arguments for update command.
+
 **RBAC**
 
-* derive service principal's display name from name in the create-for-rbac command
+* Fix #10151 - `az ad app update --homepage` not updating homepage.
+* Derive service principal's display name from name in the create-for-rbac command
 
-**=== New Release Section End ===**
+**ServiceFabric**
 
+* Fix for issues #7145,  #7880 and #7889 - fix for key vault and cert issues when creating a cluster.
+* Fix for issue #7130 - fix add cert command. Using the cluster resource group when the key vault resource group is not specified.
+* Fix for issue #9711 - fix command 'cluster setting set' command. Using named parameters for SettingsSectionDescription constructor.
+
+**SignalR**
+
+* signalr cors: New command to manage SignalR CORS
+* az signalr create: --service-mode: new service mode argument
+* signalr restart: new command to restart the service
+* signalr update: new command to update the service
+
+**Storage**
+
+* Add `revoke-delegation-keys` command for storage account
+
+2.0.71
+++++++
 
 **AppService**
 
 * az webapp webjob continuous group commands were failing for slots
+* fixes an issue where `az webapp deployment container config` displayed the wrong Docker CI/CD webhook URL for some apps
 
 **BotService**
 
@@ -29,11 +74,12 @@ Release History
 
 **CognitiveServices**
 
-* add "cognitiveservices account network-rule" commands.
+* Add "cognitiveservices account network-rule" commands.
 
 **Cosmos DB**
 
-* remove warning when updating multiple write locations
+* Remove warning when updating multiple write locations
+* Add CRUD commands for CosmosDB SQL, MongoDB, Cassandra, Gremlin and Table resources and resource's throughput.
 
 **HDInsight**
 
@@ -86,15 +132,10 @@ Release History
 
 * `storage copy`: add copy command for storage
 
-**Cosmos DB**
-
-* Added CRUD commands for CosmosDB SQL, MongoDB, Cassandra, Gremlin and Table resources and resource's throughput.
-
 **Kubernetes**
 
 * Use https if dashboard container port is using https 
 
-=======
 
 2.0.70
 ++++++

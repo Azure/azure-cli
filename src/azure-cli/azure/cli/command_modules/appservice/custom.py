@@ -1474,8 +1474,8 @@ def _parse_frequency(frequency):
 
 
 def _get_location_from_resource_group(cli_ctx, resource_group_name):
-    from azure.mgmt.resource import ResourceManagementClient
-    client = get_mgmt_service_client(cli_ctx, ResourceManagementClient)
+    from azure.cli.core.profiles import ResourceType
+    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     group = client.resource_groups.get(resource_group_name)
     return group.location
 
@@ -1488,8 +1488,8 @@ def _get_location_from_webapp(client, resource_group_name, webapp):
 
 
 def _get_deleted_apps_locations(cli_ctx):
-    from azure.mgmt.resource import ResourceManagementClient
-    client = get_mgmt_service_client(cli_ctx, ResourceManagementClient)
+    from azure.cli.core.profiles import ResourceType
+    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     web_provider = client.providers.get('Microsoft.Web')
     del_sites_resource = next((x for x in web_provider.resource_types if x.resource_type == 'deletedSites'), None)
     if del_sites_resource:
@@ -1580,13 +1580,10 @@ def show_container_cd_url(cmd, resource_group_name, name, slot=None):
     cd_settings['DOCKER_ENABLE_CI'] = docker_enabled
 
     if docker_enabled:
-        profiles = list_publish_profiles(cmd, resource_group_name, name, slot)
-        for profile in profiles:
-            if profile['publishMethod'] == 'MSDeploy':
-                scmUrl = profile['publishUrl'].replace(":443", "")
-                cd_url = 'https://' + profile['userName'] + ':' + profile['userPWD'] + '@' + scmUrl + '/docker/hook'
-                cd_settings['CI_CD_URL'] = cd_url
-                break
+        credentials = list_publishing_credentials(cmd, resource_group_name, name, slot)
+        if credentials:
+            cd_url = credentials.scm_uri + '/docker/hook'
+            cd_settings['CI_CD_URL'] = cd_url
     else:
         cd_settings['CI_CD_URL'] = ''
 
@@ -2354,7 +2351,7 @@ def list_continuous_webjobs(cmd, resource_group_name, name, slot=None):
 def start_continuous_webjob(cmd, resource_group_name, name, webjob_name, slot=None):
     client = web_client_factory(cmd.cli_ctx)
     if slot:
-        client.web_apps.start_continuous_web_job(resource_group_name, name, webjob_name, slot)
+        client.web_apps.start_continuous_web_job_slot(resource_group_name, name, webjob_name, slot)
         return client.web_apps.get_continuous_web_job_slot(resource_group_name, name, webjob_name, slot)
     client.web_apps.start_continuous_web_job(resource_group_name, name, webjob_name)
     return client.web_apps.get_continuous_web_job(resource_group_name, name, webjob_name)

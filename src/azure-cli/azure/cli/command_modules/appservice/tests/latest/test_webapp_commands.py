@@ -727,7 +727,7 @@ class FunctionappACRDeploymentScenarioTest(ScenarioTest):
         self.cmd('acr create --admin-enabled -g {} -n {} --sku Basic'.format(resource_group, acr_registry_name))
         self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan))
         self.cmd('functionapp create -g {} -n {} -s {} --plan {} --runtime {}'.format(resource_group, functionapp, storage_account, plan, runtime))
-        creds = self.cmd('acr credential show -n {}'.format(acr_registry_name)).get_output_in_json()
+        creds = self.cmd('acr credential show -g {} -n {}'.format(resource_group, acr_registry_name)).get_output_in_json()
         self.cmd('functionapp config container set -g {0} -n {1} --docker-custom-image-name {2}.azurecr.io/image-name:latest --docker-registry-server-url https://{2}.azurecr.io'.format(
             resource_group, functionapp, acr_registry_name), checks=[
                 JMESPathCheck("[?name=='DOCKER_REGISTRY_SERVER_USERNAME']|[0].value", creds['username'])
@@ -943,7 +943,7 @@ class WebappSSLCertTest(ScenarioTest):
         plan = self.create_random_name(prefix='ssl-test-plan', length=24)
         webapp_name = self.create_random_name(prefix='web-ssl-test', length=20)
         # Cert Generated using
-        # https://docs.microsoft.com/en-us/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
+        # https://docs.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
         pfx_file = os.path.join(TEST_DIR, 'server.pfx')
         cert_password = 'test'
         cert_thumbprint = '9E9735C45C792B03B3FFCCA614852B32EE71AD6B'

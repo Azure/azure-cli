@@ -181,7 +181,7 @@ def _check_health_environment(ignore_errors, yes):
 def _get_registry_status(login_server, registry_name, ignore_errors):
     import socket
 
-    registry_ip = ""
+    registry_ip = None
 
     try:
         registry_ip = socket.gethostbyname(login_server)
@@ -196,8 +196,15 @@ def _get_registry_status(login_server, registry_name, ignore_errors):
     print_pass("DNS lookup to {} at IP {}".format(login_server, registry_ip))
 
     import requests
+    from requests.exceptions import SSLError
     from azure.cli.core.util import should_disable_connection_verify
-    challenge = requests.get('https://' + login_server + '/v2/', verify=(not should_disable_connection_verify()))
+
+    try:
+        challenge = requests.get('https://' + login_server + '/v2/', verify=(not should_disable_connection_verify()))
+    except SSLError:
+        from ._errors import CONNECTIVITY_SSL_ERROR
+        _handle_error(CONNECTIVITY_SSL_ERROR.format_error_message(login_server), ignore_errors)
+        return False
 
     if challenge.status_code == 403:
         from ._errors import CONNECTIVITY_FORBIDDEN_ERROR

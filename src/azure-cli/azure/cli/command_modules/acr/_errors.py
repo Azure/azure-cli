@@ -76,7 +76,7 @@ CONNECTIVITY_DNS_ERROR = ErrorClass(
 
 CONNECTIVITY_FORBIDDEN_ERROR = ErrorClass(
     "CONNECTIVITY_FORBIDDEN_ERROR",
-    "Looks like you don't have access to registry '{}'. To see configured firewall rules, run 'az acr show --query networkRuleSet --name {}'. Details: https://docs.microsoft.com/en-us/azure/container-registry/container-registry-health-error-reference#connectivity_forbidden_error"
+    "Looks like you don't have access to registry '{}'. To see configured firewall rules, run 'az acr show --query networkRuleSet --name {}'. Details: https://docs.microsoft.com/azure/container-registry/container-registry-health-error-reference#connectivity_forbidden_error"
 )
 
 
@@ -101,6 +101,12 @@ CONNECTIVITY_REFRESH_TOKEN_ERROR = ErrorClass(
 CONNECTIVITY_ACCESS_TOKEN_ERROR = ErrorClass(
     "CONNECTIVITY_ACCESS_TOKEN_ERROR",
     "Access to registry '{}' was denied. Response code: {}. Please try running 'az login' again to refresh permissions."
+)
+
+
+CONNECTIVITY_SSL_ERROR = ErrorClass(
+    "CONNECTIVITY_SSL_ERROR",
+    "Unable to establish a secure connection to the registry '{}'. Are you using a proxy server?"
 )
 
 

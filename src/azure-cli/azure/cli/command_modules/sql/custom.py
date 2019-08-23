@@ -1154,7 +1154,7 @@ def _find_storage_account_resource_group(cli_ctx, name):
     resource group just to update some unrelated property, which is annoying and makes no sense to
     the customer.
     '''
-    from azure.mgmt.resource import ResourceManagementClient
+    from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
     storage_type = 'Microsoft.Storage/storageAccounts'
@@ -1163,7 +1163,7 @@ def _find_storage_account_resource_group(cli_ctx, name):
     query = "name eq '{}' and (resourceType eq '{}' or resourceType eq '{}')".format(
         name, storage_type, classic_storage_type)
 
-    client = get_mgmt_service_client(cli_ctx, ResourceManagementClient)
+    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     resources = list(client.resources.list(filter=query))
 
     if not resources:
