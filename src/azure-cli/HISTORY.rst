@@ -38,6 +38,7 @@ Release History
 **RBAC**
 
 * Fix #10151 - `az ad app update --homepage` not updating homepage.
+* Derive service principal's display name from name in the create-for-rbac command
 
 **ServiceFabric**
 
