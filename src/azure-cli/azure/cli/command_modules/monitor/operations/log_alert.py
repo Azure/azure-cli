@@ -10,11 +10,11 @@ logger = get_logger(__name__)
 
 def create_log_alert(  # pylint: disable=too-many-locals
         cmd, client, resource_group_name, rule_name, location, frequency, time_window,
-        data_source_id, alert_query, query_type,
+        data_source_id, alert_query,
         severity, threshold_operator, threshold, throttling=None,
         metric_column=None, metric_trigger_type=None, metric_threshold_operator=None, metric_threshold=None,
         action_group=None, email_subject=None,
-        authorized_resources=None, description=None, tags=None, disable=False):
+        query_type="ResultCount", authorized_resources=None, description=None, tags=None, disable=False):
     from azure.mgmt.monitor.models import (LogSearchRuleResource, Schedule, Source,
                                            TriggerCondition, AlertingAction, AzNsActionGroup, LogMetricTrigger)
     from knack.util import CLIError

@@ -334,60 +334,64 @@ def load_arguments(self, _):
 
     # region LogAlerts
     with self.argument_context('monitor log-alert') as c:
-        c.argument('rule_name', options_list=['--name', '-n'], id_part='name')
+        c.argument('rule_name', options_list=['--name', '-n'], id_part='name', help="Name of the log alert rule.")
 
     with self.argument_context('monitor log-alert create') as c:
-        c.argument('location')
-        c.argument('disable', action='store_true')
+        c.argument('location', help="Resource location.")
+        c.argument('disable', action='store_true', help="Disable the log alert rule after it is created.")
+        c.argument('description', help="The description of the log alert rule.")
+        c.argument('tags', help="Space-separated tags in 'key[=value]' format.")
 
     with self.argument_context('monitor log-alert create', arg_group='Schedule') as c:
-        c.argument('frequency')
+        c.argument('frequency', help="Frequency (in minutes) at which rule condition should be evaluated.")
         c.argument('time_window')
 
     with self.argument_context('monitor log-alert create', arg_group='Source') as c:
-        c.argument('data_source_id')
+        c.argument('data_source_id', help="The ARM resource id over which log search query is to be run.")
         c.argument('alert_query')
         c.argument('query_type')
-        c.argument('authorized_resources', nargs='+')
+        c.argument('authorized_resources', nargs='+', help="Space separated list of ARM resource ids referred into query.")
 
     with self.argument_context('monitor log-alert create', arg_group='Action') as c:
-        c.argument('severity', arg_type=get_enum_type(AlertSeverity))
-        c.argument('throttling')
-        c.argument('threshold_operator', arg_type=get_enum_type(ConditionalOperator))
-        c.argument('threshold')
+        c.argument('severity', arg_type=get_enum_type(AlertSeverity), help="Severity of the alert.")
+        c.argument('throttling', help="Time (in minutes) for which Alerts should be throttled or suppressed.")
+        c.argument('threshold_operator', arg_type=get_enum_type(ConditionalOperator), help="Evaluation operation for rule.")
+        c.argument('threshold', help="Result or count threshold based on which rule should be triggered.")
         c.argument('metric_column')
         c.argument('metric_trigger_type', arg_type=get_enum_type(MetricTriggerType))
         c.argument('metric_threshold_operator', arg_type=get_enum_type(ConditionalOperator))
         c.argument('metric_threshold')
         c.argument('action_group', nargs='+')
-        c.argument('email_subject')
+        c.argument('email_subject', help="Custom subject override for all email ids in all Azure action group(s) associated with the alert rule.")
 
     with self.argument_context('monitor log-alert update') as c:
-        c.argument('enabled', arg_type=get_three_state_flag())
+        c.argument('enabled', arg_type=get_three_state_flag(), help="Enable/disable log alert rule.")
+        c.argument('description', help="Update description for the log alert rule.")
+        c.argument('tags', help="Overwrite tags of an alert rule. Space-separated tags in 'key[=value]' format. Use "" to clear existing tags.")
 
     with self.argument_context('monitor log-alert update', arg_group='Schedule') as c:
-        c.argument('frequency')
-        c.argument('time_window')
+        c.argument('frequency', help="Update frequency (in minutes) at which rule condition should be evaluated.")
+        c.argument('time_window', help="Update time window (in minutes) for which data needs to be fetched for query (should be greater than or equal to frequencyInMinutes).")
 
     with self.argument_context('monitor log-alert update', arg_group='Source') as c:
         c.argument('alert_query')
-        c.argument('reset_authorized_resources', action='store_true')
-        c.argument('add_authorized_resources', nargs='+')
-        c.argument('remove_authorized_resources', nargs='+')
+        c.argument('reset_authorized_resources', action='store_true', help="Set authorized resources to null for alert rule.")
+        c.argument('add_authorized_resources', nargs='+', help="Add authorized resources to alert rule. Accepts space separated list of ARM resource ids.")
+        c.argument('remove_authorized_resources', nargs='+', help="Remove authorized resources from alert rule. Accepts space separated list of ARM resource ids.")
 
     with self.argument_context('monitor log-alert update', arg_group='Action') as c:
-        c.argument('severity', arg_type=get_enum_type(AlertSeverity))
-        c.argument('throttling')
-        c.argument('threshold_operator', arg_type=get_enum_type(ConditionalOperator))
-        c.argument('threshold')
-        c.argument('reset_metric_trigger', action='store_true')
-        c.argument('metric_column')
-        c.argument('metric_trigger_type', arg_type=get_enum_type(MetricTriggerType))
-        c.argument('metric_threshold_operator', arg_type=get_enum_type(ConditionalOperator))
-        c.argument('metric_threshold')
-        c.argument('reset_action_group', action='store_true')
+        c.argument('severity', arg_type=get_enum_type(AlertSeverity), help="Update severity of the alert.")
+        c.argument('throttling', help="Update time (in minutes) for which Alerts should be throttled or suppressed.")
+        c.argument('threshold_operator', arg_type=get_enum_type(ConditionalOperator), help="Update threshold operator for alert rule.")
+        c.argument('threshold', help="Update threshold for alert rule. Result or count threshold based on which rule should be triggered.")
+        c.argument('reset_metric_trigger', action='store_true', help="Reset metric trigger to null for log alert rule.")
+        c.argument('metric_column', help="Update column for evaluation of metric for metric measurement log alert rule.")
+        c.argument('metric_trigger_type', arg_type=get_enum_type(MetricTriggerType), help="Update trigger type for metric measurement log alert rule.")
+        c.argument('metric_threshold_operator', arg_type=get_enum_type(ConditionalOperator), help="Update threshold operator for metric measurement log alert rule.")
+        c.argument('metric_threshold', help="Update the threshold for metric measurement log alert rule.")
+        c.argument('reset_action_group', action='store_true', help="Set action group to null for alert rule.")
         c.argument('add_action_groups', nargs='+')
         c.argument('remove_action_groups', nargs='+')
-        c.argument('reset_email_subject', action='store_true')
-        c.argument('email_subject')
+        c.argument('reset_email_subject', action='store_true', help="Set email subject to default for all email ids in all Azure action group(s) associated with the alert rule.")
+        c.argument('email_subject', help="Update custom subject override for all email ids in all Azure action group(s) associated with the alert rule.")
     # endregion
