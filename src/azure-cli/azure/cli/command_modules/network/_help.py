@@ -12,6 +12,13 @@ type: group
 short-summary: Manage Azure Network resources.
 """
 
+helps['network list-service-tags'] = """
+type: command
+long-summary: >
+    A service tag represents a group of IP address prefixes to help minimize complexity for security rule creation.
+    To learn more about list-service-tags, visit https://docs.microsoft.com/en-us/azure/virtual-network/security-overview#service-tags
+"""
+
 helps['network application-gateway'] = """
 type: group
 short-summary: Manage application-level routing and load balancing services.
