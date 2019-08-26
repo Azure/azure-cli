@@ -53,7 +53,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-batch~=7.0',
+    'azure-batch~=8.0',
     'azure-cli-command_modules-nspkg~=2.0',
     'azure-cli-core=={}'.format(VERSION),
     'azure-cli-nspkg~=3.0,>=3.0.3',
@@ -68,7 +68,7 @@ DEPENDENCIES = [
     'azure-mgmt-applicationinsights~=0.1.1',
     'azure-mgmt-appconfiguration>=0.1.0',
     'azure-mgmt-authorization~=0.52.0',
-    'azure-mgmt-batch~=6.0',
+    'azure-mgmt-batch~=7.0',
     'azure-mgmt-batchai~=2.0',
     'azure-mgmt-billing~=0.2',
     'azure-mgmt-botservice~=0.2.0',

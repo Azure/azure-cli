@@ -19,13 +19,15 @@ from azure.cli.core.profiles import ResourceType, get_sdk
 class BatchMgmtScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
     @ResourceGroupPreparer(location='northeurope')
-    def test_batch_account_cmd(self, resource_group):
+    def test_batch_general_arm_cmd(self, resource_group):
 
         self.kwargs.update({
             'rg': resource_group,
             'str_n': 'clibatchteststorage1',
             'loc': 'northeurope',
-            'acc': 'clibatchtest1'
+            'acc': 'clibatchtest1',
+            'ip': resource_group + 'ip',
+            'poolname': 'batch_account_cmd_pool'
         })
 
         # test create storage account with default set
@@ -123,7 +125,7 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):  # pylint: disable=too-ma
 
         self.cmd('batch application package create -g {rg} -n {acc} --application-name {app}'
                  ' --version {app_p} --package-file "{app_f}"').assert_with_checks([
-                     self.check('name', '{app}'),
+                     self.check('name', '{app_p}'),
                      self.check('storageUrl != null', True),
                      self.check('state', 'Active')])
 
@@ -132,7 +134,7 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):  # pylint: disable=too-ma
 
         self.cmd('batch application package show -g {rg} -n {acc} '
                  '--application-name {app} --version {app_p}').assert_with_checks([
-                     self.check('name', '{app}'),
+                     self.check('name', '{app_p}'),
                      self.check('format', 'zip'),
                      self.check('state', 'Active')])
 
