@@ -13,7 +13,7 @@ def create_log_alert(  # pylint: disable=too-many-locals
         data_source_id, alert_query, query_type,
         severity, threshold_operator, threshold, throttling=None,
         metric_column=None, metric_trigger_type=None, metric_threshold_operator=None, metric_threshold=None,
-        action_group=None, custom_webhook_payload=None, email_subject=None,
+        action_group=None, email_subject=None,
         authorized_resources=None, description=None, tags=None, disable=False):
     from azure.mgmt.monitor.models import (LogSearchRuleResource, Schedule, Source,
                                            TriggerCondition, AlertingAction, AzNsActionGroup, LogMetricTrigger)
@@ -37,7 +37,7 @@ def create_log_alert(  # pylint: disable=too-many-locals
 
     action = AlertingAction(severity=severity, trigger=trigger, throttling_in_min=throttling,
                             azns_action=AzNsActionGroup(action_group=action_group, email_subject=email_subject,
-                                                        custom_webhook_payload=custom_webhook_payload))
+                                                        custom_webhook_payload=None))
 
     settings = LogSearchRuleResource(location=location, tags=tags, description=description, enabled=not disable,
                                      source=Source(query_type=query_type, data_source_id=data_source_id,
@@ -60,8 +60,8 @@ def update_log_alert(  # pylint: disable=too-many-locals
         threshold_operator=None, threshold=None, throttling=None,
         metric_column=None, metric_trigger_type=None, metric_threshold_operator=None, metric_threshold=None,
         reset_action_group=None, add_action_groups=None, remove_action_groups=None,
-        custom_webhook_payload=None, email_subject=None, reset_email_subject=None,
-        reset_custom_webhook_payload=None, reset_metric_trigger=None, reset_authorized_resources=None,
+        email_subject=None, reset_email_subject=None,
+        reset_metric_trigger=None, reset_authorized_resources=None,
         add_authorized_resources=None, remove_authorized_resources=None):
     # --tags "" is set as tags={}. Used for clearing tags.
     if tags or tags == {}:
@@ -93,11 +93,6 @@ def update_log_alert(  # pylint: disable=too-many-locals
 
     if enabled is not None:
         instance.enabled = enabled
-
-    if custom_webhook_payload:
-        instance.action.azns_action.custom_webhook_payload = custom_webhook_payload
-    elif reset_custom_webhook_payload:
-        instance.action.azns_action.custom_webhook_payload = None
 
     if email_subject:
         instance.action.azns_action.email_subject = email_subject

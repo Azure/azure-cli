@@ -360,7 +360,6 @@ def load_arguments(self, _):
         c.argument('metric_threshold_operator', arg_type=get_enum_type(ConditionalOperator))
         c.argument('metric_threshold')
         c.argument('action_group', nargs='+')
-        c.argument('custom_webhook_payload')
         c.argument('email_subject')
 
     with self.argument_context('monitor log alert update') as c:
@@ -389,8 +388,6 @@ def load_arguments(self, _):
         c.argument('reset_action_group', action='store_true')
         c.argument('add_action_groups', nargs='+')
         c.argument('remove_action_groups', nargs='+')
-        c.argument('reset_custom_webhook_payload', action='store_true')
-        c.argument('custom_webhook_payload')
         c.argument('reset_email_subject', action='store_true')
         c.argument('email_subject')
     # endregion

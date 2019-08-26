@@ -981,8 +981,6 @@ parameters:
     short-summary: Evaluation operation for rule.
   - name: --action-group
     short-summary: Azure Action Group reference. Allowed values = Array of Names of action group, ARM resource IDs of action groups.
-  - name: --custom-webhook-payload
-    short-summary: Custom payload to be sent for all webhook URI in Azure action group(s). Input must be valid JSON.
   - name: --email-subject
     short-summary: Custom subject override for all email ids in all Azure action group(s) associated with the alert rule.
   - name: --metric-column
@@ -1013,7 +1011,7 @@ examples:
   - name: Create a log alert rule with customization of email subject and webhook JSON payload.
     text: >
         az monitor log alert create -n {AlertName} -g {ResourceGroup} -l {Location} \\
-          --severity {Severity} --threshold {Threshold} --threshold-operator {ThresholdOperator} --action-group [ActionGroup1 ActionGroup2..] --custom-webhook-payload {CustomWebhookPayload} --email-subject {EmailSubject} \\
+          --severity {Severity} --threshold {Threshold} --threshold-operator {ThresholdOperator} --action-group [ActionGroup1 ActionGroup2..] --email-subject {EmailSubject} \\
           --frequency {Frequency} --time-window {TimeWindow} \\
           --alert-query {AlertQuery} --data-source-id /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/microsoft.operationalinsights/workspaces/{Workspace} --query-type ResultCount \\
   - name: Create a log alert rule which is initially disabled.
@@ -1062,15 +1060,11 @@ parameters:
   - name: --threshold-operator
     short-summary: Update threshold operator for alert rule.
   - name: --add-action-groups
-    short-summary: Add action groups to alert rule. Supported values = Array of Names of action group, ARM resource IDs of action groups.
+    short-summary: Add action groups to alert rule. Allowed values = Array of Names of action group, ARM resource IDs of action groups.
   - name: --remove-action-groups
-    short-summary: Remove action groups from alert. Supported values = Array of Names of action group, ARM resource IDs of action groups.
+    short-summary: Remove action groups from alert. Allowed values = Array of Names of action group, ARM resource IDs of action groups.
   - name: --reset-action-group
     short-summary: Set action group to null for alert rule.
-  - name: --custom-webhook-payload
-    short-summary: Update custom payload to be sent for all webhook URI in Azure action group. Input must be valid JSON.
-  - name: --reset-custom-webhook-payload
-    short-summary: Set custom webhook payload to default.
   - name: --email-subject
     short-summary: Update custom subject override for all email ids in all Azure action group(s) associated with the alert rule.
   - name: --reset-email-subject
@@ -1091,7 +1085,7 @@ examples:
   - name: Update parameters of an alert rule.
     text: >
         az monitor log alert update -n {AlertName} -g {ResourceGroup} --description {Description} --tags [key1=value1 key2=value2 ...]\\
-          --severity {Severity} --threshold {Threshold} --threshold-operator {ThresholdOperator} --custom-webhook-payload {CustomWebhookPayload} --email-subject {EmailSubject}
+          --severity {Severity} --threshold {Threshold} --threshold-operator {ThresholdOperator} --email-subject {EmailSubject}
           --metric-column {MetricColumn} --metric-threshold {MetricThreshold} --metric-threshold-operator {MetricThresholdOperator} --metric-trigger-type {MetricTriggerType} --throttling {Throttling} \\
           --frequency {Frequency} --time-window {TimeWindow} \\
           --alert-query {AlertQuery} \\
@@ -1103,10 +1097,10 @@ examples:
   - name: Disable an alert rule.
     text: >
         az monitor log alert update -n {AlertName} -g {ResourceGroup} --enable false
-  - name: Reset action group, email subject, custom webhook payload, metricTrigger and authorized resorce of an alert rule.
+  - name: Reset action group, email subject, metricTrigger and authorized resorce of an alert rule.
     text: >
         az monitor log alert update -n {AlertName} -g {ResourceGroup} \\
-          --reset-action-group --reset-custom-webhook-payload --reset-email-subject --reset-metric-trigger \\
+          --reset-action-group --reset-email-subject --reset-metric-trigger \\
           --reset-authorized-resources \\
 """
 
