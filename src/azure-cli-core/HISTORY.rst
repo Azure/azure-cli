@@ -6,10 +6,6 @@ Release History
 * properly handle type errors caused by invalid JMESPath queries in core.util.handle_exception
 * `--query`: properly handle type errors caused by invalid JMESPath queries.
 
-2.0.71
-++++++
-* no changes
-
 2.0.70
 ++++++
 * no changes

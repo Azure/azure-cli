@@ -122,6 +122,50 @@ class BotTests(ScenarioTest):
         self.cmd('az bot delete -g {rg} -n {botname}')
 
     @ResourceGroupPreparer(random_name_length=20)
+    def test_create_v3_webapp_bot(self, resource_group):
+        self.kwargs.update({
+            'botname': self.create_random_name(prefix='cli', length=15),
+            'app_id': str(uuid.uuid4()),
+            'password': str(uuid.uuid4())
+        })
+
+        # Delete the bot if already exists
+        self.cmd('az bot delete -g {rg} -n {botname}')
+
+        dir_path = os.path.join('.', self.kwargs.get('botname'))
+        if os.path.exists(dir_path):
+            # Clean up the folder
+            shutil.rmtree(dir_path)
+
+        self.cmd(
+            'az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --location westus '
+            '--insights-location "West US 2" -v v3 --lang Csharp',
+            checks=[
+                self.check('resourceGroup', '{rg}'),
+                self.check('id', '{botname}'),
+                self.check('type', 'abs'),
+                self.exists('publishCommand')
+            ])
+
+        # Talk to bot
+        self.__talk_to_bot('hi', 'You said hi')
+
+        # Download the bot
+        self.cmd('az bot download -g {rg} -n {botname}', checks=[
+            self.exists('downloadPath')
+        ])
+
+        self.check(os.path.isdir(os.path.join('dir_path', 'postDeployScripts')), True)
+
+        # Publish it back
+        self.cmd('az bot publish -g {rg} -n {botname} --code-dir {botname} -v v3', checks=[
+            self.check('active', True)
+        ])
+
+        # Clean up the folder
+        shutil.rmtree(dir_path)
+
+    @ResourceGroupPreparer(random_name_length=20)
     def test_botservice_create_v4_csharp_echo_webapp_bot(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),
@@ -143,7 +187,8 @@ class BotTests(ScenarioTest):
             checks=[
                 self.check('resourceGroup', '{rg}'),
                 self.check('id', '{botname}'),
-                self.check('type', 'abs')
+                self.check('type', 'abs'),
+                self.exists('publishCommand')
             ])
 
         # Talk to bot
@@ -166,6 +211,50 @@ class BotTests(ScenarioTest):
         self.cmd('az bot delete -g {rg} -n {botname}')
 
     @ResourceGroupPreparer(random_name_length=20)
+    def test_create_v3_js_webapp_bot(self, resource_group):
+        self.kwargs.update({
+            'botname': self.create_random_name(prefix='cli', length=15),
+            'app_id': str(uuid.uuid4()),
+            'password': str(uuid.uuid4())
+        })
+
+        # Delete the bot if already exists
+        self.cmd('az bot delete -g {rg} -n {botname}')
+
+        dir_path = os.path.join('.', self.kwargs.get('botname'))
+        if os.path.exists(dir_path):
+            # Clean up the folder
+            shutil.rmtree(dir_path)
+
+        self.cmd(
+            'az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --location westus '
+            '--insights-location "West US 2" --lang Javascript -v v3',
+            checks=[
+                self.check('resourceGroup', '{rg}'),
+                self.check('id', '{botname}'),
+                self.check('type', 'abs'),
+                self.exists('publishCommand')
+            ])
+
+        # We don't talk to the bot in this test because it takes a while for the node app to be responsive
+        # Download the bot
+        self.cmd('az bot download -g {rg} -n {botname}', checks=[
+            self.exists('downloadPath')
+        ])
+
+        self.check(os.path.isdir(os.path.join('dir_path', 'postDeployScripts')), True)
+
+        # Modify bot source
+        # TODO implement
+
+        # Publish it back
+        self.cmd('az bot publish -g {rg} -n {botname} --code-dir {botname} -v v3', checks=[
+            self.check('active', True)
+        ])
+        # clean up the folder
+        shutil.rmtree(dir_path)
+
+    @ResourceGroupPreparer(random_name_length=20)
     def test_botservice_create_v4_js_echo_webapp_bot(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),
@@ -185,7 +274,8 @@ class BotTests(ScenarioTest):
                  checks={
                      self.check('resourceGroup', '{rg}'),
                      self.check('id', '{botname}'),
-                     self.check('type', 'abs')
+                     self.check('type', 'abs'),
+                     self.exists('publishCommand')
                  })
 
         # Download the bot source
@@ -296,7 +386,8 @@ class BotTests(ScenarioTest):
                            checks={
                                self.check('resourceGroup', '{rg}'),
                                self.check('id', '{botname}'),
-                               self.check('type', 'abs')
+                               self.check('type', 'abs'),
+                               self.exists('publishCommand')
                            })
 
         bot_name = results.get_output_in_json()['name']
@@ -336,7 +427,8 @@ class BotTests(ScenarioTest):
             checks={
                 self.check('resourceGroup', '{rg}'),
                 self.check('id', '{botname}'),
-                self.check('type', 'abs')
+                self.check('type', 'abs'),
+                self.exists('publishCommand')
             })
 
         results = self.cmd('az bot download -g {rg} -n {botname}', checks={self.exists('downloadPath')})
@@ -373,7 +465,8 @@ class BotTests(ScenarioTest):
                  checks={
                      self.check('resourceGroup', '{rg}'),
                      self.check('id', '{botname}'),
-                     self.check('type', 'abs')
+                     self.check('type', 'abs'),
+                     self.exists('publishCommand')
                  })
 
         # Talk to bot
@@ -467,6 +560,24 @@ class BotTests(ScenarioTest):
                  ])
 
     @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_create_v3_webapp_bot_should_fail_with_echo_flag(self, resource_group):
+        self.kwargs.update({
+            'botname': self.create_random_name(prefix='cli', length=15),
+            'app_id': str(uuid.uuid4()),
+            'password': str(uuid.uuid4())
+        })
+        try:
+            self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Javascript '
+                     '-v v3 --echo')
+            raise AssertionError()
+        except CLIError as cli_error:
+            assert cli_error.__str__() == "'az bot create --version v3' only creates one type of bot. " \
+                                          "To create a v3 bot, do not use the '--echo' flag when using this " \
+                                          "command. See 'az bot create --help'."
+        except AssertionError:
+            raise AssertionError('should have thrown an error for v3 bot with --echo flag.')
+
+    @ResourceGroupPreparer(random_name_length=20)
     def test_botservice_show_on_v4_js_webapp_bot(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),
@@ -497,6 +608,36 @@ class BotTests(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_show_on_v3_js_webapp_bot(self, resource_group):
+        self.kwargs.update({
+            'botname': self.create_random_name(prefix='cli', length=15),
+            'app_id': str(uuid.uuid4()),
+            'password': str(uuid.uuid4())
+        })
+
+        # Delete the bot if already exists
+        self.cmd('az bot delete -g {rg} -n {botname}')
+
+        dir_path = os.path.join('.', self.kwargs.get('botname'))
+        if os.path.exists(dir_path):
+            # clean up the folder
+            shutil.rmtree(dir_path)
+
+        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Javascript -v v3',
+                 checks={
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('id', '{botname}'),
+                     self.check('type', 'abs')
+                 })
+
+        self.cmd('az bot show -g {rg} -n {botname} --msbot', checks=[
+            self.exists('appPassword'),
+            self.check('id', '{botname}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('type', 'abs')
+        ])
+
+    @ResourceGroupPreparer(random_name_length=20)
     def test_botservice_show_on_v4_csharp_webapp_bot(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),
@@ -513,6 +654,36 @@ class BotTests(ScenarioTest):
             shutil.rmtree(dir_path)
 
         self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v4 --lang Csharp',
+                 checks={
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('id', '{botname}'),
+                     self.check('type', 'abs')
+                 })
+
+        self.cmd('az bot show -g {rg} -n {botname} --msbot', checks=[
+            self.exists('appPassword'),
+            self.check('id', '{botname}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('type', 'abs')
+        ])
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_show_on_v3_csharp_webapp_bot(self, resource_group):
+        self.kwargs.update({
+            'botname': self.create_random_name(prefix='cli', length=15),
+            'app_id': str(uuid.uuid4()),
+            'password': str(uuid.uuid4())
+        })
+
+        # Delete the bot if already exists
+        self.cmd('az bot delete -g {rg} -n {botname}')
+
+        dir_path = os.path.join('.', self.kwargs.get('botname'))
+        if os.path.exists(dir_path):
+            # clean up the folder
+            shutil.rmtree(dir_path)
+
+        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v3 --lang Csharp',
                  checks={
                      self.check('resourceGroup', '{rg}'),
                      self.check('id', '{botname}'),

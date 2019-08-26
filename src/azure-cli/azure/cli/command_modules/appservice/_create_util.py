@@ -113,6 +113,7 @@ def get_num_apps_in_asp(cmd, rg_name, asp_name):
 
 # pylint:disable=unexpected-keyword-arg
 def get_lang_from_content(src_path):
+    import glob
     # NODE: package.json should exist in the application root dir
     # NETCORE & DOTNET: *.csproj should exist in the application dir
     # NETCORE: <TargetFramework>netcoreapp2.0</TargetFramework>
@@ -133,6 +134,7 @@ def get_lang_from_content(src_path):
                 static_html_file = os.path.join(src_path, file)
                 break
 
+    static_html_file = glob.glob("**/*.html", recursive=True)
     if os.path.isfile(package_python_file):
         runtime_details_dict['language'] = PYTHON_RUNTIME_NAME
         runtime_details_dict['file_loc'] = package_python_file

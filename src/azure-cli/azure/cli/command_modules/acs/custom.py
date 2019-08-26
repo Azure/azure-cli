@@ -1383,7 +1383,6 @@ def subnet_role_assignment_exists(cli_ctx, scope):
     return False
 
 
-# pylint: disable=too-many-statements
 def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
                listen_address='127.0.0.1', listen_port='8001'):
     if not which('kubectl'):
@@ -1398,15 +1397,15 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
                        'To use "az aks browse" first enable the add-on\n'
                        'by running "az aks enable-addons --addons kube-dashboard".')
 
+    proxy_url = 'http://{0}:{1}/'.format(listen_address, listen_port)
     _, browse_path = tempfile.mkstemp()
     # TODO: need to add an --admin option?
     aks_get_credentials(cmd, client, resource_group_name, name, admin=False, path=browse_path)
-
     # find the dashboard pod's name
     try:
         dashboard_pod = subprocess.check_output(
-            ["kubectl", "get", "pods", "--kubeconfig", browse_path, "--namespace", "kube-system",
-             "--output", "name", "--selector", "k8s-app=kubernetes-dashboard"],
+            ["kubectl", "get", "pods", "--kubeconfig", browse_path, "--namespace", "kube-system", "--output", "name",
+             "--selector", "k8s-app=kubernetes-dashboard"],
             universal_newlines=True)
     except subprocess.CalledProcessError as err:
         raise CLIError('Could not find dashboard pod: {}'.format(err))
@@ -1415,26 +1414,6 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
         dashboard_pod = str(dashboard_pod).split('/')[-1].strip()
     else:
         raise CLIError("Couldn't find the Kubernetes dashboard pod.")
-
-    # find the port
-    try:
-        dashboard_port = subprocess.check_output(
-            ["kubectl", "get", "pods", "--kubeconfig", browse_path, "--namespace", "kube-system",
-             "--selector", "k8s-app=kubernetes-dashboard",
-             "--output", "jsonpath='{.items[0].spec.containers[0].ports[0].containerPort}'"]
-        )
-        # output format: b"'{port}'"
-        dashboard_port = int((dashboard_port.decode('utf-8').replace("'", "")))
-    except subprocess.CalledProcessError as err:
-        raise CLIError('Could not find dashboard port: {}'.format(err))
-
-    # use https if dashboard container is using https
-    if dashboard_port == 8443:
-        protocol = 'https'
-    else:
-        protocol = 'http'
-
-    proxy_url = '{0}://{1}:{2}/'.format(protocol, listen_address, listen_port)
     # launch kubectl port-forward locally to access the remote dashboard
     if in_cloud_console():
         # TODO: better error handling here.
@@ -1455,14 +1434,14 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
         try:
             subprocess.check_output(["kubectl", "--kubeconfig", browse_path, "--namespace", "kube-system",
                                      "port-forward", "--address", listen_address, dashboard_pod,
-                                     "{0}:{1}".format(listen_port, dashboard_port)], stderr=subprocess.STDOUT)
+                                     "{0}:9090".format(listen_port)], stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as err:
             if err.output.find(b'unknown flag: --address'):
                 if listen_address != '127.0.0.1':
                     logger.warning('"--address" is only supported in kubectl v1.13 and later.')
                     logger.warning('The "--listen-address" argument will be ignored.')
                 subprocess.call(["kubectl", "--kubeconfig", browse_path, "--namespace", "kube-system",
-                                 "port-forward", dashboard_pod, "{0}:{1}".format(listen_port, dashboard_port)])
+                                 "port-forward", dashboard_pod, "{0}:9090".format(listen_port)])
     except KeyboardInterrupt:
         # Let command processing finish gracefully after the user presses [Ctrl+C]
         pass

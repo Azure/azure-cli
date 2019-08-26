@@ -3,95 +3,17 @@
 Release History
 ===============
 
-** Policy **
+**Policy**
 
 * Support for Policy new API version 2019-01-01
 
-**ACR**
-
-* Move to 2019-05-01 api-version, which follows replace semantics for ACR resource creation.
-* Breaking change: Classic SKU no longer supported.
-
-**API Management**
-
-* Introduced initial impementation of API Management preview commands (az apim)
-
-**AppConfig**
-
-* Added "appconfig kv restore" command.
-
-**AppService**
-
-* Fixed az webapp webjob continuous start command when specifying a slot.
-
-**AppService**
-
-* az webapp up detects env folder and removes it from compressed file used for deployment
-
-**Batch**
-
-* Expanded `--json-file` capabilities of `az batch pool create` to allow for specifying MountConfigurations for file system mounts(see https://docs.microsoft.com/en-us/rest/api/batchservice/pool/add#request-body for structure)
-* Expanded `--json-file` capabilities of `az batch pool create` with the optional property publicIPs on NetworkConfiguration. This allows specifying publicIPs to be used when deploying pools (see https://docs.microsoft.com/en-us/rest/api/batchservice/pool/add#request-body for structure)
-* Expanded `--image` capabilities to support Shared Image Galleries images. Similar to the commands support for Managed Images, to use a Shared Image Gallery image simply use the ARM ID as the value to the argument.
-* [BREAKING] When not specified, the default value for `--start-task-wait-for-success` on `az batch pool create` is now true (was false).
-* [BREAKING] The default value for Scope on AutoUserSpecification is now always Pool (was Task on Windows nodes, Pool on Linux nodes). This argument is not exposed via the commandline, but can be set in the `--json-file` arguments.
-
-**keyvault**
-
-* Fix the bug in secret set command that igores the expires argument
-
-**Network**
-
-* az network lb create/frontend-ip create: Fixes #10018. Support `--private-ip-address-version` argument to create IPv6 based private-ip-address 
-* az network private-endpoint create/update/list-types: Fixes #9474. Support create/update/list-types commands for private endpoint.
-* az network private-link-service: Fixes #9475. Onboard commands for private link service.
-* az network vnet subnet update: Support `--private-endpoint-network-policies` and `--private-link-service-network-policies` arguments for update command.
-
-**RBAC**
-
-* Fix #10151 - `az ad app update --homepage` not updating homepage.
-* Derive service principal's display name from name in the create-for-rbac command
-
-**ServiceFabric**
-
-* Fix for issues #7145,  #7880 and #7889 - fix for key vault and cert issues when creating a cluster.
-* Fix for issue #7130 - fix add cert command. Using the cluster resource group when the key vault resource group is not specified.
-* Fix for issue #9711 - fix command 'cluster setting set' command. Using named parameters for SettingsSectionDescription constructor.
-
-**SignalR**
-
-* signalr cors: New command to manage SignalR CORS
-* az signalr create: --service-mode: new service mode argument
-* signalr restart: new command to restart the service
-* signalr update: new command to update the service
-
-**Storage**
-
-* Add `revoke-delegation-keys` command for storage account
-
-2.0.71
-++++++
-
-**AppService**
-
-* az webapp webjob continuous group commands were failing for slots
-* fixes an issue where `az webapp deployment container config` displayed the wrong Docker CI/CD webhook URL for some apps
-
-**BotService**
-
-* BREAKING CHANGE:
-    create:
-        - Removed support for creating v3 SDK bots
-        - Remove `az bot publish` example when creating a Web App bot
-
 **CognitiveServices**
 
-* Add "cognitiveservices account network-rule" commands.
+* add "cognitiveservices account network-rule" commands.
 
 **Cosmos DB**
 
-* Remove warning when updating multiple write locations
-* Add CRUD commands for CosmosDB SQL, MongoDB, Cassandra, Gremlin and Table resources and resource's throughput.
+* remove warning when updating multiple write locations
 
 **HDInsight**
 
@@ -127,10 +49,6 @@ Release History
 
 * Fix a loading error on 2.0.70
 
-**Network**
-
-* az network dns record-set cname delete: Fixes #10166. Support `--yes` argument to align the behavior with other dns type. 
-
 **Profile**
 
 * Add get-access-token --resource-type enum for convenience of getting access tokens for well-known resources.
@@ -144,10 +62,9 @@ Release History
 
 * `storage copy`: add copy command for storage
 
-**Kubernetes**
+**Cosmos DB**
 
-* Use https if dashboard container port is using https 
-
+* Added CRUD commands for CosmosDB SQL, MongoDB, Cassandra, Gremlin and Table resources and resource's throughput.
 
 2.0.70
 ++++++
