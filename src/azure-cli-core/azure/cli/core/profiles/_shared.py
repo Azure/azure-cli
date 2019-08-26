@@ -32,6 +32,7 @@ class CustomResourceType(object):  # pylint: disable=too-few-public-methods
 
 class ResourceType(Enum):  # pylint: disable=too-few-public-methods
 
+    MGMT_APIMANAGEMENT = ('azure.mgmt.apimanagement', 'ApiManagementClient')
     MGMT_KUSTO = ('azure.mgmt.kusto', 'KustoManagementClient')
     MGMT_KEYVAULT = ('azure.mgmt.keyvault', 'KeyVaultManagementClient')
     MGMT_STORAGE = ('azure.mgmt.storage', 'StorageManagementClient')

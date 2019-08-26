@@ -58,5 +58,6 @@ def load_command_table(self, _):
         g.command('list', 'list_key')
         g.command('lock', 'lock_key')
         g.command('unlock', 'unlock_key')
+        g.command('restore', 'restore_key')
         g.command('import', 'import_config')
         g.command('export', 'export_config')

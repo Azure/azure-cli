@@ -17,6 +17,11 @@ helps['signalr key'] = """
     short-summary: Manage keys for Azure SignalR Service.
 """
 
+helps['signalr cors'] = """
+    type: group
+    short-summary: Manage CORS for Azure SignalR Service.
+"""
+
 helps['signalr list'] = """
     type: command
     short-summary: Lists all the SignalR Service under the current subscription.
@@ -33,9 +38,9 @@ helps['signalr create'] = """
     type: command
     short-summary: Creates a SignalR Service.
     examples:
-        - name: Create a SignalR Service with the Basic SKU.
+        - name: Create a SignalR Service with the Standard SKU and serverless mode.
           text: >
-            az signalr create -n MySignalR -g MyResourceGroup --sku Standard_S1 --unit-count 1
+            az signalr create -n MySignalR -g MyResourceGroup --sku Standard_S1 --unit-count 1 --service-mode Serverless
 """
 
 helps['signalr delete'] = """
@@ -56,6 +61,27 @@ helps['signalr show'] = """
             az signalr show -n MySignalR -g MyResourceGroup --query sku
 """
 
+helps['signalr update'] = """
+    type: command
+    short-summary: Update an existing SignalR Service.
+    examples:
+        - name: Update unit count to scale the service.
+          text: >
+            az signalr update -n MySignalR -g MyResourceGroup --sku Standard_S1 --unit-count 50
+        - name: Update service mode.
+          text: >
+            az signalr update -n MySignalR -g MyResourceGroup --service-mode Serverless
+"""
+
+helps['signalr restart'] = """
+    type: command
+    short-summary: Restart an existing SignalR Service.
+    examples:
+        - name: Restart a SignalR Service instance.
+          text: >
+            az signalr restart -n MySignalR -g MyResourceGroup
+"""
+
 helps['signalr key list'] = """
     type: command
     short-summary: List the access keys for a SignalR Service.
@@ -72,4 +98,27 @@ helps['signalr key renew'] = """
         - name: Renew the secondary key for a SignalR Service.
           text: >
             az signalr key renew -n MySignalR -g MyResourceGroup --key-type secondary
+"""
+
+helps['signalr cors add'] = """
+    type: command
+    short-summary: Add allowed origins to a SignalR Service
+    examples:
+        - name: Add a list of allowed origins to a SignalR Service
+          text: >
+            az signalr cors add -n MySignalR -g MyResourceGroup --allowed-origins "http://example1.com" "https://example2.com"
+"""
+
+helps['signalr cors list'] = """
+    type: command
+    short-summary: List allowed origins of a SignalR Service
+"""
+
+helps['signalr cors remove'] = """
+    type: command
+    short-summary: Remove allowed origins from a SignalR Service
+    examples:
+        - name: Remove a list of allowed origins from a SignalR Service
+          text: >
+            az signalr cors remove -n MySignalR -g MyResourceGroup --allowed-origins "http://example1.com" "https://example2.com"
 """
