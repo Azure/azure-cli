@@ -66,7 +66,9 @@ def cli_cosmosdb_create(cmd, client,
                         capabilities=None,
                         enable_virtual_network=None,
                         virtual_network_rules=None,
-                        enable_multiple_write_locations=None):
+                        enable_multiple_write_locations=None,
+                        enable_cassandra_connector=None,
+                        connector_offer=None):
     """Create a new Azure Cosmos DB database account."""
     consistency_policy = None
     if default_consistency_level is not None:
@@ -96,7 +98,9 @@ def cli_cosmosdb_create(cmd, client,
         enable_automatic_failover=enable_automatic_failover,
         capabilities=capabilities,
         virtual_network_rules=virtual_network_rules,
-        enable_multiple_write_locations=enable_multiple_write_locations)
+        enable_multiple_write_locations=enable_multiple_write_locations,
+        enable_cassandra_connector=enable_cassandra_connector,
+        connector_offer=connector_offer)
 
     async_docdb_create = client.create_or_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_create.result()
@@ -118,7 +122,9 @@ def cli_cosmosdb_update(client,
                         capabilities=None,
                         enable_virtual_network=None,
                         virtual_network_rules=None,
-                        enable_multiple_write_locations=None):
+                        enable_multiple_write_locations=None,
+                        enable_cassandra_connector=None,
+                        connector_offer=None):
     """Update an existing Azure Cosmos DB database account. """
     existing = client.get(resource_group_name, account_name)
 
@@ -133,7 +139,9 @@ def cli_cosmosdb_update(client,
                 enable_automatic_failover is not None or \
                 enable_virtual_network is not None or \
                 virtual_network_rules is not None or \
-                enable_multiple_write_locations is not None:
+                enable_multiple_write_locations is not None or \
+                enable_cassandra_connector is not None or \
+                connector_offer is not None:
             raise CLIError("Cannot set capabilities and update properties at the same time. {0}".format(locations))
         async_docdb_create = client.patch(resource_group_name, account_name, tags=tags, capabilities=capabilities)
         docdb_account = async_docdb_create.result()
@@ -151,7 +159,9 @@ def cli_cosmosdb_update(client,
                 enable_automatic_failover is None and \
                 enable_virtual_network is None and \
                 virtual_network_rules is None and \
-                enable_multiple_write_locations is None:
+                enable_multiple_write_locations is None and \
+                enable_cassandra_connector is None and \
+                connector_offer is None:
             async_docdb_create = client.patch(resource_group_name, account_name, tags=tags, capabilities=capabilities)
             docdb_account = async_docdb_create.result()
             docdb_account = client.get(resource_group_name, account_name)
@@ -205,6 +215,12 @@ def cli_cosmosdb_update(client,
 
     if enable_multiple_write_locations is None:
         enable_multiple_write_locations = existing.enable_multiple_write_locations
+        
+    if enable_cassandra_connector is None:
+        enable_cassandra_connector = existing.enable_cassandra_connector
+        
+    if connector_offer is None:
+        connector_offer = existing.connector_offer
 
     params = DatabaseAccountCreateUpdateParameters(
         location=existing.location,
@@ -217,7 +233,9 @@ def cli_cosmosdb_update(client,
         capabilities=existing.capabilities,
         is_virtual_network_filter_enabled=enable_virtual_network,
         virtual_network_rules=virtual_network_rules,
-        enable_multiple_write_locations=enable_multiple_write_locations)
+        enable_multiple_write_locations=enable_multiple_write_locations,
+        enable_cassandra_connector=enable_cassandra_connector,
+        connector_offer=connector_offer)
 
     async_docdb_create = client.create_or_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_create.result()
@@ -785,7 +803,9 @@ def cli_cosmosdb_network_rule_add(cmd,
         capabilities=existing.capabilities,
         is_virtual_network_filter_enabled=True,
         virtual_network_rules=virtual_network_rules,
-        enable_multiple_write_locations=existing.enable_multiple_write_locations)
+        enable_multiple_write_locations=existing.enable_multiple_write_locations,
+        enable_cassandra_connector=existing.enable_cassandra_connector,
+        connector_offer=existing.connector_offer)
 
     async_docdb_create = client.create_or_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_create.result()
@@ -833,7 +853,9 @@ def cli_cosmosdb_network_rule_remove(cmd,
         capabilities=existing.capabilities,
         is_virtual_network_filter_enabled=True,
         virtual_network_rules=virtual_network_rules,
-        enable_multiple_write_locations=existing.enable_multiple_write_locations)
+        enable_multiple_write_locations=existing.enable_multiple_write_locations,
+        enable_cassandra_connector=existing.enable_cassandra_connector,
+        connector_offer=existing.connector_offer)
 
     async_docdb_create = client.create_or_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_create.result()

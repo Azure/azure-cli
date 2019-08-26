@@ -32,6 +32,10 @@ Release History
 * [BREAKING] When not specified, the default value for `--start-task-wait-for-success` on `az batch pool create` is now true (was false).
 * [BREAKING] The default value for Scope on AutoUserSpecification is now always Pool (was Task on Windows nodes, Pool on Linux nodes). This argument is not exposed via the commandline, but can be set in the `--json-file` arguments.
 
+**Cosmos DB**
+
+* Populate new global database account properties, enable_cassandra_connector and connector_offer, for Cassanrda Connector Exchange (CCX)
+
 **keyvault**
 
 * Fix the bug in secret set command that igores the expires argument
