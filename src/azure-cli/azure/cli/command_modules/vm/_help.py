@@ -23,11 +23,11 @@ long-summary: >4
 
     For more information, see:
 
-    - Azure Disks - https://docs.microsoft.com/en-us/azure/virtual-machines/linux/about-disks-and-vhds and https://docs.microsoft.com/en-us/azure/virtual-machines/windows/about-disks-and-vhds.
+    - Azure Disks - https://docs.microsoft.com/azure/virtual-machines/linux/about-disks-and-vhds and https://docs.microsoft.com/azure/virtual-machines/windows/about-disks-and-vhds.
 
-    - Larger Managed Disks in Public Preview - https://azure.microsoft.com/en-us/blog/introducing-the-public-preview-of-larger-managed-disks-sizes/
+    - Larger Managed Disks in Public Preview - https://azure.microsoft.com/blog/introducing-the-public-preview-of-larger-managed-disks-sizes/
 
-    - Ultra SSD Managed Disks in Public Preview - https://docs.microsoft.com/en-us/azure/virtual-machines/windows/disks-ultra-ssd
+    - Ultra SSD Managed Disks in Public Preview - https://docs.microsoft.com/azure/virtual-machines/windows/disks-ultra-ssd
 
 
 """
@@ -731,6 +731,9 @@ parameters:
     populator-commands:
       - az vm image list
       - az vm image show
+  - name: --size
+    populator-commands:
+      - az vm list-sizes
   - name: --ssh-key-values
     short-summary: Space-separated list of SSH public keys or public key file paths.
   - name: --computer-name
@@ -924,11 +927,11 @@ long-summary: >4
 
     For more information, see:
 
-    - Azure Disks - https://docs.microsoft.com/en-us/azure/virtual-machines/linux/about-disks-and-vhds and https://docs.microsoft.com/en-us/azure/virtual-machines/windows/about-disks-and-vhds.
+    - Azure Disks - https://docs.microsoft.com/azure/virtual-machines/linux/about-disks-and-vhds and https://docs.microsoft.com/azure/virtual-machines/windows/about-disks-and-vhds.
 
-    - Larger Managed Disks in Public Preview - https://azure.microsoft.com/en-us/blog/introducing-the-public-preview-of-larger-managed-disks-sizes/
+    - Larger Managed Disks in Public Preview - https://azure.microsoft.com/blog/introducing-the-public-preview-of-larger-managed-disks-sizes/
 
-    - Ultra SSD Managed Disks in Public Preview - https://docs.microsoft.com/en-us/azure/virtual-machines/windows/disks-ultra-ssd
+    - Ultra SSD Managed Disks in Public Preview - https://docs.microsoft.com/azure/virtual-machines/windows/disks-ultra-ssd
 
 
 """
@@ -959,7 +962,7 @@ type: group
 short-summary: "Manage encryption of VM disks."
 long-summary: |
     For more information, see:
-    https://docs.microsoft.com/en-us/azure/security/azure-security-disk-encryption-overview"
+    https://docs.microsoft.com/azure/security/azure-security-disk-encryption-overview"
 """
 
 helps['vm encryption disable'] = """
@@ -980,7 +983,7 @@ short-summary: "Enable disk encryption on the OS disk and/or data disks. Encrypt
 long-summary: |
     Note that Azure Active Directory / service principal arguments are unnecessary for vm encryption. The older version of Azure Disk Encryption required AAD arguments.
     For more information, see:
-    https://docs.microsoft.com/en-us/azure/security/azure-security-disk-encryption-overview
+    https://docs.microsoft.com/azure/security/azure-security-disk-encryption-overview
 parameters:
   - name: --aad-client-id
     short-summary: Client ID of an AAD app with permissions to write secrets to the key vault.
@@ -1375,7 +1378,7 @@ examples:
 helps['vm list'] = """
 type: command
 short-summary: List details of Virtual Machines.
-long-summary: 'For more information on querying information about Virtual Machines, see https://docs.microsoft.com/en-us/cli/azure/query-az-cli2'
+long-summary: 'For more information on querying information about Virtual Machines, see https://docs.microsoft.com/cli/azure/query-az-cli2'
 examples:
   - name: List all VMs.
     text: az vm list
@@ -1556,7 +1559,7 @@ examples:
 helps['vm run-command'] = """
 type: group
 short-summary: Manage run commands on a Virtual Machine.
-long-summary: 'For more information, see https://docs.microsoft.com/en-us/azure/virtual-machines/windows/run-command or https://docs.microsoft.com/en-us/azure/virtual-machines/linux/run-command.'
+long-summary: 'For more information, see https://docs.microsoft.com/azure/virtual-machines/windows/run-command or https://docs.microsoft.com/azure/virtual-machines/linux/run-command.'
 """
 
 helps['vm run-command invoke'] = """
@@ -1718,11 +1721,11 @@ long-summary: >4
 
     For more information, see:
 
-    - Azure Disks - https://docs.microsoft.com/en-us/azure/virtual-machines/linux/about-disks-and-vhds and https://docs.microsoft.com/en-us/azure/virtual-machines/windows/about-disks-and-vhds.
+    - Azure Disks - https://docs.microsoft.com/azure/virtual-machines/linux/about-disks-and-vhds and https://docs.microsoft.com/azure/virtual-machines/windows/about-disks-and-vhds.
 
-    - Larger Managed Disks in Public Preview - https://azure.microsoft.com/en-us/blog/introducing-the-public-preview-of-larger-managed-disks-sizes/
+    - Larger Managed Disks in Public Preview - https://azure.microsoft.com/blog/introducing-the-public-preview-of-larger-managed-disks-sizes/
 
-    - Ultra SSD Managed Disks in Public Preview - https://docs.microsoft.com/en-us/azure/virtual-machines/windows/disks-ultra-ssd
+    - Ultra SSD Managed Disks in Public Preview - https://docs.microsoft.com/azure/virtual-machines/windows/disks-ultra-ssd
 
 
 """
@@ -1975,7 +1978,7 @@ examples:
 helps['vmss encryption'] = """
 type: group
 short-summary: "Manage encryption of VMSS."
-long-summary: "For more information, see: https://docs.microsoft.com/en-us/azure/security/azure-security-disk-encryption-overview"
+long-summary: "For more information, see: https://docs.microsoft.com/azure/security/azure-security-disk-encryption-overview"
 """
 
 helps['vmss encryption disable'] = """
@@ -1990,7 +1993,7 @@ examples:
 helps['vmss encryption enable'] = """
 type: command
 short-summary: "Encrypt a VMSS with managed disks."
-long-summary: "For more information, see: For more information, see: https://docs.microsoft.com/en-us/azure/security/azure-security-disk-encryption-overview"
+long-summary: "For more information, see: For more information, see: https://docs.microsoft.com/azure/security/azure-security-disk-encryption-overview"
 examples:
   - name: encrypt a VM scale set using a key vault in the same resource group
     text: >
@@ -2184,7 +2187,7 @@ short-summary: Manage rolling upgrades.
 helps['vmss run-command'] = """
 type: group
 short-summary: Manage run commands on a Virtual Machine Scale Set.
-long-summary: 'For more information, see https://docs.microsoft.com/en-us/azure/virtual-machines/windows/run-command or https://docs.microsoft.com/en-us/azure/virtual-machines/linux/run-command.'
+long-summary: 'For more information, see https://docs.microsoft.com/azure/virtual-machines/windows/run-command or https://docs.microsoft.com/azure/virtual-machines/linux/run-command.'
 """
 
 helps['vmss run-command invoke'] = """

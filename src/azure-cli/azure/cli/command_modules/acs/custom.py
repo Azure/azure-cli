@@ -38,7 +38,7 @@ from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.acs._params import regions_in_preview, regions_in_prod
 from azure.cli.core.api import get_config_dir
 from azure.cli.core._profile import Profile
-from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
 from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, truncate_text, sdk_no_wait
 from azure.cli.core.commands import LongRunningOperation
@@ -389,7 +389,7 @@ def _k8s_install_or_upgrade_connector(helm_cmd, cmd, client, name, resource_grou
     # Get the credentials from a AKS instance
     _, browse_path = tempfile.mkstemp()
     aks_get_credentials(cmd, client, resource_group_name, name, admin=False, path=browse_path)
-    subscription_id = _get_subscription_id(cmd.cli_ctx)
+    subscription_id = get_subscription_id(cmd.cli_ctx)
     # Get the TenantID
     profile = Profile(cli_ctx=cmd.cli_ctx)
     _, _, tenant_id = profile.get_login_credentials()
@@ -559,11 +559,6 @@ def _add_role_assignment(cli_ctx, role, service_principal, delay=2, scope=None):
     hook.add(message='AAD role propagation done', value=1.0, total_val=1.0)
     logger.info('AAD role propagation done')
     return True
-
-
-def _get_subscription_id(cli_ctx):
-    _, sub_id, _ = Profile(cli_ctx=cli_ctx).get_login_credentials(subscription_id=None)
-    return sub_id
 
 
 def _get_default_dns_prefix(name, resource_group_name, subscription_id):
@@ -791,7 +786,7 @@ def acs_create(cmd, client, resource_group_name, deployment_name, name, ssh_key_
     if ssh_key_value is not None and not is_valid_ssh_rsa_public_key(ssh_key_value):
         raise CLIError('Provided ssh key ({}) is invalid or non-existent'.format(ssh_key_value))
 
-    subscription_id = _get_subscription_id(cmd.cli_ctx)
+    subscription_id = get_subscription_id(cmd.cli_ctx)
     if not dns_name_prefix:
         dns_name_prefix = _get_default_dns_prefix(name, resource_group_name, subscription_id)
 
@@ -940,11 +935,12 @@ def load_service_principals(config_path):
 
 def _invoke_deployment(cli_ctx, resource_group_name, deployment_name, template, parameters, validate, no_wait,
                        subscription_id=None):
-    from azure.mgmt.resource.resources import ResourceManagementClient
-    from azure.mgmt.resource.resources.models import DeploymentProperties
 
+    from azure.cli.core.profiles import ResourceType, get_sdk
+    DeploymentProperties = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'DeploymentProperties', mod='models')
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
-    smc = get_mgmt_service_client(cli_ctx, ResourceManagementClient, subscription_id=subscription_id).deployments
+    smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
+                                  subscription_id=subscription_id).deployments
     if validate:
         logger.info('==== BEGIN TEMPLATE ====')
         logger.info(json.dumps(template, indent=2))
@@ -1206,7 +1202,7 @@ def create_application(client, display_name, homepage, identifier_uris,
         return client.create(app_create_param)
     except GraphErrorException as ex:
         if 'insufficient privileges' in str(ex).lower():
-            link = 'https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
+            link = 'https://docs.microsoft.com/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
             raise CLIError("Directory permission is needed for the current user to register the application. "
                            "For how to configure, please refer '{}'. Original error: {}".format(link, ex))
         raise
@@ -1229,7 +1225,7 @@ def update_application(client, object_id, display_name, homepage, identifier_uri
         return
     except GraphErrorException as ex:
         if 'insufficient privileges' in str(ex).lower():
-            link = 'https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
+            link = 'https://docs.microsoft.com/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
             raise CLIError("Directory permission is needed for the current user to register the application. "
                            "For how to configure, please refer '{}'. Original error: {}".format(link, ex))
         raise
@@ -1399,7 +1395,6 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
 
     proxy_url = 'http://{0}:{1}/'.format(listen_address, listen_port)
     _, browse_path = tempfile.mkstemp()
-    # TODO: need to add an --admin option?
     aks_get_credentials(cmd, client, resource_group_name, name, admin=False, path=browse_path)
     # find the dashboard pod's name
     try:
@@ -1500,7 +1495,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                no_wait=False):
     _validate_ssh_key(no_ssh_key, ssh_key_value)
 
-    subscription_id = _get_subscription_id(cmd.cli_ctx)
+    subscription_id = get_subscription_id(cmd.cli_ctx)
     if not dns_name_prefix:
         dns_name_prefix = _get_default_dns_prefix(name, resource_group_name, subscription_id)
 
@@ -1636,7 +1631,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
 
 def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=False):
     instance = client.get(resource_group_name, name)
-    subscription_id = _get_subscription_id(cmd.cli_ctx)
+    subscription_id = get_subscription_id(cmd.cli_ctx)
 
     instance = _update_addons(
         cmd,
@@ -1655,7 +1650,7 @@ def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=F
 def aks_enable_addons(cmd, client, resource_group_name, name, addons, workspace_resource_id=None,
                       subnet_name=None, no_wait=False):
     instance = client.get(resource_group_name, name)
-    subscription_id = _get_subscription_id(cmd.cli_ctx)
+    subscription_id = get_subscription_id(cmd.cli_ctx)
     service_principal_client_id = instance.service_principal_profile.client_id
     instance = _update_addons(cmd, instance, subscription_id, resource_group_name, addons, enable=True,
                               workspace_resource_id=workspace_resource_id, subnet_name=subnet_name, no_wait=no_wait)
@@ -2596,7 +2591,6 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
     default_router_profile = OpenShiftRouterProfile(name='default')
 
     if vnet_peer is not None:
-        from azure.cli.core.commands.client_factory import get_subscription_id
         from msrestazure.tools import is_valid_resource_id, resource_id
         if not is_valid_resource_id(vnet_peer):
             vnet_peer = resource_id(

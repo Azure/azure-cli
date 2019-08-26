@@ -779,7 +779,7 @@ def create_application(cmd, display_name, homepage=None, identifier_uris=None,  
         result = graph_client.applications.create(app_create_param)
     except GraphErrorException as ex:
         if 'insufficient privileges' in str(ex).lower():
-            link = 'https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
+            link = 'https://docs.microsoft.com/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
             raise CLIError("Directory permission is needed for the current user to register the application. "
                            "For how to configure, please refer '{}'. Original error: {}".format(link, ex))
         raise
@@ -974,6 +974,8 @@ def update_application(instance, display_name=None, homepage=None,  # pylint: di
         app_patch_param.identifier_uris = identifier_uris
     if reply_urls is not None:
         app_patch_param.reply_urls = reply_urls
+    if homepage is not None:
+        app_patch_param.homepage = homepage
 
     return app_patch_param
 
@@ -1264,12 +1266,15 @@ def create_service_principal_for_rbac(
     sp_oid = None
     _RETRY_TIMES = 36
     app_display_name, existing_sps = None, None
-    if name and '://' not in name:
-        prefix = "http://"
-        app_display_name = name
-        logger.warning('Changing "%s" to a valid URI of "%s%s", which is the required format'
-                       ' used for service principal names', name, prefix, name)
-        name = prefix + name  # normalize be a valid graph service principal name
+    if name:
+        if '://' not in name:
+            prefix = "http://"
+            app_display_name = name
+            logger.warning('Changing "%s" to a valid URI of "%s%s", which is the required format'
+                           ' used for service principal names', name, prefix, name)
+            name = prefix + name  # normalize be a valid graph service principal name
+        else:
+            app_display_name = name.split('://', 1)[-1]
 
     if name:
         query_exp = 'servicePrincipalNames/any(x:x eq \'{}\')'.format(name)

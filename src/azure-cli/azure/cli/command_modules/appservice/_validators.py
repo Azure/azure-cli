@@ -53,8 +53,9 @@ def validate_asp_create(cmd, namespace):
         if isinstance(namespace.location, str):
             location = namespace.location
         else:
-            from azure.mgmt.resource import ResourceManagementClient
-            rg_client = get_mgmt_service_client(cmd.cli_ctx, ResourceManagementClient)
+            from azure.cli.core.profiles import ResourceType
+            rg_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+
             group = rg_client.resource_groups.get(resource_group_name)
             location = group.location
         validation_payload = {
