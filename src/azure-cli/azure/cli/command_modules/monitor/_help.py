@@ -938,12 +938,12 @@ examples:
     crafted: true
 """
 
-helps['monitor log alert'] = """
+helps['monitor log-alert'] = """
 type: group
 short-summary: Manage log alert rules.
 """
 
-helps['monitor log alert create'] = """
+helps['monitor log-alert create'] = """
 type: command
 short-summary: Create log alert rule using scheduledQueryRules API.
 parameters:
@@ -1004,30 +1004,30 @@ parameters:
 examples:
   - name: Create a log alert rule
     text: >
-        az monitor log alert create -n {AlertName} -g {ResourceGroup} -l {Location} \\
+        az monitor log-alert create -n {AlertName} -g {ResourceGroup} -l {Location} \\
           --severity {Severity} --threshold {Threshold} --threshold-operator {ThresholdOperator} \\
           --frequency {Frequency} --time-window {TimeWindow} \\
           --alert-query {AlertQuery} --data-source-id /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/microsoft.operationalinsights/workspaces/{Workspace} --query-type ResultCount \\
   - name: Create a log alert rule with customization of email subject and webhook JSON payload.
     text: >
-        az monitor log alert create -n {AlertName} -g {ResourceGroup} -l {Location} \\
+        az monitor log-alert create -n {AlertName} -g {ResourceGroup} -l {Location} \\
           --severity {Severity} --threshold {Threshold} --threshold-operator {ThresholdOperator} --action-group [ActionGroup1 ActionGroup2..] --email-subject {EmailSubject} \\
           --frequency {Frequency} --time-window {TimeWindow} \\
           --alert-query {AlertQuery} --data-source-id /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/microsoft.operationalinsights/workspaces/{Workspace} --query-type ResultCount \\
   - name: Create a log alert rule which is initially disabled.
     text: >
-        az monitor log alert create -n {AlertName} -g {ResourceGroup} -l {Location} --disable \\
+        az monitor log-alert create -n {AlertName} -g {ResourceGroup} -l {Location} --disable \\
           --severity {severity} --threshold {threshold} --threshold-operator {thresholdOperator} \\
           --frequency {frequency} --time-window {timeWindow} \\
           --alert-query {alertQuery} --data-source-id /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/microsoft.operationalinsights/workspaces/{Workspace} --query-type ResultCount \\
   - name: Create a metric measurement log alert rule with throttling, description and tags.
     text: >
-        az monitor log alert create -n {AlertName} -g {ResourceGroup} -l {Location} --description {Description} --tags [key1=value1 key2=value2 ..]\\
+        az monitor log-alert create -n {AlertName} -g {ResourceGroup} -l {Location} --description {Description} --tags [key1=value1 key2=value2 ..]\\
           --severity {Severity} --threshold {Threshold} --threshold-operator {ThresholdOperator} --metric-column {MetricColumn} --metric-threshold {MetricThreshold} --metric-threshold-operator {MetricThresholdOperator} --metric-trigger-type {metricTriggerType} --throttling {throttling} \\
           --frequency {Frequency} --time-window {TimeWindow} \\
           --alert-query {AlertQuery} --data-source-id /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/microsoft.operationalinsights/workspaces/{Workspace} --query-type ResultCount \\
 """
-helps['monitor log alert update'] = """
+helps['monitor log-alert update'] = """
 type: command
 short-summary: Update the configuration of log alert rule
 parameters:
@@ -1084,27 +1084,27 @@ parameters:
 examples:
   - name: Update parameters of an alert rule.
     text: >
-        az monitor log alert update -n {AlertName} -g {ResourceGroup} --description {Description} --tags [key1=value1 key2=value2 ...]\\
+        az monitor log-alert update -n {AlertName} -g {ResourceGroup} --description {Description} --tags [key1=value1 key2=value2 ...]\\
           --severity {Severity} --threshold {Threshold} --threshold-operator {ThresholdOperator} --email-subject {EmailSubject}
           --metric-column {MetricColumn} --metric-threshold {MetricThreshold} --metric-threshold-operator {MetricThresholdOperator} --metric-trigger-type {MetricTriggerType} --throttling {Throttling} \\
           --frequency {Frequency} --time-window {TimeWindow} \\
           --alert-query {AlertQuery} \\
   - name: Update action groups and authorized resorce of an alert rule.
     text: >
-        az monitor log alert update -n {AlertName} -g {ResourceGroup} \\
+        az monitor log-alert update -n {AlertName} -g {ResourceGroup} \\
           --add-action-groups [ActionGroup1 ActionGroup2..] --remove-action-groups [ActionGroup1 ActionGroup2..] \\
           --add-authorized-resources [AuthorizedResource1 AuthorizedResource2..] --remove-authorized-resources [AuthorizedResource1 AuthorizedResource2..] \\
   - name: Disable an alert rule.
     text: >
-        az monitor log alert update -n {AlertName} -g {ResourceGroup} --enable false
+        az monitor log-alert update -n {AlertName} -g {ResourceGroup} --enable false
   - name: Reset action group, email subject, metricTrigger and authorized resorce of an alert rule.
     text: >
-        az monitor log alert update -n {AlertName} -g {ResourceGroup} \\
+        az monitor log-alert update -n {AlertName} -g {ResourceGroup} \\
           --reset-action-group --reset-email-subject --reset-metric-trigger \\
           --reset-authorized-resources \\
 """
 
-helps['monitor log alert list'] = """
+helps['monitor log-alert list'] = """
 type: command
 short-summary: List log alert rules under a resource group or the current subscription.
 long-summary: >
@@ -1114,12 +1114,12 @@ parameters:
     short-summary: Name of the resource group under which the log alert rules are being listed. If it is omitted, all the log alert rules under the current subscription are listed.
 """
 
-helps['monitor log alert delete'] = """
+helps['monitor log-alert delete'] = """
 type: command
 short-summary: Delete log alert rule.
 """
 
-helps['monitor log alert show'] = """
+helps['monitor log-alert show'] = """
 type: command
 short-summary: Get log alert rule.
 """

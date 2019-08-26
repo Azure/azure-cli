@@ -333,24 +333,24 @@ def load_arguments(self, _):
     # endregion
 
     # region LogAlerts
-    with self.argument_context('monitor log alert') as c:
+    with self.argument_context('monitor log-alert') as c:
         c.argument('rule_name', options_list=['--name', '-n'], id_part='name')
 
-    with self.argument_context('monitor log alert create') as c:
+    with self.argument_context('monitor log-alert create') as c:
         c.argument('location')
         c.argument('disable', action='store_true')
 
-    with self.argument_context('monitor log alert create', arg_group='Schedule') as c:
+    with self.argument_context('monitor log-alert create', arg_group='Schedule') as c:
         c.argument('frequency')
         c.argument('time_window')
 
-    with self.argument_context('monitor log alert create', arg_group='Source') as c:
+    with self.argument_context('monitor log-alert create', arg_group='Source') as c:
         c.argument('data_source_id')
         c.argument('alert_query')
         c.argument('query_type')
         c.argument('authorized_resources', nargs='+')
 
-    with self.argument_context('monitor log alert create', arg_group='Action') as c:
+    with self.argument_context('monitor log-alert create', arg_group='Action') as c:
         c.argument('severity', arg_type=get_enum_type(AlertSeverity))
         c.argument('throttling')
         c.argument('threshold_operator', arg_type=get_enum_type(ConditionalOperator))
@@ -362,20 +362,20 @@ def load_arguments(self, _):
         c.argument('action_group', nargs='+')
         c.argument('email_subject')
 
-    with self.argument_context('monitor log alert update') as c:
+    with self.argument_context('monitor log-alert update') as c:
         c.argument('enabled', arg_type=get_three_state_flag())
 
-    with self.argument_context('monitor log alert update', arg_group='Schedule') as c:
+    with self.argument_context('monitor log-alert update', arg_group='Schedule') as c:
         c.argument('frequency')
         c.argument('time_window')
 
-    with self.argument_context('monitor log alert update', arg_group='Source') as c:
+    with self.argument_context('monitor log-alert update', arg_group='Source') as c:
         c.argument('alert_query')
         c.argument('reset_authorized_resources', action='store_true')
         c.argument('add_authorized_resources', nargs='+')
         c.argument('remove_authorized_resources', nargs='+')
 
-    with self.argument_context('monitor log alert update', arg_group='Action') as c:
+    with self.argument_context('monitor log-alert update', arg_group='Action') as c:
         c.argument('severity', arg_type=get_enum_type(AlertSeverity))
         c.argument('throttling')
         c.argument('threshold_operator', arg_type=get_enum_type(ConditionalOperator))

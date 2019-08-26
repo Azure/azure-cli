@@ -191,7 +191,7 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.command('list', 'list')
 
-    with self.command_group('monitor log alert', log_alerts_sdk, custom_command_type=log_alert_custom) as g:
+    with self.command_group('monitor log-alert', log_alerts_sdk, custom_command_type=log_alert_custom) as g:
         g.custom_command('create', 'create_log_alert')
         g.command('delete', 'delete', exception_handler=missing_resource_handler)
         g.show_command('show', 'get', exception_handler=missing_resource_handler)
