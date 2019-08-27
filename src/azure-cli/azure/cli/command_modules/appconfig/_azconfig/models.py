@@ -43,6 +43,15 @@ class KeyValue(object):
         self.last_modified = None
         self.locked = None
 
+    def __str__(self):
+        return "\nKey: " + self.key + \
+               "\nValue: " + self.value + \
+               "\nLabel: " + (self.label if self.label else '') + \
+               "\netag: " + self.etag + \
+               "\nLast Modified: " + self.last_modified + \
+               "\nContent Type: " + self.content_type + \
+               "\nTags: " + '{!s}'.format(self.tags)
+
 
 class QueryFields(Enum):
     KEY = 0x001
