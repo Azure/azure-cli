@@ -32,7 +32,12 @@ Fix #10286: Unable to delete network rules.
 
 **Network**
 
-* network watcher flow-log: Fix #8132. Support `--interval` to set traffic analysis interval value.
+* az network watcher flow-log: Fix #8132. Support `--interval` to set traffic analysis interval value.
+* az network application-gateway identity: Fix #10073 and #8244 Add support for setting identity in application-gateway.
+* az network application-gateway ssl-cert: Fix #8244. Add support for setting key vault id in application-gateway ssl-cert.
+
+2.0.72
+++++++
 
 **Policy**
 
@@ -69,8 +74,6 @@ Fix #10286: Unable to delete network rules.
 * az network private-endpoint create/update/list-types: Fixes #9474. Support create/update/list-types commands for private endpoint.
 * az network private-link-service: Fixes #9475. Onboard commands for private link service.
 * az network vnet subnet update: Support `--private-endpoint-network-policies` and `--private-link-service-network-policies` arguments for update command.
-* az network application-gateway identity: Fixes #10073 and #8244 Add support for setting identity in application-gateway.
-* az network application-gateway ssl-cert: Fixes #8244. Add support for setting key vault id in application-gateway ssl-cert.
 
 **RBAC**
 
