@@ -20,6 +20,10 @@ Release History
 
 Fix #10286: Unable to delete network rules.
 
+**Network**
+
+* network watcher flow-log: Fix #8132. Support `--interval` to set traffic analysis interval value.
+
 2.0.72
 ++++++
 
