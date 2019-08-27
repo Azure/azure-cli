@@ -7,6 +7,7 @@
 
 import json
 import os
+import time
 
 from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest)
 
@@ -17,7 +18,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_mgmt(self, resource_group, location):
-        config_store_name = "MgmtTest"
+        config_store_name = self.create_random_name(prefix='MgmtTest', length=24)
 
         location = 'eastus'
         self.kwargs.update({
@@ -65,7 +66,7 @@ class AppConfigCredentialScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_credential(self, resource_group, location):
 
-        config_store_name = "CredentialTest"
+        config_store_name = self.create_random_name(prefix='CredentialTest', length=24)
 
         location = 'eastus'
 
@@ -96,7 +97,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_kv(self, resource_group, location):
-        config_store_name = "KVTest"
+        config_store_name = self.create_random_name(prefix='KVTest', length=24)
 
         location = 'eastus'
         self.kwargs.update({
@@ -163,13 +164,24 @@ class AppConfigKVScenarioTest(ScenarioTest):
         assert len(revisions) == 3
 
         # IN CLI, since we support delete by key/label filters, return is a list of deleted items
-        self.cmd('appconfig kv delete -n {config_store_name} --key {key} --label {label} -y',
-                 checks=[self.check('[0].key', entry_key),
-                         self.check('[0].contentType', entry_content_type),
-                         self.check('[0].value', updated_entry_value),
-                         self.check('[0].label', updated_label)])
+        deleted = self.cmd('appconfig kv delete -n {config_store_name} --key {key} --label {label} -y',
+                           checks=[self.check('[0].key', entry_key),
+                                   self.check('[0].contentType', entry_content_type),
+                                   self.check('[0].value', updated_entry_value),
+                                   self.check('[0].label', updated_label)]).get_output_in_json()
 
-        # set key-value entry with connection string
+        deleted_time = deleted[0]['lastModified']
+
+        # sleep a little over 1 second
+        time.sleep(1.1)
+
+        # set key-value entry with connection string, but to the original value
+        # take a note of the deleted_time
+        self.kwargs.update({
+            'value': entry_value,
+            'timestamp': _format_datetime(deleted_time)
+        })
+
         credential_list = self.cmd(
             'appconfig credential list -n {config_store_name} -g {rg}').get_output_in_json()
         self.kwargs.update({
@@ -178,15 +190,23 @@ class AppConfigKVScenarioTest(ScenarioTest):
         self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} --content-type {content_type} --label {label} -y',
                  checks=[self.check('contentType', entry_content_type),
                          self.check('key', entry_key),
-                         self.check('value', updated_entry_value),
+                         self.check('value', entry_value),
                          self.check('label', updated_label)])
+
+        # Now restore to last modified and ensure that we find updated_entry_value
+        self.cmd('appconfig kv restore -n {config_store_name} --key {key} --label {label} --datetime {timestamp} -y')
+        self.cmd('appconfig kv list -n {config_store_name} --key {key} --label {label}',
+                 checks=[self.check('[0].contentType', entry_content_type),
+                         self.check('[0].key', entry_key),
+                         self.check('[0].value', updated_entry_value),
+                         self.check('[0].label', updated_label)])
 
 
 class AppConfigImportExportScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_import_export(self, resource_group, location):
-        config_store_name = "ImportTest"
+        config_store_name = self.create_random_name(prefix='ImportTest', length=24)
 
         location = 'eastus'
         self.kwargs.update({
@@ -226,3 +246,12 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
 
 def _create_config_store(test, kwargs):
     test.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc}')
+
+
+def _format_datetime(date_string):
+    from dateutil.parser import parse
+    try:
+        return parse(date_string).strftime("%Y-%m-%dT%H:%M:%SZ")
+    except ValueError:
+        print("Unable to parse date_string '%s'", date_string)
+        return date_string or ' '

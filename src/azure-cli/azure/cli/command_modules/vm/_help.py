@@ -731,6 +731,9 @@ parameters:
     populator-commands:
       - az vm image list
       - az vm image show
+  - name: --size
+    populator-commands:
+      - az vm list-sizes
   - name: --ssh-key-values
     short-summary: Space-separated list of SSH public keys or public key file paths.
   - name: --computer-name
