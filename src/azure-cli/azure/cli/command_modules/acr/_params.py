@@ -76,8 +76,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('repository', help='The repository name for a manifest-only copy of images. Multiple copies supported by passing --repository multiple times.', action='append')
         c.argument('force', help='Overwrite the existing tag of the image to be imported.', action='store_true')
 
-    with self.argument_context('acr config content-trust') as c:
+    with self.argument_context('acr config') as c:
         c.argument('status', help="Indicates whether content-trust is enabled or disabled.", arg_type=get_enum_type(PolicyStatus))
+
+    with self.argument_context('acr config retention') as c:
+        c.argument('days', help='The number of days to retain an untagged manifest after which it gets purged. Defaults to: 7')
 
     with self.argument_context('acr login') as c:
         c.argument('resource_group_name', deprecate_info=c.deprecate(hide=True))

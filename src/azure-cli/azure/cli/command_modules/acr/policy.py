@@ -43,3 +43,45 @@ def acr_config_content_trust_update(cmd,
         client.update(resource_group_name, registry_name, parameters)
     )
     return updated_policies.policies.trust_policy
+
+
+def acr_config_retention_show(cmd,
+                              registry_name,
+                              resource_group_name=None):
+    registry, _ = validate_premium_registry(
+        cmd, registry_name, resource_group_name, POLICIES_NOT_SUPPORTED)
+    policies = registry.policies
+    retention_policy = policies.retention_policy if policies else None
+    return retention_policy
+
+
+def acr_config_retention_update(cmd,
+                                client,
+                                registry_name,
+                                status=None,
+                                days=None,
+                                resource_group_name=None):
+    registry, resource_group_name = validate_premium_registry(
+        cmd, registry_name, resource_group_name, POLICIES_NOT_SUPPORTED)
+
+    Policy = cmd.get_models('Policy')
+    RetentionPolicy = cmd.get_models('RetentionPolicy')
+
+    policies = registry.policies
+    if policies is None:
+        policies = Policy()
+
+    policies.retention_policy = policies.retention_policy if policies.retention_policy else RetentionPolicy()
+
+    if status is not None:
+        policies.retention_policy.status = status
+
+    if days is not None:
+        policies.retention_policy.days = days
+
+    RegistryUpdateParameters = cmd.get_models('RegistryUpdateParameters')
+    parameters = RegistryUpdateParameters(policies=policies)
+    updated_policies = LongRunningOperation(cmd.cli_ctx)(
+        client.update(resource_group_name, registry_name, parameters)
+    )
+    return updated_policies.policies.retention_policy
