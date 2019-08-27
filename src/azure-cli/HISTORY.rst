@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**Policy**
+
+* Support for Policy new API version 2019-01-01
+
 **ACR**
 
 * Move to 2019-05-01 api-version, which follows replace semantics for ACR resource creation.
