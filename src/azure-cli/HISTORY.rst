@@ -36,7 +36,7 @@ Release History
 
 * Populate new global database account properties in DatabaseAccountCreateUpdateParameters, enable_cassandra_connector and connector_offer, for Cassanrda Connector Exchange (CCX)
 
-**keyvault**
+**Keyvault**
 
 * Fix the bug in secret set command that igores the expires argument
 
