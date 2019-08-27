@@ -34,7 +34,7 @@ Release History
 
 **Cosmos DB**
 
-* Populate new global database account properties, enable_cassandra_connector and connector_offer, for Cassanrda Connector Exchange (CCX)
+* Populate new global database account properties in DatabaseAccountCreateUpdateParameters, enable_cassandra_connector and connector_offer, for Cassanrda Connector Exchange (CCX)
 
 **keyvault**
 
