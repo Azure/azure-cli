@@ -489,7 +489,15 @@ def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=No
 
     if subnet:
         rules.virtual_network_rules = rules.virtual_network_rules or []
-        rules.virtual_network_rules.append(VirtualNetworkRule(id=subnet))
+
+        # if the rule already exists, don't add again
+        modified = True
+        for x in rules.virtual_network_rules:
+            if x.id.lower() == subnet.lower():
+                modified = False
+                break
+        if modified:
+            rules.virtual_network_rules.append(VirtualNetworkRule(id=subnet))
 
     if ip_address:
         rules.ip_rules = rules.ip_rules or []
@@ -518,7 +526,8 @@ def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address
     modified = False
 
     if subnet and rules.virtual_network_rules:
-        new_rules = [x for x in rules.virtual_network_rules if x.id != subnet]
+        # key vault service will convert subnet ID to lowercase, so do case-insensitive compare
+        new_rules = [x for x in rules.virtual_network_rules if x.id.lower() != subnet.lower()]
         modified |= len(new_rules) != len(rules.virtual_network_rules)
         if modified:
             rules.virtual_network_rules = new_rules
