@@ -1232,7 +1232,7 @@ def _get_resource_group_by_name(cli_ctx, resource_group_name):
 
 
 def _create_resource_group_name(cli_ctx, rg_name, location, tags=None):
-    from azure.mgmt.resource.resources.models import ResourceGroup
+    ResourceGroup = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'ResourceGroup', mod='models')
     client = resource_client_factory(cli_ctx).resource_groups
     parameters = ResourceGroup(location=location, tags=tags)
     client.create_or_update(rg_name, parameters)
@@ -1304,7 +1304,8 @@ def _deploy_arm_template_core(cli_ctx,
                               mode='incremental',
                               validate_only=False,
                               no_wait=False):
-    from azure.mgmt.resource.resources.models import DeploymentProperties
+    DeploymentProperties = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'DeploymentProperties', mod='models')
+
     properties = DeploymentProperties(
         template=template, template_link=None, parameters=parameters, mode=mode)
     client = resource_client_factory(cli_ctx)

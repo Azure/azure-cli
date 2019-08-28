@@ -3857,11 +3857,15 @@ def update_subnet(cmd, instance, resource_group_name, address_prefix=None, netwo
     if delegations:
         instance.delegations = delegations
 
-    if disable_private_endpoint_network_policies is not None:
-        instance.private_endpoint_network_policies = disable_private_endpoint_network_policies
+    if disable_private_endpoint_network_policies:
+        instance.private_endpoint_network_policies = "Disabled"
+    elif disable_private_endpoint_network_policies is not None:
+        instance.private_endpoint_network_policies = "Enabled"
 
-    if disable_private_link_service_network_policies is not None:
-        instance.private_link_service_network_policies = disable_private_link_service_network_policies
+    if disable_private_link_service_network_policies:
+        instance.private_link_service_network_policies = "Disabled"
+    elif disable_private_link_service_network_policies is not None:
+        instance.private_link_service_network_policies = "Enabled"
 
     return instance
 

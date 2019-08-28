@@ -13,11 +13,12 @@ import time
 import chardet
 import javaproperties
 import yaml
+from itertools import chain
 from jsondiff import JsonDiffer
 from knack.log import get_logger
 from knack.util import CLIError
 
-from ._utils import resolve_connection_string, user_confirmation
+from ._utils import resolve_connection_string, user_confirmation, error_print
 from ._azconfig.azconfig_client import AzconfigClient
 from ._azconfig.constants import StatusCodes
 from ._azconfig.exceptions import HTTPException
@@ -377,6 +378,62 @@ def list_key(cmd,
         raise CLIError(str(exception))
 
 
+def restore_key(cmd,
+                datetime,
+                key=None,
+                name=None,
+                label=None,
+                connection_string=None,
+                yes=False):
+
+    connection_string = resolve_connection_string(cmd, name, connection_string)
+    azconfig_client = AzconfigClient(connection_string)
+
+    if label == '':
+        label = QueryKeyValueCollectionOptions.empty_label
+
+    query_option_then = QueryKeyValueCollectionOptions(key_filter=key,
+                                                       label_filter=label,
+                                                       query_datetime=datetime)
+    query_option_now = QueryKeyValueCollectionOptions(key_filter=key,
+                                                      label_filter=label)
+
+    try:
+        restore_keyvalues = azconfig_client.get_keyvalues(query_option_then)
+        current_keyvalues = azconfig_client.get_keyvalues(query_option_now)
+        kvs_to_restore, kvs_to_modify, kvs_to_delete = __compare_kvs_for_restore(restore_keyvalues, current_keyvalues)
+
+        if not yes:
+            need_change = __print_restore_preview(kvs_to_restore, kvs_to_modify, kvs_to_delete)
+            if need_change is False:
+                logger.debug('Canceling the restore operation based on user selection.')
+                return
+
+        keys_to_restore = len(kvs_to_restore) + len(kvs_to_modify) + len(kvs_to_delete)
+        restored_so_far = 0
+
+        for kv in chain(kvs_to_restore, kvs_to_modify):
+            try:
+                azconfig_client.set_keyvalue(kv, ModifyKeyValueOptions())
+                restored_so_far += 1
+            except HTTPException as exception:
+                logger.error('Error while setting the keyvalue:%s', kv)
+                logger.error('Failed after restoring %d out of %d keys', restored_so_far, keys_to_restore)
+                raise CLIError(str(exception))
+        for kv in kvs_to_delete:
+            try:
+                azconfig_client.delete_keyvalue(kv, ModifyKeyValueOptions())
+                restored_so_far += 1
+            except HTTPException as exception:
+                logger.error('Error while setting the keyvalue:%s', kv)
+                logger.error('Failed after restoring %d out of %d keys', restored_so_far, keys_to_restore)
+                raise CLIError(str(exception))
+
+        logger.debug('Successfully restored %d out of %d keys', restored_so_far, keys_to_restore)
+    except Exception as exception:
+        raise CLIError(str(exception))
+
+
 def list_revision(cmd,
                   key=None,
                   fields=None,
@@ -420,6 +477,27 @@ def list_revision(cmd,
     except Exception as exception:
         raise CLIError(str(exception))
 
+
+def __compare_kvs_for_restore(restore_kvs, current_kvs):
+    # compares two lists and find those that are new or changed in the restore_kvs
+    # optionally (delete == True) find the new ones in current_kvs for deletion
+    dict_current_kvs = {(kv.key, kv.label): (kv.value, kv.content_type, kv.locked, kv.tags) for kv in current_kvs}
+    kvs_to_restore = []
+    kvs_to_modify = []
+    kvs_to_delete = []
+    for entry in restore_kvs:
+        current_tuple = dict_current_kvs.get((entry.key, entry.label), None)
+        if current_tuple is None:
+            kvs_to_restore.append(entry)
+        elif current_tuple != (entry.value, entry.content_type, entry.locked, entry.tags):
+            kvs_to_modify.append(entry)
+
+    set_restore_kvs = {(kv.key, kv.label) for kv in restore_kvs}
+    for entry in current_kvs:
+        if (entry.key, entry.label) not in set_restore_kvs:
+            kvs_to_delete.append(entry)
+
+    return kvs_to_restore, kvs_to_modify, kvs_to_delete
 
 # File <-> List of KeyValue object
 
@@ -598,10 +676,29 @@ def __serialize_kv_list_to_comparable_json_object(keyvalues, level):
     return res
 
 
+def __serialize_kv_list_to_comparable_json_list(keyvalues):
+    res = []
+    for kv in keyvalues:
+        # value
+        kv_json = {'key': kv.key,
+                   'value': kv.value,
+                   'label': kv.label,
+                   'last modified': kv.last_modified,
+                   'content type': kv.content_type}
+        # tags
+        tag_json = {}
+        if kv.tags:
+            for tag_k, tag_v in kv.tags.items():
+                tag_json[tag_k] = tag_v
+        kv_json['tags'] = tag_json
+        res.append(kv_json)
+    return res
+
+
 def __print_preview(old_json, new_json):
-    print('\n---------------- Preview (Beta) ----------------')
+    error_print('\n---------------- Preview (Beta) ----------------')
     if not new_json:
-        print('\nSource configuration is empty. No changes will be made.')
+        error_print('\nSource configuration is empty. No changes will be made.')
         return False
 
     # perform diff operation
@@ -612,7 +709,7 @@ def __print_preview(old_json, new_json):
     res = differ.diff(old_json, new_json)
     keys = str(res.keys())
     if res == {} or (('update' not in keys) and ('insert' not in keys)):
-        print('\nTarget configuration already contains all key-values in source. No changes will be made.')
+        error_print('\nTarget configuration already contains all key-values in source. No changes will be made.')
         return False
 
     # format result printing
@@ -620,14 +717,14 @@ def __print_preview(old_json, new_json):
         if action.label == 'delete':
             continue  # we do not delete KVs while importing/exporting
         elif action.label == 'insert':
-            print('\nAdding:')
+            error_print('\nAdding:')
             for key, adding in changes.items():
                 record = {'key': key}
                 for attribute, value in adding.items():
                     record[str(attribute)] = str(value)
-                print(json.dumps(record))
+                error_print(json.dumps(record))
         elif action.label == 'update':
-            print('\nUpdating:')
+            error_print('\nUpdating:')
             for key, updates in changes.items():
                 updates = list(updates.values())[0]
                 attributes = list(updates.keys())
@@ -636,9 +733,34 @@ def __print_preview(old_json, new_json):
                 for attribute in attributes:
                     old_record[attribute] = old_json[key][attribute]
                     new_record[attribute] = new_json[key][attribute]
-                print('- ' + json.dumps(old_record))
-                print('+ ' + json.dumps(new_record))
-    print("")  # printing an empty line for formatting purpose
+                error_print('- ' + json.dumps(old_record))
+                error_print('+ ' + json.dumps(new_record))
+    error_print("")  # printing an empty line for formatting purpose
+    confirmation_message = "Do you want to continue? \n"
+    user_confirmation(confirmation_message)
+    return True
+
+
+def __print_restore_preview(kvs_to_restore, kvs_to_modify, kvs_to_delete):
+    error_print('\n---------------- Preview (Beta) ----------------')
+    if len(kvs_to_restore) + len(kvs_to_modify) + len(kvs_to_delete) == 0:
+        error_print('\nNo records matching found to be restored. No changes will be made.')
+        return False
+
+    # format result printing
+    if kvs_to_restore:
+        error_print('\nAdding:')
+        error_print(json.dumps(__serialize_kv_list_to_comparable_json_list(kvs_to_restore), indent=2))
+
+    if kvs_to_modify:
+        error_print('\nUpdating:')
+        error_print(json.dumps(__serialize_kv_list_to_comparable_json_list(kvs_to_modify), indent=2))
+
+    if kvs_to_delete:
+        error_print('\nDeleting:')
+        error_print(json.dumps(__serialize_kv_list_to_comparable_json_list(kvs_to_delete), indent=2))
+
+    error_print("")  # printing an empty line for formatting purpose
     confirmation_message = "Do you want to continue? \n"
     user_confirmation(confirmation_message)
     return True

@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.0.71"
+VERSION = "2.0.72"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -53,7 +53,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-batch~=7.0',
+    'azure-batch~=8.0',
     'azure-cli-command_modules-nspkg~=2.0',
     'azure-cli-core=={}'.format(VERSION),
     'azure-cli-nspkg~=3.0,>=3.0.3',
@@ -64,10 +64,11 @@ DEPENDENCIES = [
     'azure-graphrbac~=0.60.0',
     'azure-keyvault~=1.1',
     'azure-mgmt-advisor>=2.0.1,<3.0.0',
+    'azure-mgmt-apimanagement>=0.1.0',
     'azure-mgmt-applicationinsights~=0.1.1',
     'azure-mgmt-appconfiguration>=0.1.0',
     'azure-mgmt-authorization~=0.52.0',
-    'azure-mgmt-batch~=6.0',
+    'azure-mgmt-batch~=7.0',
     'azure-mgmt-batchai~=2.0',
     'azure-mgmt-billing~=0.2',
     'azure-mgmt-botservice~=0.2.0',
@@ -113,12 +114,12 @@ DEPENDENCIES = [
     'azure-mgmt-relay~=0.1.0',
     # 'azure-mgmt-reservations~=0.3.1',
     'azure-mgmt-reservations==0.3.1',  # TODO: Use requirements.txt instead of '==' #9781
-    'azure-mgmt-resource~=2.1',
+    'azure-mgmt-resource~=3.1',
     'azure-mgmt-search~=2.0',
     'azure-mgmt-security~=0.1.0',
     'azure-mgmt-servicebus~=0.6.0',
     'azure-mgmt-servicefabric~=0.2.0',
-    'azure-mgmt-signalr~=0.1.1',
+    'azure-mgmt-signalr~=0.3.0',
     'azure-mgmt-sql~=0.12',
     'azure-mgmt-sqlvirtualmachine~=0.4.0',
     'azure-mgmt-storage~=4.0',

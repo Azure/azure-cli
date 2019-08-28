@@ -2,11 +2,33 @@
 
 Release History
 ===============
+**Batch**
+
+* Expanded `--json-file` capabilities of `az batch pool create` to allow for specifying MountConfigurations for file system mounts(see https://docs.microsoft.com/en-us/rest/api/batchservice/pool/add#request-body for structure)
+* Expanded `--json-file` capabilities of `az batch pool create` with the optional property publicIPs on NetworkConfiguration. This allows specifying publicIPs to be used when deploying pools (see https://docs.microsoft.com/en-us/rest/api/batchservice/pool/add#request-body for structure)
+* Expanded `--image` capabilities to support Shared Image Galleries images. Similar to the commands support for Managed Images, to use a Shared Image Gallery image simply use the ARM ID as the value to the argument.
+* [BREAKING] When not specified, the default value for `--start-task-wait-for-success` on `az batch pool create` is now true (was false).
+* [BREAKING] The default value for Scope on AutoUserSpecification is now always Pool (was Task on Windows nodes, Pool on Linux nodes). This argument is not exposed via the commandline, but can be set in the `--json-file` arguments.
+
+2.0.72
+++++++
+
+**Policy**
+
+* Support for Policy new API version 2019-01-01
 
 **ACR**
 
 * Move to 2019-05-01 api-version, which follows replace semantics for ACR resource creation.
 * Breaking change: Classic SKU no longer supported.
+
+**API Management**
+
+* Introduced initial impementation of API Management preview commands (az apim)
+
+**AppConfig**
+
+* Added "appconfig kv restore" command.
 
 **AppService**
 
@@ -16,7 +38,7 @@ Release History
 
 * az webapp up detects env folder and removes it from compressed file used for deployment
 
-**keyvault**
+**Keyvault**
 
 * Fix the bug in secret set command that igores the expires argument
 
@@ -30,12 +52,20 @@ Release History
 **RBAC**
 
 * Fix #10151 - `az ad app update --homepage` not updating homepage.
+* Derive service principal's display name from name in the create-for-rbac command
 
 **ServiceFabric**
 
 * Fix for issues #7145,  #7880 and #7889 - fix for key vault and cert issues when creating a cluster.
 * Fix for issue #7130 - fix add cert command. Using the cluster resource group when the key vault resource group is not specified.
 * Fix for issue #9711 - fix command 'cluster setting set' command. Using named parameters for SettingsSectionDescription constructor.
+
+**SignalR**
+
+* signalr cors: New command to manage SignalR CORS
+* az signalr create: --service-mode: new service mode argument
+* signalr restart: new command to restart the service
+* signalr update: new command to update the service
 
 **Storage**
 
@@ -47,6 +77,7 @@ Release History
 **AppService**
 
 * az webapp webjob continuous group commands were failing for slots
+* fixes an issue where `az webapp deployment container config` displayed the wrong Docker CI/CD webhook URL for some apps
 
 **BotService**
 
