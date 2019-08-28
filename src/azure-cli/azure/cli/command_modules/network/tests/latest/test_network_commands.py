@@ -331,6 +331,7 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
         self.cmd('network application-gateway delete --resource-group {rg} -n ag1')
         self.cmd('network application-gateway list --resource-group {rg}', checks=self.check('length(@)', ag_count - 1))
 
+
 class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_ag_identity')
@@ -391,6 +392,7 @@ class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
         self.cmd('network application-gateway show -g {rg} -n ag1', checks=[
             self.check('identity.type', 'UserAssigned')
         ])
+
         self.cmd('network application-gateway identity remove -g {rg} --gateway-name ag1', checks=[
             self.check('identity', None)
         ])
@@ -403,10 +405,9 @@ class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
 
         # There is a validation by the backend server to check the effectiveness of the certificate.
         # Since we cannot create a real certificate, so here we just check that the communication between the CLI and the backend server works.
-        with self.assertRaisesRegexp(CLIError, 'ResourceDeploymentFailure'):
+        with self.assertRaisesRegexp(CLIError, '^Deployment failed'):
             self.cmd('network application-gateway ssl-cert create --gateway-name ag1 --name ssl-cert1 -g {rg} --key-vault-secret-id {sid2}')
-        with self.assertRaisesRegexp(CLIError, 'ResourceDeploymentFailure'):
-            self.cmd('network application-gateway ssl-cert update --gateway-name ag1 --name ssl-cert1 -g {rg} --key-vault-secret-id {sid1}')
+
 
 class NetworkAppGatewayZoneScenario(ScenarioTest):
 

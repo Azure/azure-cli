@@ -216,11 +216,13 @@ def validate_cert(namespace):
 
 def validate_ssl_cert(namespace):
     params = [namespace.cert_data, namespace.cert_password]
-    if all([not x for x in params]):
+    if all([not x for x in params]) and not namespace.key_vault_secret_id:
         # no cert supplied -- use HTTP
         if not namespace.frontend_port:
             namespace.frontend_port = 80
     else:
+        if namespace.key_vault_secret_id:
+            return
         # cert supplied -- use HTTPS
         if not all(params):
             raise CLIError(
