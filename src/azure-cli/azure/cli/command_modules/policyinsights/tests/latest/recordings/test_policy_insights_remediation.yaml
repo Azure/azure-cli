@@ -1,208 +1,5 @@
 interactions:
 - request:
-    body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
-      "date": "2019-06-17T19:03:48Z"}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - group create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '110'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - --location --name --tag
-      User-Agent:
-      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
-        resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.66
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001?api-version=2018-05-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001","name":"cli_test_remediation000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-06-17T19:03:48Z"},"properties":{"provisioningState":"Succeeded"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '384'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 17 Jun 2019 19:03:48 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 201
-      message: Created
-- request:
-    body: '{"sku": {"name": "Standard_LRS"}, "kind": "Storage", "location": "westus"}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - storage account create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '74'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -n -g -l --sku
-      User-Agent:
-      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
-        azure-mgmt-storage/3.3.0 Azure-SDK-For-Python AZURECLI/2.0.66
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.Storage/storageAccounts/cliremediation000002?api-version=2019-04-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      content-type:
-      - text/plain; charset=utf-8
-      date:
-      - Mon, 17 Jun 2019 19:03:50 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/387c51dd-4c29-4fed-81a7-8728857c6b41?monitor=true&api-version=2019-04-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - storage account create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l --sku
-      User-Agent:
-      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
-        azure-mgmt-storage/3.3.0 Azure-SDK-For-Python AZURECLI/2.0.66
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/387c51dd-4c29-4fed-81a7-8728857c6b41?monitor=true&api-version=2019-04-01
-  response:
-    body:
-      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.Storage/storageAccounts/cliremediation000002","name":"cliremediation000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"minimumTlsVersion":"TLS1_2","allowBlobPublicAccess":false,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2019-06-17T19:03:50.4060414Z"},"blob":{"enabled":true,"lastEnabledTime":"2019-06-17T19:03:50.4060414Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2019-06-17T19:03:50.2810232Z","primaryEndpoints":{"blob":"https://cliremediation000002.blob.core.windows.net/","queue":"https://cliremediation000002.queue.core.windows.net/","table":"https://cliremediation000002.table.core.windows.net/","file":"https://cliremediation000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1227'
-      content-type:
-      - application/json
-      date:
-      - Mon, 17 Jun 2019 19:04:08 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - storage account keys list
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - -n -g --query -o
-      User-Agent:
-      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
-        azure-mgmt-storage/3.3.0 Azure-SDK-For-Python AZURECLI/2.0.66
-      accept-language:
-      - en-US
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.Storage/storageAccounts/cliremediation000002/listKeys?api-version=2019-04-01
-  response:
-    body:
-      string: '{"keys":[{"keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '288'
-      content-type:
-      - application/json
-      date:
-      - Mon, 17 Jun 2019 19:04:09 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 200
-      message: OK
-- request:
     body: null
     headers:
       Accept:
@@ -216,12 +13,12 @@ interactions:
       ParameterSetName:
       - --policy -n
       User-Agent:
-      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
-        policyclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-resource/3.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.70
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d?api-version=2018-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d?api-version=2019-01-01
   response:
     body:
       string: '{"error":{"code":"PolicyDefinitionNotFound","message":"The policy definition
@@ -234,7 +31,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 17 Jun 2019 19:04:09 GMT
+      - Mon, 05 Aug 2019 20:53:50 GMT
       expires:
       - '-1'
       pragma:
@@ -260,12 +57,12 @@ interactions:
       ParameterSetName:
       - --policy -n
       User-Agent:
-      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
-        policyclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-resource/3.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.70
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d?api-version=2018-05-01
+    uri: https://management.azure.com/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d?api-version=2019-01-01
   response:
     body:
       string: '{"properties":{"displayName":"Audit VMs that do not use managed disks","policyType":"BuiltIn","mode":"All","description":"This
@@ -278,7 +75,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 17 Jun 2019 19:04:09 GMT
+      - Mon, 05 Aug 2019 20:53:50 GMT
       expires:
       - '-1'
       pragma:
@@ -314,15 +111,15 @@ interactions:
       ParameterSetName:
       - --policy -n
       User-Agent:
-      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
-        policyclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-resource/3.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.70
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000003?api-version=2018-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000003?api-version=2019-01-01
   response:
     body:
-      string: '{"sku":{"name":"A0","tier":"Free"},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","metadata":{"createdBy":"2262dfe7-375f-4597-a47c-2766489ecbe7","createdOn":"2019-06-17T19:04:10.3756615Z","updatedBy":null,"updatedOn":null}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000003","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-policy-assignment000003"}'
+      string: '{"sku":{"name":"A0","tier":"Free"},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","metadata":{"createdBy":"82f25a3e-d28d-4c27-90d6-d92c79d98936","createdOn":"2019-08-05T20:53:50.9022888Z","updatedBy":null,"updatedOn":null}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000003","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-policy-assignment000003"}'
     headers:
       cache-control:
       - no-cache
@@ -331,7 +128,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 17 Jun 2019 19:04:10 GMT
+      - Mon, 05 Aug 2019 20:53:50 GMT
       expires:
       - '-1'
       pragma:
@@ -359,27 +156,54 @@ interactions:
       ParameterSetName:
       - -n -g -a
       User-Agent:
-      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
-        policyclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-resource/3.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.70
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments?api-version=2018-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments?api-version=2019-01-01
   response:
     body:
-      string: '{"value":[{"sku":{"name":"A0","tier":"Free"},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","metadata":{"createdBy":"2262dfe7-375f-4597-a47c-2766489ecbe7","createdOn":"2019-06-17T19:04:10.3756615Z","updatedBy":null,"updatedOn":null}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000003","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-policy-assignment000003"},{"sku":{"name":"A1","tier":"Standard"},"properties":{"displayName":"ASC
-        Default (subscription: 0b1f6471-1bf0-4dda-aec3-cb9272f09590)","policyDefinitionId":"/providers/Microsoft.Authorization/policySetDefinitions/1f3afdf9-d0c9-4c3d-847f-89da613e70a8","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","parameters":{"diagnosticsLogsInServiceFabricMonitoringEffect":{"value":"AuditIfNotExists"},"systemUpdatesMonitoringEffect":{"value":"AuditIfNotExists"},"systemConfigurationsMonitoringEffect":{"value":"AuditIfNotExists"},"endpointProtectionMonitoringEffect":{"value":"AuditIfNotExists"},"diskEncryptionMonitoringEffect":{"value":"AuditIfNotExists"},"networkSecurityGroupsMonitoringEffect":{"value":"AuditIfNotExists"},"webApplicationFirewallMonitoringEffect":{"value":"AuditIfNotExists"},"sqlAuditingMonitoringEffect":{"value":"AuditIfNotExists"},"sqlEncryptionMonitoringEffect":{"value":"AuditIfNotExists"},"nextGenerationFirewallMonitoringEffect":{"value":"AuditIfNotExists"},"vulnerabilityAssesmentMonitoringEffect":{"value":"AuditIfNotExists"},"storageEncryptionMonitoringEffect":{"value":"Audit"},"jitNetworkAccessMonitoringEffect":{"value":"AuditIfNotExists"},"adaptiveApplicationControlsMonitoringEffect":{"value":"AuditIfNotExists"},"identityDesignateLessThanOwnersMonitoringEffect":{"value":"AuditIfNotExists"},"identityDesignateMoreThanOneOwnerMonitoringEffect":{"value":"AuditIfNotExists"},"identityEnableMFAForOwnerPermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"identityEnableMFAForWritePermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"identityEnableMFAForReadPermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"identityRemoveDeprecatedAccountWithOwnerPermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"identityRemoveDeprecatedAccountMonitoringEffect":{"value":"AuditIfNotExists"},"identityRemoveExternalAccountWithOwnerPermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"identityRemoveExternalAccountWithWritePermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"identityRemoveExternalAccountWithReadPermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"secureTransferToStorageAccountMonitoringEffect":{"value":"Audit"},"aadAuthenticationInSqlServerMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInRedisCacheMonitoringEffect":{"value":"Audit"},"clusterProtectionLevelInServiceFabricMonitoringEffect":{"value":"Audit"},"aadAuthenticationInServiceFabricMonitoringEffect":{"value":"Audit"},"diagnosticsLogsInServiceBusMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInDataLakeAnalyticsMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInDataLakeStoreMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInBatchAccountMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInEventHubMonitoringEffect":{"value":"AuditIfNotExists"},"metricAlertsInBatchAccountMonitoringEffect":{"value":"AuditIfNotExists"},"namespaceAuthorizationRulesInServiceBusMonitoringEffect":{"value":"Audit"},"disableUnrestrictedNetworkToStorageAccountMonitoringEffect":{"value":"Audit"},"classicComputeVMsMonitoringEffect":{"value":"Audit"},"classicStorageAccountsMonitoringEffect":{"value":"Audit"},"sqlDbVulnerabilityAssesmentMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInKeyVaultMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInStreamAnalyticsMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInSearchServiceMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInLogicAppsMonitoringEffect":{"value":"AuditIfNotExists"}},"description":"This
-        policy assignment was automatically created by Azure Security Center","metadata":{"assignedBy":"Security
-        Center"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/SecurityCenterBuiltIn","type":"Microsoft.Authorization/policyAssignments","name":"SecurityCenterBuiltIn"}]}'
+      string: '{"value":[{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"[Preview]:
+        Enable Monitoring in Azure Security Center","policyDefinitionId":"/providers/Microsoft.Authorization/policySetDefinitions/1f3afdf9-d0c9-4c3d-847f-89da613e70a8","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Sandip
+        Shahane","parameterScopes":{}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/1e4e70f9cd4846268b6998ee","type":"Microsoft.Authorization/policyAssignments","name":"1e4e70f9cd4846268b6998ee","location":"eastus"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"VMs
+        with no Managed Disk","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/95696b24-404f-4376-a9a6-7fa8ba91e4d5","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Tigran
+        Shahbazian","parameterScopes":{}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/21e5086343384f34a3b2d10b","type":"Microsoft.Authorization/policyAssignments","name":"21e5086343384f34a3b2d10b"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"Audit
+        unrestricted network access to storage accounts","policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/34c877ad-507e-4c82-993e-3452a6e0ad3c","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Sandip
+        Shahane","parameterScopes":{}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/4d31128e32d04a0098fd536e","type":"Microsoft.Authorization/policyAssignments","name":"4d31128e32d04a0098fd536e","location":"eastus"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"[Preview]:
+        Enable Monitoring in Azure Security Center","policyDefinitionId":"/providers/Microsoft.Authorization/policySetDefinitions/1f3afdf9-d0c9-4c3d-847f-89da613e70a8","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Sandip
+        Shahane","parameterScopes":{}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/4e4179ff39194a62bad4ef3e","type":"Microsoft.Authorization/policyAssignments","name":"4e4179ff39194a62bad4ef3e","location":"eastus"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"[Preview]:
+        Audit missing blob encryption for storage accounts","policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/655cb504-bcee-4362-bd4c-402e6aa38759","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Sandip
+        Shahane","parameterScopes":{}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/5e9286a7cef840afb36b18a7","type":"Microsoft.Authorization/policyAssignments","name":"5e9286a7cef840afb36b18a7","location":"eastus"},{"sku":{"name":"A0","tier":"Free"},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","metadata":{"createdBy":"82f25a3e-d28d-4c27-90d6-d92c79d98936","createdOn":"2019-08-05T20:53:50.9022888Z","updatedBy":null,"updatedOn":null}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000003","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-policy-assignment000003"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"[Preview]:
+        Enable Monitoring in Azure Security Center","policyDefinitionId":"/providers/Microsoft.Authorization/policySetDefinitions/1f3afdf9-d0c9-4c3d-847f-89da613e70a8","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Rohit
+        Bhardwaj","parameterScopes":{},"createdBy":"22ac4b8c-9194-4feb-b6c6-0e7a995fca2e","createdOn":"2019-05-01T00:17:00.0617598Z","updatedBy":null,"updatedOn":null}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/d58dea05c8704a33b6c8e43e","type":"Microsoft.Authorization/policyAssignments","name":"d58dea05c8704a33b6c8e43e","location":"eastus"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"Enforce
+        tag and its value","policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/1e30110a-5ceb-460c-a204-c1c3969c6d62","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/stuartko_testrg1","notScopes":[],"parameters":{"tagName":{"value":"blahName"},"tagValue":{"value":"blahValue"}},"metadata":{"assignedBy":"Stuart
+        Konen","parameterScopes":{}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/stuartko_testrg1/providers/Microsoft.Authorization/policyAssignments/41dfc116d41aa99bd1dfdd32578eecd9cf75e14481795fc90975dbb25ed97d70","type":"Microsoft.Authorization/policyAssignments","name":"41dfc116d41aa99bd1dfdd32578eecd9cf75e14481795fc90975dbb25ed97d70"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"jilmntest
+        Append tag and its value from the resource group","policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/9ea02ca2-71db-412d-8b00-7c7ca9fcd32d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jilimntest","notScopes":[],"parameters":{"tagName":{"value":"tag1"}},"metadata":{"assignedBy":"Jin
+        Soon Lim","parameterScopes":{},"createdBy":"69108416-6ac7-4a4f-ac13-fee20ff1ee02","createdOn":"2019-06-24T23:20:46.5138204Z","updatedBy":null,"updatedOn":null}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jilimntest/providers/Microsoft.Authorization/policyAssignments/56af151b043845ba9dfe0e84","type":"Microsoft.Authorization/policyAssignments","name":"56af151b043845ba9dfe0e84","location":"eastus"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"Azure
+        KeyVault Allowed Locations","policyDefinitionId":"/providers/Microsoft.Management/managementGroups/AzGovTest5/providers/Microsoft.Authorization/policyDefinitions/e1d7de9f-42f0-4af1-9ee0-0187bfce08d5","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ramya-test","notScopes":[],"parameters":{"allowedLocations":{"value":["westus"]}},"metadata":{"assignedBy":"Ramyasree
+        Chakka","parameterScopes":{"allowedLocations":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ramya-test"},"createdBy":"82f25a3e-d28d-4c27-90d6-d92c79d98936","createdOn":"2019-05-15T23:11:34.9169304Z","updatedBy":null,"updatedOn":null}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ramya-test/providers/Microsoft.Authorization/policyAssignments/8c219f36c4c449b198f38f45","type":"Microsoft.Authorization/policyAssignments","name":"8c219f36c4c449b198f38f45","location":"eastus"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"[Preview]:
+        Enable Monitoring in Azure Security Center","policyDefinitionId":"/providers/Microsoft.Authorization/policySetDefinitions/1f3afdf9-d0c9-4c3d-847f-89da613e70a8","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cheggpolicy","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Rohit
+        Bhardwaj","parameterScopes":{},"createdBy":"22ac4b8c-9194-4feb-b6c6-0e7a995fca2e","createdOn":"2019-05-01T00:22:01.0195887Z","updatedBy":null,"updatedOn":null}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cheggpolicy/providers/Microsoft.Authorization/policyAssignments/8a4555d353ed46bb856e9890","type":"Microsoft.Authorization/policyAssignments","name":"8a4555d353ed46bb856e9890","location":"eastus"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"[Preview]:
+        Deploy Log Analytics Agent for Windows VMs","policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/0868462e-646c-4fe3-9ced-a733534b6a2c","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jilimrg","notScopes":[],"parameters":{"logAnalytics":{"value":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/defaultresourcegroup-weu/providers/microsoft.operationalinsights/workspaces/defaultworkspace-e78961ba-36fe-4739-9212-e3031b4c8db7-weu"}},"metadata":{"assignedBy":"Jin
+        Soon Lim","parameterScopes":{"logAnalytics":"/subscriptions/00000000-0000-0000-0000-000000000000"},"createdBy":"69108416-6ac7-4a4f-ac13-fee20ff1ee02","createdOn":"2019-06-24T19:14:43.0131358Z","updatedBy":null,"updatedOn":null}},"identity":{"principalId":"ebd0adfd-2ebb-49ac-8356-2e445a21c226","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jilimrg/providers/Microsoft.Authorization/policyAssignments/9f4513e4b2254b3c9be27189","type":"Microsoft.Authorization/policyAssignments","name":"9f4513e4b2254b3c9be27189","location":"centralus"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"jilim
+        Append tag and its value from the resource group","policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/9ea02ca2-71db-412d-8b00-7c7ca9fcd32d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jilimrg","notScopes":[],"parameters":{"tagName":{"value":"tag1"}},"metadata":{"assignedBy":"Jin
+        Soon Lim","parameterScopes":{},"createdBy":"69108416-6ac7-4a4f-ac13-fee20ff1ee02","createdOn":"2019-06-24T21:57:46.067217Z","updatedBy":null,"updatedOn":null}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jilimrg/providers/Microsoft.Authorization/policyAssignments/f1b5c3295c3d4498abf1b7a9","type":"Microsoft.Authorization/policyAssignments","name":"f1b5c3295c3d4498abf1b7a9","location":"eastus"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"Audit
+        enabling of diagnostic logs in Azure Data Lake Store","policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/057ef27e-665e-4328-8ea3-04b3122bd9fb","scope":"/providers/Microsoft.Management/managementGroups/PolicyUIMG","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Sandip
+        Shahane","parameterScopes":{}}},"id":"/providers/Microsoft.Management/managementGroups/PolicyUIMG/providers/Microsoft.Authorization/policyAssignments/66926b7556734dcf9a80080f","type":"Microsoft.Authorization/policyAssignments","name":"66926b7556734dcf9a80080f","location":"eastus"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"Audit
+        VMs that do not use managed disks delete this","policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/providers/Microsoft.Management/managementGroups/PolicyUIMG","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Sandip
+        Shahane","parameterScopes":{},"createdBy":"327c26bf-bf3e-4128-9b75-fbbd99e98739","createdOn":"2019-06-20T23:21:22.259084Z","updatedBy":null,"updatedOn":null}},"id":"/providers/Microsoft.Management/managementGroups/PolicyUIMG/providers/Microsoft.Authorization/policyAssignments/ebc169a314df42b9bf912b4f","type":"Microsoft.Authorization/policyAssignments","name":"ebc169a314df42b9bf912b4f","location":"eastus"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"sandipsh
+        CRI 2 [Preview]: Audit Dependency Agent Deployment - VM Image (OS) unlisted","policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/11ac78e3-31bc-4f0c-8434-37ab963cea07","scope":"/providers/Microsoft.Management/managementGroups/AzGovTest5","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Sandip
+        Shahane","parameterScopes":{}}},"id":"/providers/Microsoft.Management/managementGroups/AzGovTest5/providers/Microsoft.Authorization/policyAssignments/8a5f4a42ed8743de909b269c","type":"Microsoft.Authorization/policyAssignments","name":"8a5f4a42ed8743de909b269c","location":"eastus"},{"sku":{"name":"A0","tier":"Free"},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/404c3081-a854-4457-ae30-26a93ef643f9","scope":"/providers/microsoft.management/managementgroups/AzGovTest5"},"id":"/providers/microsoft.management/managementgroups/AzGovTest5/providers/Microsoft.Authorization/policyAssignments/jilimcss","type":"Microsoft.Authorization/policyAssignments","name":"jilimcss"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '4572'
+      - '12617'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 17 Jun 2019 19:04:10 GMT
+      - Mon, 05 Aug 2019 20:53:50 GMT
       expires:
       - '-1'
       pragma:
@@ -396,7 +220,7 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: 'b''{"properties": {"policyAssignmentId": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000003"}}'''
+    body: '{"properties": {"policyAssignmentId": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000003"}}'
     headers:
       Accept:
       - application/json
@@ -413,24 +237,24 @@ interactions:
       ParameterSetName:
       - -n -g -a
       User-Agent:
-      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
-        azure-mgmt-policyinsights/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-policyinsights/0.3.1
+        Azure-SDK-For-Python AZURECLI/2.0.70
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.PolicyInsights/remediations/azurecli-test-remediation000004?api-version=2018-07-01-preview
   response:
     body:
-      string: '{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Succeeded","createdOn":"2019-06-17T19:04:12.197504Z","lastUpdatedOn":"2019-06-17T19:04:12.2600598Z","deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations"}'
+      string: '{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Succeeded","createdOn":"2019-08-05T20:53:52.5038916Z","lastUpdatedOn":"2019-08-05T20:53:52.5663567Z","deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '731'
+      - '732'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 17 Jun 2019 19:04:12 GMT
+      - Mon, 05 Aug 2019 20:53:52 GMT
       expires:
       - '-1'
       pragma:
@@ -462,24 +286,24 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
-        azure-mgmt-policyinsights/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-policyinsights/0.3.1
+        Azure-SDK-For-Python AZURECLI/2.0.70
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.PolicyInsights/remediations/azurecli-test-remediation000004?api-version=2018-07-01-preview
   response:
     body:
-      string: '{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Succeeded","createdOn":"2019-06-17T19:04:12.197504Z","lastUpdatedOn":"2019-06-17T19:04:12.2600598Z","deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations"}'
+      string: '{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Succeeded","createdOn":"2019-08-05T20:53:52.5038916Z","lastUpdatedOn":"2019-08-05T20:53:52.5663567Z","deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '731'
+      - '732'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 17 Jun 2019 19:04:12 GMT
+      - Mon, 05 Aug 2019 20:53:52 GMT
       expires:
       - '-1'
       pragma:
@@ -513,24 +337,24 @@ interactions:
       ParameterSetName:
       - -g
       User-Agent:
-      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
-        azure-mgmt-policyinsights/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-policyinsights/0.3.1
+        Azure-SDK-For-Python AZURECLI/2.0.70
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.PolicyInsights/remediations?api-version=2018-07-01-preview
   response:
     body:
-      string: '{"value":[{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Succeeded","createdOn":"2019-06-17T19:04:12.197504Z","lastUpdatedOn":"2019-06-17T19:04:12.2600598Z","deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations"}]}'
+      string: '{"value":[{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Succeeded","createdOn":"2019-08-05T20:53:52.5038916Z","lastUpdatedOn":"2019-08-05T20:53:52.5663567Z","deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '743'
+      - '744'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 17 Jun 2019 19:04:13 GMT
+      - Mon, 05 Aug 2019 20:53:53 GMT
       expires:
       - '-1'
       pragma:
@@ -546,7 +370,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-policy-insights-requests:
-      - '599'
+      - '598'
     status:
       code: 200
       message: OK
@@ -566,8 +390,8 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
-        azure-mgmt-policyinsights/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-policyinsights/0.3.1
+        Azure-SDK-For-Python AZURECLI/2.0.70
       accept-language:
       - en-US
     method: POST
@@ -583,7 +407,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 17 Jun 2019 19:04:14 GMT
+      - Mon, 05 Aug 2019 20:53:54 GMT
       expires:
       - '-1'
       pragma:
@@ -599,7 +423,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-policy-insights-requests:
-      - '599'
+      - '597'
     status:
       code: 200
       message: OK
@@ -619,24 +443,24 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
-        azure-mgmt-policyinsights/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-policyinsights/0.3.1
+        Azure-SDK-For-Python AZURECLI/2.0.70
       accept-language:
       - en-US
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.PolicyInsights/remediations/azurecli-test-remediation000004?api-version=2018-07-01-preview
   response:
     body:
-      string: '{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Succeeded","createdOn":"2019-06-17T19:04:12.197504Z","lastUpdatedOn":"2019-06-17T19:04:12.2600598Z","deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations"}'
+      string: '{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Succeeded","createdOn":"2019-08-05T20:53:52.5038916Z","lastUpdatedOn":"2019-08-05T20:53:52.5663567Z","deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '731'
+      - '732'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 17 Jun 2019 19:04:15 GMT
+      - Mon, 05 Aug 2019 20:53:55 GMT
       expires:
       - '-1'
       pragma:
@@ -672,8 +496,8 @@ interactions:
       ParameterSetName:
       - -g
       User-Agent:
-      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
-        azure-mgmt-policyinsights/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-policyinsights/0.3.1
+        Azure-SDK-For-Python AZURECLI/2.0.70
       accept-language:
       - en-US
     method: GET
@@ -689,7 +513,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 17 Jun 2019 19:04:16 GMT
+      - Mon, 05 Aug 2019 20:53:55 GMT
       expires:
       - '-1'
       pragma:
@@ -705,7 +529,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-policy-insights-requests:
-      - '598'
+      - '599'
     status:
       code: 200
       message: OK
@@ -723,27 +547,54 @@ interactions:
       ParameterSetName:
       - -n -a --location-filters
       User-Agent:
-      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
-        policyclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-resource/3.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.70
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments?api-version=2018-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments?api-version=2019-01-01
   response:
     body:
-      string: '{"value":[{"sku":{"name":"A0","tier":"Free"},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","metadata":{"createdBy":"2262dfe7-375f-4597-a47c-2766489ecbe7","createdOn":"2019-06-17T19:04:10.3756615Z","updatedBy":null,"updatedOn":null}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000003","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-policy-assignment000003"},{"sku":{"name":"A1","tier":"Standard"},"properties":{"displayName":"ASC
-        Default (subscription: 0b1f6471-1bf0-4dda-aec3-cb9272f09590)","policyDefinitionId":"/providers/Microsoft.Authorization/policySetDefinitions/1f3afdf9-d0c9-4c3d-847f-89da613e70a8","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","parameters":{"diagnosticsLogsInServiceFabricMonitoringEffect":{"value":"AuditIfNotExists"},"systemUpdatesMonitoringEffect":{"value":"AuditIfNotExists"},"systemConfigurationsMonitoringEffect":{"value":"AuditIfNotExists"},"endpointProtectionMonitoringEffect":{"value":"AuditIfNotExists"},"diskEncryptionMonitoringEffect":{"value":"AuditIfNotExists"},"networkSecurityGroupsMonitoringEffect":{"value":"AuditIfNotExists"},"webApplicationFirewallMonitoringEffect":{"value":"AuditIfNotExists"},"sqlAuditingMonitoringEffect":{"value":"AuditIfNotExists"},"sqlEncryptionMonitoringEffect":{"value":"AuditIfNotExists"},"nextGenerationFirewallMonitoringEffect":{"value":"AuditIfNotExists"},"vulnerabilityAssesmentMonitoringEffect":{"value":"AuditIfNotExists"},"storageEncryptionMonitoringEffect":{"value":"Audit"},"jitNetworkAccessMonitoringEffect":{"value":"AuditIfNotExists"},"adaptiveApplicationControlsMonitoringEffect":{"value":"AuditIfNotExists"},"identityDesignateLessThanOwnersMonitoringEffect":{"value":"AuditIfNotExists"},"identityDesignateMoreThanOneOwnerMonitoringEffect":{"value":"AuditIfNotExists"},"identityEnableMFAForOwnerPermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"identityEnableMFAForWritePermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"identityEnableMFAForReadPermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"identityRemoveDeprecatedAccountWithOwnerPermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"identityRemoveDeprecatedAccountMonitoringEffect":{"value":"AuditIfNotExists"},"identityRemoveExternalAccountWithOwnerPermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"identityRemoveExternalAccountWithWritePermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"identityRemoveExternalAccountWithReadPermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"secureTransferToStorageAccountMonitoringEffect":{"value":"Audit"},"aadAuthenticationInSqlServerMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInRedisCacheMonitoringEffect":{"value":"Audit"},"clusterProtectionLevelInServiceFabricMonitoringEffect":{"value":"Audit"},"aadAuthenticationInServiceFabricMonitoringEffect":{"value":"Audit"},"diagnosticsLogsInServiceBusMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInDataLakeAnalyticsMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInDataLakeStoreMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInBatchAccountMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInEventHubMonitoringEffect":{"value":"AuditIfNotExists"},"metricAlertsInBatchAccountMonitoringEffect":{"value":"AuditIfNotExists"},"namespaceAuthorizationRulesInServiceBusMonitoringEffect":{"value":"Audit"},"disableUnrestrictedNetworkToStorageAccountMonitoringEffect":{"value":"Audit"},"classicComputeVMsMonitoringEffect":{"value":"Audit"},"classicStorageAccountsMonitoringEffect":{"value":"Audit"},"sqlDbVulnerabilityAssesmentMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInKeyVaultMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInStreamAnalyticsMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInSearchServiceMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInLogicAppsMonitoringEffect":{"value":"AuditIfNotExists"}},"description":"This
-        policy assignment was automatically created by Azure Security Center","metadata":{"assignedBy":"Security
-        Center"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/SecurityCenterBuiltIn","type":"Microsoft.Authorization/policyAssignments","name":"SecurityCenterBuiltIn"}]}'
+      string: '{"value":[{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"[Preview]:
+        Enable Monitoring in Azure Security Center","policyDefinitionId":"/providers/Microsoft.Authorization/policySetDefinitions/1f3afdf9-d0c9-4c3d-847f-89da613e70a8","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Sandip
+        Shahane","parameterScopes":{}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/1e4e70f9cd4846268b6998ee","type":"Microsoft.Authorization/policyAssignments","name":"1e4e70f9cd4846268b6998ee","location":"eastus"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"VMs
+        with no Managed Disk","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/95696b24-404f-4376-a9a6-7fa8ba91e4d5","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Tigran
+        Shahbazian","parameterScopes":{}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/21e5086343384f34a3b2d10b","type":"Microsoft.Authorization/policyAssignments","name":"21e5086343384f34a3b2d10b"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"Audit
+        unrestricted network access to storage accounts","policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/34c877ad-507e-4c82-993e-3452a6e0ad3c","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Sandip
+        Shahane","parameterScopes":{}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/4d31128e32d04a0098fd536e","type":"Microsoft.Authorization/policyAssignments","name":"4d31128e32d04a0098fd536e","location":"eastus"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"[Preview]:
+        Enable Monitoring in Azure Security Center","policyDefinitionId":"/providers/Microsoft.Authorization/policySetDefinitions/1f3afdf9-d0c9-4c3d-847f-89da613e70a8","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Sandip
+        Shahane","parameterScopes":{}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/4e4179ff39194a62bad4ef3e","type":"Microsoft.Authorization/policyAssignments","name":"4e4179ff39194a62bad4ef3e","location":"eastus"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"[Preview]:
+        Audit missing blob encryption for storage accounts","policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/655cb504-bcee-4362-bd4c-402e6aa38759","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Sandip
+        Shahane","parameterScopes":{}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/5e9286a7cef840afb36b18a7","type":"Microsoft.Authorization/policyAssignments","name":"5e9286a7cef840afb36b18a7","location":"eastus"},{"sku":{"name":"A0","tier":"Free"},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","metadata":{"createdBy":"82f25a3e-d28d-4c27-90d6-d92c79d98936","createdOn":"2019-08-05T20:53:50.9022888Z","updatedBy":null,"updatedOn":null}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000003","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-policy-assignment000003"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"[Preview]:
+        Enable Monitoring in Azure Security Center","policyDefinitionId":"/providers/Microsoft.Authorization/policySetDefinitions/1f3afdf9-d0c9-4c3d-847f-89da613e70a8","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Rohit
+        Bhardwaj","parameterScopes":{},"createdBy":"22ac4b8c-9194-4feb-b6c6-0e7a995fca2e","createdOn":"2019-05-01T00:17:00.0617598Z","updatedBy":null,"updatedOn":null}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/d58dea05c8704a33b6c8e43e","type":"Microsoft.Authorization/policyAssignments","name":"d58dea05c8704a33b6c8e43e","location":"eastus"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"Enforce
+        tag and its value","policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/1e30110a-5ceb-460c-a204-c1c3969c6d62","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/stuartko_testrg1","notScopes":[],"parameters":{"tagName":{"value":"blahName"},"tagValue":{"value":"blahValue"}},"metadata":{"assignedBy":"Stuart
+        Konen","parameterScopes":{}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/stuartko_testrg1/providers/Microsoft.Authorization/policyAssignments/41dfc116d41aa99bd1dfdd32578eecd9cf75e14481795fc90975dbb25ed97d70","type":"Microsoft.Authorization/policyAssignments","name":"41dfc116d41aa99bd1dfdd32578eecd9cf75e14481795fc90975dbb25ed97d70"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"jilmntest
+        Append tag and its value from the resource group","policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/9ea02ca2-71db-412d-8b00-7c7ca9fcd32d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jilimntest","notScopes":[],"parameters":{"tagName":{"value":"tag1"}},"metadata":{"assignedBy":"Jin
+        Soon Lim","parameterScopes":{},"createdBy":"69108416-6ac7-4a4f-ac13-fee20ff1ee02","createdOn":"2019-06-24T23:20:46.5138204Z","updatedBy":null,"updatedOn":null}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jilimntest/providers/Microsoft.Authorization/policyAssignments/56af151b043845ba9dfe0e84","type":"Microsoft.Authorization/policyAssignments","name":"56af151b043845ba9dfe0e84","location":"eastus"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"Azure
+        KeyVault Allowed Locations","policyDefinitionId":"/providers/Microsoft.Management/managementGroups/AzGovTest5/providers/Microsoft.Authorization/policyDefinitions/e1d7de9f-42f0-4af1-9ee0-0187bfce08d5","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ramya-test","notScopes":[],"parameters":{"allowedLocations":{"value":["westus"]}},"metadata":{"assignedBy":"Ramyasree
+        Chakka","parameterScopes":{"allowedLocations":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ramya-test"},"createdBy":"82f25a3e-d28d-4c27-90d6-d92c79d98936","createdOn":"2019-05-15T23:11:34.9169304Z","updatedBy":null,"updatedOn":null}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ramya-test/providers/Microsoft.Authorization/policyAssignments/8c219f36c4c449b198f38f45","type":"Microsoft.Authorization/policyAssignments","name":"8c219f36c4c449b198f38f45","location":"eastus"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"[Preview]:
+        Enable Monitoring in Azure Security Center","policyDefinitionId":"/providers/Microsoft.Authorization/policySetDefinitions/1f3afdf9-d0c9-4c3d-847f-89da613e70a8","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cheggpolicy","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Rohit
+        Bhardwaj","parameterScopes":{},"createdBy":"22ac4b8c-9194-4feb-b6c6-0e7a995fca2e","createdOn":"2019-05-01T00:22:01.0195887Z","updatedBy":null,"updatedOn":null}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cheggpolicy/providers/Microsoft.Authorization/policyAssignments/8a4555d353ed46bb856e9890","type":"Microsoft.Authorization/policyAssignments","name":"8a4555d353ed46bb856e9890","location":"eastus"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"[Preview]:
+        Deploy Log Analytics Agent for Windows VMs","policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/0868462e-646c-4fe3-9ced-a733534b6a2c","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jilimrg","notScopes":[],"parameters":{"logAnalytics":{"value":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/defaultresourcegroup-weu/providers/microsoft.operationalinsights/workspaces/defaultworkspace-e78961ba-36fe-4739-9212-e3031b4c8db7-weu"}},"metadata":{"assignedBy":"Jin
+        Soon Lim","parameterScopes":{"logAnalytics":"/subscriptions/00000000-0000-0000-0000-000000000000"},"createdBy":"69108416-6ac7-4a4f-ac13-fee20ff1ee02","createdOn":"2019-06-24T19:14:43.0131358Z","updatedBy":null,"updatedOn":null}},"identity":{"principalId":"ebd0adfd-2ebb-49ac-8356-2e445a21c226","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jilimrg/providers/Microsoft.Authorization/policyAssignments/9f4513e4b2254b3c9be27189","type":"Microsoft.Authorization/policyAssignments","name":"9f4513e4b2254b3c9be27189","location":"centralus"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"jilim
+        Append tag and its value from the resource group","policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/9ea02ca2-71db-412d-8b00-7c7ca9fcd32d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jilimrg","notScopes":[],"parameters":{"tagName":{"value":"tag1"}},"metadata":{"assignedBy":"Jin
+        Soon Lim","parameterScopes":{},"createdBy":"69108416-6ac7-4a4f-ac13-fee20ff1ee02","createdOn":"2019-06-24T21:57:46.067217Z","updatedBy":null,"updatedOn":null}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jilimrg/providers/Microsoft.Authorization/policyAssignments/f1b5c3295c3d4498abf1b7a9","type":"Microsoft.Authorization/policyAssignments","name":"f1b5c3295c3d4498abf1b7a9","location":"eastus"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"Audit
+        enabling of diagnostic logs in Azure Data Lake Store","policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/057ef27e-665e-4328-8ea3-04b3122bd9fb","scope":"/providers/Microsoft.Management/managementGroups/PolicyUIMG","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Sandip
+        Shahane","parameterScopes":{}}},"id":"/providers/Microsoft.Management/managementGroups/PolicyUIMG/providers/Microsoft.Authorization/policyAssignments/66926b7556734dcf9a80080f","type":"Microsoft.Authorization/policyAssignments","name":"66926b7556734dcf9a80080f","location":"eastus"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"Audit
+        VMs that do not use managed disks delete this","policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/providers/Microsoft.Management/managementGroups/PolicyUIMG","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Sandip
+        Shahane","parameterScopes":{},"createdBy":"327c26bf-bf3e-4128-9b75-fbbd99e98739","createdOn":"2019-06-20T23:21:22.259084Z","updatedBy":null,"updatedOn":null}},"id":"/providers/Microsoft.Management/managementGroups/PolicyUIMG/providers/Microsoft.Authorization/policyAssignments/ebc169a314df42b9bf912b4f","type":"Microsoft.Authorization/policyAssignments","name":"ebc169a314df42b9bf912b4f","location":"eastus"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"sandipsh
+        CRI 2 [Preview]: Audit Dependency Agent Deployment - VM Image (OS) unlisted","policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/11ac78e3-31bc-4f0c-8434-37ab963cea07","scope":"/providers/Microsoft.Management/managementGroups/AzGovTest5","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Sandip
+        Shahane","parameterScopes":{}}},"id":"/providers/Microsoft.Management/managementGroups/AzGovTest5/providers/Microsoft.Authorization/policyAssignments/8a5f4a42ed8743de909b269c","type":"Microsoft.Authorization/policyAssignments","name":"8a5f4a42ed8743de909b269c","location":"eastus"},{"sku":{"name":"A0","tier":"Free"},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/404c3081-a854-4457-ae30-26a93ef643f9","scope":"/providers/microsoft.management/managementgroups/AzGovTest5"},"id":"/providers/microsoft.management/managementgroups/AzGovTest5/providers/Microsoft.Authorization/policyAssignments/jilimcss","type":"Microsoft.Authorization/policyAssignments","name":"jilimcss"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '4572'
+      - '12617'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 17 Jun 2019 19:04:16 GMT
+      - Mon, 05 Aug 2019 20:53:55 GMT
       expires:
       - '-1'
       pragma:
@@ -760,8 +611,8 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: 'b''{"properties": {"policyAssignmentId": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000003",
-      "filters": {"locations": ["westus"]}}}'''
+    body: '{"properties": {"policyAssignmentId": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000003",
+      "filters": {"locations": ["westus"]}}}'
     headers:
       Accept:
       - application/json
@@ -778,24 +629,24 @@ interactions:
       ParameterSetName:
       - -n -a --location-filters
       User-Agent:
-      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
-        azure-mgmt-policyinsights/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-policyinsights/0.3.1
+        Azure-SDK-For-Python AZURECLI/2.0.70
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/remediations/azurecli-test-remediation000004?api-version=2018-07-01-preview
   response:
     body:
-      string: '{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Succeeded","createdOn":"2019-06-17T19:04:17.8659993Z","lastUpdatedOn":"2019-06-17T19:04:17.928526Z","filters":{"locations":["westus"]},"deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations"}'
+      string: '{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Succeeded","createdOn":"2019-08-05T20:53:57.3832736Z","lastUpdatedOn":"2019-08-05T20:53:57.4457152Z","filters":{"locations":["westus"]},"deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '675'
+      - '676'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 17 Jun 2019 19:04:17 GMT
+      - Mon, 05 Aug 2019 20:53:57 GMT
       expires:
       - '-1'
       pragma:
@@ -807,7 +658,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-policy-insights-requests:
-      - '599'
+      - '598'
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -827,126 +678,24 @@ interactions:
       ParameterSetName:
       - -n
       User-Agent:
-      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
-        azure-mgmt-policyinsights/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-policyinsights/0.3.1
+        Azure-SDK-For-Python AZURECLI/2.0.70
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/remediations/azurecli-test-remediation000004?api-version=2018-07-01-preview
   response:
     body:
-      string: '{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Succeeded","createdOn":"2019-06-17T19:04:17.8659993Z","lastUpdatedOn":"2019-06-17T19:04:17.928526Z","filters":{"locations":["westus"]},"deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations"}'
+      string: '{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Succeeded","createdOn":"2019-08-05T20:53:57.3832736Z","lastUpdatedOn":"2019-08-05T20:53:57.4457152Z","filters":{"locations":["westus"]},"deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '675'
+      - '676'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 17 Jun 2019 19:04:18 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
-      - '598'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - policy remediation list
-      Connection:
-      - keep-alive
-      User-Agent:
-      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
-        azure-mgmt-policyinsights/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.66
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/remediations?api-version=2018-07-01-preview
-  response:
-    body:
-      string: '{"value":[{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Succeeded","createdOn":"2019-06-17T19:04:17.8659993Z","lastUpdatedOn":"2019-06-17T19:04:17.928526Z","filters":{"locations":["westus"]},"deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations"}]}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '687'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 17 Jun 2019 19:04:19 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
-      - '598'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - policy remediation deployment list
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - -n
-      User-Agent:
-      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
-        azure-mgmt-policyinsights/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.66
-      accept-language:
-      - en-US
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/remediations/azurecli-test-remediation000004/listDeployments?api-version=2018-07-01-preview
-  response:
-    body:
-      string: '{"value":[]}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '12'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 17 Jun 2019 19:04:20 GMT
+      - Mon, 05 Aug 2019 20:53:57 GMT
       expires:
       - '-1'
       pragma:
@@ -974,6 +723,108 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
+      - policy remediation list
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-policyinsights/0.3.1
+        Azure-SDK-For-Python AZURECLI/2.0.70
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/remediations?api-version=2018-07-01-preview
+  response:
+    body:
+      string: '{"value":[{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Succeeded","createdOn":"2019-08-05T20:53:57.3832736Z","lastUpdatedOn":"2019-08-05T20:53:57.4457152Z","filters":{"locations":["westus"]},"deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '688'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 05 Aug 2019 20:53:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
+      - '599'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy remediation deployment list
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-policyinsights/0.3.1
+        Azure-SDK-For-Python AZURECLI/2.0.70
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/remediations/azurecli-test-remediation000004/listDeployments?api-version=2018-07-01-preview
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 05 Aug 2019 20:53:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
+      - '596'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
       - policy remediation delete
       Connection:
       - keep-alive
@@ -982,24 +833,24 @@ interactions:
       ParameterSetName:
       - -n
       User-Agent:
-      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
-        azure-mgmt-policyinsights/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-policyinsights/0.3.1
+        Azure-SDK-For-Python AZURECLI/2.0.70
       accept-language:
       - en-US
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/remediations/azurecli-test-remediation000004?api-version=2018-07-01-preview
   response:
     body:
-      string: '{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Succeeded","createdOn":"2019-06-17T19:04:17.8659993Z","lastUpdatedOn":"2019-06-17T19:04:17.928526Z","filters":{"locations":["westus"]},"deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations"}'
+      string: '{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Succeeded","createdOn":"2019-08-05T20:53:57.3832736Z","lastUpdatedOn":"2019-08-05T20:53:57.4457152Z","filters":{"locations":["westus"]},"deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '675'
+      - '676'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 17 Jun 2019 19:04:21 GMT
+      - Mon, 05 Aug 2019 20:53:59 GMT
       expires:
       - '-1'
       pragma:
@@ -1017,7 +868,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-deletes:
       - '14999'
       x-ms-ratelimit-remaining-subscription-policy-insights-requests:
-      - '596'
+      - '598'
     status:
       code: 200
       message: OK
@@ -1033,8 +884,8 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
-        azure-mgmt-policyinsights/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-policyinsights/0.3.1
+        Azure-SDK-For-Python AZURECLI/2.0.70
       accept-language:
       - en-US
     method: GET
@@ -1050,7 +901,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 17 Jun 2019 19:04:21 GMT
+      - Mon, 05 Aug 2019 20:54:00 GMT
       expires:
       - '-1'
       pragma:
@@ -1066,7 +917,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-policy-insights-requests:
-      - '598'
+      - '597'
     status:
       code: 200
       message: OK
@@ -1084,27 +935,54 @@ interactions:
       ParameterSetName:
       - -n -a -g --namespace --resource-type --resource
       User-Agent:
-      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
-        policyclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-resource/3.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.70
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments?api-version=2018-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments?api-version=2019-01-01
   response:
     body:
-      string: '{"value":[{"sku":{"name":"A0","tier":"Free"},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","metadata":{"createdBy":"2262dfe7-375f-4597-a47c-2766489ecbe7","createdOn":"2019-06-17T19:04:10.3756615Z","updatedBy":null,"updatedOn":null}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000003","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-policy-assignment000003"},{"sku":{"name":"A1","tier":"Standard"},"properties":{"displayName":"ASC
-        Default (subscription: 0b1f6471-1bf0-4dda-aec3-cb9272f09590)","policyDefinitionId":"/providers/Microsoft.Authorization/policySetDefinitions/1f3afdf9-d0c9-4c3d-847f-89da613e70a8","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","parameters":{"diagnosticsLogsInServiceFabricMonitoringEffect":{"value":"AuditIfNotExists"},"systemUpdatesMonitoringEffect":{"value":"AuditIfNotExists"},"systemConfigurationsMonitoringEffect":{"value":"AuditIfNotExists"},"endpointProtectionMonitoringEffect":{"value":"AuditIfNotExists"},"diskEncryptionMonitoringEffect":{"value":"AuditIfNotExists"},"networkSecurityGroupsMonitoringEffect":{"value":"AuditIfNotExists"},"webApplicationFirewallMonitoringEffect":{"value":"AuditIfNotExists"},"sqlAuditingMonitoringEffect":{"value":"AuditIfNotExists"},"sqlEncryptionMonitoringEffect":{"value":"AuditIfNotExists"},"nextGenerationFirewallMonitoringEffect":{"value":"AuditIfNotExists"},"vulnerabilityAssesmentMonitoringEffect":{"value":"AuditIfNotExists"},"storageEncryptionMonitoringEffect":{"value":"Audit"},"jitNetworkAccessMonitoringEffect":{"value":"AuditIfNotExists"},"adaptiveApplicationControlsMonitoringEffect":{"value":"AuditIfNotExists"},"identityDesignateLessThanOwnersMonitoringEffect":{"value":"AuditIfNotExists"},"identityDesignateMoreThanOneOwnerMonitoringEffect":{"value":"AuditIfNotExists"},"identityEnableMFAForOwnerPermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"identityEnableMFAForWritePermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"identityEnableMFAForReadPermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"identityRemoveDeprecatedAccountWithOwnerPermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"identityRemoveDeprecatedAccountMonitoringEffect":{"value":"AuditIfNotExists"},"identityRemoveExternalAccountWithOwnerPermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"identityRemoveExternalAccountWithWritePermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"identityRemoveExternalAccountWithReadPermissionsMonitoringEffect":{"value":"AuditIfNotExists"},"secureTransferToStorageAccountMonitoringEffect":{"value":"Audit"},"aadAuthenticationInSqlServerMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInRedisCacheMonitoringEffect":{"value":"Audit"},"clusterProtectionLevelInServiceFabricMonitoringEffect":{"value":"Audit"},"aadAuthenticationInServiceFabricMonitoringEffect":{"value":"Audit"},"diagnosticsLogsInServiceBusMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInDataLakeAnalyticsMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInDataLakeStoreMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInBatchAccountMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInEventHubMonitoringEffect":{"value":"AuditIfNotExists"},"metricAlertsInBatchAccountMonitoringEffect":{"value":"AuditIfNotExists"},"namespaceAuthorizationRulesInServiceBusMonitoringEffect":{"value":"Audit"},"disableUnrestrictedNetworkToStorageAccountMonitoringEffect":{"value":"Audit"},"classicComputeVMsMonitoringEffect":{"value":"Audit"},"classicStorageAccountsMonitoringEffect":{"value":"Audit"},"sqlDbVulnerabilityAssesmentMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInKeyVaultMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInStreamAnalyticsMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInSearchServiceMonitoringEffect":{"value":"AuditIfNotExists"},"diagnosticsLogsInLogicAppsMonitoringEffect":{"value":"AuditIfNotExists"}},"description":"This
-        policy assignment was automatically created by Azure Security Center","metadata":{"assignedBy":"Security
-        Center"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/SecurityCenterBuiltIn","type":"Microsoft.Authorization/policyAssignments","name":"SecurityCenterBuiltIn"}]}'
+      string: '{"value":[{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"[Preview]:
+        Enable Monitoring in Azure Security Center","policyDefinitionId":"/providers/Microsoft.Authorization/policySetDefinitions/1f3afdf9-d0c9-4c3d-847f-89da613e70a8","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Sandip
+        Shahane","parameterScopes":{}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/1e4e70f9cd4846268b6998ee","type":"Microsoft.Authorization/policyAssignments","name":"1e4e70f9cd4846268b6998ee","location":"eastus"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"VMs
+        with no Managed Disk","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/95696b24-404f-4376-a9a6-7fa8ba91e4d5","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Tigran
+        Shahbazian","parameterScopes":{}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/21e5086343384f34a3b2d10b","type":"Microsoft.Authorization/policyAssignments","name":"21e5086343384f34a3b2d10b"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"Audit
+        unrestricted network access to storage accounts","policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/34c877ad-507e-4c82-993e-3452a6e0ad3c","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Sandip
+        Shahane","parameterScopes":{}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/4d31128e32d04a0098fd536e","type":"Microsoft.Authorization/policyAssignments","name":"4d31128e32d04a0098fd536e","location":"eastus"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"[Preview]:
+        Enable Monitoring in Azure Security Center","policyDefinitionId":"/providers/Microsoft.Authorization/policySetDefinitions/1f3afdf9-d0c9-4c3d-847f-89da613e70a8","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Sandip
+        Shahane","parameterScopes":{}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/4e4179ff39194a62bad4ef3e","type":"Microsoft.Authorization/policyAssignments","name":"4e4179ff39194a62bad4ef3e","location":"eastus"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"[Preview]:
+        Audit missing blob encryption for storage accounts","policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/655cb504-bcee-4362-bd4c-402e6aa38759","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Sandip
+        Shahane","parameterScopes":{}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/5e9286a7cef840afb36b18a7","type":"Microsoft.Authorization/policyAssignments","name":"5e9286a7cef840afb36b18a7","location":"eastus"},{"sku":{"name":"A0","tier":"Free"},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","metadata":{"createdBy":"82f25a3e-d28d-4c27-90d6-d92c79d98936","createdOn":"2019-08-05T20:53:50.9022888Z","updatedBy":null,"updatedOn":null}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000003","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-policy-assignment000003"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"[Preview]:
+        Enable Monitoring in Azure Security Center","policyDefinitionId":"/providers/Microsoft.Authorization/policySetDefinitions/1f3afdf9-d0c9-4c3d-847f-89da613e70a8","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Rohit
+        Bhardwaj","parameterScopes":{},"createdBy":"22ac4b8c-9194-4feb-b6c6-0e7a995fca2e","createdOn":"2019-05-01T00:17:00.0617598Z","updatedBy":null,"updatedOn":null}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/d58dea05c8704a33b6c8e43e","type":"Microsoft.Authorization/policyAssignments","name":"d58dea05c8704a33b6c8e43e","location":"eastus"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"Enforce
+        tag and its value","policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/1e30110a-5ceb-460c-a204-c1c3969c6d62","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/stuartko_testrg1","notScopes":[],"parameters":{"tagName":{"value":"blahName"},"tagValue":{"value":"blahValue"}},"metadata":{"assignedBy":"Stuart
+        Konen","parameterScopes":{}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/stuartko_testrg1/providers/Microsoft.Authorization/policyAssignments/41dfc116d41aa99bd1dfdd32578eecd9cf75e14481795fc90975dbb25ed97d70","type":"Microsoft.Authorization/policyAssignments","name":"41dfc116d41aa99bd1dfdd32578eecd9cf75e14481795fc90975dbb25ed97d70"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"jilmntest
+        Append tag and its value from the resource group","policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/9ea02ca2-71db-412d-8b00-7c7ca9fcd32d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jilimntest","notScopes":[],"parameters":{"tagName":{"value":"tag1"}},"metadata":{"assignedBy":"Jin
+        Soon Lim","parameterScopes":{},"createdBy":"69108416-6ac7-4a4f-ac13-fee20ff1ee02","createdOn":"2019-06-24T23:20:46.5138204Z","updatedBy":null,"updatedOn":null}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jilimntest/providers/Microsoft.Authorization/policyAssignments/56af151b043845ba9dfe0e84","type":"Microsoft.Authorization/policyAssignments","name":"56af151b043845ba9dfe0e84","location":"eastus"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"Azure
+        KeyVault Allowed Locations","policyDefinitionId":"/providers/Microsoft.Management/managementGroups/AzGovTest5/providers/Microsoft.Authorization/policyDefinitions/e1d7de9f-42f0-4af1-9ee0-0187bfce08d5","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ramya-test","notScopes":[],"parameters":{"allowedLocations":{"value":["westus"]}},"metadata":{"assignedBy":"Ramyasree
+        Chakka","parameterScopes":{"allowedLocations":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ramya-test"},"createdBy":"82f25a3e-d28d-4c27-90d6-d92c79d98936","createdOn":"2019-05-15T23:11:34.9169304Z","updatedBy":null,"updatedOn":null}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ramya-test/providers/Microsoft.Authorization/policyAssignments/8c219f36c4c449b198f38f45","type":"Microsoft.Authorization/policyAssignments","name":"8c219f36c4c449b198f38f45","location":"eastus"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"[Preview]:
+        Enable Monitoring in Azure Security Center","policyDefinitionId":"/providers/Microsoft.Authorization/policySetDefinitions/1f3afdf9-d0c9-4c3d-847f-89da613e70a8","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cheggpolicy","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Rohit
+        Bhardwaj","parameterScopes":{},"createdBy":"22ac4b8c-9194-4feb-b6c6-0e7a995fca2e","createdOn":"2019-05-01T00:22:01.0195887Z","updatedBy":null,"updatedOn":null}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cheggpolicy/providers/Microsoft.Authorization/policyAssignments/8a4555d353ed46bb856e9890","type":"Microsoft.Authorization/policyAssignments","name":"8a4555d353ed46bb856e9890","location":"eastus"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"[Preview]:
+        Deploy Log Analytics Agent for Windows VMs","policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/0868462e-646c-4fe3-9ced-a733534b6a2c","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jilimrg","notScopes":[],"parameters":{"logAnalytics":{"value":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/defaultresourcegroup-weu/providers/microsoft.operationalinsights/workspaces/defaultworkspace-e78961ba-36fe-4739-9212-e3031b4c8db7-weu"}},"metadata":{"assignedBy":"Jin
+        Soon Lim","parameterScopes":{"logAnalytics":"/subscriptions/00000000-0000-0000-0000-000000000000"},"createdBy":"69108416-6ac7-4a4f-ac13-fee20ff1ee02","createdOn":"2019-06-24T19:14:43.0131358Z","updatedBy":null,"updatedOn":null}},"identity":{"principalId":"ebd0adfd-2ebb-49ac-8356-2e445a21c226","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jilimrg/providers/Microsoft.Authorization/policyAssignments/9f4513e4b2254b3c9be27189","type":"Microsoft.Authorization/policyAssignments","name":"9f4513e4b2254b3c9be27189","location":"centralus"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"jilim
+        Append tag and its value from the resource group","policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/9ea02ca2-71db-412d-8b00-7c7ca9fcd32d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jilimrg","notScopes":[],"parameters":{"tagName":{"value":"tag1"}},"metadata":{"assignedBy":"Jin
+        Soon Lim","parameterScopes":{},"createdBy":"69108416-6ac7-4a4f-ac13-fee20ff1ee02","createdOn":"2019-06-24T21:57:46.067217Z","updatedBy":null,"updatedOn":null}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jilimrg/providers/Microsoft.Authorization/policyAssignments/f1b5c3295c3d4498abf1b7a9","type":"Microsoft.Authorization/policyAssignments","name":"f1b5c3295c3d4498abf1b7a9","location":"eastus"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"Audit
+        enabling of diagnostic logs in Azure Data Lake Store","policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/057ef27e-665e-4328-8ea3-04b3122bd9fb","scope":"/providers/Microsoft.Management/managementGroups/PolicyUIMG","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Sandip
+        Shahane","parameterScopes":{}}},"id":"/providers/Microsoft.Management/managementGroups/PolicyUIMG/providers/Microsoft.Authorization/policyAssignments/66926b7556734dcf9a80080f","type":"Microsoft.Authorization/policyAssignments","name":"66926b7556734dcf9a80080f","location":"eastus"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"Audit
+        VMs that do not use managed disks delete this","policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/providers/Microsoft.Management/managementGroups/PolicyUIMG","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Sandip
+        Shahane","parameterScopes":{},"createdBy":"327c26bf-bf3e-4128-9b75-fbbd99e98739","createdOn":"2019-06-20T23:21:22.259084Z","updatedBy":null,"updatedOn":null}},"id":"/providers/Microsoft.Management/managementGroups/PolicyUIMG/providers/Microsoft.Authorization/policyAssignments/ebc169a314df42b9bf912b4f","type":"Microsoft.Authorization/policyAssignments","name":"ebc169a314df42b9bf912b4f","location":"eastus"},{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"sandipsh
+        CRI 2 [Preview]: Audit Dependency Agent Deployment - VM Image (OS) unlisted","policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/11ac78e3-31bc-4f0c-8434-37ab963cea07","scope":"/providers/Microsoft.Management/managementGroups/AzGovTest5","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Sandip
+        Shahane","parameterScopes":{}}},"id":"/providers/Microsoft.Management/managementGroups/AzGovTest5/providers/Microsoft.Authorization/policyAssignments/8a5f4a42ed8743de909b269c","type":"Microsoft.Authorization/policyAssignments","name":"8a5f4a42ed8743de909b269c","location":"eastus"},{"sku":{"name":"A0","tier":"Free"},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/404c3081-a854-4457-ae30-26a93ef643f9","scope":"/providers/microsoft.management/managementgroups/AzGovTest5"},"id":"/providers/microsoft.management/managementgroups/AzGovTest5/providers/Microsoft.Authorization/policyAssignments/jilimcss","type":"Microsoft.Authorization/policyAssignments","name":"jilimcss"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '4572'
+      - '12617'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 17 Jun 2019 19:04:21 GMT
+      - Mon, 05 Aug 2019 20:54:01 GMT
       expires:
       - '-1'
       pragma:
@@ -1121,7 +999,7 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: 'b''{"properties": {"policyAssignmentId": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000003"}}'''
+    body: '{"properties": {"policyAssignmentId": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000003"}}'
     headers:
       Accept:
       - application/json
@@ -1138,24 +1016,24 @@ interactions:
       ParameterSetName:
       - -n -a -g --namespace --resource-type --resource
       User-Agent:
-      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
-        azure-mgmt-policyinsights/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-policyinsights/0.3.1
+        Azure-SDK-For-Python AZURECLI/2.0.70
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.Storage/storageAccounts/cliremediation000002/providers/Microsoft.PolicyInsights/remediations/azurecli-test-remediation000004?api-version=2018-07-01-preview
   response:
     body:
-      string: '{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Succeeded","createdOn":"2019-06-17T19:04:23.3422093Z","lastUpdatedOn":"2019-06-17T19:04:23.4047456Z","deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001/providers/microsoft.storage/storageaccounts/cliremediation000002/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations"}'
+      string: '{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Succeeded","createdOn":"2019-08-05T20:54:02.459106Z","lastUpdatedOn":"2019-08-05T20:54:02.5215095Z","deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001/providers/microsoft.storage/storageaccounts/cliremediation000002/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '801'
+      - '800'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 17 Jun 2019 19:04:23 GMT
+      - Mon, 05 Aug 2019 20:54:02 GMT
       expires:
       - '-1'
       pragma:
@@ -1167,7 +1045,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-policy-insights-requests:
-      - '595'
+      - '598'
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -1187,24 +1065,24 @@ interactions:
       ParameterSetName:
       - -n -g --namespace --resource-type --resource
       User-Agent:
-      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
-        azure-mgmt-policyinsights/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-policyinsights/0.3.1
+        Azure-SDK-For-Python AZURECLI/2.0.70
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.Storage/storageAccounts/cliremediation000002/providers/Microsoft.PolicyInsights/remediations/azurecli-test-remediation000004?api-version=2018-07-01-preview
   response:
     body:
-      string: '{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Succeeded","createdOn":"2019-06-17T19:04:23.3422093Z","lastUpdatedOn":"2019-06-17T19:04:23.4047456Z","deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001/providers/microsoft.storage/storageaccounts/cliremediation000002/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations"}'
+      string: '{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Succeeded","createdOn":"2019-08-05T20:54:02.459106Z","lastUpdatedOn":"2019-08-05T20:54:02.5215095Z","deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001/providers/microsoft.storage/storageaccounts/cliremediation000002/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '801'
+      - '800'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 17 Jun 2019 19:04:23 GMT
+      - Mon, 05 Aug 2019 20:54:03 GMT
       expires:
       - '-1'
       pragma:
@@ -1220,7 +1098,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-policy-insights-requests:
-      - '597'
+      - '596'
     status:
       code: 200
       message: OK
@@ -1238,24 +1116,24 @@ interactions:
       ParameterSetName:
       - -g --namespace --resource-type --resource
       User-Agent:
-      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
-        azure-mgmt-policyinsights/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-policyinsights/0.3.1
+        Azure-SDK-For-Python AZURECLI/2.0.70
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.Storage/storageAccounts/cliremediation000002/providers/Microsoft.PolicyInsights/remediations?api-version=2018-07-01-preview
   response:
     body:
-      string: '{"value":[{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Succeeded","createdOn":"2019-06-17T19:04:23.3422093Z","lastUpdatedOn":"2019-06-17T19:04:23.4047456Z","deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001/providers/microsoft.storage/storageaccounts/cliremediation000002/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations"}]}'
+      string: '{"value":[{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Succeeded","createdOn":"2019-08-05T20:54:02.459106Z","lastUpdatedOn":"2019-08-05T20:54:02.5215095Z","deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001/providers/microsoft.storage/storageaccounts/cliremediation000002/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '813'
+      - '812'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 17 Jun 2019 19:04:25 GMT
+      - Mon, 05 Aug 2019 20:54:03 GMT
       expires:
       - '-1'
       pragma:
@@ -1291,8 +1169,8 @@ interactions:
       ParameterSetName:
       - -n -g --namespace --resource-type --resource
       User-Agent:
-      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
-        azure-mgmt-policyinsights/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-policyinsights/0.3.1
+        Azure-SDK-For-Python AZURECLI/2.0.70
       accept-language:
       - en-US
     method: POST
@@ -1308,7 +1186,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 17 Jun 2019 19:04:25 GMT
+      - Mon, 05 Aug 2019 20:54:03 GMT
       expires:
       - '-1'
       pragma:
@@ -1324,7 +1202,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-policy-insights-requests:
-      - '598'
+      - '599'
     status:
       code: 200
       message: OK
@@ -1344,24 +1222,24 @@ interactions:
       ParameterSetName:
       - -n -g --namespace --resource-type --resource
       User-Agent:
-      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
-        azure-mgmt-policyinsights/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-policyinsights/0.3.1
+        Azure-SDK-For-Python AZURECLI/2.0.70
       accept-language:
       - en-US
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.Storage/storageAccounts/cliremediation000002/providers/Microsoft.PolicyInsights/remediations/azurecli-test-remediation000004?api-version=2018-07-01-preview
   response:
     body:
-      string: '{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Succeeded","createdOn":"2019-06-17T19:04:23.3422093Z","lastUpdatedOn":"2019-06-17T19:04:23.4047456Z","deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001/providers/microsoft.storage/storageaccounts/cliremediation000002/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations"}'
+      string: '{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Succeeded","createdOn":"2019-08-05T20:54:02.459106Z","lastUpdatedOn":"2019-08-05T20:54:02.5215095Z","deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001/providers/microsoft.storage/storageaccounts/cliremediation000002/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '801'
+      - '800'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 17 Jun 2019 19:04:27 GMT
+      - Mon, 05 Aug 2019 20:54:05 GMT
       expires:
       - '-1'
       pragma:
@@ -1397,8 +1275,8 @@ interactions:
       ParameterSetName:
       - -g --namespace --resource-type --resource
       User-Agent:
-      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
-        azure-mgmt-policyinsights/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-policyinsights/0.3.1
+        Azure-SDK-For-Python AZURECLI/2.0.70
       accept-language:
       - en-US
     method: GET
@@ -1414,7 +1292,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 17 Jun 2019 19:04:27 GMT
+      - Mon, 05 Aug 2019 20:54:05 GMT
       expires:
       - '-1'
       pragma:
@@ -1430,7 +1308,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-policy-insights-requests:
-      - '597'
+      - '595'
     status:
       code: 200
       message: OK
@@ -1450,15 +1328,15 @@ interactions:
       ParameterSetName:
       - -n
       User-Agent:
-      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
-        policyclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-resource/3.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.70
       accept-language:
       - en-US
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000003?api-version=2018-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000003?api-version=2019-01-01
   response:
     body:
-      string: '{"sku":{"name":"A0","tier":"Free"},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","metadata":{"createdBy":"2262dfe7-375f-4597-a47c-2766489ecbe7","createdOn":"2019-06-17T19:04:10.3756615Z","updatedBy":null,"updatedOn":null}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000003","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-policy-assignment000003"}'
+      string: '{"sku":{"name":"A0","tier":"Free"},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","metadata":{"createdBy":"82f25a3e-d28d-4c27-90d6-d92c79d98936","createdOn":"2019-08-05T20:53:50.9022888Z","updatedBy":null,"updatedOn":null}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000003","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-policy-assignment000003"}'
     headers:
       cache-control:
       - no-cache
@@ -1467,7 +1345,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 17 Jun 2019 19:04:28 GMT
+      - Mon, 05 Aug 2019 20:54:06 GMT
       expires:
       - '-1'
       pragma:
@@ -1485,51 +1363,4 @@ interactions:
     status:
       code: 200
       message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - group delete
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - --name --yes --no-wait
-      User-Agent:
-      - python/3.7.2 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
-        resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.66
-      accept-language:
-      - en-US
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001?api-version=2018-05-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Mon, 17 Jun 2019 19:04:29 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGUkVNRURJQVRJT05JWk5WQUFYSUdHT0w1NlRIQUJMS0VCWXxBMDA4OTgwRDQ2OEVCMDcxLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
-    status:
-      code: 202
-      message: Accepted
 version: 1
