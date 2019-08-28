@@ -1213,6 +1213,7 @@ def load_arguments(self, _):
         c.argument('radius_server', min_api='2017-06-01', help='Radius server address to connect to.', arg_group='VPN Client')
         c.argument('radius_secret', min_api='2017-06-01', help='Radius secret to use for authentication.', arg_group='VPN Client')
         c.argument('client_protocol', min_api='2017-06-01', help='Protocols to use for connecting', nargs='+', arg_group='VPN Client', arg_type=get_enum_type(VpnClientProtocol))
+        c.argument('custom_routes', help='Space-separated list of CIDR prefixes representing the custom routes address space specified by the customer for virtual network gateway and VpnClient.', nargs='+', arg_group='VPN Client')
 
     with self.argument_context('network vnet-gateway update') as c:
         c.argument('gateway_type', vnet_gateway_type, default=None)
