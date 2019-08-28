@@ -109,7 +109,7 @@ def load_arguments(self, _):
         c.argument('params', help='JSON formatted string or a path to a file or uri with parameter definitions.', type=file_type, completer=FilesCompleter(), min_api='2016-12-01')
         c.argument('metadata', min_api='2017-06-01-preview', nargs='+', validator=validate_metadata, help='Metadata in space-separated key=value pairs.')
         c.argument('management_group', arg_type=management_group_name_type)
-        c.argument('mode', options_list=['--mode', '-m'], help='Mode of the policy definition.', min_api='2016-12-01')
+        c.argument('mode', options_list=['--mode', '-m'], help='Mode of the policy definition, e.g. All, Indexed. Please visit https://aka.ms/azure-policy-mode for more information.', min_api='2016-12-01')
         c.argument('subscription', arg_type=subscription_type)
         c.ignore('_subscription')  # disable global subscription
 
