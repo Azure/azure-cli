@@ -252,7 +252,7 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
     # 3. if we still don't have credentials, attempt to get the admin credentials (if enabled)
     if registry:
         if registry.admin_user_enabled:
-            logger.warning("Attempting with admin credentials...")
+            logger.info("Attempting with admin credentials...")
             try:
                 cred = cf_acr_registries(cli_ctx).list_credentials(resource_group_name, registry_name)
                 return login_server, cred.username, cred.passwords[0].value
