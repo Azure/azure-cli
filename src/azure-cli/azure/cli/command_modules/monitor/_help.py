@@ -998,7 +998,7 @@ examples:
 """
 
 helps['monitor log-alert action-group'] = """
-type: command
+type: group
 short-summary: Manage action groups for alert rule.
 """
 
@@ -1030,7 +1030,7 @@ examples:
 """
 
 helps['monitor log-alert authorized-resource'] = """
-type: command
+type: group
 short-summary: Manage authorized resources for alert rule.
 """
 
