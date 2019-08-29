@@ -260,7 +260,7 @@ short-summary: Get Action Rules Information
 long-summary: >
     Get Action Rules Information.
 parameters:
-  - name: --resource-group-name
+  - name: --resource-group
     type: string
     short-summary: Resource group in which action rule reside.
   - name: --target-resource
@@ -296,10 +296,10 @@ parameters:
 examples:
   - name: Get Action Rules Information filtered resource-group-name, severity, monitor-service.
     text: >
-        az alertsmanagement action-rule list --resource-group-name "test-rg" --severity "Sev2" --monitor-service "Platform"
+        az alertsmanagement action-rule list --resource-group "MyResourceGroup" --severity "Sev2" --monitor-service "Platform"
   - name: Get Action Rules Information filtered resource-group-name and name.
     text: >
-        az alertsmanagement action-rule list --resource-group-name "test-rg" --name "Test-Action-Rule"
+        az alertsmanagement action-rule list --resource-group "MyResourceGroup" --name "Test-Action-Rule"
 """
 
 helps['alertsmanagement action-rule show'] = """
@@ -308,7 +308,7 @@ short-summary: Get action-rule based on parameters
 long-summary: >
     Get action-rule based on parameters
 parameters:
-  - name: --resource-group-name
+  - name: --resource-group
     type: string
     short-summary: Resource group in which action rule reside.
   - name: --name
@@ -317,7 +317,7 @@ parameters:
 examples:
   - name: Get action-rule based on resource-group-name and name of action-rule.
     text: >
-        az alertsmanagement action-rule show --resource-group-name "test-rg" --name "Test-AR"
+        az alertsmanagement action-rule show --resource-group "MyResourceGroup" --name "Test-AR"
 """
 
 helps['alertsmanagement action-rule set'] = """
@@ -326,7 +326,7 @@ short-summary: Create or update an action rule.
 long-summary: >
     Create or update an action rule.
 parameters:
-  - name: --resource-group-name
+  - name: --resource-group
     type: string
     short-summary: Resource group in which action rule reside.
   - name: --name
@@ -383,7 +383,7 @@ parameters:
 examples:
   - name: Set action-rule on various parameters.
     text: >
-        az alertsmanagement action-rule set --resource-group-name "test-rg" --name "Test-AR" --scope "/subscriptions/dd91de05-d791-4ceb-b6dc-988682dc7d72/resourceGroups/alertslab","/subscriptions/dd91de05-d791-4ceb-b6dc-988682dc7d72/resourceGroups/Test-VMs" --severity-condition "Equals:Sev0,Sev1" --monitor-condition "NotEquals:Resolved" --description "Test description" --status "Enabled" --action-rule-type "Suppression" --recurrence-type "Weekly" --suppression-start-time "06/26/2018 06:00:00" --suppression-end-time "07/27/2018 06:00:00" --recurrence-values 1,4,6
+        az alertsmanagement action-rule set --resource-group "MyResourceGroup" --name "Test-AR" --scope "/subscriptions/MySubscriptionID/resourceGroups/alertslab","/subscriptions/MySubscriptionID/resourceGroups/Test-VMs" --severity-condition "Equals:Sev0,Sev1" --monitor-condition "NotEquals:Resolved" --description "Test description" --status "Enabled" --action-rule-type "Suppression" --recurrence-type "Weekly" --suppression-start-time "06/26/2018 06:00:00" --suppression-end-time "07/27/2018 06:00:00" --recurrence-values 1,4,6
 """
 
 helps['alertsmanagement action-rule update'] = """
@@ -392,7 +392,7 @@ short-summary: Updates action rule properties.
 long-summary: >
     Updates action rule properties.
 parameters:
-  - name: --resource-group-name
+  - name: --resource-group
     type: string
     short-summary: Resource group in which action rule reside.
   - name: --name
@@ -407,7 +407,7 @@ parameters:
 examples:
   - name: Update status of action rule.
     text: >
-        az alertsmanagement action-rule update --resource-group-name "test-rg" --name "Test-ActionRule" --status "Disabled"
+        az alertsmanagement action-rule update --resource-group "MyResourceGroup" --name "Test-ActionRule" --status "Disabled"
 """
 
 helps['alertsmanagement action-rule delete'] = """
@@ -416,7 +416,7 @@ short-summary: Deletes a action group
 long-summary: >
     Deletes a action group based on parameters
 parameters:
-  - name: --resource-group-name
+  - name: --resource-group
     type: string
     short-summary: Resource group in which action rule reside.
   - name: --name
@@ -425,5 +425,5 @@ parameters:
 examples:
   - name: Deletes a action rule
     text: >
-        alertsmanagement action-rule delete --resource-group-name "test-rg" --name "ActionRuleName"
+        alertsmanagement action-rule delete --resource-group "MyResourceGroup" --name "ActionRuleName"
 """

@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**ALERTSMANAGEMENT**
+
+* Initial release of Alertsmanagement module which manages alerts, smart-groups and action-rules for Azure Monitor.
+
 **ACR**
 
 * Fixed issue #9952 (a regression in the `acr pack build` command).
