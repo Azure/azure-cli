@@ -9,11 +9,11 @@ logger = get_logger(__name__)
 
 
 def create_log_alert(  # pylint: disable=too-many-locals
-        cmd, client, resource_group_name, rule_name, location, frequency, time_window,
+        client, resource_group_name, rule_name, location, frequency, time_window,
         data_source_id, alert_query,
         severity, threshold_operator, threshold, throttling=None,
         metric_column=None, metric_trigger_type=None, metric_threshold_operator=None, metric_threshold=None,
-        action_group=None, email_subject=None,
+        action_group_ids=None, email_subject=None,
         query_type="ResultCount", authorized_resources=None, description=None, tags=None, disable=False):
     from azure.mgmt.monitor.models import (LogSearchRuleResource, Schedule, Source,
                                            TriggerCondition, AlertingAction, AzNsActionGroup, LogMetricTrigger)
@@ -31,12 +31,8 @@ def create_log_alert(  # pylint: disable=too-many-locals
     else:
         trigger = TriggerCondition(threshold_operator=threshold_operator, threshold=threshold)
 
-    if action_group:
-        action_group = _normalize_names(cmd.cli_ctx, action_group, resource_group_name, 'microsoft.insights',
-                                        'actionGroups')
-
     action = AlertingAction(severity=severity, trigger=trigger, throttling_in_min=throttling,
-                            azns_action=AzNsActionGroup(action_group=action_group, email_subject=email_subject,
+                            azns_action=AzNsActionGroup(action_group=action_group_ids, email_subject=email_subject,
                                                         custom_webhook_payload=None))
 
     settings = LogSearchRuleResource(location=location, tags=tags, description=description, enabled=not disable,
@@ -135,17 +131,13 @@ def reset_action_group(client, resource_group_name, rule_name):
     return client.create_or_update(resource_group_name, rule_name, settings)
 
 
-def add_action_group(cmd, client, resource_group_name, rule_name, action_group_ids, reset=False):
+def add_action_group(client, resource_group_name, rule_name, action_group_ids):
     settings = _get_alert_settings(client, resource_group_name, rule_name)
 
-    # normalize the action group ids
-    action_groups = _normalize_names(cmd.cli_ctx, action_group_ids, resource_group_name, 'microsoft.insights',
-                                     'actionGroups')
-
     if settings.action.azns_action.action_group is None:
-        settings.action.azns_action.action_group = action_groups
+        settings.action.azns_action.action_group = action_group_ids
     else:
-        for action_group in action_groups:
+        for action_group in action_group_ids:
             match = next(
                 (x for x in settings.action.azns_action.action_group if action_group.lower() == x.lower()), None
             )
@@ -155,18 +147,15 @@ def add_action_group(cmd, client, resource_group_name, rule_name, action_group_i
     return client.create_or_update(resource_group_name, rule_name, settings)
 
 
-def remove_action_group(cmd, client, resource_group_name, rule_name, action_group_ids):
+def remove_action_group(client, resource_group_name, rule_name, action_group_ids):
     from knack.util import CLIError
 
     settings = _get_alert_settings(client, resource_group_name, rule_name)
 
-    action_groups = _normalize_names(cmd.cli_ctx, action_group_ids, resource_group_name, 'microsoft.insights',
-                                     'actionGroups')
-
     if settings.action.azns_action.action_group is None:
         raise CLIError('Error in removing action group. There are no action groups attached to alert rule.')
 
-    for action_group in action_groups:
+    for action_group in action_group_ids:
         match = next(
             (x for x in settings.action.azns_action.action_group if action_group.lower() == x.lower()), None
         )
@@ -186,7 +175,7 @@ def reset_authorized_resource(client, resource_group_name, rule_name):
     return client.create_or_update(resource_group_name, rule_name, settings)
 
 
-def add_authorized_resource(client, resource_group_name, rule_name, authorized_resources=None):
+def add_authorized_resource(client, resource_group_name, rule_name, authorized_resources):
     settings = _get_alert_settings(client, resource_group_name, rule_name)
 
     if settings.source.authorized_resources is None:
@@ -202,7 +191,7 @@ def add_authorized_resource(client, resource_group_name, rule_name, authorized_r
     return client.create_or_update(resource_group_name, rule_name, settings)
 
 
-def remove_authorized_resource(client, resource_group_name, rule_name, authorized_resources=None):
+def remove_authorized_resource(client, resource_group_name, rule_name, authorized_resources):
     from knack.util import CLIError
     settings = _get_alert_settings(client, resource_group_name, rule_name)
     if settings.source.authorized_resources is None:
@@ -223,28 +212,29 @@ def remove_authorized_resource(client, resource_group_name, rule_name, authorize
     return client.create_or_update(resource_group_name, rule_name, settings)
 
 
-def _normalize_names(cli_ctx, resource_names, resource_group, namespace, resource_type):
+def validate_action_group(cmd, namespace):
     """Normalize a group of resource names. Returns a set of resource ids. Throws if any of the name can't be correctly
     converted to a resource id."""
     from msrestazure.tools import is_valid_resource_id, resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
-    rids = set()
-    # normalize the action group ids
-    for name in resource_names:
-        if is_valid_resource_id(name):
-            rids.add(name)
-        else:
-            rid = resource_id(subscription=get_subscription_id(cli_ctx),
-                              resource_group=resource_group,
-                              namespace=namespace,
-                              type=resource_type,
-                              name=name)
-            if not is_valid_resource_id(rid):
-                raise ValueError('The resource name {} is not valid.'.format(name))
-            rids.add(rid)
+    if namespace.action_group_ids:
+        rids = set()
+        # normalize the action group ids
+        for name in namespace.action_group_ids:
+            if is_valid_resource_id(name):
+                rids.add(name)
+            else:
+                rid = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
+                                  resource_group=namespace.resource_group_name,
+                                  namespace='microsoft.insights',
+                                  type='actionGroups',
+                                  name=name)
+                if not is_valid_resource_id(rid):
+                    raise ValueError('The resource name {} is not valid.'.format(name))
+                rids.add(rid)
 
-    return rids
+        setattr(namespace, 'action_group_ids', rids)
 
 
 def _get_alert_settings(client, resource_group_name, rule_name, throw_if_missing=True):

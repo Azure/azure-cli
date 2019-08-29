@@ -353,6 +353,7 @@ def load_arguments(self, _):
         c.argument('authorized_resources', nargs='+', help="Space separated list of ARM resource ids referred into query.")
 
     with self.argument_context('monitor log-alert create', arg_group='Action') as c:
+        from .operations.log_alert import validate_action_group
         c.argument('severity', arg_type=get_enum_type(AlertSeverity), help="Severity of the alert.")
         c.argument('throttling', type=int, help="Time (in minutes) for which Alerts should be throttled or suppressed.")
         c.argument('threshold_operator', arg_type=get_enum_type(ConditionalOperator), help="Evaluation operation for rule.")
@@ -361,7 +362,7 @@ def load_arguments(self, _):
         c.argument('metric_trigger_type', arg_type=get_enum_type(MetricTriggerType), help="Metric Trigger Type. This argument is needed only for metric measurement log alert rule.")
         c.argument('metric_threshold_operator', arg_type=get_enum_type(ConditionalOperator), help="Result Condition Evaluation criteria. This argument is needed only for metric measurement log alert rule.")
         c.argument('metric_threshold', type=int, help="The threshold of the metric trigger. Theshold is compared with numeric value in AggregatedValue field, used to trigger for metric measurement log alert rule.")
-        c.argument('action_group', nargs='+', help="Azure Action Group reference. Accepts space-separated action group identifiers. The identifier can be the action group's name or its resource ID.")
+        c.argument('action_group_ids', options_list=['--action-group', '-a'], nargs='+', validator=validate_action_group, help="Azure Action Group reference. Accepts space-separated action group identifiers. The identifier can be the action group's name or its resource ID.")
         c.argument('email_subject', help="Custom subject override for all email ids in all Azure action group(s) associated with the alert rule.")
 
     with self.argument_context('monitor log-alert update') as c:
@@ -390,16 +391,18 @@ def load_arguments(self, _):
         c.argument('email_subject', help="Update custom subject override for all email ids in all Azure action group(s) associated with the alert rule.")
 
     with self.argument_context('monitor log-alert action-group add') as c:
-        c.argument('action_group_ids', options_list=['--action-group', '-a'], nargs='+',
+        from .operations.log_alert import validate_action_group
+        c.argument('action_group_ids', options_list=['--action-group', '-a'], nargs='+', validator=validate_action_group,
                    help="Accepts space separated action group identifiers. The identifier can be the action group's name or its resource ID.")
 
     with self.argument_context('monitor log-alert action-group remove') as c:
-        c.argument('action_group_ids', options_list=['--action-group', '-a'], nargs='+',
+        from .operations.log_alert import validate_action_group
+        c.argument('action_group_ids', options_list=['--action-group', '-a'], nargs='+', validator=validate_action_group,
                    help="Accepts space separated action group identifiers. The identifier can be the action group's name or its resource ID.")
 
     with self.argument_context('monitor log-alert authorized-resource add') as c:
-        c.argument('authorized_resources', options_list=['--authorized-resource', '-a'], nargs='+', help="Accepts space separated list of ARM resource ids.")
+        c.argument('authorized_resources', options_list=['--authorized-resource'], nargs='+', help="Accepts space separated list of ARM resource ids.")
 
     with self.argument_context('monitor log-alert authorized-resource remove') as c:
-        c.argument('authorized_resources', options_list=['--authorized-resource', '-a'], nargs='+', help="Accepts space separated list of ARM resource ids.")
+        c.argument('authorized_resources', options_list=['--authorized-resource'], nargs='+', help="Accepts space separated list of ARM resource ids.")
     # endregion

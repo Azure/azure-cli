@@ -1046,7 +1046,7 @@ short-summary: Add authorized resources to alert rule.
 examples:
   - name: Add authorized resources to an alert rule.
     text: >
-        az monitor log-alert authorized-resource add -n {AlertName} -g {ResourceGroup} -a {AuthorizedResource1} {AuthorizedResource2}
+        az monitor log-alert authorized-resource add -n {AlertName} -g {ResourceGroup} --authorized-resource {AuthorizedResource1} {AuthorizedResource2}
 """
 
 helps['monitor log-alert authorized-resource remove'] = """
@@ -1055,7 +1055,7 @@ short-summary: Remove authorized resources from alert rule.
 examples:
   - name: Remove authorized resources from alert rule.
     text: >
-        az monitor log-alert authorized-resource remove -n {AlertName} -g {ResourceGroup} -a {AuthorizedResource1} {AuthorizedResource2}
+        az monitor log-alert authorized-resource remove -n {AlertName} -g {ResourceGroup} --authorized-resource {AuthorizedResource1} {AuthorizedResource2}
 """
 
 helps['monitor log-alert authorized-resource reset'] = """
