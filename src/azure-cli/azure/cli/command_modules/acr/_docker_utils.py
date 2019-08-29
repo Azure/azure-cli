@@ -24,6 +24,7 @@ from knack.log import get_logger
 from azure.cli.core.util import should_disable_connection_verify
 from azure.cli.core.cloud import CloudSuffixNotSetException
 from azure.cli.core._profile import _AZ_LOGIN_MESSAGE
+from azure.cli.core.commands.client_factory import get_subscription_id
 
 from ._client_factory import cf_acr_registries
 from ._constants import get_managed_sku
@@ -54,7 +55,10 @@ def _get_aad_token_after_challenge(cli_ctx,
 
     from azure.cli.core._profile import Profile
     profile = Profile(cli_ctx=cli_ctx)
-    creds, _, tenant = profile.get_raw_token()
+
+    # this might be a cross tenant scenario, so pass subscription to get_raw_token
+    subscription = get_subscription_id(cli_ctx)
+    creds, _, tenant = profile.get_raw_token(subscription=subscription)
 
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
     content = {
@@ -238,6 +242,7 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
 
     # 2. if we don't yet have credentials, attempt to get a refresh token
     if not registry or registry.sku.name in get_managed_sku(cmd):
+        logger.info("Attempting to retrieve AAD refresh token...")
         try:
             return login_server, EMPTY_GUID, _get_aad_token(
                 cli_ctx, login_server, only_refresh_token, repository, artifact_repository, permission)
@@ -247,6 +252,7 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
     # 3. if we still don't have credentials, attempt to get the admin credentials (if enabled)
     if registry:
         if registry.admin_user_enabled:
+            logger.warning("Attempting with admin credentials...")
             try:
                 cred = cf_acr_registries(cli_ctx).list_credentials(resource_group_name, registry_name)
                 return login_server, cred.username, cred.passwords[0].value
