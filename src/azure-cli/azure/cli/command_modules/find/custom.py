@@ -96,7 +96,7 @@ def call_aladdin_service(query):
         "versionNumber": version
     }
 
-    api_url = 'https://aladdin.microsoft.com/api/v1.0/examples'
+    api_url = 'https://app.aladdin.microsoft.com/api/v1.0/examples'
     headers = {'Content-Type': 'application/json'}
 
     response = requests.get(
