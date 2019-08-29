@@ -349,7 +349,7 @@ def load_arguments(self, _):
     with self.argument_context('monitor log-alert create', arg_group='Source') as c:
         c.argument('data_source_id', help="The ARM resource id over which log search query is to be run.")
         c.argument('alert_query')
-        c.argument('query_type')
+        c.argument('query_type', help="Currently only 'ResultCount' is supported.")
         c.argument('authorized_resources', nargs='+', help="Space separated list of ARM resource ids referred into query.")
 
     with self.argument_context('monitor log-alert create', arg_group='Action') as c:
@@ -357,11 +357,11 @@ def load_arguments(self, _):
         c.argument('throttling', type=int, help="Time (in minutes) for which Alerts should be throttled or suppressed.")
         c.argument('threshold_operator', arg_type=get_enum_type(ConditionalOperator), help="Evaluation operation for rule.")
         c.argument('threshold', type=int, help="Result or count threshold based on which rule should be triggered.")
-        c.argument('metric_column')
-        c.argument('metric_trigger_type', arg_type=get_enum_type(MetricTriggerType))
-        c.argument('metric_threshold_operator', arg_type=get_enum_type(ConditionalOperator))
-        c.argument('metric_threshold', type=int)
-        c.argument('action_group', nargs='+')
+        c.argument('metric_column', help="Evaluation of metric on a particular column. Specify the field to be used to aggregate-on and use as dimension for metric measurement log alert rule.")
+        c.argument('metric_trigger_type', arg_type=get_enum_type(MetricTriggerType), help="Metric Trigger Type. This argument is needed only for metric measurement log alert rule.")
+        c.argument('metric_threshold_operator', arg_type=get_enum_type(ConditionalOperator), help="Result Condition Evaluation criteria. This argument is needed only for metric measurement log alert rule.")
+        c.argument('metric_threshold', type=int, help="The threshold of the metric trigger. Theshold is compared with numeric value in AggregatedValue field, used to trigger for metric measurement log alert rule.")
+        c.argument('action_group', nargs='+', help="Azure Action Group reference. Accepts space-separated action group identifiers. The identifier can be the action group's name or its resource ID.")
         c.argument('email_subject', help="Custom subject override for all email ids in all Azure action group(s) associated with the alert rule.")
 
     with self.argument_context('monitor log-alert update') as c:

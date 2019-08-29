@@ -960,28 +960,6 @@ parameters:
     long-summary: >
       Valid Azure Monitor log search query that will be executed at stated frequency with data for configured timeWindow.
       See https://docs.microsoft.com/en-us/azure/azure-monitor/log-query/log-query-overview for more information and examples.
-  - name: --query-type
-    long-summary: >
-      Currently only "ResultCount" is supported.
-  - name: --action-group
-    short-summary: Azure Action Group reference. Accepts space-separated action group identifiers. The identifier can be the action group's name
-      or its resource ID.
-  - name: --metric-column
-    short-summary: Evaluation of metric on a particular column.
-    long-summary: >
-      Specify the field to be used to aggregate-on and use as dimension for metric measurement log alert rule
-  - name: --metric-threshold
-    short-summary: The threshold of the metric trigger.
-    long-summary: >
-      Theshold is compared with numeric value in AggregatedValue field, used to trigger for metric measurement log alert rule.
-  - name: --metric-threshold-operator
-    short-summary: Result Condition Evaluation criteria
-    long-summary: >
-      This argument is needed only for metric measurement log alert rule.
-  - name: --metric-trigger-type
-    short-summary: Metric Trigger Type.
-    long-summary: >
-      This argument is needed only for metric measurement log alert rule.
 examples:
   - name: Create a log alert rule
     text: >
@@ -1030,10 +1008,9 @@ examples:
   - name: Disable an alert rule.
     text: >
         az monitor log-alert update -n {AlertName} -g {ResourceGroup} --enable false
-  - name: Reset action group, email subject, metricTrigger and authorized resorce of an alert rule.
+  - name: Reset email subject and metricTrigger of an alert rule.
     text: >
-        az monitor log-alert update -n {AlertName} -g {ResourceGroup} \\
-          --reset-email-subject --reset-metric-trigger \\
+        az monitor log-alert update -n {AlertName} -g {ResourceGroup} --reset-email-subject --reset-metric-trigger 
 """
 
 helps['monitor log-alert action-group add'] = """
