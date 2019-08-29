@@ -950,16 +950,6 @@ type: command
 short-summary: Create log alert rule using scheduledQueryRules API.
 long-summary: >
     See https://docs.microsoft.com/en-us/rest/api/monitor/scheduledqueryrules/createorupdate for more information.
-parameters:
-  - name: --time-window
-    short-summary: Time window (in minutes) for which data needs to be fetched for query (should be greater than or equal to frequencyInMinutes).
-    long-summary: >
-      This argument overrules any time command (like ago) used in alert query.
-  - name: --alert-query
-    short-summary: Log search query. Required for action type - AlertingAction.
-    long-summary: >
-      Valid Azure Monitor log search query that will be executed at stated frequency with data for configured timeWindow.
-      See https://docs.microsoft.com/en-us/azure/azure-monitor/log-query/log-query-overview for more information and examples.
 examples:
   - name: Create a log alert rule
     text: >
@@ -991,12 +981,6 @@ type: command
 short-summary: Update the configuration of log alert rule.
 long-summary: >
     See https://docs.microsoft.com/en-us/rest/api/monitor/scheduledqueryrules/createorupdate for more information.
-parameters:
-  - name: --alert-query
-    short-summary: Update the log search query.
-    long-summary: >
-      Valid Azure Monitor log search query that will be executed at stated frequency with data for configured timeWindow.
-      See https://docs.microsoft.com/en-us/azure/azure-monitor/log-query/log-query-overview for more information and examples.
 examples:
   - name: Update parameters of an alert rule.
     text: >
@@ -1010,7 +994,12 @@ examples:
         az monitor log-alert update -n {AlertName} -g {ResourceGroup} --enable false
   - name: Reset email subject and metricTrigger of an alert rule.
     text: >
-        az monitor log-alert update -n {AlertName} -g {ResourceGroup} --reset-email-subject --reset-metric-trigger 
+        az monitor log-alert update -n {AlertName} -g {ResourceGroup} --reset-email-subject --reset-metric-trigger
+"""
+
+helps['monitor log-alert action-group'] = """
+type: command
+short-summary: Manage action groups for alert rule.
 """
 
 helps['monitor log-alert action-group add'] = """
@@ -1038,6 +1027,11 @@ examples:
   - name: Reset action groups of alert rule.
     text: >
         az monitor log-alert action-group reset -n {AlertName} -g {ResourceGroup}
+"""
+
+helps['monitor log-alert authorized-resource'] = """
+type: command
+short-summary: Manage authorized resources for alert rule.
 """
 
 helps['monitor log-alert authorized-resource add'] = """

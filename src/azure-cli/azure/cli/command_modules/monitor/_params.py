@@ -344,11 +344,11 @@ def load_arguments(self, _):
 
     with self.argument_context('monitor log-alert create', arg_group='Schedule') as c:
         c.argument('frequency', type=int, help="Frequency (in minutes) at which rule condition should be evaluated.")
-        c.argument('time_window', type=int)
+        c.argument('time_window', type=int, help="Time window (in minutes) for which data needs to be fetched for query (should be greater than or equal to frequencyInMinutes). This argument overrules any time command (like ago) used in alert query.")
 
     with self.argument_context('monitor log-alert create', arg_group='Source') as c:
         c.argument('data_source_id', help="The ARM resource id over which log search query is to be run.")
-        c.argument('alert_query')
+        c.argument('alert_query', help="Log search query. Valid Azure Monitor log search query that will be executed at stated frequency with data for configured timeWindow. See https://docs.microsoft.com/en-us/azure/azure-monitor/log-query/log-query-overview for more information and examples.")
         c.argument('query_type', help="Currently only 'ResultCount' is supported.")
         c.argument('authorized_resources', nargs='+', help="Space separated list of ARM resource ids referred into query.")
 
@@ -375,7 +375,7 @@ def load_arguments(self, _):
         c.argument('time_window', type=int, help="Update time window (in minutes) for which data needs to be fetched for query (should be greater than or equal to frequencyInMinutes).")
 
     with self.argument_context('monitor log-alert update', arg_group='Source') as c:
-        c.argument('alert_query')
+        c.argument('alert_query', help="Update the log search query. Valid Azure Monitor log search query that will be executed at stated frequency with data for configured timeWindow. See https://docs.microsoft.com/en-us/azure/azure-monitor/log-query/log-query-overview for more information and examples.")
 
     with self.argument_context('monitor log-alert update', arg_group='Action') as c:
         c.argument('severity', arg_type=get_enum_type(AlertSeverity), help="Update severity of the alert.")
