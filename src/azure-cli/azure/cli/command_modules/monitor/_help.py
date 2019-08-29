@@ -1019,12 +1019,6 @@ parameters:
     long-summary: >
       Valid Azure Monitor log search query that will be executed at stated frequency with data for configured timeWindow.
       See https://docs.microsoft.com/en-us/azure/azure-monitor/log-query/log-query-overview for more information and examples.
-  - name: --add-action-groups
-    short-summary: Add action groups to alert rule. Accepts space-separated action group identifiers. The identifier can be the action group's name
-        or its resource ID.
-  - name: --remove-action-groups
-    short-summary: Remove action groups from alert. Accepts space-separated action group identifiers. The identifier can be the action group's name
-        or its resource ID.
 examples:
   - name: Update parameters of an alert rule.
     text: >
@@ -1033,19 +1027,67 @@ examples:
           --metric-column {MetricColumn} --metric-threshold {MetricThreshold} --metric-threshold-operator {MetricThresholdOperator} --metric-trigger-type {MetricTriggerType} --throttling {Throttling} \\
           --frequency {Frequency} --time-window {TimeWindow} \\
           --alert-query {AlertQuery} \\
-  - name: Update action groups and authorized resorce of an alert rule.
-    text: >
-        az monitor log-alert update -n {AlertName} -g {ResourceGroup} \\
-          --add-action-groups {ActionGroup1} {ActionGroup2} --remove-action-groups {ActionGroup1} {ActionGroup2}\\
-          --add-authorized-resources {AuthorizedResource1} {AuthorizedResource2} --remove-authorized-resources {AuthorizedResource1} {AuthorizedResource2} \\
   - name: Disable an alert rule.
     text: >
         az monitor log-alert update -n {AlertName} -g {ResourceGroup} --enable false
   - name: Reset action group, email subject, metricTrigger and authorized resorce of an alert rule.
     text: >
         az monitor log-alert update -n {AlertName} -g {ResourceGroup} \\
-          --reset-action-group --reset-email-subject --reset-metric-trigger \\
-          --reset-authorized-resources \\
+          --reset-email-subject --reset-metric-trigger \\
+"""
+
+helps['monitor log-alert action-group add'] = """
+type: command
+short-summary: Add action groups to alert rule.
+examples:
+  - name: Add action groups to an alert rule.
+    text: >
+        az monitor log-alert action-group add -n {AlertName} -g {ResourceGroup} -a {ActionGroup1} {ActionGroup2}
+"""
+
+helps['monitor log-alert action-group remove'] = """
+type: command
+short-summary: Remove action groups from alert rule.
+examples:
+  - name: Remove action groups from alert rule.
+    text: >
+        az monitor log-alert action-group remove -n {AlertName} -g {ResourceGroup} -a {ActionGroup1} {ActionGroup2}
+"""
+
+helps['monitor log-alert action-group reset'] = """
+type: command
+short-summary: Remove all action groups from alert rule.
+examples:
+  - name: Reset action groups of alert rule.
+    text: >
+        az monitor log-alert action-group reset -n {AlertName} -g {ResourceGroup}
+"""
+
+helps['monitor log-alert authorized-resource add'] = """
+type: command
+short-summary: Add authorized resources to alert rule.
+examples:
+  - name: Add authorized resources to an alert rule.
+    text: >
+        az monitor log-alert authorized-resource add -n {AlertName} -g {ResourceGroup} -a {AuthorizedResource1} {AuthorizedResource2}
+"""
+
+helps['monitor log-alert authorized-resource remove'] = """
+type: command
+short-summary: Remove authorized resources from alert rule.
+examples:
+  - name: Remove authorized resources from alert rule.
+    text: >
+        az monitor log-alert authorized-resource remove -n {AlertName} -g {ResourceGroup} -a {AuthorizedResource1} {AuthorizedResource2}
+"""
+
+helps['monitor log-alert authorized-resource reset'] = """
+type: command
+short-summary: Remove all authorized resources from alert rule.
+examples:
+  - name: Reset authorized resources of alert rule.
+    text: >
+        az monitor log-alert authorized-resource reset -n {AlertName} -g {ResourceGroup}
 """
 
 helps['monitor log-alert list'] = """

@@ -197,6 +197,12 @@ def load_command_table(self, _):
         g.show_command('show', 'get', exception_handler=missing_resource_handler)
         g.custom_command('list', 'list_log_alert')
         g.generic_update_command('update', custom_func_name='update_log_alert', setter_arg_name='parameters')
+        g.custom_command('action-group add', 'add_action_group')
+        g.custom_command('action-group remove', 'remove_action_group')
+        g.custom_command('action-group reset', 'reset_action_group')
+        g.custom_command('authorized-resource add', 'add_authorized_resource')
+        g.custom_command('authorized-resource remove', 'remove_authorized_resource')
+        g.custom_command('authorized-resource reset', 'reset_authorized_resource')
 
     with self.command_group('monitor log-profiles', log_profiles_sdk, custom_command_type=log_profiles_custom) as g:
         g.custom_command('create', 'create_log_profile_operations')

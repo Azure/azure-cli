@@ -55,14 +55,11 @@ def list_log_alert(client, resource_group_name=None):
 
 
 def update_log_alert(  # pylint: disable=too-many-locals
-        cmd, instance, resource_group_name, enabled=None, tags=None, description=None, frequency=None,
+        instance, enabled=None, tags=None, description=None, frequency=None,
         time_window=None, alert_query=None, severity=None,
         threshold_operator=None, threshold=None, throttling=None,
         metric_column=None, metric_trigger_type=None, metric_threshold_operator=None, metric_threshold=None,
-        reset_action_group=None, add_action_groups=None, remove_action_groups=None,
-        email_subject=None, reset_email_subject=None,
-        reset_metric_trigger=None, reset_authorized_resources=None,
-        add_authorized_resources=None, remove_authorized_resources=None):
+        email_subject=None, reset_email_subject=None, reset_metric_trigger=None):
     # --tags "" is set as tags={}. Used for clearing tags.
     if tags or tags == {}:
         instance.tags = tags
@@ -99,14 +96,8 @@ def update_log_alert(  # pylint: disable=too-many-locals
     elif reset_email_subject:
         instance.action.azns_action.email_subject = None
 
-    instance = update_action_group(cmd, instance, resource_group_name, reset_action_group, add_action_groups,
-                                   remove_action_groups)
-
     instance = update_metric_trigger(instance, metric_column, metric_trigger_type,
                                      metric_threshold_operator, metric_threshold, reset_metric_trigger)
-
-    instance = update_authorized_resources(instance, reset_authorized_resources, add_authorized_resources,
-                                           remove_authorized_resources)
 
     return instance
 
@@ -138,79 +129,98 @@ def update_metric_trigger(instance, metric_column=None, metric_trigger_type=None
     return instance
 
 
-def update_action_group(cmd, instance, resource_group, reset_action_group=None, add_action_groups=None,
-                        remove_action_groups=None):
-    if reset_action_group:
-        instance.action.azns_action.action_group = None
+def reset_action_group(client, resource_group_name, rule_name):
+    settings = _get_alert_settings(client, resource_group_name, rule_name)
+    settings.action.azns_action.action_group = None
+    return client.create_or_update(resource_group_name, rule_name, settings)
 
-    if add_action_groups:
-        add_action_groups = _normalize_names(cmd.cli_ctx, add_action_groups, resource_group, 'microsoft.insights',
-                                             'actionGroups')
-        if instance.action.azns_action.action_group is None:
-            instance.action.azns_action.action_group = add_action_groups
-        else:
-            for action_group in add_action_groups:
-                match = next(
-                    (x for x in instance.action.azns_action.action_group if action_group.lower() == x.lower()), None
-                )
-                if not match:
-                    instance.action.azns_action.action_group.append(action_group)
 
-    if remove_action_groups:
-        remove_action_groups = _normalize_names(cmd.cli_ctx, remove_action_groups, resource_group, 'microsoft.insights',
-                                                'actionGroups')
-        from knack.util import CLIError
-        if instance.action.azns_action.action_group is None:
-            raise CLIError('Error in removing action group. There are no action groups attached to alert rule.')
+def add_action_group(cmd, client, resource_group_name, rule_name, action_group_ids, reset=False):
+    settings = _get_alert_settings(client, resource_group_name, rule_name)
 
-        for action_group in remove_action_groups:
+    # normalize the action group ids
+    action_groups = _normalize_names(cmd.cli_ctx, action_group_ids, resource_group_name, 'microsoft.insights',
+                                     'actionGroups')
+
+    if settings.action.azns_action.action_group is None:
+        settings.action.azns_action.action_group = action_groups
+    else:
+        for action_group in action_groups:
             match = next(
-                (x for x in instance.action.azns_action.action_group if action_group.lower() == x.lower()), None
+                (x for x in settings.action.azns_action.action_group if action_group.lower() == x.lower()), None
             )
-            if match:
-                instance.action.azns_action.action_group.remove(action_group)
-            else:
-                raise CLIError(
-                    'Error in removing action group. Action group "{}" is not attached to alert rule.'
-                    .format(action_group))
+            if not match:
+                settings.action.azns_action.action_group.append(action_group)
 
-    return instance
+    return client.create_or_update(resource_group_name, rule_name, settings)
 
 
-def update_authorized_resources(instance, reset_authorized_resources=None, add_authorized_resources=None,
-                                remove_authorized_resources=None):
-    if reset_authorized_resources:
-        instance.source.authorized_resources = None
+def remove_action_group(cmd, client, resource_group_name, rule_name, action_group_ids):
+    from knack.util import CLIError
 
-    if add_authorized_resources:
-        if instance.source.authorized_resources is None:
-            instance.source.authorized_resources = add_authorized_resources
+    settings = _get_alert_settings(client, resource_group_name, rule_name)
+
+    action_groups = _normalize_names(cmd.cli_ctx, action_group_ids, resource_group_name, 'microsoft.insights',
+                                     'actionGroups')
+
+    if settings.action.azns_action.action_group is None:
+        raise CLIError('Error in removing action group. There are no action groups attached to alert rule.')
+
+    for action_group in action_groups:
+        match = next(
+            (x for x in settings.action.azns_action.action_group if action_group.lower() == x.lower()), None
+        )
+        if match:
+            settings.action.azns_action.action_group.remove(action_group)
         else:
-            for authorized_resources in add_authorized_resources:
-                match = next(
-                    (x for x in instance.source.authorized_resources if authorized_resources.lower() == x.lower()), None
-                )
-                if not match:
-                    instance.source.authorized_resources.append(authorized_resources)
-
-    if remove_authorized_resources:
-        from knack.util import CLIError
-        if instance.source.authorized_resources is None:
             raise CLIError(
-                'Error in removing authorized resource. There are no authorized resources attached to alert rule.')
+                'Error in removing action group. Action group "{}" is not attached to alert rule.'
+                .format(action_group))
 
-        for authorized_resources in remove_authorized_resources:
+    return client.create_or_update(resource_group_name, rule_name, settings)
+
+
+def reset_authorized_resource(client, resource_group_name, rule_name):
+    settings = _get_alert_settings(client, resource_group_name, rule_name)
+    settings.action.azns_action.action_group = None
+    return client.create_or_update(resource_group_name, rule_name, settings)
+
+
+def add_authorized_resource(client, resource_group_name, rule_name, authorized_resources=None):
+    settings = _get_alert_settings(client, resource_group_name, rule_name)
+
+    if settings.source.authorized_resources is None:
+        settings.source.authorized_resources = authorized_resources
+    else:
+        for authorized_resource in authorized_resources:
             match = next(
-                (x for x in instance.source.authorized_resources if authorized_resources.lower() == x.lower()), None
+                (x for x in settings.source.authorized_resources if authorized_resource.lower() == x.lower()), None
             )
-            if match:
-                instance.source.authorized_resources.remove(authorized_resources)
-            else:
-                raise CLIError(
-                    'Error in removing authorized resource. Authorized resource "{}" is not attached to alert rule.'
-                    .format(authorized_resources))
+            if not match:
+                settings.source.authorized_resources.append(authorized_resource)
 
-    return instance
+    return client.create_or_update(resource_group_name, rule_name, settings)
+
+
+def remove_authorized_resource(client, resource_group_name, rule_name, authorized_resources=None):
+    from knack.util import CLIError
+    settings = _get_alert_settings(client, resource_group_name, rule_name)
+    if settings.source.authorized_resources is None:
+        raise CLIError(
+            'Error in removing authorized resource. There are no authorized resources attached to alert rule.')
+
+    for authorized_resource in authorized_resources:
+        match = next(
+            (x for x in settings.source.authorized_resources if authorized_resource.lower() == x.lower()), None
+        )
+        if match:
+            settings.source.authorized_resources.remove(authorized_resource)
+        else:
+            raise CLIError(
+                'Error in removing authorized resource. Authorized resource "{}" is not attached to alert rule.'
+                .format(authorized_resource))
+
+    return client.create_or_update(resource_group_name, rule_name, settings)
 
 
 def _normalize_names(cli_ctx, resource_names, resource_group, namespace, resource_type):
