@@ -577,7 +577,7 @@ def load_arguments(self, _):
         c.argument('peer_circuit', help='Name or ID of the peer ExpressRoute circuit.', validator=validate_er_peer_circuit)
 
     with self.argument_context('network express-route peering peer-connection') as c:
-        c.argument('circuit_name', circuit_name_type)
+        c.argument('circuit_name', circuit_name_type, id_part=None)
         c.argument('peering_name', options_list=['--peering-name'], help='Name of BGP peering (i.e. AzurePrivatePeering).', id_part=None)
         c.argument('connection_name', options_list=['--name', '-n'], help='Name of the peering peer-connection.', id_part=None)
     # endregion
