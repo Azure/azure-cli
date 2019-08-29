@@ -207,7 +207,7 @@ helps['eventgrid event-subscription create'] = """
             Example: --deadletter-endpoint /subscriptions/{SubID}/resourceGroups/rg1/providers/Microsoft.Storage/storageAccounts/sa1/blobServices/default/containers/containerName
         - name: --endpoint-type
           short-summary: The type of the destination endpoint.
-          long-summary: The type of the destination endpoint. It is expected that the destination endpoint be created and available for use before executing any Event Grid command.
+          long-summary: The type of the destination endpoint.
     examples:
         - name: Create a new event subscription for an Event Grid topic, using default filters.
           text: |
