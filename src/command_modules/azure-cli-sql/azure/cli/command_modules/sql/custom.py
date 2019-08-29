@@ -288,6 +288,26 @@ def _db_elastic_pool_update_sku(
 
 _DEFAULT_SERVER_VERSION = "12.0"
 
+def failover_group_update_common(
+        instance,
+        failover_policy=None,
+        grace_period=None,):
+    '''
+    Updates the failover group grace period and failover policy. Common logic for both Sterling and Managed Instance
+    '''
+
+    if failover_policy is not None:
+        instance.read_write_endpoint.failover_policy = failover_policy
+
+    if instance.read_write_endpoint.failover_policy == FailoverPolicyType.manual.value:
+        grace_period = None
+        instance.read_write_endpoint.failover_with_data_loss_grace_period_minutes = grace_period
+
+    if grace_period is not None:
+        grace_period = int(grace_period) * 60
+        instance.read_write_endpoint.failover_with_data_loss_grace_period_minutes = grace_period
+
+
 ###############################################
 #                sql db                       #
 ###############################################
@@ -317,6 +337,11 @@ class ClientAuthenticationType(Enum):
     active_directory_password = 'ADPassword'
     active_directory_integrated = 'ADIntegrated'
 
+
+# pylint: disable=too-few-public-methods
+class FailoverPolicyType(Enum):
+    automatic = 'Automatic'
+    manual = 'Manual'
 
 def _get_server_dns_suffx(cli_ctx):
     '''
@@ -2137,13 +2162,6 @@ def managed_db_restore(
 #              sql failover-group             #
 ###############################################
 
-
-# pylint: disable=too-few-public-methods
-class FailoverPolicyType(Enum):
-    automatic = 'Automatic'
-    manual = 'Manual'
-
-
 def failover_group_create(
         cmd,
         client,
@@ -2214,16 +2232,9 @@ def failover_group_update(
     Updates the failover group.
     '''
 
-    if failover_policy is not None:
-        instance.read_write_endpoint.failover_policy = failover_policy
-
-    if instance.read_write_endpoint.failover_policy == FailoverPolicyType.manual.value:
-        grace_period = None
-        instance.read_write_endpoint.failover_with_data_loss_grace_period_minutes = grace_period
-
-    if grace_period is not None:
-        grace_period = int(grace_period) * 60
-        instance.read_write_endpoint.failover_with_data_loss_grace_period_minutes = grace_period
+    failover_group_update_common(instance,
+        failover_policy,
+        grace_period)
 
     if add_db is None:
         add_db = []
@@ -2320,22 +2331,15 @@ def virtual_cluster_list(
 #              sql instance failover group    #
 ###############################################
 
-
-# pylint: disable=too-few-public-methods
-class InstanceFailoverPolicyType(Enum):
-    automatic = 'Automatic'
-    manual = 'Manual'
-
-
 def instance_failover_group_create(
         cmd,
         client,
         resource_group_name,
         managed_instance,
-        instance_failover_group_name,
+        failover_group_name,
         partner_managed_instance_name,
         partner_resource_group,
-        failover_policy=InstanceFailoverPolicyType.automatic.value,
+        failover_policy=FailoverPolicyType.automatic.value,
         grace_period=1):
     '''
     Creates a failover group.
@@ -2360,13 +2364,13 @@ def instance_failover_group_create(
     # Convert grace period from hours to minutes
     grace_period = int(grace_period) * 60
 
-    if failover_policy == InstanceFailoverPolicyType.manual.value:
+    if failover_policy == FailoverPolicyType.manual.value:
         grace_period = None
 
     return client.create_or_update(
         resource_group_name=resource_group_name,
         location_name=primary_server.location,
-        failover_group_name=instance_failover_group_name,
+        failover_group_name=failover_group_name,
         parameters=InstanceFailoverGroup(
             managed_instance_pairs=[managed_server_info_pair],
             partner_regions=[partner_region_info],
@@ -2385,16 +2389,9 @@ def instance_failover_group_update(
     Updates the failover group.
     '''
 
-    if failover_policy is not None:
-        instance.read_write_endpoint.failover_policy = failover_policy
-
-    if instance.read_write_endpoint.failover_policy == FailoverPolicyType.manual.value:
-        grace_period = None
-        instance.read_write_endpoint.failover_with_data_loss_grace_period_minutes = grace_period
-
-    if grace_period is not None:
-        grace_period = int(grace_period) * 60
-        instance.read_write_endpoint.failover_with_data_loss_grace_period_minutes = grace_period
+    failover_group_update_common(instance,
+        failover_policy,
+        grace_period)
 
     return instance
 
@@ -2403,11 +2400,11 @@ def instance_failover_group_failover(
         cmd,
         client,
         resource_group_name,
-        instance_failover_group_name,
+        failover_group_name,
         location_name,
         allow_data_loss=False):
     '''
-    Failover a failover group.
+    Failover an instance failover group.
     '''
 
     from azure.cli.core.commands.client_factory import get_subscription_id
@@ -2415,7 +2412,7 @@ def instance_failover_group_failover(
     failover_group = client.get(
         resource_group_name=resource_group_name,
         subscription_id=get_subscription_id(cmd.cli_ctx),
-        failover_group_name=instance_failover_group_name,
+        failover_group_name=failover_group_name,
         location_name=location_name)
 
     if failover_group.replication_role == "Primary":
@@ -2429,5 +2426,5 @@ def instance_failover_group_failover(
 
     return failover_func(
         resource_group_name=resource_group_name,
-        failover_group_name=instance_failover_group_name,
+        failover_group_name=failover_group_name,
         location_name=location_name)
