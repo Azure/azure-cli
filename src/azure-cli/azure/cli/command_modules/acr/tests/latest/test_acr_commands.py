@@ -31,7 +31,7 @@ class AcrCommandsTests(ScenarioTest):
                          self.check('tags', {'cat': '', 'foo': 'bar'}),
                          self.check('adminUserEnabled', True),
                          self.check('provisioningState', 'Succeeded')])
-                         
+
         # test retention
         self.cmd('acr config retention update -n {} --status enabled --days 30'.format(registry_name),
                  checks=[self.check('status', "enabled"),
