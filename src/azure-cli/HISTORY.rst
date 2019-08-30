@@ -2,6 +2,10 @@
 
 Release History
 ===============
+**EventGrid**
+
+* Fix the endpoint help text to point to the right parameter (namely, to point to parameter `--endpoint` rather than `--endpoint-type` in event subscription commands).
+
 **Batch**
 
 * Expanded `--json-file` capabilities of `az batch pool create` to allow for specifying MountConfigurations for file system mounts(see https://docs.microsoft.com/en-us/rest/api/batchservice/pool/add#request-body for structure)
