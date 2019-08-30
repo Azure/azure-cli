@@ -35,27 +35,31 @@ def process_query(cli_term):
             colorama.init(convert=True)
         hasPrunedAnswer = False
         answer_list = json.loads(response.content)
-        if answer_list[0]['source'] == 'pruned':
-            hasPrunedAnswer = True
-            answer_list.pop(0)
-        print("\nHere are the most common ways to use [" + cli_term + "]: \n", file=sys.stderr)
+        if not answer_list:
+            print("\nSorry I am not able to help with [" + cli_term + "]."
+                  "\nTry typing the beginning of a command e.g. " + style_message('az vm') + ".", file=sys.stderr)
+        else:
+            if answer_list[0]['source'] == 'pruned':
+                hasPrunedAnswer = True
+                answer_list.pop(0)
+            print("\nHere are the most common ways to use [" + cli_term + "]: \n", file=sys.stderr)
 
-        for answer in answer_list:
-            current_title = answer['title'].strip()
-            current_snippet = answer['snippet'].strip()
-            if current_title.startswith("az "):
-                current_title, current_snippet = current_snippet, current_title
-                current_title = current_title.split('\r\n')[0]
-            elif '```azurecli\r\n' in current_snippet:
-                start_index = current_snippet.index('```azurecli\r\n') + len('```azurecli\r\n')
-                current_snippet = current_snippet[start_index:]
-            current_snippet = current_snippet.replace('```', '').replace(current_title, '').strip()
-            current_snippet = re.sub(r'\[.*\]', '', current_snippet).strip()
-            print(style_message(current_title))
-            print(current_snippet + '\n')
-        if hasPrunedAnswer:
-            print(style_message("More commands and examples are available in the latest version of the CLI. "
-                                "Please update for the best experience.\n"))
+            for answer in answer_list:
+                current_title = answer['title'].strip()
+                current_snippet = answer['snippet'].strip()
+                if current_title.startswith("az "):
+                    current_title, current_snippet = current_snippet, current_title
+                    current_title = current_title.split('\r\n')[0]
+                elif '```azurecli\r\n' in current_snippet:
+                    start_index = current_snippet.index('```azurecli\r\n') + len('```azurecli\r\n')
+                    current_snippet = current_snippet[start_index:]
+                current_snippet = current_snippet.replace('```', '').replace(current_title, '').strip()
+                current_snippet = re.sub(r'\[.*\]', '', current_snippet).strip()
+                print(style_message(current_title))
+                print(current_snippet + '\n')
+            if hasPrunedAnswer:
+                print(style_message("More commands and examples are available in the latest version of the CLI. "
+                                    "Please update for the best experience.\n"))
 
 
 def style_message(msg):
