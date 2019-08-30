@@ -4,12 +4,15 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.util import CLIError
+from knack.log import get_logger
 from msrestazure.tools import is_valid_resource_id
 
 from ._utils import (
     validate_managed_registry,
     get_registry_from_name_or_login_server
 )
+
+logger = get_logger(__name__)
 
 SOURCE_REGISTRY_NOT_FOUND = "The source container registry can not be found in the current subscription. " \
                             "Please provide a valid address and/or credentials."
@@ -75,6 +78,7 @@ def acr_import(cmd,
         else:
             raise CLIError(SOURCE_NOT_FOUND)
 
+    _validate_target_tags(target_tags)
     if not target_tags and not repository:
         index = source_image.find("@")
         if index > 0:
@@ -90,3 +94,12 @@ def acr_import(cmd,
         resource_group_name=resource_group_name,
         registry_name=registry_name,
         parameters=import_parameters)
+
+
+def _validate_target_tags(target_tags):
+    if not target_tags:
+        return
+
+    for t_tag in target_tags:
+        if t_tag.startswith("/"):
+            logger.warning("Tag '%s' is unexpectedly prefixed with a '/'", t_tag)
