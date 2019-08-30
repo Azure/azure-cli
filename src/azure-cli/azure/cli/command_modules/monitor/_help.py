@@ -950,6 +950,7 @@ type: command
 short-summary: Create log alert rule using scheduledQueryRules API.
 long-summary: >
     See https://docs.microsoft.com/en-us/rest/api/monitor/scheduledqueryrules/createorupdate for more information.
+    Adding custom-webhook-payload in alert is not supported via CLI.
 examples:
   - name: Create a log alert rule
     text: >
@@ -981,6 +982,7 @@ type: command
 short-summary: Update the configuration of log alert rule.
 long-summary: >
     See https://docs.microsoft.com/en-us/rest/api/monitor/scheduledqueryrules/createorupdate for more information.
+    Updation of custom-webhook-payload is not supported via CLI.
 examples:
   - name: Update parameters of an alert rule.
     text: >
