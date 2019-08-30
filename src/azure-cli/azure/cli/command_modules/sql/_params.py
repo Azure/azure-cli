@@ -16,6 +16,7 @@ from azure.mgmt.sql.models import (
     ExportRequest,
     ManagedDatabase,
     ManagedInstance,
+    ManagedInstanceAdministrator,
     Server,
     ServerAzureADAdministrator,
     Sku,
@@ -1192,6 +1193,37 @@ def load_arguments(self, _):
         c.argument('kid',
                    arg_type=kid_param_type,
                    required=True,)
+
+    #####
+    #           sql managed instance ad-admin
+    ######
+    with self.argument_context('sql mi ad-admin') as c:
+       c.argument('managed_instance_name',
+                   arg_type=managed_instance_param_type)
+
+       c.argument('login',
+                   options_list=['--display-name', '-u'],
+                   help='Display name of the Azure AD administrator user or group.')
+
+       c.argument('sid',
+                   options_list=['--object-id', '-i'],
+                   help='The unique ID of the Azure AD administrator ')
+
+    with self.argument_context('sql mi ad-admin create') as c:
+        # Create args that will be used to build up the ManagedInstanceAdministrator object
+        create_args_for_complex_type(
+            c, 'properties', ManagedInstanceAdministrator, [
+                'login',
+                'sid',
+            ])
+
+    with self.argument_context('sql mi ad-admin update') as c:
+        # Create args that will be used to build up the ManagedInstanceAdministrator object
+        create_args_for_complex_type(
+            c, 'properties', ManagedInstanceAdministrator, [
+                'login',
+                'sid',
+            ])
 
     #####
     #           sql server tde-key

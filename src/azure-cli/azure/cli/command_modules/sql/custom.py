@@ -2196,6 +2196,48 @@ def managed_instance_encryption_protector_update(
         server_key_name=key_name
     )
 
+
+#####
+#           sql managed instance ad-admin
+#####
+
+
+def mi_ad_admin_set(
+        cmd,
+        client,
+        resource_group_name,
+        managed_instance_name,
+        **kwargs):
+    '''
+    Creates a managed instance active directory administrator.
+    '''
+    from azure.cli.core._profile import Profile
+
+    profile = Profile()
+    sub = profile.get_subscription()
+    kwargs['tenant_id'] = sub['tenantId']
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        managed_instance_name=managed_instance_name,
+        administrator_name="ActiveDirectory",
+        parameters=kwargs
+    )
+
+def mi_ad_admin_delete(
+        cmd,
+        client,
+        resource_group_name,
+        managed_instance_name):
+    '''
+    Deletes a managed instance active directory administrator.
+    '''
+    return client.delete(
+        resource_group_name=resource_group_name,
+        managed_instance_name=managed_instance_name,
+        administrator_name="ActiveDirectory"
+    )
+
 ###############################################
 #                sql managed db               #
 ###############################################
