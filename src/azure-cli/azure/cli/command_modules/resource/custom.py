@@ -245,7 +245,7 @@ def _urlretrieve(url):
     return req.read()
 
 
-def _covert_deployment_template_to_json(template):
+def _convert_deployment_template_to_json(template):
     from jsmin import jsmin
     #TODO: catch exceptions
     # deal with line comments
@@ -269,10 +269,10 @@ def _deploy_arm_template_core(cli_ctx, resource_group_name,
     if template_uri:
         template_link = TemplateLink(uri=template_uri)
         template_content = _urlretrieve(template_uri).decode('utf-8')
-        template_obj = _covert_deployment_template_to_json(template_content)
+        template_obj = _convert_deployment_template_to_json(template_content)
     else:
         template_content = read_file_content(template_file)
-        template_obj = _covert_deployment_template_to_json(template_content)
+        template_obj = _convert_deployment_template_to_json(template_content)
 
     if rollback_on_error == '':
         on_error_deployment = OnErrorDeployment(type='LastSuccessful')
@@ -291,8 +291,76 @@ def _deploy_arm_template_core(cli_ctx, resource_group_name,
     #properties.template =  properties.template.replace('\r\n', '') json.loads(properties.template)#
 
     smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+    class JsonCTemplate(object):
+        def __init__(self, template_as_bytes):
+            self.template_as_bytes = template_as_bytes
+
+    from msrest.serialization import Serializer
+
+    class MySerializer(Serializer):
+        def body(self, data, data_type, **kwargs):
+            if data_type == 'Deployment':
+                # Be sure to pass a DeploymentProperties
+                template = data.properties.template
+                if template:
+                    data.properties.template = None
+                    data_as_dict = data.serialize()
+                    data_as_dict["properties"]["template"] = JsonCTemplate(template)
+                    return data_as_dict
+            return super(MySerializer, self).body(data, data_type, **kwargs)
+    deployments_operation_group = smc.deployments  # This solves the multi-api for you
+
+    deployments_operation_group._serialize = MySerializer(
+        deployments_operation_group._serialize.dependencies
+    )
+
+    # Now, you have a serializer that keeps a weird class inside it, you need to explain to the HTTP pipeline how to translate that into bytes
+    from msrest.pipeline import SansIOHTTPPolicy
+
+    class JsonCTemplatePolicy(SansIOHTTPPolicy):
+        def on_request(self, request, **kwargs):
+            # type: (Request[HTTPRequestType], Any) -> None
+            """Is executed before sending the request to next policy.
+            """
+            http_request = request.http_request
+            print(http_request.data)
+            try:
+                template = http_request.data["properties"]["template"]
+                if not isinstance(template, JsonCTemplate):
+                    raise ValueError()
+            except (KeyError, ValueError):
+                # Not a template
+                return
+            # I know it's my weird template
+            del http_request.data["properties"]["template"]
+            partial_request = json.dumps(http_request.data)
+            http_request.data = partial_request[:-2] + ", template:" + template.template_as_bytes.decode(
+                "utf-8") + r"}}"
+
+    # Plug this as default HTTP pipeline
+    from msrest.pipeline import Pipeline
+    from msrest.pipeline.requests import (
+        RequestsCredentialsPolicy,
+        RequestsPatchSession,
+        PipelineRequestsHTTPSender
+    )
+    from msrest.universal_http.requests import RequestsHTTPSender
+
+    original_pipeline = smc.config.pipeline
+    smc.config.pipeline = Pipeline(
+        policies=[
+            JsonCTemplatePolicy(),
+            smc.config.user_agent_policy,
+            RequestsPatchSession(),
+            smc.config.http_logger_policy,
+            RequestsCredentialsPolicy(smc.config.credentials)
+        ],
+        sender=PipelineRequestsHTTPSender(RequestsHTTPSender(smc.config))
+    )
+
+
     if validate_only:
-        return sdk_no_wait(no_wait, smc.deployments.validate, resource_group_name, deployment_name, properties)
+        return sdk_no_wait(no_wait, deployments_operation_group.validate, resource_group_name, deployment_name, properties)
     return sdk_no_wait(no_wait, smc.deployments.create_or_update, resource_group_name, deployment_name, properties, template_content)
 
 
