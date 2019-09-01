@@ -333,9 +333,12 @@ def _deploy_arm_template_core(cli_ctx, resource_group_name,
                 return
             # I know it's my weird template
             del http_request.data["properties"]["template"]
+            # templateLink nad template cannot exist at the same time in deployment_dry_run mode
+            if "templateLink" in http_request.data["properties"].keys():
+                del http_request.data["properties"]["templateLink"]
             partial_request = json.dumps(http_request.data)
-            http_request.data = partial_request[:-2] + ", template:" + template.template_as_bytes.decode(
-                "utf-8") + r"}}"
+
+            http_request.data = partial_request[:-2] + ", template:" + template.template_as_bytes + r"}}"
 
     # Plug this as default HTTP pipeline
     from msrest.pipeline import Pipeline
