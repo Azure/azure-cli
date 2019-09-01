@@ -46,6 +46,7 @@ Release History
 
 **AppService**
 
+* Added "webapp config access-restriction show | set | add | remove"
 * az webapp deployment source config-zip support for connection_verify
 * Add support for ACR images with az webapp create
 
