@@ -2,6 +2,10 @@
 
 Release History
 ===============
+**Aladdin**
+
+* Update Aladdin Service (az find) to v1.0 (GA)
+
 **Batch**
 
 * Expanded `--json-file` capabilities of `az batch pool create` to allow for specifying MountConfigurations for file system mounts(see https://docs.microsoft.com/en-us/rest/api/batchservice/pool/add#request-body for structure)
