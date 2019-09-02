@@ -111,7 +111,6 @@ def load_arguments(self, _):
         c.argument('firewall_policy', options_list='--waf-policy', min_api='2018-12-01', help='Name or ID of a web application firewall (WAF) policy.', validator=validate_waf_policy)
 
     with self.argument_context('network application-gateway', arg_group='Identity') as c:
-        c.argument('identity_type', help="The type of identity used for the resource.", arg_type=get_enum_type(['SystemAssigned', 'UserAssigned', 'None']))
         c.argument('user_assigned_identity', options_list='--identity', help="Name or ID of the ManagedIdentity Resource", validator=validate_application_gateway_identity)
 
     with self.argument_context('network application-gateway', arg_group='Network') as c:

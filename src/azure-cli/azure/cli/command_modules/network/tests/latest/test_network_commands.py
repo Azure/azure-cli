@@ -388,7 +388,7 @@ class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
             'ver2': first_version
         })
 
-        self.cmd('network application-gateway create -g {rg} -n ag1 --identity-type UserAssigned --identity {emsi} --sku Standard_v2 --public-ip-address {ip}')
+        self.cmd('network application-gateway create -g {rg} -n ag1 --identity {emsi} --sku Standard_v2 --public-ip-address {ip}')
         self.cmd('network application-gateway show -g {rg} -n ag1', checks=[
             self.check('identity.type', 'UserAssigned')
         ])
@@ -396,7 +396,7 @@ class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
         self.cmd('network application-gateway identity remove -g {rg} --gateway-name ag1', checks=[
             self.check('identity', None)
         ])
-        self.cmd('network application-gateway identity assign -g {rg} --gateway-name ag1 --identity-type UserAssigned --identity {emsi2}', checks=[
+        self.cmd('network application-gateway identity assign -g {rg} --gateway-name ag1 --identity {emsi2}', checks=[
             self.check('identity.type', 'UserAssigned')
         ])
         self.cmd('network application-gateway identity show -g {rg} --gateway-name ag1', checks=[
