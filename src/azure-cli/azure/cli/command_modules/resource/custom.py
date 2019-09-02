@@ -247,7 +247,7 @@ def _urlretrieve(url):
 
 def _convert_deployment_template_to_json(template):
     from jsmin import jsmin
-    #TODO: catch exceptions
+    # TODO: catch exceptions
     # deal with line comments
     minified = jsmin(template)
     # Get rid of multi-line strings. Note, we are not sending it on the wire rather just extract parameters to prompt for values
@@ -255,6 +255,7 @@ def _convert_deployment_template_to_json(template):
     return shell_safe_json_parse(result, preserve_order=True)
 
 
+# pylint: disable=too-many-locals, too-many-statements, too-few-public-methods
 def _deploy_arm_template_core(cli_ctx, resource_group_name,
                               template_file=None, template_uri=None, deployment_name=None,
                               parameters=None, mode=None, rollback_on_error=None, validate_only=False,
@@ -288,9 +289,10 @@ def _deploy_arm_template_core(cli_ctx, resource_group_name,
 
     properties = DeploymentProperties(template=template_content, template_link=template_link,
                                       parameters=parameters, mode=mode, on_error_deployment=on_error_deployment)
-    #properties.template =  properties.template.replace('\r\n', '') json.loads(properties.template)#
+    # properties.template =  properties.template.replace('\r\n', '') json.loads(properties.template)#
 
     smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+
     class JsonCTemplate(object):
         def __init__(self, template_as_bytes):
             self.template_as_bytes = template_as_bytes
@@ -310,6 +312,7 @@ def _deploy_arm_template_core(cli_ctx, resource_group_name,
             return super(MySerializer, self).body(data, data_type, **kwargs)
     deployments_operation_group = smc.deployments  # This solves the multi-api for you
 
+    # pylint: disable=protected-access
     deployments_operation_group._serialize = MySerializer(
         deployments_operation_group._serialize.dependencies
     )
@@ -319,9 +322,6 @@ def _deploy_arm_template_core(cli_ctx, resource_group_name,
 
     class JsonCTemplatePolicy(SansIOHTTPPolicy):
         def on_request(self, request, **kwargs):
-            # type: (Request[HTTPRequestType], Any) -> None
-            """Is executed before sending the request to next policy.
-            """
             http_request = request.http_request
             print(http_request.data)
             try:
@@ -349,7 +349,6 @@ def _deploy_arm_template_core(cli_ctx, resource_group_name,
     )
     from msrest.universal_http.requests import RequestsHTTPSender
 
-    original_pipeline = smc.config.pipeline
     smc.config.pipeline = Pipeline(
         policies=[
             JsonCTemplatePolicy(),
@@ -361,10 +360,9 @@ def _deploy_arm_template_core(cli_ctx, resource_group_name,
         sender=PipelineRequestsHTTPSender(RequestsHTTPSender(smc.config))
     )
 
-
     if validate_only:
         return sdk_no_wait(no_wait, deployments_operation_group.validate, resource_group_name, deployment_name, properties)
-    return sdk_no_wait(no_wait, smc.deployments.create_or_update, resource_group_name, deployment_name, properties, template_content)
+    return sdk_no_wait(no_wait, deployments_operation_group.create_or_update, resource_group_name, deployment_name, properties, template_content)
 
 
 def _deploy_arm_template_subscription_scope(cli_ctx,
