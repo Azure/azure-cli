@@ -16,6 +16,9 @@ Release History
   * Add `--attach-acr <acr-name-or-resource-id>` to `az aks create` command, which allows for attach the ACR to AKS cluster.
   * Add `--attach-acr <acr-name-or-resource-id>` and `--detach-acr <acr-name-or-resource-id>` to `az aks update` command, which allows to attach or detach the ACR from AKS cluster.
 
+**Key Vault**
+
+Fix #10286: Unable to delete network rules.
 
 2.0.72
 ++++++
@@ -47,7 +50,7 @@ Release History
 
 **Keyvault**
 
-* Fix the bug in secret set command that igores the expires argument
+* Fix the bug in secret set command that ignores the expires argument
 
 **Network**
 

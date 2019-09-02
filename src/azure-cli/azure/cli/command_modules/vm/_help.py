@@ -1328,7 +1328,7 @@ short-summary: List the VM image offers available in the Azure Marketplace.
 parameters:
   - name: --publisher -p
     populator-commands:
-      - az vm list-publishers
+      - az vm image list-publishers
 examples:
   - name: List all offers from Microsoft in the West US region.
     text: az vm image list-offers -l westus -p MicrosoftWindowsServer

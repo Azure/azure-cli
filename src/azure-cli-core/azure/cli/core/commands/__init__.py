@@ -44,6 +44,7 @@ except AttributeError:  # in Python 2.7
     t_JSONDecodeError = ValueError
 
 logger = get_logger(__name__)
+DEFAULT_CACHE_TTL = '10'
 
 
 def _explode_list_args(args):
@@ -357,7 +358,6 @@ def _is_stale(cli_ctx, cache_obj):
         cls_str = str(ex.__class__)
         if 'NoOptionError' in cls_str or 'NoSectionError' in cls_str:
             # ensure a default value exists even if not previously set
-            from azure.cli.command_modules.configure._consts import DEFAULT_CACHE_TTL
             cli_ctx.config.set_value('core', 'cache_ttl', DEFAULT_CACHE_TTL)
             cache_ttl = DEFAULT_CACHE_TTL
         else:
