@@ -937,3 +937,148 @@ examples:
     text: az monitor metrics list-definitions --resource /subscriptions/{subscriptionID}/resourceGroups/Space1999/providers/Microsoft.Network/networkSecurityGroups/ADDS-NSG
     crafted: true
 """
+
+helps['monitor log-alert'] = """
+type: group
+short-summary: Manage log alert rules.
+long-summary: >
+    See https://docs.microsoft.com/en-us/azure/azure-monitor/platform/alerts-unified-log for more information.
+"""
+
+helps['monitor log-alert create'] = """
+type: command
+short-summary: Create log alert rule using scheduledQueryRules API.
+long-summary: >
+    See https://docs.microsoft.com/en-us/rest/api/monitor/scheduledqueryrules/createorupdate for more information.
+    Adding custom-webhook-payload in alert is not supported via CLI.
+examples:
+  - name: Create a log alert rule
+    text: >
+        az monitor log-alert create -n {AlertName} -g {ResourceGroup} -l {Location} \\
+          --severity {Severity} --threshold {Threshold} --threshold-operator {ThresholdOperator} \\
+          --frequency {Frequency} --time-window {TimeWindow} \\
+          --alert-query {AlertQuery} --data-source-id /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/microsoft.operationalinsights/workspaces/{Workspace} \\
+  - name: Create a log alert rule with customization of email subject and webhook JSON payload.
+    text: >
+        az monitor log-alert create -n {AlertName} -g {ResourceGroup} -l {Location} \\
+          --severity {Severity} --threshold {Threshold} --threshold-operator {ThresholdOperator} --action-group {ActionGroup1} {ActionGroup2} --email-subject {EmailSubject} \\
+          --frequency {Frequency} --time-window {TimeWindow} \\
+          --alert-query {AlertQuery} --data-source-id /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/microsoft.operationalinsights/workspaces/{Workspace} \\
+  - name: Create a log alert rule which is initially disabled.
+    text: >
+        az monitor log-alert create -n {AlertName} -g {ResourceGroup} -l {Location} --disable \\
+          --severity {severity} --threshold {threshold} --threshold-operator {thresholdOperator} \\
+          --frequency {frequency} --time-window {timeWindow} \\
+          --alert-query {alertQuery} --data-source-id /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/microsoft.operationalinsights/workspaces/{Workspace} \\
+  - name: Create a metric measurement log alert rule with throttling, description and tags.
+    text: >
+        az monitor log-alert create -n {AlertName} -g {ResourceGroup} -l {Location} --description {Description} --tags key1=value1 key2=value2\\
+          --severity {Severity} --threshold {Threshold} --threshold-operator {ThresholdOperator} --metric-column {MetricColumn} --metric-threshold {MetricThreshold} --metric-threshold-operator {MetricThresholdOperator} --metric-trigger-type {metricTriggerType} --throttling {throttling} \\
+          --frequency {Frequency} --time-window {TimeWindow} \\
+          --alert-query {AlertQuery} --data-source-id /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/microsoft.operationalinsights/workspaces/{Workspace} \\
+"""
+helps['monitor log-alert update'] = """
+type: command
+short-summary: Update the configuration of log alert rule.
+long-summary: >
+    See https://docs.microsoft.com/en-us/rest/api/monitor/scheduledqueryrules/createorupdate for more information.
+    Updation of custom-webhook-payload is not supported via CLI.
+examples:
+  - name: Update parameters of an alert rule.
+    text: >
+        az monitor log-alert update -n {AlertName} -g {ResourceGroup} --description {Description} --tags key1=value1 key2=value2\\
+          --severity {Severity} --threshold {Threshold} --threshold-operator {ThresholdOperator} --email-subject {EmailSubject}
+          --metric-column {MetricColumn} --metric-threshold {MetricThreshold} --metric-threshold-operator {MetricThresholdOperator} --metric-trigger-type {MetricTriggerType} --throttling {Throttling} \\
+          --frequency {Frequency} --time-window {TimeWindow} \\
+          --alert-query {AlertQuery} \\
+  - name: Disable an alert rule.
+    text: >
+        az monitor log-alert update -n {AlertName} -g {ResourceGroup} --enable false
+  - name: Reset email subject and metricTrigger of an alert rule.
+    text: >
+        az monitor log-alert update -n {AlertName} -g {ResourceGroup} --reset-email-subject --reset-metric-trigger
+"""
+
+helps['monitor log-alert action-group'] = """
+type: group
+short-summary: Manage action groups for alert rule.
+"""
+
+helps['monitor log-alert action-group add'] = """
+type: command
+short-summary: Add action groups to alert rule.
+examples:
+  - name: Add action groups to an alert rule.
+    text: >
+        az monitor log-alert action-group add -n {AlertName} -g {ResourceGroup} -a {ActionGroup1} {ActionGroup2}
+"""
+
+helps['monitor log-alert action-group remove'] = """
+type: command
+short-summary: Remove action groups from alert rule.
+examples:
+  - name: Remove action groups from alert rule.
+    text: >
+        az monitor log-alert action-group remove -n {AlertName} -g {ResourceGroup} -a {ActionGroup1} {ActionGroup2}
+"""
+
+helps['monitor log-alert action-group reset'] = """
+type: command
+short-summary: Remove all action groups from alert rule.
+examples:
+  - name: Reset action groups of alert rule.
+    text: >
+        az monitor log-alert action-group reset -n {AlertName} -g {ResourceGroup}
+"""
+
+helps['monitor log-alert authorized-resource'] = """
+type: group
+short-summary: Manage authorized resources for alert rule.
+"""
+
+helps['monitor log-alert authorized-resource add'] = """
+type: command
+short-summary: Add authorized resources to alert rule.
+examples:
+  - name: Add authorized resources to an alert rule.
+    text: >
+        az monitor log-alert authorized-resource add -n {AlertName} -g {ResourceGroup} --authorized-resource {AuthorizedResource1} {AuthorizedResource2}
+"""
+
+helps['monitor log-alert authorized-resource remove'] = """
+type: command
+short-summary: Remove authorized resources from alert rule.
+examples:
+  - name: Remove authorized resources from alert rule.
+    text: >
+        az monitor log-alert authorized-resource remove -n {AlertName} -g {ResourceGroup} --authorized-resource {AuthorizedResource1} {AuthorizedResource2}
+"""
+
+helps['monitor log-alert authorized-resource reset'] = """
+type: command
+short-summary: Remove all authorized resources from alert rule.
+examples:
+  - name: Reset authorized resources of alert rule.
+    text: >
+        az monitor log-alert authorized-resource reset -n {AlertName} -g {ResourceGroup}
+"""
+
+helps['monitor log-alert list'] = """
+type: command
+short-summary: List log alert rules under a resource group or the current subscription.
+long-summary: >
+  Lists alert rules only for Microsoft.Insights/scheduledQueryRules.
+parameters:
+  - name: --resource-group -g
+    short-summary: Name of the resource group under which the log alert rules are being listed. If it is omitted, all the log alert rules under the current subscription are listed.
+"""
+
+helps['monitor log-alert delete'] = """
+type: command
+short-summary: Delete log alert rule.
+"""
+
+helps['monitor log-alert show'] = """
+type: command
+short-summary: Get log alert rule.
+"""

@@ -57,3 +57,7 @@ def cf_event_categories(cli_ctx, _):
 
 def cf_metric_alerts(cli_ctx, _):
     return cf_monitor(cli_ctx, _).metric_alerts
+
+
+def cf_log_alerts(cli_ctx, _):
+    return cf_monitor(cli_ctx, _).scheduled_query_rules

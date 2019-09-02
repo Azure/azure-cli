@@ -23,7 +23,7 @@ from knack.arguments import CLIArgumentType
 
 # pylint: disable=line-too-long, too-many-statements
 def load_arguments(self, _):
-    from azure.mgmt.monitor.models import ConditionOperator, TimeAggregationOperator, EventData
+    from azure.mgmt.monitor.models import ConditionOperator, TimeAggregationOperator, EventData, AlertSeverity, MetricTriggerType, ConditionalOperator
 
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
     webhook_prop_type = CLIArgumentType(validator=process_webhook_prop, nargs='*')
@@ -330,4 +330,79 @@ def load_arguments(self, _):
 
     with self.argument_context('monitor activity-log alert scope remove') as c:
         c.argument('scopes', options_list=['--scope', '-s'], nargs='+')
+    # endregion
+
+    # region LogAlerts
+    with self.argument_context('monitor log-alert') as c:
+        c.argument('rule_name', options_list=['--name', '-n'], id_part='name', help="Name of the log alert rule.")
+
+    with self.argument_context('monitor log-alert create') as c:
+        c.argument('location', get_location_type(self.cli_ctx))
+        c.argument('disable', action='store_true', help="Disable the log alert rule after it is created.")
+        c.argument('description', help="The description of the log alert rule.")
+        c.argument('tags', tags_type)
+
+    with self.argument_context('monitor log-alert create', arg_group='Schedule') as c:
+        c.argument('frequency', type=int, help="Frequency (in minutes) at which rule condition should be evaluated.")
+        c.argument('time_window', type=int, help="Time window (in minutes) for which data needs to be fetched for query (should be greater than or equal to frequencyInMinutes). This argument overrules any time command (like ago) used in alert query.")
+
+    with self.argument_context('monitor log-alert create', arg_group='Source') as c:
+        c.argument('data_source_id', help="The ARM resource id over which log search query is to be run.")
+        c.argument('alert_query', help="Log search query. Valid Azure Monitor log search query that will be executed at stated frequency with data for configured timeWindow. See https://docs.microsoft.com/en-us/azure/azure-monitor/log-query/log-query-overview for more information and examples.")
+        c.argument('query_type', help="Currently only 'ResultCount' is supported.")
+        c.argument('authorized_resources', nargs='+', help="Space separated list of ARM resource ids referred into query.")
+
+    with self.argument_context('monitor log-alert create', arg_group='Action') as c:
+        from .operations.log_alert import validate_action_group
+        c.argument('severity', arg_type=get_enum_type(AlertSeverity), help="Severity of the alert.")
+        c.argument('throttling', type=int, help="Time (in minutes) for which Alerts should be throttled or suppressed.")
+        c.argument('threshold_operator', arg_type=get_enum_type(ConditionalOperator), help="Evaluation operation for rule.")
+        c.argument('threshold', type=int, help="Result or count threshold based on which rule should be triggered.")
+        c.argument('metric_column', help="Evaluation of metric on a particular column. Specify the field to be used to aggregate-on and use as dimension for metric measurement log alert rule.")
+        c.argument('metric_trigger_type', arg_type=get_enum_type(MetricTriggerType), help="Metric Trigger Type. This argument is needed only for metric measurement log alert rule.")
+        c.argument('metric_threshold_operator', arg_type=get_enum_type(ConditionalOperator), help="Result Condition Evaluation criteria. This argument is needed only for metric measurement log alert rule.")
+        c.argument('metric_threshold', type=int, help="The threshold of the metric trigger. Theshold is compared with numeric value in AggregatedValue field, used to trigger for metric measurement log alert rule.")
+        c.argument('action_group_ids', options_list=['--action-group', '-a'], nargs='+', validator=validate_action_group, help="Azure Action Group reference. Accepts space-separated action group identifiers. The identifier can be the action group's name or its resource ID.")
+        c.argument('email_subject', help="Custom subject override for all email ids in all Azure action group(s) associated with the alert rule.")
+
+    with self.argument_context('monitor log-alert update') as c:
+        c.argument('enabled', arg_type=get_three_state_flag(), help="Enable/disable log alert rule.")
+        c.argument('description', help="Update description for the log alert rule.")
+        c.argument('tags', tags_type)
+
+    with self.argument_context('monitor log-alert update', arg_group='Schedule') as c:
+        c.argument('frequency', type=int, help="Update frequency (in minutes) at which rule condition should be evaluated.")
+        c.argument('time_window', type=int, help="Update time window (in minutes) for which data needs to be fetched for query (should be greater than or equal to frequencyInMinutes).")
+
+    with self.argument_context('monitor log-alert update', arg_group='Source') as c:
+        c.argument('alert_query', help="Update the log search query. Valid Azure Monitor log search query that will be executed at stated frequency with data for configured timeWindow. See https://docs.microsoft.com/en-us/azure/azure-monitor/log-query/log-query-overview for more information and examples.")
+
+    with self.argument_context('monitor log-alert update', arg_group='Action') as c:
+        c.argument('severity', arg_type=get_enum_type(AlertSeverity), help="Update severity of the alert.")
+        c.argument('throttling', type=int, help="Update time (in minutes) for which Alerts should be throttled or suppressed.")
+        c.argument('threshold_operator', arg_type=get_enum_type(ConditionalOperator), help="Update threshold operator for alert rule.")
+        c.argument('threshold', type=int, help="Update threshold for alert rule. Result or count threshold based on which rule should be triggered.")
+        c.argument('reset_metric_trigger', action='store_true', help="Reset metric trigger to null for log alert rule.")
+        c.argument('metric_column', help="Update column for evaluation of metric for metric measurement log alert rule.")
+        c.argument('metric_trigger_type', arg_type=get_enum_type(MetricTriggerType), help="Update trigger type for metric measurement log alert rule.")
+        c.argument('metric_threshold_operator', arg_type=get_enum_type(ConditionalOperator), help="Update threshold operator for metric measurement log alert rule.")
+        c.argument('metric_threshold', type=int, help="Update the threshold for metric measurement log alert rule.")
+        c.argument('reset_email_subject', action='store_true', help="Set email subject to default for all email ids in all Azure action group(s) associated with the alert rule.")
+        c.argument('email_subject', help="Update custom subject override for all email ids in all Azure action group(s) associated with the alert rule.")
+
+    with self.argument_context('monitor log-alert action-group add') as c:
+        from .operations.log_alert import validate_action_group
+        c.argument('action_group_ids', options_list=['--action-group', '-a'], nargs='+', validator=validate_action_group,
+                   help="Accepts space separated action group identifiers. The identifier can be the action group's name or its resource ID.")
+
+    with self.argument_context('monitor log-alert action-group remove') as c:
+        from .operations.log_alert import validate_action_group
+        c.argument('action_group_ids', options_list=['--action-group', '-a'], nargs='+', validator=validate_action_group,
+                   help="Accepts space separated action group identifiers. The identifier can be the action group's name or its resource ID.")
+
+    with self.argument_context('monitor log-alert authorized-resource add') as c:
+        c.argument('authorized_resources', options_list=['--authorized-resource'], nargs='+', help="Accepts space separated list of ARM resource ids.")
+
+    with self.argument_context('monitor log-alert authorized-resource remove') as c:
+        c.argument('authorized_resources', options_list=['--authorized-resource'], nargs='+', help="Accepts space separated list of ARM resource ids.")
     # endregion
