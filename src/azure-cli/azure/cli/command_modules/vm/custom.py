@@ -1858,7 +1858,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
                 assign_identity=None, identity_scope=None, identity_role='Contributor',
                 identity_role_id=None, zones=None, priority=None, eviction_policy=None,
                 application_security_groups=None, ultra_ssd_enabled=None, ephemeral_os_disk=None,
-                proximity_placement_group=None, aux_subscriptions=None):
+                proximity_placement_group=None, aux_subscriptions=None, terminate_notification=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -2062,7 +2062,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
         single_placement_group=single_placement_group, platform_fault_domain_count=platform_fault_domain_count,
         custom_data=custom_data, secrets=secrets, license_type=license_type, zones=zones, priority=priority,
         eviction_policy=eviction_policy, application_security_groups=application_security_groups,
-        ultra_ssd_enabled=ultra_ssd_enabled, proximity_placement_group=proximity_placement_group)
+        ultra_ssd_enabled=ultra_ssd_enabled, proximity_placement_group=proximity_placement_group,
+        terminate_notification=terminate_notification)
     vmss_resource['dependsOn'] = vmss_dependencies
 
     if plan_name:

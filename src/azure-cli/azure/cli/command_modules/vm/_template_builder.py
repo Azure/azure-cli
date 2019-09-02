@@ -623,7 +623,8 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
                         backend_address_pool_id=None, inbound_nat_pool_id=None, health_probe=None,
                         single_placement_group=None, platform_fault_domain_count=None, custom_data=None,
                         secrets=None, license_type=None, zones=None, priority=None, eviction_policy=None,
-                        application_security_groups=None, ultra_ssd_enabled=None, proximity_placement_group=None):
+                        application_security_groups=None, ultra_ssd_enabled=None, proximity_placement_group=None,
+                        terminate_notification=None):
 
     # Build IP configuration
     ip_configuration = {
@@ -794,6 +795,15 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
 
     if proximity_placement_group:
         vmss_properties['proximityPlacementGroup'] = {'id': proximity_placement_group}
+
+    if terminate_notification is not None:
+        scheduled_events_profile = {
+            'terminateNotificationProfile': {
+                'notBeforeTimeout': terminate_notification,
+                'enable': 'true'
+            }
+        }
+        vmss_properties['virtualMachineProfile']['scheduledEventsProfile'] = scheduled_events_profile
 
     vmss = {
         'type': 'Microsoft.Compute/virtualMachineScaleSets',
