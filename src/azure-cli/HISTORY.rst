@@ -40,7 +40,7 @@ Release History
 
 **HDInsight**
 
-* resize: Made --workernode-count/-c required
+* `az hdinsight resize`: Make parameter `--workernode-count/-c` required
 * GA release
 
 **keyvault**
