@@ -21,6 +21,9 @@ Fix #10286: Unable to delete network rules.
 
 * Support for Policy new API version 2019-01-01
 
+**ARM**
+* Update azure-mgmt-resource package to use 3.1.0, which utilizes API version 2019-05-10, allowing copy count to be zero.
+
 **ACR**
 
 * Move to 2019-05-01 api-version, which follows replace semantics for ACR resource creation.
