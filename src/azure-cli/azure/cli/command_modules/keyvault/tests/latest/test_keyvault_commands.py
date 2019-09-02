@@ -888,5 +888,46 @@ class KeyVaultStorageAccountScenarioTest(ScenarioTest):
         self.cmd('keyvault storage list --vault-name {kv}', checks=[self.check('length(@)', 0)])
 
 
+class KeyVaultNetworkRuleScenarioTest(ScenarioTest):
+
+    def _create_subnet(test, kwargs, additional_args=None):
+        test.cmd('network vnet create -g {rg} -n {vnet} -l {loc} ')
+        test.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} --name {subnet} '
+                 '--address-prefixes 10.0.0.0/21 --service-endpoints Microsoft.KeyVault')
+        return test.cmd('network vnet subnet show -g {rg} --vnet-name {vnet} --name {subnet}')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_network_rule')
+    def test_keyvault_network_rule(self, resource_group):
+
+        self.kwargs.update({
+            'kv': self.create_random_name('cli-test-keyvault-', 24),
+            'vnet': self.create_random_name('cli-test-vnet-', 24),
+            'subnet': self.create_random_name('cli-test-subnet-', 24),
+            'loc': 'eastus2'
+        })
+
+        subnet = self._create_subnet(self, self.kwargs).get_output_in_json()
+        _create_keyvault(self, self.kwargs).get_output_in_json()
+
+        self.kwargs.update({
+            # key vault service will convert subnet ID to lowercase, so convert subnet ID to lowercase in advance
+            'subnetId': subnet['id'].lower()
+        })
+
+        self.cmd('keyvault update --name {kv} --resource-group {rg} --default-action Deny')
+
+        # add network-rule
+        self.cmd('keyvault network-rule add --subnet {subnetId} --name {kv} --resource-group {rg}', checks=[
+            self.check('properties.networkAcls.virtualNetworkRules[0].id', '{subnetId}')])
+
+        # list network-rule
+        self.cmd('keyvault network-rule list --name {kv} --resource-group {rg}', checks=[
+            self.check('virtualNetworkRules[0].id', '{subnetId}')])
+
+        # remove network-rule
+        self.cmd('keyvault network-rule remove --subnet {subnetId} --name {kv} --resource-group {rg}', checks=[
+            self.check('length(properties.networkAcls.virtualNetworkRules)', 0)])
+
+
 if __name__ == '__main__':
     unittest.main()
