@@ -383,28 +383,6 @@ def assign_ag_identity(cmd, resource_group_name, application_gateway_name,
     return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag)
 
 
-# Unused due to service limitation.
-def add_ag_identity(cmd, resource_group_name, application_gateway_name,
-                    no_wait=False, user_assigned_identity=None,
-                    client_id=None, principal_id=None):
-    ncf = network_client_factory(cmd.cli_ctx).application_gateways
-    ag = ncf.get(resource_group_name, application_gateway_name)
-    if ag.identity is None:
-        raise CLIError("Please first use 'az network application-gateway identity assign` to init the identity.")
-    ManagedServiceIdentityUserAssignedIdentitiesValue = \
-        cmd.get_models('ManagedServiceIdentityUserAssignedIdentitiesValue')
-    user_assigned_indentity_instance = ManagedServiceIdentityUserAssignedIdentitiesValue(
-        client_id=client_id,
-        principal_id=principal_id
-    )
-    if ag.identity.user_assigned_identities is not None:
-        ag.identity.user_assigned_identities[user_assigned_identity] = user_assigned_indentity_instance
-    else:
-        logger.warning("This command will be ignored. Please check the type of the identity.")
-
-    return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag)
-
-
 def remove_ag_identity(cmd, resource_group_name, application_gateway_name, no_wait=False):
     ncf = network_client_factory(cmd.cli_ctx).application_gateways
     ag = ncf.get(resource_group_name, application_gateway_name)

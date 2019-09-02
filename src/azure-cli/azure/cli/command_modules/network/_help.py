@@ -346,7 +346,7 @@ type: command
 short-summary: Assign a managed service identity to an application-gateway
 examples:
   - name: Assign an identity to the application gateway
-    text: az network application-gateway identity assign -g MyResourceGroup --gateway-name ag1 --identity-type UserAssigned \\
+    text: az network application-gateway identity assign -g MyResourceGroup --gateway-name ag1 \\
             --identity /subscriptions/*-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id1
 """
 
