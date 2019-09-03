@@ -35,6 +35,7 @@ Release History
 * Fix #10286: Unable to delete subnet from network rules.
 * Fix: Duplicated subnets and IP addresses can be added to network rules.
 
+
 **Network**
 
 * az network watcher flow-log: Fix #8132. Support `--interval` to set traffic analysis interval value.
@@ -44,6 +45,10 @@ Release History
 **Policy**
 
 * Support for Policy new API version 2019-01-01
+
+**Storage**
+
+`az storage remove`: remove --auth-mode argument
 
 2.0.72
 ++++++
