@@ -10,6 +10,12 @@ Release History
 * [BREAKING] When not specified, the default value for `--start-task-wait-for-success` on `az batch pool create` is now true (was false).
 * [BREAKING] The default value for Scope on AutoUserSpecification is now always Pool (was Task on Windows nodes, Pool on Linux nodes). This argument is not exposed via the commandline, but can be set in the `--json-file` arguments.
 
+**AKS**
+
+* Add support of ACR integration, which includes
+  * Add `--attach-acr <acr-name-or-resource-id>` to `az aks create` command, which allows for attach the ACR to AKS cluster.
+  * Add `--attach-acr <acr-name-or-resource-id>` and `--detach-acr <acr-name-or-resource-id>` to `az aks update` command, which allows to attach or detach the ACR from AKS cluster.
+
 **Key Vault**
 
 Fix #10286: Unable to delete network rules.
@@ -20,6 +26,9 @@ Fix #10286: Unable to delete network rules.
 **Policy**
 
 * Support for Policy new API version 2019-01-01
+
+**ARM**
+* Update azure-mgmt-resource package to use 3.1.0, which utilizes API version 2019-05-10, allowing copy count to be zero.
 
 **ACR**
 
@@ -42,7 +51,12 @@ Fix #10286: Unable to delete network rules.
 
 * az webapp up detects env folder and removes it from compressed file used for deployment
 
-**Keyvault**
+**HDInsight**
+
+* `az hdinsight resize`: Make parameter `--workernode-count/-c` required
+* GA release
+
+**keyvault**
 
 * Fix the bug in secret set command that ignores the expires argument
 
