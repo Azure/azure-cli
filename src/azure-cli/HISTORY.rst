@@ -36,9 +36,6 @@ Fix #10286: Unable to delete network rules.
 * az network application-gateway identity: Fix #10073 and #8244 Add support for setting identity in application-gateway.
 * az network application-gateway ssl-cert: Fix #8244. Add support for setting key vault id in application-gateway ssl-cert.
 
-2.0.72
-++++++
-
 **Policy**
 
 * Support for Policy new API version 2019-01-01
