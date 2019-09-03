@@ -501,7 +501,14 @@ def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=No
 
     if ip_address:
         rules.ip_rules = rules.ip_rules or []
-        rules.ip_rules.append(IPRule(value=ip_address))
+        # if the rule already exists, don't add again
+        to_modify = True
+        for x in rules.ip_rules:
+            if x.value == ip_address:
+                to_modify = False
+                break
+        if to_modify:
+            rules.ip_rules.append(IPRule(value=ip_address))
 
     return client.create_or_update(resource_group_name=resource_group_name,
                                    vault_name=vault_name,
