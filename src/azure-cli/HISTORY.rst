@@ -28,7 +28,8 @@ Release History
 
 **Key Vault**
 
-Fix #10286: Unable to delete network rules.
+* Fix #10286: Unable to delete subnet from network rules.
+* Fix: Duplicated subnets and IP addresses can be added to network rules.
 
 **Network**
 
