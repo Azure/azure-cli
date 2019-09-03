@@ -3303,7 +3303,8 @@ def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_acc
                     'enabled': traffic_analytics_enabled,
                     'workspace_id': workspace.properties['customerId'],
                     'workspace_region': workspace.location,
-                    'workspace_resource_id': traffic_analytics_workspace
+                    'workspace_resource_id': traffic_analytics_workspace,
+                    'traffic_analytics_interval': traffic_analytics_interval
                 }
             }
         else:
@@ -3317,6 +3318,7 @@ def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_acc
                     c.set_param('workspace_id', workspace.properties['customerId'])
                     c.set_param('workspace_region', workspace.location)
                     c.set_param('workspace_resource_id', traffic_analytics_workspace)
+                    c.set_param('traffic_analytics_interval', traffic_analytics_interval)
 
     return client.set_flow_log_configuration(watcher_rg, watcher_name, config)
 
