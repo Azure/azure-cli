@@ -30,7 +30,7 @@ def acr_config_content_trust_update(cmd,
 
     policies = registry.policies
 
-    if status is not None:
+    if status:
         Policy = cmd.get_models('Policy')
         policies = policies if policies else Policy()
         TrustPolicy = cmd.get_models('TrustPolicy')
@@ -64,8 +64,8 @@ def acr_config_retention_update(cmd,
     registry, resource_group_name = validate_premium_registry(
         cmd, registry_name, resource_group_name, POLICIES_NOT_SUPPORTED)
 
-    Policy = cmd.get_models('Policy')
-    RetentionPolicy = cmd.get_models('RetentionPolicy')
+    Policy, RetentionPolicy, RegistryUpdateParameters = cmd.get_models(
+        'Policy', 'RetentionPolicy', 'RegistryUpdateParameters')
 
     policies = registry.policies
     if policies is None:
@@ -73,13 +73,12 @@ def acr_config_retention_update(cmd,
 
     policies.retention_policy = policies.retention_policy if policies.retention_policy else RetentionPolicy()
 
-    if status is not None:
+    if status:
         policies.retention_policy.status = status
 
     if days is not None:
         policies.retention_policy.days = days
 
-    RegistryUpdateParameters = cmd.get_models('RegistryUpdateParameters')
     parameters = RegistryUpdateParameters(policies=policies)
     updated_policies = LongRunningOperation(cmd.cli_ctx)(
         client.update(resource_group_name, registry_name, parameters)

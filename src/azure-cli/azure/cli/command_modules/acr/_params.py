@@ -28,7 +28,8 @@ from ._validators import (
     validate_arg,
     validate_secret_arg,
     validate_set,
-    validate_set_secret
+    validate_set_secret,
+    validate_retention_days
 )
 
 image_by_tag_or_digest_type = CLIArgumentType(
@@ -80,7 +81,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('status', help="Indicates whether content-trust is enabled or disabled.", arg_type=get_enum_type(PolicyStatus))
 
     with self.argument_context('acr config retention') as c:
-        c.argument('days', help='The number of days to retain an untagged manifest after which it gets purged. Defaults to: 7')
+        c.argument('days', type=int, help='The number of days to retain an untagged manifest after which it gets purged (Range: 0 to 365). Value "0" will delete untagged manifests immediately.', validator=validate_retention_days, default=7)
 
     with self.argument_context('acr login') as c:
         c.argument('resource_group_name', deprecate_info=c.deprecate(hide=True))

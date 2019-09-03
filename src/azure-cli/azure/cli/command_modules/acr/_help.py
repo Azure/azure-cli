@@ -103,9 +103,12 @@ helps['acr config retention update'] = """
 type: command
 short-summary: Update retention policy for an Azure Container Registry.
 examples:
-  - name: Update retention policy for an Azure Container Registry
+  - name: Enable retention policy for an Azure Container Registry to delete an untagged manifest after 30 days.
     text: >
         az acr config retention update -n MyRegistry --status Enabled --days 30
+  - name: Enable retention policy for an Azure Container Registry to delete a manifest as soon as it gets untagged.
+    text: >
+        az acr config retention update -n MyRegistry --status Enabled --days 0
 """
 
 helps['acr create'] = """
