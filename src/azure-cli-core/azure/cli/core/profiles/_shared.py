@@ -48,9 +48,12 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_RESOURCE_RESOURCES = ('azure.mgmt.resource.resources', 'ResourceManagementClient')
     MGMT_RESOURCE_SUBSCRIPTIONS = ('azure.mgmt.resource.subscriptions', 'SubscriptionClient')
     DATA_KEYVAULT = ('azure.keyvault', 'KeyVaultClient')
+    MGMT_EVENTHUB = ('azure.mgmt.eventhub', 'EventHubManagementClient')
+    # the "None" below will stay till a command module fills in the type so "get_mgmt_service_client"
+    # can be provided with "ResourceType.XXX" to initialize the client object. This usually happens
+    # when related commands start to support Multi-API
     DATA_STORAGE = ('azure.multiapi.storage', None)
     DATA_COSMOS_TABLE = ('azure.multiapi.cosmosdb', None)
-    MGMT_EVENTHUB = ('azure.mgmt.eventhub', 'EventHubManagementClient')
     MGMT_CONTAINERSERVICE = ('azure.mgmt.containerservice', None)
     MGMT_ADVISOR = ('azure.mgmt.advisor', None)
     MGMT_MEDIA = ('azure.mgmt.media', None)
@@ -87,6 +90,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_SQLVM = ('azure.mgmt.sqlvirtualmachine', None)
     MGMT_MANAGEDSERVICES = ('azure.mgmt.managedservices', None)
     MGMT_NETAPPFILES = ('azure.mgmt.netappfiles', None)
+    MGMT_APPSERVICE = ('azure.mgmt.web', None)
 
     def __init__(self, import_prefix, client_name):
         """Constructor.
