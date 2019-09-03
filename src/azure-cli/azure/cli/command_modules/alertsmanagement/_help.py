@@ -139,7 +139,7 @@ parameters:
 examples:
   - name: Get alerts list summary using state and group-by parameters
     text: >
-         az alertsmanagement alert list-summary --group-by "severity,alertstate" --state "Active"
+         az alertsmanagement alert list-summary --group-by "severity,alertstate" --state "New"
 """
 
 helps['alertsmanagement alert show-history'] = """
@@ -216,7 +216,7 @@ examples:
         az alertsmanagement smart-group show --smart-group-id "afbf1b3a-0a6c-4f19-9c9b-644ccd7b1529"
 """
 
-helps['az alertsmanagement  smart-group show-history'] = """
+helps['az alertsmanagement smart-group show-history'] = """
 type: command
 short-summary: Gets smart group history
 long-summary: >
@@ -260,7 +260,7 @@ short-summary: Get Action Rules Information
 long-summary: >
     Get Action Rules Information.
 parameters:
-  - name: --resource-group
+  - name: --resource-group-name
     type: string
     short-summary: Resource group in which action rule reside.
   - name: --target-resource
@@ -308,7 +308,7 @@ short-summary: Get action-rule based on parameters
 long-summary: >
     Get action-rule based on parameters
 parameters:
-  - name: --resource-group
+  - name: --resource-group-name
     type: string
     short-summary: Resource group in which action rule reside.
   - name: --name
@@ -326,7 +326,7 @@ short-summary: Create or update an action rule.
 long-summary: >
     Create or update an action rule.
 parameters:
-  - name: --resource-group
+  - name: --resource-group-name
     type: string
     short-summary: Resource group in which action rule reside.
   - name: --name
@@ -353,7 +353,7 @@ parameters:
   - name: --target-resource-type-condition
     type: string
     short-summary: Expected format - {<operation>:<comma separated list of values>}
-  - name: --alert-rule-id-condition
+  - name: --alert-rule-condition
     type: string
     short-summary: Expected format - {<operation>:<comma separated list of values>} For eg. Equals:ARM_ID_1,ARM_ID_2
   - name: --description-condition
@@ -392,7 +392,7 @@ short-summary: Updates action rule properties.
 long-summary: >
     Updates action rule properties.
 parameters:
-  - name: --resource-group
+  - name: --resource-group-name
     type: string
     short-summary: Resource group in which action rule reside.
   - name: --name
@@ -416,7 +416,7 @@ short-summary: Deletes a action group
 long-summary: >
     Deletes a action group based on parameters
 parameters:
-  - name: --resource-group
+  - name: --resource-group-name
     type: string
     short-summary: Resource group in which action rule reside.
   - name: --name
@@ -425,5 +425,5 @@ parameters:
 examples:
   - name: Deletes a action rule
     text: >
-        alertsmanagement action-rule delete --resource-group "MyResourceGroup" --name "ActionRuleName"
+        az alertsmanagement action-rule delete --resource-group "MyResourceGroup" --name "ActionRuleName"
 """

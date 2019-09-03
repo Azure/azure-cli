@@ -1,3 +1,8 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+
 from azure.mgmt.alertsmanagement.models import (ActionRule,
                                                 ActionGroup,
                                                 Suppression,
@@ -58,7 +63,7 @@ def cli_alertsmanagement_set_actionrule(client,
                                         monitor_service_condition=None,
                                         monitor_condition=None,
                                         target_resource_type_condition=None,
-                                        alert_ruleId_condition=None,
+                                        alert_rule_condition=None,
                                         description_condition=None,
                                         alert_context_condition=None,
                                         suppression_start_time=None,
@@ -78,7 +83,7 @@ def cli_alertsmanagement_set_actionrule(client,
                                                                monitor_service_condition,
                                                                monitor_condition,
                                                                target_resource_type_condition,
-                                                               alert_ruleId_condition,
+                                                               alert_rule_condition,
                                                                description_condition,
                                                                alert_context_condition),
                                    action_group_id=action_group_id,
@@ -109,7 +114,7 @@ def cli_alertsmanagement_set_actionrule(client,
                                                                monitor_service_condition,
                                                                monitor_condition,
                                                                target_resource_type_condition,
-                                                               alert_ruleId_condition,
+                                                               alert_rule_condition,
                                                                description_condition,
                                                                alert_context_condition),
                                    description=description,
@@ -126,7 +131,7 @@ def cli_alertsmanagement_set_actionrule(client,
                                                                monitor_service_condition,
                                                                monitor_condition,
                                                                target_resource_type_condition,
-                                                               alert_ruleId_condition,
+                                                               alert_rule_condition,
                                                                description_condition,
                                                                alert_context_condition),
                                    description=description,
@@ -150,7 +155,7 @@ def parse_conditions(severity_condition=None,
                      monitor_service_condition=None,
                      monitor_condition=None,
                      target_resource_type_condition=None,
-                     alert_ruleId_condition=None,
+                     alert_rule_condition=None,
                      description_condition=None,
                      alert_context_condition=None):
     conditions = Conditions()
@@ -184,10 +189,10 @@ def parse_conditions(severity_condition=None,
             values=description_condition.split(':')[1].split(',')
         )
 
-    if alert_ruleId_condition is not None:
+    if alert_rule_condition is not None:
         conditions.AlertRuleId = Conditions(
-            operatorProperty=alert_ruleId_condition.split(':')[0],
-            values=alert_ruleId_condition.split(':')[1].split(',')
+            operatorProperty=alert_rule_condition.split(':')[0],
+            values=alert_rule_condition.split(':')[1].split(',')
         )
 
     if alert_context_condition is not None:

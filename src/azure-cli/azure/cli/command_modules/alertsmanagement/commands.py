@@ -1,3 +1,8 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+
 from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.alertsmanagement._client_factory import (
     alerts_mgmt_client_factory,

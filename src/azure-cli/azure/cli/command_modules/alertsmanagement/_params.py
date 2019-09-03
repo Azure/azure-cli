@@ -1,8 +1,13 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+
+# pylint: disable=too-many-statements
+
 from knack.arguments import CLIArgumentType
 from azure.cli.core.commands.parameters import resource_group_name_type
 from azure.cli.core.commands.parameters import get_enum_type
-
-# pylint: disable=too-many-statements
 
 
 def load_arguments(self, _):
@@ -39,7 +44,7 @@ def load_arguments(self, _):
                                                  metavar='CUSTOM_TIME_RANGE')
     state_arg_type = CLIArgumentType(options_list=['--state'], arg_type=get_enum_type(State),
                                      help='State', metavar='STATE')
-    resource_group_name_arg_type = CLIArgumentType(options_list=['--resource-group-name'],
+    resource_group_name_arg_type = CLIArgumentType(options_list=['--resource-group-name', '--resource-group'],
                                                    arg_type=resource_group_name_type,
                                                    help='Resource Group Name',
                                                    metavar='RESOURCE_GROUP_NAME')
@@ -97,10 +102,10 @@ def load_arguments(self, _):
         c.argument('sort_order', sort_order_arg_type, required=False)
         c.argument('time_range', time_range_arg_type, required=False)
 
-    with self.argument_context('alertsmanagement  smart-group show') as c:
+    with self.argument_context('alertsmanagement smart-group show') as c:
         c.argument('smart_group_id', smart_group_id_arg_type, required=True)
 
-    with self.argument_context('alertsmanagement  smart-group show-history') as c:
+    with self.argument_context('alertsmanagement smart-group show-history') as c:
         c.argument('smart_group_id', smart_group_id_arg_type, required=True)
 
     with self.argument_context('alertsmanagement action-rule list') as c:
@@ -141,7 +146,7 @@ def load_arguments(self, _):
         c.argument('target_resource_type_condition', options_list=['--target-resource-type-condition'], required=False,
                    help='Expected format - {<operation>:<comma separated list of values>}' +
                    ' For eg. Contains:Virtual Machines,Storage Account')
-        c.argument('alert_rule_id_condition', options_list=['--alert-rule-id-condition'], required=False,
+        c.argument('alert_rule_condition', options_list=['--alert-rule-condition'], required=False,
                    help='Expected format - {<operation>:<comma separated list of values>}' +
                    ' For eg. Equals:ARM_ID_1,ARM_ID_2')
         c.argument('description_condition', options_list=['--description-condition'], required=False,
