@@ -190,7 +190,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('cpu', type=int, help='The CPU configuration in terms of number of cores required for the run.')
 
         # MSI parameter
-        c.argument('assign_identity', nargs='*', help="Assigns managed identities to the task. Use '[system]' to refer to the system-assigned identity or a resource ID to refer to a user-assigned identity.")
+        c.argument('assign_identity', nargs='*', help="Assigns managed identities to the task. Use '[system]' to refer to the system-assigned identity or a resource ID to refer to a user-assigned identity. Please see https://aka.ms/acr/tasks/task-create-managed-identity for more information.")
 
         # Update trigger token parameters
         c.argument('update_trigger_token', help="The payload that will be passed back alongwith the base image trigger notification.", is_preview=True)
@@ -209,7 +209,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         with self.argument_context(scope) as c:
             c.argument('username', options_list=['--username', '-u'], help="The username to login to the custom registry. This can be plain text or a key vault secret URI.")
             c.argument('password', options_list=['--password', '-p'], help="The password to login to the custom registry. This can be plain text or a key vault secret URI.")
-            c.argument('use_identity', help="The task managed identity used for the credential. Use '[system]' to refer to the system-assigned identity or a client id to refer to a user-assigned identity.")
+            c.argument('use_identity', help="The task managed identity used for the credential. Use '[system]' to refer to the system-assigned identity or a client id to refer to a user-assigned identity. Please see https://aka.ms/acr/tasks/cross-registry-authentication for more information.")
 
     with self.argument_context('acr task timer') as c:
         # Timer trigger parameters
