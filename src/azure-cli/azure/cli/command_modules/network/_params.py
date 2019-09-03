@@ -859,8 +859,8 @@ def load_arguments(self, _):
             c.argument('destination_address_prefix', help="CIDR prefix or IP range. Use '*' to match all IPs. Can also use 'VirtualNetwork', 'AzureLoadBalancer', and 'Internet'.", arg_group='Destination')
 
         with self.argument_context('network nsg rule {}'.format(item), min_api='2017-09-01') as c:
-            c.argument('source_asgs', nargs='+', help="Space-separated list of application security group names or IDs.", arg_group='Source', validator=get_asg_validator(self, 'source_asgs'))
-            c.argument('destination_asgs', nargs='+', help="Space-separated list of application security group names or IDs.", arg_group='Destination', validator=get_asg_validator(self, 'destination_asgs'))
+            c.argument('source_asgs', nargs='+', help="Space-separated list of application security group names or IDs. Limited by backend server, temporarily this argument only supports one application security group name or ID", arg_group='Source', validator=get_asg_validator(self, 'source_asgs'))
+            c.argument('destination_asgs', nargs='+', help="Space-separated list of application security group names or IDs. Limited by backend server, temporarily this argument only supports one application security group name or ID", arg_group='Destination', validator=get_asg_validator(self, 'destination_asgs'))
 
     # endregion
 
@@ -946,7 +946,7 @@ def load_arguments(self, _):
         c.argument('log_version', help='Version (revision) of the flow log.', type=int)
 
     with self.argument_context('network watcher flow-log', arg_group='Traffic Analytics', min_api='2018-10-01') as c:
-        c.argument('traffic_analytics_interval', arg_type=ignore_type, options_list='--interval', help='Interval in minutes at which to conduct flow analytics.', min_api='2018-12-01')
+        c.argument('traffic_analytics_interval', type=int, options_list='--interval', help='Interval in minutes at which to conduct flow analytics. Temporarily allowed values are 10 and 60.', min_api='2018-12-01')
         c.argument('traffic_analytics_workspace', options_list='--workspace', help='Name or ID of a Log Analytics workspace.')
         c.argument('traffic_analytics_enabled', options_list='--traffic-analytics', arg_type=get_three_state_flag(), help='Enable traffic analytics. Defaults to true if `--workspace` is provided.')
 
