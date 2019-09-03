@@ -1489,3 +1489,18 @@ def process_vm_vmss_stop(cmd, namespace):  # pylint: disable=unused-argument
     else:
         logger.warning("About to power off the specified VM...\nIt will continue to be billed. "
                        "To deallocate a VM, run: az vm deallocate.")
+
+
+def validate_terminate_notification(terminate_notification, terminate_notification_time):
+    """
+    Validate terminate_notification and terminate_notification_time
+    :param terminate_notification:
+    :param terminate_notification_time:
+    :return:
+    """
+    if terminate_notification is True:
+        if terminate_notification_time is None:
+            raise CLIError("usage error: missing --terminate_notification_time.")
+    else:
+        if terminate_notification_time is not None:
+            raise CLIError("usage error: please enable --terminate_notification")

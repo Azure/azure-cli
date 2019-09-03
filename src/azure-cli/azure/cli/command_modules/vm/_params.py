@@ -501,6 +501,13 @@ def load_arguments(self, _):
         c.argument('protect_from_scale_in', arg_type=protection_policy_type, help="Protect the VM instance from scale-in operations.")
         c.argument('protect_from_scale_set_actions', arg_type=protection_policy_type, help="Protect the VM instance from scale set actions (including scale-in).")
 
+    for scope in ['vmss create', 'vmss update']:
+        with self.argument_context(scope) as c:
+            c.argument('terminate_notification', min_api='2019-03-01', arg_type=get_three_state_flag(),
+                       help='Enable terminate notification')
+            c.argument('terminate_notification_time', min_api='2019-03-01',
+                       help='Length of time (ISO 8601 format, e.g. PT5M) a notification to be sent to the VM on the instance metadata server till the VM gets deleted')
+
     for scope, help_prefix in [('vmss update', 'Update the'), ('vmss wait', 'Wait on the')]:
         with self.argument_context(scope) as c:
             c.argument('instance_id', id_part='child_name_1', help="{0} VM instance with this ID. If missing, {0} VMSS.".format(help_prefix))
@@ -585,7 +592,6 @@ def load_arguments(self, _):
             c.argument('custom_data', help='Custom init script file or text (cloud-init, cloud-config, etc..)', completer=FilesCompleter(), type=file_type)
             c.argument('secrets', multi_ids_type, help='One or many Key Vault secrets as JSON strings or files via `@{path}` containing `[{ "sourceVault": { "id": "value" }, "vaultCertificates": [{ "certificateUrl": "value", "certificateStore": "cert store name (only on windows)"}] }]`', type=file_type, completer=FilesCompleter())
             c.argument('assign_identity', nargs='*', arg_group='Managed Service Identity', help="accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples")
-            c.argument('terminate_notification', help='Terminate Scheduled Event. Configurable length of time a Virtual Machine being deleted will have to potentially approve the Terminate Scheduled Event before the event is auto approved (timed out). The configuration must be specified in ISO 8601 format. e.g. PT5M')
             c.ignore('aux_subscriptions')
 
         with self.argument_context(scope, arg_group='Authentication') as c:

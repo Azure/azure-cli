@@ -3369,5 +3369,45 @@ class DedicatedHostScenarioTest(ScenarioTest):
 # endregion
 
 
+class VMSSTerminateNotificationScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_terminate_notification_')
+    def test_vmss_terminate_notification(self, resource_group):
+        update_enable_key = 'virtualMachineProfile.scheduledEventsProfile.terminateNotificationProfile.enable'
+        update_not_before_timeout_key = 'virtualMachineProfile.scheduledEventsProfile.terminateNotificationProfile.notBeforeTimeout'
+        create_enable_key = 'vmss.' + update_enable_key
+        create_not_before_timeout_key = 'vmss.' + update_not_before_timeout_key
+
+        # Create, enable terminate notification
+        self.cmd('vmss create -g {rg} -n vm1 --image UbuntuLTS --terminate-notification --terminate-notification-time PT5M',
+                 checks=[
+                     self.check(create_enable_key, True),
+                     self.check(create_not_before_timeout_key, 'PT5M')
+                 ])
+
+        # Update, enable terminate notification
+        self.cmd('vmss update -g {rg} -n vm1 --terminate-notification --terminate-notification-time PT8M',
+                 checks=[
+                     self.check(update_enable_key, True),
+                     self.check(update_not_before_timeout_key, 'PT8M')
+                 ])
+
+        # Update, disable terminate notification
+        self.cmd('vmss update -g {rg} -n vm1 --terminate-notification false',
+                 checks=[
+                     self.check('virtualMachineProfile.scheduledEventsProfile.terminateNotificationProfile', None)
+                 ])
+
+        # Parameter validation, the following commands should fail
+        with self.assertRaises(CLIError):
+            self.cmd('vmss create -g {rg} -n vm1 --image UbuntuLTS --terminate-notification')
+        with self.assertRaises(CLIError):
+            self.cmd('vmss create -g {rg} -n vm1 --image UbuntuLTS --terminate-notification-time PT5M')
+        with self.assertRaises(CLIError):
+            self.cmd('vmss update -g {rg} -n vm1 --terminate-notification')
+        with self.assertRaises(CLIError):
+            self.cmd('vmss update -g {rg} -n vm1 --terminate-notification-time PT5M')
+
+
 if __name__ == '__main__':
     unittest.main()
