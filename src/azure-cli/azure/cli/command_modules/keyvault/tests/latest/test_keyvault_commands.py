@@ -902,8 +902,9 @@ class KeyVaultNetworkRuleScenarioTest(ScenarioTest):
         self.kwargs.update({
             'kv': self.create_random_name('cli-test-keyvault-', 24),
             'vnet': self.create_random_name('cli-test-vnet-', 24),
+            'loc': 'eastus2',
             'subnet': self.create_random_name('cli-test-subnet-', 24),
-            'loc': 'eastus2'
+            'ip': '1.2.3.4/32'
         })
 
         subnet = self._create_subnet(self, self.kwargs).get_output_in_json()
@@ -916,17 +917,41 @@ class KeyVaultNetworkRuleScenarioTest(ScenarioTest):
 
         self.cmd('keyvault update --name {kv} --resource-group {rg} --default-action Deny')
 
-        # add network-rule
+        # add network-rule for subnet
         self.cmd('keyvault network-rule add --subnet {subnetId} --name {kv} --resource-group {rg}', checks=[
             self.check('properties.networkAcls.virtualNetworkRules[0].id', '{subnetId}')])
 
-        # list network-rule
+        # Add twice to make sure there is no duplication
+        self.cmd('keyvault network-rule add --subnet {subnetId} --name {kv} --resource-group {rg}', checks=[
+            self.check('length(properties.networkAcls.virtualNetworkRules)', 1),
+            self.check('properties.networkAcls.virtualNetworkRules[0].id', '{subnetId}')
+        ])
+
+        # list network-rule for subnet
         self.cmd('keyvault network-rule list --name {kv} --resource-group {rg}', checks=[
             self.check('virtualNetworkRules[0].id', '{subnetId}')])
 
-        # remove network-rule
+        # remove network-rule for subnet
         self.cmd('keyvault network-rule remove --subnet {subnetId} --name {kv} --resource-group {rg}', checks=[
             self.check('length(properties.networkAcls.virtualNetworkRules)', 0)])
+
+        # add network-rule for ip-address
+        self.cmd('keyvault network-rule add --ip-address {ip} --name {kv} --resource-group {rg}', checks=[
+            self.check('properties.networkAcls.ipRules[0].value', '{ip}')])
+
+        # Add twice to make sure there is no duplication
+        self.cmd('keyvault network-rule add --ip-address {ip} --name {kv} --resource-group {rg}', checks=[
+            self.check('length(properties.networkAcls.ipRules)', 1),
+            self.check('properties.networkAcls.ipRules[0].value', '{ip}')
+        ])
+
+        # list network-rule for ip-address
+        self.cmd('keyvault network-rule list --name {kv} --resource-group {rg}', checks=[
+            self.check('ipRules[0].value', '{ip}')])
+
+        # remove network-rule for ip-address
+        self.cmd('keyvault network-rule remove --ip-address {ip} --name {kv} --resource-group {rg}', checks=[
+            self.check('length(properties.networkAcls.ipRules)', 0)])
 
 
 if __name__ == '__main__':
