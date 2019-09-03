@@ -37,9 +37,12 @@ def load_arguments(self, _):
                                                  help='Supported format - <start-time>/<end-time>' +
                                                  ' where time is in ISO-8601 format',
                                                  metavar='CUSTOM_TIME_RANGE')
-    state_arg_type = CLIArgumentType(options_list=['--state'], arg_type=get_enum_type(State), help='State',
-                                              metavar='STATE')
-    resource_group_name_arg_type = CLIArgumentType(options_list=['--resource-group-name'], arg_type=resource_group_name_type,                                                help='Resource Group Name',metavar='RESOURCE_GROUP_NAME')
+    state_arg_type = CLIArgumentType(options_list=['--state'], arg_type=get_enum_type(State),
+                                     help='State', metavar='STATE')
+    resource_group_name_arg_type = CLIArgumentType(options_list=['--resource-group-name'],
+                                                   arg_type=resource_group_name_type,
+                                                   help='Resource Group Name',
+                                                   metavar='RESOURCE_GROUP_NAME')
 
     with self.argument_context('alertsmanagement alert list') as c:
         c.argument('target_resource', target_resource_arg_type, required=False)
@@ -87,7 +90,7 @@ def load_arguments(self, _):
         c.argument('custom_time_range', custom_time_range_arg_type, required=False)
 
     with self.argument_context('alertsmanagement alert show-history') as c:
-        c.argument('alert_id', options_list=['--alert-id'], required=True, help='Id of the alert to fetch it’s history')
+        c.argument('alert_id', options_list=['--alert-id'], required=True, help='Id of the alert to fetch history')
 
     with self.argument_context('alertsmanagement smart-group list') as c:
         c.argument('sort_by', sortby_arg_type, required=False)
@@ -133,7 +136,7 @@ def load_arguments(self, _):
                    help='Expected format - {<operation>:<comma separated list of values>}' +
                    ' For eg. Equals:Platform,Log Analytics')
         c.argument('monitor_condition', options_list=['--monitor-condition'], required=False,
-                    help='Expected format - {<operation>:<comma separated list of values>}' +
+                   help='Expected format - {<operation>:<comma separated list of values>}' +
                    ' For eg. Contains:Fired')
         c.argument('target_resource_type_condition', options_list=['--target-resource-type-condition'], required=False,
                    help='Expected format - {<operation>:<comma separated list of values>}' +

@@ -88,8 +88,8 @@ def cli_alertsmanagement_set_actionrule(client,
 
     if action_rule_type == 'Suppression' and recurrence_type is not None:
         if (recurrence_type not in ['Always', 'Once', 'Daily', 'Weekly', 'Monthly']):
-            raise CLIError("Invalid input value for --recurrence-type parameter. Valid inputs are - Always, Once, Daily, Weekly, Monthly")
-        
+            raise CLIError("Invalid input value for --recurrence-type parameter. " +
+                           "Valid inputs are - Always, Once, Daily, Weekly, Monthly")
         config = SuppressionConfig(recurrence_type=recurrence_type)
         if recurrence_type != 'Always':
             config.schedule = SuppressionSchedule(
