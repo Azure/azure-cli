@@ -313,6 +313,7 @@ def _deploy_arm_template_core(cli_ctx, resource_group_name,
     deployments_operation_group = smc.deployments  # This solves the multi-api for you
 
     # pylint: disable=protected-access
+    old_serialize = deployments_operation_group._serialize
     deployments_operation_group._serialize = MySerializer(
         deployments_operation_group._serialize.dependencies
     )
@@ -349,6 +350,7 @@ def _deploy_arm_template_core(cli_ctx, resource_group_name,
     )
     from msrest.universal_http.requests import RequestsHTTPSender
 
+    old_pipeline = smc.config.pipeline
     smc.config.pipeline = Pipeline(
         policies=[
             JsonCTemplatePolicy(),
@@ -362,7 +364,11 @@ def _deploy_arm_template_core(cli_ctx, resource_group_name,
 
     if validate_only:
         return sdk_no_wait(no_wait, deployments_operation_group.validate, resource_group_name, deployment_name, properties)
-    return sdk_no_wait(no_wait, deployments_operation_group.create_or_update, resource_group_name, deployment_name, properties, template_content)
+    res = sdk_no_wait(no_wait, deployments_operation_group.create_or_update, resource_group_name, deployment_name, properties)
+    # restore the old pipelines and serializer
+    smc.config.pipeline = old_pipeline
+    deployments_operation_group._serialize = old_serialize
+    return res
 
 
 def _deploy_arm_template_subscription_scope(cli_ctx,

@@ -413,11 +413,11 @@ class DeploymentTest(ScenarioTest):
         self.cmd('group deployment validate -g {rg} --template-file {tf} --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
-
+        """
         self.cmd('group deployment validate -g {rg} --template-file {tf} --parameters "{params_uri}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
-
+        """
         self.cmd('group deployment create -g {rg} -n {dn} --template-file {tf} --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{rg}')
