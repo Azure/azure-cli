@@ -37,6 +37,9 @@ def load_arguments(self, _):
                                                  help='Supported format - <start-time>/<end-time>' +
                                                  ' where time is in ISO-8601 format',
                                                  metavar='CUSTOM_TIME_RANGE')
+    state_arg_type = CLIArgumentType(options_list=['--state'], arg_type=get_enum_type(State), help='State',
+                                              metavar='STATE')
+    resource_group_name_arg_type = CLIArgumentType(options_list=['--resource-group-name'], arg_type=resource_group_name_type,                                                help='Resource Group Name',metavar='RESOURCE_GROUP_NAME')
 
     with self.argument_context('alertsmanagement alert list') as c:
         c.argument('target_resource', target_resource_arg_type, required=False)
@@ -45,7 +48,7 @@ def load_arguments(self, _):
         c.argument('monitor_service', monitor_service_arg_type, required=False)
         c.argument('monitor_condition', arg_type=get_enum_type(MonitorCondition), required=False)
         c.argument('severity', arg_type=get_enum_type(Severity), required=False)
-        c.argument('alert_state', arg_type=get_enum_type(State), required=False)
+        c.argument('alert_state', state_arg_type, required=False)
         c.argument('alert_rule', alert_rule_arg_type, required=False)
         c.argument('smart_group_id', smart_group_id_arg_type, required=False)
         c.argument('include_context', options_list=['--include-context'], required=False,
@@ -78,7 +81,7 @@ def load_arguments(self, _):
         c.argument('monitor_service', monitor_service_arg_type, required=False)
         c.argument('monitor_condition', arg_type=get_enum_type(MonitorCondition), required=False)
         c.argument('severity', arg_type=get_enum_type(Severity), required=False)
-        c.argument('state', arg_type=get_enum_type(State), required=False)
+        c.argument('state', state_arg_type, required=False)
         c.argument('alert_rule', alert_rule_arg_type, required=False)
         c.argument('time_range', time_range_arg_type, required=False)
         c.argument('custom_time_range', custom_time_range_arg_type, required=False)
@@ -98,7 +101,7 @@ def load_arguments(self, _):
         c.argument('smart_group_id', smart_group_id_arg_type, required=True)
 
     with self.argument_context('alertsmanagement action-rule list') as c:
-        c.argument('resource_group_name', resource_group_name_type, required=False)
+        c.argument('resource_group_name', resource_group_name_arg_type, required=False)
         c.argument('target_resource', target_resource_arg_type, required=False)
         c.argument('target_resource_type', target_resource_type_arg_type, required=False)
         c.argument('target_resource_group', target_resource_group_arg_type, required=False)
@@ -115,11 +118,11 @@ def load_arguments(self, _):
                    help='Gets all actions rules in a subscription filter by action rule name')
 
     with self.argument_context('alertsmanagement action-rule show') as c:
-        c.argument('resource_group_name', resource_group_name_type, required=True)
+        c.argument('resource_group_name', resource_group_name_arg_type, required=True)
         c.argument('action_rule_name', options_list=['--name'], required=True, help='Name of action rule')
 
     with self.argument_context('alertsmanagement action-rule set') as c:
-        c.argument('resource_group_name', resource_group_name_type, required=True)
+        c.argument('resource_group_name', resource_group_name_arg_type, required=True)
         c.argument('name', options_list=['--name'], required=True, help='Unique name for action rule')
         c.argument('description', options_list=['--description'], required=False, help='Description of Action Rule')
         c.argument('status', options_list=['--status'], required=True, help='Status of Action Rule')
@@ -129,11 +132,13 @@ def load_arguments(self, _):
         c.argument('monitor_service_condition', options_list=['--monitor-service-condition'], required=False,
                    help='Expected format - {<operation>:<comma separated list of values>}' +
                    ' For eg. Equals:Platform,Log Analytics')
-        c.argument('monitor_condition', arg_type=get_enum_type(MonitorCondition), required=False)
+        c.argument('monitor_condition', options_list=['--monitor-condition'], required=False,
+                    help='Expected format - {<operation>:<comma separated list of values>}' +
+                   ' For eg. Contains:Fired')
         c.argument('target_resource_type_condition', options_list=['--target-resource-type-condition'], required=False,
                    help='Expected format - {<operation>:<comma separated list of values>}' +
                    ' For eg. Contains:Virtual Machines,Storage Account')
-        c.argument('alert_rule_id_condition', options_list=['--alert-ruleId-condition'], required=False,
+        c.argument('alert_rule_id_condition', options_list=['--alert-rule-id-condition'], required=False,
                    help='Expected format - {<operation>:<comma separated list of values>}' +
                    ' For eg. Equals:ARM_ID_1,ARM_ID_2')
         c.argument('description_condition', options_list=['--description-condition'], required=False,
@@ -157,20 +162,20 @@ def load_arguments(self, _):
 
     with self.argument_context('alertsmanagement alert update-state') as c:
         c.argument('alert_id', options_list=['--alert-id'], required=True, help='Id of alert to be updated')
-        c.argument('new_state', arg_type=get_enum_type(State), required=True)
+        c.argument('new_state', state_arg_type, required=True)
 
     with self.argument_context('alertsmanagement smart-group update-state') as c:
         c.argument('smart_group_id', smart_group_id_arg_type, required=True)
-        c.argument('new_state', arg_type=get_enum_type(State), required=True)
+        c.argument('new_state', state_arg_type, required=True)
 
     with self.argument_context('alertsmanagement action-rule update') as c:
-        c.argument('resource_group_name', resource_group_name_type, required=True)
+        c.argument('resource_group_name', resource_group_name_arg_type, required=True)
         c.argument('action_rule_name', options_list=['--name'], required=True,
                    help='Unique name of action rule to be updated')
         c.argument('status', options_list=['--status'], required=False, help='Status of Action Rule')
         c.argument('tags', options_list=['--tags'], required=False, help='List of Azure Resource Tag')
 
     with self.argument_context('alertsmanagement action-rule delete') as c:
-        c.argument('resource_group_name', resource_group_name_type, required=True)
+        c.argument('resource_group_name', resource_group_name_arg_type, required=True)
         c.argument('action_rule_name', options_list=['--name'], required=True,
                    help='Unique name of action rule to be deleted')

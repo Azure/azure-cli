@@ -353,7 +353,7 @@ parameters:
   - name: --target-resource-type-condition
     type: string
     short-summary: Expected format - {<operation>:<comma separated list of values>}
-  - name: --alert-ruleId-condition
+  - name: --alert-rule-id-condition
     type: string
     short-summary: Expected format - {<operation>:<comma separated list of values>} For eg. Equals:ARM_ID_1,ARM_ID_2
   - name: --description-condition

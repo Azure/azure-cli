@@ -64,8 +64,7 @@ def cli_alertsmanagement_set_actionrule(client,
                                         suppression_start_time=None,
                                         suppression_end_time=None,
                                         recurrence_values=None):
-    if (action_rule_type not in ['ActionGroup', 'Suppression', 'Diagnostics']) or \
-       (recurrence_type not in ['Always', 'Once', 'Daily', 'Weekly', 'Monthly']):
+    if (action_rule_type not in ['ActionGroup', 'Suppression', 'Diagnostics']):
         raise CLIError("Invalid input value for --action-rule-type")
 
     action_rule = ActionRule(location="Global", tags={})
@@ -88,6 +87,9 @@ def cli_alertsmanagement_set_actionrule(client,
         )
 
     if action_rule_type == 'Suppression' and recurrence_type is not None:
+        if (recurrence_type not in ['Always', 'Once', 'Daily', 'Weekly', 'Monthly']):
+            raise CLIError("Invalid input value for --recurrence-type parameter. Valid inputs are - Always, Once, Daily, Weekly, Monthly")
+        
         config = SuppressionConfig(recurrence_type=recurrence_type)
         if recurrence_type != 'Always':
             config.schedule = SuppressionSchedule(
