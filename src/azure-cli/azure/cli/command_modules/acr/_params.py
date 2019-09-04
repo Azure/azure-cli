@@ -174,7 +174,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         # Trigger parameters
         c.argument('source_trigger_name', help="The name of the source trigger.")
         c.argument('commit_trigger_enabled', help="Indicates whether the source control commit trigger is enabled.", arg_type=get_three_state_flag())
-        c.argument('pull_request_trigger_enabled', help="Indicates whether the source control pull request trigger is enabled.", arg_type=get_three_state_flag())
+        c.argument('pull_request_trigger_enabled', help="Indicates whether the source control pull request trigger is enabled. The trigger is disabled by default.", arg_type=get_three_state_flag())
         c.argument('schedule', help="Schedule for a timer trigger represented as a cron expression. An optional trigger name can be specified using `--schedule name:schedule` format. Multiples supported by passing --schedule multiple times.", action='append')
         c.argument('git_access_token', help="The access token used to access the source control provider.")
         c.argument('branch', help="The source control branch name.")
