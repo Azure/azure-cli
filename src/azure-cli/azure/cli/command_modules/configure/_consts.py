@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azure.cli.core.commands import DEFAULT_CACHE_TTL
+
 OUTPUT_LIST = [
     {'name': 'json', 'desc': 'JSON formatted output that most closely matches API responses.'},
     {'name': 'jsonc',
@@ -42,5 +44,4 @@ MSG_PROMPT_TELEMETRY = '\nMicrosoft would like to collect anonymous Azure CLI us
                        'again.\nSelect y to enable data collection.'
 MSG_PROMPT_FILE_LOGGING = '\nWould you like to enable logging to file?'
 
-DEFAULT_CACHE_TTL = '10'
 MSG_PROMPT_CACHE_TTL = '\nCLI object cache time-to-live (TTL) in minutes [Default: {}]: '.format(DEFAULT_CACHE_TTL)
