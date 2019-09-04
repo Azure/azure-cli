@@ -52,7 +52,8 @@ Release History
 
 **Cosmos DB**
 
-* Updating to use latest cosmos db management python 0.8.0 library
+* Update azure-mgmt-cosmosdb to latest python 0.8.0 library
+* Populate DatabaseAccountCreateUpdateParameters with 2 new parameters to support Cassandra Connector Exchange(CCX) feature - enable_cassandra_connector, connector_offer
 
 2.0.72
 ++++++
