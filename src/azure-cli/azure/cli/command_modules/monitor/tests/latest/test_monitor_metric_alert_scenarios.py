@@ -78,6 +78,49 @@ class MonitorTests(ScenarioTest):
             self.check('criteria.allOf[0].dimensions[0].values[0]', '*')
         ])
 
+
+    @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_v2')
+    @StorageAccountPreparer()
+    @StorageAccountPreparer(parameter_name='storage_account_2')
+    def test_metric_alert_multiple_scopes(self, resource_group, storage_account):
+
+        from msrestazure.tools import resource_id
+        self.kwargs.update({
+            'alert': 'alert1',
+            'sa': storage_account,
+            'sa2': storage_account_2,
+            'plan': 'plan1',
+            'app': self.create_random_name('app', 15),
+            'ag1': 'ag1',
+            'ag2': 'ag2',
+            'webhooks': '{{test=banoodle}}',
+            'sub': self.get_subscription_id(),
+            'sa_id': resource_id(
+                resource_group=resource_group,
+                subscription=self.get_subscription_id(),
+                name=storage_account,
+                namespace='Microsoft.Storage',
+                type='storageAccounts'),
+            'sa_id_2': resource_id(
+                resource_group=resource_group,
+                subscription=self.get_subscription_id(),
+                name=storage_account_2,
+                namespace='Microsoft.Storage',
+                type='storageAccounts')
+        })
+        self.cmd('monitor action-group create -g {rg} -n {ag1}')
+        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {sa_id} {sa_id_2} --action {ag1} --description "Test" --condition "total transactions > 5 where ResponseType includes Success and ApiName includes GetBlob" --condition "avg SuccessE2ELatency > 250 where ApiName includes GetBlob or PutBlob"', checks=[
+            self.check('description', 'Test'),
+            self.check('severity', 2),
+            self.check('autoMitigate', None),
+            self.check('windowSize', '0:05:00'),
+            self.check('evaluationFrequency', '0:01:00'),
+            self.check('length(criteria.allOf)', 2),
+            self.check('length(criteria.allOf[0].dimensions)', 2),
+            self.check('length(criteria.allOf[1].dimensions)', 1)
+        ])
+
+
     @ResourceGroupPreparer(name_prefix='cli_test_monitor')
     def test_metric_alert_basic_scenarios(self, resource_group):
         vm = 'vm1'

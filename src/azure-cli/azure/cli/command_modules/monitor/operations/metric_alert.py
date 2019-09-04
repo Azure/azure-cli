@@ -14,9 +14,15 @@ def create_metric_alert(client, resource_group_name, rule_name, scopes, descript
                         tags=None, actions=None, severity=2, window_size='5m', evaluation_frequency='1m',
                         auto_mitigate=None):
     from azure.mgmt.monitor.models import MetricAlertResource, MetricAlertSingleResourceMultipleMetricCriteria
+    from azure.mgmt.monitor.models import MetricAlertMultipleResourceMultipleMetricCriteria
     # generate names for the conditions
     for i, cond in enumerate(condition):
         cond.name = 'cond{}'.format(i)
+    criteria = None
+    if len(scopes) == 1:
+        criteria = MetricAlertSingleResourceMultipleMetricCriteria(all_of=condition)
+    else:
+        criteria = MetricAlertMultipleResourceMultipleMetricCriteria(all_of=condition)
     kwargs = {
         'description': description,
         'severity': severity,
@@ -24,7 +30,7 @@ def create_metric_alert(client, resource_group_name, rule_name, scopes, descript
         'scopes': scopes,
         'evaluation_frequency': evaluation_frequency,
         'window_size': window_size,
-        'criteria': MetricAlertSingleResourceMultipleMetricCriteria(all_of=condition),
+        'criteria': criteria,
         'actions': actions,
         'tags': tags,
         'location': 'global',
