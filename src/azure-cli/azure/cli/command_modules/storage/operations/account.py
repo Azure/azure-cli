@@ -8,7 +8,9 @@
 import os
 from azure.cli.command_modules.storage._client_factory import storage_client_factory
 from azure.cli.core.util import get_file_json, shell_safe_json_parse
+from knack.log import get_logger
 
+logger = get_logger(__name__)
 
 # pylint: disable=too-many-locals
 def create_storage_account(cmd, resource_group_name, account_name, sku=None, location=None, kind=None,
@@ -18,6 +20,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
     scf = storage_client_factory(cmd.cli_ctx)
+    logger.warning("The default kind for created storage account will change to 'StorageV2' from 'Storage' in future")
     params = StorageAccountCreateParameters(sku=Sku(name=sku), kind=Kind(kind), location=location, tags=tags)
     if custom_domain:
         params.custom_domain = CustomDomain(name=custom_domain, use_sub_domain=None)
