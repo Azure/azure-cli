@@ -37,7 +37,9 @@ Release History
 
 **Network**
 
-* network watcher flow-log: Fix #8132. Support `--interval` to set traffic analysis interval value.
+* az network watcher flow-log: Fix #8132. Support `--interval` to set traffic analysis interval value.
+* az network application-gateway identity: Fix #10073 and #8244 Add support for setting identity in application-gateway.
+* az network application-gateway ssl-cert: Fix #8244. Add support for setting key vault id in application-gateway ssl-cert.
 
 **Policy**
 

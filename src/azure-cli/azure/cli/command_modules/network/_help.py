@@ -336,6 +336,36 @@ examples:
             -n MyHttpSettings --probe MyNewProbe
 """
 
+helps['network application-gateway identity'] = """
+type: group
+short-summary: Manage the managed service identity of an application gateway.
+"""
+
+helps['network application-gateway identity assign'] = """
+type: command
+short-summary: Assign a managed service identity to an application-gateway
+examples:
+  - name: Assign an identity to the application gateway
+    text: az network application-gateway identity assign -g MyResourceGroup --gateway-name ag1 \\
+            --identity /subscriptions/*-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id1
+"""
+
+helps['network application-gateway identity remove'] = """
+type: command
+short-summary: Remove the managed service identity of an application-gateway
+examples:
+  - name: Remove an identity to the application gateway
+    text: az network application-gateway identity remove -g MyResourceGroup --gateway-name ag1
+"""
+
+helps['network application-gateway identity show'] = """
+type: command
+short-summary: Show the managed service identity of an application-gateway
+examples:
+  - name: Show an identity to the application gateway
+    text: az network application-gateway identity show -g MyResourceGroup --gateway-name ag1
+"""
+
 helps['network application-gateway list'] = """
 type: command
 short-summary: List application gateways.
