@@ -42,9 +42,6 @@ Release History
 * az network application-gateway ssl-cert: Fix #8244. Add support for setting key vault id in application-gateway ssl-cert.
 * az network express-route peering peer-connection: Fix #9404. Onboard `show` and `list` command for Azure express route peering peer connection resource.
 
-2.0.72
-++++++
-
 **Policy**
 
 * Support for Policy new API version 2019-01-01
