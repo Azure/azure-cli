@@ -50,7 +50,7 @@ Release History
 * az network application-gateway identity: Fix #10073 and #8244 Add support for setting identity in application-gateway.
 * az network application-gateway ssl-cert: Fix #8244. Add support for setting key vault id in application-gateway ssl-cert.
 * az network express-route peering peer-connection: Fix #9404. Onboard `show` and `list` command for Azure express route peering peer connection resource.
-* az network vnet-gateway create/update: Fix #9327. Support `--custom-routes` argument to set custom routes address space for vnet gateway and vpn client.
+* az network vnet-gateway create/update: Fix #9327. Support `--custom-routes` argument to set custom routes address space for VNet gateway and VPN client.
 
 **Policy**
 

@@ -4152,8 +4152,6 @@ def update_vnet_gateway(cmd, instance, sku=None, vpn_type=None, tags=None,
     if custom_routes and cmd.supported_api_version(min_api='2019-02-01'):
         if not instance.custom_routes:
             instance.custom_routes = AddressSpace()
-        if not instance.custom_routes.address_prefixes:
-            instance.custom_routes.address_prefixes = []
         instance.custom_routes.address_prefixes = custom_routes
 
     _validate_bgp_peering(cmd, instance, asn, bgp_peering_address, peer_weight)
