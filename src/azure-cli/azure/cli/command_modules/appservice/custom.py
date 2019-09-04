@@ -77,11 +77,15 @@ logger = get_logger(__name__)
 
 def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_file=None,  # pylint: disable=too-many-statements
                   deployment_container_image_name=None, deployment_source_url=None, deployment_source_branch='master',
-                  deployment_local_git=None, docker_registry_server_password=None, docker_registry_server_url=None,
-                  docker_registry_server_user=None, multicontainer_config_type=None, multicontainer_config_file=None,
-                  tags=None):
+                  deployment_local_git=None, docker_registry_server_password=None, docker_registry_server_user=None,
+                  multicontainer_config_type=None, multicontainer_config_file=None, tags=None):
     if deployment_source_url and deployment_local_git:
         raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
+    if deployment_container_image_name:
+        slash_ix = deployment_container_image_name.rfind('/')
+        docker_registry_server_url = deployment_container_image_name[0:slash_ix]
+        if slash_ix == -1 or ("." not in docker_registry_server_url and ":" not in docker_registry_server_url):
+            docker_registry_server_url = None
     client = web_client_factory(cmd.cli_ctx)
     if is_valid_resource_id(plan):
         parse_result = parse_resource_id(plan)
@@ -155,8 +159,10 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
 
     _fill_ftp_publishing_url(cmd, webapp, resource_group_name, name)
 
-    update_container_settings(cmd, resource_group_name, name, docker_registry_server_url, deployment_container_image_name, 
-                              docker_registry_server_user, docker_registry_server_password=docker_registry_server_password)
+    if deployment_container_image_name:
+        update_container_settings(cmd, resource_group_name, name, docker_registry_server_url,
+                                deployment_container_image_name, docker_registry_server_user,
+                                docker_registry_server_password=docker_registry_server_password)
 
     return webapp
 

@@ -1044,6 +1044,12 @@ examples:
   - name: Create a web app with a NodeJS 6.2 runtime and deployed from a local git repository.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "node|6.2" --deployment-local-git
+  - name: Create a web app with an image from DockerHub.
+    text: >
+        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName -i nginx
+  - name: Create a web app with an image from a private Azure Container Registry.
+    text: >
+        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName -i myregistry.azurecr.io/docker-image:tag
 """
 
 helps['webapp delete'] = """
