@@ -2204,6 +2204,11 @@ type: group
 short-summary: Manage ExpressRoute circuit connections.
 """
 
+helps['network express-route peering peer-connection'] = """
+type: group
+short-summary: Manage ExpressRoute circuit peer connections.
+"""
+
 helps['network express-route peering connection create'] = """
 type: command
 short-summary: Create connections between two ExpressRoute circuits.

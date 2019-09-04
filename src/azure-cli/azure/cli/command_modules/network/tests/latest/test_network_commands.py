@@ -1235,6 +1235,27 @@ class NetworkExpressRouteGlobalReachScenarioTest(ScenarioTest):
         self.cmd('network express-route peering connection show -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12}')
         self.cmd('network express-route peering connection delete -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12}')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_express_route_peer_connection')
+    def test_network_express_route_peer_connection(self, resource_group):
+        from msrestazure.azure_exceptions import CloudError
+
+        self.kwargs.update({
+            'er1': 'er1',
+            'er2': 'er2',
+            'peconn12': 'peconn12',
+        })
+
+        self.cmd('network express-route create -g {rg} -n {er1} --allow-global-reach --bandwidth 50 --peering-location Area51 --provider "Microsoft ER Test" --sku-tier Premium')
+        self.cmd('network express-route peering create -g {rg} --circuit-name {er1} --peering-type AzurePrivatePeering --peer-asn 10001 --vlan-id 101 --primary-peer-subnet 102.0.0.0/30 --secondary-peer-subnet 103.0.0.0/30')
+
+        self.cmd('network express-route create -g {rg} -n {er2} --allow-global-reach --bandwidth 50 --peering-location "Denver Test" --provider "Test Provider NW" --sku-tier Premium')
+        self.cmd('network express-route peering create -g {rg} --circuit-name {er2} --peering-type AzurePrivatePeering --peer-asn 10002 --vlan-id 102 --primary-peer-subnet 104.0.0.0/30 --secondary-peer-subnet 105.0.0.0/30')
+
+        # cannot create it, so this test will fail due to resource is not found.
+        with self.assertRaisesRegexp(SystemExit, '3'):
+            self.cmd('network express-route peering peer-connection show -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {peconn12}')
+        self.cmd('network express-route peering peer-connection list -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering')
+
 
 class NetworkLoadBalancerScenarioTest(ScenarioTest):
 
