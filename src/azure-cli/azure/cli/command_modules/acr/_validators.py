@@ -83,6 +83,5 @@ def validate_task_argument(string, is_secret):
 
 def validate_retention_days(namespace):
     days = namespace.days
-    if isinstance(days, int):
-        if days and (days < 0 or days > 365):
-            raise CLIError("invalid value for days: should be from 0 to 365")
+    if days and (days < 0 or days > 365):
+        raise CLIError("Invalid value for days: should be from 0 to 365")
