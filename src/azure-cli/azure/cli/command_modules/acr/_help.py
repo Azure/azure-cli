@@ -28,9 +28,9 @@ examples:
   - name: Queue a local context as a Linux build without pushing it to the registry.
     text: >
         az acr build -r MyRegistry .
-  - name: Queue a remote GitHub context as a Windows build and x86 architecture, tag it, and push it to the registry.
+  - name: Queue a remote GitHub context as a Windows build, tag it, and push it to the registry.
     text: >
-        az acr build -r MyRegistry https://github.com/Azure/acr-builder.git -f Windows.Dockerfile --platform Windows/x86
+        az acr build -r MyRegistry https://github.com/Azure/acr-builder.git -f Windows.Dockerfile --platform windows
   - name: Queue a local context as a Linux build on arm/v7 architecture, tag it, and push it to the registry.
     text: >
         az acr build -t sample/hello-world:{{.Run.ID}} -r MyRegistry . --platform linux/arm/v7
@@ -536,11 +536,11 @@ examples:
         az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry \\
             --auth-mode None -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile \\
             --git-access-token 0000000000000000000000000000000000000000
-  - name: Create a Windows task from a public GitHub repository which builds the Azure Container Builder image on Amd64 architecture.
+  - name: Create a Windows task from a public GitHub repository which builds the Azure Container Builder image.
     text: |
         az acr task create -t acb:{{.Run.ID}} -n acb-win -r MyRegistry \\
             -c https://github.com/Azure/acr-builder.git -f Windows.Dockerfile \\
-            --commit-trigger-enabled false --pull-request-trigger-enabled false --platform Windows/amd64
+            --commit-trigger-enabled false --pull-request-trigger-enabled false --platform windows
   - name: Create a Linux multi-step task from a public GitHub repository with a git commit trigger and with the system-assigned managed identity
     text: |
         az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry \\
@@ -571,7 +571,7 @@ examples:
 
 helps['acr task credential'] = """
 type: group
-short-summary: Manage credentials for a task
+short-summary: Manage credentials for a task. Please see https://aka.ms/acr/tasks/cross-registry-authentication for more information.
 """
 
 helps['acr task credential add'] = """
@@ -690,12 +690,12 @@ examples:
 
 helps['acr task identity'] = """
 type: group
-short-summary: Managed Service Identities for Task.
+short-summary: Managed Identities for Task. Please see https://aka.ms/acr/tasks/task-create-managed-identity for more information.
 """
 
 helps['acr task identity assign'] = """
 type: command
-short-summary: Update the managed service identity for a task.
+short-summary: Update the managed identity for a task.
 examples:
   - name: Enable the system-assigned identity on an existing task. This will replace all existing user-assigned identities for that task.
     text: >
@@ -712,7 +712,7 @@ examples:
 
 helps['acr task identity remove'] = """
 type: command
-short-summary: Remove managed service identities for a task.
+short-summary: Remove managed identities for a task.
 examples:
   - name: Remove the system-assigned identity from a task.
     text: >
@@ -728,9 +728,9 @@ examples:
 
 helps['acr task identity show'] = """
 type: command
-short-summary: Display the managed service identities for task.
+short-summary: Display the managed identities for task.
 examples:
-  - name: Display the managed service identities for a task.
+  - name: Display the managed identities for a task.
     text: >
         az acr task identity show -n MyTask -r MyRegistry
 """
