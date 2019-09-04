@@ -5,7 +5,7 @@ Release History
 
 **ACR**
 
-* Added commands to configure retention policy: "az acr config retention"
+* Added commands to configure retention policy (in preview): "az acr config retention"
 
 **AKS**
 
