@@ -170,7 +170,7 @@ def load_arguments(self, _):
     # resize
     with self.argument_context('hdinsight resize') as c:
         c.argument('target_instance_count', options_list=['--workernode-count', '-c'],
-                   help='The target worker node instance count for the operation.')
+                   help='The target worker node instance count for the operation.', required=True)
 
     # application
     with self.argument_context('hdinsight application') as c:

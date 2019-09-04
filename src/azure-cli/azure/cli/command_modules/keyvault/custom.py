@@ -489,11 +489,26 @@ def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=No
 
     if subnet:
         rules.virtual_network_rules = rules.virtual_network_rules or []
-        rules.virtual_network_rules.append(VirtualNetworkRule(id=subnet))
+
+        # if the rule already exists, don't add again
+        to_modify = True
+        for x in rules.virtual_network_rules:
+            if x.id.lower() == subnet.lower():
+                to_modify = False
+                break
+        if to_modify:
+            rules.virtual_network_rules.append(VirtualNetworkRule(id=subnet))
 
     if ip_address:
         rules.ip_rules = rules.ip_rules or []
-        rules.ip_rules.append(IPRule(value=ip_address))
+        # if the rule already exists, don't add again
+        to_modify = True
+        for x in rules.ip_rules:
+            if x.value == ip_address:
+                to_modify = False
+                break
+        if to_modify:
+            rules.ip_rules.append(IPRule(value=ip_address))
 
     return client.create_or_update(resource_group_name=resource_group_name,
                                    vault_name=vault_name,
@@ -515,22 +530,23 @@ def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address
 
     rules = vault.properties.network_acls
 
-    modified = False
+    to_modify = False
 
     if subnet and rules.virtual_network_rules:
-        new_rules = [x for x in rules.virtual_network_rules if x.id != subnet]
-        modified |= len(new_rules) != len(rules.virtual_network_rules)
-        if modified:
+        # key vault service will convert subnet ID to lowercase, so do case-insensitive compare
+        new_rules = [x for x in rules.virtual_network_rules if x.id.lower() != subnet.lower()]
+        to_modify |= len(new_rules) != len(rules.virtual_network_rules)
+        if to_modify:
             rules.virtual_network_rules = new_rules
 
     if ip_address and rules.ip_rules:
         new_rules = [x for x in rules.ip_rules if x.value != ip_address]
-        modified |= len(new_rules) != len(rules.ip_rules)
-        if modified:
+        to_modify |= len(new_rules) != len(rules.ip_rules)
+        if to_modify:
             rules.ip_rules = new_rules
 
     # if we didn't modify the network rules just return the vault as is
-    if not modified:
+    if not to_modify:
         return vault
 
     # otherwise update
