@@ -6,6 +6,7 @@ Release History
 **ACR**
 
 * Added commands to configure retention policy (in preview): "az acr config retention"
+* [BREAKING] Disable the pull request trigger by default for ACR Tasks
 
 **AKS**
 

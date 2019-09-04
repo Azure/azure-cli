@@ -542,28 +542,32 @@ examples:
   - name: Create a Linux task from a public GitHub repository which builds the hello-world image without triggers.
     text: |
         az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry \\
-            -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile --commit-trigger-enabled false \\
-            --pull-request-trigger-enabled false
+            -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile --commit-trigger-enabled false
   - name: Create a Linux task from a public GitHub repository which builds the hello-world image without triggers and uses a build argument.
     text: |
         az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry \\
             -c https://github.com/Azure/acr-builder.git -f Dockerfile --commit-trigger-enabled false \\
-            --pull-request-trigger-enabled false --arg DOCKER_CLI_BASE_IMAGE=docker:18.03.0-ce-git
+            --arg DOCKER_CLI_BASE_IMAGE=docker:18.03.0-ce-git
   - name: Create a Linux task using a private GitHub repository which builds the hello-world image without triggers on Arm architecture (V7 variant)
     text: |
         az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry \\
             -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile --commit-trigger-enabled false \\
-            --pull-request-trigger-enabled false --git-access-token 0000000000000000000000000000000000000000 --platform linux/arm/v7
+            --git-access-token 0000000000000000000000000000000000000000 --platform linux/arm/v7
   - name: Create a Linux task from a public GitHub repository which builds the hello-world image with a git commit trigger. Note that this task does not use Source Registry (MyRegistry), so we can explicitly set Auth mode as None for it.
     text: |
         az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry \\
             --auth-mode None -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile \\
             --git-access-token 0000000000000000000000000000000000000000
-  - name: Create a Windows task from a public GitHub repository which builds the Azure Container Builder image.
+  - name: Create a Linux task from a public GitHub repository which builds the hello-world image with a git pull request trigger. Note that this task does not use Source Registry (MyRegistry), so we can explicitly set Auth mode as None for it.
+    text: |
+        az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry \\
+            --auth-mode None -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile \\
+            --pull-request-trigger-enabled True --git-access-token 0000000000000000000000000000000000000000
+  - name: Create a Windows task from a public GitHub repository which builds the Azure Container Builder image on Amd64 architecture without triggers.
     text: |
         az acr task create -t acb:{{.Run.ID}} -n acb-win -r MyRegistry \\
             -c https://github.com/Azure/acr-builder.git -f Windows.Dockerfile \\
-            --commit-trigger-enabled false --pull-request-trigger-enabled false --platform windows
+            --commit-trigger-enabled false --platform Windows/amd64
   - name: Create a Linux multi-step task from a public GitHub repository with a git commit trigger and with the system-assigned managed identity
     text: |
         az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry \\
@@ -583,8 +587,8 @@ examples:
     text: |
         az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry \\
             -c https://github.com/Azure-Samples/acr-tasks.git#:multipleRegistries -f testtask.yaml \\
-            --commit-trigger-enabled false --pull-request-trigger-enabled false \\
-            --assign-identity --schedule "0 12 * * Mon-Fri"
+            --commit-trigger-enabled false --schedule "0 12 * * Mon-Fri"\\
+            --assign-identity
   - name: Create a Linux task from a public GitHub repository which builds the hello-world image with a git commit trigger and a timer trigger that runs that task at noon on Mondays through Fridays with the trigger name provided.
     text: |
         az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry \\
