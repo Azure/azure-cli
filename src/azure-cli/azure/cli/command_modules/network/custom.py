@@ -121,7 +121,7 @@ def list_network_watchers(cmd, resource_group_name=None):
 # pylint: disable=too-many-locals
 def create_application_gateway(cmd, application_gateway_name, resource_group_name, location=None,
                                tags=None, no_wait=False, capacity=2,
-                               cert_data=None, cert_password=None,
+                               cert_data=None, cert_password=None, key_vault_secret_id=None,
                                frontend_port=None, http_settings_cookie_based_affinity='disabled',
                                http_settings_port=80, http_settings_protocol='Http',
                                routing_rule_type='Basic', servers=None,
@@ -132,7 +132,8 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
                                virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
                                public_ip_address_type=None, subnet_type=None, validate=False,
                                connection_draining_timeout=0, enable_http2=None, min_capacity=None, zones=None,
-                               custom_error_pages=None, firewall_policy=None, max_capacity=None):
+                               custom_error_pages=None, firewall_policy=None, max_capacity=None,
+                               user_assigned_identity=None):
     from azure.cli.core.util import random_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.network._template_builder import (
@@ -180,11 +181,11 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
 
     app_gateway_resource = build_application_gateway_resource(
         cmd, application_gateway_name, location, tags, sku, sku_tier, capacity, servers, frontend_port,
-        private_ip_address, private_ip_allocation, cert_data, cert_password,
+        private_ip_address, private_ip_allocation, cert_data, cert_password, key_vault_secret_id,
         http_settings_cookie_based_affinity, http_settings_protocol, http_settings_port,
         http_listener_protocol, routing_rule_type, public_ip_id, subnet_id,
         connection_draining_timeout, enable_http2, min_capacity, zones, custom_error_pages,
-        firewall_policy, max_capacity)
+        firewall_policy, max_capacity, user_assigned_identity)
     app_gateway_resource['dependsOn'] = ag_dependencies
     master_template.add_variable(
         'appGwID',
@@ -359,6 +360,45 @@ def update_ag_http_listener(cmd, instance, parent, item_name, frontend_ip=None, 
         instance.host_name = host_name or None
     instance.require_server_name_indication = instance.host_name and instance.protocol.lower() == 'https'
     return parent
+
+
+def assign_ag_identity(cmd, resource_group_name, application_gateway_name,
+                       user_assigned_identity, no_wait=False):
+    ncf = network_client_factory(cmd.cli_ctx).application_gateways
+    ag = ncf.get(resource_group_name, application_gateway_name)
+    ManagedServiceIdentity, ManagedServiceIdentityUserAssignedIdentitiesValue = \
+        cmd.get_models('ManagedServiceIdentity', 'ManagedServiceIdentityUserAssignedIdentitiesValue')
+    user_assigned_indentity_instance = ManagedServiceIdentityUserAssignedIdentitiesValue()
+
+    user_assigned_identities_instance = dict()
+
+    user_assigned_identities_instance[user_assigned_identity] = user_assigned_indentity_instance
+
+    identity_instance = ManagedServiceIdentity(
+        type="UserAssigned",
+        user_assigned_identities=user_assigned_identities_instance
+    )
+    ag.identity = identity_instance
+
+    return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag)
+
+
+def remove_ag_identity(cmd, resource_group_name, application_gateway_name, no_wait=False):
+    ncf = network_client_factory(cmd.cli_ctx).application_gateways
+    ag = ncf.get(resource_group_name, application_gateway_name)
+    if ag.identity is None:
+        logger.warning("This command will be ignored. The identity doesn't exist.")
+    ag.identity = None
+
+    return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag)
+
+
+def show_ag_identity(cmd, resource_group_name, application_gateway_name):
+    ncf = network_client_factory(cmd.cli_ctx).application_gateways
+    ag = ncf.get(resource_group_name, application_gateway_name)
+    if ag.identity is None:
+        raise CLIError("Please first use 'az network application-gateway identity assign` to init the identity.")
+    return ag.identity
 
 
 def create_ag_backend_http_settings_collection(cmd, resource_group_name, application_gateway_name, item_name, port,
@@ -710,23 +750,26 @@ def update_ag_request_routing_rule(cmd, instance, parent, item_name, address_poo
     return parent
 
 
-def create_ag_ssl_certificate(cmd, resource_group_name, application_gateway_name, item_name, cert_data,
-                              cert_password, no_wait=False):
+def create_ag_ssl_certificate(cmd, resource_group_name, application_gateway_name, item_name, cert_data=None,
+                              cert_password=None, key_vault_secret_id=None, no_wait=False):
     ApplicationGatewaySslCertificate = cmd.get_models('ApplicationGatewaySslCertificate')
     ncf = network_client_factory(cmd.cli_ctx)
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     new_cert = ApplicationGatewaySslCertificate(
-        name=item_name, data=cert_data, password=cert_password)
+        name=item_name, data=cert_data, password=cert_password, key_vault_secret_id=key_vault_secret_id)
     upsert_to_collection(ag, 'ssl_certificates', new_cert, 'name')
     return sdk_no_wait(no_wait, ncf.application_gateways.create_or_update,
                        resource_group_name, application_gateway_name, ag)
 
 
-def update_ag_ssl_certificate(instance, parent, item_name, cert_data=None, cert_password=None):
+def update_ag_ssl_certificate(instance, parent, item_name,
+                              cert_data=None, cert_password=None, key_vault_secret_id=None):
     if cert_data is not None:
         instance.data = cert_data
     if cert_password is not None:
         instance.password = cert_password
+    if key_vault_secret_id is not None:
+        instance.key_vault_secret_id = key_vault_secret_id
     return parent
 
 

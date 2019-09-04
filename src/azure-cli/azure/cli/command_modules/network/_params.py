@@ -32,7 +32,8 @@ from azure.cli.command_modules.network._validators import (
     WafConfigExclusionAction, validate_express_route_peering, validate_virtual_hub,
     validate_express_route_port, bandwidth_validator_factory,
     get_header_configuration_validator, validate_nat_gateway, validate_match_variables,
-    validate_waf_policy, get_subscription_list_validator, validate_frontend_ip_configs)
+    validate_waf_policy, get_subscription_list_validator, validate_frontend_ip_configs,
+    validate_application_gateway_identity)
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 from azure.cli.command_modules.network._completers import (
     subnet_completion_list, get_lb_subresource_completion_list, get_ag_subresource_completion_list,
@@ -109,6 +110,9 @@ def load_arguments(self, _):
         c.argument('custom_error_pages', min_api='2018-08-01', nargs='+', help='Space-separated list of custom error pages in `STATUS_CODE=URL` format.', validator=validate_custom_error_pages)
         c.argument('firewall_policy', options_list='--waf-policy', min_api='2018-12-01', help='Name or ID of a web application firewall (WAF) policy.', validator=validate_waf_policy)
 
+    with self.argument_context('network application-gateway', arg_group='Identity') as c:
+        c.argument('user_assigned_identity', options_list='--identity', help="Name or ID of the ManagedIdentity Resource", validator=validate_application_gateway_identity)
+
     with self.argument_context('network application-gateway', arg_group='Network') as c:
         c.argument('virtual_network_name', virtual_network_name_type)
         c.argument('private_ip_address')
@@ -138,6 +142,7 @@ def load_arguments(self, _):
         c.argument('cert_password', help='The certificate password')
         c.argument('http_settings_port', help='The HTTP settings port.')
         c.argument('servers', ag_servers_type)
+        c.argument('key_vault_secret_id', help="Secret Id of (base-64 encoded unencrypted pfx) 'Secret' or 'Certificate' object stored in Azure KeyVault. You need enable soft delete for keyvault to use this feature.", is_preview=True)
 
     with self.argument_context('network application-gateway update', arg_group=None) as c:
         c.argument('sku', default=None)
@@ -271,6 +276,7 @@ def load_arguments(self, _):
     with self.argument_context('network application-gateway ssl-cert') as c:
         c.argument('cert_data', options_list='--cert-file', type=file_type, completer=FilesCompleter(), help='The path to the PFX certificate file.', validator=validate_ssl_cert)
         c.argument('cert_password', help='Certificate password.')
+        c.argument('key_vault_secret_id', help="Secret Id of (base-64 encoded unencrypted pfx) 'Secret' or 'Certificate' object stored in Azure KeyVault.", is_preview=True)
 
     with self.argument_context('network application-gateway ssl-policy') as c:
         c.argument('clear', action='store_true', help='Clear SSL policy.')
@@ -357,6 +363,8 @@ def load_arguments(self, _):
     with self.argument_context('network application-gateway rule', min_api='2017-06-01') as c:
         c.argument('redirect_config', help='The name or ID of the redirect configuration to use with the created rule.')
 
+    with self.argument_context('network application-gateway identity', min_api='2019-04-01') as c:
+        c.argument('application_gateway_name', app_gateway_name_type)
     # endregion
 
     # region ApplicationGatewayWAFPolicies
