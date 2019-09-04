@@ -32,6 +32,7 @@ class CustomResourceType(object):  # pylint: disable=too-few-public-methods
 
 class ResourceType(Enum):  # pylint: disable=too-few-public-methods
 
+    MGMT_MONITOR = ('azure.mgmt.monitor', 'MonitorManagementClient' )
     MGMT_APIMANAGEMENT = ('azure.mgmt.apimanagement', 'ApiManagementClient')
     MGMT_KUSTO = ('azure.mgmt.kusto', 'KustoManagementClient')
     MGMT_KEYVAULT = ('azure.mgmt.keyvault', 'KeyVaultManagementClient')
@@ -76,7 +77,6 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_IOTCENTRAL = ('azure.mgmt.iotcentral', None)
     MGMT_DEVTESTLABS = ('azure.mgmt.devtestlabs', None)
     MGMT_MAPS = ('azure.mgmt.maps', None)
-    MGMT_MONITOR = ('azure.mgmt.monitor', None)
     MGMT_POLICYINSIGHTS = ('azure.mgmt.policyinsights', None)
     MGMT_RDBMS = ('azure.mgmt.rdbms', None)
     MGMT_REDIS = ('azure.mgmt.redis', None)
@@ -123,6 +123,7 @@ class SDKProfile(object):  # pylint: disable=too-few-public-methods
 
 AZURE_API_PROFILES = {
     'latest': {
+        ResourceType.MGMT_MONITOR: '2015-04-01',
         ResourceType.MGMT_STORAGE: '2019-04-01',
         ResourceType.MGMT_NETWORK: '2019-09-01',
         ResourceType.MGMT_COMPUTE: SDKProfile('2019-03-01', {
