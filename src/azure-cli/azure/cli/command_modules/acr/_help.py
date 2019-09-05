@@ -1080,16 +1080,6 @@ examples:
     text: az acr token credential generate -n MyToken -r MyRegistry --password1 --months 24
 """
 
-helps['acr token credential add-certificate'] = """
-type: command
-short-summary: Add a certificate in a PEM format for a token under an Azure Container Registry. If target certificate already exists, it will be replaced with the new one.
-examples:
-  - name: Add certificate1 for the token 'MyToken'.
-    text: az acr token credential add-certificate -n MyToken -r MyRegistry --target-cert certificate1 --certificate C:\\myCertificates\\certificate.pem
-  - name: Create a self-signed certificate at the key vault 'MyKeyVault' and add it to the token 'MyToken'.
-    text: az acr token credential add-certificate -n MyToken -r MyRegistry --target-cert certificate1 --certificate MyNewCert -k MyKeyVault --create-cert
-"""
-
 helps['acr token credential delete'] = """
 type: command
 short-summary: Delete a token credential. To be used upon expiration, loss or leak of information.

@@ -279,14 +279,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('expiry', options_list=['--expiry'], help='Expiry date for the password(s), e.g., \'2220-12-31T11:59:59+00:00\' or \'2299-12-31\'. Finer grain of expiry time if \'--months\' is insufficient.', required=False)
         c.argument('months', options_list=['--months'], help='Number of months for which the credentials will be valid.', type=int, required=False)
 
-    with self.argument_context('acr token credential add-certificate') as c:
-        c.argument('target_certificate', options_list=['-t', '--target-cert'], help='Target certificate to be added. Allowed values are "certificate1" and "certificate2"', required=True)
-        c.argument('certificate', options_list=['-c', '--certificate'], help='Certificate name under target keyvault. If \'keyvault\' is not specified, this should be the path to a local certificate.', required=True)
-        c.argument('key_vault', options_list=['-k', '--key-vault'], help='Target key vault', required=False)
-        c.argument('create_certificate', options_list=['--create-cert'], help='Flag indicating if a new self-signed certificate should be created', action='store_true', required=False)
-
     with self.argument_context('acr token credential delete') as c:
-        c.argument('certificate1', options_list=['--certificate1'], help='Flag indicating if first certificate should be deleted.', action='store_true', required=False)
-        c.argument('certificate2', options_list=['--certificate2'], help='Flag indicating if second certificate should be deleted.', action='store_true', required=False)
         c.argument('password1', options_list=['--password1'], help='Flag indicating if first password should be deleted', action='store_true', required=False)
         c.argument('password2', options_list=['--password2'], help='Flag indicating if second password should be deleted.', action='store_true', required=False)
