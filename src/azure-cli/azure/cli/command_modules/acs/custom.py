@@ -2105,9 +2105,9 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
 
     # sanity check that locations and clouds match.
     if ((cloud_name.lower() == 'azurecloud' and AzureChinaRegionToOmsRegionMap.get(rg_location, False)) or
-        (cloud_name.lower() == 'azurechinacloud' and AzureCloudRegionToOmsRegionMap.get(rg_location, False))):
-        raise CLIError('Wrong cloud ({}) setting for region {}, please use "az cloud set ..."'.format(
-            cloud_name.lower(), rg_location))
+            (cloud_name.lower() == 'azurechinacloud' and AzureCloudRegionToOmsRegionMap.get(rg_location, False))):
+                raise CLIError('Wrong cloud ({}) setting for region {}, please use "az cloud set ..."'.format(
+                cloud_name.lower(), rg_location))
 
     # another if statement since custom.py:2107:8: R0916: Too many boolean expressions in if statement (6/5)
     if ((cloud_name.lower() == 'azureusgovernment') and AzureFairfaxRegionToOmsRegionMap.get(rg_location, False)):
