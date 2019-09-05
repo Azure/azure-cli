@@ -369,15 +369,20 @@ class AcrMockCommandsTests(unittest.TestCase):
             json=None,
             verify=mock.ANY)
 
+    @mock.patch('azure.cli.core._profile.Profile.get_subscription_id', autospec=True)
     @mock.patch('azure.cli.command_modules.acr._docker_utils.get_registry_by_name', autospec=True)
     @mock.patch('requests.post', autospec=True)
     @mock.patch('requests.get', autospec=True)
     @mock.patch('azure.cli.core._profile.Profile.get_raw_token', autospec=True)
-    def test_get_docker_credentials(self, mock_get_raw_token, mock_requests_get, mock_requests_post, mock_get_registry_by_name):
+    def test_get_docker_credentials(self, mock_get_raw_token, mock_requests_get, mock_requests_post,
+                                    mock_get_registry_by_name, mock_get_subscription):
         test_registry = 'testregistry'
         test_login_server = '{}.azurecr.io'.format(test_registry)
         test_tenant_suffix = 'microsoft'
         test_login_server_with_tenant_suffix = '{}-{}.azurecr.io'.format(test_registry, test_tenant_suffix)
+
+        # Mock as Profile.get_subscription_id fails in CI (CI logs in with a SP)
+        mock_get_subscription.return_value = TEST_SUBSCRIPTION
 
         # Registry found, login server without tenant suffix
         self._core_token_scenarios(mock_get_raw_token,

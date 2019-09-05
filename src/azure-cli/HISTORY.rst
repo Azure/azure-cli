@@ -7,6 +7,7 @@ Release History
 
 * Added commands to configure retention policy (in preview): "az acr config retention"
 * [BREAKING] Disable the pull request trigger by default for ACR Tasks
+* az acr login --subscription: now supports cross tenant scenarios.
 
 **AKS**
 
