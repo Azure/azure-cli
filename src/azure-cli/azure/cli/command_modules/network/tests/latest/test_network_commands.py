@@ -2450,7 +2450,9 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
             'gw3': 'gateway3',
             'ip1': 'pubip1',
             'ip2': 'pubip2',
-            'ip3': 'pubip3'
+            'ip3': 'pubip3',
+            'custom_routes1': "101.168.0.6/32",
+            'custom_routes2': "102.168.0.6/32"
         })
 
         self.cmd('network public-ip create -n {ip1} -g {rg}')
@@ -2466,7 +2468,7 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
             'vnet2_id': '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Network/virtualNetworks/{vnet2}'.format(**self.kwargs)
         })
 
-        self.cmd('network vnet-gateway create -g {rg} -n {gw1} --vnet {vnet1_id} --public-ip-address {ip1} --no-wait')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw1} --vnet {vnet1_id} --public-ip-address {ip1} --custom-routes {custom_routes1} --no-wait')
         self.cmd('network vnet-gateway create -g {rg} -n {gw2} --vnet {vnet2_id} --public-ip-address {ip2} --no-wait')
         self.cmd('network vnet-gateway create -g {rg} -n {gw3} --vnet {vnet3} --public-ip-address {ip3} --no-wait --sku standard --asn 12345 --bgp-peering-address 10.2.250.250 --peer-weight 50')
 
@@ -2479,8 +2481,14 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
             self.check('sku.capacity', 2),
             self.check('sku.name', 'Basic'),
             self.check('vpnType', 'RouteBased'),
-            self.check('enableBgp', False)
+            self.check('enableBgp', False),
+            self.check('customRoutes.addressPrefixes[0]', self.kwargs['custom_routes1'])
         ])
+
+        self.cmd('network vnet-gateway update -g {rg} -n {gw1} --custom-routes {custom_routes1} {custom_routes2}', checks=[
+            self.check('length(customRoutes.addressPrefixes)', 2)
+        ])
+
         self.cmd('network vnet-gateway show -g {rg} -n {gw2}', checks=[
             self.check('gatewayType', 'Vpn'),
             self.check('sku.capacity', 2),

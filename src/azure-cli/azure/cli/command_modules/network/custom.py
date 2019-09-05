@@ -4044,7 +4044,7 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, 
                         no_wait=False, gateway_type=None, sku=None, vpn_type=None,
                         asn=None, bgp_peering_address=None, peer_weight=None,
                         address_prefixes=None, radius_server=None, radius_secret=None, client_protocol=None,
-                        gateway_default_site=None):
+                        gateway_default_site=None, custom_routes=None):
     (VirtualNetworkGateway, BgpSettings, SubResource, VirtualNetworkGatewayIPConfiguration, VirtualNetworkGatewaySku,
      VpnClientConfiguration, AddressSpace) = cmd.get_models(
          'VirtualNetworkGateway', 'BgpSettings', 'SubResource', 'VirtualNetworkGatewayIPConfiguration',
@@ -4080,6 +4080,10 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, 
             vnet_gateway.vpn_client_configuration.radius_server_address = radius_server
             vnet_gateway.vpn_client_configuration.radius_server_secret = radius_secret
 
+    if custom_routes and cmd.supported_api_version(min_api='2019-02-01'):
+        vnet_gateway.custom_routes = AddressSpace()
+        vnet_gateway.custom_routes.address_prefixes = custom_routes
+
     return sdk_no_wait(no_wait, client.create_or_update,
                        resource_group_name, virtual_network_gateway_name, vnet_gateway)
 
@@ -4088,7 +4092,7 @@ def update_vnet_gateway(cmd, instance, sku=None, vpn_type=None, tags=None,
                         public_ip_address=None, gateway_type=None, enable_bgp=None,
                         asn=None, bgp_peering_address=None, peer_weight=None, virtual_network=None,
                         address_prefixes=None, radius_server=None, radius_secret=None, client_protocol=None,
-                        gateway_default_site=None):
+                        gateway_default_site=None, custom_routes=None):
     AddressSpace, SubResource, VirtualNetworkGatewayIPConfiguration, VpnClientConfiguration = cmd.get_models(
         'AddressSpace', 'SubResource', 'VirtualNetworkGatewayIPConfiguration', 'VpnClientConfiguration')
 
@@ -4144,6 +4148,11 @@ def update_vnet_gateway(cmd, instance, sku=None, vpn_type=None, tags=None,
 
     if enable_bgp is not None:
         instance.enable_bgp = enable_bgp.lower() == 'true'
+
+    if custom_routes and cmd.supported_api_version(min_api='2019-02-01'):
+        if not instance.custom_routes:
+            instance.custom_routes = AddressSpace()
+        instance.custom_routes.address_prefixes = custom_routes
 
     _validate_bgp_peering(cmd, instance, asn, bgp_peering_address, peer_weight)
 
