@@ -22,6 +22,10 @@ Release History
 
 * Update azure-mgmt-resource package to use 3.1.0, which utilizes API version 2019-05-10, allowing copy count to be zero.
 
+**AppService**
+
+* az webapp deployment source config-zip support for connection_verify
+
 **Batch**
 
 * Expanded `--json-file` capabilities of `az batch pool create` to allow for specifying MountConfigurations for file system mounts(see https://docs.microsoft.com/en-us/rest/api/batchservice/pool/add#request-body for structure)
