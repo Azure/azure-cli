@@ -154,7 +154,7 @@ def acr_repository_show_tags(cmd,
         username=username,
         password=password,
         repository=repository,
-        permission='pull')
+        permission='metadataRead')
 
     try:
         raw_result = _obtain_data_from_registry(
@@ -206,7 +206,7 @@ def acr_repository_show_manifests(cmd,
         username=username,
         password=password,
         repository=repository,
-        permission='pull')
+        permission='metadataRead')
 
     raw_result = _obtain_data_from_registry(
         login_server=login_server,
@@ -241,7 +241,7 @@ def acr_repository_show(cmd,
         registry_name=registry_name,
         http_method='get',
         json_payload=None,
-        permission='pull',
+        permission='metadataRead',
         repository=repository,
         image=image,
         tenant_suffix=tenant_suffix,
@@ -285,7 +285,7 @@ def acr_repository_update(cmd,
         registry_name=registry_name,
         http_method='patch' if json_payload else 'get',
         json_payload=json_payload,
-        permission='push,pull' if json_payload else 'pull',
+        permission='metadataWrite,metadataRead' if json_payload else 'metadataRead',
         repository=repository,
         image=image,
         tenant_suffix=tenant_suffix,
@@ -392,7 +392,7 @@ def acr_repository_delete(cmd,
         username=username,
         password=password,
         repository=repository,
-        permission='delete,pull')
+        permission='delete,metadataRead')
 
     if tag or manifest:
         manifest = _delete_manifest_confirmation(
@@ -492,7 +492,7 @@ def get_image_digest(cmd, registry_name, image):
         cmd=cmd,
         registry_name=registry_name,
         repository=repository,
-        permission='pull')
+        permission='metadataRead')
 
     manifest = _get_manifest_digest(
         login_server=login_server,

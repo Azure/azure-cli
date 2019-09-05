@@ -81,6 +81,15 @@ def get_resource_group_name_by_registry_name(cli_ctx, registry_name,
     return resource_group_name
 
 
+def get_resource_id_by_registry_name(cli_ctx, registry_name):
+    """Returns the resource id for the container registry.
+    :param str storage_account_name: The name of container registry
+    """
+    arm_resource = _arm_get_resource_by_name(
+        cli_ctx, registry_name, REGISTRY_RESOURCE_TYPE)
+    return arm_resource.id
+
+
 def get_registry_by_name(cli_ctx, registry_name, resource_group_name=None):
     """Returns a tuple of Registry object and resource group name.
     :param str registry_name: The name of container registry
@@ -373,6 +382,19 @@ def remove_timer_trigger(task_name,
         raise CLIError("The timer '{}' does not exist for the task '{}'.".format(timer_name, task_name))
 
     return timer_triggers
+
+
+def add_months_to_now(months):
+    months = int(months)
+    if months <= 0:
+        raise CLIError('Number of months must be positive.')
+    from datetime import datetime
+    new_date = datetime.now()
+    total_months = new_date.month + months
+    additional_years = total_months // 12
+    new_month = total_months % 12
+    new_date = new_date.replace(year=min(new_date.year + additional_years, 9999), month=new_month)
+    return new_date
 
 
 def is_vault_secret(cmd, credential):

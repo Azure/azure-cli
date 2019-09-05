@@ -92,6 +92,12 @@ CONNECTIVITY_AAD_LOGIN_ERROR = ErrorClass(
 )
 
 
+CONNECTIVITY_WWW_AUTHENTICATE_ERROR = ErrorClass(
+    "CONNECTIVITY_WWW_AUTHENTICATE_ERROR",
+    "Registry '{}' did not ask properly for a basic or a bearer authentication."
+)
+
+
 CONNECTIVITY_REFRESH_TOKEN_ERROR = ErrorClass(
     "CONNECTIVITY_REFRESH_TOKEN_ERROR",
     "Access to registry '{}' was denied. Response code: {}. Please try running 'az login' again to refresh permissions."
