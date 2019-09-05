@@ -59,6 +59,11 @@ Release History
 
 * [BREAKING CHANGE] `az storage remove`: remove --auth-mode argument
 
+**Cosmos DB**
+
+* Update azure-mgmt-cosmosdb to latest python 0.8.0 library
+* Populate DatabaseAccountCreateUpdateParameters with 2 new parameters to support Cassandra Connector Exchange(CCX) feature - enable_cassandra_connector, connector_offer
+
 2.0.72
 ++++++
 
