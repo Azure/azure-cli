@@ -14,6 +14,10 @@ Release History
 * Add `--attach-acr <acr-name-or-resource-id>` to `az aks create` command, which allows for attach the ACR to AKS cluster.
 * Add `--attach-acr <acr-name-or-resource-id>` and `--detach-acr <acr-name-or-resource-id>` to `az aks update` command, which allows to attach or detach the ACR from AKS cluster.
 
+**Aladdin**
+
+* Update Aladdin Service (az find) to v1.0 (GA)
+
 **ARM**
 
 * Update azure-mgmt-resource package to use 3.1.0, which utilizes API version 2019-05-10, allowing copy count to be zero.
