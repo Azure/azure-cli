@@ -215,7 +215,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.command('show', 'acr_config_content_trust_show')
         g.command('update', 'acr_config_content_trust_update')
 
-    with self.command_group('acr config retention', acr_policy_util) as g:
+    with self.command_group('acr config retention', acr_policy_util, is_preview=True) as g:
         g.command('show', 'acr_config_retention_show')
         g.command('update', 'acr_config_retention_update')
 
