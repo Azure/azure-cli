@@ -32,7 +32,6 @@ class CustomResourceType(object):  # pylint: disable=too-few-public-methods
 
 class ResourceType(Enum):  # pylint: disable=too-few-public-methods
 
-    MGMT_MONITOR = ('azure.mgmt.monitor', 'MonitorManagementClient' )
     MGMT_APIMANAGEMENT = ('azure.mgmt.apimanagement', 'ApiManagementClient')
     MGMT_KUSTO = ('azure.mgmt.kusto', 'KustoManagementClient')
     MGMT_KEYVAULT = ('azure.mgmt.keyvault', 'KeyVaultManagementClient')
@@ -48,6 +47,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_RESOURCE_POLICY = ('azure.mgmt.resource.policy', 'PolicyClient')
     MGMT_RESOURCE_RESOURCES = ('azure.mgmt.resource.resources', 'ResourceManagementClient')
     MGMT_RESOURCE_SUBSCRIPTIONS = ('azure.mgmt.resource.subscriptions', 'SubscriptionClient')
+    MGMT_MONITOR = ('azure.mgmt.monitor', 'MonitorManagementClient')
     DATA_KEYVAULT = ('azure.keyvault', 'KeyVaultClient')
     MGMT_EVENTHUB = ('azure.mgmt.eventhub', 'EventHubManagementClient')
     # the "None" below will stay till a command module fills in the type so "get_mgmt_service_client"
@@ -123,7 +123,6 @@ class SDKProfile(object):  # pylint: disable=too-few-public-methods
 
 AZURE_API_PROFILES = {
     'latest': {
-        ResourceType.MGMT_MONITOR: '2015-04-01',
         ResourceType.MGMT_STORAGE: '2019-04-01',
         ResourceType.MGMT_NETWORK: '2019-09-01',
         ResourceType.MGMT_COMPUTE: SDKProfile('2019-03-01', {
@@ -149,7 +148,10 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_KEYVAULT: '7.0',
         ResourceType.DATA_STORAGE: '2018-11-09',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
-        ResourceType.MGMT_EVENTHUB: '2017-04-01'
+        ResourceType.MGMT_EVENTHUB: '2017-04-01',
+        ResourceType.MGMT_MONITOR: SDKProfile('2019-06-01', {
+            'monitor': '2019-06-01',
+        })
     },
     '2019-03-01-hybrid': {
         ResourceType.MGMT_STORAGE: '2017-10-01',

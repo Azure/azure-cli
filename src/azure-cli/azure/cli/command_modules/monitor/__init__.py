@@ -40,6 +40,7 @@ class MonitorCommandsLoader(AzCommandsLoader):
         super(MonitorCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                     resource_type=ResourceType.MGMT_MONITOR,
                                                     argument_context_cls=MonitorArgumentContext,
+                                                    operation_group='monitor',
                                                     custom_command_type=monitor_custom)
 
     def load_command_table(self, args):
