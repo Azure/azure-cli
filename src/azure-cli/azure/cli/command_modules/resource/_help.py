@@ -669,6 +669,9 @@ examples:
   - name: Create a resource policy assignment with a system assigned identity. The identity will have 'Contributor' role access to the subscription.
     text: >
         az policy assignment create --name myPolicy --policy {PolicyName} --assign-identity --identity-scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --role Contributor
+  - name: Create a resource policy assignment with a enforcement mode. The assignment will be enforced with specified enforcement mode (Default or DoNotEnforce).
+    test: >
+        az policy assignment create --name myPolicy --policy {PolicyName} --enforcement-mode 'DoNotEnforce'
 """
 
 helps['policy assignment delete'] = """

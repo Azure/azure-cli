@@ -2,6 +2,9 @@
 
 Release History
 ===============
+**Policy**
+
+* Support for Policy new API version 2019-06-01
 
 **ACR**
 
