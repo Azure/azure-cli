@@ -12,14 +12,6 @@ type: group
 short-summary: Manage Azure Network resources.
 """
 
-helps['network list-service-tags'] = """
-type: command
-short-summary: List all service tags which are below to different resources
-long-summary: >
-    A service tag represents a group of IP address prefixes to help minimize complexity for security rule creation.
-    To learn more about list-service-tags, visit https://docs.microsoft.com/en-us/azure/virtual-network/security-overview#service-tags
-"""
-
 helps['network application-gateway'] = """
 type: group
 short-summary: Manage application-level routing and load balancing services.
@@ -346,8 +338,7 @@ type: command
 short-summary: Assign a managed service identity to an application-gateway
 examples:
   - name: Assign an identity to the application gateway
-    text: az network application-gateway identity assign -g MyResourceGroup --gateway-name ag1 \\
-            --identity /subscriptions/*-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id1
+    text: az network application-gateway identity assign -g MyResourceGroup --gateway-name ag1 \\ --identity /subscriptions/*-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id1
 """
 
 helps['network application-gateway identity remove'] = """
@@ -2204,11 +2195,6 @@ type: group
 short-summary: Manage ExpressRoute circuit connections.
 """
 
-helps['network express-route peering peer-connection'] = """
-type: group
-short-summary: Manage ExpressRoute circuit peer connections.
-"""
-
 helps['network express-route peering connection create'] = """
 type: command
 short-summary: Create connections between two ExpressRoute circuits.
@@ -2258,6 +2244,11 @@ examples:
   - name: List peering settings of an ExpressRoute circuit.
     text: >
         az network express-route peering list -g MyResourceGroup --circuit-name MyCircuit
+"""
+
+helps['network express-route peering peer-connection'] = """
+type: group
+short-summary: Manage ExpressRoute circuit peer connections.
 """
 
 helps['network express-route peering show'] = """
@@ -2812,6 +2803,14 @@ examples:
     text: az network lb update -g MyResourceGroup -n MyLb --set tags.CostCenter=MyBusinessGroup
 """
 
+helps['network list-service-tags'] = """
+type: command
+short-summary: List all service tags which are below to different resources
+long-summary: >
+    A service tag represents a group of IP address prefixes to help minimize complexity for security rule creation.
+    To learn more about list-service-tags, visit https://docs.microsoft.com/en-us/azure/virtual-network/security-overview#service-tags
+"""
+
 helps['network list-usages'] = """
 type: command
 short-summary: List the number of network resources in a region that are used against a subscription quota.
@@ -3270,6 +3269,28 @@ type: group
 short-summary: Manage private link services.
 """
 
+helps['network private-link-service connection'] = """
+type: group
+short-summary: Manage private link service endpoint connections.
+"""
+
+helps['network private-link-service connection delete'] = """
+type: command
+short-summary: Delete a private link service endpoint connection.
+"""
+
+helps['network private-link-service connection update'] = """
+type: command
+short-summary: Update a private link service endpoint connection.
+long-summary: >
+    To update the connection status, the name of the connection should be provided.
+    Please obtain this name by running 'az network private-link-service show -g MyResourceGroup -n MyPLSName'.
+    The connection name is under the 'privateEndpointConnections' filed.
+examples:
+  - name: Update the endpoint connections status of private link service
+    text: az network private-link-service connection update -g MyResourceGroup -n MyEndpointName.f072a430-2d82-4470-ab30-d23fcfee58d1 --service-name MyPLSName --connection-status Rejected
+"""
+
 helps['network private-link-service create'] = """
 type: command
 short-summary: Create a private link service.
@@ -3299,28 +3320,6 @@ short-summary: Update a private link service.
 examples:
   - name: Update a private link service
     text: az network private-link-service update -g MyResourceGroup -n MyPLSName --visibility SubId1 SubId2 --auto-approval SubId1 SubId2
-"""
-
-helps['network private-link-service connection'] = """
-type: group
-short-summary: Manage private link service endpoint connections.
-"""
-
-helps['network private-link-service connection delete'] = """
-type: command
-short-summary: Delete a private link service endpoint connection.
-"""
-
-helps['network private-link-service connection update'] = """
-type: command
-short-summary: Update a private link service endpoint connection.
-long-summary: >
-    To update the connection status, the name of the connection should be provided.
-    Please obtain this name by running 'az network private-link-service show -g MyResourceGroup -n MyPLSName'.
-    The connection name is under the 'privateEndpointConnections' filed.
-examples:
-  - name: Update the endpoint connections status of private link service
-    text: az network private-link-service connection update -g MyResourceGroup -n MyEndpointName.f072a430-2d82-4470-ab30-d23fcfee58d1 --service-name MyPLSName --connection-status Rejected
 """
 
 helps['network profile'] = """
