@@ -26,6 +26,7 @@ Release History
 **AppService**
 
 * az webapp deployment source config-zip support for connection_verify
+* Add support for ACR images with az webapp create
 
 **Batch**
 
