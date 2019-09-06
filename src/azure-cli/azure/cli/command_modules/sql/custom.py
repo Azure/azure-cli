@@ -17,7 +17,6 @@ from azure.mgmt.sql.models import (
     CapabilityStatus,
     CreateMode,
     DatabaseEdition,
-    EncryptionProtector,
     FailoverGroup,
     FailoverGroupReadOnlyEndpoint,
     FailoverGroupReadWriteEndpoint,
@@ -1980,10 +1979,8 @@ def encryption_protector_update(
     return client.create_or_update(
         resource_group_name=resource_group_name,
         server_name=server_name,
-        parameters=EncryptionProtector(
-            server_key_type=server_key_type,
-            server_key_name=key_name
-        )
+        server_key_type=server_key_type,
+        server_key_name=key_name
     )
 
 ###############################################
