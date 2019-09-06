@@ -497,8 +497,8 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.sql.operations#ManagedInstanceAdministratorsOperations.{}',
         client_factory=get_sql_managed_instance_azure_ad_administrators_operations)
 
-    with self.command_group('sql mi ad-admin', 
-                            managed_instance_aadadmin_operations, 
+    with self.command_group('sql mi ad-admin',
+                            managed_instance_aadadmin_operations,
                             client_factory=get_sql_managed_instance_azure_ad_administrators_operations) as g:
 
         g.custom_command('create', 'mi_ad_admin_set')

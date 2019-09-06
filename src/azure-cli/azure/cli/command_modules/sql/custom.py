@@ -2203,7 +2203,6 @@ def managed_instance_encryption_protector_update(
 
 
 def mi_ad_admin_set(
-        cmd,
         client,
         resource_group_name,
         managed_instance_name,
@@ -2224,8 +2223,8 @@ def mi_ad_admin_set(
         parameters=kwargs
     )
 
+
 def mi_ad_admin_delete(
-        cmd,
         client,
         resource_group_name,
         managed_instance_name):

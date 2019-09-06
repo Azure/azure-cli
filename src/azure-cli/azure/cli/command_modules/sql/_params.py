@@ -1198,14 +1198,14 @@ def load_arguments(self, _):
     #           sql managed instance ad-admin
     ######
     with self.argument_context('sql mi ad-admin') as c:
-       c.argument('managed_instance_name',
+        c.argument('managed_instance_name',
                    arg_type=managed_instance_param_type)
 
-       c.argument('login',
+        c.argument('login',
                    options_list=['--display-name', '-u'],
                    help='Display name of the Azure AD administrator user or group.')
 
-       c.argument('sid',
+        c.argument('sid',
                    options_list=['--object-id', '-i'],
                    help='The unique ID of the Azure AD administrator ')
 
