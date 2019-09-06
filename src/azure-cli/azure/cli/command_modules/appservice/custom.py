@@ -2330,11 +2330,13 @@ def list_locations(cmd, sku, linux_workers_enabled=None):
 
 def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, authorization, timeout=None):
     import requests
+    from azure.cli.core.util import should_disable_connection_verify
     total_trials = (int(timeout) // 2) if timeout else 450
     num_trials = 0
     while num_trials < total_trials:
         time.sleep(2)
-        response = requests.get(deployment_status_url, headers=authorization)
+        response = requests.get(deployment_status_url, headers=authorization,
+                                verify=not should_disable_connection_verify())
         time.sleep(2)
         res_dict = response.json()
         num_trials = num_trials + 1

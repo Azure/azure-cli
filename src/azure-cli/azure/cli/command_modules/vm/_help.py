@@ -17,9 +17,7 @@ long-summary: >4
     The operating system disk is created from an image, and both the operating system disk and the image are actually virtual hard disks (VHDs)
     stored in an Azure storage account. Virtual machines also can have one or more data disks, that are also stored as VHDs.
 
-
     Azure Managed and Unmanaged Data Disks have a maximum size of 4095 GB (with the exception of larger disks in preview). Azure Unmanaged Disks also have a maximum capacity of 4095 GB.
-
 
     For more information, see:
 
@@ -28,7 +26,6 @@ long-summary: >4
     - Larger Managed Disks in Public Preview - https://azure.microsoft.com/blog/introducing-the-public-preview-of-larger-managed-disks-sizes/
 
     - Ultra SSD Managed Disks in Public Preview - https://docs.microsoft.com/azure/virtual-machines/windows/disks-ultra-ssd
-
 
 """
 
@@ -1331,7 +1328,7 @@ short-summary: List the VM image offers available in the Azure Marketplace.
 parameters:
   - name: --publisher -p
     populator-commands:
-      - az vm list-publishers
+      - az vm image list-publishers
 examples:
   - name: List all offers from Microsoft in the West US region.
     text: az vm image list-offers -l westus -p MicrosoftWindowsServer

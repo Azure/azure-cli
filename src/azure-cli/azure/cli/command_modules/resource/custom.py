@@ -1449,8 +1449,6 @@ def cli_managementgroups_subscription_add(
         cmd, client, group_name, subscription):
     subscription_id = _get_subscription_id_from_subscription(
         cmd.cli_ctx, subscription)
-    _register_rp(cmd.cli_ctx)
-    _register_rp(cmd.cli_ctx, subscription_id)
     return client.create(group_name, subscription_id)
 
 
@@ -1458,8 +1456,6 @@ def cli_managementgroups_subscription_remove(
         cmd, client, group_name, subscription):
     subscription_id = _get_subscription_id_from_subscription(
         cmd.cli_ctx, subscription)
-    _register_rp(cmd.cli_ctx)
-    _register_rp(cmd.cli_ctx, subscription_id)
     return client.delete(group_name, subscription_id)
 
 
