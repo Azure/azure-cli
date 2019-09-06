@@ -12,18 +12,10 @@ type: group
 short-summary: Manage Azure Network resources.
 """
 
-helps['network list-service-tags'] = """
-type: command
-short-summary: List all service tags which are below to different resources
-long-summary: >
-    A service tag represents a group of IP address prefixes to help minimize complexity for security rule creation.
-    To learn more about list-service-tags, visit https://docs.microsoft.com/en-us/azure/virtual-network/security-overview#service-tags
-"""
-
 helps['network application-gateway'] = """
 type: group
 short-summary: Manage application-level routing and load balancing services.
-long-summary: To learn more about Application Gateway, visit https://docs.microsoft.com/azure/application-gateway/application-gateway-create-gateway-cli
+long-summary: To learn more about Application Gateway, visit https://docs.microsoft.com/en-us/azure/application-gateway/application-gateway-create-gateway-cli
 """
 
 helps['network application-gateway address-pool'] = """
@@ -336,36 +328,6 @@ examples:
             -n MyHttpSettings --probe MyNewProbe
 """
 
-helps['network application-gateway identity'] = """
-type: group
-short-summary: Manage the managed service identity of an application gateway.
-"""
-
-helps['network application-gateway identity assign'] = """
-type: command
-short-summary: Assign a managed service identity to an application-gateway
-examples:
-  - name: Assign an identity to the application gateway
-    text: az network application-gateway identity assign -g MyResourceGroup --gateway-name ag1 \\
-            --identity /subscriptions/*-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id1
-"""
-
-helps['network application-gateway identity remove'] = """
-type: command
-short-summary: Remove the managed service identity of an application-gateway
-examples:
-  - name: Remove an identity to the application gateway
-    text: az network application-gateway identity remove -g MyResourceGroup --gateway-name ag1
-"""
-
-helps['network application-gateway identity show'] = """
-type: command
-short-summary: Show the managed service identity of an application-gateway
-examples:
-  - name: Show an identity to the application gateway
-    text: az network application-gateway identity show -g MyResourceGroup --gateway-name ag1
-"""
-
 helps['network application-gateway list'] = """
 type: command
 short-summary: List application gateways.
@@ -635,7 +597,7 @@ helps['network application-gateway rule'] = """
 type: group
 short-summary: Evaluate probe information and define routing rules.
 long-summary: >
-    For more information, visit, https://docs.microsoft.com/azure/application-gateway/application-gateway-customize-waf-rules-cli
+    For more information, visit, https://docs.microsoft.com/en-us/azure/application-gateway/application-gateway-customize-waf-rules-cli
 """
 
 helps['network application-gateway rule create'] = """
@@ -705,7 +667,7 @@ examples:
 helps['network application-gateway ssl-cert'] = """
 type: group
 short-summary: Manage SSL certificates of an application gateway.
-long-summary: For more information visit https://docs.microsoft.com/azure/application-gateway/application-gateway-ssl-cli
+long-summary: For more information visit https://docs.microsoft.com/en-us/azure/application-gateway/application-gateway-ssl-cli
 """
 
 helps['network application-gateway ssl-cert create'] = """
@@ -856,7 +818,7 @@ short-summary: Create a URL path map.
 long-summary: >
     The map must be created with at least one rule. This command requires the creation of the
     first rule at the time the map is created. To learn more
-    visit https://docs.microsoft.com/azure/application-gateway/application-gateway-create-url-route-cli
+    visit https://docs.microsoft.com/en-us/azure/application-gateway/application-gateway-create-url-route-cli
 examples:
   - name: Create a URL path map with a rule.
     text: |
@@ -933,7 +895,7 @@ type: group
 short-summary: Configure the settings of a web application firewall.
 long-summary: >
     These commands are only applicable to application gateways with an SKU type of WAF. To learn
-    more, visit https://docs.microsoft.com/azure/application-gateway/application-gateway-web-application-firewall-cli
+    more, visit https://docs.microsoft.com/en-us/azure/application-gateway/application-gateway-web-application-firewall-cli
 """
 
 helps['network application-gateway waf-config list-rule-sets'] = """
@@ -964,7 +926,7 @@ type: command
 short-summary: Update the firewall configuration of a web application.
 long-summary: >
     This command is only applicable to application gateways with an SKU type of WAF. To learn
-    more, visit https://docs.microsoft.com/azure/application-gateway/application-gateway-web-application-firewall-cli
+    more, visit https://docs.microsoft.com/en-us/azure/application-gateway/application-gateway-web-application-firewall-cli
 parameters:
   - name: --rule-set-type
     short-summary: Rule set type.
@@ -1115,7 +1077,7 @@ long-summary: >
     You can configure network security as a natural extension of an application's structure, ASG allows
     you to group virtual machines and define network security policies based on those groups. You can specify an
     application security group as the source and destination in a NSG security rule. For more information
-    visit https://docs.microsoft.com/azure/virtual-network/create-network-security-group-preview
+    visit https://docs.microsoft.com/en-us/azure/virtual-network/create-network-security-group-preview
 """
 
 helps['network asg create'] = """
@@ -1990,7 +1952,7 @@ type: group
 short-summary: Manage dedicated private network fiber connections to Azure.
 long-summary: >
     To learn more about ExpressRoute circuits visit
-    https://docs.microsoft.com/azure/expressroute/howto-circuit-cli
+    https://docs.microsoft.com/en-us/azure/expressroute/howto-circuit-cli
 """
 
 helps['network express-route auth'] = """
@@ -1998,7 +1960,7 @@ type: group
 short-summary: Manage authentication of an ExpressRoute circuit.
 long-summary: >
     To learn more about ExpressRoute circuit authentication visit
-    https://docs.microsoft.com/azure/expressroute/howto-linkvnet-cli#connect-a-virtual-network-in-a-different-subscription-to-a-circuit
+    https://docs.microsoft.com/en-us/azure/expressroute/howto-linkvnet-cli#connect-a-virtual-network-in-a-different-subscription-to-a-circuit
 """
 
 helps['network express-route auth create'] = """
@@ -2204,11 +2166,6 @@ type: group
 short-summary: Manage ExpressRoute circuit connections.
 """
 
-helps['network express-route peering peer-connection'] = """
-type: group
-short-summary: Manage ExpressRoute circuit peer connections.
-"""
-
 helps['network express-route peering connection create'] = """
 type: command
 short-summary: Create connections between two ExpressRoute circuits.
@@ -2382,7 +2339,7 @@ examples:
 helps['network lb'] = """
 type: group
 short-summary: Manage and configure load balancers.
-long-summary: To learn more about Azure Load Balancer visit https://docs.microsoft.com/azure/load-balancer/load-balancer-get-started-internet-arm-cli
+long-summary: To learn more about Azure Load Balancer visit https://docs.microsoft.com/en-us/azure/load-balancer/load-balancer-get-started-internet-arm-cli
 """
 
 helps['network lb address-pool'] = """
@@ -2824,7 +2781,7 @@ helps['network local-gateway'] = """
 type: group
 short-summary: Manage local gateways.
 long-summary: >
-    For more information on local gateways, visit: https://docs.microsoft.com/azure/vpn-gateway/vpn-gateway-howto-site-to-site-resource-manager-cli#localnet
+    For more information on local gateways, visit: https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-howto-site-to-site-resource-manager-cli#localnet
 """
 
 helps['network local-gateway create'] = """
@@ -2843,7 +2800,7 @@ short-summary: Delete a local VPN gateway.
 long-summary: >
     In order to delete a Local Network Gateway, you must first delete ALL Connection objects in Azure
     that are connected to the Gateway. After deleting the Gateway, proceed to delete other resources now not in use.
-    For more information, follow the order of instructions on this page: https://docs.microsoft.com/azure/vpn-gateway/vpn-gateway-delete-vnet-gateway-portal
+    For more information, follow the order of instructions on this page: https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-delete-vnet-gateway-portal
 examples:
   - name: Create a Local Network Gateway to represent your on-premises site.
     text: az network local-gateway delete -g MyResourceGroup -n MyLocalGateway
@@ -2894,7 +2851,7 @@ helps['network nic'] = """
 type: group
 short-summary: Manage network interfaces.
 long-summary: >
-    To learn more about network interfaces in Azure visit https://docs.microsoft.com/azure/virtual-network/virtual-network-network-interface
+    To learn more about network interfaces in Azure visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-network-interface
 """
 
 helps['network nic create'] = """
@@ -3061,7 +3018,7 @@ helps['network nic list-effective-nsg'] = """
 type: command
 short-summary: List all effective network security groups applied to a network interface.
 long-summary: >
-    To learn more about troubleshooting using effective security rules visit https://docs.microsoft.com/azure/virtual-network/virtual-network-nsg-troubleshoot-portal
+    To learn more about troubleshooting using effective security rules visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-nsg-troubleshoot-portal
 examples:
   - name: List the effective security groups associated with a NIC.
     text: az network nic list-effective-nsg -g MyResourceGroup -n MyNic
@@ -3080,7 +3037,7 @@ type: command
 short-summary: Show the effective route table applied to a network interface.
 long-summary: >
     To learn more about troubleshooting using the effective route tables visit
-    https://docs.microsoft.com/azure/virtual-network/virtual-network-routes-troubleshoot-portal#using-effective-routes-to-troubleshoot-vm-traffic-flow
+    https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-routes-troubleshoot-portal#using-effective-routes-to-troubleshoot-vm-traffic-flow
 examples:
   - name: Show the effective routes applied to a network interface.
     text: az network nic show-effective-route-table -g MyResourceGroup -n MyNic
@@ -3112,7 +3069,7 @@ long-summary: >
     You can control network traffic to resources in a virtual network using a network security group.
     A network security group contains a list of security rules that allow or deny inbound or
     outbound network traffic based on source or destination IP addresses, Application Security
-    Groups, ports, and protocols. For more information visit https://docs.microsoft.com/azure/virtual-network/virtual-networks-create-nsg-arm-cli
+    Groups, ports, and protocols. For more information visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-networks-create-nsg-arm-cli
 """
 
 helps['network nsg create'] = """
@@ -3234,19 +3191,6 @@ type: group
 short-summary: Manage private endpoints.
 """
 
-helps['network private-endpoint create'] = """
-type: command
-short-summary: Create a private endpoint.
-examples:
-  - name: Create a private endpoint.
-    text: az network private-endpoint create -g MyResourceGroup -n MyPE --vnet-name MyVnetName --subnet MySubnet --private-connection-resource-id ""/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.Network/privateLinkServices/MyPLS"" --connection-name tttt -l centralus
-"""
-
-helps['network private-endpoint delete'] = """
-type: command
-short-summary: Delete a private endpoint.
-"""
-
 helps['network private-endpoint list'] = """
 type: command
 short-summary: List private endpoints.
@@ -3254,73 +3198,7 @@ short-summary: List private endpoints.
 
 helps['network private-endpoint show'] = """
 type: command
-short-summary: Get the details of a private endpoint.
-"""
-
-helps['network private-endpoint update'] = """
-type: command
-short-summary: Update a private endpoint.
-examples:
-  - name: Update a private endpoint.
-    text: az network private-endpoint update -g MyResourceGroup -n MyPE --request-message "test" --tags mytag=hello
-"""
-
-helps['network private-link-service'] = """
-type: group
-short-summary: Manage private link services.
-"""
-
-helps['network private-link-service create'] = """
-type: command
-short-summary: Create a private link service.
-examples:
-  - name: Create a private link service
-    text: az network private-link-service create -g MyResourceGroup -n MyPLSName --vnet-name MyVnetName --subnet MySubnet --lb-name MyLBName --lb-frontend-ip-configs LoadBalancerFrontEnd -l centralus
-"""
-
-helps['network private-link-service delete'] = """
-type: command
-short-summary: Delete a private link service.
-"""
-
-helps['network private-link-service list'] = """
-type: command
-short-summary: List private link services.
-"""
-
-helps['network private-link-service show'] = """
-type: command
-short-summary: Get the details of a private link service.
-"""
-
-helps['network private-link-service update'] = """
-type: command
-short-summary: Update a private link service.
-examples:
-  - name: Update a private link service
-    text: az network private-link-service update -g MyResourceGroup -n MyPLSName --visibility SubId1 SubId2 --auto-approval SubId1 SubId2
-"""
-
-helps['network private-link-service connection'] = """
-type: group
-short-summary: Manage private link service endpoint connections.
-"""
-
-helps['network private-link-service connection delete'] = """
-type: command
-short-summary: Delete a private link service endpoint connection.
-"""
-
-helps['network private-link-service connection update'] = """
-type: command
-short-summary: Update a private link service endpoint connection.
-long-summary: >
-    To update the connection status, the name of the connection should be provided.
-    Please obtain this name by running 'az network private-link-service show -g MyResourceGroup -n MyPLSName'.
-    The connection name is under the 'privateEndpointConnections' filed.
-examples:
-  - name: Update the endpoint connections status of private link service
-    text: az network private-link-service connection update -g MyResourceGroup -n MyEndpointName.f072a430-2d82-4470-ab30-d23fcfee58d1 --service-name MyPLSName --connection-status Rejected
+short-summary: Get the details of an private endpoint.
 """
 
 helps['network profile'] = """
@@ -3358,7 +3236,7 @@ helps['network public-ip'] = """
 type: group
 short-summary: Manage public IP addresses.
 long-summary: >
-    To learn more about public IP addresses visit https://docs.microsoft.com/azure/virtual-network/virtual-network-public-ip-address
+    To learn more about public IP addresses visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-public-ip-address
 """
 
 helps['network public-ip create'] = """
@@ -3458,7 +3336,7 @@ helps['network route-filter'] = """
 type: group
 short-summary: Manage route filters.
 long-summary: >
-    To learn more about route filters with Microsoft peering with ExpressRoute, visit https://docs.microsoft.com/azure/expressroute/how-to-routefilter-cli
+    To learn more about route filters with Microsoft peering with ExpressRoute, visit https://docs.microsoft.com/en-us/azure/expressroute/how-to-routefilter-cli
 """
 
 helps['network route-filter create'] = """
@@ -3489,7 +3367,7 @@ helps['network route-filter rule'] = """
 type: group
 short-summary: Manage rules in a route filter.
 long-summary: >
-    To learn more about route filters with Microsoft peering with ExpressRoute, visit https://docs.microsoft.com/azure/expressroute/how-to-routefilter-cli
+    To learn more about route filters with Microsoft peering with ExpressRoute, visit https://docs.microsoft.com/en-us/azure/expressroute/how-to-routefilter-cli
 """
 
 helps['network route-filter rule create'] = """
@@ -3870,7 +3748,7 @@ examples:
 helps['network vnet'] = """
 type: group
 short-summary: Manage Azure Virtual Networks.
-long-summary: To learn more about Virtual Networks visit https://docs.microsoft.com/azure/virtual-network/virtual-network-manage-network
+long-summary: To learn more about Virtual Networks visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-network
 """
 
 helps['network vnet check-ip-address'] = """
@@ -3886,7 +3764,7 @@ type: command
 short-summary: Create a virtual network.
 long-summary: >
     You may also create a subnet at the same time by specifying a subnet name and (optionally) an address prefix.
-    To learn about how to create a virtual network visit https://docs.microsoft.com/azure/virtual-network/manage-virtual-network#create-a-virtual-network
+    To learn about how to create a virtual network visit https://docs.microsoft.com/en-us/azure/virtual-network/manage-virtual-network#create-a-virtual-network
 examples:
   - name: Create a virtual network.
     text: az network vnet create -g MyResourceGroup -n MyVnet
@@ -3919,7 +3797,7 @@ examples:
 helps['network vnet list-endpoint-services'] = """
 type: command
 short-summary: List which services support VNET service tunneling in a given region.
-long-summary: To learn more about service endpoints visit https://docs.microsoft.com/azure/virtual-network/virtual-network-service-endpoints-configure#azure-cli
+long-summary: To learn more about service endpoints visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-service-endpoints-configure#azure-cli
 examples:
   - name: List the endpoint services available for use in the West US region.
     text: az network vnet list-endpoint-services -l westus -o table
@@ -3928,7 +3806,7 @@ examples:
 helps['network vnet peering'] = """
 type: group
 short-summary: Manage peering connections between Azure Virtual Networks.
-long-summary: To learn more about virtual network peering visit https://docs.microsoft.com/azure/virtual-network/virtual-network-manage-peering
+long-summary: To learn more about virtual network peering visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-peering
 """
 
 helps['network vnet peering create'] = """
@@ -3997,7 +3875,7 @@ examples:
 helps['network vnet subnet'] = """
 type: group
 short-summary: Manage subnets in an Azure Virtual Network.
-long-summary: To learn more about subnets visit https://docs.microsoft.com/azure/virtual-network/virtual-network-manage-subnet
+long-summary: To learn more about subnets visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-subnet
 """
 
 helps['network vnet subnet create'] = """
@@ -4072,8 +3950,6 @@ examples:
     text: az network vnet subnet update -g MyResourceGroup -n MySubnet --vnet-name MyVNet --network-security-group MyNsg
   - name: Update subnet with NAT gateway.
     text: az network vnet subnet update -n MySubnet --vnet-name MyVnet -g MyResourceGroup --nat-gateway MyNatGateway --address-prefixes "10.0.0.0/21"
-  - name: Disable the private endpoint network policies
-    text: az network vnet subnet update -n MySubnet --vnet-name MyVnet -g MyResourceGroup --disable-private-endpoint-network-policies
 """
 
 helps['network vnet update'] = """
@@ -4088,7 +3964,7 @@ helps['network vnet-gateway'] = """
 type: group
 short-summary: Use an Azure Virtual Network Gateway to establish secure, cross-premises connectivity.
 long-summary: >
-    To learn more about Azure Virtual Network Gateways, visit https://docs.microsoft.com/azure/vpn-gateway/vpn-gateway-howto-site-to-site-resource-manager-cli
+    To learn more about Azure Virtual Network Gateways, visit https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-howto-site-to-site-resource-manager-cli
 """
 
 helps['network vnet-gateway create'] = """
@@ -4117,7 +3993,7 @@ long-summary: >
     In order to delete a Virtual Network Gateway, you must first delete ALL Connection objects in Azure that are
      connected to the Gateway. After deleting the Gateway, proceed to delete other resources now not in use.
      For more information, follow the order of instructions on this page:
-     https://docs.microsoft.com/azure/vpn-gateway/vpn-gateway-delete-vnet-gateway-portal
+     https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-delete-vnet-gateway-portal
 examples:
   - name: Delete a virtual network gateway.
     text: az network vnet-gateway delete -g MyResourceGroup -n MyVnetGateway
@@ -4308,8 +4184,8 @@ type: group
 short-summary: Manage VPN connections.
 long-summary: >
     For more information on site-to-site connections,
-    visit https://docs.microsoft.com/azure/vpn-gateway/vpn-gateway-howto-site-to-site-resource-manager-cli.
-    For more information on Vnet-to-Vnet connections, visit https://docs.microsoft.com/azure/vpn-gateway/vpn-gateway-howto-vnet-vnet-cli
+    visit https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-howto-site-to-site-resource-manager-cli.
+    For more information on Vnet-to-Vnet connections, visit https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-howto-vnet-vnet-cli
 """
 
 helps['network vpn-connection create'] = """
@@ -4445,7 +4321,7 @@ helps['network watcher'] = """
 type: group
 short-summary: Manage the Azure Network Watcher.
 long-summary: >
-    Network Watcher assists with monitoring and diagnosing conditions at a network scenario level. To learn more visit https://docs.microsoft.com/azure/network-watcher/
+    Network Watcher assists with monitoring and diagnosing conditions at a network scenario level. To learn more visit https://docs.microsoft.com/en-us/azure/network-watcher/
 """
 
 helps['network watcher configure'] = """
@@ -4544,7 +4420,7 @@ helps['network watcher flow-log'] = """
 type: group
 short-summary: Manage network security group flow logging.
 long-summary: >
-    For more information about configuring flow logs visit https://docs.microsoft.com/azure/network-watcher/network-watcher-nsg-flow-logging-cli
+    For more information about configuring flow logs visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-nsg-flow-logging-cli
 """
 
 helps['network watcher flow-log configure'] = """
@@ -4587,7 +4463,7 @@ type: group
 short-summary: Manage packet capture sessions on VMs.
 long-summary: >
     These commands require that both Azure Network Watcher is enabled for the VMs region and that AzureNetworkWatcherExtension is enabled on the VM.
-    For more information visit https://docs.microsoft.com/azure/network-watcher/network-watcher-packet-capture-manage-cli
+    For more information visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-packet-capture-manage-cli
 """
 
 helps['network watcher packet-capture create'] = """
@@ -4718,7 +4594,7 @@ type: command
 short-summary: Get information on the 'next hop' of a VM.
 long-summary: >
     Requires that Network Watcher is enabled for the region in which the VM is located.
-    For more information about show-next-hop visit https://docs.microsoft.com/azure/network-watcher/network-watcher-check-next-hop-cli
+    For more information about show-next-hop visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-check-next-hop-cli
 examples:
   - name: Get the next hop from a VMs assigned IP address to a destination at 10.1.0.4.
     text: az network watcher show-next-hop -g MyResourceGroup --vm MyVm --source-ip 10.0.0.4 --dest-ip 10.1.0.4
@@ -4728,7 +4604,7 @@ helps['network watcher show-security-group-view'] = """
 type: command
 short-summary: Get detailed security information on a VM for the currently configured network security group.
 long-summary: >
-    For more information on using security group view visit https://docs.microsoft.com/azure/network-watcher/network-watcher-security-group-view-cli
+    For more information on using security group view visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-security-group-view-cli
 examples:
   - name: Get the network security group information for the specified VM.
     text: az network watcher show-security-group-view -g MyResourceGroup --vm MyVm
@@ -4737,7 +4613,7 @@ examples:
 helps['network watcher show-topology'] = """
 type: command
 short-summary: Get the network topology of a resource group, virtual network or subnet.
-long-summary: For more information about using network topology visit https://docs.microsoft.com/azure/network-watcher/network-watcher-topology-cli
+long-summary: For more information about using network topology visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-topology-cli
 parameters:
   - name: --resource-group -g
     short-summary: The name of the target resource group to perform topology on.
@@ -4756,7 +4632,7 @@ type: command
 short-summary: Test if a connection can be established between a Virtual Machine and a given endpoint.
 long-summary: >
     To check connectivity between two VMs in different regions, use the VM ids instead of the VM names for the source and destination resource arguments.
-    To register for this feature or see additional examples visit https://docs.microsoft.com/azure/network-watcher/network-watcher-connectivity-cli
+    To register for this feature or see additional examples visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-connectivity-cli
 parameters:
   - name: --source-resource
     short-summary: Name or ID of the resource from which to originate traffic.
@@ -4782,7 +4658,7 @@ type: command
 short-summary: Test IP flow to/from a VM given the currently configured network security group rules.
 long-summary: >
     Requires that Network Watcher is enabled for the region in which the VM is located.
-    For more information visit https://docs.microsoft.com/azure/network-watcher/network-watcher-check-ip-flow-verify-cli
+    For more information visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-check-ip-flow-verify-cli
 parameters:
   - name: --local
     short-summary: >
@@ -4807,7 +4683,7 @@ helps['network watcher troubleshooting'] = """
 type: group
 short-summary: Manage Network Watcher troubleshooting sessions.
 long-summary: >
-    For more information on configuring troubleshooting visit https://docs.microsoft.com/azure/network-watcher/network-watcher-troubleshoot-manage-cli
+    For more information on configuring troubleshooting visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-troubleshoot-manage-cli
 """
 
 helps['network watcher troubleshooting show'] = """
