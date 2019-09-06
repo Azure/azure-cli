@@ -1190,16 +1190,6 @@ examples:
             --auto-replace false --resource-group my-resource-group --sku ESv3-Type1 --location eastasia
 """
 
-helps['vm host list'] = """
-type: command
-short-summary: List dedicated hosts.
-"""
-
-helps['vm host show'] = """
-type: command
-short-summary: Get the details of a dedicated host.
-"""
-
 helps['vm host get-instance-view'] = """
 type: command
 short-summary: Get instance information about a dedicated host.
@@ -1210,16 +1200,6 @@ examples:
   - name: Get instance views for all dedicated hosts in a host group.
     text: >
         az vm host get-instance-view --ids $(az vm host list -g my-rg --host-group my-host-group --query "[].id" -o tsv)
-"""
-
-helps['vm host update'] = """
-type: command
-short-summary: Update a dedicated host.
-examples:
-  - name: Update the 'autoReplaceOnFailure' field of a dedicated host.
-    text: |-
-        az vm host update --host-group my-host-group --name my-host \\
-            --resource-group my-resource-group --set autoReplaceOnFailure=True
 """
 
 helps['vm host group'] = """
@@ -1246,6 +1226,26 @@ short-summary: Get the details of a dedicated host group.
 helps['vm host group update'] = """
 type: command
 short-summary: Update a dedicated host group.
+"""
+
+helps['vm host list'] = """
+type: command
+short-summary: List dedicated hosts.
+"""
+
+helps['vm host show'] = """
+type: command
+short-summary: Get the details of a dedicated host.
+"""
+
+helps['vm host update'] = """
+type: command
+short-summary: Update a dedicated host.
+examples:
+  - name: Update the 'autoReplaceOnFailure' field of a dedicated host.
+    text: |-
+        az vm host update --host-group my-host-group --name my-host \\
+            --resource-group my-resource-group --set autoReplaceOnFailure=True
 """
 
 helps['vm identity'] = """
