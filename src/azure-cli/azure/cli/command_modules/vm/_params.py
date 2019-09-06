@@ -475,6 +475,7 @@ def load_arguments(self, _):
                    help="The eviction policy for virtual machines in a low priority scale set.", is_preview=True)
         c.argument('application_security_groups', resource_type=ResourceType.MGMT_COMPUTE, min_api='2018-06-01', nargs='+', options_list=['--asgs'], help='Space-separated list of existing application security groups to associate with the VM.', arg_group='Network', validator=validate_asg_names_or_ids)
 
+
     with self.argument_context('vmss create', arg_group='Network Balancer') as c:
         LoadBalancerSkuName = self.get_models('LoadBalancerSkuName', resource_type=ResourceType.MGMT_NETWORK)
         c.argument('application_gateway', help='Name to use when creating a new application gateway (default) or referencing an existing one. Can also reference an existing application gateway by ID or specify "" for none.', options_list=['--app-gateway'])
@@ -500,11 +501,11 @@ def load_arguments(self, _):
 
         c.argument('protect_from_scale_in', arg_type=protection_policy_type, help="Protect the VM instance from scale-in operations.")
         c.argument('protect_from_scale_set_actions', arg_type=protection_policy_type, help="Protect the VM instance from scale set actions (including scale-in).")
+        c.argument('enable_terminate_notification', min_api='2019-03-01', arg_type=get_three_state_flag(),
+                   help='Enable terminate notification')
 
     for scope in ['vmss create', 'vmss update']:
         with self.argument_context(scope) as c:
-            c.argument('terminate_notification', min_api='2019-03-01', arg_type=get_three_state_flag(),
-                       help='Enable terminate notification')
             c.argument('terminate_notification_time', min_api='2019-03-01',
                        help='Length of time (ISO 8601 format, e.g. PT5M) a notification to be sent to the VM on the instance metadata server till the VM gets deleted')
 

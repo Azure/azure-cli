@@ -1306,6 +1306,7 @@ def validate_vmss_update_namespace(cmd, namespace):  # pylint: disable=unused-ar
         if namespace.protect_from_scale_in is not None or namespace.protect_from_scale_set_actions is not None:
             raise CLIError("usage error: protection policies can only be applied to VM instances within a VMSS."
                            " Please use --instance-id to specify a VM instance")
+    _validate_vmss_terminate_notification(cmd, namespace)
 # endregion
 
 
@@ -1491,16 +1492,13 @@ def process_vm_vmss_stop(cmd, namespace):  # pylint: disable=unused-argument
                        "To deallocate a VM, run: az vm deallocate.")
 
 
-def validate_terminate_notification(terminate_notification, terminate_notification_time):
+def _validate_vmss_terminate_notification(cmd, namespace):
     """
-    Validate terminate_notification and terminate_notification_time
-    :param terminate_notification:
-    :param terminate_notification_time:
-    :return:
+    Validate vmss update enable_terminate_notification and terminate_notification_time.
+    If terminate_notification_time is specified, enable_terminate_notification should not be false
+    If enable_terminate_notification is true, must specify terminate_notification_time
     """
-    if terminate_notification is True:
-        if terminate_notification_time is None:
-            raise CLIError("usage error: missing --terminate_notification_time.")
-    else:
-        if terminate_notification_time is not None:
-            raise CLIError("usage error: please enable --terminate_notification")
+    if namespace.enable_terminate_notification is False and namespace.terminate_notification_time is not None:
+        raise CLIError("usage error: please enable --enable-terminate-notification")
+    if namespace.enable_terminate_notification is True and namespace.terminate_notification_time is None:
+        raise CLIError("usage error: please set --terminate-notification-time")

@@ -3378,35 +3378,41 @@ class VMSSTerminateNotificationScenarioTest(ScenarioTest):
         create_enable_key = 'vmss.' + update_enable_key
         create_not_before_timeout_key = 'vmss.' + update_not_before_timeout_key
 
+        self.kwargs.update({
+            'vm': 'vm1'
+        })
+
         # Create, enable terminate notification
-        self.cmd('vmss create -g {rg} -n vm1 --image UbuntuLTS --terminate-notification --terminate-notification-time PT5M',
+        self.cmd('vmss create -g {rg} -n {vm} --image UbuntuLTS --terminate-notification-time PT5M',
                  checks=[
                      self.check(create_enable_key, True),
                      self.check(create_not_before_timeout_key, 'PT5M')
                  ])
 
-        # Update, enable terminate notification
-        self.cmd('vmss update -g {rg} -n vm1 --terminate-notification --terminate-notification-time PT8M',
+        # Update, enable terminate notification and set time
+        self.cmd('vmss update -g {rg} -n {vm} --enable-terminate-notification --terminate-notification-time PT8M',
                  checks=[
                      self.check(update_enable_key, True),
                      self.check(update_not_before_timeout_key, 'PT8M')
                  ])
 
+        # Update, set time
+        self.cmd('vmss update -g {rg} -n {vm} --terminate-notification-time PT9M',
+                 checks=[
+                     self.check(update_not_before_timeout_key, 'PT9M')
+                 ])
+
         # Update, disable terminate notification
-        self.cmd('vmss update -g {rg} -n vm1 --terminate-notification false',
+        self.cmd('vmss update -g {rg} -n {vm} --enable-terminate-notification false',
                  checks=[
                      self.check('virtualMachineProfile.scheduledEventsProfile.terminateNotificationProfile', None)
                  ])
 
         # Parameter validation, the following commands should fail
         with self.assertRaises(CLIError):
-            self.cmd('vmss create -g {rg} -n vm1 --image UbuntuLTS --terminate-notification')
+            self.cmd('vmss update -g {rg} -n {vm} --enable-terminate-notification false --terminate-notification-time PT5M')
         with self.assertRaises(CLIError):
-            self.cmd('vmss create -g {rg} -n vm1 --image UbuntuLTS --terminate-notification-time PT5M')
-        with self.assertRaises(CLIError):
-            self.cmd('vmss update -g {rg} -n vm1 --terminate-notification')
-        with self.assertRaises(CLIError):
-            self.cmd('vmss update -g {rg} -n vm1 --terminate-notification-time PT5M')
+            self.cmd('vmss update -g {rg} -n {vm} --enable-terminate-notification')
 
 
 if __name__ == '__main__':

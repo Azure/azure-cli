@@ -19,8 +19,7 @@ from six.moves.urllib.request import urlopen  # noqa, pylint: disable=import-err
 from knack.log import get_logger
 from knack.util import CLIError
 
-from azure.cli.command_modules.vm._validators import (_get_resource_group_from_vault_name,
-                                                      validate_terminate_notification)
+from azure.cli.command_modules.vm._validators import _get_resource_group_from_vault_name
 from azure.cli.core.commands.validators import validate_file_or_dict
 
 from azure.cli.core.commands import LongRunningOperation, DeploymentOutputLongRunningOperation
@@ -1859,8 +1858,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
                 assign_identity=None, identity_scope=None, identity_role='Contributor',
                 identity_role_id=None, zones=None, priority=None, eviction_policy=None,
                 application_security_groups=None, ultra_ssd_enabled=None, ephemeral_os_disk=None,
-                proximity_placement_group=None, aux_subscriptions=None, terminate_notification=None,
-                terminate_notification_time=None):
+                proximity_placement_group=None, aux_subscriptions=None, terminate_notification_time=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -2050,8 +2048,6 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
     if secrets:
         secrets = _merge_secrets([validate_file_or_dict(secret) for secret in secrets])
 
-    validate_terminate_notification(terminate_notification, terminate_notification_time)
-
     vmss_resource = build_vmss_resource(
         cmd=cmd, name=vmss_name, naming_prefix=naming_prefix, location=location, tags=tags,
         overprovision=not disable_overprovision, upgrade_policy_mode=upgrade_policy_mode, vm_sku=vm_sku,
@@ -2067,7 +2063,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
         custom_data=custom_data, secrets=secrets, license_type=license_type, zones=zones, priority=priority,
         eviction_policy=eviction_policy, application_security_groups=application_security_groups,
         ultra_ssd_enabled=ultra_ssd_enabled, proximity_placement_group=proximity_placement_group,
-        terminate_notification=terminate_notification, terminate_notification_time=terminate_notification_time)
+        terminate_notification_time=terminate_notification_time)
     vmss_resource['dependsOn'] = vmss_dependencies
 
     if plan_name:
@@ -2294,7 +2290,7 @@ def update_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_
 
 def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False, instance_id=None,
                 protect_from_scale_in=None, protect_from_scale_set_actions=None,
-                terminate_notification=None, terminate_notification_time=None,
+                enable_terminate_notification=None, terminate_notification_time=None,
                 **kwargs):
     vmss = kwargs['parameters']
     client = _compute_client_factory(cmd.cli_ctx)
@@ -2322,13 +2318,11 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
     if license_type is not None:
         vmss.virtual_machine_profile.license_type = license_type
 
-    # Terminate notification
-    validate_terminate_notification(terminate_notification, terminate_notification_time)
-    if terminate_notification is not None:
+    if enable_terminate_notification is not None or terminate_notification_time is not None:
         TerminateNotificationProfile = cmd.get_models('TerminateNotificationProfile')
         vmss.virtual_machine_profile.scheduled_events_profile.terminate_notification_profile =\
             TerminateNotificationProfile(not_before_timeout=terminate_notification_time,
-                                         enable=terminate_notification)
+                                         enable=enable_terminate_notification)
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.create_or_update,
                        resource_group_name, name, **kwargs)
