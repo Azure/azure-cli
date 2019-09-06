@@ -313,6 +313,16 @@ type: group
 short-summary: Manage Azure Container Registry Tasks that use Cloud Native Buildpacks.
 """
 
+helps['acr pack build'] = """
+type: command
+short-summary: Queues a quick build task that builds an app and pushes it into an Azure Container Registry.
+examples:
+  - name: Queue a build for the current directory with the CloudFoundry builder.
+    text: az acr pack build -r MyRegistry -t {{.Run.Registry}}/node-app:{{.Run.ID}} --builder cloudfoundry/cnb:bionic .
+  - name: Queue a build for the given GitHub repository with the Heroku builder.
+    text: az acr pack build -r MyRegistry -t {{.Run.Registry}}/node-app:{{.Run.ID}} --pull --builder heroku/buildpacks:18 https://github.com/Azure-Samples/nodejs-docs-hello-world.git
+"""
+
 helps['acr replication'] = """
 type: group
 short-summary: Manage geo-replicated regions of Azure Container Registries.
@@ -471,21 +481,6 @@ examples:
   - name: Queue a remote git context with streaming logs and runs the task on Linux platform.
     text: >
         az acr run -r MyRegistry https://github.com/Azure-Samples/acr-tasks.git -f build-hello-world.yaml --platform linux
-"""
-
-helps['acr pack'] = """
-type: group
-short-summary: Manage Azure Container Registry Tasks that use Cloud Native Buildpacks.
-"""
-
-helps['acr pack build'] = """
-type: command
-short-summary: Queues a quick build task that builds an app and pushes it into an Azure Container Registry.
-examples:
-  - name: Queue a build for the current directory with the CloudFoundry builder.
-    text: az acr pack build -r MyRegistry -t {{.Run.Registry}}/node-app:{{.Run.ID}} --builder cloudfoundry/cnb:bionic .
-  - name: Queue a build for the given GitHub repository with the Heroku builder.
-    text: az acr pack build -r MyRegistry -t {{.Run.Registry}}/node-app:{{.Run.ID}} --pull --builder heroku/buildpacks:18 https://github.com/Azure-Samples/nodejs-docs-hello-world.git
 """
 
 helps['acr show'] = """
@@ -662,50 +657,6 @@ examples:
             -u 'myusername2' -p 'mysecret'
 """
 
-helps['acr task timer'] = """
-type: group
-short-summary: Manage timer triggers for a task
-"""
-
-helps['acr task timer add'] = """
-type: command
-short-summary: Add a timer trigger to a task.
-examples:
-  - name: Add a timer trigger to a task.
-    text: >
-        az acr task timer add -n taskname -r registryname --timer-name t2 --schedule "30 9 * * 1-5"
-"""
-
-helps['acr task timer update'] = """
-type: command
-short-summary: Update the timer trigger for a task.
-examples:
-  - name: Update the schedule of a timer trigger for a task.
-    text: >
-        az acr task timer update -n taskname -r registryname --timer-name t2 --schedule "0 12 * * *"
-  - name: Update the status of a timer trigger for a task.
-    text: >
-        az acr task timer update -n taskname -r registryname --timer-name t2 --enabled False
-"""
-
-helps['acr task timer remove'] = """
-type: command
-short-summary: Remove a timer trigger from a task.
-examples:
-  - name: Remove a timer trigger from a task.
-    text: >
-        az acr task timer remove -n taskname -r registryname --timer-name t2
-"""
-
-helps['acr task timer list'] = """
-type: command
-short-summary: List all timer triggers for a task.
-examples:
-  - name: List all timer triggers for a task.
-    text: >
-        az acr task timer list -n taskname -r registryname
-"""
-
 helps['acr task delete'] = """
 type: command
 short-summary: Delete a task from an Azure Container Registry.
@@ -842,6 +793,50 @@ examples:
   - name: Get the details of a run, displaying the results in a table.
     text: >
         az acr task show-run -r MyRegistry --run-id runId -o table
+"""
+
+helps['acr task timer'] = """
+type: group
+short-summary: Manage timer triggers for a task
+"""
+
+helps['acr task timer add'] = """
+type: command
+short-summary: Add a timer trigger to a task.
+examples:
+  - name: Add a timer trigger to a task.
+    text: >
+        az acr task timer add -n taskname -r registryname --timer-name t2 --schedule "30 9 * * 1-5"
+"""
+
+helps['acr task timer list'] = """
+type: command
+short-summary: List all timer triggers for a task.
+examples:
+  - name: List all timer triggers for a task.
+    text: >
+        az acr task timer list -n taskname -r registryname
+"""
+
+helps['acr task timer remove'] = """
+type: command
+short-summary: Remove a timer trigger from a task.
+examples:
+  - name: Remove a timer trigger from a task.
+    text: >
+        az acr task timer remove -n taskname -r registryname --timer-name t2
+"""
+
+helps['acr task timer update'] = """
+type: command
+short-summary: Update the timer trigger for a task.
+examples:
+  - name: Update the schedule of a timer trigger for a task.
+    text: >
+        az acr task timer update -n taskname -r registryname --timer-name t2 --schedule "0 12 * * *"
+  - name: Update the status of a timer trigger for a task.
+    text: >
+        az acr task timer update -n taskname -r registryname --timer-name t2 --enabled False
 """
 
 helps['acr task update'] = """

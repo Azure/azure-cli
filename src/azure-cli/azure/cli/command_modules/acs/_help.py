@@ -4,7 +4,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.help_files import helps
+from knack.help_files import helps  # pylint: disable=unused-import
 # pylint: disable=line-too-long, too-many-lines
 
 helps['acs'] = """
@@ -491,6 +491,21 @@ examples:
     crafted: true
 """
 
+helps['aks update'] = """
+type: command
+short-summary: Update a managed Kubernetes cluster to attach or detach ACR
+parameters:
+  - name: --attach-acr
+    type: string
+    short-summary: Grant the 'acrpull' role assignment to the ACR specified by name or resource ID.
+  - name: --detach-acr
+    type: string
+    short-summary: Disable the 'acrpull' role assignment to the ACR specified by name or resource ID.
+examples:
+  - name: Attach AKS cluster to ACR by name "acrName"
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --attach-acr acrName
+"""
+
 helps['aks update-credentials'] = """
 type: command
 short-summary: Update credentials for a managed Kubernetes cluster, like service principal.
@@ -616,21 +631,6 @@ examples:
   - name: Use Azure Dev Spaces with a managed Kubernetes cluster, selecting a new or existing dev space \\ 'develop/my-space' without prompting for confirmation.
     text: |-
         az aks use-dev-spaces -g my-aks-group -n my-aks -s develop/my-space -y
-"""
-
-helps['aks update'] = """
-type: command
-short-summary: Update a managed Kubernetes cluster to attach or detach ACR
-parameters:
-  - name: --attach-acr
-    type: string
-    short-summary: Grant the 'acrpull' role assignment to the ACR specified by name or resource ID.
-  - name: --detach-acr
-    type: string
-    short-summary: Disable the 'acrpull' role assignment to the ACR specified by name or resource ID.
-examples:
-  - name: Attach AKS cluster to ACR by name "acrName"
-    text: az aks update -g MyResourceGroup -n MyManagedCluster --attach-acr acrName
 """
 
 helps['aks wait'] = """
