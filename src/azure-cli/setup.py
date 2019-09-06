@@ -121,7 +121,6 @@ DEPENDENCIES = [
     'azure-mgmt-servicefabric~=0.2.0',
     'azure-mgmt-signalr~=0.3.0',
     'azure-mgmt-sql~=0.13',
-    'azure-mgmt-sql~=0.12.0',
     'azure-mgmt-sqlvirtualmachine~=0.4.0',
     'azure-mgmt-storage~=4.0',
     'azure-mgmt-trafficmanager~=0.51.0',
