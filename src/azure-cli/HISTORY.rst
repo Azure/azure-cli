@@ -3,6 +3,9 @@
 Release History
 ===============
 
+2.0.73
+++++++
+
 **ACR**
 
 * Added commands to configure retention policy (in preview): "az acr config retention"
@@ -35,6 +38,11 @@ Release History
 * [BREAKING CHANGE] When not specified, the default value for `--start-task-wait-for-success` on `az batch pool create` is now true (was false).
 * [BREAKING CHANGE] The default value for Scope on AutoUserSpecification is now always Pool (was Task on Windows nodes, Pool on Linux nodes). This argument is not exposed via the commandline, but can be set in the `--json-file` arguments.
 
+**Cosmos DB**
+
+* Update azure-mgmt-cosmosdb to latest python 0.8.0 library
+* Populate DatabaseAccountCreateUpdateParameters with 2 new parameters to support Cassandra Connector Exchange(CCX) feature - enable_cassandra_connector, connector_offer
+
 **HDInsight**
 
 * `az hdinsight resize`: Make parameter `--workernode-count/-c` required
@@ -60,11 +68,6 @@ Release History
 **Storage**
 
 * [BREAKING CHANGE] `az storage remove`: remove --auth-mode argument
-
-**Cosmos DB**
-
-* Update azure-mgmt-cosmosdb to latest python 0.8.0 library
-* Populate DatabaseAccountCreateUpdateParameters with 2 new parameters to support Cassandra Connector Exchange(CCX) feature - enable_cassandra_connector, connector_offer
 
 2.0.72
 ++++++
