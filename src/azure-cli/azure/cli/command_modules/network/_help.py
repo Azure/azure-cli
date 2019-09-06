@@ -12,6 +12,14 @@ type: group
 short-summary: Manage Azure Network resources.
 """
 
+helps['network list-service-tags'] = """
+type: command
+short-summary: List all service tags which are below to different resources
+long-summary: >
+    A service tag represents a group of IP address prefixes to help minimize complexity for security rule creation.
+    To learn more about list-service-tags, visit https://docs.microsoft.com/en-us/azure/virtual-network/security-overview#service-tags
+"""
+
 helps['network application-gateway'] = """
 type: group
 short-summary: Manage application-level routing and load balancing services.
@@ -326,6 +334,36 @@ examples:
     text: |
         az network application-gateway http-settings update -g MyResourceGroup --gateway-name MyAppGateway \\
             -n MyHttpSettings --probe MyNewProbe
+"""
+
+helps['network application-gateway identity'] = """
+type: group
+short-summary: Manage the managed service identity of an application gateway.
+"""
+
+helps['network application-gateway identity assign'] = """
+type: command
+short-summary: Assign a managed service identity to an application-gateway
+examples:
+  - name: Assign an identity to the application gateway
+    text: az network application-gateway identity assign -g MyResourceGroup --gateway-name ag1 \\
+            --identity /subscriptions/*-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id1
+"""
+
+helps['network application-gateway identity remove'] = """
+type: command
+short-summary: Remove the managed service identity of an application-gateway
+examples:
+  - name: Remove an identity to the application gateway
+    text: az network application-gateway identity remove -g MyResourceGroup --gateway-name ag1
+"""
+
+helps['network application-gateway identity show'] = """
+type: command
+short-summary: Show the managed service identity of an application-gateway
+examples:
+  - name: Show an identity to the application gateway
+    text: az network application-gateway identity show -g MyResourceGroup --gateway-name ag1
 """
 
 helps['network application-gateway list'] = """
@@ -2164,6 +2202,11 @@ short-summary: Manage ExpressRoute peering of an ExpressRoute circuit.
 helps['network express-route peering connection'] = """
 type: group
 short-summary: Manage ExpressRoute circuit connections.
+"""
+
+helps['network express-route peering peer-connection'] = """
+type: group
+short-summary: Manage ExpressRoute circuit peer connections.
 """
 
 helps['network express-route peering connection create'] = """
