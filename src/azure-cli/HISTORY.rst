@@ -35,12 +35,6 @@ Release History
 * [BREAKING CHANGE] When not specified, the default value for `--start-task-wait-for-success` on `az batch pool create` is now true (was false).
 * [BREAKING CHANGE] The default value for Scope on AutoUserSpecification is now always Pool (was Task on Windows nodes, Pool on Linux nodes). This argument is not exposed via the commandline, but can be set in the `--json-file` arguments.
 
-**SQL**
-
-* New Cmdlets for Management.Sql that supports setting AAD administrator on Managed instance
-
-2.0.72
-++++++
 **HDInsight**
 
 * `az hdinsight resize`: Make parameter `--workernode-count/-c` required
@@ -66,6 +60,10 @@ Release History
 **Storage**
 
 * [BREAKING CHANGE] `az storage remove`: remove --auth-mode argument
+
+**SQL**
+
+* New Cmdlets for Management.Sql that supports setting AAD administrator on Managed instance
 
 **Cosmos DB**
 
