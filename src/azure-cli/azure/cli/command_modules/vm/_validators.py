@@ -1492,7 +1492,7 @@ def process_vm_vmss_stop(cmd, namespace):  # pylint: disable=unused-argument
                        "To deallocate a VM, run: az vm deallocate.")
 
 
-def _validate_vmss_terminate_notification(cmd, namespace):
+def _validate_vmss_terminate_notification(cmd, namespace):  # pylint: disable=unused-argument
     """
     Validate vmss update enable_terminate_notification and terminate_notification_time.
     If terminate_notification_time is specified, enable_terminate_notification should not be false
