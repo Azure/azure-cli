@@ -506,7 +506,7 @@ def load_arguments(self, _):
     for scope in ['vmss create', 'vmss update']:
         with self.argument_context(scope) as c:
             c.argument('terminate_notification_time', min_api='2019-03-01',
-                       help='Length of time (ISO 8601 format, e.g. PT5M) a notification to be sent to the VM on the instance metadata server till the VM gets deleted')
+                       help='Length of time (in minutes) a notification to be sent to the VM on the instance metadata server till the VM gets deleted')
 
     for scope, help_prefix in [('vmss update', 'Update the'), ('vmss wait', 'Wait on the')]:
         with self.argument_context(scope) as c:
