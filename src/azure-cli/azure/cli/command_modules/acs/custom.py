@@ -2104,8 +2104,8 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
     workspace_region_code = "EUS"
 
     # sanity check that locations and clouds match.
-    if ((cloud_name.lower() == 'azurecloud' and AzureChinaRegionToOmsRegionMap.get(rg_location, False)) or
-            (cloud_name.lower() == 'azurechinacloud' and AzureCloudRegionToOmsRegionMap.get(rg_location, False))):
+    if ((cloud_name.lower() == 'azurecloud' and AzureCloudRegionToOmsRegionMap.get(rg_location, False)) or
+            (cloud_name.lower() == 'azurechinacloud' and AzureChinaRegionToOmsRegionMap.get(rg_location, False))):
         raise CLIError('Wrong cloud ({}) setting for region {}, please use "az cloud set ..."'.format(
             cloud_name.lower(), rg_location))
 
