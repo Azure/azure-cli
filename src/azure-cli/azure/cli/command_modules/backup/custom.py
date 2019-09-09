@@ -360,7 +360,7 @@ def _should_use_original_storage_account(recovery_point, restore_to_staging_stor
 
 
 def restore_disks(cmd, client, resource_group_name, vault_name, container_name, item_name, rp_name, storage_account,
-                  TargetRg=None, restore_to_staging_storage_account=None):
+                  target_resource_group=None, restore_to_staging_storage_account=None):
     item = show_item(cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name, container_name,
                      item_name, "AzureIaasVM", "VM")
     _validate_item(item)
@@ -388,8 +388,8 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
     _storage_account_id = _get_storage_account_id(cmd.cli_ctx, sa_name, sa_rg)
     _source_resource_id = item.properties.source_resource_id
     target_rg_id = None
-    if recovery_point.properties.is_managed_virtual_machine and TargetRg is not None:
-        target_rg_id = '/'.join(_source_resource_id.split('/')[:4]) + "/" + TargetRg
+    if recovery_point.properties.is_managed_virtual_machine and target_resource_group is not None:
+        target_rg_id = '/'.join(_source_resource_id.split('/')[:4]) + "/" + target_resource_group
     trigger_restore_properties = IaasVMRestoreRequest(create_new_cloud_service=True,
                                                       recovery_point_id=rp_name,
                                                       recovery_type='RestoreDisks',
