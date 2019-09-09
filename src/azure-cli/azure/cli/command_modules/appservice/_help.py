@@ -1047,6 +1047,9 @@ examples:
   - name: Create a web app with an image from DockerHub.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName -i nginx
+  - name: Create a web app with an image from a private DockerHub registry.
+    text: >
+        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName -i MyImageName -s username -w password
   - name: Create a web app with an image from a private Azure Container Registry.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName -i myregistry.azurecr.io/docker-image:tag
