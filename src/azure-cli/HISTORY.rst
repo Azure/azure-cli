@@ -35,6 +35,12 @@ Release History
 * [BREAKING CHANGE] When not specified, the default value for `--start-task-wait-for-success` on `az batch pool create` is now true (was false).
 * [BREAKING CHANGE] The default value for Scope on AutoUserSpecification is now always Pool (was Task on Windows nodes, Pool on Linux nodes). This argument is not exposed via the commandline, but can be set in the `--json-file` arguments.
 
+**Compute**
+
+* vmss create: Add --terminate-notification-time parameters to support terminate scheduled event configurability.
+* vmss update: Add --enable-terminate-notification and --terminate-notification-time parameters to support terminate scheduled event configurability.
+* Update azure-mgmt-compute version to 7.0.0.
+
 **HDInsight**
 
 * `az hdinsight resize`: Make parameter `--workernode-count/-c` required
