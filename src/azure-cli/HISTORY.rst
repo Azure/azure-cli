@@ -2,9 +2,6 @@
 
 Release History
 ===============
-**EventGrid**
-
-* Fix the endpoint help text to point to the right parameter (namely, to point to parameter `--endpoint` rather than `--endpoint-type` in event subscription commands).
 
 **Batch**
 
@@ -13,6 +10,10 @@ Release History
 * Expanded `--image` capabilities to support Shared Image Galleries images. Similar to the commands support for Managed Images, to use a Shared Image Gallery image simply use the ARM ID as the value to the argument.
 * [BREAKING] When not specified, the default value for `--start-task-wait-for-success` on `az batch pool create` is now true (was false).
 * [BREAKING] The default value for Scope on AutoUserSpecification is now always Pool (was Task on Windows nodes, Pool on Linux nodes). This argument is not exposed via the commandline, but can be set in the `--json-file` arguments.
+
+**EventGrid**
+
+* Fix the endpoint help text to point to the right parameter (namely, to point to parameter `--endpoint` rather than `--endpoint-type` in event subscription commands).
 
 2.0.72
 ++++++
