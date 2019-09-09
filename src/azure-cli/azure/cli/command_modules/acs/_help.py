@@ -233,6 +233,25 @@ parameters:
     type: string
     short-summary: A specific IP address and netmask for the Docker bridge, using standard CIDR notation.
     long-summary: This address must not be in any Subnet IP ranges, or the Kubernetes service address range. For example, 172.17.0.1/16.
+  - name: --load-balancer-sku
+    type: string
+    short-summary: Azure Load Balancer SKU selection for your cluster. basic or standard.
+    long-summary: Select between Basic or Standard Azure Load Balancer SKU for your AKS cluster.
+  - name: --load-balancer-managed-outbound-ip-count
+    type: int
+    short-summary: Load balancer managed outbound IP count.
+    long-summary: Desired number of managed outbound IPs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.
+  - name: --load-balancer-outbound-ips
+    type: string
+    short-summary: Load balancer outbound IP resource IDs.
+    long-summary: Comma-separated public IP resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.
+  - name: --load-balancer-outbound-ip-prefixes
+    type: string
+    short-summary: Load balancer outbound IP prefix resource IDs.
+    long-summary: Comma-separated public IP prefix resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.
+  - name: --vm-set-type
+    type: string
+    short-summary: Agent pool vm set type. VirtualMachineScaleSets or AvailabilitySet.
   - name: --enable-addons -a
     type: string
     short-summary: Enable the Kubernetes addons in a comma-separated list.
@@ -288,6 +307,18 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --kubernetes-version 1.12.6
   - name: Create a Kubernetes cluster with a larger node pool.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --node-count 7
+  - name: Create a kubernetes cluster with k8s 1.13.9 but use vmas.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --kubernetes-version 1.13.9 --vm-set-type AvailabilitySet
+  - name: Create a kubernetes cluster with default kubernetes vesrion, default SKU load balancer(basic) and default vm set type(AvailabilitySet).
+    text: az aks create -g MyResourceGroup -n MyManagedCluster
+  - name: Create a kubernetes cluster with standard SKU load balancer and two AKS created IPs for the load balancer outbound connection usage.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
+  - name: Create a kubernetes cluster with standard SKU load balancer and use the provided public IPs for the load balancer outbound connection usage.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-outbound-ips <ip-resource-id-1,ip-resource-id-2>
+  - name: Create a kubernetes cluster with standard SKU load balancer and use the provided public IP prefixes for the load balancer outbound connection usage.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-outbound-ip-prefixes <ip-prefix-resource-id-1,ip-prefix-resource-id-2>
+  - name: Create a kubernetes cluster with basic SKU load balancer and AvailabilitySet vm set type.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-sku basic --vm-set-type AvailabilitySet
 """
 
 helps['aks delete'] = """
