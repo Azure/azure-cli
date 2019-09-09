@@ -73,6 +73,8 @@ from ._client_factory import cf_resource_groups
 from ._client_factory import get_auth_management_client
 from ._client_factory import get_graph_rbac_management_client
 from ._client_factory import cf_resources
+from ._client_factory import get_resource_by_name
+from ._client_factory import cf_container_registry_service
 
 logger = get_logger(__name__)
 
@@ -559,6 +561,104 @@ def _add_role_assignment(cli_ctx, role, service_principal, delay=2, scope=None):
     hook.add(message='AAD role propagation done', value=1.0, total_val=1.0)
     logger.info('AAD role propagation done')
     return True
+
+
+def delete_role_assignments(cli_ctx, ids=None, assignee=None, role=None, resource_group_name=None,
+                            scope=None, include_inherited=False, yes=None):
+    factory = get_auth_management_client(cli_ctx, scope)
+    assignments_client = factory.role_assignments
+    definitions_client = factory.role_definitions
+    ids = ids or []
+    if ids:
+        if assignee or role or resource_group_name or scope or include_inherited:
+            raise CLIError('When assignment ids are used, other parameter values are not required')
+        for i in ids:
+            assignments_client.delete_by_id(i)
+        return
+    if not any([ids, assignee, role, resource_group_name, scope, assignee, yes]):
+        from knack.prompting import prompt_y_n
+        msg = 'This will delete all role assignments under the subscription. Are you sure?'
+        if not prompt_y_n(msg, default="n"):
+            return
+
+    scope = _build_role_scope(resource_group_name, scope,
+                              assignments_client.config.subscription_id)
+    assignments = _search_role_assignments(cli_ctx, assignments_client, definitions_client,
+                                           scope, assignee, role, include_inherited,
+                                           include_groups=False)
+
+    if assignments:
+        for a in assignments:
+            assignments_client.delete_by_id(a.id)
+
+
+def _delete_role_assignments(cli_ctx, role, service_principal, delay=2, scope=None):
+    # AAD can have delays in propagating data, so sleep and retry
+    hook = cli_ctx.get_progress_controller(True)
+    hook.add(message='Waiting for AAD role to delete', value=0, total_val=1.0)
+    logger.info('Waiting for AAD role to delete')
+    for x in range(0, 10):
+        hook.add(message='Waiting for AAD role to delete', value=0.1 * x, total_val=1.0)
+        try:
+            delete_role_assignments(cli_ctx,
+                                    role=role,
+                                    assignee=service_principal,
+                                    scope=scope)
+            break
+        except CLIError as ex:
+            raise ex
+        except CloudError as ex:
+            logger.info(ex)
+        time.sleep(delay + delay * x)
+    else:
+        return False
+    hook.add(message='AAD role deletion done', value=1.0, total_val=1.0)
+    logger.info('AAD role deletion done')
+    return True
+
+
+def _search_role_assignments(cli_ctx, assignments_client, definitions_client,
+                             scope, assignee, role, include_inherited, include_groups):
+    assignee_object_id = None
+    if assignee:
+        assignee_object_id = _resolve_object_id(cli_ctx, assignee)
+
+    # always use "scope" if provided, so we can get assignments beyond subscription e.g. management groups
+    if scope:
+        assignments = list(assignments_client.list_for_scope(
+            scope=scope, filter='atScope()'))
+    elif assignee_object_id:
+        if include_groups:
+            f = "assignedTo('{}')".format(assignee_object_id)
+        else:
+            f = "principalId eq '{}'".format(assignee_object_id)
+        assignments = list(assignments_client.list(filter=f))
+    else:
+        assignments = list(assignments_client.list())
+
+    if assignments:
+        assignments = [a for a in assignments if (
+            not scope or
+            include_inherited and re.match(_get_role_property(a, 'scope'), scope, re.I) or
+            _get_role_property(a, 'scope').lower() == scope.lower()
+        )]
+
+        if role:
+            role_id = _resolve_role_id(role, scope, definitions_client)
+            assignments = [i for i in assignments if _get_role_property(
+                i, 'role_definition_id') == role_id]
+
+        if assignee_object_id:
+            assignments = [i for i in assignments if _get_role_property(
+                i, 'principal_id') == assignee_object_id]
+
+    return assignments
+
+
+def _get_role_property(obj, property_name):
+    if isinstance(obj, dict):
+        return obj[property_name]
+    return getattr(obj, property_name)
 
 
 def _get_default_dns_prefix(name, resource_group_name, subscription_id):
@@ -1513,6 +1613,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                aad_tenant_id=None,
                tags=None,
                generate_ssh_keys=False,  # pylint: disable=unused-argument
+               attach_acr=None,
                no_wait=False):
     _validate_ssh_key(no_ssh_key, ssh_key_value)
 
@@ -1559,6 +1660,12 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                                     service_principal_profile.client_id, scope=scope):
             logger.warning('Could not create a role assignment for subnet. '
                            'Are you an Owner on this subscription?')
+
+    if attach_acr:
+        _ensure_aks_acr(cmd.cli_ctx,
+                        client_id=service_principal_profile.client_id,
+                        acr_name_or_id=attach_acr,
+                        subscription_id=subscription_id)
 
     network_profile = None
     if any([network_plugin, pod_cidr, service_cidr, dns_service_ip, docker_bridge_address, network_policy]):
@@ -1785,6 +1892,36 @@ def aks_scale(cmd, client, resource_group_name, name, node_count, nodepool_name=
             instance.aad_profile = None
             return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
     raise CLIError('The nodepool "{}" was not found.'.format(nodepool_name))
+
+
+def aks_update(cmd, client, resource_group_name, name,
+               attach_acr=None,
+               detach_acr=None,
+               no_wait=False):
+    if not attach_acr and not detach_acr:
+        raise CLIError('Please sepcify "--attach-acr" or "--detach-acr".')
+
+    if attach_acr and detach_acr:
+        raise CLIError('Cannot specify "--attach-acr" and "--detach-acr" at the same time.')
+
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    instance = client.get(resource_group_name, name)
+    client_id = instance.service_principal_profile.client_id
+    if not client_id:
+        raise CLIError('Cannot get the AKS cluster\'s service principal.')
+
+    if attach_acr:
+        _ensure_aks_acr(cmd.cli_ctx,
+                        client_id=client_id,
+                        acr_name_or_id=attach_acr,
+                        subscription_id=subscription_id)
+
+    if detach_acr:
+        _ensure_aks_acr(cmd.cli_ctx,
+                        client_id=client_id,
+                        acr_name_or_id=detach_acr,
+                        subscription_id=subscription_id,
+                        detach=True)
 
 
 def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, no_wait=False, **kwargs):  # pylint: disable=unused-argument
@@ -2262,6 +2399,58 @@ def _ensure_container_insights_for_monitoring(cmd, addon):
     # publish the Container Insights solution to the Log Analytics workspace
     return _invoke_deployment(cmd.cli_ctx, resource_group, deployment_name, template, params,
                               validate=False, no_wait=False, subscription_id=subscription_id)
+
+
+def _ensure_aks_acr(cli_ctx,
+                    client_id,
+                    acr_name_or_id,
+                    subscription_id,
+                    detach=False):
+    from msrestazure.tools import is_valid_resource_id, parse_resource_id
+    # Check if the ACR exists by resource ID.
+    if is_valid_resource_id(acr_name_or_id):
+        try:
+            parsed_registry = parse_resource_id(acr_name_or_id)
+            acr_client = cf_container_registry_service(cli_ctx, subscription_id=parsed_registry['subscription'])
+            registry = acr_client.registries.get(parsed_registry['resource_group'], parsed_registry['name'])
+        except CloudError as ex:
+            raise CLIError(ex.message)
+        _ensure_aks_acr_role_assignment(cli_ctx, client_id, registry.id, detach)
+        return
+
+    # Check if the ACR exists by name accross all resource groups.
+    registry_name = acr_name_or_id
+    registry_resource = 'Microsoft.ContainerRegistry/registries'
+    try:
+        registry = get_resource_by_name(cli_ctx, registry_name, registry_resource)
+    except CloudError as ex:
+        if 'was not found' in ex.message:
+            raise CLIError("ACR {} not found. Have you provided the right ACR name?".format(registry_name))
+        raise CLIError(ex.message)
+    _ensure_aks_acr_role_assignment(cli_ctx, client_id, registry.id, detach)
+    return
+
+
+def _ensure_aks_acr_role_assignment(cli_ctx,
+                                    client_id,
+                                    registry_id,
+                                    detach=False):
+    if detach:
+        if not _delete_role_assignments(cli_ctx,
+                                        'acrpull',
+                                        client_id,
+                                        scope=registry_id):
+            raise CLIError('Could not delete role assignments for ACR. '
+                           'Are you an Owner on this subscription?')
+        return
+
+    if not _add_role_assignment(cli_ctx,
+                                'acrpull',
+                                client_id,
+                                scope=registry_id):
+        raise CLIError('Could not create a role assignment for ACR. '
+                       'Are you an Owner on this subscription?')
+    return
 
 
 def _ensure_aks_service_principal(cli_ctx,

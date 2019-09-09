@@ -280,7 +280,9 @@ parameters:
   - name: --workspace-resource-id
     type: string
     short-summary: The resource ID of an existing Log Analytics Workspace to use for storing monitoring data. If not specified, uses the default Log Analytics Workspace if it exists, otherwise creates one.
-
+  - name: --attach-acr
+    type: string
+    short-summary: Grant the 'acrpull' role assignment to the ACR specified by name or resource ID.
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
@@ -614,6 +616,21 @@ examples:
   - name: Use Azure Dev Spaces with a managed Kubernetes cluster, selecting a new or existing dev space \\ 'develop/my-space' without prompting for confirmation.
     text: |-
         az aks use-dev-spaces -g my-aks-group -n my-aks -s develop/my-space -y
+"""
+
+helps['aks update'] = """
+type: command
+short-summary: Update a managed Kubernetes cluster to attach or detach ACR
+parameters:
+  - name: --attach-acr
+    type: string
+    short-summary: Grant the 'acrpull' role assignment to the ACR specified by name or resource ID.
+  - name: --detach-acr
+    type: string
+    short-summary: Disable the 'acrpull' role assignment to the ACR specified by name or resource ID.
+examples:
+  - name: Attach AKS cluster to ACR by name "acrName"
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --attach-acr acrName
 """
 
 helps['aks wait'] = """

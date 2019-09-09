@@ -17,7 +17,7 @@ from azure.cli.core.mock import DummyCli
 class FindCustomCommandTest(unittest.TestCase):
 
     def test_call_aladdin_service(self):
-        response = call_aladdin_service("what is azure cli?")
+        response = call_aladdin_service("RunTestAutomation")
         self.assertEqual(200, response.status_code)
 
 

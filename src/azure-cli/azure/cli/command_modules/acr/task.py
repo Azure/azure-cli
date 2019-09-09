@@ -51,7 +51,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     values=None,
                     source_trigger_name='defaultSourceTriggerName',
                     commit_trigger_enabled=True,
-                    pull_request_trigger_enabled=True,
+                    pull_request_trigger_enabled=False,
                     schedule=None,
                     branch='master',
                     no_push=False,
@@ -114,7 +114,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
     source_trigger_events = _get_trigger_event_list_put(cmd,
                                                         commit_trigger_enabled,
                                                         pull_request_trigger_enabled)
-    # if source_trigger_events contains any event types we assume they are enabled
+    # if source_trigger_events contains any event types we know they are enabled
     if source_trigger_events:
         SourceTrigger, SourceProperties, AuthInfo, TriggerStatus = cmd.get_models(
             'SourceTrigger', 'SourceProperties', 'AuthInfo', 'TriggerStatus')
