@@ -1287,6 +1287,7 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_vm_vmss_create_auth(namespace)
     _validate_vm_vmss_msi(cmd, namespace)
     _validate_proximity_placement_group(cmd, namespace)
+    _validate_vmss_terminate_notification(cmd, namespace)
 
     if namespace.secrets:
         _validate_secrets(namespace.secrets, namespace.os_type)
@@ -1306,6 +1307,7 @@ def validate_vmss_update_namespace(cmd, namespace):  # pylint: disable=unused-ar
         if namespace.protect_from_scale_in is not None or namespace.protect_from_scale_set_actions is not None:
             raise CLIError("usage error: protection policies can only be applied to VM instances within a VMSS."
                            " Please use --instance-id to specify a VM instance")
+    _validate_vmss_update_terminate_notification_related(cmd, namespace)
 # endregion
 
 
@@ -1489,3 +1491,24 @@ def process_vm_vmss_stop(cmd, namespace):  # pylint: disable=unused-argument
     else:
         logger.warning("About to power off the specified VM...\nIt will continue to be billed. "
                        "To deallocate a VM, run: az vm deallocate.")
+
+
+def _validate_vmss_update_terminate_notification_related(cmd, namespace):  # pylint: disable=unused-argument
+    """
+    Validate vmss update enable_terminate_notification and terminate_notification_time.
+    If terminate_notification_time is specified, enable_terminate_notification should not be false
+    If enable_terminate_notification is true, must specify terminate_notification_time
+    """
+    if namespace.enable_terminate_notification is False and namespace.terminate_notification_time is not None:
+        raise CLIError("usage error: please enable --enable-terminate-notification")
+    if namespace.enable_terminate_notification is True and namespace.terminate_notification_time is None:
+        raise CLIError("usage error: please set --terminate-notification-time")
+    _validate_vmss_terminate_notification(cmd, namespace)
+
+
+def _validate_vmss_terminate_notification(cmd, namespace):  # pylint: disable=unused-argument
+    """
+    Transform minutes to ISO 8601 formmat
+    """
+    if namespace.terminate_notification_time is not None:
+        namespace.terminate_notification_time = 'PT' + namespace.terminate_notification_time + 'M'
