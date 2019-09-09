@@ -18,12 +18,17 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
+<<<<<<< HEAD
       - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-monitor/0.5.2 Azure-SDK-For-Python AZURECLI/2.0.75
+=======
+      - python/3.6.8 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-monitor/0.7.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
+>>>>>>> in progress
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag1?api-version=2018-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag1?api-version=2019-06-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag1","type":"Microsoft.Insights/ActionGroups","name":"ag1","location":"Global","kind":null,"tags":null,"properties":{"groupShortName":"ag1","enabled":true,"emailReceivers":[],"smsReceivers":[],"webhookReceivers":[],"itsmReceivers":[],"azureAppPushReceivers":[],"automationRunbookReceivers":[],"voiceReceivers":[],"logicAppReceivers":[],"azureFunctionReceivers":[],"armRoleReceivers":[]},"identity":null}'
@@ -35,7 +40,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
+<<<<<<< HEAD
       - Mon, 21 Oct 2019 11:36:08 GMT
+=======
+      - Thu, 05 Sep 2019 08:16:44 GMT
+>>>>>>> in progress
       expires:
       - '-1'
       pragma:
@@ -70,12 +79,17 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
+<<<<<<< HEAD
       - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-monitor/0.5.2 Azure-SDK-For-Python AZURECLI/2.0.75
+=======
+      - python/3.6.8 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-monitor/0.7.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
+>>>>>>> in progress
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag2?api-version=2018-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag2?api-version=2019-06-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag2","type":"Microsoft.Insights/ActionGroups","name":"ag2","location":"Global","kind":null,"tags":null,"properties":{"groupShortName":"ag2","enabled":true,"emailReceivers":[],"smsReceivers":[],"webhookReceivers":[],"itsmReceivers":[],"azureAppPushReceivers":[],"automationRunbookReceivers":[],"voiceReceivers":[],"logicAppReceivers":[],"azureFunctionReceivers":[],"armRoleReceivers":[]},"identity":null}'
@@ -87,7 +101,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
+<<<<<<< HEAD
       - Mon, 21 Oct 2019 11:36:12 GMT
+=======
+      - Thu, 05 Sep 2019 08:16:47 GMT
+>>>>>>> in progress
       expires:
       - '-1'
       pragma:
@@ -108,13 +126,14 @@ interactions:
       2, "enabled": true, "scopes": ["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Storage/storageAccounts/clitest000002"],
       "evaluationFrequency": "PT1M", "windowSize": "PT5M", "criteria": {"odata.type":
       "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria", "allOf": [{"name":
-      "cond0", "metricName": "transactions", "operator": "GreaterThan", "timeAggregation":
-      "Total", "threshold": 5.0, "dimensions": [{"name": "ResponseType", "operator":
-      "Include", "values": ["Success"]}, {"name": "ApiName", "operator": "Include",
-      "values": ["GetBlob"]}]}, {"name": "cond1", "metricName": "SuccessE2ELatency",
-      "operator": "GreaterThan", "timeAggregation": "Average", "threshold": 250.0,
-      "dimensions": [{"name": "ApiName", "operator": "Include", "values": ["GetBlob",
-      "PutBlob"]}]}]}, "actions": [{"actionGroupId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag1"}]}}\'''''
+      "cond0", "metricName": "transactions", "timeAggregation": "Total", "dimensions":
+      [{"name": "ResponseType", "operator": "Include", "values": ["Success"]}, {"name":
+      "ApiName", "operator": "Include", "values": ["GetBlob"]}], "criterionType":
+      "StaticThresholdCriterion", "operator": "GreaterThan", "threshold": 5.0}, {"name":
+      "cond1", "metricName": "SuccessE2ELatency", "timeAggregation": "Average", "dimensions":
+      [{"name": "ApiName", "operator": "Include", "values": ["GetBlob", "PutBlob"]}],
+      "criterionType": "StaticThresholdCriterion", "operator": "GreaterThan", "threshold":
+      250.0}]}, "actions": [{"actionGroupId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag1"}]}}\'''''
     headers:
       Accept:
       - application/json
@@ -125,14 +144,19 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1202'
+      - '1292'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -g -n --scopes --action --description --condition --condition
       User-Agent:
+<<<<<<< HEAD
       - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-monitor/0.5.2 Azure-SDK-For-Python AZURECLI/2.0.75
+=======
+      - python/3.6.8 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-monitor/0.7.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
+>>>>>>> in progress
       accept-language:
       - en-US
     method: PUT
@@ -175,7 +199,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
+<<<<<<< HEAD
       - Mon, 21 Oct 2019 11:36:44 GMT
+=======
+      - Thu, 05 Sep 2019 08:16:53 GMT
+>>>>>>> in progress
       expires:
       - '-1'
       pragma:
@@ -193,7 +221,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
+<<<<<<< HEAD
       - '1141'
+=======
+      - '1196'
+>>>>>>> in progress
       x-powered-by:
       - ASP.NET
     status:
@@ -210,14 +242,17 @@ interactions:
       - monitor metrics alert update
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - -g -n --severity --description --add-action --remove-action --remove-condition
         --add-condition --evaluation-frequency --window-size --tags --auto-mitigate
       User-Agent:
+<<<<<<< HEAD
       - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-monitor/0.5.2 Azure-SDK-For-Python AZURECLI/2.0.75
+=======
+      - python/3.6.8 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-monitor/0.7.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
+>>>>>>> in progress
       accept-language:
       - en-US
     method: GET
@@ -260,7 +295,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
+<<<<<<< HEAD
       - Mon, 21 Oct 2019 11:36:48 GMT
+=======
+      - Thu, 05 Sep 2019 08:16:55 GMT
+>>>>>>> in progress
       expires:
       - '-1'
       pragma:
@@ -285,14 +324,15 @@ interactions:
 - request:
     body: 'b''b\''{"location": "global", "tags": {"foo": "boo"}, "properties": {"description":
       "alt desc", "severity": 3, "enabled": true, "scopes": ["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Storage/storageAccounts/clitest000002"],
-      "evaluationFrequency": "PT5M", "windowSize": "PT15M", "criteria": {"odata.type":
-      "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria", "allOf": [{"name":
-      "cond1", "metricName": "SuccessE2ELatency", "metricNamespace": "microsoft.storage/storageaccounts",
-      "operator": "GreaterThan", "timeAggregation": "Average", "threshold": 250.0,
-      "dimensions": [{"name": "ApiName", "operator": "Include", "values": ["GetBlob",
-      "PutBlob"]}]}, {"name": "cond0", "metricName": "transactions", "operator": "LessThan",
-      "timeAggregation": "Total", "threshold": 100.0, "dimensions": []}]}, "autoMitigate":
-      true, "actions": [{"actionGroupId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag2",
+      "evaluationFrequency": "PT5M", "windowSize": "PT15M", "targetResourceType":
+      "microsoft.storage/storageaccounts", "criteria": {"odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+      "allOf": [{"name": "cond1", "metricName": "SuccessE2ELatency", "metricNamespace":
+      "microsoft.storage/storageaccounts", "timeAggregation": "Average", "dimensions":
+      [{"name": "ApiName", "operator": "Include", "values": ["GetBlob", "PutBlob"]}],
+      "criterionType": "StaticThresholdCriterion", "operator": "GreaterThan", "threshold":
+      250.0}, {"name": "cond0", "metricName": "transactions", "timeAggregation": "Total",
+      "dimensions": [], "criterionType": "StaticThresholdCriterion", "operator": "LessThan",
+      "threshold": 100.0}]}, "autoMitigate": true, "actions": [{"actionGroupId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag2",
       "webhookProperties": {"test": "best"}}]}}\'''''
     headers:
       Accept:
@@ -304,15 +344,20 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1210'
+      - '1359'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -g -n --severity --description --add-action --remove-action --remove-condition
         --add-condition --evaluation-frequency --window-size --tags --auto-mitigate
       User-Agent:
+<<<<<<< HEAD
       - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-monitor/0.5.2 Azure-SDK-For-Python AZURECLI/2.0.75
+=======
+      - python/3.6.8 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-monitor/0.7.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
+>>>>>>> in progress
       accept-language:
       - en-US
     method: PUT
@@ -352,7 +397,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
+<<<<<<< HEAD
       - Mon, 21 Oct 2019 11:37:33 GMT
+=======
+      - Thu, 05 Sep 2019 08:17:08 GMT
+>>>>>>> in progress
       expires:
       - '-1'
       pragma:
@@ -370,7 +419,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
+<<<<<<< HEAD
       - '1107'
+=======
+      - '1199'
+>>>>>>> in progress
       x-powered-by:
       - ASP.NET
     status:
@@ -387,13 +440,16 @@ interactions:
       - monitor metrics alert update
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - -g -n --enabled
       User-Agent:
+<<<<<<< HEAD
       - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-monitor/0.5.2 Azure-SDK-For-Python AZURECLI/2.0.75
+=======
+      - python/3.6.8 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-monitor/0.7.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
+>>>>>>> in progress
       accept-language:
       - en-US
     method: GET
@@ -433,7 +489,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
+<<<<<<< HEAD
       - Mon, 21 Oct 2019 11:37:35 GMT
+=======
+      - Thu, 05 Sep 2019 08:17:09 GMT
+>>>>>>> in progress
       expires:
       - '-1'
       pragma:
@@ -458,14 +518,15 @@ interactions:
 - request:
     body: 'b''b\''{"location": "global", "tags": {"foo": "boo"}, "properties": {"description":
       "alt desc", "severity": 3, "enabled": false, "scopes": ["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Storage/storageAccounts/clitest000002"],
-      "evaluationFrequency": "PT5M", "windowSize": "PT15M", "criteria": {"odata.type":
-      "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria", "allOf": [{"name":
-      "cond1", "metricName": "SuccessE2ELatency", "metricNamespace": "microsoft.storage/storageaccounts",
-      "operator": "GreaterThan", "timeAggregation": "Average", "threshold": 250.0,
-      "dimensions": [{"name": "ApiName", "operator": "Include", "values": ["GetBlob",
-      "PutBlob"]}]}, {"name": "cond0", "metricName": "transactions", "metricNamespace":
-      "microsoft.storage/storageaccounts", "operator": "LessThan", "timeAggregation":
-      "Total", "threshold": 100.0, "dimensions": []}]}, "autoMitigate": true, "actions":
+      "evaluationFrequency": "PT5M", "windowSize": "PT15M", "targetResourceType":
+      "microsoft.storage/storageaccounts", "criteria": {"odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+      "allOf": [{"name": "cond1", "metricName": "SuccessE2ELatency", "metricNamespace":
+      "microsoft.storage/storageaccounts", "timeAggregation": "Average", "dimensions":
+      [{"name": "ApiName", "operator": "Include", "values": ["GetBlob", "PutBlob"]}],
+      "criterionType": "StaticThresholdCriterion", "operator": "GreaterThan", "threshold":
+      250.0}, {"name": "cond0", "metricName": "transactions", "metricNamespace": "microsoft.storage/storageaccounts",
+      "timeAggregation": "Total", "dimensions": [], "criterionType": "StaticThresholdCriterion",
+      "operator": "LessThan", "threshold": 100.0}]}, "autoMitigate": true, "actions":
       [{"actionGroupId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag2"}]}}\'''''
     headers:
       Accept:
@@ -477,14 +538,19 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1228'
+      - '1377'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -g -n --enabled
       User-Agent:
+<<<<<<< HEAD
       - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-monitor/0.5.2 Azure-SDK-For-Python AZURECLI/2.0.75
+=======
+      - python/3.6.8 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-monitor/0.7.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
+>>>>>>> in progress
       accept-language:
       - en-US
     method: PUT
@@ -523,7 +589,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
+<<<<<<< HEAD
       - Mon, 21 Oct 2019 11:38:08 GMT
+=======
+      - Thu, 05 Sep 2019 08:17:15 GMT
+>>>>>>> in progress
       expires:
       - '-1'
       pragma:
@@ -541,7 +611,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
+<<<<<<< HEAD
       - '1106'
+=======
+      - '1198'
+>>>>>>> in progress
       x-powered-by:
       - ASP.NET
     status:
@@ -558,13 +632,16 @@ interactions:
       - monitor metrics alert list
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - -g
       User-Agent:
+<<<<<<< HEAD
       - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-monitor/0.5.2 Azure-SDK-For-Python AZURECLI/2.0.75
+=======
+      - python/3.6.8 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-monitor/0.7.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
+>>>>>>> in progress
       accept-language:
       - en-US
     method: GET
@@ -605,7 +682,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
+<<<<<<< HEAD
       - Mon, 21 Oct 2019 11:38:11 GMT
+=======
+      - Thu, 05 Sep 2019 08:17:17 GMT
+>>>>>>> in progress
       expires:
       - '-1'
       pragma:
@@ -638,13 +719,16 @@ interactions:
       - monitor metrics alert show
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - -g -n
       User-Agent:
+<<<<<<< HEAD
       - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-monitor/0.5.2 Azure-SDK-For-Python AZURECLI/2.0.75
+=======
+      - python/3.6.8 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-monitor/0.7.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
+>>>>>>> in progress
       accept-language:
       - en-US
     method: GET
@@ -683,7 +767,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
+<<<<<<< HEAD
       - Mon, 21 Oct 2019 11:38:12 GMT
+=======
+      - Thu, 05 Sep 2019 08:17:18 GMT
+>>>>>>> in progress
       expires:
       - '-1'
       pragma:
@@ -718,13 +806,16 @@ interactions:
       - keep-alive
       Content-Length:
       - '0'
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - -g -n
       User-Agent:
+<<<<<<< HEAD
       - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-monitor/0.5.2 Azure-SDK-For-Python AZURECLI/2.0.75
+=======
+      - python/3.6.8 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-monitor/0.7.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
+>>>>>>> in progress
       accept-language:
       - en-US
     method: DELETE
@@ -738,7 +829,11 @@ interactions:
       content-length:
       - '0'
       date:
+<<<<<<< HEAD
       - Mon, 21 Oct 2019 11:38:19 GMT
+=======
+      - Thu, 05 Sep 2019 08:17:22 GMT
+>>>>>>> in progress
       expires:
       - '-1'
       pragma:
@@ -769,13 +864,16 @@ interactions:
       - monitor metrics alert list
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - -g
       User-Agent:
+<<<<<<< HEAD
       - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-monitor/0.5.2 Azure-SDK-For-Python AZURECLI/2.0.75
+=======
+      - python/3.6.8 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-monitor/0.7.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
+>>>>>>> in progress
       accept-language:
       - en-US
     method: GET
@@ -791,7 +889,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
+<<<<<<< HEAD
       - Mon, 21 Oct 2019 11:38:21 GMT
+=======
+      - Thu, 05 Sep 2019 08:17:22 GMT
+>>>>>>> in progress
       expires:
       - '-1'
       pragma:
@@ -910,15 +1012,24 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
+<<<<<<< HEAD
       - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+=======
+      - python/3.6.8 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-resource/3.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
+>>>>>>> in progress
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_metric_alert_v2000001?api-version=2019-07-01
   response:
     body:
+<<<<<<< HEAD
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001","name":"cli_test_metric_alert_v2000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-10-21T11:35:35Z"},"properties":{"provisioningState":"Succeeded"}}'
+=======
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001","name":"cli_test_metric_alert_v2000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-09-05T08:16:09Z"},"properties":{"provisioningState":"Succeeded"}}'
+>>>>>>> in progress
     headers:
       cache-control:
       - no-cache
@@ -927,7 +1038,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
+<<<<<<< HEAD
       - Mon, 21 Oct 2019 11:38:55 GMT
+=======
+      - Thu, 05 Sep 2019 08:17:23 GMT
+>>>>>>> in progress
       expires:
       - '-1'
       pragma:
@@ -960,8 +1075,13 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
+<<<<<<< HEAD
       - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-web/0.42.0 Azure-SDK-For-Python AZURECLI/2.0.75
+=======
+      - python/3.6.8 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
+>>>>>>> in progress
       accept-language:
       - en-US
     method: POST
@@ -977,7 +1097,11 @@ interactions:
       content-type:
       - application/json
       date:
+<<<<<<< HEAD
       - Mon, 21 Oct 2019 11:38:57 GMT
+=======
+      - Thu, 05 Sep 2019 08:17:25 GMT
+>>>>>>> in progress
       expires:
       - '-1'
       pragma:
@@ -995,7 +1119,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
+<<<<<<< HEAD
       - '1186'
+=======
+      - '1199'
+>>>>>>> in progress
       x-powered-by:
       - ASP.NET
     status:
@@ -1015,15 +1143,24 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
+<<<<<<< HEAD
       - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+=======
+      - python/3.6.8 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-resource/3.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
+>>>>>>> in progress
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_metric_alert_v2000001?api-version=2019-07-01
   response:
     body:
+<<<<<<< HEAD
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001","name":"cli_test_metric_alert_v2000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-10-21T11:35:35Z"},"properties":{"provisioningState":"Succeeded"}}'
+=======
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001","name":"cli_test_metric_alert_v2000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-09-05T08:16:09Z"},"properties":{"provisioningState":"Succeeded"}}'
+>>>>>>> in progress
     headers:
       cache-control:
       - no-cache
@@ -1032,7 +1169,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
+<<<<<<< HEAD
       - Mon, 21 Oct 2019 11:38:59 GMT
+=======
+      - Thu, 05 Sep 2019 08:17:25 GMT
+>>>>>>> in progress
       expires:
       - '-1'
       pragma:
@@ -1065,8 +1206,13 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
+<<<<<<< HEAD
       - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-web/0.42.0 Azure-SDK-For-Python AZURECLI/2.0.75
+=======
+      - python/3.6.8 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
+>>>>>>> in progress
       accept-language:
       - en-US
     method: PUT
@@ -1074,8 +1220,13 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Web/serverfarms/plan1","name":"plan1","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
+<<<<<<< HEAD
         US","properties":{"serverFarmId":31680,"name":"plan1","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"cli_test_metric_alert_v2000001-WestUSwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
         US","perSiteScaling":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"cli_test_metric_alert_v2000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-bay-051_31680","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'
+=======
+        US","properties":{"serverFarmId":24550,"name":"plan1","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"cli_test_metric_alert_v2000001-WestUSwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
+        US","perSiteScaling":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"cli_test_metric_alert_v2000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-bay-087_24550","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'
+>>>>>>> in progress
     headers:
       cache-control:
       - no-cache
@@ -1084,7 +1235,11 @@ interactions:
       content-type:
       - application/json
       date:
+<<<<<<< HEAD
       - Mon, 21 Oct 2019 11:39:08 GMT
+=======
+      - Thu, 05 Sep 2019 08:17:35 GMT
+>>>>>>> in progress
       expires:
       - '-1'
       pragma:
@@ -1102,7 +1257,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
+<<<<<<< HEAD
       - '1161'
+=======
+      - '1197'
+>>>>>>> in progress
       x-powered-by:
       - ASP.NET
     status:
@@ -1122,8 +1281,13 @@ interactions:
       ParameterSetName:
       - -g -n -p
       User-Agent:
+<<<<<<< HEAD
       - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-web/0.42.0 Azure-SDK-For-Python AZURECLI/2.0.75
+=======
+      - python/3.6.8 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
+>>>>>>> in progress
       accept-language:
       - en-US
     method: GET
@@ -1131,8 +1295,13 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Web/serverfarms/plan1","name":"plan1","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
+<<<<<<< HEAD
         US","properties":{"serverFarmId":31680,"name":"plan1","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"cli_test_metric_alert_v2000001-WestUSwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
         US","perSiteScaling":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"cli_test_metric_alert_v2000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-bay-051_31680","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'
+=======
+        US","properties":{"serverFarmId":24550,"name":"plan1","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"cli_test_metric_alert_v2000001-WestUSwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
+        US","perSiteScaling":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"cli_test_metric_alert_v2000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-bay-087_24550","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'
+>>>>>>> in progress
     headers:
       cache-control:
       - no-cache
@@ -1141,7 +1310,11 @@ interactions:
       content-type:
       - application/json
       date:
+<<<<<<< HEAD
       - Mon, 21 Oct 2019 11:39:10 GMT
+=======
+      - Thu, 05 Sep 2019 08:17:38 GMT
+>>>>>>> in progress
       expires:
       - '-1'
       pragma:
@@ -1182,8 +1355,13 @@ interactions:
       ParameterSetName:
       - -g -n -p
       User-Agent:
+<<<<<<< HEAD
       - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-web/0.42.0 Azure-SDK-For-Python AZURECLI/2.0.75
+=======
+      - python/3.6.8 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
+>>>>>>> in progress
       accept-language:
       - en-US
     method: POST
@@ -1199,7 +1377,11 @@ interactions:
       content-type:
       - application/json
       date:
+<<<<<<< HEAD
       - Mon, 21 Oct 2019 11:39:12 GMT
+=======
+      - Thu, 05 Sep 2019 08:17:38 GMT
+>>>>>>> in progress
       expires:
       - '-1'
       pragma:
@@ -1217,7 +1399,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
+<<<<<<< HEAD
       - '1180'
+=======
+      - '1199'
+>>>>>>> in progress
       x-powered-by:
       - ASP.NET
     status:
@@ -1237,8 +1423,13 @@ interactions:
       ParameterSetName:
       - -g -n -p
       User-Agent:
+<<<<<<< HEAD
       - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-web/0.42.0 Azure-SDK-For-Python AZURECLI/2.0.75
+=======
+      - python/3.6.8 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
+>>>>>>> in progress
       accept-language:
       - en-US
     method: GET
@@ -1246,8 +1437,13 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Web/serverfarms/plan1","name":"plan1","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
+<<<<<<< HEAD
         US","properties":{"serverFarmId":31680,"name":"plan1","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"cli_test_metric_alert_v2000001-WestUSwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
         US","perSiteScaling":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"cli_test_metric_alert_v2000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-bay-051_31680","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'
+=======
+        US","properties":{"serverFarmId":24550,"name":"plan1","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"cli_test_metric_alert_v2000001-WestUSwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
+        US","perSiteScaling":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"cli_test_metric_alert_v2000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-bay-087_24550","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'
+>>>>>>> in progress
     headers:
       cache-control:
       - no-cache
@@ -1256,7 +1452,11 @@ interactions:
       content-type:
       - application/json
       date:
+<<<<<<< HEAD
       - Mon, 21 Oct 2019 11:39:13 GMT
+=======
+      - Thu, 05 Sep 2019 08:17:41 GMT
+>>>>>>> in progress
       expires:
       - '-1'
       pragma:
@@ -1299,8 +1499,13 @@ interactions:
       ParameterSetName:
       - -g -n -p
       User-Agent:
+<<<<<<< HEAD
       - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-web/0.42.0 Azure-SDK-For-Python AZURECLI/2.0.75
+=======
+      - python/3.6.8 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
+>>>>>>> in progress
       accept-language:
       - en-US
     method: PUT
@@ -1308,11 +1513,16 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Web/sites/app000003","name":"app000003","type":"Microsoft.Web/sites","kind":"app","location":"West
+<<<<<<< HEAD
         US","properties":{"name":"app000003","state":"Running","hostNames":["app000003.azurewebsites.net"],"webSpace":"cli_test_metric_alert_v2000001-WestUSwebspace","selfLink":"https://waws-prod-bay-051.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/cli_test_metric_alert_v2000001-WestUSwebspace/sites/app000003","repositorySiteName":"app000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["app000003.azurewebsites.net","app000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"app000003.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"app000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Web/serverfarms/plan1","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-10-21T11:39:19.763","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"app000003","trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"1064DF0D28E9F61D7FD80FC971E47C173C4689B1AF200D019CDE122E6196E70B","kind":"app","inboundIpAddress":"40.78.18.232","possibleInboundIpAddresses":"40.78.18.232","outboundIpAddresses":"40.78.17.157,40.78.21.191,40.78.22.38,40.78.21.180","possibleOutboundIpAddresses":"40.78.17.157,40.78.21.191,40.78.22.38,40.78.21.180","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-051","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"cli_test_metric_alert_v2000001","defaultHostName":"app000003.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":null,"buildVersion":null,"targetBuildVersion":null}}'
+=======
+        US","properties":{"name":"app000003","state":"Running","hostNames":["app000003.azurewebsites.net"],"webSpace":"cli_test_metric_alert_v2000001-WestUSwebspace","selfLink":"https://waws-prod-bay-087.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/cli_test_metric_alert_v2000001-WestUSwebspace/sites/app000003","repositorySiteName":"app000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["app000003.azurewebsites.net","app000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"app000003.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"app000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Web/serverfarms/plan1","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-09-05T08:17:45.36","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"app000003","trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","inboundIpAddress":"40.83.145.50","possibleInboundIpAddresses":"40.83.145.50","outboundIpAddresses":"40.83.145.50,104.42.191.8,104.42.186.112,104.42.186.44,104.42.187.158","possibleOutboundIpAddresses":"40.83.145.50,104.42.191.8,104.42.186.112,104.42.186.44,104.42.187.158,104.42.188.168,104.42.185.137","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-087","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"cli_test_metric_alert_v2000001","defaultHostName":"app000003.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":null}}'
+>>>>>>> in progress
     headers:
       cache-control:
       - no-cache
       content-length:
+<<<<<<< HEAD
       - '3393'
       content-type:
       - application/json
@@ -1320,6 +1530,15 @@ interactions:
       - Mon, 21 Oct 2019 11:39:37 GMT
       etag:
       - '"1D588042D8E12B0"'
+=======
+      - '3318'
+      content-type:
+      - application/json
+      date:
+      - Thu, 05 Sep 2019 08:18:02 GMT
+      etag:
+      - '"1D563C265C03C00"'
+>>>>>>> in progress
       expires:
       - '-1'
       pragma:
@@ -1361,8 +1580,13 @@ interactions:
       ParameterSetName:
       - -g -n -p
       User-Agent:
+<<<<<<< HEAD
       - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-web/0.42.0 Azure-SDK-For-Python AZURECLI/2.0.75
+=======
+      - python/3.6.8 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
+>>>>>>> in progress
       accept-language:
       - en-US
     method: POST
@@ -1371,6 +1595,7 @@ interactions:
     body:
       string: <publishData><publishProfile profileName="app000003 - Web Deploy" publishMethod="MSDeploy"
         publishUrl="app000003.scm.azurewebsites.net:443" msdeploySite="app000003"
+<<<<<<< HEAD
         userName="$app000003" userPWD="i2TY4afkq1Ne8aNPzanjxDlZLWt9bQDQLGDb8vF58MskacaZF1de0oP5cWDW"
         destinationAppUrl="http://app000003.azurewebsites.net" SQLServerDBConnectionString=""
         mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
@@ -1382,6 +1607,19 @@ interactions:
         webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="app000003
         - ReadOnly - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-051dr.ftp.azurewebsites.windows.net/site/wwwroot"
         ftpPassiveMode="True" userName="app000003\$app000003" userPWD="i2TY4afkq1Ne8aNPzanjxDlZLWt9bQDQLGDb8vF58MskacaZF1de0oP5cWDW"
+=======
+        userName="$app000003" userPWD="a6lQxa8yRYT7uMNAJ6uaAlaP5dFwZKQqLKNzbPRyHSSqYkh0juiiSREgsWRv"
+        destinationAppUrl="http://app000003.azurewebsites.net" SQLServerDBConnectionString=""
+        mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
+        webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="app000003
+        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-087.ftp.azurewebsites.windows.net/site/wwwroot"
+        ftpPassiveMode="True" userName="app000003\$app000003" userPWD="a6lQxa8yRYT7uMNAJ6uaAlaP5dFwZKQqLKNzbPRyHSSqYkh0juiiSREgsWRv"
+        destinationAppUrl="http://app000003.azurewebsites.net" SQLServerDBConnectionString=""
+        mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
+        webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="app000003
+        - ReadOnly - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-087dr.ftp.azurewebsites.windows.net/site/wwwroot"
+        ftpPassiveMode="True" userName="app000003\$app000003" userPWD="a6lQxa8yRYT7uMNAJ6uaAlaP5dFwZKQqLKNzbPRyHSSqYkh0juiiSREgsWRv"
+>>>>>>> in progress
         destinationAppUrl="http://app000003.azurewebsites.net" SQLServerDBConnectionString=""
         mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
         webSystem="WebSites"><databases /></publishProfile></publishData>
@@ -1393,7 +1631,11 @@ interactions:
       content-type:
       - application/xml
       date:
+<<<<<<< HEAD
       - Mon, 21 Oct 2019 11:39:38 GMT
+=======
+      - Thu, 05 Sep 2019 08:18:05 GMT
+>>>>>>> in progress
       expires:
       - '-1'
       pragma:
@@ -1418,9 +1660,10 @@ interactions:
       2, "enabled": true, "scopes": ["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Web/sites/app000003"],
       "evaluationFrequency": "PT1M", "windowSize": "PT5M", "criteria": {"odata.type":
       "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria", "allOf": [{"name":
-      "cond0", "metricName": "Http4xx", "operator": "GreaterThan", "timeAggregation":
-      "Total", "threshold": 10.0, "dimensions": [{"name": "Instance", "operator":
-      "Include", "values": ["*"]}]}]}, "actions": [{"actionGroupId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag1"}]}}'''
+      "cond0", "metricName": "Http4xx", "timeAggregation": "Total", "dimensions":
+      [{"name": "Instance", "operator": "Include", "values": ["*"]}], "criterionType":
+      "StaticThresholdCriterion", "operator": "GreaterThan", "threshold": 10.0}]},
+      "actions": [{"actionGroupId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag1"}]}}'''
     headers:
       Accept:
       - application/json
@@ -1431,14 +1674,19 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '875'
+      - '920'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -g -n --scopes --action --description --condition
       User-Agent:
+<<<<<<< HEAD
       - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-monitor/0.5.2 Azure-SDK-For-Python AZURECLI/2.0.75
+=======
+      - python/3.6.8 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-monitor/0.7.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
+>>>>>>> in progress
       accept-language:
       - en-US
     method: PUT
@@ -1470,7 +1718,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
+<<<<<<< HEAD
       - Mon, 21 Oct 2019 11:39:55 GMT
+=======
+      - Thu, 05 Sep 2019 08:18:30 GMT
+>>>>>>> in progress
       expires:
       - '-1'
       pragma:

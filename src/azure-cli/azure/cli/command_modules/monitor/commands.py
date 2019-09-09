@@ -24,6 +24,7 @@ def load_command_table(self, _):
     action_group_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.monitor.operations#ActionGroupsOperations.{}',
         client_factory=cf_action_groups,
+        operation_group='action_groups',
         exception_handler=monitor_exception_handler)
 
     action_group_custom = CliCommandType(

@@ -315,7 +315,7 @@ class MultiObjectsDeserializeAction(argparse._AppendAction):  # pylint: disable=
 
 class ActionGroupReceiverParameterAction(MultiObjectsDeserializeAction):
     def deserialize_object(self, type_name, type_properties):
-        from azure.mgmt.monitor.models import EmailReceiver, SmsReceiver, WebhookReceiver
+        EmailReceiver, SmsReceiver, WebhookReceiver = self.get_models('EmailReceiver', 'SmsReceiver', 'WebhookReceiver')
 
         if type_name == 'email':
             try:

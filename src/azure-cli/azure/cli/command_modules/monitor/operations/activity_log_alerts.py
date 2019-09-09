@@ -62,7 +62,7 @@ def create(cmd, client, resource_group_name, activity_log_alert_name, scopes=Non
     if not scopes:
         scopes = [resource_id(subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name)]
 
-    if _get_alert_settings(client, resource_group_name, activity_log_alert_name, throw_if_missing=False):
+    if _get_alert_settings(cmd, client, resource_group_name, activity_log_alert_name, throw_if_missing=False):
         raise CLIError('The activity log alert {} already exists in resource group {}.'.format(activity_log_alert_name,
                                                                                                resource_group_name))
 
@@ -83,8 +83,8 @@ def create(cmd, client, resource_group_name, activity_log_alert_name, scopes=Non
                                    activity_log_alert_name=activity_log_alert_name, activity_log_alert=settings)
 
 
-def add_scope(client, resource_group_name, activity_log_alert_name, scopes, reset=False):
-    settings = _get_alert_settings(client, resource_group_name, activity_log_alert_name)
+def add_scope(cmd, client, resource_group_name, activity_log_alert_name, scopes, reset=False):
+    settings = _get_alert_settings(cmd, client, resource_group_name, activity_log_alert_name)
 
     new_scopes = set() if reset else set(settings.scopes)
     for scope in scopes:
@@ -96,8 +96,8 @@ def add_scope(client, resource_group_name, activity_log_alert_name, scopes, rese
                                    activity_log_alert=settings)
 
 
-def remove_scope(client, resource_group_name, activity_log_alert_name, scopes):
-    settings = _get_alert_settings(client, resource_group_name, activity_log_alert_name)
+def remove_scope(cmd, client, resource_group_name, activity_log_alert_name, scopes):
+    settings = _get_alert_settings(cmd, client, resource_group_name, activity_log_alert_name)
 
     new_scopes = set(settings.scopes)
     for scope in scopes:
@@ -116,7 +116,7 @@ def add_action_group(cmd, client, resource_group_name, activity_log_alert_name, 
                      webhook_properties=None, strict=False):
     from azure.mgmt.monitor.models import ActivityLogAlertActionGroup as ActionGroup
 
-    settings = _get_alert_settings(client, resource_group_name, activity_log_alert_name)
+    settings = _get_alert_settings(cmd, client, resource_group_name, activity_log_alert_name)
 
     # normalize the action group ids
     rids = _normalize_names(cmd.cli_ctx, action_group_ids, resource_group_name, 'microsoft.insights', 'actionGroups')
@@ -140,7 +140,7 @@ def add_action_group(cmd, client, resource_group_name, activity_log_alert_name, 
 
 
 def remove_action_group(cmd, client, resource_group_name, activity_log_alert_name, action_group_ids):
-    settings = _get_alert_settings(client, resource_group_name, activity_log_alert_name)
+    settings = _get_alert_settings(cmd, client, resource_group_name, activity_log_alert_name)
 
     if len(action_group_ids) == 1 and action_group_ids[0] == '*':
         settings.actions.action_groups = []
@@ -211,8 +211,8 @@ def _normalize_names(cli_ctx, resource_names, resource_group, namespace, resourc
     return rids
 
 
-def _get_alert_settings(client, resource_group_name, activity_log_alert_name, throw_if_missing=True):
-    from azure.mgmt.monitor.models import ErrorResponseException
+def _get_alert_settings(cmd, client, resource_group_name, activity_log_alert_name, throw_if_missing=True):
+    ErrorResponseException = cmd.get_models('ErrorResponseException', operation_group='activity_log_alerts')
 
     try:
         return client.get(resource_group_name=resource_group_name, activity_log_alert_name=activity_log_alert_name)
