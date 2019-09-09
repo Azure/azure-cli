@@ -53,18 +53,16 @@ from azure.graphrbac.models import (ApplicationCreateParameters,
 
 from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes
 
-from azure.mgmt.containerservice.models import ContainerServiceStorageProfileTypes
-
 from azure.mgmt.containerservice.v2019_08_01.models import ContainerServiceNetworkProfile
 from azure.mgmt.containerservice.v2019_08_01.models import ContainerServiceLinuxProfile
 from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterServicePrincipalProfile
 from azure.mgmt.containerservice.v2019_08_01.models import ContainerServiceSshConfiguration
 from azure.mgmt.containerservice.v2019_08_01.models import ContainerServiceSshPublicKey
-
-from azure.mgmt.containerservice.v2019_08_01.models import ManagedCluster as AKSManagedCluster
-from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterAADProfile as AKSManagedClusterAADProfile
-from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterAddonProfile as AKSManagedClusterAddonProfile
-from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterAgentPoolProfile as AKSManagedClusterAgentPoolProfile
+from azure.mgmt.containerservice.v2019_08_01.models import ContainerServiceStorageProfileTypes
+from azure.mgmt.containerservice.v2019_08_01.models import ManagedCluster
+from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterAADProfile
+from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterAddonProfile
+from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterAgentPoolProfile
 
 from azure.mgmt.containerservice.v2019_04_30.models import OpenShiftManagedClusterAgentPoolProfile
 from azure.mgmt.containerservice.v2019_04_30.models import OpenShiftAgentPoolProfileRole
