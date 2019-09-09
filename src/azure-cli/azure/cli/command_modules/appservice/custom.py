@@ -150,7 +150,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     if using_webapp_up:  # when the routine is invoked as a help method for webapp up
         logger.info("will set appsetting for enabling build")
         site_config.app_settings.append(NameValuePair(name="SCM_DO_BUILD_DURING_DEPLOYMENT", value=True))
-    if language.lower() == 'dotnetcore':
+    if language is not None and language.lower() == 'dotnetcore':
         site_config.app_settings.append(NameValuePair(name='ANCM_ADDITIONAL_ERROR_PAGE_LINK',
                                                       value='https://{}.scm.azurewebsites.net/detectors'.format(name)))
 
