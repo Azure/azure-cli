@@ -21,9 +21,6 @@ from ._validators import (
     validate_vm_set_type, validate_load_balancer_sku, validate_load_balancer_outbound_ips,
     validate_load_balancer_outbound_ip_prefixes)
 
-
-    validate_load_balancer_outbound_ips, validate_load_balancer_outbound_ip_prefixes)
-
 aci_connector_os_type = ['Windows', 'Linux', 'Both']
 
 aci_connector_chart_url = 'https://github.com/virtual-kubelet/virtual-kubelet/raw/master/charts/virtual-kubelet-for-aks-latest.tgz'
@@ -189,6 +186,11 @@ def load_arguments(self, _):
         c.argument('vnet_subnet_id')
         c.argument('workspace_resource_id')
         c.argument('skip_subnet_role_assignment', action='store_true')
+
+    with self.argument_context('aks update') as c:
+        c.argument('load_balancer_managed_outbound_ip_count', type=int)
+        c.argument('load_balancer_outbound_ips', type=str, validator=validate_load_balancer_outbound_ips)
+        c.argument('load_balancer_outbound_ip_prefixes', type=str, validator=validate_load_balancer_outbound_ip_prefixes)
 
     with self.argument_context('aks disable-addons') as c:
         c.argument('addons', options_list=['--addons', '-a'])

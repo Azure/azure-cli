@@ -23,9 +23,9 @@ import threading
 import time
 import uuid
 import webbrowser
+from distutils.version import StrictVersion  # pylint: disable=no-name-in-module,import-error
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from six.moves.urllib.error import URLError  # pylint: disable=import-error
-from distutils.version import StrictVersion  # pylint: disable=no-name-in-module,import-error
 
 import yaml
 import dateutil.parser
@@ -63,6 +63,11 @@ from azure.mgmt.containerservice.v2019_08_01.models import ManagedCluster
 from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterAADProfile
 from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterAddonProfile
 from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterAgentPoolProfile
+from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterLoadBalancerProfile
+from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterLoadBalancerProfileManagedOutboundIPs
+from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterLoadBalancerProfileOutboundIPPrefixes
+from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterLoadBalancerProfileOutboundIPs
+from azure.mgmt.containerservice.v2019_08_01.models import ResourceReference
 
 from azure.mgmt.containerservice.v2019_04_30.models import OpenShiftManagedClusterAgentPoolProfile
 from azure.mgmt.containerservice.v2019_04_30.models import OpenShiftAgentPoolProfileRole
@@ -1711,6 +1716,37 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             else:
                 raise ex
     raise retry_exception
+
+
+def aks_update(cmd, client, resource_group_name, name, no_wait=False,
+               load_balancer_managed_outbound_ip_count=None,
+               load_balancer_outbound_ips=None,
+               load_balancer_outbound_ip_prefixes=None):
+    update_lb_profile = load_balancer_managed_outbound_ip_count is not None or \
+        load_balancer_outbound_ips is not None or load_balancer_outbound_ip_prefixes is not None
+
+    if not update_lb_profile:
+        raise CLIError('Please specify "--load-balancer-managed-outbound-ip-count" or '
+                       '"--load-balancer-outbound-ips" or '
+                       '"--load-balancer-outbound-ip-prefixes"')
+
+    instance = client.get(resource_group_name, name)
+
+    load_balancer_profile = _get_load_balancer_profile(
+        load_balancer_managed_outbound_ip_count,
+        load_balancer_outbound_ips,
+        load_balancer_outbound_ip_prefixes)
+
+    if load_balancer_profile:
+        instance.network_profile.load_balancer_profile = load_balancer_profile
+
+    subscription_id = _get_subscription_id(cmd.cli_ctx)
+    location = instance.location
+    service_principal = instance.service_principal_profile.client_id
+    if not service_principal:
+        raise CLIError('Cannot get the AKS cluster\'s service principal.')
+
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
 
 def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=False):

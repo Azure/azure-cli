@@ -67,6 +67,7 @@ def load_command_table(self, _):
     with self.command_group('aks', managed_clusters_sdk, client_factory=cf_managed_clusters) as g:
         g.custom_command('browse', 'aks_browse')
         g.custom_command('create', 'aks_create', supports_no_wait=True)
+        g.custom_command('update', 'aks_update', supports_no_wait=True)
         g.command('delete', 'delete', supports_no_wait=True, confirmation=True)
         g.custom_command('update-credentials', 'aks_update_credentials', supports_no_wait=True)
         g.custom_command('disable-addons', 'aks_disable_addons', supports_no_wait=True)
