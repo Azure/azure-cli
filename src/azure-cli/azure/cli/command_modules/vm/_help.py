@@ -2299,9 +2299,9 @@ examples:
   - name: Update a VMSS' license type for Azure Hybrid Benefit.
     text: az vmss update --name MyScaleSet --resource-group MyResourceGroup --license-type windows_server
   - name: Update a VM instance's protection policies.
-    text: az vmss update --name MyScaleSet --resource-group MyResourceGroup --instance-id 4             --protect-from-scale-set-actions False --protect-from-scale-in
+    text: az vmss update --name MyScaleSet --resource-group MyResourceGroup --instance-id 4 --protect-from-scale-set-actions False --protect-from-scale-in
   - name: Update a VM instance's protection policies.
-    text: az vmss update --name MyScaleSet --resource-group MyResourceGroup --instance-id 4             --set protectionPolicy.protectFromScaleIn=True protectionPolicy.protectFromScaleSetActions=False
+    text: az vmss update --name MyScaleSet --resource-group MyResourceGroup --instance-id 4 --set protectionPolicy.protectFromScaleIn=True protectionPolicy.protectFromScaleSetActions=False
 
 """
 
