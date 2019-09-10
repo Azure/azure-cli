@@ -37,7 +37,7 @@ Release History
 
 **EventGrid**
 
-* Fix the endpoint help text to point to the right parameter (namely, to point to parameter `--endpoint` rather than `--endpoint-type` in event subscription commands).
+* Fix the endpoint help text to refer to the right parameter (namely, to point to parameter `--endpoint` rather than `--endpoint-type` in event subscription commands).
 
 **Compute**
 
