@@ -670,7 +670,7 @@ examples:
     text: >
         az policy assignment create --name myPolicy --policy {PolicyName} --assign-identity --identity-scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --role Contributor
   - name: Create a resource policy assignment with a enforcement mode. The assignment will be enforced with specified enforcement mode (Default or DoNotEnforce).
-    test: >
+    text: >
         az policy assignment create --name myPolicy --policy {PolicyName} --enforcement-mode 'DoNotEnforce'
 """
 

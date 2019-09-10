@@ -608,7 +608,7 @@ class PolicyScenarioTest(ScenarioTest):
             'padn': self.create_random_name('test_assignment', 20)
         })
 
-        self.cmd('policy assignment create --policy {pn} -n {pan} --display-name {padn} -g {rg} --params {params}', checks=[        
+        self.cmd('policy assignment create --policy {pn} -n {pan} --display-name {padn} -g {rg} --params {params}', checks=[
             self.check('name', '{pan}'),
             self.check('displayName', '{padn}'),
             self.check('sku.name', 'A0'),
@@ -1031,7 +1031,7 @@ class PolicyScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     def test_resource_policyset_management_group(self, resource_group):
         management_group_name = self.create_random_name('cli-test-mgmt-group', 30)
-        self.cmd('account management-group create -n ' + management_group_name)        
+        self.cmd('account management-group create -n ' + management_group_name)
         try:
             self.resource_policyset_operations(resource_group, management_group_name)
         finally:
