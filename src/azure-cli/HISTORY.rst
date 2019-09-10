@@ -195,6 +195,10 @@ Release History
 
 * Support for Policy new API version 2019-01-01
 
+**Profile**
+
+* Fixed `az account get-access-token --resource-type ms-graph`
+
 **Storage**
 
 * [BREAKING CHANGE] `az storage remove`: remove --auth-mode argument
