@@ -105,10 +105,10 @@ short-summary: Update retention policy for an Azure Container Registry.
 examples:
   - name: Enable retention policy for an Azure Container Registry to delete an untagged manifest after 30 days.
     text: >
-        az acr config retention update -n MyRegistry --status Enabled --days 30
+        az acr config retention update -n MyRegistry --status Enabled --days 30 --type UntaggedManifests
   - name: Enable retention policy for an Azure Container Registry to delete a manifest as soon as it gets untagged.
     text: >
-        az acr config retention update -n MyRegistry --status Enabled --days 0
+        az acr config retention update -n MyRegistry --status Enabled --days 0 --type UntaggedManifests
 """
 
 helps['acr create'] = """
