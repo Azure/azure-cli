@@ -325,21 +325,22 @@ def _deploy_arm_template_core(cli_ctx, resource_group_name,
         def on_request(self, request, **kwargs):
             http_request = request.http_request
             print(http_request.data)
-            try:
-                template = http_request.data["properties"]["template"]
-                if not isinstance(template, JsonCTemplate):
-                    raise ValueError()
-            except (KeyError, ValueError):
-                # Not a template
-                return
-            # I know it's my weird template
-            del http_request.data["properties"]["template"]
-            # templateLink nad template cannot exist at the same time in deployment_dry_run mode
-            if "templateLink" in http_request.data["properties"].keys():
-                del http_request.data["properties"]["templateLink"]
-            partial_request = json.dumps(http_request.data)
+            if (getattr(http_request, 'data', {}) or {}).get('properties', {}).get('template'):
+                try:
+                    template = http_request.data["properties"]["template"]
+                    if not isinstance(template, JsonCTemplate):
+                        raise ValueError()
+                except (KeyError, ValueError):
+                    # Not a template
+                    return
+                # I know it's my weird template
+                del http_request.data["properties"]["template"]
+                # templateLink nad template cannot exist at the same time in deployment_dry_run mode
+                if "templateLink" in http_request.data["properties"].keys():
+                    del http_request.data["properties"]["templateLink"]
+                partial_request = json.dumps(http_request.data)
 
-            http_request.data = partial_request[:-2] + ", template:" + template.template_as_bytes + r"}}"
+                http_request.data = partial_request[:-2] + ", template:" + template.template_as_bytes + r"}}"
 
     # Plug this as default HTTP pipeline
     from msrest.pipeline import Pipeline
@@ -366,8 +367,8 @@ def _deploy_arm_template_core(cli_ctx, resource_group_name,
         return sdk_no_wait(no_wait, deployments_operation_group.validate, resource_group_name, deployment_name, properties)
     res = sdk_no_wait(no_wait, deployments_operation_group.create_or_update, resource_group_name, deployment_name, properties)
     # restore the old pipelines and serializer
-    smc.config.pipeline = old_pipeline
-    deployments_operation_group._serialize = old_serialize
+    #smc.config.pipeline = old_pipeline
+    #deployments_operation_group._serialize = old_serialize
     return res
 
 
