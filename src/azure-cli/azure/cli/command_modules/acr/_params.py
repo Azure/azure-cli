@@ -30,7 +30,8 @@ from ._validators import (
     validate_secret_arg,
     validate_set,
     validate_set_secret,
-    validate_retention_days
+    validate_retention_days,
+    validate_token_status
 )
 
 image_by_tag_or_digest_type = CLIArgumentType(
@@ -254,18 +255,18 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('acr scope-map') as c:
         c.argument('registry_name', options_list=['--registryName', '-r'])
         c.argument('description', options_list=['--description'], help='Description for the scope map. Max of 255 characters.', required=False)
-        c.argument('add_repository', options_list=['--add'], nargs='+', help='Actions to be added. Use the format "--add REPO [ACTION1 ACTION2 ...]" per flag.', action='append', required=False)
-        c.argument('remove_repository', options_list=['--remove'], nargs='+', help='Actions to be removed. Use the format "--remove REPO [ACTION1 ACTION2 ...]" per flag.', action='append', required=False)
+        c.argument('add_repository', options_list=['--add'], nargs='+', help='Actions to be added. Use the format "--add REPO [ACTION1 ACTION2 ...]" per flag. Valid actions are ContentRead, ContentWrite, Delete, Read and Write', action='append', required=False)
+        c.argument('remove_repository', options_list=['--remove'], nargs='+', help='Actions to be removed. Use the format "--remove REPO [ACTION1 ACTION2 ...]" per flag. Valid actions are ContentRead, ContentWrite, Delete, Read and Write', action='append', required=False)
         c.argument('scope_map_name', options_list=['--name', '-n'], help='The name of the scope map.', required=True)
 
     with self.argument_context('acr scope-map create') as c:
-        c.argument('remove_repository', options_list=['--remove'], nargs='+', help='Actions to be removed. Use the format "--remove REPO [ACTION1 ACTION2 ...]" per flag.', action='append', required=True)
+        c.argument('add_repository', options_list=['--add'], nargs='+', help='Actions to be added. Use the format "--add REPO [ACTION1 ACTION2 ...]" per flag. Valid actions are ContentRead, ContentWrite, Delete, Read and Write', action='append', required=True)
 
     with self.argument_context('acr token') as c:
         c.argument('registry_name', options_list=['--registryName', '-r'])
         c.argument('token_name', options_list=['--name', '-n'], help='The name of the token.', required=True)
         c.argument('scope_map_name', options_list=['--scope-map'], help='The name of the scope map associated with the token', required=False)
-        c.argument('status', options_list=['--status'], help='The status of the token. Allowed values are "enabled" or "disabled".', required=False)
+        c.argument('status', options_list=['--status'], help='The status of the token. Allowed values are "enabled" or "disabled".', required=False, validator=validate_token_status)
 
     with self.argument_context('acr token create') as c:
         c.argument('scope_map_name', options_list=['--scope-map'], help='The name of the scope map associated with the token', required=True)

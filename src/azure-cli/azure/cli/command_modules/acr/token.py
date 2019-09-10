@@ -6,6 +6,9 @@
 from azure.cli.core.util import CLIError
 from ._utils import get_resource_group_name_by_registry_name
 
+SCOPE_MAPS = 'scopeMaps'
+TOKENS = 'tokens'
+
 
 def acr_token_create(cmd,
                      client,
@@ -19,28 +22,19 @@ def acr_token_create(cmd,
 
     from ._utils import get_resource_id_by_registry_name
 
-    token_create_parameters = {
-        "Properties": {
-            "ScopeMapId": None,
-            "Credentials": {
-            }
-        }
-    }
-
     arm_resource_id = get_resource_id_by_registry_name(cmd.cli_ctx, registry_name)
-    scope_map_id = arm_resource_id + "/scopeMaps/" + scope_map_name
-    token_create_parameters["Properties"]["ScopeMapId"] = scope_map_id
+    scope_map_id = '{}/{}/{}'.format(arm_resource_id, SCOPE_MAPS, scope_map_name)
 
-    if status:
-        if status not in ["enabled", "disabled"]:
-            raise CLIError("Unkown status: {}. Allowed values are 'enabled' or 'disabled'.".format(status))
-        token_create_parameters["Properties"]["Status"] = status
+    Token = cmd.get_models('Token')
 
     return client.create(
         resource_group_name,
         registry_name,
         token_name,
-        token_create_parameters
+        Token(
+            scope_map_id=scope_map_id,
+            status=status
+        )
     )
 
 
@@ -75,24 +69,21 @@ def acr_token_update(cmd,
 
     from ._utils import get_resource_id_by_registry_name
 
-    token_update_parameters = {}
+    TokenUpdateParameters = cmd.get_models('TokenUpdateParameters')
 
     scope_map_id = None
     if scope_map_name:
         arm_resource_id = get_resource_id_by_registry_name(cmd.cli_ctx, registry_name)
-        scope_map_id = arm_resource_id + "/scopeMaps/" + scope_map_name
-        token_update_parameters["ScopeMapId"] = scope_map_id
-
-    if status:
-        if status not in ["enabled", "disabled"]:
-            raise CLIError("Unkown status: {}. Allowed values are 'enabled' or 'disabled'.".format(status))
-        token_update_parameters["Status"] = status
+        scope_map_id = '{}/{}/{}'.format(arm_resource_id, SCOPE_MAPS, scope_map_name)
 
     return client.update(
         resource_group_name,
         registry_name,
         token_name,
-        token_update_parameters
+        TokenUpdateParameters(
+            scope_map_id=scope_map_id,
+            status=status
+        )
     )
 
 
@@ -125,8 +116,6 @@ def acr_token_list(cmd,
 
 
 # Credential functions
-
-
 def acr_token_credential_generate(cmd,
                                   client,
                                   registry_name,
@@ -141,22 +130,25 @@ def acr_token_credential_generate(cmd,
 
     resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
     arm_resource_id = get_resource_id_by_registry_name(cmd.cli_ctx, registry_name)
-    token_id = arm_resource_id + "/tokens/" + token_name
-    generate_credentials_parameters = {"TokenId": token_id}
+    token_id = '{}/{}/{}'.format(arm_resource_id, TOKENS, token_name)
 
-    if password1 ^ password2:  # We only want to specify a password if only one wass passed.
-        generate_credentials_parameters["Name"] = "password1" if password1 else "password2"
+    # We only want to specify a password if only one wass passed.
+    name = ("password1" if password1 else "password2") if password1 ^ password2 else None
 
-    if expiry:
-        generate_credentials_parameters["Expiry"] = expiry
-    elif months is not None:
+    if months and not expiry:
         from ._utils import add_months_to_now
-        generate_credentials_parameters["Expiry"] = add_months_to_now(months).isoformat(sep='T')
+        expiry = add_months_to_now(months).isoformat(sep='T')
+
+    GenerateCredentialsParameters = cmd.get_models('GenerateCredentialsParameters')
 
     return client.generate_credentials(
         resource_group_name,
         registry_name,
-        generate_credentials_parameters
+        GenerateCredentialsParameters(
+            token_id=token_id,
+            name=name,
+            expiry=expiry
+        )
     )
 
 
@@ -170,7 +162,7 @@ def acr_token_credential_delete(cmd,
 
     resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
 
-    if (password1 or password2) is False:
+    if not (password1 or password2):
         raise CLIError("Nothing to delete")
 
     token = acr_token_show(cmd,
@@ -185,21 +177,15 @@ def acr_token_credential_delete(cmd,
     if password2:
         new_passwords = [password for password in new_passwords if password.name != "password2"]
 
-    new_passwords_payload = []
-    for password in new_passwords:
-        new_passwords_payload.append({
-            "Name": password.name
-        })
+    new_passwords_payload = list(map(lambda password: {"Name": password.name}, new_passwords))
 
-    token_update_parameters = {
-        "Credentials": {
-            "Passwords": new_passwords_payload
-        }
-    }
+    TokenUpdateParameters = cmd.get_models('TokenUpdateParameters')
 
     return client.update(
         resource_group_name,
         registry_name,
         token_name,
-        token_update_parameters
+        TokenUpdateParameters(
+            credentials=new_passwords_payload
+        )
     )

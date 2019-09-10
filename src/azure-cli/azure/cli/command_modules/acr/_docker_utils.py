@@ -11,6 +11,7 @@ except ImportError:
 
 import time
 from json import loads
+from enum import Enum
 from base64 import b64encode
 import requests
 from requests import RequestException
@@ -36,17 +37,25 @@ logger = get_logger(__name__)
 
 EMPTY_GUID = '00000000-0000-0000-0000-000000000000'
 ALLOWED_HTTP_METHOD = ['get', 'patch', 'put', 'delete']
-REPOSITORY_ACCESS_TOKEN_PERMISSION = [
-    'metadataRead', 'metadataWrite', 'delete', 'metadataWrite,metadataRead', 'delete,metadataRead'
-]
-HELM_ACCESS_TOKEN_PERMISSION = [
-    'pull', 'push', 'delete', 'push,pull', 'delete,pull'
-]
-
 AAD_TOKEN_BASE_ERROR_MESSAGE = "Unable to get AAD authorization tokens with message"
 ADMIN_USER_BASE_ERROR_MESSAGE = "Unable to get admin user credentials with message"
-
 ALLOWS_BASIC_AUTH = "allows_basic_auth"
+
+
+class RepoAccessTokenPermission(Enum):
+    READ = 'metadataRead'
+    WRITE = 'metadataWrite'
+    DELETE = 'delete'
+    WRITE_READ = 'metadataWrite,metadataRead'
+    DELETE_READ = 'delete,metadataRead'
+
+
+class HelmAccessTokenPermission(Enum):
+    PULL = 'pull'
+    PUSH = 'push'
+    DELETE = 'delete'
+    PUSH_PULL = 'push,pull'
+    DELETE_PULL = 'delete,pull'
 
 
 def _handle_challenge_phase(login_server,
@@ -59,20 +68,22 @@ def _handle_challenge_phase(login_server,
     if repository and artifact_repository:
         raise ValueError("Only one of repository and artifact_repository can be provided.")
 
-    if repository and permission not in REPOSITORY_ACCESS_TOKEN_PERMISSION:
+    repo_permissions = {permission.value for permission in RepoAccessTokenPermission}
+    if repository and permission not in repo_permissions:
         raise ValueError(
             "Permission is required for a repository. Allowed access token permission: {}"
-            .format(REPOSITORY_ACCESS_TOKEN_PERMISSION))
+            .format(repo_permissions))
 
-    if artifact_repository and permission not in HELM_ACCESS_TOKEN_PERMISSION:
+    helm_permissions = {permission.value for permission in HelmAccessTokenPermission}
+    if artifact_repository and permission not in helm_permissions:
         raise ValueError(
             "Permission is required for an artifact_repository. Allowed access token permission: {}"
-            .format(HELM_ACCESS_TOKEN_PERMISSION))
+            .format(helm_permissions))
 
     login_server = login_server.rstrip('/')
 
     challenge = requests.get('https://' + login_server + '/v2/', verify=(not should_disable_connection_verify()))
-    if challenge.status_code not in [401] or 'WWW-Authenticate' not in challenge.headers:
+    if challenge.status_code != 401 or 'WWW-Authenticate' not in challenge.headers:
         from ._errors import CONNECTIVITY_CHALLENGE_ERROR
         if is_diagnostics_context:
             return CONNECTIVITY_CHALLENGE_ERROR.format_error_message(login_server)
@@ -85,27 +96,12 @@ def _handle_challenge_phase(login_server,
     if not is_aad_token and tokens[0].lower() == 'basic':
         return {ALLOWS_BASIC_AUTH: True}
 
-    if len(tokens) < 2 or tokens[0].lower() != 'bearer':
+    token_params = {y[0]: y[1].strip('"') for y in (x.strip().split('=', 2) for x in tokens[1].split(','))} \
+        if len(tokens) >= 2 and tokens[0].lower() == 'bearer' else None
+
+    if not token_params or 'realm' not in token_params or 'service' not in token_params:
         from ._errors import CONNECTIVITY_AAD_LOGIN_ERROR, CONNECTIVITY_WWW_AUTHENTICATE_ERROR
-
-        if is_aad_token:
-            error = CONNECTIVITY_AAD_LOGIN_ERROR
-        else:
-            error = CONNECTIVITY_WWW_AUTHENTICATE_ERROR
-
-        if is_diagnostics_context:
-            return error.format_error_message(login_server)
-        raise CLIError(error.format_error_message(login_server).get_error_message())
-
-    token_params = {y[0]: y[1].strip('"') for y in
-                    (x.strip().split('=', 2) for x in tokens[1].split(','))}
-    if 'realm' not in token_params or 'service' not in token_params:
-        from ._errors import CONNECTIVITY_AAD_LOGIN_ERROR, CONNECTIVITY_WWW_AUTHENTICATE_ERROR
-
-        if is_aad_token:
-            error = CONNECTIVITY_AAD_LOGIN_ERROR
-        else:
-            error = CONNECTIVITY_WWW_AUTHENTICATE_ERROR
+        error = CONNECTIVITY_AAD_LOGIN_ERROR if is_aad_token else CONNECTIVITY_WWW_AUTHENTICATE_ERROR
 
         if is_diagnostics_context:
             return error.format_error_message(login_server)
@@ -272,7 +268,7 @@ def _get_token_with_username_and_password(login_server,
     response = requests.post(authhost, urlencode(content), headers=headers,
                              verify=(not should_disable_connection_verify()))
 
-    if response.status_code not in [200]:
+    if response.status_code != 200:
         from ._errors import CONNECTIVITY_ACCESS_TOKEN_ERROR
         if is_diagnostics_context:
             return CONNECTIVITY_ACCESS_TOKEN_ERROR.format_error_message(login_server, response.status_code)

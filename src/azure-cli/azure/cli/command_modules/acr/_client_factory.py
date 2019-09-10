@@ -5,8 +5,8 @@
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
+VERSION_2019_05_01_PREVIEW = "2019-05-01-preview"
 VERSION_2019_06_01_PREVIEW = "2019-06-01-preview"
-API_2019_05_01_PREVIEW = "2019-05-01-preview"
 
 
 def get_acr_service_client(cli_ctx, api_version=None):
@@ -40,12 +40,12 @@ def cf_acr_runs(cli_ctx, *_):
 
 
 def cf_acr_scope_maps(cli_ctx, *_):
-    return get_acr_service_client(cli_ctx, API_2019_05_01_PREVIEW).scope_maps
+    return get_acr_service_client(cli_ctx, VERSION_2019_05_01_PREVIEW).scope_maps
 
 
 def cf_acr_tokens(cli_ctx, *_):
-    return get_acr_service_client(cli_ctx, API_2019_05_01_PREVIEW).tokens
+    return get_acr_service_client(cli_ctx, VERSION_2019_05_01_PREVIEW).tokens
 
 
 def cf_acr_token_credentials(cli_ctx, *_):
-    return get_acr_service_client(cli_ctx, API_2019_05_01_PREVIEW).registries
+    return get_acr_service_client(cli_ctx, VERSION_2019_05_01_PREVIEW).registries

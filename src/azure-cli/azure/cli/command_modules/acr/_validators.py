@@ -85,3 +85,9 @@ def validate_retention_days(namespace):
     days = namespace.days
     if days and (days < 0 or days > 365):
         raise CLIError("Invalid value for days: should be from 0 to 365")
+
+
+def validate_token_status(namespace):
+    status = namespace.status
+    if status and status not in {"enabled", "disabled"}:
+        raise CLIError("Unkown status: {}. Allowed values are 'enabled' or 'disabled'.".format(status))

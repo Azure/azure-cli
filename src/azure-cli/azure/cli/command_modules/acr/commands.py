@@ -121,13 +121,15 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
     acr_scope_map_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.acr.scope_map#{}',
         table_transformer=scope_map_output_format,
-        client_factory=cf_acr_scope_maps
+        client_factory=cf_acr_scope_maps,
+        operation_group='scope_map'
     )
 
     acr_token_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.acr.token#{}',
         table_transformer=token_output_format,
-        client_factory=cf_acr_tokens
+        client_factory=cf_acr_tokens,
+        operation_group='token'
     )
 
     acr_token_credential_generate_util = CliCommandType(
@@ -271,7 +273,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.command('update', 'acr_token_update')
         g.command('show', 'acr_token_show')
         g.command('list', 'acr_token_list')
-        g.command('credential delete', 'acr_token_credential_delete')
 
     with self.command_group('acr token credential', acr_token_credential_generate_util) as g:
+        g.command('delete', 'acr_token_credential_delete')
         g.command('generate', 'acr_token_credential_generate')
