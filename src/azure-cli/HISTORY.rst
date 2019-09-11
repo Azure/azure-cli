@@ -13,6 +13,9 @@ Release History
 
 * Fix the endpoint help text to refer to the right parameter (namely, to point to parameter `--endpoint` rather than `--endpoint-type` in event subscription commands).
 
+2.0.73
+++++++
+
 **ACR**
 
 * Added commands to configure retention policy (in preview): "az acr config retention"
