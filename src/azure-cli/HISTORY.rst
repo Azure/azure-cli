@@ -3,6 +3,16 @@
 Release History
 ===============
 
+**Compute**
+
+* vmss create: Add --terminate-notification-time parameters to support terminate scheduled event configurability.
+* vmss update: Add --enable-terminate-notification and --terminate-notification-time parameters to support terminate scheduled event configurability.
+* Update azure-mgmt-compute version to 7.0.0.
+
+**EventGrid**
+
+* Fix the endpoint help text to refer to the right parameter (namely, to point to parameter `--endpoint` rather than `--endpoint-type` in event subscription commands).
+
 **ACR**
 
 * Added commands to configure retention policy (in preview): "az acr config retention"
@@ -26,6 +36,7 @@ Release History
 **AppService**
 
 * az webapp deployment source config-zip support for connection_verify
+* Add support for ACR images with az webapp create
 
 **Batch**
 
@@ -35,15 +46,10 @@ Release History
 * [BREAKING CHANGE] When not specified, the default value for `--start-task-wait-for-success` on `az batch pool create` is now true (was false).
 * [BREAKING CHANGE] The default value for Scope on AutoUserSpecification is now always Pool (was Task on Windows nodes, Pool on Linux nodes). This argument is not exposed via the commandline, but can be set in the `--json-file` arguments.
 
-**EventGrid**
+**Cosmos DB**
 
-* Fix the endpoint help text to refer to the right parameter (namely, to point to parameter `--endpoint` rather than `--endpoint-type` in event subscription commands).
-
-**Compute**
-
-* vmss create: Add --terminate-notification-time parameters to support terminate scheduled event configurability.
-* vmss update: Add --enable-terminate-notification and --terminate-notification-time parameters to support terminate scheduled event configurability.
-* Update azure-mgmt-compute version to 7.0.0.
+* Update azure-mgmt-cosmosdb to latest python 0.8.0 library
+* Populate DatabaseAccountCreateUpdateParameters with 2 new parameters to support Cassandra Connector Exchange(CCX) feature - enable_cassandra_connector, connector_offer
 
 **HDInsight**
 
@@ -70,11 +76,6 @@ Release History
 **Storage**
 
 * [BREAKING CHANGE] `az storage remove`: remove --auth-mode argument
-
-**Cosmos DB**
-
-* Update azure-mgmt-cosmosdb to latest python 0.8.0 library
-* Populate DatabaseAccountCreateUpdateParameters with 2 new parameters to support Cassandra Connector Exchange(CCX) feature - enable_cassandra_connector, connector_offer
 
 2.0.72
 ++++++
