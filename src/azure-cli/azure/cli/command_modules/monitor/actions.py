@@ -297,7 +297,7 @@ class MultiObjectsDeserializeAction(argparse._AppendAction):  # pylint: disable=
         try:
             super(MultiObjectsDeserializeAction, self).__call__(parser,
                                                                 namespace,
-                                                                self.deserialize_object(type_name, type_properties),
+                                                                self.deserialize_object(type_name, type_properties, namespace),
                                                                 option_string)
         except KeyError:
             raise ValueError('usage error: the type "{}" is not recognizable.'.format(type_name))
@@ -314,12 +314,12 @@ class MultiObjectsDeserializeAction(argparse._AppendAction):  # pylint: disable=
 
 
 class ActionGroupReceiverParameterAction(MultiObjectsDeserializeAction):
-    def deserialize_object(self, type_name, type_properties):
-        EmailReceiver, SmsReceiver, WebhookReceiver = self.get_models('EmailReceiver', 'SmsReceiver', 'WebhookReceiver')
+    def deserialize_object(self, type_name, type_properties, namespace):
+        EmailReceiver, SmsReceiver, WebhookReceiver = namespace._cmd.get_models('EmailReceiver', 'SmsReceiver', 'WebhookReceiver')
 
         if type_name == 'email':
             try:
-                return EmailReceiver(name=type_properties[0], email_address=type_properties[1])
+                return EmailReceiver(name=type_properties[0], email_address=type_properties[1], use_common_alert_schema=True)
             except IndexError:
                 raise CLIError('usage error: --action email NAME EMAIL_ADDRESS')
         elif type_name == 'sms':
@@ -333,7 +333,7 @@ class ActionGroupReceiverParameterAction(MultiObjectsDeserializeAction):
                 raise CLIError('usage error: --action sms NAME COUNTRY_CODE PHONE_NUMBER')
         elif type_name == 'webhook':
             try:
-                return WebhookReceiver(name=type_properties[0], service_uri=type_properties[1])
+                return WebhookReceiver(name=type_properties[0], service_uri=type_properties[1], use_common_alert_schema=True)
             except IndexError:
                 raise CLIError('usage error: --action webhook NAME URI')
         else:

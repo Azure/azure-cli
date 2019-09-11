@@ -82,7 +82,7 @@ class MonitorTests(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_v2')
     @StorageAccountPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_2')
-    def test_metric_alert_multiple_scopes(self, resource_group, storage_account):
+    def test_metric_alert_multiple_scopes(self, resource_group, storage_account, storage_account_2):
 
         from msrestazure.tools import resource_id
         self.kwargs.update({
