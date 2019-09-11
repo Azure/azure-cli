@@ -16,6 +16,7 @@ from ._format import aks_upgrades_table_format
 from ._format import aks_versions_table_format
 
 
+# pylint: disable=too-many-statements
 def load_command_table(self, _):
 
     container_services_sdk = CliCommandType(
@@ -86,6 +87,7 @@ def load_command_table(self, _):
                          'Are you sure you want to perform this operation?')
         g.custom_command('upgrade-connector', 'k8s_upgrade_connector', is_preview=True)
         g.custom_command('use-dev-spaces', 'aks_use_dev_spaces')
+        g.custom_command('update', 'aks_update', supports_no_wait=True)
         g.wait_command('wait')
 
     with self.command_group('aks', container_services_sdk, client_factory=cf_container_services) as g:

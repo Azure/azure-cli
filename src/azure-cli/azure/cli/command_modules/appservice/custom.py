@@ -75,12 +75,15 @@ logger = get_logger(__name__)
 # Please maintain compatibility in both interfaces and functionalities"
 
 
-def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_file=None,  # pylint: disable=too-many-statements
+def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_file=None,  # pylint: disable=too-many-statements,too-many-branches
                   deployment_container_image_name=None, deployment_source_url=None, deployment_source_branch='master',
-                  deployment_local_git=None, multicontainer_config_type=None, multicontainer_config_file=None,
-                  tags=None):
+                  deployment_local_git=None, docker_registry_server_password=None, docker_registry_server_user=None,
+                  multicontainer_config_type=None, multicontainer_config_file=None, tags=None):
     if deployment_source_url and deployment_local_git:
         raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
+
+    docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
+
     client = web_client_factory(cmd.cli_ctx)
     if is_valid_resource_id(plan):
         parse_result = parse_resource_id(plan)
@@ -154,6 +157,11 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
 
     _fill_ftp_publishing_url(cmd, webapp, resource_group_name, name)
 
+    if deployment_container_image_name:
+        update_container_settings(cmd, resource_group_name, name, docker_registry_server_url,
+                                  deployment_container_image_name, docker_registry_server_user,
+                                  docker_registry_server_password=docker_registry_server_password)
+
     return webapp
 
 
@@ -163,6 +171,16 @@ def validate_container_app_create_options(runtime=None, deployment_container_ima
         return False
     opts = [runtime, deployment_container_image_name, multicontainer_config_type]
     return len([x for x in opts if x]) == 1  # you can only specify one out the combinations
+
+
+def parse_docker_image_name(deployment_container_image_name):
+    if not deployment_container_image_name:
+        return None
+    slash_ix = deployment_container_image_name.rfind('/')
+    docker_registry_server_url = deployment_container_image_name[0:slash_ix]
+    if slash_ix == -1 or ("." not in docker_registry_server_url and ":" not in docker_registry_server_url):
+        return None
+    return docker_registry_server_url
 
 
 def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None, slot_settings=None):
@@ -1474,8 +1492,8 @@ def _parse_frequency(frequency):
 
 
 def _get_location_from_resource_group(cli_ctx, resource_group_name):
-    from azure.mgmt.resource import ResourceManagementClient
-    client = get_mgmt_service_client(cli_ctx, ResourceManagementClient)
+    from azure.cli.core.profiles import ResourceType
+    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     group = client.resource_groups.get(resource_group_name)
     return group.location
 
@@ -1488,8 +1506,8 @@ def _get_location_from_webapp(client, resource_group_name, webapp):
 
 
 def _get_deleted_apps_locations(cli_ctx):
-    from azure.mgmt.resource import ResourceManagementClient
-    client = get_mgmt_service_client(cli_ctx, ResourceManagementClient)
+    from azure.cli.core.profiles import ResourceType
+    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     web_provider = client.providers.get('Microsoft.Web')
     del_sites_resource = next((x for x in web_provider.resource_types if x.resource_type == 'deletedSites'), None)
     if del_sites_resource:
@@ -1580,13 +1598,10 @@ def show_container_cd_url(cmd, resource_group_name, name, slot=None):
     cd_settings['DOCKER_ENABLE_CI'] = docker_enabled
 
     if docker_enabled:
-        profiles = list_publish_profiles(cmd, resource_group_name, name, slot)
-        for profile in profiles:
-            if profile['publishMethod'] == 'MSDeploy':
-                scmUrl = profile['publishUrl'].replace(":443", "")
-                cd_url = 'https://' + profile['userName'] + ':' + profile['userPWD'] + '@' + scmUrl + '/docker/hook'
-                cd_settings['CI_CD_URL'] = cd_url
-                break
+        credentials = list_publishing_credentials(cmd, resource_group_name, name, slot)
+        if credentials:
+            cd_url = credentials.scm_uri + '/docker/hook'
+            cd_settings['CI_CD_URL'] = cd_url
     else:
         cd_settings['CI_CD_URL'] = ''
 
@@ -2323,11 +2338,13 @@ def list_locations(cmd, sku, linux_workers_enabled=None):
 
 def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, authorization, timeout=None):
     import requests
+    from azure.cli.core.util import should_disable_connection_verify
     total_trials = (int(timeout) // 2) if timeout else 450
     num_trials = 0
     while num_trials < total_trials:
         time.sleep(2)
-        response = requests.get(deployment_status_url, headers=authorization)
+        response = requests.get(deployment_status_url, headers=authorization,
+                                verify=not should_disable_connection_verify())
         time.sleep(2)
         res_dict = response.json()
         num_trials = num_trials + 1
@@ -2354,7 +2371,7 @@ def list_continuous_webjobs(cmd, resource_group_name, name, slot=None):
 def start_continuous_webjob(cmd, resource_group_name, name, webjob_name, slot=None):
     client = web_client_factory(cmd.cli_ctx)
     if slot:
-        client.web_apps.start_continuous_web_job(resource_group_name, name, webjob_name, slot)
+        client.web_apps.start_continuous_web_job_slot(resource_group_name, name, webjob_name, slot)
         return client.web_apps.get_continuous_web_job_slot(resource_group_name, name, webjob_name, slot)
     client.web_apps.start_continuous_web_job(resource_group_name, name, webjob_name)
     return client.web_apps.get_continuous_web_job(resource_group_name, name, webjob_name)

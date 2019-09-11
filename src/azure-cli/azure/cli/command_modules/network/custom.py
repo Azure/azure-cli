@@ -121,7 +121,7 @@ def list_network_watchers(cmd, resource_group_name=None):
 # pylint: disable=too-many-locals
 def create_application_gateway(cmd, application_gateway_name, resource_group_name, location=None,
                                tags=None, no_wait=False, capacity=2,
-                               cert_data=None, cert_password=None,
+                               cert_data=None, cert_password=None, key_vault_secret_id=None,
                                frontend_port=None, http_settings_cookie_based_affinity='disabled',
                                http_settings_port=80, http_settings_protocol='Http',
                                routing_rule_type='Basic', servers=None,
@@ -132,7 +132,8 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
                                virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
                                public_ip_address_type=None, subnet_type=None, validate=False,
                                connection_draining_timeout=0, enable_http2=None, min_capacity=None, zones=None,
-                               custom_error_pages=None, firewall_policy=None, max_capacity=None):
+                               custom_error_pages=None, firewall_policy=None, max_capacity=None,
+                               user_assigned_identity=None):
     from azure.cli.core.util import random_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.network._template_builder import (
@@ -180,11 +181,11 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
 
     app_gateway_resource = build_application_gateway_resource(
         cmd, application_gateway_name, location, tags, sku, sku_tier, capacity, servers, frontend_port,
-        private_ip_address, private_ip_allocation, cert_data, cert_password,
+        private_ip_address, private_ip_allocation, cert_data, cert_password, key_vault_secret_id,
         http_settings_cookie_based_affinity, http_settings_protocol, http_settings_port,
         http_listener_protocol, routing_rule_type, public_ip_id, subnet_id,
         connection_draining_timeout, enable_http2, min_capacity, zones, custom_error_pages,
-        firewall_policy, max_capacity)
+        firewall_policy, max_capacity, user_assigned_identity)
     app_gateway_resource['dependsOn'] = ag_dependencies
     master_template.add_variable(
         'appGwID',
@@ -359,6 +360,45 @@ def update_ag_http_listener(cmd, instance, parent, item_name, frontend_ip=None, 
         instance.host_name = host_name or None
     instance.require_server_name_indication = instance.host_name and instance.protocol.lower() == 'https'
     return parent
+
+
+def assign_ag_identity(cmd, resource_group_name, application_gateway_name,
+                       user_assigned_identity, no_wait=False):
+    ncf = network_client_factory(cmd.cli_ctx).application_gateways
+    ag = ncf.get(resource_group_name, application_gateway_name)
+    ManagedServiceIdentity, ManagedServiceIdentityUserAssignedIdentitiesValue = \
+        cmd.get_models('ManagedServiceIdentity', 'ManagedServiceIdentityUserAssignedIdentitiesValue')
+    user_assigned_indentity_instance = ManagedServiceIdentityUserAssignedIdentitiesValue()
+
+    user_assigned_identities_instance = dict()
+
+    user_assigned_identities_instance[user_assigned_identity] = user_assigned_indentity_instance
+
+    identity_instance = ManagedServiceIdentity(
+        type="UserAssigned",
+        user_assigned_identities=user_assigned_identities_instance
+    )
+    ag.identity = identity_instance
+
+    return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag)
+
+
+def remove_ag_identity(cmd, resource_group_name, application_gateway_name, no_wait=False):
+    ncf = network_client_factory(cmd.cli_ctx).application_gateways
+    ag = ncf.get(resource_group_name, application_gateway_name)
+    if ag.identity is None:
+        logger.warning("This command will be ignored. The identity doesn't exist.")
+    ag.identity = None
+
+    return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag)
+
+
+def show_ag_identity(cmd, resource_group_name, application_gateway_name):
+    ncf = network_client_factory(cmd.cli_ctx).application_gateways
+    ag = ncf.get(resource_group_name, application_gateway_name)
+    if ag.identity is None:
+        raise CLIError("Please first use 'az network application-gateway identity assign` to init the identity.")
+    return ag.identity
 
 
 def create_ag_backend_http_settings_collection(cmd, resource_group_name, application_gateway_name, item_name, port,
@@ -710,23 +750,26 @@ def update_ag_request_routing_rule(cmd, instance, parent, item_name, address_poo
     return parent
 
 
-def create_ag_ssl_certificate(cmd, resource_group_name, application_gateway_name, item_name, cert_data,
-                              cert_password, no_wait=False):
+def create_ag_ssl_certificate(cmd, resource_group_name, application_gateway_name, item_name, cert_data=None,
+                              cert_password=None, key_vault_secret_id=None, no_wait=False):
     ApplicationGatewaySslCertificate = cmd.get_models('ApplicationGatewaySslCertificate')
     ncf = network_client_factory(cmd.cli_ctx)
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     new_cert = ApplicationGatewaySslCertificate(
-        name=item_name, data=cert_data, password=cert_password)
+        name=item_name, data=cert_data, password=cert_password, key_vault_secret_id=key_vault_secret_id)
     upsert_to_collection(ag, 'ssl_certificates', new_cert, 'name')
     return sdk_no_wait(no_wait, ncf.application_gateways.create_or_update,
                        resource_group_name, application_gateway_name, ag)
 
 
-def update_ag_ssl_certificate(instance, parent, item_name, cert_data=None, cert_password=None):
+def update_ag_ssl_certificate(instance, parent, item_name,
+                              cert_data=None, cert_password=None, key_vault_secret_id=None):
     if cert_data is not None:
         instance.data = cert_data
     if cert_password is not None:
         instance.password = cert_password
+    if key_vault_secret_id is not None:
+        instance.key_vault_secret_id = key_vault_secret_id
     return parent
 
 
@@ -2058,11 +2101,163 @@ def list_express_route_ports(cmd, resource_group_name=None):
 
 
 # region PrivateEndpoint
+def create_private_endpoint(cmd, resource_group_name, private_endpoint_name, subnet,
+                            private_connection_resource_id, connection_name, group_ids=None,
+                            virtual_network_name=None, tags=None, location=None,
+                            request_message=None, manual_request=None):
+    client = network_client_factory(cmd.cli_ctx).private_endpoints
+    PrivateEndpoint, Subnet, PrivateLinkServiceConnection = cmd.get_models('PrivateEndpoint',
+                                                                           'Subnet',
+                                                                           'PrivateLinkServiceConnection')
+    pls_connection = PrivateLinkServiceConnection(private_link_service_id=private_connection_resource_id,
+                                                  group_ids=group_ids,
+                                                  request_message=request_message,
+                                                  name=connection_name)
+    private_endpoint = PrivateEndpoint(
+        location=location,
+        tags=tags,
+        subnet=Subnet(id=subnet)
+    )
+
+    if manual_request:
+        private_endpoint.manual_private_link_service_connections = [pls_connection]
+    else:
+        private_endpoint.private_link_service_connections = [pls_connection]
+
+    return client.create_or_update(resource_group_name, private_endpoint_name, private_endpoint)
+
+
+def update_private_endpoint(instance, cmd, tags=None, request_message=None):
+    with cmd.update_context(instance) as c:
+        c.set_param('tags', tags)
+
+    if request_message is not None:
+        if instance.private_link_service_connections:
+            instance.private_link_service_connections[0].request_message = request_message
+        else:
+            instance.manual_private_link_service_connections[0].request_message = request_message
+
+    return instance
+
+
 def list_private_endpoints(cmd, resource_group_name=None):
     client = network_client_factory(cmd.cli_ctx).private_endpoints
     if resource_group_name:
         return client.list(resource_group_name)
     return client.list_by_subscription()
+# endregion
+
+
+# region PrivateLinkService
+def create_private_link_service(cmd, resource_group_name, service_name, subnet, frontend_ip_configurations,
+                                private_ip_address=None, private_ip_allocation_method=None,
+                                private_ip_address_version=None,
+                                virtual_network_name=None, public_ip_address=None,
+                                location=None, tags=None, load_balancer_name=None,
+                                visibility=None, auto_approval=None, fqdns=None):
+    client = network_client_factory(cmd.cli_ctx).private_link_services
+    FrontendIPConfiguration, PrivateLinkService, PrivateLinkServiceIpConfiguration, PublicIPAddress, Subnet = \
+        cmd.get_models('FrontendIPConfiguration', 'PrivateLinkService', 'PrivateLinkServiceIpConfiguration',
+                       'PublicIPAddress', 'Subnet')
+    pls_ip_config = PrivateLinkServiceIpConfiguration(
+        name='{}_ipconfig_0'.format(service_name),
+        private_ip_address=private_ip_address,
+        private_ip_allocation_method=private_ip_allocation_method,
+        private_ip_address_version=private_ip_address_version,
+        subnet=subnet and Subnet(id=subnet),
+        public_ip_address=public_ip_address and PublicIPAddress(id=public_ip_address)
+    )
+    link_service = PrivateLinkService(
+        location=location,
+        load_balancer_frontend_ip_configurations=frontend_ip_configurations and [
+            FrontendIPConfiguration(id=ip_config) for ip_config in frontend_ip_configurations
+        ],
+        ip_configurations=[pls_ip_config],
+        visbility=visibility,
+        auto_approval=auto_approval,
+        fqdns=fqdns,
+        tags=tags
+    )
+    return client.create_or_update(resource_group_name, service_name, link_service)
+
+
+def update_private_link_service(instance, cmd, tags=None, frontend_ip_configurations=None, load_balancer_name=None,
+                                visibility=None, auto_approval=None, fqdns=None):
+    FrontendIPConfiguration = cmd.get_models('FrontendIPConfiguration')
+    with cmd.update_context(instance) as c:
+        c.set_param('tags', tags)
+        c.set_param('load_balancer_frontend_ip_configurations', frontend_ip_configurations and [
+            FrontendIPConfiguration(id=ip_config) for ip_config in frontend_ip_configurations
+        ])
+        c.set_param('visibility', visibility)
+        c.set_param('auto_approval', auto_approval)
+        c.set_param('fqdns', fqdns)
+    return instance
+
+
+def list_private_link_services(cmd, resource_group_name=None):
+    client = network_client_factory(cmd.cli_ctx).private_link_services
+    if resource_group_name:
+        return client.list(resource_group_name)
+    return client.list_by_subscription()
+
+
+def update_private_endpoint_connection(cmd, resource_group_name, service_name, pe_connection_name,
+                                       connection_status, description=None, action_required=None):
+    client = network_client_factory(cmd.cli_ctx).private_link_services
+    PrivateEndpointConnection, PrivateLinkServiceConnectionState = cmd.get_models('PrivateEndpointConnection',
+                                                                                  'PrivateLinkServiceConnectionState')
+    connection_state = PrivateLinkServiceConnectionState(
+        status=connection_status,
+        description=description,
+        action_required=action_required
+    )
+    pe_connection = PrivateEndpointConnection(
+        private_link_service_connection_state=connection_state
+    )
+    return client.update_private_endpoint_connection(resource_group_name, service_name, pe_connection_name, pe_connection)  # pylint: disable=line-too-long
+
+
+def add_private_link_services_ipconfig(cmd, resource_group_name, service_name,
+                                       private_ip_address=None, private_ip_allocation_method=None,
+                                       private_ip_address_version=None,
+                                       subnet=None, virtual_network_name=None, public_ip_address=None):
+    client = network_client_factory(cmd.cli_ctx).private_link_services
+    PrivateLinkServiceIpConfiguration, PublicIPAddress, Subnet = cmd.get_models('PrivateLinkServiceIpConfiguration',
+                                                                                'PublicIPAddress',
+                                                                                'Subnet')
+    link_service = client.get(resource_group_name, service_name)
+    if link_service is None:
+        raise CLIError("Private link service should be existed. Please create it first.")
+    ip_name_index = len(link_service.ip_configurations)
+    ip_config = PrivateLinkServiceIpConfiguration(
+        name='{0}_ipconfig_{1}'.format(service_name, ip_name_index),
+        private_ip_address=private_ip_address,
+        private_ip_allocation_method=private_ip_allocation_method,
+        private_ip_address_version=private_ip_address_version,
+        subnet=subnet and Subnet(id=subnet),
+        public_ip_address=public_ip_address and PublicIPAddress(id=public_ip_address)
+    )
+    link_service.ip_configurations.append(ip_config)
+    return client.create_or_update(resource_group_name, service_name, link_service)
+
+
+def remove_private_link_services_ipconfig(cmd, resource_group_name, service_name, ip_config_name):
+    client = network_client_factory(cmd.cli_ctx).private_link_services
+    link_service = client.get(resource_group_name, service_name)
+    if link_service is None:
+        raise CLIError("Private link service should be existed. Please create it first.")
+    ip_config = None
+    for item in link_service.ip_configurations:
+        if item.name == ip_config_name:
+            ip_config = item
+            break
+    if ip_config is None:  # pylint: disable=no-else-return
+        logger.warning("%s ip configuration doesn't exist", ip_config_name)
+        return link_service
+    else:
+        link_service.ip_configurations.remove(ip_config)
+        return client.create_or_update(resource_group_name, service_name, link_service)
 # endregion
 
 
@@ -2074,7 +2269,8 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
                          public_ip_dns_name=None, subnet=None, subnet_address_prefix='10.0.0.0/24',
                          virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
                          public_ip_address_type=None, subnet_type=None, validate=False,
-                         no_wait=False, sku=None, frontend_ip_zone=None, public_ip_zone=None):
+                         no_wait=False, sku=None, frontend_ip_zone=None, public_ip_zone=None,
+                         private_ip_address_version=None):
     from azure.cli.core.util import random_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.network._template_builder import (
@@ -2125,7 +2321,7 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
     load_balancer_resource = build_load_balancer_resource(
         cmd, load_balancer_name, location, tags, backend_pool_name, frontend_ip_name,
         public_ip_id, subnet_id, private_ip_address, private_ip_allocation, sku,
-        frontend_ip_zone)
+        frontend_ip_zone, private_ip_address_version)
     load_balancer_resource['dependsOn'] = lb_dependencies
     master_template.add_resource(load_balancer_resource)
     master_template.add_output('loadBalancer', load_balancer_name, output_type='object')
@@ -2237,7 +2433,7 @@ def set_lb_inbound_nat_pool(
 def create_lb_frontend_ip_configuration(
         cmd, resource_group_name, load_balancer_name, item_name, public_ip_address=None,
         public_ip_prefix=None, subnet=None, virtual_network_name=None, private_ip_address=None,
-        private_ip_address_allocation=None, zone=None):
+        private_ip_address_version=None, private_ip_address_allocation=None, zone=None):
     FrontendIPConfiguration, SubResource, Subnet = cmd.get_models(
         'FrontendIPConfiguration', 'SubResource', 'Subnet')
     ncf = network_client_factory(cmd.cli_ctx)
@@ -2249,6 +2445,7 @@ def create_lb_frontend_ip_configuration(
     new_config = FrontendIPConfiguration(
         name=item_name,
         private_ip_address=private_ip_address,
+        private_ip_address_version=private_ip_address_version,
         private_ip_allocation_method=private_ip_address_allocation,
         public_ip_address=SubResource(id=public_ip_address) if public_ip_address else None,
         public_ip_prefix=SubResource(id=public_ip_prefix) if public_ip_prefix else None,
@@ -2264,15 +2461,19 @@ def create_lb_frontend_ip_configuration(
 
 def set_lb_frontend_ip_configuration(
         cmd, instance, parent, item_name, private_ip_address=None,
-        private_ip_address_allocation=None, public_ip_address=None, subnet=None,
-        virtual_network_name=None, public_ip_prefix=None):
+        private_ip_address_allocation=None, public_ip_address=None,
+        subnet=None, virtual_network_name=None, public_ip_prefix=None):
     PublicIPAddress, Subnet, SubResource = cmd.get_models('PublicIPAddress', 'Subnet', 'SubResource')
-    if private_ip_address == '':
+    if not private_ip_address:
         instance.private_ip_allocation_method = 'dynamic'
         instance.private_ip_address = None
     elif private_ip_address is not None:
         instance.private_ip_allocation_method = 'static'
         instance.private_ip_address = private_ip_address
+
+    # Doesn't support update operation for now
+    # if cmd.supported_api_version(min_api='2019-04-01'):
+    #    instance.private_ip_address_version = private_ip_address_version
 
     if subnet == '':
         instance.subnet = None
@@ -3145,7 +3346,8 @@ def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_acc
                     'enabled': traffic_analytics_enabled,
                     'workspace_id': workspace.properties['customerId'],
                     'workspace_region': workspace.location,
-                    'workspace_resource_id': traffic_analytics_workspace
+                    'workspace_resource_id': traffic_analytics_workspace,
+                    'traffic_analytics_interval': traffic_analytics_interval
                 }
             }
         else:
@@ -3159,6 +3361,7 @@ def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_acc
                     c.set_param('workspace_id', workspace.properties['customerId'])
                     c.set_param('workspace_region', workspace.location)
                     c.set_param('workspace_resource_id', traffic_analytics_workspace)
+                    c.set_param('traffic_analytics_interval', traffic_analytics_interval)
 
     return client.set_flow_log_configuration(watcher_rg, watcher_name, config)
 
@@ -3658,7 +3861,8 @@ def create_subnet(cmd, resource_group_name, virtual_network_name, subnet_name,
 
 def update_subnet(cmd, instance, resource_group_name, address_prefix=None, network_security_group=None,
                   route_table=None, service_endpoints=None, delegations=None, nat_gateway=None,
-                  service_endpoint_policy=None):
+                  service_endpoint_policy=None, disable_private_endpoint_network_policies=None,
+                  disable_private_link_service_network_policies=None):
     NetworkSecurityGroup, ServiceEndpoint, SubResource = cmd.get_models(
         'NetworkSecurityGroup', 'ServiceEndpointPropertiesFormat', 'SubResource')
 
@@ -3697,6 +3901,16 @@ def update_subnet(cmd, instance, resource_group_name, address_prefix=None, netwo
 
     if delegations:
         instance.delegations = delegations
+
+    if disable_private_endpoint_network_policies:
+        instance.private_endpoint_network_policies = "Disabled"
+    elif disable_private_endpoint_network_policies is not None:
+        instance.private_endpoint_network_policies = "Enabled"
+
+    if disable_private_link_service_network_policies:
+        instance.private_link_service_network_policies = "Disabled"
+    elif disable_private_link_service_network_policies is not None:
+        instance.private_link_service_network_policies = "Enabled"
 
     return instance
 
@@ -3830,7 +4044,7 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, 
                         no_wait=False, gateway_type=None, sku=None, vpn_type=None,
                         asn=None, bgp_peering_address=None, peer_weight=None,
                         address_prefixes=None, radius_server=None, radius_secret=None, client_protocol=None,
-                        gateway_default_site=None):
+                        gateway_default_site=None, custom_routes=None):
     (VirtualNetworkGateway, BgpSettings, SubResource, VirtualNetworkGatewayIPConfiguration, VirtualNetworkGatewaySku,
      VpnClientConfiguration, AddressSpace) = cmd.get_models(
          'VirtualNetworkGateway', 'BgpSettings', 'SubResource', 'VirtualNetworkGatewayIPConfiguration',
@@ -3866,6 +4080,10 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, 
             vnet_gateway.vpn_client_configuration.radius_server_address = radius_server
             vnet_gateway.vpn_client_configuration.radius_server_secret = radius_secret
 
+    if custom_routes and cmd.supported_api_version(min_api='2019-02-01'):
+        vnet_gateway.custom_routes = AddressSpace()
+        vnet_gateway.custom_routes.address_prefixes = custom_routes
+
     return sdk_no_wait(no_wait, client.create_or_update,
                        resource_group_name, virtual_network_gateway_name, vnet_gateway)
 
@@ -3874,7 +4092,7 @@ def update_vnet_gateway(cmd, instance, sku=None, vpn_type=None, tags=None,
                         public_ip_address=None, gateway_type=None, enable_bgp=None,
                         asn=None, bgp_peering_address=None, peer_weight=None, virtual_network=None,
                         address_prefixes=None, radius_server=None, radius_secret=None, client_protocol=None,
-                        gateway_default_site=None):
+                        gateway_default_site=None, custom_routes=None):
     AddressSpace, SubResource, VirtualNetworkGatewayIPConfiguration, VpnClientConfiguration = cmd.get_models(
         'AddressSpace', 'SubResource', 'VirtualNetworkGatewayIPConfiguration', 'VpnClientConfiguration')
 
@@ -3930,6 +4148,11 @@ def update_vnet_gateway(cmd, instance, sku=None, vpn_type=None, tags=None,
 
     if enable_bgp is not None:
         instance.enable_bgp = enable_bgp.lower() == 'true'
+
+    if custom_routes and cmd.supported_api_version(min_api='2019-02-01'):
+        if not instance.custom_routes:
+            instance.custom_routes = AddressSpace()
+        instance.custom_routes.address_prefixes = custom_routes
 
     _validate_bgp_peering(cmd, instance, asn, bgp_peering_address, peer_weight)
 

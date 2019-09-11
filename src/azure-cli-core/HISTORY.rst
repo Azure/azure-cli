@@ -2,13 +2,20 @@
 
 Release History
 ===============
-* Added ossrdbmsResourceId to cloud.py.
-* properly handle type errors caused by invalid JMESPath queries in core.util.handle_exception
-* `--query`: properly handle type errors caused by invalid JMESPath queries.
+
+2.0.73
+++++++
+* Minor changes
+
+2.0.72
+++++++
+* no changes
 
 2.0.71
 ++++++
-* no changes
+* Added ossrdbmsResourceId to cloud.py.
+* properly handle type errors caused by invalid JMESPath queries in core.util.handle_exception
+* `--query`: properly handle type errors caused by invalid JMESPath queries.
 
 2.0.70
 ++++++

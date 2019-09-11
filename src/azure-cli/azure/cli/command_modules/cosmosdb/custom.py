@@ -74,9 +74,10 @@ def cli_cosmosdb_create(cmd, client,
                                                max_staleness_prefix=max_staleness_prefix,
                                                max_interval_in_seconds=max_interval)
 
-    from azure.mgmt.resource import ResourceManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    resource_client = get_mgmt_service_client(cmd.cli_ctx, ResourceManagementClient)
+    from azure.cli.core.profiles import ResourceType
+    resource_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+
     rg = resource_client.resource_groups.get(resource_group_name)
     resource_group_location = rg.location  # pylint: disable=no-member
 
@@ -216,7 +217,9 @@ def cli_cosmosdb_update(client,
         capabilities=existing.capabilities,
         is_virtual_network_filter_enabled=enable_virtual_network,
         virtual_network_rules=virtual_network_rules,
-        enable_multiple_write_locations=enable_multiple_write_locations)
+        enable_multiple_write_locations=enable_multiple_write_locations,
+        enable_cassandra_connector=existing.enable_cassandra_connector,
+        connector_offer=existing.connector_offer)
 
     async_docdb_create = client.create_or_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_create.result()
@@ -784,7 +787,9 @@ def cli_cosmosdb_network_rule_add(cmd,
         capabilities=existing.capabilities,
         is_virtual_network_filter_enabled=True,
         virtual_network_rules=virtual_network_rules,
-        enable_multiple_write_locations=existing.enable_multiple_write_locations)
+        enable_multiple_write_locations=existing.enable_multiple_write_locations,
+        enable_cassandra_connector=existing.enable_cassandra_connector,
+        connector_offer=existing.connector_offer)
 
     async_docdb_create = client.create_or_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_create.result()
@@ -832,7 +837,9 @@ def cli_cosmosdb_network_rule_remove(cmd,
         capabilities=existing.capabilities,
         is_virtual_network_filter_enabled=True,
         virtual_network_rules=virtual_network_rules,
-        enable_multiple_write_locations=existing.enable_multiple_write_locations)
+        enable_multiple_write_locations=existing.enable_multiple_write_locations,
+        enable_cassandra_connector=existing.enable_cassandra_connector,
+        connector_offer=existing.connector_offer)
 
     async_docdb_create = client.create_or_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_create.result()

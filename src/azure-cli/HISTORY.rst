@@ -3,13 +3,132 @@
 Release History
 ===============
 
+**Compute**
+
+* vmss create: Add --terminate-notification-time parameters to support terminate scheduled event configurability.
+* vmss update: Add --enable-terminate-notification and --terminate-notification-time parameters to support terminate scheduled event configurability.
+* Update azure-mgmt-compute version to 7.0.0.
+
+2.0.73
+++++++
+
+**ACR**
+
+* Added commands to configure retention policy (in preview): "az acr config retention"
+* [BREAKING] Disable the pull request trigger by default for ACR Tasks
+* az acr login --subscription: now supports cross tenant scenarios.
+
+**AKS**
+
+* Add support of ACR integration, which includes
+* Add `--attach-acr <acr-name-or-resource-id>` to `az aks create` command, which allows for attach the ACR to AKS cluster.
+* Add `--attach-acr <acr-name-or-resource-id>` and `--detach-acr <acr-name-or-resource-id>` to `az aks update` command, which allows to attach or detach the ACR from AKS cluster.
+
+**Aladdin**
+
+* Update Aladdin Service (az find) to v1.0 (GA)
+
+**ARM**
+
+* Update azure-mgmt-resource package to use 3.1.0, which utilizes API version 2019-05-10, allowing copy count to be zero.
+
+**AppService**
+
+* az webapp deployment source config-zip support for connection_verify
+* Add support for ACR images with az webapp create
+
+**Batch**
+
+* Expanded `--json-file` capabilities of `az batch pool create` to allow for specifying MountConfigurations for file system mounts(see https://docs.microsoft.com/en-us/rest/api/batchservice/pool/add#request-body for structure)
+* Expanded `--json-file` capabilities of `az batch pool create` with the optional property publicIPs on NetworkConfiguration. This allows specifying publicIPs to be used when deploying pools (see https://docs.microsoft.com/en-us/rest/api/batchservice/pool/add#request-body for structure)
+* Expanded `--image` capabilities to support Shared Image Galleries images. Similar to the commands support for Managed Images, to use a Shared Image Gallery image simply use the ARM ID as the value to the argument.
+* [BREAKING CHANGE] When not specified, the default value for `--start-task-wait-for-success` on `az batch pool create` is now true (was false).
+* [BREAKING CHANGE] The default value for Scope on AutoUserSpecification is now always Pool (was Task on Windows nodes, Pool on Linux nodes). This argument is not exposed via the commandline, but can be set in the `--json-file` arguments.
+
+**Cosmos DB**
+
+* Update azure-mgmt-cosmosdb to latest python 0.8.0 library
+* Populate DatabaseAccountCreateUpdateParameters with 2 new parameters to support Cassandra Connector Exchange(CCX) feature - enable_cassandra_connector, connector_offer
+
+**HDInsight**
+
+* `az hdinsight resize`: Make parameter `--workernode-count/-c` required
+* GA release
+
+**Key Vault**
+
+* Fix #10286: Unable to delete subnet from network rules.
+* Fix: Duplicated subnets and IP addresses can be added to network rules.
+
+**Network**
+
+* az network watcher flow-log: Fix #8132. Support `--interval` to set traffic analysis interval value.
+* az network application-gateway identity: Fix #10073 and #8244 Add support for setting identity in application-gateway.
+* az network application-gateway ssl-cert: Fix #8244. Add support for setting key vault id in application-gateway ssl-cert.
+* az network express-route peering peer-connection: Fix #9404. Onboard `show` and `list` command for Azure express route peering peer connection resource.
+* az network vnet-gateway create/update: Fix #9327. Support `--custom-routes` argument to set custom routes address space for VNet gateway and VPN client.
+
+**Policy**
+
+* Support for Policy new API version 2019-01-01
+
+**Storage**
+
+* [BREAKING CHANGE] `az storage remove`: remove --auth-mode argument
+
+2.0.72
+++++++
+
+**ACR**
+
+* Move to 2019-05-01 api-version, which follows replace semantics for ACR resource creation.
+* Breaking change: Classic SKU no longer supported.
+
+**API Management**
+
+* Introduced initial impementation of API Management preview commands (az apim)
+
+**AppConfig**
+
+* Added "appconfig kv restore" command.
+
+**AppService**
+
+* Fixed az webapp webjob continuous start command when specifying a slot.
+* az webapp up detects env folder and removes it from compressed file used for deployment
+
 **keyvault**
 
-* Fix the bug in secret set command that igores the expires argument
+* Fix the bug in secret set command that ignores the expires argument
+
+**Network**
+
+* az network lb create/frontend-ip create: Fixes #10018. Support `--private-ip-address-version` argument to create IPv6 based private-ip-address 
+* az network private-endpoint create/update/list-types: Fixes #9474. Support create/update/list-types commands for private endpoint.
+* az network private-link-service: Fixes #9475. Onboard commands for private link service.
+* az network vnet subnet update: Support `--private-endpoint-network-policies` and `--private-link-service-network-policies` arguments for update command.
 
 **RBAC**
 
 * Fix #10151 - `az ad app update --homepage` not updating homepage.
+* Derive service principal's display name from name in the create-for-rbac command
+
+**ServiceFabric**
+
+* Fix for issues #7145,  #7880 and #7889 - fix for key vault and cert issues when creating a cluster.
+* Fix for issue #7130 - fix add cert command. Using the cluster resource group when the key vault resource group is not specified.
+* Fix for issue #9711 - fix command 'cluster setting set' command. Using named parameters for SettingsSectionDescription constructor.
+
+**SignalR**
+
+* signalr cors: New command to manage SignalR CORS
+* az signalr create: --service-mode: new service mode argument
+* signalr restart: new command to restart the service
+* signalr update: new command to update the service
+
+**Storage**
+
+* Add `revoke-delegation-keys` command for storage account
 
 2.0.71
 ++++++
@@ -17,6 +136,7 @@ Release History
 **AppService**
 
 * az webapp webjob continuous group commands were failing for slots
+* fixes an issue where `az webapp deployment container config` displayed the wrong Docker CI/CD webhook URL for some apps
 
 **BotService**
 

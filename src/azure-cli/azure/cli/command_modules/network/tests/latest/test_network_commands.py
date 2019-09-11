@@ -75,13 +75,112 @@ class NetworkPrivateEndpoints(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_network_private_endpoints')
     def test_network_private_endpoints(self, resource_group):
 
+        self.kwargs.update({
+            'lb': 'lb1',
+            'sku': 'Standard',
+            'vnet': 'vnet1',
+            'subnet1': 'subnet1',
+            'subnet2': 'subnet2',
+            'location': 'centralus',
+            'ip': 'pubip1',
+            'lks1': 'lks1',
+            'lks2': 'lks2',
+            'pe': 'pe1'
+        })
+
+        # Create PLS
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet1} -l {location}')
+        self.cmd('network lb create -g {rg} -l {location} -n {lb} --public-ip-address {ip} --sku {sku}')
+        self.cmd('network vnet subnet update -g {rg} -n {subnet1} --vnet-name {vnet} --disable-private-link-service-network-policies')
+        self.cmd('network vnet subnet create -g {rg} -n {subnet2} --vnet-name {vnet} --address-prefixes 10.0.2.0/24')
+        self.cmd('network vnet subnet update -g {rg} -n {subnet2} --vnet-name {vnet} --disable-private-endpoint-network-policies')
+        pls1 = self.cmd('network private-link-service create -g {rg} -n {lks1} --vnet-name {vnet} --subnet {subnet1} --lb-name {lb} --lb-frontend-ip-configs LoadBalancerFrontEnd -l {location}', checks=[
+            self.check('type', 'Microsoft.Network/privateLinkServices'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('name', self.kwargs['lks1'])
+        ]).get_output_in_json()
+        self.kwargs['pls_id'] = pls1['id']
+        self.cmd('network private-endpoint list-types -l {location}')
+
+        self.cmd('network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet2} --private-connection-resource-id {pls_id} --connection-name tttt -l {location}', checks=[
+            self.check('name', 'pe1'),
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('network private-endpoint update -g {rg} -n {pe} --request-message "test"', checks=[
+            self.check('privateLinkServiceConnections[0].requestMessage', 'test')
+        ])
+
+        self.cmd('network private-endpoint list')
+        self.cmd('network private-endpoint list -g {rg}', checks=[
+            self.check('length(@)', 1)
+        ])
+
+        pe_connection_name = self.cmd('network private-link-service show -g {rg} -n {lks1}').get_output_in_json()['privateEndpointConnections'][0]['name']
+        self.kwargs['pe_connect'] = pe_connection_name
+        self.cmd('network private-link-service connection update -g {rg} -n {pe_connect} --service-name {lks1} --connection-status Rejected')
+        self.cmd('network private-endpoint show -g {rg} -n {pe}', checks=[
+            self.check('privateLinkServiceConnections[0].privateLinkServiceConnectionState.status', 'Rejected')
+        ])
+        self.cmd('network private-link-service connection delete -g {rg} -n {pe_connect} --service-name {lks1}')
+        self.cmd('network private-link-service show -g {rg} -n {lks1}', checks=[
+            self.check('length(privateEndpointConnections)', 0)
+        ])
+        self.cmd('network private-endpoint delete -g {rg} -n {pe}')
+
+
+class NetworkPrivateLinkService(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_network_private_link_service')
+    def test_network_private_link_service(self, resource_group):
+
         # unable to create resource so we can only verify the commands don't fail (or fail expectedly)
         self.cmd('network private-endpoint list')
         self.cmd('network private-endpoint list -g {rg}')
 
-        # system code 3 for 'not found'
-        with self.assertRaisesRegexp(SystemExit, '3'):
-            self.cmd('network private-endpoint show -g {rg} -n dummy')
+        self.kwargs.update({
+            'lb': 'lb1',
+            'sku': 'Standard',
+            'vnet': 'vnet1',
+            'subnet1': 'subnet1',
+            'subnet2': 'subnet2',
+            'location': 'centralus',
+            'ip': 'pubip1',
+            'lks1': 'lks1',
+            'lks2': 'lks2',
+            'sub1': '00000000-0000-0000-0000-000000000000'
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet1} -l {location}')
+        self.cmd('network lb create -g {rg} -l {location} -n {lb} --public-ip-address {ip} --sku {sku}')
+        self.cmd('network vnet subnet update -g {rg} -n {subnet1} --vnet-name {vnet} --disable-private-link-service-network-policies')
+        self.cmd('network vnet subnet create -g {rg} -n {subnet2} --vnet-name {vnet} --address-prefixes 10.0.2.0/24')
+        self.cmd('network vnet subnet update -g {rg} -n {subnet2} --vnet-name {vnet} --disable-private-endpoint-network-policies')
+        self.cmd('network private-link-service create -g {rg} -n {lks1} --vnet-name {vnet} --subnet {subnet1} --lb-name {lb} --lb-frontend-ip-configs LoadBalancerFrontEnd -l {location}', checks=[
+            self.check('type', 'Microsoft.Network/privateLinkServices'),
+            self.check('length(ipConfigurations)', 1),
+            self.check('length(loadBalancerFrontendIpConfigurations)', 1)
+        ])
+
+        self.cmd('network private-link-service update -g {rg} -n {lks1} --visibility {sub1} {sub1} --auto-approval {sub1} {sub1}', checks=[
+            self.check('length(visibility.subscriptions)', 2),
+            self.check('length(autoApproval.subscriptions)', 2)
+        ])
+        self.cmd('network private-link-service list -g {rg}', checks=[
+            self.check('length(@)', 1),
+            self.check('@[0].type', 'Microsoft.Network/privateLinkServices')
+        ])
+        self.cmd('network private-link-service show -g {rg} -n {lks1}', checks=[
+            self.check('type', 'Microsoft.Network/privateLinkServices'),
+            self.check('length(ipConfigurations)', 1),
+            self.check('length(loadBalancerFrontendIpConfigurations)', 1)
+        ])
+
+        self.cmd('network private-link-service delete -g {rg} -n {lks1}')
+
+        self.cmd('network vnet subnet update -g {rg} -n {subnet1} --vnet-name {vnet} --disable-private-link-service-network-policies false', checks=[
+            self.check('privateLinkServiceNetworkPolicies', 'Enabled')
+        ])
 
 
 class NetworkLoadBalancerWithZone(ScenarioTest):
@@ -91,9 +190,12 @@ class NetworkLoadBalancerWithZone(ScenarioTest):
 
         self.kwargs.update({
             'lb': 'lb1',
+            'lb2': 'lb4',
+            'lb3': 'lb5',
             'zone': '2',
             'location': 'eastus2',
-            'ip': 'pubip1'
+            'ip': 'pubip1',
+            'ip2': 'pubip2'
         })
 
         # LB with public ip
@@ -119,6 +221,19 @@ class NetworkLoadBalancerWithZone(ScenarioTest):
         # add a second frontend ip configuration
         self.cmd('network lb frontend-ip create -g {rg} --lb-name {lb} -n LoadBalancerFrontEnd2 -z {zone}  --vnet-name vnet1 --subnet subnet1', checks=[
             self.check("zones", [self.kwargs['zone']])
+        ])
+
+        # test for private-ip-address-version
+        self.cmd('network lb create -g {rg} -n {lb2} -l westcentralus --sku Standard')
+        self.cmd('network public-ip create -n {ip2} -g {rg} -l westcentralus --sku Standard --allocation-method Static --version IPv6')
+        self.cmd('network lb frontend-ip create --lb-name {lb2} -n ipv6 -g {rg} --private-ip-address-version IPv6 --public-ip-address {ip2}', checks=[
+            self.check('name', 'ipv6'),
+            self.check('privateIpAddressVersion', 'IPv6'),
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('network lb create -g {rg} -n {lb3} --sku Standard -l westcentralus --private-ip-address-version IPv6', checks=[
+            self.check('loadBalancer.frontendIPConfigurations[0].properties.privateIPAddressVersion', 'IPv6')
         ])
 
 
@@ -215,6 +330,83 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
         self.cmd('network application-gateway start --resource-group {rg} -n ag1')
         self.cmd('network application-gateway delete --resource-group {rg} -n ag1')
         self.cmd('network application-gateway list --resource-group {rg}', checks=self.check('length(@)', ag_count - 1))
+
+
+class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_identity')
+    def test_network_app_gateway_with_identity(self, resource_group):
+
+        self.kwargs.update({
+            'emsi': 'id1',
+            'emsi2': 'id2',
+            'ip': 'pubip1',
+            'kv': self.create_random_name('cli-test-kevault-', 24),
+            'loc': 'westus',
+            'sec': 'secret1',
+            'sec_value': "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tDQpNSUlFdmdJQkFEQU5CZ2txaGtpRzl3MEJBUUVGQUFTQ0JLZ3dnZ1NrQWdFQUFvSUJBUUNybWp0MlJCSFRBbllkDQprOWE3ZHgvTU1EK3hjSGkvdk9zcEwzN1lJREdGbEMrZnU3d2RiRzZpUGVWRm5xMkRKOHhSUm1TUkdabUc0SWJYDQpFYzIxcy85WWJPTmVaSXhhOWlSc0ZKdERNRU5EY2VQZ0lNQ2pqcGczb01vcHNaSUhHdk1pVzI4TG54RzZvVXJ6DQovVzUwazNTMGUzT0NvcTZuNlBmdElsbGhuRlFKUmV6d01pRHpUeHIvOHBJaGFOaitnNG5pd0QraEErSDhqU2tmDQpmT3BVWXQ0UndoWUo1ZDBlMit1R0tSUkJUNFZ4YnlGVGw3MzFPd3VacUxYa1hncjlXTUNONkN2VHJlSC9JQWpIDQpaRHN2cU9veTZ2SGE3bk5tRUNZT2VQbnlhTkVpSjJ3Mjh3NGl3Q3N0Z2RRNEVaWk5KUGh5R3IzZDdrWUNXcnZODQpYR3RPZUhYekFnTUJBQUVDZ2dFQUZtRmhJVVdJeFpVV21UanZmVGViY0ExWU5wTjM5c1IwTHhwQXJYNEFETVNNDQozdHBQUGM4bk1Wc1NqSWZyWi9yeXpNN1BlRC9NZVg0akFwTVIyZGJiUUo4WVJhRlF6NG1MLzludGZmcDNhMVBEDQo1K0ZJVStIWnZHSStFT2lySmo0VTQ3QTZjQVkrVVFia09FOTBtUmo2S1pKeTR1REdGL2xzWWEyNTFvbmE4L0p4DQo1QjFpNTNmNzdFSHhBbXJ5Tkxac0h3VzA2ZkNBMTdCTmd1TEZ2VjVCM0Zoa081QzhSb05XdkhSZ01NZzFFQURZDQpZODVjempnNnk2UlhSVjdvT3QyT3ZyNmJRNnEzMURVSU5zZ3lrczZ1djY5Y3lKbjh0TWt6Z1RRYm9seTRKTUJwDQp6V2tEYjlzZHMwVHRrN3NBQ1pKWU5GWk95UTlXaDh3NkpSY2VoeTBHQVFLQmdRREI1OE5qTTMxbFdxbGFXNEVjDQpFZFRMNnkwRXVmVmEzVlFhd0tJTVIreFZWWHFsUGxiYXdQNEY2bzNETTNIZThEbzVZVVRuUjFMM2tua1U3TGZTDQpwTFhhTlk1c2V3V0crMmxFd0NmQXpMVGpyOE9acUlFSXd3N0c0QjczdTVnQ2dJU0dsSWE5djBxQVp0bUVqL3pnDQpQUEZwaXhyOE5UNVo4eFZSdERkNlE5c21nUUtCZ1FEaWpoaFArOVdGaEhHblRLQWpBZDUxY1ZjcnFIOHpFdmYzDQppRWRLYlRsdi8zc3l4emQ2UmNJR2NLOExmbGx1bHhMVWhOY3ovU0FpeElxU2V0UW9IcU5LYzZwTGh6T3BmM3dyDQpVd29ldWcxNkhKUWh5WTVzVkswNG5MamVMZHdYN1ZEQlVjQkFPcHd0WHNUZy81UjlEMFYrMlNWN0hSZXZKVUNhDQpvNWxtNWpVcWN3S0JnUUNla1FHRjZRQmRWdU53d2ExMkg5ck5teGJvYTQySjdiNnVWZUx1ZWc1NHhmc1NrRVVFDQpoSmYyakpXN0VDSEpkdGVXUHNYUy84K0lKeDZmRHVsUDkyUEMrdExxUVR3RzR5ZDFrbEd2NTNieFRyVjh2WUF2DQpneHRkWkwvT1JIa05hcjExTkpadktyUXBCbkpRWmxNYnFKcWVmYVBtcFQvRTNQVU5LSHZKbngzaWdRS0JnUUNsDQpQVzZPSitmOGtqVXpDTGhqMENFcEY1bTB4aGpBYjcxY1ZaRnB2M0I5TjZIcnoxR3ZaT0czUU1qcllTUnBmTmJIDQpHbnk3OW90UjBIZ2hqbVRmUGpsclBDR2hKT09SWk9KejF3VXlsQkR3VjVmVGJPYnNMSGFMTEFQS1NUaVdXd2pqDQpkM1Q1WThZMWNVRzN1YkhiNVIrUy9WNVJCVThZOTlxKzcwUWJ3UnhWOFFLQmdHSW1yY1pXSkpJa2lkYVMrR2dYDQpYRmlVOTA4QTJpRlQ3Kzkva3B3Q08rRVVYZjljWS80WFZoNkVLa2RQaXhUN2gwT2duamVnMWQwbjcrWkl5bUlQDQpkUGVLeGNvcGlzdm9zOXd2eSs0ZmV0YmZQeG5vbXlIUlpzMnhZQUs0VzZTMmVPZ2F3aUN0aDc1bmlxNmxZeTVvDQpJTjNmWitjNHJqYUt6UUo0Vm5hOWlNUE4NCi0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0NCi0tLS0tQkVHSU4gQ0VSVElGSUNBVEUtLS0tLQ0KTUlJRThUQ0NBOW1nQXdJQkFnSVRWZ0JmMFR5b2dRbGg1eUk5c0FBQUFGL1JQREFOQmdrcWhraUc5dzBCQVFzRg0KQURBVk1STXdFUVlEVlFRREV3cE5VMGxVSUVOQklGb3lNQjRYRFRFNE1EWXhPVEF4TVRZeE4xb1hEVEU1TURZeA0KT1RBeE1UWXhOMW93R1RFWE1CVUdBMVVFQXhNT2EyVjVkbUYxYkhRdGRHVnpkSE13Z2dFaU1BMEdDU3FHU0liMw0KRFFFQkFRVUFBNElCRHdBd2dnRUtBb0lCQVFDcm1qdDJSQkhUQW5ZZGs5YTdkeC9NTUQreGNIaS92T3NwTDM3WQ0KSURHRmxDK2Z1N3dkYkc2aVBlVkZucTJESjh4UlJtU1JHWm1HNEliWEVjMjFzLzlZYk9OZVpJeGE5aVJzRkp0RA0KTUVORGNlUGdJTUNqanBnM29Nb3BzWklIR3ZNaVcyOExueEc2b1Vyei9XNTBrM1MwZTNPQ29xNm42UGZ0SWxsaA0KbkZRSlJlendNaUR6VHhyLzhwSWhhTmorZzRuaXdEK2hBK0g4alNrZmZPcFVZdDRSd2hZSjVkMGUyK3VHS1JSQg0KVDRWeGJ5RlRsNzMxT3d1WnFMWGtYZ3I5V01DTjZDdlRyZUgvSUFqSFpEc3ZxT295NnZIYTduTm1FQ1lPZVBueQ0KYU5FaUoydzI4dzRpd0NzdGdkUTRFWlpOSlBoeUdyM2Q3a1lDV3J2TlhHdE9lSFh6QWdNQkFBR2pnZ0kwTUlJQw0KTURBbkJna3JCZ0VFQVlJM0ZRb0VHakFZTUFvR0NDc0dBUVVGQndNQk1Bb0dDQ3NHQVFVRkJ3TUNNRDRHQ1NzRw0KQVFRQmdqY1ZCd1F4TUM4R0p5c0dBUVFCZ2pjVkNJZmFobldEN3RrQmdzbUZHNEcxbm1HRjlPdGdnVjJGM3Vscg0KZ2RTRlp3SUJaQUlCRkRDQmhRWUlLd1lCQlFVSEFRRUVlVEIzTURFR0NDc0dBUVVGQnpBQ2hpVm9kSFJ3T2k4dg0KWTI5eWNIQnJhUzloYVdFdlRWTkpWQ1V5TUVOQkpUSXdXakl1WTNKME1FSUdDQ3NHQVFVRkJ6QUNoalpvZEhSdw0KT2k4dmQzZDNMbTFwWTNKdmMyOW1kQzVqYjIwdmNHdHBMMjF6WTI5eWNDOU5VMGxVSlRJd1EwRWxNakJhTWk1ag0KY25Rd0hRWURWUjBPQkJZRUZHaktXQzNiSmNtcTRvK0pTQlJVSFI1SjdGWUJNQXNHQTFVZER3UUVBd0lGb0RBWg0KQmdOVkhSRUVFakFRZ2c1clpYbDJZWFZzZEMxMFpYTjBjekNCdFFZRFZSMGZCSUd0TUlHcU1JR25vSUdrb0lHaA0KaGlWb2RIUndPaTh2WTI5eWNIQnJhUzlqY213dlRWTkpWQ1V5TUVOQkpUSXdXakl1WTNKc2hqeG9kSFJ3T2k4dg0KYlhOamNtd3ViV2xqY205emIyWjBMbU52YlM5d2Eya3ZiWE5qYjNKd0wyTnliQzlOVTBsVUpUSXdRMEVsTWpCYQ0KTWk1amNteUdPbWgwZEhBNkx5OWpjbXd1YldsamNtOXpiMlowTG1OdmJTOXdhMmt2YlhOamIzSndMMk55YkM5Tg0KVTBsVUpUSXdRMEVsTWpCYU1pNWpjbXd3SHdZRFZSMGpCQmd3Rm9BVVljdTdobUZCWXpMVlcyYkdqcmVjVFFCdg0KQlBrd0hRWURWUjBsQkJZd0ZBWUlLd1lCQlFVSEF3RUdDQ3NHQVFVRkJ3TUNNQTBHQ1NxR1NJYjNEUUVCQ3dVQQ0KQTRJQkFRQmdLb0hZdlZPdHZDYXpwc1RWZVoxVENFbTdBVnA5cUtRUVd5YXNUbTdwT3FVQkplM2twMkhuSFNVWA0KemU4YzMvK2FZcmdaS25uOS9VWGFxdHk3QXFadWxNcjloWFJQVWhCeFpqV0J1Q1NTV1dvS2MxckdUcDlmY3lKdw0KZ0M5VTcxQnAwQzYyTnlQRnhqZkcvOFNwYlR5a09lejNJdHY5R1JPelIxUVhpU01tdE1LSzlvMVl3SUZDVmRXRw0KR0U3VnhsbitvUlFYckVqUHdIcFBEam5CWGJIelh3SXZUVVNsL0VrZExqRW5teDI2ZHMxL0RMaHdMWVJCSERpTA0KUzFNWXcrdHZacmNXNnMvOVdLOGNkc0VWUXFCMVBPMXlpVHlRdFRxUXNjblhxMzd6S0ZJUTArL2w3R1pBMEhJOA0KYlB4K3ExSUNJWXpVcUYzN3Y0UTZWZVdUbHZMaQ0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ0K",
+            'sec2': 'secret2'
+        })
+
+        # create a managed identity
+        emsi_result = self.cmd('identity create -g {rg} -n {emsi}').get_output_in_json()
+        emsi2_result = self.cmd('identity create -g {rg} -n {emsi2}').get_output_in_json()
+
+        emsi_id = emsi_result['principalId']
+        emsi2_id = emsi2_result['principalId']
+
+        self.kwargs.update({
+            'emsi_id': emsi_id,
+            'emsi2_id': emsi2_id
+        })
+
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
+
+        self.cmd('keyvault create -g {rg} -n {kv} -l {loc} --sku premium')
+
+        self.cmd('keyvault set-policy -n {kv} -g {rg} --object-id {emsi_id} --secret-permissions get list set')
+        self.cmd('keyvault set-policy -n {kv} -g {rg} --object-id {emsi2_id} --secret-permissions get list set')
+
+        self.cmd('keyvault update -n {kv} --enable-soft-delete -g {rg}')
+
+        # create a secret
+        secret = self.cmd('keyvault secret set --vault-name {kv} -n {sec} --value {sec_value}',
+                          checks=self.check('value', self.kwargs['sec_value'])).get_output_in_json()
+        first_sid = secret['id']
+        first_version = first_sid.rsplit('/', 1)[1]
+        self.kwargs.update({
+            'sid1': first_sid,
+            'ver1': first_version
+        })
+
+        secret = self.cmd('keyvault secret set --vault-name {kv} -n {sec2} --value {sec_value}',
+                          checks=self.check('value', self.kwargs['sec_value'])).get_output_in_json()
+        first_sid = secret['id']
+        first_version = first_sid.rsplit('/', 1)[1]
+        self.kwargs.update({
+            'sid2': first_sid,
+            'ver2': first_version
+        })
+
+        self.cmd('network application-gateway create -g {rg} -n ag1 --identity {emsi} --sku Standard_v2 --public-ip-address {ip}')
+        self.cmd('network application-gateway show -g {rg} -n ag1', checks=[
+            self.check('identity.type', 'UserAssigned')
+        ])
+
+        self.cmd('network application-gateway identity remove -g {rg} --gateway-name ag1', checks=[
+            self.check('identity', None)
+        ])
+        self.cmd('network application-gateway identity assign -g {rg} --gateway-name ag1 --identity {emsi2}', checks=[
+            self.check('identity.type', 'UserAssigned')
+        ])
+        self.cmd('network application-gateway identity show -g {rg} --gateway-name ag1', checks=[
+            self.check('type', 'UserAssigned')
+        ])
+
+        # There is a validation by the backend server to check the effectiveness of the certificate.
+        # Since we cannot create a real certificate, so here we just check that the communication between the CLI and the backend server works.
+        with self.assertRaisesRegexp(CLIError, '^Deployment failed'):
+            self.cmd('network application-gateway ssl-cert create --gateway-name ag1 --name ssl-cert1 -g {rg} --key-vault-secret-id {sid2}')
 
 
 class NetworkAppGatewayZoneScenario(ScenarioTest):
@@ -1042,6 +1234,27 @@ class NetworkExpressRouteGlobalReachScenarioTest(ScenarioTest):
             self.cmd('network express-route peering connection create -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12} --peer-circuit {er2} --address-prefix 104.0.0.0/29')
         self.cmd('network express-route peering connection show -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12}')
         self.cmd('network express-route peering connection delete -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12}')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_express_route_peer_connection')
+    def test_network_express_route_peer_connection(self, resource_group):
+        from msrestazure.azure_exceptions import CloudError
+
+        self.kwargs.update({
+            'er1': 'er1',
+            'er2': 'er2',
+            'peconn12': 'peconn12',
+        })
+
+        self.cmd('network express-route create -g {rg} -n {er1} --allow-global-reach --bandwidth 50 --peering-location Area51 --provider "Microsoft ER Test" --sku-tier Premium')
+        self.cmd('network express-route peering create -g {rg} --circuit-name {er1} --peering-type AzurePrivatePeering --peer-asn 10001 --vlan-id 101 --primary-peer-subnet 102.0.0.0/30 --secondary-peer-subnet 103.0.0.0/30')
+
+        self.cmd('network express-route create -g {rg} -n {er2} --allow-global-reach --bandwidth 50 --peering-location "Denver Test" --provider "Test Provider NW" --sku-tier Premium')
+        self.cmd('network express-route peering create -g {rg} --circuit-name {er2} --peering-type AzurePrivatePeering --peer-asn 10002 --vlan-id 102 --primary-peer-subnet 104.0.0.0/30 --secondary-peer-subnet 105.0.0.0/30')
+
+        # cannot create it, so this test will fail due to resource is not found.
+        with self.assertRaisesRegexp(SystemExit, '3'):
+            self.cmd('network express-route peering peer-connection show -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {peconn12}')
+        self.cmd('network express-route peering peer-connection list -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering')
 
 
 class NetworkLoadBalancerScenarioTest(ScenarioTest):
@@ -2237,7 +2450,9 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
             'gw3': 'gateway3',
             'ip1': 'pubip1',
             'ip2': 'pubip2',
-            'ip3': 'pubip3'
+            'ip3': 'pubip3',
+            'custom_routes1': "101.168.0.6/32",
+            'custom_routes2': "102.168.0.6/32"
         })
 
         self.cmd('network public-ip create -n {ip1} -g {rg}')
@@ -2253,7 +2468,7 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
             'vnet2_id': '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Network/virtualNetworks/{vnet2}'.format(**self.kwargs)
         })
 
-        self.cmd('network vnet-gateway create -g {rg} -n {gw1} --vnet {vnet1_id} --public-ip-address {ip1} --no-wait')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw1} --vnet {vnet1_id} --public-ip-address {ip1} --custom-routes {custom_routes1} --no-wait')
         self.cmd('network vnet-gateway create -g {rg} -n {gw2} --vnet {vnet2_id} --public-ip-address {ip2} --no-wait')
         self.cmd('network vnet-gateway create -g {rg} -n {gw3} --vnet {vnet3} --public-ip-address {ip3} --no-wait --sku standard --asn 12345 --bgp-peering-address 10.2.250.250 --peer-weight 50')
 
@@ -2266,8 +2481,14 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
             self.check('sku.capacity', 2),
             self.check('sku.name', 'Basic'),
             self.check('vpnType', 'RouteBased'),
-            self.check('enableBgp', False)
+            self.check('enableBgp', False),
+            self.check('customRoutes.addressPrefixes[0]', self.kwargs['custom_routes1'])
         ])
+
+        self.cmd('network vnet-gateway update -g {rg} -n {gw1} --custom-routes {custom_routes1} {custom_routes2}', checks=[
+            self.check('length(customRoutes.addressPrefixes)', 2)
+        ])
+
         self.cmd('network vnet-gateway show -g {rg} -n {gw2}', checks=[
             self.check('gatewayType', 'Vpn'),
             self.check('sku.capacity', 2),
@@ -2447,8 +2668,8 @@ class NetworkWatcherScenarioTest(ScenarioTest):
         self.cmd('network watcher show-security-group-view -g {rg} --vm {vm}')
         self.cmd('network watcher show-next-hop -g {rg} --vm {vm} --source-ip 123.4.5.6 --dest-ip 10.0.0.6')
 
-    @ResourceGroupPreparer(name_prefix='cli_test_nw_flow_log', location='eastus')
-    @StorageAccountPreparer(name_prefix='clitestnw', location='eastus')
+    @ResourceGroupPreparer(name_prefix='cli_test_nw_flow_log', location='eastasia')
+    @StorageAccountPreparer(name_prefix='clitestnw', location='eastasia')
     def test_network_watcher_flow_log(self, resource_group, resource_group_location, storage_account):
 
         self.kwargs.update({
@@ -2466,9 +2687,13 @@ class NetworkWatcherScenarioTest(ScenarioTest):
 
         # test traffic-analytics features
         self.cmd('resource create -g {rg} -n {ws} --resource-type Microsoft.OperationalInsights/workspaces -p @"{la_prop_path}"')
-        self.cmd('network watcher flow-log configure -g {rg} --nsg {nsg} --workspace {ws}', checks=[
+        self.cmd('network watcher flow-log configure -g {rg} --nsg {nsg} --workspace {ws} --interval 10', checks=[
             self.check("contains(flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.workspaceResourceId, '{ws}')", True),
+            self.check("flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.trafficAnalyticsInterval", 10),
             self.check("flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.enabled", True)
+        ])
+        self.cmd('network watcher flow-log configure -g {rg} --nsg {nsg} --workspace {ws} --interval 60', checks=[
+            self.check("flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.trafficAnalyticsInterval", 60)
         ])
         self.cmd('network watcher flow-log configure -g {rg} --nsg {nsg} --traffic-analytics false', checks=[
             self.check('flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.enabled', False)

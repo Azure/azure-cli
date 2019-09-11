@@ -12,6 +12,7 @@ from argcomplete.completers import FilesCompleter
 from azure.cli.core.commands.parameters import (
     file_type, get_enum_type, get_resource_name_completion_list, name_type, tags_type)
 from azure.cli.core.commands.validators import validate_file_or_dict
+from knack.arguments import CLIArgumentType
 
 from ._completers import (
     get_vm_size_completion_list, get_k8s_versions_completion_list, get_k8s_upgrades_completion_list)
@@ -63,6 +64,8 @@ storage_profile_types = ["StorageAccount", "ManagedDisks"]
 
 
 def load_arguments(self, _):
+
+    acr_arg_type = CLIArgumentType(metavar='ACR_NAME_OR_RESOURCE_ID')
 
     # ACS command argument configuration
     with self.argument_context('acs') as c:
@@ -186,6 +189,11 @@ def load_arguments(self, _):
         c.argument('vnet_subnet_id')
         c.argument('workspace_resource_id')
         c.argument('skip_subnet_role_assignment', action='store_true')
+        c.argument('attach_acr', acr_arg_type)
+
+    with self.argument_context('aks update') as c:
+        c.argument('attach_acr', acr_arg_type)
+        c.argument('detach_acr', acr_arg_type)
 
     with self.argument_context('aks update') as c:
         c.argument('load_balancer_managed_outbound_ip_count', type=int)

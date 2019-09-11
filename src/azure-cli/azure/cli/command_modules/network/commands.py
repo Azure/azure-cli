@@ -26,7 +26,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_service_endpoint_policy_definitions, cf_dns_references, cf_private_endpoints, cf_network_profiles,
     cf_express_route_circuit_connections, cf_express_route_gateways, cf_express_route_connections,
     cf_express_route_ports, cf_express_route_port_locations, cf_express_route_links, cf_app_gateway_waf_policy,
-    cf_service_tags)
+    cf_service_tags, cf_private_link_services, cf_private_endpoint_types, cf_peer_express_route_circuit_connections)
 from azure.cli.command_modules.network._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry)
 from azure.cli.command_modules.network._format import (
@@ -157,6 +157,12 @@ def load_command_table(self, _):
         min_api='2018-07-01'
     )
 
+    network_perconn_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations#PeerExpressRouteCircuitConnectionsOperations.{}',
+        client_factory=cf_peer_express_route_circuit_connections,
+        min_api='2019-02-01'
+    )
+
     network_ersp_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#ExpressRouteServiceProvidersOperations.{}',
         client_factory=cf_express_route_service_providers,
@@ -172,6 +178,12 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.network.operations#PrivateEndpointsOperations.{}',
         client_factory=cf_private_endpoints,
         min_api='2018-08-01'
+    )
+
+    network_private_link_service_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations#PrivateLinkServicesOperations.{}',
+        client_factory=cf_private_link_services,
+        min_api='2019-04-01'
     )
 
     network_lb_sdk = CliCommandType(
@@ -422,6 +434,11 @@ def load_command_table(self, _):
         g.custom_command('set', 'set_ag_waf_config_2016_09_01', max_api='2016-09-01', supports_no_wait=True)
         g.custom_show_command('show', 'show_ag_waf_config')
         g.custom_command('list-rule-sets', 'list_ag_waf_rule_sets', min_api='2017-03-01', client_factory=cf_application_gateways, table_transformer=transform_waf_rule_sets_table_output)
+
+    with self.command_group('network application-gateway identity', command_type=network_ag_sdk, min_api='2018-12-01') as g:
+        g.custom_command('assign', 'assign_ag_identity', supports_no_wait=True)
+        g.custom_command('remove', 'remove_ag_identity', supports_no_wait=True)
+        g.custom_show_command('show', 'show_ag_identity')
     # endregion
 
     # region ApplicationGatewayWAFPolicy
@@ -559,6 +576,10 @@ def load_command_table(self, _):
         g.command('delete', 'delete')
         g.show_command('show')
 
+    with self.command_group('network express-route peering peer-connection', network_perconn_sdk, is_preview=True) as g:
+        g.show_command('show', is_preview=True)
+        g.show_command('list', 'list', is_preview=True)
+
     with self.command_group('network express-route port', network_er_ports_sdk) as g:
         g.custom_command('create', 'create_express_route_port')
         g.command('delete', 'delete')
@@ -577,8 +598,37 @@ def load_command_table(self, _):
 
     # region PrivateEndpoint
     with self.command_group('network private-endpoint', network_private_endpoint_sdk) as g:
+        g.custom_command('create', 'create_private_endpoint', min_api='2019-04-01', is_preview=True)
+        g.command('delete', 'delete', min_api='2019-04-01', is_preview=True)
         g.custom_command('list', 'list_private_endpoints')
         g.show_command('show')
+        g.generic_update_command('update', custom_func_name='update_private_endpoint', is_preview=True, min_api='2019-04-01')
+        g.command(
+            'list-types', 'list',
+            operations_tmpl='azure.mgmt.network.operations#AvailablePrivateEndpointTypesOperations.{}',
+            client_factory=cf_private_endpoint_types,
+            is_preview=True,
+            min_api='2019-04-01'
+        )
+    # endregion
+
+    # region PrivateLinkServices
+    with self.command_group('network private-link-service', network_private_link_service_sdk, is_preview=True) as g:
+        g.custom_command('create', 'create_private_link_service')
+        g.command('delete', 'delete')
+        g.custom_command('list', 'list_private_link_services')
+        g.show_command('show')
+        g.generic_update_command('update', custom_func_name='update_private_link_service')
+
+    with self.command_group('network private-link-service connection', network_private_link_service_sdk) as g:
+        g.command('delete', 'delete_private_endpoint_connection')
+        g.custom_command('update', 'update_private_endpoint_connection')
+
+    # TODO: Due to service limitation.
+    # with self.command_group('network private-link-service ip-configs', network_private_link_service_sdk) as g:
+    #     g.custom_command('add', 'add_private_link_services_ipconfig')
+    #     g.custom_command('remove', 'remove_private_link_services_ipconfig')
+
     # endregion
 
     # region LoadBalancers

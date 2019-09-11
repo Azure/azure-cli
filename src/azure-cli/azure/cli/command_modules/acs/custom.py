@@ -39,7 +39,7 @@ from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.acs._params import regions_in_preview, regions_in_prod
 from azure.cli.core.api import get_config_dir
 from azure.cli.core._profile import Profile
-from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
 from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, truncate_text, sdk_no_wait
 from azure.cli.core.commands import LongRunningOperation
@@ -83,6 +83,8 @@ from ._client_factory import cf_resource_groups
 from ._client_factory import get_auth_management_client
 from ._client_factory import get_graph_rbac_management_client
 from ._client_factory import cf_resources
+from ._client_factory import get_resource_by_name
+from ._client_factory import cf_container_registry_service
 
 logger = get_logger(__name__)
 
@@ -399,7 +401,7 @@ def _k8s_install_or_upgrade_connector(helm_cmd, cmd, client, name, resource_grou
     # Get the credentials from a AKS instance
     _, browse_path = tempfile.mkstemp()
     aks_get_credentials(cmd, client, resource_group_name, name, admin=False, path=browse_path)
-    subscription_id = _get_subscription_id(cmd.cli_ctx)
+    subscription_id = get_subscription_id(cmd.cli_ctx)
     # Get the TenantID
     profile = Profile(cli_ctx=cmd.cli_ctx)
     _, _, tenant_id = profile.get_login_credentials()
@@ -571,9 +573,102 @@ def _add_role_assignment(cli_ctx, role, service_principal, delay=2, scope=None):
     return True
 
 
-def _get_subscription_id(cli_ctx):
-    _, sub_id, _ = Profile(cli_ctx=cli_ctx).get_login_credentials(subscription_id=None)
-    return sub_id
+def delete_role_assignments(cli_ctx, ids=None, assignee=None, role=None, resource_group_name=None,
+                            scope=None, include_inherited=False, yes=None):
+    factory = get_auth_management_client(cli_ctx, scope)
+    assignments_client = factory.role_assignments
+    definitions_client = factory.role_definitions
+    ids = ids or []
+    if ids:
+        if assignee or role or resource_group_name or scope or include_inherited:
+            raise CLIError('When assignment ids are used, other parameter values are not required')
+        for i in ids:
+            assignments_client.delete_by_id(i)
+        return
+    if not any([ids, assignee, role, resource_group_name, scope, assignee, yes]):
+        from knack.prompting import prompt_y_n
+        msg = 'This will delete all role assignments under the subscription. Are you sure?'
+        if not prompt_y_n(msg, default="n"):
+            return
+
+    scope = _build_role_scope(resource_group_name, scope,
+                              assignments_client.config.subscription_id)
+    assignments = _search_role_assignments(cli_ctx, assignments_client, definitions_client,
+                                           scope, assignee, role, include_inherited,
+                                           include_groups=False)
+
+    if assignments:
+        for a in assignments:
+            assignments_client.delete_by_id(a.id)
+
+
+def _delete_role_assignments(cli_ctx, role, service_principal, delay=2, scope=None):
+    # AAD can have delays in propagating data, so sleep and retry
+    hook = cli_ctx.get_progress_controller(True)
+    hook.add(message='Waiting for AAD role to delete', value=0, total_val=1.0)
+    logger.info('Waiting for AAD role to delete')
+    for x in range(0, 10):
+        hook.add(message='Waiting for AAD role to delete', value=0.1 * x, total_val=1.0)
+        try:
+            delete_role_assignments(cli_ctx,
+                                    role=role,
+                                    assignee=service_principal,
+                                    scope=scope)
+            break
+        except CLIError as ex:
+            raise ex
+        except CloudError as ex:
+            logger.info(ex)
+        time.sleep(delay + delay * x)
+    else:
+        return False
+    hook.add(message='AAD role deletion done', value=1.0, total_val=1.0)
+    logger.info('AAD role deletion done')
+    return True
+
+
+def _search_role_assignments(cli_ctx, assignments_client, definitions_client,
+                             scope, assignee, role, include_inherited, include_groups):
+    assignee_object_id = None
+    if assignee:
+        assignee_object_id = _resolve_object_id(cli_ctx, assignee)
+
+    # always use "scope" if provided, so we can get assignments beyond subscription e.g. management groups
+    if scope:
+        assignments = list(assignments_client.list_for_scope(
+            scope=scope, filter='atScope()'))
+    elif assignee_object_id:
+        if include_groups:
+            f = "assignedTo('{}')".format(assignee_object_id)
+        else:
+            f = "principalId eq '{}'".format(assignee_object_id)
+        assignments = list(assignments_client.list(filter=f))
+    else:
+        assignments = list(assignments_client.list())
+
+    if assignments:
+        assignments = [a for a in assignments if (
+            not scope or
+            include_inherited and re.match(_get_role_property(a, 'scope'), scope, re.I) or
+            _get_role_property(a, 'scope').lower() == scope.lower()
+        )]
+
+        if role:
+            role_id = _resolve_role_id(role, scope, definitions_client)
+            assignments = [i for i in assignments if _get_role_property(
+                i, 'role_definition_id') == role_id]
+
+        if assignee_object_id:
+            assignments = [i for i in assignments if _get_role_property(
+                i, 'principal_id') == assignee_object_id]
+
+    return assignments
+
+
+def _get_role_property(obj, property_name):
+    if isinstance(obj, dict):
+        return obj[property_name]
+    return getattr(obj, property_name)
 
 
 def _get_default_dns_prefix(name, resource_group_name, subscription_id):
@@ -801,7 +896,7 @@ def acs_create(cmd, client, resource_group_name, deployment_name, name, ssh_key_
     if ssh_key_value is not None and not is_valid_ssh_rsa_public_key(ssh_key_value):
         raise CLIError('Provided ssh key ({}) is invalid or non-existent'.format(ssh_key_value))
 
-    subscription_id = _get_subscription_id(cmd.cli_ctx)
+    subscription_id = get_subscription_id(cmd.cli_ctx)
     if not dns_name_prefix:
         dns_name_prefix = _get_default_dns_prefix(name, resource_group_name, subscription_id)
 
@@ -950,11 +1045,12 @@ def load_service_principals(config_path):
 
 def _invoke_deployment(cli_ctx, resource_group_name, deployment_name, template, parameters, validate, no_wait,
                        subscription_id=None):
-    from azure.mgmt.resource.resources import ResourceManagementClient
-    from azure.mgmt.resource.resources.models import DeploymentProperties
 
+    from azure.cli.core.profiles import ResourceType, get_sdk
+    DeploymentProperties = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'DeploymentProperties', mod='models')
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
-    smc = get_mgmt_service_client(cli_ctx, ResourceManagementClient, subscription_id=subscription_id).deployments
+    smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
+                                  subscription_id=subscription_id).deployments
     if validate:
         logger.info('==== BEGIN TEMPLATE ====')
         logger.info(json.dumps(template, indent=2))
@@ -1216,7 +1312,7 @@ def create_application(client, display_name, homepage, identifier_uris,
         return client.create(app_create_param)
     except GraphErrorException as ex:
         if 'insufficient privileges' in str(ex).lower():
-            link = 'https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
+            link = 'https://docs.microsoft.com/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
             raise CLIError("Directory permission is needed for the current user to register the application. "
                            "For how to configure, please refer '{}'. Original error: {}".format(link, ex))
         raise
@@ -1239,7 +1335,7 @@ def update_application(client, object_id, display_name, homepage, identifier_uri
         return
     except GraphErrorException as ex:
         if 'insufficient privileges' in str(ex).lower():
-            link = 'https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
+            link = 'https://docs.microsoft.com/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
             raise CLIError("Directory permission is needed for the current user to register the application. "
                            "For how to configure, please refer '{}'. Original error: {}".format(link, ex))
         raise
@@ -1409,7 +1505,6 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
                        'by running "az aks enable-addons --addons kube-dashboard".')
 
     _, browse_path = tempfile.mkstemp()
-    # TODO: need to add an --admin option?
     aks_get_credentials(cmd, client, resource_group_name, name, admin=False, path=browse_path)
 
     # find the dashboard pod's name
@@ -1533,10 +1628,11 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                aad_tenant_id=None,
                tags=None,
                generate_ssh_keys=False,  # pylint: disable=unused-argument
+               attach_acr=None,
                no_wait=False):
     _validate_ssh_key(no_ssh_key, ssh_key_value)
 
-    subscription_id = _get_subscription_id(cmd.cli_ctx)
+    subscription_id = get_subscription_id(cmd.cli_ctx)
     if not dns_name_prefix:
         dns_name_prefix = _get_default_dns_prefix(name, resource_group_name, subscription_id)
 
@@ -1617,6 +1713,12 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         load_balancer_managed_outbound_ip_count,
         load_balancer_outbound_ips,
         load_balancer_outbound_ip_prefixes)
+
+    if attach_acr:
+        _ensure_aks_acr(cmd.cli_ctx,
+                        client_id=service_principal_profile.client_id,
+                        acr_name_or_id=attach_acr,
+                        subscription_id=subscription_id)
 
     network_profile = None
     if any([network_plugin, pod_cidr, service_cidr, dns_service_ip, docker_bridge_address, network_policy]):
@@ -1751,7 +1853,7 @@ def aks_update(cmd, client, resource_group_name, name, no_wait=False,
 
 def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=False):
     instance = client.get(resource_group_name, name)
-    subscription_id = _get_subscription_id(cmd.cli_ctx)
+    subscription_id = get_subscription_id(cmd.cli_ctx)
 
     instance = _update_addons(
         cmd,
@@ -1770,7 +1872,7 @@ def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=F
 def aks_enable_addons(cmd, client, resource_group_name, name, addons, workspace_resource_id=None,
                       subnet_name=None, no_wait=False):
     instance = client.get(resource_group_name, name)
-    subscription_id = _get_subscription_id(cmd.cli_ctx)
+    subscription_id = get_subscription_id(cmd.cli_ctx)
     service_principal_client_id = instance.service_principal_profile.client_id
     instance = _update_addons(cmd, instance, subscription_id, resource_group_name, addons, enable=True,
                               workspace_resource_id=workspace_resource_id, subnet_name=subnet_name, no_wait=no_wait)
@@ -1884,6 +1986,36 @@ def aks_scale(cmd, client, resource_group_name, name, node_count, nodepool_name=
             instance.aad_profile = None
             return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
     raise CLIError('The nodepool "{}" was not found.'.format(nodepool_name))
+
+
+def aks_update(cmd, client, resource_group_name, name,
+               attach_acr=None,
+               detach_acr=None,
+               no_wait=False):
+    if not attach_acr and not detach_acr:
+        raise CLIError('Please sepcify "--attach-acr" or "--detach-acr".')
+
+    if attach_acr and detach_acr:
+        raise CLIError('Cannot specify "--attach-acr" and "--detach-acr" at the same time.')
+
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    instance = client.get(resource_group_name, name)
+    client_id = instance.service_principal_profile.client_id
+    if not client_id:
+        raise CLIError('Cannot get the AKS cluster\'s service principal.')
+
+    if attach_acr:
+        _ensure_aks_acr(cmd.cli_ctx,
+                        client_id=client_id,
+                        acr_name_or_id=attach_acr,
+                        subscription_id=subscription_id)
+
+    if detach_acr:
+        _ensure_aks_acr(cmd.cli_ctx,
+                        client_id=client_id,
+                        acr_name_or_id=detach_acr,
+                        subscription_id=subscription_id,
+                        detach=True)
 
 
 def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, no_wait=False, **kwargs):  # pylint: disable=unused-argument
@@ -2363,6 +2495,58 @@ def _ensure_container_insights_for_monitoring(cmd, addon):
                               validate=False, no_wait=False, subscription_id=subscription_id)
 
 
+def _ensure_aks_acr(cli_ctx,
+                    client_id,
+                    acr_name_or_id,
+                    subscription_id,
+                    detach=False):
+    from msrestazure.tools import is_valid_resource_id, parse_resource_id
+    # Check if the ACR exists by resource ID.
+    if is_valid_resource_id(acr_name_or_id):
+        try:
+            parsed_registry = parse_resource_id(acr_name_or_id)
+            acr_client = cf_container_registry_service(cli_ctx, subscription_id=parsed_registry['subscription'])
+            registry = acr_client.registries.get(parsed_registry['resource_group'], parsed_registry['name'])
+        except CloudError as ex:
+            raise CLIError(ex.message)
+        _ensure_aks_acr_role_assignment(cli_ctx, client_id, registry.id, detach)
+        return
+
+    # Check if the ACR exists by name accross all resource groups.
+    registry_name = acr_name_or_id
+    registry_resource = 'Microsoft.ContainerRegistry/registries'
+    try:
+        registry = get_resource_by_name(cli_ctx, registry_name, registry_resource)
+    except CloudError as ex:
+        if 'was not found' in ex.message:
+            raise CLIError("ACR {} not found. Have you provided the right ACR name?".format(registry_name))
+        raise CLIError(ex.message)
+    _ensure_aks_acr_role_assignment(cli_ctx, client_id, registry.id, detach)
+    return
+
+
+def _ensure_aks_acr_role_assignment(cli_ctx,
+                                    client_id,
+                                    registry_id,
+                                    detach=False):
+    if detach:
+        if not _delete_role_assignments(cli_ctx,
+                                        'acrpull',
+                                        client_id,
+                                        scope=registry_id):
+            raise CLIError('Could not delete role assignments for ACR. '
+                           'Are you an Owner on this subscription?')
+        return
+
+    if not _add_role_assignment(cli_ctx,
+                                'acrpull',
+                                client_id,
+                                scope=registry_id):
+        raise CLIError('Could not create a role assignment for ACR. '
+                       'Are you an Owner on this subscription?')
+    return
+
+
 def _ensure_aks_service_principal(cli_ctx,
                                   service_principal=None,
                                   client_secret=None,
@@ -2711,7 +2895,6 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
     default_router_profile = OpenShiftRouterProfile(name='default')
 
     if vnet_peer is not None:
-        from azure.cli.core.commands.client_factory import get_subscription_id
         from msrestazure.tools import is_valid_resource_id, resource_id
         if not is_valid_resource_id(vnet_peer):
             vnet_peer = resource_id(

@@ -23,7 +23,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('certificate_output_folder', help='The folder of the new certificate file to be created.')
         c.argument('certificate_password', help='The password of the certificate file.')
         c.argument('certificate_subject_name', help='The subject name of the certificate to be created.')
-        c.argument('vault_resource_group_name', options_list=['--vault-resource-group'], help='Key vault resource group name,if not given it will be cluster resource group name')
+        c.argument('vault_resource_group_name', options_list=['--vault-resource-group'], help='Key vault resource group name, if not given it will be cluster resource group name')
         c.argument('vault_name', help='Azure key vault name, it not given it will be the cluster resource group name')
         c.argument('cluster_size', options_list=['--cluster-size', '-s'], help='The number of nodes in the cluster. Default are 5 nodes')
         c.argument('vm_sku', help='VM Sku')
@@ -88,7 +88,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('upgrade_mode', arg_type=get_enum_type(['manual', 'automatic']), help='cluster upgrade mode')
 
     with self.argument_context('sf cluster reliability') as c:
-        c.argument('reliability_level', arg_type=get_enum_type(['Bronze', 'Silver', 'Gold']), help='durability level.')
+        c.argument('reliability_level', arg_type=get_enum_type(['Bronze', 'Silver', 'Gold', 'Platinum']), help='durability level.')
         c.argument('auto_add_node', help='Add node count automatically when changing reliability.')
 
     with self.argument_context('sf cluster setting set') as c:

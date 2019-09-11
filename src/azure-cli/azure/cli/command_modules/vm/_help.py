@@ -17,18 +17,15 @@ long-summary: >4
     The operating system disk is created from an image, and both the operating system disk and the image are actually virtual hard disks (VHDs)
     stored in an Azure storage account. Virtual machines also can have one or more data disks, that are also stored as VHDs.
 
-
     Azure Managed and Unmanaged Data Disks have a maximum size of 4095 GB (with the exception of larger disks in preview). Azure Unmanaged Disks also have a maximum capacity of 4095 GB.
-
 
     For more information, see:
 
-    - Azure Disks - https://docs.microsoft.com/en-us/azure/virtual-machines/linux/about-disks-and-vhds and https://docs.microsoft.com/en-us/azure/virtual-machines/windows/about-disks-and-vhds.
+    - Azure Disks - https://docs.microsoft.com/azure/virtual-machines/linux/about-disks-and-vhds and https://docs.microsoft.com/azure/virtual-machines/windows/about-disks-and-vhds.
 
-    - Larger Managed Disks in Public Preview - https://azure.microsoft.com/en-us/blog/introducing-the-public-preview-of-larger-managed-disks-sizes/
+    - Larger Managed Disks in Public Preview - https://azure.microsoft.com/blog/introducing-the-public-preview-of-larger-managed-disks-sizes/
 
-    - Ultra SSD Managed Disks in Public Preview - https://docs.microsoft.com/en-us/azure/virtual-machines/windows/disks-ultra-ssd
-
+    - Ultra SSD Managed Disks in Public Preview - https://docs.microsoft.com/azure/virtual-machines/windows/disks-ultra-ssd
 
 """
 
@@ -731,6 +728,9 @@ parameters:
     populator-commands:
       - az vm image list
       - az vm image show
+  - name: --size
+    populator-commands:
+      - az vm list-sizes
   - name: --ssh-key-values
     short-summary: Space-separated list of SSH public keys or public key file paths.
   - name: --computer-name
@@ -924,11 +924,11 @@ long-summary: >4
 
     For more information, see:
 
-    - Azure Disks - https://docs.microsoft.com/en-us/azure/virtual-machines/linux/about-disks-and-vhds and https://docs.microsoft.com/en-us/azure/virtual-machines/windows/about-disks-and-vhds.
+    - Azure Disks - https://docs.microsoft.com/azure/virtual-machines/linux/about-disks-and-vhds and https://docs.microsoft.com/azure/virtual-machines/windows/about-disks-and-vhds.
 
-    - Larger Managed Disks in Public Preview - https://azure.microsoft.com/en-us/blog/introducing-the-public-preview-of-larger-managed-disks-sizes/
+    - Larger Managed Disks in Public Preview - https://azure.microsoft.com/blog/introducing-the-public-preview-of-larger-managed-disks-sizes/
 
-    - Ultra SSD Managed Disks in Public Preview - https://docs.microsoft.com/en-us/azure/virtual-machines/windows/disks-ultra-ssd
+    - Ultra SSD Managed Disks in Public Preview - https://docs.microsoft.com/azure/virtual-machines/windows/disks-ultra-ssd
 
 
 """
@@ -959,7 +959,7 @@ type: group
 short-summary: "Manage encryption of VM disks."
 long-summary: |
     For more information, see:
-    https://docs.microsoft.com/en-us/azure/security/azure-security-disk-encryption-overview"
+    https://docs.microsoft.com/azure/security/azure-security-disk-encryption-overview"
 """
 
 helps['vm encryption disable'] = """
@@ -980,7 +980,7 @@ short-summary: "Enable disk encryption on the OS disk and/or data disks. Encrypt
 long-summary: |
     Note that Azure Active Directory / service principal arguments are unnecessary for vm encryption. The older version of Azure Disk Encryption required AAD arguments.
     For more information, see:
-    https://docs.microsoft.com/en-us/azure/security/azure-security-disk-encryption-overview
+    https://docs.microsoft.com/azure/security/azure-security-disk-encryption-overview
 parameters:
   - name: --aad-client-id
     short-summary: Client ID of an AAD app with permissions to write secrets to the key vault.
@@ -1328,7 +1328,7 @@ short-summary: List the VM image offers available in the Azure Marketplace.
 parameters:
   - name: --publisher -p
     populator-commands:
-      - az vm list-publishers
+      - az vm image list-publishers
 examples:
   - name: List all offers from Microsoft in the West US region.
     text: az vm image list-offers -l westus -p MicrosoftWindowsServer
@@ -1375,7 +1375,7 @@ examples:
 helps['vm list'] = """
 type: command
 short-summary: List details of Virtual Machines.
-long-summary: 'For more information on querying information about Virtual Machines, see https://docs.microsoft.com/en-us/cli/azure/query-az-cli2'
+long-summary: 'For more information on querying information about Virtual Machines, see https://docs.microsoft.com/cli/azure/query-az-cli2'
 examples:
   - name: List all VMs.
     text: az vm list
@@ -1556,7 +1556,7 @@ examples:
 helps['vm run-command'] = """
 type: group
 short-summary: Manage run commands on a Virtual Machine.
-long-summary: 'For more information, see https://docs.microsoft.com/en-us/azure/virtual-machines/windows/run-command or https://docs.microsoft.com/en-us/azure/virtual-machines/linux/run-command.'
+long-summary: 'For more information, see https://docs.microsoft.com/azure/virtual-machines/windows/run-command or https://docs.microsoft.com/azure/virtual-machines/linux/run-command.'
 """
 
 helps['vm run-command invoke'] = """
@@ -1718,11 +1718,11 @@ long-summary: >4
 
     For more information, see:
 
-    - Azure Disks - https://docs.microsoft.com/en-us/azure/virtual-machines/linux/about-disks-and-vhds and https://docs.microsoft.com/en-us/azure/virtual-machines/windows/about-disks-and-vhds.
+    - Azure Disks - https://docs.microsoft.com/azure/virtual-machines/linux/about-disks-and-vhds and https://docs.microsoft.com/azure/virtual-machines/windows/about-disks-and-vhds.
 
-    - Larger Managed Disks in Public Preview - https://azure.microsoft.com/en-us/blog/introducing-the-public-preview-of-larger-managed-disks-sizes/
+    - Larger Managed Disks in Public Preview - https://azure.microsoft.com/blog/introducing-the-public-preview-of-larger-managed-disks-sizes/
 
-    - Ultra SSD Managed Disks in Public Preview - https://docs.microsoft.com/en-us/azure/virtual-machines/windows/disks-ultra-ssd
+    - Ultra SSD Managed Disks in Public Preview - https://docs.microsoft.com/azure/virtual-machines/windows/disks-ultra-ssd
 
 
 """
@@ -1975,7 +1975,7 @@ examples:
 helps['vmss encryption'] = """
 type: group
 short-summary: "Manage encryption of VMSS."
-long-summary: "For more information, see: https://docs.microsoft.com/en-us/azure/security/azure-security-disk-encryption-overview"
+long-summary: "For more information, see: https://docs.microsoft.com/azure/security/azure-security-disk-encryption-overview"
 """
 
 helps['vmss encryption disable'] = """
@@ -1990,7 +1990,7 @@ examples:
 helps['vmss encryption enable'] = """
 type: command
 short-summary: "Encrypt a VMSS with managed disks."
-long-summary: "For more information, see: For more information, see: https://docs.microsoft.com/en-us/azure/security/azure-security-disk-encryption-overview"
+long-summary: "For more information, see: For more information, see: https://docs.microsoft.com/azure/security/azure-security-disk-encryption-overview"
 examples:
   - name: encrypt a VM scale set using a key vault in the same resource group
     text: >
@@ -2184,7 +2184,7 @@ short-summary: Manage rolling upgrades.
 helps['vmss run-command'] = """
 type: group
 short-summary: Manage run commands on a Virtual Machine Scale Set.
-long-summary: 'For more information, see https://docs.microsoft.com/en-us/azure/virtual-machines/windows/run-command or https://docs.microsoft.com/en-us/azure/virtual-machines/linux/run-command.'
+long-summary: 'For more information, see https://docs.microsoft.com/azure/virtual-machines/windows/run-command or https://docs.microsoft.com/azure/virtual-machines/linux/run-command.'
 """
 
 helps['vmss run-command invoke'] = """
@@ -2299,9 +2299,9 @@ examples:
   - name: Update a VMSS' license type for Azure Hybrid Benefit.
     text: az vmss update --name MyScaleSet --resource-group MyResourceGroup --license-type windows_server
   - name: Update a VM instance's protection policies.
-    text: az vmss update --name MyScaleSet --resource-group MyResourceGroup --instance-id 4             --protect-from-scale-set-actions False --protect-from-scale-in
+    text: az vmss update --name MyScaleSet --resource-group MyResourceGroup --instance-id 4 --protect-from-scale-set-actions False --protect-from-scale-in
   - name: Update a VM instance's protection policies.
-    text: az vmss update --name MyScaleSet --resource-group MyResourceGroup --instance-id 4             --set protectionPolicy.protectFromScaleIn=True protectionPolicy.protectFromScaleSetActions=False
+    text: az vmss update --name MyScaleSet --resource-group MyResourceGroup --instance-id 4 --set protectionPolicy.protectFromScaleIn=True protectionPolicy.protectFromScaleSetActions=False
 
 """
 

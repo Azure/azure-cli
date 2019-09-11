@@ -344,8 +344,8 @@ class SubscriptionLevelDeploymentTest(LiveScenarioTest):
             'tf': os.path.join(curr_dir, 'subscription_level_template.json').replace('\\', '\\\\'),
             'params': os.path.join(curr_dir, 'subscription_level_parameters.json').replace('\\', '\\\\'),
             # params-uri below is the raw file url of the subscription_level_parameters.json above
-            'params_uri': 'https://raw.githubusercontent.com/Azure/azure-cli/dev/src/command_modules/azure-cli-resource/azure/cli/command_modules/resource/tests/latest/subscription_level_parameters.json',
-            'dn': self.create_random_name('azure-cli-sub-level-desubscription_level_parametersployment', 40)
+            'params_uri': 'https://raw.githubusercontent.com/Azure/azure-cli/dev/src/azure-cli/azure/cli/command_modules/resource/tests/latest/subscription_level_parameters.json',
+            'dn': self.create_random_name('azure-cli-sub-level-desubscription_level_parametersployment', 60)
         })
 
         self.cmd('group create --name cli_test_subscription_level_deployment --location WestUS', checks=[
@@ -404,7 +404,7 @@ class DeploymentTest(ScenarioTest):
             'tf': os.path.join(curr_dir, 'test-template.json').replace('\\', '\\\\'),
             'params': os.path.join(curr_dir, 'test-params.json').replace('\\', '\\\\'),
             # params-uri below is the raw file url of the test_params.json above
-            'params_uri': 'https://raw.githubusercontent.com/Azure/azure-cli/dev/src/command_modules/azure-cli-resource/azure/cli/command_modules/resource/tests/latest/test-params.json',
+            'params_uri': 'https://raw.githubusercontent.com/Azure/azure-cli/dev/src/azure-cli/azure/cli/command_modules/resource/tests/latest/test-params.json',
             'of': os.path.join(curr_dir, 'test-object.json').replace('\\', '\\\\'),
             'dn': 'azure-cli-deployment'
         })
@@ -542,7 +542,7 @@ class DeploymentThruUriTest(ScenarioTest):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         # same copy of the sample template file under current folder, but it is uri based now
         self.kwargs.update({
-            'tf': 'https://raw.githubusercontent.com/Azure/azure-cli/dev/src/command_modules/azure-cli-resource/azure/cli/command_modules/resource/tests/latest/simple_deploy.json',
+            'tf': 'https://raw.githubusercontent.com/Azure/azure-cli/dev/src/azure-cli/azure/cli/command_modules/resource/tests/latest/simple_deploy.json',
             'params': os.path.join(curr_dir, 'simple_deploy_parameters.json').replace('\\', '\\\\')
         })
         self.kwargs['dn'] = self.cmd('group deployment create -g {rg} --template-uri {tf} --parameters @{params}', checks=[
@@ -767,10 +767,15 @@ class PolicyScenarioTest(ScenarioTest):
             'pn': self.create_random_name('azure-cli-test-policy', 30),
             'pdn': self.create_random_name('test_policy', 20),
             'desc': 'desc_for_test_policy_123',
+            'dpn': self.create_random_name('azure-cli-test-data-policy', 30),
+            'dpdn': self.create_random_name('test_data_policy', 20),
+            'dp_desc': 'desc_for_test_data_policy_123',
+            'dp_mode': 'Microsoft.KeyVault.Data',
             'psn': self.create_random_name('azure-cli-test-policyset', 30),
             'psdn': self.create_random_name('test_policyset', 20),
             'ps_desc': 'desc_for_test_policyset_123',
             'rf': os.path.join(curr_dir, 'sample_policy_rule.json').replace('\\', '\\\\'),
+            'dprf': os.path.join(curr_dir, 'sample_data_policy_rule.json').replace('\\', '\\\\'),
             'psf': os.path.join(curr_dir, 'sample_policy_set.json').replace('\\', '\\\\'),
             'pdf': os.path.join(curr_dir, 'sample_policy_param_def.json').replace('\\', '\\\\')
         })
@@ -783,9 +788,14 @@ class PolicyScenarioTest(ScenarioTest):
         cmd = self.cmdstring('policy definition create -n {pn} --rules {rf} --params {pdf} --display-name {pdn} --description {desc}', management_group, subscription)
         policy = self.cmd(cmd).get_output_in_json()
 
+        # create a data policy
+        cmd = self.cmdstring('policy definition create -n {dpn} --rules {dprf} --mode {dp_mode} --display-name {dpdn} --description {dp_desc}', management_group, subscription)
+        datapolicy = self.cmd(cmd).get_output_in_json()
+
         # create a policy set
         policyset = get_file_json(self.kwargs['psf'])
         policyset[0]['policyDefinitionId'] = policy['id']
+        policyset[1]['policyDefinitionId'] = datapolicy['id']
         with open(os.path.join(curr_dir, 'sample_policy_set.json'), 'w') as outfile:
             json.dump(policyset, outfile)
 
@@ -846,6 +856,7 @@ class PolicyScenarioTest(ScenarioTest):
         self.kwargs['psf'] = os.path.join(curr_dir, 'sample_policy_set_parameterized.json').replace('\\', '\\\\')
         policyset = get_file_json(self.kwargs['psf'])
         policyset[0]['policyDefinitionId'] = policy['id']
+        policyset[1]['policyDefinitionId'] = datapolicy['id']
         with open(os.path.join(curr_dir, 'sample_policy_set_parameterized.json'), 'w') as outfile:
             json.dump(policyset, outfile)
 
@@ -877,10 +888,17 @@ class PolicyScenarioTest(ScenarioTest):
         # delete the policy
         cmd = self.cmdstring('policy definition delete -n {pn}', management_group, subscription)
         self.cmd(cmd)
-        time.sleep(10)  # ensure the policy is gone when run live.
+        time.sleep(10)
 
+        # delete the data policy
+        cmd = self.cmdstring('policy definition delete -n {dpn}', management_group, subscription)
+        self.cmd(cmd)
+        time.sleep(10)
+
+        # ensure the policy is gone when run live.
         cmd = self.cmdstring('policy definition list', management_group, subscription)
         self.cmd(cmd, checks=self.check("length([?name=='{pn}'])", 0))
+        self.cmd(cmd, checks=self.check("length([?name=='{dpn}'])", 0))
 
     @ResourceGroupPreparer(name_prefix='cli_test_policy')
     @AllowLargeResponse(8192)
@@ -998,9 +1016,9 @@ class PolicyScenarioTest(ScenarioTest):
         if not self.in_recording:
             with mock.patch('azure.cli.command_modules.resource.custom._get_subscription_id_from_subscription',
                             return_value=MOCKED_SUBSCRIPTION_ID):
-                self.resource_policy_operations(resource_group, None, 'e8a0d3c2-c26a-4363-ba6b-f56ac74c5ae0')
+                self.resource_policy_operations(resource_group, None, 'e78961ba-36fe-4739-9212-e3031b4c8db7')
         else:
-            self.resource_policy_operations(resource_group, None, 'e8a0d3c2-c26a-4363-ba6b-f56ac74c5ae0')
+            self.resource_policy_operations(resource_group, None, 'e78961ba-36fe-4739-9212-e3031b4c8db7')
 
     @ResourceGroupPreparer(name_prefix='cli_test_policyset')
     @AllowLargeResponse()
@@ -1026,9 +1044,9 @@ class PolicyScenarioTest(ScenarioTest):
         if not self.in_recording:
             with mock.patch('azure.cli.command_modules.resource.custom._get_subscription_id_from_subscription',
                             return_value=MOCKED_SUBSCRIPTION_ID):
-                self.resource_policyset_operations(resource_group, None, '89aebce6-7c12-4e98-8b32-54b514921a15')
+                self.resource_policyset_operations(resource_group, None, 'e78961ba-36fe-4739-9212-e3031b4c8db7')
         else:
-            self.resource_policyset_operations(resource_group, None, '89aebce6-7c12-4e98-8b32-54b514921a15')
+            self.resource_policyset_operations(resource_group, None, 'e78961ba-36fe-4739-9212-e3031b4c8db7')
 
     @AllowLargeResponse(8192)
     def test_show_built_in_policy(self):
