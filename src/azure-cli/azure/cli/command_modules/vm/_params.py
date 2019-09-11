@@ -115,6 +115,7 @@ def load_arguments(self, _):
         c.argument('os_type', arg_type=get_enum_type(OperatingSystemTypes), help='The Operating System type of the Disk.')
         c.argument('disk_iops_read_write', type=int, min_api='2018-06-01', help='The number of IOPS allowed for this disk. Only settable for UltraSSD disks. One operation can transfer between 4k and 256k bytes')
         c.argument('disk_mbps_read_write', type=int, min_api='2018-06-01', help="The bandwidth allowed for this disk. Only settable for UltraSSD disks. MBps means millions of bytes per second with ISO notation of powers of 10")
+        c.argument('upload_size', type=int, min_api='2019-03-01', help='The size (in bytes) of the contents of the upload including the VHD footer. Min value: 20972032. Max value: 35183298347520')
     # endregion
 
     # region Snapshots
@@ -122,6 +123,7 @@ def load_arguments(self, _):
         c.argument('snapshot_name', existing_snapshot_name, id_part='name', completer=get_resource_name_completion_list('Microsoft.Compute/snapshots'))
         c.argument('name', arg_type=name_arg_type)
         c.argument('sku', arg_type=snapshot_sku)
+        c.argument('incremental', help='Whether a snapshot is incremental. Incremental snapshots on the same disk occupy less space than full snapshots and can be diffed', arg_type=get_three_state_flag())
     # endregion
 
     # region Images
