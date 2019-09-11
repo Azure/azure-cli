@@ -63,9 +63,9 @@ def acr_config_retention_show(cmd,
 def acr_config_retention_update(cmd,
                                 client,
                                 registry_name,
+                                policy_type,  # pylint: disable=unused-argument
                                 status=None,
                                 days=None,
-                                policy_type=None,  # pylint: disable=unused-argument
                                 resource_group_name=None):
     registry, resource_group_name = validate_premium_registry(
         cmd, registry_name, resource_group_name, POLICIES_NOT_SUPPORTED)
