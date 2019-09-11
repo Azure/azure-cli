@@ -18,6 +18,12 @@ Release History
 * vmss update: Add --enable-terminate-notification and --terminate-notification-time parameters to support terminate scheduled event configurability.
 * Update azure-mgmt-compute version to 7.0.0.
 
+**Cosmos DB**
+
+* Add `--type <key-type>` to `az cosmosdb keys list` command to show  key, read only keys or connection strings
+* Add `regenerate` to `az cosmosdb keys` group
+* Deprecate `az cosmosdb list-connection-strings`, `az cosmosdb regenerate-key` and `az cosmosdb list-read-only-keys`
+
 **Key Vault**
 
 * Fix #8840: When using tenant domain name in `az login -t`, `keyvault create` fails. Tenant domain name is now resolved to GUID if it is not.
