@@ -88,6 +88,10 @@ Release History
 
 * Add --blob-type parameter for `az storage copy` command
 
+**Network**
+
+* [BREAKING CHANGE] network vnet subnet list: Fix #10401. `--resource-group` and `--vnet-name` are required now.
+
 2.0.73
 ++++++
 
