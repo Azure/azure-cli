@@ -500,6 +500,13 @@ def load_arguments(self, _):
 
         c.argument('protect_from_scale_in', arg_type=protection_policy_type, help="Protect the VM instance from scale-in operations.")
         c.argument('protect_from_scale_set_actions', arg_type=protection_policy_type, help="Protect the VM instance from scale set actions (including scale-in).")
+        c.argument('enable_terminate_notification', min_api='2019-03-01', arg_type=get_three_state_flag(),
+                   help='Enable terminate notification')
+
+    for scope in ['vmss create', 'vmss update']:
+        with self.argument_context(scope) as c:
+            c.argument('terminate_notification_time', min_api='2019-03-01',
+                       help='Length of time (in minutes, between 5 and 15) a notification to be sent to the VM on the instance metadata server till the VM gets deleted')
 
     for scope, help_prefix in [('vmss update', 'Update the'), ('vmss wait', 'Wait on the')]:
         with self.argument_context(scope) as c:
