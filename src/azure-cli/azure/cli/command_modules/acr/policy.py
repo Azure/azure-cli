@@ -7,11 +7,12 @@ from enum import Enum
 from azure.cli.core.commands import LongRunningOperation
 from ._utils import validate_premium_registry
 
+POLICIES_NOT_SUPPORTED = 'Policies are only supported for managed registries in Premium SKU.'
+
+
 # temporary place holder enum for retention type
 class RetentionType(str, Enum):
     UntaggedManifests = "UntaggedManifests"
-
-POLICIES_NOT_SUPPORTED = 'Policies are only supported for managed registries in Premium SKU.'
 
 
 def acr_config_content_trust_show(cmd,
@@ -64,7 +65,7 @@ def acr_config_retention_update(cmd,
                                 registry_name,
                                 status=None,
                                 days=None,
-                                type=None, # pylint: disable=unused-argument
+                                policy_type=None,  # pylint: disable=unused-argument
                                 resource_group_name=None):
     registry, resource_group_name = validate_premium_registry(
         cmd, registry_name, resource_group_name, POLICIES_NOT_SUPPORTED)

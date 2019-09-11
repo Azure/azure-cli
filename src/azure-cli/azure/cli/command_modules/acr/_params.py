@@ -85,7 +85,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('status', help="Indicates whether retention policy is enabled or disabled.", arg_type=get_enum_type(PolicyStatus))
         c.argument('registry_name', options_list=['--registry', '-r'])
         c.argument('days', type=int, help='The number of days to retain an untagged manifest after which it gets purged (Range: 0 to 365). Value "0" will delete untagged manifests immediately.', validator=validate_retention_days, default=7)
-        c.argument('type', help='The type of retention policy.', default=RetentionType.UntaggedManifests.name, arg_type=get_enum_type(RetentionType))
+        c.argument('policy_type', options_list=['--type'], help='The type of retention policy.', default=RetentionType.UntaggedManifests.name, arg_type=get_enum_type(RetentionType))
 
     with self.argument_context('acr login') as c:
         c.argument('resource_group_name', deprecate_info=c.deprecate(hide=True))
