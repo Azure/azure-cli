@@ -55,8 +55,9 @@ def load_arguments(self, _):
             c.argument('virtual_network_rules', nargs='+', validator=validate_virtual_network_rules, help='ACL\'s for virtual network')
             c.argument('enable_multiple_write_locations', arg_type=get_three_state_flag(), help="Enable Multiple Write Locations")
 
-    with self.argument_context('cosmosdb regenerate-key') as c:
-        c.argument('key_kind', arg_type=get_enum_type(KeyKind))
+    for scope in ['cosmosdb regenerate-key', 'cosmosdb keys regenerate']:
+        with self.argument_context(scope) as c:
+            c.argument('key_kind', arg_type=get_enum_type(KeyKind))
 
     with self.argument_context('cosmosdb failover-priority-change') as c:
         c.argument('failover_policies', validator=validate_failover_policies, help="space-separated failover policies in 'regionName=failoverPriority' format. E.g eastus=0 westus=1", nargs='+')
@@ -65,7 +66,8 @@ def load_arguments(self, _):
         c.argument('account_name', id_part=None)
 
     with self.argument_context('cosmosdb keys list') as c:
-        c.argument('account_name', id_part=None)
+        c.argument('account_name', help="Cosmosdb account name", id_part=None)
+        c.argument('key_type', options_list=['--type'], help="The type of keys to list. Allowed values: keys, read-only-keys, list-connection-strings")
 
     with self.argument_context('cosmosdb network-rule add') as c:
         c.argument('subnet', help="Name or ID of the subnet")

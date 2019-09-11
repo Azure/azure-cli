@@ -29,6 +29,10 @@ from azure.mgmt.cosmosdb.models import (
 
 logger = get_logger(__name__)
 
+KEYS = "keys"
+READ_ONLY_KEYS = "read-only-keys"
+LIST_CONNECTION_STRINGS = "list-connection-strings"
+
 DEFAULT_INDEXING_POLICY = """{
   "indexingMode": "consistent",
   "automatic": true,
@@ -234,6 +238,14 @@ def cli_cosmosdb_list(client, resource_group_name=None):
 
     return client.list()
 
+def cli_cosmosdb_keys(client, resource_group_name, account_name, key_type=KEYS):
+    if key_type.lower() == KEYS.lower():
+        return client.list_keys(resource_group_name, account_name)
+    if key_type.lower() == READ_ONLY_KEYS.lower():
+        return client.list_read_only_keys(resource_group_name, account_name)
+    if key_type.lower() == LIST_CONNECTION_STRINGS.lower():
+        return client.list_connection_strings(resource_group_name, account_name)
+    raise CLIError("az cosmosdb keys list: '%s' is not a valid value for '--type'. See 'az cosmosdb keys list --help'." % key_type)
 
 def cli_cosmosdb_sql_database_create(client,
                                      resource_group_name,
