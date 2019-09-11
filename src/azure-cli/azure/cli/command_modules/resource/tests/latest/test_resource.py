@@ -672,7 +672,8 @@ class PolicyScenarioTest(ScenarioTest):
             self.check('name', '{pan}'),
             self.check('displayName', '{padn}'),
             self.check('sku.name', 'A0'),
-            self.check('sku.tier', 'Free')
+            self.check('sku.tier', 'Free'),
+            self.check('enforcementMode', '{em}')
         ])
 
         # delete the assignment and validate it's gone
@@ -784,6 +785,8 @@ class PolicyScenarioTest(ScenarioTest):
             self.kwargs.update({'mg': management_group})
         if (subscription):
             self.kwargs.update({'sub': subscription})
+
+        time.sleep(60)
 
         # create a policy
         cmd = self.cmdstring('policy definition create -n {pn} --rules {rf} --params {pdf} --display-name {pdn} --description {desc}', management_group, subscription)
@@ -1031,7 +1034,7 @@ class PolicyScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     def test_resource_policyset_management_group(self, resource_group):
         management_group_name = self.create_random_name('cli-test-mgmt-group', 30)
-        self.cmd('account management-group create -n ' + management_group_name)
+        self.cmd('account management-group create -n ' + management_group_name)        
         try:
             self.resource_policyset_operations(resource_group, management_group_name)
         finally:
