@@ -199,10 +199,6 @@ class CliHelpFile(KnackHelpFile):
         if all((supported_profiles, unsupported_profiles)):
             raise HelpAuthoringException("An example cannot have both supported-profiles and unsupported-profiles.")
 
-        if 'min_profile' in ex or 'max_profile' in ex:
-            raise HelpAuthoringException("Help entry fields 'min_profile' and 'max_profile' are no longer supported. "
-                                         "Please use 'supported-profiles' or 'unsupported-profiles'.")
-
         if supported_profiles:
             supported_profiles = [profile.strip() for profile in supported_profiles.split(',')]
             return self.help_ctx.cli_ctx.cloud.profile in supported_profiles
@@ -266,6 +262,7 @@ class CliCommandHelpFile(KnackCommandHelpFile, CliHelpFile):
                 param_kwargs = {
                     'name_source': [action.metavar or action.dest],
                     'deprecate_info': getattr(action, 'deprecate_info', None),
+                    'preview_info': getattr(action, 'preview_info', None),
                     'description': action.help,
                     'choices': action.choices,
                     'required': False,

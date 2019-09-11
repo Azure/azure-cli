@@ -15,6 +15,7 @@ from six import string_types
 from azure.cli.core import AzCommandsLoader, EXCLUDED_PARAMS
 from azure.cli.core.commands import LongRunningOperation, _is_poller, cached_get, cached_put
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.cli.core.commands.events import EVENT_INVOKER_PRE_LOAD_ARGUMENTS
 from azure.cli.core.commands.validators import IterateValue
 from azure.cli.core.util import (
     shell_safe_json_parse, augment_no_wait_handler_args, get_command_type_kwarg, find_child_item)
@@ -221,6 +222,7 @@ def register_ids_argument(cli_ctx):
                         "no other 'Resource Id' arguments should be specified.",
                 'dest': 'ids' if id_arg else '_ids',
                 'deprecate_info': deprecate_info,
+                'is_preview': id_arg.settings.get('is_preview', None) if id_arg else None,
                 'nargs': '+',
                 'arg_group': group_name
             }
@@ -323,9 +325,8 @@ def register_ids_argument(cli_ctx):
 
 def register_global_subscription_argument(cli_ctx):
 
-    import knack.events as events
-
     def add_subscription_parameter(_, **kwargs):
+
         from azure.cli.core._completers import get_subscription_id_list
 
         class SubscriptionNameOrIdAction(argparse.Action):  # pylint:disable=too-few-public-methods
@@ -347,7 +348,8 @@ def register_global_subscription_argument(cli_ctx):
 
         commands_loader = kwargs['commands_loader']
         cmd_tbl = commands_loader.command_table
-        subscription_kwargs = {
+
+        default_sub_kwargs = {
             'help': 'Name or ID of subscription. You can configure the default subscription '
                     'using `az account set -s NAME_OR_ID`',
             'completer': get_subscription_id_list,
@@ -356,11 +358,11 @@ def register_global_subscription_argument(cli_ctx):
             'configured_default': 'subscription',
             'id_part': 'subscription'
         }
-        for _, cmd in cmd_tbl.items():
-            if 'subscription' not in cmd.arguments:
-                cmd.add_argument('_subscription', '--subscription', **subscription_kwargs)
 
-    cli_ctx.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, add_subscription_parameter)
+        for _, cmd in cmd_tbl.items():
+            cmd.add_argument('_subscription', *['--subscription'], **default_sub_kwargs)
+
+    cli_ctx.register_event(EVENT_INVOKER_PRE_LOAD_ARGUMENTS, add_subscription_parameter)
 
 
 add_usage = '--add property.listProperty <key=value, string or JSON string>'

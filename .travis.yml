@@ -19,20 +19,8 @@ jobs:
       env: PURPOSE='Reject PRs to master'
       script: ./scripts/ci/reject_master_prs.sh
     - stage: precheck
-      env: PURPOSE='PEP8'
-      script: ./scripts/ci/precheck_pep8.sh
-      python: 3.6
-    - stage: precheck
-      env: PURPOSE='Headers'
-      script: ./scripts/ci/precheck_header.sh
-      python: 3.6
-    - stage: precheck
       env: PURPOSE='Dependency Check'
-      script: ./scripts/dependency/check.sh
-      python: 3.6
-    - stage: verify
-      env: PURPOSE='Lint Command Table and Help'
-      script: ./scripts/ci/verify_linter.sh
+      script: ./scripts/ci/dependency_check.sh
       python: 3.6
     - stage: unittest
       python: 3.6
@@ -43,33 +31,6 @@ jobs:
       env: TOXENV=py27
       script: ./scripts/ci/unittest.sh
     - stage: verify
-      env:
-      - PURPOSE='Automation'
-      - REDUCE_SDK='True'
-      script: ./scripts/ci/test_automation.sh
-      python: 3.6
-    - stage: verify
-      env: PURPOSE='Automation'
-      script: ./scripts/ci/test_automation.sh
-      python: 2.7
-    - stage: verify
-      env:
-      - PURPOSE='Automation'
-      - REDUCE_SDK='True'
-      - AZURE_CLI_TEST_TARGET_PROFILE='2019-03-01'
-      script: ./scripts/ci/test_automation.sh
-      python: 3.6
-    - stage: verify
-      env:
-      - PURPOSE='Automation'
-      - AZURE_CLI_TEST_TARGET_PROFILE='2018-03-01'
-      script: ./scripts/ci/test_automation.sh
-      python: 3.6
-    - stage: verify
-      script: ./scripts/ci/test_static.sh
-      env: PURPOSE='Static Check'
-      python: 3.6
-    - stage: verify
       script: ./scripts/ci/test_profile_integration.sh
       env: PURPOSE='Integration for profiles'
       python: 3.6
@@ -77,10 +38,6 @@ jobs:
       script: ./scripts/ci/test_profile_integration.sh
       env: PURPOSE='Integration for profiles'
       python: 2.7
-    - stage: verify
-      script: ./scripts/ci/test_perf.sh
-      env: PURPOSE='Module Load Performance'
-      python: 3.6
     - stage: verify
       script: ./scripts/ci/test_ref_doc.sh
       env: PURPOSE='RefDocVerify'

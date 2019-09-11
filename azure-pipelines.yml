@@ -22,10 +22,84 @@ jobs:
       filePath: scripts/release/get_version.sh
 
 
-  - task: PublishBuildArtifacts@1
+  - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: metadata'
     inputs:
+      TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: metadata
+
+- job: VerifyLinuxRequirements
+  displayName: 'Verify src/azure-cli/requirements.*.Linux.txt'
+  condition: succeeded()
+  pool:
+    vmImage: 'ubuntu-16.04'
+
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3'
+    inputs:
+      versionSpec: 3.x
+
+  - bash: ./scripts/ci/dependency_check.sh
+    displayName: 'Verify src/azure-cli/requirements.py3.Linux.txt'
+
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 2'
+    inputs:
+      versionSpec: 2.x
+
+  - bash: ./scripts/ci/dependency_check.sh
+    displayName: 'Verify src/azure-cli/requirements.py2.Linux.txt'
+
+- job: VerifyDarwinRequirements
+  displayName: 'Verify src/azure-cli/requirements.*.Darwin.txt'
+  condition: succeeded()
+  pool:
+    vmImage: 'macOS-10.13'
+
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3'
+    inputs:
+      versionSpec: 3.x
+
+  - bash: ./scripts/ci/dependency_check.sh
+    displayName: 'Verify src/azure-cli/requirements.py3.Darwin.txt'
+
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 2'
+    inputs:
+      versionSpec: 2.x
+
+  - bash: ./scripts/ci/dependency_check.sh
+    displayName: 'Verify src/azure-cli/requirements.py2.Darwin.txt'
+
+- job: VerifyWindowsRequirements
+  displayName: 'Verify src/azure-cli/requirements.*.Windows.txt'
+  condition: succeeded()
+  pool:
+    vmImage: 'vs2017-win2016'
+
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3'
+    inputs:
+      versionSpec: 3.x
+
+  - task: BatchScript@1
+    inputs:
+      filename: ./scripts/ci/dependency_check.bat
+    displayName: 'Verify src/azure-cli/requirements.py3.Windows.txt'
+
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 2'
+    inputs:
+      versionSpec: 2.x
+
+  - task: BatchScript@1
+    inputs:
+      filename: ./scripts/ci/dependency_check.bat
+    displayName: 'Verify src/azure-cli/requirements.py2.Windows.txt'
 
 - job: VerifyVersions
   displayName: Verify Command Module Versions
@@ -57,21 +131,9 @@ jobs:
 
       set -ev
 
-      # TODO: once Azure/azure-cli-dev-tools#56 is fixed, remove grep component of check
-      azdev verify history 2>&1 | grep -e "^OK$"
+      azdev verify history
 
     displayName: 'Verify History'
-
-  - bash: |
-      #!/usr/bin/env bash
-      . ./venv/bin/activate
-
-      set -ev
-
-      # TODO: once Azure/azure-cli-dev-tools#56 is fixed, remove grep component of check
-      azdev cli check-versions 2>&1 >/dev/null | grep "OK!"
-    displayName: 'Verify Versions'
-    condition: succeededOrFailed() # This step should run regardless of whether or not history was found to be invalid.
 
 - job: BuildWindowsMSI
   displayName: Build Windows MSI
@@ -81,9 +143,10 @@ jobs:
   pool:
     vmImage: 'vs2017-win2016'
   steps:
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download Build Artifacts'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
       artifactName: metadata
 
 
@@ -94,11 +157,10 @@ jobs:
        build_scripts/windows/scripts/build.cmd
     displayName: 'Build Windows MSI'
 
-  - task: PublishBuildArtifacts@1
+  - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: MSI'
     inputs:
-      PathtoPublish: 'build_scripts/windows/out/'
-
+      TargetPath: 'build_scripts/windows/out/'
       ArtifactName: msi
 
 - job: TestWindowsMSI
@@ -110,9 +172,10 @@ jobs:
   pool:
     vmImage: 'vs2017-win2016'
   steps:
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download Build Artifacts'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/msi'
       artifactName: msi
 
   - task: PowerShell@2
@@ -148,12 +211,11 @@ jobs:
       filePath: scripts/release/docker/pipeline.sh
 
 
-  - task: PublishBuildArtifacts@1
+  - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: docker image'
     inputs:
+      TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: docker
-
-
 
 - job: TestDockerImage
   displayName: Test Docker Image
@@ -163,15 +225,17 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
       artifactName: metadata
 
 
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download Docker Image'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/docker'
       artifactName: docker
 
 
@@ -187,7 +251,6 @@ jobs:
        docker load < $TAR_FILE
        docker run $IMAGE_NAME /bin/bash -c "time az self-test && time az --version && sleep 5"
     displayName: 'Bash Script'
-
 
 - job: BuildPythonWheel
   displayName: Build Python Wheels
@@ -210,12 +273,11 @@ jobs:
       filePath: scripts/release/pypi/build.sh
 
 
-  - task: PublishBuildArtifacts@1
+  - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: pypi'
     inputs:
+      TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: pypi
-
-
 
 - job: TestPythonWheel
   displayName: Test Python Wheels
@@ -225,15 +287,17 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
       artifactName: metadata
 
 
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download PyPI Packages'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
       artifactName: pypi
 
 
@@ -265,6 +329,108 @@ jobs:
 
     displayName: 'Test pip Install'
 
+- job: RunAutomationFullPython2
+  displayName: Run Automation, Python 2
+  dependsOn: BuildPythonWheel
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 2.7'
+    inputs:
+      versionSpec: 2.7
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Python Wheels'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
+      artifactName: pypi
+  - bash: |
+      pip install --force-reinstall wheel
+  - task: Bash@3
+    displayName: 'Run Test Automation'
+    inputs:
+      targetType: 'filePath'
+      filePath: ./scripts/ci/test_automation.sh
+
+- job: RunAutomationReducedPython3
+  displayName: Run Automation, Python 3
+  dependsOn: BuildPythonWheel
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.6'
+    inputs:
+      versionSpec: 3.6
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Python Wheels'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
+      artifactName: pypi
+  - bash: |
+      pip install --force-reinstall wheel
+  - task: Bash@3
+    displayName: 'Run Test Automation'
+    inputs:
+      targetType: 'filePath'
+      filePath: ./scripts/ci/test_automation.sh
+    env:
+      REDUCE_SDK: 'True'
+
+- job: RunAutomationReduced20190301
+  displayName: Run Automation Reduced
+  dependsOn: BuildPythonWheel
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.6'
+    inputs:
+      versionSpec: 3.6
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Python Wheels'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
+      artifactName: pypi
+  - bash: |
+      pip install --force-reinstall wheel
+  - task: Bash@3
+    displayName: 'Run Test Automation'
+    inputs:
+      targetType: 'filePath'
+      filePath: ./scripts/ci/test_automation.sh
+    env:
+      REDUCE_SDK: 'True'
+      AZURE_CLI_TEST_TARGET_PROFILE: '2019-03-01'
+
+- job: RunAutomationReduced20180301
+  displayName: Run Automation, Profile 2018-03-01
+  dependsOn: BuildPythonWheel
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.6'
+    inputs:
+      versionSpec: 3.6
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Python Wheels'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
+      artifactName: pypi
+  - bash: |
+      pip install --force-reinstall wheel
+  - task: Bash@3
+    displayName: 'Run Test Automation'
+    inputs:
+      targetType: 'filePath'
+      filePath: ./scripts/ci/test_automation.sh
+    env:
+      AZURE_CLI_TEST_TARGET_PROFILE: '2018-03-01'
 
 - job: BuildHomebrewFormula
   displayName: Build Homebrew Formula
@@ -274,15 +440,17 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
       artifactName: metadata
 
 
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download PyPI Packages'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
       artifactName: pypi
 
   - bash: |
@@ -315,12 +483,11 @@ jobs:
        docker rm --force azurecli
     displayName: 'Build homebrew formula'
 
-  - task: PublishBuildArtifacts@1
+  - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: homebrew'
     inputs:
+      TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: homebrew
-
-
 
 - job: TestHomebrewFormula
   displayName: Test Homebrew Formula
@@ -330,15 +497,17 @@ jobs:
   pool:
     vmImage: 'macOS-10.13'
   steps:
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
       artifactName: metadata
 
 
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download Homebrew'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/homebrew'
       artifactName: homebrew
 
 
@@ -362,7 +531,6 @@ jobs:
 
     displayName: 'Bash Script'
 
-
 - job: BuildYumPackage
   displayName: Build Yum Package
 
@@ -378,12 +546,11 @@ jobs:
       filePath: scripts/release/rpm/pipeline.sh
 
 
-  - task: PublishBuildArtifacts@1
+  - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: yum'
     inputs:
+      TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: yum
-
-
 
 - job: TestYumPackage
   displayName: Test Yum Package
@@ -393,15 +560,17 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
       artifactName: metadata
 
 
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download Build Artifacts'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/yum'
       artifactName: yum
 
 
@@ -419,7 +588,6 @@ jobs:
 
     displayName: 'Bash Script'
 
-
 - job: BuildUbuntuXenial
   displayName: Build Ubuntu Xenial Package
 
@@ -428,9 +596,10 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download Build Artifacts'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
       artifactName: pypi
 
 
@@ -443,10 +612,11 @@ jobs:
       DISTRO: xenial
       DISTRO_BASE_IMAGE: ubuntu:xenial
 
-  - task: PublishBuildArtifacts@1
+  - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: debian'
     inputs:
-      ArtifactName: debian
+      TargetPath: $(Build.ArtifactStagingDirectory)
+      ArtifactName: ubuntu-xenial
 
 - job: BuildUbuntuTrusty
   displayName: Build Ubuntu Trusty Package
@@ -456,9 +626,10 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download Build Artifacts'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
       artifactName: pypi
 
 
@@ -472,12 +643,11 @@ jobs:
       DISTRO_BASE_IMAGE: ubuntu:trusty
 
 
-  - task: PublishBuildArtifacts@1
+  - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: debian'
     inputs:
-      ArtifactName: debian
-
-
+      TargetPath: $(Build.ArtifactStagingDirectory)
+      ArtifactName: ubuntu-trusty
 
 - job: BuildUbuntuBionic
   displayName: Build Ubuntu Bionic Package
@@ -487,9 +657,10 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download Build Artifacts'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
       artifactName: pypi
 
 
@@ -503,10 +674,11 @@ jobs:
       DISTRO_BASE_IMAGE: ubuntu:bionic
 
 
-  - task: PublishBuildArtifacts@1
+  - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: debian'
     inputs:
-      ArtifactName: debian
+      TargetPath: $(Build.ArtifactStagingDirectory)
+      ArtifactName: ubuntu-bionic
 
 - job: BuildUbuntuDisco
   displayName: Build Ubuntu Disco Package
@@ -516,9 +688,10 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
-    - task: DownloadBuildArtifacts@0
+    - task: DownloadPipelineArtifact@1
       displayName: 'Download Build Artifacts'
       inputs:
+        TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
         artifactName: pypi
 
 
@@ -532,11 +705,11 @@ jobs:
         DISTRO_BASE_IMAGE: ubuntu:disco
 
 
-    - task: PublishBuildArtifacts@1
+    - task: PublishPipelineArtifact@0
       displayName: 'Publish Artifact: debian'
       inputs:
-        ArtifactName: debian
-
+        TargetPath: $(Build.ArtifactStagingDirectory)
+        ArtifactName: ubuntu-disco
 
 - job: BuildDebianJessie
   displayName: Build Debian Jessie Package
@@ -546,9 +719,10 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download Build Artifacts'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
       artifactName: pypi
 
 
@@ -561,12 +735,11 @@ jobs:
       DISTRO: jessie
       DISTRO_BASE_IMAGE: debian:jessie
 
-  - task: PublishBuildArtifacts@1
+  - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: debian'
     inputs:
-      ArtifactName: debian
-
-
+      TargetPath: $(Build.ArtifactStagingDirectory)
+      ArtifactName: debian-jessie
 
 - job: BuildDebianStretch
   displayName: Build Debian Stretch Package
@@ -576,9 +749,10 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download Build Artifacts'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
       artifactName: pypi
 
 
@@ -591,12 +765,11 @@ jobs:
       DISTRO: stretch
       DISTRO_BASE_IMAGE: debian:stretch
 
-  - task: PublishBuildArtifacts@1
+  - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: debian'
     inputs:
-      ArtifactName: debian
-
-
+      TargetPath: $(Build.ArtifactStagingDirectory)
+      ArtifactName: debian-stretch
 
 - job: TestLinuxPackages
   displayName: Test Linux Packages
@@ -608,20 +781,63 @@ jobs:
    - BuildDebianJessie
    - BuildDebianStretch
    - BuildUbuntuCosmic
+   - BuildUbuntuDisco
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
       artifactName: metadata
 
 
-  - task: DownloadBuildArtifacts@0
-    displayName: 'Download Debian Builds'
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Debian:Stretch Build'
     inputs:
-      artifactName: debian
+      TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
+      artifactName: debian-stretch
+
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Debian:Jessie Builds'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
+      artifactName: debian-jessie
+
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Ubuntu:Bionic Builds'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
+      artifactName: ubuntu-bionic
+
+
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Ubuntu:Cosmic Builds'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
+      artifactName: ubuntu-cosmic
+
+
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Ubuntu:Disco Builds'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
+      artifactName: ubuntu-disco
+
+
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Ubuntu:Xenial Builds'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
+      artifactName: ubuntu-xenial
+
+
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Ubuntu:Trusty Builds'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
+      artifactName: ubuntu-trusty
 
 
   - bash: |
@@ -644,8 +860,8 @@ jobs:
        done
 
        # Distros that do require libssl1.1
-       DISTROS=(bionic cosmic)
-       BASE_IMAGES=(ubuntu:bionic ubuntu:cosmic)
+       DISTROS=(bionic cosmic disco)
+       BASE_IMAGES=(ubuntu:bionic ubuntu:cosmic ubuntu:disco)
 
        for i in ${!DISTROS[@]}; do
            echo "== Test debian package on ${DISTROS[$i]} =="
@@ -666,9 +882,10 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download Build Artifacts'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
       artifactName: pypi
 
 
@@ -681,9 +898,67 @@ jobs:
       DISTRO: cosmic
       DISTRO_BASE_IMAGE: ubuntu:cosmic
 
-  - task: PublishBuildArtifacts@1
+  - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: debian'
     inputs:
-      ArtifactName: debian
+      TargetPath: $(Build.ArtifactStagingDirectory)
+      ArtifactName: ubuntu-cosmic
 
+- job: CheckStyle
+  displayName: "Check CLI Style"
 
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.7'
+    inputs:
+      versionSpec: 3.7
+  - bash: |
+      . scripts/ci/install_azdev.sh
+      pip list
+      azdev style
+
+- job: CheckHeaders
+  displayName: "Check License, History, and DocMap"
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.6'
+    inputs:
+      versionSpec: 3.6
+  - bash: |
+      . scripts/ci/install_azdev.sh
+      azdev verify license
+      azdev verify history
+      azdev verify document-map
+
+- job: CheckLoadPerformance
+  displayName: "Check Module Load Performance"
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.6'
+    inputs:
+      versionSpec: 3.6
+  - bash: |
+      . scripts/ci/install_azdev.sh
+      azdev perf load-times
+
+- job: CheckLinter
+  displayName: "Check CLI Linter"
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.6'
+    inputs:
+      versionSpec: 3.6
+  - bash: |
+      . scripts/ci/install_azdev.sh
+      azdev linter --ci-exclusions

@@ -103,9 +103,17 @@ For clarity, Bash scripts are used inline. Windows batch or PowerScript examples
   2. Check out the Rest API reference for the request payload, URL and API version. As an examplee, check out the community's comments on [how to create AppInsights](https://github.com/Azure/azure-cli/issues/5543).
 
 ## Working behind a proxy
-  Proxy is common behind corporate network or introduced by tracing tools like fiddler, mitmproxy, etc. If the proxy uses self-signed certificates, the Python [requests library](https://github.com/kennethreitz/requests) which CLI depends on will throw `SSLError("bad handshake: Error([('SSL routines', 'tls_process_server_certificate', 'certificate verify failed')],)",)`.  There are 2 ways to handle this error:
+  Proxy is common behind corporate network or introduced by tracing tools like Fiddler, mitmproxy, etc. If the proxy uses self-signed certificates, the Python [requests library](https://github.com/kennethreitz/requests) which CLI depends on will throw `SSLError("bad handshake: Error([('SSL routines', 'tls_process_server_certificate', 'certificate verify failed')],)",)`.  There are 2 ways to handle this error:
   1. Disable the certificate check across the CLI by setting the env var of `AZURE_CLI_DISABLE_CONNECTION_VERIFICATION` to any value. This is not safe, but good for a short period like you want to capture a trace for a specific command and promptly turn it off after done.
-  2. Set env var of `REQUESTS_CA_BUNDLE` to the file path of the proxy server's certificate. This is recommended if you use CLI frequently behind a corporate proxy. 
+  2. Set env var of `REQUESTS_CA_BUNDLE` to the CA bundle certificate in PEM format. This is recommended if you use CLI frequently behind a corporate proxy. The default CA bundle which CLI uses is located at `C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\Lib\site-packages\certifi\cacert.pem` on Windows and ` /opt/az/lib/python3.6/site-packages/certifi/cacert.pem` on Linux. You may append the proxy server's certificate to this file or copy the contents to another certificate file, then set `REQUESTS_CA_BUNDLE` to it. For example:
+  
+```
+<Original cacert.pem>
+
+-----BEGIN CERTIFICATE-----
+<Your proxy's certificate here> 
+-----END CERTIFICATE-----
+```
 
   A frequent ask is whether or not `HTTP_PROXY` or `HTTPS_PROXY` envionment variables should be set, the answer is it depends. For fiddler on Windows, by default it acts as system proxy on start, you don't need to set anything. If the option is off or using other tools which don't work as system proxy, you should set them. Since almost all traffics from CLI are SSL based, so only `HTTPS_PROXY` should be set. If you are not sure, just set them, but do remember to unset it after the proxy is shut down. For fiddler, the default value is `http://localhost:8888`.
 
@@ -116,7 +124,7 @@ For clarity, Bash scripts are used inline. Windows batch or PowerScript examples
 If you are using az on a build machine, and multiple jobs can be run in parallel, then there is a risk that the login tokens are shared between two build jobs is the jobs run as the same OS user.  To avoid mix ups like this, set AZURE_CONFIG_DIR to a directory where the login tokens should be stored.  It could be a randomly created folder, or just the name of the jenkins workspace, like this ```AZURE_CONFIG_DIR=.```
 
 ## Appendix
-   ### Windows batch scripts for saving to variables and using it later 
+### Windows batch scripts for saving to variables and using it later
        
        ECHO OFF
        SETLOCAL
@@ -125,12 +133,12 @@ If you are using az on a build machine, and multiple jobs can be run in parallel
        )
        az vm stop --ids %vm_ids% :: CLI stops all VMs in parallel 
 
-   ### Windows PowerShell scrips for saving to variables and using it later 
+### Windows PowerShell scrips for saving to variables and using it later
 
        $vm_ids=(az vm list -d -g my_rg --query "[?powerState=='VM running'].id" -o tsv)
        az vm stop --ids $vm_ids # CLI stops all VMs in parallel 
 
-   ### Windows batch scripts to loop through a list
+### Windows batch scripts to loop through a list
        ECHO OFF
        SETLOCAL
        FOR /F "tokens=* USEBACKQ" %%F IN (`az vm list -d -g my_rg --query "[?powerState=='VM running'].id" -o tsv`) DO (
@@ -138,9 +146,16 @@ If you are using az on a build machine, and multiple jobs can be run in parallel
            az vm stop --ids %%F
        )
 
-   ### Windows PowerShell scrips to loop through a list
+### Windows PowerShell scrips to loop through a list
        $vm_ids=(az vm list -d -g my_rg --query "[?powerState=='VM running'].id" -o tsv)
        foreach ($vm_id in $vm_ids) {
            Write-Output "Stopping $vm_id"
            az vm stop --ids $vm_id
        }
+
+### CLI Environment Variables
+
+|  Environment Variable          | Description            |
+|--------------------------------|------------------------|
+| **AZURE_CONFIG_DIR**           | Global config directory for config files, logs and telemetry. If unspecified, defaults to `~/.azure`. |
+| **AZURE_EXTENSION_DIR**        | Extensions' installation directory. If unspecified, defaults to cliextensions directory within the global config directory. |

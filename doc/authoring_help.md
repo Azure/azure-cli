@@ -4,7 +4,7 @@ Help authoring for commands is done in a number of places, all of which are cont
 
 ## YAML Help Authoring ##
 
-The YAML syntax is described [here](http://www.yaml.org/spec/1.2/spec.html "here").
+If you're not familiar with YAML, see the [YAML specification](http://www.yaml.org/spec/1.2/spec.html).
 
 To override help for a given command:
 
@@ -74,72 +74,6 @@ helps['account'] = """
             """
 </pre>
 
-
-### Example YAML help file, help.yaml (Version 1) ###
-<pre>
-#---------------------------------------------------------------------------------------------
-# Copyright (c) Microsoft Corporation. All rights reserved.
-# Licensed under the MIT License. See License.txt in the project root for license information.
-#---------------------------------------------------------------------------------------------
-
-version: 1
-
-content:
-
-- command:
-    name: account clear
-    summary: Clear account
-    description: Longer summary of how the dummy account clear command works
-    links:
-      - title: Azure Accounts Webpage
-        url: https://azure.microsoft.com/en-us/account/
-      - url: https://aka.ms/just-a-url
-    arguments:
-      - name: --account-name
-        summary: Account name
-        description: |
-          Longer summary with newlines preserved.
-          Preserving newlines is helpful for paragraph breaks.
-        value-sources:
-          - link:
-              title: List accounts
-              command: az account list
-          - link:
-              title: Show an accounts details
-              command: az account show
-          - link:
-              title: Azure Accounts Webpage
-              url: https://azure.microsoft.com/en-us/account/
-          - link:
-              title: Azure Billing Documentation
-              url: https://docs.microsoft.com/en-us/azure/billing/
-          - string:
-              "Account name should be lower case with no numbers or special symbol."
-    examples:
-    - summary: Clear an account
-      description: >
-        This is a longer description of the example.
-        The > character collapses multiple lines into a single line,
-        which is good for on-screen wrapping.
-      command: |
-        az account clear --acount-name myaccount
-
-</pre>
-
-You can also document groups using a similar format.
-
-<pre>
-
-- group:
-    name: account
-    summary: Manage Azure accounts
-    description: Longer summary of the account command group
-    links:
-      - title: Azure Accounts Webpage
-        url: https://azure.microsoft.com/en-us/account/
-      - url: https://aka.ms/just-a-url
-</pre>
-
 # Tips to write effective help for your command
 
 - Make sure the doc contains all the details that someone unfamiliar with the API needs to use the command.
@@ -168,7 +102,6 @@ Here are the layers of Project Az help, with each layer overriding the layer bel
 
 | Help Display                  |
 |-------------------------------|
-| YAML Authoring via *help.yaml*|
 | YAML Authoring via *_help.py* |
 | Code Specified                |
 | Docstring                     |
@@ -213,20 +146,6 @@ The first example is only supported on the `latest` and `2018-03-01-hybrid` prof
           supported-profiles: 2017-03-09-profile
 ```
 
-### help.yaml
-
-```
-    examples:
-        - summary: Create a storage account MyStorageAccount in resource group MyResourceGroup in the West US region with locally redundant storage.
-          command: az storage account create -n MyStorageAccount -g MyResourceGroup -l westus --sku Standard_LRS
-          supported-profiles: latest, 2018-03-01-hybrid
-          # alternatively 
-          # supported-profiles: latest, 2018-03-01-hybrid
-        - summary: Create a storage account MyStorageAccount in resource group MyResourceGroup in the West US region with locally redundant storage.
-          command: az storage account create -n MyStorageAccount -g MyResourceGroup -l westus --account-type Standard_LRS
-          supported-profiles: 2017-03-09-profile
-```
-
 Here is how this looks in CLI `--help`:
 
 On profiles `latest` and `2018-03-01-hybrid`.
@@ -251,7 +170,7 @@ Examples
 
 The help that you author above will be available online as reference documentation.
 
-https://docs.microsoft.com/en-us/cli/azure/reference-index
+https://docs.microsoft.com/cli/azure/reference-index
 
 If you are not satisfied with the heading that is automatically provided, please create a PR to update the following file:
 

@@ -1,0 +1,1041 @@
+interactions:
+- request:
+    body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
+      "date": "2019-05-30T21:36:04Z"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '110'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --location --name --tag
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_lock_with_resource_id000001?api-version=2018-05-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001","name":"cli_test_lock_with_resource_id000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-05-30T21:36:04Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '384'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 30 May 2019 21:36:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_lock_with_resource_id000001?api-version=2018-05-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001","name":"cli_test_lock_with_resource_id000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-05-30T21:36:04Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '384'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 30 May 2019 21:36:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
+      ["10.0.0.0/16"]}, "dhcpOptions": {}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '123'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001/providers/Microsoft.Network/virtualNetworks/cli-lock-vnet000002?api-version=2019-04-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cli-lock-vnet000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001/providers/Microsoft.Network/virtualNetworks/cli-lock-vnet000002\",\r\n
+        \ \"etag\": \"W/\\\"1d9c06eb-99cf-41ef-a702-a6ea9a8e686c\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
+        \   \"resourceGuid\": \"a2bb3861-8e7f-43c7-8038-965b8480918a\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/75b3417c-750a-475c-8be9-c699a4dbc402?api-version=2019-04-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '816'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 30 May 2019 21:36:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/75b3417c-750a-475c-8be9-c699a4dbc402?api-version=2019-04-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 30 May 2019 21:36:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001/providers/Microsoft.Network/virtualNetworks/cli-lock-vnet000002?api-version=2019-04-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cli-lock-vnet000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001/providers/Microsoft.Network/virtualNetworks/cli-lock-vnet000002\",\r\n
+        \ \"etag\": \"W/\\\"e13155b1-14e0-4da2-aba4-14574717e77b\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"a2bb3861-8e7f-43c7-8038-965b8480918a\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '817'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 30 May 2019 21:36:11 GMT
+      etag:
+      - W/"e13155b1-14e0-4da2-aba4-14574717e77b"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --address-prefix --vnet-name -g
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001/providers/Microsoft.Network/virtualNetworks/cli-lock-vnet000002?api-version=2019-04-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cli-lock-vnet000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001/providers/Microsoft.Network/virtualNetworks/cli-lock-vnet000002\",\r\n
+        \ \"etag\": \"W/\\\"e13155b1-14e0-4da2-aba4-14574717e77b\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"a2bb3861-8e7f-43c7-8038-965b8480918a\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '817'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 30 May 2019 21:36:11 GMT
+      etag:
+      - W/"e13155b1-14e0-4da2-aba4-14574717e77b"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: 'b''b\''b\\\''{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001/providers/Microsoft.Network/virtualNetworks/cli-lock-vnet000002",
+      "location": "westus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
+      ["10.0.0.0/16"]}, "dhcpOptions": {"dnsServers": []}, "subnets": [{"properties":
+      {"addressPrefix": "10.0.0.0/16"}, "name": "cli-lock-subnet000003"}], "virtualNetworkPeerings":
+      [], "resourceGuid": "a2bb3861-8e7f-43c7-8038-965b8480918a", "provisioningState":
+      "Succeeded", "enableDdosProtection": false, "enableVmProtection": false}, "etag":
+      "W/\\\\\\\\"e13155b1-14e0-4da2-aba4-14574717e77b\\\\\\\\""}\\\''\'''''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '705'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n --address-prefix --vnet-name -g
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001/providers/Microsoft.Network/virtualNetworks/cli-lock-vnet000002?api-version=2019-04-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cli-lock-vnet000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001/providers/Microsoft.Network/virtualNetworks/cli-lock-vnet000002\",\r\n
+        \ \"etag\": \"W/\\\"405b2bcc-ca12-4941-a4ac-cf9feb03690d\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
+        \   \"resourceGuid\": \"a2bb3861-8e7f-43c7-8038-965b8480918a\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"cli-lock-subnet000003\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001/providers/Microsoft.Network/virtualNetworks/cli-lock-vnet000002/subnets/cli-lock-subnet000003\",\r\n
+        \       \"etag\": \"W/\\\"405b2bcc-ca12-4941-a4ac-cf9feb03690d\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/16\",\r\n          \"delegations\":
+        []\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/6f113447-5112-4b6f-b051-a94ec01719b4?api-version=2019-04-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1443'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 30 May 2019 21:36:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --address-prefix --vnet-name -g
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/6f113447-5112-4b6f-b051-a94ec01719b4?api-version=2019-04-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 30 May 2019 21:36:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --address-prefix --vnet-name -g
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001/providers/Microsoft.Network/virtualNetworks/cli-lock-vnet000002?api-version=2019-04-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cli-lock-vnet000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001/providers/Microsoft.Network/virtualNetworks/cli-lock-vnet000002\",\r\n
+        \ \"etag\": \"W/\\\"5c348995-1dd8-4297-bfd6-631fdd43971d\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"a2bb3861-8e7f-43c7-8038-965b8480918a\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"cli-lock-subnet000003\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lock_with_resource_id000001/providers/Microsoft.Network/virtualNetworks/cli-lock-vnet000002/subnets/cli-lock-subnet000003\",\r\n
+        \       \"etag\": \"W/\\\"5c348995-1dd8-4297-bfd6-631fdd43971d\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/16\",\r\n          \"delegations\":
+        []\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1445'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 30 May 2019 21:36:16 GMT
+      etag:
+      - W/"5c348995-1dd8-4297-bfd6-631fdd43971d"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"level": "CanNotDelete"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - resource lock create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '41'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n --resource --lock-type
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 managementlockclient/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_lock_with_resource_id000001/providers/Microsoft.Network/virtualNetworks/cli-lock-vnet000002/providers/Microsoft.Authorization/locks/cli-test-lock000004?api-version=2016-09-01
+  response:
+    body:
+      string: '{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_lock_with_resource_id000001/providers/Microsoft.Network/virtualNetworks/cli-lock-vnet000002/providers/Microsoft.Authorization/locks/cli-test-lock000004","type":"Microsoft.Authorization/locks","name":"cli-test-lock000004"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '454'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 30 May 2019 21:36:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"properties": {"level": "CanNotDelete"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - lock create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '41'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n --resource --lock-type
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 managementlockclient/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_lock_with_resource_id000001/providers/Microsoft.Network/virtualNetworks/cli-lock-vnet000002/subnets/cli-lock-subnet000003/providers/Microsoft.Authorization/locks/cli-test-lock000005?api-version=2016-09-01
+  response:
+    body:
+      string: '{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_lock_with_resource_id000001/providers/Microsoft.Network/virtualNetworks/cli-lock-vnet000002/subnets/cli-lock-subnet000003/providers/Microsoft.Authorization/locks/cli-test-lock000005","type":"Microsoft.Authorization/locks","name":"cli-test-lock000005"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '433'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 30 May 2019 21:36:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - resource lock show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 managementlockclient/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks?api-version=2016-09-01
+  response:
+    body:
+      string: '{"value":[{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_lock_with_resource_id000001/providers/Microsoft.Network/virtualNetworks/cli-lock-vnet000002/providers/Microsoft.Authorization/locks/cli-test-lock000004","type":"Microsoft.Authorization/locks","name":"cli-test-lock000004"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_lock_with_resource_id000001/providers/Microsoft.Network/virtualNetworks/cli-lock-vnet000002/subnets/cli-lock-subnet000003/providers/Microsoft.Authorization/locks/cli-test-lock000005","type":"Microsoft.Authorization/locks","name":"cli-test-lock000005"},{"properties":{"level":"CanNotDelete","notes":"Prevent
+        deleting my cloudshell store"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mccloudshellstore/providers/Microsoft.Authorization/locks/mccloudshellstorelock","type":"Microsoft.Authorization/locks","name":"mccloudshellstorelock"},{"properties":{"level":"CanNotDelete","notes":"Automation
+        account for automation repros"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/automationrepro2/providers/Microsoft.Authorization/locks/NoDeleteRG","type":"Microsoft.Authorization/locks","name":"NoDeleteRG"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cleanupservice/providers/Microsoft.Authorization/locks/donotdelete","type":"Microsoft.Authorization/locks","name":"donotdelete"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1755'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 30 May 2019 21:36:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - resource lock show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 managementlockclient/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_lock_with_resource_id000001/providers/Microsoft.Network/virtualNetworks/cli-lock-vnet000002/providers/Microsoft.Authorization/locks/cli-test-lock000004?api-version=2016-09-01
+  response:
+    body:
+      string: '{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_lock_with_resource_id000001/providers/Microsoft.Network/virtualNetworks/cli-lock-vnet000002/providers/Microsoft.Authorization/locks/cli-test-lock000004","type":"Microsoft.Authorization/locks","name":"cli-test-lock000004"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '454'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 30 May 2019 21:36:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - lock show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 managementlockclient/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks?api-version=2016-09-01
+  response:
+    body:
+      string: '{"value":[{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_lock_with_resource_id000001/providers/Microsoft.Network/virtualNetworks/cli-lock-vnet000002/providers/Microsoft.Authorization/locks/cli-test-lock000004","type":"Microsoft.Authorization/locks","name":"cli-test-lock000004"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_lock_with_resource_id000001/providers/Microsoft.Network/virtualNetworks/cli-lock-vnet000002/subnets/cli-lock-subnet000003/providers/Microsoft.Authorization/locks/cli-test-lock000005","type":"Microsoft.Authorization/locks","name":"cli-test-lock000005"},{"properties":{"level":"CanNotDelete","notes":"Prevent
+        deleting my cloudshell store"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mccloudshellstore/providers/Microsoft.Authorization/locks/mccloudshellstorelock","type":"Microsoft.Authorization/locks","name":"mccloudshellstorelock"},{"properties":{"level":"CanNotDelete","notes":"Automation
+        account for automation repros"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/automationrepro2/providers/Microsoft.Authorization/locks/NoDeleteRG","type":"Microsoft.Authorization/locks","name":"NoDeleteRG"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cleanupservice/providers/Microsoft.Authorization/locks/donotdelete","type":"Microsoft.Authorization/locks","name":"donotdelete"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1755'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 30 May 2019 21:36:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - lock show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 managementlockclient/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_lock_with_resource_id000001/providers/Microsoft.Network/virtualNetworks/cli-lock-vnet000002/subnets/cli-lock-subnet000003/providers/Microsoft.Authorization/locks/cli-test-lock000005?api-version=2016-09-01
+  response:
+    body:
+      string: '{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_lock_with_resource_id000001/providers/Microsoft.Network/virtualNetworks/cli-lock-vnet000002/subnets/cli-lock-subnet000003/providers/Microsoft.Authorization/locks/cli-test-lock000005","type":"Microsoft.Authorization/locks","name":"cli-test-lock000005"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '433'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 30 May 2019 21:36:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - resource lock delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 managementlockclient/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks?api-version=2016-09-01
+  response:
+    body:
+      string: '{"value":[{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_lock_with_resource_id000001/providers/Microsoft.Network/virtualNetworks/cli-lock-vnet000002/providers/Microsoft.Authorization/locks/cli-test-lock000004","type":"Microsoft.Authorization/locks","name":"cli-test-lock000004"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_lock_with_resource_id000001/providers/Microsoft.Network/virtualNetworks/cli-lock-vnet000002/subnets/cli-lock-subnet000003/providers/Microsoft.Authorization/locks/cli-test-lock000005","type":"Microsoft.Authorization/locks","name":"cli-test-lock000005"},{"properties":{"level":"CanNotDelete","notes":"Prevent
+        deleting my cloudshell store"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mccloudshellstore/providers/Microsoft.Authorization/locks/mccloudshellstorelock","type":"Microsoft.Authorization/locks","name":"mccloudshellstorelock"},{"properties":{"level":"CanNotDelete","notes":"Automation
+        account for automation repros"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/automationrepro2/providers/Microsoft.Authorization/locks/NoDeleteRG","type":"Microsoft.Authorization/locks","name":"NoDeleteRG"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cleanupservice/providers/Microsoft.Authorization/locks/donotdelete","type":"Microsoft.Authorization/locks","name":"donotdelete"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1755'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 30 May 2019 21:36:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - resource lock delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --name --resource
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 managementlockclient/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_lock_with_resource_id000001/providers/Microsoft.Network/virtualNetworks/cli-lock-vnet000002/providers/Microsoft.Authorization/locks/cli-test-lock000004?api-version=2016-09-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Thu, 30 May 2019 21:36:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14998'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - lock delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 managementlockclient/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks?api-version=2016-09-01
+  response:
+    body:
+      string: '{"value":[{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_lock_with_resource_id000001/providers/Microsoft.Network/virtualNetworks/cli-lock-vnet000002/providers/Microsoft.Authorization/locks/cli-test-lock000004","type":"Microsoft.Authorization/locks","name":"cli-test-lock000004"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_lock_with_resource_id000001/providers/Microsoft.Network/virtualNetworks/cli-lock-vnet000002/subnets/cli-lock-subnet000003/providers/Microsoft.Authorization/locks/cli-test-lock000005","type":"Microsoft.Authorization/locks","name":"cli-test-lock000005"},{"properties":{"level":"CanNotDelete","notes":"Prevent
+        deleting my cloudshell store"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mccloudshellstore/providers/Microsoft.Authorization/locks/mccloudshellstorelock","type":"Microsoft.Authorization/locks","name":"mccloudshellstorelock"},{"properties":{"level":"CanNotDelete","notes":"Automation
+        account for automation repros"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/automationrepro2/providers/Microsoft.Authorization/locks/NoDeleteRG","type":"Microsoft.Authorization/locks","name":"NoDeleteRG"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cleanupservice/providers/Microsoft.Authorization/locks/donotdelete","type":"Microsoft.Authorization/locks","name":"donotdelete"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1755'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 30 May 2019 21:36:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - lock delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --name --resource
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 managementlockclient/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_lock_with_resource_id000001/providers/Microsoft.Network/virtualNetworks/cli-lock-vnet000002/subnets/cli-lock-subnet000003/providers/Microsoft.Authorization/locks/cli-test-lock000005?api-version=2016-09-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Thu, 30 May 2019 21:36:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --name --yes --no-wait
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_lock_with_resource_id000001?api-version=2018-05-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Thu, 30 May 2019 21:36:28 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGTE9DSzo1RldJVEg6NUZSRVNPVVJDRTo1RklEQUtPRVo3NXw4RUYyMEU1MjkzRjA1OTQxLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 202
+      message: Accepted
+version: 1

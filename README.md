@@ -2,7 +2,7 @@
 
 [![Python](https://img.shields.io/pypi/pyversions/azure-cli.svg?maxAge=2592000)](https://pypi.python.org/pypi/azure-cli)
 [![Travis](https://travis-ci.org/Azure/azure-cli.svg?branch=dev)](https://travis-ci.org/Azure/azure-cli)
-[![Build Status](https://dev.azure.com/azure-public/azcli/_apis/build/status/azcli-CI?branchName=dev)](https://dev.azure.com/azure-public/azcli/_build/latest?definitionId=18&branchName=dev)
+[![Build Status](https://dev.azure.com/azure-sdk/public/_apis/build/status/cli/Azure.azure-cli?branchName=dev)](https://dev.azure.com/azure-sdk/public/_build/latest?definitionId=246&branchName=dev)
 [![Slack](https://img.shields.io/badge/Slack-azurecli.slack.com-blue.svg)](https://azurecli.slack.com)
 
 A great cloud needs great tools; we're excited to introduce *Azure CLI*, our next generation multi-platform command line experience for Azure.
@@ -13,7 +13,7 @@ Take a test run now from Azure Cloud Shell!
 
 ## Installation
 
-Please refer to the [install guide](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) for detailed install instructions.
+Please refer to the [install guide](https://docs.microsoft.com/cli/azure/install-azure-cli) for detailed install instructions.
 
 A list of common install issues and their resolutions are available at [install troubleshooting](https://github.com/Azure/azure-cli/blob/dev/doc/install_troubleshooting.md).
 
@@ -31,7 +31,7 @@ $ az [ group ] [ subgroup ] [ command ] {parameters}
 
 ### Get Started
 
-Please refer to the ["get started" guide](https://docs.microsoft.com/en-us/cli/azure/get-started-with-az-cli2) for in-depth instructions.
+Please refer to the ["get started" guide](https://docs.microsoft.com/cli/azure/get-started-with-az-cli2) for in-depth instructions.
 
 For usage and help content, pass in the `-h` parameter, for example:
 
@@ -77,31 +77,6 @@ demo32111vm             Windows
 dcos-master-39DB807E-0  Linux
 ```
 
-#### Creating a VM
-The following block creates a new resource group in the 'westus' region, then creates a new Ubuntu VM.  We automatically provide a series of smart defaults, such as setting up SSH with your  `~/.ssh/id_rsa.pub` key.  For more details, try `az vm create -h`.
-
-```bash
-$ az group create -l westus -n MyGroup
-Name     Location
--------  ----------
-MyGroup  westus
-
-$ az vm create -g MyGroup -n MyVM --image ubuntults
-MacAddress         ResourceGroup    PublicIpAddress    PrivateIpAddress
------------------  ---------------  -----------------  ------------------
-00-0D-3A-30-B2-D7  MyGroup          52.160.111.118     10.0.0.4
-
-$ ssh 52.160.111.118
-Welcome to Ubuntu 14.04.4 LTS (GNU/Linux 3.19.0-65-generic x86_64)
-
-System information as of Thu Sep 15 20:47:31 UTC 2016
-
-System load: 0.39              Memory usage: 2%   Processes:       80
-Usage of /:  39.6% of 1.94GB   Swap usage:   0%   Users logged in: 0
-
-jasonsha@MyVM:~$
-```
-
 #### Exit Codes
 For scripting purposes, we output certain exit codes for differing scenarios.
 
@@ -113,7 +88,7 @@ For scripting purposes, we output certain exit codes for differing scenarios.
 |3   |Missing ARM resource; used for existence check from `show` commands.   |
 
 #### More Samples and Snippets
-For more usage examples, take a look at our [GitHub samples repo](http://github.com/Azure/azure-cli-samples) or [https://docs.microsoft.com/en-us/cli/azure/overview](https://docs.microsoft.com/en-us/cli/azure/overview).
+For more usage examples, take a look at our [GitHub samples repo](http://github.com/Azure/azure-cli-samples) or [https://docs.microsoft.com/cli/azure/overview](https://docs.microsoft.com/cli/azure/overview).
 
 For how to use CLI effectively, check out [tips](./doc/use_cli_effectively.md).
 
@@ -157,27 +132,14 @@ You can easily install the latest Homebrew edge build with the following command
 brew install $(curl -Ls -o /dev/null -w %{url_effective} https://aka.ms/InstallAzureCliHomebrewEdge)
 ```
 
-Here's an example of installing edge dev builds with pip in a virtual environment.
-
-```bash
-$ virtualenv env
-$ . env/bin/activate
-$ pip install --pre azure-cli --extra-index-url https://azurecliprod.blob.core.windows.net/edge
-```
-
-To upgrade your current edge build pass the `--upgrade` option. The `--no-cache-dir` option is also recommended since
-the feed is frequently updated.
-
-```bash
-$ pip install --upgrade --pre azure-cli --extra-index-url https://azurecliprod.blob.core.windows.net/edge --no-cache-dir
-```
-
-The edge build is generated for each push to the `dev` branch as a part of the Travis CI build. The version of the edge build follows
-
 
 ## Developer Setup
-If you would like to setup a development environment and contribute to the CLI, see
-[Configuring Your Machine](https://github.com/Azure/azure-cli/blob/dev/doc/configuring_your_machine.md).
+
+If you would like to setup a development environment and contribute to the CLI, see:
+
+[Configuring Your Machine](https://github.com/Azure/azure-cli/blob/dev/doc/configuring_your_machine.md)
+
+[Authoring Command Modules](https://github.com/Azure/azure-cli/tree/dev/doc/authoring_command_modules)
 
 ## Contribute Code
 
@@ -187,7 +149,3 @@ For more information see the [Code of Conduct FAQ](https://opensource.microsoft.
 
 If you would like to become an active contributor to this project please
 follow the instructions provided in [Microsoft Azure Projects Contribution Guidelines](http://azure.github.io/guidelines.html).
-
-## Automation
-
-- [How to write scenario based VCR test](https://github.com/Azure/azure-cli/blob/dev/doc/authoring_tests.md)

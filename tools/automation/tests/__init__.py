@@ -138,7 +138,7 @@ def get_test_index(args):
         with open(test_index_path, 'r') as f:
             test_index = json.loads(''.join(f.readlines()))
     else:
-        display('No test index found. Building test')
+        display('No test index found. Building test index.')
         test_index = discover_tests(args)
         with open(test_index_path, 'w') as f:
             f.write(json.dumps(test_index))

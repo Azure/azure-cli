@@ -1,0 +1,2675 @@
+interactions:
+- request:
+    body: '{"location": "westcentralus", "tags": {"product": "azurecli", "cause":
+      "automation", "date": "2019-06-03T22:59:33Z"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '117'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --location --name --tag
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clieventgridrg000001?api-version=2018-05-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001","name":"clieventgridrg000001","location":"westcentralus","tags":{"product":"azurecli","cause":"automation","date":"2019-06-03T22:59:33Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '391'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 22:59:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"sku": {"name": "Standard_LRS"}, "kind": "Storage", "location": "westcentralus"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '81'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g -l --sku
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-storage/3.3.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002?api-version=2019-04-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      content-type:
+      - text/plain; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 22:59:38 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westcentralus/asyncoperations/e026ef72-49bb-4298-ab7c-f8a02a5df2d2?monitor=true&api-version=2018-11-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l --sku
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-storage/3.3.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westcentralus/asyncoperations/e026ef72-49bb-4298-ab7c-f8a02a5df2d2?monitor=true&api-version=2018-11-01
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002","name":"clieventgrid000002","type":"Microsoft.Storage/storageAccounts","location":"westcentralus","tags":{},"properties":{"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":false,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2019-06-03T22:59:37.8539241Z"},"blob":{"enabled":true,"lastEnabledTime":"2019-06-03T22:59:37.8539241Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2019-06-03T22:59:37.7758031Z","primaryEndpoints":{"blob":"https://clieventgrid000002.blob.core.windows.net/","queue":"https://clieventgrid000002.queue.core.windows.net/","table":"https://clieventgrid000002.table.core.windows.net/","file":"https://clieventgrid000002.file.core.windows.net/"},"primaryLocation":"westcentralus","statusOfPrimary":"available"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1183'
+      content-type:
+      - application/json
+      date:
+      - Mon, 03 Jun 2019 22:59:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account keys list
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g --query -o
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-storage/3.3.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/listKeys?api-version=2019-04-01
+  response:
+    body:
+      string: '{"keys":[{"keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '288'
+      content-type:
+      - application/json
+      date:
+      - Mon, 03 Jun 2019 22:59:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"sku": {"name": "Standard_LRS"}, "kind": "Storage", "location": "westcentralus"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '81'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --sku -l
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-storage/3.3.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002?api-version=2019-04-01
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002","name":"clieventgrid000002","type":"Microsoft.Storage/storageAccounts","location":"westcentralus","tags":{},"properties":{"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":false,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2019-06-03T22:59:37.8539241Z"},"blob":{"enabled":true,"lastEnabledTime":"2019-06-03T22:59:37.8539241Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2019-06-03T22:59:37.7758031Z","primaryEndpoints":{"blob":"https://clieventgrid000002.blob.core.windows.net/","queue":"https://clieventgrid000002.queue.core.windows.net/","table":"https://clieventgrid000002.table.core.windows.net/","file":"https://clieventgrid000002.file.core.windows.net/"},"primaryLocation":"westcentralus","statusOfPrimary":"available"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1183'
+      content-type:
+      - application/json
+      date:
+      - Mon, 03 Jun 2019 22:59:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --set
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-storage/3.3.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002?api-version=2019-04-01
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002","name":"clieventgrid000002","type":"Microsoft.Storage/storageAccounts","location":"westcentralus","tags":{},"properties":{"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":false,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2019-06-03T22:59:37.8539241Z"},"blob":{"enabled":true,"lastEnabledTime":"2019-06-03T22:59:37.8539241Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2019-06-03T22:59:37.7758031Z","primaryEndpoints":{"blob":"https://clieventgrid000002.blob.core.windows.net/","queue":"https://clieventgrid000002.queue.core.windows.net/","table":"https://clieventgrid000002.table.core.windows.net/","file":"https://clieventgrid000002.file.core.windows.net/"},"primaryLocation":"westcentralus","statusOfPrimary":"available"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1183'
+      content-type:
+      - application/json
+      date:
+      - Mon, 03 Jun 2019 22:59:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"sku": {"name": "Standard_LRS"}, "tags": {}, "properties": {"encryption":
+      {"services": {"blob": {"enabled": true}, "file": {"enabled": true}}, "keySource":
+      "Microsoft.Storage"}, "supportsHttpsTrafficOnly": false, "networkAcls": {"bypass":
+      "AzureServices", "virtualNetworkRules": [], "ipRules": [], "defaultAction":
+      "Allow"}}, "kind": "StorageV2"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '347'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --set
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-storage/3.3.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002?api-version=2019-04-01
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002","name":"clieventgrid000002","type":"Microsoft.Storage/storageAccounts","location":"westcentralus","tags":{},"properties":{"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":false,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2019-06-03T22:59:37.8539241Z"},"blob":{"enabled":true,"lastEnabledTime":"2019-06-03T22:59:37.8539241Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2019-06-03T22:59:37.7758031Z","primaryEndpoints":{"dfs":"https://clieventgrid000002.dfs.core.windows.net/","web":"https://clieventgrid000002.z4.web.core.windows.net/","blob":"https://clieventgrid000002.blob.core.windows.net/","queue":"https://clieventgrid000002.queue.core.windows.net/","table":"https://clieventgrid000002.table.core.windows.net/","file":"https://clieventgrid000002.file.core.windows.net/"},"primaryLocation":"westcentralus","statusOfPrimary":"available"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1333'
+      content-type:
+      - application/json
+      date:
+      - Mon, 03 Jun 2019 23:00:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"destination": {"endpointType": "WebHook", "properties":
+      {"endpointUrl": "https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid?functionName=EventGridTrigger1&code=<HIDDEN>"}},
+      "filter": {"isSubjectCaseSensitive": false}, "retryPolicy": {"maxDeliveryAttempts":
+      30, "eventTimeToLiveInMinutes": 1440}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '388'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --source-resource-id --name --endpoint
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003?api-version=2019-06-01
+  response:
+    body:
+      string: '{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/microsoft.storage/storageaccounts/clieventgrid000002","provisioningState":"Creating","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"includedEventTypes":["Microsoft.Storage.BlobCreated","Microsoft.Storage.BlobDeleted"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003","name":"cli000003","type":"Microsoft.EventGrid/eventSubscriptions"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/locations/westcentralus/operationsStatus/BC01775F-E320-4184-BC39-CCC4022C4088?api-version=2019-06-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1034'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 23:00:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --source-resource-id --name --endpoint
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/locations/westcentralus/operationsStatus/BC01775F-E320-4184-BC39-CCC4022C4088?api-version=2019-06-01
+  response:
+    body:
+      string: '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/locations/westcentralus/operationsStatus/BC01775F-E320-4184-BC39-CCC4022C4088?api-version=2019-06-01","name":"bc01775f-e320-4184-bc39-ccc4022c4088","status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '286'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 23:00:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --source-resource-id --name --endpoint
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003?api-version=2019-06-01
+  response:
+    body:
+      string: '{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/microsoft.storage/storageaccounts/clieventgrid000002","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Storage.BlobCreated","Microsoft.Storage.BlobDeleted"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003","name":"cli000003","type":"Microsoft.EventGrid/eventSubscriptions"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1079'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 23:00:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --source-resource-id --name
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003?api-version=2019-06-01
+  response:
+    body:
+      string: '{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/microsoft.storage/storageaccounts/clieventgrid000002","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Storage.BlobCreated","Microsoft.Storage.BlobDeleted"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003","name":"cli000003","type":"Microsoft.EventGrid/eventSubscriptions"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1079'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 23:00:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --include-full-endpoint-url --resource-id --name
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003?api-version=2019-06-01
+  response:
+    body:
+      string: '{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/microsoft.storage/storageaccounts/clieventgrid000002","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Storage.BlobCreated","Microsoft.Storage.BlobDeleted"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003","name":"cli000003","type":"Microsoft.EventGrid/eventSubscriptions"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1079'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 23:00:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription show
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --include-full-endpoint-url --resource-id --name
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003/getFullUrl?api-version=2019-06-01
+  response:
+    body:
+      string: '{"endpointUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid?functionName=EventGridTrigger1&code=<HIDDEN>"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 23:00:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --source-resource-id --name --endpoint --subject-ends-with
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003?api-version=2019-06-01
+  response:
+    body:
+      string: '{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/microsoft.storage/storageaccounts/clieventgrid000002","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Storage.BlobCreated","Microsoft.Storage.BlobDeleted"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003","name":"cli000003","type":"Microsoft.EventGrid/eventSubscriptions"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1079'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 23:00:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"destination": {"endpointType": "WebHook", "properties": {"endpointUrl":
+      "https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid?functionName=EventGridTrigger1&code=<HIDDEN>"}},
+      "filter": {"subjectBeginsWith": "", "subjectEndsWith": ".jpg", "includedEventTypes":
+      ["Microsoft.Storage.BlobCreated", "Microsoft.Storage.BlobDeleted"]}, "retryPolicy":
+      {"maxDeliveryAttempts": 30, "eventTimeToLiveInMinutes": 1440}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '481'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --source-resource-id --name --endpoint --subject-ends-with
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003?api-version=2019-06-01
+  response:
+    body:
+      string: '{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/microsoft.storage/storageaccounts/clieventgrid000002","provisioningState":"Updating","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":".jpg","includedEventTypes":["Microsoft.Storage.BlobCreated","Microsoft.Storage.BlobDeleted"]},"labels":null,"eventDeliverySchema":"EventGridSchema","retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003","name":"cli000003","type":"Microsoft.EventGrid/eventSubscriptions"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/locations/westcentralus/operationsStatus/7243928C-AAC4-4CB5-8FFB-C17458958957?api-version=2019-06-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1122'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 23:00:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1196'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --source-resource-id --name --endpoint --subject-ends-with
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/locations/westcentralus/operationsStatus/7243928C-AAC4-4CB5-8FFB-C17458958957?api-version=2019-06-01
+  response:
+    body:
+      string: '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/locations/westcentralus/operationsStatus/7243928C-AAC4-4CB5-8FFB-C17458958957?api-version=2019-06-01","name":"7243928c-aac4-4cb5-8ffb-c17458958957","status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '286'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 23:00:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --source-resource-id --name --endpoint --subject-ends-with
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003?api-version=2019-06-01
+  response:
+    body:
+      string: '{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/microsoft.storage/storageaccounts/clieventgrid000002","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":".jpg","includedEventTypes":["Microsoft.Storage.BlobCreated","Microsoft.Storage.BlobDeleted"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003","name":"cli000003","type":"Microsoft.EventGrid/eventSubscriptions"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1083'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 23:00:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --source-resource-id
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions?api-version=2019-06-01&$top=100
+  response:
+    body:
+      string: '{"value":[{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/microsoft.storage/storageaccounts/clieventgrid000002","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":".jpg","includedEventTypes":["Microsoft.Storage.BlobCreated","Microsoft.Storage.BlobDeleted"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003","name":"cli000003","type":"Microsoft.EventGrid/eventSubscriptions"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1095'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 23:00:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --topic-type --location
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/locations/westcentralus/topicTypes/Microsoft.Storage.StorageAccounts/eventSubscriptions?api-version=2019-06-01&$top=100
+  response:
+    body:
+      string: '{"value":[{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridrunnerrgwestcentralus/providers/microsoft.storage/storageaccounts/egstrgltncypubwstcntrlus","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventHub/namespaces/egrunnereventhubnamespacewestcentralus/eventhubs/egstoragelatencyrunnereventhubwestcentralus"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":["TestLabel1","TestLabel2"]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.Storage/storageAccounts/egstrgltncypubwstcntrlus/providers/Microsoft.EventGrid/eventSubscriptions/egstoragelatencyrunnersubscriptiocentralus","name":"egstoragelatencyrunnersubscriptiocentralus","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridrunnerrgwestcentralus/providers/microsoft.storage/storageaccounts/egstrgltncypubwstcntrlus","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventHub/namespaces/egrunnereventhubnamespacewestcentralus/eventhubs/egstoragelatencyrunnereventhubwestcentralus"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":["TestLabel1","TestLabel2"]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.Storage/storageAccounts/egstrgltncypubwstcntrlus/providers/Microsoft.EventGrid/eventSubscriptions/egstrgltncysubscriptionsubscriptioncentralus","name":"egstrgltncysubscriptionsubscriptioncentralus","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridrunnerrgwestcentralus/providers/microsoft.storage/storageaccounts/egstrgltncypubwstcntlus","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventHub/namespaces/egrunnereventhubnamespacewestcentralus/eventhubs/egstrgltncyrunnereventhubwestcentralus"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":["TestLabel1","TestLabel2"]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.Storage/storageAccounts/egstrgltncypubwstcntlus/providers/Microsoft.EventGrid/eventSubscriptions/egstrgltncysubscriptioncentralus","name":"egstrgltncysubscriptioncentralus","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridrunnerrgwestcentralus/providers/microsoft.storage/storageaccounts/egstrgltncypubwstcntrlus","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventHub/namespaces/egrunnereventhubnamespacewestcentralus/eventhubs/egstrgltncyrunnereventhubwestcentralus"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Storage.BlobCreated","Microsoft.Storage.BlobDeleted"]},"labels":["TestLabel1","TestLabel2"],"retryPolicy":{"eventTimeToLiveInMinutes":1439}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.Storage/storageAccounts/egstrgltncypubwstcntrlus/providers/Microsoft.EventGrid/eventSubscriptions/eg-strg-ltncy-Subscription-west-central-us","name":"eg-strg-ltncy-Subscription-west-central-us","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/microsoft.storage/storageaccounts/clieventgrid000002","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":".jpg","includedEventTypes":["Microsoft.Storage.BlobCreated","Microsoft.Storage.BlobDeleted"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003","name":"cli000003","type":"Microsoft.EventGrid/eventSubscriptions"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5210'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 23:00:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --topic-type --location --resource-group
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.EventGrid/locations/westcentralus/topicTypes/Microsoft.Storage.StorageAccounts/eventSubscriptions?api-version=2019-06-01&$top=100
+  response:
+    body:
+      string: '{"value":[{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/microsoft.storage/storageaccounts/clieventgrid000002","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":".jpg","includedEventTypes":["Microsoft.Storage.BlobCreated","Microsoft.Storage.BlobDeleted"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003","name":"cli000003","type":"Microsoft.EventGrid/eventSubscriptions"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1095'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 23:00:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --location --resource-group
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.EventGrid/locations/westcentralus/eventSubscriptions?api-version=2019-06-01&$top=100
+  response:
+    body:
+      string: '{"value":[{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/microsoft.storage/storageaccounts/clieventgrid000002","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":".jpg","includedEventTypes":["Microsoft.Storage.BlobCreated","Microsoft.Storage.BlobDeleted"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003","name":"cli000003","type":"Microsoft.EventGrid/eventSubscriptions"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1095'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 23:00:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --location
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/locations/westcentralus/eventSubscriptions?api-version=2019-06-01&$top=100
+  response:
+    body:
+      string: '{"value":[{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridrunnerrgwestcentralus/providers/microsoft.eventgrid/topics/egrunnercustomtopicwestcentralus","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventHub/namespaces/egrunnereventhubnamespacewestcentralus/eventhubs/egrunnereventhubwestcentralus"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":["TestLabel1","TestLabel2"]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventGrid/topics/egrunnercustomtopicwestcentralus/providers/Microsoft.EventGrid/eventSubscriptions/egrunnertopicsubscriptionwestcentralus","name":"egrunnertopicsubscriptionwestcentralus","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridrunnerrgwestcentralus/providers/microsoft.storage/storageaccounts/egstrgltncypubwstcntrlus","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventHub/namespaces/egrunnereventhubnamespacewestcentralus/eventhubs/egstoragelatencyrunnereventhubwestcentralus"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":["TestLabel1","TestLabel2"]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.Storage/storageAccounts/egstrgltncypubwstcntrlus/providers/Microsoft.EventGrid/eventSubscriptions/egstoragelatencyrunnersubscriptiocentralus","name":"egstoragelatencyrunnersubscriptiocentralus","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridrunnerrgwestcentralus/providers/microsoft.storage/storageaccounts/egstrgltncypubwstcntrlus","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventHub/namespaces/egrunnereventhubnamespacewestcentralus/eventhubs/egstoragelatencyrunnereventhubwestcentralus"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":["TestLabel1","TestLabel2"]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.Storage/storageAccounts/egstrgltncypubwstcntrlus/providers/Microsoft.EventGrid/eventSubscriptions/egstrgltncysubscriptionsubscriptioncentralus","name":"egstrgltncysubscriptionsubscriptioncentralus","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridrunnerrgwestcentralus/providers/microsoft.storage/storageaccounts/egstrgltncypubwstcntlus","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventHub/namespaces/egrunnereventhubnamespacewestcentralus/eventhubs/egstrgltncyrunnereventhubwestcentralus"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":["TestLabel1","TestLabel2"]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.Storage/storageAccounts/egstrgltncypubwstcntlus/providers/Microsoft.EventGrid/eventSubscriptions/egstrgltncysubscriptioncentralus","name":"egstrgltncysubscriptioncentralus","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridrunnerrgwestcentralus/providers/microsoft.eventgrid/topics/eglatencyrunnercustomtopicwestcentralus","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventHub/namespaces/egrunnereventhubnamespacewestcentralus/eventhubs/eglatencyrunnereventhubwestcentralus"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":["TestLabel1","TestLabel2"]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventGrid/topics/eglatencyrunnercustomtopicwestcentralus/providers/Microsoft.EventGrid/eventSubscriptions/eglatencyrunnersubscriptionwestcentralus","name":"eglatencyrunnersubscriptionwestcentralus","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridrunnerrgwestcentralus/providers/microsoft.eventgrid/topics/eg-latency-runner-custom-topic-west-central-us","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventHub/namespaces/egrunnereventhubnamespacewestcentralus/eventhubs/eglatencyrunnereventhubwestcentralus"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":["TestLabel1","TestLabel2"]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventGrid/topics/eg-latency-runner-custom-topic-west-central-us/providers/Microsoft.EventGrid/eventSubscriptions/eg-latency-runner-subscription-west-central-us","name":"eg-latency-runner-subscription-west-central-us","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridrunnerrgwestcentralus/providers/microsoft.eventgrid/topics/eg-latency-runner-topic-west-central-us","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventHub/namespaces/egrunnereventhubnamespacewestcentralus/eventhubs/eglatencyrunnereventhubwestcentralus"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"Subject","subjectEndsWith":"","isSubjectCaseSensitive":true,"advancedFilters":[{"values":["runner"],"operatorType":"StringContains","key":"topic"},{"values":["Info"],"operatorType":"StringEndsWith","key":"data.EventData"},{"values":[1.0,2.0,3.0],"operatorType":"NumberIn","key":"data.key1"},{"value":true,"operatorType":"BoolEquals","key":"data.key2"},{"values":["3.0"],"operatorType":"StringContains","key":"dataversion"}]},"labels":["TestLabel1","TestLabel2"],"retryPolicy":{"eventTimeToLiveInMinutes":1439}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventGrid/topics/eg-latency-runner-topic-west-central-us/providers/Microsoft.EventGrid/eventSubscriptions/eg-latency-runner-subscription-west-central-us","name":"eg-latency-runner-subscription-west-central-us","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridrunnerrgwestcentralus/providers/microsoft.eventgrid/topics/eg-latency-runner-topic-eg-prod-uswc-002","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventHub/namespaces/egrunnereventhubnamespacewestcentralus/eventhubs/eglatencyrunnereventhub-eg-prod-uswc-002"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"Subject","subjectEndsWith":"","isSubjectCaseSensitive":true,"advancedFilters":[{"values":["runner"],"operatorType":"StringContains","key":"topic"},{"values":["Info"],"operatorType":"StringEndsWith","key":"data.EventData"},{"values":[1.0,2.0,3.0],"operatorType":"NumberIn","key":"data.key1"},{"value":true,"operatorType":"BoolEquals","key":"data.key2"},{"values":["3.0"],"operatorType":"StringContains","key":"dataversion"}]},"labels":["TestLabel1","TestLabel2"],"retryPolicy":{"eventTimeToLiveInMinutes":1439}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventGrid/topics/eg-latency-runner-topic-eg-prod-uswc-002/providers/Microsoft.EventGrid/eventSubscriptions/eg-latency-runner-subscription-eg-prod-uswc-002","name":"eg-latency-runner-subscription-eg-prod-uswc-002","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridrunnerrgwestcentralus/providers/microsoft.eventgrid/topics/eg-latency-runner-topic-eg-prod-uswc-003","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventHub/namespaces/egrunnereventhubnamespacewestcentralus/eventhubs/eglatencyrunnereventhub-eg-prod-uswc-003"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"Subject","subjectEndsWith":"","isSubjectCaseSensitive":true,"advancedFilters":[{"values":["runner"],"operatorType":"StringContains","key":"topic"},{"values":["Info"],"operatorType":"StringEndsWith","key":"data.EventData"},{"values":[1.0,2.0,3.0],"operatorType":"NumberIn","key":"data.key1"},{"value":true,"operatorType":"BoolEquals","key":"data.key2"},{"values":["3.0"],"operatorType":"StringContains","key":"dataversion"}]},"labels":["TestLabel1","TestLabel2"],"retryPolicy":{"eventTimeToLiveInMinutes":1439}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventGrid/topics/eg-latency-runner-topic-eg-prod-uswc-003/providers/Microsoft.EventGrid/eventSubscriptions/eg-latency-runner-subscription-eg-prod-uswc-003","name":"eg-latency-runner-subscription-eg-prod-uswc-003","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridrunnerrgwestcentralus/providers/microsoft.storage/storageaccounts/egstrgltncypubwstcntrlus","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventHub/namespaces/egrunnereventhubnamespacewestcentralus/eventhubs/egstrgltncyrunnereventhubwestcentralus"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Storage.BlobCreated","Microsoft.Storage.BlobDeleted"]},"labels":["TestLabel1","TestLabel2"],"retryPolicy":{"eventTimeToLiveInMinutes":1439}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.Storage/storageAccounts/egstrgltncypubwstcntrlus/providers/Microsoft.EventGrid/eventSubscriptions/eg-strg-ltncy-Subscription-west-central-us","name":"eg-strg-ltncy-Subscription-west-central-us","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridrunnerrgwestcentralus/providers/microsoft.eventgrid/topics/eg-latency-runner-topic-eg-prod-uswc-01","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventHub/namespaces/egrunnereventhubnamespacewestcentralus/eventhubs/eglatencyrunnereventhub-eg-prod-uswc-01"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"Subject","subjectEndsWith":"","isSubjectCaseSensitive":true,"advancedFilters":[{"values":["runner"],"operatorType":"StringContains","key":"topic"},{"values":["Info"],"operatorType":"StringEndsWith","key":"data.EventData"},{"values":[1.0,2.0,3.0],"operatorType":"NumberIn","key":"data.key1"},{"value":true,"operatorType":"BoolEquals","key":"data.key2"},{"values":["3.0"],"operatorType":"StringContains","key":"dataversion"}]},"labels":["TestLabel1","TestLabel2"],"retryPolicy":{"eventTimeToLiveInMinutes":1439}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventGrid/topics/eg-latency-runner-topic-eg-prod-uswc-01/providers/Microsoft.EventGrid/eventSubscriptions/eg-latency-runner-subscription-eg-prod-uswc-01","name":"eg-latency-runner-subscription-eg-prod-uswc-01","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridrunnerrgwestcentralus/providers/microsoft.eventgrid/topics/eg-crud-runner-topic-9e81fd7b-west-central-us","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventHub/namespaces/egrunnereventhubnamespacewestcentralus/eventhubs/egoperationrunnereventhubwestcentralus"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"Subject","subjectEndsWith":"","isSubjectCaseSensitive":true,"advancedFilters":[{"values":["runner"],"operatorType":"StringContains","key":"topic"},{"values":["Info"],"operatorType":"StringEndsWith","key":"data.EventData"},{"values":[1.0,2.0,3.0],"operatorType":"NumberIn","key":"data.key1"},{"value":true,"operatorType":"BoolEquals","key":"data.key2"},{"values":["3.0"],"operatorType":"StringContains","key":"dataversion"}]},"labels":["TestLabel1","TestLabel2"],"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1439},"deadLetterDestination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.Storage/storageAccounts/egrunnerstgwestcentralus","blobContainerName":"egrunnerstgdlqcentralus"},"endpointType":"StorageBlob"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventGrid/topics/eg-crud-runner-topic-9e81fd7b-West-Central-US/providers/Microsoft.EventGrid/eventSubscriptions/eg-crud-runner-subscription-8d7764d2-West-Central-US","name":"eg-crud-runner-subscription-8d7764d2-West-Central-US","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridrunnerrgwestcentralus/providers/microsoft.eventgrid/topics/eglatencyrunnerqueuetopicwestcentralus","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.Storage/storageAccounts/egrunnerstgwestcentralus","queueName":"egltcyrunnerstgqueuedestinationcentralus"},"endpointType":"StorageQueue"},"filter":{"subjectBeginsWith":"Subject","subjectEndsWith":"","isSubjectCaseSensitive":true,"advancedFilters":[{"values":["runner"],"operatorType":"StringContains","key":"topic"},{"values":["Info"],"operatorType":"StringEndsWith","key":"data.EventData"},{"values":[1.0,2.0,3.0],"operatorType":"NumberIn","key":"data.key1"},{"value":true,"operatorType":"BoolEquals","key":"data.key2"},{"values":["3.0"],"operatorType":"StringContains","key":"dataversion"}]},"labels":["TestLabel1","TestLabel2"],"retryPolicy":{"eventTimeToLiveInMinutes":1439},"deadLetterDestination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.Storage/storageAccounts/egrunnerstgwestcentralus","blobContainerName":"egltcyrunnerstgdlqcentralus"},"endpointType":"StorageBlob"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventGrid/topics/eglatencyrunnerqueuetopicwestcentralus/providers/Microsoft.EventGrid/eventSubscriptions/eglatencyrunnerqueuesubscriptionwestcentralus","name":"eglatencyrunnerqueuesubscriptionwestcentralus","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridrunnerrgwestcentralus/providers/microsoft.eventgrid/topics/eg-latency-runner-topic-eg-prod-uswc-02","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventHub/namespaces/egrunnereventhubnamespacewestcentralus-1/eventhubs/eglatencyrunnereventhub-eg-prod-uswc-02"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"Subject","subjectEndsWith":"","isSubjectCaseSensitive":true,"advancedFilters":[{"values":["runner"],"operatorType":"StringContains","key":"topic"},{"values":["Info"],"operatorType":"StringEndsWith","key":"data.EventData"},{"values":[1.0,2.0,3.0],"operatorType":"NumberIn","key":"data.key1"},{"value":true,"operatorType":"BoolEquals","key":"data.key2"},{"values":["3.0"],"operatorType":"StringContains","key":"dataversion"}]},"labels":["TestLabel1","TestLabel2"],"retryPolicy":{"eventTimeToLiveInMinutes":1439}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventGrid/topics/eg-latency-runner-topic-eg-prod-uswc-02/providers/Microsoft.EventGrid/eventSubscriptions/eg-latency-runner-subscription-eg-prod-uswc-02","name":"eg-latency-runner-subscription-eg-prod-uswc-02","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridrunnerrgwestcentralus/providers/microsoft.eventgrid/topics/eg-latency-runner-topic-eg-prod-uswc-03","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventHub/namespaces/egrunnereventhubnamespacewestcentralus-1/eventhubs/eglatencyrunnereventhub-eg-prod-uswc-03"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"Subject","subjectEndsWith":"","isSubjectCaseSensitive":true,"advancedFilters":[{"values":["runner"],"operatorType":"StringContains","key":"topic"},{"values":["Info"],"operatorType":"StringEndsWith","key":"data.EventData"},{"values":[1.0,2.0,3.0],"operatorType":"NumberIn","key":"data.key1"},{"value":true,"operatorType":"BoolEquals","key":"data.key2"},{"values":["3.0"],"operatorType":"StringContains","key":"dataversion"}]},"labels":["TestLabel1","TestLabel2"],"retryPolicy":{"eventTimeToLiveInMinutes":1439}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventGrid/topics/eg-latency-runner-topic-eg-prod-uswc-03/providers/Microsoft.EventGrid/eventSubscriptions/eg-latency-runner-subscription-eg-prod-uswc-03","name":"eg-latency-runner-subscription-eg-prod-uswc-03","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgname-ps1242/providers/microsoft.eventgrid/topics/pstesttopic-ps4285","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null,"retryPolicy":{"maxDeliveryAttempts":20,"eventTimeToLiveInMinutes":50}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/RGName-ps1242/providers/Microsoft.EventGrid/topics/PSTestTopic-ps4285/providers/Microsoft.EventGrid/eventSubscriptions/EventSubscription-ps9036","name":"EventSubscription-ps9036","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgname-ps1242/providers/microsoft.eventgrid/topics/pstesttopic-ps4285","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/RGName-ps1242/providers/Microsoft.ServiceBus/namespaces/sbnamespace-ps4675/queues/sbname-ps588"},"endpointType":"ServiceBusQueue"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/RGName-ps1242/providers/microsoft.eventgrid/topics/PSTestTopic-ps4285/providers/Microsoft.EventGrid/eventSubscriptions/EventSubscription-ps3830","name":"EventSubscription-ps3830","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rghuhzrtxh6mezlggjiwuoqlbte6n73sukdwjqw6l6rmbqyv6ijjco7jnm6mxemzmzg/providers/microsoft.eventgrid/topics/clio3g44s4zmc7fcypemj6q4jwokqfohytgntl7q","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rghuhzrtxh6mezlggjiwuoqlbte6n73sukdwjqw6l6rmbqyv6ijjco7jnm6mxemzmzg/providers/Microsoft.EventGrid/topics/clio3g44s4zmc7fcypemj6q4jwokqfohytgntl7q/providers/Microsoft.EventGrid/eventSubscriptions/clirkw3plbdxypzf223lo5ged5wtpsvkxqr24b4g","name":"clirkw3plbdxypzf223lo5ged5wtpsvkxqr24b4g","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/microsoft.storage/storageaccounts/clieventgrid000002","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":".jpg","includedEventTypes":["Microsoft.Storage.BlobCreated","Microsoft.Storage.BlobDeleted"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003","name":"cli000003","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgaa5l63q5yqi2h4j7n4jnwkbytn54x63dhrlkvdkhldjtha24rqe5swjwt7kx3sh36/providers/microsoft.eventgrid/topics/cliedq7t32wjsskqiqhbi54udokpnwhm6q4ycz2r","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgaa5l63q5yqi2h4j7n4jnwkbytn54x63dhrlkvdkhldjtha24rqe5swjwt7kx3sh36/providers/Microsoft.EventGrid/topics/cliedq7t32wjsskqiqhbi54udokpnwhm6q4ycz2r/providers/Microsoft.EventGrid/eventSubscriptions/clilckguqswrbzhswyuet2cwoesglzpqdakujjml","name":"clilckguqswrbzhswyuet2cwoesglzpqdakujjml","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridrunnerrgwestcentralus/providers/microsoft.eventgrid/topics/egcrudrunnerqueuetopic5a72a0a1westcentralus","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.Storage/storageAccounts/egrunnerstgwestcentralus","queueName":"egrunnerstgqueuedestinationcentralus"},"endpointType":"StorageQueue"},"filter":{"subjectBeginsWith":"Subject","subjectEndsWith":"","isSubjectCaseSensitive":true,"advancedFilters":[{"values":["runner"],"operatorType":"StringContains","key":"topic"},{"values":["Info"],"operatorType":"StringEndsWith","key":"data.EventData"},{"values":[1.0,2.0,3.0],"operatorType":"NumberIn","key":"data.key1"},{"value":true,"operatorType":"BoolEquals","key":"data.key2"},{"values":["3.0"],"operatorType":"StringContains","key":"dataversion"}]},"labels":["TestLabel1","TestLabel2"],"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1439},"deadLetterDestination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.Storage/storageAccounts/egrunnerstgwestcentralus","blobContainerName":"egrunnerstgdlqcentralus"},"endpointType":"StorageBlob"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventGrid/topics/egcrudrunnerqueuetopic5a72a0a1WestCentralUS/providers/Microsoft.EventGrid/eventSubscriptions/eg-crud-runner-subscription-3967f4f8-West-Central-US","name":"eg-crud-runner-subscription-3967f4f8-West-Central-US","type":"Microsoft.EventGrid/eventSubscriptions"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '26188'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 23:00:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --source-resource-id --odata-query
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions?api-version=2019-06-01&$filter=CONTAINS%28name%2C%27cli000003%27%29&$top=100
+  response:
+    body:
+      string: '{"value":[{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/microsoft.storage/storageaccounts/clieventgrid000002","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":".jpg","includedEventTypes":["Microsoft.Storage.BlobCreated","Microsoft.Storage.BlobDeleted"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003","name":"cli000003","type":"Microsoft.EventGrid/eventSubscriptions"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1095'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 23:00:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --topic-type --location --odata-query
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/locations/westcentralus/topicTypes/Microsoft.Storage.StorageAccounts/eventSubscriptions?api-version=2019-06-01&$filter=CONTAINS%28name%2C%27cli000003%27%29&$top=100
+  response:
+    body:
+      string: '{"value":[{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/microsoft.storage/storageaccounts/clieventgrid000002","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":".jpg","includedEventTypes":["Microsoft.Storage.BlobCreated","Microsoft.Storage.BlobDeleted"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003","name":"cli000003","type":"Microsoft.EventGrid/eventSubscriptions"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1095'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 23:00:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --topic-type --location --resource-group --odata-query
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.EventGrid/locations/westcentralus/topicTypes/Microsoft.Storage.StorageAccounts/eventSubscriptions?api-version=2019-06-01&$filter=CONTAINS%28name%2C%27cli000003%27%29&$top=100
+  response:
+    body:
+      string: '{"value":[{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/microsoft.storage/storageaccounts/clieventgrid000002","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":".jpg","includedEventTypes":["Microsoft.Storage.BlobCreated","Microsoft.Storage.BlobDeleted"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003","name":"cli000003","type":"Microsoft.EventGrid/eventSubscriptions"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1095'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 23:00:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --location --resource-group --odata-query
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.EventGrid/locations/westcentralus/eventSubscriptions?api-version=2019-06-01&$filter=name%20eq%20%27cli000003%27&$top=100
+  response:
+    body:
+      string: '{"value":[{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/microsoft.storage/storageaccounts/clieventgrid000002","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":".jpg","includedEventTypes":["Microsoft.Storage.BlobCreated","Microsoft.Storage.BlobDeleted"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003","name":"cli000003","type":"Microsoft.EventGrid/eventSubscriptions"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1095'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 23:00:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --location --odata-query
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/locations/westcentralus/eventSubscriptions?api-version=2019-06-01&$filter=name%20eq%20%27cli000003%27&$top=100
+  response:
+    body:
+      string: '{"value":[{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/microsoft.storage/storageaccounts/clieventgrid000002","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":".jpg","includedEventTypes":["Microsoft.Storage.BlobCreated","Microsoft.Storage.BlobDeleted"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003","name":"cli000003","type":"Microsoft.EventGrid/eventSubscriptions"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1095'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 23:00:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --source-resource-id --name
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003?api-version=2019-06-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Mon, 03 Jun 2019 23:00:31 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/locations/westcentralus/operationResults/2E91A345-0BBA-4EDC-9723-C61E5C236888?api-version=2019-06-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --source-resource-id --name
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/locations/westcentralus/operationResults/2E91A345-0BBA-4EDC-9723-C61E5C236888?api-version=2019-06-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Mon, 03 Jun 2019 23:00:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-storage/3.3.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002?api-version=2019-04-01
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002","name":"clieventgrid000002","type":"Microsoft.Storage/storageAccounts","location":"westcentralus","tags":{},"properties":{"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":false,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2019-06-03T22:59:37.8539241Z"},"blob":{"enabled":true,"lastEnabledTime":"2019-06-03T22:59:37.8539241Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2019-06-03T22:59:37.7758031Z","primaryEndpoints":{"dfs":"https://clieventgrid000002.dfs.core.windows.net/","web":"https://clieventgrid000002.z4.web.core.windows.net/","blob":"https://clieventgrid000002.blob.core.windows.net/","queue":"https://clieventgrid000002.queue.core.windows.net/","table":"https://clieventgrid000002.table.core.windows.net/","file":"https://clieventgrid000002.file.core.windows.net/"},"primaryLocation":"westcentralus","statusOfPrimary":"available"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1333'
+      content-type:
+      - application/json
+      date:
+      - Mon, 03 Jun 2019 23:00:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"destination": {"endpointType": "WebHook", "properties":
+      {"endpointUrl": "https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid?functionName=EventGridTrigger1&code=<HIDDEN>"}},
+      "filter": {"isSubjectCaseSensitive": false}, "retryPolicy": {"maxDeliveryAttempts":
+      30, "eventTimeToLiveInMinutes": 1440}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '388'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --resource-id --name --endpoint
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003?api-version=2019-06-01
+  response:
+    body:
+      string: '{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/microsoft.storage/storageaccounts/clieventgrid000002","provisioningState":"Creating","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"includedEventTypes":["Microsoft.Storage.BlobCreated","Microsoft.Storage.BlobDeleted"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003","name":"cli000003","type":"Microsoft.EventGrid/eventSubscriptions"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/locations/westcentralus/operationsStatus/6B3CBD53-3841-4868-8AB8-84D21C7A4D19?api-version=2019-06-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1034'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 23:00:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-id --name --endpoint
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/locations/westcentralus/operationsStatus/6B3CBD53-3841-4868-8AB8-84D21C7A4D19?api-version=2019-06-01
+  response:
+    body:
+      string: '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/locations/westcentralus/operationsStatus/6B3CBD53-3841-4868-8AB8-84D21C7A4D19?api-version=2019-06-01","name":"6b3cbd53-3841-4868-8ab8-84d21c7a4d19","status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '286'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 23:00:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-id --name --endpoint
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003?api-version=2019-06-01
+  response:
+    body:
+      string: '{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/microsoft.storage/storageaccounts/clieventgrid000002","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Storage.BlobCreated","Microsoft.Storage.BlobDeleted"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003","name":"cli000003","type":"Microsoft.EventGrid/eventSubscriptions"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1079'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 23:00:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-id --name
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003?api-version=2019-06-01
+  response:
+    body:
+      string: '{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/microsoft.storage/storageaccounts/clieventgrid000002","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Storage.BlobCreated","Microsoft.Storage.BlobDeleted"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003","name":"cli000003","type":"Microsoft.EventGrid/eventSubscriptions"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1079'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 23:00:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --include-full-endpoint-url --resource-id --name
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003?api-version=2019-06-01
+  response:
+    body:
+      string: '{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/microsoft.storage/storageaccounts/clieventgrid000002","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Storage.BlobCreated","Microsoft.Storage.BlobDeleted"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003","name":"cli000003","type":"Microsoft.EventGrid/eventSubscriptions"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1079'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 23:00:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription show
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --include-full-endpoint-url --resource-id --name
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003/getFullUrl?api-version=2019-06-01
+  response:
+    body:
+      string: '{"endpointUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid?functionName=EventGridTrigger1&code=<HIDDEN>"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 23:00:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-id --name --endpoint --subject-ends-with
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003?api-version=2019-06-01
+  response:
+    body:
+      string: '{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/microsoft.storage/storageaccounts/clieventgrid000002","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Storage.BlobCreated","Microsoft.Storage.BlobDeleted"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003","name":"cli000003","type":"Microsoft.EventGrid/eventSubscriptions"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1079'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 23:00:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"destination": {"endpointType": "WebHook", "properties": {"endpointUrl":
+      "https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid?functionName=EventGridTrigger1&code=<HIDDEN>"}},
+      "filter": {"subjectBeginsWith": "", "subjectEndsWith": ".jpg", "includedEventTypes":
+      ["Microsoft.Storage.BlobCreated", "Microsoft.Storage.BlobDeleted"]}, "retryPolicy":
+      {"maxDeliveryAttempts": 30, "eventTimeToLiveInMinutes": 1440}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '481'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --resource-id --name --endpoint --subject-ends-with
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003?api-version=2019-06-01
+  response:
+    body:
+      string: '{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/microsoft.storage/storageaccounts/clieventgrid000002","provisioningState":"Updating","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":".jpg","includedEventTypes":["Microsoft.Storage.BlobCreated","Microsoft.Storage.BlobDeleted"]},"labels":null,"eventDeliverySchema":"EventGridSchema","retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003","name":"cli000003","type":"Microsoft.EventGrid/eventSubscriptions"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/locations/westcentralus/operationsStatus/A3303482-84C0-4E28-899A-8EDE310C92C6?api-version=2019-06-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1122'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 23:00:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-id --name --endpoint --subject-ends-with
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/locations/westcentralus/operationsStatus/A3303482-84C0-4E28-899A-8EDE310C92C6?api-version=2019-06-01
+  response:
+    body:
+      string: '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/locations/westcentralus/operationsStatus/A3303482-84C0-4E28-899A-8EDE310C92C6?api-version=2019-06-01","name":"a3303482-84c0-4e28-899a-8ede310c92c6","status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '286'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 23:01:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-id --name --endpoint --subject-ends-with
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003?api-version=2019-06-01
+  response:
+    body:
+      string: '{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/microsoft.storage/storageaccounts/clieventgrid000002","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":".jpg","includedEventTypes":["Microsoft.Storage.BlobCreated","Microsoft.Storage.BlobDeleted"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003","name":"cli000003","type":"Microsoft.EventGrid/eventSubscriptions"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1083'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 23:01:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-id
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions?api-version=2019-06-01&$top=100
+  response:
+    body:
+      string: '{"value":[{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/microsoft.storage/storageaccounts/clieventgrid000002","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":".jpg","includedEventTypes":["Microsoft.Storage.BlobCreated","Microsoft.Storage.BlobDeleted"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003","name":"cli000003","type":"Microsoft.EventGrid/eventSubscriptions"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1095'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 23:01:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --topic-type --location
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/locations/westcentralus/topicTypes/Microsoft.Storage.StorageAccounts/eventSubscriptions?api-version=2019-06-01&$top=100
+  response:
+    body:
+      string: '{"value":[{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridrunnerrgwestcentralus/providers/microsoft.storage/storageaccounts/egstrgltncypubwstcntrlus","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventHub/namespaces/egrunnereventhubnamespacewestcentralus/eventhubs/egstoragelatencyrunnereventhubwestcentralus"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":["TestLabel1","TestLabel2"]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.Storage/storageAccounts/egstrgltncypubwstcntrlus/providers/Microsoft.EventGrid/eventSubscriptions/egstoragelatencyrunnersubscriptiocentralus","name":"egstoragelatencyrunnersubscriptiocentralus","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridrunnerrgwestcentralus/providers/microsoft.storage/storageaccounts/egstrgltncypubwstcntrlus","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventHub/namespaces/egrunnereventhubnamespacewestcentralus/eventhubs/egstoragelatencyrunnereventhubwestcentralus"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":["TestLabel1","TestLabel2"]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.Storage/storageAccounts/egstrgltncypubwstcntrlus/providers/Microsoft.EventGrid/eventSubscriptions/egstrgltncysubscriptionsubscriptioncentralus","name":"egstrgltncysubscriptionsubscriptioncentralus","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridrunnerrgwestcentralus/providers/microsoft.storage/storageaccounts/egstrgltncypubwstcntlus","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventHub/namespaces/egrunnereventhubnamespacewestcentralus/eventhubs/egstrgltncyrunnereventhubwestcentralus"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":["TestLabel1","TestLabel2"]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.Storage/storageAccounts/egstrgltncypubwstcntlus/providers/Microsoft.EventGrid/eventSubscriptions/egstrgltncysubscriptioncentralus","name":"egstrgltncysubscriptioncentralus","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridrunnerrgwestcentralus/providers/microsoft.storage/storageaccounts/egstrgltncypubwstcntrlus","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventHub/namespaces/egrunnereventhubnamespacewestcentralus/eventhubs/egstrgltncyrunnereventhubwestcentralus"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Storage.BlobCreated","Microsoft.Storage.BlobDeleted"]},"labels":["TestLabel1","TestLabel2"],"retryPolicy":{"eventTimeToLiveInMinutes":1439}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.Storage/storageAccounts/egstrgltncypubwstcntrlus/providers/Microsoft.EventGrid/eventSubscriptions/eg-strg-ltncy-Subscription-west-central-us","name":"eg-strg-ltncy-Subscription-west-central-us","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/microsoft.storage/storageaccounts/clieventgrid000002","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":".jpg","includedEventTypes":["Microsoft.Storage.BlobCreated","Microsoft.Storage.BlobDeleted"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003","name":"cli000003","type":"Microsoft.EventGrid/eventSubscriptions"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5210'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 23:01:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --topic-type --location --resource-group
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.EventGrid/locations/westcentralus/topicTypes/Microsoft.Storage.StorageAccounts/eventSubscriptions?api-version=2019-06-01&$top=100
+  response:
+    body:
+      string: '{"value":[{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/microsoft.storage/storageaccounts/clieventgrid000002","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":".jpg","includedEventTypes":["Microsoft.Storage.BlobCreated","Microsoft.Storage.BlobDeleted"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003","name":"cli000003","type":"Microsoft.EventGrid/eventSubscriptions"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1095'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 23:01:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --location --resource-group
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.EventGrid/locations/westcentralus/eventSubscriptions?api-version=2019-06-01&$top=100
+  response:
+    body:
+      string: '{"value":[{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/microsoft.storage/storageaccounts/clieventgrid000002","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":".jpg","includedEventTypes":["Microsoft.Storage.BlobCreated","Microsoft.Storage.BlobDeleted"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003","name":"cli000003","type":"Microsoft.EventGrid/eventSubscriptions"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1095'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 23:01:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --location
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/locations/westcentralus/eventSubscriptions?api-version=2019-06-01&$top=100
+  response:
+    body:
+      string: '{"value":[{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridrunnerrgwestcentralus/providers/microsoft.eventgrid/topics/egrunnercustomtopicwestcentralus","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventHub/namespaces/egrunnereventhubnamespacewestcentralus/eventhubs/egrunnereventhubwestcentralus"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":["TestLabel1","TestLabel2"]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventGrid/topics/egrunnercustomtopicwestcentralus/providers/Microsoft.EventGrid/eventSubscriptions/egrunnertopicsubscriptionwestcentralus","name":"egrunnertopicsubscriptionwestcentralus","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridrunnerrgwestcentralus/providers/microsoft.storage/storageaccounts/egstrgltncypubwstcntrlus","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventHub/namespaces/egrunnereventhubnamespacewestcentralus/eventhubs/egstoragelatencyrunnereventhubwestcentralus"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":["TestLabel1","TestLabel2"]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.Storage/storageAccounts/egstrgltncypubwstcntrlus/providers/Microsoft.EventGrid/eventSubscriptions/egstoragelatencyrunnersubscriptiocentralus","name":"egstoragelatencyrunnersubscriptiocentralus","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridrunnerrgwestcentralus/providers/microsoft.storage/storageaccounts/egstrgltncypubwstcntrlus","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventHub/namespaces/egrunnereventhubnamespacewestcentralus/eventhubs/egstoragelatencyrunnereventhubwestcentralus"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":["TestLabel1","TestLabel2"]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.Storage/storageAccounts/egstrgltncypubwstcntrlus/providers/Microsoft.EventGrid/eventSubscriptions/egstrgltncysubscriptionsubscriptioncentralus","name":"egstrgltncysubscriptionsubscriptioncentralus","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridrunnerrgwestcentralus/providers/microsoft.storage/storageaccounts/egstrgltncypubwstcntlus","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventHub/namespaces/egrunnereventhubnamespacewestcentralus/eventhubs/egstrgltncyrunnereventhubwestcentralus"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":["TestLabel1","TestLabel2"]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.Storage/storageAccounts/egstrgltncypubwstcntlus/providers/Microsoft.EventGrid/eventSubscriptions/egstrgltncysubscriptioncentralus","name":"egstrgltncysubscriptioncentralus","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridrunnerrgwestcentralus/providers/microsoft.eventgrid/topics/eglatencyrunnercustomtopicwestcentralus","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventHub/namespaces/egrunnereventhubnamespacewestcentralus/eventhubs/eglatencyrunnereventhubwestcentralus"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":["TestLabel1","TestLabel2"]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventGrid/topics/eglatencyrunnercustomtopicwestcentralus/providers/Microsoft.EventGrid/eventSubscriptions/eglatencyrunnersubscriptionwestcentralus","name":"eglatencyrunnersubscriptionwestcentralus","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridrunnerrgwestcentralus/providers/microsoft.eventgrid/topics/eg-latency-runner-custom-topic-west-central-us","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventHub/namespaces/egrunnereventhubnamespacewestcentralus/eventhubs/eglatencyrunnereventhubwestcentralus"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":["TestLabel1","TestLabel2"]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventGrid/topics/eg-latency-runner-custom-topic-west-central-us/providers/Microsoft.EventGrid/eventSubscriptions/eg-latency-runner-subscription-west-central-us","name":"eg-latency-runner-subscription-west-central-us","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridrunnerrgwestcentralus/providers/microsoft.eventgrid/topics/eg-latency-runner-topic-west-central-us","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventHub/namespaces/egrunnereventhubnamespacewestcentralus/eventhubs/eglatencyrunnereventhubwestcentralus"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"Subject","subjectEndsWith":"","isSubjectCaseSensitive":true,"advancedFilters":[{"values":["runner"],"operatorType":"StringContains","key":"topic"},{"values":["Info"],"operatorType":"StringEndsWith","key":"data.EventData"},{"values":[1.0,2.0,3.0],"operatorType":"NumberIn","key":"data.key1"},{"value":true,"operatorType":"BoolEquals","key":"data.key2"},{"values":["3.0"],"operatorType":"StringContains","key":"dataversion"}]},"labels":["TestLabel1","TestLabel2"],"retryPolicy":{"eventTimeToLiveInMinutes":1439}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventGrid/topics/eg-latency-runner-topic-west-central-us/providers/Microsoft.EventGrid/eventSubscriptions/eg-latency-runner-subscription-west-central-us","name":"eg-latency-runner-subscription-west-central-us","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridrunnerrgwestcentralus/providers/microsoft.eventgrid/topics/eg-latency-runner-topic-eg-prod-uswc-002","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventHub/namespaces/egrunnereventhubnamespacewestcentralus/eventhubs/eglatencyrunnereventhub-eg-prod-uswc-002"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"Subject","subjectEndsWith":"","isSubjectCaseSensitive":true,"advancedFilters":[{"values":["runner"],"operatorType":"StringContains","key":"topic"},{"values":["Info"],"operatorType":"StringEndsWith","key":"data.EventData"},{"values":[1.0,2.0,3.0],"operatorType":"NumberIn","key":"data.key1"},{"value":true,"operatorType":"BoolEquals","key":"data.key2"},{"values":["3.0"],"operatorType":"StringContains","key":"dataversion"}]},"labels":["TestLabel1","TestLabel2"],"retryPolicy":{"eventTimeToLiveInMinutes":1439}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventGrid/topics/eg-latency-runner-topic-eg-prod-uswc-002/providers/Microsoft.EventGrid/eventSubscriptions/eg-latency-runner-subscription-eg-prod-uswc-002","name":"eg-latency-runner-subscription-eg-prod-uswc-002","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridrunnerrgwestcentralus/providers/microsoft.eventgrid/topics/eg-latency-runner-topic-eg-prod-uswc-003","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventHub/namespaces/egrunnereventhubnamespacewestcentralus/eventhubs/eglatencyrunnereventhub-eg-prod-uswc-003"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"Subject","subjectEndsWith":"","isSubjectCaseSensitive":true,"advancedFilters":[{"values":["runner"],"operatorType":"StringContains","key":"topic"},{"values":["Info"],"operatorType":"StringEndsWith","key":"data.EventData"},{"values":[1.0,2.0,3.0],"operatorType":"NumberIn","key":"data.key1"},{"value":true,"operatorType":"BoolEquals","key":"data.key2"},{"values":["3.0"],"operatorType":"StringContains","key":"dataversion"}]},"labels":["TestLabel1","TestLabel2"],"retryPolicy":{"eventTimeToLiveInMinutes":1439}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventGrid/topics/eg-latency-runner-topic-eg-prod-uswc-003/providers/Microsoft.EventGrid/eventSubscriptions/eg-latency-runner-subscription-eg-prod-uswc-003","name":"eg-latency-runner-subscription-eg-prod-uswc-003","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridrunnerrgwestcentralus/providers/microsoft.storage/storageaccounts/egstrgltncypubwstcntrlus","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventHub/namespaces/egrunnereventhubnamespacewestcentralus/eventhubs/egstrgltncyrunnereventhubwestcentralus"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Storage.BlobCreated","Microsoft.Storage.BlobDeleted"]},"labels":["TestLabel1","TestLabel2"],"retryPolicy":{"eventTimeToLiveInMinutes":1439}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.Storage/storageAccounts/egstrgltncypubwstcntrlus/providers/Microsoft.EventGrid/eventSubscriptions/eg-strg-ltncy-Subscription-west-central-us","name":"eg-strg-ltncy-Subscription-west-central-us","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridrunnerrgwestcentralus/providers/microsoft.eventgrid/topics/eg-latency-runner-topic-eg-prod-uswc-01","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventHub/namespaces/egrunnereventhubnamespacewestcentralus/eventhubs/eglatencyrunnereventhub-eg-prod-uswc-01"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"Subject","subjectEndsWith":"","isSubjectCaseSensitive":true,"advancedFilters":[{"values":["runner"],"operatorType":"StringContains","key":"topic"},{"values":["Info"],"operatorType":"StringEndsWith","key":"data.EventData"},{"values":[1.0,2.0,3.0],"operatorType":"NumberIn","key":"data.key1"},{"value":true,"operatorType":"BoolEquals","key":"data.key2"},{"values":["3.0"],"operatorType":"StringContains","key":"dataversion"}]},"labels":["TestLabel1","TestLabel2"],"retryPolicy":{"eventTimeToLiveInMinutes":1439}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventGrid/topics/eg-latency-runner-topic-eg-prod-uswc-01/providers/Microsoft.EventGrid/eventSubscriptions/eg-latency-runner-subscription-eg-prod-uswc-01","name":"eg-latency-runner-subscription-eg-prod-uswc-01","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridrunnerrgwestcentralus/providers/microsoft.eventgrid/topics/eg-crud-runner-topic-9e81fd7b-west-central-us","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventHub/namespaces/egrunnereventhubnamespacewestcentralus/eventhubs/egoperationrunnereventhubwestcentralus"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"Subject","subjectEndsWith":"","isSubjectCaseSensitive":true,"advancedFilters":[{"values":["runner"],"operatorType":"StringContains","key":"topic"},{"values":["Info"],"operatorType":"StringEndsWith","key":"data.EventData"},{"values":[1.0,2.0,3.0],"operatorType":"NumberIn","key":"data.key1"},{"value":true,"operatorType":"BoolEquals","key":"data.key2"},{"values":["3.0"],"operatorType":"StringContains","key":"dataversion"}]},"labels":["TestLabel1","TestLabel2"],"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1439},"deadLetterDestination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.Storage/storageAccounts/egrunnerstgwestcentralus","blobContainerName":"egrunnerstgdlqcentralus"},"endpointType":"StorageBlob"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventGrid/topics/eg-crud-runner-topic-9e81fd7b-West-Central-US/providers/Microsoft.EventGrid/eventSubscriptions/eg-crud-runner-subscription-8d7764d2-West-Central-US","name":"eg-crud-runner-subscription-8d7764d2-West-Central-US","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridrunnerrgwestcentralus/providers/microsoft.eventgrid/topics/eglatencyrunnerqueuetopicwestcentralus","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.Storage/storageAccounts/egrunnerstgwestcentralus","queueName":"egltcyrunnerstgqueuedestinationcentralus"},"endpointType":"StorageQueue"},"filter":{"subjectBeginsWith":"Subject","subjectEndsWith":"","isSubjectCaseSensitive":true,"advancedFilters":[{"values":["runner"],"operatorType":"StringContains","key":"topic"},{"values":["Info"],"operatorType":"StringEndsWith","key":"data.EventData"},{"values":[1.0,2.0,3.0],"operatorType":"NumberIn","key":"data.key1"},{"value":true,"operatorType":"BoolEquals","key":"data.key2"},{"values":["3.0"],"operatorType":"StringContains","key":"dataversion"}]},"labels":["TestLabel1","TestLabel2"],"retryPolicy":{"eventTimeToLiveInMinutes":1439},"deadLetterDestination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.Storage/storageAccounts/egrunnerstgwestcentralus","blobContainerName":"egltcyrunnerstgdlqcentralus"},"endpointType":"StorageBlob"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventGrid/topics/eglatencyrunnerqueuetopicwestcentralus/providers/Microsoft.EventGrid/eventSubscriptions/eglatencyrunnerqueuesubscriptionwestcentralus","name":"eglatencyrunnerqueuesubscriptionwestcentralus","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridrunnerrgwestcentralus/providers/microsoft.eventgrid/topics/eg-latency-runner-topic-eg-prod-uswc-02","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventHub/namespaces/egrunnereventhubnamespacewestcentralus-1/eventhubs/eglatencyrunnereventhub-eg-prod-uswc-02"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"Subject","subjectEndsWith":"","isSubjectCaseSensitive":true,"advancedFilters":[{"values":["runner"],"operatorType":"StringContains","key":"topic"},{"values":["Info"],"operatorType":"StringEndsWith","key":"data.EventData"},{"values":[1.0,2.0,3.0],"operatorType":"NumberIn","key":"data.key1"},{"value":true,"operatorType":"BoolEquals","key":"data.key2"},{"values":["3.0"],"operatorType":"StringContains","key":"dataversion"}]},"labels":["TestLabel1","TestLabel2"],"retryPolicy":{"eventTimeToLiveInMinutes":1439}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventGrid/topics/eg-latency-runner-topic-eg-prod-uswc-02/providers/Microsoft.EventGrid/eventSubscriptions/eg-latency-runner-subscription-eg-prod-uswc-02","name":"eg-latency-runner-subscription-eg-prod-uswc-02","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridrunnerrgwestcentralus/providers/microsoft.eventgrid/topics/eg-latency-runner-topic-eg-prod-uswc-03","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventHub/namespaces/egrunnereventhubnamespacewestcentralus-1/eventhubs/eglatencyrunnereventhub-eg-prod-uswc-03"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"Subject","subjectEndsWith":"","isSubjectCaseSensitive":true,"advancedFilters":[{"values":["runner"],"operatorType":"StringContains","key":"topic"},{"values":["Info"],"operatorType":"StringEndsWith","key":"data.EventData"},{"values":[1.0,2.0,3.0],"operatorType":"NumberIn","key":"data.key1"},{"value":true,"operatorType":"BoolEquals","key":"data.key2"},{"values":["3.0"],"operatorType":"StringContains","key":"dataversion"}]},"labels":["TestLabel1","TestLabel2"],"retryPolicy":{"eventTimeToLiveInMinutes":1439}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventGrid/topics/eg-latency-runner-topic-eg-prod-uswc-03/providers/Microsoft.EventGrid/eventSubscriptions/eg-latency-runner-subscription-eg-prod-uswc-03","name":"eg-latency-runner-subscription-eg-prod-uswc-03","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgname-ps1242/providers/microsoft.eventgrid/topics/pstesttopic-ps4285","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null,"retryPolicy":{"maxDeliveryAttempts":20,"eventTimeToLiveInMinutes":50}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/RGName-ps1242/providers/Microsoft.EventGrid/topics/PSTestTopic-ps4285/providers/Microsoft.EventGrid/eventSubscriptions/EventSubscription-ps9036","name":"EventSubscription-ps9036","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgname-ps1242/providers/microsoft.eventgrid/topics/pstesttopic-ps4285","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/RGName-ps1242/providers/Microsoft.ServiceBus/namespaces/sbnamespace-ps4675/queues/sbname-ps588"},"endpointType":"ServiceBusQueue"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/RGName-ps1242/providers/microsoft.eventgrid/topics/PSTestTopic-ps4285/providers/Microsoft.EventGrid/eventSubscriptions/EventSubscription-ps3830","name":"EventSubscription-ps3830","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rghuhzrtxh6mezlggjiwuoqlbte6n73sukdwjqw6l6rmbqyv6ijjco7jnm6mxemzmzg/providers/microsoft.eventgrid/topics/clio3g44s4zmc7fcypemj6q4jwokqfohytgntl7q","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rghuhzrtxh6mezlggjiwuoqlbte6n73sukdwjqw6l6rmbqyv6ijjco7jnm6mxemzmzg/providers/Microsoft.EventGrid/topics/clio3g44s4zmc7fcypemj6q4jwokqfohytgntl7q/providers/Microsoft.EventGrid/eventSubscriptions/clirkw3plbdxypzf223lo5ged5wtpsvkxqr24b4g","name":"clirkw3plbdxypzf223lo5ged5wtpsvkxqr24b4g","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgaa5l63q5yqi2h4j7n4jnwkbytn54x63dhrlkvdkhldjtha24rqe5swjwt7kx3sh36/providers/microsoft.eventgrid/topics/cliedq7t32wjsskqiqhbi54udokpnwhm6q4ycz2r","provisioningState":"Updating","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgaa5l63q5yqi2h4j7n4jnwkbytn54x63dhrlkvdkhldjtha24rqe5swjwt7kx3sh36/providers/Microsoft.EventGrid/topics/cliedq7t32wjsskqiqhbi54udokpnwhm6q4ycz2r/providers/Microsoft.EventGrid/eventSubscriptions/clilckguqswrbzhswyuet2cwoesglzpqdakujjml","name":"clilckguqswrbzhswyuet2cwoesglzpqdakujjml","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridrunnerrgwestcentralus/providers/microsoft.eventgrid/topics/egcrudrunnerqueuetopic5a72a0a1westcentralus","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.Storage/storageAccounts/egrunnerstgwestcentralus","queueName":"egrunnerstgqueuedestinationcentralus"},"endpointType":"StorageQueue"},"filter":{"subjectBeginsWith":"Subject","subjectEndsWith":"","isSubjectCaseSensitive":true,"advancedFilters":[{"values":["runner"],"operatorType":"StringContains","key":"topic"},{"values":["Info"],"operatorType":"StringEndsWith","key":"data.EventData"},{"values":[1.0,2.0,3.0],"operatorType":"NumberIn","key":"data.key1"},{"value":true,"operatorType":"BoolEquals","key":"data.key2"},{"values":["3.0"],"operatorType":"StringContains","key":"dataversion"}]},"labels":["NewTestLabel1","NewTestLabel2","NewTestLabel3"],"retryPolicy":{"eventTimeToLiveInMinutes":1438},"deadLetterDestination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.Storage/storageAccounts/egrunnerstgwestcentralus","blobContainerName":"egrunnerstgdlqcentralus"},"endpointType":"StorageBlob"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridRunnerRGWestCentralUS/providers/Microsoft.EventGrid/topics/egcrudrunnerqueuetopic5a72a0a1WestCentralUS/providers/Microsoft.EventGrid/eventSubscriptions/eg-crud-runner-subscription-3967f4f8-West-Central-US","name":"eg-crud-runner-subscription-3967f4f8-West-Central-US","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/microsoft.storage/storageaccounts/clieventgrid000002","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":".jpg","includedEventTypes":["Microsoft.Storage.BlobCreated","Microsoft.Storage.BlobDeleted"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003","name":"cli000003","type":"Microsoft.EventGrid/eventSubscriptions"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '26184'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 23:01:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-id --odata-query
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions?api-version=2019-06-01&$filter=CONTAINS%28name%2C%27cli000003%27%29&$top=100
+  response:
+    body:
+      string: '{"value":[{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/microsoft.storage/storageaccounts/clieventgrid000002","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":".jpg","includedEventTypes":["Microsoft.Storage.BlobCreated","Microsoft.Storage.BlobDeleted"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003","name":"cli000003","type":"Microsoft.EventGrid/eventSubscriptions"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1095'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 23:01:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --topic-type --location --odata-query
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/locations/westcentralus/topicTypes/Microsoft.Storage.StorageAccounts/eventSubscriptions?api-version=2019-06-01&$filter=CONTAINS%28name%2C%27cli000003%27%29&$top=100
+  response:
+    body:
+      string: '{"value":[{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/microsoft.storage/storageaccounts/clieventgrid000002","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":".jpg","includedEventTypes":["Microsoft.Storage.BlobCreated","Microsoft.Storage.BlobDeleted"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003","name":"cli000003","type":"Microsoft.EventGrid/eventSubscriptions"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1095'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 23:01:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --topic-type --location --resource-group --odata-query
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.EventGrid/locations/westcentralus/topicTypes/Microsoft.Storage.StorageAccounts/eventSubscriptions?api-version=2019-06-01&$filter=name%20eq%20%27cli000003%27&$top=100
+  response:
+    body:
+      string: '{"value":[{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/microsoft.storage/storageaccounts/clieventgrid000002","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":".jpg","includedEventTypes":["Microsoft.Storage.BlobCreated","Microsoft.Storage.BlobDeleted"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003","name":"cli000003","type":"Microsoft.EventGrid/eventSubscriptions"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1095'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 23:01:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --location --resource-group --odata-query
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.EventGrid/locations/westcentralus/eventSubscriptions?api-version=2019-06-01&$filter=name%20eq%20%27cli000003%27&$top=100
+  response:
+    body:
+      string: '{"value":[{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/microsoft.storage/storageaccounts/clieventgrid000002","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":".jpg","includedEventTypes":["Microsoft.Storage.BlobCreated","Microsoft.Storage.BlobDeleted"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003","name":"cli000003","type":"Microsoft.EventGrid/eventSubscriptions"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1095'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 23:01:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --location --odata-query
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/locations/westcentralus/eventSubscriptions?api-version=2019-06-01&$filter=name%20eq%20%27cli000003%27&$top=100
+  response:
+    body:
+      string: '{"value":[{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/microsoft.storage/storageaccounts/clieventgrid000002","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":".jpg","includedEventTypes":["Microsoft.Storage.BlobCreated","Microsoft.Storage.BlobDeleted"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003","name":"cli000003","type":"Microsoft.EventGrid/eventSubscriptions"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1095'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 23:01:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --resource-id --name
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/cli000003?api-version=2019-06-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Mon, 03 Jun 2019 23:01:16 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/locations/westcentralus/operationResults/DDD28C80-034E-4957-9292-D31A41FF8366?api-version=2019-06-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14997'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-id --name
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/locations/westcentralus/operationResults/DDD28C80-034E-4957-9292-D31A41FF8366?api-version=2019-06-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Mon, 03 Jun 2019 23:01:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -y -g -n
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-storage/3.3.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clieventgridrg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002?api-version=2019-04-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      content-type:
+      - text/plain; charset=utf-8
+      date:
+      - Mon, 03 Jun 2019 23:01:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --name --yes --no-wait
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clieventgridrg000001?api-version=2018-05-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Mon, 03 Jun 2019 23:01:29 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElFVkVOVEdSSURSR1dXTUZLU1k2VElVRkc3SjM2TzVOU1g1MkRKNEhDM0dSWXwzRTdCOUQ0RjVFMjRGNzRELVdFU1RDRU5UUkFMVVMiLCJqb2JMb2NhdGlvbiI6Indlc3RjZW50cmFsdXMifQ?api-version=2018-05-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14998'
+    status:
+      code: 202
+      message: Accepted
+version: 1

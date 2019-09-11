@@ -2,6 +2,366 @@
 
 Release History
 ===============
+**Batch**
+
+* Expanded `--json-file` capabilities of `az batch pool create` to allow for specifying MountConfigurations for file system mounts(see https://docs.microsoft.com/en-us/rest/api/batchservice/pool/add#request-body for structure)
+* Expanded `--json-file` capabilities of `az batch pool create` with the optional property publicIPs on NetworkConfiguration. This allows specifying publicIPs to be used when deploying pools (see https://docs.microsoft.com/en-us/rest/api/batchservice/pool/add#request-body for structure)
+* Expanded `--image` capabilities to support Shared Image Galleries images. Similar to the commands support for Managed Images, to use a Shared Image Gallery image simply use the ARM ID as the value to the argument.
+* [BREAKING] When not specified, the default value for `--start-task-wait-for-success` on `az batch pool create` is now true (was false).
+* [BREAKING] The default value for Scope on AutoUserSpecification is now always Pool (was Task on Windows nodes, Pool on Linux nodes). This argument is not exposed via the commandline, but can be set in the `--json-file` arguments.
+
+2.0.72
+++++++
+
+**Policy**
+
+* Support for Policy new API version 2019-01-01
+
+**ACR**
+
+* Move to 2019-05-01 api-version, which follows replace semantics for ACR resource creation.
+* Breaking change: Classic SKU no longer supported.
+
+**API Management**
+
+* Introduced initial impementation of API Management preview commands (az apim)
+
+**AppConfig**
+
+* Added "appconfig kv restore" command.
+
+**AppService**
+
+* Fixed az webapp webjob continuous start command when specifying a slot.
+
+**AppService**
+
+* az webapp up detects env folder and removes it from compressed file used for deployment
+
+**Keyvault**
+
+* Fix the bug in secret set command that igores the expires argument
+
+**Network**
+
+* az network lb create/frontend-ip create: Fixes #10018. Support `--private-ip-address-version` argument to create IPv6 based private-ip-address 
+* az network private-endpoint create/update/list-types: Fixes #9474. Support create/update/list-types commands for private endpoint.
+* az network private-link-service: Fixes #9475. Onboard commands for private link service.
+* az network vnet subnet update: Support `--private-endpoint-network-policies` and `--private-link-service-network-policies` arguments for update command.
+
+**RBAC**
+
+* Fix #10151 - `az ad app update --homepage` not updating homepage.
+* Derive service principal's display name from name in the create-for-rbac command
+
+**ServiceFabric**
+
+* Fix for issues #7145,  #7880 and #7889 - fix for key vault and cert issues when creating a cluster.
+* Fix for issue #7130 - fix add cert command. Using the cluster resource group when the key vault resource group is not specified.
+* Fix for issue #9711 - fix command 'cluster setting set' command. Using named parameters for SettingsSectionDescription constructor.
+
+**SignalR**
+
+* signalr cors: New command to manage SignalR CORS
+* az signalr create: --service-mode: new service mode argument
+* signalr restart: new command to restart the service
+* signalr update: new command to update the service
+
+**Storage**
+
+* Add `revoke-delegation-keys` command for storage account
+
+2.0.71
+++++++
+
+**AppService**
+
+* az webapp webjob continuous group commands were failing for slots
+* fixes an issue where `az webapp deployment container config` displayed the wrong Docker CI/CD webhook URL for some apps
+
+**BotService**
+
+* BREAKING CHANGE:
+    create:
+        - Removed support for creating v3 SDK bots
+        - Remove `az bot publish` example when creating a Web App bot
+
+**CognitiveServices**
+
+* Add "cognitiveservices account network-rule" commands.
+
+**Cosmos DB**
+
+* Remove warning when updating multiple write locations
+* Add CRUD commands for CosmosDB SQL, MongoDB, Cassandra, Gremlin and Table resources and resource's throughput.
+
+**HDInsight**
+
+* BREAKING CHANGE:
+    create:
+        - Renamed --storage-default-container to --storage-container and --storage-default-filesystem to --storage-filesystem
+    application create: 
+        - Changed the --name/-n argument to represent the application name instead of the cluster name and added a separate --cluster-name argument
+        - Renamed --application-type to --type/-t
+        - Renamed --marketplace-identifier to --marketplace-id
+        - Renamed --https-endpoint-access-mode to --access-mode and --https-endpoint-destination-port to --destination-port
+        - Removed --https-endpoint-location, --https-endpoint-public-port, --ssh-endpoint-destination-port, --ssh-endpoint-location and --ssh-endpoint-public-port
+    resize:
+        - Renamed --target-instance-count to --workernode-count/-c
+    script-action
+        - Changed --name/-n to represent the name of the script action and added the --cluster-name argument to represent the cluster name
+        - Changed --script-execution-id to --execution-id
+        - Renamed the "show" command to "show-execution-details"
+    script-action execute:
+        - Made parameters for the --roles argument space separated instead of comma separated
+    script-action list:
+        - Removed the --persisted parameter
+* create:
+    Enabled the --cluster-configurations argument to accept a path to a local JSON file or a JSON string as the parameter
+* script-action list-execution-history:
+    Added this command to list the execution history for all script action executions
+* monitor enable:
+    Enabled the --workspace argument to accept a Log Analytics workspace ID or workspace name as the parameter
+    Added the --primary-key argument, which is needed if a workspace ID is provided as the parameter 
+* Added more examples and updated descriptions for help messages
+
+**interactive**
+
+* Fix a loading error on 2.0.70
+
+**Network**
+
+* az network dns record-set cname delete: Fixes #10166. Support `--yes` argument to align the behavior with other dns type. 
+
+**Profile**
+
+* Add get-access-token --resource-type enum for convenience of getting access tokens for well-known resources.
+
+**ServiceFabric**
+
+* Fix for issue #6112 - added all supported os version for sf cluster create
+* Fix for issue #6536 - primary certificate validation bug
+
+**Storage**
+
+* `storage copy`: add copy command for storage
+
+**Kubernetes**
+
+* Use https if dashboard container port is using https 
+
+
+2.0.70
+++++++
+
+**ACR**
+
+* Fixed issue #9952 (a regression in the `acr pack build` command).
+* Removed the default builder image name in `acr pack build`.
+
+**Appservice**
+* az webapp config ssl support to show a message if a resource is not found
+* Fixed issue where `az functionapp create` does not accept Standard_RAGRS storage account type.
+* Fixed an issue where az webapp up would fail if run using older versions of python
+
+**Monitor**
+
+* `metrics alert create`: Allow '/' and '.' characters in namespace name to support custom metrics.
+
+**Network**
+
+* network nic ip-config add: Fixes #9861 where --ids was inadvertently exposed but did not work.
+* network application-gateway http-settings create/update: Fixes #9604. Add `--root-certs` to support user associate trusted root certificates with the HTTP settings.
+* network dns record-set ns create: Fixes #9965. Support --subscription again by moving the supression into lower scope.
+* network watcher test-ip-flow: Fixes #9845. Fixes #9844. Correct the error messages and help message for the `--vm` and `--nic` arguments. Only providing the name of the vm or nic without `--resource-group` will raise CLI usage error.
+
+**RBAC**
+
+* add "user update" command
+* deprecate "--upn-or-object-id" from user related commands and introduce "--id"
+
+**SQL**
+
+* New Cmdlets for Management.Sql that supports Managed instance key and managed instance TDE protector management
+
+**Storage**
+
+* `storage remove`: add remove command for storage
+* Fixed issue `storage blob update`.
+
+**VM**
+
+* list-skus: use newer api-version to output zone details
+* vmss create: restore client end defaults to False for "--single-placement-group"
+* snapshot/disk create: expose ZRS storage skus
+* Add new command group `vm host` to support dedicated hosts. Expose `--host` and `--host-group` on `vm create`
+
+2.0.69
+++++++
+
+**AKS**                                                                                                                                                                                                                                                                         * Fixed an issue where terminating the browse command always tried to call an endpoint that is only available within cloud shell, resulting in a connection failure in other environments
+
+**Appservice**
+
+* az webapp identity commands will return a proper error message if ResourceGroupName or App name are invalid.
+* az webapp list fixed to return the correct value for numberOfSites if no ResourceGroup was provided.
+* restore the idempotency of "appservice plan create" and "webapp create"
+
+**Core**
+
+* Fixed issue where `--subscription` would appear despite being not applicable.
+* Added ossrdbmsResourceId to cloud.py.
+
+**BATCH**
+
+* Updated to Batch SDK and Batch Management Plane SDK to 7.0.0
+* [Breaking] Replaced az batch pool node-agent-skus list with az batch pool supported-images list. The new command contains all of the same information originally available, but in a clearer format. New non-verified images are also now returned. Additional information about capabilities and batchSupportEndOfLife is accessible on the imageInformation object returned.
+* When using --json-file option of az batch pool create network security rules blocking network access to a pool based on the source port of the traffic is now supported. This is done via the SourcePortRanges property on NetworkSecurityGroupRule.
+* When using --json-file option of az batch task create and running a container, Batch now supports executing the task in the container working directory or in the Batch task working directory. This is controlled by the WorkingDirectory property on TaskContainerSettings.
+* Fix error in --application-package-references option of `az batch pool create` where it would only work with defaults. Now it will properly accept specific versions as well.
+
+**Eventhubs**
+
+* Fix for issue #5824 - added validation for parameter --rights of authorizationrule commands
+
+**RDBMS**
+
+* Add optional parameter to specify replica SKU for create replica command.
+* Fix the issue with CI test failure with creating MySQL replica.
+
+**Relay**
+
+* Fixed issue #8775 : Cannot create hybrid connection with disabled client authroization
+* Added parameter "--requires-transport-security" to az relay wcfrelay create
+
+**Servicebus**
+
+* Fix for issue #5824 - added validation for parameter --rights of authorizationrule commands
+
+**SQL**
+
+* Improved error message when attempting to create a SQL resource which is not available in the specified region.
+
+**Storage**
+
+* Enable Files AADDS for storage account update.
+* Fixed issue `storage blob service-properties update --set`.
+
+2.0.68
+++++++
+**ACR**
+
+* Support Timer Triggers for Task.
+
+**Appservice**
+
+* functionapp: `az functionapp create` enables application insights by default
+* BREAKING CHANGE: (functionapp) removes deprecated `az functionapp devops-build` command. Please use the new command `az functionapp devops-pipeline` instead.
+* functionapp: `az functionapp deployment config-zip` now works for Linux Consumption Function app plans
+
+**Cosmos DB**
+
+* Added support for disabling TTL
+
+**DLS**
+
+* Update ADLS version (0.0.45).
+
+**Feedback**
+
+* When reporting a failed extension command, `az feedback` now attempts to open the browser to the project/repo url of the
+  extension from the index.
+
+**HDInsight**
+
+* BREAKING CHANGE: Changed "oms" command group name to "monitor"
+* BREAKING CHANGE: Made "--http-password/-p" a required parameter
+* Added completers for "--cluster-admin-account" and "cluster-users-group-dns" parameters completer
+* "cluster-users-group-dns" parameter is now required when "—esp" is present
+* Added a timeout for all existing argument auto-completers
+* Added a timeout for transforming resource name to resource id
+* Auto-completers can now select resources from any resource group. It can be a different resource group than the one specified with "-g"
+* Added support for "--sub-domain-suffix" and "--disable_gateway_auth" parameters in the "az hdinsight application create" command
+
+**Managed Services**
+
+* Added support for API version 2019-06-01 (GA)
+
+**NetAppFiles**
+
+* Volume create/update: Added new argument --protocol-types
+* Initial version relating to the R4 version of the RP.
+
+**Profile**
+* Suppress `--subscription` argument for logout command.
+
+**IoT**
+
+* Support for IoT Hub message enrichments
+
+**RBAC**
+
+* [BREAKING CHANGE] create-for-rbac: remove --password
+* role assignment: expose --assignee-principal-type from create command to avoid intermittent
+                   failures caused by AAD graph server replication latency
+* ad signed-in-user: fix a crash on listing owned objects
+* ad sp: use the right approach to find the application from a service principal
+
+**RDBMS**
+
+* Support storage auto-grow for MySQL, PostgreSQL and MariaDB
+
+* Support replication for MariaDB.
+
+**SQL**
+
+* Document allowed values for sql db create --sample-name
+
+**SQL VM**
+
+* sql vm create/update: Added optional parameter `--sql-mgmt-type` to setup SQL management
+* Minor fixes on SQL vm group that did not allow to update the key for storage accounts.
+
+**VM**
+
+* vmss create: Fix bug where command returns an error message when run with `--no-wait`. The command succesfully sends
+  the request but returns failure status code and returns an error mesage.
+* vm/vmss extension image list: Fix bug where command fails when used with --latest
+* vmss create `--single-placement-group`: Removed client-side validation. Does not fail if `--single-placement-group` is
+  set to true and`--instance-count` is greater than 100 or availability zones are specified, but leaves this validation
+  to the compute service.
+* vmss create `--platform-fault-domain-count`: Removed client-side validation. Allows platform fault domain count to be
+  specified without specifying zone information, via `--zones`.
+
+**Storage**
+
+* storage blob generate-sas: User delegation SAS token support with --as-user
+* storage container generate-sas: User delegation SAS token support with --as-user
+
+2.0.67
+++++++
+* Introduced a new [Preview] status to tag to more clearly communicate to customers
+  when a command group, command or argument is in preview status. This was previously
+  called out in help text or communicated implicitly by the command module version number.
+  The CLI will be removing version numbers for individual packages in the future, so this
+  mechanism will be the sole way to communicate that a feature is in preview. Items which
+  are not labeled as being in preview can be considered to be GA. Not that if a command is
+  in preview, all of its arguments are as well, and, by extension, if a command group is
+  labeled as being in preview, then all commands and arguments are considered to be in
+  preview as well.
+
+  As a result of this change, several command groups may seem to "suddenly" appear to be
+  in a preview status with this release. What actually happened is that most packages were
+  in a preview status, but are being deemed GA with this release.
+
+2.0.66
+++++++
+* Minor fixes.
+
+2.0.65
+++++++
+* Minor fixes.
+
 2.0.64
 ++++++
 * Minor fixes.
