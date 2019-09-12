@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-base_images=("ubuntu:xenial" "ubuntu:bionic" "debian:stretch" "debian:jessie")
+base_images=("ubuntu:xenial" "ubuntu:bionic" "debian:stretch" "debian:jessie" "debian:buster")
 
 set -e
 
