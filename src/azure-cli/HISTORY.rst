@@ -3,6 +3,8 @@
 Release History
 ===============
 
+* Rewrite the az wrapper in python
+
 **Compute**
 
 * vmss create: Add --terminate-notification-time parameters to support terminate scheduled event configurability.
