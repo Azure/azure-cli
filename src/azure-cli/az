@@ -3,13 +3,13 @@
 import sys
 import os
 
-dir = os.path.dirname(os.path.realpath(__file__))
+dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'src')
 
 if os.environ.get('PYTHONPATH') == None:
-    os.environ['PYTHONPATH'] = os.path.join(dir, 'src')
+    os.environ['PYTHONPATH'] = dir
 else:
     os.environ['PYTHONPATH'] = os.pathsep.join([
-        os.path.join(dir, 'src'),
+        dir,
         os.environ.get('PYTHONPATH'),
     ])
 
