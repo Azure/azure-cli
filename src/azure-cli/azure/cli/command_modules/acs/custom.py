@@ -1820,37 +1820,6 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     raise retry_exception
 
 
-def aks_update(cmd, client, resource_group_name, name, no_wait=False,
-               load_balancer_managed_outbound_ip_count=None,
-               load_balancer_outbound_ips=None,
-               load_balancer_outbound_ip_prefixes=None):
-    update_lb_profile = load_balancer_managed_outbound_ip_count is not None or \
-        load_balancer_outbound_ips is not None or load_balancer_outbound_ip_prefixes is not None
-
-    if not update_lb_profile:
-        raise CLIError('Please specify "--load-balancer-managed-outbound-ip-count" or '
-                       '"--load-balancer-outbound-ips" or '
-                       '"--load-balancer-outbound-ip-prefixes"')
-
-    instance = client.get(resource_group_name, name)
-
-    load_balancer_profile = _get_load_balancer_profile(
-        load_balancer_managed_outbound_ip_count,
-        load_balancer_outbound_ips,
-        load_balancer_outbound_ip_prefixes)
-
-    if load_balancer_profile:
-        instance.network_profile.load_balancer_profile = load_balancer_profile
-
-    subscription_id = _get_subscription_id(cmd.cli_ctx)
-    location = instance.location
-    service_principal = instance.service_principal_profile.client_id
-    if not service_principal:
-        raise CLIError('Cannot get the AKS cluster\'s service principal.')
-
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
-
-
 def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=False):
     instance = client.get(resource_group_name, name)
     subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -1989,11 +1958,20 @@ def aks_scale(cmd, client, resource_group_name, name, node_count, nodepool_name=
 
 
 def aks_update(cmd, client, resource_group_name, name,
+               load_balancer_managed_outbound_ip_count=None,
+               load_balancer_outbound_ips=None,
+               load_balancer_outbound_ip_prefixes=None,
                attach_acr=None,
                detach_acr=None,
                no_wait=False):
-    if not attach_acr and not detach_acr:
-        raise CLIError('Please sepcify "--attach-acr" or "--detach-acr".')
+    update_lb_profile = load_balancer_managed_outbound_ip_count is not None or \
+        load_balancer_outbound_ips is not None or load_balancer_outbound_ip_prefixes is not None
+
+    if not update_lb_profile and not attach_acr and not detach_acr:
+        raise CLIError('Please specify "--load-balancer-managed-outbound-ip-count" or '
+                       '"--load-balancer-outbound-ips" or '
+                       '"--load-balancer-outbound-ip-prefixes" or '
+                       '"--attach-acr" or "--dettach-acr"')
 
     if attach_acr and detach_acr:
         raise CLIError('Cannot specify "--attach-acr" and "--detach-acr" at the same time.')
@@ -2017,8 +1995,18 @@ def aks_update(cmd, client, resource_group_name, name,
                         subscription_id=subscription_id,
                         detach=True)
 
+    load_balancer_profile = _get_load_balancer_profile(
+        load_balancer_managed_outbound_ip_count,
+        load_balancer_outbound_ips,
+        load_balancer_outbound_ip_prefixes)
 
-def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, no_wait=False, **kwargs):  # pylint: disable=unused-argument
+    if load_balancer_profile:
+        instance.network_profile.load_balancer_profile = load_balancer_profile
+        return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
+
+
+def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, control_plane_only=False, \
+    no_wait=False, **kwargs):  # pylint: disable=unused-argument
     instance = client.get(resource_group_name, name)
 
     if instance.kubernetes_version == kubernetes_version:
@@ -2031,6 +2019,17 @@ def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, no_w
                            "attempt resolution of failed cluster state.", instance.kubernetes_version)
 
     instance.kubernetes_version = kubernetes_version
+    from knack.prompting import prompt_y_n
+    if not control_plane_only:
+        msg = 'Since control-plane-only argument is not specified, this will upgrade the control plane AND all nodepools to version {}. Are you sure?'.format(instance.kubernetes_version)
+        if not prompt_y_n(msg, default="n"):
+            return
+        for agent_profile in instance.agent_pool_profiles:
+            agent_profile.orchestrator_version = kubernetes_version
+    else:
+        msg = 'Since control-plane-only argument is specified, this will upgrade only the control plane to {}. Node pool will not change. Are you sure?'.format(instance.kubernetes_version)
+        if not prompt_y_n(msg, default="n"):
+            return
 
     # null out the SP and AAD profile because otherwise validation complains
     instance.service_principal_profile = None

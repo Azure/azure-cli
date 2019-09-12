@@ -525,7 +525,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('agentPoolProfiles[0].type', 'AvailabilitySet'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion'),
-            self.check('networkProfile.loadBalancerSku', 'basic'),
+            self.check('networkProfile.loadBalancerSku', 'Basic'),
         ])
 
         # get-credentials
@@ -607,7 +607,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('agentPoolProfiles[0].type', 'VirtualMachineScaleSets'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion'),
-            self.check('networkProfile.loadBalancerSku', 'standard'),
+            self.check('networkProfile.loadBalancerSku', 'Standard'),
             self.check('networkProfile.loadBalancerProfile.managedOutboundIps.count', 1),
             self.exists('networkProfile.loadBalancerProfile.effectiveOutboundIps')
         ])
@@ -728,7 +728,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('agentPoolProfiles[0].type', 'VirtualMachineScaleSets'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion'),
-            self.check('networkProfile.loadBalancerSku', 'standard'),
+            self.check('networkProfile.loadBalancerSku', 'Standard'),
             self.exists('networkProfile.loadBalancerProfile'),
             self.exists('networkProfile.loadBalancerProfile.outboundIps'),
             self.exists('networkProfile.loadBalancerProfile.effectiveOutboundIps')
@@ -843,7 +843,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('agentPoolProfiles[0].type', 'VirtualMachineScaleSets'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion'),
-            self.check('networkProfile.loadBalancerSku', 'standard'),
+            self.check('networkProfile.loadBalancerSku', 'Standard'),
             self.exists('networkProfile.loadBalancerProfile'),
             self.exists('networkProfile.loadBalancerProfile.outboundIpPrefixes'),
             self.exists('networkProfile.loadBalancerProfile.effectiveOutboundIps')
