@@ -687,10 +687,10 @@ class VMManagedDiskScenarioTest(ScenarioTest):
                      self.check('storageProfile.osDisk.caching', 'ReadWrite')
                  ])
 
-        # test snapshot incremental
-        self.cmd('snapshot create -g {rg} -n {snapshot3} --size-gb 10 --incremental', checks=[
-            # self.check('incremental', True) # not sure whether service team has supported it
-        ])
+        # test snapshot incremental, subscription not in whitelist yet
+        # self.cmd('snapshot create -g {rg} -n {snapshot3} --size-gb 10 --incremental', checks=[
+        #      self.check('incremental', True)
+        # ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_large_disk')
     def test_vm_large_disk(self, resource_group):
