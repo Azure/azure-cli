@@ -92,8 +92,10 @@ def get_period_type(as_timedelta=False):
 class MetricAlertConditionAction(argparse._AppendAction):
 
     def __call__(self, parser, namespace, values, option_string=None):
-        from azure.cli.command_modules.monitor.grammar import (
-            MetricAlertConditionLexer, MetricAlertConditionParser, MetricAlertConditionValidator)
+        MetricAlertConditionLexer, MetricAlertConditionParser, MetricAlertConditionValidator = \
+            namespace._cmd.get_models('MetricAlertConditionLexer',
+                                      'MetricAlertConditionParser',
+                                      'MetricAlertConditionValidator')
 
         usage = 'usage error: --condition {avg,min,max,total,count} [NAMESPACE.]METRIC {=,!=,>,>=,<,<=} THRESHOLD\n' \
                 '                         [where DIMENSION {includes,excludes} VALUE [or VALUE ...]\n' \
@@ -123,7 +125,7 @@ class MetricAlertConditionAction(argparse._AppendAction):
 class MetricAlertAddAction(argparse._AppendAction):
 
     def __call__(self, parser, namespace, values, option_string=None):
-        from azure.mgmt.monitor.models import MetricAlertAction
+        MetricAlertAction = namespace._cmd.get_models('MetricAlertAction')
         action = MetricAlertAction(
             action_group_id=values[0],
             webhook_properties=dict(x.split('=', 1) for x in values[1:]) if len(values) > 1 else None
@@ -136,7 +138,8 @@ class MetricAlertAddAction(argparse._AppendAction):
 # pylint: disable=too-few-public-methods
 class ConditionAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
-        from azure.mgmt.monitor.models import ThresholdRuleCondition, RuleMetricDataSource
+        ThresholdRuleCondition, RuleMetricDataSource = \
+            namespace._cmd.get_models('ThresholdRuleCondition', 'RuleMetricDataSource')
         # get default description if not specified
         if namespace.description is None:
             namespace.description = ' '.join(values)
@@ -161,16 +164,16 @@ class ConditionAction(argparse.Action):
 # pylint: disable=protected-access
 class AlertAddAction(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
-        action = self.get_action(values, option_string)
+        action = self.get_action(values, option_string, namespace)
         super(AlertAddAction, self).__call__(parser, namespace, action, option_string)
 
-    def get_action(self, values, option_string):  # pylint: disable=no-self-use
+    def get_action(self, values, option_string, namespace):  # pylint: disable=no-self-use
         _type = values[0].lower()
         if _type == 'email':
-            from azure.mgmt.monitor.models import RuleEmailAction
+            RuleEmailAction = namespace._cmd.get_models('RuleEmailAction')
             return RuleEmailAction(custom_emails=values[1:])
         if _type == 'webhook':
-            from azure.mgmt.monitor.models import RuleWebhookAction
+            RuleWebhookAction = namespace._cmd.get_models('RuleWebhookAction')
             uri = values[1]
             try:
                 properties = dict(x.split('=', 1) for x in values[2:])
@@ -197,16 +200,16 @@ class AlertRemoveAction(argparse._AppendAction):
 # pylint: disable=protected-access
 class AutoscaleAddAction(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
-        action = self.get_action(values, option_string)
+        action = self.get_action(values, option_string, namespace)
         super(AutoscaleAddAction, self).__call__(parser, namespace, action, option_string)
 
-    def get_action(self, values, option_string):  # pylint: disable=no-self-use
+    def get_action(self, values, option_string, namespace):  # pylint: disable=no-self-use
         _type = values[0].lower()
         if _type == 'email':
-            from azure.mgmt.monitor.models import EmailNotification
+            EmailNotification = namespace._cmd.get_models('EmailNotification')
             return EmailNotification(custom_emails=values[1:])
         if _type == 'webhook':
-            from azure.mgmt.monitor.models import WebhookNotification
+            WebhookNotification = namespace._cmd.get_models('WebhookNotification')
             uri = values[1]
             try:
                 properties = dict(x.split('=', 1) for x in values[2:])
@@ -232,7 +235,7 @@ class AutoscaleRemoveAction(argparse._AppendAction):
 
 class AutoscaleConditionAction(argparse.Action):  # pylint: disable=protected-access
     def __call__(self, parser, namespace, values, option_string=None):
-        from azure.mgmt.monitor.models import MetricTrigger
+        MetricTrigger = namespace._cmd.get_models('MetricTrigger')
         if len(values) == 1:
             # workaround because CMD.exe eats > character... Allows condition to be
             # specified as a quoted expression
@@ -262,7 +265,7 @@ class AutoscaleConditionAction(argparse.Action):  # pylint: disable=protected-ac
 
 class AutoscaleScaleAction(argparse.Action):  # pylint: disable=protected-access
     def __call__(self, parser, namespace, values, option_string=None):
-        from azure.mgmt.monitor.models import ScaleAction, ScaleType
+        ScaleAction, ScaleType = namespace._cmd.get_models('ScaleAction', 'ScaleType')
         if len(values) == 1:
             # workaround because CMD.exe eats > character... Allows condition to be
             # specified as a quoted expression
@@ -297,7 +300,7 @@ class MultiObjectsDeserializeAction(argparse._AppendAction):  # pylint: disable=
         try:
             super(MultiObjectsDeserializeAction, self).__call__(parser,
                                                                 namespace,
-                                                                self.deserialize_object(type_name, type_properties, namespace),
+                                                                self.deserialize_object(type_name, type_properties, namespace), # pylint: disable=line-too-long
                                                                 option_string)
         except KeyError:
             raise ValueError('usage error: the type "{}" is not recognizable.'.format(type_name))
@@ -309,17 +312,20 @@ class MultiObjectsDeserializeAction(argparse._AppendAction):  # pylint: disable=
                 'usage error: Failed to parse "{}" as object of type "{}". {}'.format(
                     ' '.join(values), type_name, str(ex)))
 
-    def deserialize_object(self, type_name, type_properties):
+    def deserialize_object(self, type_name, type_properties, namespace):
         raise NotImplementedError()
 
 
 class ActionGroupReceiverParameterAction(MultiObjectsDeserializeAction):
     def deserialize_object(self, type_name, type_properties, namespace):
-        EmailReceiver, SmsReceiver, WebhookReceiver = namespace._cmd.get_models('EmailReceiver', 'SmsReceiver', 'WebhookReceiver')
+        EmailReceiver, SmsReceiver, WebhookReceiver = \
+            namespace._cmd.get_models('EmailReceiver', 'SmsReceiver', 'WebhookReceiver')
 
         if type_name == 'email':
             try:
-                return EmailReceiver(name=type_properties[0], email_address=type_properties[1], use_common_alert_schema=True)
+                return EmailReceiver(name=type_properties[0],
+                                     email_address=type_properties[1],
+                                     use_common_alert_schema=True)
             except IndexError:
                 raise CLIError('usage error: --action email NAME EMAIL_ADDRESS')
         elif type_name == 'sms':
@@ -333,7 +339,9 @@ class ActionGroupReceiverParameterAction(MultiObjectsDeserializeAction):
                 raise CLIError('usage error: --action sms NAME COUNTRY_CODE PHONE_NUMBER')
         elif type_name == 'webhook':
             try:
-                return WebhookReceiver(name=type_properties[0], service_uri=type_properties[1], use_common_alert_schema=True)
+                return WebhookReceiver(name=type_properties[0],
+                                       service_uri=type_properties[1],
+                                       use_common_alert_schema=True)
             except IndexError:
                 raise CLIError('usage error: --action webhook NAME URI')
         else:
