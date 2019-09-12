@@ -245,6 +245,47 @@ def _urlretrieve(url):
     return req.read()
 
 
+def _deploy_arm_template_core(cli_ctx, resource_group_name,
+                              template_file=None, template_uri=None, deployment_name=None,
+                              parameters=None, mode=None, rollback_on_error=None, validate_only=False,
+                              no_wait=False):
+    DeploymentProperties, TemplateLink, OnErrorDeployment = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
+                                                                    'DeploymentProperties', 'TemplateLink',
+                                                                    'OnErrorDeployment', mod='models')
+    template = None
+    template_link = None
+    template_obj = None
+    on_error_deployment = None
+
+    if template_uri:
+        template_link = TemplateLink(uri=template_uri)
+        template_obj = shell_safe_json_parse(_urlretrieve(template_uri).decode('utf-8'), preserve_order=True)
+    else:
+        template = get_file_json(template_file, preserve_order=True)
+        template_obj = template
+
+    if rollback_on_error == '':
+        on_error_deployment = OnErrorDeployment(type='LastSuccessful')
+    elif rollback_on_error:
+        on_error_deployment = OnErrorDeployment(type='SpecificDeployment', deployment_name=rollback_on_error)
+
+    template_param_defs = template_obj.get('parameters', {})
+    template_obj['resources'] = template_obj.get('resources', [])
+    parameters = _process_parameters(template_param_defs, parameters) or {}
+    parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters)
+
+    template = json.loads(json.dumps(template))
+    parameters = json.loads(json.dumps(parameters))
+
+    properties = DeploymentProperties(template=template, template_link=template_link,
+                                      parameters=parameters, mode=mode, on_error_deployment=on_error_deployment)
+
+    smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+    if validate_only:
+        return sdk_no_wait(no_wait, smc.deployments.validate, resource_group_name, deployment_name, properties)
+    return sdk_no_wait(no_wait, smc.deployments.create_or_update, resource_group_name, deployment_name, properties)
+
+
 def _convert_deployment_template_to_json(template):
     from jsmin import jsmin
     # TODO: catch exceptions
@@ -256,10 +297,9 @@ def _convert_deployment_template_to_json(template):
 
 
 # pylint: disable=too-many-locals, too-many-statements, too-few-public-methods
-def _deploy_arm_template_core(cli_ctx, resource_group_name,
-                              template_file=None, template_uri=None, deployment_name=None,
-                              parameters=None, mode=None, rollback_on_error=None, validate_only=False,
-                              no_wait=False):
+def _deploy_arm_template_unmodified(cli_ctx, resource_group_name, template_file=None,
+                                    template_uri=None, deployment_name=None, parameters=None,
+                                    mode=None, rollback_on_error=None, validate_only=False, no_wait=False):
     DeploymentProperties, TemplateLink, OnErrorDeployment = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
                                                                     'DeploymentProperties', 'TemplateLink',
                                                                     'OnErrorDeployment', mod='models')
@@ -363,9 +403,7 @@ def _deploy_arm_template_core(cli_ctx, resource_group_name,
 
     if validate_only:
         return sdk_no_wait(no_wait, deployments_operation_group.validate, resource_group_name, deployment_name, properties)
-    res = sdk_no_wait(no_wait, deployments_operation_group.create_or_update, resource_group_name, deployment_name, properties)
-
-    return res
+    return sdk_no_wait(no_wait, deployments_operation_group.create_or_update, resource_group_name, deployment_name, properties)
 
 
 def _deploy_arm_template_subscription_scope(cli_ctx,
@@ -806,7 +844,11 @@ def list_applications(cmd, resource_group_name=None):
 
 def deploy_arm_template(cmd, resource_group_name,
                         template_file=None, template_uri=None, deployment_name=None,
-                        parameters=None, mode=None, rollback_on_error=None, no_wait=False):
+                        parameters=None, mode=None, rollback_on_error=None, no_wait=False, support_unmodified=False):
+    if support_unmodified:
+        return _deploy_arm_template_unmodified(cmd.cli_ctx, resource_group_name, template_file, template_uri,
+                                               deployment_name, parameters, mode, rollback_on_error, no_wait=no_wait)
+
     return _deploy_arm_template_core(cmd.cli_ctx, resource_group_name, template_file, template_uri,
                                      deployment_name, parameters, mode, rollback_on_error, no_wait=no_wait)
 
