@@ -1957,13 +1957,14 @@ def aks_scale(cmd, client, resource_group_name, name, node_count, nodepool_name=
     raise CLIError('The nodepool "{}" was not found.'.format(nodepool_name))
 
 
+# pylint: disable=inconsistent-return-statements
 def aks_update(cmd, client, resource_group_name, name,
                load_balancer_managed_outbound_ip_count=None,
                load_balancer_outbound_ips=None,
                load_balancer_outbound_ip_prefixes=None,
                attach_acr=None,
                detach_acr=None,
-               no_wait=False):  # pylint: inconsistent-return-statements
+               no_wait=False):
     update_lb_profile = load_balancer_managed_outbound_ip_count is not None or \
         load_balancer_outbound_ips is not None or load_balancer_outbound_ip_prefixes is not None
 
@@ -1984,16 +1985,16 @@ def aks_update(cmd, client, resource_group_name, name,
 
     if attach_acr:
         return _ensure_aks_acr(cmd.cli_ctx,
-                        client_id=client_id,
-                        acr_name_or_id=attach_acr,
-                        subscription_id=subscription_id)
+                               client_id=client_id,
+                               acr_name_or_id=attach_acr,
+                               subscription_id=subscription_id)
 
     if detach_acr:
         return _ensure_aks_acr(cmd.cli_ctx,
-                        client_id=client_id,
-                        acr_name_or_id=detach_acr,
-                        subscription_id=subscription_id,
-                        detach=True)
+                               client_id=client_id,
+                               acr_name_or_id=detach_acr,
+                               subscription_id=subscription_id,
+                               detach=True)
 
     load_balancer_profile = _get_load_balancer_profile(
         load_balancer_managed_outbound_ip_count,
@@ -2007,8 +2008,9 @@ def aks_update(cmd, client, resource_group_name, name,
     return
 
 
+# pylint: disable=unused-argument,inconsistent-return-statements
 def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, control_plane_only=False,
-                no_wait=False, **kwargs):  # pylint: disable=unused-argument,inconsistent-return-statements
+                no_wait=False, **kwargs):
     instance = client.get(resource_group_name, name)
 
     if instance.kubernetes_version == kubernetes_version:
