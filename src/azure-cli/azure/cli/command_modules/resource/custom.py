@@ -363,7 +363,7 @@ def _deploy_arm_template_unmodified(cli_ctx, resource_group_name, template_file=
     class JsonCTemplatePolicy(SansIOHTTPPolicy):
         def on_request(self, request, **kwargs):
             http_request = request.http_request
-            print(http_request.data)
+            logger.info(http_request.data)
             if (getattr(http_request, 'data', {}) or {}).get('properties', {}).get('template'):
                 try:
                     template = http_request.data["properties"]["template"]
@@ -844,8 +844,8 @@ def list_applications(cmd, resource_group_name=None):
 
 def deploy_arm_template(cmd, resource_group_name,
                         template_file=None, template_uri=None, deployment_name=None,
-                        parameters=None, mode=None, rollback_on_error=None, no_wait=False, support_unmodified=False):
-    if support_unmodified:
+                        parameters=None, mode=None, rollback_on_error=None, no_wait=False, send_unmodified=False):
+    if send_unmodified:
         return _deploy_arm_template_unmodified(cmd.cli_ctx, resource_group_name, template_file, template_uri,
                                                deployment_name, parameters, mode, rollback_on_error, no_wait=no_wait)
 
