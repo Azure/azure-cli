@@ -517,7 +517,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               plan_promotion_code=None, license_type=None, assign_identity=None, identity_scope=None,
               identity_role='Contributor', identity_role_id=None, application_security_groups=None, zone=None,
               boot_diagnostics_storage=None, ultra_ssd_enabled=None, ephemeral_os_disk=None,
-              proximity_placement_group=None, dedicated_host=None, dedicated_host_group=None, aux_subscriptions=None):
+              proximity_placement_group=None, dedicated_host=None, dedicated_host_group=None, aux_subscriptions=None,
+              priority=None, max_billing=None, eviction_policy=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -1858,7 +1859,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
                 assign_identity=None, identity_scope=None, identity_role='Contributor',
                 identity_role_id=None, zones=None, priority=None, eviction_policy=None,
                 application_security_groups=None, ultra_ssd_enabled=None, ephemeral_os_disk=None,
-                proximity_placement_group=None, aux_subscriptions=None, terminate_notification_time=None):
+                proximity_placement_group=None, aux_subscriptions=None, terminate_notification_time=None,
+                max_billing=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder

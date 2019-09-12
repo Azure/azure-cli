@@ -3415,5 +3415,22 @@ class VMSSTerminateNotificationScenarioTest(ScenarioTest):
             self.cmd('vmss update -g {rg} -n {vm} --enable-terminate-notification')
 
 
+class VMPriorityEvictionBilling(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_priority_eviction_billing_')
+    def test_vm_priority_eviction_billing(self, resource_group):
+        self.kwargs.update({
+            'vm': 'vm1'
+        })
+
+        self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --priority Low --eviction-policy Deallocate --max-billing=50', checks=[
+            # self.check('priority', 'Low')
+        ])
+
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('priority', 'Low')
+        ])
+
+
 if __name__ == '__main__':
     unittest.main()

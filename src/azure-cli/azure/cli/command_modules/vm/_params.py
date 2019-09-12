@@ -268,6 +268,9 @@ def load_arguments(self, _):
         c.argument('disk_caching', nargs='*', help="Use singular value to apply across, or specify individual disks, e.g. 'os=ReadWrite 0=None 1=ReadOnly' should enable update os disk and 2 data disks")
 
     with self.argument_context('vm create') as c:
+        VMPriorityTypes = self.get_models('VirtualMachinePriorityTypes', resource_type=ResourceType.MGMT_COMPUTE)
+        VirtualMachineEvictionPolicyTypes = self.get_models('VirtualMachineEvictionPolicyTypes',
+                                                            resource_type=ResourceType.MGMT_COMPUTE)
         c.argument('name', name_arg_type, validator=_resource_not_exists(self.cli_ctx, 'Microsoft.Compute/virtualMachines'))
         c.argument('vm_name', name_arg_type, id_part=None, help='Name of the virtual machine.', completer=None)
         c.argument('os_disk_size_gb', type=int, help='the size of the os disk in GB', arg_group='Storage')
@@ -279,6 +282,12 @@ def load_arguments(self, _):
                    help='pre-existing storage account name or its blob uri to capture boot diagnostics. Its sku should be one of Standard_GRS, Standard_LRS and Standard_RAGRS')
         c.argument('accelerated_networking', resource_type=ResourceType.MGMT_NETWORK, min_api='2016-09-01', arg_type=get_three_state_flag(), arg_group='Network',
                    help="enable accelerated networking. Unless specified, CLI will enable it based on machine image and size")
+        c.argument('priority', resource_type=ResourceType.MGMT_COMPUTE, min_api='2019-03-01',
+                   arg_type=get_enum_type(VMPriorityTypes, default=None),
+                   help="Priority. Use 'Low' to run short-lived workloads in a cost-effective way")
+        c.argument('eviction_policy', resource_type=ResourceType.MGMT_COMPUTE, min_api='2019-03-01',
+                   arg_type=get_enum_type(VirtualMachineEvictionPolicyTypes, default=None),
+                   help="The eviction policy for the low priority virtual machine.")
 
     with self.argument_context('vm create', arg_group='Storage') as c:
         c.argument('attach_os_disk', help='Attach an existing OS disk to the VM. Can use the name or ID of a managed disk or the URI to an unmanaged disk VHD.')
@@ -593,6 +602,8 @@ def load_arguments(self, _):
             c.argument('secrets', multi_ids_type, help='One or many Key Vault secrets as JSON strings or files via `@{path}` containing `[{ "sourceVault": { "id": "value" }, "vaultCertificates": [{ "certificateUrl": "value", "certificateStore": "cert store name (only on windows)"}] }]`', type=file_type, completer=FilesCompleter())
             c.argument('assign_identity', nargs='*', arg_group='Managed Service Identity', help="accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples")
             c.ignore('aux_subscriptions')
+            max_billing_help = 'The maximum price (in US Dollars) you are willing to pay for a low priority VM/VMSS. -1 indicates that the low priority VM/VMSS should not be evicted for price reasons'
+            c.argument('max_billing', help=max_billing_help, min_api='2019-03-01', type=float, default=-1)
 
         with self.argument_context(scope, arg_group='Authentication') as c:
             c.argument('generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing. The keys will be stored in the ~/.ssh directory')

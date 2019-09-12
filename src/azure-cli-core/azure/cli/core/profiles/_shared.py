@@ -152,10 +152,10 @@ AZURE_API_PROFILES = {
     '2019-03-01-hybrid': {
         ResourceType.MGMT_STORAGE: '2017-10-01',
         ResourceType.MGMT_NETWORK: '2017-10-01',
-        ResourceType.MGMT_COMPUTE: SDKProfile('2017-12-01', {
+        ResourceType.MGMT_COMPUTE: SDKProfile('2019-03-01', {
             'resource_skus': '2017-09-01',
-            'disks': '2017-03-30',
-            'snapshots': '2017-03-30'
+            'disks': '2019-03-01',
+            'snapshots': '2019-03-01'
         }),
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',

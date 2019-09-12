@@ -248,7 +248,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         os_publisher=None, os_offer=None, os_sku=None, os_version=None, os_vhd_uri=None,
         attach_os_disk=None, os_disk_size_gb=None, custom_data=None, secrets=None, license_type=None, zone=None,
         disk_info=None, boot_diagnostics_storage_uri=None, ultra_ssd_enabled=None, proximity_placement_group=None,
-        computer_name=None, dedicated_host=None):
+        computer_name=None, dedicated_host=None, priority=None, max_billing=None, eviction_policy=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -395,6 +395,15 @@ def build_vm_resource(  # pylint: disable=too-many-locals
 
     if dedicated_host:
         vm_properties['host'] = {'id': dedicated_host}
+
+    if priority is not None:
+        vm_properties['priority'] = priority
+
+    if eviction_policy is not None:
+        vm_properties['evictionPolicy'] = eviction_policy
+
+    if max_billing is not None:
+        vm_properties['billingProfile'] = {'maxPrice': max_billing}
 
     vm = {
         'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machines'),
