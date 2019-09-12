@@ -389,8 +389,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                     recursively when uploading from local file system.')
         c.argument('put_md5', action='store_true', help='Create an MD5 hash of each file, and save the hash \
                     as the Content-MD5 property of the destination blob/file.Only available when uploading.')
-        c.argument('blob_type', options_list=('--type', '-t'), validator=validate_blob_type,
-                   arg_type=get_enum_type(get_blob_types()), help='The type of blob at the destination.')
+        c.argument('blob_type', validator=validate_blob_type,
+                   arg_type=get_enum_type(["BlockBlob", "PageBlob", "AppendBlob"]), help='The type of blob at the destination.')
 
     with self.argument_context('storage blob copy') as c:
         for item in ['destination', 'source']:
