@@ -2106,15 +2106,18 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
     # sanity check that locations and clouds match.
     if ((cloud_name.lower() == 'azurecloud' and AzureChinaRegionToOmsRegionMap.get(rg_location, False)) or
             (cloud_name.lower() == 'azurecloud' and AzureFairfaxRegionToOmsRegionMap.get(rg_location, False))):
-        raise CLIError('Wrong cloud (azurecloud) setting for region {}, please use "az cloud set ..."'.format(rg_location))
+        raise CLIError('Wrong cloud (azurecloud) setting for region {}, please use "az cloud set ..."'
+                       .format(rg_location))
 
     if ((cloud_name.lower() == 'azurechinacloud' and AzureCloudRegionToOmsRegionMap.get(rg_location, False)) or
             (cloud_name.lower() == 'azurechinacloud' and AzureFairfaxRegionToOmsRegionMap.get(rg_location, False))):
-        raise CLIError('Wrong cloud (azurechinacloud) setting for region {}, please use "az cloud set ..."'.format(rg_location))
+        raise CLIError('Wrong cloud (azurechinacloud) setting for region {}, please use "az cloud set ..."'
+                       .format(rg_location))
 
     if ((cloud_name.lower() == 'azureusgovernment' and AzureCloudRegionToOmsRegionMap.get(rg_location, False)) or
             (cloud_name.lower() == 'azureusgovernment' and AzureChinaRegionToOmsRegionMap.get(rg_location, False))):
-        raise CLIError('Wrong cloud (azureusgovernment) setting for region {}, please use "az cloud set ..."'.format(rg_location))
+        raise CLIError('Wrong cloud (azureusgovernment) setting for region {}, please use "az cloud set ..."'
+                       .format(rg_location))
 
     if cloud_name.lower() == 'azurecloud':
         workspace_region = AzureCloudRegionToOmsRegionMap.get(rg_location, "eastus")
