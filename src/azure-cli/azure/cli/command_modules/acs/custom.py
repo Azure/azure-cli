@@ -2004,9 +2004,11 @@ def aks_update(cmd, client, resource_group_name, name,
         instance.network_profile.load_balancer_profile = load_balancer_profile
         return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
+    return
 
-def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, control_plane_only=False, \
-    no_wait=False, **kwargs):  # pylint: disable=unused-argument
+
+def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, control_plane_only=False,
+                no_wait=False, **kwargs):  # pylint: disable=unused-argument
     instance = client.get(resource_group_name, name)
 
     if instance.kubernetes_version == kubernetes_version:
