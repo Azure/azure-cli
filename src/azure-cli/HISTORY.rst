@@ -11,6 +11,10 @@ Release History
     job start:
         - Changed the command from `job start` to `job create`.
 
+**AppService**
+
+* stack: surface commands under the profile of 2019-03-01-hybrid
+
 **Compute**
 
 * vm create: Add --enable-agent configuration.
