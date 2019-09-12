@@ -880,8 +880,8 @@ jobs:
 
        CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
 
-       DISTROS=(jessie stretch buster xenial trusty)
-       BASE_IMAGES=(debian:jessie debian:stretch debian:buster ubuntu:xenial ubuntu:trusty)
+       DISTROS=(jessie stretch xenial trusty)
+       BASE_IMAGES=(debian:jessie debian:stretch ubuntu:xenial ubuntu:trusty)
 
        # Distros that don't require libssl1.1
        for i in ${!DISTROS[@]}; do
@@ -890,12 +890,15 @@ jobs:
            DEB_FILE=$SYSTEM_ARTIFACTSDIRECTORY/debian/azure-cli_$CLI_VERSION-1~${DISTROS[$i]}_all.deb
 
            docker pull ${BASE_IMAGES[$i]}
-           docker run --rm -v $SYSTEM_ARTIFACTSDIRECTORY/debian:/mnt/artifacts ${BASE_IMAGES[$i]} /bin/bash -c "apt-get update && apt-get install -y apt-transport-https lsb-release gnupg curl && dpkg -i /mnt/artifacts/azure-cli_$CLI_VERSION-1~${DISTROS[$i]}_all.deb && time az self-test && time az --version && sleep 5"
+           if [ $i ne "buster" ]
+           then
+               docker run --rm -v $SYSTEM_ARTIFACTSDIRECTORY/debian:/mnt/artifacts ${BASE_IMAGES[$i]} /bin/bash -c "apt-get update && apt-get install -y apt-transport-https && dpkg -i /mnt/artifacts/azure-cli_$CLI_VERSION-1~${DISTROS[$i]}_all.deb && time az self-test && time az --version && sleep 5"
+          
        done
 
        # Distros that do require libssl1.1
-       DISTROS=(bionic cosmic disco)
-       BASE_IMAGES=(ubuntu:bionic ubuntu:cosmic ubuntu:disco)
+       DISTROS=(bionic cosmic disco buster)
+       BASE_IMAGES=(ubuntu:bionic ubuntu:cosmic ubuntu:disco debian:buster)
 
        for i in ${!DISTROS[@]}; do
            echo "== Test debian package on ${DISTROS[$i]} =="
