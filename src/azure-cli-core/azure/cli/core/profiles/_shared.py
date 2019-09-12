@@ -50,6 +50,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_MONITOR = ('azure.mgmt.monitor', 'MonitorManagementClient')
     DATA_KEYVAULT = ('azure.keyvault', 'KeyVaultClient')
     MGMT_EVENTHUB = ('azure.mgmt.eventhub', 'EventHubManagementClient')
+    MGMT_APPSERVICE = ('azure.mgmt.web', 'WebSiteManagementClient')
     # the "None" below will stay till a command module fills in the type so "get_mgmt_service_client"
     # can be provided with "ResourceType.XXX" to initialize the client object. This usually happens
     # when related commands start to support Multi-API
@@ -90,7 +91,6 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_SQLVM = ('azure.mgmt.sqlvirtualmachine', None)
     MGMT_MANAGEDSERVICES = ('azure.mgmt.managedservices', None)
     MGMT_NETAPPFILES = ('azure.mgmt.netappfiles', None)
-    MGMT_APPSERVICE = ('azure.mgmt.web', None)
 
     def __init__(self, import_prefix, client_name):
         """Constructor.
@@ -174,7 +174,8 @@ AZURE_API_PROFILES = {
             'service_diagnostic_settings': '2016-09-01',
             'tenant_activity_logs': '2015-04-01',
             'vm_insights': '2018-11-27-preview'
-        })
+        }),
+        ResourceType.MGMT_APPSERVICE: '2018-02-01'
     },
     '2019-03-01-hybrid': {
         ResourceType.MGMT_STORAGE: '2017-10-01',
@@ -198,7 +199,11 @@ AZURE_API_PROFILES = {
         }),
         ResourceType.DATA_KEYVAULT: '2016-10-01',
         ResourceType.DATA_STORAGE: '2017-11-09',
-        ResourceType.DATA_COSMOS_TABLE: '2017-04-17'
+        ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
+        # Full MultiAPI support is not done in AppService, the line below is merely
+        # to have commands show up in the hybrid profile which happens to have the latest
+        # API versions
+        ResourceType.MGMT_APPSERVICE: '2018-02-01'
     },
     '2018-03-01-hybrid': {
         ResourceType.MGMT_STORAGE: '2016-01-01',
