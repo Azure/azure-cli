@@ -1592,7 +1592,7 @@ def _validate_ssh_key(no_ssh_key, ssh_key_value):
             raise CLIError('Provided ssh key ({}) is invalid or non-existent'.format(shortened_key))
 
 
-# pylint: disable=too-many-statements
+# pylint: disable=too-many-statements,too-many-branches
 def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint: disable=too-many-locals
                dns_name_prefix=None,
                location=None,
@@ -1963,7 +1963,7 @@ def aks_update(cmd, client, resource_group_name, name,
                load_balancer_outbound_ip_prefixes=None,
                attach_acr=None,
                detach_acr=None,
-               no_wait=False):
+               no_wait=False):  # pylint: inconsistent-return-statements
     update_lb_profile = load_balancer_managed_outbound_ip_count is not None or \
         load_balancer_outbound_ips is not None or load_balancer_outbound_ip_prefixes is not None
 
@@ -1983,13 +1983,13 @@ def aks_update(cmd, client, resource_group_name, name,
         raise CLIError('Cannot get the AKS cluster\'s service principal.')
 
     if attach_acr:
-        _ensure_aks_acr(cmd.cli_ctx,
+        return _ensure_aks_acr(cmd.cli_ctx,
                         client_id=client_id,
                         acr_name_or_id=attach_acr,
                         subscription_id=subscription_id)
 
     if detach_acr:
-        _ensure_aks_acr(cmd.cli_ctx,
+        return _ensure_aks_acr(cmd.cli_ctx,
                         client_id=client_id,
                         acr_name_or_id=detach_acr,
                         subscription_id=subscription_id,
@@ -2008,7 +2008,7 @@ def aks_update(cmd, client, resource_group_name, name,
 
 
 def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, control_plane_only=False,
-                no_wait=False, **kwargs):  # pylint: disable=unused-argument
+                no_wait=False, **kwargs):  # pylint: disable=unused-argument,inconsistent-return-statements
     instance = client.get(resource_group_name, name)
 
     if instance.kubernetes_version == kubernetes_version:
@@ -2023,13 +2023,15 @@ def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, cont
     instance.kubernetes_version = kubernetes_version
     from knack.prompting import prompt_y_n
     if not control_plane_only:
-        msg = 'Since control-plane-only argument is not specified, this will upgrade the control plane AND all nodepools to version {}. Are you sure?'.format(instance.kubernetes_version)
+        msg = 'Since control-plane-only argument is not specified, this will upgrade the control plane AND' \
+            ' all nodepools to version {}. Are you sure?'.format(instance.kubernetes_version)
         if not prompt_y_n(msg, default="n"):
             return
         for agent_profile in instance.agent_pool_profiles:
             agent_profile.orchestrator_version = kubernetes_version
     else:
-        msg = 'Since control-plane-only argument is specified, this will upgrade only the control plane to {}. Node pool will not change. Are you sure?'.format(instance.kubernetes_version)
+        msg = 'Since control-plane-only argument is specified, this will upgrade only the control plane to {}. ' \
+            'Node pool will not change. Are you sure?'.format(instance.kubernetes_version)
         if not prompt_y_n(msg, default="n"):
             return
 
