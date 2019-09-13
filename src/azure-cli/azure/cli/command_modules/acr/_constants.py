@@ -16,6 +16,7 @@ TASK_RESOURCE_ID_TEMPLATE = '/subscriptions/{sub_id}/resourceGroups/{rg}/provide
 ACR_TASK_YAML_DEFAULT_NAME = 'acb.yaml'
 
 ACR_CACHED_BUILDER_IMAGES = ('cloudfoundry/cnb:bionic',)
+ACR_CHECK_HEALTH_MSG = "Try running 'az acr check-health -n {} --yes' to diagnose this issue."
 
 
 def get_classic_sku(cmd):
