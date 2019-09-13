@@ -28,8 +28,8 @@ item_name_type = CLIArgumentType(help='Name of the backed up item.', options_lis
 policy_name_type = CLIArgumentType(help='Name of the backup policy.', options_list=['--policy-name', '-p'])
 job_name_type = CLIArgumentType(help='Name of the job.', options_list=['--name', '-n'])
 rp_name_type = CLIArgumentType(help='Name of the recovery point.', options_list=['--rp-name', '-r'])
-backup_management_type = CLIArgumentType(help='Name of the backup management type.', arg_type=get_enum_type(['AzureWorkload', 'AzureIaasVM']), options_list=['--backup-management-type', '-bmt'])
-wl_type = CLIArgumentType(help='Name of the workload type.', arg_type=get_enum_type(['MSSQL', 'SAPHANA', 'SAPASE']), options_list=['--workload-type', '-wt'])
+backup_management_type = CLIArgumentType(help='Name of the backup management type.', arg_type=get_enum_type(['AzureWorkload', 'AzureIaasVM']), options_list=['--backup-management-type'])
+wl_type = CLIArgumentType(help='Name of the workload type.', arg_type=get_enum_type(['MSSQL', 'SAPHANA', 'SAPASE']), options_list=['--workload-type'])
 
 
 # pylint: disable=too-many-statements
@@ -61,7 +61,7 @@ def load_arguments(self, _):
 
     with self.argument_context('backup container register') as c:
         c.argument('workload_type', wl_type)
-        c.argument('resource_id', options_list=['--resource-id', '-id'], help='ID of the Azure Resource containing items to be protected by Azure Backup service. Currently, only Azure VM resource IDs are supported.')
+        c.argument('resource_id', options_list=['--resource-id'], help='ID of the Azure Resource containing items to be protected by Azure Backup service. Currently, only Azure VM resource IDs are supported.')
 
     with self.argument_context('backup container re-register') as c:
         c.argument('workload_type', wl_type)
@@ -96,10 +96,13 @@ def load_arguments(self, _):
     with self.argument_context('backup protectable-item show') as c:
         c.argument('name', item_name_type, options_list=['--name', '-n'], help='Name of the backed up protectable item. You can use the backup protectable-item list command to get the name of a backed up protectable item.')
         c.argument('server_name', options_list=['--server-name', '-s'])
-        c.argument('protectable_item_type', arg_type=get_enum_type(['SQLAG', 'SQLInstance', 'SQLDatabase', 'HANAInstance', 'HANADatabase']), options_list=['--protectable-item-type', '-pit'])
+        c.argument('protectable_item_type', arg_type=get_enum_type(['SQLAG', 'SQLInstance', 'SQLDatabase', 'HANAInstance', 'HANADatabase']), options_list=['--protectable-item-type'])
 
     with self.argument_context('backup protectable-item') as c:
         c.argument('container_name', container_name_type)
+
+    with self.argument_context('backup protectable-item list')  as c:
+        c.argument('container_name', container_name_type, id_part=None)
 
     # Policy
     with self.argument_context('backup policy') as c:
@@ -120,6 +123,7 @@ def load_arguments(self, _):
     with self.argument_context('backup policy list') as c:
         c.argument('workload_type', wl_type)
         c.argument('container_type', backup_management_type)
+        c.argument('vault_name', vault_name_type, id_part=None)
 
     with self.argument_context('backup policy show') as c:
         c.argument('container_type', backup_management_type)
@@ -135,7 +139,7 @@ def load_arguments(self, _):
         c.argument('workload_type', wl_type)
 
     with self.argument_context('backup recoverypoint list') as c:
-        c.argument('container_type', backup_management_type)
+        c.argument('container_type', backup_management_type, id_part=None)
 
     with self.argument_context('backup recoverypoint show') as c:
         c.argument('name', rp_name_type, options_list=['--name', '-n'], help='Name of the recovery point. You can use the backup recovery point list command to get the name of a backed up item.')
@@ -154,9 +158,9 @@ def load_arguments(self, _):
             c.argument('item_name', item_name_type)
 
     with self.argument_context('backup protection backup-now') as c:
-        c.argument('retain_until', type=datetime_type, help='The date until which this backed up copy will be available for retrieval, in UTC (d-m-Y).', options_list=['--retain-until', '-rt'])
-        c.argument('backup_type', arg_type=get_enum_type(['Full', 'Differential', 'Log', 'CopyOnlyFull']), options_list=['--backup-type', '-bt'])
-        c.argument('enable_compression', arg_type=get_three_state_flag(), options_list=['--enable-compression', '-ec'])
+        c.argument('retain_until', type=datetime_type, help='The date until which this backed up copy will be available for retrieval, in UTC (d-m-Y).', options_list=['--retain-until'])
+        c.argument('backup_type', arg_type=get_enum_type(['Full', 'Differential', 'Log', 'CopyOnlyFull']), options_list=['--backup-type'])
+        c.argument('enable_compression', arg_type=get_three_state_flag(), options_list=['--enable-compression'])
 
     with self.argument_context('backup protection disable') as c:
         c.argument('delete_backup_data', arg_type=get_three_state_flag(), help='Option to delete existing backed up data in the Recovery services vault.')
@@ -165,10 +169,10 @@ def load_arguments(self, _):
         c.argument('vm_id', help='ID of the virtual machine to be checked for protection.')
 
     with self.argument_context('backup protection enable-for-azurewl') as c:
-        c.argument('protectable_item', type=file_type, help='JSON encoded protectable item definition.', completer=FilesCompleter(), options_list=['--protectable-item', '-pi'])
+        c.argument('protectable_item', type=file_type, help='JSON encoded protectable item definition.', completer=FilesCompleter(), options_list=['--protectable-item'])
 
     with self.argument_context('backup protection auto-enable-for-azurewl') as c:
-        c.argument('protectable_item', type=file_type, help='JSON encoded protectable item definition.', completer=FilesCompleter(), options_list=['--protectable-item', '-pi'])
+        c.argument('protectable_item', type=file_type, help='JSON encoded protectable item definition.', completer=FilesCompleter(), options_list=['--protectable-item'])
         c.argument('policy_name', policy_name_type, help='Name of the Backup policy. You can use the backup policy list command to get the name of a backup policy.')
 
     with self.argument_context('backup protection disable auto-for-azurewl') as c:
@@ -188,7 +192,7 @@ def load_arguments(self, _):
         c.argument('target_resource_group', options_list=['--target-resource-group', '-t'], help='Use this to specify the target resource group in which the restored disks will be saved')
 
     with self.argument_context('backup restore restore-azurewl') as c:
-        c.argument('recovery_config', type=file_type, help='JSON encoded protectable item definition.', completer=FilesCompleter(), options_list=['--recovery-config', '-rc'])
+        c.argument('recovery_config', type=file_type, help='JSON encoded protectable item definition.', completer=FilesCompleter(), options_list=['--recovery-config'])
 
     # Job
     with self.argument_context('backup job') as c:
@@ -213,7 +217,7 @@ def load_arguments(self, _):
         c.argument('vault_name', vault_name_type, id_part='name')
         c.argument('container_name', container_name_type)
         c.argument('item_name', item_name_type)
-        c.argument('restore_mode', arg_type=get_enum_type(['OriginalWorkloadRestore', 'AlternateWorkloadRestore']), options_list=['--restore-mode', '-m'])
+        c.argument('restore_mode', arg_type=get_enum_type(['OriginalWorkloadRestore', 'AlternateWorkloadRestore']), options_list=['--restore-mode'])
         c.argument('rp_name', rp_name_type)
-        c.argument('target_item', type=file_type, help='JSON encoded protectable item definition.', completer=FilesCompleter(), options_list=['--target-item', '-ti'])
-        c.argument('log_point_in_time', options_list=['--log-point-in-time', '-lp'])
+        c.argument('target_item', type=file_type, help='JSON encoded protectable item definition.', completer=FilesCompleter(), options_list=['--target-item'])
+        c.argument('log_point_in_time', options_list=['--log-point-in-time'])
