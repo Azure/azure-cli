@@ -38,6 +38,12 @@ attr_map = {'sqldatabase': 'SQLDatabase',
             'saphanadatabase': 'SAPHanaDatabase',
             'sapasedatabase': 'SAPAseDatabase'}
 
+protectable_item_type_map = {'SQLDatabase': 'SQLDataBase',
+                                'HANADatabase': 'SAPHanaDatabase',
+                                'HANAInstance': 'SAPHanaSystem',
+                                'SQLInstance': 'SQLInstance',
+                                'SQLAG': 'SQLAG'}
+
 
 def show_wl_policy(client, resource_group_name, vault_name, name):
     return [client.get(vault_name, resource_group_name, name)]
@@ -296,12 +302,6 @@ def show_protectable_item(cmd, client, resource_group_name, vault_name, name, se
                           workload_type, container_type="AzureWorkload"):
     items = list_protectable_items(cmd, client, resource_group_name, vault_name, workload_type)
 
-    # Mapping of protectable item type
-    protectable_item_type_map = {'SQLDatabase': 'SQLDataBase',
-                                 'HANADatabase': 'SAPHanaDatabase',
-                                 'HANAInstance': 'SAPHanaSystem',
-                                 'SQLInstance': 'SQLInstance',
-                                 'SQLAG': 'SQLAG'}
     protectable_item_type = protectable_item_type_map[protectable_item_type]
 
     # Name filter
