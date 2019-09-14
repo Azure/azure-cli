@@ -231,7 +231,12 @@ def load_command_table(self, _):
         g.command('list', 'list')
         g.custom_show_command('show', 'get_deployment_operations', client_factory=cf_deployment_operations)
 
-    with self.command_group('deployment', resource_deployment_sdk, min_api='2018-05-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
+    deployment_command_notice = ('Upcoming breaking change: a new parameter "scope_type" will be introduced to commands in this group '
+        'and will be mandatory. Scope type will be an enum with four values: ResourceGroup, Subscription, ManagementGroup, Tenant. '
+        'Adding this parameter allows us to use one command for all Azure Resource Manager template deployments but still determine the '
+        'intended level of scope.')
+
+    with self.command_group('deployment', resource_deployment_sdk, min_api='2018-05-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES, warning_msg=deployment_command_notice) as g:
         g.command('list', 'list_at_subscription_scope', table_transformer=transform_deployments_list)
         g.show_command('show', 'get_at_subscription_scope')
         g.command('delete', 'delete_at_subscription_scope', supports_no_wait=True)
