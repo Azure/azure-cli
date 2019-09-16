@@ -188,6 +188,7 @@ def load_arguments(self, _):
 
         with self.argument_context(scope + ' deployment source config-zip') as c:
             c.argument('src', help='a zip file path for deployment')
+            c.argument('build_remote', help='enable remote build during deployment', arg_type=get_three_state_flag(return_label=True))
             c.argument('timeout', type=int, options_list=['--timeout', '-t'], help='Configurable timeout in seconds for checking the status of deployment', validator=validate_timeout_value)
 
         with self.argument_context(scope + ' config appsettings list') as c:

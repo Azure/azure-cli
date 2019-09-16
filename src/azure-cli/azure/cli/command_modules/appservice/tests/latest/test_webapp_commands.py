@@ -1472,6 +1472,24 @@ class WebappZipDeployScenarioTest(ScenarioTest):
         ])
 
 
+# Disabled due to issue https://github.com/Azure/azure-cli/issues/10705
+# class FunctionappRemoteBuildScenarioTest(ScenarioTest):
+#    @ResourceGroupPreparer()
+#    @StorageAccountPreparer()
+#    def test_functionapp_remote_build(self, resource_group, storage_account):
+#        functionapp_name = self.create_random_name(prefix='faremotebuildapp', length=24)
+#        plan_name = self.create_random_name(prefix='faremotebuildplan', length=24)
+#        zip_file = os.path.join(TEST_DIR, 'test_remote_build.zip')
+#        self.cmd('functionapp plan create -g {} -n {} --sku S1 --is-linux true'.format(resource_group, plan_name))
+#        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --os-type Linux --runtime python'.format(resource_group, functionapp_name, plan_name, storage_account))
+#        self.cmd('functionapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, functionapp_name, zip_file)).assert_with_checks([
+#            JMESPathCheck('status', 4),
+#            JMESPathCheck('deployer', 'Push-Deployer'),
+#           JMESPathCheck('message', 'Created via a push deployment'),
+#            JMESPathCheck('complete', True)
+#        ])
+
+
 class WebappImplictIdentityTest(ScenarioTest):
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer()
