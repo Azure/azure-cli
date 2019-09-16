@@ -3424,16 +3424,20 @@ class VMPriorityEvictionBilling(ScenarioTest):
             'vmss': 'vmss1'
         })
 
-        self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --priority Low --eviction-policy Deallocate --max-billing=50', checks=[
+        # vm create
+        self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --priority Low --eviction-policy Deallocate --max-billing=50')
+
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('priority', 'Low'),
-            self.check('eviction-policy', 'Deallocate'),
-            self.check('max-billing', 50)
+            self.check('evictionPolicy', 'Deallocate'),
+            self.check('billingProfile.maxPrice', 50)
         ])
 
-        self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --priority Low --eviction-policy Deallocate --max-billing=50', checks=[
-            self.check('priority', 'Low'),
-            self.check('eviction-policy', 'Deallocate'),
-            self.check('max-billing', 50)
+        # vmss create
+        self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --lb-sku Standard --priority Low --eviction-policy Deallocate --max-billing=50', checks=[
+            self.check('vmss.virtualMachineProfile.priority', 'Low'),
+            self.check('vmss.virtualMachineProfile.evictionPolicy', 'Deallocate'),
+            self.check('vmss.virtualMachineProfile.billingProfile.maxPrice', 50)
         ])
 
 

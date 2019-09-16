@@ -633,7 +633,7 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
                         single_placement_group=None, platform_fault_domain_count=None, custom_data=None,
                         secrets=None, license_type=None, zones=None, priority=None, eviction_policy=None,
                         application_security_groups=None, ultra_ssd_enabled=None, proximity_placement_group=None,
-                        terminate_notification_time=None):
+                        terminate_notification_time=None, max_billing=None):
 
     # Build IP configuration
     ip_configuration = {
@@ -791,6 +791,10 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
     if eviction_policy and cmd.supported_api_version(min_api='2017-12-01',
                                                      operation_group='virtual_machine_scale_sets'):
         vmss_properties['virtualMachineProfile']['evictionPolicy'] = eviction_policy
+
+    if max_billing is not None and cmd.supported_api_version(
+            min_api='2019-03-01', operation_group='virtual_machine_scale_sets'):
+        vmss_properties['virtualMachineProfile']['billingProfile'] = {'maxPrice': max_billing}
 
     if platform_fault_domain_count is not None and cmd.supported_api_version(
             min_api='2017-12-01', operation_group='virtual_machine_scale_sets'):
