@@ -309,10 +309,10 @@ def _deploy_arm_template_unmodified(cli_ctx, resource_group_name, template_file=
     if template_uri:
         template_link = TemplateLink(uri=template_uri)
         template_content = _urlretrieve(template_uri).decode('utf-8')
-        template_obj = _convert_deployment_template_to_json(template_content)
+        template_obj = _remove_comments_from_json(template_content)
     else:
         template_content = read_file_content(template_file)
-        template_obj = _convert_deployment_template_to_json(template_content)
+        template_obj = _remove_comments_from_json(template_content)
 
     if rollback_on_error == '':
         on_error_deployment = OnErrorDeployment(type='LastSuccessful')
