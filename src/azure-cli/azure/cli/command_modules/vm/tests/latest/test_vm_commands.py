@@ -3420,15 +3420,20 @@ class VMPriorityEvictionBilling(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_vm_priority_eviction_billing_')
     def test_vm_priority_eviction_billing(self, resource_group):
         self.kwargs.update({
-            'vm': 'vm1'
+            'vm': 'vm1',
+            'vmss': 'vmss1'
         })
 
         self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --priority Low --eviction-policy Deallocate --max-billing=50', checks=[
-            # self.check('priority', 'Low')
+            self.check('priority', 'Low'),
+            self.check('eviction-policy', 'Deallocate'),
+            self.check('max-billing', 50)
         ])
 
-        self.cmd('vm show -g {rg} -n {vm}', checks=[
-            self.check('priority', 'Low')
+        self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --priority Low --eviction-policy Deallocate --max-billing=50', checks=[
+            self.check('priority', 'Low'),
+            self.check('eviction-policy', 'Deallocate'),
+            self.check('max-billing', 50)
         ])
 
 

@@ -8,6 +8,7 @@ Release History
 * vmss create: Add --terminate-notification-time parameters to support terminate scheduled event configurability.
 * vmss update: Add --enable-terminate-notification and --terminate-notification-time parameters to support terminate scheduled event configurability.
 * Update azure-mgmt-compute version to 7.0.0.
+* vm/vmss create: Support --priority, --eviction-policy, --max-billing parameters.
 
 2.0.73
 ++++++
