@@ -139,6 +139,9 @@ def cf_sa(cli_ctx, _):
 
 
 def cf_sa_for_keys(cli_ctx, _):
+    from knack.log import get_logger
+    logger = get_logger(__name__)
+    logger.debug('Redact HTTP response body to avoid including storage keys in body')
     client = storage_client_factory(cli_ctx)
     client.config.enable_http_logger = False
     return client.storage_accounts

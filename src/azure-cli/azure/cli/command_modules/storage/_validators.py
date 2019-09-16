@@ -33,6 +33,7 @@ def _query_account_key(cli_ctx, account_name):
         cli_ctx, ResourceType.MGMT_STORAGE, 'models.storage_account_keys#StorageAccountKeys')
 
     scf.config.enable_http_logger = False
+    logger.debug('Redact HTTP response body to avoid including storage keys in body')
     if t_storage_account_keys:
         return scf.storage_accounts.list_keys(rg, account_name).key1
     # of type: models.storage_account_list_keys_result#StorageAccountListKeysResult
