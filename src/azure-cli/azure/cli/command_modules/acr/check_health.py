@@ -24,6 +24,7 @@ FAQ_MESSAGE = "\nPlease refer to https://aka.ms/acr/health-check for more inform
 ERROR_MSG_DEEP_LINK = "\nPlease refer to https://aka.ms/acr/errors#{} for more information."
 MIN_HELM_VERSION = "2.11.0"
 HELM_VERSION_REGEX = re.compile(r'SemVer:"v([.\d]+)"', re.I)
+ACR_CHECK_HEALTH_MSG = "Try running 'az acr check-health -n {} --yes' to diagnose this issue."
 
 
 # Utilities functions
@@ -198,7 +199,7 @@ def _get_registry_status(login_server, registry_name, ignore_errors):
     print_pass("DNS lookup to {} at IP {}".format(login_server, registry_ip))
 
     import requests
-    from requests.exceptions import SSLError, ConnectionError  # pylint: disable=redefined-builtin
+    from requests.exceptions import SSLError, RequestException
     from azure.cli.core.util import should_disable_connection_verify
 
     try:
@@ -207,7 +208,7 @@ def _get_registry_status(login_server, registry_name, ignore_errors):
         from ._errors import CONNECTIVITY_SSL_ERROR
         _handle_error(CONNECTIVITY_SSL_ERROR.format_error_message(login_server), ignore_errors)
         return False
-    except ConnectionError:
+    except RequestException:
         # To reproduce this error, configure <registryName>.azurecr.io to a random IP in 'hosts' file.
         from ._errors import CONNECTIVITY_CHALLENGE_ERROR
         _handle_error(CONNECTIVITY_CHALLENGE_ERROR.format_error_message(login_server), ignore_errors)

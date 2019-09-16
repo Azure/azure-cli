@@ -29,7 +29,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from ._client_factory import cf_acr_registries
 from ._constants import get_managed_sku
 from ._utils import get_registry_by_name, ResourceNotFound
-from ._constants import ACR_CHECK_HEALTH_MSG
+
 
 logger = get_logger(__name__)
 
@@ -219,19 +219,18 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
         challenge = requests.get(url, verify=(not should_disable_connection_verify()))
         if challenge.status_code == 403:
             raise CLIError("Looks like you don't have access to registry '{}'. "
-                           "To see configured firewall rules, run "
-                           "'az acr show --query networkRuleSet --name {}'. "
-                           "Details: https://aka.ms/acr/errors#connectivity_forbidden_error"
-                           .format(login_server, registry_name))  # pylint: disable=line-too-long
+                           "To see configured firewall rules, run 'az acr show --query networkRuleSet --name {}'. "
+                           "Please refer to https://aka.ms/acr/errors#connectivity_forbidden_error for more information."  # pylint: disable=line-too-long
+                           .format(login_server, registry_name))
     except RequestException as e:
         logger.debug("Could not connect to registry login server. Exception: %s", str(e))
         if resource_not_found:
             logger.warning("%s\nUsing '%s' as the default registry login server.", resource_not_found, login_server)
 
+        from .check_health import ACR_CHECK_HEALTH_MSG
         check_health_msg = ACR_CHECK_HEALTH_MSG.format(registry_name)
         raise CLIError("Could not connect to the registry login server '{}'. "
-                       "Please verify that the registry exists and "
-                       "the URL '{}' is reachable from your environment.\n{}"
+                       "Please verify that the registry exists and the URL '{}' is reachable from your environment.\n{}"
                        .format(login_server, url, check_health_msg))
 
     # 1. if username was specified, verify that password was also specified
