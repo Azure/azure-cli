@@ -8,6 +8,8 @@ Release History
 * vmss create: Add --terminate-notification-time parameters to support terminate scheduled event configurability.
 * vmss update: Add --enable-terminate-notification and --terminate-notification-time parameters to support terminate scheduled event configurability.
 * Update azure-mgmt-compute version to 7.0.0.
+* disk create: Allow specifying the exact size of the upload for customers who upload their disks directly.
+* snapshot create: Support incremental snapshots for managed disks.
 
 2.0.73
 ++++++
