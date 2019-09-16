@@ -286,10 +286,9 @@ def _deploy_arm_template_core(cli_ctx, resource_group_name,
     return sdk_no_wait(no_wait, smc.deployments.create_or_update, resource_group_name, deployment_name, properties)
 
 
-def _convert_deployment_template_to_json(template):
+def _remove_comments_from_json(template):
     from jsmin import jsmin
-    # TODO: catch exceptions
-    # deal with line comments
+
     minified = jsmin(template)
     # Get rid of multi-line strings. Note, we are not sending it on the wire rather just extract parameters to prompt for values
     result = re.sub(r'"[^"]*?\n[^"]*?(?<!\\)"', '"#Azure Cli#"', minified, re.DOTALL)
@@ -329,7 +328,6 @@ def _deploy_arm_template_unmodified(cli_ctx, resource_group_name, template_file=
 
     properties = DeploymentProperties(template=template_content, template_link=template_link,
                                       parameters=parameters, mode=mode, on_error_deployment=on_error_deployment)
-    # properties.template =  properties.template.replace('\r\n', '') json.loads(properties.template)#
 
     smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
 
@@ -365,14 +363,10 @@ def _deploy_arm_template_unmodified(cli_ctx, resource_group_name, template_file=
             http_request = request.http_request
             logger.info(http_request.data)
             if (getattr(http_request, 'data', {}) or {}).get('properties', {}).get('template'):
-                try:
-                    template = http_request.data["properties"]["template"]
-                    if not isinstance(template, JsonCTemplate):
-                        raise ValueError()
-                except (KeyError, ValueError):
-                    # Not a template
-                    return
-                # I know it's my weird template
+                template = http_request.data["properties"]["template"]
+                if not isinstance(template, JsonCTemplate):
+                    raise ValueError()
+
                 del http_request.data["properties"]["template"]
                 # templateLink nad template cannot exist at the same time in deployment_dry_run mode
                 if "templateLink" in http_request.data["properties"].keys():
@@ -844,8 +838,8 @@ def list_applications(cmd, resource_group_name=None):
 
 def deploy_arm_template(cmd, resource_group_name,
                         template_file=None, template_uri=None, deployment_name=None,
-                        parameters=None, mode=None, rollback_on_error=None, no_wait=False, send_unmodified=False):
-    if send_unmodified:
+                        parameters=None, mode=None, rollback_on_error=None, no_wait=False, handle_extended_json_format=False):
+    if handle_extended_json_format:
         return _deploy_arm_template_unmodified(cmd.cli_ctx, resource_group_name, template_file, template_uri,
                                                deployment_name, parameters, mode, rollback_on_error, no_wait=no_wait)
 
@@ -863,6 +857,7 @@ def deploy_arm_template_at_subscription_scope(cmd, template_file=None, template_
 
 def validate_arm_template(cmd, resource_group_name, template_file=None, template_uri=None,
                           parameters=None, mode=None, rollback_on_error=None):
+
     return _deploy_arm_template_core(cmd.cli_ctx, resource_group_name, template_file, template_uri,
                                      'deployment_dry_run', parameters, mode, rollback_on_error, validate_only=True)
 
