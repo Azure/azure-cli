@@ -2,6 +2,10 @@
 
 Release History
 ===============
+**ARM**
+
+* Update azure-mgmt-resource package to use 4.0.0, which utilizes API version 2019-06-01, with new 'enforcementmode' property for policy assignment.
+
 **Policy**
 
 * Support for Policy new API version 2019-06-01
