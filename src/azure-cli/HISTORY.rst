@@ -9,6 +9,10 @@ Release History
 * vmss update: Add --enable-terminate-notification and --terminate-notification-time parameters to support terminate scheduled event configurability.
 * Update azure-mgmt-compute version to 7.0.0.
 
+**Monitor**
+
+* monitor metrics alert create: Fix #9901. Support special character `:` in `--condition` argument.
+
 2.0.73
 ++++++
 
