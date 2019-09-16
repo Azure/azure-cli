@@ -90,7 +90,7 @@ def register_wl_container(cmd, client, vault_name, resource_group_name, workload
 
     workload_type = workload_type_map[workload_type]
 
-    # Extracting friendly container name from resource id
+
     container_name = resource_id.split('/')[-1]
 
     containers = list_protectable_containers(cmd, resource_group_name, vault_name)
