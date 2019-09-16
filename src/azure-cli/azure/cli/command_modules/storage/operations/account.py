@@ -61,7 +61,7 @@ def show_storage_account_connection_string(cmd, resource_group_name, account_nam
     connection_string = 'DefaultEndpointsProtocol={};EndpointSuffix={}'.format(protocol, endpoint_suffix)
     if account_name is not None:
         scf = storage_client_factory(cmd.cli_ctx)
-        obj = scf.storage_accounts.list_keys(resource_group_name, account_name)  # pylint: disable=no-member
+        obj = scf.storage_accounts.list_keys(resource_group_name, account_name, enable_http_logger=False)  # pylint: disable=no-member
         try:
             keys = [obj.keys[0].value, obj.keys[1].value]  # pylint: disable=no-member
         except AttributeError:

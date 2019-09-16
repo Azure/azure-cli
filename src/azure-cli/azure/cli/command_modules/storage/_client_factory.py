@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import msrest
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_data_service_client
 from azure.cli.core.profiles import ResourceType, get_sdk
 
@@ -21,25 +20,6 @@ Missing credentials to access storage service. The following variations are acce
         set AZURE_STORAGE_CONNECTION_STRING environment variable); some shells will require
         quoting to preserve literal character interpretation.
 """
-
-
-def log_response_securely(policy_object, request, response, **kwargs):
-    # logic here was cloned from msrest.pipeline.SansIOHTTPPolicy
-    if kwargs.get("enable_http_logger", policy_object.enable_http_logger):
-        if 'listKeys?' in request.http_request.url and response.http_response.status_code == 200:
-            import logging
-            _LOGGER = logging.getLogger(__name__)
-            if not _LOGGER.isEnabledFor(logging.DEBUG):
-                return
-
-            _LOGGER.debug("Response status: %r", response.http_response.status_code)
-            _LOGGER.debug("Response headers:")
-            for res_header, value in response.http_response.headers.items():
-                _LOGGER.debug("    %r: %r", res_header, value)
-
-            _LOGGER.debug("Response content: *****REDACTED")
-        else:
-            msrest.http_logger.log_response(None, request.http_request, response.http_response, result=response)
 
 
 def get_storage_data_service_client(cli_ctx, service, name=None, key=None, connection_string=None, sas_token=None,
@@ -66,9 +46,7 @@ def generic_data_service_factory(cli_ctx, service, name=None, key=None, connecti
 
 
 def storage_client_factory(cli_ctx, **_):
-    msrest.pipeline.universal.HTTPLogger.on_response = log_response_securely
-    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_STORAGE)
-    return client
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_STORAGE)
 
 
 def file_data_service_factory(cli_ctx, kwargs):
@@ -158,6 +136,12 @@ def multi_service_properties_factory(cli_ctx, kwargs):
 
 def cf_sa(cli_ctx, _):
     return storage_client_factory(cli_ctx).storage_accounts
+
+
+def cf_sa_for_keys(cli_ctx, _):
+    client = storage_client_factory(cli_ctx)
+    client.config.enable_http_logger = False
+    return client.storage_accounts
 
 
 def cf_mgmt_policy(cli_ctx, _):
