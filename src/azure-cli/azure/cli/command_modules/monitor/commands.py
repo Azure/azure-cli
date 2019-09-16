@@ -30,6 +30,7 @@ def load_command_table(self, _):
     action_group_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.operations.action_groups#{}',
         client_factory=cf_action_groups,
+        operation_group='action_groups',
         exception_handler=monitor_exception_handler)
 
     activity_log_sdk = CliCommandType(
@@ -47,6 +48,7 @@ def load_command_table(self, _):
     activity_log_alerts_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.operations.activity_log_alerts#{}',
         client_factory=cf_activity_log_alerts,
+        operation_group='activity_log_alerts',
         exception_handler=monitor_exception_handler)
 
     alert_sdk = CliCommandType(
@@ -70,6 +72,7 @@ def load_command_table(self, _):
     autoscale_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.operations.autoscale_settings#{}',
         client_factory=cf_autoscale,
+        operation_group='autoscale_settings',
         exception_handler=monitor_exception_handler)
 
     diagnostics_sdk = CliCommandType(
@@ -87,6 +90,7 @@ def load_command_table(self, _):
     diagnostics_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.operations.diagnostics_settings#{}',
         client_factory=cf_diagnostics,
+        operation_group='diagnostic_settings_category',
         exception_handler=monitor_exception_handler)
 
     log_profiles_sdk = CliCommandType(
@@ -98,11 +102,19 @@ def load_command_table(self, _):
     log_profiles_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.operations.log_profiles#{}',
         client_factory=cf_log_profiles,
+        operation_group='log_profiles',
+        exception_handler=monitor_exception_handler)
+
+    metric_alert_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.monitor.operations.metric_alert#{}',
+        client_factory=cf_metric_alerts,
+        operation_group='metric_alerts',
         exception_handler=monitor_exception_handler)
 
     alert_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.operations.metric_alert#{}',
         client_factory=cf_alert_rules,
+        operation_group='alert_rules',
         exception_handler=monitor_exception_handler)
 
     metric_alert_sdk = CliCommandType(
@@ -216,12 +228,12 @@ def load_command_table(self, _):
         g.command('list', 'list_metrics', command_type=monitor_custom, table_transformer=metrics_table)
         g.command('list-definitions', 'list', command_type=metric_definitions_sdk, table_transformer=metrics_definitions_table)
 
-    with self.command_group('monitor metrics alert', metric_alert_sdk, custom_command_type=alert_custom, client_factory=cf_metric_alerts) as g:
-        g.custom_command('create', 'create_metric_alert', custom_command_type=alert_custom)
+    with self.command_group('monitor metrics alert', metric_alert_sdk, custom_command_type=metric_alert_custom, client_factory=cf_metric_alerts) as g:
+        g.custom_command('create', 'create_metric_alert', custom_command_type=metric_alert_custom)
         g.command('delete', 'delete')
-        g.custom_command('list', 'list_metric_alerts', custom_command_type=alert_custom)
+        g.custom_command('list', 'list_metric_alerts', custom_command_type=metric_alert_custom)
         g.command('show', 'get')
-        g.generic_update_command('update', custom_func_name='update_metric_alert', custom_func_type=alert_custom)
+        g.generic_update_command('update', custom_func_name='update_metric_alert', custom_func_type=metric_alert_custom)
 
     with self.command_group('monitor log-analytics workspace', log_analytics_workspace_sdk, custom_command_type=log_analytics_workspace_custom, is_preview=True) as g:
         g.custom_command('create', 'create_log_analytics_workspace')
