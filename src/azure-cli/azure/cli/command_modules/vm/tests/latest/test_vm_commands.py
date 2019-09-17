@@ -603,10 +603,8 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             'loc': 'westus',
             'disk1': 'd1',
             'disk2': 'd2',
-            'disk3': 'd3',
             'snapshot1': 's1',
             'snapshot2': 's2',
-            'snapshot3': 's3',
             'image': 'i1',
             'image_2': 'i2',
             'image_3': 'i3'
@@ -630,11 +628,6 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         # create another disk by importing from the disk1
         self.kwargs['disk1_id'] = data_disk['id']
         data_disk2 = self.cmd('disk create -g {rg} -n {disk2} --source {disk1_id}').get_output_in_json()
-
-        # test --size parameter
-        self.cmd('disk create -g {rg} -n {disk3} --for-upload --upload-size 21474836992', checks=[
-            self.check('creationData.uploadSizeBytes', 21474836992)
-        ])
 
         # create a snpashot
         os_snapshot = self.cmd('snapshot create -g {rg} -n {snapshot1} --size-gb 1 --sku Premium_LRS --tags tag1=s1', checks=[
@@ -687,8 +680,25 @@ class VMManagedDiskScenarioTest(ScenarioTest):
                      self.check('storageProfile.osDisk.caching', 'ReadWrite')
                  ])
 
-        # test snapshot incremental, subscription not in whitelist yet
-        # self.cmd('snapshot create -g {rg} -n {snapshot3} --size-gb 10 --incremental', checks=[
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_disk_upload_')
+    def test_vm_disk_upload(self, resource_group):
+        self.kwargs.update({
+            'disk': 'disk1',
+        })
+
+        # test --upload-size-byte parameter
+        self.cmd('disk create -g {rg} -n {disk} --for-upload --upload-size-byte 21474836992', checks=[
+            self.check('creationData.uploadSizeBytes', 21474836992)
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_snapshot_incremental_')
+    def test_vm_snapshot_incremental(self, resource_group):
+        self.kwargs.update({
+            'snapshot': 'snapshot1'
+        })
+
+        # test snapshot --incremental, subscription not in whitelist yet
+        # self.cmd('snapshot create -g {rg} -n {snapshot} --size-gb 10 --incremental', checks=[
         #      self.check('incremental', True)
         # ])
 
