@@ -691,6 +691,8 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             self.check('creationData.uploadSizeBytes', 21474836992)
         ])
 
+    # subscription not in whitelist yet
+    """
     @ResourceGroupPreparer(name_prefix='cli_test_vm_snapshot_incremental_')
     def test_vm_snapshot_incremental(self, resource_group):
         self.kwargs.update({
@@ -698,9 +700,10 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         })
 
         # test snapshot --incremental, subscription not in whitelist yet
-        # self.cmd('snapshot create -g {rg} -n {snapshot} --size-gb 10 --incremental', checks=[
-        #      self.check('incremental', True)
-        # ])
+        self.cmd('snapshot create -g {rg} -n {snapshot} --size-gb 10 --incremental', checks=[
+             self.check('incremental', True)
+        ])
+    """
 
     """
     @ResourceGroupPreparer(name_prefix='cli_test_large_disk')
