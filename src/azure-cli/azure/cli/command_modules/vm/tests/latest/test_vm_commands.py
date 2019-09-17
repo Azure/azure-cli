@@ -680,13 +680,36 @@ class VMManagedDiskScenarioTest(ScenarioTest):
                      self.check('storageProfile.osDisk.caching', 'ReadWrite')
                  ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_disk_upload_')
+    def test_vm_disk_upload(self, resource_group):
+        self.kwargs.update({
+            'disk': 'disk1',
+        })
+
+        # test --upload-size-byte parameter
+        self.cmd('disk create -g {rg} -n {disk} --for-upload --upload-size-byte 21474836992', checks=[
+            self.check('creationData.uploadSizeBytes', 21474836992)
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_snapshot_incremental_')
+    def test_vm_snapshot_incremental(self, resource_group):
+        self.kwargs.update({
+            'snapshot': 'snapshot1'
+        })
+
+        # test snapshot --incremental, subscription not in whitelist yet
+        # self.cmd('snapshot create -g {rg} -n {snapshot} --size-gb 10 --incremental', checks=[
+        #      self.check('incremental', True)
+        # ])
+
+    """
     @ResourceGroupPreparer(name_prefix='cli_test_large_disk')
     def test_vm_large_disk(self, resource_group):
         self.kwargs.update({
             'disk': 'd1',
             'snapshot': 's1'
         })
-        self.cmd('disk create -g {rg} -n {disk} --size-gb 1 --hyper-v-generation V2 --for-upload', checks=[
+        self.cmd('disk create -g {rg} -n {disk} --hyper-v-generation V2 --for-upload --upload-size-byte 1073742336', checks=[
             self.check('hyperVgeneration', "V2")
         ])
         self.cmd('disk grant-access -g {rg} -n {disk} --access-level Write --duration-in-seconds 3600')
@@ -694,6 +717,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         self.cmd('snapshot create -g {rg} -n {snapshot} --source {disk} --hyper-v-generation V2', checks=[
             self.check('hyperVgeneration', "V2")
         ])
+    """
 
 
 class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
@@ -1546,6 +1570,8 @@ class VMDiskAttachDetachTest(ScenarioTest):
             self.check('storageProfile.dataDisks[3].managedDisk.storageAccountType', 'StandardSSD_LRS'),
         ])
 
+    # No quota
+    """
     @ResourceGroupPreparer(name_prefix='cli-test-stdssdk', location='eastus2')
     def test_vm_ultra_ssd_storage_sku(self, resource_group):
 
@@ -1576,7 +1602,10 @@ class VMDiskAttachDetachTest(ScenarioTest):
             self.check('storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
             self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'UltraSSD_LRS'),
         ])
+    """
 
+    # No quota
+    """
     @ResourceGroupPreparer(name_prefix='cli-test-ultrassd', location='eastus2')
     def test_vm_ultra_ssd_disk_update(self, resource_group):
         self.kwargs.update({
@@ -1587,6 +1616,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
             self.check('diskIopsReadWrite', 510),
             self.check('diskMbpsReadWrite', 10)
         ])
+    """
 
     @ResourceGroupPreparer(name_prefix='cli-test-std_zrs', location='eastus2')
     def test_vm_disk_create_with_standard_zrs_sku(self, resource_group):
