@@ -209,7 +209,6 @@ def _get_registry_status(login_server, registry_name, ignore_errors):
         _handle_error(CONNECTIVITY_SSL_ERROR.format_error_message(login_server), ignore_errors)
         return False
     except RequestException:
-        # To reproduce this error, configure <registryName>.azurecr.io to a random IP in 'hosts' file.
         from ._errors import CONNECTIVITY_CHALLENGE_ERROR
         _handle_error(CONNECTIVITY_CHALLENGE_ERROR.format_error_message(login_server), ignore_errors)
         return False
