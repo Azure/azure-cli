@@ -109,6 +109,10 @@ Release History
 * Fixed az webapp webjob continuous start command when specifying a slot.
 * az webapp up detects env folder and removes it from compressed file used for deployment
 
+**Backup**
+
+* Added Support for managed disk restore, InstantRP
+
 **keyvault**
 
 * Fix the bug in secret set command that ignores the expires argument
