@@ -13,6 +13,10 @@ Release History
 
 * Fix #8840: When using tenant domain name in `az login -t`, `keyvault create` fails. Tenant domain name is now resolved to GUID if it is not.
 
+**EventGrid**
+
+* Fix the endpoint help text to refer to the right parameter (namely, to point to parameter `--endpoint` rather than `--endpoint-type` in event subscription commands).
+
 **Monitor**
 
 * monitor metrics alert create: Fix #9901. Support special character `:` in `--condition` argument.

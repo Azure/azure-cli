@@ -64,7 +64,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('endpoint_type', arg_type=get_enum_type(['webhook', 'eventhub', 'storagequeue', 'hybridconnection', 'servicebusqueue'], default='webhook'))
         c.argument('source_resource_id', help="Fully qualified identifier of the source Azure resource.")
         c.argument('resource_id', deprecate_info=c.deprecate(redirect="--source-resource-id", expiration='2.1.0', hide=True), help="Fully qualified identifier of the Azure resource.")
-        c.argument('endpoint', help="Endpoint where EventGrid should deliver events matching this event subscription. For webhook endpoint type, this should be the corresponding webhook URL. For other endpoint types, this should be the Azure resource identifier of the endpoint.")
+        c.argument('endpoint', help="Endpoint where EventGrid should deliver events matching this event subscription. For webhook endpoint type, this should be the corresponding webhook URL. For other endpoint types, this should be the Azure resource identifier of the endpoint. It is expected that the destination endpoint to be already created and available for use before executing any Event Grid command.")
         c.argument('event_subscription_name', help="Name of the event subscription.")
         c.argument('subject_begins_with', help="An optional string to filter events for an event subscription based on a prefix. Wildcard characters are not supported.")
         c.argument('subject_ends_with', help="An optional string to filter events for an event subscription based on a suffix. Wildcard characters are not supported.")
