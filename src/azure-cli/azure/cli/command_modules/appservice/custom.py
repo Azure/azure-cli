@@ -78,7 +78,8 @@ logger = get_logger(__name__)
 def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_file=None,  # pylint: disable=too-many-statements,too-many-branches
                   deployment_container_image_name=None, deployment_source_url=None, deployment_source_branch='master',
                   deployment_local_git=None, docker_registry_server_password=None, docker_registry_server_user=None,
-                  multicontainer_config_type=None, multicontainer_config_file=None, tags=None, using_webapp_up=False, language=None):
+                  multicontainer_config_type=None, multicontainer_config_file=None, tags=None,
+                  using_webapp_up=False, language=None):
     if deployment_source_url and deployment_local_git:
         raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
 
