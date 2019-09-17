@@ -24,7 +24,7 @@ def validate_tenant(cmd, namespace):
     Make sure tenant is a GUID. If domain name is provided, resolve to GUID.
     https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-protocols-oidc#fetch-the-openid-connect-metadata-document
     """
-    if not _is_guid(namespace.tenant):
+    if namespace.tenant is not None and not _is_guid(namespace.tenant):
         import requests
         active_directory_endpoint = cmd.cli_ctx.cloud.endpoints.active_directory
         url = '{}/{}/.well-known/openid-configuration'.format(active_directory_endpoint, namespace.tenant)
