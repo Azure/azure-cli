@@ -89,8 +89,7 @@ class AppConfigCredentialScenarioTest(ScenarioTest):
         })
 
         self.cmd('appconfig credential regenerate -n {config_store_name} -g {rg} --id {id}',
-                 checks=[self.check('name', credential_list[0]['name']),
-                         self.check('id', credential_list[0]['id'])])
+                 checks=[self.check('name', credential_list[0]['name'])])
 
 
 class AppConfigKVScenarioTest(ScenarioTest):
@@ -243,6 +242,101 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
 
         assert imported_kvs == exported_kvs
 
+
+
+class AppConfigFeatureScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(parameter_name_for_location='location')
+    def test_azconfig_feature(self, resource_group, location):
+        config_store_name = self.create_random_name(prefix='FeatureTest', length=24)
+
+        location = 'eastus'
+        self.kwargs.update({
+            'config_store_name': config_store_name,
+            'rg_loc': location,
+            'rg': resource_group
+        })
+        _create_config_store(self, self.kwargs)
+
+        entry_feature = 'Beta'
+        entry_label = 'v1'
+        default_description = None
+        default_conditions = "{{\'client_filters\': []}}"
+        default_locked = False
+        default_state = "off"
+
+        self.kwargs.update({
+            'feature': entry_feature,
+            'description': default_description,
+            'label': entry_label
+        })
+
+        # add a brand new feature flag entry
+        self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} -y',
+                checks=[self.check('locked', default_locked),
+                        self.check('key', entry_feature),
+                        self.check('description', default_description),
+                        self.check('label', entry_label),
+                        self.check('state', default_state),
+                        self.check('conditions', default_conditions)])
+        
+        # update an existing feature flag entry (we can only update description)
+        updated_entry_description = "Beta Testing Feature Flag"
+        self.kwargs.update({
+            'description': updated_entry_description
+        })
+        self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} --description "{description}" -y',
+                checks=[self.check('locked', default_locked),
+                        self.check('key', entry_feature),
+                        self.check('description', updated_entry_description),
+                        self.check('label', entry_label),
+                        self.check('state', default_state),
+                        self.check('conditions', default_conditions)])
+       
+    
+        # add a new label - this should create a new KV in the config store
+        updated_label = 'v2'
+        self.kwargs.update({
+            'label': updated_label
+        })
+
+        self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} -y',
+                checks=[self.check('locked', default_locked),
+                        self.check('key', entry_feature),
+                        self.check('description', default_description),
+                        self.check('label', updated_label),
+                        self.check('state', default_state),
+                        self.check('conditions', default_conditions)])
+
+
+        # set feature flag with connection string
+        credential_list = self.cmd(
+            'appconfig credential list -n {config_store_name} -g {rg}').get_output_in_json()
+        self.kwargs.update({
+            'connection_string': credential_list[0]['connectionString']
+        })
+        self.cmd('appconfig feature set --connection-string {connection_string} --feature {feature} --label {label} --description "{description}" -y',
+                checks=[self.check('locked', default_locked),
+                        self.check('key', entry_feature),
+                        self.check('description', updated_entry_description),
+                        self.check('label', updated_label),
+                        self.check('state', default_state),
+                        self.check('conditions', default_conditions)])
+
+        # show a feature flag with all 7 fields
+        self.cmd('appconfig feature show -n {config_store_name} --feature {feature} --label {label}',
+                checks=[self.check('locked', default_locked),
+                        self.check('key', entry_feature),
+                        self.check('description', updated_entry_description),
+                        self.check('label', updated_label),
+                        self.check('state', default_state),
+                        self.check('conditions', default_conditions)])
+
+        # show a feature flag with field filtering
+        self.cmd('appconfig feature show -n {config_store_name} --feature {feature} --label {label} --fields key label state locked',
+                checks=[self.check('locked', default_locked),
+                        self.check('key', entry_feature),
+                        self.check('label', updated_label),
+                        self.check('state', default_state)])
 
 def _create_config_store(test, kwargs):
     test.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc}')

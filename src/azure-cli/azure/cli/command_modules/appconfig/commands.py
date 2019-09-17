@@ -8,7 +8,8 @@ from azure.cli.core.commands import CliCommandType
 from ._client_factory import cf_configstore, cf_configstore_operations
 from ._format import (configstore_credential_format,
                       configstore_output_format,
-                      keyvalue_entry_format)
+                      keyvalue_entry_format,
+                      featureflag_entry_format)
 
 
 def load_command_table(self, _):
@@ -28,6 +29,12 @@ def load_command_table(self, _):
     configstore_keyvalue_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.appconfig.keyvalue#{}',
         table_transformer=keyvalue_entry_format,
+        client_factory=cf_configstore_operations
+    )
+
+    configstore_feature_util = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.appconfig.feature#{}',
+        table_transformer=featureflag_entry_format,
         client_factory=cf_configstore_operations
     )
 
@@ -61,3 +68,8 @@ def load_command_table(self, _):
         g.command('restore', 'restore_key')
         g.command('import', 'import_config')
         g.command('export', 'export_config')
+
+    # FeatureManagement Commands
+    with self.command_group('appconfig feature', configstore_feature_util) as g:
+        g.command('set', 'set_feature')
+        g.command('show', 'show_feature')
