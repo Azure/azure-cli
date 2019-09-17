@@ -541,3 +541,31 @@ def cli_returnnsdetails(cmd, resource_group_name, namespace_name, max_size_in_me
                                                                             40960, 81920]:
         raise CLIError(
             '--max-size on Premium sku namespace only supports upto [1024, 2048, 3072, 4096, 5120, 10240, 20480, 40960, 81920] GB')
+
+
+def cli_queue_exists(cmd, resource_group_name, namespace_name, queue_name):
+    from knack.util import CLIError
+    from azure.mgmt.servicebus.models import ErrorResponseException
+    from azure.mgmt.servicebus import ServiceBusManagementClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    nsclient = get_mgmt_service_client(cmd.cli_ctx, ServiceBusManagementClient).queues
+    try:
+        getresponse = nsclient.get(resource_group_name, namespace_name, queue_name)
+        return 1
+    except ErrorResponseException as ex:
+        if ex.response.status_code in [404]:
+            return
+
+
+def cli_topic_exists(cmd, resource_group_name, namespace_name, topic_name):
+    from knack.util import CLIError
+    from azure.mgmt.servicebus.models import ErrorResponseException
+    from azure.mgmt.servicebus import ServiceBusManagementClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    nsclient = get_mgmt_service_client(cmd.cli_ctx, ServiceBusManagementClient).topics
+    try:
+        getresponse = nsclient.get(resource_group_name, namespace_name, topic_name)
+        return 1
+    except ErrorResponseException as ex:
+        if ex.response.status_code in [404]:
+            return

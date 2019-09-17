@@ -3,6 +3,11 @@
 Release History
 ===============
 
+**ServiceBus**
+
+* Added new command 'az servicebus queue exists' under Queue to verify queue with given name exists or not
+* Added new command 'az servicebus topic exists'under Topic to verify topic with given name exists or not
+
 **Compute**
 
 * vmss create: Add --terminate-notification-time parameters to support terminate scheduled event configurability.

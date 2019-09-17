@@ -106,7 +106,7 @@ def load_arguments_sb(self, _):
         c.argument('namespace_name', id_part=None, options_list=['--namespace-name'], help='Name of Namespace')
 
     # region - Topic
-    for scope in ['servicebus topic show', 'servicebus topic delete']:
+    for scope in ['servicebus topic']:
         with self.argument_context(scope) as c:
             c.argument('topic_name', arg_type=name_type, id_part='child_name_1', completer=get_topic_command_completion_list, help='Name of Topic')
 
@@ -124,10 +124,6 @@ def load_arguments_sb(self, _):
             c.argument('auto_delete_on_idle', validator=_validate_auto_delete_on_idle, help='ISO 8601 timespan or duration time format for idle interval after which the topic is automatically deleted. The minimum duration is 5 minutes.')
             c.argument('enable_partitioning', arg_type=get_three_state_flag(), help='A boolean value that indicates whether the topic to be partitioned across multiple message brokers is enabled.')
             c.argument('enable_express', arg_type=get_three_state_flag(), help='A boolean value that indicates whether Express Entities are enabled. An express topic holds a message in memory temporarily before writing it to persistent storage.')
-
-    for scope in ['servicebus topic show', 'servicebus topic delete']:
-        with self.argument_context(scope) as c:
-            c.argument('topic_name', arg_type=name_type, id_part='child_name_1', completer=get_topic_command_completion_list, help='Name of Topic')
 
     with self.argument_context('servicebus topic list') as c:
         c.argument('namespace_name', id_part=None, options_list=['--namespace-name'], help='Name of Namespace')

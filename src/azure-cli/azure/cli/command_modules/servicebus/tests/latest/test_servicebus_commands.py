@@ -116,7 +116,6 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
             'queueauthoname': self.create_random_name(prefix='cliQueueAutho', length=25),
             'lockduration': 'PT10M',
             'lockduration1': 'PT11M'
-
         })
 
         # Create Namespace
@@ -127,6 +126,11 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
         # Get Created Namespace
         self.cmd('servicebus namespace show --resource-group {rg} --name {namespacename}',
                  checks=[self.check('sku.name', '{sku}')])
+
+        # Queues exists
+        checkexists = self.cmd(
+            'servicebus queue exists --resource-group {rg} --namespace-name {namespacename} --name {queuename}').output.rstrip()
+        self.assertFalse(checkexists)
 
         # Create Queue
         self.cmd(
@@ -209,6 +213,10 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
         # Get Created Namespace
         self.cmd('servicebus namespace show --resource-group {rg} --name {namespacename}',
                  checks=[self.check('sku.name', '{sku}')])
+
+        checkexists = self.cmd(
+            'servicebus topic exists --resource-group {rg} --namespace-name {namespacename} --name {topicname}').output.rstrip()
+        self.assertFalse(checkexists)
 
         # Create Topic
         self.cmd(

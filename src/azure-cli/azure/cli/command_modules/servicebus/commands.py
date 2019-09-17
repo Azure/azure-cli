@@ -78,6 +78,7 @@ def load_command_table(self, _):
         g.command('list', 'list_by_namespace')
         g.command('delete', 'delete')
         g.generic_update_command('update', custom_func_name='cli_sbqueue_update')
+        g.custom_command('exists', 'cli_queue_exists')
 
     with self.command_group('servicebus queue authorization-rule', sb_queue_util, client_factory=queues_mgmt_client_factory) as g:
         g.command('create', 'create_or_update_authorization_rule')
@@ -95,6 +96,7 @@ def load_command_table(self, _):
         g.command('list', 'list_by_namespace')
         g.command('delete', 'delete')
         g.generic_update_command('update', custom_func_name='cli_sbtopic_update')
+        g.custom_command('exists', 'cli_topic_exists')
 
     with self.command_group('servicebus topic authorization-rule', sb_topic_util, client_factory=topics_mgmt_client_factory) as g:
         g.command('create', 'create_or_update_authorization_rule')

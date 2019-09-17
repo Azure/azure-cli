@@ -1,55 +1,5 @@
 interactions:
 - request:
-    body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
-      "date": "2019-05-31T19:44:49Z"}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - group create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '110'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - --location --name --tag
-      User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_topic000001?api-version=2019-05-10
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001","name":"cli_test_sb_topic000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-05-31T19:44:49Z"},"properties":{"provisioningState":"Succeeded"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '384'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 31 May 2019 19:44:49 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
-    status:
-      code: 201
-      message: Created
-- request:
     body: null
     headers:
       Accept:
@@ -63,24 +13,24 @@ interactions:
       ParameterSetName:
       - --resource-group --name --tags --sku
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-resource/3.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_topic000001?api-version=2019-05-10
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001","name":"cli_test_sb_topic000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-05-31T19:44:49Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001","name":"cli_test_sb_topic000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-09-17T02:28:56Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '384'
+      - '428'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 31 May 2019 19:44:50 GMT
+      - Tue, 17 Sep 2019 02:28:58 GMT
       expires:
       - '-1'
       pragma:
@@ -95,7 +45,7 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus", "tags": {"{tag2: value2,": "", "tag1: value1}":
+    body: '{"location": "westus", "tags": {"{tag1: value1,": "", "tag2: value2}":
       ""}, "sku": {"name": "Premium", "tier": "Premium"}}'
     headers:
       Accept:
@@ -114,7 +64,7 @@ interactions:
       - --resource-group --name --tags --sku
       User-Agent:
       - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-servicebus/0.6.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+        Azure-SDK-For-Python AZURECLI/2.0.73
       accept-language:
       - en-US
     method: PUT
@@ -122,16 +72,16 @@ interactions:
   response:
     body:
       string: '{"sku":{"name":"Premium","tier":"Premium","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002","name":"sb-nscli000002","type":"Microsoft.ServiceBus/Namespaces","location":"West
-        US","tags":{"{tag2: value2,":"","tag1: value1}":""},"properties":{"provisioningState":"Created","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:sb-nscli000002","createdAt":"2019-05-31T19:44:52.32Z","updatedAt":"2019-05-31T19:44:52.32Z","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
+        US","tags":{"{tag1: value1,":"","tag2: value2}":""},"properties":{"provisioningState":"Created","metricId":"dbedb4e0-40e6-4145-81f3-f1314c150774:sb-nscli000002","createdAt":"2019-09-17T02:29:00.257Z","updatedAt":"2019-09-17T02:29:00.257Z","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '703'
+      - '705'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 31 May 2019 19:44:52 GMT
+      - Tue, 17 Sep 2019 02:29:00 GMT
       expires:
       - '-1'
       pragma:
@@ -150,7 +100,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 200
       message: OK
@@ -169,31 +119,31 @@ interactions:
       - --resource-group --name --tags --sku
       User-Agent:
       - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-servicebus/0.6.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+        Azure-SDK-For-Python AZURECLI/2.0.73
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002?api-version=2017-04-01
   response:
     body:
       string: '{"sku":{"name":"Premium","tier":"Premium","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002","name":"sb-nscli000002","type":"Microsoft.ServiceBus/Namespaces","location":"West
-        US","tags":{"{tag2: value2,":"","tag1: value1}":""},"properties":{"provisioningState":"Created","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:sb-nscli000002","createdAt":"2019-05-31T19:44:52.32Z","updatedAt":"2019-05-31T19:44:52.32Z","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
+        US","tags":{"{tag1: value1,":"","tag2: value2}":""},"properties":{"provisioningState":"Created","metricId":"dbedb4e0-40e6-4145-81f3-f1314c150774:sb-nscli000002","createdAt":"2019-09-17T02:29:00.257Z","updatedAt":"2019-09-17T02:29:00.257Z","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '703'
+      - '705'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 31 May 2019 19:45:22 GMT
+      - Tue, 17 Sep 2019 02:29:30 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -220,13 +170,13 @@ interactions:
       - --resource-group --name --tags --sku
       User-Agent:
       - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-servicebus/0.6.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+        Azure-SDK-For-Python AZURECLI/2.0.73
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002?api-version=2017-04-01
   response:
     body:
       string: '{"sku":{"name":"Premium","tier":"Premium","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002","name":"sb-nscli000002","type":"Microsoft.ServiceBus/Namespaces","location":"West
-        US","tags":{"{tag2: value2,":"","tag1: value1}":""},"properties":{"provisioningState":"Succeeded","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:sb-nscli000002","createdAt":"2019-05-31T19:44:52.32Z","updatedAt":"2019-05-31T19:45:51.467Z","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
+        US","tags":{"{tag1: value1,":"","tag2: value2}":""},"properties":{"provisioningState":"Succeeded","metricId":"dbedb4e0-40e6-4145-81f3-f1314c150774:sb-nscli000002","createdAt":"2019-09-17T02:29:00.257Z","updatedAt":"2019-09-17T02:29:59.35Z","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
@@ -235,16 +185,16 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 31 May 2019 19:45:52 GMT
+      - Tue, 17 Sep 2019 02:30:01 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -271,7 +221,7 @@ interactions:
       - --resource-group --name --tags --sku
       User-Agent:
       - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-servicebus/0.6.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+        Azure-SDK-For-Python AZURECLI/2.0.73
       accept-language:
       - en-US
     method: GET
@@ -279,7 +229,7 @@ interactions:
   response:
     body:
       string: '{"sku":{"name":"Premium","tier":"Premium","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002","name":"sb-nscli000002","type":"Microsoft.ServiceBus/Namespaces","location":"West
-        US","tags":{"{tag2: value2,":"","tag1: value1}":""},"properties":{"provisioningState":"Succeeded","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:sb-nscli000002","createdAt":"2019-05-31T19:44:52.32Z","updatedAt":"2019-05-31T19:45:51.467Z","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
+        US","tags":{"{tag1: value1,":"","tag2: value2}":""},"properties":{"provisioningState":"Succeeded","metricId":"dbedb4e0-40e6-4145-81f3-f1314c150774:sb-nscli000002","createdAt":"2019-09-17T02:29:00.257Z","updatedAt":"2019-09-17T02:29:59.35Z","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
@@ -288,16 +238,16 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 31 May 2019 19:45:53 GMT
+      - Tue, 17 Sep 2019 02:30:01 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -324,7 +274,7 @@ interactions:
       - --resource-group --name
       User-Agent:
       - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-servicebus/0.6.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+        Azure-SDK-For-Python AZURECLI/2.0.73
       accept-language:
       - en-US
     method: GET
@@ -332,7 +282,7 @@ interactions:
   response:
     body:
       string: '{"sku":{"name":"Premium","tier":"Premium","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002","name":"sb-nscli000002","type":"Microsoft.ServiceBus/Namespaces","location":"West
-        US","tags":{"{tag2: value2,":"","tag1: value1}":""},"properties":{"provisioningState":"Succeeded","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:sb-nscli000002","createdAt":"2019-05-31T19:44:52.32Z","updatedAt":"2019-05-31T19:45:51.467Z","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
+        US","tags":{"{tag1: value1,":"","tag2: value2}":""},"properties":{"provisioningState":"Succeeded","metricId":"dbedb4e0-40e6-4145-81f3-f1314c150774:sb-nscli000002","createdAt":"2019-09-17T02:29:00.257Z","updatedAt":"2019-09-17T02:29:59.35Z","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
@@ -341,16 +291,16 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 31 May 2019 19:45:54 GMT
+      - Tue, 17 Sep 2019 02:30:01 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -362,6 +312,55 @@ interactions:
     status:
       code: 200
       message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - servicebus topic exists
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --namespace-name --name
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-servicebus/0.6.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-topiccli000004?api-version=2017-04-01
+  response:
+    body:
+      string: '{"error":{"message":"The requested resource sb-topiccli000004 does
+        not exist. CorrelationId: 940358b8-530f-462a-b82b-4106efdc7b6e","code":"NotFound"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '158'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 17 Sep 2019 02:30:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 404
+      message: Not Found
 - request:
     body: '{}'
     headers:
@@ -381,7 +380,7 @@ interactions:
       - --resource-group --namespace-name --name
       User-Agent:
       - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-servicebus/0.6.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+        Azure-SDK-For-Python AZURECLI/2.0.73
       accept-language:
       - en-US
     method: PUT
@@ -389,25 +388,25 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/Namespaces/Topics","location":"West
-        US","properties":{"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","maxSizeInMegabytes":81920,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2019-05-31T19:45:57.19Z","updatedAt":"2019-05-31T19:45:57.943Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+        US","properties":{"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","maxSizeInMegabytes":81920,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2019-09-17T02:30:12.897Z","updatedAt":"2019-09-17T02:30:13.517Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1002'
+      - '1003'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 31 May 2019 19:45:58 GMT
+      - Tue, 17 Sep 2019 02:30:13 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -436,7 +435,7 @@ interactions:
       - --resource-group --namespace-name --name
       User-Agent:
       - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-servicebus/0.6.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+        Azure-SDK-For-Python AZURECLI/2.0.73
       accept-language:
       - en-US
     method: GET
@@ -444,25 +443,25 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/Namespaces/Topics","location":"West
-        US","properties":{"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","maxSizeInMegabytes":81920,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2019-05-31T19:45:57.19Z","updatedAt":"2019-05-31T19:45:57.943Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+        US","properties":{"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","maxSizeInMegabytes":81920,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2019-09-17T02:30:12.897Z","updatedAt":"2019-09-17T02:30:13.517Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1003'
+      - '1004'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 31 May 2019 19:46:00 GMT
+      - Tue, 17 Sep 2019 02:30:14 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -489,7 +488,7 @@ interactions:
       - --resource-group --namespace-name --name --enable-ordering
       User-Agent:
       - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-servicebus/0.6.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+        Azure-SDK-For-Python AZURECLI/2.0.73
       accept-language:
       - en-US
     method: GET
@@ -497,25 +496,25 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/Namespaces/Topics","location":"West
-        US","properties":{"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","maxSizeInMegabytes":81920,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2019-05-31T19:45:57.19Z","updatedAt":"2019-05-31T19:45:57.943Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+        US","properties":{"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","maxSizeInMegabytes":81920,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2019-09-17T02:30:12.897Z","updatedAt":"2019-09-17T02:30:13.517Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1003'
+      - '1004'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 31 May 2019 19:46:00 GMT
+      - Tue, 17 Sep 2019 02:30:15 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -546,7 +545,7 @@ interactions:
       - --resource-group --namespace-name --name --enable-ordering
       User-Agent:
       - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-servicebus/0.6.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+        Azure-SDK-For-Python AZURECLI/2.0.73
       accept-language:
       - en-US
     method: PUT
@@ -563,16 +562,16 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 31 May 2019 19:46:02 GMT
+      - Tue, 17 Sep 2019 02:30:17 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -601,7 +600,7 @@ interactions:
       - --resource-group --namespace-name
       User-Agent:
       - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-servicebus/0.6.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+        Azure-SDK-For-Python AZURECLI/2.0.73
       accept-language:
       - en-US
     method: GET
@@ -609,25 +608,25 @@ interactions:
   response:
     body:
       string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/Namespaces/Topics","location":"West
-        US","properties":{"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","maxSizeInMegabytes":81920,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2019-05-31T19:45:57.19Z","updatedAt":"2019-05-31T19:46:02.657Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}]}'
+        US","properties":{"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","maxSizeInMegabytes":81920,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2019-09-17T02:30:12.9787389Z","updatedAt":"2019-09-17T02:30:17.2443542Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1015'
+      - '1024'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 31 May 2019 19:46:04 GMT
+      - Tue, 17 Sep 2019 02:30:18 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -660,7 +659,7 @@ interactions:
       - --resource-group --namespace-name --topic-name --name --rights
       User-Agent:
       - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-servicebus/0.6.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+        Azure-SDK-For-Python AZURECLI/2.0.73
       accept-language:
       - en-US
     method: PUT
@@ -677,16 +676,16 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 31 May 2019 19:46:05 GMT
+      - Tue, 17 Sep 2019 02:30:19 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -715,7 +714,7 @@ interactions:
       - --resource-group --namespace-name --topic-name --name
       User-Agent:
       - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-servicebus/0.6.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+        Azure-SDK-For-Python AZURECLI/2.0.73
       accept-language:
       - en-US
     method: GET
@@ -732,16 +731,16 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 31 May 2019 19:46:07 GMT
+      - Tue, 17 Sep 2019 02:30:20 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -768,7 +767,7 @@ interactions:
       - --resource-group --namespace-name --topic-name --name --rights
       User-Agent:
       - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-servicebus/0.6.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+        Azure-SDK-For-Python AZURECLI/2.0.73
       accept-language:
       - en-US
     method: GET
@@ -785,16 +784,16 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 31 May 2019 19:46:07 GMT
+      - Tue, 17 Sep 2019 02:30:21 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -825,7 +824,7 @@ interactions:
       - --resource-group --namespace-name --topic-name --name --rights
       User-Agent:
       - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-servicebus/0.6.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+        Azure-SDK-For-Python AZURECLI/2.0.73
       accept-language:
       - en-US
     method: PUT
@@ -842,16 +841,16 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 31 May 2019 19:46:09 GMT
+      - Tue, 17 Sep 2019 02:30:22 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -882,14 +881,14 @@ interactions:
       - --resource-group --namespace-name --topic-name --name
       User-Agent:
       - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-servicebus/0.6.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+        Azure-SDK-For-Python AZURECLI/2.0.73
       accept-language:
       - en-US
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/authorizationRules/cliAutho000003/ListKeys?api-version=2017-04-01
   response:
     body:
-      string: '{"primaryConnectionString":"Endpoint=sb://sb-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=i3NdfGANrcgLl8edzRmoXQr4i9sWplB0rYgUUxMdr+I=;EntityPath=sb-topiccli000004","secondaryConnectionString":"Endpoint=sb://sb-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=kOyfKSwQPm6h0zq9mB6S/Abqimh7x3cfWm+VSJ7PpDw=;EntityPath=sb-topiccli000004","primaryKey":"i3NdfGANrcgLl8edzRmoXQr4i9sWplB0rYgUUxMdr+I=","secondaryKey":"kOyfKSwQPm6h0zq9mB6S/Abqimh7x3cfWm+VSJ7PpDw=","keyName":"cliAutho000003"}'
+      string: '{"primaryConnectionString":"Endpoint=sb://sb-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=Bepi2vksQ4DBkLaYfumQ1LqCuJEBn/qh7V/ppgOq3iY=;EntityPath=sb-topiccli000004","secondaryConnectionString":"Endpoint=sb://sb-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=5SgHDl6rwzKWbn0xxFKe1BvQPrP5NKwnHeHJyxVAf5Y=;EntityPath=sb-topiccli000004","primaryKey":"Bepi2vksQ4DBkLaYfumQ1LqCuJEBn/qh7V/ppgOq3iY=","secondaryKey":"5SgHDl6rwzKWbn0xxFKe1BvQPrP5NKwnHeHJyxVAf5Y=","keyName":"cliAutho000003"}'
     headers:
       cache-control:
       - no-cache
@@ -898,16 +897,16 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 31 May 2019 19:46:10 GMT
+      - Tue, 17 Sep 2019 02:30:23 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -940,14 +939,14 @@ interactions:
       - --resource-group --namespace-name --topic-name --name --key
       User-Agent:
       - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-servicebus/0.6.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+        Azure-SDK-For-Python AZURECLI/2.0.73
       accept-language:
       - en-US
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/authorizationRules/cliAutho000003/regenerateKeys?api-version=2017-04-01
   response:
     body:
-      string: '{"primaryConnectionString":"Endpoint=sb://sb-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=sJ+Ojln6C1dHMs8qTiWnib3RyYLx61b4tAk8u2jG6GE=;EntityPath=sb-topiccli000004","secondaryConnectionString":"Endpoint=sb://sb-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=kOyfKSwQPm6h0zq9mB6S/Abqimh7x3cfWm+VSJ7PpDw=;EntityPath=sb-topiccli000004","primaryKey":"sJ+Ojln6C1dHMs8qTiWnib3RyYLx61b4tAk8u2jG6GE=","secondaryKey":"kOyfKSwQPm6h0zq9mB6S/Abqimh7x3cfWm+VSJ7PpDw=","keyName":"cliAutho000003"}'
+      string: '{"primaryConnectionString":"Endpoint=sb://sb-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=u9Kc3+6bW0uQ6hE1CWW/NDJKVNrPTtWsOYHLgh8AN1Q=;EntityPath=sb-topiccli000004","secondaryConnectionString":"Endpoint=sb://sb-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=5SgHDl6rwzKWbn0xxFKe1BvQPrP5NKwnHeHJyxVAf5Y=;EntityPath=sb-topiccli000004","primaryKey":"u9Kc3+6bW0uQ6hE1CWW/NDJKVNrPTtWsOYHLgh8AN1Q=","secondaryKey":"5SgHDl6rwzKWbn0xxFKe1BvQPrP5NKwnHeHJyxVAf5Y=","keyName":"cliAutho000003"}'
     headers:
       cache-control:
       - no-cache
@@ -956,16 +955,16 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 31 May 2019 19:46:10 GMT
+      - Tue, 17 Sep 2019 02:30:24 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -975,7 +974,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1176'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -998,14 +997,14 @@ interactions:
       - --resource-group --namespace-name --topic-name --name --key
       User-Agent:
       - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-servicebus/0.6.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+        Azure-SDK-For-Python AZURECLI/2.0.73
       accept-language:
       - en-US
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/authorizationRules/cliAutho000003/regenerateKeys?api-version=2017-04-01
   response:
     body:
-      string: '{"primaryConnectionString":"Endpoint=sb://sb-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=sJ+Ojln6C1dHMs8qTiWnib3RyYLx61b4tAk8u2jG6GE=;EntityPath=sb-topiccli000004","secondaryConnectionString":"Endpoint=sb://sb-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=YMkzCFOy5sOu9449hDfET5wgDqM/YTl6xunMqhcB2Vo=;EntityPath=sb-topiccli000004","primaryKey":"sJ+Ojln6C1dHMs8qTiWnib3RyYLx61b4tAk8u2jG6GE=","secondaryKey":"YMkzCFOy5sOu9449hDfET5wgDqM/YTl6xunMqhcB2Vo=","keyName":"cliAutho000003"}'
+      string: '{"primaryConnectionString":"Endpoint=sb://sb-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=u9Kc3+6bW0uQ6hE1CWW/NDJKVNrPTtWsOYHLgh8AN1Q=;EntityPath=sb-topiccli000004","secondaryConnectionString":"Endpoint=sb://sb-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=Y7IJrzpCfW/nJywEe3iqC4C4UtNt/WhnS05kY93mb7s=;EntityPath=sb-topiccli000004","primaryKey":"u9Kc3+6bW0uQ6hE1CWW/NDJKVNrPTtWsOYHLgh8AN1Q=","secondaryKey":"Y7IJrzpCfW/nJywEe3iqC4C4UtNt/WhnS05kY93mb7s=","keyName":"cliAutho000003"}'
     headers:
       cache-control:
       - no-cache
@@ -1014,16 +1013,16 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 31 May 2019 19:46:12 GMT
+      - Tue, 17 Sep 2019 02:30:25 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1033,7 +1032,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 200
       message: OK
@@ -1054,7 +1053,7 @@ interactions:
       - --resource-group --namespace-name --topic-name --name
       User-Agent:
       - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-servicebus/0.6.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+        Azure-SDK-For-Python AZURECLI/2.0.73
       accept-language:
       - en-US
     method: DELETE
@@ -1068,16 +1067,16 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 31 May 2019 19:46:14 GMT
+      - Tue, 17 Sep 2019 02:30:25 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
@@ -1104,7 +1103,7 @@ interactions:
       - --resource-group --namespace-name --name
       User-Agent:
       - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-servicebus/0.6.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+        Azure-SDK-For-Python AZURECLI/2.0.73
       accept-language:
       - en-US
     method: DELETE
@@ -1118,16 +1117,16 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 31 May 2019 19:46:15 GMT
+      - Tue, 17 Sep 2019 02:30:27 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
@@ -1137,51 +1136,4 @@ interactions:
     status:
       code: 200
       message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - group delete
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - --name --yes --no-wait
-      User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
-      accept-language:
-      - en-US
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_topic000001?api-version=2019-05-10
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Fri, 31 May 2019 19:46:16 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGU0I6NUZUT1BJQ0k3RVpNTVY0TTIyRlNSVENaUkhCUVdUQnxDRTZFRjY0MDcxNkE1MUZFLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2019-05-10
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
-    status:
-      code: 202
-      message: Accepted
 version: 1

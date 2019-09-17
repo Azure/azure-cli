@@ -222,6 +222,14 @@ helps['servicebus queue show'] = """
           text: az servicebus queue show --resource-group myresourcegroup --namespace-name mynamespace --name myqueue
 """
 
+helps['servicebus queue exists'] = """
+    type: command
+    short-summary: Check if the  Service Bus Queue with given name exists under the given Namespace
+    examples:
+        - name: Check if the  Service Bus Queue with given name exists under the given Namespace
+          text: az servicebus queue exists --resource-group myresourcegroup --namespace-name mynamespace --name myqueue
+"""
+
 helps['servicebus queue list'] = """
     type: command
     short-summary: List the Queue by Service Bus Namepsace
@@ -316,6 +324,14 @@ helps['servicebus topic show'] = """
     examples:
         - name: Shows the Topic details.
           text: az servicebus topic show --resource-group myresourcegroup --namespace-name mynamespace --name mytopic
+"""
+
+helps['servicebus topic exists'] = """
+    type: command
+    short-summary: Check if the  Service Bus Topic with given name exists under the given Namespace
+    examples:
+        - name: Check if the  Service Bus Topic with given name exists under the given Namespace
+          text: az servicebus topic exists --resource-group myresourcegroup --namespace-name mynamespace --name myqueue
 """
 
 helps['servicebus topic list'] = """
