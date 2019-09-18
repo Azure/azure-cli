@@ -184,16 +184,16 @@ storage_param_type = CLIArgumentType(
     validator=validate_managed_instance_storage_size)
 
 grace_period_param_type = CLIArgumentType(
-                   help='Interval in hours before automatic failover is initiated '
-                        'if an outage occurs on the primary server. '
-                        'This indicates that Azure SQL Database will not initiate '
-                        'automatic failover before the grace period expires. '
-                        'Please note that failover operation with AllowDataLoss option '
-                        'might cause data loss due to the nature of asynchronous synchronization.')
+                    help='Interval in hours before automatic failover is initiated '
+                    'if an outage occurs on the primary server. '
+                    'This indicates that Azure SQL Database will not initiate '
+                    'automatic failover before the grace period expires. '
+                    'Please note that failover operation with AllowDataLoss option '
+                    'might cause data loss due to the nature of asynchronous synchronization.')
 
 allow_data_loss_param_type = CLIArgumentType(
                     help='Complete the failover even if doing so may result in data loss. '
-                        'This will allow the failover to proceed even if a primary database is unavailable.')
+                    'This will allow the failover to proceed even if a primary database is unavailable.')
 
 db_service_objective_examples = 'Basic, S0, P1, GP_Gen4_1, BC_Gen5_2.'
 dw_service_objective_examples = 'DW100, DW1000c'
@@ -1287,19 +1287,19 @@ def load_arguments(self, _):
                    id_part='name')
 
         c.argument('resource_group_name', arg_type=resource_group_name_type)
-        
+
     ###############################################
     #             sql instance failover-group     #
     ###############################################
 
     with self.argument_context('sql instance-failover-group') as c:
         c.argument('failover_group_name',
-                   options_list=['--name','-n'],
+                   options_list=['--name', '-n'],
                    help="The name of the Instance Failover Group")
 
         c.argument('managed_instance',
                    arg_type=managed_instance_param_type,
-                   options_list=['--source-mi','-mi'])
+                   options_list=['--source-mi', '-mi'])
 
         c.argument('partner_managed_instance',
                    help="The name of the partner managed instance of a Instance Failover Group",

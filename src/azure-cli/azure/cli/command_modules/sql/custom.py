@@ -2365,7 +2365,8 @@ def failover_group_update(
     Updates the failover group.
     '''
 
-    failover_group_update_common(instance,
+    failover_group_update_common(
+        instance,
         failover_policy,
         grace_period)
 
@@ -2522,7 +2523,8 @@ def instance_failover_group_update(
     Updates the failover group.
     '''
 
-    failover_group_update_common(instance,
+    failover_group_update_common(
+        instance,
         failover_policy,
         grace_period)
 
