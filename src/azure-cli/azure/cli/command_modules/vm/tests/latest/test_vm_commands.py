@@ -695,21 +695,22 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             self.check('creationData.uploadSizeBytes', 21474836992)
         ])
 
-    # subscription not in whitelist yet
-    """
     @ResourceGroupPreparer(name_prefix='cli_test_vm_snapshot_incremental_')
     def test_vm_snapshot_incremental(self, resource_group):
         self.kwargs.update({
-            'snapshot': 'snapshot1'
+            'disk': 'd1',
+            'snapshot': 's1'
         })
 
-        # test snapshot --incremental, subscription not in whitelist yet
-        self.cmd('snapshot create -g {rg} -n {snapshot} --size-gb 10 --incremental', checks=[
+        # create a disk first
+        self.cmd('disk create -g {rg} -n {disk} --size-gb 10 -l centraluseuap')
+
+        # test snapshot --incremental
+        self.cmd('snapshot create -g {rg} -n {snapshot} --incremental -l centraluseuap --source {disk}', checks=[
              self.check('incremental', True)
         ])
-    """
 
-    """
+    """ Disable temporarily
     @ResourceGroupPreparer(name_prefix='cli_test_large_disk')
     def test_vm_large_disk(self, resource_group):
         self.kwargs.update({
