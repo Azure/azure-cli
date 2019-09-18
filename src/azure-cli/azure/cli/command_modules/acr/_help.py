@@ -73,7 +73,7 @@ short-summary: Show the configured content-trust policy for an Azure Container R
 examples:
   - name: Show the configured content-trust policy for an Azure Container Registry
     text: >
-        az acr config content-trust show -n MyRegistry
+        az acr config content-trust show -r MyRegistry
 """
 
 helps['acr config content-trust update'] = """
@@ -82,7 +82,7 @@ short-summary: Update content-trust policy for an Azure Container Registry.
 examples:
   - name: Update content-trust policy for an Azure Container Registry
     text: >
-        az acr config content-trust update -n MyRegistry --status Enabled
+        az acr config content-trust update -r MyRegistry --status Enabled
 """
 
 helps['acr config retention'] = """
