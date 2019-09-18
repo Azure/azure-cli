@@ -185,9 +185,9 @@ class Profile(object):
 
             if not use_device_code:
                 try:
-                    authority_url, _ = _get_authority_url(self.cli_ctx, tenant)
+                    # authority_url, _ = _get_authority_url(self.cli_ctx, tenant)
                     subscriptions = subscription_finder.find_through_authorization_code_flow(
-                        tenant, self._ad_resource_uri, authority_url)
+                        tenant, self._ad_resource_uri)
                 except RuntimeError:
                     use_device_code = True
                     logger.warning('Not able to launch a browser to log you in, falling back to device code...')
@@ -739,6 +739,7 @@ class MsiAccountTypes(object):
 
 class SubscriptionFinder(object):
     '''finds all subscriptions for a user or service principal'''
+    mfa_tenants = []
 
     def __init__(self, cli_ctx, auth_context_factory, adal_token_cache, arm_client_factory=None):
 
@@ -778,8 +779,9 @@ class SubscriptionFinder(object):
             result = self._find_using_specific_tenant(tenant, token_entry[_ACCESS_TOKEN])
         return result
 
-    def find_through_authorization_code_flow(self, tenant, resource, authority_url):
+    def find_through_authorization_code_flow(self, tenant, resource):
         # launch browser and get the code
+        authority_url, _ = _get_authority_url(self.cli_ctx, tenant)
         results = _get_authorization_code(resource, authority_url)
 
         if not results.get('code'):
@@ -793,6 +795,28 @@ class SubscriptionFinder(object):
         logger.warning("You have logged in. Now let us find all the subscriptions to which you have access...")
         if tenant is None:
             result = self._find_using_common_tenant(token_entry[_ACCESS_TOKEN], resource)
+
+            # Re-authenticating for tenants that require MFA
+            if self.mfa_tenants:
+                logger.warning('Some tenants require multi-factor authentication. Re-authenticating...')
+                # Get refresh token for the first MFA tenant
+                authority_url, _ = _get_authority_url(self.cli_ctx, self.mfa_tenants[0])
+                logger.info('Login to MFA tenant %s', authority_url)
+
+                results = _get_authorization_code(resource, authority_url)
+
+                if not results.get('code'):
+                    raise CLIError('Login failed')  # error detail is already displayed through previous steps
+
+                # exchange the code for the token
+                context = self._create_auth_context(self.mfa_tenants[0])
+                token_entry = context.acquire_token_with_authorization_code(results['code'], results['reply_url'],
+                                                                            resource, _CLIENT_ID, None)
+                self.user_id = token_entry[_TOKEN_ENTRY_USER_ID]
+                logger.info("Multi-factor authentication succeeded")
+                mfa_subscriptions = self._find_using_tenant_list_mfa(self.mfa_tenants, token_entry[_ACCESS_TOKEN], resource)
+                result.extend(mfa_subscriptions)
+                return result
         else:
             result = self._find_using_specific_tenant(tenant, token_entry[_ACCESS_TOKEN])
         return result
@@ -828,6 +852,22 @@ class SubscriptionFinder(object):
         token_cache = self._adal_token_cache if use_token_cache else None
         return self._auth_context_factory(self.cli_ctx, tenant, token_cache)
 
+    def _find_using_tenant_list_mfa(self, tenants, access_token, resource):
+        import adal
+        all_subscriptions = []
+
+        for tenant_id in tenants:
+            temp_context = self._create_auth_context(tenant_id)
+            try:
+                temp_credentials = temp_context.acquire_token(resource, self.user_id, _CLIENT_ID)
+            except adal.AdalError as err:
+                # Absolute failure, not MFA-related
+                logger.warning("Failed to authenticate '%s' due to error '%s'", tenant_id, err)
+                continue
+            subscriptions = self._find_using_specific_tenant(tenant_id, temp_credentials[_ACCESS_TOKEN])
+            all_subscriptions.extend(subscriptions)
+        return all_subscriptions
+
     def _find_using_common_tenant(self, access_token, resource):
         import adal
         from msrest.authentication import BasicTokenAuthentication
@@ -835,9 +875,11 @@ class SubscriptionFinder(object):
         all_subscriptions = []
         token_credential = BasicTokenAuthentication({'access_token': access_token})
         client = self._arm_client_factory(token_credential)
+        logger.info("Listing tenants with common access token")
         tenants = client.tenants.list()
         for t in tenants:
             tenant_id = t.tenant_id
+            logger.info("Listing subscriptions for tenant %s", tenant_id)
             temp_context = self._create_auth_context(tenant_id)
             try:
                 temp_credentials = temp_context.acquire_token(resource, self.user_id, _CLIENT_ID)
@@ -845,7 +887,12 @@ class SubscriptionFinder(object):
                 # because user creds went through the 'common' tenant, the error here must be
                 # tenant specific, like the account was disabled. For such errors, we will continue
                 # with other tenants.
-                logger.warning("Failed to authenticate '%s' due to error '%s'", t, ex)
+                ex = (getattr(ex, 'error_response', None) or {}).get('error_description') or ''
+                if 'AADSTS50076' in ex:
+                    logger.info("AADSTS50076: interaction_required error when getting token for tenant %s", tenant_id)
+                    self.mfa_tenants.append(tenant_id)
+                else:
+                    logger.warning("Failed to authenticate '%s' due to error '%s'", t, ex)
                 continue
             subscriptions = self._find_using_specific_tenant(
                 tenant_id,
