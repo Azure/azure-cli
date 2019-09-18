@@ -8,6 +8,10 @@ Release History
 * Add `--load-balancer-managed-outbound-ip-count`, `--load-balancer-outbound-ips` and `--load-balancer-outbound-ip-prefixes` to `az aks update` command, which allows for updating load balancer profile of an AKS cluster with SLB.
 * Add `--vm-set-type` to `az aks create` command, which allows to specify vm types of an AKS Cluster (vmas or vmss).
 
+**ARM**
+
+* az group deployment create: Add --handle-extended-json-format to support multiline and comments in json template
+
 **Compute**
 
 * vmss create: Add --terminate-notification-time parameters to support terminate scheduled event configurability.
