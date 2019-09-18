@@ -1299,7 +1299,7 @@ def load_arguments(self, _):
 
         c.argument('managed_instance',
                    arg_type=managed_instance_param_type,
-                   options_list=['--source-mi', '-mi'])
+                   options_list=['--source-mi', '--mi'])
 
         c.argument('partner_managed_instance',
                    help="The name of the partner managed instance of a Instance Failover Group",

@@ -3244,7 +3244,7 @@ class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
         mi2_location = "WestUS"
 
         # Create Failover Group
-        self.cmd('sql instance-failover-group create -n {} -g {} -mi {} --partner-resource-group {} --partner-managed-instance {} --failover-policy Automatic --grace-period 2'
+        self.cmd('sql instance-failover-group create -n {} -g {} --mi {} --partner-resource-group {} --partner-managed-instance {} --failover-policy Automatic --grace-period 2'
                  .format(failover_group_name, resource_group_name, managed_instance_name_1, resource_group_name, managed_instance_name_2),
                  checks=[
                      JMESPathCheck('name', failover_group_name),

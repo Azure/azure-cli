@@ -2471,7 +2471,7 @@ def instance_failover_group_create(
         resource_group_name,
         managed_instance,
         failover_group_name,
-        partner_managed_instance_name,
+        partner_managed_instance,
         partner_resource_group,
         failover_policy=FailoverPolicyType.automatic.value,
         grace_period=1):
@@ -2486,7 +2486,7 @@ def instance_failover_group_create(
         resource_group_name=resource_group_name)
 
     partner_server = managed_instance_client.get(
-        managed_instance_name=partner_managed_instance_name,
+        managed_instance_name=partner_managed_instance,
         resource_group_name=partner_resource_group)
 
     # Build the partner server id
