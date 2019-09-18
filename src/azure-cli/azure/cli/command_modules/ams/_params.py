@@ -170,7 +170,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('ams job list') as c:
         c.argument('account_name', id_part=None)
 
-    with self.argument_context('ams job start') as c:
+    with self.argument_context('ams job create') as c:
         c.argument('correlation_data', arg_type=correlation_data_type)
         c.argument('input_asset_name',
                    arg_group='Asset Job Input',
