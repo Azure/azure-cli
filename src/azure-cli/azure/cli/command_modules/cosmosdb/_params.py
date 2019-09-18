@@ -17,6 +17,8 @@ from azure.cli.command_modules.cosmosdb._validators import (
 
 from azure.cli.command_modules.cosmosdb.actions import (
     CreateLocation)
+from azure.cli.command_modules.cosmosdb.custom import (
+    CosmosKeyTypes)
 
 SQL_GREMLIN_INDEXING_POLICY_EXAMPLE = """--idx "{\\"indexingMode\\": \\"consistent\\", \\"includedPaths\\": [{\\"path\\": \\"/*\\", \\"indexes\\": [{\\"dataType\\": \\"String\\", \\"kind\\": \\"Range\\"}]}], \\"excludedPaths\\": [{ \\"path\\": \\"/headquarters/employees/?\\"}]}"
 """
@@ -67,7 +69,7 @@ def load_arguments(self, _):
 
     with self.argument_context('cosmosdb keys list') as c:
         c.argument('account_name', help="Cosmosdb account name", id_part=None)
-        c.argument('key_type', options_list=['--type'], help="The type of keys to list. Allowed values: keys, read-only-keys, list-connection-strings")
+        c.argument('key_type', arg_type=get_enum_type(CosmosKeyTypes), options_list=['--type'])
 
     with self.argument_context('cosmosdb network-rule add') as c:
         c.argument('subnet', help="Name or ID of the subnet")

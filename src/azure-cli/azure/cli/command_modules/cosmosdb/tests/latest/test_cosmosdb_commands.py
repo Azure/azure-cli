@@ -58,7 +58,7 @@ class CosmosDBTests(ScenarioTest):
         assert len(account['capabilities']) == 1
         assert account['capabilities'][0]['name'] == "EnableAggregationPipeline"
 
-        connection_strings = self.cmd('az cosmosdb list-connection-strings -n {acc} -g {rg}').get_output_in_json()
+        connection_strings = self.cmd('az cosmosdb connection-strings -n {acc} -g {rg}').get_output_in_json()
         assert len(connection_strings['connectionStrings']) == 4
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')

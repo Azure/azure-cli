@@ -5,6 +5,7 @@
 
 # pylint: disable=too-many-lines
 
+from enum import Enum
 from knack.log import get_logger
 from knack.util import CLIError
 
@@ -29,9 +30,12 @@ from azure.mgmt.cosmosdb.models import (
 
 logger = get_logger(__name__)
 
-KEYS = "keys"
-READ_ONLY_KEYS = "read-only-keys"
-LIST_CONNECTION_STRINGS = "list-connection-strings"
+
+class CosmosKeyTypes(Enum):
+    keys = "keys"
+    read_only_keys = "read-only-keys"
+    connection_strings = "connection-strings"
+
 
 DEFAULT_INDEXING_POLICY = """{
   "indexingMode": "consistent",
@@ -240,14 +244,13 @@ def cli_cosmosdb_list(client, resource_group_name=None):
 
 
 # pylint: disable=line-too-long
-def cli_cosmosdb_keys(client, resource_group_name, account_name, key_type=KEYS):
-    if key_type.lower() == KEYS.lower():
+def cli_cosmosdb_keys(client, resource_group_name, account_name, key_type=CosmosKeyTypes.keys.value):
+    if key_type == CosmosKeyTypes.keys.value:
         return client.list_keys(resource_group_name, account_name)
-    if key_type.lower() == READ_ONLY_KEYS.lower():
+    if key_type == CosmosKeyTypes.read_only_keys.value:
         return client.list_read_only_keys(resource_group_name, account_name)
-    if key_type.lower() == LIST_CONNECTION_STRINGS.lower():
+    if key_type == CosmosKeyTypes.connection_strings.value:
         return client.list_connection_strings(resource_group_name, account_name)
-    raise CLIError("az cosmosdb keys list: '{0}' is not a valid value for '--type'. See 'az cosmosdb keys list --help'.".format(key_type))
 
 
 def cli_cosmosdb_sql_database_create(client,
