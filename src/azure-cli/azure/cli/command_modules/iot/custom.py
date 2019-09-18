@@ -714,7 +714,7 @@ def iot_hub_route_update(cmd, client, hub_name, route_name, source_type=None, en
     return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
 
 
-def iot_hub_route_test(client, hub_name, route_name=None, source_type=None, body=None, app_properties=None,
+def iot_hub_route_test(cmd, client, hub_name, route_name=None, source_type=None, body=None, app_properties=None,
                        system_properties=None, resource_group_name=None):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     route_message = RoutingMessage(
@@ -724,7 +724,7 @@ def iot_hub_route_test(client, hub_name, route_name=None, source_type=None, body
     )
 
     if route_name:
-        route = iot_hub_route_show(client, hub_name, route_name, resource_group_name)
+        route = iot_hub_route_show(cmd, client, hub_name, route_name, resource_group_name)
         test_route_input = TestRouteInput(
             message=route_message,
             twin=None,

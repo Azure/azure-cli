@@ -17,6 +17,10 @@ Release History
 
 * Fix the endpoint help text to refer to the right parameter (namely, to point to parameter `--endpoint` rather than `--endpoint-type` in event subscription commands).
 
+**IoT**
+
+* Fix #2116: Unexpected 'az iot hub show' error for resource not found.
+
 **Monitor**
 
 * monitor metrics alert create: Fix #9901. Support special character `:` in `--condition` argument.
