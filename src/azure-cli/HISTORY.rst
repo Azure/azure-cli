@@ -12,6 +12,11 @@ Release History
 
 * az group deployment create: Add --handle-extended-json-format to support multiline and comments in json template
 
+**ACR**
+
+* Added a required `--type` parameter to command `az acr config retention update`
+* Param `-n, --name` changed to `-r, --registry` for `az acr config` command group.
+
 **Compute**
 
 * vmss create: Add --terminate-notification-time parameters to support terminate scheduled event configurability.
