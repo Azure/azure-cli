@@ -2,6 +2,10 @@
 
 Release History
 ===============
+**AMS**
+
+* BREAKING CHANGE:
+    Changed job creation from "job start" to "job create".
 
 **keyvault**
 
