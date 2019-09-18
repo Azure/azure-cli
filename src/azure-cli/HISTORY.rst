@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**ARM**
+
+* az group deployment create: Add --handle-extended-json-format to support multiline and comments in json template
+
 **Compute**
 
 * vmss create: Add --terminate-notification-time parameters to support terminate scheduled event configurability.
