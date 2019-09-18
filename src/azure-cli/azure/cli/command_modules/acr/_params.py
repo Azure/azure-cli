@@ -80,10 +80,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('acr config content-trust') as c:
         c.argument('registry_name', options_list=['--registry', '-r', c.deprecate(target='-n', redirect='-r', hide=True), c.deprecate(target='--name', redirect='--registry', hide=True)])
-        c.argument('status', help="Indicates whether content-trust is enabled or disabled.", arg_type=get_enum_type(PolicyStatus))
+        c.argument('status', help="Indicates whether content-trust is enabled.", arg_type=get_enum_type(PolicyStatus))
 
     with self.argument_context('acr config retention') as c:
-        c.argument('status', help="Indicates whether retention policy is enabled or disabled.", arg_type=get_enum_type(PolicyStatus))
+        c.argument('status', help="Indicates whether retention policy is enabled.", arg_type=get_enum_type(PolicyStatus))
         c.argument('registry_name', options_list=['--registry', '-r'])
         c.argument('days', type=int, help='The number of days to retain an untagged manifest after which it gets purged (Range: 0 to 365). Value "0" will delete untagged manifests immediately.', validator=validate_retention_days, default=7)
         c.argument('policy_type', options_list=['--type'], help='The type of retention policy.', default=RetentionType.UntaggedManifests.name, arg_type=get_enum_type(RetentionType))
