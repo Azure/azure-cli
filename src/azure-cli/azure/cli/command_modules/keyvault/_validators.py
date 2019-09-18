@@ -211,8 +211,7 @@ def certificate_type(string):
     except (IOError, OSError) as e:  # FileNotFoundError introduced in Python 3
         if e.errno == errno.ENOENT:
             raise CLIError("Certificate file '{}' does not exist.".format(string))
-        else:
-            raise CLIError("Unable to load certificate file '{}'.".format(string))
+        raise CLIError("Unable to load certificate file '{}'.".format(string))
 
 
 def datetime_type(string):
