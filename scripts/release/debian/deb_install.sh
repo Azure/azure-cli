@@ -36,6 +36,8 @@ function assert_consent {
 
 global_consent=0 # Artificially giving global consent after review-feedback. Remove this line to enable interactive mode
 
+setup() {
+
 assert_consent "Add packages necessary to modify your apt-package sources?" ${global_consent}
 set -v
 apt-get update
@@ -57,3 +59,7 @@ set +v
 
 assert_consent "Install the Azure CLI?" ${global_consent}
 apt-get install -y azure-cli
+
+}
+
+setup
