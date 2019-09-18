@@ -268,11 +268,12 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         # Upload to managed disk
         diskname = self.create_random_name(prefix='disk', length=12)
         local_file = self.create_temp_file(1024)
-        self.cmd('az disk create -n {disk} -g {rg} --for-upload -z 10'
+        self.cmd('disk create -n {} -g {} --for-upload -z 1'
                  .format(diskname, resource_group))
-        sasURL = self.cmd('az disk grant-access --access-level Write --duration-in-seconds 3600 -n {} -g {} --query [accessSas] -o tsv'
-                          .format(diskname, resource_group))
-        self.cmd('az storage copy -s {} -d {} --blob-type PageBlob'
+        sasURL = self.cmd(
+            'disk grant-access --access-level Write --duration-in-seconds 3600 -n {} -g {} --query accessSas'
+            .format(diskname, resource_group))
+        self.cmd('storage copy -s "{}" -d "{}" --blob-type PageBlob'
                  .format(local_file, sasURL))
 
     @ResourceGroupPreparer()
