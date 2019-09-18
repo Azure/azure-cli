@@ -69,7 +69,7 @@ def load_arguments(self, _):
 
     with self.argument_context('cosmosdb keys list') as c:
         c.argument('account_name', help="Cosmosdb account name", id_part=None)
-        c.argument('key_type', arg_type=get_enum_type(CosmosKeyTypes), options_list=['--type'])
+        c.argument('key_type', arg_type=get_enum_type(CosmosKeyTypes), options_list=['--type'], help="The type of account key.")
 
     with self.argument_context('cosmosdb network-rule add') as c:
         c.argument('subnet', help="Name or ID of the subnet")
