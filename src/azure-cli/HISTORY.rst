@@ -2,6 +2,10 @@
 
 Release History
 ===============
+**ams**
+
+* BREAKING CHANGE:
+    All show commands returned True when resource not found, now return False and print not found messages.
 
 **keyvault**
 
