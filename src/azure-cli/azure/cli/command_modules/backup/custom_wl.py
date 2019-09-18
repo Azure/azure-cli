@@ -612,7 +612,6 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
     if log_point_in_time is not None:
         item_type = item_type + 'PointInTime'
 
-    # Dynamically instantiating class based on item type
     module_ = import_module("azure.mgmt.recoveryservicesbackup.models.azure_workload_"+restore_module_map[item_type.lower()]+"_restore_request")
     class_ = getattr(module_, "AzureWorkload"+item_type+"RestoreRequest")
 
