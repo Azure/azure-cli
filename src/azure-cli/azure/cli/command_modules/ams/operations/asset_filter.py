@@ -110,3 +110,11 @@ def _parse_filter_tracks_json(tracks):
             errorMessage = 'Malformed JSON.'
             raise CLIError('{}. {}'.format(str(ex), errorMessage))
     return tracks_result
+
+
+def get_asset_filter(client, account_name, resource_group_name, asset_name, filter_name):
+    asset_filter = client.get(resource_group_name, account_name, asset_name, filter_name)
+    if not asset_filter:
+        raise CLIError('The asset-filter resource was not found.')
+
+    return asset_filter

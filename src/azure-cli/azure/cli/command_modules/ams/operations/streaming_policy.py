@@ -261,3 +261,11 @@ def _envelope_encryption_factory(envelope_clear_tracks,
                                              custom_key_acquisition_url_template=envelope_template)
 
     return envelope_encryption
+
+
+def get_streaming_policy(client, resource_group_name, account_name, streaming_policy_name):
+    streaming_policy = client.get(resource_group_name, account_name, streaming_policy_name)
+    if not streaming_policy:
+        raise CLIError('The streaming-policy resource was not found.')
+
+    return streaming_policy

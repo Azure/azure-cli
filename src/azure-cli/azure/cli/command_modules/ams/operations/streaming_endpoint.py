@@ -194,3 +194,12 @@ def stop(cmd, client, resource_group_name, account_name,
                                                   streaming_endpoint_name))
 
     return client.get(resource_group_name, account_name, streaming_endpoint_name)
+
+
+def get_streaming_endpoint(client, resource_group_name, account_name,
+                           streaming_endpoint_name):
+    streaming_endpoint = client.get(resource_group_name, account_name, streaming_endpoint_name)
+    if not streaming_endpoint:
+        raise CLIError('The streaming-endpoint resource was not found.')
+
+    return streaming_endpoint

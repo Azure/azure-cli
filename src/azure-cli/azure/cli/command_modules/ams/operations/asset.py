@@ -24,6 +24,14 @@ def get_sas_urls(client, resource_group_name, account_name, asset_name, permissi
                                      asset_name, permissions, expiry_time).asset_container_sas_urls
 
 
+def get_asset(client, account_name, resource_group_name, asset_name):
+    asset = client.get(resource_group_name, account_name, asset_name)
+    if not asset:
+        raise CLIError('The asset resource was not found.')
+
+    return asset
+
+
 def update_asset(instance, alternate_id=None, description=None):
     if not instance:
         raise CLIError('The asset resource was not found.')

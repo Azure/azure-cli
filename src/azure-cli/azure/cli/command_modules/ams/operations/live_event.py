@@ -170,3 +170,11 @@ def update_live_event(instance, tags=None, description=None, key_frame_interval_
             instance.cross_site_access_policies.cross_domain_policy = cross_domain_policy
 
     return instance
+
+
+def get_live_event(client, resource_group_name, account_name, live_event_name):
+    live_event = client.get(resource_group_name, account_name, live_event_name)
+    if not live_event:
+        raise CLIError('The live-event resource was not found.')
+
+    return live_event

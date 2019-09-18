@@ -75,6 +75,9 @@ def mediaservice_update_getter(client, resource_group_name, account_name):
 
 
 def update_mediaservice(instance, tags=None):
+    if not instance:
+        raise CLIError('The account resource was not found.')
+
     if tags:
         instance.tags = tags
 

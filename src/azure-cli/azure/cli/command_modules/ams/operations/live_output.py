@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.mgmt.media.models import LiveOutput
+from knack.util import CLIError
 
 
 def create_live_output(client, resource_group_name, account_name, live_event_name,
@@ -20,3 +21,11 @@ def create_live_output(client, resource_group_name, account_name, live_event_nam
                                                archive_window_length=archive_window_length,
                                                description=description, hls=fragments_per_ts_segment,
                                                output_snap_time=output_snap_time))
+
+
+def get_live_output(client, resource_group_name, account_name, live_event_name, live_output_name):
+    live_output = client.get(resource_group_name, account_name, live_event_name, live_output_name)
+    if not live_output:
+        raise CLIError('The live-output resource was not found.')
+
+    return live_output

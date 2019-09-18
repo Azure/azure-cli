@@ -67,3 +67,12 @@ def _valid_content_keys(content_keys):
         raise CLIError('Malformed JSON: ' + str(err))
 
     return isinstance(obj, list) and all(__valid_content_key(k) for k in obj)
+
+
+def get_streaming_locator(client, resource_group_name, account_name,
+                          streaming_locator_name):
+    streaming_locator = client.get(resource_group_name, account_name, streaming_locator_name)
+    if not streaming_locator:
+        raise CLIError('The streaming-locator resource was not found.')
+
+    return streaming_locator

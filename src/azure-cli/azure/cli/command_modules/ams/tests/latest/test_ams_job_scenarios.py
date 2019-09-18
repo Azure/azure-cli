@@ -71,6 +71,13 @@ class AmsJobTests(ScenarioTest):
             self.check('outputs[0].label', '{outputLabel}')
         ])
 
+        nonexits_job_name = self.create_random_name(prefix='job', length=20)
+        self.kwargs.update({
+            'nonexits_job_name': nonexits_job_name
+        })
+        with self.assertRaisesRegexp(CLIError, "The job resource was not found."):
+            self.cmd('az ams job show -a {amsname} -n{nonexits_job_name} -g {rg} -t {transformName}')
+
         list = self.cmd('az ams job list -a {amsname} -g {rg} -t {transformName}').get_output_in_json()
         assert len(list) > 0
 

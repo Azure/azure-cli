@@ -127,3 +127,11 @@ def parse_standard_encoder_preset(custom_preset_path):
     except:
         raise CLIError("Couldn't find a valid custom preset JSON definition in '{}'. Check the schema is correct."
                        .format(custom_preset_path))
+
+
+def get_transform(client, account_name, resource_group_name, transform_name):
+    transform = client.get(resource_group_name, account_name, transform_name)
+    if not transform:
+        raise CLIError('The transform resource was not found.')
+
+    return transform
