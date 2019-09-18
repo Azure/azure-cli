@@ -6,6 +6,7 @@
 import argparse
 import base64
 import binascii
+import errno
 from datetime import datetime
 import re
 
@@ -203,9 +204,15 @@ def validate_x509_certificate_chain(ns):
 def certificate_type(string):
     """ Loads file and outputs contents as base64 encoded string. """
     import os
-    with open(os.path.expanduser(string), 'rb') as f:
-        cert_data = f.read()
-    return cert_data
+    try:
+        with open(os.path.expanduser(string), 'rb') as f:
+            cert_data = f.read()
+        return cert_data
+    except (IOError, OSError) as e:  # FileNotFoundError introduced in Python 3
+        if e.errno == errno.ENOENT:
+            raise CLIError("Certificate file '{}' does not exist.".format(string))
+        else:
+            raise CLIError("Unable to load certificate file '{}'.".format(string))
 
 
 def datetime_type(string):

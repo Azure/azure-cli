@@ -2019,7 +2019,7 @@ def rest_call(cmd, method, uri, headers=None, uri_parameters=None,
         try:
             return r.json()
         except ValueError:
-            logger.warning('Not a json response, outputing to stdout. For binary data '
+            logger.warning('Not a json response, outputting to stdout. For binary data '
                            'suggest use "--output-file" to write to a file')
             print(r.text)
 
