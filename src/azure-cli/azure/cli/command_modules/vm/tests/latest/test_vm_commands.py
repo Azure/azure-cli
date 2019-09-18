@@ -409,7 +409,6 @@ class VMImageWithPlanTest(ScenarioTest):
 
     # Disable temporarily. You cannot purchase reservation because required AAD tenant information is missing.
     # Please ask your tenant admin to fill this form: https://aka.ms/orgprofile
-    """
     @ResourceGroupPreparer()
     def test_vm_create_with_market_place_image(self, resource_group, resource_group_location):
         # test 2 scenarios, 1. create vm from market place image, 2. create from a custom image captured from such vms
@@ -444,7 +443,6 @@ class VMImageWithPlanTest(ScenarioTest):
 
         self.cmd('vm create -g {rg} -n {vm2} --image {image} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password --plan-publisher {plan_publisher} --plan-name {plan_name} --plan-product {plan_product}')
         self.cmd('vm show -g {rg} -n {vm2}', checks=self.check('provisioningState', 'Succeeded'))
-    """
 
 
 class VMCreateFromUnmanagedDiskTest(ScenarioTest):
@@ -706,9 +704,8 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         self.cmd('disk create -g {rg} -n {disk} --size-gb 10 -l centraluseuap')
 
         # test snapshot --incremental
-        self.cmd('snapshot create -g {rg} -n {snapshot} --incremental -l centraluseuap --source {disk}', checks=[
-             self.check('incremental', True)
-        ])
+        self.cmd('snapshot create -g {rg} -n {snapshot} --incremental -l centraluseuap --source {disk}',
+                 checks=[self.check('incremental', True)])
 
     """ Disable temporarily
     @ResourceGroupPreparer(name_prefix='cli_test_large_disk')
@@ -1578,8 +1575,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
             self.check('storageProfile.dataDisks[3].managedDisk.storageAccountType', 'StandardSSD_LRS'),
         ])
 
-    # No quota
-    """
+    """ No quota
     @ResourceGroupPreparer(name_prefix='cli-test-stdssdk', location='eastus2')
     def test_vm_ultra_ssd_storage_sku(self, resource_group):
 
@@ -1612,8 +1608,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
         ])
     """
 
-    # No quota
-    """
+    """ No quota
     @ResourceGroupPreparer(name_prefix='cli-test-ultrassd', location='eastus2')
     def test_vm_ultra_ssd_disk_update(self, resource_group):
         self.kwargs.update({
