@@ -3,6 +3,11 @@
 Release History
 ===============
 
+**ACR**
+
+* Added a required `--type` parameter to command `az acr config retention update`
+* Param `-n, --name` changed to `-r, --registry` for `az acr config` command group.
+
 **Compute**
 
 * vmss create: Add --terminate-notification-time parameters to support terminate scheduled event configurability.
