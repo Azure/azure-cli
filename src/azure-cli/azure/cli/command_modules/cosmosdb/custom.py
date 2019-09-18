@@ -253,6 +253,7 @@ def cli_cosmosdb_keys(client, resource_group_name, account_name, key_type=Cosmos
         return client.list_connection_strings(resource_group_name, account_name)
     raise CLIError("az cosmosdb keys list: '{0}' is not a valid value for '--type'. See 'az cosmosdb keys list --help'.".format(key_type))
 
+
 def cli_cosmosdb_sql_database_create(client,
                                      resource_group_name,
                                      account_name,
