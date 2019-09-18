@@ -330,6 +330,7 @@ def _db_elastic_pool_update_sku(
 
 _DEFAULT_SERVER_VERSION = "12.0"
 
+
 def failover_group_update_common(
         instance,
         failover_policy=None,
@@ -378,9 +379,11 @@ class ClientAuthenticationType(Enum):
     active_directory_password = 'ADPassword'
     active_directory_integrated = 'ADIntegrated'
 
+
 class FailoverPolicyType(Enum):
     automatic = 'Automatic'
     manual = 'Manual'
+
 
 def _get_server_dns_suffx(cli_ctx):
     '''
@@ -2387,6 +2390,7 @@ def failover_group_update(
     instance.databases = databases
 
     return instance
+
 
 def failover_group_failover(
         client,
