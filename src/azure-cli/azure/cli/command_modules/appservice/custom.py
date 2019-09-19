@@ -2766,7 +2766,7 @@ def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, sl
     return client.web_apps.list_triggered_web_job_history(resource_group_name, name, webjob_name)
 
 
-def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku='F1', dryrun=False, logs=False,  # pylint: disable=too-many-statements,
+def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku=None, dryrun=False, logs=False,  # pylint: disable=too-many-statements,
               launch_browser=False):
     import os
     src_dir = os.getcwd()
@@ -2820,8 +2820,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
         site_config = client.web_apps.get_configuration(rg_name, name)
     else:  # need to create new app, check if we need to use default RG or use user entered values
         logger.warning("webapp %s doesn't exist", name)
-        sku_value = get_sku_to_use(src_dir, sku)
-        sku = get_sku_name(sku_value)
+        sku = get_sku_to_use(src_dir, sku)
         loc = set_location(cmd, sku, location)
         rg_name = get_rg_to_use(cmd, user, loc, os_name, resource_group_name)
         _is_linux = os_name.lower() == 'linux'
@@ -2838,7 +2837,8 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
                 "version_detected": "%s",
                 "runtime_version": "%s"
                 }
-                """ % (name, plan, rg_name, sku, os_name, loc, _src_path_escaped, detected_version, runtime_version)
+                """ % (name, plan, rg_name, get_sku_name(sku), os_name, loc, _src_path_escaped, detected_version,
+                       runtime_version)
     create_json = json.loads(dry_run_str)
 
     if dryrun:
