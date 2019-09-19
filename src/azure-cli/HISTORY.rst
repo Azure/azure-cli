@@ -23,17 +23,21 @@ Release History
 * vmss update: Add --enable-terminate-notification and --terminate-notification-time parameters to support terminate scheduled event configurability.
 * Update azure-mgmt-compute version to 7.0.0.
 
-**Key Vault**
-
-* Fix #8840: When using tenant domain name in `az login -t`, `keyvault create` fails. Tenant domain name is now resolved to GUID if it is not.
-
 **EventGrid**
 
 * Fix the endpoint help text to refer to the right parameter (namely, to point to parameter `--endpoint` rather than `--endpoint-type` in event subscription commands).
 
+**Key Vault**
+
+* Fix #8840: When using tenant domain name in `az login -t`, `keyvault create` fails. Tenant domain name is now resolved to GUID if it is not.
+
 **Monitor**
 
 * monitor metrics alert create: Fix #9901. Support special character `:` in `--condition` argument.
+
+**Storage**
+
+* Add --blob-type parameter for `az storage copy` command
 
 2.0.73
 ++++++
