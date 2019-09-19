@@ -245,7 +245,7 @@ class ExtensionUpdateLongRunningOperation(LongRunningOperation):  # pylint: disa
 # region Disks (Managed)
 def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # pylint: disable=too-many-locals
                         size_gb=None, sku='Premium_LRS', os_type=None,
-                        source=None, for_upload=None, upload_size_byte=None,  # pylint: disable=unused-argument
+                        source=None, for_upload=None, upload_size_bytes=None,  # pylint: disable=unused-argument
                         # below are generated internally from 'source'
                         source_blob_uri=None, source_disk=None, source_snapshot=None,
                         source_storage_account_id=None, no_wait=False, tags=None, zone=None,
@@ -262,17 +262,17 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
     else:
         option = DiskCreateOption.empty
 
-    if upload_size_byte is not None and for_upload is not True:
-        raise CLIError('usage error: --upload-size-byte should be used together with --for-upload')
+    if upload_size_bytes is not None and for_upload is not True:
+        raise CLIError('usage error: --upload-size-bytes should be used together with --for-upload')
 
     creation_data = CreationData(create_option=option, source_uri=source_blob_uri,
                                  image_reference=None,
                                  source_resource_id=source_disk or source_snapshot,
                                  storage_account_id=source_storage_account_id,
-                                 upload_size_bytes=upload_size_byte)
+                                 upload_size_bytes=upload_size_bytes)
 
-    if size_gb is None and upload_size_byte is None and (option == DiskCreateOption.empty or for_upload):
-        raise CLIError('usage error: --size-gb or --upload-size-byte required to create an empty disk')
+    if size_gb is None and upload_size_bytes is None and (option == DiskCreateOption.empty or for_upload):
+        raise CLIError('usage error: --size-gb or --upload-size-bytes required to create an empty disk')
     disk = Disk(location=location, creation_data=creation_data, tags=(tags or {}),
                 sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb, os_type=os_type)
 

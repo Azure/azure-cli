@@ -688,8 +688,8 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             'disk': 'disk1',
         })
 
-        # test --upload-size-byte parameter
-        self.cmd('disk create -g {rg} -n {disk} --for-upload --upload-size-byte 21474836992', checks=[
+        # test --upload-size-bytes parameter
+        self.cmd('disk create -g {rg} -n {disk} --for-upload --upload-size-bytes 21474836992', checks=[
             self.check('creationData.uploadSizeBytes', 21474836992)
         ])
 
@@ -714,7 +714,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             'disk': 'd1',
             'snapshot': 's1'
         })
-        self.cmd('disk create -g {rg} -n {disk} --hyper-v-generation V2 --for-upload --upload-size-byte 1073742336', checks=[
+        self.cmd('disk create -g {rg} -n {disk} --hyper-v-generation V2 --for-upload --upload-size-bytes 1073742336', checks=[
             self.check('hyperVgeneration', "V2")
         ])
         self.cmd('disk grant-access -g {rg} -n {disk} --access-level Write --duration-in-seconds 3600')

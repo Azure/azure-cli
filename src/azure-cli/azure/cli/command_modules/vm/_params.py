@@ -115,7 +115,7 @@ def load_arguments(self, _):
         c.argument('os_type', arg_type=get_enum_type(OperatingSystemTypes), help='The Operating System type of the Disk.')
         c.argument('disk_iops_read_write', type=int, min_api='2018-06-01', help='The number of IOPS allowed for this disk. Only settable for UltraSSD disks. One operation can transfer between 4k and 256k bytes')
         c.argument('disk_mbps_read_write', type=int, min_api='2018-06-01', help="The bandwidth allowed for this disk. Only settable for UltraSSD disks. MBps means millions of bytes per second with ISO notation of powers of 10")
-        c.argument('upload_size_byte', type=int, min_api='2019-03-01',
+        c.argument('upload_size_bytes', type=int, min_api='2019-03-01',
                    help='The size (in bytes) of the contents of the upload including the VHD footer. Min value: 20972032. Max value: 35183298347520')
     # endregion
 
@@ -124,7 +124,7 @@ def load_arguments(self, _):
         c.argument('snapshot_name', existing_snapshot_name, id_part='name', completer=get_resource_name_completion_list('Microsoft.Compute/snapshots'))
         c.argument('name', arg_type=name_arg_type)
         c.argument('sku', arg_type=snapshot_sku)
-        c.argument('incremental', arg_type=get_three_state_flag(),
+        c.argument('incremental', arg_type=get_three_state_flag(), min_api='2019-03-01',
                    help='Whether a snapshot is incremental. Incremental snapshots on the same disk occupy less space than full snapshots and can be diffed')
     # endregion
 
@@ -272,9 +272,6 @@ def load_arguments(self, _):
         c.argument('disk_caching', nargs='*', help="Use singular value to apply across, or specify individual disks, e.g. 'os=ReadWrite 0=None 1=ReadOnly' should enable update os disk and 2 data disks")
 
     with self.argument_context('vm create') as c:
-        VMPriorityTypes = self.get_models('VirtualMachinePriorityTypes', resource_type=ResourceType.MGMT_COMPUTE)
-        VirtualMachineEvictionPolicyTypes = self.get_models('VirtualMachineEvictionPolicyTypes',
-                                                            resource_type=ResourceType.MGMT_COMPUTE)
         c.argument('name', name_arg_type, validator=_resource_not_exists(self.cli_ctx, 'Microsoft.Compute/virtualMachines'))
         c.argument('vm_name', name_arg_type, id_part=None, help='Name of the virtual machine.', completer=None)
         c.argument('os_disk_size_gb', type=int, help='the size of the os disk in GB', arg_group='Storage')
@@ -286,12 +283,15 @@ def load_arguments(self, _):
                    help='pre-existing storage account name or its blob uri to capture boot diagnostics. Its sku should be one of Standard_GRS, Standard_LRS and Standard_RAGRS')
         c.argument('accelerated_networking', resource_type=ResourceType.MGMT_NETWORK, min_api='2016-09-01', arg_type=get_three_state_flag(), arg_group='Network',
                    help="enable accelerated networking. Unless specified, CLI will enable it based on machine image and size")
-        c.argument('priority', resource_type=ResourceType.MGMT_COMPUTE, min_api='2019-03-01',
-                   arg_type=get_enum_type(VMPriorityTypes, default=None),
-                   help="Priority. Use 'Low' to run short-lived workloads in a cost-effective way")
-        c.argument('eviction_policy', resource_type=ResourceType.MGMT_COMPUTE, min_api='2019-03-01',
-                   arg_type=get_enum_type(VirtualMachineEvictionPolicyTypes, default=None),
-                   help="The eviction policy for the low priority virtual machine.")
+        if self.supported_api_version(min_api='2019-03-01', resource_type=ResourceType.MGMT_COMPUTE):
+            VMPriorityTypes = self.get_models('VirtualMachinePriorityTypes', resource_type=ResourceType.MGMT_COMPUTE)
+            VirtualMachineEvictionPolicyTypes = self.get_models('VirtualMachineEvictionPolicyTypes', resource_type=ResourceType.MGMT_COMPUTE)
+            c.argument('priority', resource_type=ResourceType.MGMT_COMPUTE, min_api='2019-03-01',
+                       arg_type=get_enum_type(VMPriorityTypes, default=None),
+                       help="Priority. Use 'Low' to run short-lived workloads in a cost-effective way")
+            c.argument('eviction_policy', resource_type=ResourceType.MGMT_COMPUTE, min_api='2019-03-01',
+                       arg_type=get_enum_type(VirtualMachineEvictionPolicyTypes, default=None),
+                       help="The eviction policy for the low priority virtual machine.")
 
     with self.argument_context('vm create', arg_group='Storage') as c:
         c.argument('attach_os_disk', help='Attach an existing OS disk to the VM. Can use the name or ID of a managed disk or the URI to an unmanaged disk VHD.')
