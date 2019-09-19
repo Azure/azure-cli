@@ -17,6 +17,10 @@ Release History
 * Added a required `--type` parameter to command `az acr config retention update`
 * Param `-n, --name` changed to `-r, --registry` for `az acr config` command group.
 
+**BotService**
+
+* Added `--icon-url` to `az bot update`
+
 **Compute**
 
 * vmss create: Add --terminate-notification-time parameters to support terminate scheduled event configurability.
