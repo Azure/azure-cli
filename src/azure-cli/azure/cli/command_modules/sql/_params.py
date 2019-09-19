@@ -188,7 +188,7 @@ grace_period_param_type = CLIArgumentType(
     'if an outage occurs on the primary server. '
     'This indicates that Azure SQL Database will not initiate '
     'automatic failover before the grace period expires. '
-    'Please note that failover operation with AllowDataLoss option '
+    'Please note that failover operation with --allow-data-loss option '
     'might cause data loss due to the nature of asynchronous synchronization.')
 
 allow_data_loss_param_type = CLIArgumentType(
@@ -878,7 +878,7 @@ def load_arguments(self, _):
                    help='List of databases to add to Failover Group')
         c.argument('remove_db', nargs='+',
                    help='List of databases to remove from Failover Group')
-        c.argument('allow-data-loss',
+        c.argument('allow_data_loss',
                    arg_type=allow_data_loss_param_type)
 
     ###############################################
@@ -1315,5 +1315,5 @@ def load_arguments(self, _):
         c.argument('grace_period',
                    arg_type=grace_period_param_type)
 
-        c.argument('allow-data-loss',
+        c.argument('allow_data_loss',
                    arg_type=allow_data_loss_param_type)
