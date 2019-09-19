@@ -215,6 +215,10 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.command('show', 'acr_config_content_trust_show')
         g.command('update', 'acr_config_content_trust_update')
 
+    with self.command_group('acr config retention', acr_policy_util, is_preview=True) as g:
+        g.command('show', 'acr_config_retention_show')
+        g.command('update', 'acr_config_retention_update')
+
     with self.command_group('acr helm', acr_helm_util) as g:
         g.command('list', 'acr_helm_list', table_transformer=helm_list_output_format)
         g.command('show', 'acr_helm_show', table_transformer=helm_show_output_format)

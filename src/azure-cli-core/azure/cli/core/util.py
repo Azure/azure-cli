@@ -145,8 +145,8 @@ def get_az_version_string():
         local = version_dict['local']
         pypi = version_dict.get('pypi', None)
         if pypi and LooseVersion(pypi) > LooseVersion(local):
-            return name.ljust(20) + local.rjust(20) + ' *'
-        return name.ljust(20) + local.rjust(20)
+            return name.ljust(25) + local.rjust(15) + ' *'
+        return name.ljust(25) + local.rjust(15)
 
     ver_string = _get_version_string(CLI_PACKAGE_NAME, versions.pop(CLI_PACKAGE_NAME))
     if '*' in ver_string:

@@ -2,17 +2,123 @@
 
 Release History
 ===============
+**AKS**
+
+* Add `--load-balancer-sku`, `--load-balancer-managed-outbound-ip-count`, `--load-balancer-outbound-ips` and `--load-balancer-outbound-ip-prefixes` to `az aks create` command, which allows for creating AKS cluster with SLB.
+* Add `--load-balancer-managed-outbound-ip-count`, `--load-balancer-outbound-ips` and `--load-balancer-outbound-ip-prefixes` to `az aks update` command, which allows for updating load balancer profile of an AKS cluster with SLB.
+* Add `--vm-set-type` to `az aks create` command, which allows to specify vm types of an AKS Cluster (vmas or vmss).
+
+**ARM**
+
+* az group deployment create: Add --handle-extended-json-format to support multiline and comments in json template
+
+**ACR**
+
+* Added a required `--type` parameter to command `az acr config retention update`
+* Param `-n, --name` changed to `-r, --registry` for `az acr config` command group.
+
+**Compute**
+
+* vmss create: Add --terminate-notification-time parameters to support terminate scheduled event configurability.
+* vmss update: Add --enable-terminate-notification and --terminate-notification-time parameters to support terminate scheduled event configurability.
+* Update azure-mgmt-compute version to 8.0.0.
+* vm/vmss create: Support --priority, --eviction-policy, --max-billing parameters.
+* disk create: Allow specifying the exact size of the upload for customers who upload their disks directly.
+* snapshot create: Support incremental snapshots for managed disks.
+
+**Cosmos DB**
+
+* Add `--type <key-type>` to `az cosmosdb keys list` command to show key, read only keys or connection strings
+* Add `regenerate` to `az cosmosdb keys` group
+* Deprecate `az cosmosdb list-connection-strings`, `az cosmosdb regenerate-key` and `az cosmosdb list-read-only-keys`
+
+**EventGrid**
+
+* Fix the endpoint help text to refer to the right parameter (namely, to point to parameter `--endpoint` rather than `--endpoint-type` in event subscription commands).
+
+**Key Vault**
+
+* Fix #8840: When using tenant domain name in `az login -t`, `keyvault create` fails. Tenant domain name is now resolved to GUID if it is not.
+
+**Monitor**
+
+* monitor metrics alert create: Fix #9901. Support special character `:` in `--condition` argument.
+
+**Network**
+
+* az network private-dns link vnet create/update: Fixes #9851. Support cross-tenant virtual network linking.
+
+**Storage**
+
+* Add --blob-type parameter for `az storage copy` command
+
+2.0.73
+++++++
+
+**ACR**
+
+* Added commands to configure retention policy (in preview): "az acr config retention"
+* [BREAKING] Disable the pull request trigger by default for ACR Tasks
+* az acr login --subscription: now supports cross tenant scenarios.
+
+**AKS**
+
+* Add support of ACR integration, which includes
+* Add `--attach-acr <acr-name-or-resource-id>` to `az aks create` command, which allows for attach the ACR to AKS cluster.
+* Add `--attach-acr <acr-name-or-resource-id>` and `--detach-acr <acr-name-or-resource-id>` to `az aks update` command, which allows to attach or detach the ACR from AKS cluster.
+
+**Aladdin**
+
+* Update Aladdin Service (az find) to v1.0 (GA)
+
+**ARM**
+
+* Update azure-mgmt-resource package to use 3.1.0, which utilizes API version 2019-05-10, allowing copy count to be zero.
+
+**AppService**
+
+* Added "webapp config access-restriction show | set | add | remove"
+* az webapp deployment source config-zip support for connection_verify
+* Add support for ACR images with az webapp create
+
 **Batch**
 
 * Expanded `--json-file` capabilities of `az batch pool create` to allow for specifying MountConfigurations for file system mounts(see https://docs.microsoft.com/en-us/rest/api/batchservice/pool/add#request-body for structure)
 * Expanded `--json-file` capabilities of `az batch pool create` with the optional property publicIPs on NetworkConfiguration. This allows specifying publicIPs to be used when deploying pools (see https://docs.microsoft.com/en-us/rest/api/batchservice/pool/add#request-body for structure)
 * Expanded `--image` capabilities to support Shared Image Galleries images. Similar to the commands support for Managed Images, to use a Shared Image Gallery image simply use the ARM ID as the value to the argument.
-* [BREAKING] When not specified, the default value for `--start-task-wait-for-success` on `az batch pool create` is now true (was false).
-* [BREAKING] The default value for Scope on AutoUserSpecification is now always Pool (was Task on Windows nodes, Pool on Linux nodes). This argument is not exposed via the commandline, but can be set in the `--json-file` arguments.
+* [BREAKING CHANGE] When not specified, the default value for `--start-task-wait-for-success` on `az batch pool create` is now true (was false).
+* [BREAKING CHANGE] The default value for Scope on AutoUserSpecification is now always Pool (was Task on Windows nodes, Pool on Linux nodes). This argument is not exposed via the commandline, but can be set in the `--json-file` arguments.
+
+**Cosmos DB**
+
+* Update azure-mgmt-cosmosdb to latest python 0.8.0 library
+* Populate DatabaseAccountCreateUpdateParameters with 2 new parameters to support Cassandra Connector Exchange(CCX) feature - enable_cassandra_connector, connector_offer
+
+**HDInsight**
+
+* `az hdinsight resize`: Make parameter `--workernode-count/-c` required
+* GA release
+
+**Key Vault**
+
+* Fix #10286: Unable to delete subnet from network rules.
+* Fix: Duplicated subnets and IP addresses can be added to network rules.
 
 **Network**
 
-* az network private-dns link vnet create/update: Fixes #9851. Support cross-tenant virtual network linking.
+* az network watcher flow-log: Fix #8132. Support `--interval` to set traffic analysis interval value.
+* az network application-gateway identity: Fix #10073 and #8244 Add support for setting identity in application-gateway.
+* az network application-gateway ssl-cert: Fix #8244. Add support for setting key vault id in application-gateway ssl-cert.
+* az network express-route peering peer-connection: Fix #9404. Onboard `show` and `list` command for Azure express route peering peer connection resource.
+* az network vnet-gateway create/update: Fix #9327. Support `--custom-routes` argument to set custom routes address space for VNet gateway and VPN client.
+
+**Policy**
+
+* Support for Policy new API version 2019-01-01
+
+**Storage**
+
+* [BREAKING CHANGE] `az storage remove`: remove --auth-mode argument
 
 2.0.72
 ++++++
@@ -33,14 +139,15 @@ Release History
 **AppService**
 
 * Fixed az webapp webjob continuous start command when specifying a slot.
-
-**AppService**
-
 * az webapp up detects env folder and removes it from compressed file used for deployment
 
-**Keyvault**
+**Backup**
 
-* Fix the bug in secret set command that igores the expires argument
+* Added Support for managed disk restore, InstantRP
+
+**keyvault**
+
+* Fix the bug in secret set command that ignores the expires argument
 
 **Network**
 

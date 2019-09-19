@@ -24,7 +24,7 @@ from msrestazure.tools import is_valid_resource_id, parse_resource_id
 from azure.mgmt.resource.resources.models import GenericResource
 
 from azure.cli.core.parser import IncorrectUsageError
-from azure.cli.core.util import get_file_json, shell_safe_json_parse, sdk_no_wait
+from azure.cli.core.util import get_file_json, read_file_content, shell_safe_json_parse, sdk_no_wait
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version
 
@@ -284,6 +284,120 @@ def _deploy_arm_template_core(cli_ctx, resource_group_name,
     if validate_only:
         return sdk_no_wait(no_wait, smc.deployments.validate, resource_group_name, deployment_name, properties)
     return sdk_no_wait(no_wait, smc.deployments.create_or_update, resource_group_name, deployment_name, properties)
+
+
+def _remove_comments_from_json(template):
+    from jsmin import jsmin
+
+    minified = jsmin(template)
+    # Get rid of multi-line strings. Note, we are not sending it on the wire rather just extract parameters to prompt for values
+    result = re.sub(r'"[^"]*?\n[^"]*?(?<!\\)"', '"#Azure Cli#"', minified, re.DOTALL)
+    return shell_safe_json_parse(result, preserve_order=True)
+
+
+# pylint: disable=too-many-locals, too-many-statements, too-few-public-methods
+def _deploy_arm_template_unmodified(cli_ctx, resource_group_name, template_file=None,
+                                    template_uri=None, deployment_name=None, parameters=None,
+                                    mode=None, rollback_on_error=None, validate_only=False, no_wait=False):
+    DeploymentProperties, TemplateLink, OnErrorDeployment = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
+                                                                    'DeploymentProperties', 'TemplateLink',
+                                                                    'OnErrorDeployment', mod='models')
+    template_link = None
+    template_obj = None
+    on_error_deployment = None
+    template_content = None
+    if template_uri:
+        template_link = TemplateLink(uri=template_uri)
+        template_content = _urlretrieve(template_uri).decode('utf-8')
+        template_obj = _remove_comments_from_json(template_content)
+    else:
+        template_content = read_file_content(template_file)
+        template_obj = _remove_comments_from_json(template_content)
+
+    if rollback_on_error == '':
+        on_error_deployment = OnErrorDeployment(type='LastSuccessful')
+    elif rollback_on_error:
+        on_error_deployment = OnErrorDeployment(type='SpecificDeployment', deployment_name=rollback_on_error)
+
+    template_param_defs = template_obj.get('parameters', {})
+    template_obj['resources'] = template_obj.get('resources', [])
+    parameters = _process_parameters(template_param_defs, parameters) or {}
+    parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters)
+
+    parameters = json.loads(json.dumps(parameters))
+
+    properties = DeploymentProperties(template=template_content, template_link=template_link,
+                                      parameters=parameters, mode=mode, on_error_deployment=on_error_deployment)
+
+    smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+
+    class JsonCTemplate(object):
+        def __init__(self, template_as_bytes):
+            self.template_as_bytes = template_as_bytes
+
+    from msrest.serialization import Serializer
+
+    class MySerializer(Serializer):
+        def body(self, data, data_type, **kwargs):
+            if data_type == 'Deployment':
+                # Be sure to pass a DeploymentProperties
+                template = data.properties.template
+                if template:
+                    data.properties.template = None
+                    data_as_dict = data.serialize()
+                    data_as_dict["properties"]["template"] = JsonCTemplate(template)
+                    return data_as_dict
+            return super(MySerializer, self).body(data, data_type, **kwargs)
+    deployments_operation_group = smc.deployments  # This solves the multi-api for you
+
+    # pylint: disable=protected-access
+    deployments_operation_group._serialize = MySerializer(
+        deployments_operation_group._serialize.dependencies
+    )
+
+    # Now, you have a serializer that keeps a weird class inside it, you need to explain to the HTTP pipeline how to translate that into bytes
+    from msrest.pipeline import SansIOHTTPPolicy
+
+    class JsonCTemplatePolicy(SansIOHTTPPolicy):
+        def on_request(self, request, **kwargs):
+            http_request = request.http_request
+            logger.info(http_request.data)
+            if (getattr(http_request, 'data', {}) or {}).get('properties', {}).get('template'):
+                template = http_request.data["properties"]["template"]
+                if not isinstance(template, JsonCTemplate):
+                    raise ValueError()
+
+                del http_request.data["properties"]["template"]
+                # templateLink nad template cannot exist at the same time in deployment_dry_run mode
+                if "templateLink" in http_request.data["properties"].keys():
+                    del http_request.data["properties"]["templateLink"]
+                partial_request = json.dumps(http_request.data)
+
+                http_request.data = partial_request[:-2] + ", template:" + template.template_as_bytes + r"}}"
+
+    # Plug this as default HTTP pipeline
+    from msrest.pipeline import Pipeline
+    from msrest.pipeline.requests import (
+        RequestsCredentialsPolicy,
+        RequestsPatchSession,
+        PipelineRequestsHTTPSender
+    )
+    from msrest.universal_http.requests import RequestsHTTPSender
+
+    smc.config.pipeline = Pipeline(
+        policies=[
+            JsonCTemplatePolicy(),
+            smc.config.user_agent_policy,
+            RequestsPatchSession(),
+            smc.config.http_logger_policy,
+            RequestsCredentialsPolicy(smc.config.credentials)
+        ],
+        sender=PipelineRequestsHTTPSender(RequestsHTTPSender(smc.config))
+    )
+
+    if validate_only:
+        return sdk_no_wait(no_wait, deployments_operation_group.validate, resource_group_name, deployment_name, properties)
+    return sdk_no_wait(no_wait, deployments_operation_group.create_or_update, resource_group_name, deployment_name, properties)
 
 
 def _deploy_arm_template_subscription_scope(cli_ctx,
@@ -724,7 +838,11 @@ def list_applications(cmd, resource_group_name=None):
 
 def deploy_arm_template(cmd, resource_group_name,
                         template_file=None, template_uri=None, deployment_name=None,
-                        parameters=None, mode=None, rollback_on_error=None, no_wait=False):
+                        parameters=None, mode=None, rollback_on_error=None, no_wait=False, handle_extended_json_format=False):
+    if handle_extended_json_format:
+        return _deploy_arm_template_unmodified(cmd.cli_ctx, resource_group_name, template_file, template_uri,
+                                               deployment_name, parameters, mode, rollback_on_error, no_wait=no_wait)
+
     return _deploy_arm_template_core(cmd.cli_ctx, resource_group_name, template_file, template_uri,
                                      deployment_name, parameters, mode, rollback_on_error, no_wait=no_wait)
 
@@ -739,6 +857,7 @@ def deploy_arm_template_at_subscription_scope(cmd, template_file=None, template_
 
 def validate_arm_template(cmd, resource_group_name, template_file=None, template_uri=None,
                           parameters=None, mode=None, rollback_on_error=None):
+
     return _deploy_arm_template_core(cmd.cli_ctx, resource_group_name, template_file, template_uri,
                                      'deployment_dry_run', parameters, mode, rollback_on_error, validate_only=True)
 
@@ -1449,8 +1568,6 @@ def cli_managementgroups_subscription_add(
         cmd, client, group_name, subscription):
     subscription_id = _get_subscription_id_from_subscription(
         cmd.cli_ctx, subscription)
-    _register_rp(cmd.cli_ctx)
-    _register_rp(cmd.cli_ctx, subscription_id)
     return client.create(group_name, subscription_id)
 
 
@@ -1458,8 +1575,6 @@ def cli_managementgroups_subscription_remove(
         cmd, client, group_name, subscription):
     subscription_id = _get_subscription_id_from_subscription(
         cmd.cli_ctx, subscription)
-    _register_rp(cmd.cli_ctx)
-    _register_rp(cmd.cli_ctx, subscription_id)
     return client.delete(group_name, subscription_id)
 
 

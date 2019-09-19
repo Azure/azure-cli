@@ -32,6 +32,15 @@ class AcrCommandsTests(ScenarioTest):
                          self.check('adminUserEnabled', True),
                          self.check('provisioningState', 'Succeeded')])
 
+        # test retention
+        self.cmd('acr config retention update -r {} --status enabled --days 30 --type UntaggedManifests'.format(registry_name),
+                 checks=[self.check('status', "enabled"),
+                         self.check('days', 30)])
+
+        self.cmd('acr config retention show -r {}'.format(registry_name),
+                 checks=[self.check('status', "enabled"),
+                         self.check('days', 30)])
+
         # test content-trust
         self.cmd('acr config content-trust update -n {} --status enabled'.format(registry_name),
                  checks=[self.check('status', "enabled")])

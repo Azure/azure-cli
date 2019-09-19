@@ -1,8 +1,12 @@
 ---
 name: "\U0001F41BBug report"
 about: Create a report to help us improve
+title: ''
+labels: ''
+assignees: ''
 
 ---
+
 > ### `az feedback` auto-generates most of the information requested below, as of CLI version 2.0.62
 
 **Describe the bug**
