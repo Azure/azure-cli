@@ -138,3 +138,7 @@ def get_sql_managed_databases_operations(cli_ctx, _):
 
 def get_sql_virtual_clusters_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).virtual_clusters
+
+
+def get_sql_instance_failover_groups_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).instance_failover_groups

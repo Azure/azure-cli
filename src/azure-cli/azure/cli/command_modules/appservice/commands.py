@@ -72,6 +72,8 @@ def load_command_table(self, _):
     )
     appservice_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.custom#{}')
 
+    webapp_access_restrictions = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.access_restrictions#{}')
+
     with self.command_group('webapp', webapp_sdk) as g:
         g.custom_command('create', 'create_webapp', exception_handler=ex_handler_factory())
         g.custom_command('up', 'webapp_up', exception_handler=ex_handler_factory())
@@ -324,3 +326,15 @@ def load_command_table(self, _):
         g.custom_command('auto-swap', 'config_slot_auto_swap')
         g.custom_command('swap', 'swap_slot', exception_handler=ex_handler_factory())
         g.custom_command('create', 'create_functionapp_slot', exception_handler=ex_handler_factory())
+
+    with self.command_group('webapp config access-restriction', custom_command_type=webapp_access_restrictions, is_preview=True) as g:
+        g.custom_command('show', 'show_webapp_access_restrictions')
+        g.custom_command('add', 'add_webapp_access_restriction')
+        g.custom_command('remove', 'remove_webapp_access_restriction')
+        g.custom_command('set', 'set_webapp_access_restriction')
+
+    with self.command_group('functionapp config access-restriction', custom_command_type=webapp_access_restrictions, is_preview=True) as g:
+        g.custom_command('show', 'show_webapp_access_restrictions')
+        g.custom_command('add', 'add_webapp_access_restriction')
+        g.custom_command('remove', 'remove_webapp_access_restriction')
+        g.custom_command('set', 'set_webapp_access_restriction')

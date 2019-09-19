@@ -2,16 +2,35 @@
 
 Release History
 ===============
+**AKS**
+
+* Add `--load-balancer-sku`, `--load-balancer-managed-outbound-ip-count`, `--load-balancer-outbound-ips` and `--load-balancer-outbound-ip-prefixes` to `az aks create` command, which allows for creating AKS cluster with SLB.
+* Add `--load-balancer-managed-outbound-ip-count`, `--load-balancer-outbound-ips` and `--load-balancer-outbound-ip-prefixes` to `az aks update` command, which allows for updating load balancer profile of an AKS cluster with SLB.
+* Add `--vm-set-type` to `az aks create` command, which allows to specify vm types of an AKS Cluster (vmas or vmss).
+
+**ARM**
+
+* az group deployment create: Add --handle-extended-json-format to support multiline and comments in json template
+
+**ACR**
+
+* Added a required `--type` parameter to command `az acr config retention update`
+* Param `-n, --name` changed to `-r, --registry` for `az acr config` command group.
 
 **Compute**
 
 * vmss create: Add --terminate-notification-time parameters to support terminate scheduled event configurability.
 * vmss update: Add --enable-terminate-notification and --terminate-notification-time parameters to support terminate scheduled event configurability.
-* Update azure-mgmt-compute version to 7.0.0.
+* Update azure-mgmt-compute version to 8.0.0.
+* vm/vmss create: Support --priority, --eviction-policy, --max-billing parameters.
+* disk create: Allow specifying the exact size of the upload for customers who upload their disks directly.
+* snapshot create: Support incremental snapshots for managed disks.
 
-**Key Vault**
+**Cosmos DB**
 
-* Fix #8840: When using tenant domain name in `az login -t`, `keyvault create` fails. Tenant domain name is now resolved to GUID if it is not.
+* Add `--type <key-type>` to `az cosmosdb keys list` command to show key, read only keys or connection strings
+* Add `regenerate` to `az cosmosdb keys` group
+* Deprecate `az cosmosdb list-connection-strings`, `az cosmosdb regenerate-key` and `az cosmosdb list-read-only-keys`
 
 **EventGrid**
 
@@ -21,9 +40,17 @@ Release History
 
 * Fix #2116: Unexpected 'az iot hub show' error for resource not found.
 
+**Key Vault**
+
+* Fix #8840: When using tenant domain name in `az login -t`, `keyvault create` fails. Tenant domain name is now resolved to GUID if it is not.
+
 **Monitor**
 
 * monitor metrics alert create: Fix #9901. Support special character `:` in `--condition` argument.
+
+**Storage**
+
+* Add --blob-type parameter for `az storage copy` command
 
 2.0.73
 ++++++
@@ -50,6 +77,7 @@ Release History
 
 **AppService**
 
+* Added "webapp config access-restriction show | set | add | remove"
 * az webapp deployment source config-zip support for connection_verify
 * Add support for ACR images with az webapp create
 

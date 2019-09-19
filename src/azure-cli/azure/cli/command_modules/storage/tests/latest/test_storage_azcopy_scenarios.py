@@ -265,6 +265,17 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.cmd('storage blob list -c {} --account-name {}'
                  .format(first_container, second_account), checks=JMESPathCheck('length(@)', 21))
 
+        # Upload to managed disk
+        diskname = self.create_random_name(prefix='disk', length=12)
+        local_file = self.create_temp_file(1024)
+        self.cmd('disk create -n {} -g {} --for-upload -z 1'
+                 .format(diskname, resource_group))
+        sasURL = self.cmd(
+            'disk grant-access --access-level Write --duration-in-seconds 3600 -n {} -g {} --query accessSas'
+            .format(diskname, resource_group))
+        self.cmd('storage copy -s "{}" -d "{}" --blob-type PageBlob'
+                 .format(local_file, sasURL))
+
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='first_account')
     @StorageAccountPreparer(parameter_name='second_account')

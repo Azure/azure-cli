@@ -73,7 +73,7 @@ short-summary: Show the configured content-trust policy for an Azure Container R
 examples:
   - name: Show the configured content-trust policy for an Azure Container Registry
     text: >
-        az acr config content-trust show -n MyRegistry
+        az acr config content-trust show -r MyRegistry
 """
 
 helps['acr config content-trust update'] = """
@@ -82,7 +82,7 @@ short-summary: Update content-trust policy for an Azure Container Registry.
 examples:
   - name: Update content-trust policy for an Azure Container Registry
     text: >
-        az acr config content-trust update -n MyRegistry --status Enabled
+        az acr config content-trust update -r MyRegistry --status Enabled
 """
 
 helps['acr config retention'] = """
@@ -96,7 +96,7 @@ short-summary: Show the configured retention policy for an Azure Container Regis
 examples:
   - name: Show the configured retention policy for an Azure Container Registry
     text: >
-        az acr config retention show -n MyRegistry
+        az acr config retention show -r MyRegistry
 """
 
 helps['acr config retention update'] = """
@@ -105,10 +105,10 @@ short-summary: Update retention policy for an Azure Container Registry.
 examples:
   - name: Enable retention policy for an Azure Container Registry to delete an untagged manifest after 30 days.
     text: >
-        az acr config retention update -n MyRegistry --status Enabled --days 30
+        az acr config retention update -r MyRegistry --status Enabled --days 30 --type UntaggedManifests
   - name: Enable retention policy for an Azure Container Registry to delete a manifest as soon as it gets untagged.
     text: >
-        az acr config retention update -n MyRegistry --status Enabled --days 0
+        az acr config retention update -r MyRegistry --status Enabled --days 0 --type UntaggedManifests
 """
 
 helps['acr create'] = """
