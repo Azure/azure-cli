@@ -26,6 +26,12 @@ Release History
 * disk create: Allow specifying the exact size of the upload for customers who upload their disks directly.
 * snapshot create: Support incremental snapshots for managed disks.
 
+**Cosmos DB**
+
+* Add `--type <key-type>` to `az cosmosdb keys list` command to show key, read only keys or connection strings
+* Add `regenerate` to `az cosmosdb keys` group
+* Deprecate `az cosmosdb list-connection-strings`, `az cosmosdb regenerate-key` and `az cosmosdb list-read-only-keys`
+
 **EventGrid**
 
 * Fix the endpoint help text to refer to the right parameter (namely, to point to parameter `--endpoint` rather than `--endpoint-type` in event subscription commands).
