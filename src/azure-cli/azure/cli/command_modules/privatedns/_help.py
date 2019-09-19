@@ -117,6 +117,10 @@ helps['network private-dns link vnet update'] = """
     parameters:
         - name: --tags
           short-summary: Resource tags for the virtual network link.
+        - name: --if-match
+          short-summary: The ETag of the virtual network link to the Private DNS zone.
+          long-summary: Omit this value to always overwrite the current virtual network link.
+                        Specify the last-seen ETag value to prevent accidentally overwritting any concurrent changes.
     examples:
         - name: Update a virtual network link properties to enable registration.
           text: >

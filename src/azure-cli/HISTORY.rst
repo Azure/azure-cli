@@ -10,6 +10,10 @@ Release History
 * [BREAKING] When not specified, the default value for `--start-task-wait-for-success` on `az batch pool create` is now true (was false).
 * [BREAKING] The default value for Scope on AutoUserSpecification is now always Pool (was Task on Windows nodes, Pool on Linux nodes). This argument is not exposed via the commandline, but can be set in the `--json-file` arguments.
 
+**Network**
+
+* az network private-dns link vnet create/update: Fixes #9851. Support cross-tenant virtual network linking.
+
 2.0.72
 ++++++
 
