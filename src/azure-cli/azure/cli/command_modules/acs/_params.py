@@ -196,12 +196,9 @@ def load_arguments(self, _):
         c.argument('detach_acr', acr_arg_type)
 
     with self.argument_context('aks update') as c:
-        c.argument('load_balancer_managed_outbound_ip_count', type=int,
-                   help='Desired number of managed outbound IPs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.')
-        c.argument('load_balancer_outbound_ips', type=str, validator=validate_load_balancer_outbound_ips,
-                   help='Comma-separated public IP resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.')
-        c.argument('load_balancer_outbound_ip_prefixes', type=str, validator=validate_load_balancer_outbound_ip_prefixes,
-                   help='Comma-separated public IP prefix resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.')
+        c.argument('load_balancer_managed_outbound_ip_count', type=int)
+        c.argument('load_balancer_outbound_ips', type=str, validator=validate_load_balancer_outbound_ips)
+        c.argument('load_balancer_outbound_ip_prefixes', type=str, validator=validate_load_balancer_outbound_ip_prefixes)
 
     with self.argument_context('aks disable-addons') as c:
         c.argument('addons', options_list=['--addons', '-a'])
