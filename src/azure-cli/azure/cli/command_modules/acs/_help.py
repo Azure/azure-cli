@@ -324,36 +324,36 @@ examples:
 """
 
 helps['aks update'] = """
-    type: command
-    short-summary: Update a managed Kubernetes cluster.
-    parameters:
-        - name: --load-balancer-managed-outbound-ip-count
-          type: int
-          short-summary: Load balancer managed outbound IP count.
-          long-summary: Desired number of managed outbound IPs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.
-        - name: --load-balancer-outbound-ips
-          type: string
-          short-summary: Load balancer outbound IP resource IDs.
-          long-summary: Comma-separated public IP resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.
-        - name: --load-balancer-outbound-ip-prefixes
-          type: string
-          short-summary: Load balancer outbound IP prefix resource IDs.
-          long-summary: Comma-separated public IP prefix resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.
-        - name: --attach-acr
-          type: string
-          short-summary: Grant the 'acrpull' role assignment to the ACR specified by name or resource ID.
-        - name: --detach-acr
-          type: string
-          short-summary: Disable the 'acrpull' role assignment to the ACR specified by name or resource ID.
-    examples:
-      - name: Update a kubernetes cluster with standard SKU load balancer to use two AKS created IPs for the load balancer outbound connection usage.
-        text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
-      - name: Update a kubernetes cluster with standard SKU load balancer to use the provided public IPs for the load balancer outbound connection usage.
-        text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-outbound-ips <ip-resource-id-1,ip-resource-id-2>
-      - name: Update a kubernetes cluster with standard SKU load balancer to use the provided public IP prefixes for the load balancer outbound connection usage.
-        text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-outbound-ip-prefixes <ip-prefix-resource-id-1,ip-prefix-resource-id-2>
-      - name: Attach AKS cluster to ACR by name "acrName"
-        text: az aks update -g MyResourceGroup -n MyManagedCluster --attach-acr acrName
+type: command
+short-summary: Update a managed Kubernetes cluster.
+parameters:
+  - name: --load-balancer-managed-outbound-ip-count
+    type: int
+    short-summary: Load balancer managed outbound IP count.
+    long-summary: Desired number of managed outbound IPs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.
+  - name: --load-balancer-outbound-ips
+    type: string
+    short-summary: Load balancer outbound IP resource IDs.
+    long-summary: Comma-separated public IP resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.
+  - name: --load-balancer-outbound-ip-prefixes
+    type: string
+    short-summary: Load balancer outbound IP prefix resource IDs.
+    long-summary: Comma-separated public IP prefix resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.
+  - name: --attach-acr
+    type: string
+    short-summary: Grant the 'acrpull' role assignment to the ACR specified by name or resource ID.
+  - name: --detach-acr
+    type: string
+    short-summary: Disable the 'acrpull' role assignment to the ACR specified by name or resource ID.
+examples:
+  - name: Update a kubernetes cluster with standard SKU load balancer to use two AKS created IPs for the load balancer outbound connection usage.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
+  - name: Update a kubernetes cluster with standard SKU load balancer to use the provided public IPs for the load balancer outbound connection usage.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-outbound-ips <ip-resource-id-1,ip-resource-id-2>
+  - name: Update a kubernetes cluster with standard SKU load balancer to use the provided public IP prefixes for the load balancer outbound connection usage.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-outbound-ip-prefixes <ip-prefix-resource-id-1,ip-prefix-resource-id-2>
+  - name: Attach AKS cluster to ACR by name "acrName"
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --attach-acr acrName
 """
 
 helps['aks delete'] = """
@@ -556,21 +556,6 @@ examples:
   - name: Show the details for a managed Kubernetes cluster
     text: az aks show --name MyManagedCluster --resource-group MyResourceGroup
     crafted: true
-"""
-
-helps['aks update'] = """
-type: command
-short-summary: Update a managed Kubernetes cluster to attach or detach ACR
-parameters:
-  - name: --attach-acr
-    type: string
-    short-summary: Grant the 'acrpull' role assignment to the ACR specified by name or resource ID.
-  - name: --detach-acr
-    type: string
-    short-summary: Disable the 'acrpull' role assignment to the ACR specified by name or resource ID.
-examples:
-  - name: Attach AKS cluster to ACR by name "acrName"
-    text: az aks update -g MyResourceGroup -n MyManagedCluster --attach-acr acrName
 """
 
 helps['aks update-credentials'] = """
