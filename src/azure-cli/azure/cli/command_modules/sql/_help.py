@@ -794,7 +794,7 @@ helps['sql instance-failover-group create'] = """
     long-summary: If an outage occurs on the primary server,
                   the grace period indicates that Azure SQL Managed Database will not initiate
                   automatic failover before the grace period expires.
-                  Please note that failover operation with AllowDataLoss option
+                  Please note that failover operation with --allow-data-loss option
                   might cause data loss due to the nature of asynchronous synchronization.
     """
 helps['sql instance-failover-group update'] = """
