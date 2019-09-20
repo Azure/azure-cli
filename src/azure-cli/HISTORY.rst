@@ -46,7 +46,6 @@ Release History
 
 * monitor metrics alert create: Fix #9901. Support special character `:` in `--condition` argument.
 
-
 **Policy**
 
 * Support for Policy new API version 2019-06-01.
