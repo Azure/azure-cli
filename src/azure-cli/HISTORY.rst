@@ -8,8 +8,8 @@ Release History
 
 **ACR**
 
-* Added a required `--type` parameter to command `az acr config retention update`
-* Param `-n, --name` changed to `-r, --registry` for `az acr config` command group.
+* Add a required `--type` parameter to command `az acr config retention update`
+* Parameter `-n, --name` changed to `-r, --registry` for `az acr config` command group.
 
 **AKS**
 
