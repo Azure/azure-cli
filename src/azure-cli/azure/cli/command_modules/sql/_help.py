@@ -641,7 +641,7 @@ type: command
 short-summary: Update a firewall rule.
 examples:
   - name: Update a firewall rule
-    text: az sql server firewall-rule update -g mygroup -s myserver -n myrule --start-ip-address 9.8.7.6 --end-ip-address 5.4.3.2
+    text: az sql server firewall-rule update -g mygroup -s myserver -n myrule --start-ip-address 5.4.3.2 --end-ip-address 9.8.7.6
 """
 
 helps['sql server key'] = """
