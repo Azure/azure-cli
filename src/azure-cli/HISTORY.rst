@@ -49,7 +49,7 @@ Release History
 **Policy**
 
 * Support for Policy new API version 2019-06-01.
-* az policy assignment create: Add `--enforcement-mode` parameter for `az policy assignment create' command.
+* az policy assignment create: Add `--enforcement-mode` parameter for `az policy assignment create` command.
 
 **Storage**
 
