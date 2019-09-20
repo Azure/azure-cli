@@ -18,7 +18,7 @@ from ._validators import (validate_appservice_name_or_id,
                           validate_connection_string, validate_datetime,
                           validate_export, validate_import,
                           validate_import_depth, validate_query_fields,
-                          validate_separator)
+                          validate_feature_query_fields, validate_separator)
 
 
 def load_arguments(self, _):
@@ -28,7 +28,13 @@ def load_arguments(self, _):
         nargs='+',
         help='Customize output fields.',
         validator=validate_query_fields,
-        arg_type=get_enum_type(['key', 'value', 'label', 'content_type', 'etag', 'locked', 'last_modified'])
+        arg_type=get_enum_type(['key', 'value', 'label', 'content_type', 'etag', 'tags', 'locked', 'last_modified'])
+    )
+    feature_fields_arg_type = CLIArgumentType(
+        nargs='+',
+        help='Customize output fields for Feature Flags.',
+        validator=validate_feature_query_fields,
+        arg_type=get_enum_type(['key', 'label', 'locked' ,'last_modified', 'state', 'description', 'conditions'])
     )
     datatime_filter_arg_type = CLIArgumentType(
         validator=validate_datetime,
@@ -37,7 +43,7 @@ def load_arguments(self, _):
     top_arg_type = CLIArgumentType(
         options_list=['--top', '-t'],
         type=int,
-        help='Maximum number of items to return. Default to 100.'
+        help='Maximum number of items to return. Must be a positive integer. Default to 100.'
     )
 
     with self.argument_context('appconfig') as c:
@@ -142,3 +148,38 @@ def load_arguments(self, _):
         c.argument('name', id_part=None)
         c.argument('key', help='If no key specified, return all keys by default. Support star sign as filters, for instance abc* means keys with abc as prefix. Similarly, *abc and *abc* are also supported.')
         c.argument('label', help="If no label specified, list all labels. Support star sign as filters, for instance abc* means labels with abc as prefix. Similarly, *abc and *abc* are also supported.")
+
+    with self.argument_context('appconfig feature show') as c:
+        c.argument('feature', help='Name of the Feature flag to be retrieved')
+        c.argument('label', help="If no label specified, show entry with null label. Does NOT support filters like other commands.")
+        c.argument('fields', arg_type=feature_fields_arg_type)
+
+    with self.argument_context('appconfig feature set') as c:
+        c.argument('feature', help='Name of the Feature flag to be set.')
+        c.argument('label', help="If no label specified, set the feature flag with null label by default")
+        c.argument('description', help='Description of the feature flag to be set.')
+
+    with self.argument_context('appconfig feature delete') as c:
+        c.argument('feature', help='Key of the Feature to be deleted. Support star sign as filters, for instance * means all key and abc* means keys with abc as prefix. Similarly, *abc and *abc* are also supported.  Comma separated keys are not supported. Please provide escaped string if your feature name contains comma.')
+        c.argument('label', help="If no label specified, delete the feature flag with null label by default. Support star sign as filters, for instance * means all key and abc* means keys with abc as prefix. Similarly, *abc and *abc* are also supported.")
+
+    with self.argument_context('appconfig feature list') as c:
+        c.argument('feature', help='Key of the Feature to be listed. Support star sign as filters, for instance * means all key and abc* means keys with abc as prefix. Similarly, *abc and *abc* are also supported. Comma separated keys are not supported. Please provide escaped string if your feature name contains comma.')
+        c.argument('label', help="If no label specified, list the feature flag with null label by default. Support star sign as filters, for instance * means all key and abc* means keys with abc as prefix. Similarly, *abc and *abc* are also supported.")
+        c.argument('fields', arg_type=feature_fields_arg_type)
+
+    with self.argument_context('appconfig feature lock') as c:
+        c.argument('feature', help='Key of the Feature to be locked.')
+        c.argument('label', help="If no label specified, lock the feature flag with null label by default.")
+
+    with self.argument_context('appconfig feature unlock') as c:
+        c.argument('feature', help='Key of the Feature to be unlocked.')
+        c.argument('label', help="If no label specified, unlock the feature flag with null label by default.")
+
+    with self.argument_context('appconfig feature enable') as c:
+        c.argument('feature', help='Key of the Feature to be enabled.')
+        c.argument('label', help="If no label specified, enable the feature flag with null label by default.")
+
+    with self.argument_context('appconfig feature disable') as c:
+        c.argument('feature', help='Key of the Feature to be disabled.')
+        c.argument('label', help="If no label specified, disable the feature flag with null label by default.")
