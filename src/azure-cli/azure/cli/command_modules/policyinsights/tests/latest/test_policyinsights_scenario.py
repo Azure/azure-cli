@@ -327,7 +327,7 @@ class PolicyInsightsTests(ScenarioTest):
     @AllowLargeResponse()
     def test_policy_insights_remediation_complete(self):
         self.kwargs.update({
-            'pan': 'd75aea4c16e44f2f9777e3da',
+            'pan': 'cd7ac64c77ec441dbff7af7c',
             'rg': 'az-cli-policy-insights-test',
             'rn': self.create_random_name('azurecli-test-remediation', 40)
         })
