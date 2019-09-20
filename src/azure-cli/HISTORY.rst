@@ -2,6 +2,7 @@
 
 Release History
 ===============
+
 **AKS**
 
 * Add `--load-balancer-sku`, `--load-balancer-managed-outbound-ip-count`, `--load-balancer-outbound-ips` and `--load-balancer-outbound-ip-prefixes` to `az aks create` command, which allows for creating AKS cluster with SLB.
@@ -11,6 +12,7 @@ Release History
 **ARM**
 
 * az group deployment create: Add --handle-extended-json-format to support multiline and comments in json template
+* Update azure-mgmt-resource package to use 4.0.0
 
 **ACR**
 
@@ -47,6 +49,11 @@ Release History
 **Network**
 
 * az network private-dns link vnet create/update: Fixes #9851. Support cross-tenant virtual network linking.
+
+**Policy**
+
+* Support for Policy new API version 2019-06-01.
+* az policy assignment create: Add `--enforcement-mode` parameter for `az policy assignment create` command.
 
 **Storage**
 
