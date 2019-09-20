@@ -63,7 +63,6 @@ def load_arguments(self, _):
         c.argument('password', options_list=['-p', '--password'], help='The Microsoft account (MSA) password for the bot. Used to authorize messages being sent to the bot.')
         c.argument('tags', arg_type=tags_type)
         c.argument('language', options_list=['--lang'], arg_type=get_enum_type(SUPPORTED_LANGUAGES), help='The language to be used to create the bot.', arg_group='Web Bot Specific')
-        c.argument('version', options_list=['-v', '--version'], help='The Microsoft Bot Builder SDK version to be used to create the bot', arg_type=get_enum_type(['v4']), arg_group='Web Bot Specific')
         c.argument('deploy_echo', options_list=['--echo'], arg_type=get_three_state_flag(), help='Deploy an Echo Bot template to the newly created v4 Web App Bot.', arg_group='V4 Bot Templates')
 
     with self.argument_context('bot publish') as c:

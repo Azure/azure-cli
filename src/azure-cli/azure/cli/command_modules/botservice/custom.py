@@ -76,7 +76,7 @@ def __prepare_configuration_file(cmd, resource_group_name, kudu_client, folder_p
 
 def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, password, language=None,  # pylint: disable=too-many-locals, too-many-statements
            description=None, display_name=None, endpoint=None, tags=None, location='Central US',
-           sku_name='F0', version='v4', deploy_echo=None):
+           sku_name='F0', deploy_echo=None):
     # Kind parameter validation
     kind = kind.lower()
     registration_kind = 'registration'
@@ -153,7 +153,7 @@ def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, pa
 
     creation_results = BotTemplateDeployer.create_app(
         cmd, logger, client, resource_group_name, resource_name, description, kind, msa_app_id, password,
-        location, sku_name, language, version, bot_template_type)
+        location, sku_name, language, bot_template_type)
 
     return creation_results
 
