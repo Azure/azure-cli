@@ -522,7 +522,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               identity_role='Contributor', identity_role_id=None, application_security_groups=None, zone=None,
               boot_diagnostics_storage=None, ultra_ssd_enabled=None, ephemeral_os_disk=None,
               proximity_placement_group=None, dedicated_host=None, dedicated_host_group=None, aux_subscriptions=None,
-              priority=None, max_billing=None, eviction_policy=None, enable_agent=None):
+              priority=None, max_billing=None, eviction_policy=None, enable_agent=None，workspace_id=None, workspace_location=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -543,6 +543,12 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     vm_id = resource_id(
         subscription=subscription_id, resource_group=resource_group_name,
         namespace='Microsoft.Compute', type='virtualMachines', name=vm_name)
+
+    workspace_id_template = resource_id(
+        subscription=subscription_id, resource_group=resource_group_name,
+        namespace='microsoft.operationalinsights',
+        type='workspaces'
+    )
 
     # determine final defaults and calculated values
     tags = tags or {}
