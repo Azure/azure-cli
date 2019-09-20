@@ -101,7 +101,7 @@ def load_arguments(self, _):
     with self.argument_context('backup protectable-item') as c:
         c.argument('container_name', container_name_type)
 
-    with self.argument_context('backup protectable-item list')  as c:
+    with self.argument_context('backup protectable-item list') as c:
         c.argument('container_name', container_name_type, id_part=None)
 
     # Policy

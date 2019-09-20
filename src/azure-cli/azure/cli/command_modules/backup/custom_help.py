@@ -63,7 +63,8 @@ def _is_range_valid(start_date, end_date):
         raise CLIError(
                     """
                     Start date must be earlier than end date.
-                    """)
+                    """
+                    )
 
 
 def _get_resource_id(resource_id):

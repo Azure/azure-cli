@@ -148,31 +148,27 @@ def transform_enable_protection_for_azure_wl(result):
 
 
 def transform_containers_list(container_list):
-    if len(container_list) != 0 and container_list[0]['properties']['backupManagementType'] == 'AzureWorkload':
+    if container_list != [] and container_list[0]['properties']['backupManagementType'] == 'AzureWorkload':
         return transform_wl_container_list(container_list)
-    else:
-        return transform_container_list(container_list)
+    return transform_container_list(container_list)
 
 
 def transform_policies_list(policy_list):
-    if len(policy_list) != 0 and policy_list[0]['properties']['backupManagementType'] == 'AzureWorkload':
+    if policy_list != [] and policy_list[0]['properties']['backupManagementType'] == 'AzureWorkload':
         return transform_wl_policy_list(policy_list)
-    else:
-        return transform_policy_list(policy_list)
+    return transform_policy_list(policy_list)
 
 
 def transform_items_list(item_list):
-    if len(item_list) != 0 and item_list[0]['properties']['backupManagementType'] == 'AzureWorkload':
+    if item_list != [] and item_list[0]['properties']['backupManagementType'] == 'AzureWorkload':
         return transform_wl_item_list(item_list)
-    else:
-        return transform_item_list(item_list)
+    return transform_item_list(item_list)
 
 
 def transform_recovery_points_list(recovery_point_list):
-    if len(recovery_point_list) != 0 and recovery_point_list[0]['id'].split('/')[12].split(';')[0] == 'VMAppContainer':
+    if recovery_point_list != [] and recovery_point_list[0]['id'].split('/')[12].split(';')[0] == 'VMAppContainer':
         return transform_wl_recovery_point_list(recovery_point_list)
-    else:
-        return transform_recovery_point_list(recovery_point_list)
+    return transform_recovery_point_list(recovery_point_list)
 
 
 def transform_container_list(container_list):
@@ -218,8 +214,11 @@ def transform_wl_policy_list(policy_list):
 def transform_wl_policy_set(policy):
     if policy['properties']['backupManagementType'] == 'AzureWorkload':
         return [transform_workload_policy_show(p) for p in [policy]]
+    return []
 
 
 def transform_wl_policy_show(policy_list):
-    if type(policy_list) == list and len(policy_list) != 0 and policy_list[0]['properties']['backupManagementType'] == 'AzureWorkload':
-        return [transform_workload_policy_show(p) for p in policy_list]
+    if type(policy_list) == list and policy_list != []:
+        if policy_list[0]['properties']['backupManagementType'] == 'AzureWorkload':
+            return [transform_workload_policy_show(p) for p in policy_list]
+    return []

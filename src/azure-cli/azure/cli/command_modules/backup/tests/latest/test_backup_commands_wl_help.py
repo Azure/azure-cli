@@ -421,12 +421,12 @@ def test_backup_wl_protectable_item(self, container_name1, container_name2, reso
         self.check("length([?properties.friendlyName == '{protectable_item_name}'])", 1)
     ])
 
-    item1_json = self.cmd('backup protectable-item show -g {rg} -v {vault} -n {protectable_item_name} --workload-type {wt} --protectable-item-type {pit} -s {fname}', checks=[
+    self.cmd('backup protectable-item show -g {rg} -v {vault} -n {protectable_item_name} --workload-type {wt} --protectable-item-type {pit} -s {fname}', checks=[
         self.check('properties.friendlyName', '{protectable_item_name}'),
         self.check('properties.protectableItemType', '{pit}' if workload_type == 'MSSQL' else '{pit_hana}'),
         self.check('properties.serverName', '{fname}'),
         self.check('resourceGroup', '{rg}')
-    ]).get_output_in_json()
+    ])
 
     self.cmd('backup container unregister -v {vault} -g {rg} -n {name} -y')
 
