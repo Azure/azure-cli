@@ -178,6 +178,8 @@ def load_arguments(self, _):
     with self.argument_context('group deployment create') as c:
         c.argument('deployment_name', options_list=['--name', '-n'], required=False,
                    help='The deployment name. Default to template file base name')
+        c.argument('handle_extended_json_format', action='store_true', is_preview=True,
+                   help='Support to handle extended template content including multiline and comments in deployment')
 
     with self.argument_context('group deployment operation show') as c:
         c.argument('operation_ids', nargs='+', help='A list of operation ids to show')

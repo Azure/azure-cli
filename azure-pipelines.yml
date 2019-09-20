@@ -771,6 +771,35 @@ jobs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: debian-stretch
 
+- job: BuildDebianBuster
+  displayName: Build Debian Buster Package
+
+  dependsOn: BuildPythonWheel
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Build Artifacts'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
+      artifactName: pypi
+
+  - task: Bash@3
+    displayName: 'Build Debian Buster Package'
+    inputs:
+      targetType: 'filePath'
+      filePath: scripts/release/debian/pipeline.sh
+    env:
+      DISTRO: buster
+      DISTRO_BASE_IMAGE: debian:buster
+
+  - task: PublishPipelineArtifact@0
+    displayName: 'Publish Artifact: debian'
+    inputs:
+      TargetPath: $(Build.ArtifactStagingDirectory)
+      ArtifactName: debian-buster
+
 - job: TestLinuxPackages
   displayName: Test Linux Packages
 
@@ -798,6 +827,12 @@ jobs:
     inputs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
       artifactName: debian-stretch
+
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Debian:Buster Build'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
+      artifactName: debian-buster
 
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Debian:Jessie Builds'
@@ -860,8 +895,8 @@ jobs:
        done
 
        # Distros that do require libssl1.1
-       DISTROS=(bionic cosmic disco)
-       BASE_IMAGES=(ubuntu:bionic ubuntu:cosmic ubuntu:disco)
+       DISTROS=(bionic cosmic disco buster)
+       BASE_IMAGES=(ubuntu:bionic ubuntu:cosmic ubuntu:disco debian:buster)
 
        for i in ${!DISTROS[@]}; do
            echo "== Test debian package on ${DISTROS[$i]} =="
