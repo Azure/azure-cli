@@ -219,3 +219,105 @@ helps['appconfig kv unlock'] = """
           text:
             az appconfig kv unlock --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --key color --label test --yes
     """
+
+helps['appconfig feature set'] = """
+    type: command
+    short-summary: Set a feature flag.
+    examples:
+        - name: Set a feature flag with label MyLabel.
+          text:
+            az appconfig feature set -n MyAppConfiguration --feature color --label MyLabel 
+        - name: Set a feature flag with null label using connection string and set a description.
+          text:
+            az appconfig feature set --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --feature color --description "This is a colorful feature"
+    """
+
+helps['appconfig feature delete'] = """
+    type: command
+    short-summary: Delete feature flag.
+    examples:
+        - name: Delete a feature using App Configuration name without confirmation.
+          text:
+            az appconfig feature delete -n MyAppConfiguration --feature color --label MyLabel --yes
+        - name: Delete a feature using connection string.
+          text:
+            az appconfig feature delete --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --feature color --label MyLabel
+    """
+
+helps['appconfig feature show'] = """
+    type: command
+    short-summary: Show all attributes of a feature flag.
+    examples:
+        - name: Show a feature flag using App Configuration name with a specific label
+          text:
+            az appconfig feature show -n MyAppConfiguration --feature color --label MyLabel
+        - name: Show a feature flag using connection string and field filters
+          text:
+            az appconfig feature show --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --feature color --fields key locked conditions state
+    """
+
+helps['appconfig feature list'] = """
+    type: command
+    short-summary: List feature flags.
+    examples:
+        - name: List all feature flags.
+          text:
+            az appconfig feature list -n MyAppConfiguration
+        - name: List a specfic feature for any label start with v1. using connection string.
+          text:
+            az appconfig feature list --feature color --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --label v1.*
+        - name: List all features with any labels and query only key, state and conditions.
+          text:
+            az appconfig feature list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --fields key state conditions
+        - name: List 150 feature flags with any labels.
+          text:
+            az appconfig feature list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx  --top 150
+    """
+
+helps['appconfig feature lock'] = """
+    type: command
+    short-summary: Lock a feature flag to prohibit write operations.
+    examples:
+        - name: Lock a feature using App Configuration name.
+          text:
+            az appconfig feature lock -n MyAppConfiguration --feature color --label test
+        - name: Force locking a feature using connection string.
+          text:
+            az appconfig feature lock --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --feature color --label test --yes
+    """
+
+helps['appconfig feature unlock'] = """
+    type: command
+    short-summary: Unlock a feature to gain write operations.
+    examples:
+        - name: Unlock a feature using App Configuration name.
+          text:
+            az appconfig feature unlock -n MyAppConfiguration --feature color --label test
+        - name: Force unlocking a feature using connection string.
+          text:
+            az appconfig feature unlock --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --feature color --label test --yes
+    """
+
+helps['appconfig feature enable'] = """
+    type: command
+    short-summary: Enable a feature flag to turn it ON for use.
+    examples:
+        - name: enable a feature using App Configuration name.
+          text:
+            az appconfig feature enable -n MyAppConfiguration --feature color --label test
+        - name: Force enabling a feature using connection string.
+          text:
+            az appconfig feature enable --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --feature color --label test --yes
+    """
+
+helps['appconfig feature disable'] = """
+    type: command
+    short-summary: Disable a feature flag to turn it OFF for use.
+    examples:
+        - name: disable a feature using App Configuration name.
+          text:
+            az appconfig feature disable -n MyAppConfiguration --feature color --label test
+        - name: Force disabling a feature using connection string.
+          text:
+            az appconfig feature disable --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --feature color --label test --yes
+    """
