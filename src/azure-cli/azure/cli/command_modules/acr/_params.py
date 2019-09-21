@@ -55,7 +55,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('timeout', type=int, help='The timeout in seconds.')
         c.argument('docker_file_path', options_list=['--file', '-f'], help="The relative path of the the docker file to the source code root folder. Default to 'Dockerfile'.")
         c.argument('no_logs', help="Do not show logs after successfully queuing the build.", action='store_true')
-        c.argument('no_wait', help="Do not wait for the run to complete and return immediately after queuing the run.", action='store_true')
         c.argument('no_format', help="Indicates whether the logs should be displayed in raw format", action='store_true')
         c.argument('platform', options_list=['--platform', c.deprecate(target='--os', redirect='--platform', hide=True)], help="The platform where build/task is run, Eg, 'windows' and 'linux'. When it's used in build commands, it also can be specified in 'os/arch/variant' format for the resulting image. Eg, linux/arm/v7. The 'arch' and 'variant' parts are optional.")
         c.argument('target', help='The name of the target build stage.')
@@ -140,6 +139,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('values', help="The task values file path relative to the source context.")
         c.argument('set_value', options_list=['--set'], help="Value in 'name[=value]' format. Multiples supported by passing --set multiple times.", action='append', validator=validate_set)
         c.argument('set_secret', help="Secret value in '--set name[=value]' format. Multiples supported by passing --set multiple times.", action='append', validator=validate_set_secret)
+        c.argument('no_wait', help="Do not wait for the run to complete and return immediately after queuing the run.", action='store_true')
 
     with self.argument_context('acr pack build') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])
@@ -161,6 +161,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('task_name', options_list=['--name', '-n'], help='The name of the task.', completer=get_resource_name_completion_list(TASK_RESOURCE_TYPE))
         c.argument('status', help='The current status of task.', arg_type=get_enum_type(TaskStatus))
         c.argument('with_secure_properties', help="Indicates whether the secure properties of a task should be returned.", action='store_true')
+        c.argument('no_wait', help="Do not wait for the run to complete and return immediately after queuing the run.", action='store_true')
 
         # DockerBuildStep, FileTaskStep parameters
         c.argument('file', options_list=['--file', '-f'], help="The relative path of the the task/docker file to the source code root folder. Task files must be suffixed with '.yaml' or piped from the standard input using '-'.")
