@@ -37,7 +37,8 @@ def acr_create(cmd,
                location=None,
                admin_enabled=False,
                default_action=None,
-               tags=None):
+               tags=None,
+               no_wait=False):
     if default_action and sku not in get_premium_sku(cmd):
         raise CLIError(NETWORK_RULE_NOT_SUPPORTED)
 
@@ -48,12 +49,12 @@ def acr_create(cmd,
     registry = Registry(location=location, sku=Sku(name=sku), admin_user_enabled=admin_enabled, tags=tags)
     if default_action:
         registry.network_rule_set = NetworkRuleSet(default_action=default_action)
-    return client.create(resource_group_name, registry_name, registry)
+    return client.create(resource_group_name, registry_name, registry, polling=not no_wait)
 
 
-def acr_delete(cmd, client, registry_name, resource_group_name=None):
+def acr_delete(cmd, client, registry_name, resource_group_name=None, no_wait=False):
     resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
-    return client.delete(resource_group_name, registry_name)
+    return client.delete(resource_group_name, registry_name, polling=not no_wait)
 
 
 def acr_show(cmd, client, registry_name, resource_group_name=None):
