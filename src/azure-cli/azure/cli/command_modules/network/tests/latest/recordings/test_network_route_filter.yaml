@@ -1,55 +1,5 @@
 interactions:
 - request:
-    body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
-      "date": "2019-05-30T18:03:43Z"}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - group create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '110'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - --location --name --tag
-      User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_network_route_filter000001?api-version=2019-05-10
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001","name":"cli_test_network_route_filter000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-05-30T18:03:43Z"},"properties":{"provisioningState":"Succeeded"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '384'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 30 May 2019 18:03:43 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
-    status:
-      code: 201
-      message: Created
-- request:
     body: null
     headers:
       Accept:
@@ -63,24 +13,24 @@ interactions:
       ParameterSetName:
       - -g -n --tags
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.73
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_network_route_filter000001?api-version=2019-05-10
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001","name":"cli_test_network_route_filter000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-05-30T18:03:43Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001","name":"cli_test_network_route_filter000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-09-22T03:18:31Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '384'
+      - '428'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 18:03:44 GMT
+      - Sun, 22 Sep 2019 03:18:39 GMT
       expires:
       - '-1'
       pragma:
@@ -112,22 +62,22 @@ interactions:
       ParameterSetName:
       - -g -n --tags
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/5.0.0 Azure-SDK-For-Python AZURECLI/2.0.73
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1?api-version=2019-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1?api-version=2019-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"filter1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1\",\r\n
-        \ \"etag\": \"W/\\\"44c390cb-9598-4a4b-bbf3-3b4658941f42\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"04f3c2ea-dccf-4987-a7c1-418323b7b4ee\\\"\",\r\n  \"type\":
         \"Microsoft.Network/routeFilters\",\r\n  \"location\": \"westus\",\r\n  \"tags\":
         {\r\n    \"foo\": \"doo\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
         \"Updating\",\r\n    \"rules\": []\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/c5e8a8c4-59c4-46f8-8b57-b4962b283943?api-version=2019-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/5aa50712-2be7-4890-aaf8-6f796df22047?api-version=2019-06-01
       cache-control:
       - no-cache
       content-length:
@@ -135,7 +85,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 18:03:45 GMT
+      - Sun, 22 Sep 2019 03:18:43 GMT
       expires:
       - '-1'
       pragma:
@@ -147,8 +97,10 @@ interactions:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - a64ba1ce-a06f-42a8-bb1c-ebb61585f4d2
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1198'
     status:
       code: 201
       message: Created
@@ -166,10 +118,10 @@ interactions:
       ParameterSetName:
       - -g -n --tags
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/5.0.0 Azure-SDK-For-Python AZURECLI/2.0.73
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/c5e8a8c4-59c4-46f8-8b57-b4962b283943?api-version=2019-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/5aa50712-2be7-4890-aaf8-6f796df22047?api-version=2019-06-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -181,7 +133,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 18:03:56 GMT
+      - Sun, 22 Sep 2019 03:18:54 GMT
       expires:
       - '-1'
       pragma:
@@ -197,6 +149,8 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - 471e3bba-3205-45e7-b335-5a690a7679df
     status:
       code: 200
       message: OK
@@ -214,14 +168,14 @@ interactions:
       ParameterSetName:
       - -g -n --tags
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/5.0.0 Azure-SDK-For-Python AZURECLI/2.0.73
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1?api-version=2019-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1?api-version=2019-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"filter1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1\",\r\n
-        \ \"etag\": \"W/\\\"38ddc1b3-17a1-4e15-bdca-2110d664413b\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"f89393f6-37c5-4b4e-adbf-09c6c6d5691d\\\"\",\r\n  \"type\":
         \"Microsoft.Network/routeFilters\",\r\n  \"location\": \"westus\",\r\n  \"tags\":
         {\r\n    \"foo\": \"doo\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
         \"Succeeded\",\r\n    \"rules\": []\r\n  }\r\n}"
@@ -233,9 +187,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 18:03:56 GMT
+      - Sun, 22 Sep 2019 03:18:55 GMT
       etag:
-      - W/"38ddc1b3-17a1-4e15-bdca-2110d664413b"
+      - W/"f89393f6-37c5-4b4e-adbf-09c6c6d5691d"
       expires:
       - '-1'
       pragma:
@@ -251,6 +205,8 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - 50e5bc32-5700-41e2-8ffa-3e983bf89688
     status:
       code: 200
       message: OK
@@ -268,16 +224,16 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/5.0.0 Azure-SDK-For-Python AZURECLI/2.0.73
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1?api-version=2019-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1?api-version=2019-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"filter1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1\",\r\n
-        \ \"etag\": \"W/\\\"38ddc1b3-17a1-4e15-bdca-2110d664413b\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"f89393f6-37c5-4b4e-adbf-09c6c6d5691d\\\"\",\r\n  \"type\":
         \"Microsoft.Network/routeFilters\",\r\n  \"location\": \"westus\",\r\n  \"tags\":
         {\r\n    \"foo\": \"doo\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
         \"Succeeded\",\r\n    \"rules\": []\r\n  }\r\n}"
@@ -289,9 +245,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 18:03:57 GMT
+      - Sun, 22 Sep 2019 03:18:55 GMT
       etag:
-      - W/"38ddc1b3-17a1-4e15-bdca-2110d664413b"
+      - W/"f89393f6-37c5-4b4e-adbf-09c6c6d5691d"
       expires:
       - '-1'
       pragma:
@@ -307,6 +263,8 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - ac2b5972-a412-4f16-801e-9f5df8705ef9
     status:
       code: 200
       message: OK
@@ -329,22 +287,22 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/5.0.0 Azure-SDK-For-Python AZURECLI/2.0.73
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1?api-version=2019-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1?api-version=2019-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"filter1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1\",\r\n
-        \ \"etag\": \"W/\\\"e38c0810-4ebd-4a72-a437-f096c25af17c\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"be3368d2-34ea-464e-b904-25e110dbfa52\\\"\",\r\n  \"type\":
         \"Microsoft.Network/routeFilters\",\r\n  \"location\": \"westus\",\r\n  \"tags\":
         {\r\n    \"foo\": \"doo\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
         \"Succeeded\",\r\n    \"rules\": []\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/9c61ffbc-ce8b-4cb0-a912-8ef87f786fbb?api-version=2019-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/3f537232-3ab4-416f-ab22-b9331aaf2acf?api-version=2019-06-01
       cache-control:
       - no-cache
       content-length:
@@ -352,7 +310,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 18:03:57 GMT
+      - Sun, 22 Sep 2019 03:18:56 GMT
       expires:
       - '-1'
       pragma:
@@ -368,8 +326,10 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - f740875a-967b-4a49-8593-7a82cd3fee90
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1196'
     status:
       code: 200
       message: OK
@@ -387,10 +347,10 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/5.0.0 Azure-SDK-For-Python AZURECLI/2.0.73
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/9c61ffbc-ce8b-4cb0-a912-8ef87f786fbb?api-version=2019-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/3f537232-3ab4-416f-ab22-b9331aaf2acf?api-version=2019-06-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -402,7 +362,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 18:04:27 GMT
+      - Sun, 22 Sep 2019 03:19:27 GMT
       expires:
       - '-1'
       pragma:
@@ -418,6 +378,8 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - cb54d9b0-3bd1-48d7-bf35-ddd9049040ee
     status:
       code: 200
       message: OK
@@ -435,14 +397,14 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/5.0.0 Azure-SDK-For-Python AZURECLI/2.0.73
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1?api-version=2019-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1?api-version=2019-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"filter1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1\",\r\n
-        \ \"etag\": \"W/\\\"e38c0810-4ebd-4a72-a437-f096c25af17c\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"be3368d2-34ea-464e-b904-25e110dbfa52\\\"\",\r\n  \"type\":
         \"Microsoft.Network/routeFilters\",\r\n  \"location\": \"westus\",\r\n  \"tags\":
         {\r\n    \"foo\": \"doo\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
         \"Succeeded\",\r\n    \"rules\": []\r\n  }\r\n}"
@@ -454,9 +416,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 18:04:28 GMT
+      - Sun, 22 Sep 2019 03:19:27 GMT
       etag:
-      - W/"e38c0810-4ebd-4a72-a437-f096c25af17c"
+      - W/"be3368d2-34ea-464e-b904-25e110dbfa52"
       expires:
       - '-1'
       pragma:
@@ -472,6 +434,8 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - f299620b-09e3-413e-8fa2-979945ab410a
     status:
       code: 200
       message: OK
@@ -489,16 +453,16 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/5.0.0 Azure-SDK-For-Python AZURECLI/2.0.73
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1?api-version=2019-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1?api-version=2019-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"filter1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1\",\r\n
-        \ \"etag\": \"W/\\\"e38c0810-4ebd-4a72-a437-f096c25af17c\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"be3368d2-34ea-464e-b904-25e110dbfa52\\\"\",\r\n  \"type\":
         \"Microsoft.Network/routeFilters\",\r\n  \"location\": \"westus\",\r\n  \"tags\":
         {\r\n    \"foo\": \"doo\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
         \"Succeeded\",\r\n    \"rules\": []\r\n  }\r\n}"
@@ -510,9 +474,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 18:04:29 GMT
+      - Sun, 22 Sep 2019 03:19:28 GMT
       etag:
-      - W/"e38c0810-4ebd-4a72-a437-f096c25af17c"
+      - W/"be3368d2-34ea-464e-b904-25e110dbfa52"
       expires:
       - '-1'
       pragma:
@@ -528,6 +492,8 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - 5ce69bea-10eb-4c81-b9a6-b69bf205a5d6
     status:
       code: 200
       message: OK
@@ -545,17 +511,17 @@ interactions:
       ParameterSetName:
       - -g
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/5.0.0 Azure-SDK-For-Python AZURECLI/2.0.73
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters?api-version=2019-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters?api-version=2019-06-01
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"filter1\",\r\n      \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1\",\r\n
-        \     \"etag\": \"W/\\\"e38c0810-4ebd-4a72-a437-f096c25af17c\\\"\",\r\n      \"type\":
+        \     \"etag\": \"W/\\\"be3368d2-34ea-464e-b904-25e110dbfa52\\\"\",\r\n      \"type\":
         \"Microsoft.Network/routeFilters\",\r\n      \"location\": \"westus\",\r\n
         \     \"tags\": {\r\n        \"foo\": \"doo\"\r\n      },\r\n      \"properties\":
         {\r\n        \"provisioningState\": \"Succeeded\",\r\n        \"rules\": []\r\n
@@ -568,7 +534,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 18:04:30 GMT
+      - Sun, 22 Sep 2019 03:19:28 GMT
       expires:
       - '-1'
       pragma:
@@ -584,6 +550,8 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - 660a7639-e8e0-4748-94b5-6688f9e19988
     status:
       code: 200
       message: OK
@@ -599,12 +567,12 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/5.0.0 Azure-SDK-For-Python AZURECLI/2.0.73
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/bgpServiceCommunities?api-version=2019-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/bgpServiceCommunities?api-version=2019-06-01
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"Exchange\",\r\n      \"id\":
@@ -636,46 +604,33 @@ interactions:
         \             \"13.106.56.0/25\",\r\n              \"13.107.6.156/31\",\r\n
         \             \"13.107.6.171/32\",\r\n              \"13.107.7.190/31\",\r\n
         \             \"13.107.9.156/31\",\r\n              \"13.107.140.6/32\",\r\n
-        \             \"20.190.128.0/18\",\r\n              \"23.100.16.168/29\",\r\n
-        \             \"23.100.32.136/29\",\r\n              \"23.100.72.32/29\",\r\n
-        \             \"23.100.120.64/29\",\r\n              \"23.101.165.168/29\",\r\n
-        \             \"23.101.181.128/29\",\r\n              \"40.81.156.154/32\",\r\n
-        \             \"40.90.218.198/32\",\r\n              \"40.114.120.16/29\",\r\n
-        \             \"40.126.0.0/18\",\r\n              \"52.108.0.0/14\",\r\n              \"52.174.56.180/32\",\r\n
+        \             \"20.190.128.0/18\",\r\n              \"40.81.156.154/32\",\r\n
+        \             \"40.90.218.198/32\",\r\n              \"40.126.0.0/18\",\r\n
+        \             \"52.108.0.0/14\",\r\n              \"52.174.56.180/32\",\r\n
         \             \"52.183.75.62/32\",\r\n              \"52.184.165.82/32\",\r\n
         \             \"52.238.106.116/32\",\r\n              \"52.247.150.191/32\",\r\n
-        \             \"65.52.1.16/29\",\r\n              \"65.52.193.136/29\",\r\n
         \             \"65.54.170.128/25\",\r\n              \"70.37.154.128/25\",\r\n
-        \             \"104.41.13.120/29\",\r\n              \"104.42.72.16/29\",\r\n
         \             \"104.42.230.91/32\",\r\n              \"104.44.218.128/25\",\r\n
         \             \"104.44.254.128/25\",\r\n              \"104.44.255.0/25\",\r\n
-        \             \"104.45.208.104/29\",\r\n              \"104.210.48.8/29\",\r\n
-        \             \"104.210.208.16/29\",\r\n              \"104.211.16.16/29\",\r\n
-        \             \"104.211.48.16/29\",\r\n              \"104.215.96.24/29\",\r\n
         \             \"134.170.67.0/25\",\r\n              \"134.170.116.0/25\",\r\n
         \             \"134.170.165.0/25\",\r\n              \"134.170.172.128/25\",\r\n
-        \             \"157.55.45.128/25\",\r\n              \"157.55.59.128/25\",\r\n
-        \             \"157.55.130.0/25\",\r\n              \"157.55.145.0/25\",\r\n
-        \             \"157.55.155.0/25\",\r\n              \"157.55.227.192/26\",\r\n
-        \             \"157.56.58.0/25\",\r\n              \"157.56.151.0/25\",\r\n
-        \             \"191.232.2.128/25\",\r\n              \"191.237.248.32/29\",\r\n
-        \             \"191.237.252.192/28\"\r\n            ],\r\n            \"isAuthorizedToUse\":
-        true,\r\n            \"serviceGroup\": \"O365\"\r\n          }\r\n        ]\r\n
-        \     }\r\n    },\r\n    {\r\n      \"name\": \"SharePoint\",\r\n      \"id\":
-        \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/SharePoint\",\r\n
+        \             \"157.55.45.128/25\",\r\n              \"157.55.130.0/25\",\r\n
+        \             \"157.55.145.0/25\",\r\n              \"157.55.155.0/25\",\r\n
+        \             \"157.55.227.192/26\",\r\n              \"191.232.2.128/25\"\r\n
+        \           ],\r\n            \"isAuthorizedToUse\": true,\r\n            \"serviceGroup\":
+        \"O365\"\r\n          }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n      \"name\":
+        \"SharePoint\",\r\n      \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/SharePoint\",\r\n
         \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
         {\r\n        \"serviceName\": \"SharePoint\",\r\n        \"bgpCommunities\":
         [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
         \           \"communityName\": \"SharePoint Online\",\r\n            \"communityValue\":
         \"12076:5020\",\r\n            \"communityPrefixes\": [\r\n              \"13.107.136.0/22\",\r\n
         \             \"40.108.128.0/17\",\r\n              \"52.104.0.0/14\",\r\n
-        \             \"104.146.128.0/17\",\r\n              \"134.170.200.0/21\",\r\n
-        \             \"134.170.208.0/21\",\r\n              \"150.171.40.0/22\",\r\n
-        \             \"191.232.0.0/23\",\r\n              \"13.107.136.0/24\",\r\n
-        \             \"150.171.40.0/24\"\r\n            ],\r\n            \"isAuthorizedToUse\":
-        true,\r\n            \"serviceGroup\": \"O365\"\r\n          }\r\n        ]\r\n
-        \     }\r\n    },\r\n    {\r\n      \"name\": \"SkypeForBusiness\",\r\n      \"id\":
-        \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/SkypeForBusiness\",\r\n
+        \             \"104.146.128.0/17\",\r\n              \"150.171.40.0/22\",\r\n
+        \             \"13.107.136.0/24\",\r\n              \"150.171.40.0/24\"\r\n
+        \           ],\r\n            \"isAuthorizedToUse\": true,\r\n            \"serviceGroup\":
+        \"O365\"\r\n          }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n      \"name\":
+        \"SkypeForBusiness\",\r\n      \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/SkypeForBusiness\",\r\n
         \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
         {\r\n        \"serviceName\": \"SkypeForBusiness\",\r\n        \"bgpCommunities\":
         [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
@@ -848,7 +803,7 @@ interactions:
         \             \"191.234.160.0/19\",\r\n              \"191.235.32.0/19\",\r\n
         \             \"191.235.64.0/18\",\r\n              \"191.235.196.0/22\",\r\n
         \             \"191.235.200.0/21\",\r\n              \"191.235.224.0/20\",\r\n
-        \             \"191.235.240.0/21\",\r\n              \"191.235.248.0/24\",\r\n
+        \             \"191.235.240.0/21\",\r\n              \"191.235.248.0/23\",\r\n
         \             \"191.235.250.0/25\",\r\n              \"191.237.195.0/24\",\r\n
         \             \"191.237.200.0/21\",\r\n              \"191.237.248.0/21\",\r\n
         \             \"191.238.128.0/21\",\r\n              \"191.238.192.0/19\",\r\n
@@ -914,13 +869,13 @@ interactions:
         \             \"52.140.64.0/18\",\r\n              \"52.159.64.0/19\",\r\n
         \             \"52.172.128.0/17\",\r\n              \"52.239.135.64/26\",\r\n
         \             \"52.239.202.0/24\",\r\n              \"52.245.96.0/22\",\r\n
-        \             \"104.47.210.0/23\",\r\n              \"104.211.64.0/20\",\r\n
-        \             \"104.211.81.0/24\",\r\n              \"104.211.82.0/23\",\r\n
-        \             \"104.211.84.0/22\",\r\n              \"104.211.88.0/21\",\r\n
-        \             \"104.211.96.0/19\"\r\n            ],\r\n            \"isAuthorizedToUse\":
-        true,\r\n            \"serviceGroup\": \"Azure\"\r\n          }\r\n        ]\r\n
-        \     }\r\n    },\r\n    {\r\n      \"name\": \"AzureCentralUS\",\r\n      \"id\":
-        \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureCentralUS\",\r\n
+        \             \"52.253.181.0/24\",\r\n              \"104.47.210.0/23\",\r\n
+        \             \"104.211.64.0/20\",\r\n              \"104.211.81.0/24\",\r\n
+        \             \"104.211.82.0/23\",\r\n              \"104.211.84.0/22\",\r\n
+        \             \"104.211.88.0/21\",\r\n              \"104.211.96.0/19\"\r\n
+        \           ],\r\n            \"isAuthorizedToUse\": true,\r\n            \"serviceGroup\":
+        \"Azure\"\r\n          }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n      \"name\":
+        \"AzureCentralUS\",\r\n      \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureCentralUS\",\r\n
         \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
         {\r\n        \"serviceName\": \"AzureCentralUS\",\r\n        \"bgpCommunities\":
         [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
@@ -949,7 +904,9 @@ interactions:
         \             \"40.83.24.0/26\",\r\n              \"40.83.24.64/27\",\r\n
         \             \"40.83.24.128/25\",\r\n              \"40.83.25.0/24\",\r\n
         \             \"40.83.26.0/23\",\r\n              \"40.83.28.0/22\",\r\n              \"40.83.32.0/19\",\r\n
-        \             \"40.86.0.0/17\",\r\n              \"40.87.180.0/22\",\r\n              \"40.89.224.0/19\",\r\n
+        \             \"40.86.0.0/17\",\r\n              \"40.87.182.0/24\",\r\n              \"40.87.183.0/27\",\r\n
+        \             \"40.87.183.32/28\",\r\n              \"40.87.183.48/31\",\r\n
+        \             \"40.87.183.64/28\",\r\n              \"40.89.224.0/19\",\r\n
         \             \"40.90.144.0/27\",\r\n              \"40.113.192.0/18\",\r\n
         \             \"40.122.16.0/20\",\r\n              \"40.122.32.0/19\",\r\n
         \             \"40.122.64.0/18\",\r\n              \"40.122.128.0/17\",\r\n
@@ -1008,12 +965,13 @@ interactions:
         \           \"communityName\": \"Azure Central US EUAP\",\r\n            \"communityValue\":
         \"12076:51009\",\r\n            \"communityPrefixes\": [\r\n              \"13.67.153.16/28\",\r\n
         \             \"13.67.154.0/24\",\r\n              \"20.45.192.0/18\",\r\n
-        \             \"20.47.105.0/24\",\r\n              \"40.66.120.0/21\",\r\n
-        \             \"40.78.200.0/23\",\r\n              \"40.78.202.0/24\",\r\n
-        \             \"40.78.203.0/26\",\r\n              \"40.78.203.96/27\",\r\n
-        \             \"40.78.203.128/25\",\r\n              \"40.78.204.0/22\",\r\n
-        \             \"40.78.208.16/28\",\r\n              \"40.79.232.0/21\",\r\n
-        \             \"40.82.0.0/22\",\r\n              \"40.83.24.96/27\",\r\n              \"40.89.32.0/19\",\r\n
+        \             \"20.46.0.0/19\",\r\n              \"20.47.105.0/24\",\r\n              \"20.150.23.0/24\",\r\n
+        \             \"40.66.120.0/21\",\r\n              \"40.78.200.0/23\",\r\n
+        \             \"40.78.202.0/24\",\r\n              \"40.78.203.0/26\",\r\n
+        \             \"40.78.203.96/27\",\r\n              \"40.78.203.128/25\",\r\n
+        \             \"40.78.204.0/22\",\r\n              \"40.78.208.16/28\",\r\n
+        \             \"40.79.232.0/21\",\r\n              \"40.82.0.0/22\",\r\n              \"40.83.24.96/27\",\r\n
+        \             \"40.87.183.50/31\",\r\n              \"40.89.32.0/19\",\r\n
         \             \"40.122.0.0/20\",\r\n              \"52.141.224.0/20\",\r\n
         \             \"52.143.198.0/24\",\r\n              \"52.158.176.0/20\",\r\n
         \             \"52.165.104.128/26\",\r\n              \"52.176.225.0/24\",\r\n
@@ -1038,9 +996,10 @@ interactions:
         \             \"13.75.39.0/24\",\r\n              \"13.75.40.0/21\",\r\n              \"13.75.48.0/20\",\r\n
         \             \"13.75.64.0/18\",\r\n              \"13.88.208.0/20\",\r\n
         \             \"13.94.0.0/18\",\r\n              \"20.150.1.128/25\",\r\n
-        \             \"20.187.64.0/18\",\r\n              \"20.189.64.0/18\",\r\n
-        \             \"23.97.64.0/19\",\r\n              \"23.98.32.0/21\",\r\n              \"23.98.40.0/22\",\r\n
-        \             \"23.98.44.0/24\",\r\n              \"23.99.96.0/19\",\r\n              \"23.100.88.0/21\",\r\n
+        \             \"20.150.22.0/24\",\r\n              \"20.187.64.0/18\",\r\n
+        \             \"20.189.64.0/18\",\r\n              \"23.97.64.0/19\",\r\n
+        \             \"23.98.32.0/21\",\r\n              \"23.98.40.0/22\",\r\n              \"23.98.44.0/24\",\r\n
+        \             \"23.99.96.0/19\",\r\n              \"23.100.88.0/21\",\r\n
         \             \"23.101.0.0/20\",\r\n              \"23.102.200.0/23\",\r\n
         \             \"23.102.224.0/19\",\r\n              \"40.79.210.0/24\",\r\n
         \             \"40.81.16.0/20\",\r\n              \"40.82.116.0/22\",\r\n
@@ -1079,8 +1038,8 @@ interactions:
         \"12076:51004\",\r\n            \"communityPrefixes\": [\r\n              \"13.68.128.0/17\",\r\n
         \             \"13.72.64.0/18\",\r\n              \"13.82.0.0/16\",\r\n              \"13.90.0.0/16\",\r\n
         \             \"13.92.0.0/16\",\r\n              \"20.38.98.0/24\",\r\n              \"20.39.32.0/19\",\r\n
-        \             \"20.42.0.0/17\",\r\n              \"20.185.0.0/16\",\r\n              \"23.96.0.0/17\",\r\n
-        \             \"23.98.45.0/24\",\r\n              \"23.100.16.0/20\",\r\n
+        \             \"20.42.0.0/17\",\r\n              \"20.150.32.0/23\",\r\n              \"20.185.0.0/16\",\r\n
+        \             \"23.96.0.0/17\",\r\n              \"23.98.45.0/24\",\r\n              \"23.100.16.0/20\",\r\n
         \             \"23.101.128.0/20\",\r\n              \"40.64.0.0/16\",\r\n
         \             \"40.71.0.0/21\",\r\n              \"40.71.8.0/22\",\r\n              \"40.71.12.0/24\",\r\n
         \             \"40.71.13.32/27\",\r\n              \"40.71.13.64/26\",\r\n
@@ -1132,33 +1091,37 @@ interactions:
         \           \"communityName\": \"Azure East US 2\",\r\n            \"communityValue\":
         \"12076:51005\",\r\n            \"communityPrefixes\": [\r\n              \"13.68.0.0/17\",\r\n
         \             \"13.77.64.0/18\",\r\n              \"20.36.128.0/17\",\r\n
-        \             \"20.38.100.0/23\",\r\n              \"20.41.0.0/18\",\r\n              \"20.44.16.0/27\",\r\n
-        \             \"20.44.16.64/26\",\r\n              \"20.44.16.128/25\",\r\n
-        \             \"20.44.17.0/24\",\r\n              \"20.44.18.0/23\",\r\n              \"20.44.20.0/22\",\r\n
-        \             \"20.44.64.0/18\",\r\n              \"20.186.0.0/17\",\r\n              \"20.186.128.0/18\",\r\n
-        \             \"20.190.192.0/18\",\r\n              \"23.100.64.0/21\",\r\n
-        \             \"23.101.32.0/21\",\r\n              \"23.101.80.0/21\",\r\n
-        \             \"23.101.144.0/20\",\r\n              \"23.102.96.0/19\",\r\n
-        \             \"23.102.204.0/22\",\r\n              \"23.102.208.0/20\",\r\n
-        \             \"40.65.192.0/18\",\r\n              \"40.67.128.0/19\",\r\n
-        \             \"40.70.0.0/18\",\r\n              \"40.70.64.0/20\",\r\n              \"40.70.80.0/21\",\r\n
-        \             \"40.70.128.0/17\",\r\n              \"40.75.0.0/19\",\r\n              \"40.75.64.0/18\",\r\n
-        \             \"40.78.208.48/28\",\r\n              \"40.78.220.0/24\",\r\n
-        \             \"40.79.0.0/21\",\r\n              \"40.79.8.0/27\",\r\n              \"40.79.8.32/28\",\r\n
-        \             \"40.79.8.64/27\",\r\n              \"40.79.8.96/28\",\r\n              \"40.79.9.0/24\",\r\n
-        \             \"40.79.16.0/20\",\r\n              \"40.79.32.0/20\",\r\n              \"40.79.48.0/27\",\r\n
-        \             \"40.79.48.32/28\",\r\n              \"40.79.49.0/24\",\r\n
-        \             \"40.79.56.0/21\",\r\n              \"40.79.64.0/20\",\r\n              \"40.79.80.0/21\",\r\n
-        \             \"40.79.90.0/24\",\r\n              \"40.79.91.0/28\",\r\n              \"40.79.92.0/24\",\r\n
-        \             \"40.79.93.0/28\",\r\n              \"40.79.94.0/24\",\r\n              \"40.79.95.0/28\",\r\n
-        \             \"40.79.240.0/20\",\r\n              \"40.82.4.0/22\",\r\n              \"40.82.44.0/22\",\r\n
-        \             \"40.84.0.0/17\",\r\n              \"40.87.168.0/22\",\r\n              \"40.91.12.16/28\",\r\n
-        \             \"40.91.12.48/28\",\r\n              \"40.91.12.64/26\",\r\n
-        \             \"40.91.12.128/28\",\r\n              \"40.91.12.160/27\",\r\n
-        \             \"40.91.12.208/28\",\r\n              \"40.91.12.240/28\",\r\n
-        \             \"40.91.13.64/27\",\r\n              \"40.91.13.96/28\",\r\n
-        \             \"40.91.13.128/27\",\r\n              \"40.91.13.240/28\",\r\n
-        \             \"40.91.14.0/24\",\r\n              \"40.123.0.0/17\",\r\n              \"52.136.29.0/24\",\r\n
+        \             \"20.38.100.0/23\",\r\n              \"20.38.208.0/22\",\r\n
+        \             \"20.41.0.0/18\",\r\n              \"20.44.16.0/27\",\r\n              \"20.44.16.64/26\",\r\n
+        \             \"20.44.16.128/25\",\r\n              \"20.44.17.0/24\",\r\n
+        \             \"20.44.18.0/23\",\r\n              \"20.44.20.0/22\",\r\n              \"20.44.64.0/18\",\r\n
+        \             \"20.150.29.0/24\",\r\n              \"20.186.0.0/17\",\r\n
+        \             \"20.186.128.0/18\",\r\n              \"20.190.192.0/18\",\r\n
+        \             \"23.100.64.0/21\",\r\n              \"23.101.32.0/21\",\r\n
+        \             \"23.101.80.0/21\",\r\n              \"23.101.144.0/20\",\r\n
+        \             \"23.102.96.0/19\",\r\n              \"23.102.204.0/22\",\r\n
+        \             \"23.102.208.0/20\",\r\n              \"40.65.192.0/18\",\r\n
+        \             \"40.67.128.0/19\",\r\n              \"40.70.0.0/18\",\r\n              \"40.70.64.0/20\",\r\n
+        \             \"40.70.80.0/21\",\r\n              \"40.70.128.0/17\",\r\n
+        \             \"40.75.0.0/19\",\r\n              \"40.75.64.0/18\",\r\n              \"40.78.208.48/28\",\r\n
+        \             \"40.78.220.0/24\",\r\n              \"40.79.0.0/21\",\r\n              \"40.79.8.0/27\",\r\n
+        \             \"40.79.8.32/28\",\r\n              \"40.79.8.64/27\",\r\n              \"40.79.8.96/28\",\r\n
+        \             \"40.79.9.0/24\",\r\n              \"40.79.16.0/20\",\r\n              \"40.79.32.0/20\",\r\n
+        \             \"40.79.48.0/27\",\r\n              \"40.79.48.32/28\",\r\n
+        \             \"40.79.49.0/24\",\r\n              \"40.79.56.0/21\",\r\n              \"40.79.64.0/20\",\r\n
+        \             \"40.79.80.0/21\",\r\n              \"40.79.90.0/24\",\r\n              \"40.79.91.0/28\",\r\n
+        \             \"40.79.92.0/24\",\r\n              \"40.79.93.0/28\",\r\n              \"40.79.94.0/24\",\r\n
+        \             \"40.79.95.0/28\",\r\n              \"40.79.240.0/20\",\r\n
+        \             \"40.82.4.0/22\",\r\n              \"40.82.44.0/22\",\r\n              \"40.84.0.0/17\",\r\n
+        \             \"40.87.168.0/24\",\r\n              \"40.87.169.0/26\",\r\n
+        \             \"40.87.169.64/27\",\r\n              \"40.87.169.96/31\",\r\n
+        \             \"40.91.12.16/28\",\r\n              \"40.91.12.48/28\",\r\n
+        \             \"40.91.12.64/26\",\r\n              \"40.91.12.128/28\",\r\n
+        \             \"40.91.12.160/27\",\r\n              \"40.91.12.208/28\",\r\n
+        \             \"40.91.12.240/28\",\r\n              \"40.91.13.64/27\",\r\n
+        \             \"40.91.13.96/28\",\r\n              \"40.91.13.128/27\",\r\n
+        \             \"40.91.13.240/28\",\r\n              \"40.91.14.0/24\",\r\n
+        \             \"40.123.0.0/17\",\r\n              \"52.136.29.0/24\",\r\n
         \             \"52.138.80.0/21\",\r\n              \"52.138.96.0/19\",\r\n
         \             \"52.143.192.0/24\",\r\n              \"52.147.160.0/19\",\r\n
         \             \"52.167.0.0/16\",\r\n              \"52.177.0.0/16\",\r\n              \"52.179.128.0/17\",\r\n
@@ -1221,48 +1184,48 @@ interactions:
         \             \"40.75.32.0/22\",\r\n              \"40.75.37.0/24\",\r\n              \"40.75.38.0/23\",\r\n
         \             \"40.78.208.0/28\",\r\n              \"40.79.88.0/27\",\r\n
         \             \"40.79.88.32/28\",\r\n              \"40.79.89.0/24\",\r\n
-        \             \"40.79.96.0/19\",\r\n              \"40.89.64.0/18\",\r\n              \"40.91.12.0/28\",\r\n
-        \             \"40.91.12.32/28\",\r\n              \"40.91.13.0/28\",\r\n
-        \             \"52.138.64.0/20\",\r\n              \"52.138.88.0/21\",\r\n
-        \             \"52.143.212.0/23\",\r\n              \"52.147.128.0/19\",\r\n
-        \             \"52.184.168.16/28\",\r\n              \"52.184.168.32/28\",\r\n
-        \             \"52.225.136.48/28\",\r\n              \"52.225.144.0/20\",\r\n
-        \             \"52.225.160.0/19\",\r\n              \"52.232.150.0/24\",\r\n
-        \             \"52.239.157.224/27\",\r\n              \"52.239.165.192/26\",\r\n
-        \             \"52.239.184.128/27\",\r\n              \"52.239.184.176/28\",\r\n
-        \             \"52.239.184.224/27\",\r\n              \"52.239.185.0/28\",\r\n
-        \             \"52.239.192.128/27\",\r\n              \"52.239.198.128/27\",\r\n
-        \             \"52.239.230.0/24\",\r\n              \"52.239.239.0/24\",\r\n
-        \             \"52.245.45.144/28\",\r\n              \"52.245.46.32/28\",\r\n
-        \             \"52.245.46.80/28\",\r\n              \"52.245.46.96/28\",\r\n
-        \             \"52.245.47.0/24\",\r\n              \"52.253.150.0/23\",\r\n
-        \             \"52.253.152.0/23\",\r\n              \"52.253.224.0/21\",\r\n
-        \             \"52.254.120.0/21\"\r\n            ],\r\n            \"isAuthorizedToUse\":
-        true,\r\n            \"serviceGroup\": \"Azure\"\r\n          }\r\n        ]\r\n
-        \     }\r\n    },\r\n    {\r\n      \"name\": \"AzureFranceCentral\",\r\n
-        \     \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureFranceCentral\",\r\n
+        \             \"40.79.96.0/19\",\r\n              \"40.87.169.98/31\",\r\n
+        \             \"40.89.64.0/18\",\r\n              \"40.91.12.0/28\",\r\n              \"40.91.12.32/28\",\r\n
+        \             \"40.91.13.0/28\",\r\n              \"52.138.64.0/20\",\r\n
+        \             \"52.138.88.0/21\",\r\n              \"52.143.212.0/23\",\r\n
+        \             \"52.147.128.0/19\",\r\n              \"52.184.168.16/28\",\r\n
+        \             \"52.184.168.32/28\",\r\n              \"52.225.136.48/28\",\r\n
+        \             \"52.225.144.0/20\",\r\n              \"52.225.160.0/19\",\r\n
+        \             \"52.232.150.0/24\",\r\n              \"52.239.157.224/27\",\r\n
+        \             \"52.239.165.192/26\",\r\n              \"52.239.184.128/27\",\r\n
+        \             \"52.239.184.176/28\",\r\n              \"52.239.184.224/27\",\r\n
+        \             \"52.239.185.0/28\",\r\n              \"52.239.192.128/27\",\r\n
+        \             \"52.239.198.128/27\",\r\n              \"52.239.230.0/24\",\r\n
+        \             \"52.239.239.0/24\",\r\n              \"52.245.45.144/28\",\r\n
+        \             \"52.245.46.32/28\",\r\n              \"52.245.46.80/28\",\r\n
+        \             \"52.245.46.96/28\",\r\n              \"52.245.47.0/24\",\r\n
+        \             \"52.253.150.0/23\",\r\n              \"52.253.152.0/23\",\r\n
+        \             \"52.253.224.0/21\",\r\n              \"52.254.120.0/21\"\r\n
+        \           ],\r\n            \"isAuthorizedToUse\": true,\r\n            \"serviceGroup\":
+        \"Azure\"\r\n          }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n      \"name\":
+        \"AzureFranceCentral\",\r\n      \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureFranceCentral\",\r\n
         \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
         {\r\n        \"serviceName\": \"AzureFranceCentral\",\r\n        \"bgpCommunities\":
         [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
         \           \"communityName\": \"Azure France Central\",\r\n            \"communityValue\":
-        \"12076:51030\",\r\n            \"communityPrefixes\": [\r\n              \"20.39.232.0/21\",\r\n
-        \             \"20.39.240.0/20\",\r\n              \"20.40.128.0/19\",\r\n
-        \             \"20.43.32.0/19\",\r\n              \"20.188.32.0/19\",\r\n
-        \             \"40.66.32.0/19\",\r\n              \"40.79.128.0/23\",\r\n
-        \             \"40.79.130.0/24\",\r\n              \"40.79.131.0/25\",\r\n
-        \             \"40.79.131.160/27\",\r\n              \"40.79.131.192/26\",\r\n
-        \             \"40.79.132.0/22\",\r\n              \"40.79.136.0/23\",\r\n
-        \             \"40.79.138.0/25\",\r\n              \"40.79.138.128/26\",\r\n
-        \             \"40.79.139.0/24\",\r\n              \"40.79.140.0/22\",\r\n
-        \             \"40.79.144.0/21\",\r\n              \"40.79.222.0/24\",\r\n
-        \             \"40.80.24.0/22\",\r\n              \"40.89.128.0/18\",\r\n
-        \             \"52.143.128.0/18\",\r\n              \"52.143.215.0/24\",\r\n
-        \             \"52.143.216.0/23\",\r\n              \"52.239.134.0/24\",\r\n
-        \             \"52.239.194.0/24\",\r\n              \"52.239.241.0/24\",\r\n
-        \             \"52.245.116.0/22\"\r\n            ],\r\n            \"isAuthorizedToUse\":
-        true,\r\n            \"serviceGroup\": \"Azure\"\r\n          }\r\n        ]\r\n
-        \     }\r\n    },\r\n    {\r\n      \"name\": \"AzureFranceSouth\",\r\n      \"id\":
-        \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureFranceSouth\",\r\n
+        \"12076:51030\",\r\n            \"communityPrefixes\": [\r\n              \"20.38.196.0/22\",\r\n
+        \             \"20.39.232.0/21\",\r\n              \"20.39.240.0/20\",\r\n
+        \             \"20.40.128.0/19\",\r\n              \"20.43.32.0/19\",\r\n
+        \             \"20.188.32.0/19\",\r\n              \"40.66.32.0/19\",\r\n
+        \             \"40.79.128.0/23\",\r\n              \"40.79.130.0/24\",\r\n
+        \             \"40.79.131.0/25\",\r\n              \"40.79.131.160/27\",\r\n
+        \             \"40.79.131.192/26\",\r\n              \"40.79.132.0/22\",\r\n
+        \             \"40.79.136.0/23\",\r\n              \"40.79.138.0/25\",\r\n
+        \             \"40.79.138.128/26\",\r\n              \"40.79.139.0/24\",\r\n
+        \             \"40.79.140.0/22\",\r\n              \"40.79.144.0/21\",\r\n
+        \             \"40.79.222.0/24\",\r\n              \"40.80.24.0/22\",\r\n
+        \             \"40.89.128.0/18\",\r\n              \"52.143.128.0/18\",\r\n
+        \             \"52.143.215.0/24\",\r\n              \"52.143.216.0/23\",\r\n
+        \             \"52.239.134.0/24\",\r\n              \"52.239.194.0/24\",\r\n
+        \             \"52.239.241.0/24\",\r\n              \"52.245.116.0/22\"\r\n
+        \           ],\r\n            \"isAuthorizedToUse\": true,\r\n            \"serviceGroup\":
+        \"Azure\"\r\n          }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n      \"name\":
+        \"AzureFranceSouth\",\r\n      \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureFranceSouth\",\r\n
         \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
         {\r\n        \"serviceName\": \"AzureFranceSouth\",\r\n        \"bgpCommunities\":
         [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
@@ -1274,25 +1237,26 @@ interactions:
         \             \"40.79.179.192/26\",\r\n              \"40.79.180.0/22\",\r\n
         \             \"40.79.223.0/24\",\r\n              \"40.80.20.0/22\",\r\n
         \             \"40.80.96.0/20\",\r\n              \"40.82.224.0/20\",\r\n
-        \             \"52.136.8.0/21\",\r\n              \"52.136.28.0/24\",\r\n
-        \             \"52.136.128.0/18\",\r\n              \"52.239.135.0/26\",\r\n
-        \             \"52.239.196.0/24\",\r\n              \"52.245.120.0/22\"\r\n
-        \           ],\r\n            \"isAuthorizedToUse\": true,\r\n            \"serviceGroup\":
-        \"Azure\"\r\n          }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n      \"name\":
-        \"AzureGlobalServices\",\r\n      \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureGlobalServices\",\r\n
+        \             \"51.105.88.0/21\",\r\n              \"52.136.8.0/21\",\r\n
+        \             \"52.136.28.0/24\",\r\n              \"52.136.128.0/18\",\r\n
+        \             \"52.239.135.0/26\",\r\n              \"52.239.196.0/24\",\r\n
+        \             \"52.245.120.0/22\"\r\n            ],\r\n            \"isAuthorizedToUse\":
+        true,\r\n            \"serviceGroup\": \"Azure\"\r\n          }\r\n        ]\r\n
+        \     }\r\n    },\r\n    {\r\n      \"name\": \"AzureGlobalServices\",\r\n
+        \     \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureGlobalServices\",\r\n
         \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
         {\r\n        \"serviceName\": \"AzureGlobalServices\",\r\n        \"bgpCommunities\":
         [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
         \           \"communityName\": \"Azure Global Services\",\r\n            \"communityValue\":
         \"12076:5050\",\r\n            \"communityPrefixes\": [\r\n              \"13.107.6.175/32\",\r\n
-        \             \"13.107.6.183/32\",\r\n              \"13.107.9.175/32\",\r\n
-        \             \"13.107.9.183/32\",\r\n              \"23.100.74.137/32\",\r\n
-        \             \"40.65.115.201/32\",\r\n              \"40.124.51.183/32\",\r\n
-        \             \"70.37.89.14/32\",\r\n              \"168.62.105.45/32\",\r\n
-        \             \"191.238.233.155/32\",\r\n              \"191.238.234.133/32\"\r\n
-        \           ],\r\n            \"isAuthorizedToUse\": true,\r\n            \"serviceGroup\":
-        \"Azure\"\r\n          }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n      \"name\":
-        \"AzureJapanEast\",\r\n      \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureJapanEast\",\r\n
+        \             \"13.107.6.176/32\",\r\n              \"13.107.6.183/32\",\r\n
+        \             \"13.107.9.175/32\",\r\n              \"13.107.9.176/32\",\r\n
+        \             \"13.107.9.183/32\",\r\n              \"13.107.42.18/31\",\r\n
+        \             \"13.107.42.20/32\",\r\n              \"13.107.43.18/31\",\r\n
+        \             \"13.107.43.20/32\"\r\n            ],\r\n            \"isAuthorizedToUse\":
+        true,\r\n            \"serviceGroup\": \"Azure\"\r\n          }\r\n        ]\r\n
+        \     }\r\n    },\r\n    {\r\n      \"name\": \"AzureJapanEast\",\r\n      \"id\":
+        \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureJapanEast\",\r\n
         \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
         {\r\n        \"serviceName\": \"AzureJapanEast\",\r\n        \"bgpCommunities\":
         [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
@@ -1398,12 +1362,13 @@ interactions:
         \           \"communityName\": \"Azure North Central US\",\r\n            \"communityValue\":
         \"12076:51007\",\r\n            \"communityPrefixes\": [\r\n              \"20.36.96.0/21\",\r\n
         \             \"20.41.128.0/18\",\r\n              \"20.150.17.0/25\",\r\n
-        \             \"23.96.128.0/17\",\r\n              \"23.98.48.0/21\",\r\n
-        \             \"23.100.72.0/21\",\r\n              \"23.100.224.0/20\",\r\n
-        \             \"23.101.160.0/20\",\r\n              \"40.78.208.64/28\",\r\n
-        \             \"40.78.222.0/24\",\r\n              \"40.80.184.0/21\",\r\n
-        \             \"40.81.32.0/20\",\r\n              \"40.87.172.0/22\",\r\n
-        \             \"40.91.24.0/22\",\r\n              \"40.116.0.0/16\",\r\n              \"52.141.128.0/18\",\r\n
+        \             \"20.150.25.0/24\",\r\n              \"23.96.128.0/17\",\r\n
+        \             \"23.98.48.0/21\",\r\n              \"23.100.72.0/21\",\r\n
+        \             \"23.100.224.0/20\",\r\n              \"23.101.160.0/20\",\r\n
+        \             \"40.78.208.64/28\",\r\n              \"40.78.222.0/24\",\r\n
+        \             \"40.80.184.0/21\",\r\n              \"40.81.32.0/20\",\r\n
+        \             \"40.87.172.0/22\",\r\n              \"40.91.24.0/22\",\r\n
+        \             \"40.116.0.0/16\",\r\n              \"52.141.128.0/18\",\r\n
         \             \"52.162.0.0/18\",\r\n              \"52.162.64.0/19\",\r\n
         \             \"52.162.96.0/21\",\r\n              \"52.162.104.0/22\",\r\n
         \             \"52.162.108.0/23\",\r\n              \"52.162.110.0/26\",\r\n
@@ -1450,62 +1415,62 @@ interactions:
         \             \"13.74.107.0/24\",\r\n              \"13.74.108.0/22\",\r\n
         \             \"13.74.112.0/20\",\r\n              \"13.74.128.0/17\",\r\n
         \             \"13.79.0.0/16\",\r\n              \"13.94.64.0/18\",\r\n              \"20.38.64.0/19\",\r\n
-        \             \"20.38.102.0/23\",\r\n              \"20.191.0.0/18\",\r\n
-        \             \"23.100.48.0/20\",\r\n              \"23.100.128.0/18\",\r\n
-        \             \"23.101.48.0/20\",\r\n              \"23.102.0.0/18\",\r\n
-        \             \"40.67.224.0/19\",\r\n              \"40.69.0.0/18\",\r\n              \"40.69.64.0/19\",\r\n
-        \             \"40.69.192.0/19\",\r\n              \"40.78.211.0/24\",\r\n
-        \             \"40.85.0.0/17\",\r\n              \"40.85.128.0/20\",\r\n              \"40.87.128.0/19\",\r\n
-        \             \"40.87.188.0/22\",\r\n              \"40.90.141.128/29\",\r\n
-        \             \"40.90.145.224/27\",\r\n              \"40.91.20.0/22\",\r\n
-        \             \"40.91.32.0/22\",\r\n              \"40.112.0.0/19\",\r\n              \"40.112.36.0/25\",\r\n
-        \             \"40.112.37.64/26\",\r\n              \"40.112.64.0/19\",\r\n
-        \             \"40.113.0.0/18\",\r\n              \"40.113.64.0/19\",\r\n
-        \             \"40.115.96.0/19\",\r\n              \"40.127.96.0/20\",\r\n
-        \             \"40.127.128.0/17\",\r\n              \"51.104.64.0/18\",\r\n
-        \             \"51.104.128.0/18\",\r\n              \"52.138.128.0/17\",\r\n
-        \             \"52.142.64.0/18\",\r\n              \"52.143.195.0/24\",\r\n
-        \             \"52.143.209.0/24\",\r\n              \"52.146.128.0/17\",\r\n
-        \             \"52.155.64.0/19\",\r\n              \"52.155.128.0/17\",\r\n
-        \             \"52.156.192.0/18\",\r\n              \"52.158.0.0/17\",\r\n
-        \             \"52.164.0.0/16\",\r\n              \"52.169.0.0/16\",\r\n              \"52.178.128.0/17\",\r\n
-        \             \"52.232.148.0/24\",\r\n              \"52.236.0.0/17\",\r\n
-        \             \"52.239.136.0/22\",\r\n              \"52.239.205.0/24\",\r\n
-        \             \"52.239.248.0/24\",\r\n              \"52.245.40.0/22\",\r\n
-        \             \"52.245.88.0/22\",\r\n              \"65.52.64.0/20\",\r\n
-        \             \"65.52.224.0/21\",\r\n              \"94.245.88.0/21\",\r\n
-        \             \"94.245.104.0/21\",\r\n              \"94.245.114.1/32\",\r\n
-        \             \"94.245.114.2/31\",\r\n              \"94.245.114.4/32\",\r\n
-        \             \"94.245.114.33/32\",\r\n              \"94.245.114.34/31\",\r\n
-        \             \"94.245.114.36/32\",\r\n              \"94.245.117.96/27\",\r\n
-        \             \"94.245.118.0/27\",\r\n              \"94.245.118.65/32\",\r\n
-        \             \"94.245.118.66/31\",\r\n              \"94.245.118.68/32\",\r\n
-        \             \"94.245.118.97/32\",\r\n              \"94.245.118.98/31\",\r\n
-        \             \"94.245.118.100/32\",\r\n              \"94.245.118.129/32\",\r\n
-        \             \"94.245.118.130/31\",\r\n              \"94.245.118.132/32\",\r\n
-        \             \"94.245.120.128/28\",\r\n              \"94.245.122.0/24\",\r\n
-        \             \"94.245.123.144/28\",\r\n              \"94.245.123.176/28\",\r\n
-        \             \"104.41.64.0/18\",\r\n              \"104.41.192.0/18\",\r\n
-        \             \"104.44.88.66/31\",\r\n              \"104.44.91.64/27\",\r\n
-        \             \"104.45.80.0/20\",\r\n              \"104.45.96.0/19\",\r\n
-        \             \"104.46.8.0/21\",\r\n              \"104.46.64.0/19\",\r\n
-        \             \"104.47.218.0/23\",\r\n              \"134.170.80.64/28\",\r\n
-        \             \"137.116.224.0/19\",\r\n              \"137.135.128.0/17\",\r\n
-        \             \"138.91.48.0/20\",\r\n              \"157.55.3.0/24\",\r\n
-        \             \"157.55.10.160/29\",\r\n              \"157.55.10.176/28\",\r\n
-        \             \"157.55.204.128/25\",\r\n              \"157.55.230.160/27\",\r\n
-        \             \"168.61.80.0/20\",\r\n              \"168.61.96.0/19\",\r\n
-        \             \"168.63.32.0/19\",\r\n              \"168.63.64.0/20\",\r\n
-        \             \"168.63.80.0/21\",\r\n              \"168.63.92.0/22\",\r\n
-        \             \"191.235.128.0/18\",\r\n              \"191.235.192.0/22\",\r\n
-        \             \"191.235.208.0/20\",\r\n              \"191.235.255.0/24\",\r\n
-        \             \"191.237.192.0/23\",\r\n              \"191.237.194.0/24\",\r\n
-        \             \"191.237.196.0/24\",\r\n              \"191.237.208.0/20\",\r\n
-        \             \"191.238.96.0/19\",\r\n              \"191.239.208.0/20\",\r\n
-        \             \"193.149.88.0/21\"\r\n            ],\r\n            \"isAuthorizedToUse\":
-        true,\r\n            \"serviceGroup\": \"Azure\"\r\n          }\r\n        ]\r\n
-        \     }\r\n    },\r\n    {\r\n      \"name\": \"AzureSouthAfricaNorth\",\r\n
-        \     \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureSouthAfricaNorth\",\r\n
+        \             \"20.38.102.0/23\",\r\n              \"20.150.26.0/24\",\r\n
+        \             \"20.191.0.0/18\",\r\n              \"23.100.48.0/20\",\r\n
+        \             \"23.100.128.0/18\",\r\n              \"23.101.48.0/20\",\r\n
+        \             \"23.102.0.0/18\",\r\n              \"40.67.224.0/19\",\r\n
+        \             \"40.69.0.0/18\",\r\n              \"40.69.64.0/19\",\r\n              \"40.69.192.0/19\",\r\n
+        \             \"40.78.211.0/24\",\r\n              \"40.85.0.0/17\",\r\n              \"40.85.128.0/20\",\r\n
+        \             \"40.87.128.0/19\",\r\n              \"40.87.188.0/22\",\r\n
+        \             \"40.90.141.128/29\",\r\n              \"40.90.145.224/27\",\r\n
+        \             \"40.91.20.0/22\",\r\n              \"40.91.32.0/22\",\r\n              \"40.112.0.0/19\",\r\n
+        \             \"40.112.36.0/25\",\r\n              \"40.112.37.64/26\",\r\n
+        \             \"40.112.64.0/19\",\r\n              \"40.113.0.0/18\",\r\n
+        \             \"40.113.64.0/19\",\r\n              \"40.115.96.0/19\",\r\n
+        \             \"40.127.96.0/20\",\r\n              \"40.127.128.0/17\",\r\n
+        \             \"51.104.64.0/18\",\r\n              \"51.104.128.0/18\",\r\n
+        \             \"52.138.128.0/17\",\r\n              \"52.142.64.0/18\",\r\n
+        \             \"52.143.195.0/24\",\r\n              \"52.143.209.0/24\",\r\n
+        \             \"52.146.128.0/17\",\r\n              \"52.155.64.0/19\",\r\n
+        \             \"52.155.128.0/17\",\r\n              \"52.156.192.0/18\",\r\n
+        \             \"52.158.0.0/17\",\r\n              \"52.164.0.0/16\",\r\n              \"52.169.0.0/16\",\r\n
+        \             \"52.178.128.0/17\",\r\n              \"52.232.148.0/24\",\r\n
+        \             \"52.236.0.0/17\",\r\n              \"52.239.136.0/22\",\r\n
+        \             \"52.239.205.0/24\",\r\n              \"52.239.248.0/24\",\r\n
+        \             \"52.245.40.0/22\",\r\n              \"52.245.88.0/22\",\r\n
+        \             \"65.52.64.0/20\",\r\n              \"65.52.224.0/21\",\r\n
+        \             \"94.245.88.0/21\",\r\n              \"94.245.104.0/21\",\r\n
+        \             \"94.245.114.1/32\",\r\n              \"94.245.114.2/31\",\r\n
+        \             \"94.245.114.4/32\",\r\n              \"94.245.114.33/32\",\r\n
+        \             \"94.245.114.34/31\",\r\n              \"94.245.114.36/32\",\r\n
+        \             \"94.245.117.96/27\",\r\n              \"94.245.118.0/27\",\r\n
+        \             \"94.245.118.65/32\",\r\n              \"94.245.118.66/31\",\r\n
+        \             \"94.245.118.68/32\",\r\n              \"94.245.118.97/32\",\r\n
+        \             \"94.245.118.98/31\",\r\n              \"94.245.118.100/32\",\r\n
+        \             \"94.245.118.129/32\",\r\n              \"94.245.118.130/31\",\r\n
+        \             \"94.245.118.132/32\",\r\n              \"94.245.120.128/28\",\r\n
+        \             \"94.245.122.0/24\",\r\n              \"94.245.123.144/28\",\r\n
+        \             \"94.245.123.176/28\",\r\n              \"104.41.64.0/18\",\r\n
+        \             \"104.41.192.0/18\",\r\n              \"104.44.88.66/31\",\r\n
+        \             \"104.44.91.64/27\",\r\n              \"104.45.80.0/20\",\r\n
+        \             \"104.45.96.0/19\",\r\n              \"104.46.8.0/21\",\r\n
+        \             \"104.46.64.0/19\",\r\n              \"104.47.218.0/23\",\r\n
+        \             \"134.170.80.64/28\",\r\n              \"137.116.224.0/19\",\r\n
+        \             \"137.135.128.0/17\",\r\n              \"138.91.48.0/20\",\r\n
+        \             \"157.55.3.0/24\",\r\n              \"157.55.10.160/29\",\r\n
+        \             \"157.55.10.176/28\",\r\n              \"157.55.204.128/25\",\r\n
+        \             \"157.55.230.160/27\",\r\n              \"168.61.80.0/20\",\r\n
+        \             \"168.61.96.0/19\",\r\n              \"168.63.32.0/19\",\r\n
+        \             \"168.63.64.0/20\",\r\n              \"168.63.80.0/21\",\r\n
+        \             \"168.63.92.0/22\",\r\n              \"191.235.128.0/18\",\r\n
+        \             \"191.235.192.0/22\",\r\n              \"191.235.208.0/20\",\r\n
+        \             \"191.235.255.0/24\",\r\n              \"191.237.192.0/23\",\r\n
+        \             \"191.237.194.0/24\",\r\n              \"191.237.196.0/24\",\r\n
+        \             \"191.237.208.0/20\",\r\n              \"191.238.96.0/19\",\r\n
+        \             \"191.239.208.0/20\",\r\n              \"193.149.88.0/21\"\r\n
+        \           ],\r\n            \"isAuthorizedToUse\": true,\r\n            \"serviceGroup\":
+        \"Azure\"\r\n          }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n      \"name\":
+        \"AzureSouthAfricaNorth\",\r\n      \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureSouthAfricaNorth\",\r\n
         \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
         {\r\n        \"serviceName\": \"AzureSouthAfricaNorth\",\r\n        \"bgpCommunities\":
         [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
@@ -1516,13 +1481,13 @@ interactions:
         \             \"40.82.120.0/22\",\r\n              \"40.119.64.0/22\",\r\n
         \             \"40.127.0.0/19\",\r\n              \"52.143.204.0/23\",\r\n
         \             \"52.143.206.0/24\",\r\n              \"52.239.232.0/25\",\r\n
-        \             \"102.133.120.0/21\",\r\n              \"102.133.128.0/18\",\r\n
-        \             \"102.133.192.0/19\",\r\n              \"102.133.224.0/20\",\r\n
-        \             \"102.133.240.0/25\",\r\n              \"102.133.240.128/26\",\r\n
-        \             \"102.133.248.0/21\"\r\n            ],\r\n            \"isAuthorizedToUse\":
-        true,\r\n            \"serviceGroup\": \"Azure\"\r\n          }\r\n        ]\r\n
-        \     }\r\n    },\r\n    {\r\n      \"name\": \"AzureSouthAfricaWest\",\r\n
-        \     \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureSouthAfricaWest\",\r\n
+        \             \"102.37.0.0/20\",\r\n              \"102.133.120.0/21\",\r\n
+        \             \"102.133.128.0/18\",\r\n              \"102.133.192.0/19\",\r\n
+        \             \"102.133.224.0/20\",\r\n              \"102.133.240.0/25\",\r\n
+        \             \"102.133.240.128/26\",\r\n              \"102.133.248.0/21\"\r\n
+        \           ],\r\n            \"isAuthorizedToUse\": true,\r\n            \"serviceGroup\":
+        \"Azure\"\r\n          }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n      \"name\":
+        \"AzureSouthAfricaWest\",\r\n      \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureSouthAfricaWest\",\r\n
         \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
         {\r\n        \"serviceName\": \"AzureSouthAfricaWest\",\r\n        \"bgpCommunities\":
         [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
@@ -1546,14 +1511,17 @@ interactions:
         \             \"13.73.240.128/25\",\r\n              \"13.73.241.0/24\",\r\n
         \             \"13.73.242.0/23\",\r\n              \"13.73.244.0/22\",\r\n
         \             \"13.73.248.0/21\",\r\n              \"13.84.0.0/15\",\r\n              \"20.38.104.0/23\",\r\n
-        \             \"20.45.0.0/18\",\r\n              \"20.45.120.0/21\",\r\n              \"20.150.20.128/25\",\r\n
-        \             \"20.188.64.0/19\",\r\n              \"20.189.0.0/18\",\r\n
-        \             \"23.98.128.0/17\",\r\n              \"23.100.120.0/21\",\r\n
-        \             \"23.101.176.0/20\",\r\n              \"23.102.128.0/18\",\r\n
-        \             \"40.74.160.0/19\",\r\n              \"40.74.192.0/18\",\r\n
-        \             \"40.78.214.0/24\",\r\n              \"40.80.192.0/19\",\r\n
-        \             \"40.82.40.0/22\",\r\n              \"40.84.128.0/17\",\r\n
-        \             \"40.86.128.0/19\",\r\n              \"40.87.176.0/22\",\r\n
+        \             \"20.45.0.0/18\",\r\n              \"20.45.120.0/21\",\r\n              \"20.47.0.0/24\",\r\n
+        \             \"20.150.20.128/25\",\r\n              \"20.188.64.0/19\",\r\n
+        \             \"20.189.0.0/18\",\r\n              \"23.98.128.0/17\",\r\n
+        \             \"23.100.120.0/21\",\r\n              \"23.101.176.0/20\",\r\n
+        \             \"23.102.128.0/18\",\r\n              \"40.74.160.0/19\",\r\n
+        \             \"40.74.192.0/18\",\r\n              \"40.78.214.0/24\",\r\n
+        \             \"40.80.192.0/19\",\r\n              \"40.82.40.0/22\",\r\n
+        \             \"40.84.128.0/17\",\r\n              \"40.86.128.0/19\",\r\n
+        \             \"40.87.176.0/25\",\r\n              \"40.87.176.128/27\",\r\n
+        \             \"40.87.176.160/29\",\r\n              \"40.87.176.174/31\",\r\n
+        \             \"40.87.176.184/31\",\r\n              \"40.87.176.192/28\",\r\n
         \             \"40.91.16.0/22\",\r\n              \"40.119.0.0/18\",\r\n              \"40.124.0.0/16\",\r\n
         \             \"52.141.64.0/18\",\r\n              \"52.152.0.0/17\",\r\n
         \             \"52.153.64.0/18\",\r\n              \"52.153.192.0/18\",\r\n
@@ -1565,6 +1533,7 @@ interactions:
         \             \"52.239.203.0/24\",\r\n              \"52.239.204.0/24\",\r\n
         \             \"52.239.208.0/23\",\r\n              \"52.245.24.0/22\",\r\n
         \             \"52.248.0.0/17\",\r\n              \"52.249.0.0/18\",\r\n              \"52.253.0.0/18\",\r\n
+        \             \"52.253.179.0/24\",\r\n              \"52.253.180.0/24\",\r\n
         \             \"52.255.64.0/18\",\r\n              \"65.52.32.0/21\",\r\n
         \             \"65.54.55.160/27\",\r\n              \"65.54.55.224/27\",\r\n
         \             \"70.37.48.0/20\",\r\n              \"70.37.64.0/18\",\r\n              \"70.37.160.0/21\",\r\n
@@ -1610,9 +1579,10 @@ interactions:
         \             \"13.67.12.0/22\",\r\n              \"13.67.16.0/20\",\r\n              \"13.67.32.0/19\",\r\n
         \             \"13.67.64.0/18\",\r\n              \"13.76.0.0/16\",\r\n              \"20.43.128.0/18\",\r\n
         \             \"20.44.192.0/18\",\r\n              \"20.150.17.128/25\",\r\n
-        \             \"20.184.0.0/18\",\r\n              \"20.188.96.0/19\",\r\n
-        \             \"20.190.64.0/19\",\r\n              \"20.191.128.0/19\",\r\n
-        \             \"23.97.48.0/20\",\r\n              \"23.98.64.0/18\",\r\n              \"23.100.112.0/21\",\r\n
+        \             \"20.150.28.0/24\",\r\n              \"20.184.0.0/18\",\r\n
+        \             \"20.188.96.0/19\",\r\n              \"20.190.64.0/19\",\r\n
+        \             \"20.191.128.0/19\",\r\n              \"23.97.48.0/20\",\r\n
+        \             \"23.98.64.0/18\",\r\n              \"23.100.112.0/21\",\r\n
         \             \"23.101.16.0/20\",\r\n              \"40.65.128.0/18\",\r\n
         \             \"40.78.223.0/24\",\r\n              \"40.78.232.0/21\",\r\n
         \             \"40.82.28.0/22\",\r\n              \"40.87.196.0/22\",\r\n
@@ -1769,9 +1739,9 @@ interactions:
         \             \"13.69.96.0/19\",\r\n              \"13.73.128.0/18\",\r\n
         \             \"13.73.224.0/21\",\r\n              \"13.80.0.0/15\",\r\n              \"13.88.200.0/21\",\r\n
         \             \"13.93.0.0/17\",\r\n              \"13.94.128.0/17\",\r\n              \"13.95.0.0/16\",\r\n
-        \             \"20.38.108.0/23\",\r\n              \"20.150.8.0/23\",\r\n
-        \             \"23.97.128.0/17\",\r\n              \"23.98.46.0/24\",\r\n
-        \             \"23.100.0.0/20\",\r\n              \"23.101.64.0/20\",\r\n
+        \             \"20.38.108.0/23\",\r\n              \"20.38.200.0/22\",\r\n
+        \             \"20.150.8.0/23\",\r\n              \"23.97.128.0/17\",\r\n
+        \             \"23.98.46.0/24\",\r\n              \"23.100.0.0/20\",\r\n              \"23.101.64.0/20\",\r\n
         \             \"40.67.192.0/19\",\r\n              \"40.68.0.0/16\",\r\n              \"40.74.0.0/18\",\r\n
         \             \"40.78.210.0/24\",\r\n              \"40.82.92.0/22\",\r\n
         \             \"40.87.184.0/22\",\r\n              \"40.90.141.167/32\",\r\n
@@ -1781,8 +1751,8 @@ interactions:
         \             \"40.112.96.0/19\",\r\n              \"40.113.96.0/19\",\r\n
         \             \"40.113.128.0/18\",\r\n              \"40.114.128.0/17\",\r\n
         \             \"40.115.0.0/18\",\r\n              \"40.118.0.0/17\",\r\n              \"40.119.128.0/19\",\r\n
-        \             \"51.105.128.0/17\",\r\n              \"51.136.0.0/16\",\r\n
-        \             \"51.137.0.0/17\",\r\n              \"51.137.192.0/18\",\r\n
+        \             \"51.105.96.0/19\",\r\n              \"51.105.128.0/17\",\r\n
+        \             \"51.136.0.0/16\",\r\n              \"51.137.0.0/17\",\r\n              \"51.137.192.0/18\",\r\n
         \             \"51.144.0.0/16\",\r\n              \"51.145.128.0/17\",\r\n
         \             \"52.136.192.0/18\",\r\n              \"52.137.0.0/18\",\r\n
         \             \"52.142.192.0/18\",\r\n              \"52.143.0.0/18\",\r\n
@@ -1986,7 +1956,7 @@ interactions:
         \"12076:52014\",\r\n            \"communityPrefixes\": [\r\n              \"23.97.112.64/26\",\r\n
         \             \"191.232.216.32/27\",\r\n              \"191.232.221.16/28\",\r\n
         \             \"191.232.221.32/28\",\r\n              \"191.233.128.0/24\",\r\n
-        \             \"191.235.248.0/24\",\r\n              \"191.235.250.0/25\"\r\n
+        \             \"191.235.248.0/23\",\r\n              \"191.235.250.0/25\"\r\n
         \           ],\r\n            \"isAuthorizedToUse\": true,\r\n            \"serviceGroup\":
         \"AzureStorage\"\r\n          }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n
         \     \"name\": \"AzureStorageCanadaCentral\",\r\n      \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureStorageCanadaCentral\",\r\n
@@ -2068,30 +2038,30 @@ interactions:
         {\r\n        \"serviceName\": \"AzureStorageCentralUSEUAP\",\r\n        \"bgpCommunities\":
         [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
         \           \"communityName\": \"Azure Storage Central US EUAP\",\r\n            \"communityValue\":
-        \"12076:52009\",\r\n            \"communityPrefixes\": [\r\n              \"40.83.24.96/27\",\r\n
-        \             \"52.165.104.144/28\",\r\n              \"52.165.104.160/28\",\r\n
-        \             \"52.185.112.80/28\",\r\n              \"52.239.177.0/27\",\r\n
-        \             \"52.239.238.0/24\"\r\n            ],\r\n            \"isAuthorizedToUse\":
-        true,\r\n            \"serviceGroup\": \"AzureStorage\"\r\n          }\r\n
-        \       ]\r\n      }\r\n    },\r\n    {\r\n      \"name\": \"AzureStorageEastAsia\",\r\n
-        \     \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureStorageEastAsia\",\r\n
+        \"12076:52009\",\r\n            \"communityPrefixes\": [\r\n              \"20.150.23.0/24\",\r\n
+        \             \"40.83.24.96/27\",\r\n              \"52.165.104.144/28\",\r\n
+        \             \"52.165.104.160/28\",\r\n              \"52.185.112.80/28\",\r\n
+        \             \"52.239.177.0/27\",\r\n              \"52.239.238.0/24\"\r\n
+        \           ],\r\n            \"isAuthorizedToUse\": true,\r\n            \"serviceGroup\":
+        \"AzureStorage\"\r\n          }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n
+        \     \"name\": \"AzureStorageEastAsia\",\r\n      \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureStorageEastAsia\",\r\n
         \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
         {\r\n        \"serviceName\": \"AzureStorageEastAsia\",\r\n        \"bgpCommunities\":
         [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
         \           \"communityName\": \"Azure Storage East Asia\",\r\n            \"communityValue\":
         \"12076:52010\",\r\n            \"communityPrefixes\": [\r\n              \"20.150.1.128/25\",\r\n
-        \             \"40.83.104.176/28\",\r\n              \"40.83.104.208/28\",\r\n
-        \             \"52.175.40.128/28\",\r\n              \"52.175.112.16/28\",\r\n
-        \             \"52.184.40.16/28\",\r\n              \"52.184.40.32/28\",\r\n
-        \             \"52.239.128.0/24\",\r\n              \"52.239.224.0/24\",\r\n
-        \             \"168.63.128.0/26\",\r\n              \"168.63.128.128/25\",\r\n
-        \             \"168.63.129.128/25\",\r\n              \"168.63.130.0/26\",\r\n
-        \             \"168.63.130.128/26\",\r\n              \"168.63.131.0/26\",\r\n
-        \             \"168.63.156.64/26\",\r\n              \"168.63.156.192/26\",\r\n
-        \             \"191.237.238.32/28\"\r\n            ],\r\n            \"isAuthorizedToUse\":
-        true,\r\n            \"serviceGroup\": \"AzureStorage\"\r\n          }\r\n
-        \       ]\r\n      }\r\n    },\r\n    {\r\n      \"name\": \"AzureStorageEastUS\",\r\n
-        \     \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureStorageEastUS\",\r\n
+        \             \"20.150.22.0/24\",\r\n              \"40.83.104.176/28\",\r\n
+        \             \"40.83.104.208/28\",\r\n              \"52.175.40.128/28\",\r\n
+        \             \"52.175.112.16/28\",\r\n              \"52.184.40.16/28\",\r\n
+        \             \"52.184.40.32/28\",\r\n              \"52.239.128.0/24\",\r\n
+        \             \"52.239.224.0/24\",\r\n              \"168.63.128.0/26\",\r\n
+        \             \"168.63.128.128/25\",\r\n              \"168.63.129.128/25\",\r\n
+        \             \"168.63.130.0/26\",\r\n              \"168.63.130.128/26\",\r\n
+        \             \"168.63.131.0/26\",\r\n              \"168.63.156.64/26\",\r\n
+        \             \"168.63.156.192/26\",\r\n              \"191.237.238.32/28\"\r\n
+        \           ],\r\n            \"isAuthorizedToUse\": true,\r\n            \"serviceGroup\":
+        \"AzureStorage\"\r\n          }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n
+        \     \"name\": \"AzureStorageEastUS\",\r\n      \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureStorageEastUS\",\r\n
         \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
         {\r\n        \"serviceName\": \"AzureStorageEastUS\",\r\n        \"bgpCommunities\":
         [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
@@ -2100,29 +2070,29 @@ interactions:
         \             \"13.68.165.64/28\",\r\n              \"13.68.167.240/28\",\r\n
         \             \"13.82.33.32/28\",\r\n              \"13.82.152.16/28\",\r\n
         \             \"13.82.152.48/28\",\r\n              \"13.82.152.80/28\",\r\n
-        \             \"20.38.98.0/24\",\r\n              \"23.96.64.64/26\",\r\n
-        \             \"40.71.104.16/28\",\r\n              \"40.71.104.32/28\",\r\n
-        \             \"40.71.240.16/28\",\r\n              \"40.117.48.80/28\",\r\n
-        \             \"40.117.48.112/28\",\r\n              \"40.117.104.16/28\",\r\n
-        \             \"52.179.24.16/28\",\r\n              \"52.186.112.32/27\",\r\n
-        \             \"52.226.8.32/27\",\r\n              \"52.226.8.80/28\",\r\n
-        \             \"52.226.8.96/28\",\r\n              \"52.226.8.128/27\",\r\n
-        \             \"52.234.176.48/28\",\r\n              \"52.234.176.64/28\",\r\n
-        \             \"52.234.176.96/27\",\r\n              \"52.239.152.0/22\",\r\n
-        \             \"52.239.168.0/22\",\r\n              \"52.239.207.192/26\",\r\n
-        \             \"52.239.214.0/23\",\r\n              \"52.239.220.0/23\",\r\n
-        \             \"52.239.246.0/23\",\r\n              \"52.239.252.0/24\",\r\n
-        \             \"52.240.48.16/28\",\r\n              \"52.240.48.32/28\",\r\n
-        \             \"52.240.60.16/28\",\r\n              \"52.240.60.32/28\",\r\n
-        \             \"52.240.60.64/27\",\r\n              \"138.91.96.64/26\",\r\n
-        \             \"138.91.96.128/26\",\r\n              \"168.62.32.0/26\",\r\n
-        \             \"168.62.32.192/26\",\r\n              \"168.62.33.128/26\",\r\n
-        \             \"191.237.32.128/28\",\r\n              \"191.237.32.208/28\",\r\n
-        \             \"191.237.32.240/28\",\r\n              \"191.238.0.0/26\",\r\n
-        \             \"191.238.0.224/28\"\r\n            ],\r\n            \"isAuthorizedToUse\":
-        true,\r\n            \"serviceGroup\": \"AzureStorage\"\r\n          }\r\n
-        \       ]\r\n      }\r\n    },\r\n    {\r\n      \"name\": \"AzureStorageEastUS2\",\r\n
-        \     \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureStorageEastUS2\",\r\n
+        \             \"20.38.98.0/24\",\r\n              \"20.150.32.0/23\",\r\n
+        \             \"23.96.64.64/26\",\r\n              \"40.71.104.16/28\",\r\n
+        \             \"40.71.104.32/28\",\r\n              \"40.71.240.16/28\",\r\n
+        \             \"40.117.48.80/28\",\r\n              \"40.117.48.112/28\",\r\n
+        \             \"40.117.104.16/28\",\r\n              \"52.179.24.16/28\",\r\n
+        \             \"52.186.112.32/27\",\r\n              \"52.226.8.32/27\",\r\n
+        \             \"52.226.8.80/28\",\r\n              \"52.226.8.96/28\",\r\n
+        \             \"52.226.8.128/27\",\r\n              \"52.234.176.48/28\",\r\n
+        \             \"52.234.176.64/28\",\r\n              \"52.234.176.96/27\",\r\n
+        \             \"52.239.152.0/22\",\r\n              \"52.239.168.0/22\",\r\n
+        \             \"52.239.207.192/26\",\r\n              \"52.239.214.0/23\",\r\n
+        \             \"52.239.220.0/23\",\r\n              \"52.239.246.0/23\",\r\n
+        \             \"52.239.252.0/24\",\r\n              \"52.240.48.16/28\",\r\n
+        \             \"52.240.48.32/28\",\r\n              \"52.240.60.16/28\",\r\n
+        \             \"52.240.60.32/28\",\r\n              \"52.240.60.64/27\",\r\n
+        \             \"138.91.96.64/26\",\r\n              \"138.91.96.128/26\",\r\n
+        \             \"168.62.32.0/26\",\r\n              \"168.62.32.192/26\",\r\n
+        \             \"168.62.33.128/26\",\r\n              \"191.237.32.128/28\",\r\n
+        \             \"191.237.32.208/28\",\r\n              \"191.237.32.240/28\",\r\n
+        \             \"191.238.0.0/26\",\r\n              \"191.238.0.224/28\"\r\n
+        \           ],\r\n            \"isAuthorizedToUse\": true,\r\n            \"serviceGroup\":
+        \"AzureStorage\"\r\n          }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n
+        \     \"name\": \"AzureStorageEastUS2\",\r\n      \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureStorageEastUS2\",\r\n
         \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
         {\r\n        \"serviceName\": \"AzureStorageEastUS2\",\r\n        \"bgpCommunities\":
         [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
@@ -2131,42 +2101,38 @@ interactions:
         \             \"13.77.112.16/28\",\r\n              \"13.77.112.32/28\",\r\n
         \             \"13.77.112.112/28\",\r\n              \"13.77.112.128/28\",\r\n
         \             \"13.77.115.16/28\",\r\n              \"13.77.115.32/28\",\r\n
-        \             \"20.38.100.0/23\",\r\n              \"23.102.206.0/28\",\r\n
-        \             \"23.102.206.128/28\",\r\n              \"23.102.206.192/28\",\r\n
-        \             \"40.79.8.16/28\",\r\n              \"40.79.48.16/28\",\r\n
-        \             \"40.84.8.32/28\",\r\n              \"40.84.11.80/28\",\r\n
-        \             \"40.123.16.16/28\",\r\n              \"52.167.88.80/28\",\r\n
-        \             \"52.167.88.112/28\",\r\n              \"52.167.240.16/28\",\r\n
-        \             \"52.177.208.80/28\",\r\n              \"52.179.144.32/28\",\r\n
-        \             \"52.179.144.64/28\",\r\n              \"52.179.240.16/28\",\r\n
-        \             \"52.179.240.48/28\",\r\n              \"52.179.240.64/28\",\r\n
-        \             \"52.179.240.96/27\",\r\n              \"52.179.240.144/28\",\r\n
-        \             \"52.179.240.160/28\",\r\n              \"52.179.240.192/27\",\r\n
-        \             \"52.179.240.240/28\",\r\n              \"52.179.241.0/28\",\r\n
-        \             \"52.179.241.32/27\",\r\n              \"52.184.168.96/27\",\r\n
-        \             \"52.225.136.16/28\",\r\n              \"52.225.136.32/28\",\r\n
-        \             \"52.225.240.0/28\",\r\n              \"52.232.232.16/28\",\r\n
-        \             \"52.232.232.32/28\",\r\n              \"52.232.232.80/28\",\r\n
-        \             \"52.232.232.96/28\",\r\n              \"52.232.232.128/27\",\r\n
-        \             \"52.232.232.176/28\",\r\n              \"52.232.232.192/28\",\r\n
-        \             \"52.239.156.0/24\",\r\n              \"52.239.157.0/25\",\r\n
-        \             \"52.239.157.128/26\",\r\n              \"52.239.157.192/27\",\r\n
-        \             \"52.239.172.0/22\",\r\n              \"52.239.184.0/25\",\r\n
-        \             \"52.239.184.160/28\",\r\n              \"52.239.184.192/27\",\r\n
-        \             \"52.239.185.32/27\",\r\n              \"52.239.185.64/27\",\r\n
-        \             \"52.239.192.0/25\",\r\n              \"52.239.192.160/27\",\r\n
-        \             \"52.239.192.192/26\",\r\n              \"52.239.198.0/25\",\r\n
-        \             \"52.239.198.160/27\",\r\n              \"52.239.198.192/26\",\r\n
-        \             \"52.239.206.0/24\",\r\n              \"52.239.207.0/27\",\r\n
-        \             \"52.239.207.32/28\",\r\n              \"52.239.207.64/26\",\r\n
-        \             \"52.239.207.128/26\",\r\n              \"52.239.222.0/23\",\r\n
-        \             \"104.208.128.16/28\",\r\n              \"104.208.248.16/28\",\r\n
-        \             \"137.116.1.0/25\",\r\n              \"137.116.2.0/26\",\r\n
-        \             \"137.116.2.64/27\",\r\n              \"137.116.2.96/29\",\r\n
-        \             \"137.116.2.104/30\",\r\n              \"137.116.2.108/32\",\r\n
-        \             \"137.116.2.110/31\",\r\n              \"137.116.2.112/32\",\r\n
-        \             \"137.116.2.114/32\",\r\n              \"137.116.2.116/30\",\r\n
-        \             \"137.116.2.120/29\",\r\n              \"137.116.3.0/25\",\r\n
+        \             \"20.38.100.0/23\",\r\n              \"20.150.29.0/24\",\r\n
+        \             \"23.102.206.0/28\",\r\n              \"23.102.206.128/28\",\r\n
+        \             \"23.102.206.192/28\",\r\n              \"40.79.8.16/28\",\r\n
+        \             \"40.79.48.16/28\",\r\n              \"40.84.8.32/28\",\r\n
+        \             \"40.84.11.80/28\",\r\n              \"40.123.16.16/28\",\r\n
+        \             \"52.167.88.80/28\",\r\n              \"52.167.88.112/28\",\r\n
+        \             \"52.167.240.16/28\",\r\n              \"52.177.208.80/28\",\r\n
+        \             \"52.179.144.32/28\",\r\n              \"52.179.144.64/28\",\r\n
+        \             \"52.179.240.16/28\",\r\n              \"52.179.240.48/28\",\r\n
+        \             \"52.179.240.64/28\",\r\n              \"52.179.240.96/27\",\r\n
+        \             \"52.179.240.144/28\",\r\n              \"52.179.240.160/28\",\r\n
+        \             \"52.179.240.192/27\",\r\n              \"52.179.240.240/28\",\r\n
+        \             \"52.179.241.0/28\",\r\n              \"52.179.241.32/27\",\r\n
+        \             \"52.184.168.96/27\",\r\n              \"52.225.136.16/28\",\r\n
+        \             \"52.225.136.32/28\",\r\n              \"52.225.240.0/28\",\r\n
+        \             \"52.232.232.16/28\",\r\n              \"52.232.232.32/28\",\r\n
+        \             \"52.232.232.80/28\",\r\n              \"52.232.232.96/28\",\r\n
+        \             \"52.232.232.128/27\",\r\n              \"52.232.232.176/28\",\r\n
+        \             \"52.232.232.192/28\",\r\n              \"52.239.156.0/24\",\r\n
+        \             \"52.239.157.0/25\",\r\n              \"52.239.157.128/26\",\r\n
+        \             \"52.239.157.192/27\",\r\n              \"52.239.172.0/22\",\r\n
+        \             \"52.239.184.0/25\",\r\n              \"52.239.184.160/28\",\r\n
+        \             \"52.239.184.192/27\",\r\n              \"52.239.185.32/27\",\r\n
+        \             \"52.239.185.64/27\",\r\n              \"52.239.192.0/25\",\r\n
+        \             \"52.239.192.160/27\",\r\n              \"52.239.192.192/26\",\r\n
+        \             \"52.239.198.0/25\",\r\n              \"52.239.198.160/27\",\r\n
+        \             \"52.239.198.192/26\",\r\n              \"52.239.206.0/24\",\r\n
+        \             \"52.239.207.0/27\",\r\n              \"52.239.207.32/28\",\r\n
+        \             \"52.239.207.64/26\",\r\n              \"52.239.207.128/26\",\r\n
+        \             \"52.239.222.0/23\",\r\n              \"104.208.128.16/28\",\r\n
+        \             \"104.208.248.16/28\",\r\n              \"137.116.1.0/25\",\r\n
+        \             \"137.116.2.0/25\",\r\n              \"137.116.3.0/25\",\r\n
         \             \"137.116.3.128/26\",\r\n              \"137.116.96.0/25\",\r\n
         \             \"137.116.96.128/26\",\r\n              \"191.237.160.64/26\",\r\n
         \             \"191.237.160.224/28\",\r\n              \"191.239.224.0/26\"\r\n
@@ -2177,25 +2143,16 @@ interactions:
         {\r\n        \"serviceName\": \"AzureStorageEastUS2EUAP\",\r\n        \"bgpCommunities\":
         [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
         \           \"communityName\": \"Azure Storage East US 2 EUAP\",\r\n            \"communityValue\":
-        \"12076:52005\",\r\n            \"communityPrefixes\": [\r\n              \"40.70.88.0/30\",\r\n
-        \             \"40.70.88.4/31\",\r\n              \"40.70.88.6/32\",\r\n              \"40.70.88.8/31\",\r\n
-        \             \"40.70.88.10/32\",\r\n              \"40.70.88.12/32\",\r\n
-        \             \"40.70.88.14/31\",\r\n              \"40.79.88.16/30\",\r\n
-        \             \"40.79.88.20/31\",\r\n              \"40.79.88.22/32\",\r\n
-        \             \"40.79.88.24/31\",\r\n              \"40.79.88.26/32\",\r\n
-        \             \"40.79.88.28/32\",\r\n              \"40.79.88.30/31\",\r\n
-        \             \"52.184.168.32/30\",\r\n              \"52.184.168.36/31\",\r\n
-        \             \"52.184.168.38/32\",\r\n              \"52.184.168.40/31\",\r\n
-        \             \"52.184.168.42/32\",\r\n              \"52.184.168.44/32\",\r\n
-        \             \"52.184.168.46/31\",\r\n              \"52.239.157.224/27\",\r\n
-        \             \"52.239.165.192/26\",\r\n              \"52.239.184.128/27\",\r\n
-        \             \"52.239.184.176/28\",\r\n              \"52.239.184.224/27\",\r\n
-        \             \"52.239.185.0/28\",\r\n              \"52.239.192.128/27\",\r\n
-        \             \"52.239.198.128/27\",\r\n              \"52.239.230.0/24\",\r\n
-        \             \"52.239.239.0/24\"\r\n            ],\r\n            \"isAuthorizedToUse\":
-        true,\r\n            \"serviceGroup\": \"AzureStorage\"\r\n          }\r\n
-        \       ]\r\n      }\r\n    },\r\n    {\r\n      \"name\": \"AzureStorageFranceCentral\",\r\n
-        \     \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureStorageFranceCentral\",\r\n
+        \"12076:52005\",\r\n            \"communityPrefixes\": [\r\n              \"40.70.88.0/28\",\r\n
+        \             \"40.79.88.16/28\",\r\n              \"52.184.168.32/28\",\r\n
+        \             \"52.239.157.224/27\",\r\n              \"52.239.165.192/26\",\r\n
+        \             \"52.239.184.128/27\",\r\n              \"52.239.184.176/28\",\r\n
+        \             \"52.239.184.224/27\",\r\n              \"52.239.185.0/28\",\r\n
+        \             \"52.239.192.128/27\",\r\n              \"52.239.198.128/27\",\r\n
+        \             \"52.239.230.0/24\",\r\n              \"52.239.239.0/24\"\r\n
+        \           ],\r\n            \"isAuthorizedToUse\": true,\r\n            \"serviceGroup\":
+        \"AzureStorage\"\r\n          }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n
+        \     \"name\": \"AzureStorageFranceCentral\",\r\n      \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureStorageFranceCentral\",\r\n
         \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
         {\r\n        \"serviceName\": \"AzureStorageFranceCentral\",\r\n        \"bgpCommunities\":
         [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
@@ -2270,20 +2227,16 @@ interactions:
         [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
         \           \"communityName\": \"Azure Storage North Central US\",\r\n            \"communityValue\":
         \"12076:52007\",\r\n            \"communityPrefixes\": [\r\n              \"20.150.17.0/25\",\r\n
-        \             \"23.98.49.0/26\",\r\n              \"23.98.49.192/26\",\r\n
-        \             \"23.98.55.0/26\",\r\n              \"23.98.55.112/28\",\r\n
-        \             \"23.98.55.144/28\",\r\n              \"40.116.120.16/28\",\r\n
-        \             \"40.116.232.16/28\",\r\n              \"40.116.232.48/28\",\r\n
-        \             \"40.116.232.96/28\",\r\n              \"52.162.56.16/28\",\r\n
-        \             \"52.162.56.32/28\",\r\n              \"52.162.56.64/27\",\r\n
-        \             \"52.162.56.112/28\",\r\n              \"52.162.56.128/28\",\r\n
-        \             \"52.239.149.0/24\",\r\n              \"52.239.186.0/24\",\r\n
-        \             \"52.239.253.0/24\",\r\n              \"157.56.216.0/26\",\r\n
-        \             \"168.62.96.128/26\",\r\n              \"168.62.96.192/29\",\r\n
-        \             \"168.62.96.200/30\",\r\n              \"168.62.96.204/32\",\r\n
-        \             \"168.62.96.206/31\",\r\n              \"168.62.96.208/32\",\r\n
-        \             \"168.62.96.210/32\",\r\n              \"168.62.96.212/30\",\r\n
-        \             \"168.62.96.216/29\",\r\n              \"168.62.96.224/27\"\r\n
+        \             \"20.150.25.0/24\",\r\n              \"23.98.49.0/26\",\r\n
+        \             \"23.98.49.192/26\",\r\n              \"23.98.55.0/26\",\r\n
+        \             \"23.98.55.112/28\",\r\n              \"23.98.55.144/28\",\r\n
+        \             \"40.116.120.16/28\",\r\n              \"40.116.232.16/28\",\r\n
+        \             \"40.116.232.48/28\",\r\n              \"40.116.232.96/28\",\r\n
+        \             \"52.162.56.16/28\",\r\n              \"52.162.56.32/28\",\r\n
+        \             \"52.162.56.64/27\",\r\n              \"52.162.56.112/28\",\r\n
+        \             \"52.162.56.128/28\",\r\n              \"52.239.149.0/24\",\r\n
+        \             \"52.239.186.0/24\",\r\n              \"52.239.253.0/24\",\r\n
+        \             \"157.56.216.0/26\",\r\n              \"168.62.96.128/25\"\r\n
         \           ],\r\n            \"isAuthorizedToUse\": true,\r\n            \"serviceGroup\":
         \"AzureStorage\"\r\n          }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n
         \     \"name\": \"AzureStorageNorthEurope\",\r\n      \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureStorageNorthEurope\",\r\n
@@ -2295,27 +2248,28 @@ interactions:
         \             \"13.74.208.64/28\",\r\n              \"13.74.208.112/28\",\r\n
         \             \"13.74.208.144/28\",\r\n              \"13.79.176.16/28\",\r\n
         \             \"13.79.176.48/28\",\r\n              \"13.79.176.80/28\",\r\n
-        \             \"20.38.102.0/23\",\r\n              \"40.85.105.32/28\",\r\n
-        \             \"40.112.0.16/28\",\r\n              \"40.113.27.176/28\",\r\n
-        \             \"52.164.112.16/28\",\r\n              \"52.164.232.16/28\",\r\n
-        \             \"52.164.232.32/28\",\r\n              \"52.164.232.64/28\",\r\n
-        \             \"52.169.168.32/27\",\r\n              \"52.169.240.16/28\",\r\n
-        \             \"52.169.240.32/28\",\r\n              \"52.169.240.64/28\",\r\n
-        \             \"52.178.168.32/27\",\r\n              \"52.178.168.80/28\",\r\n
-        \             \"52.178.168.96/28\",\r\n              \"52.178.168.128/27\",\r\n
-        \             \"52.236.40.16/28\",\r\n              \"52.236.40.32/28\",\r\n
-        \             \"52.239.136.0/22\",\r\n              \"52.239.205.0/24\",\r\n
-        \             \"52.239.248.0/24\",\r\n              \"52.245.40.0/24\",\r\n
-        \             \"104.41.232.16/28\",\r\n              \"137.135.192.64/26\",\r\n
-        \             \"137.135.192.192/26\",\r\n              \"137.135.193.192/26\",\r\n
-        \             \"137.135.194.0/25\",\r\n              \"137.135.194.192/26\",\r\n
-        \             \"168.61.120.32/27\",\r\n              \"168.61.120.64/27\",\r\n
-        \             \"168.61.121.0/26\",\r\n              \"168.63.32.0/26\",\r\n
-        \             \"168.63.33.192/26\",\r\n              \"191.235.192.192/26\",\r\n
-        \             \"191.235.193.32/28\",\r\n              \"191.235.255.192/26\"\r\n
-        \           ],\r\n            \"isAuthorizedToUse\": true,\r\n            \"serviceGroup\":
-        \"AzureStorage\"\r\n          }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n
-        \     \"name\": \"AzureStorageSouthAfricaNorth\",\r\n      \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureStorageSouthAfricaNorth\",\r\n
+        \             \"20.38.102.0/23\",\r\n              \"20.150.26.0/24\",\r\n
+        \             \"40.85.105.32/28\",\r\n              \"40.112.0.16/28\",\r\n
+        \             \"40.113.27.176/28\",\r\n              \"52.164.112.16/28\",\r\n
+        \             \"52.164.232.16/28\",\r\n              \"52.164.232.32/28\",\r\n
+        \             \"52.164.232.64/28\",\r\n              \"52.169.168.32/27\",\r\n
+        \             \"52.169.240.16/28\",\r\n              \"52.169.240.32/28\",\r\n
+        \             \"52.169.240.64/28\",\r\n              \"52.178.168.32/27\",\r\n
+        \             \"52.178.168.80/28\",\r\n              \"52.178.168.96/28\",\r\n
+        \             \"52.178.168.128/27\",\r\n              \"52.236.40.16/28\",\r\n
+        \             \"52.236.40.32/28\",\r\n              \"52.239.136.0/22\",\r\n
+        \             \"52.239.205.0/24\",\r\n              \"52.239.248.0/24\",\r\n
+        \             \"52.245.40.0/24\",\r\n              \"104.41.232.16/28\",\r\n
+        \             \"137.135.192.64/26\",\r\n              \"137.135.192.192/26\",\r\n
+        \             \"137.135.193.192/26\",\r\n              \"137.135.194.0/25\",\r\n
+        \             \"137.135.194.192/26\",\r\n              \"168.61.120.32/27\",\r\n
+        \             \"168.61.120.64/27\",\r\n              \"168.61.121.0/26\",\r\n
+        \             \"168.63.32.0/26\",\r\n              \"168.63.33.192/26\",\r\n
+        \             \"191.235.192.192/26\",\r\n              \"191.235.193.32/28\",\r\n
+        \             \"191.235.255.192/26\"\r\n            ],\r\n            \"isAuthorizedToUse\":
+        true,\r\n            \"serviceGroup\": \"AzureStorage\"\r\n          }\r\n
+        \       ]\r\n      }\r\n    },\r\n    {\r\n      \"name\": \"AzureStorageSouthAfricaNorth\",\r\n
+        \     \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureStorageSouthAfricaNorth\",\r\n
         \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
         {\r\n        \"serviceName\": \"AzureStorageSouthAfricaNorth\",\r\n        \"bgpCommunities\":
         [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
@@ -2342,7 +2296,7 @@ interactions:
         \             \"13.65.160.16/28\",\r\n              \"13.65.160.48/28\",\r\n
         \             \"13.65.160.64/28\",\r\n              \"13.84.56.16/28\",\r\n
         \             \"13.85.88.16/28\",\r\n              \"13.85.200.128/28\",\r\n
-        \             \"20.38.104.0/23\",\r\n              \"20.150.20.128/25\",\r\n
+        \             \"20.38.104.0/23\",\r\n              \"20.47.0.0/24\",\r\n              \"20.150.20.128/25\",\r\n
         \             \"23.98.160.64/26\",\r\n              \"23.98.162.192/26\",\r\n
         \             \"23.98.168.0/24\",\r\n              \"23.98.192.64/26\",\r\n
         \             \"23.98.255.64/26\",\r\n              \"52.171.144.32/27\",\r\n
@@ -2376,22 +2330,23 @@ interactions:
         [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
         \           \"communityName\": \"Azure Storage Southeast Asia\",\r\n            \"communityValue\":
         \"12076:52011\",\r\n            \"communityPrefixes\": [\r\n              \"13.76.104.16/28\",\r\n
-        \             \"20.150.17.128/25\",\r\n              \"52.163.176.16/28\",\r\n
-        \             \"52.163.232.16/28\",\r\n              \"52.187.141.32/27\",\r\n
-        \             \"52.237.104.16/28\",\r\n              \"52.237.104.32/28\",\r\n
-        \             \"52.239.129.0/24\",\r\n              \"52.239.197.0/24\",\r\n
-        \             \"52.239.227.0/24\",\r\n              \"52.239.249.0/24\",\r\n
-        \             \"104.43.80.16/28\",\r\n              \"104.215.240.64/28\",\r\n
-        \             \"104.215.240.96/28\",\r\n              \"168.63.160.0/26\",\r\n
-        \             \"168.63.160.192/26\",\r\n              \"168.63.161.64/26\",\r\n
-        \             \"168.63.161.160/27\",\r\n              \"168.63.161.192/26\",\r\n
-        \             \"168.63.162.32/27\",\r\n              \"168.63.162.64/26\",\r\n
-        \             \"168.63.162.144/28\",\r\n              \"168.63.162.192/26\",\r\n
-        \             \"168.63.163.128/26\",\r\n              \"168.63.180.64/26\",\r\n
-        \             \"191.238.64.64/26\",\r\n              \"191.238.64.192/28\"\r\n
-        \           ],\r\n            \"isAuthorizedToUse\": true,\r\n            \"serviceGroup\":
-        \"AzureStorage\"\r\n          }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n
-        \     \"name\": \"AzureStorageUAECentral\",\r\n      \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureStorageUAECentral\",\r\n
+        \             \"20.150.17.128/25\",\r\n              \"20.150.28.0/24\",\r\n
+        \             \"52.163.176.16/28\",\r\n              \"52.163.232.16/28\",\r\n
+        \             \"52.187.141.32/27\",\r\n              \"52.237.104.16/28\",\r\n
+        \             \"52.237.104.32/28\",\r\n              \"52.239.129.0/24\",\r\n
+        \             \"52.239.197.0/24\",\r\n              \"52.239.227.0/24\",\r\n
+        \             \"52.239.249.0/24\",\r\n              \"104.43.80.16/28\",\r\n
+        \             \"104.215.240.64/28\",\r\n              \"104.215.240.96/28\",\r\n
+        \             \"168.63.160.0/26\",\r\n              \"168.63.160.192/26\",\r\n
+        \             \"168.63.161.64/26\",\r\n              \"168.63.161.160/27\",\r\n
+        \             \"168.63.161.192/26\",\r\n              \"168.63.162.32/27\",\r\n
+        \             \"168.63.162.64/26\",\r\n              \"168.63.162.144/28\",\r\n
+        \             \"168.63.162.192/26\",\r\n              \"168.63.163.128/26\",\r\n
+        \             \"168.63.180.64/26\",\r\n              \"191.238.64.64/26\",\r\n
+        \             \"191.238.64.192/28\"\r\n            ],\r\n            \"isAuthorizedToUse\":
+        true,\r\n            \"serviceGroup\": \"AzureStorage\"\r\n          }\r\n
+        \       ]\r\n      }\r\n    },\r\n    {\r\n      \"name\": \"AzureStorageUAECentral\",\r\n
+        \     \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureStorageUAECentral\",\r\n
         \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
         {\r\n        \"serviceName\": \"AzureStorageUAECentral\",\r\n        \"bgpCommunities\":
         [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
@@ -3150,16 +3105,439 @@ interactions:
         \             \"52.191.152.64/26\",\r\n              \"52.191.172.187/32\",\r\n
         \             \"52.191.174.114/32\",\r\n              \"52.229.17.93/32\"\r\n
         \           ],\r\n            \"isAuthorizedToUse\": true,\r\n            \"serviceGroup\":
-        \"AzureSQL\"\r\n          }\r\n        ]\r\n      }\r\n    }\r\n  ]\r\n}"
+        \"AzureSQL\"\r\n          }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n
+        \     \"name\": \"AzureCosmosDBAustraliaCentral\",\r\n      \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureCosmosDBAustraliaCentral\",\r\n
+        \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
+        {\r\n        \"serviceName\": \"AzureCosmosDBAustraliaCentral\",\r\n        \"bgpCommunities\":
+        [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
+        \           \"communityName\": \"Azure Cosmos DB Australia Central\",\r\n
+        \           \"communityValue\": \"12076:54032\",\r\n            \"communityPrefixes\":
+        [\r\n              \"20.36.42.8/32\",\r\n              \"20.36.106.0/26\"\r\n
+        \           ],\r\n            \"isAuthorizedToUse\": true,\r\n            \"serviceGroup\":
+        \"AzureCosmosDB\"\r\n          }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n
+        \     \"name\": \"AzureCosmosDBAustraliaCentral2\",\r\n      \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureCosmosDBAustraliaCentral2\",\r\n
+        \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
+        {\r\n        \"serviceName\": \"AzureCosmosDBAustraliaCentral2\",\r\n        \"bgpCommunities\":
+        [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
+        \           \"communityName\": \"Azure Cosmos DB Australia Central 2\",\r\n
+        \           \"communityValue\": \"12076:54033\",\r\n            \"communityPrefixes\":
+        [\r\n              \"20.36.75.163/32\",\r\n              \"20.36.114.0/28\"\r\n
+        \           ],\r\n            \"isAuthorizedToUse\": true,\r\n            \"serviceGroup\":
+        \"AzureCosmosDB\"\r\n          }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n
+        \     \"name\": \"AzureCosmosDBAustraliaEast\",\r\n      \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureCosmosDBAustraliaEast\",\r\n
+        \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
+        {\r\n        \"serviceName\": \"AzureCosmosDBAustraliaEast\",\r\n        \"bgpCommunities\":
+        [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
+        \           \"communityName\": \"Azure Cosmos DB Australia East\",\r\n            \"communityValue\":
+        \"12076:54015\",\r\n            \"communityPrefixes\": [\r\n              \"13.72.255.150/32\",\r\n
+        \             \"13.75.134.84/32\",\r\n              \"40.79.170.48/28\",\r\n
+        \             \"40.126.244.209/32\",\r\n              \"52.156.170.104/32\",\r\n
+        \             \"104.210.89.99/32\"\r\n            ],\r\n            \"isAuthorizedToUse\":
+        true,\r\n            \"serviceGroup\": \"AzureCosmosDB\"\r\n          }\r\n
+        \       ]\r\n      }\r\n    },\r\n    {\r\n      \"name\": \"AzureCosmosDBAustraliaSoutheast\",\r\n
+        \     \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureCosmosDBAustraliaSoutheast\",\r\n
+        \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
+        {\r\n        \"serviceName\": \"AzureCosmosDBAustraliaSoutheast\",\r\n        \"bgpCommunities\":
+        [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
+        \           \"communityName\": \"Azure Cosmos DB Australia Southeast\",\r\n
+        \           \"communityValue\": \"12076:54016\",\r\n            \"communityPrefixes\":
+        [\r\n              \"13.73.100.183/32\",\r\n              \"13.73.109.135/32\",\r\n
+        \             \"13.77.50.0/28\",\r\n              \"52.255.52.19/32\",\r\n
+        \             \"52.255.58.221/32\",\r\n              \"191.239.179.124/32\"\r\n
+        \           ],\r\n            \"isAuthorizedToUse\": true,\r\n            \"serviceGroup\":
+        \"AzureCosmosDB\"\r\n          }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n
+        \     \"name\": \"AzureCosmosDBBrazilSouth\",\r\n      \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureCosmosDBBrazilSouth\",\r\n
+        \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
+        {\r\n        \"serviceName\": \"AzureCosmosDBBrazilSouth\",\r\n        \"bgpCommunities\":
+        [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
+        \           \"communityName\": \"Azure Cosmos DB Brazil South\",\r\n            \"communityValue\":
+        \"12076:54014\",\r\n            \"communityPrefixes\": [\r\n              \"104.41.52.61/32\",\r\n
+        \             \"104.41.54.69/32\",\r\n              \"191.232.51.175/32\",\r\n
+        \             \"191.232.53.203/32\",\r\n              \"191.233.204.128/27\",\r\n
+        \             \"191.234.179.157/32\"\r\n            ],\r\n            \"isAuthorizedToUse\":
+        true,\r\n            \"serviceGroup\": \"AzureCosmosDB\"\r\n          }\r\n
+        \       ]\r\n      }\r\n    },\r\n    {\r\n      \"name\": \"AzureCosmosDBCanadaCentral\",\r\n
+        \     \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureCosmosDBCanadaCentral\",\r\n
+        \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
+        {\r\n        \"serviceName\": \"AzureCosmosDBCanadaCentral\",\r\n        \"bgpCommunities\":
+        [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
+        \           \"communityName\": \"Azure Cosmos DB Canada Central\",\r\n            \"communityValue\":
+        \"12076:54020\",\r\n            \"communityPrefixes\": [\r\n              \"13.71.170.0/28\",\r\n
+        \             \"13.88.253.180/32\",\r\n              \"20.38.146.0/26\",\r\n
+        \             \"52.233.41.60/32\",\r\n              \"52.237.20.252/32\",\r\n
+        \             \"52.246.154.0/26\"\r\n            ],\r\n            \"isAuthorizedToUse\":
+        true,\r\n            \"serviceGroup\": \"AzureCosmosDB\"\r\n          }\r\n
+        \       ]\r\n      }\r\n    },\r\n    {\r\n      \"name\": \"AzureCosmosDBCanadaEast\",\r\n
+        \     \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureCosmosDBCanadaEast\",\r\n
+        \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
+        {\r\n        \"serviceName\": \"AzureCosmosDBCanadaEast\",\r\n        \"bgpCommunities\":
+        [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
+        \           \"communityName\": \"Azure Cosmos DB Canada East\",\r\n            \"communityValue\":
+        \"12076:54021\",\r\n            \"communityPrefixes\": [\r\n              \"40.69.106.0/28\",\r\n
+        \             \"40.86.229.245/32\",\r\n              \"52.235.40.247/32\",\r\n
+        \             \"52.235.46.28/32\"\r\n            ],\r\n            \"isAuthorizedToUse\":
+        true,\r\n            \"serviceGroup\": \"AzureCosmosDB\"\r\n          }\r\n
+        \       ]\r\n      }\r\n    },\r\n    {\r\n      \"name\": \"AzureCosmosDBCentralIndia\",\r\n
+        \     \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureCosmosDBCentralIndia\",\r\n
+        \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
+        {\r\n        \"serviceName\": \"AzureCosmosDBCentralIndia\",\r\n        \"bgpCommunities\":
+        [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
+        \           \"communityName\": \"Azure Cosmos DB Central India\",\r\n            \"communityValue\":
+        \"12076:54017\",\r\n            \"communityPrefixes\": [\r\n              \"40.80.50.0/26\",\r\n
+        \             \"52.172.206.130/32\",\r\n              \"104.211.84.0/28\",\r\n
+        \             \"104.211.102.50/32\"\r\n            ],\r\n            \"isAuthorizedToUse\":
+        true,\r\n            \"serviceGroup\": \"AzureCosmosDB\"\r\n          }\r\n
+        \       ]\r\n      }\r\n    },\r\n    {\r\n      \"name\": \"AzureCosmosDBCentralUS\",\r\n
+        \     \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureCosmosDBCentralUS\",\r\n
+        \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
+        {\r\n        \"serviceName\": \"AzureCosmosDBCentralUS\",\r\n        \"bgpCommunities\":
+        [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
+        \           \"communityName\": \"Azure Cosmos DB Central US\",\r\n            \"communityValue\":
+        \"12076:54009\",\r\n            \"communityPrefixes\": [\r\n              \"13.89.41.245/32\",\r\n
+        \             \"13.89.170.0/25\",\r\n              \"13.89.190.186/32\",\r\n
+        \             \"13.89.224.229/32\",\r\n              \"20.44.10.0/26\",\r\n
+        \             \"40.77.63.179/32\",\r\n              \"40.122.132.89/32\",\r\n
+        \             \"40.122.174.140/32\",\r\n              \"52.165.42.204/32\",\r\n
+        \             \"52.165.46.249/32\",\r\n              \"52.165.129.184/32\",\r\n
+        \             \"52.165.229.112/32\",\r\n              \"52.165.229.184/32\",\r\n
+        \             \"52.173.148.217/32\",\r\n              \"52.173.196.170/32\",\r\n
+        \             \"52.173.240.244/32\",\r\n              \"52.176.0.136/32\",\r\n
+        \             \"52.176.7.71/32\",\r\n              \"52.176.101.49/32\",\r\n
+        \             \"52.176.155.127/32\",\r\n              \"52.182.138.0/25\"\r\n
+        \           ],\r\n            \"isAuthorizedToUse\": true,\r\n            \"serviceGroup\":
+        \"AzureCosmosDB\"\r\n          }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n
+        \     \"name\": \"AzureCosmosDBCentralUSEUAP\",\r\n      \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureCosmosDBCentralUSEUAP\",\r\n
+        \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
+        {\r\n        \"serviceName\": \"AzureCosmosDBCentralUSEUAP\",\r\n        \"bgpCommunities\":
+        [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
+        \           \"communityName\": \"Azure Cosmos DB Central US EUAP\",\r\n            \"communityValue\":
+        \"12076:54009\",\r\n            \"communityPrefixes\": [\r\n              \"40.78.203.32/27\",\r\n
+        \             \"52.180.160.251/32\",\r\n              \"52.180.161.1/32\",\r\n
+        \             \"52.180.177.137/32\"\r\n            ],\r\n            \"isAuthorizedToUse\":
+        true,\r\n            \"serviceGroup\": \"AzureCosmosDB\"\r\n          }\r\n
+        \       ]\r\n      }\r\n    },\r\n    {\r\n      \"name\": \"AzureCosmosDBEastAsia\",\r\n
+        \     \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureCosmosDBEastAsia\",\r\n
+        \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
+        {\r\n        \"serviceName\": \"AzureCosmosDBEastAsia\",\r\n        \"bgpCommunities\":
+        [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
+        \           \"communityName\": \"Azure Cosmos DB East Asia\",\r\n            \"communityValue\":
+        \"12076:54010\",\r\n            \"communityPrefixes\": [\r\n              \"13.75.34.0/26\",\r\n
+        \             \"23.102.239.134/32\",\r\n              \"52.175.25.211/32\",\r\n
+        \             \"52.175.39.232/32\",\r\n              \"191.237.238.75/32\",\r\n
+        \             \"207.46.150.252/32\"\r\n            ],\r\n            \"isAuthorizedToUse\":
+        true,\r\n            \"serviceGroup\": \"AzureCosmosDB\"\r\n          }\r\n
+        \       ]\r\n      }\r\n    },\r\n    {\r\n      \"name\": \"AzureCosmosDBEastUS\",\r\n
+        \     \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureCosmosDBEastUS\",\r\n
+        \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
+        {\r\n        \"serviceName\": \"AzureCosmosDBEastUS\",\r\n        \"bgpCommunities\":
+        [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
+        \           \"communityName\": \"Azure Cosmos DB East US\",\r\n            \"communityValue\":
+        \"12076:54004\",\r\n            \"communityPrefixes\": [\r\n              \"13.82.53.191/32\",\r\n
+        \             \"13.90.199.155/32\",\r\n              \"40.71.10.0/25\",\r\n
+        \             \"40.71.17.19/32\",\r\n              \"40.71.203.37/32\",\r\n
+        \             \"40.71.204.115/32\",\r\n              \"40.71.216.114/32\",\r\n
+        \             \"40.78.226.0/25\",\r\n              \"40.79.154.128/26\",\r\n
+        \             \"40.85.178.211/32\",\r\n              \"40.121.203.15/32\",\r\n
+        \             \"52.168.28.222/32\",\r\n              \"52.170.204.83/32\",\r\n
+        \             \"52.186.69.224/32\",\r\n              \"52.191.197.220/32\",\r\n
+        \             \"52.226.18.140/32\",\r\n              \"52.226.21.178/32\",\r\n
+        \             \"104.45.131.193/32\",\r\n              \"104.45.144.73/32\",\r\n
+        \             \"191.237.32.43/32\",\r\n              \"191.237.32.44/32\"\r\n
+        \           ],\r\n            \"isAuthorizedToUse\": true,\r\n            \"serviceGroup\":
+        \"AzureCosmosDB\"\r\n          }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n
+        \     \"name\": \"AzureCosmosDBEastUS2\",\r\n      \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureCosmosDBEastUS2\",\r\n
+        \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
+        {\r\n        \"serviceName\": \"AzureCosmosDBEastUS2\",\r\n        \"bgpCommunities\":
+        [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
+        \           \"communityName\": \"Azure Cosmos DB East US 2\",\r\n            \"communityValue\":
+        \"12076:54005\",\r\n            \"communityPrefixes\": [\r\n              \"13.68.22.163/32\",\r\n
+        \             \"13.68.28.135/32\",\r\n              \"40.70.0.140/32\",\r\n
+        \             \"40.70.220.202/32\",\r\n              \"40.79.39.162/32\",\r\n
+        \             \"40.79.59.92/32\",\r\n              \"40.79.67.136/32\",\r\n
+        \             \"52.167.107.128/26\",\r\n              \"52.177.172.74/32\",\r\n
+        \             \"52.177.206.153/32\",\r\n              \"52.179.141.33/32\",\r\n
+        \             \"52.179.143.233/32\",\r\n              \"52.179.200.0/25\",\r\n
+        \             \"52.184.152.241/32\",\r\n              \"104.208.231.0/25\"\r\n
+        \           ],\r\n            \"isAuthorizedToUse\": true,\r\n            \"serviceGroup\":
+        \"AzureCosmosDB\"\r\n          }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n
+        \     \"name\": \"AzureCosmosDBEastUS2EUAP\",\r\n      \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureCosmosDBEastUS2EUAP\",\r\n
+        \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
+        {\r\n        \"serviceName\": \"AzureCosmosDBEastUS2EUAP\",\r\n        \"bgpCommunities\":
+        [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
+        \           \"communityName\": \"Azure Cosmos DB East US 2 EUAP\",\r\n            \"communityValue\":
+        \"12076:54005\",\r\n            \"communityPrefixes\": [\r\n              \"40.74.147.192/26\",\r\n
+        \             \"40.75.32.32/29\",\r\n              \"40.75.34.128/26\",\r\n
+        \             \"40.89.67.208/32\",\r\n              \"52.138.66.90/32\",\r\n
+        \             \"52.138.70.62/32\",\r\n              \"52.138.92.0/26\"\r\n
+        \           ],\r\n            \"isAuthorizedToUse\": true,\r\n            \"serviceGroup\":
+        \"AzureCosmosDB\"\r\n          }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n
+        \     \"name\": \"AzureCosmosDBFranceCentral\",\r\n      \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureCosmosDBFranceCentral\",\r\n
+        \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
+        {\r\n        \"serviceName\": \"AzureCosmosDBFranceCentral\",\r\n        \"bgpCommunities\":
+        [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
+        \           \"communityName\": \"Azure Cosmos DB France Central\",\r\n            \"communityValue\":
+        \"12076:54030\",\r\n            \"communityPrefixes\": [\r\n              \"40.79.130.0/28\",\r\n
+        \             \"40.79.138.48/28\",\r\n              \"40.79.146.48/28\",\r\n
+        \             \"40.89.132.238/32\",\r\n              \"52.143.136.41/32\"\r\n
+        \           ],\r\n            \"isAuthorizedToUse\": true,\r\n            \"serviceGroup\":
+        \"AzureCosmosDB\"\r\n          }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n
+        \     \"name\": \"AzureCosmosDBFranceSouth\",\r\n      \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureCosmosDBFranceSouth\",\r\n
+        \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
+        {\r\n        \"serviceName\": \"AzureCosmosDBFranceSouth\",\r\n        \"bgpCommunities\":
+        [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
+        \           \"communityName\": \"Azure Cosmos DB France South\",\r\n            \"communityValue\":
+        \"12076:54031\",\r\n            \"communityPrefixes\": [\r\n              \"40.79.178.0/28\",\r\n
+        \             \"52.136.134.25/32\",\r\n              \"52.136.134.250/32\",\r\n
+        \             \"52.136.136.70/32\"\r\n            ],\r\n            \"isAuthorizedToUse\":
+        true,\r\n            \"serviceGroup\": \"AzureCosmosDB\"\r\n          }\r\n
+        \       ]\r\n      }\r\n    },\r\n    {\r\n      \"name\": \"AzureCosmosDBJapanEast\",\r\n
+        \     \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureCosmosDBJapanEast\",\r\n
+        \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
+        {\r\n        \"serviceName\": \"AzureCosmosDBJapanEast\",\r\n        \"bgpCommunities\":
+        [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
+        \           \"communityName\": \"Azure Cosmos DB Japan East\",\r\n            \"communityValue\":
+        \"12076:54012\",\r\n            \"communityPrefixes\": [\r\n              \"13.78.51.35/32\",\r\n
+        \             \"13.78.106.0/26\",\r\n              \"40.79.186.16/28\",\r\n
+        \             \"40.79.194.128/26\",\r\n              \"40.115.241.37/32\",\r\n
+        \             \"104.41.177.93/32\"\r\n            ],\r\n            \"isAuthorizedToUse\":
+        true,\r\n            \"serviceGroup\": \"AzureCosmosDB\"\r\n          }\r\n
+        \       ]\r\n      }\r\n    },\r\n    {\r\n      \"name\": \"AzureCosmosDBJapanWest\",\r\n
+        \     \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureCosmosDBJapanWest\",\r\n
+        \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
+        {\r\n        \"serviceName\": \"AzureCosmosDBJapanWest\",\r\n        \"bgpCommunities\":
+        [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
+        \           \"communityName\": \"Azure Cosmos DB Japan West\",\r\n            \"communityValue\":
+        \"12076:54013\",\r\n            \"communityPrefixes\": [\r\n              \"40.74.98.0/26\",\r\n
+        \             \"40.74.143.235/32\",\r\n              \"104.215.1.53/32\",\r\n
+        \             \"104.215.21.39/32\",\r\n              \"104.215.55.227/32\"\r\n
+        \           ],\r\n            \"isAuthorizedToUse\": true,\r\n            \"serviceGroup\":
+        \"AzureCosmosDB\"\r\n          }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n
+        \     \"name\": \"AzureCosmosDBKoreaCentral\",\r\n      \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureCosmosDBKoreaCentral\",\r\n
+        \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
+        {\r\n        \"serviceName\": \"AzureCosmosDBKoreaCentral\",\r\n        \"bgpCommunities\":
+        [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
+        \           \"communityName\": \"Azure Cosmos DB Korea Central\",\r\n            \"communityValue\":
+        \"12076:54029\",\r\n            \"communityPrefixes\": [\r\n              \"20.44.26.0/26\",\r\n
+        \             \"52.231.18.0/28\",\r\n              \"52.231.25.123/32\",\r\n
+        \             \"52.231.39.143/32\",\r\n              \"52.231.56.0/28\"\r\n
+        \           ],\r\n            \"isAuthorizedToUse\": true,\r\n            \"serviceGroup\":
+        \"AzureCosmosDB\"\r\n          }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n
+        \     \"name\": \"AzureCosmosDBKoreaSouth\",\r\n      \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureCosmosDBKoreaSouth\",\r\n
+        \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
+        {\r\n        \"serviceName\": \"AzureCosmosDBKoreaSouth\",\r\n        \"bgpCommunities\":
+        [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
+        \           \"communityName\": \"Azure Cosmos DB Korea South\",\r\n            \"communityValue\":
+        \"12076:54028\",\r\n            \"communityPrefixes\": [\r\n              \"52.231.146.0/27\",\r\n
+        \             \"52.231.206.234/32\",\r\n              \"52.231.207.31/32\"\r\n
+        \           ],\r\n            \"isAuthorizedToUse\": true,\r\n            \"serviceGroup\":
+        \"AzureCosmosDB\"\r\n          }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n
+        \     \"name\": \"AzureCosmosDBNorthCentralUS\",\r\n      \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureCosmosDBNorthCentralUS\",\r\n
+        \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
+        {\r\n        \"serviceName\": \"AzureCosmosDBNorthCentralUS\",\r\n        \"bgpCommunities\":
+        [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
+        \           \"communityName\": \"Azure Cosmos DB North Central US\",\r\n            \"communityValue\":
+        \"12076:54007\",\r\n            \"communityPrefixes\": [\r\n              \"23.96.180.213/32\",\r\n
+        \             \"23.96.219.207/32\",\r\n              \"23.96.242.234/32\",\r\n
+        \             \"52.162.106.0/26\",\r\n              \"52.162.252.26/32\",\r\n
+        \             \"65.52.210.9/32\",\r\n              \"157.55.170.133/32\"\r\n
+        \           ],\r\n            \"isAuthorizedToUse\": true,\r\n            \"serviceGroup\":
+        \"AzureCosmosDB\"\r\n          }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n
+        \     \"name\": \"AzureCosmosDBNorthEurope\",\r\n      \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureCosmosDBNorthEurope\",\r\n
+        \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
+        {\r\n        \"serviceName\": \"AzureCosmosDBNorthEurope\",\r\n        \"bgpCommunities\":
+        [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
+        \           \"communityName\": \"Azure Cosmos DB North Europe\",\r\n            \"communityValue\":
+        \"12076:54003\",\r\n            \"communityPrefixes\": [\r\n              \"13.69.226.0/25\",\r\n
+        \             \"13.74.106.0/25\",\r\n              \"13.79.34.236/32\",\r\n
+        \             \"40.113.90.91/32\",\r\n              \"52.138.141.112/32\",\r\n
+        \             \"52.138.197.33/32\",\r\n              \"52.138.201.47/32\",\r\n
+        \             \"52.138.205.97/32\",\r\n              \"52.138.206.153/32\",\r\n
+        \             \"52.138.227.192/26\",\r\n              \"52.164.250.188/32\",\r\n
+        \             \"52.169.122.37/32\",\r\n              \"52.169.219.183/32\",\r\n
+        \             \"104.41.232.75/32\",\r\n              \"191.235.192.139/32\",\r\n
+        \             \"191.235.192.140/32\"\r\n            ],\r\n            \"isAuthorizedToUse\":
+        true,\r\n            \"serviceGroup\": \"AzureCosmosDB\"\r\n          }\r\n
+        \       ]\r\n      }\r\n    },\r\n    {\r\n      \"name\": \"AzureCosmosDBSouthAfricaNorth\",\r\n
+        \     \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureCosmosDBSouthAfricaNorth\",\r\n
+        \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
+        {\r\n        \"serviceName\": \"AzureCosmosDBSouthAfricaNorth\",\r\n        \"bgpCommunities\":
+        [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
+        \           \"communityName\": \"Azure Cosmos DB South Africa North\",\r\n
+        \           \"communityValue\": \"12076:54034\",\r\n            \"communityPrefixes\":
+        [\r\n              \"102.133.122.0/26\",\r\n              \"102.133.154.64/26\",\r\n
+        \             \"102.133.250.0/26\"\r\n            ],\r\n            \"isAuthorizedToUse\":
+        true,\r\n            \"serviceGroup\": \"AzureCosmosDB\"\r\n          }\r\n
+        \       ]\r\n      }\r\n    },\r\n    {\r\n      \"name\": \"AzureCosmosDBSouthAfricaWest\",\r\n
+        \     \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureCosmosDBSouthAfricaWest\",\r\n
+        \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
+        {\r\n        \"serviceName\": \"AzureCosmosDBSouthAfricaWest\",\r\n        \"bgpCommunities\":
+        [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
+        \           \"communityName\": \"Azure Cosmos DB South Africa West\",\r\n
+        \           \"communityValue\": \"12076:54035\",\r\n            \"communityPrefixes\":
+        [\r\n              \"102.133.26.64/26\"\r\n            ],\r\n            \"isAuthorizedToUse\":
+        true,\r\n            \"serviceGroup\": \"AzureCosmosDB\"\r\n          }\r\n
+        \       ]\r\n      }\r\n    },\r\n    {\r\n      \"name\": \"AzureCosmosDBSouthCentralUS\",\r\n
+        \     \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureCosmosDBSouthCentralUS\",\r\n
+        \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
+        {\r\n        \"serviceName\": \"AzureCosmosDBSouthCentralUS\",\r\n        \"bgpCommunities\":
+        [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
+        \           \"communityName\": \"Azure Cosmos DB South Central US\",\r\n            \"communityValue\":
+        \"12076:54008\",\r\n            \"communityPrefixes\": [\r\n              \"13.65.145.92/32\",\r\n
+        \             \"13.66.26.107/32\",\r\n              \"13.84.150.178/32\",\r\n
+        \             \"13.84.157.70/32\",\r\n              \"13.85.16.188/32\",\r\n
+        \             \"20.45.122.0/26\",\r\n              \"23.102.191.13/32\",\r\n
+        \             \"104.214.18.0/25\",\r\n              \"104.214.23.192/27\",\r\n
+        \             \"104.214.26.177/32\"\r\n            ],\r\n            \"isAuthorizedToUse\":
+        true,\r\n            \"serviceGroup\": \"AzureCosmosDB\"\r\n          }\r\n
+        \       ]\r\n      }\r\n    },\r\n    {\r\n      \"name\": \"AzureCosmosDBSouthIndia\",\r\n
+        \     \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureCosmosDBSouthIndia\",\r\n
+        \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
+        {\r\n        \"serviceName\": \"AzureCosmosDBSouthIndia\",\r\n        \"bgpCommunities\":
+        [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
+        \           \"communityName\": \"Azure Cosmos DB South India\",\r\n            \"communityValue\":
+        \"12076:54019\",\r\n            \"communityPrefixes\": [\r\n              \"13.71.115.125/32\",\r\n
+        \             \"13.71.124.81/32\",\r\n              \"40.78.194.0/28\",\r\n
+        \             \"52.172.55.127/32\",\r\n              \"104.211.227.84/32\"\r\n
+        \           ],\r\n            \"isAuthorizedToUse\": true,\r\n            \"serviceGroup\":
+        \"AzureCosmosDB\"\r\n          }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n
+        \     \"name\": \"AzureCosmosDBSoutheastAsia\",\r\n      \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureCosmosDBSoutheastAsia\",\r\n
+        \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
+        {\r\n        \"serviceName\": \"AzureCosmosDBSoutheastAsia\",\r\n        \"bgpCommunities\":
+        [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
+        \           \"communityName\": \"Azure Cosmos DB Southeast Asia\",\r\n            \"communityValue\":
+        \"12076:54011\",\r\n            \"communityPrefixes\": [\r\n              \"13.67.8.0/26\",\r\n
+        \             \"13.76.161.130/32\",\r\n              \"23.98.82.0/26\",\r\n
+        \             \"40.78.236.192/26\",\r\n              \"52.163.63.20/32\",\r\n
+        \             \"52.163.249.82/32\",\r\n              \"52.187.11.8/32\",\r\n
+        \             \"52.187.12.93/32\",\r\n              \"52.230.15.63/32\",\r\n
+        \             \"52.230.23.170/32\",\r\n              \"52.230.70.94/32\",\r\n
+        \             \"52.230.87.21/32\",\r\n              \"191.238.64.235/32\"\r\n
+        \           ],\r\n            \"isAuthorizedToUse\": true,\r\n            \"serviceGroup\":
+        \"AzureCosmosDB\"\r\n          }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n
+        \     \"name\": \"AzureCosmosDBUAECentral\",\r\n      \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureCosmosDBUAECentral\",\r\n
+        \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
+        {\r\n        \"serviceName\": \"AzureCosmosDBUAECentral\",\r\n        \"bgpCommunities\":
+        [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
+        \           \"communityName\": \"Azure Cosmos DB UAE Central\",\r\n            \"communityValue\":
+        \"12076:54037\",\r\n            \"communityPrefixes\": [\r\n              \"20.37.75.128/26\"\r\n
+        \           ],\r\n            \"isAuthorizedToUse\": true,\r\n            \"serviceGroup\":
+        \"AzureCosmosDB\"\r\n          }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n
+        \     \"name\": \"AzureCosmosDBUAENorth\",\r\n      \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureCosmosDBUAENorth\",\r\n
+        \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
+        {\r\n        \"serviceName\": \"AzureCosmosDBUAENorth\",\r\n        \"bgpCommunities\":
+        [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
+        \           \"communityName\": \"Azure Cosmos DB UAE North\",\r\n            \"communityValue\":
+        \"12076:54036\",\r\n            \"communityPrefixes\": [\r\n              \"65.52.251.128/26\"\r\n
+        \           ],\r\n            \"isAuthorizedToUse\": true,\r\n            \"serviceGroup\":
+        \"AzureCosmosDB\"\r\n          }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n
+        \     \"name\": \"AzureCosmosDBUKSouth\",\r\n      \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureCosmosDBUKSouth\",\r\n
+        \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
+        {\r\n        \"serviceName\": \"AzureCosmosDBUKSouth\",\r\n        \"bgpCommunities\":
+        [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
+        \           \"communityName\": \"Azure Cosmos DB UK South\",\r\n            \"communityValue\":
+        \"12076:54024\",\r\n            \"communityPrefixes\": [\r\n              \"51.105.66.0/26\",\r\n
+        \             \"51.105.74.0/26\",\r\n              \"51.140.52.73/32\",\r\n
+        \             \"51.140.70.75/32\",\r\n              \"51.140.75.146/32\",\r\n
+        \             \"51.140.83.56/32\",\r\n              \"51.140.99.233/32\",\r\n
+        \             \"51.140.146.0/27\",\r\n              \"51.143.189.37/32\"\r\n
+        \           ],\r\n            \"isAuthorizedToUse\": true,\r\n            \"serviceGroup\":
+        \"AzureCosmosDB\"\r\n          }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n
+        \     \"name\": \"AzureCosmosDBUKSouth2\",\r\n      \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureCosmosDBUKSouth2\",\r\n
+        \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
+        {\r\n        \"serviceName\": \"AzureCosmosDBUKSouth2\",\r\n        \"bgpCommunities\":
+        [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
+        \           \"communityName\": \"Azure Cosmos DB UK South 2\",\r\n            \"communityValue\":
+        \"12076:54023\",\r\n            \"communityPrefixes\": [\r\n              \"13.87.56.0/27\"\r\n
+        \           ],\r\n            \"isAuthorizedToUse\": true,\r\n            \"serviceGroup\":
+        \"AzureCosmosDB\"\r\n          }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n
+        \     \"name\": \"AzureCosmosDBUKWest\",\r\n      \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureCosmosDBUKWest\",\r\n
+        \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
+        {\r\n        \"serviceName\": \"AzureCosmosDBUKWest\",\r\n        \"bgpCommunities\":
+        [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
+        \           \"communityName\": \"Azure Cosmos DB UK West\",\r\n            \"communityValue\":
+        \"12076:54025\",\r\n            \"communityPrefixes\": [\r\n              \"51.140.210.0/27\",\r\n
+        \             \"51.141.11.34/32\",\r\n              \"51.141.25.77/32\",\r\n
+        \             \"51.141.53.76/32\",\r\n              \"51.141.55.229/32\"\r\n
+        \           ],\r\n            \"isAuthorizedToUse\": true,\r\n            \"serviceGroup\":
+        \"AzureCosmosDB\"\r\n          }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n
+        \     \"name\": \"AzureCosmosDBWestCentralUS\",\r\n      \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureCosmosDBWestCentralUS\",\r\n
+        \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
+        {\r\n        \"serviceName\": \"AzureCosmosDBWestCentralUS\",\r\n        \"bgpCommunities\":
+        [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
+        \           \"communityName\": \"Azure Cosmos DB West Central US\",\r\n            \"communityValue\":
+        \"12076:54027\",\r\n            \"communityPrefixes\": [\r\n              \"13.71.194.0/26\",\r\n
+        \             \"13.78.188.25/32\",\r\n              \"52.161.13.67/32\",\r\n
+        \             \"52.161.15.197/32\",\r\n              \"52.161.22.131/32\",\r\n
+        \             \"52.161.100.126/32\"\r\n            ],\r\n            \"isAuthorizedToUse\":
+        true,\r\n            \"serviceGroup\": \"AzureCosmosDB\"\r\n          }\r\n
+        \       ]\r\n      }\r\n    },\r\n    {\r\n      \"name\": \"AzureCosmosDBWestEurope\",\r\n
+        \     \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureCosmosDBWestEurope\",\r\n
+        \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
+        {\r\n        \"serviceName\": \"AzureCosmosDBWestEurope\",\r\n        \"bgpCommunities\":
+        [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
+        \           \"communityName\": \"Azure Cosmos DB West Europe\",\r\n            \"communityValue\":
+        \"12076:54002\",\r\n            \"communityPrefixes\": [\r\n              \"13.69.66.0/25\",\r\n
+        \             \"13.69.66.128/29\",\r\n              \"13.69.112.0/25\",\r\n
+        \             \"13.81.51.99/32\",\r\n              \"13.94.201.5/32\",\r\n
+        \             \"13.95.234.68/32\",\r\n              \"40.68.44.85/32\",\r\n
+        \             \"40.114.240.253/32\",\r\n              \"51.144.177.166/32\",\r\n
+        \             \"51.144.182.233/32\",\r\n              \"52.174.253.239/32\",\r\n
+        \             \"52.178.108.222/32\",\r\n              \"52.232.59.220/32\",\r\n
+        \             \"52.233.128.86/32\",\r\n              \"52.236.189.0/26\",\r\n
+        \             \"104.40.189.161/32\",\r\n              \"104.45.16.183/32\",\r\n
+        \             \"168.61.61.107/32\"\r\n            ],\r\n            \"isAuthorizedToUse\":
+        true,\r\n            \"serviceGroup\": \"AzureCosmosDB\"\r\n          }\r\n
+        \       ]\r\n      }\r\n    },\r\n    {\r\n      \"name\": \"AzureCosmosDBWestIndia\",\r\n
+        \     \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureCosmosDBWestIndia\",\r\n
+        \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
+        {\r\n        \"serviceName\": \"AzureCosmosDBWestIndia\",\r\n        \"bgpCommunities\":
+        [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
+        \           \"communityName\": \"Azure Cosmos DB West India\",\r\n            \"communityValue\":
+        \"12076:54018\",\r\n            \"communityPrefixes\": [\r\n              \"104.211.146.0/28\",\r\n
+        \             \"104.211.162.94/32\",\r\n              \"104.211.184.117/32\",\r\n
+        \             \"104.211.188.174/32\"\r\n            ],\r\n            \"isAuthorizedToUse\":
+        true,\r\n            \"serviceGroup\": \"AzureCosmosDB\"\r\n          }\r\n
+        \       ]\r\n      }\r\n    },\r\n    {\r\n      \"name\": \"AzureCosmosDBWestUS\",\r\n
+        \     \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureCosmosDBWestUS\",\r\n
+        \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
+        {\r\n        \"serviceName\": \"AzureCosmosDBWestUS\",\r\n        \"bgpCommunities\":
+        [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
+        \           \"communityName\": \"Azure Cosmos DB West US\",\r\n            \"communityValue\":
+        \"12076:54006\",\r\n            \"communityPrefixes\": [\r\n              \"13.64.69.151/32\",\r\n
+        \             \"13.64.113.68/32\",\r\n              \"13.64.114.48/32\",\r\n
+        \             \"13.64.194.140/32\",\r\n              \"13.88.30.39/32\",\r\n
+        \             \"13.91.246.52/32\",\r\n              \"13.93.153.80/32\",\r\n
+        \             \"13.93.156.125/32\",\r\n              \"13.93.207.66/32\",\r\n
+        \             \"23.99.32.43/32\",\r\n              \"23.99.32.47/32\",\r\n
+        \             \"23.99.32.50/32\",\r\n              \"40.83.137.191/32\",\r\n
+        \             \"40.112.140.12/32\",\r\n              \"40.112.241.0/24\",\r\n
+        \             \"40.112.249.60/32\",\r\n              \"40.118.245.44/32\",\r\n
+        \             \"40.118.245.251/32\",\r\n              \"137.117.9.157/32\"\r\n
+        \           ],\r\n            \"isAuthorizedToUse\": true,\r\n            \"serviceGroup\":
+        \"AzureCosmosDB\"\r\n          }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n
+        \     \"name\": \"AzureCosmosDBWestUS2\",\r\n      \"id\": \"/subscriptions//resourceGroups//providers/Microsoft.Network/bgpServiceCommunities/AzureCosmosDBWestUS2\",\r\n
+        \     \"type\": \"Microsoft.Network/bgpServiceCommunities\",\r\n      \"properties\":
+        {\r\n        \"serviceName\": \"AzureCosmosDBWestUS2\",\r\n        \"bgpCommunities\":
+        [\r\n          {\r\n            \"serviceSupportedRegion\": \"Global\",\r\n
+        \           \"communityName\": \"Azure Cosmos DB West US 2\",\r\n            \"communityValue\":
+        \"12076:54026\",\r\n            \"communityPrefixes\": [\r\n              \"13.66.138.0/26\",\r\n
+        \             \"20.36.26.132/32\",\r\n              \"40.65.106.154/32\",\r\n
+        \             \"40.65.114.105/32\",\r\n              \"40.78.243.192/26\",\r\n
+        \             \"40.78.250.0/26\",\r\n              \"52.151.16.118/32\",\r\n
+        \             \"52.158.234.203/32\",\r\n              \"52.183.42.252/32\",\r\n
+        \             \"52.183.66.36/32\",\r\n              \"52.183.92.223/32\",\r\n
+        \             \"52.183.119.101/32\"\r\n            ],\r\n            \"isAuthorizedToUse\":
+        true,\r\n            \"serviceGroup\": \"AzureCosmosDB\"\r\n          }\r\n
+        \       ]\r\n      }\r\n    }\r\n  ]\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '191294'
+      - '225017'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 18:04:41 GMT
+      - Sun, 22 Sep 2019 03:19:45 GMT
       expires:
       - '-1'
       pragma:
@@ -3175,6 +3553,8 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - 2b5eb22e-d1e2-4680-9565-aa53e3f38915
     status:
       code: 200
       message: OK
@@ -3192,24 +3572,24 @@ interactions:
       ParameterSetName:
       - -g --filter-name -n --communities --access
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.73
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_network_route_filter000001?api-version=2019-05-10
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001","name":"cli_test_network_route_filter000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-05-30T18:03:43Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001","name":"cli_test_network_route_filter000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-09-22T03:18:31Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '384'
+      - '428'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 18:04:41 GMT
+      - Sun, 22 Sep 2019 03:19:46 GMT
       expires:
       - '-1'
       pragma:
@@ -3242,23 +3622,23 @@ interactions:
       ParameterSetName:
       - -g --filter-name -n --communities --access
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/5.0.0 Azure-SDK-For-Python AZURECLI/2.0.73
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1/routeFilterRules/rule1?api-version=2019-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1/routeFilterRules/rule1?api-version=2019-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"rule1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1/routeFilterRules/rule1\",\r\n
-        \ \"etag\": \"W/\\\"6921c570-d01f-40cd-af29-7af903e1f108\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"f0fc8db8-a9ab-462c-80c5-5e58247befc4\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Updating\",\r\n    \"access\": \"Allow\",\r\n
         \   \"routeFilterRuleType\": \"Community\",\r\n    \"communities\": [\r\n
         \     \"12076:5040\",\r\n      \"12076:5030\"\r\n    ]\r\n  },\r\n  \"type\":
         \"Microsoft.Network/routeFilters/routeFilterRules\"\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/d31073d8-1e0f-480a-8fd0-649d96cb6aaf?api-version=2019-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/7d4a8434-d444-45b5-9c5f-e7eed0966487?api-version=2019-06-01
       cache-control:
       - no-cache
       content-length:
@@ -3266,7 +3646,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 18:04:42 GMT
+      - Sun, 22 Sep 2019 03:19:47 GMT
       expires:
       - '-1'
       pragma:
@@ -3278,8 +3658,10 @@ interactions:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - 5de56a4c-4bb7-4ba1-8952-bf3936a012e8
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1195'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -3297,10 +3679,10 @@ interactions:
       ParameterSetName:
       - -g --filter-name -n --communities --access
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/5.0.0 Azure-SDK-For-Python AZURECLI/2.0.73
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/d31073d8-1e0f-480a-8fd0-649d96cb6aaf?api-version=2019-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/7d4a8434-d444-45b5-9c5f-e7eed0966487?api-version=2019-06-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -3312,7 +3694,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 18:04:53 GMT
+      - Sun, 22 Sep 2019 03:19:58 GMT
       expires:
       - '-1'
       pragma:
@@ -3328,6 +3710,8 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - d44a2284-702d-4262-839a-790b03d46da7
     status:
       code: 200
       message: OK
@@ -3345,14 +3729,14 @@ interactions:
       ParameterSetName:
       - -g --filter-name -n --communities --access
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/5.0.0 Azure-SDK-For-Python AZURECLI/2.0.73
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1/routeFilterRules/rule1?api-version=2019-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1/routeFilterRules/rule1?api-version=2019-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"rule1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1/routeFilterRules/rule1\",\r\n
-        \ \"etag\": \"W/\\\"3127699a-e5a4-4d38-94b3-7e8a5efc8ec8\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"da8e2a3c-f974-4086-864e-0c620389993b\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"access\": \"Allow\",\r\n
         \   \"routeFilterRuleType\": \"Community\",\r\n    \"communities\": [\r\n
         \     \"12076:5040\",\r\n      \"12076:5030\"\r\n    ]\r\n  },\r\n  \"type\":
@@ -3365,9 +3749,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 18:04:54 GMT
+      - Sun, 22 Sep 2019 03:19:58 GMT
       etag:
-      - W/"3127699a-e5a4-4d38-94b3-7e8a5efc8ec8"
+      - W/"da8e2a3c-f974-4086-864e-0c620389993b"
       expires:
       - '-1'
       pragma:
@@ -3383,6 +3767,8 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - f2212bd1-86bd-4161-9fa9-41ea8733431d
     status:
       code: 200
       message: OK
@@ -3400,16 +3786,16 @@ interactions:
       ParameterSetName:
       - -g --filter-name -n --set
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/5.0.0 Azure-SDK-For-Python AZURECLI/2.0.73
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1/routeFilterRules/rule1?api-version=2019-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1/routeFilterRules/rule1?api-version=2019-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"rule1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1/routeFilterRules/rule1\",\r\n
-        \ \"etag\": \"W/\\\"3127699a-e5a4-4d38-94b3-7e8a5efc8ec8\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"da8e2a3c-f974-4086-864e-0c620389993b\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"access\": \"Allow\",\r\n
         \   \"routeFilterRuleType\": \"Community\",\r\n    \"communities\": [\r\n
         \     \"12076:5040\",\r\n      \"12076:5030\"\r\n    ]\r\n  },\r\n  \"type\":
@@ -3422,9 +3808,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 18:04:56 GMT
+      - Sun, 22 Sep 2019 03:20:00 GMT
       etag:
-      - W/"3127699a-e5a4-4d38-94b3-7e8a5efc8ec8"
+      - W/"da8e2a3c-f974-4086-864e-0c620389993b"
       expires:
       - '-1'
       pragma:
@@ -3440,6 +3826,8 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - bc79222e-5790-41a8-9694-d5453ccc9b5c
     status:
       code: 200
       message: OK
@@ -3463,23 +3851,23 @@ interactions:
       ParameterSetName:
       - -g --filter-name -n --set
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/5.0.0 Azure-SDK-For-Python AZURECLI/2.0.73
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1/routeFilterRules/rule1?api-version=2019-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1/routeFilterRules/rule1?api-version=2019-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"rule1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1/routeFilterRules/rule1\",\r\n
-        \ \"etag\": \"W/\\\"7e63c01f-86c7-4ee8-8482-2347cbd73f35\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"72740a22-e74b-47e8-8985-e1537e556c13\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Updating\",\r\n    \"access\": \"Deny\",\r\n
         \   \"routeFilterRuleType\": \"Community\",\r\n    \"communities\": [\r\n
         \     \"12076:5040\",\r\n      \"12076:5030\"\r\n    ]\r\n  },\r\n  \"type\":
         \"Microsoft.Network/routeFilters/routeFilterRules\"\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/3c9d7cd6-f57d-44a7-931c-e00e5069914a?api-version=2019-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/8623fe84-8449-4518-a5ec-727d0de3b3fa?api-version=2019-06-01
       cache-control:
       - no-cache
       content-length:
@@ -3487,7 +3875,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 18:04:57 GMT
+      - Sun, 22 Sep 2019 03:20:00 GMT
       expires:
       - '-1'
       pragma:
@@ -3503,6 +3891,8 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - 6d6ce0d9-6290-49a6-b145-344ed6dce53b
       x-ms-ratelimit-remaining-subscription-writes:
       - '1198'
     status:
@@ -3522,10 +3912,10 @@ interactions:
       ParameterSetName:
       - -g --filter-name -n --set
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/5.0.0 Azure-SDK-For-Python AZURECLI/2.0.73
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/3c9d7cd6-f57d-44a7-931c-e00e5069914a?api-version=2019-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/8623fe84-8449-4518-a5ec-727d0de3b3fa?api-version=2019-06-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -3537,7 +3927,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 18:05:07 GMT
+      - Sun, 22 Sep 2019 03:20:11 GMT
       expires:
       - '-1'
       pragma:
@@ -3553,6 +3943,8 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - 8a3b9e40-676c-4afb-acaa-5144efce48ef
     status:
       code: 200
       message: OK
@@ -3570,14 +3962,14 @@ interactions:
       ParameterSetName:
       - -g --filter-name -n --set
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/5.0.0 Azure-SDK-For-Python AZURECLI/2.0.73
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1/routeFilterRules/rule1?api-version=2019-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1/routeFilterRules/rule1?api-version=2019-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"rule1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1/routeFilterRules/rule1\",\r\n
-        \ \"etag\": \"W/\\\"248ab304-f414-4f7e-8998-7ed14964cc6d\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"3586245c-e6d3-4810-9466-9c12027d2def\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"access\": \"Deny\",\r\n
         \   \"routeFilterRuleType\": \"Community\",\r\n    \"communities\": [\r\n
         \     \"12076:5040\",\r\n      \"12076:5030\"\r\n    ]\r\n  },\r\n  \"type\":
@@ -3590,9 +3982,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 18:05:07 GMT
+      - Sun, 22 Sep 2019 03:20:11 GMT
       etag:
-      - W/"248ab304-f414-4f7e-8998-7ed14964cc6d"
+      - W/"3586245c-e6d3-4810-9466-9c12027d2def"
       expires:
       - '-1'
       pragma:
@@ -3608,6 +4000,8 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - c2eb930e-aa55-42ce-97cb-ae6a4cc04bc3
     status:
       code: 200
       message: OK
@@ -3625,16 +4019,16 @@ interactions:
       ParameterSetName:
       - -g --filter-name -n
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/5.0.0 Azure-SDK-For-Python AZURECLI/2.0.73
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1/routeFilterRules/rule1?api-version=2019-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1/routeFilterRules/rule1?api-version=2019-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"rule1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1/routeFilterRules/rule1\",\r\n
-        \ \"etag\": \"W/\\\"248ab304-f414-4f7e-8998-7ed14964cc6d\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"3586245c-e6d3-4810-9466-9c12027d2def\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"access\": \"Deny\",\r\n
         \   \"routeFilterRuleType\": \"Community\",\r\n    \"communities\": [\r\n
         \     \"12076:5040\",\r\n      \"12076:5030\"\r\n    ]\r\n  },\r\n  \"type\":
@@ -3647,9 +4041,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 18:05:09 GMT
+      - Sun, 22 Sep 2019 03:20:31 GMT
       etag:
-      - W/"248ab304-f414-4f7e-8998-7ed14964cc6d"
+      - W/"3586245c-e6d3-4810-9466-9c12027d2def"
       expires:
       - '-1'
       pragma:
@@ -3665,6 +4059,8 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - 7a49a75e-8146-4d9f-bfa7-619622a57296
     status:
       code: 200
       message: OK
@@ -3682,17 +4078,17 @@ interactions:
       ParameterSetName:
       - -g --filter-name
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/5.0.0 Azure-SDK-For-Python AZURECLI/2.0.73
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1/routeFilterRules?api-version=2019-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1/routeFilterRules?api-version=2019-06-01
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"rule1\",\r\n      \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1/routeFilterRules/rule1\",\r\n
-        \     \"etag\": \"W/\\\"248ab304-f414-4f7e-8998-7ed14964cc6d\\\"\",\r\n      \"properties\":
+        \     \"etag\": \"W/\\\"3586245c-e6d3-4810-9466-9c12027d2def\\\"\",\r\n      \"properties\":
         {\r\n        \"provisioningState\": \"Succeeded\",\r\n        \"access\":
         \"Deny\",\r\n        \"routeFilterRuleType\": \"Community\",\r\n        \"communities\":
         [\r\n          \"12076:5040\",\r\n          \"12076:5030\"\r\n        ]\r\n
@@ -3706,7 +4102,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 18:05:09 GMT
+      - Sun, 22 Sep 2019 03:20:32 GMT
       expires:
       - '-1'
       pragma:
@@ -3722,6 +4118,8 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - ec0ce02c-77c8-4b9f-829a-f9a3aa924d22
     status:
       code: 200
       message: OK
@@ -3741,28 +4139,28 @@ interactions:
       ParameterSetName:
       - -g --filter-name -n
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/5.0.0 Azure-SDK-For-Python AZURECLI/2.0.73
       accept-language:
       - en-US
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1/routeFilterRules/rule1?api-version=2019-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1/routeFilterRules/rule1?api-version=2019-06-01
   response:
     body:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/d03156ec-0785-4606-ba58-48b7b9e60324?api-version=2019-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/626c10ef-6dd4-4ef8-994d-1f5bac354ea1?api-version=2019-06-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Thu, 30 May 2019 18:05:11 GMT
+      - Sun, 22 Sep 2019 03:20:33 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/d03156ec-0785-4606-ba58-48b7b9e60324?api-version=2019-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/626c10ef-6dd4-4ef8-994d-1f5bac354ea1?api-version=2019-06-01
       pragma:
       - no-cache
       server:
@@ -3772,8 +4170,10 @@ interactions:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - 813e9bb8-dd7c-4b1a-b206-1efaf5c36110
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      - '14998'
     status:
       code: 202
       message: Accepted
@@ -3791,10 +4191,10 @@ interactions:
       ParameterSetName:
       - -g --filter-name -n
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/5.0.0 Azure-SDK-For-Python AZURECLI/2.0.73
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/d03156ec-0785-4606-ba58-48b7b9e60324?api-version=2019-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/626c10ef-6dd4-4ef8-994d-1f5bac354ea1?api-version=2019-06-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -3806,7 +4206,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 18:05:21 GMT
+      - Sun, 22 Sep 2019 03:20:44 GMT
       expires:
       - '-1'
       pragma:
@@ -3822,6 +4222,8 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - d4b339db-a593-4b50-bd24-5fb688cf9e94
     status:
       code: 200
       message: OK
@@ -3841,28 +4243,28 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/5.0.0 Azure-SDK-For-Python AZURECLI/2.0.73
       accept-language:
       - en-US
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1?api-version=2019-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1?api-version=2019-06-01
   response:
     body:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/b665b2e8-6650-4074-8e19-452583b3dde3?api-version=2019-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/494776b2-8577-4d9a-be25-0d4f13bba9de?api-version=2019-06-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Thu, 30 May 2019 18:05:23 GMT
+      - Sun, 22 Sep 2019 03:20:46 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/b665b2e8-6650-4074-8e19-452583b3dde3?api-version=2019-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/494776b2-8577-4d9a-be25-0d4f13bba9de?api-version=2019-06-01
       pragma:
       - no-cache
       server:
@@ -3872,6 +4274,8 @@ interactions:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - e4192190-6882-4669-9372-6f7e830be02e
       x-ms-ratelimit-remaining-subscription-deletes:
       - '14997'
     status:
@@ -3891,10 +4295,10 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/5.0.0 Azure-SDK-For-Python AZURECLI/2.0.73
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/b665b2e8-6650-4074-8e19-452583b3dde3?api-version=2019-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/494776b2-8577-4d9a-be25-0d4f13bba9de?api-version=2019-06-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -3906,7 +4310,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 18:05:34 GMT
+      - Sun, 22 Sep 2019 03:20:57 GMT
       expires:
       - '-1'
       pragma:
@@ -3922,54 +4326,9 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - ebdd52b6-a775-4a1e-89be-36cc6b327059
     status:
       code: 200
       message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - group delete
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - --name --yes --no-wait
-      User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
-      accept-language:
-      - en-US
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_network_route_filter000001?api-version=2019-05-10
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Thu, 30 May 2019 18:05:36 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGTkVUV09SSzo1RlJPVVRFOjVGRklMVEVSR1FON0NDTFZLQ3wzQkI3MUE3N0YxNEFEQUMzLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2019-05-10
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-deletes:
-      - '14998'
-    status:
-      code: 202
-      message: Accepted
 version: 1

@@ -1032,9 +1032,9 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
             self.check('publicIp.publicIpAllocationMethod', 'Dynamic'),
             self.check('publicIp.dnsSettings', None)
         ])
-        self.cmd('network public-ip update -g {rg} -n {ip2} --allocation-method static --dns-name wowza --idle-timeout 10 --tags foo=doo', checks=[
+        self.cmd('network public-ip update -g {rg} -n {ip2} --allocation-method static --dns-name wowza2 --idle-timeout 10 --tags foo=doo', checks=[
             self.check('publicIpAllocationMethod', 'Static'),
-            self.check('dnsSettings.domainNameLabel', 'wowza'),
+            self.check('dnsSettings.domainNameLabel', 'wowza2'),
             self.check('idleTimeoutInMinutes', 10),
             self.check('tags.foo', 'doo')
         ])
