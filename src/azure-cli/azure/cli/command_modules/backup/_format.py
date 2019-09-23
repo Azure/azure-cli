@@ -218,7 +218,7 @@ def transform_wl_policy_set(policy):
 
 
 def transform_wl_policy_show(policy_list):
-    if type(policy_list) == list and policy_list != []:
+    if isinstance(policy_list, list) and policy_list != []:
         if policy_list[0]['properties']['backupManagementType'] == 'AzureWorkload':
             return [transform_workload_policy_show(p) for p in policy_list]
     return []
