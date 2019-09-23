@@ -15,15 +15,12 @@ from knack.log import get_logger
 from msrest.paging import Paged
 from msrestazure.tools import parse_resource_id, is_valid_resource_id
 
-from azure.mgmt.recoveryservicesbackup.models import ProtectedItemResource, AzureIaaSComputeVMProtectedItem, \
-    AzureIaaSClassicComputeVMProtectedItem, ProtectionState, IaasVMBackupRequest, BackupRequestResource, \
-    BackupManagementType, WorkloadType, OperationStatusValues, JobStatus
+from azure.mgmt.recoveryservicesbackup.models import OperationStatusValues, JobStatus
 
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.command_modules.backup._client_factory import (
-    backup_protected_items_cf, job_details_cf, protection_container_refresh_operation_results_cf,
-    protection_containers_cf, backup_protectable_items_cf, resources_cf, backup_operation_statuses_cf,
-    protection_container_operation_results_cf)
+    job_details_cf, protection_container_refresh_operation_results_cf,
+    backup_operation_statuses_cf, protection_container_operation_results_cf)
 
 
 logger = get_logger(__name__)
@@ -41,16 +38,16 @@ def is_native_name(name):
     return ";" in name
 
 
-def is_id(id):
-    return "/" in id
+def is_id(identity):
+    return "/" in identity
 
 
-def is_sql(type):
-    return type.lower() == 'sqldatabase'
+def is_sql(resource_type):
+    return resource_type.lower() == 'sqldatabase'
 
 
-def is_hana(type):
-    return type.lower() == 'saphanadatabase'
+def is_hana(resource_type):
+    return resource_type.lower() == 'saphanadatabase'
 
 
 def is_wl_container(name):
@@ -66,9 +63,9 @@ def get_resource_id(resource_id):
     return "/".join(resource_id.split('/')[3:])
 
 
-def get_target_path(type, path, logical_name, data_directory_paths):
+def get_target_path(resource_type, path, logical_name, data_directory_paths):
     for path in data_directory_paths:
-        if path.type == type:
+        if path.type == resource_type:
             data_directory_path = path
     file_type = path.split('\\')[-1].split('.')[1]
     file_name = logical_name + '_' + str(int(time.time())) + '.' + file_type
@@ -81,14 +78,14 @@ def get_containers(client, container_type, status, resource_group_name, vault_na
         'status': status
     }
 
-    if container_name and not _is_native_name(container_name):
+    if container_name and not is_native_name(container_name):
         filter_dict['friendlyName'] = container_name
-    filter_string = _get_filter_string(filter_dict)
+    filter_string = get_filter_string(filter_dict)
 
     paged_containers = client.list(vault_name, resource_group_name, filter_string)
-    containers = _get_list_from_paged_response(paged_containers)
+    containers = get_list_from_paged_response(paged_containers)
 
-    if container_name and _is_native_name(container_name):
+    if container_name and is_native_name(container_name):
         return [container for container in containers if container.name == container_name]
 
     return containers
@@ -106,15 +103,15 @@ def get_resource_name_and_rg(resource_group_name, name_or_id):
 
 
 def validate_container(container):
-    _validate_object(container, "Container not found. Please provide a valid container_name.")
+    validate_object(container, "Container not found. Please provide a valid container_name.")
 
 
 def validate_item(item):
-    _validate_object(item, "Item not found. Please provide a valid item_name.")
+    validate_object(item, "Item not found. Please provide a valid item_name.")
 
 
 def validate_policy(policy):
-    _validate_object(policy, "Policy not found. Please provide a valid policy_name.")
+    validate_object(policy, "Policy not found. Please provide a valid policy_name.")
 
 
 def validate_object(obj, error_message):
@@ -125,7 +122,7 @@ def validate_object(obj, error_message):
 # Tracking Utilities
 # pylint: disable=inconsistent-return-statements
 def track_backup_ilr(cli_ctx, result, vault_name, resource_group):
-    operation_status = _track_backup_operation(cli_ctx, resource_group, result, vault_name)
+    operation_status = track_backup_operation(cli_ctx, resource_group, result, vault_name)
 
     if operation_status.properties:
         recovery_target = operation_status.properties.recovery_target
@@ -136,7 +133,7 @@ def track_backup_ilr(cli_ctx, result, vault_name, resource_group):
 def track_backup_job(cli_ctx, result, vault_name, resource_group):
     job_details_client = job_details_cf(cli_ctx)
 
-    operation_status = _track_backup_operation(cli_ctx, resource_group, result, vault_name)
+    operation_status = track_backup_operation(cli_ctx, resource_group, result, vault_name)
 
     if operation_status.properties:
         job_id = operation_status.properties.job_id
@@ -147,7 +144,7 @@ def track_backup_job(cli_ctx, result, vault_name, resource_group):
 def track_backup_operation(cli_ctx, resource_group, result, vault_name):
     backup_operation_statuses_client = backup_operation_statuses_cf(cli_ctx)
 
-    operation_id = _get_operation_id_from_header(result.response.headers['Azure-AsyncOperation'])
+    operation_id = get_operation_id_from_header(result.response.headers['Azure-AsyncOperation'])
     operation_status = backup_operation_statuses_client.get(vault_name, resource_group, operation_id)
     while operation_status.status == OperationStatusValues.in_progress.value:
         time.sleep(1)
@@ -158,7 +155,7 @@ def track_backup_operation(cli_ctx, resource_group, result, vault_name):
 def track_refresh_operation(cli_ctx, result, vault_name, resource_group):
     protection_container_refresh_operation_results_client = protection_container_refresh_operation_results_cf(cli_ctx)
 
-    operation_id = _get_operation_id_from_header(result.response.headers['Location'])
+    operation_id = get_operation_id_from_header(result.response.headers['Location'])
     result = sdk_no_wait(True, protection_container_refresh_operation_results_client.get,
                          vault_name, resource_group, fabric_name, operation_id)
     while result.response.status_code == 202:
@@ -170,7 +167,7 @@ def track_refresh_operation(cli_ctx, result, vault_name, resource_group):
 def track_register_operation(cli_ctx, result, vault_name, resource_group, container_name):
     protection_container_operation_results_client = protection_container_operation_results_cf(cli_ctx)
 
-    operation_id = _get_operation_id_from_header(result.response.headers['Location'])
+    operation_id = get_operation_id_from_header(result.response.headers['Location'])
     result = sdk_no_wait(True, protection_container_operation_results_client.get,
                          vault_name, resource_group, fabric_name, container_name, operation_id)
     while result.response.status_code == 202:
@@ -180,7 +177,7 @@ def track_register_operation(cli_ctx, result, vault_name, resource_group, contai
 
 
 def job_in_progress(job_status):
-    return job_status == JobStatus.in_progress.value or job_status == JobStatus.cancelling.value
+    return job_status in [JobStatus.in_progress.value, JobStatus.cancelling.value]
 
 # List Utilities
 
@@ -192,7 +189,7 @@ def get_list_from_paged_response(obj_list):
 def get_none_one_or_many(obj_list):
     if not obj_list:
         return None
-    elif len(obj_list) == 1:
+    if len(obj_list) == 1:
         return obj_list[0]
     return obj_list
 
@@ -231,35 +228,35 @@ def get_query_dates(end_date, start_date):
 
 
 def get_container_from_json(client, container):
-    return _get_object_from_json(client, container, 'ProtectionContainerResource')
+    return get_object_from_json(client, container, 'ProtectionContainerResource')
 
 
 def get_vault_from_json(client, vault):
-    return _get_object_from_json(client, vault, 'Vault')
+    return get_object_from_json(client, vault, 'Vault')
 
 
 def get_vm_from_json(client, vm):
-    return _get_object_from_json(client, vm, 'VirtualMachine')
+    return get_object_from_json(client, vm, 'VirtualMachine')
 
 
 def get_policy_from_json(client, policy):
-    return _get_object_from_json(client, policy, 'ProtectionPolicyResource')
+    return get_object_from_json(client, policy, 'ProtectionPolicyResource')
 
 
 def get_item_from_json(client, item):
-    return _get_object_from_json(client, item, 'ProtectedItemResource')
+    return get_object_from_json(client, item, 'ProtectedItemResource')
 
 
 def get_protectable_item_from_json(client, item):
-    return _get_object_from_json(client, item, 'WorkloadProtectableItemResource')
+    return get_object_from_json(client, item, 'WorkloadProtectableItemResource')
 
 
 def get_job_from_json(client, job):
-    return _get_object_from_json(client, job, 'JobResource')
+    return get_object_from_json(client, job, 'JobResource')
 
 
 def get_recovery_point_from_json(client, recovery_point):
-    return _get_object_from_json(client, recovery_point, 'RecoveryPointResource')
+    return get_object_from_json(client, recovery_point, 'RecoveryPointResource')
 
 
 def get_or_read_json(json_or_file):
@@ -282,7 +279,7 @@ def get_or_read_json(json_or_file):
 
 def get_object_from_json(client, json_or_file, class_name):
     # Determine if input is json or file
-    json_obj = _get_or_read_json(json_or_file)
+    json_obj = get_or_read_json(json_or_file)
 
     # Deserialize json to object
     param = client._deserialize(class_name, json_obj)  # pylint: disable=protected-access

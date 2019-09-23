@@ -13,44 +13,38 @@ def show_container(cmd, client, name, resource_group_name, vault_name, container
                    status="Registered"):
     if container_type == "AzureIaasVM":
         return custom.show_container(client, name, resource_group_name, vault_name, container_type, status)
-    else:
-        return custom_wl.show_wl_container(cmd, name, resource_group_name, vault_name, container_type)
+    return custom_wl.show_wl_container(cmd, name, resource_group_name, vault_name, container_type)
 
 
 def list_containers(client, resource_group_name, vault_name, container_type="AzureIaasVM", status="Registered"):
     if container_type == "AzureIaasVM":
         return custom.list_containers(client, resource_group_name, vault_name, container_type, status)
-    else:
-        return custom_wl.list_wl_containers(client, resource_group_name, vault_name, container_type)
+    return custom_wl.list_wl_containers(client, resource_group_name, vault_name, container_type)
 
 
 def show_policy(client, resource_group_name, vault_name, name, container_type="AzureIaasVM"):
     if container_type == "AzureIaasVM":
         return custom.show_policy(client, resource_group_name, vault_name, name)
-    else:
-        return custom_wl.show_wl_policy(client, resource_group_name, vault_name, name)
+    return custom_wl.show_wl_policy(client, resource_group_name, vault_name, name)
 
 
 def list_policies(client, resource_group_name, vault_name, workload_type=None, container_type="AzureIaasVM"):
     if container_type == "AzureIaasVM" and workload_type is None:
         return custom.list_policies(client, resource_group_name, vault_name)
-    else:
-        return custom_wl.list_wl_policies(client, resource_group_name, vault_name, workload_type, container_type)
+    return custom_wl.list_wl_policies(client, resource_group_name, vault_name, workload_type, container_type)
 
 
 def show_item(cmd, client, resource_group_name, vault_name, container_name, name, container_type="AzureIaasVM"):
     if container_type == "AzureIaasVM":
         return custom.show_item(cmd, client, resource_group_name, vault_name, container_name, name)
-    else:
-        return custom_wl.show_wl_item(cmd, resource_group_name, vault_name, container_name, name)
+    return custom_wl.show_wl_item(cmd, resource_group_name, vault_name, container_name, name)
 
 
 def list_items(cmd, client, resource_group_name, vault_name, workload_type=None, container_name=None,
                container_type="AzureIaasVM", item_type="VM"):
     if container_type == "AzureIaasVM":
         return custom.list_items(cmd, client, resource_group_name, vault_name, container_name)
-    else:
-        return custom_wl.list_wl_items(client, resource_group_name, vault_name, workload_type, container_name)
+    return custom_wl.list_wl_items(client, resource_group_name, vault_name, workload_type, container_name)
 
 
 def show_recovery_point(cmd, client, resource_group_name, vault_name, container_name, item_name, name,
@@ -58,8 +52,7 @@ def show_recovery_point(cmd, client, resource_group_name, vault_name, container_
     if container_type == "AzureIaasVM" and workload_type is None:
         return custom.show_recovery_point(cmd, client, resource_group_name, vault_name, container_name,
                                           item_name, name, container_type, item_type)
-    else:
-        return custom_wl.show_wl_recovery_point(cmd, client, resource_group_name, vault_name, container_name,
+    return custom_wl.show_wl_recovery_point(cmd, client, resource_group_name, vault_name, container_name,
                                                 item_name, name, workload_type, container_type)
 
 
@@ -68,8 +61,7 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, container
     if container_type == "AzureIaasVM" and workload_type is None:
         return custom.list_recovery_points(cmd, client, resource_group_name, vault_name, container_name, item_name,
                                            container_type, item_type, start_date, end_date)
-    else:
-        return custom_wl.list_wl_recovery_points(cmd, client, resource_group_name, vault_name, container_name,
+    return custom_wl.list_wl_recovery_points(cmd, client, resource_group_name, vault_name, container_name,
                                                  item_name, workload_type, start_date, end_date)
 
 
@@ -85,32 +77,29 @@ def backup_now(cmd, client, resource_group_name, vault_name, item_name, retain_u
 
 def disable_protection(cmd, client, resource_group_name, vault_name, item_name, container_name=None,
                        container_type="AzureIaasVM", item_type="VM", delete_backup_data=False, **kwargs):
-    if (custom_help._is_id(item_name) and custom_help._is_wl_container(item_name)) or (container_name is not None and
-                                                                                       custom_help._is_wl_container(item_name)):
+    if (custom_help.is_id(item_name) and custom_help.is_wl_container(item_name)) or (container_name is not None and
+                                                                                       custom_help.is_wl_container(item_name)):
         return custom_wl.disable_protection(cmd, client, resource_group_name, vault_name,
                                             container_name, item_name, delete_backup_data)
-    else:
-        return custom.disable_protection(cmd, client, resource_group_name, vault_name, container_name, item_name,
+    return custom.disable_protection(cmd, client, resource_group_name, vault_name, container_name, item_name,
                                          container_type, item_type, delete_backup_data, **kwargs)
 
 
 def update_policy_for_item(cmd, client, resource_group_name, vault_name, item_name, policy_name, item_type="VM",
                            container_type="AzureIaasVM", container_name=None):
-    if container_type != "AzureIaasVM" or (custom_help._is_wl_container(item_name) and (custom_help._is_id(item_name) or
+    if container_type != "AzureIaasVM" or (custom_help.is_wl_container(item_name) and (custom_help.is_id(item_name) or
                                                                                         container_name is not None)):
         return custom_wl.update_policy_for_item(cmd, client, resource_group_name, vault_name, container_name,
                                                 item_name, policy_name, container_type)
-    else:
-        return custom.update_policy_for_item(cmd, client, resource_group_name, vault_name, container_name,
+    return custom.update_policy_for_item(cmd, client, resource_group_name, vault_name, container_name,
                                              item_name, policy_name)
 
 
 def set_policy(client, resource_group_name, vault_name, policy, name=None):
-    policy_object = custom_help._get_policy_from_json(client, policy)
+    policy_object = custom_help.get_policy_from_json(client, policy)
     if policy_object.properties.backup_management_type == "AzureWorkload":
         return custom_wl.set_policy(client, resource_group_name, vault_name, policy, name)
-    else:
-        return custom.set_policy(client, resource_group_name, vault_name, policy)
+    return custom.set_policy(client, resource_group_name, vault_name, policy)
 
 
 def delete_policy(client, resource_group_name, vault_name, name):

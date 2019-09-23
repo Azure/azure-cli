@@ -552,9 +552,9 @@ def auto_enable_for_azure_wl(cmd, client, resource_group_name, vault_name, polic
 
     try:
         client.create_or_update(vault_name, resource_group_name, fabric_name, intent_object_name, param)
-        return { 'status': True }
+        return {'status': True}
     except:
-        return { 'status': False }
+        return {'status': False}
 
 
 def disable_auto_for_azure_wl(client, resource_group_name, vault_name, item_name):
@@ -575,9 +575,9 @@ def disable_auto_for_azure_wl(client, resource_group_name, vault_name, item_name
 
     try:
         client.delete(vault_name, resource_group_name, fabric_name, intent_object_name)
-        return { 'status': True }
+        return {'status': True}
     except:
-        return { 'status': False }
+        return {'status': False}
 
 
 def list_workload_items(cmd, vault_name, resource_group_name, container_name,
@@ -626,7 +626,7 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
         if 'sql' in item_type.lower():
             directory_map = []
             for i in alternate_directory_paths:
-                directory_map.append([SQLDataDirectoryMapping(mapping_type=i[0], source_path=i[1], 
+                directory_map.append([SQLDataDirectoryMapping(mapping_type=i[0], source_path=i[1],
                                                               source_logical_name=i[2], target_path=i[3])])
             setattr(trigger_restore_properties, 'alternate_directory_paths', directory_map)
 
@@ -713,12 +713,12 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
         items = list_workload_items(cmd, vault_name, resource_group_name, container_name)
         for item in items:
             if item.properties.friendly_name == protectable_item_object.properties.friendly_name:
-               if item.properties.server_name == protectable_item_object.properties.server_name:
+                if item.properties.server_name == protectable_item_object.properties.server_name:
                     for path in recovery_point.properties.extended_info.data_directory_paths:
                         target_path = cust_help.get_target_path(path.type, path.path, path.logical_name,
                                                                 item.properties.data_directory_paths)
                         alternate_directory_paths.append((path.type, path.path, path.logical_name, target_path))
-    
+
     friendly_name = protectable_item_object.properties.friendly_name
     item_friendly_name = item.properties.friendly_name
     db_name = friendly_name + '/' + item_friendly_name + '_restored_' + datetime.now().strftime('%m_%d_%Y_%H%M')
@@ -728,7 +728,6 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
     container_id = None
     if restore_mode == 'AlternateWorkloadRestore':
         container_id = '/'.join(protectable_item_object.id.split('/')[:-2])
-
 
     if not ('sql' in item_type.lower() and restore_mode == 'AlternateWorkloadRestore'):
         alternate_directory_paths = None
