@@ -2055,7 +2055,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
     if secrets:
         secrets = _merge_secrets([validate_file_or_dict(secret) for secret in secrets])
 
-    if computer_name_prefix is not None and type(computer_name_prefix) == str:
+    if computer_name_prefix is not None and isinstance(computer_name_prefix, str):
         naming_prefix = computer_name_prefix
 
     vmss_resource = build_vmss_resource(

@@ -7,9 +7,6 @@ Release History
 
 * vmss create: Add --computer-name-prefix parameter to support custom computer name prefix of virtual machines in the VMSS.
 
-2.0.74
-++++++
-
 **ACR**
 
 * Added a required `--type` parameter to command `az acr config retention update`
