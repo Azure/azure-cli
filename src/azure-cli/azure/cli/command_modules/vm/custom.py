@@ -668,7 +668,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                                                                    role_assignment_guid, identity_scope))
 
     if workspace is not None:
-        workspace_location, workspace_id = _prepare_workspace(cmd, resource_group_name, workspace)
+        workspace_id = _prepare_workspace(cmd, resource_group_name, workspace)
         master_template.add_secure_parameter('workspaceId', workspace_id)
         vm_mmaExtension_resource = build_vm_mmaExtension_resource(cmd, vm_name, location, workspace_id)
         vm_daExtensionName_resource = build_vm_daExtensionName_resource(cmd, vm_name, location)
@@ -983,7 +983,6 @@ def _prepare_workspace(cmd, resource_group_name, workspace):
     from ._client_factory import cf_log_analytics
     from azure.cli.core.commands.client_factory import get_subscription_id
 
-    workspace_location = None
     workspace_id = None
     if not is_valid_resource_id(workspace):
         workspace_name = workspace
@@ -1001,18 +1000,10 @@ def _prepare_workspace(cmd, resource_group_name, workspace):
                                            sku=sku,
                                            retention_in_days=retention_time)
             workspace_result = log_analytics_client.create_or_update(resource_group_name, workspace_name, workspace_instance)
-        workspace_location = workspace_result.location
         workspace_id = workspace_result.id
     else:
-        parsed_workspace = parse_resource_id(workspace)
-        workspace_resource_group_name = parsed_workspace['resource_group']
-        workspace_name = parsed_workspace['resource_name']
-        workspace_subscription = parsed_workspace['subscription']
-        log_analytics_client = cf_log_analytics(cmd.cli_ctx, workspace_subscription)
-        workspace_result = log_analytics_client.get(workspace_resource_group_name, workspace_name)
-        workspace_id = workspace_result.id
-        workspace_location = workspace_result.location
-    return workspace_location, workspace_id
+        workspace_id = workspace
+    return workspace_id
 # endregion
 
 
