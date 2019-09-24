@@ -815,7 +815,7 @@ parameters:
 
         Dimensions can be queried by adding the 'where' keyword and multiple dimensions can be queried by combining them with the 'and' keyword.
 
-        Values for METRIC, DIMENSION and appropriate THRESHOLD values can be obtained from `az monitor metrics list-definition` command.
+        Values for METRIC, DIMENSION and appropriate THRESHOLD values can be obtained from `az monitor metrics list-definitions` command.
 
         Multiple conditons can be specified by using more than one `--condition` argument.
 examples:
@@ -875,7 +875,7 @@ parameters:
 
         Dimensions can be queried by adding the 'where' keyword and multiple dimensions can be queried by combining them with the 'and' keyword.
 
-        Values for METRIC, DIMENSION and appropriate THRESHOLD values can be obtained from `az monitor metrics list-definition` command.
+        Values for METRIC, DIMENSION and appropriate THRESHOLD values can be obtained from `az monitor metrics list-definitions` command.
 
         Multiple conditons can be specified by using more than one `--condition` argument.
   - name: --remove-conditions
