@@ -669,6 +669,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
 
     if workspace is not None:
         workspace_location, workspace_id = _prepare_workspace(cmd, resource_group_name, workspace)
+        master_template.add_secure_parameter('workspaceId', workspace_id)
         vm_mmaExtension_resource = build_vm_mmaExtension_resource(cmd, vm_name, location, workspace_id)
         vm_daExtensionName_resource = build_vm_daExtensionName_resource(cmd, vm_name, location)
         master_template.add_resource(vm_mmaExtension_resource)

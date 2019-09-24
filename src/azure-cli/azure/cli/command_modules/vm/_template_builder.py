@@ -884,18 +884,16 @@ def build_vm_mmaExtension_resource(_, vm_name, location, workspace_id):
             "typeHandlerVersion": "1.4",
             "autoUpgradeMinorVersion": 'true',
             "settings": {
-                "workspaceId": "",
+                "workspaceId": "[reference(parameters('workspaceId'), '2015-11-01-preview').customerId]",
                 "stopOnMultipleConnections": 'true'
             },
             "protectedSettings": {
-                "workspaceKey": ""
+                "workspaceKey": "[listKeys(parameters('workspaceId'), '2015-11-01-preview').primarySharedKey]"
             }
         }
     }
     mmaExtension_resource['name']= vm_name + '/OMSExtension'
     mmaExtension_resource['location'] = location
-    mmaExtension_resource['properties']['settings']['workspaceId'] = "[reference({0}, '2015-11-01-preview').customerId]".format(workspace_id)
-    mmaExtension_resource['properties']['protectedSettings']['workspaceKey'] = "[listKeys({0}, '2015-11-01-preview').primarySharedKey]".format(workspace_id)
     mmaExtension_resource['dependsOn'] = ['Microsoft.Compute/virtualMachines/' + vm_name]
     return mmaExtension_resource
 
