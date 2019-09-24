@@ -1,0 +1,32 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+from azure.cli.command_modules.monitor._client_factory import cf_log_analytics_workspace
+
+def create_log_analytics_workspace(client, cmd, resource_group_name, workspace_name, location=None, tags=None,
+                                   linked_workspace_id=None, sku=None, retention_time=None):
+    from azure.mgmt.loganalytics.models import Workspace, Sku
+    workspace_client = client
+    sku = Sku(name=sku)
+    workspace_instance = Workspace(location=location,
+                                   tags=tags,
+                                   customer_id=linked_workspace_id,
+                                   sku=sku,
+                                   retention_in_days=retention_time)
+    return workspace_client.create_or_update(resource_group_name, workspace_name, workspace_instance)
+
+
+def update_log_analytics_workspace(instance, cmd, tags=None, retention_time=None):
+    if tags is not None:
+        instance.tags = tags
+    if retention_time is not None:
+        instance.retention_in_days = retention_time
+    return instance
+
+
+def list_log_analytics_workspace(client, cmd, resource_group_name=None):
+    workspace_client = client
+    if resource_group_name is not None:
+        return workspace_client.list_by_resource_group(resource_group_name)
+    return workspace_client.list()

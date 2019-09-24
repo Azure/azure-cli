@@ -972,3 +972,31 @@ examples:
     text: az monitor metrics list-definitions --resource /subscriptions/{subscriptionID}/resourceGroups/Space1999/providers/Microsoft.Network/networkSecurityGroups/ADDS-NSG
     crafted: true
 """
+
+helps['monitor log-analytics'] = """
+type: group
+short-summary: Manage log analytics
+"""
+
+helps['monitor log-analytics workspace'] = """
+type: group
+short-summary: Manage log analytics workspace
+"""
+
+helps['monitor log-analytics workspace create'] = """
+type: command
+short-summary: Create a workspace instance
+examples:
+  - name: Create a workspace instance
+    text: az monitor log-analytics workspace create -g MyResourceGroup -n MyWorkspace
+"""
+
+helps['monitor log-analytics workspace list'] = """
+type: command
+short-summary: List a workspace instance
+"""
+
+helps['monitor log-analytics workspace update'] = """
+type: command
+short-summary: Update a workspace instance
+"""

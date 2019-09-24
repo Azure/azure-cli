@@ -1,0 +1,32 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+
+
+class TestLogProfileScenarios(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_monitor_workspace', location='centralus')
+    def test_monitor_log_analytics_workspace_default(self, resource_group):
+        self.kwargs.update({
+            'name': self.create_random_name('clitest', 20)
+        })
+
+        self.cmd("monitor log-analytics workspace create -g {rg} -n {name}", checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('retentionInDays', 30),
+            self.check('sku.name', 'pergb2018')
+        ])
+
+        self.cmd("monitor log-analytics workspace update -g {rg} -n {name} --retention-time 100", checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('retentionInDays', 100)
+        ])
+
+        self.cmd("monitor log-analytics workspace list-usages -g {rg} -n {name}")
+        self.cmd("monitor log-analytics workspace list -g {rg}", checks=[
+            self.check('length(@)', 1),
+        ])
+        self.cmd("monitor log-analytics workspace get-shared-keys -g {rg} -n {name}")
+        self.cmd("monitor log-analytics workspace list-intelligence-packs -g {rg} -n {name}")
