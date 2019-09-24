@@ -3,6 +3,12 @@
 Release History
 ===============
 
+**Ams**
+
+* BREAKING CHANGE:
+    ams content-key-policy create:
+        - Changed parameter --ask from utf-8 string to hex string.
+
 **keyvault**
 
 * Fix the bug in secret set command that igores the expires argument
