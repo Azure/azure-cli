@@ -436,8 +436,6 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
     def command_group(self, group_name, command_type=None, **kwargs):
         if command_type:
             kwargs['command_type'] = command_type
-        if 'warning_msg' in kwargs:
-            logger.warning(kwargs['warning_msg'])
         if 'deprecate_info' in kwargs:
             kwargs['deprecate_info'].target = group_name
         if kwargs.get('is_preview', False):
