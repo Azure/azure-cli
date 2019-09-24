@@ -14,6 +14,7 @@ def storage_copy(cmd, source=None,
                  destination=None,
                  put_md5=None,
                  recursive=None,
+                 blob_type=None,
                  source_account_name=None,
                  source_container=None,
                  source_blob=None,
@@ -88,6 +89,8 @@ def storage_copy(cmd, source=None,
         flags.append('--recursive')
     if put_md5 is not None:
         flags.append('--put-md5')
+    if blob_type is not None:
+        flags.append('--blob-type=' + blob_type)
 
     azcopy.copy(full_source, full_destination, flags=flags)
 
