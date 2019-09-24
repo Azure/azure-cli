@@ -1575,7 +1575,6 @@ class VMDiskAttachDetachTest(ScenarioTest):
             self.check('storageProfile.dataDisks[3].managedDisk.storageAccountType', 'StandardSSD_LRS'),
         ])
 
-    """ No quota
     @ResourceGroupPreparer(name_prefix='cli-test-stdssdk', location='eastus2')
     def test_vm_ultra_ssd_storage_sku(self, resource_group):
 
@@ -1606,9 +1605,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
             self.check('storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
             self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'UltraSSD_LRS'),
         ])
-    """
 
-    """ No quota
     @ResourceGroupPreparer(name_prefix='cli-test-ultrassd', location='eastus2')
     def test_vm_ultra_ssd_disk_update(self, resource_group):
         self.kwargs.update({
@@ -1619,7 +1616,6 @@ class VMDiskAttachDetachTest(ScenarioTest):
             self.check('diskIopsReadWrite', 510),
             self.check('diskMbpsReadWrite', 10)
         ])
-    """
 
     @ResourceGroupPreparer(name_prefix='cli-test-std_zrs', location='eastus2')
     def test_vm_disk_create_with_standard_zrs_sku(self, resource_group):
