@@ -873,3 +873,44 @@ def build_av_set_resource(cmd, name, location, tags, platform_update_domain_coun
         av_set['properties']['proximityPlacementGroup'] = {'id': proximity_placement_group}
 
     return av_set
+
+def build_vm_mmaExtension_resource(_, vm_name, location, workspace_id):
+    mmaExtension_resource = {
+        "type": "Microsoft.Compute/virtualMachines/extensions",
+        "apiVersion": "2018-10-01",
+        "properties": {
+            "publisher": "Microsoft.EnterpriseCloud.Monitoring",
+            "type": "OmsAgentForLinux",
+            "typeHandlerVersion": "1.4",
+            "autoUpgradeMinorVersion": 'true',
+            "settings": {
+                "workspaceId": "",
+                "stopOnMultipleConnections": 'true'
+            },
+            "protectedSettings": {
+                "workspaceKey": ""
+            }
+        }
+    }
+    mmaExtension_resource['name']= vm_name + '/OMSExtension'
+    mmaExtension_resource['location'] = location
+    mmaExtension_resource['properties']['settings']['workspaceId'] = "[reference({0}, '2015-11-01-preview').customerId]".format(workspace_id)
+    mmaExtension_resource['properties']['protectedSettings']['workspaceKey'] = "[listKeys({0}, '2015-11-01-preview').primarySharedKey]".format(workspace_id)
+    mmaExtension_resource['dependsOn'] = ['Microsoft.Compute/virtualMachines/' + vm_name]
+    return mmaExtension_resource
+
+def build_vm_daExtensionName_resource(_, vm_name, location):
+    daExtensionName_resource = {
+        "type": "Microsoft.Compute/virtualMachines/extensions",
+        "apiVersion": "2018-10-01",
+        "properties": {
+                "publisher": "Microsoft.Azure.Monitoring.DependencyAgent",
+                "type": "DependencyAgentLinux",
+                "typeHandlerVersion": "9.5",
+                "autoUpgradeMinorVersion": "true"
+        }
+    }
+    daExtensionName_resource['name']= vm_name + '/DependencyAgentLinux'
+    daExtensionName_resource['location'] = location
+    daExtensionName_resource['dependsOn'] = ['Microsoft.Compute/virtualMachines/' + vm_name + '/extensions/OMSExtension']
+    return daExtensionName_resource

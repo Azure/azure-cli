@@ -530,7 +530,9 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                                                                 build_storage_account_resource, build_nic_resource,
                                                                 build_vnet_resource, build_nsg_resource,
                                                                 build_public_ip_resource, StorageProfile,
-                                                                build_msi_role_assignment)
+                                                                build_msi_role_assignment,
+                                                                build_vm_mmaExtension_resource,
+                                                                build_vm_daExtensionName_resource)
     from msrestazure.tools import resource_id, is_valid_resource_id
 
     storage_sku = disk_info['os'].get('storageAccountType')
@@ -543,12 +545,6 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     vm_id = resource_id(
         subscription=subscription_id, resource_group=resource_group_name,
         namespace='Microsoft.Compute', type='virtualMachines', name=vm_name)
-
-    workspace_id_template = resource_id(
-        subscription=subscription_id, resource_group=resource_group_name,
-        namespace='microsoft.operationalinsights',
-        type='workspaces'
-    )
 
     # determine final defaults and calculated values
     tags = tags or {}
@@ -670,6 +666,13 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
             role_assignment_guid = str(_gen_guid())
             master_template.add_resource(build_msi_role_assignment(vm_name, vm_id, identity_role_id,
                                                                    role_assignment_guid, identity_scope))
+
+    if workspace is not None:
+        workspace_location, workspace_id = _prepare_workspace(cmd, resource_group_name, workspace)
+        vm_mmaExtension_resource = build_vm_mmaExtension_resource(cmd, vm_name, location, workspace_id)
+        vm_daExtensionName_resource = build_vm_daExtensionName_resource(cmd, vm_name, location)
+        master_template.add_resource(vm_mmaExtension_resource)
+        master_template.add_resource(vm_daExtensionName_resource)
 
     master_template.add_resource(vm_resource)
 
@@ -982,15 +985,32 @@ def _prepare_workspace(cmd, resource_group_name, workspace):
     workspace_location = None
     workspace_id = None
     if not is_valid_resource_id(workspace):
+        workspace_name = workspace
         subscription_id = get_subscription_id(cmd.cli_ctx)
         log_analytics_client = cf_log_analytics(cmd.cli_ctx, subscription_id)
-        workspace_result = log_analytics_client.get(resource_group_name, workspace)
+        workspace_result = None
+        try:
+            workspace_result = log_analytics_client.get(resource_group_name, workspace_name)
+        except:
+            from azure.mgmt.loganalytics.models import Workspace, Sku
+            sku = Sku(name="pergb2018")
+            retention_time = 30
+            location = _get_resource_group_location(cmd.cli_ctx, resource_group_name)
+            workspace_instance = Workspace(location=location,
+                                           sku=sku,
+                                           retention_in_days=retention_time)
+            workspace_result = log_analytics_client.create_or_update(resource_group_name, workspace_name, workspace_instance)
+        workspace_location = workspace_result.location
+        workspace_id = workspace_result.id
     else:
         parsed_workspace = parse_resource_id(workspace)
         workspace_resource_group_name = parsed_workspace['resource_group']
         workspace_name = parsed_workspace['resource_name']
         workspace_subscription = parsed_workspace['subscription']
         log_analytics_client = cf_log_analytics(cmd.cli_ctx, workspace_subscription)
+        workspace_result = log_analytics_client.get(workspace_resource_group_name, workspace_name)
+        workspace_id = workspace_result.id
+        workspace_location = workspace_result.location
     return workspace_location, workspace_id
 # endregion
 
