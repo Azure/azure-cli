@@ -522,7 +522,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               identity_role='Contributor', identity_role_id=None, application_security_groups=None, zone=None,
               boot_diagnostics_storage=None, ultra_ssd_enabled=None, ephemeral_os_disk=None,
               proximity_placement_group=None, dedicated_host=None, dedicated_host_group=None, aux_subscriptions=None,
-              priority=None, max_billing=None, eviction_policy=None, enable_agent=None，workspace_id=None, workspace_location=None):
+              priority=None, max_billing=None, eviction_policy=None, enable_agent=None，workspace=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -973,6 +973,25 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
     return sdk_no_wait(no_wait, _compute_client_factory(cmd.cli_ctx).virtual_machines.create_or_update,
                        resource_group_name, vm_name, **kwargs)
 
+
+def _prepare_workspace(cmd, resource_group_name, workspace):
+    from msrestazure.tools import parse_resource_id, is_valid_resource_id
+    from ._client_factory import cf_log_analytics
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    workspace_location = None
+    workspace_id = None
+    if not is_valid_resource_id(workspace):
+        subscription_id = get_subscription_id(cmd.cli_ctx)
+        log_analytics_client = cf_log_analytics(cmd.cli_ctx, subscription_id)
+        workspace_result = log_analytics_client.get(resource_group_name, workspace)
+    else:
+        parsed_workspace = parse_resource_id(workspace)
+        workspace_resource_group_name = parsed_workspace['resource_group']
+        workspace_name = parsed_workspace['resource_name']
+        workspace_subscription = parsed_workspace['subscription']
+        log_analytics_client = cf_log_analytics(cmd.cli_ctx, workspace_subscription)
+    return workspace_location, workspace_id
 # endregion
 
 
