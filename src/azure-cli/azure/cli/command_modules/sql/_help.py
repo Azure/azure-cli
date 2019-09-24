@@ -803,6 +803,7 @@ helps['sql mi ad-admin list'] = """
 helps['sql mi ad-admin delete'] = """
     type: command
     short-summary: Deletes an existing managed instance Active Directory Administrator.
+    """
 helps['sql instance-failover-group'] = """
     type: group
     short-summary: Manage SQL Instance Failover Groups.
