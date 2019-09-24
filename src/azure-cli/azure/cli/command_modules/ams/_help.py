@@ -307,9 +307,9 @@ helps['ams job'] = """
     short-summary: Manage jobs for a transform.
 """
 
-helps['ams job start'] = """
+helps['ams job create'] = """
     type: command
-    short-summary: Start a job.
+    short-summary: Create and start a job.
 """
 
 helps['ams job update'] = """

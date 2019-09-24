@@ -407,6 +407,8 @@ class VMCustomImageTest(ScenarioTest):
 
 class VMImageWithPlanTest(ScenarioTest):
 
+    # Disable temporarily. You cannot purchase reservation because required AAD tenant information is missing.
+    # Please ask your tenant admin to fill this form: https://aka.ms/orgprofile
     @ResourceGroupPreparer()
     def test_vm_create_with_market_place_image(self, resource_group, resource_group_location):
         # test 2 scenarios, 1. create vm from market place image, 2. create from a custom image captured from such vms
@@ -680,13 +682,39 @@ class VMManagedDiskScenarioTest(ScenarioTest):
                      self.check('storageProfile.osDisk.caching', 'ReadWrite')
                  ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_disk_upload_')
+    def test_vm_disk_upload(self, resource_group):
+        self.kwargs.update({
+            'disk': 'disk1',
+        })
+
+        # test --upload-size-bytes parameter
+        self.cmd('disk create -g {rg} -n {disk} --for-upload --upload-size-bytes 21474836992', checks=[
+            self.check('creationData.uploadSizeBytes', 21474836992)
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_snapshot_incremental_')
+    def test_vm_snapshot_incremental(self, resource_group):
+        self.kwargs.update({
+            'disk': 'd1',
+            'snapshot': 's1'
+        })
+
+        # create a disk first
+        self.cmd('disk create -g {rg} -n {disk} --size-gb 10 -l centraluseuap')
+
+        # test snapshot --incremental
+        self.cmd('snapshot create -g {rg} -n {snapshot} --incremental -l centraluseuap --source {disk}',
+                 checks=[self.check('incremental', True)])
+
+    """ Disable temporarily
     @ResourceGroupPreparer(name_prefix='cli_test_large_disk')
     def test_vm_large_disk(self, resource_group):
         self.kwargs.update({
             'disk': 'd1',
             'snapshot': 's1'
         })
-        self.cmd('disk create -g {rg} -n {disk} --size-gb 1 --hyper-v-generation V2 --for-upload', checks=[
+        self.cmd('disk create -g {rg} -n {disk} --hyper-v-generation V2 --for-upload --upload-size-bytes 1073742336', checks=[
             self.check('hyperVgeneration', "V2")
         ])
         self.cmd('disk grant-access -g {rg} -n {disk} --access-level Write --duration-in-seconds 3600')
@@ -694,6 +722,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         self.cmd('snapshot create -g {rg} -n {snapshot} --source {disk} --hyper-v-generation V2', checks=[
             self.check('hyperVgeneration', "V2")
         ])
+    """
 
 
 class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
@@ -1453,7 +1482,7 @@ class VMCreateCustomIP(ScenarioTest):
             'public_ip_sku': 'Standard'
         })
 
-        self.cmd('vm create -n {vm} -g {rg} --image openSUSE-Leap --admin-username user11 --private-ip-address 10.0.0.5 --public-ip-sku {public_ip_sku} --public-ip-address-dns-name {dns} --generate-ssh-keys')
+        self.cmd('vm create -n {vm} -g {rg} --image UbuntuLTS --admin-username user11 --private-ip-address 10.0.0.5 --public-ip-sku {public_ip_sku} --public-ip-address-dns-name {dns} --generate-ssh-keys')
 
         self.cmd('network public-ip show -n {vm}PublicIP -g {rg}', checks=[
             self.check('publicIpAllocationMethod', 'Static'),
@@ -1464,7 +1493,7 @@ class VMCreateCustomIP(ScenarioTest):
                  checks=self.check('ipConfigurations[0].privateIpAllocationMethod', 'Static'))
 
         # verify the default should be "Basic" sku with "Dynamic" allocation method
-        self.cmd('vm create -n {vm2} -g {rg} --image openSUSE-Leap --admin-username user11 --generate-ssh-keys')
+        self.cmd('vm create -n {vm2} -g {rg} --image UbuntuLTS --admin-username user11 --generate-ssh-keys')
         self.cmd('network public-ip show -n {vm2}PublicIP -g {rg}', checks=[
             self.check('publicIpAllocationMethod', 'Dynamic'),
             self.check('sku.name', 'Basic')
@@ -2985,13 +3014,13 @@ class VMSSPriorityTesting(ScenarioTest):
             'vmss': 'vmss1',
             'vmss2': 'vmss2'
         })
-        self.cmd('vmss create -g {rg} -n {vmss} --admin-username clitester --admin-password PasswordPassword1! --image debian --priority {priority}')
+        self.cmd('vmss create -g {rg} -n {vmss} --admin-username clitester --admin-password PasswordPassword1! --image debian --priority {priority} --lb-sku Standard')
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('virtualMachineProfile.priority', '{priority}'),
             self.check('virtualMachineProfile.evictionPolicy', 'Deallocate')
         ])
 
-        self.cmd('vmss create -g {rg} -n {vmss2} --admin-username clitester --admin-password PasswordPassword1! --image centos --priority {priority} --eviction-policy delete')
+        self.cmd('vmss create -g {rg} -n {vmss2} --admin-username clitester --admin-password PasswordPassword1! --image centos --priority {priority} --eviction-policy delete --lb-sku Standard')
         self.cmd('vmss show -g {rg} -n {vmss2}', checks=[
             self.check('virtualMachineProfile.priority', '{priority}'),
             self.check('virtualMachineProfile.evictionPolicy', 'Delete')
@@ -3367,6 +3396,78 @@ class DedicatedHostScenarioTest(ScenarioTest):
         self.assertTrue(instance_view["assetId"])
         self.assertTrue(instance_view["availableCapacity"])
 # endregion
+
+
+class VMSSTerminateNotificationScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_terminate_notification_')
+    def test_vmss_terminate_notification(self, resource_group):
+        update_enable_key = 'virtualMachineProfile.scheduledEventsProfile.terminateNotificationProfile.enable'
+        update_not_before_timeout_key = 'virtualMachineProfile.scheduledEventsProfile.terminateNotificationProfile.notBeforeTimeout'
+        create_enable_key = 'vmss.' + update_enable_key
+        create_not_before_timeout_key = 'vmss.' + update_not_before_timeout_key
+
+        self.kwargs.update({
+            'vm': 'vm1'
+        })
+
+        # Create, enable terminate notification
+        self.cmd('vmss create -g {rg} -n {vm} --image UbuntuLTS --terminate-notification-time 5',
+                 checks=[
+                     self.check(create_enable_key, True),
+                     self.check(create_not_before_timeout_key, 'PT5M')
+                 ])
+
+        # Update, enable terminate notification and set time
+        self.cmd('vmss update -g {rg} -n {vm} --enable-terminate-notification --terminate-notification-time 8',
+                 checks=[
+                     self.check(update_enable_key, True),
+                     self.check(update_not_before_timeout_key, 'PT8M')
+                 ])
+
+        # Update, set time
+        self.cmd('vmss update -g {rg} -n {vm} --terminate-notification-time 9',
+                 checks=[
+                     self.check(update_not_before_timeout_key, 'PT9M')
+                 ])
+
+        # Update, disable terminate notification
+        self.cmd('vmss update -g {rg} -n {vm} --enable-terminate-notification false',
+                 checks=[
+                     self.check('virtualMachineProfile.scheduledEventsProfile.terminateNotificationProfile', None)
+                 ])
+
+        # Parameter validation, the following commands should fail
+        with self.assertRaises(CLIError):
+            self.cmd('vmss update -g {rg} -n {vm} --enable-terminate-notification false --terminate-notification-time 5')
+        with self.assertRaises(CLIError):
+            self.cmd('vmss update -g {rg} -n {vm} --enable-terminate-notification')
+
+
+class VMPriorityEvictionBilling(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_priority_eviction_billing_')
+    def test_vm_priority_eviction_billing(self, resource_group):
+        self.kwargs.update({
+            'vm': 'vm1',
+            'vmss': 'vmss1'
+        })
+
+        # vm create
+        self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --priority Low --eviction-policy Deallocate --max-billing=50')
+
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('priority', 'Low'),
+            self.check('evictionPolicy', 'Deallocate'),
+            self.check('billingProfile.maxPrice', 50)
+        ])
+
+        # vmss create
+        self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --lb-sku Standard --priority Low --eviction-policy Deallocate --max-billing=50', checks=[
+            self.check('vmss.virtualMachineProfile.priority', 'Low'),
+            self.check('vmss.virtualMachineProfile.evictionPolicy', 'Deallocate'),
+            self.check('vmss.virtualMachineProfile.billingProfile.maxPrice', 50)
+        ])
 
 
 if __name__ == '__main__':

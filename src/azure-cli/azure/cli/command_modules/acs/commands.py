@@ -21,19 +21,19 @@ def load_command_table(self, _):
 
     container_services_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.containerservice.v2017_07_01.operations.'
-                        'container_services_operations#ContainerServicesOperations.{}',
+                        '_container_services_operations#ContainerServicesOperations.{}',
         client_factory=cf_container_services
     )
 
     managed_clusters_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.containerservice.v2018_03_31.operations.'
-                        'managed_clusters_operations#ManagedClustersOperations.{}',
+        operations_tmpl='azure.mgmt.containerservice.v2019_08_01.operations.'
+                        '_managed_clusters_operations#ManagedClustersOperations.{}',
         client_factory=cf_managed_clusters
     )
 
     openshift_managed_clusters_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.containerservice.v2018_09_30_preview.operations.'
-                        'open_shift_managed_clusters_operations#OpenShiftManagedClustersOperations.{}',
+                        '_open_shift_managed_clusters_operations#OpenShiftManagedClustersOperations.{}',
         client_factory=cf_openshift_managed_clusters
     )
 
@@ -68,6 +68,7 @@ def load_command_table(self, _):
     with self.command_group('aks', managed_clusters_sdk, client_factory=cf_managed_clusters) as g:
         g.custom_command('browse', 'aks_browse')
         g.custom_command('create', 'aks_create', supports_no_wait=True)
+        g.custom_command('update', 'aks_update', supports_no_wait=True)
         g.command('delete', 'delete', supports_no_wait=True, confirmation=True)
         g.custom_command('update-credentials', 'aks_update_credentials', supports_no_wait=True)
         g.custom_command('disable-addons', 'aks_disable_addons', supports_no_wait=True)
@@ -86,7 +87,6 @@ def load_command_table(self, _):
                          'Are you sure you want to perform this operation?')
         g.custom_command('upgrade-connector', 'k8s_upgrade_connector', is_preview=True)
         g.custom_command('use-dev-spaces', 'aks_use_dev_spaces')
-        g.custom_command('update', 'aks_update', supports_no_wait=True)
         g.wait_command('wait')
 
     with self.command_group('aks', container_services_sdk, client_factory=cf_container_services) as g:
