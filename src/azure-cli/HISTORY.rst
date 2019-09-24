@@ -7,6 +7,14 @@ Release History
 * BREAKING CHANGE:
     Changed job creation from "job start" to "job create".
 
+2.0.74
+++++++
+
+**ACR**
+
+* Added a required `--type` parameter to command `az acr config retention update`
+* Param `-n, --name` changed to `-r, --registry` for `az acr config` command group.
+
 **AKS**
 
 * Add `--load-balancer-sku`, `--load-balancer-managed-outbound-ip-count`, `--load-balancer-outbound-ips` and `--load-balancer-outbound-ip-prefixes` to `az aks create` command, which allows for creating AKS cluster with SLB.
@@ -17,11 +25,6 @@ Release History
 
 * az group deployment create: Add --handle-extended-json-format to support multiline and comments in json template
 * Update azure-mgmt-resource package to use 4.0.0
-
-**ACR**
-
-* Added a required `--type` parameter to command `az acr config retention update`
-* Param `-n, --name` changed to `-r, --registry` for `az acr config` command group.
 
 **Compute**
 
