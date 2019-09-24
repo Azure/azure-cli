@@ -322,6 +322,14 @@ def _db_elastic_pool_update_sku(
             allow_reset_family=allow_reset_family)
 
 
+def _get_tenant_id():
+    from azure.cli.core._profile import Profile
+
+    profile = Profile()
+    sub = profile.get_subscription()
+    return sub['tenantId']
+
+
 _DEFAULT_SERVER_VERSION = "12.0"
 
 ###############################################
@@ -1746,7 +1754,6 @@ def server_update(
 
 
 def server_ad_admin_set(
-        cmd,
         client,
         resource_group_name,
         server_name,
@@ -1754,11 +1761,8 @@ def server_ad_admin_set(
     '''
     Sets a server's AD admin.
     '''
-    from azure.cli.core._profile import Profile
 
-    profile = Profile(cli_ctx=cmd.cli_ctx)
-    sub = profile.get_subscription()
-    kwargs['tenant_id'] = sub['tenantId']
+    kwargs['tenant_id'] = _get_tenant_id()
 
     return client.create_or_update(
         server_name=server_name,
@@ -2207,11 +2211,8 @@ def mi_ad_admin_set(
     '''
     Creates a managed instance active directory administrator.
     '''
-    from azure.cli.core._profile import Profile
 
-    profile = Profile()
-    sub = profile.get_subscription()
-    kwargs['tenant_id'] = sub['tenantId']
+    kwargs['tenant_id'] = _get_tenant_id()
 
     return client.create_or_update(
         resource_group_name=resource_group_name,
