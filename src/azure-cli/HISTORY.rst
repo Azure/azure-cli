@@ -2,22 +2,17 @@
 
 Release History
 ===============
+
 **AMS**
 
-* BREAKING CHANGE:
-    Changed job creation from "job start" to "job create".
-
-2.0.74
-++++++
-
-**ACR**
-
-* Added a required `--type` parameter to command `az acr config retention update`
-* Param `-n, --name` changed to `-r, --registry` for `az acr config` command group.
+* BREAKING CHANGE: Changed job creation from "job start" to "job create".
 
 **Compute**
 
 * vmss create: Add --computer-name-prefix parameter to support custom computer name prefix of virtual machines in the VMSS.
+
+2.0.74
+++++++
 
 **ACR**
 
