@@ -21,7 +21,7 @@ class PrivateDnsCommandsLoader(AzCommandsLoader):
                                                        resource_type=ResourceType.MGMT_NETWORK,
                                                        custom_command_type=privatedns_custom,
                                                        suppress_extension=[
-                                                           ModExtensionSuppress(__name__, 'privatedns', '0.1.0',
+                                                           ModExtensionSuppress(__name__, 'privatedns', '0.1.1',
                                                                                 reason='These commands are now in the CLI.',
                                                                                 recommend_remove=True)])
 
