@@ -1865,7 +1865,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
                 identity_role_id=None, zones=None, priority=None, eviction_policy=None,
                 application_security_groups=None, ultra_ssd_enabled=None, ephemeral_os_disk=None,
                 proximity_placement_group=None, aux_subscriptions=None, terminate_notification_time=None,
-                max_billing=None):
+                max_billing=None, computer_name_prefix=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -2054,6 +2054,9 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
 
     if secrets:
         secrets = _merge_secrets([validate_file_or_dict(secret) for secret in secrets])
+
+    if computer_name_prefix is not None and isinstance(computer_name_prefix, str):
+        naming_prefix = computer_name_prefix
 
     vmss_resource = build_vmss_resource(
         cmd=cmd, name=vmss_name, naming_prefix=naming_prefix, location=location, tags=tags,

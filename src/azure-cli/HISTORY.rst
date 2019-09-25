@@ -2,10 +2,14 @@
 
 Release History
 ===============
+
 **AMS**
 
-* BREAKING CHANGE:
-    Changed job creation from "job start" to "job create".
+* BREAKING CHANGE: Changed job creation from "job start" to "job create".
+
+**Compute**
+
+* vmss create: Add --computer-name-prefix parameter to support custom computer name prefix of virtual machines in the VMSS.
 
 **Network**
 
