@@ -1543,6 +1543,8 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
     # launch kubectl port-forward locally to access the remote dashboard
 
     # run in a loop to deal with idle connection drops from Azure LB
+    first_connection = True
+
     while True:
         if in_cloud_console():
             # TODO: better error handling here.
@@ -1552,17 +1554,18 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
             if term_id:
                 response = requests.post('http://localhost:8888/openLink/{}'.format(term_id),
                                         json={"url": result['url']})
-            logger.warning('To view the console, please open %s in a new tab', result['url'])
+            if first_connection:
+                logger.warning('To view the console, please open %s in a new tab', result['url'])
         else:
-            logger.warning('Proxy running on %s', proxy_url)
+            if first_connection:
+                logger.warning('Proxy running on %s', proxy_url)
 
-        logger.warning('Press CTRL+C to close the tunnel...')
-        if not disable_browser:
+        if first_connection:
+            logger.warning('Press CTRL+C to close the tunnel...')
+        
+        if not disable_browser and first_connection:
             wait_then_open_async(proxy_url)
-            
-            # disable browser after first invocation to avoid opening a new tab
-            # every time the port-forward connection drops
-            disable_browser = True
+                
         try:
             try:
                 subprocess.check_output(["kubectl", "--kubeconfig", browse_path, "--namespace", "kube-system",
@@ -1582,6 +1585,8 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
         finally:
             if in_cloud_console():
                 requests.post('http://localhost:8888/closeport/8001')
+
+        first_connection = False
 
 
 def _trim_nodepoolname(nodepool_name):
