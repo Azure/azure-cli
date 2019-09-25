@@ -1541,39 +1541,47 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
 
     proxy_url = '{0}://{1}:{2}/'.format(protocol, listen_address, listen_port)
     # launch kubectl port-forward locally to access the remote dashboard
-    if in_cloud_console():
-        # TODO: better error handling here.
-        response = requests.post('http://localhost:8888/openport/{0}'.format(listen_port))
-        result = json.loads(response.text)
-        term_id = os.environ.get('ACC_TERM_ID')
-        if term_id:
-            response = requests.post('http://localhost:8888/openLink/{}'.format(term_id),
-                                     json={"url": result['url']})
-        logger.warning('To view the console, please open %s in a new tab', result['url'])
-    else:
-        logger.warning('Proxy running on %s', proxy_url)
 
-    logger.warning('Press CTRL+C to close the tunnel...')
-    if not disable_browser:
-        wait_then_open_async(proxy_url)
-    try:
-        try:
-            subprocess.check_output(["kubectl", "--kubeconfig", browse_path, "--namespace", "kube-system",
-                                     "port-forward", "--address", listen_address, dashboard_pod,
-                                     "{0}:{1}".format(listen_port, dashboard_port)], stderr=subprocess.STDOUT)
-        except subprocess.CalledProcessError as err:
-            if err.output.find(b'unknown flag: --address'):
-                if listen_address != '127.0.0.1':
-                    logger.warning('"--address" is only supported in kubectl v1.13 and later.')
-                    logger.warning('The "--listen-address" argument will be ignored.')
-                subprocess.call(["kubectl", "--kubeconfig", browse_path, "--namespace", "kube-system",
-                                 "port-forward", dashboard_pod, "{0}:{1}".format(listen_port, dashboard_port)])
-    except KeyboardInterrupt:
-        # Let command processing finish gracefully after the user presses [Ctrl+C]
-        pass
-    finally:
+    # run in a loop to deal with idle connection drops from Azure LB
+    while True:
         if in_cloud_console():
-            requests.post('http://localhost:8888/closeport/8001')
+            # TODO: better error handling here.
+            response = requests.post('http://localhost:8888/openport/{0}'.format(listen_port))
+            result = json.loads(response.text)
+            term_id = os.environ.get('ACC_TERM_ID')
+            if term_id:
+                response = requests.post('http://localhost:8888/openLink/{}'.format(term_id),
+                                        json={"url": result['url']})
+            logger.warning('To view the console, please open %s in a new tab', result['url'])
+        else:
+            logger.warning('Proxy running on %s', proxy_url)
+
+        logger.warning('Press CTRL+C to close the tunnel...')
+        if not disable_browser:
+            wait_then_open_async(proxy_url)
+            
+            # disable browser after first invocation to avoid opening a new tab
+            # every time the port-forward connection drops
+            disable_browser = True
+        try:
+            try:
+                subprocess.check_output(["kubectl", "--kubeconfig", browse_path, "--namespace", "kube-system",
+                                        "port-forward", "--address", listen_address, dashboard_pod,
+                                        "{0}:{1}".format(listen_port, dashboard_port)], stderr=subprocess.STDOUT)
+            except subprocess.CalledProcessError as err:
+                if err.output.find(b'unknown flag: --address'):
+                    if listen_address != '127.0.0.1':
+                        logger.warning('"--address" is only supported in kubectl v1.13 and later.')
+                        logger.warning('The "--listen-address" argument will be ignored.')
+                    subprocess.call(["kubectl", "--kubeconfig", browse_path, "--namespace", "kube-system",
+                                    "port-forward", dashboard_pod, "{0}:{1}".format(listen_port, dashboard_port)])
+
+        except KeyboardInterrupt:
+            # Let command processing finish gracefully after the user presses [Ctrl+C]
+            break
+        finally:
+            if in_cloud_console():
+                requests.post('http://localhost:8888/closeport/8001')
 
 
 def _trim_nodepoolname(nodepool_name):
