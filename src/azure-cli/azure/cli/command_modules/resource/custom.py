@@ -41,7 +41,7 @@ from ._validators import MSI_LOCAL_ID
 
 logger = get_logger(__name__)
 
-deployment_command_notice = ('Upcoming breaking change: a new parameter "scope_type" will be introduced to commands in this group '
+deployment_command_notice = ('Upcoming breaking change: a new parameter "scope-type" will be introduced to commands in this group '
                                  'and will be mandatory. Scope type will be an enum with four values: ResourceGroup, Subscription, ManagementGroup, Tenant. '
                                  'Adding this parameter allows us to use one command for all Azure Resource Manager template deployments but still determine the '
                                  'intended level of scope.')
