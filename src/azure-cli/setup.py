@@ -149,7 +149,8 @@ DEPENDENCIES = [
     'websocket-client~=0.56.0',
     'xmltodict~=0.12',
     'javaproperties==0.5.1',
-    'jsondiff==1.2.0'
+    'jsondiff==1.2.0',
+    'tabulate==0.8.3'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
