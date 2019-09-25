@@ -29,6 +29,12 @@ Release History
 * Add `--load-balancer-managed-outbound-ip-count`, `--load-balancer-outbound-ips` and `--load-balancer-outbound-ip-prefixes` to `az aks update` command, which allows for updating load balancer profile of an AKS cluster with SLB.
 * Add `--vm-set-type` to `az aks create` command, which allows to specify vm types of an AKS Cluster (vmas or vmss).
 
+**AppService**
+
+* Added "webapp config access-restriction show | set | add | remove"
+* az webapp up updated for better error-handling
+* az appservice plan update support Isolated SKU
+
 **ARM**
 
 * az group deployment create: Add --handle-extended-json-format to support multiline and comments in json template
@@ -95,7 +101,6 @@ Release History
 
 **AppService**
 
-* Added "webapp config access-restriction show | set | add | remove"
 * az webapp deployment source config-zip support for connection_verify
 * Add support for ACR images with az webapp create
 
