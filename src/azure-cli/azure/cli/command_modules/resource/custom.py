@@ -42,9 +42,10 @@ from ._validators import MSI_LOCAL_ID
 logger = get_logger(__name__)
 
 deployment_command_notice = ('Upcoming breaking change: a new parameter "scope-type" will be introduced to commands in this group '
-                                 'and will be mandatory. Scope type will be an enum with four values: ResourceGroup, Subscription, ManagementGroup, Tenant. '
-                                 'Adding this parameter allows us to use one command for all Azure Resource Manager template deployments but still determine the '
-                                 'intended level of scope.')
+                             'and will be mandatory. Scope type will be an enum with four values: ResourceGroup, Subscription, ManagementGroup, Tenant. '
+                             'Adding this parameter allows us to use one command for all Azure Resource Manager template deployments but still determine the '
+                             'intended level of scope.')
+
 
 def _build_resource_id(**kwargs):
     from msrestazure.tools import resource_id as resource_id_from_dict
@@ -725,11 +726,13 @@ def list_applications(cmd, resource_group_name=None):
         applications = racf.applications.list_by_subscription()
     return list(applications)
 
+
 def list_deployments_at_subscription_scope(cmd):
     logger.warning(deployment_command_notice)
 
     rcf = _resource_client_factory(cmd.cli_ctx)
     return rcf.deployments.list_at_subscription_scope()
+
 
 def get_deployment_at_subscription_scope(cmd, deployment_name):
     logger.warning(deployment_command_notice)
@@ -737,11 +740,13 @@ def get_deployment_at_subscription_scope(cmd, deployment_name):
     rcf = _resource_client_factory(cmd.cli_ctx)
     return rcf.deployments.get_at_subscription_scope(deployment_name)
 
+
 def delete_deployment_at_subscription_scope(cmd, deployment_name):
     logger.warning(deployment_command_notice)
 
     rcf = _resource_client_factory(cmd.cli_ctx)
     return rcf.deployments.delete_at_subscription_scope(deployment_name)
+
 
 def deploy_arm_template(cmd, resource_group_name,
                         template_file=None, template_uri=None, deployment_name=None,
@@ -975,12 +980,14 @@ def get_deployment_operations(client, resource_group_name, deployment_name, oper
         result.append(dep)
     return result
 
+
 def list_deployment_operations_at_subscription_scope(cmd, deployment_name):
     """list a deployment's operations."""
     logger.warning(deployment_command_notice)
 
     rcf = _resource_client_factory(cmd.cli_ctx)
     return rcf.deployment_operations.list_at_subscription_scope(deployment_name)
+
 
 def get_deployment_operations_at_subscription_scope(client, deployment_name, operation_ids):
     """get a deployment's operation."""
