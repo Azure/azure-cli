@@ -32,7 +32,7 @@ DEPENDENCIES = [
     'pyyaml',
     'knack',
     'six>=1.10.0',
-    'tabulate>=0.7.7',
+    'tabulate==0.8.3',
     'colorama>=0.3.7'
 ]
 
