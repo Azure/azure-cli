@@ -291,7 +291,7 @@ def load_arguments(self, _):
         c.argument('headers', nargs='+', help="Space-separated headers in KEY=VALUE format or JSON string. Use @{file} to load from a file")
         c.argument('uri_parameters', nargs='+', help='Space-separated queries in KEY=VALUE format or JSON string. Use @{file} to load from a file')
         c.argument('skip_authorization_header', action='store_true', help='do not auto append "Authorization" header')
-        c.argument('body', options_list=['--body', '-b'], help='request body')
+        c.argument('body', options_list=['--body', '-b'], help='request body. Use @{file} to load from a file')
         c.argument('output_file', help='save response payload to a file')
         c.argument('resource', help='Resource url for which CLI should acquire a token in order to access '
                    'the service. The token will be placed in the "Authorization" header. By default, '
