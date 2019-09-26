@@ -254,7 +254,7 @@ def _parse_image_argument(cmd, namespace):
 
     # 4 - attempt to match an URN alias (most likely)
     from azure.cli.command_modules.vm._actions import load_images_from_aliases_doc
-    from requests.exceptions import ConnectionError
+    import requests
     try:
         images = load_images_from_aliases_doc(cmd.cli_ctx)
         matched = next((x for x in images if x['urnAlias'].lower() == namespace.image.lower()), None)
@@ -264,7 +264,7 @@ def _parse_image_argument(cmd, namespace):
             namespace.os_sku = matched['sku']
             namespace.os_version = matched['version']
             return 'urn'
-    except ConnectionError:
+    except requests.exceptions.ConnectionError:
         pass
 
     # 5 - check if an existing managed disk image resource
