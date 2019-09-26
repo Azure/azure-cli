@@ -41,7 +41,7 @@ from ._validators import MSI_LOCAL_ID
 
 logger = get_logger(__name__)
 
-deployment_command_notice = ('Upcoming breaking change: a new parameter "scope-type" will be introduced to commands in this group '
+deployment_command_notice = ('[**Upcoming breaking change**]: a new parameter "scope-type" will be introduced to commands in this group '
                              'and will be mandatory. Scope type will be an enum with four values: ResourceGroup, Subscription, ManagementGroup, Tenant. '
                              'Adding this parameter allows us to use one command for all Azure Resource Manager template deployments but still determine the '
                              'intended level of scope.')
@@ -739,6 +739,18 @@ def get_deployment_at_subscription_scope(cmd, deployment_name):
 
     rcf = _resource_client_factory(cmd.cli_ctx)
     return rcf.deployments.get_at_subscription_scope(deployment_name)
+
+
+def wait_deployment_at_subscription_scope(cmd, deployment_name):
+    if wait_deployment_at_subscription_scope.first_run:
+        logger.warning(deployment_command_notice)
+        wait_deployment_at_subscription_scope.first_run = False
+
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    return rcf.deployments.get_at_subscription_scope(deployment_name)
+
+
+wait_deployment_at_subscription_scope.first_run = True
 
 
 def delete_deployment_at_subscription_scope(cmd, deployment_name):
