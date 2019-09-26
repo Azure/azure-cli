@@ -11,6 +11,10 @@ Release History
 
 * vmss create: Add --computer-name-prefix parameter to support custom computer name prefix of virtual machines in the VMSS.
 
+**Backup**
+
+* Enhanced error detail for vault delete in force mode.
+
 **Network**
 
 * az network private-dns link vnet create/update: Fixes #9851. Support cross-tenant virtual network linking.
