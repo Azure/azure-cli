@@ -77,7 +77,7 @@ class StatusCodes:
 class Versions:
     """Constants of versions.
     """
-    SDKVersion = '0.0.1'
+    SDKVersion = '1.0.0'
 
 
 class Validator:
