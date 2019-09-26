@@ -3,6 +3,12 @@
 Release History
 ===============
 
+* Add syntax check for --set parameter in generic update command.
+
+2.0.74
+++++++
+* Introduce Debian Buster package
+
 2.0.73
 ++++++
 * Minor changes

@@ -58,7 +58,7 @@ class CosmosDBTests(ScenarioTest):
         assert len(account['capabilities']) == 1
         assert account['capabilities'][0]['name'] == "EnableAggregationPipeline"
 
-        connection_strings = self.cmd('az cosmosdb list-connection-strings -n {acc} -g {rg}').get_output_in_json()
+        connection_strings = self.cmd('az cosmosdb keys list --type connection-strings -n {acc} -g {rg}').get_output_in_json()
         assert len(connection_strings['connectionStrings']) == 4
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
@@ -100,10 +100,10 @@ class CosmosDBTests(ScenarioTest):
         assert 'secondaryMasterKey' in original_keys
         assert 'secondaryReadonlyMasterKey' in original_keys
 
-        self.cmd('az cosmosdb regenerate-key -n {acc} -g {rg} --key-kind primary')
-        self.cmd('az cosmosdb regenerate-key -n {acc} -g {rg} --key-kind primaryReadonly')
-        self.cmd('az cosmosdb regenerate-key -n {acc} -g {rg} --key-kind secondary')
-        self.cmd('az cosmosdb regenerate-key -n {acc} -g {rg} --key-kind secondaryReadonly')
+        self.cmd('az cosmosdb keys regenerate -n {acc} -g {rg} --key-kind primary')
+        self.cmd('az cosmosdb keys regenerate -n {acc} -g {rg} --key-kind primaryReadonly')
+        self.cmd('az cosmosdb keys regenerate -n {acc} -g {rg} --key-kind secondary')
+        self.cmd('az cosmosdb keys regenerate -n {acc} -g {rg} --key-kind secondaryReadonly')
 
         modified_keys = self.cmd('az cosmosdb keys list -n {acc} -g {rg}').get_output_in_json()
         assert original_keys['primaryMasterKey'] != modified_keys['primaryMasterKey']

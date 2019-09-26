@@ -3,11 +3,16 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from enum import Enum
 from azure.cli.core.commands import LongRunningOperation
 from ._utils import validate_premium_registry
 
-
 POLICIES_NOT_SUPPORTED = 'Policies are only supported for managed registries in Premium SKU.'
+
+
+# temporary place holder enum for retention type
+class RetentionType(str, Enum):
+    UntaggedManifests = "UntaggedManifests"
 
 
 def acr_config_content_trust_show(cmd,
@@ -58,6 +63,7 @@ def acr_config_retention_show(cmd,
 def acr_config_retention_update(cmd,
                                 client,
                                 registry_name,
+                                policy_type,  # pylint: disable=unused-argument
                                 status=None,
                                 days=None,
                                 resource_group_name=None):
