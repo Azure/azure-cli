@@ -927,7 +927,8 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
             'wafp': 'agp1',
             'rule': 'rule1',
             'ip': 'pip1',
-            'ag': 'ag1'
+            'ag': 'ag1',
+            'rg': resource_group
         })
         self.cmd('network application-gateway waf-policy create -g {rg} -n {wafp}')
         self.cmd('network application-gateway waf-policy update -g {rg} -n {wafp} --tags test=best',
