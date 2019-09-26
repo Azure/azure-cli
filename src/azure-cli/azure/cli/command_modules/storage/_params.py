@@ -385,12 +385,18 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                        help='File path in file share of copy {} storage account'.format(item))
             c.argument('{}_local_path'.format(item), arg_group='Copy {}'.format(item),
                        help='Local file path')
-        c.argument('recursive', action='store_true', help='Look into sub-directories \
+        c.argument('recursive', arg_group='Additional Flags', action='store_true', help='Look into sub-directories \
                     recursively when uploading from local file system.')
-        c.argument('put_md5', action='store_true', help='Create an MD5 hash of each file, and save the hash \
+        c.argument('put_md5', arg_group='Additional Flags', action='store_true', help='Create an MD5 hash of each file, and save the hash \
                     as the Content-MD5 property of the destination blob/file.Only available when uploading.')
-        c.argument('blob_type', arg_type=get_enum_type(["BlockBlob", "PageBlob", "AppendBlob"]),
+        c.argument('blob_type', arg_group='Additional Flags', arg_type=get_enum_type(["BlockBlob", "PageBlob", "AppendBlob"]),
                    help='The type of blob at the destination.')
+        c.argument('s2s_preserve_access_tier', arg_group='Additional Flags', arg_type=get_three_state_flag(),
+                   help='Preserve access tier during service to service copy. '
+                   'Please refer to https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-storage-tiers '
+                   'to ensure destination storage account support setting access tier. In the cases that setting '
+                   'access tier is not supported, please use --s2sPreserveAccessTier=false to bypass copying access tier.'
+                   ' (Default true)')
 
     with self.argument_context('storage blob copy') as c:
         for item in ['destination', 'source']:
