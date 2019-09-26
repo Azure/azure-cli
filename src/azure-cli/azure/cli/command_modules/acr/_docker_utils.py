@@ -24,6 +24,7 @@ from knack.log import get_logger
 from azure.cli.core.util import should_disable_connection_verify
 from azure.cli.core.cloud import CloudSuffixNotSetException
 from azure.cli.core._profile import _AZ_LOGIN_MESSAGE
+from azure.cli.core.commands.client_factory import get_subscription_id
 
 from ._client_factory import cf_acr_registries
 from ._constants import get_managed_sku
@@ -54,7 +55,10 @@ def _get_aad_token_after_challenge(cli_ctx,
 
     from azure.cli.core._profile import Profile
     profile = Profile(cli_ctx=cli_ctx)
-    creds, _, tenant = profile.get_raw_token()
+
+    # this might be a cross tenant scenario, so pass subscription to get_raw_token
+    subscription = get_subscription_id(cli_ctx)
+    creds, _, tenant = profile.get_raw_token(subscription=subscription)
 
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
     content = {
@@ -213,18 +217,21 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
     url = 'https://' + login_server + '/v2/'
     try:
         challenge = requests.get(url, verify=(not should_disable_connection_verify()))
-        if challenge.status_code in [403]:
-            raise CLIError("Looks like you don't have access to registry '{}'. ".format(login_server) +
-                           "To see configured firewall rules, run" +
-                           " 'az acr show --query networkRuleSet --name {}'. ".format(registry_name) +
-                           "Details: https://docs.microsoft.com/en-us/azure/container-registry/container-registry-health-error-reference#connectivity_forbidden_error")  # pylint: disable=line-too-long
+        if challenge.status_code == 403:
+            raise CLIError("Looks like you don't have access to registry '{}'. "
+                           "To see configured firewall rules, run 'az acr show --query networkRuleSet --name {}'. "
+                           "Please refer to https://aka.ms/acr/errors#connectivity_forbidden_error for more information."  # pylint: disable=line-too-long
+                           .format(login_server, registry_name))
     except RequestException as e:
         logger.debug("Could not connect to registry login server. Exception: %s", str(e))
         if resource_not_found:
             logger.warning("%s\nUsing '%s' as the default registry login server.", resource_not_found, login_server)
-        raise CLIError("Could not connect to the registry login server '{}'. ".format(login_server) +
-                       "Please verify that the registry exists and " +
-                       "the URL '{}' is reachable from your environment.".format(url))
+
+        from .check_health import ACR_CHECK_HEALTH_MSG
+        check_health_msg = ACR_CHECK_HEALTH_MSG.format(registry_name)
+        raise CLIError("Could not connect to the registry login server '{}'. "
+                       "Please verify that the registry exists and the URL '{}' is reachable from your environment.\n{}"
+                       .format(login_server, url, check_health_msg))
 
     # 1. if username was specified, verify that password was also specified
     if username:
@@ -238,6 +245,7 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
 
     # 2. if we don't yet have credentials, attempt to get a refresh token
     if not registry or registry.sku.name in get_managed_sku(cmd):
+        logger.info("Attempting to retrieve AAD refresh token...")
         try:
             return login_server, EMPTY_GUID, _get_aad_token(
                 cli_ctx, login_server, only_refresh_token, repository, artifact_repository, permission)
@@ -247,6 +255,7 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
     # 3. if we still don't have credentials, attempt to get the admin credentials (if enabled)
     if registry:
         if registry.admin_user_enabled:
+            logger.info("Attempting with admin credentials...")
             try:
                 cred = cf_acr_registries(cli_ctx).list_credentials(resource_group_name, registry_name)
                 return login_server, cred.username, cred.passwords[0].value

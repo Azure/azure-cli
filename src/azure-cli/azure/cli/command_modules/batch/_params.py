@@ -16,11 +16,12 @@ from azure.cli.core.commands.parameters import \
 
 from azure.cli.command_modules.batch._completers import load_supported_images
 from azure.cli.command_modules.batch._validators import \
-    (application_enabled, datetime_format, storage_account_id, metadata_item_format,
-     application_package_reference_format, validate_pool_resize_parameters,
-     certificate_reference_format, validate_json_file, validate_cert_file, keyvault_id,
-     environment_setting_format, validate_cert_settings, resource_file_format,
-     validate_client_parameters)
+    (application_enabled, application_package_reference_format,
+     certificate_reference_format, datetime_format, environment_setting_format,
+     keyvault_id, metadata_item_format, resource_file_format,
+     storage_account_id, validate_cert_file, validate_cert_settings,
+     validate_client_parameters, validate_json_file,
+     validate_pool_resize_parameters)
 
 
 # pylint: disable=line-too-long, too-many-statements

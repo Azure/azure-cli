@@ -5,6 +5,7 @@
 
 # pylint: disable=too-many-lines
 
+from enum import Enum
 from knack.log import get_logger
 from knack.util import CLIError
 
@@ -28,6 +29,13 @@ from azure.mgmt.cosmosdb.models import (
 )
 
 logger = get_logger(__name__)
+
+
+class CosmosKeyTypes(Enum):
+    keys = "keys"
+    read_only_keys = "read-only-keys"
+    connection_strings = "connection-strings"
+
 
 DEFAULT_INDEXING_POLICY = """{
   "indexingMode": "consistent",
@@ -74,9 +82,10 @@ def cli_cosmosdb_create(cmd, client,
                                                max_staleness_prefix=max_staleness_prefix,
                                                max_interval_in_seconds=max_interval)
 
-    from azure.mgmt.resource import ResourceManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    resource_client = get_mgmt_service_client(cmd.cli_ctx, ResourceManagementClient)
+    from azure.cli.core.profiles import ResourceType
+    resource_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+
     rg = resource_client.resource_groups.get(resource_group_name)
     resource_group_location = rg.location  # pylint: disable=no-member
 
@@ -216,7 +225,9 @@ def cli_cosmosdb_update(client,
         capabilities=existing.capabilities,
         is_virtual_network_filter_enabled=enable_virtual_network,
         virtual_network_rules=virtual_network_rules,
-        enable_multiple_write_locations=enable_multiple_write_locations)
+        enable_multiple_write_locations=enable_multiple_write_locations,
+        enable_cassandra_connector=existing.enable_cassandra_connector,
+        connector_offer=existing.connector_offer)
 
     async_docdb_create = client.create_or_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_create.result()
@@ -230,6 +241,17 @@ def cli_cosmosdb_list(client, resource_group_name=None):
         return client.list_by_resource_group(resource_group_name)
 
     return client.list()
+
+
+# pylint: disable=line-too-long
+def cli_cosmosdb_keys(client, resource_group_name, account_name, key_type=CosmosKeyTypes.keys.value):
+    if key_type == CosmosKeyTypes.keys.value:
+        return client.list_keys(resource_group_name, account_name)
+    if key_type == CosmosKeyTypes.read_only_keys.value:
+        return client.list_read_only_keys(resource_group_name, account_name)
+    if key_type == CosmosKeyTypes.connection_strings.value:
+        return client.list_connection_strings(resource_group_name, account_name)
+    raise CLIError("az cosmosdb keys list: '{0}' is not a valid value for '--type'. See 'az cosmosdb keys list --help'.".format(key_type))
 
 
 def cli_cosmosdb_sql_database_create(client,
@@ -784,7 +806,9 @@ def cli_cosmosdb_network_rule_add(cmd,
         capabilities=existing.capabilities,
         is_virtual_network_filter_enabled=True,
         virtual_network_rules=virtual_network_rules,
-        enable_multiple_write_locations=existing.enable_multiple_write_locations)
+        enable_multiple_write_locations=existing.enable_multiple_write_locations,
+        enable_cassandra_connector=existing.enable_cassandra_connector,
+        connector_offer=existing.connector_offer)
 
     async_docdb_create = client.create_or_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_create.result()
@@ -832,7 +856,9 @@ def cli_cosmosdb_network_rule_remove(cmd,
         capabilities=existing.capabilities,
         is_virtual_network_filter_enabled=True,
         virtual_network_rules=virtual_network_rules,
-        enable_multiple_write_locations=existing.enable_multiple_write_locations)
+        enable_multiple_write_locations=existing.enable_multiple_write_locations,
+        enable_cassandra_connector=existing.enable_cassandra_connector,
+        connector_offer=existing.connector_offer)
 
     async_docdb_create = client.create_or_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_create.result()

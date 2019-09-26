@@ -164,7 +164,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage account management-policy create') as c:
         c.argument('policy', type=file_type, completer=FilesCompleter(),
                    help='The Storage Account ManagementPolicies Rules, in JSON format. See more details in: '
-                        'https://docs.microsoft.com/en-us/azure/storage/common/storage-lifecycle-managment-concepts.')
+                        'https://docs.microsoft.com/azure/storage/common/storage-lifecycle-managment-concepts.')
         c.argument('account_name', help='The name of the storage account within the specified resource group.')
 
     with self.argument_context('storage account management-policy update') as c:
@@ -389,6 +389,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                     recursively when uploading from local file system.')
         c.argument('put_md5', action='store_true', help='Create an MD5 hash of each file, and save the hash \
                     as the Content-MD5 property of the destination blob/file.Only available when uploading.')
+        c.argument('blob_type', arg_type=get_enum_type(["BlockBlob", "PageBlob", "AppendBlob"]),
+                   help='The type of blob at the destination.')
 
     with self.argument_context('storage blob copy') as c:
         for item in ['destination', 'source']:
