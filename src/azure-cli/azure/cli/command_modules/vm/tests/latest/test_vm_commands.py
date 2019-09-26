@@ -1575,7 +1575,6 @@ class VMDiskAttachDetachTest(ScenarioTest):
             self.check('storageProfile.dataDisks[3].managedDisk.storageAccountType', 'StandardSSD_LRS'),
         ])
 
-    """ No quota
     @ResourceGroupPreparer(name_prefix='cli-test-stdssdk', location='eastus2')
     def test_vm_ultra_ssd_storage_sku(self, resource_group):
 
@@ -1606,9 +1605,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
             self.check('storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
             self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'UltraSSD_LRS'),
         ])
-    """
 
-    """ No quota
     @ResourceGroupPreparer(name_prefix='cli-test-ultrassd', location='eastus2')
     def test_vm_ultra_ssd_disk_update(self, resource_group):
         self.kwargs.update({
@@ -1619,7 +1616,6 @@ class VMDiskAttachDetachTest(ScenarioTest):
             self.check('diskIopsReadWrite', 510),
             self.check('diskMbpsReadWrite', 10)
         ])
-    """
 
     @ResourceGroupPreparer(name_prefix='cli-test-std_zrs', location='eastus2')
     def test_vm_disk_create_with_standard_zrs_sku(self, resource_group):
@@ -1808,7 +1804,7 @@ class VMSSCreateOptions(ScenarioTest):
 
         self.cmd('network public-ip create --name {ip} -g {rg}')
 
-        self.cmd('vmss create --image Debian --admin-password testPassword0 -l westus -g {rg} -n {vmss} --disable-overprovision --instance-count {count} --os-disk-caching {caching} --upgrade-policy-mode {update} --authentication-type password --admin-username myadmin --public-ip-address {ip} --data-disk-sizes-gb 1 --vm-sku Standard_D2_v2')
+        self.cmd('vmss create --image Debian --admin-password testPassword0 -l westus -g {rg} -n {vmss} --disable-overprovision --instance-count {count} --os-disk-caching {caching} --upgrade-policy-mode {update} --authentication-type password --admin-username myadmin --public-ip-address {ip} --data-disk-sizes-gb 1 --vm-sku Standard_D2_v2 --computer-name-prefix vmss1')
         self.cmd('network lb show -g {rg} -n {vmss}lb ',
                  checks=self.check('frontendIpConfigurations[0].publicIpAddress.id.ends_with(@, \'{ip}\')', True))
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
@@ -1816,6 +1812,7 @@ class VMSSCreateOptions(ScenarioTest):
             self.check('virtualMachineProfile.storageProfile.osDisk.caching', '{caching}'),
             self.check('upgradePolicy.mode', self.kwargs['update'].title()),
             self.check('singlePlacementGroup', True),
+            self.check('virtualMachineProfile.osProfile.computerNamePrefix', 'vmss1')
         ])
         self.kwargs['id'] = self.cmd('vmss list-instances -g {rg} -n {vmss} --query "[].instanceId"').get_output_in_json()[0]
         self.cmd('vmss show -g {rg} -n {vmss} --instance-id {id}',

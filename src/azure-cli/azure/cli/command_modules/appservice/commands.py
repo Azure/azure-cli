@@ -8,7 +8,7 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.core.util import empty_on_404
 
 from ._client_factory import cf_web_client, cf_plans, cf_webapps
-from ._validators import validate_app_exists_in_rg, validate_app_or_slot_exists_in_rg
+from ._validators import validate_app_exists_in_rg, validate_app_or_slot_exists_in_rg, validate_asp_exists_in_rg
 
 
 def output_slots_in_table(slots):
@@ -234,7 +234,9 @@ def load_command_table(self, _):
         g.command('delete', 'delete', confirmation=True)
         g.custom_command('list', 'list_app_service_plans')
         g.show_command('show', 'get')
-        g.generic_update_command('update', custom_func_name='update_app_service_plan', setter_arg_name='app_service_plan')
+        g.generic_update_command('update', custom_func_name='update_app_service_plan', setter_arg_name='app_service_plan',
+                                 validator=validate_asp_exists_in_rg)
+
     with self.command_group('appservice') as g:
         g.custom_command('list-locations', 'list_locations', transform=transform_list_location_output)
 
