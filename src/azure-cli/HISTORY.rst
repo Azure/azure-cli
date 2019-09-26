@@ -9,6 +9,7 @@ Release History
 
 **Compute**
 
+* vm create: Add --vmss to specify virtual machine scale set that the virtual machine should be assigned to.
 * vmss create: Add --computer-name-prefix parameter to support custom computer name prefix of virtual machines in the VMSS.
 
 **Network**
