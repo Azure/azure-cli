@@ -643,7 +643,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         license_type=license_type, zone=zone, disk_info=disk_info,
         boot_diagnostics_storage_uri=boot_diagnostics_storage, ultra_ssd_enabled=ultra_ssd_enabled,
         proximity_placement_group=proximity_placement_group, computer_name=computer_name,
-        dedicated_host=dedicated_host, priority=priority, max_billing=max_billing, eviction_policy=eviction_policy)
+        dedicated_host=dedicated_host, priority=priority, max_billing=max_billing, eviction_policy=eviction_policy,
+        provision_vm_agent=provision_vm_agent)
 
     vm_resource['dependsOn'] = vm_dependencies
 

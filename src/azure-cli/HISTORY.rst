@@ -9,6 +9,7 @@ Release History
 
 **Compute**
 
+* vm create: Add --provision-vm-agent configuration.
 * vmss create: Add --computer-name-prefix parameter to support custom computer name prefix of virtual machines in the VMSS.
 
 **Network**
