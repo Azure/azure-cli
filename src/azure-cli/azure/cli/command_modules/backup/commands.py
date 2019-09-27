@@ -8,7 +8,7 @@ from azure.cli.command_modules.backup._client_factory import vaults_cf, backup_p
     protection_policies_cf, backup_policies_cf, protected_items_cf, backups_cf, backup_jobs_cf, \
     job_details_cf, job_cancellations_cf, recovery_points_cf, restores_cf, backup_storage_configs_cf, \
     item_level_recovery_connections_cf, backup_protected_items_cf, backup_protectable_items_cf, \
-    protection_intent_cf, protection_containers_cf # pylint: disable=unused-variable
+    protection_intent_cf, protection_containers_cf  # pylint: disable=unused-variable
 from azure.cli.command_modules.backup._format import (
     transform_item_list, transform_job_list, transform_protectable_item_list, transform_recovery_points_list,
     transform_wl_policy_show, transform_containers_list, transform_policies_list, transform_items_list,

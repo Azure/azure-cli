@@ -83,10 +83,6 @@ def protected_items_cf(cli_ctx, *_):
     return _backup_client_factory(cli_ctx).protected_items
 
 
-def protectable_items_cf(cli_ctx, *_):
-    return _backup_client_factory(cli_ctx).protectable_items
-
-
 # Backup Client Factories
 def backup_policies_cf(cli_ctx, *_):
     return _backup_client_factory(cli_ctx).backup_policies

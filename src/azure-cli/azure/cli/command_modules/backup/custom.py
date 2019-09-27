@@ -251,17 +251,7 @@ def list_items(cmd, client, resource_group_name, vault_name, container_name=None
     return paged_items
 
 
-def update_policy_for_item(cmd, client, resource_group_name, vault_name, container_name, item_name, policy_name,
-                           container_type="AzureIaasVM", item_type="VM"):
-    # Client factories
-    backup_protected_items_client = backup_protected_items_cf(cmd.cli_ctx)
-
-    # Get objects from JSON files
-    item = show_item(cmd, backup_protected_items_client, resource_group_name, vault_name, container_name, item_name,
-                     container_type, item_type)
-    policy = show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name, policy_name)
-    _validate_policy(policy)
-
+def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, policy):
     if item.properties.backup_management_type != policy.properties.backup_management_type:
         raise CLIError(
             """
@@ -289,12 +279,7 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, contain
     return _track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
-def backup_now(cmd, client, resource_group_name, vault_name, container_name, item_name, retain_until,
-               container_type="AzureIaasVM", item_type="VM"):
-    item = show_item(cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name, container_name,
-                     item_name, container_type, item_type)
-    _validate_item(item)
-
+def backup_now(cmd, client, resource_group_name, vault_name, item, retain_until):
     # Get container and item URIs
     container_uri = _get_protection_container_uri_from_id(item.id)
     item_uri = _get_protected_item_uri_from_id(item.id)
@@ -320,12 +305,7 @@ def show_recovery_point(cmd, client, resource_group_name, vault_name, container_
     return client.get(vault_name, resource_group_name, fabric_name, container_uri, item_uri, name)
 
 
-def list_recovery_points(cmd, client, resource_group_name, vault_name, container_name, item_name,
-                         container_type="AzureIaasVM", item_type="VM", start_date=None, end_date=None):
-    item = show_item(cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name, container_name,
-                     item_name, container_type, item_type)
-    _validate_item(item)
-
+def list_recovery_points(cmd, client, resource_group_name, vault_name, item, start_date=None, end_date=None):
     # Get container and item URIs
     container_uri = _get_protection_container_uri_from_id(item.id)
     item_uri = _get_protected_item_uri_from_id(item.id)
@@ -472,12 +452,7 @@ def restore_files_unmount_rp(cmd, client, resource_group_name, vault_name, conta
         _track_backup_operation(cmd.cli_ctx, resource_group_name, result, vault_name)
 
 
-def disable_protection(cmd, client, resource_group_name, vault_name, container_name, item_name,  # pylint: disable=unused-argument
-                       container_type="AzureIaasVM", item_type="VM", delete_backup_data=False, **kwargs):
-    item = show_item(cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name, container_name,
-                     item_name, container_type, item_type)
-    _validate_item(item)
-
+def disable_protection(cmd, client, resource_group_name, vault_name, item, delete_backup_data=False, **kwargs):
     # Get container and item URIs
     container_uri = _get_protection_container_uri_from_id(item.id)
     item_uri = _get_protected_item_uri_from_id(item.id)

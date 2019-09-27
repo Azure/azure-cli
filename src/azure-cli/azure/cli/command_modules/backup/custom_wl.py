@@ -115,7 +115,7 @@ def register_wl_container(cmd, client, vault_name, resource_group_name, workload
     return cust_help.track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name, container_name)
 
 
-def re_register_wl_container(cmd, client, vault_name, resource_group_name, workload_type, 
+def re_register_wl_container(cmd, client, vault_name, resource_group_name, workload_type,
                              container_name, container_type):
     workload_type = workload_type_map[workload_type]
 
@@ -165,40 +165,41 @@ def unregister_wl_container(cmd, client, vault_name, resource_group_name, contai
     return cust_help.track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name, container_name)
 
 
-def show_wl_container(cmd, name, resource_group_name, vault_name, container_type, status="Registered"):
-    if not cust_help.is_native_name(name):
-        raise CLIError(
-            """
-            Container name passed cannot be a friendly name.
-            Please pass a native container name.
-            """)
+def show_wl_container(client, name, resource_group_name, vault_name, container_type, status="Registered"):
+    filter_dict = {
+        'backupManagementType': container_type,
+        'status': status
+    }
 
-    return protection_containers_cf(cmd.cli_ctx).get(vault_name, resource_group_name, fabric_name, name)
+    filter_dict['friendlyName'] = name
+    filter_string = cust_help._get_filter_string(filter_dict)
+
+    paged_containers = client.list(vault_name, resource_group_name, filter_string)
+    containers = cust_help._get_list_from_paged_response(paged_containers)
+
+    return cust_help.get_none_one_or_many(containers)
 
 
 def list_wl_containers(client, resource_group_name, vault_name, container_type, status="Registered"):
     return cust_help.get_containers(client, container_type, status, resource_group_name, vault_name)
 
 
-def show_wl_item(cmd, resource_group_name, vault_name, container_name, name):
-    if not cust_help.is_native_name(container_name):
-        raise CLIError(
-            """
-            Container name passed cannot be a friendly name.
-            Please pass a native container name.
-            """)
+def show_wl_item(cmd, client, resource_group_name, vault_name, container_name, name, container_type,
+                 item_type):
 
-    return protected_items_cf(cmd.cli_ctx).get(vault_name, resource_group_name, fabric_name, container_name, name)
+    items = list_wl_items(client, resource_group_name, vault_name, item_type, container_name)
+
+    if _is_native_name(name):
+        filtered_items = [item for item in items if item.name == name]
+    else:
+        filtered_items = [item for item in items if item.properties.friendly_name == name]
+
+    return _get_none_one_or_many(filtered_items)
 
 
 def list_wl_items(client, resource_group_name, vault_name, workload_type, container_name=None):
-    if workload_type is None:
-        raise CLIError(
-            """
-            Workload type is required for Azure Workload.
-            """)
 
-    if workload_type not in workload_type_map.values():
+    if workload_type is not None and workload_type not in workload_type_map.values():
         workload_type = workload_type_map[workload_type]
 
     filter_string = cust_help.get_filter_string({
@@ -207,56 +208,47 @@ def list_wl_items(client, resource_group_name, vault_name, workload_type, contai
 
     items = client.list(vault_name, resource_group_name, filter_string)
     paged_items = cust_help.get_list_from_paged_response(items)
+
+    container_uris = []
     if container_name:
         if cust_help.is_native_name(container_name):
-            container_uri = container_name
+            container_uris.append(container_name.lower())
         else:
-            raise CLIError(
-                """
-                Container name passed cannot be a friendly name.
-                Please pass a native container name.
-                """)
+            containers = show_container(backup_protection_containers_cf(cmd.cli_ctx),
+                                       container_name, resource_group_name, vault_name,
+                                       container_type)
+            
+            if isinstance(container, list):
+                for container in containers:
+                    container_uris.append(container.name.lower())
+            else:
+                if containers is not None:
+                    container_uris.append(containers.name.lower())
 
         return [item for item in paged_items if
-                cust_help.get_protection_container_uri_from_id(item.id).lower() == container_uri.lower()]
+                cust_help.get_protection_container_uri_from_id(item.id).lower() in container_uris]
+    
+    #if container_name:
+    #    if cust_help.is_native_name(container_name):
+    #        container_uri = container_name
+    #    else:
+    #        container = show_container(backup_protection_containers_cf(cmd.cli_ctx),
+    #                                   container_name, resource_group_name, vault_name,
+    #                                   container_type)
+
+    #    return [item for item in paged_items if
+    #           cust_help.get_protection_container_uri_from_id(item.id).lower() == container_uri.lower()]
+
     return paged_items
 
 
-def update_policy_for_item(cmd, client, resource_group_name, vault_name, container_name,
-                           item_name, policy_name, container_type="AzureWorkload"):
-    if container_name is None:
-        if cust_help.is_id(item_name):
-            container_uri = cust_help.get_protection_container_uri_from_id(item_name)
-            item_uri = cust_help.get_protected_item_uri_from_id(item_name)
-        else:
-            raise CLIError(
-                """
-                Item name passed without container must be an id.
-                """)
-    else:
-        if cust_help.is_native_name(container_name):
-            container_uri = container_name
-            item_uri = item_name
-        else:
-            raise CLIError(
-                """
-                Container name passed cannot be a friendly name.
-                Please pass a native container name.
-                """)
-
-    # Get objects from JSON files
-    policy = show_wl_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name, policy_name)[0]
-    cust_help.validate_policy(policy)
-
-    if policy.properties.backup_management_type != container_type:
+def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, policy):
+    if item.properties.backup_management_type != policy.properties.backup_management_type:
         raise CLIError(
             """
             The policy type should match with the workload being protected.
+            Use the relevant get-default policy command and use it to update the policy for the workload.
             """)
-
-    # Update policy request
-    item = show_wl_item(cmd, resource_group_name, vault_name, container_name, item_name)
-    cust_help.validate_item(item)
     item_properties = item.properties
     item_properties.policy_id = policy.id
 
@@ -363,12 +355,8 @@ def show_wl_recovery_point(cmd, client, resource_group_name, vault_name, contain
     return client.get(vault_name, resource_group_name, fabric_name, container_uri, item_uri, name)
 
 
-def list_wl_recovery_points(cmd, client, resource_group_name, vault_name, container_name, item_name, workload_type,
-                            start_date=None, end_date=None, extended_info=None):
-    item = show_wl_item(cmd, resource_group_name, vault_name,
-                        container_name, item_name)
-    cust_help.validate_item(item)
-
+def list_wl_recovery_points(cmd, client, resource_group_name, vault_name, item, start_date=None, end_date=None,
+                            extended_info=None):
     # Get container and item URIs
     container_uri = cust_help.get_protection_container_uri_from_id(item.id)
     item_uri = cust_help.get_protected_item_uri_from_id(item.id)
@@ -430,33 +418,11 @@ def enable_protection_for_azure_wl(cmd, client, resource_group_name, vault_name,
     return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
-def backup_now(cmd, client, resource_group_name, vault_name, container_name, item_name, retain_until, backup_type,
-               enable_compression=False):
-    if not cust_help.is_id(item_name) and not cust_help.is_native_name(item_name):
-        raise CLIError(
-            """
-            Item name cannot be friendly.
-            """)
-
-    if container_name is None:
-        if cust_help.is_id(item_name):
-            container_uri = cust_help.get_protection_container_uri_from_id(item_name)
-            item_uri = cust_help.get_protected_item_uri_from_id(item_name)
-        else:
-            raise CLIError(
-                """
-                Item name passed without container must be an id.
-                """)
-    else:
-        if cust_help.is_native_name(container_name):
-            container_uri = container_name
-            item_uri = item_name
-        else:
-            raise CLIError(
-                """
-                Container name passed cannot be a friendly name.
-                Please pass a native container name.
-                """)
+def backup_now(cmd, client, resource_group_name, vault_name, item, retain_until, backup_type,
+              enable_compression=False):
+    
+    container_uri = cust_help.get_protection_container_uri_from_id(item.id)
+    item_uri = cust_help.get_protected_item_uri_from_id(item.id)
 
     backup_item_type = item_uri.split(';')[0]
     if not cust_help.is_sql(backup_item_type) and enable_compression:
@@ -482,26 +448,10 @@ def backup_now(cmd, client, resource_group_name, vault_name, container_name, ite
     return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
-def disable_protection(cmd, client, resource_group_name, vault_name, container_name, item_name, delete_backup_data):
-    if container_name is None:
-        if cust_help.is_id(item_name):
-            container_uri = cust_help.get_protection_container_uri_from_id(item_name)
-            item_uri = cust_help.get_protected_item_uri_from_id(item_name)
-        else:
-            raise CLIError(
-                """
-                Item name passed without container must be an id.
-                """)
-    else:
-        if cust_help.is_native_name(container_name):
-            container_uri = container_name
-            item_uri = item_name
-        else:
-            raise CLIError(
-                """
-                Container name passed cannot be a friendly name.
-                Please pass a native container name.
-                """)
+def disable_protection(cmd, client, resource_group_name, vault_name, item, delete_backup_data):
+
+    container_uri = cust_help.get_protection_container_uri_from_id(item.id)
+    item_uri = cust_help.get_protected_item_uri_from_id(item.id)
 
     backup_item_type = item_uri.split(';')[0]
     if not cust_help.is_sql(backup_item_type) and not cust_help.is_hana(backup_item_type):

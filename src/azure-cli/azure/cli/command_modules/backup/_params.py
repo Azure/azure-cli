@@ -28,8 +28,8 @@ item_name_type = CLIArgumentType(help='Name of the backed up item.', options_lis
 policy_name_type = CLIArgumentType(help='Name of the backup policy.', options_list=['--policy-name', '-p'])
 job_name_type = CLIArgumentType(help='Name of the job.', options_list=['--name', '-n'])
 rp_name_type = CLIArgumentType(help='Name of the recovery point.', options_list=['--rp-name', '-r'])
-backup_management_type = CLIArgumentType(help='Name of the backup management type.', arg_type=get_enum_type(['AzureWorkload', 'AzureIaasVM']), options_list=['--backup-management-type'])
-wl_type = CLIArgumentType(help='Name of the workload type.', arg_type=get_enum_type(['MSSQL', 'SAPHANA', 'SAPASE']), options_list=['--workload-type'])
+backup_management_type = CLIArgumentType(help='Name of the backup management type.', arg_type=get_enum_type(['AzureWorkload', 'AzureIaasVM', 'AzureStorage']), options_list=['--backup-management-type'])
+wl_type = CLIArgumentType(help='Name of the workload type.', arg_type=get_enum_type(['MSSQL', 'SAPHANA', 'SAPASE', 'VM']), options_list=['--workload-type'])
 
 
 # pylint: disable=too-many-statements
