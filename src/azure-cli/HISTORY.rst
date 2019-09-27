@@ -7,6 +7,12 @@ Release History
 
 * BREAKING CHANGE: Changed job creation from "job start" to "job create".
 
+**AppConfig**
+
+* Using & in authorization header
+* Adding api-version to all requests
+* Upgrading SDK Version to 1.0.0
+
 **Compute**
 
 * vm create: Add --enable-agent configuration.
