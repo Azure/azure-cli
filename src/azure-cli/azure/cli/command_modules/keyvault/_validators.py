@@ -6,7 +6,6 @@
 import argparse
 import base64
 import binascii
-import errno
 from datetime import datetime
 import re
 
@@ -208,10 +207,8 @@ def certificate_type(string):
         with open(os.path.expanduser(string), 'rb') as f:
             cert_data = f.read()
         return cert_data
-    except (IOError, OSError) as e:  # FileNotFoundError introduced in Python 3
-        if e.errno == errno.ENOENT:
-            raise CLIError("Certificate file '{}' does not exist.".format(string))
-        raise CLIError("Unable to load certificate file '{}'.".format(string))
+    except (IOError, OSError) as e:
+        raise CLIError("Unable to load certificate file '{}': {}.".format(string, e.strerror))
 
 
 def datetime_type(string):
