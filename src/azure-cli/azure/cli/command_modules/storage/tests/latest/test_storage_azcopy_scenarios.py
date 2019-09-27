@@ -245,7 +245,17 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.assertEqual(1, sum(len(d) for r, d, f in os.walk(local_folder)))
         self.assertEqual(21, sum(len(f) for r, d, f in os.walk(local_folder)))
 
+        # Copy a single blob to another single blob
+        self.cmd('storage copy -s "{}" -d "{}" --s2s-preserve-access-tier false'.format(
+            '{}/readme'.format(first_container_url), second_container_url))
+        self.cmd('storage blob list -c {} --account-name {}'
+                 .format(second_container, second_account), checks=JMESPathCheck('length(@)', 1))
 
+        # Copy an entire directory from blob virtual directory to another blob virtual directory
+        self.cmd('storage copy -s "{}" -d "{}" --recursive --s2s-preserve-access-tier false'.format(
+            '{}/apple'.format(first_container_url), second_container_url))
+        self.cmd('storage blob list -c {} --account-name {}'
+                 .format(second_container, second_account), checks=JMESPathCheck('length(@)', 11))
 
         # Copy an entire storage account data to another blob account
         self.cmd('storage copy -s "{}" -d "{}" --recursive --s2s-preserve-access-tier false'.format(
