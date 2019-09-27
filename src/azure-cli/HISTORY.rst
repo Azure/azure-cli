@@ -15,6 +15,10 @@ Release History
 
 * az network private-dns link vnet create/update: Fixes #9851. Support cross-tenant virtual network linking.
 
+**RBAC**
+
+* Fix #10493: az ad sp delete --id {} fails when application is not found. If not found, application deletion is skipped.
+
 2.0.74
 ++++++
 
