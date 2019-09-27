@@ -7,6 +7,10 @@ Release History
 
 * BREAKING CHANGE: Changed job creation from "job start" to "job create".
 
+**AKS**
+
+* az aks browse: Fixes #10214. Handles connection drops for port-forwarding to Kubernetes dashboard.
+
 **Compute**
 
 * vmss create: Add --computer-name-prefix parameter to support custom computer name prefix of virtual machines in the VMSS.
