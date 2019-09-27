@@ -444,8 +444,8 @@ class AcrMockCommandsTests(unittest.TestCase):
         self._validate_refresh_token_request(mock_requests_get, mock_requests_post, login_server)
 
         # Test get access token for container image repository
-        get_access_credentials(cmd, registry_name, tenant_suffix=tenant_suffix, repository=TEST_REPOSITORY, permission=RepoAccessTokenPermission.READ.value)
-        self._validate_access_token_request(mock_requests_get, mock_requests_post, login_server, 'repository:{}:{}'.format(TEST_REPOSITORY, RepoAccessTokenPermission.READ.value))
+        get_access_credentials(cmd, registry_name, tenant_suffix=tenant_suffix, repository=TEST_REPOSITORY, permission=RepoAccessTokenPermission.METADATA_READ.value)
+        self._validate_access_token_request(mock_requests_get, mock_requests_post, login_server, 'repository:{}:{}'.format(TEST_REPOSITORY, RepoAccessTokenPermission.METADATA_READ.value))
 
         # Test get access token for artifact image repository
         get_access_credentials(cmd, registry_name, tenant_suffix=tenant_suffix, artifact_repository=TEST_REPOSITORY, permission=HelmAccessTokenPermission.PULL.value)

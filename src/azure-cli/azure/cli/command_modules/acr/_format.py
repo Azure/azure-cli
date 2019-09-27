@@ -231,10 +231,9 @@ def _scope_map_format_group(item):
 
     return OrderedDict([
         ('NAME', _get_value(item, 'name')),
-        ('SCOPE MAP TYPE', _get_value(item, 'scopeMapType')),
-        ('PROVISIONING STATE', _get_value(item, 'provisioningState')),
+        ('TYPE', _get_value(item, 'scopeMapType')),
+        ('CREATION DATE', _format_datetime(_get_value(item, 'creationDate'))),
         ('DESCRIPTION', description),
-        ('CREATION DATE', _format_datetime(_get_value(item, 'creationDate')))
     ])
 
 

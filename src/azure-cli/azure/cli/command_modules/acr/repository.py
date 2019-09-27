@@ -159,7 +159,7 @@ def acr_repository_show_tags(cmd,
         username=username,
         password=password,
         repository=repository,
-        permission=RepoAccessTokenPermission.READ.value)
+        permission=RepoAccessTokenPermission.METADATA_READ.value)
 
     try:
         raw_result = _obtain_data_from_registry(
@@ -211,7 +211,7 @@ def acr_repository_show_manifests(cmd,
         username=username,
         password=password,
         repository=repository,
-        permission=RepoAccessTokenPermission.READ.value)
+        permission=RepoAccessTokenPermission.METADATA_READ.value)
 
     raw_result = _obtain_data_from_registry(
         login_server=login_server,
@@ -246,7 +246,7 @@ def acr_repository_show(cmd,
         registry_name=registry_name,
         http_method='get',
         json_payload=None,
-        permission=RepoAccessTokenPermission.READ.value,
+        permission=RepoAccessTokenPermission.METADATA_READ.value,
         repository=repository,
         image=image,
         tenant_suffix=tenant_suffix,
@@ -290,7 +290,7 @@ def acr_repository_update(cmd,
         registry_name=registry_name,
         http_method='patch' if json_payload else 'get',
         json_payload=json_payload,
-        permission=RepoAccessTokenPermission.WRITE_READ.value if json_payload else RepoAccessTokenPermission.READ.value,
+        permission=RepoAccessTokenPermission.META_WRITE_META_READ.value if json_payload else RepoAccessTokenPermission.METADATA_READ.value,
         repository=repository,
         image=image,
         tenant_suffix=tenant_suffix,
@@ -362,7 +362,7 @@ def acr_repository_untag(cmd,
         username=username,
         password=password,
         repository=repository,
-        permission=RepoAccessTokenPermission.DELETE.value)
+        permission=RepoAccessTokenPermission.CONTENT_DELETE.value)
 
     return request_data_from_registry(
         http_method='delete',
@@ -397,7 +397,7 @@ def acr_repository_delete(cmd,
         username=username,
         password=password,
         repository=repository,
-        permission=RepoAccessTokenPermission.DELETE_READ.value)
+        permission=RepoAccessTokenPermission.CONT_DELETE_META_READ.value)
 
     if tag or manifest:
         manifest = _delete_manifest_confirmation(
@@ -497,7 +497,7 @@ def get_image_digest(cmd, registry_name, image):
         cmd=cmd,
         registry_name=registry_name,
         repository=repository,
-        permission=RepoAccessTokenPermission.READ.value)
+        permission=RepoAccessTokenPermission.METADATA_READ.value)
 
     manifest = _get_manifest_digest(
         login_server=login_server,

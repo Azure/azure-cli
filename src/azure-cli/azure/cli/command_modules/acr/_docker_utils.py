@@ -43,11 +43,13 @@ ALLOWS_BASIC_AUTH = "allows_basic_auth"
 
 
 class RepoAccessTokenPermission(Enum):
-    READ = 'metadataRead'
-    WRITE = 'metadataWrite'
-    DELETE = 'delete'
-    WRITE_READ = 'metadataWrite,metadataRead'
-    DELETE_READ = 'delete,metadataRead'
+    METADATA_READ = 'metadata/read'
+    METADATA_WRITE = 'metadata/write'
+    CONTENT_READ = 'content/read'
+    CONTENT_WRITE = 'content/write'
+    CONTENT_DELETE = 'content/delete'
+    META_WRITE_META_READ = '{},{}'.format(METADATA_WRITE, METADATA_READ)
+    CONT_DELETE_META_READ = '{},{}'.format(CONTENT_DELETE, METADATA_READ)
 
 
 class HelmAccessTokenPermission(Enum):

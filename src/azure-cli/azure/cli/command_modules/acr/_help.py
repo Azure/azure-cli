@@ -976,9 +976,9 @@ helps['acr scope-map create'] = """
 type: command
 short-summary: Create a scope map for an Azure Container Registry.
 examples:
-  - name: Create a scope map that allows write and contentRead actions for `hello-world` repository, and read action for `hello-world-again`.
+  - name: Create a scope map that allows content/write and metadata/read actions for `hello-world` repository, and content/read action for `hello-world-again`.
     text: >
-        az acr scope-map create -n MyScopeMap -r MyRegistry --add hello-world write contentRead --add hello-world-again read --description "Sample scope map."
+        az acr scope-map create -n MyScopeMap -r MyRegistry --add hello-world content/write metadata/read --add hello-world-again content/read --description "Sample scope map."
 """
 
 helps['acr scope-map delete'] = """
@@ -994,9 +994,9 @@ helps['acr scope-map update'] = """
 type: command
 short-summary: Update a scope map under an Azure Container Registry, appending/removing specified actions.
 examples:
-  - name: Update the scope map 'MyScopeMap' removing read and contentRead actions for `hello-world` repository, and write action for `hello-world-again`.
+  - name: Update the scope map 'MyScopeMap' removing metadata/read and content/read actions for `hello-world` repository, and metadata/write action for `hello-world-again`.
     text: >
-        az acr scope-map update -n MyScopeMap -r MyRegistry --remove hello-world read contentRead --remove hello-world-again write
+        az acr scope-map update -n MyScopeMap -r MyRegistry --remove hello-world metadata/read content/read --remove hello-world-again metadata/write
 """
 
 helps['acr scope-map show'] = """
