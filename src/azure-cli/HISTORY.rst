@@ -566,6 +566,10 @@ Release History
 
 * Add support for WebAssembly (.wasm) mimetype detection
 
+**ServiceFabric**
+
+* Adding new commands to manage appliaction and services.
+
 2.0.74
 ++++++
 
