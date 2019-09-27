@@ -1389,7 +1389,8 @@ class VMCreateExistingOptions(ScenarioTest):
     def test_vm_create_provision_vm_agent(self, resource_group):
         self.kwargs.update({
             'vm1': 'vm1',
-            'vm2': 'vm2'
+            'vm2': 'vm2',
+            'pswd': 'qpwWfn1qwernv#xnklwezxcvslkdfj'
         })
 
         self.cmd('vm create -g {rg} -n {vm1} --image UbuntuLTS --provision-vm-agent')
@@ -1397,9 +1398,9 @@ class VMCreateExistingOptions(ScenarioTest):
             self.check('osProfile.linuxConfiguration.provisionVmAgent', True)
         ])
 
-        self.cmd('vm create -g {rg} -n {vm2} --image UbuntuLTS --provision-vm-agent false')
+        self.cmd('vm create -g {rg} -n {vm2} --image Win2019Datacenter --admin-password {pswd} --provision-vm-agent false')
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
-            self.check('osProfile.linuxConfiguration.provisionVmAgent', False)
+            self.check('osProfile.windowsConfiguration.provisionVmAgent', False)
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_existing')

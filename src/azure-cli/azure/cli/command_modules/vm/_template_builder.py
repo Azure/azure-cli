@@ -280,9 +280,14 @@ def build_vm_resource(  # pylint: disable=too-many-locals
             }
 
         if provision_vm_agent is not None:
-            if 'linuxConfiguration' not in os_profile:
-                os_profile['linuxConfiguration'] = {}
-            os_profile['linuxConfiguration']['provisionVMAgent'] = provision_vm_agent
+            if custom_image_os_type.lower() == 'linux':
+                if 'linuxConfiguration' not in os_profile:
+                    os_profile['linuxConfiguration'] = {}
+                os_profile['linuxConfiguration']['provisionVMAgent'] = provision_vm_agent
+            elif custom_image_os_type.lower() == 'windows':
+                if 'windowsConfiguration' not in os_profile:
+                    os_profile['windowsConfiguration'] = {}
+                os_profile['windowsConfiguration']['provisionVMAgent'] = provision_vm_agent
 
         if secrets:
             os_profile['secrets'] = secrets
