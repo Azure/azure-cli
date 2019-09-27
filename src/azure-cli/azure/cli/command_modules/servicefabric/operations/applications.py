@@ -23,6 +23,7 @@ from knack.log import get_logger
 
 logger = get_logger(__name__)
 
+
 def create_app(client: ServiceFabricManagementClient,
                resource_group_name,
                cluster_name,
@@ -116,6 +117,7 @@ def update_app(client: ServiceFabricManagementClient,
         logger.error("ErrorModelException: %s", ex)
         raise
 
+
 def create_app_type(client: ServiceFabricManagementClient, resource_group_name, cluster_name, application_type_name):
     try:
         appTypes = client.application_types.list(resource_group_name, cluster_name)
@@ -129,6 +131,7 @@ def create_app_type(client: ServiceFabricManagementClient, resource_group_name, 
     except ErrorModelException as ex:
         logger.error("ErrorModelException: %s", ex)
         raise
+
 
 def create_app_type_version(client: ServiceFabricManagementClient,
                             resource_group_name,
@@ -174,7 +177,7 @@ def create_service(cmd,
                    default_move_cost=None,
                    partition_scheme_singleton=False,
                    partition_scheme_uniformInt64=False,
-                   partition_scheme_named=False):    
+                   partition_scheme_named=False):
     parameter_file, template_file = _get_template_file_and_parameters_file()
     template = get_file_json(template_file)
     parameters = get_file_json(parameter_file)['parameters']
@@ -187,12 +190,11 @@ def create_service(cmd,
     _set_service_parameters(template, parameters, "serviceTypeName", service_type, "string")
 
     if partition_scheme_singleton:
-        _set_service_parameters(template, parameters, "partitionDescription", {"partitionScheme":"Singleton"}, "object")
+        _set_service_parameters(template, parameters, "partitionDescription", {"partitionScheme": "Singleton"}, "object")
     elif partition_scheme_uniformInt64:
-        _set_service_parameters(template, parameters, "partitionDescription", {"partitionScheme":"UniformInt64Range"}, "object")
+        _set_service_parameters(template, parameters, "partitionDescription", {"partitionScheme": "UniformInt64Range"}, "object")
     elif partition_scheme_named:
-        _set_service_parameters(template, parameters, "partitionDescription", {"partitionScheme":"Named"}, "object")
-
+        _set_service_parameters(template, parameters, "partitionDescription", {"partitionScheme": "Named"}, "object")
 
     if stateless:
         _set_service_parameters(template, parameters, "instanceCount", int(instance_count), "int")
@@ -232,6 +234,7 @@ def _set_parameters(parameters, name, value):
     if name not in parameters:
         parameters[name] = {}
     parameters[name]["value"] = value
+
 
 def _set_uprade_policy(current_upgrade_policy: ApplicationUpgradePolicy,
                        force_restart,

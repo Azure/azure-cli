@@ -11,6 +11,7 @@ from knack.log import get_logger
 
 logger = get_logger(__name__)
 
+
 def validate_create_service(namespace):
     if not namespace.stateless and not namespace.stateful:
         raise CLIError("One of these paremeters must be specified: --stateless or --stateful")
@@ -18,7 +19,7 @@ def validate_create_service(namespace):
         raise CLIError("Only one of these paremeters can be specified: --stateless or --stateful")
     if namespace.stateless:
         if namespace.target_replica_set_size or namespace.min_replica_set_size:
-            raise CLIError("--target-replica-set-size and --min-replica-set-size should onbly be use with --stateful")
+            raise CLIError("--target-replica-set-size and --min-replica-set-size should only be use with --stateful")
         if not namespace.instance_count:
             raise CLIError("--instance-count is required")
     if namespace.stateful:
@@ -27,18 +28,20 @@ def validate_create_service(namespace):
         if not namespace.target_replica_set_size or not namespace.min_replica_set_size:
             raise CLIError("--target-replica-set-size and --min-replica-set-size are required")
 
+    # pylint: disable=too-many-boolean-expressions
     if ((namespace.partition_scheme_singleton and
          (namespace.partition_scheme_uniformInt64 or namespace.partition_scheme_named)) or
             (namespace.partition_scheme_uniformInt64 and
              (namespace.partition_scheme_singleton or namespace.partition_scheme_named)) or
             (namespace.partition_scheme_named and
              (namespace.partition_scheme_uniformInt64 or namespace.partition_scheme_singleton))):
-        raise CLIError("Only use one partitino scheme parame out of"
-                       "--partition_scheme_singleton, --partition_scheme_uniformInt64 are --partition_scheme_named")
+        raise CLIError("Only use one partition scheme parameter out of"
+                       "--partition_scheme_singleton, --partition_scheme_uniformInt64 or --partition_scheme_named")
 
     if not namespace.service_name.startswith(namespace.application_name):
         raise CLIError("Invalid service name, the application name must be a prefix of the service name, "
                        "for example: '{}~{}'".format(namespace.application_name, namespace.service_name))
+
 
 def validate_update_application(cmd, namespace):
     client = servicefabric_client_factory(cmd.cli_ctx)
@@ -77,6 +80,7 @@ def validate_update_application(cmd, namespace):
     if namespace.maximum_nodes:
         namespace.maximum_nodes = int(namespace.maximum_nodes)
 
+
 def validate_create_application(cmd, namespace):
     client = servicefabric_client_factory(cmd.cli_ctx)
     if namespace.package_url is None:
@@ -94,6 +98,7 @@ def validate_create_application(cmd, namespace):
         namespace.minimum_nodes = int(namespace.minimum_nodes)
     if namespace.maximum_nodes:
         namespace.maximum_nodes = int(namespace.maximum_nodes)
+
 
 def _safe_get_resource(getResourceAction, params):
     try:

@@ -14,8 +14,9 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 logger = logging.getLogger(__name__)
 
+
 def _create_keyvault(test, kwargs):
-    kwargs.update({ 'policy_path': os.path.join(TEST_DIR, 'policy.json') })
+    kwargs.update({'policy_path': os.path.join(TEST_DIR, 'policy.json')})
 
     test.cmd('keyvault create --resource-group {rg} -n {kv_name} -l {loc} --enabled-for-deployment true --enabled-for-template-deployment true')
     test.cmd('keyvault certificate create --vault-name {kv_name} -n {cert_name} -p @"{policy_path}"')
@@ -31,13 +32,12 @@ def _create_cluster(test, kwargs):
     assert cert['sid'] is not None
     cert_secret_id = cert['sid']
     logger.error(cert_secret_id)
-    kwargs.update({ 'cert_secret_id': cert_secret_id })
+    kwargs.update({'cert_secret_id': cert_secret_id})
 
     test.cmd('az sf cluster create -g {rg} -n {cluster_name} -l {loc} --secret-identifier {cert_secret_id} --vm-password "{vm_password}" --cluster-size 3')
     timeout = time.time() + 900
     while True:
         cluster = test.cmd('az sf cluster show -g {rg} -n {cluster_name}').get_output_in_json()
-
         if cluster['provisioningState']:
             if cluster['provisioningState'] == 'Succeeded':
                 return
@@ -78,7 +78,7 @@ class ServiceFabricApplicationTests(ScenarioTest):
         # SystemExit 3 'not found'
         with self.assertRaisesRegexp(SystemExit, '3'):
             self.cmd('az sf application-type show -g {rg} -n {cluster_name} --application-type-name {app_type_name}')
-        
+
     def _app_type_version_test(self):
         self.cmd('az sf application-type-version list -g {rg} -n {cluster_name} --application-type-name {app_type_name}',
                  checks=[self.check('length(value)', 0)])
@@ -106,7 +106,7 @@ class ServiceFabricApplicationTests(ScenarioTest):
         service = self.cmd('az sf service create -g {rg} -n {cluster_name} --application-name {app_name} --stateless --instance-count -1 '
                            '--service-name "{app_name}~testService" --service-type {service_type} --partition-scheme-singleton',
                            checks=[self.check('provisioningState', 'Succeeded')]).get_output_in_json()
-        
+
         self.cmd('az sf service show -g {rg} -n {cluster_name} --application-name {app_name} --service-name "{app_name}~testService"',
                  checks=[self.check('id', service['id'])])
 

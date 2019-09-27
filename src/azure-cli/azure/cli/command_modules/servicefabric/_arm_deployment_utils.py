@@ -5,13 +5,13 @@
 
 import datetime
 
-from azure.cli.core.util import CLIError, get_file_json, b64_to_hex, sdk_no_wait
+from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.core.commands import LongRunningOperation
+from knack.log import get_logger
 from ._client_factory import (resource_client_factory)
 
-from knack.log import get_logger
-
 logger = get_logger(__name__)
+
 
 def validate_and_deploy_arm_template(cli_ctx, resource_group_name, template, parameters):
     suffix = datetime.datetime.now().strftime("%Y%m%d%H%M")
@@ -27,6 +27,7 @@ def validate_and_deploy_arm_template(cli_ctx, resource_group_name, template, par
     logger.info("Deployment is valid, and begin to deploy")
     _deploy_arm_template_core(cli_ctx, resource_group_name, template,
                               parameters, deployment_name, 'incremental', False)
+
 
 def _deploy_arm_template_core(cli_ctx,
                               resource_group_name,
@@ -47,6 +48,7 @@ def _deploy_arm_template_core(cli_ctx,
                               deployment_name, properties)
     result = LongRunningOperation(cli_ctx)(deploy_poll)
     return result
+
 
 def _build_detailed_error(top_error, output_list):
     if output_list:

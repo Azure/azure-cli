@@ -11,6 +11,7 @@ from azure.cli.core.commands.parameters import resource_group_name_type, get_enu
 from azure.cli.core.util import get_json_object
 from azure.cli.command_modules.servicefabric._validators import validate_create_service, validate_update_application, validate_create_application
 
+
 def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('sf') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type, id_part=None, help='The resource group name')
@@ -179,6 +180,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
 
 # pylint: disable=protected-access
+# pylint: disable=too-few-public-methods
 class addAppParamsAction(argparse._AppendAction):
 
     def __call__(self, parser, namespace, values, option_string=None):

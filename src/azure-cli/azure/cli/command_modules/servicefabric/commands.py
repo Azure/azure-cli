@@ -44,7 +44,6 @@ def load_command_table(self, _):
         client_factory=servicefabric_client_factory_all
     )
 
-
     with self.command_group('sf cluster', cluster_mgmt_util, client_factory=servicefabric_clusters_client_factory) as g:
         g.show_command('show', 'get')
         g.custom_command('list', 'list_cluster')
@@ -93,7 +92,6 @@ def load_command_table(self, _):
         g.command('delete', 'delete')
         g.show_command('show', 'get')
         g.custom_command('create', 'create_service')
-
 
     with self.command_group('sf', is_preview=True):
         pass

@@ -9,8 +9,10 @@ def servicefabric_client_factory(cli_ctx, **_):
     from azure.mgmt.servicefabric import ServiceFabricManagementClient
     return get_mgmt_service_client(cli_ctx, ServiceFabricManagementClient)
 
+
 def servicefabric_client_factory_all(cli_ctx, kwargs):
     return servicefabric_client_factory(cli_ctx, **kwargs)
+
 
 def servicefabric_clusters_client_factory(cli_ctx, kwargs):
     return servicefabric_client_factory(cli_ctx, **kwargs).clusters
