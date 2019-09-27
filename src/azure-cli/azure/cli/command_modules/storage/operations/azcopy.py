@@ -93,7 +93,7 @@ def storage_copy(cmd, source=None,
     if blob_type is not None:
         flags.append('--blob-type=' + blob_type)
     if s2s_preserve_access_tier is not None:
-        flags.append('--s2s-preserve-access-tier=' + s2s_preserve_access_tier)
+        flags.append('--s2s-preserve-access-tier=' + str(s2s_preserve_access_tier))
 
     azcopy.copy(full_source, full_destination, flags=flags)
 
