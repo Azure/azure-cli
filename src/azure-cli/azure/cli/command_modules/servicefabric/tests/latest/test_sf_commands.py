@@ -97,7 +97,7 @@ class ServiceFabricApplicationTests(ScenarioTest):
         self.cmd('az sf application list -g {rg} -n {cluster_name}',
                  checks=[self.check('length(value)', 0)])
         app = self.cmd('az sf application create -g {rg} -n {cluster_name} --application-name {app_name} '
-                       '--application-type-name {app_type_name} --version {v1} --package-url {app_package_v1} '
+                       '--application-type-name {app_type_name} --application-type-version {v1} --package-url {app_package_v1} '
                        '--application-parameters Mode=binary',
                        checks=[self.check('provisioningState', 'Succeeded')]).get_output_in_json()
         self.cmd('az sf application show -g {rg} -n {cluster_name} --application-name {app_name}',

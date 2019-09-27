@@ -28,14 +28,14 @@ def create_app(client: ServiceFabricManagementClient,
                resource_group_name,
                cluster_name,
                application_type_name,
-               version,
+               application_type_version,
                application_name,
                package_url=None,
                application_parameters=None,
                minimum_nodes=None,
                maximum_nodes=None):
     if package_url is not None:
-        create_app_type_version(client, resource_group_name, cluster_name, application_type_name, version, package_url)
+        create_app_type_version(client, resource_group_name, cluster_name, application_type_name, application_type_version, package_url)
 
     try:
         apps = client.applications.list(resource_group_name, cluster_name)
@@ -45,7 +45,7 @@ def create_app(client: ServiceFabricManagementClient,
                 return app
 
         appResource = ApplicationResource(type_name=application_type_name,
-                                          type_version=version,
+                                          type_version=application_type_version,
                                           minimum_nodes=minimum_nodes,
                                           maximum_nodes=maximum_nodes,
                                           parameters=application_parameters)

@@ -4,10 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 from msrestazure.azure_exceptions import CloudError
-from ._client_factory import servicefabric_client_factory
-
 from knack.util import CLIError
 from knack.log import get_logger
+from ._client_factory import servicefabric_client_factory
 
 logger = get_logger(__name__)
 
@@ -88,11 +87,11 @@ def validate_create_application(cmd, namespace):
                                           (namespace.resource_group_name,
                                            namespace.cluster_name,
                                            namespace.application_type_name,
-                                           namespace.version))
+                                           namespace.application_type_version))
         if type_version is None:
             raise CLIError("Application type version {}:{} not found. "
                            "Create the type version before runnig this command or use --package-url to create it."
-                           .format(namespace.application_type_name, namespace.version))
+                           .format(namespace.application_type_name, namespace.application_type_version))
 
     if namespace.minimum_nodes:
         namespace.minimum_nodes = int(namespace.minimum_nodes)

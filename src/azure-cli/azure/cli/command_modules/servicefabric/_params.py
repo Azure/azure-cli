@@ -115,9 +115,17 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                         '"certificateIssuerThumbprint": "22B4AE296B504E512DF880A77A2CAE20200FF922"}]')
 
     # application
+    with self.argument_context('sf application-type create') as c:
+        c.argument('application_type_name', help='Specify the application type name.')
+
+    with self.argument_context('sf application-type-version create') as c:
+        c.argument('application_type_name', help='Specify the application type name.')
+        c.argument('version', help='Specify the application type version.')
+        c.argument('package_url', help='Specify the url of the application package sfpkg file.')
+
     with self.argument_context('sf application update', validator=validate_update_application) as c:
-        c.argument('version',
-                   help='Specify the application type version')
+        c.argument('application_name', help='Specify the application name.')
+        c.argument('application_type_version', help='Specify the application type version.')
         c.argument('application_parameters', action=addAppParamsAction, nargs='+',
                    help='Specify the application parameters as key/value pairs. These parameters must exist in the application manifest.'
                    'for example: --application-parameters param1=value1 param2=value2')
@@ -127,11 +135,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='Specifies the maximum number of nodes on which to place an application.')
         c.argument('force_restart',
                    help='Indicates that the service host restarts even if the upgrade is a configuration-only change.')
-        c.argument('UpgradeReplicaSetCheckTimeout',
+        c.argument('upgrade_replica_set_check_timeout',
                    help='Specifies the maximum time, in seconds, that Service Fabric waits for a service to reconfigure into a safe state, if not already in a safe state, before Service Fabric proceeds with the upgrade.')
         c.argument('failure_action', arg_type=get_enum_type(['Rollback', 'Manual']),
                    help='Specifies the action to take if the monitored upgrade fails. The acceptable values for this parameter are Rollback or Manual.Specifies the action to take if the monitored upgrade fails. The acceptable values for this parameter are Rollback or Manual.')
-        c.argument('health_check_retry_Timeout',
+        c.argument('health_check_retry_timeout',
                    help='Specifies the duration, in seconds, after which Service Fabric retries the health check if the previous health check fails.')
         c.argument('health_check_wait_duration',
                    help='Specifies the duration, in seconds, that Service Fabric waits before it performs the initial health check after it finishes the upgrade on the upgrade domain.')
@@ -155,7 +163,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='Specifies the map of the health policy to use for different service types as a hash table in the following format: {\"ServiceTypeName\" : \"MaxPercentUnhealthyPartitionsPerService,MaxPercentUnhealthyReplicasPerPartition,MaxPercentUnhealthyServices\"}. For example: @{ \"ServiceTypeName01\" = \"5,10,5\"; \"ServiceTypeName02\" = \"5,5,5\" }')
 
     with self.argument_context('sf application create', validator=validate_create_application) as c:
-        c.argument('version', help='Specify the application type version.')
+        c.argument('application_name', help='Specify the application name.')
+        c.argument('application_type_name', help='Specify the application type name.')
+        c.argument('application_type_version', help='Specify the application type version.')
+        c.argument('package_url', help='Specify the url of the application package sfpkg file.')
         c.argument('application_parameters', action=addAppParamsAction, nargs='+',
                    help='Specify the application parameters as key/value pairs. These parameters must exist in the application manifest.'
                    'for example: --application-parameters param1=value1 param2=value2')
@@ -169,6 +180,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='Specify the name of the service. The application name must be a prefix of the service name, for example: appName~serviceName')
         c.argument('service_type',
                    help='Specify the service type name of the application, it should exist in the application manifest.')
+        c.argument('application_name',
+                   help='Specify the name of the service. The application name must be a prefix of the service name, for example: appName~serviceName')
+        c.argument('stateful', help='Use for stateful service.')
+        c.argument('stateless', help='Use for stateless service.')
+        c.argument('instance_count', help='Specify the instance count for the stateless service.')
+        c.argument('min_replica_set_size', help='Specify the min replica set size for the stateful service.')
+        c.argument('target_replica_set_size', help='Specify the target replica set size for the stateful service.')
         c.argument('default_move_cost', arg_type=get_enum_type(['Zero', 'Low', 'Medium', 'High']),
                    help='Specify the default cost for a move. Higher costs make it less likely that the Cluster Resource Manager will move the replica when trying to balance the cluster.')
         c.argument('partition_scheme_singleton',
@@ -177,6 +195,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='Indicates that the service uses the UniformInt64 partition scheme. This means that each partition owns a range of int64 keys.')
         c.argument('partition_scheme_named',
                    help='Indicates that the service uses the named partition scheme. Services using this model usually have data that can be bucketed, within a bounded set. Some common examples of data fields used as named partition keys would be regions, postal codes, customer groups, or other business boundaries.')
+        c.argument('quorum_loss_wait_duration', help='Specify the quorum loss wait duration for the service.')
+        c.argument('replica_restart_wait_duration', help='Specify the replica restart wait duration for the service.')
+        c.argument('stand_by_replica_keep_duration', help='Specify the stand by replica duration for the service.')
 
 
 # pylint: disable=protected-access
