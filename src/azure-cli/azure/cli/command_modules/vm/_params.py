@@ -642,7 +642,7 @@ def load_arguments(self, _):
             c.argument('data_caching', options_list=['--data-disk-caching'], nargs='+',
                        help="storage caching type for data disk(s), including 'None', 'ReadOnly', 'ReadWrite', etc. Use a singular value to apply on all disks, or use '<lun>=<vaule1> <lun>=<value2>' to configure individual disk")
             c.argument('ultra_ssd_enabled', arg_type=get_three_state_flag(), min_api='2018-06-01',
-                       help='Enables or disables the capability to have 1 or more managed data disks with UltraSSD_LRS storage account', is_preview=True)
+                       help='Enables or disables the capability to have 1 or more managed data disks with UltraSSD_LRS storage account')
             c.argument('ephemeral_os_disk', arg_type=get_three_state_flag(), min_api='2018-06-01',
                        help='Allows you to create an OS disk directly on the host node, providing local disk performance and faster VM/VMSS reimage time.', is_preview=True)
 
