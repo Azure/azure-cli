@@ -271,8 +271,8 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
 
         # Upload to managed disk
         diskname = self.create_random_name(prefix='disk', length=12)
-        local_file = self.create_temp_file(1024)
-        self.cmd('disk create -n {} -g {} --for-upload -z 1'
+        local_file = self.create_temp_file(20480)
+        self.cmd('disk create -n {} -g {} --for-upload --upload-size-bytes 20972032'
                  .format(diskname, resource_group))
         sasURL = self.cmd(
             'disk grant-access --access-level Write --duration-in-seconds 3600 -n {} -g {} --query accessSas'
