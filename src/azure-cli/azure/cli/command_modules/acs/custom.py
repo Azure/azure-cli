@@ -1544,6 +1544,7 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
 
     # run in a loop to deal with idle connection drops from Azure LB
     first_connection = True
+    exit_requested = False
 
     while True:
         if in_cloud_console():
@@ -1557,11 +1558,9 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
             if first_connection:
                 logger.warning('To view the console, please open %s in a new tab', result['url'])
         else:
-            if first_connection:
-                logger.warning('Proxy running on %s', proxy_url)
+            logger.warning('Proxy running on %s', proxy_url)
 
-        if first_connection:
-            logger.warning('Press CTRL+C to close the tunnel...')
+        logger.warning('Press CTRL+C to close the tunnel...')
         
         if not disable_browser and first_connection:
             wait_then_open_async(proxy_url)
@@ -1581,10 +1580,15 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
 
         except KeyboardInterrupt:
             # Let command processing finish gracefully after the user presses [Ctrl+C]
-            break
+            exit_requested = True
         finally:
             if in_cloud_console():
                 requests.post('http://localhost:8888/closeport/8001')
+
+        if exit_requested:
+            break
+        else:
+            logger.warning('Connection dropped. Reconnecting...')
 
         first_connection = False
 
