@@ -1385,6 +1385,24 @@ class VMCreateExistingOptions(ScenarioTest):
         self.cmd('vm show -n {vm} -g {rg}',
                  checks=self.check('storageProfile.osDisk.vhd.uri', 'https://{sa}.blob.core.windows.net/{container}/{disk}.vhd'))
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_create_provision_vm_agent_')
+    def test_vm_create_provision_vm_agent(self, resource_group):
+        self.kwargs.update({
+            'vm1': 'vm1',
+            'vm2': 'vm2',
+            'pswd': 'qpwWfn1qwernv#xnklwezxcvslkdfj'
+        })
+
+        self.cmd('vm create -g {rg} -n {vm1} --image UbuntuLTS --enable-agent')
+        self.cmd('vm show -g {rg} -n {vm1}', checks=[
+            self.check('osProfile.linuxConfiguration.provisionVmAgent', True)
+        ])
+
+        self.cmd('vm create -g {rg} -n {vm2} --image Win2019Datacenter --admin-password {pswd} --enable-agent false')
+        self.cmd('vm show -g {rg} -n {vm2}', checks=[
+            self.check('osProfile.windowsConfiguration.provisionVmAgent', False)
+        ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_existing')
     def test_vm_create_auth(self, resource_group):
         self.kwargs.update({
