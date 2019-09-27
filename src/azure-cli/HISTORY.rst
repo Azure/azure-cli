@@ -16,6 +16,10 @@ Release History
 
 * az network private-dns link vnet create/update: Fixes #9851. Support cross-tenant virtual network linking.
 
+**CosmosDB**
+* Add parameter for sql container create and update command
+* Typo fix in help message
+
 2.0.74
 ++++++
 
