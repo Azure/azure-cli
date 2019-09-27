@@ -4,11 +4,12 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
-
+import argparse
+from azure.cli.core.util import CLIError
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.commands.parameters import resource_group_name_type, get_enum_type
 from azure.cli.core.util import get_json_object
-
+from azure.cli.command_modules.servicefabric._validators import validate_create_service, validate_update_application, validate_create_application
 
 def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('sf') as c:
@@ -111,3 +112,81 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='JSON encoded parameters configuration. Use @{file} to load from a file. '
                         'For example: [{"isAdmin":true, "certificateCommonName": "test.com", '
                         '"certificateIssuerThumbprint": "22B4AE296B504E512DF880A77A2CAE20200FF922"}]')
+
+    # application
+    with self.argument_context('sf application update', validator=validate_update_application) as c:
+        c.argument('version',
+                   help='Specify the application type version')
+        c.argument('application_parameters', action=addAppParamsAction, nargs='+',
+                   help='Specify the application parameters as key/value pairs. These parameters must exist in the application manifest.'
+                   'for example: --application-parameters param1=value1 param2=value2')
+        c.argument('minimum_nodes',
+                   help='Specifies the minimum number of nodes where Service Fabric will reserve capacity for this application.')
+        c.argument('maximum_nodes',
+                   help='Specifies the maximum number of nodes on which to place an application.')
+        c.argument('force_restart',
+                   help='Indicates that the service host restarts even if the upgrade is a configuration-only change.')
+        c.argument('UpgradeReplicaSetCheckTimeout',
+                   help='Specifies the maximum time, in seconds, that Service Fabric waits for a service to reconfigure into a safe state, if not already in a safe state, before Service Fabric proceeds with the upgrade.')
+        c.argument('failure_action', arg_type=get_enum_type(['Rollback', 'Manual']),
+                   help='Specifies the action to take if the monitored upgrade fails. The acceptable values for this parameter are Rollback or Manual.Specifies the action to take if the monitored upgrade fails. The acceptable values for this parameter are Rollback or Manual.')
+        c.argument('health_check_retry_Timeout',
+                   help='Specifies the duration, in seconds, after which Service Fabric retries the health check if the previous health check fails.')
+        c.argument('health_check_wait_duration',
+                   help='Specifies the duration, in seconds, that Service Fabric waits before it performs the initial health check after it finishes the upgrade on the upgrade domain.')
+        c.argument('health_check_stable_duration',
+                   help='Specifies the duration, in seconds, that Service Fabric waits in order to verify that the application is stable before moving to the next upgrade domain or completing the upgrade. This wait duration prevents undetected changes of health right after the health check is performed.')
+        c.argument('upgrade_domain_timeout',
+                   help='Specifies the maximum time, in seconds, that Service Fabric takes to upgrade a single upgrade domain. After this period, the upgrade fails.')
+        c.argument('upgrade_timeout',
+                   help='Specifies the maximum time, in seconds, that Service Fabric takes for the entire upgrade. After this period, the upgrade fails.')
+        c.argument('consider_warning_as_error',
+                   help='Indicates whether to treat a warning health event as an error event during health evaluation.')
+        c.argument('default_service_type_max_percent_unhealthy_partitions_per_service',
+                   help='Specifies the maximum percent of unhelthy partitions per service allowed by the health policy for the default service type to use for the monitored upgrade.')
+        c.argument('default_service_type_max_percent_unhealthy_replicas_per_partition',
+                   help='Specifies the maximum percent of unhelthy replicas per service allowed by the health policy for the default service type to use for the monitored upgrade.')
+        c.argument('default_max_percent_service_type_unhealthy_services',
+                   help='Specifies the maximum percent of unhelthy services allowed by the health policy for the default service type to use for the monitored upgrade.')
+        c.argument('max_percent_unhealthy_deployed_applications',
+                   help='Specifies the mximum percentage of the application instances deployed on the nodes in the cluster that have a health state of error before the application health state for the cluster is error.')
+        c.argument('service_type_health_policy_map',
+                   help='Specifies the map of the health policy to use for different service types as a hash table in the following format: {\"ServiceTypeName\" : \"MaxPercentUnhealthyPartitionsPerService,MaxPercentUnhealthyReplicasPerPartition,MaxPercentUnhealthyServices\"}. For example: @{ \"ServiceTypeName01\" = \"5,10,5\"; \"ServiceTypeName02\" = \"5,5,5\" }')
+
+    with self.argument_context('sf application create', validator=validate_create_application) as c:
+        c.argument('version', help='Specify the application type version.')
+        c.argument('application_parameters', action=addAppParamsAction, nargs='+',
+                   help='Specify the application parameters as key/value pairs. These parameters must exist in the application manifest.'
+                   'for example: --application-parameters param1=value1 param2=value2')
+        c.argument('minimum_nodes',
+                   help='Specifies the minimum number of nodes where Service Fabric will reserve capacity for this application.')
+        c.argument('maximum_nodes',
+                   help='Specifies the maximum number of nodes on which to place an application.')
+
+    with self.argument_context('sf service create', validator=validate_create_service) as c:
+        c.argument('service_name',
+                   help='Specify the name of the service. The application name must be a prefix of the service name, for example: appName~serviceName')
+        c.argument('service_type',
+                   help='Specify the service type name of the application, it should exist in the application manifest.')
+        c.argument('default_move_cost', arg_type=get_enum_type(['Zero', 'Low', 'Medium', 'High']),
+                   help='Specify the default cost for a move. Higher costs make it less likely that the Cluster Resource Manager will move the replica when trying to balance the cluster.')
+        c.argument('partition_scheme_singleton',
+                   help='Indicates that the service uses the singleton partition scheme. Singleton partitions are typically used when the service does not require any additional routing.')
+        c.argument('partition_scheme_uniformInt64',
+                   help='Indicates that the service uses the UniformInt64 partition scheme. This means that each partition owns a range of int64 keys.')
+        c.argument('partition_scheme_named',
+                   help='Indicates that the service uses the named partition scheme. Services using this model usually have data that can be bucketed, within a bounded set. Some common examples of data fields used as named partition keys would be regions, postal codes, customer groups, or other business boundaries.')
+
+
+# pylint: disable=protected-access
+class addAppParamsAction(argparse._AppendAction):
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        params = {}
+        for item in values:
+            try:
+                key, value = item.split('=', 1)
+                params[key] = value
+            except ValueError:
+                raise CLIError('usage error: {} KEY=VALUE [KEY=VALUE ...]'.format(option_string))
+        namespace.application_parameters = params
