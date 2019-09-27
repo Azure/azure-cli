@@ -249,7 +249,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         attach_os_disk=None, os_disk_size_gb=None, custom_data=None, secrets=None, license_type=None, zone=None,
         disk_info=None, boot_diagnostics_storage_uri=None, ultra_ssd_enabled=None, proximity_placement_group=None,
         computer_name=None, dedicated_host=None, priority=None, max_billing=None, eviction_policy=None,
-        provision_vm_agent=None):
+        enable_agent=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -279,15 +279,15 @@ def build_vm_resource(  # pylint: disable=too-many-locals
                 }
             }
 
-        if provision_vm_agent is not None:
+        if enable_agent is not None:
             if custom_image_os_type.lower() == 'linux':
                 if 'linuxConfiguration' not in os_profile:
                     os_profile['linuxConfiguration'] = {}
-                os_profile['linuxConfiguration']['provisionVMAgent'] = provision_vm_agent
+                os_profile['linuxConfiguration']['provisionVMAgent'] = enable_agent
             elif custom_image_os_type.lower() == 'windows':
                 if 'windowsConfiguration' not in os_profile:
                     os_profile['windowsConfiguration'] = {}
-                os_profile['windowsConfiguration']['provisionVMAgent'] = provision_vm_agent
+                os_profile['windowsConfiguration']['provisionVMAgent'] = enable_agent
 
         if secrets:
             os_profile['secrets'] = secrets

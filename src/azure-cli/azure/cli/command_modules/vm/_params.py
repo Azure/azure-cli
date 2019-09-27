@@ -292,7 +292,7 @@ def load_arguments(self, _):
             c.argument('eviction_policy', resource_type=ResourceType.MGMT_COMPUTE, min_api='2019-03-01',
                        arg_type=get_enum_type(VirtualMachineEvictionPolicyTypes, default=None),
                        help="The eviction policy for the low priority virtual machine.")
-        c.argument('provision_vm_agent', arg_type=get_three_state_flag(), min_api='2018-06-01',
+        c.argument('enable_agent', arg_type=get_three_state_flag(), min_api='2018-06-01',
                    help='Indicates whether virtual machine agent should be provisioned on the virtual machine. When this property is not specified, default behavior is to set it to true. This will ensure that VM Agent is installed on the VM so that extensions can be added to the VM later')
 
     with self.argument_context('vm create', arg_group='Storage') as c:
