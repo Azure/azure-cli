@@ -85,7 +85,8 @@ class NetworkPrivateEndpoints(ScenarioTest):
             'ip': 'pubip1',
             'lks1': 'lks1',
             'lks2': 'lks2',
-            'pe': 'pe1'
+            'pe': 'pe1',
+            'rg': resource_group
         })
 
         # Create PLS
