@@ -56,9 +56,12 @@ def transform_deployments_list(result):
 def transform_resource_invoke_action_output(result):
     r = result
     if isinstance(r, str):
-        import json
-        obj = json.loads(r)
-        return obj
+        try:
+            import json
+            obj = json.loads(r)
+            return obj
+        except Exception as ex:
+            pass
     return r
 
 # pylint: disable=too-many-statements
