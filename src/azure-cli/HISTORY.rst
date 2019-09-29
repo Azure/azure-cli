@@ -7,6 +7,10 @@ Release History
 
 * BREAKING CHANGE: Changed job creation from "job start" to "job create".
 
+**ARM**
+
+* az deployment create: Add --handle-extended-json-format parameter to support multiline and comments in json template.
+
 **Compute**
 
 * vm create: Add --enable-agent configuration.
@@ -15,6 +19,7 @@ Release History
 **Network**
 
 * az network private-dns link vnet create/update: Fixes #9851. Support cross-tenant virtual network linking.
+
 
 2.0.74
 ++++++
