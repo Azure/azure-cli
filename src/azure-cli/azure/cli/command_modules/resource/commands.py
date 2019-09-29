@@ -53,6 +53,13 @@ def transform_deployments_list(result):
     sort_list = sorted(result, key=lambda deployment: deployment['properties']['timestamp'])
     return [transform_deployment(r) for r in sort_list]
 
+def transform_resource_invoke_action_output(result):
+    r = result
+    if isinstance(r, str):
+        import json
+        obj = json.loads(r)
+        return obj
+    return r
 
 # pylint: disable=too-many-statements
 def load_command_table(self, _):
@@ -179,7 +186,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_resources', table_transformer=transform_resource_list)
         g.custom_command('tag', 'tag_resource')
         g.custom_command('move', 'move_resource')
-        g.custom_command('invoke-action', 'invoke_resource_action')
+        g.custom_command('invoke-action', 'invoke_resource_action', transform=transform_resource_invoke_action_output)
         g.generic_update_command('update', getter_name='show_resource', setter_name='update_resource',
                                  client_factory=None)
         g.wait_command('wait', getter_name='show_resource')
