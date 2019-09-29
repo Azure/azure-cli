@@ -639,6 +639,7 @@ class AzCliCommandInvoker(CommandInvoker):
             elif _is_paged(result):
                 result = list(result)
 
+            # Re-arrange transform_op to make it work for LRO result
             transform_op = cmd_copy.command_kwargs.get('transform', None)
             if transform_op:
                 result = transform_op(result)
