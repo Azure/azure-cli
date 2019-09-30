@@ -31,7 +31,8 @@ os_linux = 'Linux'
 password_offset = 33
 password_length = 15
 
-backup_management_type_map  = {"AzureVM": "AzureIaasVM", "AzureWorkload": "AzureWorkLoad"}
+backup_management_type_map = {"AzureVM": "AzureIaasVM", "AzureWorkload": "AzureWorkLoad",
+                              "AzureStorage": "AzureStorage"}
 
 # Client Utilities
 
@@ -341,6 +342,7 @@ def get_vault_from_arm_id(arm_id):
     m = re.search('(?<=vaults/)[^/]+', arm_id)
     return m.group(0)
 
+
 def validate_and_extract_container_type(container_name, backup_management_type):
     if not is_native_name(container_name) and backup_management_type is None:
         raise CLIError("""backup management type required""")
@@ -358,13 +360,14 @@ def validate_and_extract_container_type(container_name, backup_management_type):
         return container_type_mappings[container_type]
     return None
 
+
 def validate_and_extract_item_name(item_name, workload_type, container_type):
     if not is_native_name(item_name) and workload_type is None:
         raise CLIError("""workload type required""")
-
     if is_native_name(item_name):
         return item_name
-    
+
+
 def get_none_one_or_many(obj_list):
     if not obj_list:
         return None
