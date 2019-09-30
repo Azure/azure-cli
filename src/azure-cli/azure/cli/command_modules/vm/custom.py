@@ -7,6 +7,7 @@
 from __future__ import print_function
 import json
 import os
+import time
 
 try:
     from urllib.parse import urlparse
@@ -699,8 +700,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     if no_wait:
         return sdk_no_wait(no_wait, client.create_or_update,
                            resource_group_name, deployment_name, properties)
-    LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(no_wait, client.create_or_update,
-                                                  resource_group_name, deployment_name, properties))
+    LongRunningOperation(cmd.cli_ctx)(client.create_or_update(resource_group_name, deployment_name, properties))
+
     vm = get_vm_details(cmd, resource_group_name, vm_name)
     if assign_identity is not None:
         if enable_local_identity and not identity_scope:
@@ -999,7 +1000,7 @@ def _prepare_workspace(cmd, resource_group_name, workspace):
             workspace_instance = Workspace(location=location,
                                            sku=sku,
                                            retention_in_days=retention_time)
-            workspace_result = log_analytics_client.create_or_update(resource_group_name, workspace_name, workspace_instance)
+            workspace_result = LongRunningOperation(cmd.cli_ctx)(log_analytics_client.create_or_update(resource_group_name, workspace_name, workspace_instance))
         workspace_id = workspace_result.id
     else:
         workspace_id = workspace
