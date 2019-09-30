@@ -5,13 +5,13 @@
 
 # pylint: disable=protected-access
 
-from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_key_value_pairs
 from azure.cli.core.profiles import ResourceType, get_sdk
 
 from azure.cli.command_modules.storage._client_factory import (get_storage_data_service_client,
                                                                blob_data_service_factory,
-                                                               file_data_service_factory)
+                                                               file_data_service_factory,
+                                                               storage_client_factory)
 from azure.cli.command_modules.storage.util import glob_files_locally, guess_content_type
 from azure.cli.command_modules.storage.sdkutil import get_table_data_type
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url
@@ -32,6 +32,8 @@ def _query_account_key(cli_ctx, account_name):
     t_storage_account_keys = get_sdk(
         cli_ctx, ResourceType.MGMT_STORAGE, 'models.storage_account_keys#StorageAccountKeys')
 
+    scf.config.enable_http_logger = False
+    logger.debug('Disable HTTP logging to avoid having storage keys in debug logs')
     if t_storage_account_keys:
         return scf.storage_accounts.list_keys(rg, account_name).key1
     # of type: models.storage_account_list_keys_result#StorageAccountListKeysResult
@@ -40,7 +42,7 @@ def _query_account_key(cli_ctx, account_name):
 
 def _query_account_rg(cli_ctx, account_name):
     """Query the storage account's resource group, which the mgmt sdk requires."""
-    scf = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_STORAGE)
+    scf = storage_client_factory(cli_ctx)
     acc = next((x for x in scf.storage_accounts.list() if x.name == account_name), None)
     if acc:
         from msrestazure.tools import parse_resource_id

@@ -241,14 +241,15 @@ def build_msi_role_assignment(vm_vmss_name, vm_vmss_resource_id, role_definition
     }
 
 
-def build_vm_resource(  # pylint: disable=too-many-locals
+def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
         cmd, name, location, tags, size, storage_profile, nics, admin_username,
         availability_set_id=None, admin_password=None, ssh_key_values=None, ssh_key_path=None,
         image_reference=None, os_disk_name=None, custom_image_os_type=None, authentication_type=None,
         os_publisher=None, os_offer=None, os_sku=None, os_version=None, os_vhd_uri=None,
         attach_os_disk=None, os_disk_size_gb=None, custom_data=None, secrets=None, license_type=None, zone=None,
         disk_info=None, boot_diagnostics_storage_uri=None, ultra_ssd_enabled=None, proximity_placement_group=None,
-        computer_name=None, dedicated_host=None):
+        computer_name=None, dedicated_host=None, priority=None, max_billing=None, eviction_policy=None,
+        enable_agent=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -277,6 +278,16 @@ def build_vm_resource(  # pylint: disable=too-many-locals
                     ]
                 }
             }
+
+        if enable_agent is not None:
+            if custom_image_os_type.lower() == 'linux':
+                if 'linuxConfiguration' not in os_profile:
+                    os_profile['linuxConfiguration'] = {}
+                os_profile['linuxConfiguration']['provisionVMAgent'] = enable_agent
+            elif custom_image_os_type.lower() == 'windows':
+                if 'windowsConfiguration' not in os_profile:
+                    os_profile['windowsConfiguration'] = {}
+                os_profile['windowsConfiguration']['provisionVMAgent'] = enable_agent
 
         if secrets:
             os_profile['secrets'] = secrets
@@ -395,6 +406,15 @@ def build_vm_resource(  # pylint: disable=too-many-locals
 
     if dedicated_host:
         vm_properties['host'] = {'id': dedicated_host}
+
+    if priority is not None:
+        vm_properties['priority'] = priority
+
+    if eviction_policy is not None:
+        vm_properties['evictionPolicy'] = eviction_policy
+
+    if max_billing is not None:
+        vm_properties['billingProfile'] = {'maxPrice': max_billing}
 
     vm = {
         'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machines'),
@@ -624,7 +644,7 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
                         single_placement_group=None, platform_fault_domain_count=None, custom_data=None,
                         secrets=None, license_type=None, zones=None, priority=None, eviction_policy=None,
                         application_security_groups=None, ultra_ssd_enabled=None, proximity_placement_group=None,
-                        terminate_notification_time=None):
+                        terminate_notification_time=None, max_billing=None):
 
     # Build IP configuration
     ip_configuration = {
@@ -782,6 +802,10 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
     if eviction_policy and cmd.supported_api_version(min_api='2017-12-01',
                                                      operation_group='virtual_machine_scale_sets'):
         vmss_properties['virtualMachineProfile']['evictionPolicy'] = eviction_policy
+
+    if max_billing is not None and cmd.supported_api_version(
+            min_api='2019-03-01', operation_group='virtual_machine_scale_sets'):
+        vmss_properties['virtualMachineProfile']['billingProfile'] = {'maxPrice': max_billing}
 
     if platform_fault_domain_count is not None and cmd.supported_api_version(
             min_api='2017-12-01', operation_group='virtual_machine_scale_sets'):
