@@ -67,9 +67,9 @@ def _force_delete_vault(cmd, vault_name, resource_group_name):
                                container_name, item_name, delete_backup_data=True)
     # now delete the vault
     try:
-      vault_client.delete(resource_group_name, vault_name)
+        vault_client.delete(resource_group_name, vault_name)
     except Exception as ex:
-      raise CLIError("Vault cannot be deleted as there are existing resources within the vault")
+        raise CLIError("Vault cannot be deleted as there are existing resources within the vault")
 
 
 def delete_vault(cmd, client, vault_name, resource_group_name, force=False):
