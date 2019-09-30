@@ -660,7 +660,7 @@ def load_arguments(self, _):
             c.argument('public_ip_address_dns_name', help='Globally unique DNS name for a newly created public IP.')
             if self.supported_api_version(min_api='2017-08-01', resource_type=ResourceType.MGMT_NETWORK):
                 PublicIPAddressSkuName = self.get_models('PublicIPAddressSkuName', resource_type=ResourceType.MGMT_NETWORK)
-                c.argument('public_ip_sku', help='Sku', default=None, arg_type=get_enum_type(PublicIPAddressSkuName))
+                c.argument('public_ip_sku', help='Public IP SKU. Basic by default.', default=None, arg_type=get_enum_type(PublicIPAddressSkuName))
 
         with self.argument_context(scope, arg_group='Marketplace Image Plan') as c:
             c.argument('plan_name', help='plan name')
