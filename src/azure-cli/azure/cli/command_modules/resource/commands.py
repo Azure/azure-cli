@@ -19,6 +19,8 @@ from azure.cli.command_modules.resource._client_factory import (
 from azure.cli.command_modules.resource._validators import process_deployment_create_namespace
 
 from ._exception_handler import managementgroups_exception_handler
+from knack.log import get_logger
+logger = get_logger(__name__)
 
 
 # Resource group commands
@@ -53,16 +55,20 @@ def transform_deployments_list(result):
     sort_list = sorted(result, key=lambda deployment: deployment['properties']['timestamp'])
     return [transform_deployment(r) for r in sort_list]
 
+
 def transform_resource_invoke_action_output(result):
     r = result
-    if isinstance(r, str):
+    # Transform string into dict
+    if isinstance(r, str) and r:
         try:
             import json
             obj = json.loads(r)
             return obj
-        except Exception as ex:
-            pass
+        except json.decoder.JSONDecodeError:
+            logger.info("Fail to transform %s to dictionary", r)
+            return r
     return r
+
 
 # pylint: disable=too-many-statements
 def load_command_table(self, _):
