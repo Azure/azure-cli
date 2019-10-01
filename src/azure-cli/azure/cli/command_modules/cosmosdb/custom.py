@@ -278,8 +278,7 @@ def _populate_sql_container_definition(sql_container_resource,
                                        default_ttl,
                                        indexing_policy,
                                        unique_key_policy,
-                                       conflict_resolution_policy
-                                       ):
+                                       conflict_resolution_policy):
     if all(arg is None for arg in
            [partition_key_path, default_ttl, indexing_policy, unique_key_policy, conflict_resolution_policy]):
         return False
