@@ -328,6 +328,9 @@ def _db_elastic_pool_update_sku(
 
 
 def _get_tenant_id():
+    '''
+    Gets tenantId from current subscription.
+    '''
     from azure.cli.core._profile import Profile
 
     profile = Profile()
