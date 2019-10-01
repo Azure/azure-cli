@@ -1,0 +1,2318 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -n --backup-management-type --query
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupProtectionContainers?api-version=2016-12-01&$filter=backupManagementType%20eq%20%27AzureStorage%27%20and%20friendlyName%20eq%20%27sarathsa%27%20and%20status%20eq%20%27Registered%27
+  response:
+    body:
+      string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/StorageContainer;Storage;sarath-rg;sarathsa","name":"StorageContainer;Storage;sarath-rg;sarathsa","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.Storage/storageAccounts/sarathsa","protectedItemCount":5,"friendlyName":"sarathsa","backupManagementType":"AzureStorage","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"StorageContainer","protectableObjectType":"StorageContainer"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '760'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:09:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupProtectedItems?api-version=2017-07-01&$filter=backupManagementType%20eq%20%27AzureStorage%27
+  response:
+    body:
+      string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/StorageContainer;storage;sarath-rg;sarathsa/protectedItems/AzureFileShare;sarathtestafs","name":"AzureFileShare;sarathtestafs","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"sarathtestafs","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Completed","lastBackupTime":"2019-09-30T18:00:04.0819531Z","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;sarath-rg;sarathsa","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.storage/storageAccounts/sarathsa","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/afsdailypolicy"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/StorageContainer;storage;sarath-rg;sarathsa/protectedItems/AzureFileShare;testafs2","name":"AzureFileShare;testafs2","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"testafs2","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Completed","lastBackupTime":"2019-09-30T15:32:03.9424727Z","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;sarath-rg;sarathsa","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.storage/storageAccounts/sarathsa","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/afspolicy1"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/StorageContainer;storage;sarath-rg;sarathsa/protectedItems/AzureFileShare;afstest1","name":"AzureFileShare;afstest1","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"afstest1","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Completed","lastBackupTime":"2019-09-30T18:00:04.2381842Z","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;sarath-rg;sarathsa","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.storage/storageAccounts/sarathsa","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/afsdailypolicy"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/StorageContainer;storage;sarath-rg;sarathsa/protectedItems/AzureFileShare;afstest2","name":"AzureFileShare;afstest2","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"afstest2","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Completed","lastBackupTime":"2019-09-30T15:32:04.0291289Z","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;sarath-rg;sarathsa","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.storage/storageAccounts/sarathsa","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/afspolicy1"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/StorageContainer;storage;sarath-rg;sarathsa/protectedItems/AzureFileShare;afstest3","name":"AzureFileShare;afstest3","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"afstest3","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Completed","lastBackupTime":"2019-09-30T15:32:04.1455948Z","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;sarath-rg;sarathsa","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.storage/storageAccounts/sarathsa","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/afspolicy1"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5424'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:09:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupProtectedItems?api-version=2017-07-01&$filter=backupManagementType%20eq%20%27AzureStorage%27
+  response:
+    body:
+      string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/StorageContainer;storage;sarath-rg;sarathsa/protectedItems/AzureFileShare;sarathtestafs","name":"AzureFileShare;sarathtestafs","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"sarathtestafs","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Completed","lastBackupTime":"2019-09-30T18:00:04.0819531Z","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;sarath-rg;sarathsa","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.storage/storageAccounts/sarathsa","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/afsdailypolicy"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/StorageContainer;storage;sarath-rg;sarathsa/protectedItems/AzureFileShare;testafs2","name":"AzureFileShare;testafs2","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"testafs2","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Completed","lastBackupTime":"2019-09-30T15:32:03.9424727Z","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;sarath-rg;sarathsa","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.storage/storageAccounts/sarathsa","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/afspolicy1"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/StorageContainer;storage;sarath-rg;sarathsa/protectedItems/AzureFileShare;afstest1","name":"AzureFileShare;afstest1","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"afstest1","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Completed","lastBackupTime":"2019-09-30T18:00:04.2381842Z","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;sarath-rg;sarathsa","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.storage/storageAccounts/sarathsa","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/afsdailypolicy"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/StorageContainer;storage;sarath-rg;sarathsa/protectedItems/AzureFileShare;afstest2","name":"AzureFileShare;afstest2","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"afstest2","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Completed","lastBackupTime":"2019-09-30T15:32:04.0291289Z","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;sarath-rg;sarathsa","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.storage/storageAccounts/sarathsa","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/afspolicy1"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/StorageContainer;storage;sarath-rg;sarathsa/protectedItems/AzureFileShare;afstest3","name":"AzureFileShare;afstest3","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"afstest3","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Completed","lastBackupTime":"2019-09-30T15:32:04.1455948Z","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;sarath-rg;sarathsa","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.storage/storageAccounts/sarathsa","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/afspolicy1"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5424'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:09:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupProtectedItems?api-version=2017-07-01
+  response:
+    body:
+      string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;sarath-rg;clitestvm/protectedItems/VM;iaasvmcontainerv2;sarath-rg;clitestvm","name":"VM;iaasvmcontainerv2;sarath-rg;clitestvm","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"clitestvm","virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.Compute/virtualMachines/clitestvm","protectionStatus":"Unhealthy","protectionState":"ProtectionStopped","healthStatus":"ActionRequired","healthDetails":[{"code":400136,"title":"UserErrorVmNotFoundV2","message":"Virtual
+        machine doesn''t exist.","recommendations":["Please make sure that virtual
+        machine exists or select a different virtual machine."]}],"lastBackupStatus":"Failed","lastBackupTime":"2019-09-23T14:26:47.5424496Z","protectedItemDataId":"70370711395549","protectedItemType":"Microsoft.Compute/virtualMachines","backupManagementType":"AzureIaasVM","workloadType":"VM","containerName":"iaasvmcontainerv2;sarath-rg;clitestvm","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.Compute/virtualMachines/clitestvm","policyId":"","policyName":"","lastRecoveryPoint":"2019-08-22T04:53:39.0119551Z","deferredDeleteTimeInUTC":"2019-09-26T05:58:56.9762503Z","isScheduledForDeferredDelete":true,"deferredDeleteTimeRemaining":"8.20:49:25.1901221"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;sarath-rg;sarathPSTest001/protectedItems/VM;iaasvmcontainerv2;sarath-rg;sarathPSTest001","name":"VM;iaasvmcontainerv2;sarath-rg;sarathPSTest001","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"sarathPSTest001","virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.Compute/virtualMachines/sarathPSTest001","protectionStatus":"Healthy","protectionState":"Protected","healthStatus":"Passed","healthDetails":[{"code":400239,"title":"IaasVmHealthGreenDefault","message":"Backup
+        pre-check status of this virtual machine is OK.","recommendations":[]}],"lastBackupStatus":"Completed","lastBackupTime":"2019-09-30T14:10:06.0655882Z","protectedItemDataId":"70369378790574","protectedItemType":"Microsoft.Compute/virtualMachines","backupManagementType":"AzureIaasVM","workloadType":"VM","containerName":"iaasvmcontainerv2;sarath-rg;sarathPSTest001","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.Compute/virtualMachines/sarathPSTest001","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/DefaultPolicy","policyName":"DefaultPolicy","lastRecoveryPoint":"2019-09-30T14:10:10.2211419Z"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;sarath-rg;vmabc/protectedItems/VM;iaasvmcontainerv2;sarath-rg;vmabc","name":"VM;iaasvmcontainerv2;sarath-rg;vmabc","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"vmabc","virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.Compute/virtualMachines/vmabc","protectionStatus":"Healthy","protectionState":"ProtectionStopped","healthStatus":"Passed","healthDetails":[{"code":400239,"title":"IaasVmHealthGreenDefault","message":"Backup
+        pre-check status of this virtual machine is OK.","recommendations":[]}],"lastBackupStatus":"Completed","lastBackupTime":"2019-08-19T06:51:52.8174928Z","protectedItemDataId":"70368763844956","protectedItemType":"Microsoft.Compute/virtualMachines","backupManagementType":"AzureIaasVM","workloadType":"VM","containerName":"iaasvmcontainerv2;sarath-rg;vmabc","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.Compute/virtualMachines/vmabc","policyId":"","policyName":"","lastRecoveryPoint":"2019-08-19T06:52:08.7691757Z","deferredDeleteTimeInUTC":"2019-09-24T17:53:01.320606Z","isScheduledForDeferredDelete":true,"deferredDeleteTimeRemaining":"7.08:43:29.5155588"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;sarath-rg;vmsarath/protectedItems/VM;iaasvmcontainerv2;sarath-rg;vmsarath","name":"VM;iaasvmcontainerv2;sarath-rg;vmsarath","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"vmsarath","virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.Compute/virtualMachines/vmsarath","protectionStatus":"Healthy","protectionState":"ProtectionStopped","healthStatus":"Passed","healthDetails":[{"code":400239,"title":"IaasVmHealthGreenDefault","message":"Backup
+        pre-check status of this virtual machine is OK.","recommendations":[]}],"lastBackupStatus":"Completed","lastBackupTime":"2019-08-16T04:19:07.289894Z","protectedItemDataId":"70369155524934","protectedItemType":"Microsoft.Compute/virtualMachines","backupManagementType":"AzureIaasVM","workloadType":"VM","containerName":"iaasvmcontainerv2;sarath-rg;vmsarath","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.Compute/virtualMachines/vmsarath","policyId":"","policyName":"","lastRecoveryPoint":"2019-08-16T04:19:12.5416836Z"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/StorageContainer;storage;sarath-rg;sarathsa/protectedItems/AzureFileShare;sarathtestafs","name":"AzureFileShare;sarathtestafs","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"sarathtestafs","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Completed","lastBackupTime":"2019-09-30T18:00:04.0819531Z","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;sarath-rg;sarathsa","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.storage/storageAccounts/sarathsa","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/afsdailypolicy"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/StorageContainer;storage;sarath-rg;sarathsa/protectedItems/AzureFileShare;testafs2","name":"AzureFileShare;testafs2","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"testafs2","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Completed","lastBackupTime":"2019-09-30T15:32:03.9424727Z","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;sarath-rg;sarathsa","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.storage/storageAccounts/sarathsa","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/afspolicy1"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/StorageContainer;storage;sarath-rg;sarathsa/protectedItems/AzureFileShare;afstest1","name":"AzureFileShare;afstest1","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"afstest1","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Completed","lastBackupTime":"2019-09-30T18:00:04.2381842Z","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;sarath-rg;sarathsa","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.storage/storageAccounts/sarathsa","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/afsdailypolicy"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/StorageContainer;storage;sarath-rg;sarathsa/protectedItems/AzureFileShare;afstest2","name":"AzureFileShare;afstest2","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"afstest2","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Completed","lastBackupTime":"2019-09-30T15:32:04.0291289Z","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;sarath-rg;sarathsa","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.storage/storageAccounts/sarathsa","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/afspolicy1"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/StorageContainer;storage;sarath-rg;sarathsa/protectedItems/AzureFileShare;afstest3","name":"AzureFileShare;afstest3","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"afstest3","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Completed","lastBackupTime":"2019-09-30T15:32:04.1455948Z","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;sarath-rg;sarathsa","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.storage/storageAccounts/sarathsa","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/afspolicy1"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;sarath-rg;sarathvm/protectedItems/SQLDataBase;mssqlserver;master","name":"SQLDataBase;mssqlserver;master","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"master","serverName":"sarathvm","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2019-09-30T14:03:54.2486932Z","protectedItemDataSourceId":"70369306910062","protectedItemHealthStatus":"Healthy","protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;sarath-rg;sarathvm","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.Compute/virtualMachines/sarathvm","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/HourlyLogBackup"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;sarath-rg;sarathvm/protectedItems/SQLDataBase;mssqlserver;model","name":"SQLDataBase;mssqlserver;model","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"model","serverName":"sarathvm","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2019-10-01T08:36:33.5951257Z","protectedItemDataSourceId":"70369330846902","protectedItemHealthStatus":"Healthy","protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;sarath-rg;sarathvm","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.Compute/virtualMachines/sarathvm","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/HourlyLogBackup"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;sarath-rg;sarathvm/protectedItems/SQLDataBase;mssqlserver;msdb","name":"SQLDataBase;mssqlserver;msdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"msdb","serverName":"sarathvm","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2019-09-30T14:01:57.0391471Z","protectedItemDataSourceId":"70370227617145","protectedItemHealthStatus":"Healthy","protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;sarath-rg;sarathvm","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.Compute/virtualMachines/sarathvm","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/HourlyLogBackup"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '15322'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:09:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupProtectedItems?api-version=2017-07-01
+  response:
+    body:
+      string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;sarath-rg;clitestvm/protectedItems/VM;iaasvmcontainerv2;sarath-rg;clitestvm","name":"VM;iaasvmcontainerv2;sarath-rg;clitestvm","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"clitestvm","virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.Compute/virtualMachines/clitestvm","protectionStatus":"Unhealthy","protectionState":"ProtectionStopped","healthStatus":"ActionRequired","healthDetails":[{"code":400136,"title":"UserErrorVmNotFoundV2","message":"Virtual
+        machine doesn''t exist.","recommendations":["Please make sure that virtual
+        machine exists or select a different virtual machine."]}],"lastBackupStatus":"Failed","lastBackupTime":"2019-09-23T14:26:47.5424496Z","protectedItemDataId":"70370711395549","protectedItemType":"Microsoft.Compute/virtualMachines","backupManagementType":"AzureIaasVM","workloadType":"VM","containerName":"iaasvmcontainerv2;sarath-rg;clitestvm","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.Compute/virtualMachines/clitestvm","policyId":"","policyName":"","lastRecoveryPoint":"2019-08-22T04:53:39.0119551Z","deferredDeleteTimeInUTC":"2019-09-26T05:58:56.9762503Z","isScheduledForDeferredDelete":true,"deferredDeleteTimeRemaining":"8.20:49:22.8696506"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;sarath-rg;sarathPSTest001/protectedItems/VM;iaasvmcontainerv2;sarath-rg;sarathPSTest001","name":"VM;iaasvmcontainerv2;sarath-rg;sarathPSTest001","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"sarathPSTest001","virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.Compute/virtualMachines/sarathPSTest001","protectionStatus":"Healthy","protectionState":"Protected","healthStatus":"Passed","healthDetails":[{"code":400239,"title":"IaasVmHealthGreenDefault","message":"Backup
+        pre-check status of this virtual machine is OK.","recommendations":[]}],"lastBackupStatus":"Completed","lastBackupTime":"2019-09-30T14:10:06.0655882Z","protectedItemDataId":"70369378790574","protectedItemType":"Microsoft.Compute/virtualMachines","backupManagementType":"AzureIaasVM","workloadType":"VM","containerName":"iaasvmcontainerv2;sarath-rg;sarathPSTest001","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.Compute/virtualMachines/sarathPSTest001","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/DefaultPolicy","policyName":"DefaultPolicy","lastRecoveryPoint":"2019-09-30T14:10:10.2211419Z"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;sarath-rg;vmabc/protectedItems/VM;iaasvmcontainerv2;sarath-rg;vmabc","name":"VM;iaasvmcontainerv2;sarath-rg;vmabc","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"vmabc","virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.Compute/virtualMachines/vmabc","protectionStatus":"Healthy","protectionState":"ProtectionStopped","healthStatus":"Passed","healthDetails":[{"code":400239,"title":"IaasVmHealthGreenDefault","message":"Backup
+        pre-check status of this virtual machine is OK.","recommendations":[]}],"lastBackupStatus":"Completed","lastBackupTime":"2019-08-19T06:51:52.8174928Z","protectedItemDataId":"70368763844956","protectedItemType":"Microsoft.Compute/virtualMachines","backupManagementType":"AzureIaasVM","workloadType":"VM","containerName":"iaasvmcontainerv2;sarath-rg;vmabc","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.Compute/virtualMachines/vmabc","policyId":"","policyName":"","lastRecoveryPoint":"2019-08-19T06:52:08.7691757Z","deferredDeleteTimeInUTC":"2019-09-24T17:53:01.320606Z","isScheduledForDeferredDelete":true,"deferredDeleteTimeRemaining":"7.08:43:27.2140063"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;sarath-rg;vmsarath/protectedItems/VM;iaasvmcontainerv2;sarath-rg;vmsarath","name":"VM;iaasvmcontainerv2;sarath-rg;vmsarath","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"vmsarath","virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.Compute/virtualMachines/vmsarath","protectionStatus":"Healthy","protectionState":"ProtectionStopped","healthStatus":"Passed","healthDetails":[{"code":400239,"title":"IaasVmHealthGreenDefault","message":"Backup
+        pre-check status of this virtual machine is OK.","recommendations":[]}],"lastBackupStatus":"Completed","lastBackupTime":"2019-08-16T04:19:07.289894Z","protectedItemDataId":"70369155524934","protectedItemType":"Microsoft.Compute/virtualMachines","backupManagementType":"AzureIaasVM","workloadType":"VM","containerName":"iaasvmcontainerv2;sarath-rg;vmsarath","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.Compute/virtualMachines/vmsarath","policyId":"","policyName":"","lastRecoveryPoint":"2019-08-16T04:19:12.5416836Z"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/StorageContainer;storage;sarath-rg;sarathsa/protectedItems/AzureFileShare;sarathtestafs","name":"AzureFileShare;sarathtestafs","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"sarathtestafs","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Completed","lastBackupTime":"2019-09-30T18:00:04.0819531Z","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;sarath-rg;sarathsa","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.storage/storageAccounts/sarathsa","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/afsdailypolicy"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/StorageContainer;storage;sarath-rg;sarathsa/protectedItems/AzureFileShare;testafs2","name":"AzureFileShare;testafs2","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"testafs2","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Completed","lastBackupTime":"2019-09-30T15:32:03.9424727Z","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;sarath-rg;sarathsa","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.storage/storageAccounts/sarathsa","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/afspolicy1"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/StorageContainer;storage;sarath-rg;sarathsa/protectedItems/AzureFileShare;afstest1","name":"AzureFileShare;afstest1","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"afstest1","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Completed","lastBackupTime":"2019-09-30T18:00:04.2381842Z","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;sarath-rg;sarathsa","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.storage/storageAccounts/sarathsa","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/afsdailypolicy"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/StorageContainer;storage;sarath-rg;sarathsa/protectedItems/AzureFileShare;afstest2","name":"AzureFileShare;afstest2","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"afstest2","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Completed","lastBackupTime":"2019-09-30T15:32:04.0291289Z","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;sarath-rg;sarathsa","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.storage/storageAccounts/sarathsa","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/afspolicy1"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/StorageContainer;storage;sarath-rg;sarathsa/protectedItems/AzureFileShare;afstest3","name":"AzureFileShare;afstest3","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"afstest3","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Completed","lastBackupTime":"2019-09-30T15:32:04.1455948Z","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;sarath-rg;sarathsa","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.storage/storageAccounts/sarathsa","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/afspolicy1"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;sarath-rg;sarathvm/protectedItems/SQLDataBase;mssqlserver;master","name":"SQLDataBase;mssqlserver;master","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"master","serverName":"sarathvm","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2019-09-30T14:03:54.2486932Z","protectedItemDataSourceId":"70369306910062","protectedItemHealthStatus":"Healthy","protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;sarath-rg;sarathvm","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.Compute/virtualMachines/sarathvm","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/HourlyLogBackup"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;sarath-rg;sarathvm/protectedItems/SQLDataBase;mssqlserver;model","name":"SQLDataBase;mssqlserver;model","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"model","serverName":"sarathvm","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2019-10-01T08:36:33.5951257Z","protectedItemDataSourceId":"70369330846902","protectedItemHealthStatus":"Healthy","protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;sarath-rg;sarathvm","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.Compute/virtualMachines/sarathvm","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/HourlyLogBackup"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;sarath-rg;sarathvm/protectedItems/SQLDataBase;mssqlserver;msdb","name":"SQLDataBase;mssqlserver;msdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"msdb","serverName":"sarathvm","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2019-09-30T14:01:57.0391471Z","protectedItemDataSourceId":"70370227617145","protectedItemHealthStatus":"Healthy","protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;sarath-rg;sarathvm","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.Compute/virtualMachines/sarathvm","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/HourlyLogBackup"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '15322'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:09:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupProtectedItems?api-version=2017-07-01
+  response:
+    body:
+      string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;sarath-rg;clitestvm/protectedItems/VM;iaasvmcontainerv2;sarath-rg;clitestvm","name":"VM;iaasvmcontainerv2;sarath-rg;clitestvm","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"clitestvm","virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.Compute/virtualMachines/clitestvm","protectionStatus":"Unhealthy","protectionState":"ProtectionStopped","healthStatus":"ActionRequired","healthDetails":[{"code":400136,"title":"UserErrorVmNotFoundV2","message":"Virtual
+        machine doesn''t exist.","recommendations":["Please make sure that virtual
+        machine exists or select a different virtual machine."]}],"lastBackupStatus":"Failed","lastBackupTime":"2019-09-23T14:26:47.5424496Z","protectedItemDataId":"70370711395549","protectedItemType":"Microsoft.Compute/virtualMachines","backupManagementType":"AzureIaasVM","workloadType":"VM","containerName":"iaasvmcontainerv2;sarath-rg;clitestvm","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.Compute/virtualMachines/clitestvm","policyId":"","policyName":"","lastRecoveryPoint":"2019-08-22T04:53:39.0119551Z","deferredDeleteTimeInUTC":"2019-09-26T05:58:56.9762503Z","isScheduledForDeferredDelete":true,"deferredDeleteTimeRemaining":"8.20:49:22.1191889"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;sarath-rg;sarathPSTest001/protectedItems/VM;iaasvmcontainerv2;sarath-rg;sarathPSTest001","name":"VM;iaasvmcontainerv2;sarath-rg;sarathPSTest001","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"sarathPSTest001","virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.Compute/virtualMachines/sarathPSTest001","protectionStatus":"Healthy","protectionState":"Protected","healthStatus":"Passed","healthDetails":[{"code":400239,"title":"IaasVmHealthGreenDefault","message":"Backup
+        pre-check status of this virtual machine is OK.","recommendations":[]}],"lastBackupStatus":"Completed","lastBackupTime":"2019-09-30T14:10:06.0655882Z","protectedItemDataId":"70369378790574","protectedItemType":"Microsoft.Compute/virtualMachines","backupManagementType":"AzureIaasVM","workloadType":"VM","containerName":"iaasvmcontainerv2;sarath-rg;sarathPSTest001","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.Compute/virtualMachines/sarathPSTest001","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/DefaultPolicy","policyName":"DefaultPolicy","lastRecoveryPoint":"2019-09-30T14:10:10.2211419Z"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;sarath-rg;vmabc/protectedItems/VM;iaasvmcontainerv2;sarath-rg;vmabc","name":"VM;iaasvmcontainerv2;sarath-rg;vmabc","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"vmabc","virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.Compute/virtualMachines/vmabc","protectionStatus":"Healthy","protectionState":"ProtectionStopped","healthStatus":"Passed","healthDetails":[{"code":400239,"title":"IaasVmHealthGreenDefault","message":"Backup
+        pre-check status of this virtual machine is OK.","recommendations":[]}],"lastBackupStatus":"Completed","lastBackupTime":"2019-08-19T06:51:52.8174928Z","protectedItemDataId":"70368763844956","protectedItemType":"Microsoft.Compute/virtualMachines","backupManagementType":"AzureIaasVM","workloadType":"VM","containerName":"iaasvmcontainerv2;sarath-rg;vmabc","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.Compute/virtualMachines/vmabc","policyId":"","policyName":"","lastRecoveryPoint":"2019-08-19T06:52:08.7691757Z","deferredDeleteTimeInUTC":"2019-09-24T17:53:01.320606Z","isScheduledForDeferredDelete":true,"deferredDeleteTimeRemaining":"7.08:43:26.4479190"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;sarath-rg;vmsarath/protectedItems/VM;iaasvmcontainerv2;sarath-rg;vmsarath","name":"VM;iaasvmcontainerv2;sarath-rg;vmsarath","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"vmsarath","virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.Compute/virtualMachines/vmsarath","protectionStatus":"Healthy","protectionState":"ProtectionStopped","healthStatus":"Passed","healthDetails":[{"code":400239,"title":"IaasVmHealthGreenDefault","message":"Backup
+        pre-check status of this virtual machine is OK.","recommendations":[]}],"lastBackupStatus":"Completed","lastBackupTime":"2019-08-16T04:19:07.289894Z","protectedItemDataId":"70369155524934","protectedItemType":"Microsoft.Compute/virtualMachines","backupManagementType":"AzureIaasVM","workloadType":"VM","containerName":"iaasvmcontainerv2;sarath-rg;vmsarath","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.Compute/virtualMachines/vmsarath","policyId":"","policyName":"","lastRecoveryPoint":"2019-08-16T04:19:12.5416836Z"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/StorageContainer;storage;sarath-rg;sarathsa/protectedItems/AzureFileShare;sarathtestafs","name":"AzureFileShare;sarathtestafs","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"sarathtestafs","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Completed","lastBackupTime":"2019-09-30T18:00:04.0819531Z","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;sarath-rg;sarathsa","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.storage/storageAccounts/sarathsa","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/afsdailypolicy"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/StorageContainer;storage;sarath-rg;sarathsa/protectedItems/AzureFileShare;testafs2","name":"AzureFileShare;testafs2","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"testafs2","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Completed","lastBackupTime":"2019-09-30T15:32:03.9424727Z","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;sarath-rg;sarathsa","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.storage/storageAccounts/sarathsa","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/afspolicy1"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/StorageContainer;storage;sarath-rg;sarathsa/protectedItems/AzureFileShare;afstest1","name":"AzureFileShare;afstest1","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"afstest1","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Completed","lastBackupTime":"2019-09-30T18:00:04.2381842Z","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;sarath-rg;sarathsa","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.storage/storageAccounts/sarathsa","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/afsdailypolicy"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/StorageContainer;storage;sarath-rg;sarathsa/protectedItems/AzureFileShare;afstest2","name":"AzureFileShare;afstest2","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"afstest2","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Completed","lastBackupTime":"2019-09-30T15:32:04.0291289Z","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;sarath-rg;sarathsa","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.storage/storageAccounts/sarathsa","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/afspolicy1"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/StorageContainer;storage;sarath-rg;sarathsa/protectedItems/AzureFileShare;afstest3","name":"AzureFileShare;afstest3","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"afstest3","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Completed","lastBackupTime":"2019-09-30T15:32:04.1455948Z","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;sarath-rg;sarathsa","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.storage/storageAccounts/sarathsa","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/afspolicy1"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;sarath-rg;sarathvm/protectedItems/SQLDataBase;mssqlserver;master","name":"SQLDataBase;mssqlserver;master","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"master","serverName":"sarathvm","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2019-09-30T14:03:54.2486932Z","protectedItemDataSourceId":"70369306910062","protectedItemHealthStatus":"Healthy","protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;sarath-rg;sarathvm","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.Compute/virtualMachines/sarathvm","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/HourlyLogBackup"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;sarath-rg;sarathvm/protectedItems/SQLDataBase;mssqlserver;model","name":"SQLDataBase;mssqlserver;model","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"model","serverName":"sarathvm","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2019-10-01T08:36:33.5951257Z","protectedItemDataSourceId":"70369330846902","protectedItemHealthStatus":"Healthy","protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;sarath-rg;sarathvm","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.Compute/virtualMachines/sarathvm","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/HourlyLogBackup"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;sarath-rg;sarathvm/protectedItems/SQLDataBase;mssqlserver;msdb","name":"SQLDataBase;mssqlserver;msdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"msdb","serverName":"sarathvm","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2019-09-30T14:01:57.0391471Z","protectedItemDataSourceId":"70370227617145","protectedItemHealthStatus":"Healthy","protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;sarath-rg;sarathvm","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.Compute/virtualMachines/sarathvm","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/HourlyLogBackup"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '15322'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:09:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n -p
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupProtectedItems?api-version=2017-07-01&$filter=backupManagementType%20eq%20%27AzureStorage%27
+  response:
+    body:
+      string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/StorageContainer;storage;sarath-rg;sarathsa/protectedItems/AzureFileShare;sarathtestafs","name":"AzureFileShare;sarathtestafs","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"sarathtestafs","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Completed","lastBackupTime":"2019-09-30T18:00:04.0819531Z","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;sarath-rg;sarathsa","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.storage/storageAccounts/sarathsa","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/afsdailypolicy"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/StorageContainer;storage;sarath-rg;sarathsa/protectedItems/AzureFileShare;testafs2","name":"AzureFileShare;testafs2","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"testafs2","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Completed","lastBackupTime":"2019-09-30T15:32:03.9424727Z","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;sarath-rg;sarathsa","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.storage/storageAccounts/sarathsa","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/afspolicy1"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/StorageContainer;storage;sarath-rg;sarathsa/protectedItems/AzureFileShare;afstest1","name":"AzureFileShare;afstest1","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"afstest1","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Completed","lastBackupTime":"2019-09-30T18:00:04.2381842Z","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;sarath-rg;sarathsa","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.storage/storageAccounts/sarathsa","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/afsdailypolicy"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/StorageContainer;storage;sarath-rg;sarathsa/protectedItems/AzureFileShare;afstest2","name":"AzureFileShare;afstest2","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"afstest2","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Completed","lastBackupTime":"2019-09-30T15:32:04.0291289Z","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;sarath-rg;sarathsa","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.storage/storageAccounts/sarathsa","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/afspolicy1"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/StorageContainer;storage;sarath-rg;sarathsa/protectedItems/AzureFileShare;afstest3","name":"AzureFileShare;afstest3","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"afstest3","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Completed","lastBackupTime":"2019-09-30T15:32:04.1455948Z","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;sarath-rg;sarathsa","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.storage/storageAccounts/sarathsa","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/afspolicy1"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5424'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:09:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n -p
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/afsdailypolicy?api-version=2016-12-01
+  response:
+    body:
+      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/afsdailypolicy","name":"afsdailypolicy","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureStorage","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2019-08-23T18:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2019-08-23T18:00:00Z"],"retentionDuration":{"count":28,"durationType":"Days"}}},"timeZone":"UTC","protectedItemsCount":2}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '697'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:09:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"sourceResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.storage/storageAccounts/sarathsa",
+      "policyId": "/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/afsdailypolicy",
+      "protectedItemType": "AzureFileShareProtectedItem"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item set-policy
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '400'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -v -c -n -p
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/StorageContainer%3Bstorage%3Bsarath-rg%3Bsarathsa/protectedItems/AzureFileShare%3Bsarathtestafs?api-version=2016-12-01
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/StorageContainer;storage;sarath-rg;sarathsa/protectedItems/AzureFileShare;sarathtestafs/operationsStatus/bed6684e-6376-4828-921c-e49aa98e79c6?api-version=2016-12-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Tue, 01 Oct 2019 09:09:36 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/StorageContainer;storage;sarath-rg;sarathsa/protectedItems/AzureFileShare;sarathtestafs/operationResults/bed6684e-6376-4828-921c-e49aa98e79c6?api-version=2016-12-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n -p
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupOperations/bed6684e-6376-4828-921c-e49aa98e79c6?api-version=2016-12-01
+  response:
+    body:
+      string: '{"id":"bed6684e-6376-4828-921c-e49aa98e79c6","name":"bed6684e-6376-4828-921c-e49aa98e79c6","status":"InProgress","startTime":"2019-10-01T09:09:36.5586075Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:09:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n -p
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupOperations/bed6684e-6376-4828-921c-e49aa98e79c6?api-version=2016-12-01
+  response:
+    body:
+      string: '{"id":"bed6684e-6376-4828-921c-e49aa98e79c6","name":"bed6684e-6376-4828-921c-e49aa98e79c6","status":"InProgress","startTime":"2019-10-01T09:09:36.5586075Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:09:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n -p
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupOperations/bed6684e-6376-4828-921c-e49aa98e79c6?api-version=2016-12-01
+  response:
+    body:
+      string: '{"id":"bed6684e-6376-4828-921c-e49aa98e79c6","name":"bed6684e-6376-4828-921c-e49aa98e79c6","status":"InProgress","startTime":"2019-10-01T09:09:36.5586075Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:09:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n -p
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupOperations/bed6684e-6376-4828-921c-e49aa98e79c6?api-version=2016-12-01
+  response:
+    body:
+      string: '{"id":"bed6684e-6376-4828-921c-e49aa98e79c6","name":"bed6684e-6376-4828-921c-e49aa98e79c6","status":"InProgress","startTime":"2019-10-01T09:09:36.5586075Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:09:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n -p
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupOperations/bed6684e-6376-4828-921c-e49aa98e79c6?api-version=2016-12-01
+  response:
+    body:
+      string: '{"id":"bed6684e-6376-4828-921c-e49aa98e79c6","name":"bed6684e-6376-4828-921c-e49aa98e79c6","status":"InProgress","startTime":"2019-10-01T09:09:36.5586075Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:09:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n -p
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupOperations/bed6684e-6376-4828-921c-e49aa98e79c6?api-version=2016-12-01
+  response:
+    body:
+      string: '{"id":"bed6684e-6376-4828-921c-e49aa98e79c6","name":"bed6684e-6376-4828-921c-e49aa98e79c6","status":"InProgress","startTime":"2019-10-01T09:09:36.5586075Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:09:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n -p
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupOperations/bed6684e-6376-4828-921c-e49aa98e79c6?api-version=2016-12-01
+  response:
+    body:
+      string: '{"id":"bed6684e-6376-4828-921c-e49aa98e79c6","name":"bed6684e-6376-4828-921c-e49aa98e79c6","status":"InProgress","startTime":"2019-10-01T09:09:36.5586075Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:09:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n -p
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupOperations/bed6684e-6376-4828-921c-e49aa98e79c6?api-version=2016-12-01
+  response:
+    body:
+      string: '{"id":"bed6684e-6376-4828-921c-e49aa98e79c6","name":"bed6684e-6376-4828-921c-e49aa98e79c6","status":"InProgress","startTime":"2019-10-01T09:09:36.5586075Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:09:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n -p
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupOperations/bed6684e-6376-4828-921c-e49aa98e79c6?api-version=2016-12-01
+  response:
+    body:
+      string: '{"id":"bed6684e-6376-4828-921c-e49aa98e79c6","name":"bed6684e-6376-4828-921c-e49aa98e79c6","status":"InProgress","startTime":"2019-10-01T09:09:36.5586075Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:09:47 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n -p
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupOperations/bed6684e-6376-4828-921c-e49aa98e79c6?api-version=2016-12-01
+  response:
+    body:
+      string: '{"id":"bed6684e-6376-4828-921c-e49aa98e79c6","name":"bed6684e-6376-4828-921c-e49aa98e79c6","status":"InProgress","startTime":"2019-10-01T09:09:36.5586075Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:09:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n -p
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupOperations/bed6684e-6376-4828-921c-e49aa98e79c6?api-version=2016-12-01
+  response:
+    body:
+      string: '{"id":"bed6684e-6376-4828-921c-e49aa98e79c6","name":"bed6684e-6376-4828-921c-e49aa98e79c6","status":"InProgress","startTime":"2019-10-01T09:09:36.5586075Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:09:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n -p
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupOperations/bed6684e-6376-4828-921c-e49aa98e79c6?api-version=2016-12-01
+  response:
+    body:
+      string: '{"id":"bed6684e-6376-4828-921c-e49aa98e79c6","name":"bed6684e-6376-4828-921c-e49aa98e79c6","status":"InProgress","startTime":"2019-10-01T09:09:36.5586075Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:09:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n -p
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupOperations/bed6684e-6376-4828-921c-e49aa98e79c6?api-version=2016-12-01
+  response:
+    body:
+      string: '{"id":"bed6684e-6376-4828-921c-e49aa98e79c6","name":"bed6684e-6376-4828-921c-e49aa98e79c6","status":"InProgress","startTime":"2019-10-01T09:09:36.5586075Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:09:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n -p
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupOperations/bed6684e-6376-4828-921c-e49aa98e79c6?api-version=2016-12-01
+  response:
+    body:
+      string: '{"id":"bed6684e-6376-4828-921c-e49aa98e79c6","name":"bed6684e-6376-4828-921c-e49aa98e79c6","status":"InProgress","startTime":"2019-10-01T09:09:36.5586075Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:09:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n -p
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupOperations/bed6684e-6376-4828-921c-e49aa98e79c6?api-version=2016-12-01
+  response:
+    body:
+      string: '{"id":"bed6684e-6376-4828-921c-e49aa98e79c6","name":"bed6684e-6376-4828-921c-e49aa98e79c6","status":"InProgress","startTime":"2019-10-01T09:09:36.5586075Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:09:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n -p
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupOperations/bed6684e-6376-4828-921c-e49aa98e79c6?api-version=2016-12-01
+  response:
+    body:
+      string: '{"id":"bed6684e-6376-4828-921c-e49aa98e79c6","name":"bed6684e-6376-4828-921c-e49aa98e79c6","status":"InProgress","startTime":"2019-10-01T09:09:36.5586075Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:09:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n -p
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupOperations/bed6684e-6376-4828-921c-e49aa98e79c6?api-version=2016-12-01
+  response:
+    body:
+      string: '{"id":"bed6684e-6376-4828-921c-e49aa98e79c6","name":"bed6684e-6376-4828-921c-e49aa98e79c6","status":"InProgress","startTime":"2019-10-01T09:09:36.5586075Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:09:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n -p
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupOperations/bed6684e-6376-4828-921c-e49aa98e79c6?api-version=2016-12-01
+  response:
+    body:
+      string: '{"id":"bed6684e-6376-4828-921c-e49aa98e79c6","name":"bed6684e-6376-4828-921c-e49aa98e79c6","status":"InProgress","startTime":"2019-10-01T09:09:36.5586075Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:09:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n -p
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupOperations/bed6684e-6376-4828-921c-e49aa98e79c6?api-version=2016-12-01
+  response:
+    body:
+      string: '{"id":"bed6684e-6376-4828-921c-e49aa98e79c6","name":"bed6684e-6376-4828-921c-e49aa98e79c6","status":"InProgress","startTime":"2019-10-01T09:09:36.5586075Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:10:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n -p
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupOperations/bed6684e-6376-4828-921c-e49aa98e79c6?api-version=2016-12-01
+  response:
+    body:
+      string: '{"id":"bed6684e-6376-4828-921c-e49aa98e79c6","name":"bed6684e-6376-4828-921c-e49aa98e79c6","status":"InProgress","startTime":"2019-10-01T09:09:36.5586075Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:10:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n -p
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupOperations/bed6684e-6376-4828-921c-e49aa98e79c6?api-version=2016-12-01
+  response:
+    body:
+      string: '{"id":"bed6684e-6376-4828-921c-e49aa98e79c6","name":"bed6684e-6376-4828-921c-e49aa98e79c6","status":"InProgress","startTime":"2019-10-01T09:09:36.5586075Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:10:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n -p
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupOperations/bed6684e-6376-4828-921c-e49aa98e79c6?api-version=2016-12-01
+  response:
+    body:
+      string: '{"id":"bed6684e-6376-4828-921c-e49aa98e79c6","name":"bed6684e-6376-4828-921c-e49aa98e79c6","status":"InProgress","startTime":"2019-10-01T09:09:36.5586075Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:10:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n -p
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupOperations/bed6684e-6376-4828-921c-e49aa98e79c6?api-version=2016-12-01
+  response:
+    body:
+      string: '{"id":"bed6684e-6376-4828-921c-e49aa98e79c6","name":"bed6684e-6376-4828-921c-e49aa98e79c6","status":"InProgress","startTime":"2019-10-01T09:09:36.5586075Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:10:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n -p
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupOperations/bed6684e-6376-4828-921c-e49aa98e79c6?api-version=2016-12-01
+  response:
+    body:
+      string: '{"id":"bed6684e-6376-4828-921c-e49aa98e79c6","name":"bed6684e-6376-4828-921c-e49aa98e79c6","status":"InProgress","startTime":"2019-10-01T09:09:36.5586075Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:10:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n -p
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupOperations/bed6684e-6376-4828-921c-e49aa98e79c6?api-version=2016-12-01
+  response:
+    body:
+      string: '{"id":"bed6684e-6376-4828-921c-e49aa98e79c6","name":"bed6684e-6376-4828-921c-e49aa98e79c6","status":"InProgress","startTime":"2019-10-01T09:09:36.5586075Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:10:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n -p
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupOperations/bed6684e-6376-4828-921c-e49aa98e79c6?api-version=2016-12-01
+  response:
+    body:
+      string: '{"id":"bed6684e-6376-4828-921c-e49aa98e79c6","name":"bed6684e-6376-4828-921c-e49aa98e79c6","status":"InProgress","startTime":"2019-10-01T09:09:36.5586075Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:10:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n -p
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupOperations/bed6684e-6376-4828-921c-e49aa98e79c6?api-version=2016-12-01
+  response:
+    body:
+      string: '{"id":"bed6684e-6376-4828-921c-e49aa98e79c6","name":"bed6684e-6376-4828-921c-e49aa98e79c6","status":"InProgress","startTime":"2019-10-01T09:09:36.5586075Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:10:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n -p
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupOperations/bed6684e-6376-4828-921c-e49aa98e79c6?api-version=2016-12-01
+  response:
+    body:
+      string: '{"id":"bed6684e-6376-4828-921c-e49aa98e79c6","name":"bed6684e-6376-4828-921c-e49aa98e79c6","status":"InProgress","startTime":"2019-10-01T09:09:36.5586075Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:10:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n -p
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupOperations/bed6684e-6376-4828-921c-e49aa98e79c6?api-version=2016-12-01
+  response:
+    body:
+      string: '{"id":"bed6684e-6376-4828-921c-e49aa98e79c6","name":"bed6684e-6376-4828-921c-e49aa98e79c6","status":"InProgress","startTime":"2019-10-01T09:09:36.5586075Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:10:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n -p
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupOperations/bed6684e-6376-4828-921c-e49aa98e79c6?api-version=2016-12-01
+  response:
+    body:
+      string: '{"id":"bed6684e-6376-4828-921c-e49aa98e79c6","name":"bed6684e-6376-4828-921c-e49aa98e79c6","status":"InProgress","startTime":"2019-10-01T09:09:36.5586075Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:10:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n -p
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupOperations/bed6684e-6376-4828-921c-e49aa98e79c6?api-version=2016-12-01
+  response:
+    body:
+      string: '{"id":"bed6684e-6376-4828-921c-e49aa98e79c6","name":"bed6684e-6376-4828-921c-e49aa98e79c6","status":"InProgress","startTime":"2019-10-01T09:09:36.5586075Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:10:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n -p
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupOperations/bed6684e-6376-4828-921c-e49aa98e79c6?api-version=2016-12-01
+  response:
+    body:
+      string: '{"id":"bed6684e-6376-4828-921c-e49aa98e79c6","name":"bed6684e-6376-4828-921c-e49aa98e79c6","status":"InProgress","startTime":"2019-10-01T09:09:36.5586075Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:10:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n -p
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupOperations/bed6684e-6376-4828-921c-e49aa98e79c6?api-version=2016-12-01
+  response:
+    body:
+      string: '{"id":"bed6684e-6376-4828-921c-e49aa98e79c6","name":"bed6684e-6376-4828-921c-e49aa98e79c6","status":"InProgress","startTime":"2019-10-01T09:09:36.5586075Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:10:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n -p
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupOperations/bed6684e-6376-4828-921c-e49aa98e79c6?api-version=2016-12-01
+  response:
+    body:
+      string: '{"id":"bed6684e-6376-4828-921c-e49aa98e79c6","name":"bed6684e-6376-4828-921c-e49aa98e79c6","status":"Succeeded","startTime":"2019-10-01T09:09:36.5586075Z","endTime":"2019-10-01T09:09:36.5586075Z","properties":{"objectType":"OperationStatusJobExtendedInfo","jobId":"e0d6ac3b-0d63-488a-ac0a-dde55b337393"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '304'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:10:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n -p
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupJobs/e0d6ac3b-0d63-488a-ac0a-dde55b337393?api-version=2017-07-01
+  response:
+    body:
+      string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupJobs/e0d6ac3b-0d63-488a-ac0a-dde55b337393","name":"e0d6ac3b-0d63-488a-ac0a-dde55b337393","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureStorageJob","duration":"PT42.4369856S","storageAccountName":"sarathsa","storageAccountVersion":"Storage","extendedInfo":{"tasksList":[],"propertyBag":{"File
+        Share Name":"sarathtestafs","Storage Account Name":"sarathsa","Policy Name":"afsdailypolicy"}},"entityFriendlyName":"sarathtestafs","backupManagementType":"AzureStorage","operation":"ConfigureBackup","status":"Completed","startTime":"2019-10-01T09:09:36.5586075Z","endTime":"2019-10-01T09:10:18.9955931Z","activityId":"2fe103f4-e42b-11e9-b0bc-186024943d4f"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '835'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:10:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -n
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.17763-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-recoveryservicesbackup/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.0.73
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupProtectedItems?api-version=2017-07-01&$filter=backupManagementType%20eq%20%27AzureStorage%27
+  response:
+    body:
+      string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/StorageContainer;storage;sarath-rg;sarathsa/protectedItems/AzureFileShare;sarathtestafs","name":"AzureFileShare;sarathtestafs","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"sarathtestafs","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Completed","lastBackupTime":"2019-09-30T18:00:04.0819531Z","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;sarath-rg;sarathsa","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.storage/storageAccounts/sarathsa","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/afsdailypolicy"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/StorageContainer;storage;sarath-rg;sarathsa/protectedItems/AzureFileShare;testafs2","name":"AzureFileShare;testafs2","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"testafs2","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Completed","lastBackupTime":"2019-09-30T15:32:03.9424727Z","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;sarath-rg;sarathsa","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.storage/storageAccounts/sarathsa","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/afspolicy1"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/StorageContainer;storage;sarath-rg;sarathsa/protectedItems/AzureFileShare;afstest1","name":"AzureFileShare;afstest1","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"afstest1","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Completed","lastBackupTime":"2019-09-30T18:00:04.2381842Z","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;sarath-rg;sarathsa","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.storage/storageAccounts/sarathsa","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/afsdailypolicy"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/StorageContainer;storage;sarath-rg;sarathsa/protectedItems/AzureFileShare;afstest2","name":"AzureFileShare;afstest2","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"afstest2","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Completed","lastBackupTime":"2019-09-30T15:32:04.0291289Z","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;sarath-rg;sarathsa","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.storage/storageAccounts/sarathsa","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/afspolicy1"}},{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupFabrics/Azure/protectionContainers/StorageContainer;storage;sarath-rg;sarathsa/protectedItems/AzureFileShare;afstest3","name":"AzureFileShare;afstest3","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"afstest3","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Completed","lastBackupTime":"2019-09-30T15:32:04.1455948Z","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;sarath-rg;sarathsa","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.storage/storageAccounts/sarathsa","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sarath-rg/providers/Microsoft.RecoveryServices/vaults/sarath-vault/backupPolicies/afspolicy1"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5424'
+      content-type:
+      - application/json
+      date:
+      - Tue, 01 Oct 2019 09:10:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+version: 1

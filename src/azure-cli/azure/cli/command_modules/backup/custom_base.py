@@ -218,7 +218,6 @@ def restore_azurefiles(cmd, client, resource_group_name, vault_name, rp_name, co
 
     if isinstance(item, list):
         raise CLIError("Multiple items found. Please give native names instead.")
-    
     return custom_afs.restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name, item, restore_mode,
                                              resolve_conflict, "ItemLevelRestore",
                                              target_storage_account_name=target_storage_account,
