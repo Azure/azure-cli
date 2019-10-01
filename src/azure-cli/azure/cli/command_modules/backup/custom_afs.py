@@ -4,21 +4,15 @@
 # --------------------------------------------------------------------------------------------
 
 import azure.cli.command_modules.backup.custom_help as Helper
-import json
 # pylint: disable=import-error
 # pylint: disable=unused-argument
 
-from datetime import datetime
-from uuid import uuid4
-from importlib import import_module
-from azure.cli.command_modules.backup._validators import datetime_type
 import azure.cli.command_modules.backup.custom_common as common
 
-from azure.mgmt.recoveryservicesbackup.models import AzureVMAppContainerProtectionContainer, \
-    AzureWorkloadBackupRequest, ProtectedItemResource, AzureRecoveryServiceVaultProtectionIntent, TargetRestoreInfo, \
-    RestoreRequestResource, BackupRequestResource, ProtectionIntentResource, SQLDataDirectoryMapping, \
-    AzureFileShareBackupRequest, AzureFileshareProtectedItem, AzureFileShareRestoreRequest, RestoreFileSpecs, \
-    TargetAFSRestoreInfo, ProtectionState, ProtectionContainerResource  # pylint: disable=unused-import
+from azure.mgmt.recoveryservicesbackup.models import ProtectedItemResource, \
+    RestoreRequestResource, BackupRequestResource, RestoreFileSpecs, \
+    AzureFileShareBackupRequest, AzureFileshareProtectedItem, AzureFileShareRestoreRequest, \
+    TargetAFSRestoreInfo, ProtectionState  # pylint: disable=unused-import
 
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.command_modules.backup._client_factory import backup_workload_items_cf, vaults_cf, \
@@ -71,11 +65,10 @@ def _get_backup_request(retain_until):
 
 def _get_protectable_item_for_afs(cli_ctx, vault_name, resource_group_name, afs_name, storage_account_name):
     protection_containers_client = protection_containers_cf(cli_ctx)
-    protectable_item = _try_get_protectable_item_for_afs(cli_ctx, vault_name, resource_group_name, afs_name, storage_account_name)
-    
+    protectable_item = _try_get_protectable_item_for_afs(cli_ctx, vault_name, resource_group_name, 
+                                                         afs_name, storage_account_name)
     filter_string = Helper.get_filter_string({
         'backupManagementType': backup_management_type})
-
     refresh_filter_string = Helper.get_filter_string({
         'workloadType': workload_type})
 
@@ -89,7 +82,8 @@ def _get_protectable_item_for_afs(cli_ctx, vault_name, resource_group_name, afs_
         protection_containers_client.inquire(vault_name, resource_group_name, fabric_name,
                                              storage_account.name, filter=refresh_filter_string)
 
-    protectable_item = _try_get_protectable_item_for_afs(cli_ctx, vault_name, resource_group_name, afs_name, storage_account_name)
+    protectable_item = _try_get_protectable_item_for_afs(cli_ctx, vault_name, resource_group_name, afs_name,
+                                                         storage_account_name)
     return protectable_item
 
 
