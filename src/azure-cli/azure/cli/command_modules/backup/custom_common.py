@@ -18,7 +18,7 @@ fabric_name = "Azure"
 workload_type_map = {'MSSQL': 'SQLDataBase',
                      'SAPHANA': 'SAPHanaDatabase',
                      'SAPASE': 'SAPAseDatabase'}
-#pylint: disable=unused-argument
+# pylint: disable=unused-argument
 
 
 def show_container(cmd, client, name, resource_group_name, vault_name, backup_management_type=None,

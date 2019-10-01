@@ -36,6 +36,7 @@ os_windows = 'Windows'
 os_linux = 'Linux'
 password_offset = 33
 password_length = 15
+# pylint: disable=unused-argument
 
 
 def create_vault(client, vault_name, resource_group_name, location):
@@ -455,7 +456,7 @@ def restore_files_unmount_rp(cmd, client, resource_group_name, vault_name, conta
         _track_backup_operation(cmd.cli_ctx, resource_group_name, result, vault_name)
 
 
-def disable_protection(cmd, client, resource_group_name, vault_name, item, delete_backup_data=False, **kwargs):
+def disable_protection(cmd, client, resource_group_name, vault_name, item, delete_backup_data=False):
     # Get container and item URIs
     container_uri = _get_protection_container_uri_from_id(item.id)
     item_uri = _get_protected_item_uri_from_id(item.id)

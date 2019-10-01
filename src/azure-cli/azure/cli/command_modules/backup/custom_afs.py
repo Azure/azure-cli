@@ -18,7 +18,7 @@ from azure.mgmt.recoveryservicesbackup.models import AzureVMAppContainerProtecti
     AzureWorkloadBackupRequest, ProtectedItemResource, AzureRecoveryServiceVaultProtectionIntent, TargetRestoreInfo, \
     RestoreRequestResource, BackupRequestResource, ProtectionIntentResource, SQLDataDirectoryMapping, \
     AzureFileShareBackupRequest, AzureFileshareProtectedItem, AzureFileShareRestoreRequest, RestoreFileSpecs, \
-    TargetAFSRestoreInfo, ProtectionState, ProtectionContainerResource
+    TargetAFSRestoreInfo, ProtectionState, ProtectionContainerResource  # pylint: disable=unused-import
 
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.command_modules.backup._client_factory import backup_workload_items_cf, vaults_cf, \
@@ -70,6 +70,30 @@ def _get_backup_request(retain_until):
 
 
 def _get_protectable_item_for_afs(cli_ctx, vault_name, resource_group_name, afs_name, storage_account_name):
+    protection_containers_client = protection_containers_cf(cli_ctx)
+    protectable_item = _try_get_protectable_item_for_afs(cli_ctx, vault_name, resource_group_name, afs_name, storage_account_name)
+    
+    filter_string = Helper.get_filter_string({
+        'backupManagementType': backup_management_type})
+
+    refresh_filter_string = Helper.get_filter_string({
+        'workloadType': workload_type})
+
+    if protectable_item is None:
+        refresh_result = sdk_no_wait(True, protection_containers_client.refresh,
+                                     vault_name, resource_group_name, fabric_name, filter=filter_string)
+        Helper.track_refresh_operation(cli_ctx, refresh_result, vault_name, resource_group_name)
+        client = backup_protection_containers_cf(cli_ctx)
+        storage_account = common.show_container(None, client, storage_account_name, resource_group_name,
+                                                vault_name, "AzureStorage")
+        protection_containers_client.inquire(vault_name, resource_group_name, fabric_name,
+                                             storage_account.name, filter=refresh_filter_string)
+
+    protectable_item = _try_get_protectable_item_for_afs(cli_ctx, vault_name, resource_group_name, afs_name, storage_account_name)
+    return protectable_item
+
+
+def _try_get_protectable_item_for_afs(cli_ctx, vault_name, resource_group_name, afs_name, storage_account_name):
     backup_protectable_items_client = backup_protectable_items_cf(cli_ctx)
 
     filter_string = Helper.get_filter_string({
@@ -91,9 +115,11 @@ def _get_protectable_item_for_afs(cli_ctx, vault_name, resource_group_name, afs_
     else:
         result = [protectable_item for protectable_item in result
                   if protectable_item.name.split(';')[-1].lower() == afs_name.lower()]
-    if len(result) != 1:
+    if len(result) > 1:
         raise CLIError("Could not find a unique resource, Please pass native names instead")
-    return result[0]
+    if len(result) == 1:
+        return result[0]
+    return None
 
 
 def restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name, item, restore_mode,
