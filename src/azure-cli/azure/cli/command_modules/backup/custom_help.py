@@ -66,15 +66,6 @@ def get_resource_id(resource_id):
     return "/".join(resource_id.split('/')[3:])
 
 
-def get_target_path(resource_type, path, logical_name, data_directory_paths):
-    for path in data_directory_paths:
-        if path.type == resource_type:
-            data_directory_path = path
-    file_type = path.split('\\')[-1].split('.')[1]
-    file_name = logical_name + '_' + str(int(time.time())) + '.' + file_type
-    return data_directory_path.path + file_name
-
-
 def get_containers(client, container_type, status, resource_group_name, vault_name, container_name=None):
     filter_dict = {
         'backupManagementType': container_type,
@@ -359,18 +350,3 @@ def validate_and_extract_container_type(container_name, backup_management_type):
     if container_type in container_type_mappings:
         return container_type_mappings[container_type]
     return None
-
-
-def validate_and_extract_item_name(item_name, workload_type, container_type):
-    if not is_native_name(item_name) and workload_type is None:
-        raise CLIError("""workload type required""")
-    if is_native_name(item_name):
-        return item_name
-
-
-def get_none_one_or_many(obj_list):
-    if not obj_list:
-        return None
-    if len(obj_list) == 1:
-        return obj_list[0]
-    return obj_list
