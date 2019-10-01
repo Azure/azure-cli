@@ -7,11 +7,7 @@ import azure.cli.command_modules.backup.custom as custom
 import azure.cli.command_modules.backup.custom_afs as custom_afs
 import azure.cli.command_modules.backup.custom_help as custom_help
 import azure.cli.command_modules.backup.custom_common as common
-from azure.cli.command_modules.backup._client_factory import vaults_cf, backup_protection_containers_cf, \
-    protection_policies_cf, backup_policies_cf, protected_items_cf, backups_cf, backup_jobs_cf, \
-    job_details_cf, job_cancellations_cf, recovery_points_cf, restores_cf, backup_storage_configs_cf, \
-    item_level_recovery_connections_cf, backup_protected_items_cf, backup_protectable_items_cf, \
-    protection_intent_cf, protection_containers_cf  # pylint: disable=unused-import
+from azure.cli.command_modules.backup._client_factory import protection_policies_cf, backup_protected_items_cf
 from azure.cli.core.util import CLIError
 # pylint: disable=import-error
 

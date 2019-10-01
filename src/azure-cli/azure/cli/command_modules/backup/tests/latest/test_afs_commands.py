@@ -144,22 +144,21 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'rg': resource_group_name,
             'type': "AzureStorage",
         })
-    
         rp_names = self.cmd('backup recoverypoint list -g {rg} -v {vault} -c {container} -i {item1} --backup-management-type {type} --query [].name').get_output_in_json()
 
         self.kwargs['rp1'] = rp_names[0]
 
-        rp1_json = self.cmd('backup recoverypoint show -g {rg} -v {vault} -c {container} -i {item1} -n {rp1} --backup-management-type {type}', checks=[
+        self.cmd('backup recoverypoint show -g {rg} -v {vault} -c {container} -i {item1} -n {rp1} --backup-management-type {type}', checks=[
             self.check("name", '{rp1}'),
             self.check("resourceGroup", '{rg}')
-        ]).get_output_in_json()
+        ])
 
         self.kwargs['rp2'] = rp_names[1]
 
-        rp1_json = self.cmd('backup recoverypoint show -g {rg} -v {vault} -c {container} -i {item1} -n {rp2} --backup-management-type {type}', checks=[
+        self.cmd('backup recoverypoint show -g {rg} -v {vault} -c {container} -i {item1} -n {rp2} --backup-management-type {type}', checks=[
             self.check("name", '{rp2}'),
             self.check("resourceGroup", '{rg}')
-        ]).get_output_in_json()
+        ])
 
     def test_afs_backup_restore(self):
         self.kwargs.update({
@@ -187,12 +186,12 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['job1'] = trigger_restore_job1_json['name']
         self.cmd('backup job wait -g {rg} -v {vault} -n {job1}')
 
-        trigger_restore_job1_details = self.cmd('backup job show -g {rg} -v {vault} -n {job1}', checks=[
+        self.cmd('backup job show -g {rg} -v {vault} -n {job1}', checks=[
             self.check("properties.entityFriendlyName", '{item1}'),
             self.check("properties.operation", "Restore"),
             self.check("properties.status", "Completed"),
             self.check("resourceGroup", '{rg}')
-        ]).get_output_in_json()
+        ])
 
         # full share alternate location
 
@@ -205,14 +204,14 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['job2'] = trigger_restore_job2_json['name']
         self.cmd('backup job wait -g {rg} -v {vault} -n {job2}')
 
-        trigger_restore_job2_details = self.cmd('backup job show -g {rg} -v {vault} -n {job2}', checks=[
+        self.cmd('backup job show -g {rg} -v {vault} -n {job2}', checks=[
             self.check("properties.entityFriendlyName", '{item1}'),
             self.check("properties.operation", "Restore"),
             self.check("properties.status", "Completed"),
             self.check("resourceGroup", '{rg}')
-        ]).get_output_in_json()
+        ])
 
-        #item level recovery alternate location
+        # item level recovery alternate location
 
         trigger_restore_job3_json = self.cmd('backup restore restore-azurefiles -g {rg} -v {vault} -c {container} -i {item1} -r {rp1} --resolve-conflict Overwrite --restore-mode AlternateLocation --source-file-type File --source-file-path script.ps1 --target-storage-account {container} --target-file-share {item2} --target-folder folder1', checks=[
             self.check("properties.entityFriendlyName", '{item1}'),
@@ -223,10 +222,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['job3'] = trigger_restore_job3_json['name']
         self.cmd('backup job wait -g {rg} -v {vault} -n {job3}')
 
-        trigger_restore_job3_details = self.cmd('backup job show -g {rg} -v {vault} -n {job3}', checks=[
+        self.cmd('backup job show -g {rg} -v {vault} -n {job3}', checks=[
             self.check("properties.entityFriendlyName", '{item1}'),
             self.check("properties.operation", "Restore"),
             self.check("properties.status", "Completed"),
             self.check("resourceGroup", '{rg}')
-        ]).get_output_in_json()
-
+        ])
