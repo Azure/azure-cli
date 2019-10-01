@@ -807,7 +807,7 @@ helps['acr task timer add'] = """
 type: command
 short-summary: Add a timer trigger to a task.
 examples:
-  - name: Add a timer trigger at 09:30 (UTC) on every day-of-week from Monday through Friday.
+  - name: Add a timer trigger which schedules the task at 09:30 (UTC) every day of the week from Monday through Friday.
     text: >
         az acr task timer add -n taskname -r registryname --timer-name t2 --schedule "30 9 * * 1-5"
 """
