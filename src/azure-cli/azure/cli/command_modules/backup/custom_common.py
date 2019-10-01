@@ -9,7 +9,7 @@ from azure.cli.command_modules.backup._client_factory import vaults_cf, backup_p
     protection_policies_cf, backup_policies_cf, protected_items_cf, backups_cf, backup_jobs_cf, \
     job_details_cf, job_cancellations_cf, recovery_points_cf, restores_cf, backup_storage_configs_cf, \
     item_level_recovery_connections_cf, backup_protected_items_cf, backup_protectable_items_cf, \
-    protection_intent_cf, protection_containers_cf
+    protection_intent_cf, protection_containers_cf  # pylint: disable=unused-import
 from azure.cli.core.util import CLIError
 # pylint: disable=import-error
 
@@ -18,13 +18,14 @@ fabric_name = "Azure"
 workload_type_map = {'MSSQL': 'SQLDataBase',
                      'SAPHANA': 'SAPHanaDatabase',
                      'SAPASE': 'SAPAseDatabase'}
+#pylint: disable=unused-argument
 
 
 def show_container(cmd, client, name, resource_group_name, vault_name, backup_management_type=None,
                    status="Registered"):
     container_type = custom_help.validate_and_extract_container_type(name, backup_management_type)
     containers = _get_containers(client, container_type, status, resource_group_name, vault_name, name)
-    return custom_help.get_none_one_or_many(containers)  
+    return custom_help.get_none_one_or_many(containers)
 
 
 def list_containers(client, resource_group_name, vault_name, backup_management_type, status="Registered"):
@@ -36,9 +37,6 @@ def show_policy(client, resource_group_name, vault_name, name):
 
 
 def list_policies(client, resource_group_name, vault_name, workload_type=None, backup_management_type=None):
-    workload_type_map = {'MSSQL': 'SQLDataBase',
-                         'SAPHANA': 'SAPHanaDatabase',
-                         'SAPASE': 'SAPAseDatabase'}
     if workload_type and workload_type in workload_type_map:
         workload_type = workload_type_map[workload_type]
 
@@ -79,9 +77,8 @@ def list_items(cmd, client, resource_group_name, vault_name, workload_type=None,
         if custom_help.is_native_name(container_name):
             return [item for item in paged_items if
                     item.properties.container_name.lower() == container_name.lower()]
-        else:
-            return [item for item in paged_items if
-                    item.properties.container_name.lower().split(';')[-1] == container_name.lower()]
+        return [item for item in paged_items if
+                item.properties.container_name.lower().split(';')[-1] == container_name.lower()]
 
     return paged_items
 
@@ -103,17 +100,20 @@ def show_recovery_point(cmd, client, resource_group_name, vault_name, container_
 
     return client.get(vault_name, resource_group_name, fabric_name, container_uri, item_uri, name)
 
+
 def delete_policy(client, resource_group_name, vault_name, name):
     client.delete(vault_name, resource_group_name, name)
+
 
 def new_policy(client, resource_group_name, vault_name, policy, policy_name, container_type, workload_type):
     workload_type = workload_type_map[workload_type]
 
-    policy_object = cust_help.get_policy_from_json(client, policy)
+    policy_object = custom_help.get_policy_from_json(client, policy)
     policy_object.properties.backup_management_type = container_type
     policy_object.properties.workload_type = workload_type
 
     return client.create_or_update(vault_name, resource_group_name, policy_name, policy_object)
+
 
 def _get_containers(client, backup_management_type, status, resource_group_name, vault_name, container_name=None):
     filter_dict = {

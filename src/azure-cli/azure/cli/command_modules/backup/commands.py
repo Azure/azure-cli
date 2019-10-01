@@ -7,8 +7,8 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.backup._client_factory import vaults_cf, backup_protection_containers_cf, \
     protection_policies_cf, backup_policies_cf, protected_items_cf, backups_cf, backup_jobs_cf, \
     job_details_cf, job_cancellations_cf, recovery_points_cf, restores_cf, backup_storage_configs_cf, \
-    item_level_recovery_connections_cf, backup_protected_items_cf, backup_protectable_items_cf, \
-    protection_intent_cf, protection_containers_cf  # pylint: disable=unused-variable
+    item_level_recovery_connections_cf, backup_protected_items_cf, \
+    protection_containers_cf  # pylint: disable=unused-variable
 from azure.cli.command_modules.backup._format import (
     transform_container_list, transform_policy_list, transform_item_list, transform_job_list,
     transform_recovery_point_list)
@@ -56,7 +56,7 @@ def load_command_table(self, _):
         g.command('enable-for-vm', 'enable_protection_for_vm')
         g.command('backup-now', 'backup_now', client_factory=backups_cf)
         g.command('disable', 'disable_protection', confirmation=True)
-        g.command('enable-for-azurefileshare', 'enable_for_azurefile share')
+        g.command('enable-for-azurefileshare', 'enable_for_azurefileshare')
 
     with self.command_group('backup item', backup_custom_base, client_factory=protected_items_cf) as g:
         g.show_command('show', 'show_item', client_factory=backup_protected_items_cf)
