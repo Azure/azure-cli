@@ -43,4 +43,6 @@ def get_sku_name(tier):  # pylint: disable=too-many-return-statements
         return 'PremiumContainer'
     if tier in ['EP1', 'EP2', 'EP3']:
         return 'ElasticPremium'
+    if tier in ['I1', 'I2', 'I3']:
+        return 'Isolated'
     raise CLIError("Invalid sku(pricing tier), please refer to command help for valid values")
