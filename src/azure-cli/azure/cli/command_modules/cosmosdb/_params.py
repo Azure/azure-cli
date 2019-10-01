@@ -26,7 +26,7 @@ SQL_GREMLIN_INDEXING_POLICY_EXAMPLE = """--idx "{\\"indexingMode\\": \\"consiste
 SQL_UNIQUE_KEY_POLICY_EXAMPLE = """--unique "{\\"uniqueKeys\\": [{\\"paths\\": [\\"/path/to/key1\\"]}, {\\"paths\\": [\\"/path/to/key2\\"]}]}"
 """
 
-SQL_GREMLIN_CONFLICT_RESOLUTION_POLICY_EXAMPLE = """--conflict "{\\"mode\\": \\"lastWriterWins | custom\\", \\"conflictResolutionPath\\": \\"/path\\", \\"conflictResolutionProcedure\\": \\"procedureName\\"}"
+SQL_GREMLIN_CONFLICT_RESOLUTION_POLICY_EXAMPLE = """--conflict "{\\"mode\\": \\"lastWriterWins\\", \\"conflictResolutionPath\\": \\"/path\\"}"
 """
 
 MONGODB_INDEXES_EXAMPLE = """--idx "[{\\"key\\": {\\"keys\\": [\\"_ts\\"]},\\"options\\": {\\"expireAfterSeconds\\": 1000}}, {\\"key\\": {\\"keys\\": [\\"user_id\\", \\"user_address\\"]}, \\"options\\": {\\"unique\\": \\"true\\"}}]"

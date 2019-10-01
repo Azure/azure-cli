@@ -344,9 +344,7 @@ def cli_cosmosdb_sql_container_update(client,
                                       database_name,
                                       container_name,
                                       default_ttl=None,
-                                      indexing_policy=None,
-                                      unique_key_policy=None,
-                                      conflict_resolution_policy=None):
+                                      indexing_policy=None):
     """Updates an Azure Cosmos DB SQL container """
     logger.debug('reading SQL container')
     sql_container = client.get_sql_container(resource_group_name, account_name, database_name, container_name)
@@ -362,8 +360,8 @@ def cli_cosmosdb_sql_container_update(client,
                                           None,
                                           default_ttl,
                                           indexing_policy,
-                                          unique_key_policy,
-                                          conflict_resolution_policy):
+                                          None,
+                                          None):
         logger.debug('replacing SQL container')
 
     return client.create_update_sql_container(resource_group_name,
@@ -456,8 +454,7 @@ def cli_cosmosdb_gremlin_graph_update(client,
                                       database_name,
                                       graph_name,
                                       default_ttl=None,
-                                      indexing_policy=None,
-                                      conflict_resolution_policy=None):
+                                      indexing_policy=None):
     """Updates an Azure Cosmos DB Gremlin graph """
     logger.debug('reading Gremlin graph')
     gremlin_graph = client.get_gremlin_graph(resource_group_name, account_name, database_name, graph_name)
@@ -473,7 +470,7 @@ def cli_cosmosdb_gremlin_graph_update(client,
                                           None,
                                           default_ttl,
                                           indexing_policy,
-                                          conflict_resolution_policy):
+                                          None):
         logger.debug('replacing Gremlin graph')
 
     return client.create_update_gremlin_graph(resource_group_name,

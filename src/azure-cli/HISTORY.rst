@@ -12,13 +12,15 @@ Release History
 * vm create: Add --enable-agent configuration.
 * vmss create: Add --computer-name-prefix parameter to support custom computer name prefix of virtual machines in the VMSS.
 
+**CosmosDB**
+
+* Add unique key policy and conflict resolution policy parameters for az cosmosdb sql container create command
+* Add conflict resolution policy parameter for az cosmosdb gremlin graph create command
+* Fix typo in help message
+
 **Network**
 
 * az network private-dns link vnet create/update: Fixes #9851. Support cross-tenant virtual network linking.
-
-**CosmosDB**
-* Add parameter for sql container create and update command
-* Typo fix in help message
 
 2.0.74
 ++++++
