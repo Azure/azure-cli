@@ -790,11 +790,11 @@ helps['sql mi ad-admin'] = """
     """
 helps['sql mi ad-admin create'] = """
     type: command
-    short-summary: Create a new managed instance Active Directory administrator.
+    short-summary: Creates a new managed instance Active Directory administrator.
     """
 helps['sql mi ad-admin update'] = """
     type: command
-    short-summary: Update an existing managed instance Active Directory administrator.
+    short-summary: Updates an existing managed instance Active Directory administrator.
     """
 helps['sql mi ad-admin list'] = """
     type: command
