@@ -60,7 +60,7 @@ def load_arguments(self, _):
 
     with self.argument_context('backup container unregister') as c:
         c.argument('backup_management_type', options_list=['--backup-management-type'], help='Backup Management Typr of the Container.')
-        c.argument('container_name', options_list=['--container-name', 'c'], help='Name of the container.')
+        c.argument('container_name', options_list=['--container-name', '-c'], help='Name of the container.')
 
 
     # Item
@@ -115,12 +115,12 @@ def load_arguments(self, _):
         c.argument('start_date', type=datetime_type, help='The start date of the range in UTC (d-m-Y).')
         c.argument('end_date', type=datetime_type, help='The end date of the range in UTC (d-m-Y).')
         c.argument('backup_management_type', options_list=['--backup-management-type'], help='Backup Management Typr of the Container.')
-        c.argument('container_name', options_list=['--container-name', 'c'], help='Name of the container.')
+        c.argument('container_name', options_list=['--container-name', '-c'], help='Name of the container.')
 
     with self.argument_context('backup recoverypoint show') as c:
         c.argument('name', rp_name_type, options_list=['--name', '-n'], help='Name of the recovery point. You can use the backup recovery point list command to get the name of a backed up item.')
         c.argument('backup_management_type', options_list=['--backup-management-type'], help='Backup Management Typr of the Container.')
-        c.argument('container_name', options_list=['--container-name', 'c'], help='Name of the container.')
+        c.argument('container_name', options_list=['--container-name', '-c'], help='Name of the container.')
 
     # Protection
     with self.argument_context('backup protection') as c:
