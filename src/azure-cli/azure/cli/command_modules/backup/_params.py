@@ -35,7 +35,6 @@ rp_name_type = CLIArgumentType(help='Name of the recovery point.', options_list=
 def load_arguments(self, _):
 
     with self.argument_context('backup') as c:
-        c.ignore('container_type', 'item_type')
         c.argument('force', action='store_true', help='Force completion of the requested action.')
 
     # Vault

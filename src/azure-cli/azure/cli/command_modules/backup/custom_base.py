@@ -39,9 +39,9 @@ def show_item(cmd, client, resource_group_name, vault_name, container_name, name
 
 
 def list_items(cmd, client, resource_group_name, vault_name, workload_type=None, container_name=None,
-               container_type=None):
+               backup_management_type=None):
     return common.list_items(cmd, client, resource_group_name, vault_name, workload_type,
-                             container_name, container_type)
+                             container_name, backup_management_type)
 
 
 def show_recovery_point(cmd, client, resource_group_name, vault_name, container_name, item_name, name,
@@ -106,10 +106,10 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item_name, 
     if item.properties.backup_management_type.lower() == "azureiaasvm":
         return custom.disable_protection(cmd, client, resource_group_name, vault_name, item, delete_backup_data,
                                          **kwargs)
-
+  
     if item.properties.backup_management_type.lower() == "azurestorage":
-        custom_afs.disable_protection(cmd, client, resource_group_name, vault_name, item, delete_backup_data,
-                                      **kwargs)
+        return custom_afs.disable_protection(cmd, client, resource_group_name, vault_name, item, delete_backup_data,
+                                             **kwargs)
     return None
 
 

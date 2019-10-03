@@ -12,13 +12,13 @@ import azure.cli.command_modules.backup.custom_common as common
 from azure.mgmt.recoveryservicesbackup.models import ProtectedItemResource, \
     RestoreRequestResource, BackupRequestResource, RestoreFileSpecs, \
     AzureFileShareBackupRequest, AzureFileshareProtectedItem, AzureFileShareRestoreRequest, \
-    TargetAFSRestoreInfo, ProtectionState  # pylint: disable=unused-import
+    TargetAFSRestoreInfo, ProtectionState, ProtectionContainerResource, AzureStorageContainer
 
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.command_modules.backup._client_factory import backup_workload_items_cf, vaults_cf, \
     protected_items_cf, protection_containers_cf, protectable_containers_cf, protection_policies_cf, \
     backup_protection_containers_cf, backup_protected_items_cf, backup_protectable_items_cf, \
-    resources_cf
+    resources_cf, protectable_containers_cf
 
 fabric_name = "Azure"
 backup_management_type = "AzureStorage"
@@ -27,11 +27,43 @@ workload_type = "AzureFileShare"
 
 def enable_for_AzureFileShare(cmd, client, resource_group_name, vault_name, afs_name,
                               storage_account_name, policy_name):
+    # refresh containers in the vault
+    protection_containers_client = protection_containers_cf(cmd.cli_ctx)
+    filter_string = Helper.get_filter_string({
+        'backupManagementType': "AzureStorage"})
+
+    refresh_result = sdk_no_wait(True, protection_containers_client.refresh,
+                                 vault_name, resource_group_name, fabric_name, filter=filter_string)
+    Helper.track_refresh_operation(cmd.cli_ctx, refresh_result, vault_name, resource_group_name)
+
+    # get registered storage accounts
+    storage_account = None
+    containers_client = backup_protection_containers_cf(cmd.cli_ctx)
+    registered_containers = common.list_containers(containers_client, resource_group_name, vault_name, "AzureStorage")
+    storage_account = _get_storage_account_from_list(registered_containers, storage_account_name)
+  
+    # get unregistered storage accounts
+    if storage_account is None:
+        unregistered_containers = list_protectable_containers(cmd.cli_ctx, resource_group_name, vault_name)
+        storage_account = _get_storage_account_from_list(unregistered_containers, storage_account_name)
+
+        if storage_account is None:
+            raise CLIError("Storage account not found or not supported.")
+
+        # register storage account 
+        protection_containers_client = protection_containers_cf(cmd.cli_ctx)
+        properties = AzureStorageContainer(backup_management_type="AzureStorage",
+                                           source_resource_id=storage_account.properties.container_id,
+                                           workload_type="AzureFileShare")
+        param = ProtectionContainerResource(properties=properties)
+        result = sdk_no_wait(True, protection_containers_client.register,
+                             vault_name, resource_group_name, fabric_name, storage_account.name, param)
+        Helper.track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name, storage_account.name)
 
     policy = common.show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name, policy_name)
 
     protectable_item = _get_protectable_item_for_afs(cmd.cli_ctx, vault_name, resource_group_name, afs_name,
-                                                     storage_account_name)
+                                                     storage_account)
 
     container_uri = Helper.get_protection_container_uri_from_id(protectable_item.id)
     item_uri = Helper.get_protectable_item_uri_from_id(protectable_item.id)
@@ -63,24 +95,20 @@ def _get_backup_request(retain_until):
     return trigger_backup_request
 
 
-def _get_protectable_item_for_afs(cli_ctx, vault_name, resource_group_name, afs_name, storage_account_name):
+def _get_protectable_item_for_afs(cli_ctx, vault_name, resource_group_name, afs_name, storage_account):
+    storage_account_name = storage_account.name
     protection_containers_client = protection_containers_cf(cli_ctx)
-    protectable_item = _try_get_protectable_item_for_afs(cli_ctx, vault_name, resource_group_name, 
+    protectable_item = _try_get_protectable_item_for_afs(cli_ctx, vault_name, resource_group_name,
                                                          afs_name, storage_account_name)
     filter_string = Helper.get_filter_string({
-        'backupManagementType': backup_management_type})
-    refresh_filter_string = Helper.get_filter_string({
-        'workloadType': workload_type})
+        'workloadType': "AzureFileShare"})
 
     if protectable_item is None:
-        refresh_result = sdk_no_wait(True, protection_containers_client.refresh,
-                                     vault_name, resource_group_name, fabric_name, filter=filter_string)
-        Helper.track_refresh_operation(cli_ctx, refresh_result, vault_name, resource_group_name)
         client = backup_protection_containers_cf(cli_ctx)
-        storage_account = common.show_container(None, client, storage_account_name, resource_group_name,
-                                                vault_name, "AzureStorage")
-        protection_containers_client.inquire(vault_name, resource_group_name, fabric_name,
-                                             storage_account.name, filter=refresh_filter_string)
+        result = sdk_no_wait(True, protection_containers_client.inquire, vault_name, resource_group_name, fabric_name,
+                             storage_account.name, filter=filter_string)
+
+        Helper.track_inquiry_operation(cli_ctx, result, vault_name, resource_group_name, storage_account.name)
 
     protectable_item = _try_get_protectable_item_for_afs(cli_ctx, vault_name, resource_group_name, afs_name,
                                                          storage_account_name)
@@ -265,3 +293,24 @@ def unregister_afs_container(cmd, client, vault_name, resource_group_name, conta
     result = sdk_no_wait(True, client.unregister,
                          vault_name, resource_group_name, fabric_name, container_name)
     return Helper.track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name, container_name)
+
+
+def list_protectable_containers(cli_ctx, resource_group_name, vault_name):
+    filter_string = Helper.get_filter_string({
+        'backupManagementType': "AzureStorage"})
+
+    client = protectable_containers_cf(cli_ctx)
+    paged_containers = client.list(vault_name, resource_group_name, fabric_name, filter_string)
+    return Helper.get_list_from_paged_response(paged_containers)
+
+def _get_storage_account_from_list(container_list, storage_account_name):
+    storage_account = None
+    for container in container_list:
+        if Helper.is_native_name(storage_account_name) and container.name == storage_account_name:
+            return container
+        friendly_name = container.properties.friendly_name
+        if not Helper.is_native_name(storage_account_name) and friendly_name == storage_account_name:
+            if storage_account != None:
+                raise CLIError("multiple storage accounts found. Please provide native names instead")
+            storage_account = container
+    return storage_account
