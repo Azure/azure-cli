@@ -2788,7 +2788,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
     site_config = None
     if not _create_new_app:  # App exists
         # Get the ASP & RG info, if the ASP & RG parameters are provided we use those else we need to find those
-        logger.warning("Webapp %s already exits. The command will deploy contents to the existing app", name)
+        logger.warning("Webapp %s already exists. The command will deploy contents to the existing app.", name)
         app_details = get_app_details(cmd, name)
         current_rg = app_details.resource_group
         if resource_group_name is not None and (resource_group_name.lower() != current_rg.lower()):
