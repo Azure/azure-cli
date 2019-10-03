@@ -114,11 +114,13 @@ def load_arguments(self, _):
         c.argument('end_date', type=datetime_type, help='The end date of the range in UTC (d-m-Y).')
         c.argument('backup_management_type', options_list=['--backup-management-type'], help='Backup Management Typr of the Container.')
         c.argument('container_name', options_list=['--container-name', '-c'], help='Name of the container.')
+        c.argument('workload_type', options_list=['--workload-type'], help='Workload Type of the Item.')
 
     with self.argument_context('backup recoverypoint show') as c:
         c.argument('name', rp_name_type, options_list=['--name', '-n'], help='Name of the recovery point. You can use the backup recovery point list command to get the name of a backed up item.')
         c.argument('backup_management_type', options_list=['--backup-management-type'], help='Backup Management Typr of the Container.')
         c.argument('container_name', options_list=['--container-name', '-c'], help='Name of the container.')
+        c.argument('workload_type', options_list=['--workload-type'], help='Workload Type of the Item.')
 
     # Protection
     with self.argument_context('backup protection') as c:
@@ -172,7 +174,7 @@ def load_arguments(self, _):
     with self.argument_context('backup restore restore-azurefiles') as c:
         c.argument('resolve_conflict', options_list=['--resolve-conflict'], help='Accepts OverWrite or Skip.')
         c.argument('restore_mode', options_list=['--restore-mode'], help='Accepts OriginalLocation or AlternateLocation.')
-        c.argument('target_file_share', options_list=['--target-file_share'], help='Name of the Target FileShare.')
+        c.argument('target_file_share', options_list=['--target-file-share'], help='Name of the Target FileShare.')
         c.argument('target_folder', options_list=['--target-folder'], help='Name of the Target folder.')
         c.argument('target_storage_account', options_list=['--target-storage-account'], help='Name of the Target storage account.')
         c.argument('source_file_type', options_list=['--source-file-type'], help='Accepts File or Directory.')
