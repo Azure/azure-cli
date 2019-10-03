@@ -37,6 +37,7 @@ os_linux = 'Linux'
 password_offset = 33
 password_length = 15
 # pylint: disable=unused-argument
+# pylint: disable=too-many-function-args
 
 
 def create_vault(client, vault_name, resource_group_name, location):
@@ -65,7 +66,7 @@ def _force_delete_vault(cmd, vault_name, resource_group_name):
             logger.warning("Deleting backup item '%s' in container '%s'",
                            item_name, container_name)
             disable_protection(cmd, item_client, resource_group_name, vault_name,
-                               container_name, item_name, True)
+                               item, True)
     # now delete the vault
     try:
         vault_client.delete(resource_group_name, vault_name)
