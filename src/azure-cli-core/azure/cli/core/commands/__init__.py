@@ -634,15 +634,14 @@ class AzCliCommandInvoker(CommandInvoker):
             elif cmd_copy.no_wait_param and getattr(expanded_arg, cmd_copy.no_wait_param, False):
                 result = None
 
+            transform_op = cmd_copy.command_kwargs.get('transform', None)
+            if transform_op:
+                result = transform_op(result)
+
             if _is_poller(result):
                 result = LongRunningOperation(cmd_copy.cli_ctx, 'Starting {}'.format(cmd_copy.name))(result)
             elif _is_paged(result):
                 result = list(result)
-
-            # Re-arrange transform_op to make it work for LRO result
-            transform_op = cmd_copy.command_kwargs.get('transform', None)
-            if transform_op:
-                result = transform_op(result)
 
             result = todict(result, AzCliCommandInvoker.remove_additional_prop_layer)
             event_data = {'result': result}
@@ -921,14 +920,20 @@ class DeploymentOutputLongRunningOperation(LongRunningOperation):
             result = super(DeploymentOutputLongRunningOperation, self).__call__(result)
             outputs = None
             try:
-                outputs = result.properties.outputs
+                if isinstance(result, str) and result:
+                    try:
+                        obj = json.loads(result)
+                        return obj
+                    except json.decoder.JSONDecodeError:
+                        logger.info("Fail to transform result \"%s\" to dictionary", result)
+                else:
+                    outputs = result.properties.outputs
             except AttributeError:  # super.__call__ might return a ClientRawResponse
                 pass
             return {key: val['value'] for key, val in outputs.items()} if outputs else {}
         if isinstance(result, ClientRawResponse):
             # --no-wait returns a ClientRawResponse
             return {}
-
         # --validate returns a 'normal' response
         return result
 

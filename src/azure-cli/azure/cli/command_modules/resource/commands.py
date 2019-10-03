@@ -56,20 +56,6 @@ def transform_deployments_list(result):
     return [transform_deployment(r) for r in sort_list]
 
 
-def transform_resource_invoke_action_output(result):
-    r = result
-    # Transform string into dict
-    if isinstance(r, str) and r:
-        try:
-            import json
-            obj = json.loads(r)
-            return obj
-        except json.decoder.JSONDecodeError:
-            logger.info("Fail to transform %s to dictionary", r)
-            return r
-    return r
-
-
 # pylint: disable=too-many-statements
 def load_command_table(self, _):
     from azure.cli.core.commands.arm import deployment_validate_table_format
@@ -187,7 +173,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_locks')
         g.custom_show_command('show', 'get_lock')
         g.custom_command('update', 'update_lock')
-
+    from azure.cli.core.commands import DeploymentOutputLongRunningOperation
     with self.command_group('resource', resource_custom, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
         g.custom_command('create', 'create_resource')
         g.custom_command('delete', 'delete_resource')
@@ -195,7 +181,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_resources', table_transformer=transform_resource_list)
         g.custom_command('tag', 'tag_resource')
         g.custom_command('move', 'move_resource')
-        g.custom_command('invoke-action', 'invoke_resource_action', transform=transform_resource_invoke_action_output)
+        g.custom_command('invoke-action', 'invoke_resource_action', transform=DeploymentOutputLongRunningOperation(self.cli_ctx))
         g.generic_update_command('update', getter_name='show_resource', setter_name='update_resource',
                                  client_factory=None)
         g.wait_command('wait', getter_name='show_resource')
