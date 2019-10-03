@@ -62,7 +62,6 @@ def load_arguments(self, _):
         c.argument('backup_management_type', options_list=['--backup-management-type'], help='Backup Management Typr of the Container.')
         c.argument('container_name', options_list=['--container-name', '-c'], help='Name of the container.')
 
-
     # Item
     with self.argument_context('backup item') as c:
         c.argument('vault_name', vault_name_type, id_part='name')
@@ -85,7 +84,6 @@ def load_arguments(self, _):
         c.argument('backup_management_type', options_list=['--backup-management-type'], help='Backup Management Typr of the Container.')
         c.argument('workload_type', options_list=['--workload-type'], help='Workload Type of the item.')
 
-
     # Policy
     with self.argument_context('backup policy') as c:
         c.argument('vault_name', vault_name_type, id_part='name')
@@ -96,7 +94,7 @@ def load_arguments(self, _):
 
     with self.argument_context('backup policy set') as c:
         c.argument('policy', type=file_type, help='JSON encoded policy definition. Use the show command with JSON output to obtain a policy object. Modify the values using a file editor and pass the object.', completer=FilesCompleter())
-        c.argument('name', options_list=['--name', 'n'], help='Name of the Policy.')
+        c.argument('name', options_list=['--name', '-n'], help='Name of the Policy.')
 
     with self.argument_context('backup policy list') as c:
         c.argument('vault_name', vault_name_type, id_part=None)
@@ -151,7 +149,6 @@ def load_arguments(self, _):
         c.argument('azure_file_share', options_list=['--azure-file-share'], help='Name of the Azure FileShare.')
         c.argument('storage_account', options_list=['--storage-account'], help='Name of the Storage Account of the FileShare.')
 
-
     # Restore
     # TODO: Need to use recovery_point.id once https://github.com/Azure/msrestazure-for-python/issues/80 is fixed.
     with self.argument_context('backup restore') as c:
@@ -180,7 +177,6 @@ def load_arguments(self, _):
         c.argument('target_storage_account', options_list=['--target-storage-account'], help='Name of the Target storage account.')
         c.argument('source_file_type', options_list=['--source-file-type'], help='Accepts File or Directory.')
         c.argument('source_file_path', options_list=['--source-file-path'], help='File path of the source file/directory.')
-
 
     # Job
     with self.argument_context('backup job') as c:
