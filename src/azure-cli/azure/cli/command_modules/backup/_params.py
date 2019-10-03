@@ -52,9 +52,16 @@ def load_arguments(self, _):
 
     with self.argument_context('backup container show') as c:
         c.argument('name', container_name_type, options_list=['--name', '-n'], help='Name of the container. You can use the backup container list command to get the name of a container.')
+        c.argument('backup_management_type', options_list=['--backup-management-type'], help='Backup Management Typr of the Container.')
 
     with self.argument_context('backup container list') as c:
         c.argument('vault_name', vault_name_type, id_part=None)
+        c.argument('backup_management_type', options_list=['--backup-management-type'], help='Backup Management Typr of the Container.')
+
+    with self.argument_context('backup container unregister') as c:
+        c.argument('backup_management_type', options_list=['--backup-management-type'], help='Backup Management Typr of the Container.')
+        c.argument('container_name', options_list=['--container-name', 'c'], help='Name of the container.')
+
 
     # Item
     with self.argument_context('backup item') as c:
@@ -63,14 +70,21 @@ def load_arguments(self, _):
 
     with self.argument_context('backup item show') as c:
         c.argument('name', item_name_type, options_list=['--name', '-n'], help='Name of the backed up item. You can use the backup item list command to get the name of a backed up item.')
+        c.argument('backup_management_type', options_list=['--backup-management-type'], help='Backup Management Type of the Container.')
+        c.argument('workload_type', options_list=['--workload-type'], help='Workload Type of the Container.')
 
     # TODO: Need to use item.id once https://github.com/Azure/msrestazure-for-python/issues/80 is fixed.
     with self.argument_context('backup item set-policy') as c:
         c.argument('item_name', item_name_type, options_list=['--name', '-n'], id_part='name', help='Name of the backed up item. You can use the backup item list command to get the name of a backed up item.')
         c.argument('policy_name', policy_name_type, help='Name of the Backup policy. You can use the backup policy list command to get the name of a backup policy.')
+        c.argument('backup_management_type', options_list=['--backup-management-type'], help='Backup Management Type of the Container.')
+        c.argument('workload_type', options_list=['--workload-type'], help='Workload Type of the Item.')
 
     with self.argument_context('backup item list') as c:
         c.argument('vault_name', vault_name_type, id_part=None)
+        c.argument('backup_management_type', options_list=['--backup-management-type'], help='Backup Management Typr of the Container.')
+        c.argument('workload_type', options_list=['--workload-type'], help='Workload Type of the item.')
+
 
     # Policy
     with self.argument_context('backup policy') as c:
@@ -82,9 +96,12 @@ def load_arguments(self, _):
 
     with self.argument_context('backup policy set') as c:
         c.argument('policy', type=file_type, help='JSON encoded policy definition. Use the show command with JSON output to obtain a policy object. Modify the values using a file editor and pass the object.', completer=FilesCompleter())
+        c.argument('name', options_list=['--name', 'n'], help='Name of the Policy.')
 
     with self.argument_context('backup policy list') as c:
         c.argument('vault_name', vault_name_type, id_part=None)
+        c.argument('backup_management_type', options_list=['--backup-management-type'], help='Backup Management Type of the Policy.')
+        c.argument('workload_type', options_list=['--workload-type'], help='Workload Type of the Policy.')
 
     # Recovery Point
     # TODO: Need to use item.id once https://github.com/Azure/msrestazure-for-python/issues/80 is fixed.
@@ -97,9 +114,13 @@ def load_arguments(self, _):
         c.argument('vault_name', vault_name_type, id_part=None)
         c.argument('start_date', type=datetime_type, help='The start date of the range in UTC (d-m-Y).')
         c.argument('end_date', type=datetime_type, help='The end date of the range in UTC (d-m-Y).')
+        c.argument('backup_management_type', options_list=['--backup-management-type'], help='Backup Management Typr of the Container.')
+        c.argument('container_name', options_list=['--container-name', 'c'], help='Name of the container.')
 
     with self.argument_context('backup recoverypoint show') as c:
         c.argument('name', rp_name_type, options_list=['--name', '-n'], help='Name of the recovery point. You can use the backup recovery point list command to get the name of a backed up item.')
+        c.argument('backup_management_type', options_list=['--backup-management-type'], help='Backup Management Typr of the Container.')
+        c.argument('container_name', options_list=['--container-name', 'c'], help='Name of the container.')
 
     # Protection
     with self.argument_context('backup protection') as c:
@@ -112,15 +133,24 @@ def load_arguments(self, _):
         with self.argument_context('backup protection ' + command) as c:
             c.argument('container_name', container_name_type)
             c.argument('item_name', item_name_type)
+            c.argument('backup_management_type', options_list=['--backup-management-type'], help='Backup Management Type of the Item.')
+            c.argument('workload_type', options_list=['--workload-type'], help='Workload Type of the Item.')
 
     with self.argument_context('backup protection backup-now') as c:
         c.argument('retain_until', type=datetime_type, help='The date until which this backed up copy will be available for retrieval, in UTC (d-m-Y).')
 
     with self.argument_context('backup protection disable') as c:
         c.argument('delete_backup_data', arg_type=get_three_state_flag(), help='Option to delete existing backed up data in the Recovery services vault.')
+        c.argument('backup_management_type', options_list=['--backup-management-type'], help='Backup Management Type of the Item.')
+        c.argument('workload_type', options_list=['--workload-type'], help='Workload Type of the Item.')
 
     with self.argument_context('backup protection check-vm') as c:
         c.argument('vm_id', help='ID of the virtual machine to be checked for protection.')
+
+    with self.argument_context('backup protection enable-for-azurefileshare') as c:
+        c.argument('azure_file_share', options_list=['--azure-file-share'], help='Name of the Azure FileShare.')
+        c.argument('storage_account', options_list=['--storage-account'], help='Name of the Storage Account of the FileShare.')
+
 
     # Restore
     # TODO: Need to use recovery_point.id once https://github.com/Azure/msrestazure-for-python/issues/80 is fixed.
@@ -134,6 +164,23 @@ def load_arguments(self, _):
         c.argument('storage_account', help='Name or ID of the staging storage account. The VM configuration will be restored to this storage account. See the help for --restore-to-staging-storage-account parameter for more info.')
         c.argument('restore_to_staging_storage_account', arg_type=get_three_state_flag(), help='Use this flag when you want disks to be restored to the staging storage account using the --storage-account parameter. When not specified, disks will be restored to their original storage accounts. Default: false.')
         c.argument('target_resource_group', options_list=['--target-resource-group', '-t'], help='Use this to specify the target resource group in which the restored disks will be saved')
+
+    with self.argument_context('backup restore restore-azurefileshare') as c:
+        c.argument('resolve_conflict', options_list=['--resolve-conflict'], help='Accepts OverWrite or Skip.')
+        c.argument('restore_mode', options_list=['--restore-mode'], help='Accepts OriginalLocation or AlternateLocation.')
+        c.argument('target_file_share', options_list=['--target-file-share'], help='Name of the Target FileShare.')
+        c.argument('target_folder', options_list=['--target-folder'], help='Name of the Target folder.')
+        c.argument('target_storage_account', options_list=['--target-storage-account'], help='Name of the Target storage account.')
+
+    with self.argument_context('backup restore restore-azurefiles') as c:
+        c.argument('resolve_conflict', options_list=['--resolve-conflict'], help='Accepts OverWrite or Skip.')
+        c.argument('restore_mode', options_list=['--restore-mode'], help='Accepts OriginalLocation or AlternateLocation.')
+        c.argument('target_file_share', options_list=['--target-file_share'], help='Name of the Target FileShare.')
+        c.argument('target_folder', options_list=['--target-folder'], help='Name of the Target folder.')
+        c.argument('target_storage_account', options_list=['--target-storage-account'], help='Name of the Target storage account.')
+        c.argument('source_file_type', options_list=['--source-file-type'], help='Accepts File or Directory.')
+        c.argument('source_file_path', options_list=['--source-file-path'], help='File path of the source file/directory.')
+
 
     # Job
     with self.argument_context('backup job') as c:

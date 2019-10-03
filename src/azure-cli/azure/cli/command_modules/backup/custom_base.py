@@ -106,7 +106,6 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item_name, 
     if item.properties.backup_management_type.lower() == "azureiaasvm":
         return custom.disable_protection(cmd, client, resource_group_name, vault_name, item, delete_backup_data,
                                          **kwargs)
-  
     if item.properties.backup_management_type.lower() == "azurestorage":
         return custom_afs.disable_protection(cmd, client, resource_group_name, vault_name, item, delete_backup_data,
                                              **kwargs)
