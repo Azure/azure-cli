@@ -393,11 +393,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('blob_type', arg_group='Additional Flags',
                    arg_type=get_enum_type(["BlockBlob", "PageBlob", "AppendBlob"]),
                    help='The type of blob at the destination.')
-        c.argument('s2s_preserve_access_tier', arg_group='Additional Flags', arg_type=get_three_state_flag(),
+        c.argument('preserve_s2s_access_tier', arg_group='Additional Flags', arg_type=get_three_state_flag(),
                    help='Preserve access tier during service to service copy. '
                    'Please refer to https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-storage-tiers '
                    'to ensure destination storage account support setting access tier. In the cases that setting '
-                   'access tier is not supported, please use --s2sPreserveAccessTier=false to bypass copying access '
+                   'access tier is not supported, please use `--s2sPreserveAccessTier false` to bypass copying access '
                    'tier. (Default true)')
 
     with self.argument_context('storage blob copy') as c:
