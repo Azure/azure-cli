@@ -41,11 +41,6 @@ from ._validators import MSI_LOCAL_ID
 
 logger = get_logger(__name__)
 
-deployment_command_notice = ('[**Upcoming breaking change**]: a new parameter "scope-type" will be introduced to commands in this group '
-                             'and will be mandatory. Scope type will be an enum with four values: ResourceGroup, Subscription, ManagementGroup, Tenant. '
-                             'Adding this parameter allows us to use one command for all Azure Resource Manager template deployments but still determine the '
-                             'intended level of scope.')
-
 
 def _build_resource_id(**kwargs):
     from msrestazure.tools import resource_id as resource_id_from_dict
@@ -405,11 +400,12 @@ def _deploy_arm_template_unmodified(cli_ctx, resource_group_name, template_file=
     return sdk_no_wait(no_wait, deployments_operation_group.create_or_update, resource_group_name, deployment_name, properties)
 
 
-def _deploy_arm_template_subscription_scope(cli_ctx,
-                                            template_file=None, template_uri=None,
-                                            deployment_name=None, deployment_location=None,
-                                            parameters=None, mode=None, validate_only=False,
-                                            no_wait=False):
+def _deploy_arm_template(cli_ctx,
+                         scope_type=None, resource_group_name=None, management_group_id=None,
+                         template_file=None, template_uri=None,
+                         deployment_name=None, deployment_location=None,
+                         parameters=None, mode=None, validate_only=False,
+                         no_wait=False):
     DeploymentProperties, TemplateLink = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
                                                  'DeploymentProperties', 'TemplateLink', mod='models')
     template = None
@@ -433,12 +429,54 @@ def _deploy_arm_template_subscription_scope(cli_ctx,
     properties = DeploymentProperties(template=template, template_link=template_link,
                                       parameters=parameters, mode=mode)
 
+    if scope_type == 'Subscription':
+        return _deploy_at_subscription_scope(cli_ctx, deployment_name, deployment_location, properties, validate_only, no_wait)
+    elif scope_type == 'ResourceGroup':
+        return _deploy_at_resource_group(cli_ctx, resource_group_name, deployment_name, properties, validate_only, no_wait)
+    elif scope_type == 'ManagementGroup':
+        return _deploy_at_management_group(cli_ctx, management_group_id, deployment_name, deployment_location, properties, validate_only, no_wait)
+    else:
+        return _deploy_at_tenant_scope(cli_ctx, deployment_name, deployment_location, properties, validate_only, no_wait)
+
+
+def _deploy_at_subscription_scope(cli_ctx, deployment_name=None, deployment_location=None, deployment_properties=None, validate_only=False, no_wait=False):
     smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+
     if validate_only:
         return sdk_no_wait(no_wait, smc.deployments.validate_at_subscription_scope,
-                           deployment_name, properties, deployment_location)
+                           deployment_name, deployment_properties, deployment_location)
     return sdk_no_wait(no_wait, smc.deployments.create_or_update_at_subscription_scope,
-                       deployment_name, properties, deployment_location)
+                       deployment_name, deployment_properties, deployment_location)
+
+
+def _deploy_at_resource_group(cli_ctx, resource_group_name=None, deployment_name=None, deployment_properties=None, validate_only=False, no_wait=False):
+    smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+
+    if validate_only:
+        return sdk_no_wait(no_wait, smc.deployments.validate, resource_group_name,
+                           deployment_name, deployment_properties)
+    return sdk_no_wait(no_wait, smc.deployments.create_or_update, resource_group_name,
+                       deployment_name, deployment_properties)
+
+
+def _deploy_at_management_group(cli_ctx, management_group_id=None, deployment_name=None, deployment_location=None, deployment_properties=None, validate_only=False, no_wait=False):
+    smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+
+    if validate_only:
+        return sdk_no_wait(no_wait, smc.deployments.validate_at_management_group_scope,
+                           management_group_id, deployment_name, deployment_properties, deployment_location)
+    return sdk_no_wait(no_wait, smc.deployments.create_or_update_at_management_group_scope,
+                       management_group_id, deployment_name, deployment_properties, deployment_location)
+
+
+def _deploy_at_tenant_scope(cli_ctx, deployment_name=None, deployment_location=None, deployment_properties=None, validate_only=False, no_wait=False):
+    smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+
+    if validate_only:
+        return sdk_no_wait(no_wait, smc.deployments.validate_at_tenant_scope,
+                           deployment_name, deployment_properties, deployment_location)
+    return sdk_no_wait(no_wait, smc.deployments.create_or_update_at_tenant_scope,
+                       deployment_name, deployment_properties, deployment_location)
 
 
 def _list_resources_odata_filter_builder(resource_group_name=None, resource_provider_namespace=None,
@@ -841,37 +879,100 @@ def list_applications(cmd, resource_group_name=None):
     return list(applications)
 
 
-def list_deployments_at_subscription_scope(cmd):
-    logger.warning(deployment_command_notice)
+def list_deployments(cmd, scope_type, resource_group_name=None, management_group_id=None):
+    if scope_type == 'Subscription':
+        return list_deployments_at_subscription_scope(cmd)
+    elif scope_type == 'ResourceGroup':
+        return list_deployments_at_resource_group(cmd, resource_group_name)
+    elif scope_type == 'ManagementGroup':
+        return list_deployments_at_management_group(cmd, management_group_id)
+    else:
+        return list_deployments_at_tenant_scope(cmd)
 
+
+def list_deployments_at_subscription_scope(cmd):
     rcf = _resource_client_factory(cmd.cli_ctx)
     return rcf.deployments.list_at_subscription_scope()
 
 
+def list_deployments_at_resource_group(cmd, resource_group_name):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    return rcf.deployments.list_by_resource_group(resource_group_name)
+
+
+def list_deployments_at_management_group(cmd, management_group_id):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    return rcf.deployments.list_at_management_group_scope(management_group_id)
+
+
+def list_deployments_at_tenant_scope(cmd):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    return rcf.deployments.list_at_tenant_scope()
+
+
+def get_deployment(cmd, scope_type, deployment_name, resource_group_name=None, management_group_id=None):
+    if scope_type == 'Subscription':
+        return get_deployment_at_subscription_scope(cmd, deployment_name)
+    elif scope_type == 'ResourceGroup':
+        return get_deployment_at_resource_group(cmd, resource_group_name, deployment_name)
+    elif scope_type == 'ManagementGroup':
+        return get_deployment_at_management_group(cmd, management_group_id, deployment_name)
+    else:
+        return get_deployment_at_tenant_scope(cmd, deployment_name)
+
 def get_deployment_at_subscription_scope(cmd, deployment_name):
-    logger.warning(deployment_command_notice)
-
     rcf = _resource_client_factory(cmd.cli_ctx)
     return rcf.deployments.get_at_subscription_scope(deployment_name)
 
 
-def wait_deployment_at_subscription_scope(cmd, deployment_name):
-    if wait_deployment_at_subscription_scope.first_run:
-        logger.warning(deployment_command_notice)
-        wait_deployment_at_subscription_scope.first_run = False
-
+def get_deployment_at_resource_group(cmd, resource_group_name, deployment_name):
     rcf = _resource_client_factory(cmd.cli_ctx)
-    return rcf.deployments.get_at_subscription_scope(deployment_name)
+    return rcf.deployments.get(resource_group_name, deployment_name)
 
 
-wait_deployment_at_subscription_scope.first_run = True
+def get_deployment_at_management_group(cmd, management_group_id, deployment_name):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    return rcf.deployments.get_at_management_group_scope(management_group_id, deployment_name)
+
+
+def get_deployment_at_tenant_scope(cmd, deployment_name):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    return rcf.deployments.get_at_tenant_scope(deployment_name)
+
+
+def wait_deployment(cmd, scope_type, deployment_name, resource_group_name=None, management_group_id=None):
+    return get_deployment(cmd, scope_type, deployment_name, resource_group_name, management_group_id)
+
+
+def delete_deployment(cmd, scope_type, deployment_name, resource_group_name=None, management_group_id=None):
+    if scope_type == 'Subscription':
+        return delete_deployment_at_subscription_scope(cmd, deployment_name)
+    elif scope_type == 'ResourceGroup':
+        return delete_deployment_at_resource_group(cmd, resource_group_name, deployment_name)
+    elif scope_type == 'ManagementGroup':
+        return delete_deployment_at_management_group(cmd, management_group_id, deployment_name)
+    else:
+        return delete_deployment_at_tenant_scope(cmd, deployment_name)
 
 
 def delete_deployment_at_subscription_scope(cmd, deployment_name):
-    logger.warning(deployment_command_notice)
-
     rcf = _resource_client_factory(cmd.cli_ctx)
     return rcf.deployments.delete_at_subscription_scope(deployment_name)
+
+
+def delete_deployment_at_resource_group(cmd, resource_group_name, deployment_name):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    return rcf.deployments.delete(resource_group_name, deployment_name)
+
+
+def delete_deployment_at_management_group(cmd, management_group_id, deployment_name):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    return rcf.deployments.delete_at_management_group_scope(management_group_id, deployment_name)
+
+
+def delete_deployment_at_tenant_scope(cmd, deployment_name):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    return rcf.deployments.delete_at_tenant_scope(deployment_name)
 
 
 def deploy_arm_template(cmd, resource_group_name,
@@ -885,13 +986,16 @@ def deploy_arm_template(cmd, resource_group_name,
                                      deployment_name, parameters, mode, rollback_on_error, no_wait=no_wait)
 
 
-def deploy_arm_template_at_subscription_scope(cmd, template_file=None, template_uri=None,
+def deploy_arm_template_at_scope(cmd,
+                                              scope_type=None, resource_group_name=None, management_group_id=None,
+                                              template_file=None, template_uri=None,
                                               deployment_name=None, deployment_location=None,
                                               parameters=None, no_wait=False):
-    logger.warning(deployment_command_notice)
-    return _deploy_arm_template_subscription_scope(cmd.cli_ctx, template_file, template_uri,
-                                                   deployment_name, deployment_location,
-                                                   parameters, 'Incremental', no_wait=no_wait)
+    return _deploy_arm_template(cmd.cli_ctx, 
+                                scope_type, resource_group_name, management_group_id,
+                                template_file, template_uri,
+                                deployment_name, deployment_location,
+                                parameters, 'Incremental', no_wait=no_wait)
 
 
 def validate_arm_template(cmd, resource_group_name, template_file=None, template_uri=None,
@@ -901,22 +1005,48 @@ def validate_arm_template(cmd, resource_group_name, template_file=None, template
                                      'deployment_dry_run', parameters, mode, rollback_on_error, validate_only=True)
 
 
-def validate_arm_template_at_subscription_scope(cmd, template_file=None, template_uri=None, deployment_location=None,
-                                                parameters=None):
-    logger.warning(deployment_command_notice)
-    return _deploy_arm_template_subscription_scope(cmd.cli_ctx, template_file, template_uri,
-                                                   'deployment_dry_run', deployment_location,
-                                                   parameters,
-                                                   'Incremental',
-                                                   validate_only=True)
+def validate_arm_template_at_scope(cmd, scope_type=None, resource_group_name=None, management_group_id=None,
+                                   template_file=None, template_uri=None, 
+                                   deployment_location=None, parameters=None):
+    return _deploy_arm_template(cmd.cli_ctx,
+                                scope_type, resource_group_name, management_group_id,
+                                template_file, template_uri,
+                                'deployment_dry_run', deployment_location,
+                                parameters, 'Incremental',
+                                validate_only=True)
 
 
-def export_subscription_deployment_template(cmd, deployment_name):
-    logger.warning(deployment_command_notice)
-
-    smc = _resource_client_factory(cmd.cli_ctx)
-    result = smc.deployments.export_template_at_subscription_scope(deployment_name)
+def export_deployment_template(cmd, scope_type, deployment_name, resource_group_name=None, management_group_id=None):
+    if scope_type == 'Subscription':
+        result = export_template_at_subscription_scope(cmd, deployment_name)
+    elif scope_type == 'ResourceGroup':
+        result = export_template_at_resource_group(cmd, resource_group_name, deployment_name)
+    elif scope_type == 'ManagementGroup':
+        result = export_template_at_management_group(cmd, management_group_id, deployment_name)
+    else:
+        result = export_template_at_tenant_scope(cmd, deployment_name)
+    
     print(json.dumps(result.template, indent=2))  # pylint: disable=no-member
+
+
+def export_template_at_subscription_scope(cmd, deployment_name):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    return rcf.deployments.export_template_at_subscription_scope(deployment_name)
+
+
+def export_template_at_resource_group(cmd, resource_group_name, deployment_name):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    return rcf.deployments.export_template(resource_group_name, deployment_name)
+
+
+def export_template_at_management_group(cmd, management_group_id, deployment_name):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    return rcf.deployments.export_template_at_management_group_scope(management_group_id, deployment_name)
+
+
+def export_template_at_tenant_scope(cmd, deployment_name):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    return rcf.deployments.export_template_at_tenant_scope(deployment_name)
 
 
 def export_deployment_as_template(cmd, resource_group_name, deployment_name):
@@ -1112,23 +1242,74 @@ def get_deployment_operations(client, resource_group_name, deployment_name, oper
     return result
 
 
-def list_deployment_operations_at_subscription_scope(cmd, deployment_name):
-    """list a deployment's operations."""
-    logger.warning(deployment_command_notice)
+def get_deployment_operations_at_scope(cmd, scope_type, deployment_name, operation_ids, resource_group_name=None, management_group_id=None):
+    """get a deployment's operation."""
 
+    if scope_type == 'Subscription':
+        get_function = lambda op_id: get_deployment_operation_at_subscription_scope(cmd, deployment_name, op_id)
+    elif scope_type == 'ResourceGroup':
+        get_function = lambda op_id: get_deployment_operation_at_resource_group(cmd, resource_group_name, deployment_name, op_id)
+    elif scope_type == 'ManagementGroup':
+        get_function = lambda op_id: get_deployment_operation_at_management_group(cmd, management_group_id, deployment_name, op_id)
+    else:
+        get_function = lambda op_id: get_deployment_operation_at_tenant_scope(cmd, deployment_name, op_id)
+
+    result = []
+    for op_id in operation_ids:
+        dep = get_function(op_id)
+        result.append(dep)
+    return result
+
+
+def list_deployment_operations_at_scope(cmd, scope_type, deployment_name, resource_group_name=None, management_group_id=None):
+    if scope_type == 'Subscription':
+        return list_deployment_operations_at_subscription_scope(cmd, deployment_name)
+    elif scope_type == 'ResourceGroup':
+        return list_deployment_operations_at_resource_group(cmd, resource_group_name, deployment_name)
+    elif scope_type == 'ManagementGroup':
+        return list_deployment_operations_at_management_group(cmd, management_group_id, deployment_name)
+    else:
+        return list_deployment_operations_at_tenant_scope(cmd, deployment_name)
+
+
+def list_deployment_operations_at_subscription_scope(cmd, deployment_name):
     rcf = _resource_client_factory(cmd.cli_ctx)
     return rcf.deployment_operations.list_at_subscription_scope(deployment_name)
 
 
-def get_deployment_operations_at_subscription_scope(client, deployment_name, operation_ids):
-    """get a deployment's operation."""
-    logger.warning(deployment_command_notice)
+def list_deployment_operations_at_resource_group(cmd, resource_group_name, deployment_name):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    return rcf.deployment_operations.list(resource_group_name, deployment_name)
 
-    result = []
-    for op_id in operation_ids:
-        dep = client.get_at_subscription_scope(deployment_name, op_id)
-        result.append(dep)
-    return result
+
+def list_deployment_operations_at_management_group(cmd, management_group_id, deployment_name):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    return rcf.deployment_operations.list_at_management_group_scope(management_group_id, deployment_name)
+
+
+def list_deployment_operations_at_tenant_scope(cmd, deployment_name):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    return rcf.deployment_operations.list_at_tenant_scope(deployment_name)
+
+
+def get_deployment_operation_at_subscription_scope(cmd, deployment_name, op_id):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    return rcf.deployment_operations.get_at_subscription_scope(deployment_name, op_id)
+
+
+def get_deployment_operation_at_resource_group(cmd, resource_group_name, deployment_name, op_id):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    return rcf.deployment_operations.get(resource_group_name, deployment_name, op_id)
+
+
+def get_deployment_operation_at_management_group(cmd, management_group_id, deployment_name, op_id):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    return rcf.deployment_operations.get_at_management_group_scope(management_group_id, deployment_name, op_id)
+
+
+def get_deployment_operation_at_tenant_scope(cmd, deployment_name, op_id):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    return rcf.deployment_operations.get_at_tenant_scope(deployment_name, op_id)
 
 
 def list_resources(cmd, resource_group_name=None,

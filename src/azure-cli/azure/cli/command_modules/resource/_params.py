@@ -25,7 +25,7 @@ def load_arguments(self, _):
         get_resource_types_completion_list, get_providers_completion_list)
     from azure.cli.command_modules.resource._validators import (
         validate_lock_parameters, validate_resource_lock, validate_group_lock, validate_subscription_lock, validate_metadata, RollbackAction,
-        validate_msi)
+        validate_msi, DeploymentScopeType)
 
     # BASIC PARAMETER CONFIGURATION
 
@@ -185,8 +185,11 @@ def load_arguments(self, _):
         c.argument('operation_ids', nargs='+', help='A list of operation ids to show')
 
     with self.argument_context('deployment') as c:
+        c.argument('scope_type', arg_type=get_enum_type(DeploymentScopeType), options_list=['--scope-type', '-s'], required=True, help="The deployment scope type.")
+        c.argument('resource_group_name', arg_type=resource_group_name_type, completer=get_resource_group_completion_list)
+        c.argument('management_group_id', options_list=['--management-group-id', '-m'], help='The management group id.')
         c.argument('deployment_name', options_list=['--name', '-n'], required=True, help='The deployment name.')
-        c.argument('deployment_location', arg_type=get_location_type(self.cli_ctx), required=True)
+        c.argument('deployment_location', arg_type=get_location_type(self.cli_ctx))
         c.argument('template_file', completer=FilesCompleter(), type=file_type, help="a template file path in the file system")
         c.argument('template_uri', help='a uri to a remote template file')
         c.argument('parameters', action='append', nargs='+', completer=FilesCompleter())

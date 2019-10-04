@@ -208,40 +208,54 @@ examples:
 
 helps['deployment'] = """
 type: group
-short-summary: Manage Azure Resource Manager deployments at subscription scope.
-long-summary: >
-    [**Upcoming breaking change**]: a new parameter "scope-type" will be introduced to commands in this group and will be mandatory.
-    Scope type will be an enum with four values: ResourceGroup, Subscription, ManagementGroup, Tenant.
-    Adding this parameter allows us to use one command for all Azure Resource Manager template deployments but still determine the intended level of scope.
+short-summary: Manage Azure Resource Manager template deployment at subscription, resource group, management group, or tenant scope.
 """
 
 helps['deployment list'] = """
 type: command
-short-summary: List deployments at subscription scope.
+short-summary: List deployments at the given scope.
 examples:
   - name: List deployments at subscription scope.
-    text: az deployment list
+    text: az deployment list --scope-type Subscription
+  - name: List deployments at resource group scope.
+    text: az deployment list --scope-type ResourceGroup --resource-group testrg
+  - name: List deployments at management group scope.
+    text: az deployment list --scope-type ManagementGroup --management-group-id testmg
+  - name: List deployments at tenant scope.
+    text: az deployment list --scope-type Tenant
 """
 
 helps['deployment show'] = """
 type: command
-short-summary: Show a deployment at subscription scope.
+short-summary: Show a deployment at the given scope.
 examples:
   - name: Show a deployment at subscription scope.
-    text: az deployment show -n deployment01
+    text: az deployment show --scope-type Subscription -n deployment01
+  - name: Show a deployment at resource group scope.
+    text: az deployment show --scope-type ResourceGroup --resource-group testrg -n deployment01
+  - name: Show a deployment at management group scope.
+    text: az deployment show --scope-type ManagementGroup --management-group-id testmg -n deployment01
+  - name: Show a deployment at tenant scope.
+    text: az deployment show --scope-type Tenant -n deployment01
 """
 
 helps['deployment delete'] = """
 type: command
-short-summary: Delete a deployment at subscription scope.
+short-summary: Delete a deployment at the given scope.
 examples:
   - name: Delete a deployment at subscription scope.
-    text: az deployment delete -n deployment01
+    text: az deployment delete --scope-type Subscription -n deployment01
+  - name: Delete a deployment at resource group scope.
+    text: az deployment delete --scope-type ResourceGroup --resource-group testrg -n deployment01
+  - name: Delete a deployment at management group scope.
+    text: az deployment delete --scope-type ManagementGroup --management-group-id testmg -n deployment01
+  - name: Delete a deployment at tenant scope.
+    text: az deployment delete --scope-type Tenant -n deployment01
 """
 
 helps['deployment create'] = """
 type: command
-short-summary: Start a deployment.
+short-summary: Start a deployment at the given scope.
 parameters:
   - name: --parameters
     short-summary: Supply deployment parameter values.
@@ -249,29 +263,43 @@ parameters:
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
 examples:
-  - name: Create a deployment from a remote template file, using parameters from a local JSON file.
+  - name: Create a deployment at subscription scope from a remote template file, using parameters from a local JSON file.
     text: >
-        az deployment create --location WestUS --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
-  - name: Create a deployment from a local template file, using parameters from a JSON string.
+        az deployment create --scope-type Subscription --location WestUS --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
+  - name: Create a deployment at subscription scope from a local template file, using parameters from a JSON string.
     text: |
-        az deployment create --location WestUS --template-file azuredeploy.json --parameters '{
+        az deployment create --scope-type Subscription --location WestUS --template-file azuredeploy.json --parameters '{
                 "policyName": {
                     "value": "policy2"
                 }
             }'
-  - name: Create a deployment from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
+  - name: Create a deployment at subscription scope from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
     text: >
-        az deployment create --location WestUS --template-file azuredeploy.json  \\
+        az deployment create --scope-type Subscription --location WestUS --template-file azuredeploy.json  \\
             --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json
+  - name: Create a deployment at resource group scope.
+    text: >
+        az deployment create --scope-type ResourceGroup --resource-group testrg --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
+  - name: Create a deployment at management group scope.
+    text: >
+        az deployment create --scope-type ManagementGroup --management-group-id testmg --location WestUS --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
+  - name: Create a deployment at tenant scope.
+    text: >
+        az deployment create --scope-type Tenant --location WestUS --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
 """
 
 helps['deployment export'] = """
 type: command
 short-summary: Export the template used for a deployment.
 examples:
-  - name: Export the template used for a deployment. (autogenerated)
-    text: az deployment export --name MyDeployment
-    crafted: true
+  - name: Export the template used for a deployment at subscription scope.
+    text: az deployment export --scope-type Subscription --name MyDeployment
+  - name: Export the template used for a deployment at resource group scope.
+    text: az deployment export --scope-type ResourceGroup --resource-group testrg --name MyDeployment
+  - name: Export the template used for a deployment at management group scope.
+    text: az deployment export --scope-type ManagementGroup --management-group-id testmg --name MyDeployment
+  - name: Export the template used for a deployment at tenant scope.
+    text: az deployment export --scope-type Tenant --name MyDeployment
 """
 
 helps['deployment operation'] = """
@@ -281,7 +309,7 @@ short-summary: Manage deployment operations.
 
 helps['deployment validate'] = """
 type: command
-short-summary: Validate whether a template is syntactically correct.
+short-summary: Validate whether a template is valid at the given scope.
 parameters:
   - name: --parameters
     short-summary: Supply deployment parameter values.
@@ -289,9 +317,14 @@ parameters:
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
 examples:
-  - name: Validate whether a template is syntactically correct. (autogenerated)
-    text: az deployment validate --location westus2 --template-file {template-file}
-    crafted: true
+  - name: Validate whether a template is valid at subscription scope.
+    text: az deployment validate --scope-type Subscription --location westus2 --template-file {template-file}
+  - name: Validate whether a template is valid at resource group scope.
+    text: az deployment validate --scope-type ResourceGroup --resource-group testrg --template-file {template-file}
+  - name: Validate whether a template is valid at management group scope.
+    text: az deployment validate --scope-type ManagementGroup --management-group-id testmg --location westus2 --template-file {template-file}
+  - name: Validate whether a template is valid at tenant scope.
+    text: az deployment validate --scope-type Tenant --location westus2 --template-file {template-file}
 """
 
 helps['deployment wait'] = """

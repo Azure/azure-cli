@@ -1,0 +1,759 @@
+interactions:
+- request:
+    body: '{"location": "WestUS", "properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0", "parameters": {"targetMG": {"type": "string", "defaultValue":
+      "cli_tenant_level_deployment"}, "nestedSubId": {"type": "string", "defaultValue":
+      "89ec4d1d-dcc7-4a3f-a701-0a5d074c8505"}, "nestedRG": {"type": "string", "defaultValue":
+      "cli_tenant_level_deployment"}, "roleDefinitionId": {"type": "string", "defaultValue":
+      "0cb07228-4614-4814-ac1a-c4e39793ce59"}}, "variables": {"managementGroupScope":
+      "[concat(''Microsoft.Management/managementGroups/'', parameters(''targetMG''))]",
+      "managementGroupFullyQualifiedId": "[concat(''/providers/'', variables(''managementGroupScope''))]"},
+      "resources": [{"type": "Microsoft.Authorization/roleDefinitions", "name": "[parameters(''roleDefinitionId'')]",
+      "apiVersion": "2018-07-01", "properties": {"roleName": "Tiano SDK Test Role",
+      "description": "something", "type": "CustomRole", "permissions": [{"actions":
+      ["Microsoft.Storage/*/read"], "notActions": []}], "assignableScopes": ["[variables(''managementGroupFullyQualifiedId'')]"]}},
+      {"type": "Microsoft.Resources/deployments", "name": "mg-nested", "apiVersion":
+      "2019-07-01", "location": "West US", "scope": "[variables(''managementGroupScope'')]",
+      "properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0", "parameters": {}, "variables": {}, "resources":
+      [{"type": "Microsoft.Authorization/policyDefinitions", "name": "policy2", "apiVersion":
+      "2016-12-01", "properties": {"policyType": "Custom", "parameters": {}, "policyRule":
+      {"if": {"field": "location", "equals": "northeurope"}, "then": {"effect": "deny"}}}}]},
+      "mode": "Incremental"}}, {"type": "Microsoft.Resources/deployments", "name":
+      "sub-nested", "apiVersion": "2019-07-01", "location": "East US", "subscriptionId":
+      "[parameters(''nestedSubId'')]", "properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0", "parameters": {}, "variables": {}, "resources":
+      [{"type": "Microsoft.Resources/resourceGroups", "name": "[parameters(''nestedRG'')]",
+      "apiVersion": "2019-07-01", "location": "East US 2", "properties": {}}]}, "mode":
+      "Incremental"}}]}, "parameters": {}, "mode": "Incremental"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment validate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2379'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --scope-type --location --template-file
+      User-Agent:
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2019-07-01
+  response:
+    body:
+      string: '{"name":"deployment_dry_run","type":"Microsoft.Resources/deployments","location":"westus","properties":{"parameters":{"targetMG":{"type":"String","value":"cli_tenant_level_deployment"},"nestedSubId":{"type":"String","value":"89ec4d1d-dcc7-4a3f-a701-0a5d074c8505"},"nestedRG":{"type":"String","value":"cli_tenant_level_deployment"},"roleDefinitionId":{"type":"String","value":"0cb07228-4614-4814-ac1a-c4e39793ce59"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2019-10-04T04:31:09.3685019Z","duration":"PT0S","correlationId":"f9f4f733-265a-4a17-b113-8754914c272f","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"roleDefinitions","locations":[null]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":["westus","eastus"]}]}],"dependencies":[],"validatedResources":[{"id":"/providers/Microsoft.Authorization/roleDefinitions/0cb07228-4614-4814-ac1a-c4e39793ce59"},{"id":"/providers/Microsoft.Management/managementGroups/cli_tenant_level_deployment/providers/Microsoft.Resources/deployments/mg-nested"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/sub-nested"},{"id":"/providers/Microsoft.Management/managementGroups/cli_tenant_level_deployment/providers/Microsoft.Authorization/policyDefinitions/policy2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_tenant_level_deployment"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1469'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 04 Oct 2019 04:31:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-tenant-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "WestUS", "properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0", "parameters": {"targetMG": {"type": "string", "defaultValue":
+      "cli_tenant_level_deployment"}, "nestedSubId": {"type": "string", "defaultValue":
+      "89ec4d1d-dcc7-4a3f-a701-0a5d074c8505"}, "nestedRG": {"type": "string", "defaultValue":
+      "cli_tenant_level_deployment"}, "roleDefinitionId": {"type": "string", "defaultValue":
+      "0cb07228-4614-4814-ac1a-c4e39793ce59"}}, "variables": {"managementGroupScope":
+      "[concat(''Microsoft.Management/managementGroups/'', parameters(''targetMG''))]",
+      "managementGroupFullyQualifiedId": "[concat(''/providers/'', variables(''managementGroupScope''))]"},
+      "resources": [{"type": "Microsoft.Authorization/roleDefinitions", "name": "[parameters(''roleDefinitionId'')]",
+      "apiVersion": "2018-07-01", "properties": {"roleName": "Tiano SDK Test Role",
+      "description": "something", "type": "CustomRole", "permissions": [{"actions":
+      ["Microsoft.Storage/*/read"], "notActions": []}], "assignableScopes": ["[variables(''managementGroupFullyQualifiedId'')]"]}},
+      {"type": "Microsoft.Resources/deployments", "name": "mg-nested", "apiVersion":
+      "2019-07-01", "location": "West US", "scope": "[variables(''managementGroupScope'')]",
+      "properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0", "parameters": {}, "variables": {}, "resources":
+      [{"type": "Microsoft.Authorization/policyDefinitions", "name": "policy2", "apiVersion":
+      "2016-12-01", "properties": {"policyType": "Custom", "parameters": {}, "policyRule":
+      {"if": {"field": "location", "equals": "northeurope"}, "then": {"effect": "deny"}}}}]},
+      "mode": "Incremental"}}, {"type": "Microsoft.Resources/deployments", "name":
+      "sub-nested", "apiVersion": "2019-07-01", "location": "East US", "subscriptionId":
+      "[parameters(''nestedSubId'')]", "properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0", "parameters": {}, "variables": {}, "resources":
+      [{"type": "Microsoft.Resources/resourceGroups", "name": "[parameters(''nestedRG'')]",
+      "apiVersion": "2019-07-01", "location": "East US 2", "properties": {}}]}, "mode":
+      "Incremental"}}]}, "parameters": {}, "mode": "Incremental"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2379'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --scope-type --location -n --template-file
+      User-Agent:
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2019-07-01
+  response:
+    body:
+      string: '{"name":"azure-cli-tenant-level-deployment000001","type":"Microsoft.Resources/deployments","location":"westus","properties":{"parameters":{"targetMG":{"type":"String","value":"cli_tenant_level_deployment"},"nestedSubId":{"type":"String","value":"89ec4d1d-dcc7-4a3f-a701-0a5d074c8505"},"nestedRG":{"type":"String","value":"cli_tenant_level_deployment"},"roleDefinitionId":{"type":"String","value":"0cb07228-4614-4814-ac1a-c4e39793ce59"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2019-10-04T04:31:10.5653367Z","duration":"PT0.1817839S","correlationId":"013079e6-5e39-4e0d-a572-d576a758f672","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"roleDefinitions","locations":[null]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":["westus","eastus"]}]}],"dependencies":[]}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/providers/Microsoft.Resources/deployments/azure-cli-tenant-level-deployment000001/operationStatuses/08586314434150962764?api-version=2019-07-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '896'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 04 Oct 2019 04:31:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-tenant-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --scope-type --location -n --template-file
+      User-Agent:
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586314434150962764?api-version=2019-07-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 04 Oct 2019 04:31:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --scope-type --location -n --template-file
+      User-Agent:
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586314434150962764?api-version=2019-07-01
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 04 Oct 2019 04:32:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --scope-type --location -n --template-file
+      User-Agent:
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2019-07-01
+  response:
+    body:
+      string: '{"name":"azure-cli-tenant-level-deployment000001","type":"Microsoft.Resources/deployments","location":"westus","properties":{"parameters":{"targetMG":{"type":"String","value":"cli_tenant_level_deployment"},"nestedSubId":{"type":"String","value":"89ec4d1d-dcc7-4a3f-a701-0a5d074c8505"},"nestedRG":{"type":"String","value":"cli_tenant_level_deployment"},"roleDefinitionId":{"type":"String","value":"0cb07228-4614-4814-ac1a-c4e39793ce59"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2019-10-04T04:31:52.2808875Z","duration":"PT41.8973347S","correlationId":"013079e6-5e39-4e0d-a572-d576a758f672","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"roleDefinitions","locations":[null]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":["westus","eastus"]}]}],"dependencies":[],"outputResources":[{"id":"/providers/Microsoft.Authorization/roleDefinitions/0cb07228-4614-4814-ac1a-c4e39793ce59"},{"id":"/providers/Microsoft.Management/managementGroups/cli_tenant_level_deployment/providers/Microsoft.Authorization/policyDefinitions/policy2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_tenant_level_deployment"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1265'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 04 Oct 2019 04:32:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --scope-type
+      User-Agent:
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Resources/deployments/?api-version=2019-07-01
+  response:
+    body:
+      string: '{"value":[{"name":"azure-cli-tenant-level-deployment000001","type":"Microsoft.Resources/deployments","location":"westus","properties":{"parameters":{"targetMG":{"type":"String","value":"cli_tenant_level_deployment"},"nestedSubId":{"type":"String","value":"89ec4d1d-dcc7-4a3f-a701-0a5d074c8505"},"nestedRG":{"type":"String","value":"cli_tenant_level_deployment"},"roleDefinitionId":{"type":"String","value":"0cb07228-4614-4814-ac1a-c4e39793ce59"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2019-10-04T04:31:52.2808875Z","duration":"PT41.8973347S","correlationId":"013079e6-5e39-4e0d-a572-d576a758f672","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"roleDefinitions","locations":[null]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":["westus","eastus"]}]}],"dependencies":[],"outputResources":[{"id":"/providers/Microsoft.Authorization/roleDefinitions/0cb07228-4614-4814-ac1a-c4e39793ce59"},{"id":"/providers/Microsoft.Management/managementGroups/cli_tenant_level_deployment/providers/Microsoft.Authorization/policyDefinitions/policy2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_tenant_level_deployment"}]}},{"name":"azure-cli-tenant-level-deploymentecnbsnqsjfkreugushdiiunsioa","type":"Microsoft.Resources/deployments","location":"westus","properties":{"parameters":{"targetMG":{"type":"String","value":"cli_tenant_level_deployment"},"nestedSubId":{"type":"String","value":"89ec4d1d-dcc7-4a3f-a701-0a5d074c8505"},"nestedRG":{"type":"String","value":"cli_tenant_level_deployment"},"roleDefinitionId":{"type":"String","value":"0cb07228-4614-4814-ac1a-c4e39793ce59"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2019-10-04T04:30:11.2346639Z","duration":"PT51.8670508S","correlationId":"fa36c8a8-6747-46dc-ac1f-0a11d22e397c","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"roleDefinitions","locations":[null]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":["westus","eastus"]}]}],"dependencies":[],"outputResources":[{"id":"/providers/Microsoft.Authorization/roleDefinitions/0cb07228-4614-4814-ac1a-c4e39793ce59"},{"id":"/providers/Microsoft.Management/managementGroups/cli_tenant_level_deployment/providers/Microsoft.Authorization/policyDefinitions/policy2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_tenant_level_deployment"}]}},{"name":"tenant_level_template","type":"Microsoft.Resources/deployments","location":"westus","properties":{"parameters":{"targetMG":{"type":"String","value":"tiano-mgtest01"},"nestedSubId":{"type":"String","value":"89ec4d1d-dcc7-4a3f-a701-0a5d074c8505"},"nestedRG":{"type":"String","value":"sdk-testrg"},"roleDefinitionId":{"type":"String","value":"0cb07228-4614-4814-ac1a-c4e39793ce59"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2019-10-03T21:15:49.890333Z","duration":"PT36.6627604S","correlationId":"379655fa-e4ba-404b-bc33-336ab943c29b","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"roleDefinitions","locations":[null]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":["westus","eastus"]}]}],"dependencies":[],"outputResources":[{"id":"/providers/Microsoft.Authorization/roleDefinitions/0cb07228-4614-4814-ac1a-c4e39793ce59"},{"id":"/providers/Microsoft.Management/managementGroups/tiano-mgtest01/providers/Microsoft.Authorization/policyDefinitions/policy2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sdk-testrg"}]}},{"name":"d01","type":"Microsoft.Resources/deployments","location":"westus","properties":{"parameters":{"targetMG":{"type":"String","value":"tiano-mgtest11"},"nestedSubId":{"type":"String","value":"89ec4d1d-dcc7-4a3f-a701-0a5d074c8505"},"nestedRG":{"type":"String","value":"sdk-testrg"},"roleDefinitionId":{"type":"String","value":"0cb07228-4614-4814-ac1a-c4e39793ce59"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2019-09-06T04:40:28.6219863Z","duration":"PT1.0565286S","correlationId":"91197bac-0d48-4ff1-98af-838af8d8b9e6","providers":[{"namespace":"Microsoft.Management","resourceTypes":[{"resourceType":"managementGroups","locations":[null]}]}],"dependencies":[],"outputResources":[{"id":"/providers/Microsoft.Management/managementGroups/tiano-mgtest11"}]}},{"name":"az-test01","type":"Microsoft.Resources/deployments","location":"westus","properties":{"templateHash":"12707336783073826175","parameters":{"managementGroupId":{"type":"String","value":"tiano-mgtest01"},"subscriptionId":{"type":"String","value":"89ec4d1d-dcc7-4a3f-a701-0a5d074c8505"},"roleDefinitionId":{"type":"String","value":"0cb07228-4614-4814-ac1a-c4e39793ce59"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2019-08-23T06:29:22.2672627Z","duration":"PT17.1415342S","correlationId":"8eba8935-1492-4680-95ce-81acc303f746","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"roleDefinitions","locations":[null]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":["westus","eastus"]}]}],"dependencies":[],"outputResources":[{"id":"/providers/Microsoft.Authorization/roleDefinitions/0cb07228-4614-4814-ac1a-c4e39793ce59"},{"id":"/providers/Microsoft.Management/managementGroups/tiano-mgtest01/providers/Microsoft.Authorization/policyDefinitions/policy2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sdk-testrg"}]}},{"name":"csharpsdktest9982","type":"Microsoft.Resources/deployments","location":"eastus2euap","properties":{"templateHash":"12707336783073826175","parameters":{"managementGroupId":{"type":"String","value":"tiano-mgtest01"},"subscriptionId":{"type":"String","value":"89ec4d1d-dcc7-4a3f-a701-0a5d074c8505"},"roleDefinitionId":{"type":"String","value":"0cb07228-4614-4814-ac1a-c4e39793ce59"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2019-08-06T22:05:33.616361Z","duration":"PT26.5660097S","correlationId":"5cc0e033-a68d-4646-a6de-b000bcd12808","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"roleDefinitions","locations":[null]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":["westus","eastus"]}]}],"dependencies":[],"outputResources":[{"id":"/providers/Microsoft.Authorization/roleDefinitions/0cb07228-4614-4814-ac1a-c4e39793ce59"},{"id":"/providers/Microsoft.Management/managementGroups/tiano-mgtest01/providers/Microsoft.Authorization/policyDefinitions/policy2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sdk-testrg"}]}},{"name":"csharpsdktest7794","type":"Microsoft.Resources/deployments","location":"eastus2euap","properties":{"templateHash":"18016019155392159897","parameters":{"roleDefinitionId":{"type":"String","value":"0cb07228-4614-4814-ac1a-c4e39793ce59"},"managementGroupId":{"type":"String","value":"tianomgtest03"},"storageAccountName":{"type":"String","value":"tianosatestgl"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2019-08-06T20:51:52.7818689Z","duration":"PT6.9584114S","correlationId":"1fafe039-fc93-44a1-be39-96e5a94e8dbc","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"roleDefinitions","locations":[null]}]}],"dependencies":[],"outputResources":[{"id":"/providers/Microsoft.Authorization/roleDefinitions/0cb07228-4614-4814-ac1a-c4e39793ce59"}]}},{"name":"csharpsdktest1286","type":"Microsoft.Resources/deployments","location":"eastus2euap","properties":{"templateHash":"3526366353915477301","parameters":{"roleDefinitionId":{"type":"String","value":"0cb07228-4614-4814-ac1a-c4e39793ce59"},"managementGroupId":{"type":"String","value":"tianomgtest03"},"storageAccountName":{"type":"String","value":"tianosatestgl"}},"mode":"Incremental","provisioningState":"Failed","timestamp":"2019-08-06T20:50:18.0709637Z","duration":"PT3.4669637S","correlationId":"aa8a1b12-360a-409f-9d22-29192c7ac560","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]},{"resourceType":"roleDefinitions","locations":[null]}]}],"dependencies":[],"error":{"code":"DeploymentFailed","message":"At
+        least one resource deployment operation failed. Please list deployment operations
+        for details. Please see https://aka.ms/arm-debug for usage details.","details":[{"code":"BadRequest","message":"{\r\n  \"error\":
+        {\r\n    \"code\": \"InvalidPolicyUri\",\r\n    \"message\": \"The policy
+        scope ''/'' should start with ''subscriptions'' or ''/providers/Microsoft.Management/managementGroups/''.\"\r\n  }\r\n}"}]}}},{"name":"csharpsdktest3789","type":"Microsoft.Resources/deployments","location":"eastus2euap","properties":{"templateHash":"4863281370113986671","parameters":{"roleDefinitionId":{"type":"String","value":"0cb07228-4614-4814-ac1a-c4e39793ce59"},"managementGroupId":{"type":"String","value":"tianomgtest03"},"storageAccountName":{"type":"String","value":"tianosatestgl"}},"mode":"Incremental","provisioningState":"Failed","timestamp":"2019-08-06T20:48:58.1399228Z","duration":"PT9.6506969S","correlationId":"76ed6e47-9fa9-4d1b-b093-8fcd15e8a6e5","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]},{"resourceType":"roleDefinitions","locations":[null]}]}],"dependencies":[],"error":{"code":"DeploymentFailed","message":"At
+        least one resource deployment operation failed. Please list deployment operations
+        for details. Please see https://aka.ms/arm-debug for usage details.","details":[{"code":"NotFound","message":"{\r\n  \"error\":
+        {\r\n    \"code\": \"InvalidResourceType\",\r\n    \"message\": \"The resource
+        type ''roleDefinitions'' could not be found in the namespace ''Microsoft.Authorization''
+        for api version ''20168-07-01''. The supported api-versions are ''2014-04-01-preview,2014-07-01-preview,2014-10-01-preview,2015-05-01-preview,2015-06-01,2015-07-01,2016-07-01,2017-05-01,2017-09-01,2018-01-01-preview,2018-07-01''.\"\r\n  }\r\n}"},{"code":"BadRequest","message":"{\r\n  \"error\":
+        {\r\n    \"code\": \"InvalidPolicyUri\",\r\n    \"message\": \"The policy
+        scope ''/'' should start with ''subscriptions'' or ''/providers/Microsoft.Management/managementGroups/''.\"\r\n  }\r\n}"}]}}},{"name":"csharpsdktest3447","type":"Microsoft.Resources/deployments","location":"eastus2euap","properties":{"templateHash":"8688724383976892767","parameters":{"roleDefinitionId":{"type":"String","value":"0cb07228-4614-4814-ac1a-c4e39793ce59"},"managementGroupId":{"type":"String","value":"tianomgtest03"},"storageAccountName":{"type":"String","value":"tianosatestgl"}},"mode":"Incremental","provisioningState":"Failed","timestamp":"2019-08-06T20:46:29.3174229Z","duration":"PT5.9535099S","correlationId":"4e2aaeaa-54c5-401a-905b-5d13b2bb9f65","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]},{"resourceType":"roleDefinitions","locations":[null]}]}],"dependencies":[],"error":{"code":"DeploymentFailed","message":"At
+        least one resource deployment operation failed. Please list deployment operations
+        for details. Please see https://aka.ms/arm-debug for usage details.","details":[{"code":"NotFound","message":"{\r\n  \"error\":
+        {\r\n    \"code\": \"InvalidResourceType\",\r\n    \"message\": \"The resource
+        type ''roleDefinitions'' could not be found in the namespace ''Microsoft.Authorization''
+        for api version ''2016-12-01''. The supported api-versions are ''2014-04-01-preview,2014-07-01-preview,2014-10-01-preview,2015-05-01-preview,2015-06-01,2015-07-01,2016-07-01,2017-05-01,2017-09-01,2018-01-01-preview,2018-07-01''.\"\r\n  }\r\n}"},{"code":"BadRequest","message":"{\r\n  \"error\":
+        {\r\n    \"code\": \"InvalidPolicyUri\",\r\n    \"message\": \"The policy
+        scope ''/'' should start with ''subscriptions'' or ''/providers/Microsoft.Management/managementGroups/''.\"\r\n  }\r\n}"}]}}},{"name":"csharpsdktest2128","type":"Microsoft.Resources/deployments","location":"eastus2euap","properties":{"templateHash":"2930845133678626434","parameters":{"roleDefinitionId":{"type":"String","value":"0cb07228-4614-4814-ac1a-c4e39793ce59"},"managementGroupId":{"type":"String","value":"tianomgtest03"},"storageAccountName":{"type":"String","value":"tianosatestgl"}},"mode":"Incremental","provisioningState":"Failed","timestamp":"2019-08-06T20:44:00.6582452Z","duration":"PT6.5233037S","correlationId":"dc11adcf-1c6c-4066-a185-4da5dc0bf43e","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]},{"resourceType":"roleDefinitions","locations":[null]}]}],"dependencies":[],"error":{"code":"DeploymentFailed","message":"At
+        least one resource deployment operation failed. Please list deployment operations
+        for details. Please see https://aka.ms/arm-debug for usage details.","details":[{"code":"BadRequest","message":"{\r\n  \"error\":
+        {\r\n    \"code\": \"InvalidPolicyUri\",\r\n    \"message\": \"The policy
+        scope ''/'' should start with ''subscriptions'' or ''/providers/Microsoft.Management/managementGroups/''.\"\r\n  }\r\n}"},{"code":"BadRequest","message":"{\r\n  \"error\":
+        {\r\n    \"code\": \"LinkedInvalidPropertyId\",\r\n    \"message\": \"Property
+        id ''/'' at path ''properties.assignableScopes[0]'' is invalid. Expect fully
+        qualified resource Id that start with ''/subscriptions/{subscriptionId}''
+        or ''/providers/{resourceProviderNamespace}/''.\"\r\n  }\r\n}"}]}}},{"name":"csharpsdktest4395","type":"Microsoft.Resources/deployments","location":"eastus2euap","properties":{"templateHash":"8041098979082177521","parameters":{"tenantId":{"type":"String","value":"dbe499da-a935-4b9f-b4e2-5377e76aaeef"},"managementGroupId":{"type":"String","value":"tianomgtest03"},"storageAccountName":{"type":"String","value":"tianosatestgl"}},"mode":"Incremental","provisioningState":"Failed","timestamp":"2019-08-06T20:36:17.5307142Z","duration":"PT6.8230047S","correlationId":"ff28cc33-6514-4fac-99fe-a33b10d63408","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]}]}],"dependencies":[],"error":{"code":"DeploymentFailed","message":"At
+        least one resource deployment operation failed. Please list deployment operations
+        for details. Please see https://aka.ms/arm-debug for usage details.","details":[{"code":"BadRequest","message":"{\r\n  \"error\":
+        {\r\n    \"code\": \"InvalidPolicyUri\",\r\n    \"message\": \"The policy
+        scope ''/'' should start with ''subscriptions'' or ''/providers/Microsoft.Management/managementGroups/''.\"\r\n  }\r\n}"}]}}},{"name":"csharpsdktest3474","type":"Microsoft.Resources/deployments","location":"eastus2euap","properties":{"templateHash":"16902665493283057724","parameters":{"tenantId":{"type":"String","value":"dbe499da-a935-4b9f-b4e2-5377e76aaeef"},"managementGroupId":{"type":"String","value":"tianomgtest03"},"storageAccountName":{"type":"String","value":"tianosatestgl"}},"mode":"Incremental","provisioningState":"Failed","timestamp":"2019-08-06T19:21:39.1598982Z","duration":"PT1.9165911S","correlationId":"06504610-e015-4a61-88d1-2801246c8d93","providers":[{"namespace":"Microsoft.Management","resourceTypes":[{"resourceType":"managementGroups","locations":[null]}]}],"dependencies":[],"error":{"code":"DeploymentFailed","message":"At
+        least one resource deployment operation failed. Please list deployment operations
+        for details. Please see https://aka.ms/arm-debug for usage details.","details":[{"code":"BadRequest","message":"{\r\n  \"error\":
+        {\r\n    \"code\": \"BadRequest\",\r\n    \"message\": \"Name of the group
+        doesn''t match the group id.\",\r\n    \"details\": null\r\n  }\r\n}"}]}}},{"name":"csharpsdktest1471","type":"Microsoft.Resources/deployments","location":"eastus2euap","properties":{"templateHash":"16902665493283057724","parameters":{"tenantId":{"type":"String","value":"dbe499da-a935-4b9f-b4e2-5377e76aaeef"},"managementGroupId":{"type":"String","value":"tiano-mgtest03"},"storageAccountName":{"type":"String","value":"tianosatestgl"}},"mode":"Incremental","provisioningState":"Failed","timestamp":"2019-08-06T19:20:39.6831835Z","duration":"PT1.3999497S","correlationId":"e4d6de10-0dd3-4561-83b3-8e8cfb24bf8a","providers":[{"namespace":"Microsoft.Management","resourceTypes":[{"resourceType":"managementGroups","locations":[null]}]}],"dependencies":[],"error":{"code":"DeploymentFailed","message":"At
+        least one resource deployment operation failed. Please list deployment operations
+        for details. Please see https://aka.ms/arm-debug for usage details.","details":[{"code":"BadRequest","message":"{\r\n  \"error\":
+        {\r\n    \"code\": \"BadRequest\",\r\n    \"message\": \"Name of the group
+        doesn''t match the group id.\",\r\n    \"details\": null\r\n  }\r\n}"}]}}},{"name":"csharpsdktest8328","type":"Microsoft.Resources/deployments","location":"eastus2euap","properties":{"templateHash":"3540415030231822582","parameters":{"tenantId":{"type":"String","value":"dbe499da-a935-4b9f-b4e2-5377e76aaeef"},"managementGroupId":{"type":"String","value":"tiano-mgtest02"},"storageAccountName":{"type":"String","value":"tianosatestgl"}},"mode":"Incremental","provisioningState":"Failed","timestamp":"2019-08-06T19:06:35.7874235Z","duration":"PT1.4780137S","correlationId":"cd2d33e7-6146-4036-b502-d36a576271ea","providers":[{"namespace":"Microsoft.Management","resourceTypes":[{"resourceType":"managementGroups","locations":[null]}]}],"dependencies":[],"error":{"code":"DeploymentFailed","message":"At
+        least one resource deployment operation failed. Please list deployment operations
+        for details. Please see https://aka.ms/arm-debug for usage details.","details":[{"code":"BadRequest","message":"{\r\n  \"error\":
+        {\r\n    \"code\": \"BadRequest\",\r\n    \"message\": \"Name of the group
+        doesn''t match the group id.\",\r\n    \"details\": null\r\n  }\r\n}"}]}}},{"name":"csharpsdktest6779","type":"Microsoft.Resources/deployments","location":"eastus2euap","properties":{"templateHash":"11111572368475017808","parameters":{"managementGroupId":{"type":"String","value":"tiano-mgtest02"},"storageAccountName":{"type":"String","value":"tianosatestgl"}},"mode":"Incremental","provisioningState":"Failed","timestamp":"2019-08-03T01:01:12.6565512Z","duration":"PT5.6011996S","correlationId":"bd4d26f2-9d69-41a3-99ae-ab4e48193d7b","providers":[{"namespace":"Microsoft.Management","resourceTypes":[{"resourceType":"managementGroups","locations":[null]}]}],"dependencies":[],"error":{"code":"DeploymentFailed","message":"At
+        least one resource deployment operation failed. Please list deployment operations
+        for details. Please see https://aka.ms/arm-debug for usage details.","details":[{"code":"BadRequest","message":"{\r\n  \"error\":
+        {\r\n    \"code\": \"BadRequest\",\r\n    \"message\": \"Name of the group
+        doesn''t match the group id.\",\r\n    \"details\": null\r\n  }\r\n}"}]}}},{"name":"csharpsdktest908","type":"Microsoft.Resources/deployments","location":"eastus2euap","properties":{"templateHash":"16069035683376853134","parameters":{"managementGroupId":{"type":"String","value":"tiano-mgtest02"},"storageAccountName":{"type":"String","value":"tianosatestgl"}},"mode":"Incremental","provisioningState":"Failed","timestamp":"2019-08-03T00:54:36.7413406Z","duration":"PT6.2524402S","correlationId":"54d8d31f-2e43-4434-94f2-87d82de6e1d0","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]}]},{"namespace":"Microsoft.Management","resourceTypes":[{"resourceType":"managementGroups","locations":[null]}]}],"dependencies":[],"error":{"code":"DeploymentFailed","message":"At
+        least one resource deployment operation failed. Please list deployment operations
+        for details. Please see https://aka.ms/arm-debug for usage details.","details":[{"code":"BadRequest","message":"{\r\n  \"error\":
+        {\r\n    \"code\": \"InvalidPolicyUri\",\r\n    \"message\": \"The policy
+        scope ''/'' should start with ''subscriptions'' or ''/providers/Microsoft.Management/managementGroups/''.\"\r\n  }\r\n}"},{"code":"BadRequest","message":"{\r\n  \"error\":
+        {\r\n    \"code\": \"BadRequest\",\r\n    \"message\": \"Name of the group
+        doesn''t match the group id.\",\r\n    \"details\": null\r\n  }\r\n}"}]}}},{"name":"csharpsdktest1118","type":"Microsoft.Resources/deployments","location":"eastus2euap","properties":{"templateHash":"16069035683376853134","parameters":{"managementGroupId":{"type":"String","value":"tiano-mgtest02"},"storageAccountName":{"type":"String","value":"tianosatestgl"}},"mode":"Incremental","provisioningState":"Failed","timestamp":"2019-08-03T00:46:30.3816316Z","duration":"PT7.4670812S","correlationId":"d233d3a2-4b5c-41c4-9130-fd71a34cc960","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]}]},{"namespace":"Microsoft.Management","resourceTypes":[{"resourceType":"managementGroups","locations":[null]}]}],"dependencies":[],"error":{"code":"DeploymentFailed","message":"At
+        least one resource deployment operation failed. Please list deployment operations
+        for details. Please see https://aka.ms/arm-debug for usage details.","details":[{"code":"BadRequest","message":"{\r\n  \"error\":
+        {\r\n    \"code\": \"BadRequest\",\r\n    \"message\": \"Name of the group
+        doesn''t match the group id.\",\r\n    \"details\": null\r\n  }\r\n}"},{"code":"Forbidden","message":"{\r\n  \"error\":
+        {\r\n    \"code\": \"AuthorizationFailed\",\r\n    \"message\": \"The client
+        ''01b8db7b-fc40-494b-8b19-20127488a03d'' with object id ''01b8db7b-fc40-494b-8b19-20127488a03d''
+        does not have authorization to perform action ''Microsoft.Authorization/policyDefinitions/write''
+        over scope ''/providers/Microsoft.Authorization/policyDefinitions/policy2''
+        or the scope is invalid. If access was recently granted, please refresh your
+        credentials.\"\r\n  }\r\n}"}]}}},{"name":"ps6830","type":"Microsoft.Resources/deployments","location":"eastus","properties":{"parameters":{"targetMG":{"type":"String","value":"ps3566"},"nestedSubId":{"type":"String","value":"89ec4d1d-dcc7-4a3f-a701-0a5d074c8505"},"nestedRG":{"type":"String","value":"sdk-testrg"},"roleDefinitionId":{"type":"String","value":"0cb07228-4614-4814-ac1a-c4e39793ce59"}},"mode":"Incremental","provisioningState":"Failed","timestamp":"2019-09-06T01:42:47.2445451Z","duration":"PT21.3948065S","correlationId":"7af5430a-f5c0-4823-bbe0-57bb83393ac2","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"roleDefinitions","locations":[null]}]},{"namespace":"Microsoft.Management","resourceTypes":[{"resourceType":"managementGroups","locations":[null]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":["westus","eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/providers/Microsoft.Management/managementGroups/ps3566","resourceType":"Microsoft.Management/managementGroups","resourceName":"ps3566"}],"id":"/providers/Microsoft.Authorization/roleDefinitions/0cb07228-4614-4814-ac1a-c4e39793ce59","resourceType":"Microsoft.Authorization/roleDefinitions","resourceName":"0cb07228-4614-4814-ac1a-c4e39793ce59"},{"dependsOn":[{"id":"/providers/Microsoft.Management/managementGroups/ps3566","resourceType":"Microsoft.Management/managementGroups","resourceName":"ps3566"}],"id":"/providers/Microsoft.Management/managementGroups/ps3566/providers/Microsoft.Resources/deployments/mg-nested","resourceType":"Microsoft.Resources/deployments","resourceName":"mg-nested"}],"error":{"code":"DeploymentFailed","message":"At
+        least one resource deployment operation failed. Please list deployment operations
+        for details. Please see https://aka.ms/arm-debug for usage details.","details":[{"code":"InternalServerError","message":"{\r\n  \"error\":
+        {\r\n    \"code\": \"ResourceDeploymentFailure\",\r\n    \"message\": \"The
+        response for resource had empty or invalid content.\"\r\n  }\r\n}"},{"code":"BadRequest","message":"{\r\n  \"error\":
+        {\r\n    \"code\": \"InvalidTemplate\",\r\n    \"message\": \"Unable to process
+        template language expressions for resource ''/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/sub-nested''
+        at line ''99'' and column ''9''. ''The template parameter ''targetRG'' is
+        not found. Please see https://aka.ms/arm-template/#parameters for usage details.''\",\r\n    \"additionalInfo\":
+        [\r\n      {\r\n        \"type\": \"TemplateViolation\",\r\n        \"info\":
+        {\r\n          \"lineNumber\": 99,\r\n          \"positionNumber\": 9,\r\n          \"snippet\":
+        \"\"\r\n        }\r\n      }\r\n    ]\r\n  }\r\n}"}]}}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '24795'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 04 Oct 2019 04:32:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --scope-type -n
+      User-Agent:
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2019-07-01
+  response:
+    body:
+      string: '{"name":"azure-cli-tenant-level-deployment000001","type":"Microsoft.Resources/deployments","location":"westus","properties":{"parameters":{"targetMG":{"type":"String","value":"cli_tenant_level_deployment"},"nestedSubId":{"type":"String","value":"89ec4d1d-dcc7-4a3f-a701-0a5d074c8505"},"nestedRG":{"type":"String","value":"cli_tenant_level_deployment"},"roleDefinitionId":{"type":"String","value":"0cb07228-4614-4814-ac1a-c4e39793ce59"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2019-10-04T04:31:52.2808875Z","duration":"PT41.8973347S","correlationId":"013079e6-5e39-4e0d-a572-d576a758f672","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"roleDefinitions","locations":[null]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":["westus","eastus"]}]}],"dependencies":[],"outputResources":[{"id":"/providers/Microsoft.Authorization/roleDefinitions/0cb07228-4614-4814-ac1a-c4e39793ce59"},{"id":"/providers/Microsoft.Management/managementGroups/cli_tenant_level_deployment/providers/Microsoft.Authorization/policyDefinitions/policy2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_tenant_level_deployment"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1265'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 04 Oct 2019 04:32:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment export
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --scope-type -n
+      User-Agent:
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/providers/Microsoft.Resources/deployments/mock-deployment/exportTemplate?api-version=2019-07-01
+  response:
+    body:
+      string: '{"template":{"$schema":"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#","contentVersion":"1.0.0.0","parameters":{"targetMG":{"defaultValue":"cli_tenant_level_deployment","type":"String"},"nestedSubId":{"defaultValue":"89ec4d1d-dcc7-4a3f-a701-0a5d074c8505","type":"String"},"nestedRG":{"defaultValue":"cli_tenant_level_deployment","type":"String"},"roleDefinitionId":{"defaultValue":"0cb07228-4614-4814-ac1a-c4e39793ce59","type":"String"}},"variables":{"managementGroupScope":"[concat(''Microsoft.Management/managementGroups/'',
+        parameters(''targetMG''))]","managementGroupFullyQualifiedId":"[concat(''/providers/'',
+        variables(''managementGroupScope''))]"},"resources":[{"type":"Microsoft.Authorization/roleDefinitions","apiVersion":"2018-07-01","name":"[parameters(''roleDefinitionId'')]","properties":{"roleName":"Tiano
+        SDK Test Role","description":"something","type":"CustomRole","permissions":[{"actions":["Microsoft.Storage/*/read"],"notActions":[]}],"assignableScopes":["[variables(''managementGroupFullyQualifiedId'')]"]}},{"type":"Microsoft.Resources/deployments","apiVersion":"2019-07-01","name":"mg-nested","location":"West
+        US","properties":{"template":{"$schema":"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#","contentVersion":"1.0.0.0","parameters":{},"variables":{},"resources":[{"type":"Microsoft.Authorization/policyDefinitions","name":"policy2","apiVersion":"2016-12-01","properties":{"policyType":"Custom","parameters":{},"policyRule":{"if":{"field":"location","equals":"northeurope"},"then":{"effect":"deny"}}}}]},"mode":"Incremental"},"scope":"[variables(''managementGroupScope'')]"},{"type":"Microsoft.Resources/deployments","apiVersion":"2019-07-01","name":"sub-nested","location":"East
+        US","properties":{"template":{"$schema":"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#","contentVersion":"1.0.0.0","parameters":{},"variables":{},"resources":[{"type":"Microsoft.Resources/resourceGroups","name":"[parameters(''nestedRG'')]","apiVersion":"2019-07-01","location":"East
+        US 2","properties":{}}]},"mode":"Incremental"},"subscriptionId":"[parameters(''nestedSubId'')]"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2173'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 04 Oct 2019 04:32:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-tenant-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment operation list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --scope-type -n
+      User-Agent:
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Resources/deployments/mock-deployment/operations?api-version=2019-07-01
+  response:
+    body:
+      string: '{"value":[{"id":"/providers/Microsoft.Resources/deployments/azure-cli-tenant-level-deployment000001/operations/19A62B7769099801","operationId":"19A62B7769099801","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2019-10-04T04:31:42.3664563Z","duration":"PT17.9198968S","trackingId":"a4f0007a-346f-4085-99a3-85cff04d516d","serviceRequestId":"86f84735-f397-4422-a434-39d8eb1f33a2","statusCode":"OK","targetResource":{"id":"/providers/Microsoft.Management/managementGroups/cli_tenant_level_deployment/providers/Microsoft.Resources/deployments/mg-nested","resourceType":"Microsoft.Resources/deployments","resourceName":"mg-nested"}}},{"id":"/providers/Microsoft.Resources/deployments/azure-cli-tenant-level-deployment000001/operations/1861FE2FF8A6CC60","operationId":"1861FE2FF8A6CC60","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2019-10-04T04:31:28.5870629Z","duration":"PT4.1405034S","trackingId":"f21372cd-93e4-4bd0-bbfd-d680d413541b","serviceRequestId":"b3c85882-ea56-4eca-9686-a126b7fe9485","statusCode":"Created","targetResource":{"id":"/providers/Microsoft.Authorization/roleDefinitions/0cb07228-4614-4814-ac1a-c4e39793ce59","resourceType":"Microsoft.Authorization/roleDefinitions","resourceName":"0cb07228-4614-4814-ac1a-c4e39793ce59"}}},{"id":"/providers/Microsoft.Resources/deployments/azure-cli-tenant-level-deployment000001/operations/591DE40DACECA9F1","operationId":"591DE40DACECA9F1","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2019-10-04T04:31:50.6398557Z","duration":"PT26.1932962S","trackingId":"9bd670fe-2ee4-4a60-81ac-180ac295ad60","serviceRequestId":"ee623bd1-d231-402e-81c9-441b39ab3650","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/sub-nested","resourceType":"Microsoft.Resources/deployments","resourceName":"sub-nested"}}},{"id":"/providers/Microsoft.Resources/deployments/azure-cli-tenant-level-deployment000001/operations/08586314434150962764","operationId":"08586314434150962764","properties":{"provisioningOperation":"EvaluateDeploymentOutput","provisioningState":"Succeeded","timestamp":"2019-10-04T04:31:52.0679517Z","duration":"PT0.8176821S","trackingId":"62f3b420-2e96-4f06-91f2-d85bb8a0fbbe","statusCode":"OK","statusMessage":null}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2475'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 04 Oct 2019 04:32:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n --yes
+      User-Agent:
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_tenant_level_deployment?api-version=2019-07-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 04 Oct 2019 04:32:17 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURU5BTlQ6NUZMRVZFTDo1RkRFUExPWU1FTlQtRUFTVFVTMiIsImpvYkxvY2F0aW9uIjoiZWFzdHVzMiJ9?api-version=2019-07-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --yes
+      User-Agent:
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURU5BTlQ6NUZMRVZFTDo1RkRFUExPWU1FTlQtRUFTVFVTMiIsImpvYkxvY2F0aW9uIjoiZWFzdHVzMiJ9?api-version=2019-07-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 04 Oct 2019 04:32:33 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURU5BTlQ6NUZMRVZFTDo1RkRFUExPWU1FTlQtRUFTVFVTMiIsImpvYkxvY2F0aW9uIjoiZWFzdHVzMiJ9?api-version=2019-07-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --yes
+      User-Agent:
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURU5BTlQ6NUZMRVZFTDo1RkRFUExPWU1FTlQtRUFTVFVTMiIsImpvYkxvY2F0aW9uIjoiZWFzdHVzMiJ9?api-version=2019-07-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 04 Oct 2019 04:32:48 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURU5BTlQ6NUZMRVZFTDo1RkRFUExPWU1FTlQtRUFTVFVTMiIsImpvYkxvY2F0aW9uIjoiZWFzdHVzMiJ9?api-version=2019-07-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --yes
+      User-Agent:
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURU5BTlQ6NUZMRVZFTDo1RkRFUExPWU1FTlQtRUFTVFVTMiIsImpvYkxvY2F0aW9uIjoiZWFzdHVzMiJ9?api-version=2019-07-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 04 Oct 2019 04:33:03 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURU5BTlQ6NUZMRVZFTDo1RkRFUExPWU1FTlQtRUFTVFVTMiIsImpvYkxvY2F0aW9uIjoiZWFzdHVzMiJ9?api-version=2019-07-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --yes
+      User-Agent:
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURU5BTlQ6NUZMRVZFTDo1RkRFUExPWU1FTlQtRUFTVFVTMiIsImpvYkxvY2F0aW9uIjoiZWFzdHVzMiJ9?api-version=2019-07-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 04 Oct 2019 04:33:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

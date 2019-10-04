@@ -333,10 +333,12 @@ class ProviderOperationTest(ScenarioTest):
         ])
 
 
-class SubscriptionLevelDeploymentTest(LiveScenarioTest):
+class DeploymentTestAtSubscriptionScope(ScenarioTest):
     def tearDown(self):
         self.cmd('policy assignment delete -n location-lock')
         self.cmd('policy definition delete -n policy2')
+        self.cmd('group delete -n cli_test_subscription_level_deployment --yes')
+        
 
     def test_subscription_level_deployment(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
@@ -345,37 +347,154 @@ class SubscriptionLevelDeploymentTest(LiveScenarioTest):
             'params': os.path.join(curr_dir, 'subscription_level_parameters.json').replace('\\', '\\\\'),
             # params-uri below is the raw file url of the subscription_level_parameters.json above
             'params_uri': 'https://raw.githubusercontent.com/Azure/azure-cli/dev/src/azure-cli/azure/cli/command_modules/resource/tests/latest/subscription_level_parameters.json',
-            'dn': self.create_random_name('azure-cli-sub-level-desubscription_level_parametersployment', 60)
+            'dn': self.create_random_name('azure-cli-subscription_level_deployment', 60)
         })
 
         self.cmd('group create --name cli_test_subscription_level_deployment --location WestUS', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('deployment validate --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
+        self.cmd('deployment validate --scope-type Subscription --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('deployment validate --location WestUS --template-file {tf} --parameters @"{params_uri}"', checks=[
+        self.cmd('deployment validate --scope-type Subscription --location WestUS --template-file {tf} --parameters {params_uri}', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('deployment create -n {dn} --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
+        self.cmd('deployment create --scope-type Subscription -n {dn} --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
         ])
 
-        self.cmd('deployment list', checks=[
+        self.cmd('deployment list --scope-type Subscription', checks=[
             self.check('[0].name', '{dn}'),
         ])
 
-        self.cmd('deployment show -n {dn}', checks=[
+        self.cmd('deployment show --scope-type Subscription -n {dn}', checks=[
             self.check('name', '{dn}')
         ])
 
-        self.cmd('deployment export -n {dn}', checks=[
+        self.cmd('deployment export --scope-type Subscription -n {dn}', checks=[
         ])
 
-        self.cmd('deployment operation list -n {dn}', checks=[
+        self.cmd('deployment operation list --scope-type Subscription -n {dn}', checks=[
+            self.check('length([])', 5)
+        ])
+
+
+class DeploymentTestAtResourceGroup(ScenarioTest):
+    def tearDown(self):
+        self.cmd('group delete -n cli_test_resource_group_deployment --yes')
+
+    def test_resource_group_deployment(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'simple_deploy.json').replace('\\', '\\\\'),
+            'params': os.path.join(curr_dir, 'simple_deploy_parameters.json').replace('\\', '\\\\'),
+            'dn': self.create_random_name('azure-cli-resource-group-deployment', 60)
+        })
+
+        self.cmd('group create --name cli_test_resource_group_deployment --location WestUS', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment validate --scope-type ResourceGroup --resource-group cli_test_resource_group_deployment --template-file {tf} --parameters @"{params}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment create --scope-type ResourceGroup --resource-group cli_test_resource_group_deployment -n {dn} --template-file {tf} --parameters @"{params}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+        ])
+
+        self.cmd('deployment list --scope-type ResourceGroup --resource-group cli_test_resource_group_deployment', checks=[
+            self.check('[0].name', '{dn}'),
+        ])
+
+        self.cmd('deployment show --scope-type ResourceGroup --resource-group cli_test_resource_group_deployment -n {dn}', checks=[
+            self.check('name', '{dn}')
+        ])
+
+        self.cmd('deployment export --scope-type ResourceGroup --resource-group cli_test_resource_group_deployment -n {dn}', checks=[
+        ])
+
+        self.cmd('deployment operation list --scope-type ResourceGroup --resource-group cli_test_resource_group_deployment -n {dn}', checks=[
+            self.check('length([])', 2)
+        ])
+
+
+class DeploymentTestAtManagementGroup(ScenarioTest):
+    def tearDown(self):
+        self.cmd('group delete -n cli_test_management_group_deployment --yes')
+        self.cmd('account management-group delete -n cli_test_management_group_deployment')
+
+    def test_management_group_deployment(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'management_group_level_template.json').replace('\\', '\\\\'),
+            'params': os.path.join(curr_dir, 'management_group_level_parameters.json').replace('\\', '\\\\'),
+            'dn': self.create_random_name('azure-cli-management-group-deployment', 60)
+        })
+
+        self.cmd('account management-group create --name cli_test_management_group_deployment', checks=[])
+
+        self.cmd('deployment validate --scope-type ManagementGroup --management-group-id cli_test_management_group_deployment --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment create --scope-type ManagementGroup --management-group-id cli_test_management_group_deployment --location WestUS -n {dn} --template-file {tf} --parameters @"{params}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+        ])
+
+        self.cmd('deployment list --scope-type ManagementGroup --management-group-id cli_test_management_group_deployment', checks=[
+            self.check('[0].name', '{dn}'),
+        ])
+
+        self.cmd('deployment show --scope-type ManagementGroup --management-group-id cli_test_management_group_deployment -n {dn}', checks=[
+            self.check('name', '{dn}')
+        ])
+
+        self.cmd('deployment export --scope-type ManagementGroup --management-group-id cli_test_management_group_deployment -n {dn}', checks=[
+        ])
+
+        self.cmd('deployment operation list --scope-type ManagementGroup --management-group-id cli_test_management_group_deployment -n {dn}', checks=[
+            self.check('length([])', 4)
+        ])
+
+
+class DeploymentTestAtTenantScope(ScenarioTest):
+    def tearDown(self):
+        self.cmd('group delete -n cli_tenant_level_deployment --yes')
+    #    self.cmd('account management-group delete -n cli_tenant_level_deployment')
+
+    def test_tenant_level_deployment(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'tenant_level_template.json').replace('\\', '\\\\'),
+            'dn': self.create_random_name('azure-cli-tenant-level-deployment', 60)
+        })
+
+        #self.cmd('account management-group create --name cli_tenant_level_deployment', checks=[])
+
+        self.cmd('deployment validate --scope-type Tenant --location WestUS --template-file {tf}', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment create --scope-type Tenant --location WestUS -n {dn} --template-file {tf}', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+        ])
+
+        self.cmd('deployment list --scope-type Tenant', checks=[
+            self.check('[0].name', '{dn}'),
+        ])
+
+        self.cmd('deployment show --scope-type Tenant -n {dn}', checks=[
+            self.check('name', '{dn}')
+        ])
+
+        self.cmd('deployment export --scope-type Tenant -n {dn}', checks=[
+        ])
+
+        self.cmd('deployment operation list --scope-type Tenant -n {dn}', checks=[
             self.check('length([])', 4)
         ])
 
