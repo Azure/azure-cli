@@ -32,6 +32,11 @@ from azure.mgmt.sql.models import (
     ServiceObjectiveName,
     Sku,
     StorageKeyType,
+    InstanceFailoverGroup,
+    ManagedInstancePairInfo,
+    PartnerRegionInfo,
+    InstanceFailoverGroupReadOnlyEndpoint,
+    InstanceFailoverGroupReadWriteEndpoint
 )
 
 from knack.log import get_logger
@@ -325,6 +330,26 @@ def _db_elastic_pool_update_sku(
 
 _DEFAULT_SERVER_VERSION = "12.0"
 
+
+def failover_group_update_common(
+        instance,
+        failover_policy=None,
+        grace_period=None,):
+    '''
+    Updates the failover group grace period and failover policy. Common logic for both Sterling and Managed Instance
+    '''
+
+    if failover_policy is not None:
+        instance.read_write_endpoint.failover_policy = failover_policy
+
+    if instance.read_write_endpoint.failover_policy == FailoverPolicyType.manual.value:
+        grace_period = None
+        instance.read_write_endpoint.failover_with_data_loss_grace_period_minutes = grace_period
+
+    if grace_period is not None:
+        grace_period = int(grace_period) * 60
+        instance.read_write_endpoint.failover_with_data_loss_grace_period_minutes = grace_period
+
 ###############################################
 #                sql db                       #
 ###############################################
@@ -353,6 +378,11 @@ class ClientAuthenticationType(Enum):
     sql_password = 'SqlPassword'
     active_directory_password = 'ADPassword'
     active_directory_integrated = 'ADIntegrated'
+
+
+class FailoverPolicyType(Enum):
+    automatic = 'Automatic'
+    manual = 'Manual'
 
 
 def _get_server_dns_suffx(cli_ctx):
@@ -1154,7 +1184,7 @@ def _find_storage_account_resource_group(cli_ctx, name):
     resource group just to update some unrelated property, which is annoying and makes no sense to
     the customer.
     '''
-    from azure.mgmt.resource import ResourceManagementClient
+    from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
     storage_type = 'Microsoft.Storage/storageAccounts'
@@ -1163,7 +1193,7 @@ def _find_storage_account_resource_group(cli_ctx, name):
     query = "name eq '{}' and (resourceType eq '{}' or resourceType eq '{}')".format(
         name, storage_type, classic_storage_type)
 
-    client = get_mgmt_service_client(cli_ctx, ResourceManagementClient)
+    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     resources = list(client.resources.list(filter=query))
 
     if not resources:
@@ -2268,12 +2298,6 @@ def managed_db_restore(
 ###############################################
 
 
-# pylint: disable=too-few-public-methods
-class FailoverPolicyType(Enum):
-    automatic = 'Automatic'
-    manual = 'Manual'
-
-
 def failover_group_create(
         cmd,
         client,
@@ -2344,16 +2368,10 @@ def failover_group_update(
     Updates the failover group.
     '''
 
-    if failover_policy is not None:
-        instance.read_write_endpoint.failover_policy = failover_policy
-
-    if instance.read_write_endpoint.failover_policy == FailoverPolicyType.manual.value:
-        grace_period = None
-        instance.read_write_endpoint.failover_with_data_loss_grace_period_minutes = grace_period
-
-    if grace_period is not None:
-        grace_period = int(grace_period) * 60
-        instance.read_write_endpoint.failover_with_data_loss_grace_period_minutes = grace_period
+    failover_group_update_common(
+        instance,
+        failover_policy,
+        grace_period)
 
     if add_db is None:
         add_db = []
@@ -2445,3 +2463,107 @@ def virtual_cluster_list(
 
     # List all virtual clusters in the subscription
     return client.list()
+
+
+###############################################
+#              sql instance failover group    #
+###############################################
+
+def instance_failover_group_create(
+        cmd,
+        client,
+        resource_group_name,
+        managed_instance,
+        failover_group_name,
+        partner_managed_instance,
+        partner_resource_group,
+        failover_policy=FailoverPolicyType.automatic.value,
+        grace_period=1):
+    '''
+    Creates a failover group.
+    '''
+
+    managed_instance_client = get_sql_managed_instances_operations(cmd.cli_ctx, None)
+    # pylint: disable=no-member
+    primary_server = managed_instance_client.get(
+        managed_instance_name=managed_instance,
+        resource_group_name=resource_group_name)
+
+    partner_server = managed_instance_client.get(
+        managed_instance_name=partner_managed_instance,
+        resource_group_name=partner_resource_group)
+
+    # Build the partner server id
+    managed_server_info_pair = ManagedInstancePairInfo(
+        primary_managed_instance_id=primary_server.id,
+        partner_managed_instance_id=partner_server.id)
+    partner_region_info = PartnerRegionInfo(location=partner_server.location)
+
+    # Convert grace period from hours to minutes
+    grace_period = int(grace_period) * 60
+
+    if failover_policy == FailoverPolicyType.manual.value:
+        grace_period = None
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        location_name=primary_server.location,
+        failover_group_name=failover_group_name,
+        parameters=InstanceFailoverGroup(
+            managed_instance_pairs=[managed_server_info_pair],
+            partner_regions=[partner_region_info],
+            read_write_endpoint=InstanceFailoverGroupReadWriteEndpoint(
+                failover_policy=failover_policy,
+                failover_with_data_loss_grace_period_minutes=grace_period),
+            read_only_endpoint=InstanceFailoverGroupReadOnlyEndpoint(
+                failover_policy="Disabled")))
+
+
+def instance_failover_group_update(
+        instance,
+        failover_policy=None,
+        grace_period=None,):
+    '''
+    Updates the failover group.
+    '''
+
+    failover_group_update_common(
+        instance,
+        failover_policy,
+        grace_period)
+
+    return instance
+
+
+def instance_failover_group_failover(
+        cmd,
+        client,
+        resource_group_name,
+        failover_group_name,
+        location_name,
+        allow_data_loss=False):
+    '''
+    Failover an instance failover group.
+    '''
+
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    failover_group = client.get(
+        resource_group_name=resource_group_name,
+        subscription_id=get_subscription_id(cmd.cli_ctx),
+        failover_group_name=failover_group_name,
+        location_name=location_name)
+
+    if failover_group.replication_role == "Primary":
+        return
+
+    # Choose which failover method to use
+    if allow_data_loss:
+        failover_func = client.force_failover_allow_data_loss
+    else:
+        failover_func = client.failover
+
+    return failover_func(
+        resource_group_name=resource_group_name,
+        failover_group_name=failover_group_name,
+        location_name=location_name)

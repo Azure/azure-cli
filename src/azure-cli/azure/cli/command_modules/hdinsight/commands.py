@@ -62,13 +62,17 @@ def load_command_table(self, _):
     with self.command_group('hdinsight script-action',
                             hdinsight_script_actions_sdk,
                             client_factory=cf_hdinsight_script_actions) as g:
-        g.show_command('show', 'get_execution_detail')
-        g.custom_command('list', 'list_hdi_script_actions')
+        g.show_command('show-execution-details', 'get_execution_detail')
+        g.command('list', 'list_by_cluster')
         g.command('delete', 'delete')
         g.custom_command('execute',
                          'execute_hdi_script_action',
                          command_type=hdinsight_clusters_sdk,
                          client_factory=cf_hdinsight_clusters)
+        g.command('list-execution-history',
+                  'list_by_cluster',
+                  command_type=hdinsight_script_execution_history_sdk,
+                  client_factory=cf_hdinsight_script_execution_history)
         g.command('promote',
                   'promote',
                   command_type=hdinsight_script_execution_history_sdk,
@@ -88,6 +92,3 @@ def load_command_table(self, _):
         g.show_command('show', 'get_monitoring_status')
         g.custom_command('enable', 'enable_hdi_monitoring')
         g.command('disable', 'disable_monitoring')
-
-    with self.command_group('hdinsight', is_preview=True):
-        pass

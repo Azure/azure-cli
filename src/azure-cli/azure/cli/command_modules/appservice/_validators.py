@@ -53,8 +53,9 @@ def validate_asp_create(cmd, namespace):
         if isinstance(namespace.location, str):
             location = namespace.location
         else:
-            from azure.mgmt.resource import ResourceManagementClient
-            rg_client = get_mgmt_service_client(cmd.cli_ctx, ResourceManagementClient)
+            from azure.cli.core.profiles import ResourceType
+            rg_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+
             group = rg_client.resource_groups.get(resource_group_name)
             location = group.location
         validation_payload = {
@@ -93,3 +94,46 @@ def validate_app_exists_in_rg(cmd, namespace):
     app = client.web_apps.get(resource_group_name, webapp, None, raw=True)
     if app.response.status_code != 200:
         raise CLIError(app.response.text)
+
+
+def validate_add_vnet(cmd, namespace):
+    resource_group_name = namespace.resource_group_name
+    from azure.cli.command_modules.network._client_factory import network_client_factory
+    vnet_client = network_client_factory(cmd.cli_ctx)
+    list_all_vnets = vnet_client.virtual_networks.list_all()
+    vnet = namespace.vnet
+    name = namespace.name
+    slot = namespace.slot
+
+    vnet_loc = ''
+    for v in list_all_vnets:
+        if v.name == vnet:
+            vnet_loc = v.location
+            break
+
+    from ._appservice_utils import _generic_site_operation
+    webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+    # converting geo region to geo location
+    webapp_loc = webapp.location.lower().replace(" ", "")
+
+    if vnet_loc != webapp_loc:
+        raise CLIError("The app and the vnet resources are in different locations. \
+                        Cannot integrate a regional VNET to an app in a different region")
+
+
+def validate_asp_exists_in_rg(cmd, namespace):
+    import json
+    client = web_client_factory(cmd.cli_ctx)
+    serverfarm = namespace.name
+    resource_group_name = namespace.resource_group_name
+    asp = client.app_service_plans.get(resource_group_name, serverfarm, None, raw=True)
+    if asp.response.status_code != 200:
+        raise CLIError(asp.response.text)
+    # Isolated SKU is supported only for ASE
+    if namespace.sku in ['I1', 'I2', 'I3']:
+        # convert byte array to json
+        output_str = asp.response.content.decode('utf8')
+        res = json.loads(output_str)
+        if res.get('properties').get('hostingEnvironment') is None:
+            raise CLIError("The pricing tier 'Isolated' is not allowed in this resource group.Use this link to "
+                           "learn more: http://go.microsoft.com/fwlink/?LinkId=825764")

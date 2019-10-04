@@ -1,55 +1,5 @@
 interactions:
 - request:
-    body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
-      "date": "2019-05-30T17:44:35Z"}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - group create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '110'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - --location --name --tag
-      User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_dns000001?api-version=2018-05-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001","name":"cli_test_dns000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-05-30T17:44:35Z"},"properties":{"provisioningState":"Succeeded"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '384'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 30 May 2019 17:44:43 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
-    status:
-      code: 201
-      message: Created
-- request:
     body: '{"location": "global", "properties": {"zoneType": "Public"}}'
     headers:
       Accept:
@@ -67,26 +17,26 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-dns/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-dns/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/books.com?api-version=2018-05-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/c9cbd920-c00c-427c-852b-8aaf38badaeb\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/books.com","name":"books.com","type":"Microsoft.Network\/dnszones","etag":"00000002-0000-0000-2015-f75f0f17d501","location":"global","tags":{},"properties":{"maxNumberOfRecordSets":10000,"maxNumberOfRecordsPerRecordSet":null,"nameServers":["ns1-08.ppe.azure-dns.com.","ns2-08.ppe.azure-dns.net.","ns3-08.ppe.azure-dns.org.","ns4-08.ppe.azure-dns.info."],"numberOfRecordSets":2,"zoneType":"Public"}}'
+      string: '{"id":"\/subscriptions\/85a6c256-e687-4281-9cca-84869cf6ef36\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/books.com","name":"books.com","type":"Microsoft.Network\/dnszones","etag":"00000002-0000-0000-a0f5-6aa8cb5dd501","location":"global","tags":{},"properties":{"maxNumberOfRecordSets":10000,"maxNumberOfRecordsPerRecordSet":null,"nameServers":["ns1-06.azure-dns.com.","ns2-06.azure-dns.net.","ns3-06.azure-dns.org.","ns4-06.azure-dns.info."],"numberOfRecordSets":2,"zoneType":"Public"}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '593'
+      - '577'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 17:44:48 GMT
+      - Wed, 28 Aug 2019 18:08:56 GMT
       etag:
-      - 00000002-0000-0000-2015-f75f0f17d501
+      - 00000002-0000-0000-a0f5-6aa8cb5dd501
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -114,26 +64,26 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-dns/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-dns/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/books.com?api-version=2018-05-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/c9cbd920-c00c-427c-852b-8aaf38badaeb\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/books.com","name":"books.com","type":"Microsoft.Network\/dnszones","etag":"00000002-0000-0000-2015-f75f0f17d501","location":"global","tags":{},"properties":{"maxNumberOfRecordSets":10000,"maxNumberOfRecordsPerRecordSet":null,"nameServers":["ns1-08.ppe.azure-dns.com.","ns2-08.ppe.azure-dns.net.","ns3-08.ppe.azure-dns.org.","ns4-08.ppe.azure-dns.info."],"numberOfRecordSets":2,"zoneType":"Public"}}'
+      string: '{"id":"\/subscriptions\/85a6c256-e687-4281-9cca-84869cf6ef36\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/books.com","name":"books.com","type":"Microsoft.Network\/dnszones","etag":"00000002-0000-0000-a0f5-6aa8cb5dd501","location":"global","tags":{},"properties":{"maxNumberOfRecordSets":10000,"maxNumberOfRecordsPerRecordSet":null,"nameServers":["ns1-06.azure-dns.com.","ns2-06.azure-dns.net.","ns3-06.azure-dns.org.","ns4-06.azure-dns.info."],"numberOfRecordSets":2,"zoneType":"Public"}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '593'
+      - '577'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 17:44:52 GMT
+      - Wed, 28 Aug 2019 18:08:56 GMT
       etag:
-      - 00000002-0000-0000-2015-f75f0f17d501
+      - 00000002-0000-0000-a0f5-6aa8cb5dd501
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -169,26 +119,26 @@ interactions:
       ParameterSetName:
       - -n -g -p
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-dns/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-dns/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/nursery.books.com?api-version=2018-05-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/c9cbd920-c00c-427c-852b-8aaf38badaeb\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/nursery.books.com","name":"nursery.books.com","type":"Microsoft.Network\/dnszones","etag":"00000002-0000-0000-59ba-2f660f17d501","location":"global","tags":{},"properties":{"maxNumberOfRecordSets":10000,"maxNumberOfRecordsPerRecordSet":null,"nameServers":["ns1-09.ppe.azure-dns.com.","ns2-09.ppe.azure-dns.net.","ns3-09.ppe.azure-dns.org.","ns4-09.ppe.azure-dns.info."],"numberOfRecordSets":2,"zoneType":"Public"}}'
+      string: '{"id":"\/subscriptions\/85a6c256-e687-4281-9cca-84869cf6ef36\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/nursery.books.com","name":"nursery.books.com","type":"Microsoft.Network\/dnszones","etag":"00000002-0000-0000-300d-05aacb5dd501","location":"global","tags":{},"properties":{"maxNumberOfRecordSets":10000,"maxNumberOfRecordsPerRecordSet":null,"nameServers":["ns1-09.azure-dns.com.","ns2-09.azure-dns.net.","ns3-09.azure-dns.org.","ns4-09.azure-dns.info."],"numberOfRecordSets":2,"zoneType":"Public"}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '609'
+      - '593'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 17:44:58 GMT
+      - Wed, 28 Aug 2019 18:08:59 GMT
       etag:
-      - 00000002-0000-0000-59ba-2f660f17d501
+      - 00000002-0000-0000-300d-05aacb5dd501
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -216,8 +166,8 @@ interactions:
       ParameterSetName:
       - -n -g -p
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-dns/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-dns/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
       accept-language:
       - en-US
     method: GET
@@ -225,7 +175,7 @@ interactions:
   response:
     body:
       string: '{"code":"NotFound","message":"The resource record ''nursery'' does
-        not exist in resource group ''cli_test_dns000001'' of subscription ''c9cbd920-c00c-427c-852b-8aaf38badaeb''."}'
+        not exist in resource group ''cli_test_dns000001'' of subscription ''85a6c256-e687-4281-9cca-84869cf6ef36''."}'
     headers:
       cache-control:
       - private
@@ -234,7 +184,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 17:44:59 GMT
+      - Wed, 28 Aug 2019 18:08:59 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -249,7 +199,7 @@ interactions:
       code: 404
       message: Not Found
 - request:
-    body: '{"properties": {"TTL": 3600, "NSRecords": [{"nsdname": "ns1-09.ppe.azure-dns.com."}]}}'
+    body: '{"properties": {"TTL": 3600, "NSRecords": [{"nsdname": "ns1-09.azure-dns.com."}]}}'
     headers:
       Accept:
       - application/json
@@ -260,32 +210,32 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '86'
+      - '82'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -n -g -p
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-dns/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-dns/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/books.com/NS/nursery?api-version=2018-05-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/c9cbd920-c00c-427c-852b-8aaf38badaeb\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/books.com\/NS\/nursery","name":"nursery","type":"Microsoft.Network\/dnszones\/NS","etag":"fd97ac95-d82c-4376-871f-cb8d5d629663","properties":{"fqdn":"nursery.books.com.","TTL":3600,"NSRecords":[{"nsdname":"ns1-09.ppe.azure-dns.com."}],"targetResource":{},"provisioningState":"Succeeded"}}'
+      string: '{"id":"\/subscriptions\/85a6c256-e687-4281-9cca-84869cf6ef36\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/books.com\/NS\/nursery","name":"nursery","type":"Microsoft.Network\/dnszones\/NS","etag":"0d00e258-e797-4176-851c-283c382709b1","properties":{"fqdn":"nursery.books.com.","TTL":3600,"NSRecords":[{"nsdname":"ns1-09.azure-dns.com."}],"targetResource":{},"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '483'
+      - '479'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 17:45:00 GMT
+      - Wed, 28 Aug 2019 18:09:00 GMT
       etag:
-      - fd97ac95-d82c-4376-871f-cb8d5d629663
+      - 0d00e258-e797-4176-851c-283c382709b1
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -293,7 +243,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11999'
+      - '11998'
       x-powered-by:
       - ASP.NET
     status:
@@ -313,26 +263,26 @@ interactions:
       ParameterSetName:
       - -n -g -p
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-dns/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-dns/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/books.com/NS/nursery?api-version=2018-05-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/c9cbd920-c00c-427c-852b-8aaf38badaeb\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/books.com\/NS\/nursery","name":"nursery","type":"Microsoft.Network\/dnszones\/NS","etag":"fd97ac95-d82c-4376-871f-cb8d5d629663","properties":{"fqdn":"nursery.books.com.","TTL":3600,"NSRecords":[{"nsdname":"ns1-09.ppe.azure-dns.com."}],"targetResource":{},"provisioningState":"Succeeded"}}'
+      string: '{"id":"\/subscriptions\/85a6c256-e687-4281-9cca-84869cf6ef36\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/books.com\/NS\/nursery","name":"nursery","type":"Microsoft.Network\/dnszones\/NS","etag":"0d00e258-e797-4176-851c-283c382709b1","properties":{"fqdn":"nursery.books.com.","TTL":3600,"NSRecords":[{"nsdname":"ns1-09.azure-dns.com."}],"targetResource":{},"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '483'
+      - '479'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 17:45:01 GMT
+      - Wed, 28 Aug 2019 18:09:01 GMT
       etag:
-      - fd97ac95-d82c-4376-871f-cb8d5d629663
+      - 0d00e258-e797-4176-851c-283c382709b1
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -351,9 +301,9 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"etag": "fd97ac95-d82c-4376-871f-cb8d5d629663", "properties": {"TTL":
-      3600, "targetResource": {}, "NSRecords": [{"nsdname": "ns1-09.ppe.azure-dns.com."},
-      {"nsdname": "ns2-09.ppe.azure-dns.net."}]}}'
+    body: '{"etag": "0d00e258-e797-4176-851c-283c382709b1", "properties": {"TTL":
+      3600, "targetResource": {}, "NSRecords": [{"nsdname": "ns1-09.azure-dns.com."},
+      {"nsdname": "ns2-09.azure-dns.net."}]}}'
     headers:
       Accept:
       - application/json
@@ -364,32 +314,32 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '198'
+      - '190'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -n -g -p
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-dns/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-dns/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/books.com/NS/nursery?api-version=2018-05-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/c9cbd920-c00c-427c-852b-8aaf38badaeb\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/books.com\/NS\/nursery","name":"nursery","type":"Microsoft.Network\/dnszones\/NS","etag":"8fac54e0-a31e-417c-b490-87ba5a213df8","properties":{"fqdn":"nursery.books.com.","TTL":3600,"NSRecords":[{"nsdname":"ns1-09.ppe.azure-dns.com."},{"nsdname":"ns2-09.ppe.azure-dns.net."}],"targetResource":{},"provisioningState":"Succeeded"}}'
+      string: '{"id":"\/subscriptions\/85a6c256-e687-4281-9cca-84869cf6ef36\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/books.com\/NS\/nursery","name":"nursery","type":"Microsoft.Network\/dnszones\/NS","etag":"65a3cf4b-507f-417e-b280-523bb9682dba","properties":{"fqdn":"nursery.books.com.","TTL":3600,"NSRecords":[{"nsdname":"ns1-09.azure-dns.com."},{"nsdname":"ns2-09.azure-dns.net."}],"targetResource":{},"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '523'
+      - '515'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 17:45:02 GMT
+      - Wed, 28 Aug 2019 18:09:01 GMT
       etag:
-      - 8fac54e0-a31e-417c-b490-87ba5a213df8
+      - 65a3cf4b-507f-417e-b280-523bb9682dba
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -421,26 +371,26 @@ interactions:
       ParameterSetName:
       - -n -g -p
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-dns/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-dns/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/books.com/NS/nursery?api-version=2018-05-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/c9cbd920-c00c-427c-852b-8aaf38badaeb\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/books.com\/NS\/nursery","name":"nursery","type":"Microsoft.Network\/dnszones\/NS","etag":"8fac54e0-a31e-417c-b490-87ba5a213df8","properties":{"fqdn":"nursery.books.com.","TTL":3600,"NSRecords":[{"nsdname":"ns1-09.ppe.azure-dns.com."},{"nsdname":"ns2-09.ppe.azure-dns.net."}],"targetResource":{},"provisioningState":"Succeeded"}}'
+      string: '{"id":"\/subscriptions\/85a6c256-e687-4281-9cca-84869cf6ef36\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/books.com\/NS\/nursery","name":"nursery","type":"Microsoft.Network\/dnszones\/NS","etag":"65a3cf4b-507f-417e-b280-523bb9682dba","properties":{"fqdn":"nursery.books.com.","TTL":3600,"NSRecords":[{"nsdname":"ns1-09.azure-dns.com."},{"nsdname":"ns2-09.azure-dns.net."}],"targetResource":{},"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '523'
+      - '515'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 17:45:03 GMT
+      - Wed, 28 Aug 2019 18:09:02 GMT
       etag:
-      - 8fac54e0-a31e-417c-b490-87ba5a213df8
+      - 65a3cf4b-507f-417e-b280-523bb9682dba
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -459,9 +409,9 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"etag": "8fac54e0-a31e-417c-b490-87ba5a213df8", "properties": {"TTL":
-      3600, "targetResource": {}, "NSRecords": [{"nsdname": "ns1-09.ppe.azure-dns.com."},
-      {"nsdname": "ns2-09.ppe.azure-dns.net."}, {"nsdname": "ns3-09.ppe.azure-dns.org."}]}}'
+    body: '{"etag": "65a3cf4b-507f-417e-b280-523bb9682dba", "properties": {"TTL":
+      3600, "targetResource": {}, "NSRecords": [{"nsdname": "ns1-09.azure-dns.com."},
+      {"nsdname": "ns2-09.azure-dns.net."}, {"nsdname": "ns3-09.azure-dns.org."}]}}'
     headers:
       Accept:
       - application/json
@@ -472,32 +422,32 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '240'
+      - '228'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -n -g -p
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-dns/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-dns/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/books.com/NS/nursery?api-version=2018-05-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/c9cbd920-c00c-427c-852b-8aaf38badaeb\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/books.com\/NS\/nursery","name":"nursery","type":"Microsoft.Network\/dnszones\/NS","etag":"836f27a7-de14-4f50-acb6-6a2d630ceb16","properties":{"fqdn":"nursery.books.com.","TTL":3600,"NSRecords":[{"nsdname":"ns1-09.ppe.azure-dns.com."},{"nsdname":"ns2-09.ppe.azure-dns.net."},{"nsdname":"ns3-09.ppe.azure-dns.org."}],"targetResource":{},"provisioningState":"Succeeded"}}'
+      string: '{"id":"\/subscriptions\/85a6c256-e687-4281-9cca-84869cf6ef36\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/books.com\/NS\/nursery","name":"nursery","type":"Microsoft.Network\/dnszones\/NS","etag":"73443163-c1ce-4be0-9423-c1c1b114ab40","properties":{"fqdn":"nursery.books.com.","TTL":3600,"NSRecords":[{"nsdname":"ns1-09.azure-dns.com."},{"nsdname":"ns2-09.azure-dns.net."},{"nsdname":"ns3-09.azure-dns.org."}],"targetResource":{},"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '563'
+      - '551'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 17:45:04 GMT
+      - Wed, 28 Aug 2019 18:09:03 GMT
       etag:
-      - 836f27a7-de14-4f50-acb6-6a2d630ceb16
+      - 73443163-c1ce-4be0-9423-c1c1b114ab40
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -529,26 +479,26 @@ interactions:
       ParameterSetName:
       - -n -g -p
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-dns/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-dns/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/books.com/NS/nursery?api-version=2018-05-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/c9cbd920-c00c-427c-852b-8aaf38badaeb\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/books.com\/NS\/nursery","name":"nursery","type":"Microsoft.Network\/dnszones\/NS","etag":"836f27a7-de14-4f50-acb6-6a2d630ceb16","properties":{"fqdn":"nursery.books.com.","TTL":3600,"NSRecords":[{"nsdname":"ns1-09.ppe.azure-dns.com."},{"nsdname":"ns2-09.ppe.azure-dns.net."},{"nsdname":"ns3-09.ppe.azure-dns.org."}],"targetResource":{},"provisioningState":"Succeeded"}}'
+      string: '{"id":"\/subscriptions\/85a6c256-e687-4281-9cca-84869cf6ef36\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/books.com\/NS\/nursery","name":"nursery","type":"Microsoft.Network\/dnszones\/NS","etag":"73443163-c1ce-4be0-9423-c1c1b114ab40","properties":{"fqdn":"nursery.books.com.","TTL":3600,"NSRecords":[{"nsdname":"ns1-09.azure-dns.com."},{"nsdname":"ns2-09.azure-dns.net."},{"nsdname":"ns3-09.azure-dns.org."}],"targetResource":{},"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '563'
+      - '551'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 17:45:06 GMT
+      - Wed, 28 Aug 2019 18:09:04 GMT
       etag:
-      - 836f27a7-de14-4f50-acb6-6a2d630ceb16
+      - 73443163-c1ce-4be0-9423-c1c1b114ab40
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -567,10 +517,10 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"etag": "836f27a7-de14-4f50-acb6-6a2d630ceb16", "properties": {"TTL":
-      3600, "targetResource": {}, "NSRecords": [{"nsdname": "ns1-09.ppe.azure-dns.com."},
-      {"nsdname": "ns2-09.ppe.azure-dns.net."}, {"nsdname": "ns3-09.ppe.azure-dns.org."},
-      {"nsdname": "ns4-09.ppe.azure-dns.info."}]}}'
+    body: '{"etag": "73443163-c1ce-4be0-9423-c1c1b114ab40", "properties": {"TTL":
+      3600, "targetResource": {}, "NSRecords": [{"nsdname": "ns1-09.azure-dns.com."},
+      {"nsdname": "ns2-09.azure-dns.net."}, {"nsdname": "ns3-09.azure-dns.org."},
+      {"nsdname": "ns4-09.azure-dns.info."}]}}'
     headers:
       Accept:
       - application/json
@@ -581,32 +531,32 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '283'
+      - '267'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -n -g -p
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-dns/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-dns/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/books.com/NS/nursery?api-version=2018-05-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/c9cbd920-c00c-427c-852b-8aaf38badaeb\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/books.com\/NS\/nursery","name":"nursery","type":"Microsoft.Network\/dnszones\/NS","etag":"38a27f22-e6ed-46b7-ad60-d2a60c1ee6e7","properties":{"fqdn":"nursery.books.com.","TTL":3600,"NSRecords":[{"nsdname":"ns1-09.ppe.azure-dns.com."},{"nsdname":"ns2-09.ppe.azure-dns.net."},{"nsdname":"ns3-09.ppe.azure-dns.org."},{"nsdname":"ns4-09.ppe.azure-dns.info."}],"targetResource":{},"provisioningState":"Succeeded"}}'
+      string: '{"id":"\/subscriptions\/85a6c256-e687-4281-9cca-84869cf6ef36\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/books.com\/NS\/nursery","name":"nursery","type":"Microsoft.Network\/dnszones\/NS","etag":"48c79407-6736-4268-8bc3-4cdf415d9796","properties":{"fqdn":"nursery.books.com.","TTL":3600,"NSRecords":[{"nsdname":"ns1-09.azure-dns.com."},{"nsdname":"ns2-09.azure-dns.net."},{"nsdname":"ns3-09.azure-dns.org."},{"nsdname":"ns4-09.azure-dns.info."}],"targetResource":{},"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '604'
+      - '588'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 17:45:07 GMT
+      - Wed, 28 Aug 2019 18:09:04 GMT
       etag:
-      - 38a27f22-e6ed-46b7-ad60-d2a60c1ee6e7
+      - 48c79407-6736-4268-8bc3-4cdf415d9796
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -638,26 +588,26 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-dns/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-dns/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/books.com?api-version=2018-05-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/c9cbd920-c00c-427c-852b-8aaf38badaeb\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/books.com","name":"books.com","type":"Microsoft.Network\/dnszones","etag":"00000002-0000-0000-2015-f75f0f17d501","location":"global","tags":{},"properties":{"maxNumberOfRecordSets":10000,"maxNumberOfRecordsPerRecordSet":null,"nameServers":["ns1-08.ppe.azure-dns.com.","ns2-08.ppe.azure-dns.net.","ns3-08.ppe.azure-dns.org.","ns4-08.ppe.azure-dns.info."],"numberOfRecordSets":3,"zoneType":"Public"}}'
+      string: '{"id":"\/subscriptions\/85a6c256-e687-4281-9cca-84869cf6ef36\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/books.com","name":"books.com","type":"Microsoft.Network\/dnszones","etag":"00000002-0000-0000-a0f5-6aa8cb5dd501","location":"global","tags":{},"properties":{"maxNumberOfRecordSets":10000,"maxNumberOfRecordsPerRecordSet":null,"nameServers":["ns1-06.azure-dns.com.","ns2-06.azure-dns.net.","ns3-06.azure-dns.org.","ns4-06.azure-dns.info."],"numberOfRecordSets":3,"zoneType":"Public"}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '593'
+      - '577'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 17:45:08 GMT
+      - Wed, 28 Aug 2019 18:09:05 GMT
       etag:
-      - 00000002-0000-0000-2015-f75f0f17d501
+      - 00000002-0000-0000-a0f5-6aa8cb5dd501
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -689,26 +639,26 @@ interactions:
       ParameterSetName:
       - -n -g --zone-name
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-dns/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-dns/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsZones/books.com/NS/nursery?api-version=2018-05-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/c9cbd920-c00c-427c-852b-8aaf38badaeb\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/books.com\/NS\/nursery","name":"nursery","type":"Microsoft.Network\/dnszones\/NS","etag":"38a27f22-e6ed-46b7-ad60-d2a60c1ee6e7","properties":{"fqdn":"nursery.books.com.","TTL":3600,"NSRecords":[{"nsdname":"ns1-09.ppe.azure-dns.com."},{"nsdname":"ns2-09.ppe.azure-dns.net."},{"nsdname":"ns3-09.ppe.azure-dns.org."},{"nsdname":"ns4-09.ppe.azure-dns.info."}],"targetResource":{},"provisioningState":"Succeeded"}}'
+      string: '{"id":"\/subscriptions\/85a6c256-e687-4281-9cca-84869cf6ef36\/resourceGroups\/cli_test_dns000001\/providers\/Microsoft.Network\/dnszones\/books.com\/NS\/nursery","name":"nursery","type":"Microsoft.Network\/dnszones\/NS","etag":"48c79407-6736-4268-8bc3-4cdf415d9796","properties":{"fqdn":"nursery.books.com.","TTL":3600,"NSRecords":[{"nsdname":"ns1-09.azure-dns.com."},{"nsdname":"ns2-09.azure-dns.net."},{"nsdname":"ns3-09.azure-dns.org."},{"nsdname":"ns4-09.azure-dns.info."}],"targetResource":{},"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '604'
+      - '588'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 17:45:09 GMT
+      - Wed, 28 Aug 2019 18:09:06 GMT
       etag:
-      - 38a27f22-e6ed-46b7-ad60-d2a60c1ee6e7
+      - 48c79407-6736-4268-8bc3-4cdf415d9796
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -742,8 +692,8 @@ interactions:
       ParameterSetName:
       - -g -n -y
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-dns/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-dns/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
       accept-language:
       - en-US
     method: DELETE
@@ -753,15 +703,15 @@ interactions:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsOperationStatuses/delzone63694835113745071670742d1f?api-version=2018-05-01
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsOperationStatuses/delzone637026125478663382df9dabef?api-version=2018-05-01
       cache-control:
       - private
       content-length:
       - '0'
       date:
-      - Thu, 30 May 2019 17:45:13 GMT
+      - Wed, 28 Aug 2019 18:09:07 GMT
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsOperationResults/delzone63694835113745071670742d1f?api-version=2018-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsOperationResults/delzone637026125478663382df9dabef?api-version=2018-05-01
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -789,10 +739,10 @@ interactions:
       ParameterSetName:
       - -g -n -y
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-dns/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-dns/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsOperationStatuses/delzone63694835113745071670742d1f?api-version=2018-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsOperationStatuses/delzone637026125478663382df9dabef?api-version=2018-05-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -804,7 +754,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 17:45:16 GMT
+      - Wed, 28 Aug 2019 18:09:11 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -838,8 +788,8 @@ interactions:
       ParameterSetName:
       - -g -n -y
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-dns/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-dns/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
       accept-language:
       - en-US
     method: DELETE
@@ -849,15 +799,15 @@ interactions:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsOperationStatuses/delzone6369483512123479693394903f?api-version=2018-05-01
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsOperationStatuses/delzone6370261255325079300b22dfad?api-version=2018-05-01
       cache-control:
       - private
       content-length:
       - '0'
       date:
-      - Thu, 30 May 2019 17:45:21 GMT
+      - Wed, 28 Aug 2019 18:09:12 GMT
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsOperationResults/delzone6369483512123479693394903f?api-version=2018-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsOperationResults/delzone6370261255325079300b22dfad?api-version=2018-05-01
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -885,10 +835,10 @@ interactions:
       ParameterSetName:
       - -g -n -y
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-dns/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-dns/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsOperationStatuses/delzone6369483512123479693394903f?api-version=2018-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns000001/providers/Microsoft.Network/dnsOperationStatuses/delzone6370261255325079300b22dfad?api-version=2018-05-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -900,7 +850,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 17:45:24 GMT
+      - Wed, 28 Aug 2019 18:09:16 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -918,51 +868,4 @@ interactions:
     status:
       code: 200
       message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - group delete
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - --name --yes --no-wait
-      User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
-      accept-language:
-      - en-US
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_dns000001?api-version=2018-05-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Thu, 30 May 2019 17:45:27 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGRE5TVk5KVkNPRjVYQkZJTjRJSlpQV1lKS0hQRk5MTklPTnwxNUZBMUVBQUVFOTVGNDQ1LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
-    status:
-      code: 202
-      message: Accepted
 version: 1

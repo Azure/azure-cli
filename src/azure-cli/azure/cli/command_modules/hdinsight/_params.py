@@ -5,6 +5,7 @@
 
 from azure.cli.core.commands.parameters import get_enum_type, name_type, tags_type, \
     get_generic_completion_list, get_three_state_flag, get_resource_name_completion_list
+from azure.cli.core.util import get_json_object
 from ._validators import (validate_component_version,
                           validate_storage_account,
                           validate_msi,
@@ -26,8 +27,9 @@ def load_arguments(self, _):
         cluster_user_group_completion_list, get_resource_name_completion_list_under_subscription
     from knack.arguments import CLIArgumentType
     from azure.mgmt.hdinsight.models import Tier, JsonWebKeyEncryptionAlgorithm
+    from argcomplete.completers import FilesCompleter
     node_size_type = CLIArgumentType(arg_group='Node',
-                                     help='The size of the node. See also: https://docs.microsoft.com/en-us/azure/'
+                                     help='The size of the node. See also: https://docs.microsoft.com/azure/'
                                           'hdinsight/hdinsight-hadoop-provision-linux-clusters#configure-cluster-size')
 
     # cluster
@@ -38,29 +40,35 @@ def load_arguments(self, _):
                    completer=get_resource_name_completion_list('Microsoft.HDInsight/clusters'),
                    help='The name of the cluster.')
         c.argument('tags', tags_type)
-        c.argument('no_validation_timeout', arg_type=get_three_state_flag(),
-                   help='Do not report timeout error during argument validation phase.')
+        c.argument('no_validation_timeout', action='store_true',
+                   help='Permit timeout error during argument validation phase. If omitted, '
+                        'validation timeout error will be permitted.')
         c.argument('cluster_version', options_list=['--version', '-v'], arg_group='Cluster',
-                   help='The HDInsight cluster version. See also: https://docs.microsoft.com/en-us/azure/'
+                   help='The HDInsight cluster version. See also: https://docs.microsoft.com/azure/'
                         'hdinsight/hdinsight-component-versioning#supported-hdinsight-versions')
         c.argument('cluster_type', options_list=['--type', '-t'], arg_group='Cluster',
                    completer=get_generic_completion_list(known_cluster_types),
                    help='Type of HDInsight cluster, like: {}. '
-                        'See also: https://docs.microsoft.com/en-us/azure/hdinsight/hdinsight-'
+                        'See also: https://docs.microsoft.com/azure/hdinsight/hdinsight-'
                         'hadoop-provision-linux-clusters#cluster-types'.format(', '.join(known_cluster_types)))
         c.argument('component_version', arg_group='Cluster', nargs='*', validator=validate_component_version,
                    help='The versions of various Hadoop components, in space-'
                         'separated versions in \'component=version\' format. Example: '
                         'Spark=2.0 Hadoop=2.7.3 '
-                        'See also: https://docs.microsoft.com/en-us/azure/hdinsight/hdinsight'
+                        'See also: https://docs.microsoft.com/azure/hdinsight/hdinsight'
                         '-component-versioning#hadoop-components-available-with-different-'
                         'hdinsight-versions')
-        c.argument('cluster_configurations', arg_group='Cluster',
-                   help='Extra configurations of various components, in JSON.')
+        c.argument('cluster_configurations', arg_group='Cluster', type=get_json_object,
+                   completer=FilesCompleter(),
+                   help='Extra configurations of various components. '
+                        'Configurations may be supplied from a file using the `@{path}` syntax or a JSON string. '
+                        'See also: https://docs.microsoft.com/azure/hdinsight/'
+                        'hdinsight-hadoop-customize-cluster-bootstrap')
         c.argument('cluster_tier', arg_type=get_enum_type(Tier), arg_group='Cluster',
                    help='The tier of the cluster')
-        c.argument('esp', arg_group='Cluster', arg_type=get_three_state_flag(),
-                   help='Specify to create cluster with Enterprise Security Package')
+        c.argument('esp', arg_group='Cluster', action='store_true',
+                   help='Specify to create cluster with Enterprise Security Package. If omitted, '
+                        'creating cluster with Enterprise Security Package will not not allowed.')
 
         # HTTP
         c.argument('http_username', options_list=['--http-user', '-u'], arg_group='HTTP',
@@ -88,7 +96,7 @@ def load_arguments(self, _):
                    help='The size of the data disk in GB, e.g. 1023.')
         c.argument('zookeepernode_size', arg_type=node_size_type)
         c.argument('edgenode_size', arg_type=node_size_type)
-        c.argument('workernode_count', options_list=['--size', '-s'], arg_group='Node',
+        c.argument('workernode_count', options_list=['--workernode-count', '-c'], arg_group='Node',
                    help='The number of worker nodes in the cluster.')
 
         # Storage
@@ -98,11 +106,12 @@ def load_arguments(self, _):
         c.argument('storage_account_key', arg_group='Storage',
                    help='The storage account key. A key can be retrieved automatically '
                         'if the user has access to the storage account.')
-        c.argument('storage_default_container', arg_group='Storage',
+        c.argument('storage_default_container', arg_group='Storage', options_list=['--storage-container'],
                    help='The storage container the cluster will use. '
                         'Uses the cluster name if none was specified. (WASB only)')
-        c.argument('storage_default_filesystem', arg_group='Storage',
-                   help='The storage filesystem the cluster will use. (DFS only)')
+        c.argument('storage_default_filesystem', arg_group='Storage', options_list=['--storage-filesystem'],
+                   help='The storage filesystem the cluster will use. '
+                        'Uses the cluster name if none was specified. (DFS only)')
         c.argument('storage_account_managed_identity', arg_group='Storage', validator=validate_storage_msi,
                    completer=get_resource_name_completion_list_under_subscription(
                        'Microsoft.ManagedIdentity/userAssignedIdentities'),
@@ -158,42 +167,62 @@ def load_arguments(self, _):
                        'Microsoft.ManagedIdentity/userAssignedIdentities'),
                    help="The name or ID of user assigned identity.")
 
+    # resize
+    with self.argument_context('hdinsight resize') as c:
+        c.argument('target_instance_count', options_list=['--workernode-count', '-c'],
+                   help='The target worker node instance count for the operation.', required=True)
+
     # application
     with self.argument_context('hdinsight application') as c:
-        c.argument('application_name', arg_group='Application', help='The constant value for the application name.')
-        c.argument('application_type', arg_group='Application', help='The application type.')
-        c.argument('marketplace_identifier', arg_group='Application', help='The marketplace identifier.')
+        c.argument('cluster_name', options_list=['--cluster-name'],
+                   completer=get_resource_name_completion_list('Microsoft.HDInsight/clusters'),
+                   help='The name of the cluster.')
+        c.argument('application_name', arg_type=name_type,
+                   help='The constant value for the application name.')
+        c.argument('application_type', options_list=['--type', '-t'],
+                   arg_type=get_enum_type(['CustomApplication', 'RServer']),
+                   help='The application type.')
+        c.argument('marketplace_identifier', options_list=['--marketplace-id'],
+                   help='The marketplace identifier.')
         c.argument('https_endpoint_access_mode', arg_group='HTTPS Endpoint',
+                   options_list=['--access-mode'],
                    help='The access mode for the application.')
         c.argument('https_endpoint_destination_port', arg_group='HTTPS Endpoint',
+                   options_list=['--destination-port'],
                    help='The destination port to connect to.')
-        c.argument('https_endpoint_location', arg_group='HTTPS Endpoint', help='The location of the endpoint.')
-        c.argument('https_endpoint_public_port', arg_group='HTTPS Endpoint', help='The public port to connect to.')
         c.argument('sub_domain_suffix', arg_group='HTTPS Endpoint', help='The subdomain suffix of the application.')
         c.argument('disable_gateway_auth', arg_group='HTTPS Endpoint', arg_type=get_three_state_flag(),
-                   help='The flag of whether disabling gateway auth or not.')
-        c.argument('ssh_endpoint_destination_port', arg_group='SSH Endpoint',
-                   help='The destination port to connect to.')
-        c.argument('ssh_endpoint_location', arg_group='SSH Endpoint', help='The location of the endpoint.')
-        c.argument('ssh_endpoint_public_port', arg_group='SSH Endpoint', help='The public port to connect to.')
+                   help='Indicates whether to disable gateway authentication. '
+                        'Default is to enable gateway authentication. Default: false. ')
         c.argument('tags', tags_type)
         c.argument('ssh_password', options_list=['--ssh-password', '-P'], arg_group='SSH',
                    help='SSH password for the cluster nodes.')
 
     # script action
     with self.argument_context('hdinsight script-action') as c:
-        c.argument('roles', arg_group='Script Action',
-                   completer=get_generic_completion_list(known_role_types),
-                   help='A comma-delimited list of roles (nodes) where the script will be executed. '
+        c.argument('cluster_name', options_list=['--cluster-name'],
+                   completer=get_resource_name_completion_list('Microsoft.HDInsight/clusters'),
+                   help='The name of the cluster.')
+        c.argument('roles', nargs='+', completer=get_generic_completion_list(known_role_types),
+                   help='A space-delimited list of roles (nodes) where the script will be executed. '
                         'Valid roles are {}.'.format(', '.join(known_role_types)))
-        c.argument('persist_on_success', arg_group='Script Action', help='If the scripts needs to be persisted.')
-        c.argument('persisted', arg_group='Script Action', help='If only list persisted script actions.')
-        c.argument('script_name', options_list='--script-action-name', arg_group='Script Action',
+        c.argument('persist_on_success', help='If the scripts needs to be persisted.')
+        c.argument('script_action_name', arg_type=name_type, arg_group=None,
                    help='The name of the script action.')
+        c.argument('script_uri', arg_group=None, help='The URI to the script.')
+        c.argument('script_parameters', arg_group=None, help='The parameters for the script.')
+        c.argument('script_execution_id', options_list=['--execution-id'], arg_group=None,
+                   help='The script execution id')
+
+    with self.argument_context('hdinsight script-action delete') as c:
+        c.argument('script_name', arg_type=name_type, arg_group=None, help='The name of the script.')
 
     # Monitoring
     with self.argument_context('hdinsight monitor') as c:
-        c.argument('workspace', arg_group='Monitoring', validator=validate_workspace,
+        c.argument('workspace', validator=validate_workspace,
                    completer=get_resource_name_completion_list_under_subscription(
                        'Microsoft.OperationalInsights/workspaces'),
-                   help='The name or resource ID of Log Analytics workspace.')
+                   help='The name, resource ID or workspace ID of Log Analytics workspace.')
+        c.argument('primary_key', help='The certificate for the Log Analytics workspace. '
+                                       'Required when workspace ID is provided.')
+        c.ignore('workspace_type')

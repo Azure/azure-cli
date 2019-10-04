@@ -20,14 +20,19 @@ CLI_PACKAGE_NAME = 'azure-cli'
 COMPONENT_PREFIX = 'azure-cli-'
 
 
-def handle_exception(ex):
+def handle_exception(ex):  # pylint: disable=too-many-return-statements
     # For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
+    from jmespath.exceptions import JMESPathTypeError
     from msrestazure.azure_exceptions import CloudError
     from msrest.exceptions import HttpOperationError, ValidationError, ClientRequestError
     from azure.cli.core.azlogging import CommandLoggerContext
 
     with CommandLoggerContext(logger):
-
+        if isinstance(ex, JMESPathTypeError):
+            logger.error("\nInvalid jmespath query supplied for `--query`:\n%s", ex)
+            logger.error("To learn more about --query, please visit: "
+                         "https://docs.microsoft.com/cli/azure/query-azure-cli?view=azure-cli-latest")
+            return 1
         if isinstance(ex, (CLIError, CloudError)):
             logger.error(ex.args[0])
             return ex.args[1] if len(ex.args) >= 2 else 1
@@ -140,8 +145,8 @@ def get_az_version_string():
         local = version_dict['local']
         pypi = version_dict.get('pypi', None)
         if pypi and LooseVersion(pypi) > LooseVersion(local):
-            return name.ljust(20) + local.rjust(20) + ' *'
-        return name.ljust(20) + local.rjust(20)
+            return name.ljust(25) + local.rjust(15) + ' *'
+        return name.ljust(25) + local.rjust(15)
 
     ver_string = _get_version_string(CLI_PACKAGE_NAME, versions.pop(CLI_PACKAGE_NAME))
     if '*' in ver_string:

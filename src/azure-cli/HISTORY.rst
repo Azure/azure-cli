@@ -3,6 +3,288 @@
 Release History
 ===============
 
+**AMS**
+
+* BREAKING CHANGE: Changed job creation from "job start" to "job create".
+
+**Compute**
+
+* vm create: Add --enable-agent configuration.
+* vmss create: Add --computer-name-prefix parameter to support custom computer name prefix of virtual machines in the VMSS.
+
+**Network**
+
+* az network private-dns link vnet create/update: Fixes #9851. Support cross-tenant virtual network linking.
+
+2.0.74
+++++++
+
+**ACR**
+
+* Added a required `--type` parameter to command `az acr config retention update`
+* Param `-n, --name` changed to `-r, --registry` for `az acr config` command group.
+
+**AKS**
+
+* Add `--load-balancer-sku`, `--load-balancer-managed-outbound-ip-count`, `--load-balancer-outbound-ips` and `--load-balancer-outbound-ip-prefixes` to `az aks create` command, which allows for creating AKS cluster with SLB.
+* Add `--load-balancer-managed-outbound-ip-count`, `--load-balancer-outbound-ips` and `--load-balancer-outbound-ip-prefixes` to `az aks update` command, which allows for updating load balancer profile of an AKS cluster with SLB.
+* Add `--vm-set-type` to `az aks create` command, which allows to specify vm types of an AKS Cluster (vmas or vmss).
+
+**AppService**
+
+* Added "webapp config access-restriction show | set | add | remove"
+* az webapp up updated for better error-handling
+* az appservice plan update support Isolated SKU
+
+**ARM**
+
+* az group deployment create: Add --handle-extended-json-format to support multiline and comments in json template
+* Update azure-mgmt-resource package to use 4.0.0
+
+**Compute**
+
+* vmss create: Add --terminate-notification-time parameters to support terminate scheduled event configurability.
+* vmss update: Add --enable-terminate-notification and --terminate-notification-time parameters to support terminate scheduled event configurability.
+* Update azure-mgmt-compute version to 8.0.0.
+* vm/vmss create: Support --priority, --eviction-policy, --max-billing parameters.
+* disk create: Allow specifying the exact size of the upload for customers who upload their disks directly.
+* snapshot create: Support incremental snapshots for managed disks.
+
+**Cosmos DB**
+
+* Add `--type <key-type>` to `az cosmosdb keys list` command to show key, read only keys or connection strings
+* Add `regenerate` to `az cosmosdb keys` group
+* Deprecate `az cosmosdb list-connection-strings`, `az cosmosdb regenerate-key` and `az cosmosdb list-read-only-keys`
+
+**EventGrid**
+
+* Fix the endpoint help text to refer to the right parameter (namely, to point to parameter `--endpoint` rather than `--endpoint-type` in event subscription commands).
+
+**Key Vault**
+
+* Fix #8840: When using tenant domain name in `az login -t`, `keyvault create` fails. Tenant domain name is now resolved to GUID if it is not.
+
+**Monitor**
+
+* monitor metrics alert create: Fix #9901. Support special character `:` in `--condition` argument.
+
+**Policy**
+
+* Support for Policy new API version 2019-06-01.
+* az policy assignment create: Add `--enforcement-mode` parameter for `az policy assignment create` command.
+
+**Storage**
+
+* Add --blob-type parameter for `az storage copy` command
+
+2.0.73
+++++++
+
+**ACR**
+
+* Added commands to configure retention policy (in preview): "az acr config retention"
+* [BREAKING] Disable the pull request trigger by default for ACR Tasks
+* az acr login --subscription: now supports cross tenant scenarios.
+
+**AKS**
+
+* Add support of ACR integration, which includes
+* Add `--attach-acr <acr-name-or-resource-id>` to `az aks create` command, which allows for attach the ACR to AKS cluster.
+* Add `--attach-acr <acr-name-or-resource-id>` and `--detach-acr <acr-name-or-resource-id>` to `az aks update` command, which allows to attach or detach the ACR from AKS cluster.
+
+**Aladdin**
+
+* Update Aladdin Service (az find) to v1.0 (GA)
+
+**ARM**
+
+* Update azure-mgmt-resource package to use 3.1.0, which utilizes API version 2019-05-10, allowing copy count to be zero.
+
+**AppService**
+
+* az webapp deployment source config-zip support for connection_verify
+* Add support for ACR images with az webapp create
+
+**Batch**
+
+* Expanded `--json-file` capabilities of `az batch pool create` to allow for specifying MountConfigurations for file system mounts(see https://docs.microsoft.com/en-us/rest/api/batchservice/pool/add#request-body for structure)
+* Expanded `--json-file` capabilities of `az batch pool create` with the optional property publicIPs on NetworkConfiguration. This allows specifying publicIPs to be used when deploying pools (see https://docs.microsoft.com/en-us/rest/api/batchservice/pool/add#request-body for structure)
+* Expanded `--image` capabilities to support Shared Image Galleries images. Similar to the commands support for Managed Images, to use a Shared Image Gallery image simply use the ARM ID as the value to the argument.
+* [BREAKING CHANGE] When not specified, the default value for `--start-task-wait-for-success` on `az batch pool create` is now true (was false).
+* [BREAKING CHANGE] The default value for Scope on AutoUserSpecification is now always Pool (was Task on Windows nodes, Pool on Linux nodes). This argument is not exposed via the commandline, but can be set in the `--json-file` arguments.
+
+**Cosmos DB**
+
+* Update azure-mgmt-cosmosdb to latest python 0.8.0 library
+* Populate DatabaseAccountCreateUpdateParameters with 2 new parameters to support Cassandra Connector Exchange(CCX) feature - enable_cassandra_connector, connector_offer
+
+**HDInsight**
+
+* `az hdinsight resize`: Make parameter `--workernode-count/-c` required
+* GA release
+
+**Key Vault**
+
+* Fix #10286: Unable to delete subnet from network rules.
+* Fix: Duplicated subnets and IP addresses can be added to network rules.
+
+**Network**
+
+* az network watcher flow-log: Fix #8132. Support `--interval` to set traffic analysis interval value.
+* az network application-gateway identity: Fix #10073 and #8244 Add support for setting identity in application-gateway.
+* az network application-gateway ssl-cert: Fix #8244. Add support for setting key vault id in application-gateway ssl-cert.
+* az network express-route peering peer-connection: Fix #9404. Onboard `show` and `list` command for Azure express route peering peer connection resource.
+* az network vnet-gateway create/update: Fix #9327. Support `--custom-routes` argument to set custom routes address space for VNet gateway and VPN client.
+
+**Policy**
+
+* Support for Policy new API version 2019-01-01
+
+**Storage**
+
+* [BREAKING CHANGE] `az storage remove`: remove --auth-mode argument
+
+2.0.72
+++++++
+
+**ACR**
+
+* Move to 2019-05-01 api-version, which follows replace semantics for ACR resource creation.
+* Breaking change: Classic SKU no longer supported.
+
+**API Management**
+
+* Introduced initial impementation of API Management preview commands (az apim)
+
+**AppConfig**
+
+* Added "appconfig kv restore" command.
+
+**AppService**
+
+* Fixed az webapp webjob continuous start command when specifying a slot.
+* az webapp up detects env folder and removes it from compressed file used for deployment
+
+**Backup**
+
+* Added Support for managed disk restore, InstantRP
+
+**keyvault**
+
+* Fix the bug in secret set command that ignores the expires argument
+
+**Network**
+
+* az network lb create/frontend-ip create: Fixes #10018. Support `--private-ip-address-version` argument to create IPv6 based private-ip-address 
+* az network private-endpoint create/update/list-types: Fixes #9474. Support create/update/list-types commands for private endpoint.
+* az network private-link-service: Fixes #9475. Onboard commands for private link service.
+* az network vnet subnet update: Support `--private-endpoint-network-policies` and `--private-link-service-network-policies` arguments for update command.
+
+**RBAC**
+
+* Fix #10151 - `az ad app update --homepage` not updating homepage.
+* Derive service principal's display name from name in the create-for-rbac command
+
+**ServiceFabric**
+
+* Fix for issues #7145,  #7880 and #7889 - fix for key vault and cert issues when creating a cluster.
+* Fix for issue #7130 - fix add cert command. Using the cluster resource group when the key vault resource group is not specified.
+* Fix for issue #9711 - fix command 'cluster setting set' command. Using named parameters for SettingsSectionDescription constructor.
+
+**SignalR**
+
+* signalr cors: New command to manage SignalR CORS
+* az signalr create: --service-mode: new service mode argument
+* signalr restart: new command to restart the service
+* signalr update: new command to update the service
+
+**Storage**
+
+* Add `revoke-delegation-keys` command for storage account
+
+2.0.71
+++++++
+
+**AppService**
+
+* az webapp webjob continuous group commands were failing for slots
+* fixes an issue where `az webapp deployment container config` displayed the wrong Docker CI/CD webhook URL for some apps
+
+**BotService**
+
+* BREAKING CHANGE:
+    create:
+        - Removed support for creating v3 SDK bots
+        - Remove `az bot publish` example when creating a Web App bot
+
+**CognitiveServices**
+
+* Add "cognitiveservices account network-rule" commands.
+
+**Cosmos DB**
+
+* Remove warning when updating multiple write locations
+* Add CRUD commands for CosmosDB SQL, MongoDB, Cassandra, Gremlin and Table resources and resource's throughput.
+
+**HDInsight**
+
+* BREAKING CHANGE:
+    create:
+        - Renamed --storage-default-container to --storage-container and --storage-default-filesystem to --storage-filesystem
+    application create: 
+        - Changed the --name/-n argument to represent the application name instead of the cluster name and added a separate --cluster-name argument
+        - Renamed --application-type to --type/-t
+        - Renamed --marketplace-identifier to --marketplace-id
+        - Renamed --https-endpoint-access-mode to --access-mode and --https-endpoint-destination-port to --destination-port
+        - Removed --https-endpoint-location, --https-endpoint-public-port, --ssh-endpoint-destination-port, --ssh-endpoint-location and --ssh-endpoint-public-port
+    resize:
+        - Renamed --target-instance-count to --workernode-count/-c
+    script-action
+        - Changed --name/-n to represent the name of the script action and added the --cluster-name argument to represent the cluster name
+        - Changed --script-execution-id to --execution-id
+        - Renamed the "show" command to "show-execution-details"
+    script-action execute:
+        - Made parameters for the --roles argument space separated instead of comma separated
+    script-action list:
+        - Removed the --persisted parameter
+* create:
+    Enabled the --cluster-configurations argument to accept a path to a local JSON file or a JSON string as the parameter
+* script-action list-execution-history:
+    Added this command to list the execution history for all script action executions
+* monitor enable:
+    Enabled the --workspace argument to accept a Log Analytics workspace ID or workspace name as the parameter
+    Added the --primary-key argument, which is needed if a workspace ID is provided as the parameter 
+* Added more examples and updated descriptions for help messages
+
+**interactive**
+
+* Fix a loading error on 2.0.70
+
+**Network**
+
+* az network dns record-set cname delete: Fixes #10166. Support `--yes` argument to align the behavior with other dns type. 
+
+**Profile**
+
+* Add get-access-token --resource-type enum for convenience of getting access tokens for well-known resources.
+
+**ServiceFabric**
+
+* Fix for issue #6112 - added all supported os version for sf cluster create
+* Fix for issue #6536 - primary certificate validation bug
+
+**Storage**
+
+* `storage copy`: add copy command for storage
+
+**Kubernetes**
+
+* Use https if dashboard container port is using https 
+
+
+2.0.70
+++++++
+
 **ACR**
 
 * Fixed issue #9952 (a regression in the `acr pack build` command).
@@ -12,6 +294,10 @@ Release History
 * az webapp config ssl support to show a message if a resource is not found
 * Fixed issue where `az functionapp create` does not accept Standard_RAGRS storage account type.
 * Fixed an issue where az webapp up would fail if run using older versions of python
+
+**Monitor**
+
+* `metrics alert create`: Allow '/' and '.' characters in namespace name to support custom metrics.
 
 **Network**
 
@@ -55,6 +341,7 @@ Release History
 **Core**
 
 * Fixed issue where `--subscription` would appear despite being not applicable.
+* Added ossrdbmsResourceId to cloud.py.
 
 **BATCH**
 
@@ -138,6 +425,10 @@ Release History
 
 **Profile**
 * Suppress `--subscription` argument for logout command.
+
+**IoT**
+
+* Support for IoT Hub message enrichments
 
 **RBAC**
 

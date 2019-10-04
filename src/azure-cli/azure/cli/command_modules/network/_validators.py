@@ -52,6 +52,18 @@ def get_asg_validator(loader, dest):
     return _validate_asg_name_or_id
 
 
+def get_subscription_list_validator(dest, model_class):
+
+    def _validate_subscription_list(cmd, namespace):
+        val = getattr(namespace, dest, None)
+        if not val:
+            return
+        model = cmd.get_models(model_class)
+        setattr(namespace, dest, model(subscriptions=val))
+
+    return _validate_subscription_list
+
+
 def get_vnet_validator(dest):
     from msrestazure.tools import is_valid_resource_id, resource_id
 
@@ -204,11 +216,13 @@ def validate_cert(namespace):
 
 def validate_ssl_cert(namespace):
     params = [namespace.cert_data, namespace.cert_password]
-    if all([not x for x in params]):
+    if all([not x for x in params]) and not namespace.key_vault_secret_id:
         # no cert supplied -- use HTTP
         if not namespace.frontend_port:
             namespace.frontend_port = 80
     else:
+        if namespace.key_vault_secret_id:
+            return
         # cert supplied -- use HTTPS
         if not all(params):
             raise CLIError(
@@ -249,6 +263,19 @@ def validate_dns_record_type(namespace):
             else:
                 namespace.record_set_type = token
             return
+
+
+def validate_application_gateway_identity(cmd, namespace):
+    from msrestazure.tools import is_valid_resource_id, resource_id
+
+    if namespace.user_assigned_identity and not is_valid_resource_id(namespace.user_assigned_identity):
+        namespace.user_assigned_identity = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=namespace.resource_group_name,
+            namespace='Microsoft.ManagedIdentity',
+            type='userAssignedIdentities',
+            name=namespace.user_assigned_identity
+        )
 
 
 def validate_express_route_peering(cmd, namespace):
@@ -783,6 +810,7 @@ def process_ag_create_namespace(cmd, namespace):
     validate_tags(namespace)
     validate_custom_error_pages(namespace)
     validate_waf_policy(cmd, namespace)
+    validate_application_gateway_identity(cmd, namespace)
 
 
 def process_auth_create_namespace(cmd, namespace):

@@ -14,7 +14,6 @@ from azure.cli.command_modules.botservice.bot_template_deployer import BotTempla
 from azure.cli.command_modules.botservice.constants import CSHARP, JAVASCRIPT, TYPESCRIPT
 from azure.cli.command_modules.botservice.kudu_client import KuduClient
 from azure.cli.command_modules.botservice.web_app_operations import WebAppOperations
-from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.mgmt.botservice.models import (
     Bot,
     BotProperties,
@@ -29,13 +28,10 @@ from knack.log import get_logger
 logger = get_logger(__name__)
 
 
-def __bot_template_validator(version, deploy_echo):  # pylint: disable=inconsistent-return-statements
-    if version == 'v3' and deploy_echo:
-        raise CLIError("'az bot create --version v3' only creates one type of bot. To create a v3 bot, do not use "
-                       "the '--echo' flag when using this command. See 'az bot create --help'.")
-
+def __bot_template_validator(deploy_echo):  # pylint: disable=inconsistent-return-statements
     if deploy_echo:
         return 'echo'
+    return None
 
 
 def __prepare_configuration_file(cmd, resource_group_name, kudu_client, folder_path):
@@ -79,21 +75,13 @@ def __prepare_configuration_file(cmd, resource_group_name, kudu_client, folder_p
 
 
 def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, password, language=None,  # pylint: disable=too-many-locals, too-many-statements
-           description=None, display_name=None, endpoint=None, tags=None, storageAccountName=None,
-           location='Central US', sku_name='F0', appInsightsLocation=None, version='v4', deploy_echo=None):
+           description=None, display_name=None, endpoint=None, tags=None, location='Central US',
+           sku_name='F0', version='v4', deploy_echo=None):
     # Kind parameter validation
     kind = kind.lower()
     registration_kind = 'registration'
     bot_kind = 'bot'
     webapp_kind = 'webapp'
-    function_kind = 'function'
-
-    if version == 'v3':
-        logger.warning('WARNING: `az bot create` for v3 bots is being discontinued on August 1st, 2019. We encourage '
-                       'developers to move to creating and deploying v4 bots.\n\nFor more information on creating '
-                       'and deploying v4 bots, please visit https://aka.ms/create-and-deploy-v4-bot\n\nFor more '
-                       'information on v3 bot creation deprecation, please visit this blog post: '
-                       'https://blog.botframework.com/2019/06/07/v3-bot-broadcast-message/')
 
     if resource_name.find(".") > -1:
         logger.warning('"." found in --name parameter ("%s"). "." is an invalid character for Azure Bot resource names '
@@ -108,7 +96,7 @@ def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, pa
     except Exception as e:
         logger.debug(e)
         raise CLIError("--appid must be a valid GUID from a Microsoft Azure AD Application Registration. See "
-                       "https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app for "
+                       "https://docs.microsoft.com/azure/active-directory/develop/quickstart-register-app for "
                        "more information on App Registrations. See 'az bot create --help' for more CLI information.")
     if not password:
         raise CLIError("--password cannot have a length of 0. This value is used to authorize calls to your bot. See "
@@ -153,43 +141,20 @@ def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, pa
             parameters=parameters
         )
 
-    # Web app and function bots require deploying custom ARM templates, we do that in a separate method
+    # Web app bots require deploying custom ARM templates, we do that in a separate method
     logger.info('Detected kind %s, validating parameters for the specified kind.', kind)
 
     if not language:
-        raise CLIError("You must pass in a language when creating a {0} or {1} bot. See 'az bot create --help'."
-                       .format(webapp_kind, function_kind))
+        raise CLIError("You must pass in a language when creating a {0} bot. See 'az bot create --help'."
+                       .format(webapp_kind))
     language = language.lower()
 
-    bot_template_type = __bot_template_validator(version, deploy_echo)
-
-    if version == 'v4':
-        if storageAccountName:
-            logger.warning('WARNING: `az bot create` for v4 bots no longer creates or uses a Storage Account. If '
-                           'you wish to create a Storage Account via Azure CLI, please use `az storage account` or '
-                           'an ARM template.')
-        if appInsightsLocation:
-            logger.warning(
-                'WARNING: `az bot create` for v4 bots no longer creates or uses Application Insights. If '
-                'you wish to create Application Insights via Azure CLI, please use an ARM template.')
-        storageAccountName = None
-        appInsightsLocation = None
-    if version == 'v3' and not appInsightsLocation:
-        appInsightsLocation = 'South Central US'
+    bot_template_type = __bot_template_validator(deploy_echo)
 
     creation_results = BotTemplateDeployer.create_app(
         cmd, logger, client, resource_group_name, resource_name, description, kind, msa_app_id, password,
-        storageAccountName, location, sku_name, appInsightsLocation, language, version, bot_template_type)
+        location, sku_name, language, version, bot_template_type)
 
-    subscription_id = get_subscription_id(cmd.cli_ctx)
-    publish_cmd = "az bot publish --resource-group %s -n %s --subscription %s -v %s" % (
-        resource_group_name, resource_name, subscription_id, version)
-    if language == CSHARP:
-        proj_file = '%s.csproj' % resource_name
-        publish_cmd += " --proj-file-path %s" % proj_file
-    creation_results['publishCommand'] = publish_cmd
-    logger.info('To publish your local changes to Azure, use the following command from your code directory:\n  %s',
-                publish_cmd)
     return creation_results
 
 

@@ -9,7 +9,7 @@ import unittest
 
 from azure.cli.testsdk import ScenarioTest, JMESPathCheckExists, ResourceGroupPreparer, \
     StorageAccountPreparer
-from azure.mgmt.recoveryservices.models import StorageModelType
+from azure.mgmt.recoveryservicesbackup.models import StorageType
 
 from .preparers import VaultPreparer, VMPreparer, ItemPreparer, PolicyPreparer, RPPreparer
 
@@ -102,23 +102,23 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("length([?name == '{vault4}'])", 1)
         ])
 
-        storage_model_types = [e.value for e in StorageModelType]
+        storage_model_types = [e.value for e in StorageType]
         vault_properties = self.cmd('backup vault backup-properties show -n {vault1} -g {rg}', checks=[
-            JMESPathCheckExists("contains({}, storageModelType)".format(storage_model_types)),
-            self.check('storageTypeState', 'Unlocked'),
+            JMESPathCheckExists("contains({}, properties.storageModelType)".format(storage_model_types)),
+            self.check('properties.storageTypeState', 'Unlocked'),
             self.check('resourceGroup', '{rg}')
         ]).get_output_in_json()
 
-        if vault_properties['storageModelType'] == StorageModelType.geo_redundant.value:
-            new_storage_model = StorageModelType.locally_redundant.value
+        if vault_properties['properties']['storageModelType'] == StorageType.geo_redundant.value:
+            new_storage_model = StorageType.locally_redundant.value
         else:
-            new_storage_model = StorageModelType.geo_redundant.value
+            new_storage_model = StorageType.geo_redundant.value
 
         self.kwargs['model'] = new_storage_model
         self.cmd('backup vault backup-properties set -n {vault1} -g {rg} --backup-storage-redundancy {model}')
 
         self.cmd('backup vault backup-properties show -n {vault1} -g {rg}', checks=[
-            self.check('storageModelType', new_storage_model)
+            self.check('properties.storageModelType', new_storage_model)
         ])
 
         self.cmd('backup vault delete -n {vault4} -g {rg} -y')
@@ -178,7 +178,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @ResourceGroupPreparer()
     @VaultPreparer()
     @PolicyPreparer(parameter_name='policy1')
-    @PolicyPreparer(parameter_name='policy2')
+    @PolicyPreparer(parameter_name='policy2', instant_rp_days="3")
     @VMPreparer(parameter_name='vm1')
     @VMPreparer(parameter_name='vm2')
     @ItemPreparer(vm_parameter_name='vm1')
@@ -237,6 +237,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("length([?name == '{policy1}'])", 1),
             self.check("length([?name == '{policy2}'])", 1)
         ])
+
+        self.kwargs['policy4_json'] = self.cmd('backup policy show -g {rg} -v {vault} -n {policy2}').get_output_in_json()
+        self.assertEqual(self.kwargs['policy4_json']['properties']['instantRpRetentionRangeInDays'], 3)
 
     @ResourceGroupPreparer()
     @VaultPreparer()
@@ -409,16 +412,19 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertTrue(protection_check == '')
 
     @ResourceGroupPreparer()
+    @ResourceGroupPreparer(parameter_name="target_resource_group")
     @VaultPreparer()
     @VMPreparer()
     @ItemPreparer()
     @RPPreparer()
     @StorageAccountPreparer()
-    def test_backup_restore(self, resource_group, vault_name, vm_name, storage_account):
+    def test_backup_restore(self, resource_group, target_resource_group, vault_name, vm_name, storage_account):
 
         self.kwargs.update({
             'vault': vault_name,
-            'vm': vm_name
+            'vm': vm_name,
+            'target_rg': target_resource_group,
+            'rg': resource_group
         })
         self.kwargs['rp'] = self.cmd('backup recoverypoint list -g {rg} -v {vault} -c {vm} -i {vm} --query [0].name').get_output_in_json()
 
@@ -426,7 +432,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup restore restore-disks -g {rg} -v {vault} -c {vm} -i {vm} -r {rp} --storage-account {sa} --restore-to-staging-storage-account false', expect_failure=True)
 
         # Trigger Restore
-        trigger_restore_job_json = self.cmd('backup restore restore-disks -g {rg} -v {vault} -c {vm} -i {vm} -r {rp} --storage-account {sa} --restore-to-staging-storage-account', checks=[
+        trigger_restore_job_json = self.cmd('backup restore restore-disks -g {rg} -v {vault} -c {vm} -i {vm} -r {rp} -t {target_rg} --storage-account {sa} --restore-to-staging-storage-account', checks=[
             self.check("properties.entityFriendlyName", '{vm}'),
             self.check("properties.operation", "Restore"),
             self.check("properties.status", "InProgress"),

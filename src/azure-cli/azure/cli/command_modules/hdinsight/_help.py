@@ -14,14 +14,14 @@ helps['hdinsight'] = """
 
 helps['hdinsight create'] = """
     type: command
-    short-summary: Creates a new cluster.
+    short-summary: Create a new cluster.
     examples:
         - name: Create a cluster with an existing storage account.
           text: |-
               az hdinsight create -t spark -g MyResourceGroup -n MyCluster \\
               -p "HttpPassword1234!" \\
               --storage-account MyStorageAccount
-        - name: Create a cluster with Enterprise Security Package.
+        - name: Create a cluster with the Enterprise Security Package (ESP).
           text: |-
               az hdinsight create --esp -t spark -g MyResourceGroup -n MyCluster \\
               -p "HttpPassword1234!" \\
@@ -31,7 +31,7 @@ helps['hdinsight create'] = """
               --assign-identity "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/MyMsiRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MyMSI" \\
               --cluster-admin-account MyAdminAccount@MyDomain.onmicrosoft.com \\
               --cluster-users-group-dns MyGroup
-        - name: Create a Kafka cluster with disk encryption. See https://docs.microsoft.com/en-us/azure/hdinsight/kafka/apache-kafka-byok.
+        - name: Create a Kafka cluster with disk encryption. See https://docs.microsoft.com/azure/hdinsight/kafka/apache-kafka-byok.
           text: |-
              az hdinsight create -t kafka -g MyResourceGroup -n MyCluster \\
              -p "HttpPassword1234!" --workernode-data-disks-per-node 2 \\
@@ -46,11 +46,23 @@ helps['hdinsight create'] = """
               -p "HttpPassword1234!" \\
               --storage-account MyStorageAccount \\
               --storage-account-managed-identity MyMSI
+        - name: Create a cluster with configuration from JSON string.
+          text: |-
+              az hdinsight create -t spark -g MyResourceGroup -n MyCluster \\
+              -p "HttpPassword1234!" \\
+              --storage-account MyStorageAccount \\
+              --cluster-configuration {'gateway':{'restAuthCredential.username':'admin'}}
+        - name: Create a cluster with configuration from a local file.
+          text: |-
+              az hdinsight create -t spark -g MyResourceGroup -n MyCluster \\
+              -p "HttpPassword1234!" \\
+              --storage-account MyStorageAccount \\
+              --cluster-configuration @config.json
 """
 
 helps['hdinsight list'] = """
     type: command
-    short-summary: List clusters in the resource group or subscription.
+    short-summary: List HDInsight clusters in a resource group or subscription.
 """
 
 helps['hdinsight wait'] = """
@@ -60,7 +72,7 @@ helps['hdinsight wait'] = """
 
 helps['hdinsight rotate-disk-encryption-key'] = """
     type: command
-    short-summary: Rotate disk encryption key of the specified HDInsight cluster.
+    short-summary: Rotate the disk encryption key of the specified HDInsight cluster.
 """
 
 helps['hdinsight application'] = """
@@ -74,19 +86,28 @@ helps['hdinsight application create'] = """
     examples:
         - name: Create an application with a script URI.
           text: |-
-              az hdinsight application create -g MyResourceGroup -n MyCluster \\
-              --application-name MyApplication \\
-              --script-uri https://path/to/install/script.sh \\
+              az hdinsight application create -g MyResourceGroup -n MyApplication \\
+              --cluster-name MyCluster \\
+              --script-uri https://hdiconfigactions.blob.core.windows.net/linuxhueconfigactionv02/install-hue-uber-v02.sh \\
               --script-action-name MyScriptAction \\
-              --script-parameters '"-option value"'
+              --script-parameters '"-version latest -port 20000"'
         - name: Create an application with a script URI and specified edge node size.
           text: |-
-              az hdinsight application create -g MyResourceGroup -n MyCluster \\
-              --application-name MyApplication \\
-              --script-uri https://path/to/install/script.sh \\
+              az hdinsight application create -g MyResourceGroup -n MyApplication \\
+              --cluster-name MyCluster \\
+              --script-uri https://hdiconfigactions.blob.core.windows.net/linuxhueconfigactionv02/install-hue-uber-v02.sh \\
               --script-action-name MyScriptAction \\
-              --script-parameters '"-option value"' \\
+              --script-parameters "-version latest -port 20000" \\
               --edgenode-size Standard_D4_v2
+        - name: Create an application with HTTPS Endpoint.
+          text: |-
+              az hdinsight application create -g MyResourceGroup -n MyApplication \\
+              --cluster-name MyCluster \\
+              --script-uri https://hdiconfigactions.blob.core.windows.net/linuxhueconfigactionv02/install-hue-uber-v02.sh \\
+              --script-action-name MyScriptAction \\
+              --script-parameters "-version latest -port 20000" \\
+              --destination-port 8888 \\
+              --sub-domain-suffix was
 """
 
 helps['hdinsight application wait'] = """
@@ -96,22 +117,22 @@ helps['hdinsight application wait'] = """
 
 helps['hdinsight monitor'] = """
     type: group
-    short-summary: Manage Azure Monitor logs integration on the HDInsight cluster.
+    short-summary: Manage Azure Monitor logs integration on an HDInsight cluster.
 """
 
 helps['hdinsight monitor enable'] = """
     type: command
-    short-summary: Enables the Azure Monitor logs integration on the HDInsight cluster.
+    short-summary: Enable the Azure Monitor logs integration on an HDInsight cluster.
 """
 
 helps['hdinsight monitor disable'] = """
     type: command
-    short-summary: Disables the Azure Monitor logs integration on the HDInsight cluster.
+    short-summary: Disable the Azure Monitor logs integration on an HDInsight cluster.
 """
 
 helps['hdinsight monitor show'] = """
     type: command
-    short-summary: Gets the status of Azure Monitor logs integration on the HDInsight cluster.
+    short-summary: Get the status of Azure Monitor logs integration on an HDInsight cluster.
 """
 
 helps['hdinsight script-action'] = """
@@ -121,17 +142,13 @@ helps['hdinsight script-action'] = """
 
 helps['hdinsight script-action execute'] = """
     type: command
-    short-summary: Executes script actions on the specified HDInsight cluster.
-"""
-
-helps['hdinsight script-action list'] = """
-    type: command
-    short-summary: Lists script actions for the specified cluster.
+    short-summary: Execute script actions on the specified HDInsight cluster.
     examples:
-        - name: Lists all the persisted script actions for the specified cluster.
+        - name: Execute a script action and persist on success.
           text: |-
-              az hdinsight script-action list -n MyCluster -g MyResourceGroup --persisted
-        - name: Lists all scripts' execution history for the specified cluster.
-          text: |-
-              az hdinsight script-action list -n MyCluster -g MyResourceGroup
+              az hdinsight script-action execute -g MyResourceGroup -n MyScriptActionName \\
+              --cluster-name MyCluster \\
+              --script-uri https://hdiconfigactions.blob.core.windows.net/linuxgiraphconfigactionv01/giraph-installer-v01.sh \\
+              --roles headnode workernode \\
+              --persist-on-success
 """

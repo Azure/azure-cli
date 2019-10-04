@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, create_random_name, record_only
 
 
@@ -314,11 +315,20 @@ class PolicyInsightsTests(ScenarioTest):
 
     # Executing a real remediation requires more time-intensive setup than can be done in a live scenario test.
     # This record_only test executes a real remediation against a known non-compliant policy
+    # Test setup required for running the test live:
+    #    1. Create a resource group by name 'az-cli-policy-insights-test'
+    #    2. Create 2 Windows 10 Pro VMs in two different regions in above RG
+    #    3. At above RG scope, create a new policy assignment for built-in definition with name 'e0efc13a-122a-47c5-b817-2ccfe5d12615' and display name 'Deploy requirements to audit Windows VMs that do not have the specified Windows PowerShell execution policy'
+    #    4. Update the 'pan' key value in test code below with the assignment name created above
+    #    5. Trigger an on-demand evaluation scan on above RG by calling triggerEvaluation API. Check https://docs.microsoft.com/en-us/azure/governance/policy/how-to/get-compliance-data#on-demand-evaluation-scan
+    #    6. After step 5 completes, you should see the two VMs listed as non-compliant resources for the above assignment
+    #    7. Now run the testcase in live mode using command 'azdev test test_policy_insights_remediation_complete --live'
     @record_only()
+    @AllowLargeResponse()
     def test_policy_insights_remediation_complete(self):
         self.kwargs.update({
-            'pan': 'eeb18edc813c42d0ad5a9eab',
-            'rg': 'elpere',
+            'pan': 'cd7ac64c77ec441dbff7af7c',
+            'rg': 'az-cli-policy-insights-test',
             'rn': self.create_random_name('azurecli-test-remediation', 40)
         })
 
@@ -333,14 +343,14 @@ class PolicyInsightsTests(ScenarioTest):
             self.check('policyAssignmentId', '{pid}'),
             self.check('policyDefinitionReferenceId', None),
             self.check('filters', None),
-            self.check('deploymentStatus.totalDeployments', 4)
+            self.check('deploymentStatus.totalDeployments', 2)
         ])
 
         self.cmd('policy remediation show -n {rn} -g {rg}', checks=[
             self.check('name', '{rn}'),
             self.check('resourceGroup', '{rg}'),
             self.check('policyAssignmentId', '{pid}'),
-            self.check('deploymentStatus.totalDeployments', 4)
+            self.check('deploymentStatus.totalDeployments', 2)
         ])
 
         self.cmd('policy remediation list -g {rg}', checks=[
@@ -348,12 +358,12 @@ class PolicyInsightsTests(ScenarioTest):
         ])
 
         self.cmd('policy remediation deployment list -n {rn} -g {rg}', checks=[
-            self.check('length([])', 4),
+            self.check('length([])', 2),
             self.exists('[0].createdOn'),
             self.exists('[0].lastUpdatedOn'),
             self.exists('[0].resourceLocation'),
             self.exists('[0].status'),
-            self.check("length([?contains(@.remediatedResourceId, '/resourcegroups/{rg}/providers/microsoft.compute/virtualmachines')])", 4)
+            self.check("length([?contains(@.remediatedResourceId, '/resourcegroups/{rg}/providers/microsoft.compute/virtualmachines')])", 2)
         ])
 
         # cancel the remediation

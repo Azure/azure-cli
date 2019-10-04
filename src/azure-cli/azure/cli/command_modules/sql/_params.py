@@ -183,6 +183,18 @@ storage_param_type = CLIArgumentType(
     help='The storage size. If no unit is specified, defaults to gigabytes (GB).',
     validator=validate_managed_instance_storage_size)
 
+grace_period_param_type = CLIArgumentType(
+    help='Interval in hours before automatic failover is initiated '
+    'if an outage occurs on the primary server. '
+    'This indicates that Azure SQL Database will not initiate '
+    'automatic failover before the grace period expires. '
+    'Please note that failover operation with --allow-data-loss option '
+    'might cause data loss due to the nature of asynchronous synchronization.')
+
+allow_data_loss_param_type = CLIArgumentType(
+    help='Complete the failover even if doing so may result in data loss. '
+    'This will allow the failover to proceed even if a primary database is unavailable.')
+
 db_service_objective_examples = 'Basic, S0, P1, GP_Gen4_1, BC_Gen5_2.'
 dw_service_objective_examples = 'DW100, DW1000c'
 
@@ -861,19 +873,13 @@ def load_arguments(self, _):
         c.argument('failover_policy', help="The failover policy of the Failover Group",
                    arg_type=get_enum_type(FailoverPolicyType))
         c.argument('grace_period',
-                   help='Interval in hours before automatic failover is initiated '
-                        'if an outage occurs on the primary server. '
-                        'This indicates that Azure SQL Database will not initiate '
-                        'automatic failover before the grace period expires. '
-                        'Please note that failover operation with AllowDataLoss option '
-                        'might cause data loss due to the nature of asynchronous synchronization.')
+                   arg_type=grace_period_param_type)
         c.argument('add_db', nargs='+',
                    help='List of databases to add to Failover Group')
         c.argument('remove_db', nargs='+',
                    help='List of databases to remove from Failover Group')
-        c.argument('allow-data-loss',
-                   help='Complete the failover even if doing so may result in data loss. '
-                        'This will allow the failover to proceed even if a primary database is unavailable.')
+        c.argument('allow_data_loss',
+                   arg_type=allow_data_loss_param_type)
 
     ###############################################
     #                sql server                   #
@@ -1281,3 +1287,33 @@ def load_arguments(self, _):
                    id_part='name')
 
         c.argument('resource_group_name', arg_type=resource_group_name_type)
+
+    ###############################################
+    #             sql instance failover-group     #
+    ###############################################
+
+    with self.argument_context('sql instance-failover-group') as c:
+        c.argument('failover_group_name',
+                   options_list=['--name', '-n'],
+                   help="The name of the Instance Failover Group")
+
+        c.argument('managed_instance',
+                   arg_type=managed_instance_param_type,
+                   options_list=['--source-mi', '--mi'])
+
+        c.argument('partner_managed_instance',
+                   help="The name of the partner managed instance of a Instance Failover Group",
+                   options_list=['--partner-mi'])
+
+        c.argument('partner_resource_group',
+                   help="The name of the resource group of the partner managed instance")
+
+        c.argument('failover_policy',
+                   help="The failover policy of the Instance Failover Group",
+                   arg_type=get_enum_type(FailoverPolicyType))
+
+        c.argument('grace_period',
+                   arg_type=grace_period_param_type)
+
+        c.argument('allow_data_loss',
+                   arg_type=allow_data_loss_param_type)

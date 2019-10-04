@@ -48,6 +48,10 @@ def cf_express_route_circuit_connections(cli_ctx, _):
     return network_client_factory(cli_ctx).express_route_circuit_connections
 
 
+def cf_peer_express_route_circuit_connections(cli_ctx, _):
+    return network_client_factory(cli_ctx).peer_express_route_circuit_connections
+
+
 def cf_express_route_circuit_peerings(cli_ctx, _):
     return network_client_factory(cli_ctx).express_route_circuit_peerings
 
@@ -82,6 +86,14 @@ def cf_express_route_links(cli_ctx, _):
 
 def cf_private_endpoints(cli_ctx, _):
     return network_client_factory(cli_ctx).private_endpoints
+
+
+def cf_private_endpoint_types(cli_ctx, _):
+    return network_client_factory(cli_ctx).available_private_endpoint_types
+
+
+def cf_private_link_services(cli_ctx, _):
+    return network_client_factory(cli_ctx).private_link_services
 
 
 def cf_load_balancers(cli_ctx, _):

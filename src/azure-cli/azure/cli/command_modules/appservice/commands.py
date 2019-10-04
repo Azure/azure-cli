@@ -8,7 +8,7 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.core.util import empty_on_404
 
 from ._client_factory import cf_web_client, cf_plans, cf_webapps
-from ._validators import validate_app_exists_in_rg, validate_app_or_slot_exists_in_rg
+from ._validators import validate_app_exists_in_rg, validate_app_or_slot_exists_in_rg, validate_asp_exists_in_rg
 
 
 def output_slots_in_table(slots):
@@ -43,7 +43,7 @@ def ex_handler_factory(creating_plan=False):
                 if creating_plan:
                     if 'Requested features are not supported in region' in detail:
                         detail = ("Plan with linux worker is not supported in current region. For " +
-                                  "supported regions, please refer to https://docs.microsoft.com/en-us/"
+                                  "supported regions, please refer to https://docs.microsoft.com/"
                                   "azure/app-service-web/app-service-linux-intro")
                     elif 'Not enough available reserved instance servers to satisfy' in detail:
                         detail = ("Plan with Linux worker can only be created in a group " +
@@ -72,16 +72,19 @@ def load_command_table(self, _):
     )
     appservice_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.custom#{}')
 
+    webapp_access_restrictions = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.access_restrictions#{}')
+
     with self.command_group('webapp', webapp_sdk) as g:
         g.custom_command('create', 'create_webapp', exception_handler=ex_handler_factory())
         g.custom_command('up', 'webapp_up', exception_handler=ex_handler_factory())
         g.custom_command('ssh', 'ssh_webapp', exception_handler=ex_handler_factory(), is_preview=True)
         g.custom_command('list', 'list_webapp', table_transformer=transform_web_list_output)
-        g.custom_show_command('show', 'show_webapp', table_transformer=transform_web_output)
-        g.custom_command('delete', 'delete_webapp')
-        g.custom_command('stop', 'stop_webapp')
-        g.custom_command('start', 'start_webapp')
-        g.custom_command('restart', 'restart_webapp')
+        g.custom_show_command('show', 'show_webapp', table_transformer=transform_web_output,
+                              validator=validate_app_or_slot_exists_in_rg)
+        g.custom_command('delete', 'delete_webapp', validator=validate_app_or_slot_exists_in_rg)
+        g.custom_command('stop', 'stop_webapp', validator=validate_app_or_slot_exists_in_rg)
+        g.custom_command('start', 'start_webapp', validator=validate_app_or_slot_exists_in_rg)
+        g.custom_command('restart', 'restart_webapp', validator=validate_app_or_slot_exists_in_rg)
         g.custom_command('browse', 'view_in_browser')
         g.custom_command('list-runtimes', 'list_runtimes')
         g.custom_command('identity assign', 'assign_identity', validator=validate_app_or_slot_exists_in_rg)
@@ -171,10 +174,10 @@ def load_command_table(self, _):
         g.custom_command('update-token', 'update_git_token', exception_handler=ex_handler_factory())
 
     with self.command_group('webapp log') as g:
-        g.custom_command('tail', 'get_streaming_log')
+        g.custom_command('tail', 'get_streaming_log', validator=validate_app_or_slot_exists_in_rg)
         g.custom_command('download', 'download_historical_logs')
-        g.custom_command('config', 'config_diagnostics')
-        g.custom_show_command('show', 'show_diagnostic_settings')
+        g.custom_command('config', 'config_diagnostics', validator=validate_app_or_slot_exists_in_rg)
+        g.custom_show_command('show', 'show_diagnostic_settings', validator=validate_app_or_slot_exists_in_rg)
 
     with self.command_group('webapp deployment slot') as g:
         g.custom_command('list', 'list_slots', table_transformer=output_slots_in_table)
@@ -203,14 +206,42 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_deleted_webapp')
         g.custom_command('restore', 'restore_deleted_webapp')
 
+    with self.command_group('webapp hybrid-connection', is_preview=True) as g:
+        g.custom_command('list', 'list_hc')
+        g.custom_command('add', 'add_hc')
+        g.custom_command('remove', 'remove_hc')
+
+    with self.command_group('functionapp hybrid-connection', is_preview=True) as g:
+        g.custom_command('list', 'list_hc')
+        g.custom_command('add', 'add_hc')
+        g.custom_command('remove', 'remove_hc')
+
+    with self.command_group('appservice hybrid-connection', is_preview=True) as g:
+        g.custom_command('set-key', 'set_hc_key')
+
+    with self.command_group('webapp vnet-integration', is_preview=True) as g:
+        g.custom_command('add', 'add_vnet_integration')
+        g.custom_command('list', 'list_vnet_integration')
+        g.custom_command('remove', 'remove_vnet_integration')
+
+    with self.command_group('functionapp vnet-integration', is_preview=True) as g:
+        g.custom_command('add', 'add_vnet_integration')
+        g.custom_command('list', 'list_vnet_integration')
+        g.custom_command('remove', 'remove_vnet_integration')
+
     with self.command_group('appservice plan', appservice_plan_sdk) as g:
         g.custom_command('create', 'create_app_service_plan', exception_handler=ex_handler_factory(creating_plan=True))
         g.command('delete', 'delete', confirmation=True)
         g.custom_command('list', 'list_app_service_plans')
         g.show_command('show', 'get')
-        g.generic_update_command('update', custom_func_name='update_app_service_plan', setter_arg_name='app_service_plan')
+        g.generic_update_command('update', custom_func_name='update_app_service_plan', setter_arg_name='app_service_plan',
+                                 validator=validate_asp_exists_in_rg)
+
     with self.command_group('appservice') as g:
         g.custom_command('list-locations', 'list_locations', transform=transform_list_location_output)
+
+    with self.command_group('appservice vnet-integration', is_preview=True) as g:
+        g.custom_command('list', 'appservice_list_vnet')
 
     with self.command_group('functionapp') as g:
         g.custom_command('create', 'create_function', exception_handler=ex_handler_factory())
@@ -297,3 +328,15 @@ def load_command_table(self, _):
         g.custom_command('auto-swap', 'config_slot_auto_swap')
         g.custom_command('swap', 'swap_slot', exception_handler=ex_handler_factory())
         g.custom_command('create', 'create_functionapp_slot', exception_handler=ex_handler_factory())
+
+    with self.command_group('webapp config access-restriction', custom_command_type=webapp_access_restrictions, is_preview=True) as g:
+        g.custom_command('show', 'show_webapp_access_restrictions')
+        g.custom_command('add', 'add_webapp_access_restriction')
+        g.custom_command('remove', 'remove_webapp_access_restriction')
+        g.custom_command('set', 'set_webapp_access_restriction')
+
+    with self.command_group('functionapp config access-restriction', custom_command_type=webapp_access_restrictions, is_preview=True) as g:
+        g.custom_command('show', 'show_webapp_access_restrictions')
+        g.custom_command('add', 'add_webapp_access_restriction')
+        g.custom_command('remove', 'remove_webapp_access_restriction')
+        g.custom_command('set', 'set_webapp_access_restriction')

@@ -102,7 +102,6 @@ def load_arguments(self, _):
         c.argument('resource_group_name', arg_type=resource_group_name_type, help='the resource group where the policy will be applied')
 
     with self.argument_context('policy definition', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
-        from azure.mgmt.resource.policy.models import PolicyMode
         c.argument('policy_definition_name', arg_type=existing_policy_definition_name_type)
         c.argument('rules', help='JSON formatted string or a path to a file with such content', type=file_type, completer=FilesCompleter())
         c.argument('display_name', help='Display name of policy definition.')
@@ -110,7 +109,7 @@ def load_arguments(self, _):
         c.argument('params', help='JSON formatted string or a path to a file or uri with parameter definitions.', type=file_type, completer=FilesCompleter(), min_api='2016-12-01')
         c.argument('metadata', min_api='2017-06-01-preview', nargs='+', validator=validate_metadata, help='Metadata in space-separated key=value pairs.')
         c.argument('management_group', arg_type=management_group_name_type)
-        c.argument('mode', arg_type=get_enum_type(PolicyMode), options_list=['--mode', '-m'], help='Mode of the policy definition.', min_api='2016-12-01')
+        c.argument('mode', options_list=['--mode', '-m'], help='Mode of the policy definition, e.g. All, Indexed. Please visit https://aka.ms/azure-policy-mode for more information.', min_api='2016-12-01')
         c.argument('subscription', arg_type=subscription_type)
         c.ignore('_subscription')  # disable global subscription
 
@@ -141,6 +140,9 @@ def load_arguments(self, _):
         c.argument('assign_identity', nargs='*', validator=validate_msi, help="Assigns a system assigned identity to the policy assignment.")
         c.argument('identity_scope', arg_type=identity_scope_type)
         c.argument('identity_role', arg_type=identity_role_type)
+
+    with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2019-06-01') as c:
+        c.argument('enforcement_mode', options_list=['--enforcement-mode', '-e'], help='Enforcement mode of the policy assignment, e.g. Default, DoNotEnforce. Please visit https://aka.ms/azure-policyAssignment-enforcement-mode for more information.', arg_type=get_enum_type(['Default', 'DoNotEnforce']))
 
     with self.argument_context('policy assignment identity', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2018-05-01') as c:
         c.argument('identity_scope', arg_type=identity_scope_type)
@@ -176,6 +178,8 @@ def load_arguments(self, _):
     with self.argument_context('group deployment create') as c:
         c.argument('deployment_name', options_list=['--name', '-n'], required=False,
                    help='The deployment name. Default to template file base name')
+        c.argument('handle_extended_json_format', action='store_true', is_preview=True,
+                   help='Support to handle extended template content including multiline and comments in deployment')
 
     with self.argument_context('group deployment operation show') as c:
         c.argument('operation_ids', nargs='+', help='A list of operation ids to show')
@@ -287,7 +291,7 @@ def load_arguments(self, _):
         c.argument('headers', nargs='+', help="Space-separated headers in KEY=VALUE format or JSON string. Use @{file} to load from a file")
         c.argument('uri_parameters', nargs='+', help='Space-separated queries in KEY=VALUE format or JSON string. Use @{file} to load from a file')
         c.argument('skip_authorization_header', action='store_true', help='do not auto append "Authorization" header')
-        c.argument('body', options_list=['--body', '-b'], help='request body')
+        c.argument('body', options_list=['--body', '-b'], help='request body. Use @{file} to load from a file')
         c.argument('output_file', help='save response payload to a file')
         c.argument('resource', help='Resource url for which CLI should acquire a token in order to access '
                    'the service. The token will be placed in the "Authorization" header. By default, '

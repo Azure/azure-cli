@@ -5,9 +5,13 @@
 
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.commands import CliCommandType
+from azure.cli.core.commands.parameters import get_enum_type
 
 from azure.cli.command_modules.profile._format import transform_account_list
+from ._validators import validate_tenant
 import azure.cli.command_modules.profile._help  # pylint: disable=unused-import
+
+cloud_resource_types = ["oss-rdbms", "arm", "aad-graph", "ms-graph", "batch", "media", "data-lake"]
 
 
 class ProfileCommandsLoader(AzCommandsLoader):
@@ -44,7 +48,7 @@ class ProfileCommandsLoader(AzCommandsLoader):
             c.argument('password', options_list=['--password', '-p'], help="Credentials like user password, or for a service principal, provide client secret or a pem file with key and public certificate. Will prompt if not given.")
             c.argument('service_principal', action='store_true', help='The credential representing a service principal.')
             c.argument('username', options_list=['--username', '-u'], help='user name, service principal, or managed service identity ID')
-            c.argument('tenant', options_list=['--tenant', '-t'], help='The AAD tenant, must provide when using service principals.')
+            c.argument('tenant', options_list=['--tenant', '-t'], help='The AAD tenant, must provide when using service principals.', validator=validate_tenant)
             c.argument('allow_no_subscriptions', action='store_true', help="Support access tenants without subscriptions. It's uncommon but useful to run tenant level commands, such as 'az ad'")
             c.ignore('_subscription')  # hide the global subscription parameter
             c.argument('identity', options_list=('-i', '--identity'), action='store_true', help="Log in using the Virtual Machine's identity", arg_group='Managed Service Identity')
@@ -62,12 +66,15 @@ class ProfileCommandsLoader(AzCommandsLoader):
             c.ignore('_subscription')
 
         with self.argument_context('account list') as c:
-            c.argument('all', help="List all subscriptions, rather just 'Enabled' ones", action='store_true')
+            c.argument('all', help="List all subscriptions, rather than just 'Enabled' ones", action='store_true')
             c.argument('refresh', help="retrieve up-to-date subscriptions from server", action='store_true')
             c.ignore('_subscription')  # hide the global subscription parameter
 
         with self.argument_context('account show') as c:
             c.argument('show_auth_for_sdk', options_list=['--sdk-auth'], action='store_true', help='Output result to a file compatible with Azure SDK auth. Only applicable when authenticating with a Service Principal.')
+
+        with self.argument_context('account get-access-token') as c:
+            c.argument('resource_type', get_enum_type(cloud_resource_types), options_list=['--resource-type'], arg_group='', help='Type of well-known resource.')
 
 
 COMMAND_LOADER_CLS = ProfileCommandsLoader

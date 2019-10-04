@@ -13,7 +13,7 @@ Take a test run now from Azure Cloud Shell!
 
 ## Installation
 
-Please refer to the [install guide](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) for detailed install instructions.
+Please refer to the [install guide](https://docs.microsoft.com/cli/azure/install-azure-cli) for detailed install instructions.
 
 A list of common install issues and their resolutions are available at [install troubleshooting](https://github.com/Azure/azure-cli/blob/dev/doc/install_troubleshooting.md).
 
@@ -31,7 +31,7 @@ $ az [ group ] [ subgroup ] [ command ] {parameters}
 
 ### Get Started
 
-Please refer to the ["get started" guide](https://docs.microsoft.com/en-us/cli/azure/get-started-with-az-cli2) for in-depth instructions.
+Please refer to the ["get started" guide](https://docs.microsoft.com/cli/azure/get-started-with-az-cli2) for in-depth instructions.
 
 For usage and help content, pass in the `-h` parameter, for example:
 
@@ -88,7 +88,7 @@ For scripting purposes, we output certain exit codes for differing scenarios.
 |3   |Missing ARM resource; used for existence check from `show` commands.   |
 
 #### More Samples and Snippets
-For more usage examples, take a look at our [GitHub samples repo](http://github.com/Azure/azure-cli-samples) or [https://docs.microsoft.com/en-us/cli/azure/overview](https://docs.microsoft.com/en-us/cli/azure/overview).
+For more usage examples, take a look at our [GitHub samples repo](http://github.com/Azure/azure-cli-samples) or [https://docs.microsoft.com/cli/azure/overview](https://docs.microsoft.com/cli/azure/overview).
 
 For how to use CLI effectively, check out [tips](./doc/use_cli_effectively.md).
 
