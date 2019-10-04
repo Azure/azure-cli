@@ -290,7 +290,7 @@ def set_policy(client, resource_group_name, vault_name, policy, policy_name):
 
 
 def create_policy(client, resource_group_name, vault_name, name, policy):
-    policy_object =  Helper.get_policy_from_json(client, policy)
+    policy_object = Helper.get_policy_from_json(client, policy)
     policy_object.name = name
     if backup_management_type is not None:
         policy_object.properties.backup_management_type = backup_management_type

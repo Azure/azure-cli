@@ -311,7 +311,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         policies_json = self.cmd('backup policy list -g {rg} -v {vault} --backup-management-type {type}').get_output_in_json()
         policy_count2 = len(policies_json)
-        
         self.assertTrue(policy_count2 == policy_count1 + 1)
 
         self.kwargs['policy2_json']['properties']['retentionPolicy']['dailySchedule']['retentionDuration']['count'] = 20
