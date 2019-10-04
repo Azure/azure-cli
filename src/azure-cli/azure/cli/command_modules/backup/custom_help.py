@@ -14,7 +14,6 @@ from knack.log import get_logger
 
 from msrest.paging import Paged
 from msrestazure.tools import parse_resource_id, is_valid_resource_id
-import azure.cli.command_modules.backup.custom_common as common
 
 from azure.mgmt.recoveryservicesbackup.models import OperationStatusValues, JobStatus
 
