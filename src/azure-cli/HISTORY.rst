@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**ACR**
+
+* Added a preview parameter `--pack-image-tag` to command `az acr pack build`.
+
 **AMS**
 
 * BREAKING CHANGE: Changed job creation from "job start" to "job create".
