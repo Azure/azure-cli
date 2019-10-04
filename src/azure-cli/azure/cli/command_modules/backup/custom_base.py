@@ -31,6 +31,11 @@ def list_policies(client, resource_group_name, vault_name, workload_type=None, b
     return common.list_policies(client, resource_group_name, vault_name, workload_type, backup_management_type)
 
 
+def create_policy(client, resource_group_name, vault_name, name, policy,workload_type=None,
+                  backup_management_type=None):
+    return custom_afs.create_policy(client, resource_group_name, vault_name, name, policy)
+
+
 def show_item(cmd, client, resource_group_name, vault_name, container_name, name, backup_management_type=None,
               workload_type=None):
 

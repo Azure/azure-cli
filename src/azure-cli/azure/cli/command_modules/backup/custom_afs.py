@@ -282,8 +282,20 @@ def set_policy(client, resource_group_name, vault_name, policy, policy_name):
             """)
 
     policy_object = Helper.get_policy_from_json(client, policy)
+    policy_object.properties.work_load_type = workload_type
+    existing_policy = common.show_policy(client, resource_group_name, vault_name, policy_name)
+    Helper.validate_update_policy_request(existing_policy, policy_object)
 
     return client.create_or_update(vault_name, resource_group_name, policy_name, policy_object)
+
+
+def create_policy(client, resource_group_name, vault_name, name, policy):
+    policy_object =  Helper.get_policy_from_json(client, policy)
+    policy_object.name = name
+    if backup_management_type is not None:
+        policy_object.properties.backup_management_type = backup_management_type
+    policy_object.properties.work_load_type = workload_type
+    return client.create_or_update(vault_name, resource_group_name, name, policy_object)
 
 
 def unregister_afs_container(cmd, client, vault_name, resource_group_name, container_name):

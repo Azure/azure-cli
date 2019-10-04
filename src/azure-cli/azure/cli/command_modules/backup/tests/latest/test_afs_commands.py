@@ -12,7 +12,7 @@ from azure.cli.testsdk import ScenarioTest, JMESPathCheckExists, ResourceGroupPr
 from azure.mgmt.recoveryservicesbackup.models import StorageType
 
 subscription_id = "da364f0f-307b-41c9-9d47-b7413ec45535"
-unprotected_afs = "clitestafs2"
+unprotected_afs = "clitestafs"
 protected_afs1 = "sarathtestafs"
 protected_afs2 = "afstest1"
 target_afs = "afstest2"
@@ -22,7 +22,6 @@ vault_name = "sarath-vault"
 
 
 class BackupTests(ScenarioTest, unittest.TestCase):
-    @unittest.skip("The test is not working. Pending update.")
     def test_afs_backup_scenario(self):
         self.kwargs.update({
             'vault': vault_name,
@@ -274,3 +273,51 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         protected_item_count2 = len(item_json)
 
         self.assertTrue(protected_item_count1 == protected_item_count2 + 1)
+
+    def test_afs_backup_policy(self):
+        self.kwargs.update({
+            'vault': vault_name,
+            'subscription_id': subscription_id,
+            'item': "sarathtestafs",
+            'container': "sarathsa",
+            'rg': resource_group_name,
+            'type': "AzureStorage",
+            'policy': "afspolicy1",
+            'policy2': "clitestafspolicy"
+        })
+
+        policies_json = self.cmd('backup policy list -g {rg} -v {vault} --backup-management-type {type}').get_output_in_json()
+        policy_count1 = len(policies_json)
+
+        self.kwargs['policy1_json'] = self.cmd('backup policy show -g {rg} -v {vault} -n {policy}', checks=[
+            self.check("name", '{policy}'),
+            self.check("properties.backupManagementType", '{type}'),
+            self.check("resourceGroup", '{rg}'),
+            self.check("properties.retentionPolicy.dailySchedule.retentionDuration.count", 60),
+        ]).get_output_in_json()
+
+        self.kwargs['policy1_json']['name'] = self.kwargs['policy2']
+        self.kwargs['policy1_json']['properties']['retentionPolicy']['dailySchedule']['retentionDuration']['count'] = 25
+        self.kwargs['policy1_json'] = json.dumps(self.kwargs['policy1_json'])
+
+        self.cmd("backup policy create -g {rg} -v {vault} --policy '{policy1_json}' --name {policy2}")
+
+        self.kwargs['policy2_json'] = self.cmd('backup policy show -g {rg} -v {vault} --n {policy2}', checks=[
+            self.check("name", '{policy2}'),
+            self.check("properties.backupManagementType", '{type}'),
+            self.check("properties.protectedItemsCount", 0),
+            self.check("properties.retentionPolicy.dailySchedule.retentionDuration.count", 25),
+        ]).get_output_in_json()
+
+        policies_json = self.cmd('backup policy list -g {rg} -v {vault} --backup-management-type {type}').get_output_in_json()
+        policy_count2 = len(policies_json)
+        
+        self.assertTrue(policy_count2 == policy_count1 + 1)
+
+        self.kwargs['policy2_json']['properties']['retentionPolicy']['dailySchedule']['retentionDuration']['count'] = 20
+        self.kwargs['policy2_json'] = json.dumps(self.kwargs['policy2_json'])
+
+        self.cmd("backup policy set -g {rg} -v {vault} --policy '{policy2_json}' -n {policy2}")
+        self.cmd('backup policy show -g {rg} -v {vault} -n {policy2}', checks=[
+            self.check("properties.retentionPolicy.dailySchedule.retentionDuration.count", 20),
+        ]).get_output_in_json()
