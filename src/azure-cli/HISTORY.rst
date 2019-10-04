@@ -21,6 +21,10 @@ Release History
 * Add `--enable-cluster-autoscaler`, `--min-count` and `--max-count` to the `az aks create` command, which enables cluster autoscaler for the node pool.
 * Add the above flags as well as `--update-cluster-autoscaler` and `--disable-cluster-autoscaler` to the `az aks update` command, allowing updates to cluster autoscaler.
 
+**AKS**
+
+* Support cluster certificate rotation operation using "az aks rotate-certs".
+
 **AppConfig**
 
 * Add appconfig feature command group to manage feature flags stored in an App Configuration.

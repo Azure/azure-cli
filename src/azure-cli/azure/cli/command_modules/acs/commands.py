@@ -30,7 +30,7 @@ def load_command_table(self, _):
     )
 
     managed_clusters_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.containerservice.v2019_08_01.operations.'
+        operations_tmpl='azure.mgmt.containerservice.v2019_10_01.operations.'
                         '_managed_clusters_operations#ManagedClustersOperations.{}',
         client_factory=cf_managed_clusters
     )
@@ -97,6 +97,9 @@ def load_command_table(self, _):
                          'Are you sure you want to perform this operation?')
         g.custom_command('upgrade-connector', 'k8s_upgrade_connector', is_preview=True)
         g.custom_command('use-dev-spaces', 'aks_use_dev_spaces')
+        g.custom_command('rotate-certs', 'aks_rotate_certs', supports_no_wait=True,
+                         confirmation='Kubernetes will be unavailable during certificate rotation process.\n' +
+                         'Are you sure you want to perform this operation?')
         g.wait_command('wait')
 
     with self.command_group('aks', container_services_sdk, client_factory=cf_container_services) as g:
