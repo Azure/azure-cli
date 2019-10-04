@@ -14,6 +14,7 @@ from knack.log import get_logger
 
 from msrest.paging import Paged
 from msrestazure.tools import parse_resource_id, is_valid_resource_id
+import azure.cli.command_modules.backup.custom_common as common
 
 from azure.mgmt.recoveryservicesbackup.models import OperationStatusValues, JobStatus
 
@@ -362,3 +363,10 @@ def validate_and_extract_container_type(container_name, backup_management_type):
     if container_type in container_type_mappings:
         return container_type_mappings[container_type]
     return None
+
+
+def validate_update_policy_request(existing_policy, new_policy):
+    existing_backup_management_type = existing_policy.properties.backup_management_type
+    new_backup_management_type = new_policy.properties.backup_management_type
+    if existing_backup_management_type != new_backup_management_type:
+        raise CLIError("BackupManagementType cannot be different than the existing type.")

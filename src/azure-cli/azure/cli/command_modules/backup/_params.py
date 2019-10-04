@@ -96,6 +96,10 @@ def load_arguments(self, _):
         c.argument('policy', type=file_type, help='JSON encoded policy definition. Use the show command with JSON output to obtain a policy object. Modify the values using a file editor and pass the object.', completer=FilesCompleter())
         c.argument('name', options_list=['--name', '-n'], help='Name of the Policy.')
 
+    with self.argument_context('backup policy create') as c:
+        c.argument('policy', type=file_type, help='JSON encoded policy definition. Use the show command with JSON output to obtain a policy object. Modify the values using a file editor and pass the object.', completer=FilesCompleter())
+        c.argument('name', options_list=['--name', '-n'], help='Name of the Policy.')
+
     with self.argument_context('backup policy list') as c:
         c.argument('vault_name', vault_name_type, id_part=None)
         c.argument('backup_management_type', options_list=['--backup-management-type'], help='Backup Management Type of the Policy.')
