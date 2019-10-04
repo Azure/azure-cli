@@ -16,6 +16,12 @@ except ImportError:
 
 MSI_LOCAL_ID = '[system]'
 
+def process_group_deployment_create_namespace(namespace):
+    if bool(namespace.template_uri) == bool(namespace.template_file):
+        raise CLIError('incorrect usage: --template-file FILE | --template-uri URI')
+    _validate_deployment_name(namespace)
+
+
 def process_deployment_create_namespace(namespace):
     process_deployment_common_namespace(namespace)
     _validate_deployment_location(namespace)
