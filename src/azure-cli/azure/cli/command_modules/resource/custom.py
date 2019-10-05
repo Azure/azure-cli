@@ -431,12 +431,14 @@ def _deploy_arm_template(cli_ctx,
 
     if scope_type == 'Subscription':
         return _deploy_at_subscription_scope(cli_ctx, deployment_name, deployment_location, properties, validate_only, no_wait)
-    elif scope_type == 'ResourceGroup':
+
+    if scope_type == 'ResourceGroup':
         return _deploy_at_resource_group(cli_ctx, resource_group_name, deployment_name, properties, validate_only, no_wait)
-    elif scope_type == 'ManagementGroup':
+
+    if scope_type == 'ManagementGroup':
         return _deploy_at_management_group(cli_ctx, management_group_id, deployment_name, deployment_location, properties, validate_only, no_wait)
-    else:
-        return _deploy_at_tenant_scope(cli_ctx, deployment_name, deployment_location, properties, validate_only, no_wait)
+
+    return _deploy_at_tenant_scope(cli_ctx, deployment_name, deployment_location, properties, validate_only, no_wait)
 
 
 def _deploy_at_subscription_scope(cli_ctx, deployment_name=None, deployment_location=None, deployment_properties=None, validate_only=False, no_wait=False):
@@ -882,12 +884,14 @@ def list_applications(cmd, resource_group_name=None):
 def list_deployments(cmd, scope_type, resource_group_name=None, management_group_id=None):
     if scope_type == 'Subscription':
         return list_deployments_at_subscription_scope(cmd)
-    elif scope_type == 'ResourceGroup':
+
+    if scope_type == 'ResourceGroup':
         return list_deployments_at_resource_group(cmd, resource_group_name)
-    elif scope_type == 'ManagementGroup':
+
+    if scope_type == 'ManagementGroup':
         return list_deployments_at_management_group(cmd, management_group_id)
-    else:
-        return list_deployments_at_tenant_scope(cmd)
+
+    return list_deployments_at_tenant_scope(cmd)
 
 
 def list_deployments_at_subscription_scope(cmd):
@@ -913,12 +917,15 @@ def list_deployments_at_tenant_scope(cmd):
 def get_deployment(cmd, scope_type, deployment_name, resource_group_name=None, management_group_id=None):
     if scope_type == 'Subscription':
         return get_deployment_at_subscription_scope(cmd, deployment_name)
-    elif scope_type == 'ResourceGroup':
+
+    if scope_type == 'ResourceGroup':
         return get_deployment_at_resource_group(cmd, resource_group_name, deployment_name)
-    elif scope_type == 'ManagementGroup':
+
+    if scope_type == 'ManagementGroup':
         return get_deployment_at_management_group(cmd, management_group_id, deployment_name)
-    else:
-        return get_deployment_at_tenant_scope(cmd, deployment_name)
+
+    return get_deployment_at_tenant_scope(cmd, deployment_name)
+
 
 def get_deployment_at_subscription_scope(cmd, deployment_name):
     rcf = _resource_client_factory(cmd.cli_ctx)
@@ -947,12 +954,14 @@ def wait_deployment(cmd, scope_type, deployment_name, resource_group_name=None, 
 def delete_deployment(cmd, scope_type, deployment_name, resource_group_name=None, management_group_id=None):
     if scope_type == 'Subscription':
         return delete_deployment_at_subscription_scope(cmd, deployment_name)
-    elif scope_type == 'ResourceGroup':
+
+    if scope_type == 'ResourceGroup':
         return delete_deployment_at_resource_group(cmd, resource_group_name, deployment_name)
-    elif scope_type == 'ManagementGroup':
+
+    if scope_type == 'ManagementGroup':
         return delete_deployment_at_management_group(cmd, management_group_id, deployment_name)
-    else:
-        return delete_deployment_at_tenant_scope(cmd, deployment_name)
+
+    return delete_deployment_at_tenant_scope(cmd, deployment_name)
 
 
 def delete_deployment_at_subscription_scope(cmd, deployment_name):
@@ -987,11 +996,11 @@ def deploy_arm_template(cmd, resource_group_name,
 
 
 def deploy_arm_template_at_scope(cmd,
-                                              scope_type=None, resource_group_name=None, management_group_id=None,
-                                              template_file=None, template_uri=None,
-                                              deployment_name=None, deployment_location=None,
-                                              parameters=None, no_wait=False):
-    return _deploy_arm_template(cmd.cli_ctx, 
+                                 scope_type=None, resource_group_name=None, management_group_id=None,
+                                 template_file=None, template_uri=None,
+                                 deployment_name=None, deployment_location=None,
+                                 parameters=None, no_wait=False):
+    return _deploy_arm_template(cmd.cli_ctx,
                                 scope_type, resource_group_name, management_group_id,
                                 template_file, template_uri,
                                 deployment_name, deployment_location,
@@ -1006,7 +1015,7 @@ def validate_arm_template(cmd, resource_group_name, template_file=None, template
 
 
 def validate_arm_template_at_scope(cmd, scope_type=None, resource_group_name=None, management_group_id=None,
-                                   template_file=None, template_uri=None, 
+                                   template_file=None, template_uri=None,
                                    deployment_location=None, parameters=None):
     return _deploy_arm_template(cmd.cli_ctx,
                                 scope_type, resource_group_name, management_group_id,
@@ -1025,7 +1034,7 @@ def export_deployment_template(cmd, scope_type, deployment_name, resource_group_
         result = export_template_at_management_group(cmd, management_group_id, deployment_name)
     else:
         result = export_template_at_tenant_scope(cmd, deployment_name)
-    
+
     print(json.dumps(result.template, indent=2))  # pylint: disable=no-member
 
 
@@ -1264,12 +1273,14 @@ def get_deployment_operations_at_scope(cmd, scope_type, deployment_name, operati
 def list_deployment_operations_at_scope(cmd, scope_type, deployment_name, resource_group_name=None, management_group_id=None):
     if scope_type == 'Subscription':
         return list_deployment_operations_at_subscription_scope(cmd, deployment_name)
-    elif scope_type == 'ResourceGroup':
+
+    if scope_type == 'ResourceGroup':
         return list_deployment_operations_at_resource_group(cmd, resource_group_name, deployment_name)
-    elif scope_type == 'ManagementGroup':
+
+    if scope_type == 'ManagementGroup':
         return list_deployment_operations_at_management_group(cmd, management_group_id, deployment_name)
-    else:
-        return list_deployment_operations_at_tenant_scope(cmd, deployment_name)
+
+    return list_deployment_operations_at_tenant_scope(cmd, deployment_name)
 
 
 def list_deployment_operations_at_subscription_scope(cmd, deployment_name):

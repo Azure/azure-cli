@@ -338,7 +338,6 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
         self.cmd('policy assignment delete -n location-lock')
         self.cmd('policy definition delete -n policy2')
         self.cmd('group delete -n cli_test_subscription_level_deployment --yes')
-        
 
     def test_subscription_level_deployment(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
@@ -464,7 +463,7 @@ class DeploymentTestAtManagementGroup(ScenarioTest):
 class DeploymentTestAtTenantScope(ScenarioTest):
     def tearDown(self):
         self.cmd('group delete -n cli_tenant_level_deployment --yes')
-    #    self.cmd('account management-group delete -n cli_tenant_level_deployment')
+        self.cmd('account management-group delete -n cli_tenant_level_deployment_mg')
 
     def test_tenant_level_deployment(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
@@ -473,7 +472,7 @@ class DeploymentTestAtTenantScope(ScenarioTest):
             'dn': self.create_random_name('azure-cli-tenant-level-deployment', 60)
         })
 
-        #self.cmd('account management-group create --name cli_tenant_level_deployment', checks=[])
+        self.cmd('account management-group create --name cli_tenant_level_deployment_mg', checks=[])
 
         self.cmd('deployment validate --scope-type Tenant --location WestUS --template-file {tf}', checks=[
             self.check('properties.provisioningState', 'Succeeded')
