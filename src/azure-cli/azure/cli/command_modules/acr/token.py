@@ -132,7 +132,7 @@ def acr_token_credential_generate(cmd,
     arm_resource_id = get_resource_id_by_registry_name(cmd.cli_ctx, registry_name)
     token_id = '{}/{}/{}'.format(arm_resource_id, TOKENS, token_name)
 
-    # We only want to specify a password if only one wass passed.
+    # We only want to specify a password if only one was passed.
     name = ("password1" if password1 else "password2") if password1 ^ password2 else None
 
     if months and not expiry:
@@ -165,27 +165,33 @@ def acr_token_credential_delete(cmd,
     if not (password1 or password2):
         raise CLIError("Nothing to delete")
 
-    token = acr_token_show(cmd,
-                           client,
-                           registry_name,
-                           token_name,
-                           resource_group_name)
+    TokenPassword = cmd.get_models('TokenPassword')
 
-    new_passwords = token.credentials.passwords
-    if password1:
-        new_passwords = [password for password in new_passwords if password.name != "password1"]
-    if password2:
-        new_passwords = [password for password in new_passwords if password.name != "password2"]
-
-    new_passwords_payload = list(map(lambda password: {"Name": password.name}, new_passwords))
+    if password1 and password2:
+        new_password_payload = []
+    elif password1:
+        new_password_payload = [
+            TokenPassword(
+                name="password2"
+            )
+        ]
+    else:
+        new_password_payload = [
+            TokenPassword(
+                name="password1"
+            )
+        ]
 
     TokenUpdateParameters = cmd.get_models('TokenUpdateParameters')
+    TokenCredentialsProperties = cmd.get_models('TokenCredentialsProperties')
 
     return client.update(
         resource_group_name,
         registry_name,
         token_name,
         TokenUpdateParameters(
-            credentials=new_passwords_payload
+            credentials=TokenCredentialsProperties(
+                passwords=new_password_payload
+            )
         )
     )

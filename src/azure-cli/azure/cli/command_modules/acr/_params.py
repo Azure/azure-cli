@@ -30,8 +30,7 @@ from ._validators import (
     validate_secret_arg,
     validate_set,
     validate_set_secret,
-    validate_retention_days,
-    validate_token_status
+    validate_retention_days
 )
 
 image_by_tag_or_digest_type = CLIArgumentType(
@@ -266,7 +265,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('registry_name', options_list=['--registryName', '-r'])
         c.argument('token_name', options_list=['--name', '-n'], help='The name of the token.', required=True)
         c.argument('scope_map_name', options_list=['--scope-map'], help='The name of the scope map associated with the token', required=False)
-        c.argument('status', options_list=['--status'], help='The status of the token. Allowed values are "enabled" or "disabled".', required=False, validator=validate_token_status)
+        c.argument('status', options_list=['--status'], help='The status of the token. Allowed values are "enabled" or "disabled".', required=False, default="enabled")
 
     with self.argument_context('acr token create') as c:
         c.argument('scope_map_name', options_list=['--scope-map'], help='The name of the scope map associated with the token', required=True)

@@ -5,15 +5,16 @@
 
 from ._utils import get_resource_group_name_by_registry_name
 
+REPOSITORIES = 'repositories'
+
 
 def _parse_actions_from_repositories(allow_or_remove_repository):
     actions = []
 
     for rule in allow_or_remove_repository:
         repository = rule[0]
-        for i in range(1, len(rule)):
-            action = rule[i]
-            actions.append("repositories/" + repository + "/" + action)
+        for action in rule[1:]:
+            actions.append('{}/{}/{}'.format(REPOSITORIES, repository, action))
 
     return actions
 

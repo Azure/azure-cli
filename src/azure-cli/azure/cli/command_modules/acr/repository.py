@@ -285,12 +285,14 @@ def acr_repository_update(cmd,
             'writeEnabled': write_enabled
         })
 
+    permission = RepoAccessTokenPermission.META_WRITE_META_READ.value if json_payload \
+        else RepoAccessTokenPermission.METADATA_READ.value
     return _acr_repository_attributes_helper(
         cmd=cmd,
         registry_name=registry_name,
         http_method='patch' if json_payload else 'get',
         json_payload=json_payload,
-        permission=RepoAccessTokenPermission.META_WRITE_META_READ.value if json_payload else RepoAccessTokenPermission.METADATA_READ.value,
+        permission=permission,
         repository=repository,
         image=image,
         tenant_suffix=tenant_suffix,
@@ -362,7 +364,7 @@ def acr_repository_untag(cmd,
         username=username,
         password=password,
         repository=repository,
-        permission=RepoAccessTokenPermission.CONTENT_DELETE.value)
+        permission=RepoAccessTokenPermission.DELETE.value)
 
     return request_data_from_registry(
         http_method='delete',
@@ -397,7 +399,7 @@ def acr_repository_delete(cmd,
         username=username,
         password=password,
         repository=repository,
-        permission=RepoAccessTokenPermission.CONT_DELETE_META_READ.value)
+        permission=RepoAccessTokenPermission.DELETE_META_READ.value)
 
     if tag or manifest:
         manifest = _delete_manifest_confirmation(

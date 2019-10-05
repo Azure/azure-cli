@@ -66,7 +66,7 @@ def token_output_format(result):
     return _output_format(result, _token_format_group)
 
 
-def token_password_output_format(result):
+def token_credential_output_format(result):
     return _output_format(result, _token_password_format_group)
 
 
@@ -257,7 +257,8 @@ def _token_password_format_group(item):
     for password in passwords:
         password_name = _get_value(password, 'name').upper()
         password_value = _get_value(password, 'value')
-        password_expiry = _format_datetime(_get_value(password, 'expiry'))
+        expiry_value = _get_value(password, 'expiry')
+        password_expiry = "Never" if not expiry_value else _format_datetime(expiry_value)
         output.append((password_name, password_value))
         output.append(('EXPIRY FOR {}'.format(password_name), password_expiry))
 

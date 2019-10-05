@@ -22,7 +22,7 @@ from ._format import (
     helm_show_output_format,
     scope_map_output_format,
     token_output_format,
-    token_password_output_format
+    token_credential_output_format
 )
 from ._client_factory import (
     cf_acr_registries,
@@ -134,7 +134,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
 
     acr_token_credential_generate_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.acr.token#{}',
-        table_transformer=token_password_output_format,
+        table_transformer=token_credential_output_format,
         client_factory=cf_acr_token_credentials
     )
 
@@ -273,7 +273,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.command('update', 'acr_token_update')
         g.command('show', 'acr_token_show')
         g.command('list', 'acr_token_list')
+        g.command('credential delete', 'acr_token_credential_delete')
 
     with self.command_group('acr token credential', acr_token_credential_generate_util) as g:
-        g.command('delete', 'acr_token_credential_delete')
         g.command('generate', 'acr_token_credential_generate')
