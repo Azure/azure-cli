@@ -38,7 +38,7 @@ class RequestHandler(object):
         while True:
             start = time.time()
 
-            # Append api-version to all URLs 
+            # Append api-version to all URLs
             api_version = "&api-version=" if '?' in request.url else "?api-version="
             request.url = request.url + api_version + constants.Versions.ApiVersion
 
