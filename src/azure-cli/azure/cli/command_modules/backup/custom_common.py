@@ -72,7 +72,7 @@ def list_items(cmd, client, resource_group_name, vault_name, workload_type=None,
     if container_name:
         if custom_help.is_native_name(container_name):
             return [item for item in paged_items if
-                    item.properties.container_name.lower() == container_name.lower()]
+                    _is_container_name_match(item, container_name)]
         return [item for item in paged_items if
                 item.properties.container_name.lower().split(';')[-1] == container_name.lower()]
 
@@ -129,3 +129,12 @@ def _get_containers(client, backup_management_type, status, resource_group_name,
         return [container for container in containers if container.name == container_name]
 
     return containers
+
+
+def _is_container_name_match(item, container_name):
+    if item.properties.container_name.lower() == container_name.lower():
+        return True
+    name = ';'.join(container_name.split(';')[1:])
+    if item.properties.container_name.lower() == name.lower():
+        return True
+    return False

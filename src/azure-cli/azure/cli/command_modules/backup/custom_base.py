@@ -175,9 +175,9 @@ def enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, p
 
 
 def restore_disks(cmd, client, resource_group_name, vault_name, container_name, item_name, rp_name, storage_account,
-                  restore_to_staging_storage_account=None):
+                  target_resource_group=None, restore_to_staging_storage_account=None):
     return custom.restore_disks(cmd, client, resource_group_name, vault_name, container_name, item_name, rp_name,
-                                storage_account, restore_to_staging_storage_account)
+                                storage_account, target_resource_group, restore_to_staging_storage_account)
 
 
 def enable_for_azurefileshare(cmd, client, resource_group_name, vault_name, policy_name, storage_account,
