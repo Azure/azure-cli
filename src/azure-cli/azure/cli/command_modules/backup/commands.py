@@ -11,7 +11,7 @@ from azure.cli.command_modules.backup._client_factory import vaults_cf, backup_p
     protection_containers_cf  # pylint: disable=unused-variable
 from azure.cli.command_modules.backup._format import (
     transform_container_list, transform_policy_list, transform_item_list, transform_job_list,
-    transform_recovery_point_list)
+    transform_recovery_point_list, transform_container, transform_item)
 
 
 # pylint: disable=line-too-long
@@ -39,7 +39,7 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_vault', confirmation=True)
 
     with self.command_group('backup container', backup_custom_base, client_factory=protection_containers_cf) as g:
-        g.show_command('show', 'show_container', client_factory=backup_protection_containers_cf)
+        g.show_command('show', 'show_container', client_factory=backup_protection_containers_cf, table_transformer=transform_container)
         g.command('list', 'list_containers', table_transformer=transform_container_list, client_factory=backup_protection_containers_cf)
         g.command('unregister', 'unregister_container', confirmation=True)
 
@@ -60,7 +60,7 @@ def load_command_table(self, _):
         g.command('enable-for-azurefileshare', 'enable_for_azurefileshare')
 
     with self.command_group('backup item', backup_custom_base, client_factory=protected_items_cf) as g:
-        g.show_command('show', 'show_item', client_factory=backup_protected_items_cf)
+        g.show_command('show', 'show_item', client_factory=backup_protected_items_cf, table_transformer=transform_item)
         g.command('list', 'list_items', table_transformer=transform_item_list, client_factory=backup_protected_items_cf)
         g.command('set-policy', 'update_policy_for_item')
 

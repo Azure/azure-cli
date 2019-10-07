@@ -59,14 +59,14 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):
                                                self.resource_group_parameter_name))
 
     def _cleanup(self, vault_name, resource_group):
-        containers = execute(self.cli_ctx, 'az backup container list -v {} -g {} --query [].properties.friendlyName'
+        containers = execute(self.cli_ctx, 'az backup container list --backup-management-type AzureIaasVM -v {} -g {} --query [].properties.friendlyName'
                              .format(vault_name, resource_group)).get_output_in_json()
         for container in containers:
-            items = execute(self.cli_ctx, 'az backup item list -g {} -v {} -c {} --query [].properties.friendlyName'
+            items = execute(self.cli_ctx, 'az backup item list --backup-management-type AzureIaasVM --workload-type VM -g {} -v {} -c {} --query [].properties.friendlyName'
                             .format(resource_group, vault_name, container)).get_output_in_json()
             for item in items:
                 execute(self.cli_ctx,
-                        'az backup protection disable -g {} -v {} -c {} -i {} --delete-backup-data true --yes'
+                        'az backup protection disable --backup-management-type AzureIaasVM --workload-type VM -g {} -v {} -c {} -i {} --delete-backup-data true --yes'
                         .format(resource_group, vault_name, container, item))
         execute(self.cli_ctx, 'az backup vault delete -n {} -g {} --yes'.format(vault_name, resource_group))
 
@@ -256,7 +256,7 @@ class RPPreparer(AbstractPreparer, SingleValueReplacer):
             vm = self._get_vm(**kwargs)
 
             retain_date = datetime.utcnow() + timedelta(days=30)
-            command_string = 'az backup protection backup-now -g {} -v {} -c {} -i {} --retain-until {} --query name'
+            command_string = 'az backup protection backup-now --backup-management-type AzureIaasVM --workload-type VM -g {} -v {} -c {} -i {} --retain-until {} --query name'
             command_string = command_string.format(self.resource_group, vault, vm, vm,
                                                    retain_date.strftime('%d-%m-%Y'))
             backup_job = execute(self.cli_ctx, command_string).get_output_in_json()
