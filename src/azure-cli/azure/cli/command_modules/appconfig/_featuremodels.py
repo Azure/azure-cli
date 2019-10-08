@@ -37,7 +37,7 @@ class FeatureFlagValue(object):
     '''
     Schema of Value inside KeyValue when key is a Feature Flag.
 
-    :ivar str id_:
+    :ivar str id:
         ID (key) of the feature.
     :ivar str description:
         Description of Feature Flag
@@ -55,7 +55,7 @@ class FeatureFlagValue(object):
                  enabled=None,
                  label=None,
                  conditions=None):
-        self.id_ = id_
+        self.id = id_
         self.description = description
         self.enabled = enabled
         self.label = label
@@ -63,7 +63,7 @@ class FeatureFlagValue(object):
 
     def __repr__(self):
         featureflagvalue = {
-            "id": self.id_,
+            "id": self.id,
             "description": self.description,
             "enabled": self.enabled,
             "label": self.label,

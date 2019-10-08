@@ -83,7 +83,7 @@ def set_feature(cmd,
                     key=key,
                     label=label,
                     value=json.dumps(
-                        feature_flag_value.__dict__,
+                        feature_flag_value,
                         default=lambda o: o.__dict__),
                     content_type=content_type,
                     tags=retrieved_kv.tags if retrieved_kv.tags else tags)
@@ -94,7 +94,7 @@ def set_feature(cmd,
             # display
             feature_flag = map_keyvalue_to_featureflag(
                 set_kv, show_conditions=True)
-            entry = json.dumps(feature_flag.__dict__, default=lambda o: o.__dict__, indent=2, sort_keys=True)
+            entry = json.dumps(feature_flag, default=lambda o: o.__dict__, indent=2, sort_keys=True)
 
         except Exception as exception:
             # Exceptions for ValueError and AttributeError already have customized message
@@ -174,7 +174,7 @@ def delete_feature(cmd,
                 not_deleted_ff.append(failed_ff)
                 logger.error(
                     json.dumps(
-                        failed_ff.__dict__,
+                        failed_ff,
                         default=lambda o: o.__dict__,
                         indent=2,
                         sort_keys=True))
@@ -300,7 +300,7 @@ def lock_feature(cmd,
 
         feature_flag = map_keyvalue_to_featureflag(
             retrieved_kv, show_conditions=False)
-        entry = json.dumps(feature_flag.__dict__, default=lambda o: o.__dict__, indent=2, sort_keys=True)
+        entry = json.dumps(feature_flag, default=lambda o: o.__dict__, indent=2, sort_keys=True)
         confirmation_message = "Are you sure you want to lock the feature: \n" + entry + "\n"
         user_confirmation(confirmation_message, yes)
 
@@ -345,7 +345,7 @@ def unlock_feature(cmd,
 
         feature_flag = map_keyvalue_to_featureflag(
             retrieved_kv, show_conditions=False)
-        entry = json.dumps(feature_flag.__dict__, default=lambda o: o.__dict__, indent=2, sort_keys=True)
+        entry = json.dumps(feature_flag, default=lambda o: o.__dict__, indent=2, sort_keys=True)
         confirmation_message = "Are you sure you want to unlock the feature: \n" + entry + "\n"
         user_confirmation(confirmation_message, yes)
 
@@ -402,7 +402,7 @@ def enable_feature(cmd,
 
             updated_key_value = __update_existing_key_value(azconfig_client=azconfig_client,
                                                             retrieved_kv=retrieved_kv,
-                                                            updated_value=json.dumps(feature_flag_value.__dict__,
+                                                            updated_value=json.dumps(feature_flag_value,
                                                                                      default=lambda o: o.__dict__))
 
             return map_keyvalue_to_featureflag(
@@ -456,7 +456,7 @@ def disable_feature(cmd,
 
             updated_key_value = __update_existing_key_value(azconfig_client=azconfig_client,
                                                             retrieved_kv=retrieved_kv,
-                                                            updated_value=json.dumps(feature_flag_value.__dict__,
+                                                            updated_value=json.dumps(feature_flag_value,
                                                                                      default=lambda o: o.__dict__))
 
             return map_keyvalue_to_featureflag(
@@ -532,7 +532,7 @@ def add_filter(cmd,
 
             __update_existing_key_value(azconfig_client=azconfig_client,
                                         retrieved_kv=retrieved_kv,
-                                        updated_value=json.dumps(feature_flag_value.__dict__,
+                                        updated_value=json.dumps(feature_flag_value,
                                                                  default=lambda o: o.__dict__))
 
             return new_filter
@@ -629,7 +629,7 @@ def delete_filter(cmd,
 
             __update_existing_key_value(azconfig_client=azconfig_client,
                                         retrieved_kv=retrieved_kv,
-                                        updated_value=json.dumps(feature_flag_value.__dict__,
+                                        updated_value=json.dumps(feature_flag_value,
                                                                  default=lambda o: o.__dict__))
 
             return display_filter
@@ -779,7 +779,7 @@ def clear_filter(cmd,
 
                 __update_existing_key_value(azconfig_client=azconfig_client,
                                             retrieved_kv=retrieved_kv,
-                                            updated_value=json.dumps(feature_flag_value.__dict__,
+                                            updated_value=json.dumps(feature_flag_value,
                                                                      default=lambda o: o.__dict__))
 
             return display_filters
