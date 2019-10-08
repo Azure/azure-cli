@@ -11,6 +11,10 @@ Release History
     job start:
         - Changed the command from `job start` to `job create`.
 
+**AppConfig**
+
+* Added Feature Management CLI Support
+
 **Compute**
 
 * vm create: Add --enable-agent configuration.

@@ -9,7 +9,8 @@ from ._client_factory import cf_configstore, cf_configstore_operations
 from ._format import (configstore_credential_format,
                       configstore_output_format,
                       keyvalue_entry_format,
-                      featureflag_entry_format)
+                      featureflag_entry_format,
+                      featurefilter_entry_format)
 
 
 def load_command_table(self, _):
@@ -35,6 +36,12 @@ def load_command_table(self, _):
     configstore_feature_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.appconfig.feature#{}',
         table_transformer=featureflag_entry_format,
+        client_factory=cf_configstore_operations
+    )
+
+    configstore_feature_filter_util = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.appconfig.feature#{}',
+        table_transformer=featurefilter_entry_format,
         client_factory=cf_configstore_operations
     )
 
@@ -79,3 +86,10 @@ def load_command_table(self, _):
         g.command('unlock', 'unlock_feature')
         g.command('enable', 'enable_feature')
         g.command('disable', 'disable_feature')
+
+    with self.command_group('appconfig feature filter', configstore_feature_filter_util) as g:
+        g.command('add', 'add_filter')
+        g.command('delete', 'delete_filter')
+        g.command('show', 'show_filter')
+        g.command('list', 'list_filter')
+        g.command('clear', 'clear_filter')

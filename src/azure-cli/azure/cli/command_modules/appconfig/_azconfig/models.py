@@ -171,3 +171,4 @@ class ClientOptions(object):
             constants.Versions.SDKVersion) if user_agent is None else user_agent
         self.max_retries = 9 if max_retries is None else max_retries
         self.max_retry_wait_time = 30 if max_retry_wait_time is None else max_retry_wait_time
+        

@@ -20,6 +20,9 @@ def keyvalue_entry_format(result):
 def featureflag_entry_format(result):
     return _output_format(result, _featureflag_entry_format_group)
 
+def featurefilter_entry_format(result):
+    return _output_format(result, _featurefilter_entry_format_group)
+
 def _output_format(result, format_group):
     if 'value' in result and isinstance(result['value'], list):
         result = result['value']
@@ -70,6 +73,12 @@ def _featureflag_entry_format_group(item):
         ('DESCRIPTION', _get_value(item, 'description')),
         ('LAST MODIFIED', _format_datetime(_get_value(item, 'lastModified'))),
         ('CONDITIONS', _get_value(item, 'conditions'))
+    ])
+
+def _featurefilter_entry_format_group(item):
+    return OrderedDict([
+        ('NAME', _get_value(item, 'name')),
+        ('PARAMETERS', _get_value(item, 'parameters'))
     ])
 
 def _format_datetime(date_string):

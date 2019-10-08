@@ -5,7 +5,6 @@
 
 from enum import Enum
 import json
-from knack.util import CLIError
 from knack.log import get_logger
 
 # pylint: disable=too-few-public-methods
@@ -13,9 +12,9 @@ from knack.log import get_logger
 
 logger = get_logger(__name__)
 FEATURE_FLAG_PREFIX = ".appconfig.featureflag/"
-DEFAULT_CONDITIONS = {'client_filters':[]}
 
 # Feature Flag Models #
+
 
 class FeatureState(Enum):
     OFF = 1
@@ -34,7 +33,47 @@ class FeatureQueryFields(Enum):
     ALL = KEY | LABEL | LAST_MODIFIED | LOCKED | STATE | DESCRIPTION | CONDITIONS
 
 
-class FeatureFlagDisplay(object):
+class FeatureFlagValue(object):
+    '''
+    Schema of Value inside KeyValue when key is a Feature Flag.
+
+    :ivar str id_:
+        ID (key) of the feature.
+    :ivar str description:
+        Description of Feature Flag
+    :ivar bool enabled:
+        Represents if the Feature flag is On/Off/Conditionally On
+    :ivar str label:
+        Label of the entry.
+    :ivar dict {string, FeatureFilter[]} conditions:
+        Dictionary that contains client_filters List (and server_filters List in future)
+    '''
+
+    def __init__(self,
+                 id_,
+                 description=None,
+                 enabled=None,
+                 label=None,
+                 conditions=None):
+        self.id_ = id_
+        self.description = description
+        self.enabled = enabled
+        self.label = label
+        self.conditions = conditions
+
+    def __repr__(self):
+        featureflagvalue = {
+            "id": self.id_,
+            "description": self.description,
+            "enabled": self.enabled,
+            "label": self.label,
+            "conditions": custom_serialize_conditions(self.conditions)
+        }
+
+        return json.dumps(featureflagvalue, indent=2)
+
+
+class FeatureFlag(object):
     '''
     Feature Flag schema as displayed to the user.
 
@@ -52,18 +91,18 @@ class FeatureFlagDisplay(object):
         A datetime object representing the last time the feature flag was modified.
     :ivar str etag:
         The ETag contains a value that you can use to perform operations.
-    :ivar dict {string, FeatureFilter[]>} conditions:
+    :ivar dict {string, FeatureFilter[]} conditions:
         Dictionary that contains client_filters List (and server_filters List in future)
     '''
 
-    def __init__(self, 
-                key, 
-                label=None, 
-                state=None, 
-                description=None,
-                conditions=None,
-                locked=None,
-                last_modified=None):
+    def __init__(self,
+                 key,
+                 label=None,
+                 state=None,
+                 description=None,
+                 conditions=None,
+                 locked=None,
+                 last_modified=None):
         self.key = key
         self.label = label
         self.state = state.name.lower()
@@ -72,8 +111,8 @@ class FeatureFlagDisplay(object):
         self.last_modified = last_modified
         self.locked = locked
 
-    def __str__(self):
-        featureflagdisplay = {
+    def __repr__(self):
+        featureflag = {
             "Key": self.key,
             "Label": self.label,
             "State": self.state,
@@ -83,22 +122,22 @@ class FeatureFlagDisplay(object):
             "Conditions": custom_serialize_conditions(self.conditions)
         }
 
-        return json.dumps(featureflagdisplay, indent=2)
+        return json.dumps(featureflag, indent=2)
 
 
 class FeatureFilter(object):
     '''
     Feature filters class.
-   
+
     :ivar str Name:
         Name of the filter
     :ivar dict {str, str} parameters:
         Name-Value pairs of parameters
     '''
 
-    def __init__(self, 
-                name, 
-                parameters=None):
+    def __init__(self,
+                 name,
+                 parameters=None):
         self.name = name
         self.parameters = parameters
 
@@ -107,152 +146,137 @@ class FeatureFilter(object):
             "name": self.name,
             "parameters": self.parameters
         }
-        return json.dumps(featurefilter,indent=2)
-
-
-
-
-# Feature Flag Exceptions #
-
-class InvalidJsonException(ValueError):
-    def __init__(self, message):
-        self.message = message
-        super(InvalidJsonException, self).__init__(message)
-
-
-class UnsupportedValuesException(ValueError):
-    def __init__(self, message):
-        self.message = message
-        super(UnsupportedValuesException, self).__init__(message)
-
-
+        return json.dumps(featurefilter, indent=2)
 
 # Feature Flag Helper Functions #
+
 
 def custom_serialize_conditions(conditions_dict):
     '''
         Helper Function to serialize Conditions
 
-        Input: conditions_dict
-            Dictionary of {str, List[FeatureFilter]}
+        Args:
+            conditions_dict - Dictionary of {str, List[FeatureFilter]}
 
-        Return: JSON serializable Dictionary
+        Return:
+            JSON serializable Dictionary
     '''
     featurefilterdict = {}
-    if conditions_dict:
-        for key,value in conditions_dict.items():
-            featurefilters = []
-            for filter in value:
-                featurefilters.append(str(filter))
+
+    for key, value in conditions_dict.items():
+        featurefilters = []
+        for featurefilter in value:
+            featurefilters.append(str(featurefilter))
         featurefilterdict[key] = featurefilters
     return featurefilterdict
 
 
-def map_keyvalue_to_featureflagdisplay(keyvalue, show_conditions=True):
+def map_keyvalue_to_featureflag(keyvalue, show_conditions=True):
     '''
-        Helper Function to convert KeyValue object to FeatureFlagDisplay object
+        Helper Function to convert KeyValue object to FeatureFlag object for display
 
-        Input: keyvalue
-            KeyValue object to be converted
+        Args:
+            keyvalue - KeyValue object to be converted
+            show_conditions - Boolean for controlling whether we want to display "Conditions" or not
 
-        Input: show_conditions
-            Boolean for controlling whether we want to display "Conditions" or not
-
-        Return: FeatureFlagDisplay object
+        Return:
+            FeatureFlag object
     '''
-    key = getattr(keyvalue, 'key')
-    feature_name = key[len(FEATURE_FLAG_PREFIX):]
+    feature_name = keyvalue.key[len(FEATURE_FLAG_PREFIX):]
 
-    # we check that value retrieved is a valid json and only has the fields supported by backend. 
-    # if it's invalid, we throw exception 
-    # For all other exceptions, we let the outer try/except handle it.
-    try:
-        feature_flag_value = map_valuestr_to_valuedict(keyvalue)
-    except (UnsupportedValuesException, InvalidJsonException) as exception:
-        raise ValueError(f"Invalid Value found for Key '{key}'. Aborting operation\n" + str(exception))
-        
+    feature_flag_value = map_keyvalue_to_featureflagvalue(keyvalue)
+
     state = FeatureState.OFF
-    if feature_flag_value.get('enabled', False):
+    if feature_flag_value.enabled:
         state = FeatureState.ON
-    
-    conditions = feature_flag_value.get('conditions', DEFAULT_CONDITIONS)
+
+    conditions = feature_flag_value.conditions
 
     # if conditions["client_filters"] list is not empty, make state conditional
-    filters = conditions.get("client_filters", [])
+    filters = conditions["client_filters"]
+
     if filters and state == FeatureState.ON:
         state = FeatureState.CONDITIONAL
-    
-    feature_flag_display = FeatureFlagDisplay(feature_name,
-                                            getattr(keyvalue, 'label', ""),
-                                            state,
-                                            feature_flag_value.get('description', ""),
-                                            conditions,
-                                            getattr(keyvalue, 'locked', False),
-                                            getattr(keyvalue, 'last_modified', ""))
+
+    feature_flag = FeatureFlag(feature_name,
+                               keyvalue.label,
+                               state,
+                               feature_flag_value.description,
+                               conditions,
+                               keyvalue.locked,
+                               keyvalue.last_modified)
 
     # By Default, we will try to show conditions unless the user has
-    # specifically filtered them using --fields arg. 
-    # But in some operations like 'Delete feature', we don't want 
+    # specifically filtered them using --fields arg.
+    # But in some operations like 'Delete feature', we don't want
     # to display all the conditions as a result of delete operation
     if not show_conditions:
-        del feature_flag_display.conditions
-    return feature_flag_display
+        del feature_flag.conditions
+    return feature_flag
 
 
-def map_valuestr_to_valuedict(keyvalue):
+def map_keyvalue_to_featureflagvalue(keyvalue):
     '''
-        Helper Function to convert value string to a VALID value dictionary.
-        Throws Exception if value is invalid.
-        
-        Input: keyvalue
-            KeyValue object to be converted
+        Helper Function to convert value string to a valid FeatureFlagValue.
+        Throws Exception if value is an invalid JSON.
 
-        Return: Valid value dictionary
+        Args:
+            keyvalue - KeyValue object
 
-        Raises: 
-            UnsupportedValuesException: raised when feature flag value is missing required fields or contains other invalid fields
-            InvalidJsonException: raised when JSON decode error is thrown because value string cannot be deserialized to a valid JSON
+        Return:
+            Valid FeatureFlagValue object
     '''
 
-    feature_flag_value = {}
-    key = getattr(keyvalue, 'key')
-    feature_name = key[len(FEATURE_FLAG_PREFIX):]
-    
-    valuestr = getattr(keyvalue, 'value', "")
-    if valuestr:
-        try:
-            # Make sure value string is a valid json
-            feature_flag_value = json.loads(valuestr)
+    default_conditions = {'client_filters': []}
 
-            # Make sure value json has all the fields we support in the backend
-            valid_fields = {'id', 'description', 'enabled', 'label', 'conditions'}
-            if valid_fields != feature_flag_value.keys():
-                error_msg = f"This feature flag cannot be processed because it is missing required values or it contains unsupported values.\n"
-                raise UnsupportedValuesException(f"Feature flag {feature_name} contains invalid value. " + error_msg)
-        
-        except UnsupportedValuesException as exception:
-            raise UnsupportedValuesException(str(exception))
+    try:
+        # Make sure value string is a valid json
+        feature_flag_dict = json.loads(keyvalue.value)
+        feature_name = keyvalue.key[len(FEATURE_FLAG_PREFIX):]
 
-        except ValueError as exception:
-            error_msg = f"Unable to decode the following JSON value: \n{valuestr}. \nFull Exception: \n{str(exception)}"
-            raise InvalidJsonException(f"Feature flag {feature_name} contains invalid value. " + error_msg)
-        
-        except Exception as exception:
-            error_msg = f"Exception while parsing value for feature: {feature_name}\nValue: {valuestr}\n"
-            raise Exception(error_msg + str(exception))
+        # Make sure value json has all the fields we support in the backend
+        valid_fields = {
+            'id',
+            'description',
+            'enabled',
+            'label',
+            'conditions'}
+        if valid_fields != feature_flag_dict.keys():
+            logger.debug("'%s' feature flag is missing required values or it contains ", feature_name +
+                         "unsupported values. Setting missing value to defaults and ignoring unsupported values\n")
+
+        conditions = feature_flag_dict.get('conditions', default_conditions)
+        client_filters = conditions.get('client_filters', [])
+
+        # Convert all filters to FeatureFilter objects
+        client_filters_list = []
+        for client_filter in client_filters:
+            # If there is a filter, it should always have a name
+            # In case it doesn't, ignore this filter
+            name = client_filter.get('name')
+            if name:
+                params = client_filter.get('parameters', {})
+                client_filters_list.append(FeatureFilter(name, params))
+            else:
+                logger.warning("Ignoring this filter without the 'name' attribute:\n%s",
+                               json.dumps(client_filter, indent=2))
+        conditions['client_filters'] = client_filters_list
+
+        feature_flag_value = FeatureFlagValue(id_=feature_name,
+                                              description=feature_flag_dict.get(
+                                                  'description', ''),
+                                              enabled=feature_flag_dict.get(
+                                                  'enabled', False),
+                                              label=keyvalue.label,
+                                              conditions=conditions)
+
+    except ValueError as exception:
+        error_msg = f"Invalid value. Unable to decode the following JSON value: \n{keyvalue.value}." + \
+            f"\nFull exception: \n{str(exception)}"
+        raise ValueError(error_msg)
+
+    except Exception as exception:
+        logger.debug("Exception while parsing value:\n%s\n", keyvalue.value)
+        raise
 
     return feature_flag_value
-
-
-def map_json_to_featurefilter(json_object):
-    featurefilters = FeatureFilter(__get_value(json_object, 'name'),
-                                    __get_value(json_object, 'parameters'))
-    return featurefilters
-
-
-def __get_value(item, argument):
-    try:
-        return item[argument]
-    except (KeyError, TypeError, IndexError):
-        return None
-
