@@ -7,6 +7,7 @@
 
 import json
 import os
+import sys
 import time
 
 from knack.util import CLIError
@@ -261,7 +262,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         entry_feature = 'Beta'
         entry_label = 'v1'
         default_description = None
-        default_conditions = "{{\'client_filters\': []}}"
+        default_conditions = "{{u\'client_filters\': []}}" if sys.version_info[0] < 3 else "{{\'client_filters\': []}}"
         default_locked = False
         default_state = "off"
 
@@ -585,7 +586,7 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
         entry_feature = 'Color'
         entry_label = 'Standard'
         default_description = None
-        default_conditions = "{{\'client_filters\': []}}"
+        default_conditions = "{{u\'client_filters\': []}}" if sys.version_info[0] < 3 else "{{\'client_filters\': []}}"
         default_locked = False
         default_state = "off"
 

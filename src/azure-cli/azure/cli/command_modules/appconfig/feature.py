@@ -774,7 +774,8 @@ def clear_filter(cmd,
                 user_confirmation(confirmation_message, yes)
 
                 display_filters = copy.deepcopy(feature_filters)
-                feature_filters.clear()
+                # clearing feature_filters list for python 2.7 compatibility
+                del feature_filters[:]
 
                 __update_existing_key_value(azconfig_client=azconfig_client,
                                             retrieved_kv=retrieved_kv,
