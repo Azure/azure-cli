@@ -239,6 +239,8 @@ class Profile(object):
         consolidated = []
         for s in subscriptions:
             display_name = s.display_name
+            if display_name is None:
+                display_name = ''
             try:
                 s.display_name.encode(sys.getdefaultencoding())
             except (UnicodeEncodeError, UnicodeDecodeError):  # mainly for Python 2.7 with ascii as the default encoding
