@@ -875,6 +875,7 @@ def build_av_set_resource(cmd, name, location, tags, platform_update_domain_coun
     return av_set
 
 
+# used for log analytics workspace
 def build_vm_mmaExtension_resource(_, vm_name, location):
     mmaExtension_resource = {
         'type': 'Microsoft.Compute/virtualMachines/extensions',
@@ -900,6 +901,7 @@ def build_vm_mmaExtension_resource(_, vm_name, location):
     return mmaExtension_resource
 
 
+# used for log analytics workspace
 def build_vm_daExtensionName_resource(_, vm_name, location):
     daExtensionName_resource = {
         'type': 'Microsoft.Compute/virtualMachines/extensions',

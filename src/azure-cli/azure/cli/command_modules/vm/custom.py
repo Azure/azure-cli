@@ -992,9 +992,9 @@ def _prepare_workspace(cmd, resource_group_name, workspace):
         try:
             workspace_result = log_client.get(resource_group_name, workspace_name)
         except:  # pylint: disable=bare-except
-            from azure.mgmt.loganalytics.models import Workspace, Sku
-            sku = Sku(name="pergb2018")
-            retention_time = 30
+            from azure.mgmt.loganalytics.models import Workspace, Sku, SkuNameEnum
+            sku = Sku(name=SkuNameEnum.per_gb2018.value)
+            retention_time = 30  # default value
             location = _get_resource_group_location(cmd.cli_ctx, resource_group_name)
             workspace_instance = Workspace(location=location,
                                            sku=sku,

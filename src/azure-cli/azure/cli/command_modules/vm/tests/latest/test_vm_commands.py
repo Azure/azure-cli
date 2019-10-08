@@ -1176,7 +1176,8 @@ class VMCreateNoneOptionsTest(ScenarioTest):  # pylint: disable=too-many-instanc
         ])
         self.cmd('network public-ip show -n {vm}PublicIP -g {rg}', expect_failure=True)
 
-class VMCreateMonitorTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
+
+class VMCreateMonitorTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_with_monitor', location='centralus')
     def test_vm_create_with_monitor(self, resource_group):

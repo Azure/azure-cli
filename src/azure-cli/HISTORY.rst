@@ -17,6 +17,7 @@ Release History
 * vm create: Use standard public IP SKU automatically when using zones.
 * vmss create: Add --computer-name-prefix parameter to support custom computer name prefix of virtual machines in the VMSS.
 * Update galleries API version to 2019-07-01.
+* vm create: Add --workspace to enable log analytics workspace automatically.
 
 **Network**
 
