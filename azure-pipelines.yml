@@ -584,7 +584,7 @@ jobs:
        echo "== Test yum package on CentOS =="
 
        docker pull centos
-       docker run --rm -v $SYSTEM_ARTIFACTSDIRECTORY/yum:/mnt/yum centos /bin/bash -c "yum --nogpgcheck localinstall /mnt/yum/$YUM_NAME -y && time az self-test && time az --version && sleep 5"
+       docker run --rm -v $SYSTEM_ARTIFACTSDIRECTORY/yum:/mnt/yum centos /bin/bash -c "yum update -y && yum --nogpgcheck localinstall /mnt/yum/$YUM_NAME -y && time az self-test && time az --version && sleep 5"
 
     displayName: 'Bash Script'
 
