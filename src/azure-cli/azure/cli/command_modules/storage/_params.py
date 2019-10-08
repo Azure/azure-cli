@@ -66,6 +66,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         default=5000, help='Specifies the maximum number of results to return. Provide "*" to return all.',
         validator=validate_storage_data_plane_list)
 
+    large_file_share_type = CLIArgumentType(
+        arg_type=get_three_state_flag(), min_api='2019-04-01',
+        help='Enable large file shares for storage account. Note: It cannot be disabled once it is enabled.')
+
     sas_help = 'The permissions the SAS grants. Allowed values: {}. Do not use if a stored access policy is ' \
                'referenced with --id that specifies this value. Can be combined.'
 
@@ -114,6 +118,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('sku', help='The storage account SKU.', arg_type=get_enum_type(t_sku_name, default='standard_ragrs'))
         c.argument('enable_files_aadds', arg_type=get_three_state_flag(), min_api='2018-11-01',
                    help='Enable the identity based authentication settings for Azure Files.')
+        c.argument('enable_large_file_share', arg_type=get_three_state_flag(), min_api='2019-04-01',
+                   help='Enable large file shares for storage account. Note: It cannot be disabled once it is enabled.')           
 
     with self.argument_context('storage account update') as c:
         c.register_common_storage_account_options()
@@ -126,6 +132,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('tags', tags_type, default=None)
         c.argument('enable_files_aadds', arg_type=get_three_state_flag(), min_api='2018-11-01',
                    help='Enable the identity based authentication settings for Azure Files.')
+        c.argument('enable_large_file_share', arg_type=large_file_share_type)
 
     with self.argument_context('storage account update', arg_group='Customer managed key', min_api='2017-06-01') as c:
         c.extra('encryption_key_name', help='The name of the KeyVault key', )

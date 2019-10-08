@@ -20,6 +20,10 @@ Release History
 
 * az network private-dns link vnet create/update: Fixes #9851. Support cross-tenant virtual network linking.
 
+**Storage**
+
+*az storage account create/update: Add --enable-large-file-share parameter to support large file shares for storage account.
+
 2.0.74
 ++++++
 
