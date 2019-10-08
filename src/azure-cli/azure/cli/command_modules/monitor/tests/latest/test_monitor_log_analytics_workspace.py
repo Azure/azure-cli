@@ -13,7 +13,7 @@ class TestLogProfileScenarios(ScenarioTest):
             'name': self.create_random_name('clitest', 20)
         })
 
-        self.cmd("monitor log-analytics workspace create -g {rg} -n {name}", checks=[
+        self.cmd("monitor log-analytics workspace create -g {rg} -n {name} -tags clitest=myron", checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('retentionInDays', 30),
             self.check('sku.name', 'pergb2018')
@@ -24,9 +24,31 @@ class TestLogProfileScenarios(ScenarioTest):
             self.check('retentionInDays', 100)
         ])
 
+        self.cmd("monitor log-analytics workspace show -g {rg} -n {name}", checks=[
+            self.check('retentionInDays', 100)
+        ])
+
         self.cmd("monitor log-analytics workspace list-usages -g {rg} -n {name}")
         self.cmd("monitor log-analytics workspace list -g {rg}", checks=[
             self.check('length(@)', 1),
         ])
-        self.cmd("monitor log-analytics workspace get-shared-keys -g {rg} -n {name}")
-        self.cmd("monitor log-analytics workspace list-intelligence-packs -g {rg} -n {name}")
+        self.cmd("monitor log-analytics workspace get-shared-keys -g {rg} -n {name}", checks=[
+            self.check('keys(@)', ["primarySharedKey", "primarySharedKey"])
+        ])
+        self.cmd("monitor log-analytics workspace list-link-workspace")
+        self.cmd("monitor log-analytics workspace get-schema -g {rg} -n {name}", checks=[
+            self.check('__metadata.resultType', 'schema')
+        ])
+
+
+        self.cmd("monitor log-analytics workspace enable-intelligence-packs -g {rg} -n {name} --pack-name AzureSecurityOfThings")
+        self.cmd("monitor log-analytics workspace list-intelligence-packs -g {rg} -n {name}", checks=[
+            self.check('@[?name=AzureSecurityOfThings].enabled', True)
+        ])
+
+        self.cmd("monitor log-analytics workspace disable-intelligence-packs -g {rg} -n {name} --pack-name AzureSecurityOfThings")
+        self.cmd("monitor log-analytics workspace list-intelligence-packs -g {rg} -n {name}", checks=[
+            self.check('@[?name=AzureSecurityOfThings].enabled', False)
+        ])
+
+        self.cmd("monitor log-analytics workspace delete -g {rg} -n {name}")

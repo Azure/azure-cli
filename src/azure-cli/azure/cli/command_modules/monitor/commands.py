@@ -226,7 +226,5 @@ def load_command_table(self, _):
         g.command('list-intelligence-packs', 'list_intelligence_packs')
         g.command('enable-intelligence-pack', 'enable_intelligence_pack')
         g.command('disable-intelligence-pack', 'disable_intelligence_pack')
-        #g.custom_command('search-workspace', 'search_log_analytics_workspace')
-        #g.custom_command('purge-workspace', 'purge_log_analytics_workspace')
 
 
