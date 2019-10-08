@@ -4,6 +4,7 @@
 ::
 
 @IF EXIST "%~dp0\..\python.exe" (
+  echo from test build
   "%~dp0\..\python.exe" -IBm azure.cli %*
 ) ELSE (
   echo Failed to load python executable.
