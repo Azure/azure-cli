@@ -275,7 +275,7 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
             f"\nFull exception: \n{str(exception)}"
         raise ValueError(error_msg)
 
-    except Exception as exception:
+    except:
         logger.debug("Exception while parsing value:\n%s\n", keyvalue.value)
         raise
 

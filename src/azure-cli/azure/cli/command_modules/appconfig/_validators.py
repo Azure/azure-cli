@@ -15,6 +15,7 @@ from ._featuremodels import FeatureQueryFields
 
 logger = get_logger(__name__)
 
+
 def validate_datetime(namespace):
     ''' valid datetime format:YYYY-MM-DDThh:mm:ssZ '''
     datetime_format = '^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])T(2[0-3]|[01][0-9]):[0-5][0-9]:[0-5][0-9][a-zA-Z]{0,5}$'

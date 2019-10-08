@@ -530,10 +530,10 @@ def add_filter(cmd,
                 logger.debug("Adding new filter to the end of list.\n")
                 feature_filters.append(new_filter)
 
-            updated_key_value = __update_existing_key_value(azconfig_client=azconfig_client,
-                                                            retrieved_kv=retrieved_kv,
-                                                            updated_value=json.dumps(feature_flag_value.__dict__,
-                                                                                     default=lambda o: o.__dict__))
+            __update_existing_key_value(azconfig_client=azconfig_client,
+                                        retrieved_kv=retrieved_kv,
+                                        updated_value=json.dumps(feature_flag_value.__dict__,
+                                                                 default=lambda o: o.__dict__))
 
             return new_filter
 
@@ -619,18 +619,17 @@ def delete_filter(cmd,
                     del feature_filters[match_index[0]]
 
                 elif len(match_index) > 1:
-                    error_msg = f"Feature '{feature}' contains multiple instances of filter '{filterName}'. For resolving this conflict, " + \
-                        "run the command again with the filter name and correct zero-based index of the filter you want to delete.\n"
+                    error_msg = f"Feature '{feature}' contains multiple instances of filter '{filterName}'. For resolving this conflict run the command again with the filter name and correct zero-based index of the filter you want to delete.\n"
                     raise CLIError(str(error_msg))
 
                 else:
                     raise CLIError(
                         f"No filter named '{filterName}' was found for feature '{feature}'")
 
-            updated_key_value = __update_existing_key_value(azconfig_client=azconfig_client,
-                                                            retrieved_kv=retrieved_kv,
-                                                            updated_value=json.dumps(feature_flag_value.__dict__,
-                                                                                     default=lambda o: o.__dict__))
+            __update_existing_key_value(azconfig_client=azconfig_client,
+                                        retrieved_kv=retrieved_kv,
+                                        updated_value=json.dumps(feature_flag_value.__dict__,
+                                                                 default=lambda o: o.__dict__))
 
             return display_filter
 
@@ -776,10 +775,10 @@ def clear_filter(cmd,
                 display_filters = copy.deepcopy(feature_filters)
                 feature_filters.clear()
 
-                updated_key_value = __update_existing_key_value(azconfig_client=azconfig_client,
-                                                                retrieved_kv=retrieved_kv,
-                                                                updated_value=json.dumps(feature_flag_value.__dict__,
-                                                                                         default=lambda o: o.__dict__))
+                __update_existing_key_value(azconfig_client=azconfig_client,
+                                            retrieved_kv=retrieved_kv,
+                                            updated_value=json.dumps(feature_flag_value.__dict__,
+                                                                     default=lambda o: o.__dict__))
 
             return display_filters
 

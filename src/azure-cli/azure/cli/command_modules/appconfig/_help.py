@@ -220,13 +220,18 @@ helps['appconfig kv unlock'] = """
             az appconfig kv unlock --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --key color --label test --yes
     """
 
+helps['appconfig feature'] = """
+    type: group
+    short-summary: Manage feature flags stored in an App Configuration.
+    """
+
 helps['appconfig feature set'] = """
     type: command
     short-summary: Set a feature flag.
     examples:
         - name: Set a feature flag with label MyLabel.
           text:
-            az appconfig feature set -n MyAppConfiguration --feature color --label MyLabel 
+            az appconfig feature set -n MyAppConfiguration --feature color --label MyLabel
         - name: Set a feature flag with null label using connection string and set a description.
           text:
             az appconfig feature set --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --feature color --description "This is a colorful feature"
@@ -322,6 +327,11 @@ helps['appconfig feature disable'] = """
             az appconfig feature disable --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --feature color --label test --yes
     """
 
+helps['appconfig feature filter'] = """
+    type: group
+    short-summary: Manage filters associated with feature flags stored in an App Configuration.
+    """
+
 helps['appconfig feature filter add'] = """
     type: command
     short-summary: Add a filter to a feature flag.
@@ -329,12 +339,12 @@ helps['appconfig feature filter add'] = """
         - name: Add a filter for feature 'color' with label MyLabel with name 'MyFilter' and 2 parameters.
           text:
             az appconfig feature filter add -n MyAppConfiguration --feature color --label MyLabel --filterName MyFilter --filterParameters Name=Value Name2=Value2
-        - name: Insert a filter at index 2 (zero-based index) for feature 'color' with label MyLabel and filter name 'MyFilter' with no parameters 
+        - name: Insert a filter at index 2 (zero-based index) for feature 'color' with label MyLabel and filter name 'MyFilter' with no parameters
           text:
             az appconfig feature filter add -n MyAppConfiguration --feature color --label MyLabel --filterName MyFilter --index 2
         - name:  Add a filter with name 'MyFilter' using connection string.
           text:
-            az appconfig feature filter add --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --feature color --filterName MyFilter 
+            az appconfig feature filter add --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --feature color --filterName MyFilter
     """
 
 helps['appconfig feature filter delete'] = """
@@ -358,7 +368,7 @@ helps['appconfig feature filter show'] = """
             az appconfig feature filter show -n MyAppConfiguration --feature color --filterName MyFilter --index 2
         - name: Show all instances of a feature filter when you have multiple filters with that same name.
           text:
-            az appconfig feature filter show --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --feature color --filterName MyFilter 
+            az appconfig feature filter show --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --feature color --filterName MyFilter
     """
 
 helps['appconfig feature filter list'] = """

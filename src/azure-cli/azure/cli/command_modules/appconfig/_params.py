@@ -170,6 +170,7 @@ def load_arguments(self, _):
         c.argument('label', help="If no label specified, delete the feature flag with null label by default. Support star sign as filters, for instance * means all key and abc* means keys with abc as prefix. Similarly, *abc and *abc* are also supported.")
 
     with self.argument_context('appconfig feature list') as c:
+        c.argument('name', id_part=None)
         c.argument('feature', help='Key of the feature to be listed. Support star sign as filters, for instance * means all key and abc* means keys with abc as prefix. Similarly, *abc and *abc* are also supported. Comma separated keys are not supported. Please provide escaped string if your feature name contains comma.')
         c.argument('label', help="If no label specified, list the feature flag with null label by default. Support star sign as filters, for instance * means all key and abc* means keys with abc as prefix. Similarly, *abc and *abc* are also supported.")
         c.argument('fields', arg_type=feature_fields_arg_type)
@@ -210,10 +211,10 @@ def load_arguments(self, _):
         c.argument('index', type=int, help='Zero-based index of the filter to be displayed in case there are multiple instances with same filter name.')
 
     with self.argument_context('appconfig feature filter list') as c:
+        c.argument('name', id_part=None)
         c.argument('feature', help='Name of the feature whose filters you want to be displayed.')
         c.argument('label', help="If no label specified, display filters from the feature flag with null label by default.")
 
     with self.argument_context('appconfig feature filter clear') as c:
         c.argument('feature', help='Name of the feature whose filters need to be deleted.')
         c.argument('label', help="If no label specified, clear filters from the feature flag with null label by default.")
-        
