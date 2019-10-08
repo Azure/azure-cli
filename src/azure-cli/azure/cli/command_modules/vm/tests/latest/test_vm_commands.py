@@ -1183,10 +1183,11 @@ class VMCreateMonitorTest(ScenarioTest):  # pylint: disable=too-many-instance-at
 
         self.kwargs.update({
             'vm': 'monitorvm',
-            'workspace': 'monitorworkspace'
+            'workspace': 'vmlogworkspace20191009',
+            'rg': resource_group
         })
 
-        self.cmd('vm create -n {vm} -g {rg} --image Debian --workspace {workspace}')
+        self.cmd('vm create -n {vm} -g {rg} --image UbuntuLTS --workspace {workspace}')
 
 
 class VMBootDiagnostics(ScenarioTest):
