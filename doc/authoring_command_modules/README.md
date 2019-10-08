@@ -93,7 +93,7 @@ In the \_\_init__ file, you will declare a command loader class that inherits fr
   - `load_arguments` - Apply metadata to your command arguments. It is common to store the implementation of this method in a file 
                        named `_params.py` but for very small modules this may not be necessary. See command authoring for more info.
 
-**__init__.py**
+**\_\_init\_\_.py**
 ```Python
 from azure.cli.core import AzCommandsLoader
 from azure.cli.command_modules.mymod._help import helps  # pylint: disable=unused-import
