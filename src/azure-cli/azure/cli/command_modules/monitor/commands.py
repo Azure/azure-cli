@@ -226,5 +226,3 @@ def load_command_table(self, _):
         g.command('list-intelligence-packs', 'list_intelligence_packs')
         g.command('enable-intelligence-pack', 'enable_intelligence_pack')
         g.command('disable-intelligence-pack', 'disable_intelligence_pack')
-
-

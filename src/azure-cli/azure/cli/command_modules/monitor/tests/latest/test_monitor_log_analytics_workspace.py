@@ -42,7 +42,6 @@ class TestLogProfileScenarios(ScenarioTest):
             self.check('__metadata.resultType', 'schema')
         ])
 
-
         self.cmd("monitor log-analytics workspace enable-intelligence-pack -g {rg} -n {name} --pack-name AzureSecurityOfThings")
         self.cmd("monitor log-analytics workspace list-intelligence-packs -g {rg} -n {name}", checks=[
             self.check("@[?name=='AzureSecurityOfThings'].enabled", '[True]')
