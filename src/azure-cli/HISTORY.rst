@@ -5,7 +5,11 @@ Release History
 
 **AMS**
 
-* BREAKING CHANGE: Changed job creation from "job start" to "job create".
+* BREAKING CHANGE:
+    content-key-policy create:
+        - Changed parameter --ask from utf-8 string to 32 character hex string.
+    job start:
+        - Changed the command from `job start` to `job create`.
 
 **Compute**
 
