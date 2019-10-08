@@ -308,12 +308,3 @@ def get_action_group_id_validator(dest):
             action_group_ids.append(group.lower())
         setattr(namespace, dest, action_group_ids)
     return validate_action_group_ids
-
-def validate_workspace_id(namespace):
-    from msrestazure.tools import is_valid_resource_id
-    from knack.util import CLIError
-    if namespace.linked_workspace_id is None:
-        return
-    if not is_valid_resource_id(namespace.linked_workspace_id):
-        raise CLIError('usage: --linked-workspace-id should be a valid Azure resource ID')
-    return namespace

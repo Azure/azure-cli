@@ -5,13 +5,12 @@
 from azure.cli.command_modules.monitor._client_factory import cf_log_analytics_workspace
 
 def create_log_analytics_workspace(client, cmd, resource_group_name, workspace_name, location=None, tags=None,
-                                   linked_workspace_id=None, sku=None, retention_time=None):
+                                   sku=None, retention_time=None):
     from azure.mgmt.loganalytics.models import Workspace, Sku
     workspace_client = client
     sku = Sku(name=sku)
     workspace_instance = Workspace(location=location,
                                    tags=tags,
-                                   customer_id=linked_workspace_id,
                                    sku=sku,
                                    retention_in_days=retention_time)
     return workspace_client.create_or_update(resource_group_name, workspace_name, workspace_instance)

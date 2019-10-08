@@ -16,7 +16,7 @@ from azure.cli.command_modules.monitor.actions import (
 from azure.cli.command_modules.monitor.util import get_operator_map, get_aggregation_map
 from azure.cli.command_modules.monitor.validators import (
     process_webhook_prop, validate_autoscale_recurrence, validate_autoscale_timegrain, get_action_group_validator,
-    get_action_group_id_validator, validate_metric_dimension, validate_workspace_id)
+    get_action_group_id_validator, validate_metric_dimension)
 
 from knack.arguments import CLIArgumentType
 
@@ -338,6 +338,5 @@ def load_arguments(self, _):
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
         c.argument('workspace_name', options_list=['--workspace-name', '-n'], help="Name of the Log Analytics Workspace.")
         c.argument('sku', deprecate_info=c.deprecate(hide=True), arg_type=get_enum_type([SkuNameEnum.per_gb2018.value]), help="The SKU of the workspace.", default=SkuNameEnum.per_gb2018.value)
-        c.argument('linked_workspace_id', help="The ID associated with the workspace. Setting this value at creation time allows the workspace being created to be linked to an existing workspace.", validator=validate_workspace_id)
         c.argument('retention_time', help="The workspace data retention in days.", type=int, default=30)
     # endregion
