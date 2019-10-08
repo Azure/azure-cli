@@ -619,12 +619,13 @@ def delete_filter(cmd,
                     del feature_filters[match_index[0]]
 
                 elif len(match_index) > 1:
-                    error_msg = f"Feature '{feature}' contains multiple instances of filter '{filterName}'. For resolving this conflict run the command again with the filter name and correct zero-based index of the filter you want to delete.\n"
+                    error_msg = "Feature '{0}' contains multiple instances of filter '{1}'. ".format(feature, filterName) +\
+                                "For resolving this conflict run the command again with the filter name and correct zero-based index of the filter you want to delete.\n"
                     raise CLIError(str(error_msg))
 
                 else:
                     raise CLIError(
-                        f"No filter named '{filterName}' was found for feature '{feature}'")
+                        "No filter named '{0}' was found for feature '{1}'".format(filterName, feature))
 
             __update_existing_key_value(azconfig_client=azconfig_client,
                                         retrieved_kv=retrieved_kv,
@@ -692,7 +693,7 @@ def show_filter(cmd,
 
         if not display_filters:
             raise CLIError(
-                f"No filter named '{filterName}' was found for feature '{feature}'")
+                "No filter named '{0}' was found for feature '{1}'".format(filterName, feature))
         return display_filters
 
     except Exception as exception:
@@ -769,7 +770,7 @@ def clear_filter(cmd,
             # after deletion
             display_filters = []
             if feature_filters:
-                confirmation_message = f"Are you sure you want to clear all filters for feature '{feature}'?\n"
+                confirmation_message = "Are you sure you want to clear all filters for feature '{0}'?\n".format(feature)
                 user_confirmation(confirmation_message, yes)
 
                 display_filters = copy.deepcopy(feature_filters)
@@ -906,7 +907,8 @@ def __custom_key_filtering(retrieved_kv, user_key_filter):
         return filtered_kv
 
     except re.error as exception:
-        error_msg = f"Regular expression error in parsing '{user_key_filter}'. Please provide escaped string if your feature name contains special characters. \nSee \"az appconfig feature list -h\" for correct usage.\n"
+        error_msg = "Regular expression error in parsing '{0}'. ".format(user_key_filter) +\
+            "Please provide escaped string if your feature name contains special characters. \nSee \"az appconfig feature list -h\" for correct usage.\n"
         raise re.error(error_msg + "Error: " + str(exception))
 
     except AttributeError as exception:

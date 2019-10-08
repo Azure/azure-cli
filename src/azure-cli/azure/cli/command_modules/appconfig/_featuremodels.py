@@ -271,8 +271,8 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
                                               conditions=conditions)
 
     except ValueError as exception:
-        error_msg = f"Invalid value. Unable to decode the following JSON value: \n{keyvalue.value}." + \
-            f"\nFull exception: \n{str(exception)}"
+        error_msg = "Invalid value. Unable to decode the following JSON value: \n" +\
+                    "{0}\nFull exception: \n{1}".format(keyvalue.value, str(exception))
         raise ValueError(error_msg)
 
     except:
