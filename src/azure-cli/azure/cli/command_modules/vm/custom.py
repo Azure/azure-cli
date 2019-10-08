@@ -7,7 +7,6 @@
 from __future__ import print_function
 import json
 import os
-import time
 
 try:
     from urllib.parse import urlparse
@@ -671,7 +670,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     if workspace is not None:
         workspace_id = _prepare_workspace(cmd, resource_group_name, workspace)
         master_template.add_secure_parameter('workspaceId', workspace_id)
-        vm_mmaExtension_resource = build_vm_mmaExtension_resource(cmd, vm_name, location, workspace_id)
+        vm_mmaExtension_resource = build_vm_mmaExtension_resource(cmd, vm_name, location)
         vm_daExtensionName_resource = build_vm_daExtensionName_resource(cmd, vm_name, location)
         master_template.add_resource(vm_mmaExtension_resource)
         master_template.add_resource(vm_daExtensionName_resource)
@@ -980,7 +979,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
 
 
 def _prepare_workspace(cmd, resource_group_name, workspace):
-    from msrestazure.tools import parse_resource_id, is_valid_resource_id
+    from msrestazure.tools import is_valid_resource_id
     from ._client_factory import cf_log_analytics
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -988,11 +987,11 @@ def _prepare_workspace(cmd, resource_group_name, workspace):
     if not is_valid_resource_id(workspace):
         workspace_name = workspace
         subscription_id = get_subscription_id(cmd.cli_ctx)
-        log_analytics_client = cf_log_analytics(cmd.cli_ctx, subscription_id)
+        log_client = cf_log_analytics(cmd.cli_ctx, subscription_id)
         workspace_result = None
         try:
-            workspace_result = log_analytics_client.get(resource_group_name, workspace_name)
-        except:
+            workspace_result = log_client.get(resource_group_name, workspace_name)
+        except:  # pylint: disable=bare-except
             from azure.mgmt.loganalytics.models import Workspace, Sku
             sku = Sku(name="pergb2018")
             retention_time = 30
@@ -1000,7 +999,9 @@ def _prepare_workspace(cmd, resource_group_name, workspace):
             workspace_instance = Workspace(location=location,
                                            sku=sku,
                                            retention_in_days=retention_time)
-            workspace_result = LongRunningOperation(cmd.cli_ctx)(log_analytics_client.create_or_update(resource_group_name, workspace_name, workspace_instance))
+            workspace_result = LongRunningOperation(cmd.cli_ctx)(log_client.create_or_update(resource_group_name,
+                                                                                             workspace_name,
+                                                                                             workspace_instance))
         workspace_id = workspace_result.id
     else:
         workspace_id = workspace

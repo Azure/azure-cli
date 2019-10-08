@@ -874,41 +874,45 @@ def build_av_set_resource(cmd, name, location, tags, platform_update_domain_coun
 
     return av_set
 
-def build_vm_mmaExtension_resource(_, vm_name, location, workspace_id):
+
+def build_vm_mmaExtension_resource(_, vm_name, location):
     mmaExtension_resource = {
-        "type": "Microsoft.Compute/virtualMachines/extensions",
-        "apiVersion": "2018-10-01",
-        "properties": {
-            "publisher": "Microsoft.EnterpriseCloud.Monitoring",
-            "type": "OmsAgentForLinux",
-            "typeHandlerVersion": "1.4",
-            "autoUpgradeMinorVersion": 'true',
-            "settings": {
-                "workspaceId": "[reference(parameters('workspaceId'), '2015-11-01-preview').customerId]",
-                "stopOnMultipleConnections": 'true'
+        'type': 'Microsoft.Compute/virtualMachines/extensions',
+        'apiVersion': '2018-10-01',
+        'properties': {
+            'publisher': 'Microsoft.EnterpriseCloud.Monitoring',
+            'type': 'OmsAgentForLinux',
+            'typeHandlerVersion': '1.4',
+            'autoUpgradeMinorVersion': 'true',
+            'settings': {
+                'workspaceId': "[reference(parameters('workspaceId'), '2015-11-01-preview').customerId]",
+                'stopOnMultipleConnections': 'true'
             },
-            "protectedSettings": {
-                "workspaceKey": "[listKeys(parameters('workspaceId'), '2015-11-01-preview').primarySharedKey]"
+            'protectedSettings': {
+                'workspaceKey': "[listKeys(parameters('workspaceId'), '2015-11-01-preview').primarySharedKey]"
             }
         }
     }
-    mmaExtension_resource['name']= vm_name + '/OMSExtension'
+
+    mmaExtension_resource['name'] = vm_name + '/OMSExtension'
     mmaExtension_resource['location'] = location
     mmaExtension_resource['dependsOn'] = ['Microsoft.Compute/virtualMachines/' + vm_name]
     return mmaExtension_resource
 
+
 def build_vm_daExtensionName_resource(_, vm_name, location):
     daExtensionName_resource = {
-        "type": "Microsoft.Compute/virtualMachines/extensions",
-        "apiVersion": "2018-10-01",
-        "properties": {
-                "publisher": "Microsoft.Azure.Monitoring.DependencyAgent",
-                "type": "DependencyAgentLinux",
-                "typeHandlerVersion": "9.5",
-                "autoUpgradeMinorVersion": "true"
+        'type': 'Microsoft.Compute/virtualMachines/extensions',
+        'apiVersion': '2018-10-01',
+        'properties': {
+            'publisher': 'Microsoft.Azure.Monitoring.DependencyAgent',
+            'type': 'DependencyAgentLinux',
+            'typeHandlerVersion': '9.5',
+            'autoUpgradeMinorVersion': 'true'
         }
     }
-    daExtensionName_resource['name']= vm_name + '/DependencyAgentLinux'
+
+    daExtensionName_resource['name'] = vm_name + '/DependencyAgentLinux'
     daExtensionName_resource['location'] = location
-    daExtensionName_resource['dependsOn'] = ['Microsoft.Compute/virtualMachines/' + vm_name + '/extensions/OMSExtension']
+    daExtensionName_resource['dependsOn'] = ['Microsoft.Compute/virtualMachines/{0}/extensions/OMSExtension'.format(vm_name)]  # pylint: disable=line-too-long
     return daExtensionName_resource

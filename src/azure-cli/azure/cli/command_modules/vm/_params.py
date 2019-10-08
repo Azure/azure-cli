@@ -261,7 +261,7 @@ def load_arguments(self, _):
         c.argument('nsg', help='The name to use when creating a new Network Security Group (default) or referencing an existing one. Can also reference an existing NSG by ID or specify "" for none.', arg_group='Network')
         c.argument('nsg_rule', help='NSG rule to create when creating a new NSG. Defaults to open ports for allowing RDP on Windows and allowing SSH on Linux.', arg_group='Network', arg_type=get_enum_type(['RDP', 'SSH']))
         c.argument('application_security_groups', min_api='2017-09-01', nargs='+', options_list=['--asgs'], help='Space-separated list of existing application security groups to associate with the VM.', arg_group='Network')
-
+        c.argument('workspace', arg_group='Monitor', help='Name or ID of Log Analytics Workspace. If name is given, the workspace should be in the same resource group with the vm, otherwise a new workspace will be created.')
     with self.argument_context('vm capture') as c:
         c.argument('overwrite', action='store_true')
 

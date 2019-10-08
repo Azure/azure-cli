@@ -109,6 +109,7 @@ def cf_dedicated_hosts(cli_ctx, _):
 def cf_dedicated_host_groups(cli_ctx, _):
     return _compute_client_factory(cli_ctx).dedicated_host_groups
 
+
 def _log_analytics_client_factory(cli_ctx, subscription_id, *_):
     from azure.mgmt.loganalytics import LogAnalyticsManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
