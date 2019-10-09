@@ -56,7 +56,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'rg': resource_group_name,
             'type': "AzureStorage"
         })
-
         container_json = self.cmd('backup container show -n {sa2} -v {vault} -g {rg} --backup-management-type {type}', checks=[
             self.check('properties.friendlyName', '{sa2}'),
             self.check('properties.healthStatus', 'Healthy'),
@@ -75,7 +74,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ]).get_output_in_json()
 
         self.cmd('backup container list -v {vault} -g {rg} --backup-management-type {type}', checks=[
-            self.check("length(@)", 2),
+            self.check("length(@)", 6),
             self.check("length([?properties.friendlyName == '{sa1}'])", 1),
             self.check("length([?properties.friendlyName == '{sa2}'])", 1)])
 
@@ -111,17 +110,17 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
         self.cmd('backup item list -g {rg} -v {vault} -c {container}', checks=[
-            self.check("length(@)", 5),
+            self.check("length(@)", 6),
             self.check("length([?properties.friendlyName == '{item1}'])", 1)
         ])
 
         self.cmd('backup item list -g {rg} -v {vault} -c {container}', checks=[
-            self.check("length(@)", 5),
+            self.check("length(@)", 6),
             self.check("length([?properties.friendlyName == '{item2}'])", 1)
         ])
 
         self.cmd('backup item list -g {rg} -v {vault} -c {container1}', checks=[
-            self.check("length(@)", 5),
+            self.check("length(@)", 6),
             self.check("length([?properties.friendlyName == '{item1}'])", 1)
         ])
 

@@ -5,7 +5,8 @@
 
 
 import azure.cli.command_modules.backup.custom_help as custom_help
-from azure.cli.command_modules.backup._client_factory import backup_protected_items_cf
+from azure.cli.command_modules.backup._client_factory import backup_protected_items_cf, \
+    protection_containers_cf, protected_items_cf
 from azure.cli.core.util import CLIError
 # pylint: disable=import-error
 
@@ -19,6 +20,8 @@ workload_type_map = {'MSSQL': 'SQLDataBase',
 
 def show_container(cmd, client, name, resource_group_name, vault_name, backup_management_type=None,
                    status="Registered"):
+    if custom_help.is_native_name(name):
+        return protection_containers_cf(cmd.cli_ctx).get(vault_name, resource_group_name, fabric_name, name)
     container_type = custom_help.validate_and_extract_container_type(name, backup_management_type)
     containers = _get_containers(client, container_type, status, resource_group_name, vault_name, name)
     return custom_help.get_none_one_or_many(containers)
@@ -46,7 +49,9 @@ def list_policies(client, resource_group_name, vault_name, workload_type=None, b
 
 def show_item(cmd, client, resource_group_name, vault_name, container_name, name, backup_management_type=None,
               workload_type=None):
-
+    if custom_help.is_native_name(name) and custom_help.is_native_name(container_name):
+        client = protected_items_cf(cmd.cli_ctx)
+        return client.get(vault_name, resource_group_name, fabric_name, container_name, name)
     container_type = custom_help.validate_and_extract_container_type(container_name, backup_management_type)
 
     items = list_items(cmd, client, resource_group_name, vault_name, workload_type, container_name,

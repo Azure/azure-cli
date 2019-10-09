@@ -130,7 +130,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("length([?name == '{vault3}'])", 1)
         ])
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(location="southeastasia")
     @VaultPreparer()
     @VMPreparer(parameter_name='vm1')
     @VMPreparer(parameter_name='vm2')
@@ -149,17 +149,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.healthStatus', 'Healthy'),
             self.check('properties.registrationStatus', 'Registered'),
             self.check('properties.resourceGroup', '{rg}'),
-            self.check('resourceGroup', '{rg}')
-        ]).get_output_in_json()
-
-        self.kwargs['container_name'] = container_json['name']
-
-        self.cmd('backup container show --backup-management-type AzureIaasVM -n {container_name} -v {vault} -g {rg}', checks=[
-            self.check('properties.friendlyName', '{vm1}'),
-            self.check('properties.healthStatus', 'Healthy'),
-            self.check('properties.registrationStatus', 'Registered'),
-            self.check('properties.resourceGroup', '{rg}'),
-            self.check('name', '{container_name}'),
             self.check('resourceGroup', '{rg}')
         ]).get_output_in_json()
 
@@ -241,7 +230,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['policy4_json'] = self.cmd('backup policy show -g {rg} -v {vault} -n {policy2}').get_output_in_json()
         self.assertEqual(self.kwargs['policy4_json']['properties']['instantRpRetentionRangeInDays'], 3)
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(location="southeastasia")
     @VaultPreparer()
     @VMPreparer(parameter_name='vm1')
     @VMPreparer(parameter_name='vm2')

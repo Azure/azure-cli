@@ -7,7 +7,8 @@ import azure.cli.command_modules.backup.custom as custom
 import azure.cli.command_modules.backup.custom_afs as custom_afs
 import azure.cli.command_modules.backup.custom_help as custom_help
 import azure.cli.command_modules.backup.custom_common as common
-from azure.cli.command_modules.backup._client_factory import protection_policies_cf, backup_protected_items_cf
+from azure.cli.command_modules.backup._client_factory import protection_policies_cf, backup_protected_items_cf, \
+    backup_protection_containers_cf
 from azure.cli.core.util import CLIError
 # pylint: disable=import-error
 
@@ -160,7 +161,9 @@ def list_associated_items_for_policy(client, resource_group_name, vault_name, na
 
 
 def unregister_container(cmd, client, vault_name, resource_group_name, container_name, backup_management_type=None):
-    container = show_container(cmd, client, container_name, resource_group_name, vault_name, backup_management_type)
+    containrs_client = backup_protection_containers_cf(cmd.cli_ctx)
+    container = show_container(cmd, containrs_client, container_name, resource_group_name, vault_name,
+                               backup_management_type)
 
     if container.properties.backup_management_type.lower() == "azurestorage":
         custom_afs.unregister_afs_container(cmd, client, vault_name, resource_group_name, container.name)
