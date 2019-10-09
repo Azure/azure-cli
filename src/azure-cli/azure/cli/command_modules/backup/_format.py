@@ -64,6 +64,17 @@ def transform_recovery_point(result):
                         ('Consistency', result['properties']['recoveryPointType'])])
 
 
+def transform_protectable_item(result):
+    columns = []
+    columns.append(('Name', result['name']))
+    columns.append(('Protectable Item Type', result['properties']['protectableItemType']))
+    columns.append(('ParentName', result['properties']['parentName']))
+    columns.append(('ServerName', result['properties']['serverName']))
+    columns.append(('isProtected', result['properties']['protectionState']))
+
+    return OrderedDict(columns)
+
+
 def transform_container_list(container_list):
     return [transform_container(c) for c in container_list]
 
@@ -82,3 +93,7 @@ def transform_policy_list(policy_list):
 
 def transform_recovery_point_list(recovery_point_list):
     return [transform_recovery_point(rp) for rp in recovery_point_list]
+
+
+def transform_protectable_item_list(protectable_item_list):
+    return [transform_protectable_item(i) for i in protectable_item_list]
