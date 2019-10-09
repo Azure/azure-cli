@@ -13,8 +13,8 @@ interactions:
       ParameterSetName:
       - -n
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-cosmosdb/0.7.0
-        Azure-SDK-For-Python AZURECLI/2.0.71
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-cosmosdb/0.8.0 Azure-SDK-For-Python AZURECLI/2.0.74
       accept-language:
       - en-US
     method: HEAD
@@ -26,9 +26,9 @@ interactions:
       cache-control:
       - no-store, no-cache
       content-length:
-      - '95'
+      - '147'
       date:
-      - Wed, 21 Aug 2019 20:17:20 GMT
+      - Tue, 08 Oct 2019 06:02:52 GMT
       pragma:
       - no-cache
       server:
@@ -54,24 +54,24 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-resource/3.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.71
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_cosmosdb_account000001?api-version=2019-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_cosmosdb_account000001?api-version=2019-07-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001","name":"cli_test_cosmosdb_account000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-08-21T20:17:17Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001","name":"cli_test_cosmosdb_account000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-10-08T06:02:48Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '384'
+      - '428'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 21 Aug 2019 20:17:20 GMT
+      - Tue, 08 Oct 2019 06:02:52 GMT
       expires:
       - '-1'
       pragma:
@@ -105,8 +105,879 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-cosmosdb/0.7.0
-        Azure-SDK-For-Python AZURECLI/2.0.71
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-cosmosdb/0.8.0 Azure-SDK-For-Python AZURECLI/2.0.74
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002?api-version=2015-04-08
+  response:
+    body:
+      string: '{"error":{"code":"MissingSubscriptionRegistration","message":"The subscription
+        is not registered to use namespace ''Microsoft.DocumentDB''. See https://aka.ms/rps-not-found
+        for how to register subscriptions.","details":[{"code":"MissingSubscriptionRegistration","target":"Microsoft.DocumentDB","message":"The
+        subscription is not registered to use namespace ''Microsoft.DocumentDB''.
+        See https://aka.ms/rps-not-found for how to register subscriptions."}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '451'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 08 Oct 2019 06:02:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+    status:
+      code: 409
+      message: Conflict
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      User-Agent:
+      - python-requests/2.22.0
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/register?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB","namespace":"Microsoft.DocumentDB","authorizations":[{"applicationId":"57c0fc58-a83a-41d0-8ae9-08952659bdfd","roleDefinitionId":"FFFD5CF5-FFD3-4B24-B0E2-0715ADD4C282"},{"applicationId":"36e2398c-9dd3-4f29-9a72-d9f2cfc47ad9","roleDefinitionId":"D5A795DE-916D-4818-B015-33C9E103E39B"}],"resourceTypes":[{"resourceType":"databaseAccounts","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"databaseAccountNames","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"operations","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"operationResults","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"locations/operationsStatus","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"locations","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"locations/deleteVirtualNetworkOrSubnets","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5010'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 08 Oct 2019 06:02:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB","namespace":"Microsoft.DocumentDB","authorizations":[{"applicationId":"57c0fc58-a83a-41d0-8ae9-08952659bdfd","roleDefinitionId":"FFFD5CF5-FFD3-4B24-B0E2-0715ADD4C282"},{"applicationId":"36e2398c-9dd3-4f29-9a72-d9f2cfc47ad9","roleDefinitionId":"D5A795DE-916D-4818-B015-33C9E103E39B"}],"resourceTypes":[{"resourceType":"databaseAccounts","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"databaseAccountNames","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"operations","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"operationResults","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"locations/operationsStatus","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"locations","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"locations/deleteVirtualNetworkOrSubnets","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5010'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 08 Oct 2019 06:03:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB","namespace":"Microsoft.DocumentDB","authorizations":[{"applicationId":"57c0fc58-a83a-41d0-8ae9-08952659bdfd","roleDefinitionId":"FFFD5CF5-FFD3-4B24-B0E2-0715ADD4C282"},{"applicationId":"36e2398c-9dd3-4f29-9a72-d9f2cfc47ad9","roleDefinitionId":"D5A795DE-916D-4818-B015-33C9E103E39B"}],"resourceTypes":[{"resourceType":"databaseAccounts","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"databaseAccountNames","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"operations","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"operationResults","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"locations/operationsStatus","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"locations","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"locations/deleteVirtualNetworkOrSubnets","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5010'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 08 Oct 2019 06:03:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB","namespace":"Microsoft.DocumentDB","authorizations":[{"applicationId":"57c0fc58-a83a-41d0-8ae9-08952659bdfd","roleDefinitionId":"FFFD5CF5-FFD3-4B24-B0E2-0715ADD4C282"},{"applicationId":"36e2398c-9dd3-4f29-9a72-d9f2cfc47ad9","roleDefinitionId":"D5A795DE-916D-4818-B015-33C9E103E39B"}],"resourceTypes":[{"resourceType":"databaseAccounts","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"databaseAccountNames","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"operations","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"operationResults","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"locations/operationsStatus","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"locations","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"locations/deleteVirtualNetworkOrSubnets","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5010'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 08 Oct 2019 06:03:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB","namespace":"Microsoft.DocumentDB","authorizations":[{"applicationId":"57c0fc58-a83a-41d0-8ae9-08952659bdfd","roleDefinitionId":"FFFD5CF5-FFD3-4B24-B0E2-0715ADD4C282"},{"applicationId":"36e2398c-9dd3-4f29-9a72-d9f2cfc47ad9","roleDefinitionId":"D5A795DE-916D-4818-B015-33C9E103E39B"}],"resourceTypes":[{"resourceType":"databaseAccounts","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"databaseAccountNames","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"operations","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"operationResults","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"locations/operationsStatus","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"locations","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"locations/deleteVirtualNetworkOrSubnets","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5010'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 08 Oct 2019 06:03:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB","namespace":"Microsoft.DocumentDB","authorizations":[{"applicationId":"57c0fc58-a83a-41d0-8ae9-08952659bdfd","roleDefinitionId":"FFFD5CF5-FFD3-4B24-B0E2-0715ADD4C282"},{"applicationId":"36e2398c-9dd3-4f29-9a72-d9f2cfc47ad9","roleDefinitionId":"D5A795DE-916D-4818-B015-33C9E103E39B"}],"resourceTypes":[{"resourceType":"databaseAccounts","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"databaseAccountNames","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"operations","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"operationResults","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"locations/operationsStatus","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"locations","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"locations/deleteVirtualNetworkOrSubnets","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5010'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 08 Oct 2019 06:03:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB","namespace":"Microsoft.DocumentDB","authorizations":[{"applicationId":"57c0fc58-a83a-41d0-8ae9-08952659bdfd","roleDefinitionId":"FFFD5CF5-FFD3-4B24-B0E2-0715ADD4C282"},{"applicationId":"36e2398c-9dd3-4f29-9a72-d9f2cfc47ad9","roleDefinitionId":"D5A795DE-916D-4818-B015-33C9E103E39B"}],"resourceTypes":[{"resourceType":"databaseAccounts","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"databaseAccountNames","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"operations","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"operationResults","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"locations/operationsStatus","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"locations","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"locations/deleteVirtualNetworkOrSubnets","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5010'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 08 Oct 2019 06:03:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB","namespace":"Microsoft.DocumentDB","authorizations":[{"applicationId":"57c0fc58-a83a-41d0-8ae9-08952659bdfd","roleDefinitionId":"FFFD5CF5-FFD3-4B24-B0E2-0715ADD4C282"},{"applicationId":"36e2398c-9dd3-4f29-9a72-d9f2cfc47ad9","roleDefinitionId":"D5A795DE-916D-4818-B015-33C9E103E39B"}],"resourceTypes":[{"resourceType":"databaseAccounts","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"databaseAccountNames","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"operations","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"operationResults","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"locations/operationsStatus","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"locations","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"locations/deleteVirtualNetworkOrSubnets","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5010'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 08 Oct 2019 06:04:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB","namespace":"Microsoft.DocumentDB","authorizations":[{"applicationId":"57c0fc58-a83a-41d0-8ae9-08952659bdfd","roleDefinitionId":"FFFD5CF5-FFD3-4B24-B0E2-0715ADD4C282"},{"applicationId":"36e2398c-9dd3-4f29-9a72-d9f2cfc47ad9","roleDefinitionId":"D5A795DE-916D-4818-B015-33C9E103E39B"}],"resourceTypes":[{"resourceType":"databaseAccounts","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"databaseAccountNames","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"operations","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"operationResults","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"locations/operationsStatus","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"locations","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"locations/deleteVirtualNetworkOrSubnets","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5010'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 08 Oct 2019 06:04:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB","namespace":"Microsoft.DocumentDB","authorizations":[{"applicationId":"57c0fc58-a83a-41d0-8ae9-08952659bdfd","roleDefinitionId":"FFFD5CF5-FFD3-4B24-B0E2-0715ADD4C282"},{"applicationId":"36e2398c-9dd3-4f29-9a72-d9f2cfc47ad9","roleDefinitionId":"D5A795DE-916D-4818-B015-33C9E103E39B"}],"resourceTypes":[{"resourceType":"databaseAccounts","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"databaseAccountNames","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"operations","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"operationResults","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"locations/operationsStatus","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"locations","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]},{"resourceType":"locations/deleteVirtualNetworkOrSubnets","locations":["Australia
+        Central","Australia East","Australia Southeast","Canada Central","Canada East","Central
+        India","Central US","East Asia","East US","East US 2","France Central","Japan
+        East","Japan West","North Central US","North Europe","South Africa North","South
+        Central US","South India","Southeast Asia","West Central US","West Europe","West
+        India","West US","West US 2","UAE North","UK West","UK South","Brazil South","Korea
+        South","Korea Central","France South","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-08-01","2016-03-31","2016-03-19","2015-11-06","2015-04-08","2014-04-01"]}],"registrationState":"Registered"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5009'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 08 Oct 2019 06:04:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "kind": "GlobalDocumentDB", "properties": {"locations":
+      [{"locationName": "westus", "failoverPriority": 0, "isZoneRedundant": false}],
+      "databaseAccountOfferType": "Standard"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cosmosdb create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '198'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-cosmosdb/0.8.0 Azure-SDK-For-Python AZURECLI/2.0.74
       accept-language:
       - en-US
     method: PUT
@@ -114,26 +985,26 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002","name":"cli000002","location":"West
-        US","type":"Microsoft.DocumentDB/databaseAccounts","kind":"GlobalDocumentDB","tags":{},"properties":{"provisioningState":"Initializing","ipRangeFilter":"","enableAutomaticFailover":false,"enableMultipleWriteLocations":false,"enablePartitionKeyMonitor":false,"isVirtualNetworkFilterEnabled":false,"virtualNetworkRules":[],"EnabledApiTypes":"Sql","databaseAccountOfferType":"Standard","consistencyPolicy":{"defaultConsistencyLevel":"Session","maxIntervalInSeconds":5,"maxStalenessPrefix":100},"configurationOverrides":{},"writeLocations":[{"id":"cli000002-westus","locationName":"West
+        US","type":"Microsoft.DocumentDB/databaseAccounts","kind":"GlobalDocumentDB","tags":{},"properties":{"provisioningState":"Initializing","ipRangeFilter":"","enableAutomaticFailover":false,"enableMultipleWriteLocations":false,"enablePartitionKeyMonitor":false,"isVirtualNetworkFilterEnabled":false,"virtualNetworkRules":[],"EnabledApiTypes":"Sql","disableKeyBasedMetadataWriteAccess":false,"databaseAccountOfferType":"Standard","consistencyPolicy":{"defaultConsistencyLevel":"Session","maxIntervalInSeconds":5,"maxStalenessPrefix":100},"configurationOverrides":{},"writeLocations":[{"id":"cli000002-westus","locationName":"West
         US","provisioningState":"Initializing","failoverPriority":0,"isZoneRedundant":false}],"readLocations":[{"id":"cli000002-westus","locationName":"West
         US","provisioningState":"Initializing","failoverPriority":0,"isZoneRedundant":false}],"locations":[{"id":"cli000002-westus","locationName":"West
         US","provisioningState":"Initializing","failoverPriority":0,"isZoneRedundant":false}],"failoverPolicies":[{"id":"cli000002-westus","locationName":"West
         US","failoverPriority":0}],"cors":[],"capabilities":[]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/df1e1506-29cc-4388-936a-54f09a608301?api-version=2015-04-08
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/9dc3bd2a-2281-474c-a357-5d1cdc449bed?api-version=2015-04-08
       cache-control:
       - no-store, no-cache
       content-length:
-      - '1516'
+      - '1559'
       content-location:
-      - https://management.documents.azure.com:450/subscriptions/85a6c256-e687-4281-9cca-84869cf6ef36/resourceGroups/cli_test_cosmosdb_accountcp3xanzetosd7bybq7w37msiobz7lrd7wmow44xmq2dornj4af/providers/Microsoft.DocumentDB/databaseAccounts/cli4phfk35bcta5gzkgz4sbwisgjir5hqdvwbhjm?api-version=2015-04-08
+      - https://management.documents.azure.com:450/subscriptions/fb3a3d6b-44c8-44f5-88c9-b20917c9b96b/resourceGroups/cli_test_cosmosdb_account2vjr5hagwku2o63bqevaifykteln43mtphylojeyy3xp4scmc6/providers/Microsoft.DocumentDB/databaseAccounts/clicuuq4uw5xvjuyq3rngtmgfxcyxtw4gymun53z?api-version=2015-04-08
       content-type:
       - application/json
       date:
-      - Wed, 21 Aug 2019 20:17:23 GMT
+      - Tue, 08 Oct 2019 06:04:27 GMT
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/operationResults/df1e1506-29cc-4388-936a-54f09a608301?api-version=2015-04-08
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/operationResults/9dc3bd2a-2281-474c-a357-5d1cdc449bed?api-version=2015-04-08
       pragma:
       - no-cache
       server:
@@ -147,7 +1018,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-gatewayversion:
-      - version=2.5.1
+      - version=2.7.0
       x-ms-ratelimit-remaining-subscription-writes:
       - '1198'
     status:
@@ -167,10 +1038,10 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-cosmosdb/0.7.0
-        Azure-SDK-For-Python AZURECLI/2.0.71
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-cosmosdb/0.8.0 Azure-SDK-For-Python AZURECLI/2.0.74
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/df1e1506-29cc-4388-936a-54f09a608301?api-version=2015-04-08
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/9dc3bd2a-2281-474c-a357-5d1cdc449bed?api-version=2015-04-08
   response:
     body:
       string: '{"status":"Dequeued","error":{}}'
@@ -180,11 +1051,11 @@ interactions:
       content-length:
       - '32'
       content-location:
-      - https://management.documents.azure.com:450/subscriptions/85a6c256-e687-4281-9cca-84869cf6ef36/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/df1e1506-29cc-4388-936a-54f09a608301?api-version=2015-04-08
+      - https://management.documents.azure.com:450/subscriptions/fb3a3d6b-44c8-44f5-88c9-b20917c9b96b/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/9dc3bd2a-2281-474c-a357-5d1cdc449bed?api-version=2015-04-08
       content-type:
       - application/json
       date:
-      - Wed, 21 Aug 2019 20:17:54 GMT
+      - Tue, 08 Oct 2019 06:04:57 GMT
       pragma:
       - no-cache
       server:
@@ -198,7 +1069,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-gatewayversion:
-      - version=2.5.1
+      - version=2.7.0
     status:
       code: 200
       message: Ok
@@ -216,10 +1087,10 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-cosmosdb/0.7.0
-        Azure-SDK-For-Python AZURECLI/2.0.71
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-cosmosdb/0.8.0 Azure-SDK-For-Python AZURECLI/2.0.74
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/df1e1506-29cc-4388-936a-54f09a608301?api-version=2015-04-08
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/9dc3bd2a-2281-474c-a357-5d1cdc449bed?api-version=2015-04-08
   response:
     body:
       string: '{"status":"Dequeued","error":{}}'
@@ -229,11 +1100,11 @@ interactions:
       content-length:
       - '32'
       content-location:
-      - https://management.documents.azure.com:450/subscriptions/85a6c256-e687-4281-9cca-84869cf6ef36/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/df1e1506-29cc-4388-936a-54f09a608301?api-version=2015-04-08
+      - https://management.documents.azure.com:450/subscriptions/fb3a3d6b-44c8-44f5-88c9-b20917c9b96b/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/9dc3bd2a-2281-474c-a357-5d1cdc449bed?api-version=2015-04-08
       content-type:
       - application/json
       date:
-      - Wed, 21 Aug 2019 20:18:25 GMT
+      - Tue, 08 Oct 2019 06:05:28 GMT
       pragma:
       - no-cache
       server:
@@ -247,7 +1118,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-gatewayversion:
-      - version=2.5.1
+      - version=2.7.0
     status:
       code: 200
       message: Ok
@@ -265,10 +1136,10 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-cosmosdb/0.7.0
-        Azure-SDK-For-Python AZURECLI/2.0.71
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-cosmosdb/0.8.0 Azure-SDK-For-Python AZURECLI/2.0.74
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/df1e1506-29cc-4388-936a-54f09a608301?api-version=2015-04-08
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/9dc3bd2a-2281-474c-a357-5d1cdc449bed?api-version=2015-04-08
   response:
     body:
       string: '{"status":"Dequeued","error":{}}'
@@ -278,11 +1149,11 @@ interactions:
       content-length:
       - '32'
       content-location:
-      - https://management.documents.azure.com:450/subscriptions/85a6c256-e687-4281-9cca-84869cf6ef36/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/df1e1506-29cc-4388-936a-54f09a608301?api-version=2015-04-08
+      - https://management.documents.azure.com:450/subscriptions/fb3a3d6b-44c8-44f5-88c9-b20917c9b96b/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/9dc3bd2a-2281-474c-a357-5d1cdc449bed?api-version=2015-04-08
       content-type:
       - application/json
       date:
-      - Wed, 21 Aug 2019 20:18:55 GMT
+      - Tue, 08 Oct 2019 06:05:59 GMT
       pragma:
       - no-cache
       server:
@@ -296,7 +1167,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-gatewayversion:
-      - version=2.5.1
+      - version=2.7.0
     status:
       code: 200
       message: Ok
@@ -314,10 +1185,10 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-cosmosdb/0.7.0
-        Azure-SDK-For-Python AZURECLI/2.0.71
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-cosmosdb/0.8.0 Azure-SDK-For-Python AZURECLI/2.0.74
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/df1e1506-29cc-4388-936a-54f09a608301?api-version=2015-04-08
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/9dc3bd2a-2281-474c-a357-5d1cdc449bed?api-version=2015-04-08
   response:
     body:
       string: '{"status":"Dequeued","error":{}}'
@@ -327,11 +1198,11 @@ interactions:
       content-length:
       - '32'
       content-location:
-      - https://management.documents.azure.com:450/subscriptions/85a6c256-e687-4281-9cca-84869cf6ef36/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/df1e1506-29cc-4388-936a-54f09a608301?api-version=2015-04-08
+      - https://management.documents.azure.com:450/subscriptions/fb3a3d6b-44c8-44f5-88c9-b20917c9b96b/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/9dc3bd2a-2281-474c-a357-5d1cdc449bed?api-version=2015-04-08
       content-type:
       - application/json
       date:
-      - Wed, 21 Aug 2019 20:19:26 GMT
+      - Tue, 08 Oct 2019 06:06:29 GMT
       pragma:
       - no-cache
       server:
@@ -345,7 +1216,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-gatewayversion:
-      - version=2.5.1
+      - version=2.7.0
     status:
       code: 200
       message: Ok
@@ -363,10 +1234,10 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-cosmosdb/0.7.0
-        Azure-SDK-For-Python AZURECLI/2.0.71
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-cosmosdb/0.8.0 Azure-SDK-For-Python AZURECLI/2.0.74
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/df1e1506-29cc-4388-936a-54f09a608301?api-version=2015-04-08
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/9dc3bd2a-2281-474c-a357-5d1cdc449bed?api-version=2015-04-08
   response:
     body:
       string: '{"status":"Dequeued","error":{}}'
@@ -376,11 +1247,11 @@ interactions:
       content-length:
       - '32'
       content-location:
-      - https://management.documents.azure.com:450/subscriptions/85a6c256-e687-4281-9cca-84869cf6ef36/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/df1e1506-29cc-4388-936a-54f09a608301?api-version=2015-04-08
+      - https://management.documents.azure.com:450/subscriptions/fb3a3d6b-44c8-44f5-88c9-b20917c9b96b/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/9dc3bd2a-2281-474c-a357-5d1cdc449bed?api-version=2015-04-08
       content-type:
       - application/json
       date:
-      - Wed, 21 Aug 2019 20:19:56 GMT
+      - Tue, 08 Oct 2019 06:06:59 GMT
       pragma:
       - no-cache
       server:
@@ -394,7 +1265,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-gatewayversion:
-      - version=2.5.1
+      - version=2.7.0
     status:
       code: 200
       message: Ok
@@ -412,10 +1283,10 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-cosmosdb/0.7.0
-        Azure-SDK-For-Python AZURECLI/2.0.71
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-cosmosdb/0.8.0 Azure-SDK-For-Python AZURECLI/2.0.74
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/df1e1506-29cc-4388-936a-54f09a608301?api-version=2015-04-08
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/9dc3bd2a-2281-474c-a357-5d1cdc449bed?api-version=2015-04-08
   response:
     body:
       string: '{"status":"Dequeued","error":{}}'
@@ -425,11 +1296,11 @@ interactions:
       content-length:
       - '32'
       content-location:
-      - https://management.documents.azure.com:450/subscriptions/85a6c256-e687-4281-9cca-84869cf6ef36/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/df1e1506-29cc-4388-936a-54f09a608301?api-version=2015-04-08
+      - https://management.documents.azure.com:450/subscriptions/fb3a3d6b-44c8-44f5-88c9-b20917c9b96b/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/9dc3bd2a-2281-474c-a357-5d1cdc449bed?api-version=2015-04-08
       content-type:
       - application/json
       date:
-      - Wed, 21 Aug 2019 20:20:27 GMT
+      - Tue, 08 Oct 2019 06:07:30 GMT
       pragma:
       - no-cache
       server:
@@ -443,7 +1314,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-gatewayversion:
-      - version=2.5.1
+      - version=2.7.0
     status:
       code: 200
       message: Ok
@@ -461,10 +1332,10 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-cosmosdb/0.7.0
-        Azure-SDK-For-Python AZURECLI/2.0.71
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-cosmosdb/0.8.0 Azure-SDK-For-Python AZURECLI/2.0.74
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/df1e1506-29cc-4388-936a-54f09a608301?api-version=2015-04-08
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/9dc3bd2a-2281-474c-a357-5d1cdc449bed?api-version=2015-04-08
   response:
     body:
       string: '{"status":"Dequeued","error":{}}'
@@ -474,11 +1345,11 @@ interactions:
       content-length:
       - '32'
       content-location:
-      - https://management.documents.azure.com:450/subscriptions/85a6c256-e687-4281-9cca-84869cf6ef36/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/df1e1506-29cc-4388-936a-54f09a608301?api-version=2015-04-08
+      - https://management.documents.azure.com:450/subscriptions/fb3a3d6b-44c8-44f5-88c9-b20917c9b96b/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/9dc3bd2a-2281-474c-a357-5d1cdc449bed?api-version=2015-04-08
       content-type:
       - application/json
       date:
-      - Wed, 21 Aug 2019 20:20:57 GMT
+      - Tue, 08 Oct 2019 06:08:00 GMT
       pragma:
       - no-cache
       server:
@@ -492,7 +1363,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-gatewayversion:
-      - version=2.5.1
+      - version=2.7.0
     status:
       code: 200
       message: Ok
@@ -510,10 +1381,10 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-cosmosdb/0.7.0
-        Azure-SDK-For-Python AZURECLI/2.0.71
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-cosmosdb/0.8.0 Azure-SDK-For-Python AZURECLI/2.0.74
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/df1e1506-29cc-4388-936a-54f09a608301?api-version=2015-04-08
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/9dc3bd2a-2281-474c-a357-5d1cdc449bed?api-version=2015-04-08
   response:
     body:
       string: '{"status":"Dequeued","error":{}}'
@@ -523,11 +1394,11 @@ interactions:
       content-length:
       - '32'
       content-location:
-      - https://management.documents.azure.com:450/subscriptions/85a6c256-e687-4281-9cca-84869cf6ef36/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/df1e1506-29cc-4388-936a-54f09a608301?api-version=2015-04-08
+      - https://management.documents.azure.com:450/subscriptions/fb3a3d6b-44c8-44f5-88c9-b20917c9b96b/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/9dc3bd2a-2281-474c-a357-5d1cdc449bed?api-version=2015-04-08
       content-type:
       - application/json
       date:
-      - Wed, 21 Aug 2019 20:21:27 GMT
+      - Tue, 08 Oct 2019 06:08:30 GMT
       pragma:
       - no-cache
       server:
@@ -541,7 +1412,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-gatewayversion:
-      - version=2.5.1
+      - version=2.7.0
     status:
       code: 200
       message: Ok
@@ -559,10 +1430,10 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-cosmosdb/0.7.0
-        Azure-SDK-For-Python AZURECLI/2.0.71
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-cosmosdb/0.8.0 Azure-SDK-For-Python AZURECLI/2.0.74
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/df1e1506-29cc-4388-936a-54f09a608301?api-version=2015-04-08
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/9dc3bd2a-2281-474c-a357-5d1cdc449bed?api-version=2015-04-08
   response:
     body:
       string: '{"status":"Dequeued","error":{}}'
@@ -572,11 +1443,11 @@ interactions:
       content-length:
       - '32'
       content-location:
-      - https://management.documents.azure.com:450/subscriptions/85a6c256-e687-4281-9cca-84869cf6ef36/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/df1e1506-29cc-4388-936a-54f09a608301?api-version=2015-04-08
+      - https://management.documents.azure.com:450/subscriptions/fb3a3d6b-44c8-44f5-88c9-b20917c9b96b/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/9dc3bd2a-2281-474c-a357-5d1cdc449bed?api-version=2015-04-08
       content-type:
       - application/json
       date:
-      - Wed, 21 Aug 2019 20:21:58 GMT
+      - Tue, 08 Oct 2019 06:09:01 GMT
       pragma:
       - no-cache
       server:
@@ -590,7 +1461,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-gatewayversion:
-      - version=2.5.1
+      - version=2.7.0
     status:
       code: 200
       message: Ok
@@ -608,10 +1479,10 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-cosmosdb/0.7.0
-        Azure-SDK-For-Python AZURECLI/2.0.71
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-cosmosdb/0.8.0 Azure-SDK-For-Python AZURECLI/2.0.74
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/df1e1506-29cc-4388-936a-54f09a608301?api-version=2015-04-08
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/9dc3bd2a-2281-474c-a357-5d1cdc449bed?api-version=2015-04-08
   response:
     body:
       string: '{"status":"Dequeued","error":{}}'
@@ -621,11 +1492,11 @@ interactions:
       content-length:
       - '32'
       content-location:
-      - https://management.documents.azure.com:450/subscriptions/85a6c256-e687-4281-9cca-84869cf6ef36/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/df1e1506-29cc-4388-936a-54f09a608301?api-version=2015-04-08
+      - https://management.documents.azure.com:450/subscriptions/fb3a3d6b-44c8-44f5-88c9-b20917c9b96b/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/9dc3bd2a-2281-474c-a357-5d1cdc449bed?api-version=2015-04-08
       content-type:
       - application/json
       date:
-      - Wed, 21 Aug 2019 20:22:29 GMT
+      - Tue, 08 Oct 2019 06:09:31 GMT
       pragma:
       - no-cache
       server:
@@ -639,7 +1510,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-gatewayversion:
-      - version=2.5.1
+      - version=2.7.0
     status:
       code: 200
       message: Ok
@@ -657,10 +1528,10 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-cosmosdb/0.7.0
-        Azure-SDK-For-Python AZURECLI/2.0.71
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-cosmosdb/0.8.0 Azure-SDK-For-Python AZURECLI/2.0.74
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/df1e1506-29cc-4388-936a-54f09a608301?api-version=2015-04-08
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/9dc3bd2a-2281-474c-a357-5d1cdc449bed?api-version=2015-04-08
   response:
     body:
       string: '{"status":"Dequeued","error":{}}'
@@ -670,11 +1541,11 @@ interactions:
       content-length:
       - '32'
       content-location:
-      - https://management.documents.azure.com:450/subscriptions/85a6c256-e687-4281-9cca-84869cf6ef36/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/df1e1506-29cc-4388-936a-54f09a608301?api-version=2015-04-08
+      - https://management.documents.azure.com:450/subscriptions/fb3a3d6b-44c8-44f5-88c9-b20917c9b96b/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/9dc3bd2a-2281-474c-a357-5d1cdc449bed?api-version=2015-04-08
       content-type:
       - application/json
       date:
-      - Wed, 21 Aug 2019 20:23:00 GMT
+      - Tue, 08 Oct 2019 06:10:02 GMT
       pragma:
       - no-cache
       server:
@@ -688,7 +1559,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-gatewayversion:
-      - version=2.5.1
+      - version=2.7.0
     status:
       code: 200
       message: Ok
@@ -706,10 +1577,10 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-cosmosdb/0.7.0
-        Azure-SDK-For-Python AZURECLI/2.0.71
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-cosmosdb/0.8.0 Azure-SDK-For-Python AZURECLI/2.0.74
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/df1e1506-29cc-4388-936a-54f09a608301?api-version=2015-04-08
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/9dc3bd2a-2281-474c-a357-5d1cdc449bed?api-version=2015-04-08
   response:
     body:
       string: '{"status":"Dequeued","error":{}}'
@@ -719,11 +1590,11 @@ interactions:
       content-length:
       - '32'
       content-location:
-      - https://management.documents.azure.com:450/subscriptions/85a6c256-e687-4281-9cca-84869cf6ef36/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/df1e1506-29cc-4388-936a-54f09a608301?api-version=2015-04-08
+      - https://management.documents.azure.com:450/subscriptions/fb3a3d6b-44c8-44f5-88c9-b20917c9b96b/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/9dc3bd2a-2281-474c-a357-5d1cdc449bed?api-version=2015-04-08
       content-type:
       - application/json
       date:
-      - Wed, 21 Aug 2019 20:23:30 GMT
+      - Tue, 08 Oct 2019 06:10:32 GMT
       pragma:
       - no-cache
       server:
@@ -737,7 +1608,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-gatewayversion:
-      - version=2.5.1
+      - version=2.7.0
     status:
       code: 200
       message: Ok
@@ -755,10 +1626,10 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-cosmosdb/0.7.0
-        Azure-SDK-For-Python AZURECLI/2.0.71
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-cosmosdb/0.8.0 Azure-SDK-For-Python AZURECLI/2.0.74
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/df1e1506-29cc-4388-936a-54f09a608301?api-version=2015-04-08
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/9dc3bd2a-2281-474c-a357-5d1cdc449bed?api-version=2015-04-08
   response:
     body:
       string: '{"status":"Dequeued","error":{}}'
@@ -768,11 +1639,11 @@ interactions:
       content-length:
       - '32'
       content-location:
-      - https://management.documents.azure.com:450/subscriptions/85a6c256-e687-4281-9cca-84869cf6ef36/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/df1e1506-29cc-4388-936a-54f09a608301?api-version=2015-04-08
+      - https://management.documents.azure.com:450/subscriptions/fb3a3d6b-44c8-44f5-88c9-b20917c9b96b/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/9dc3bd2a-2281-474c-a357-5d1cdc449bed?api-version=2015-04-08
       content-type:
       - application/json
       date:
-      - Wed, 21 Aug 2019 20:24:00 GMT
+      - Tue, 08 Oct 2019 06:11:02 GMT
       pragma:
       - no-cache
       server:
@@ -786,7 +1657,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-gatewayversion:
-      - version=2.5.1
+      - version=2.7.0
     status:
       code: 200
       message: Ok
@@ -804,10 +1675,108 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-cosmosdb/0.7.0
-        Azure-SDK-For-Python AZURECLI/2.0.71
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-cosmosdb/0.8.0 Azure-SDK-For-Python AZURECLI/2.0.74
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/df1e1506-29cc-4388-936a-54f09a608301?api-version=2015-04-08
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/9dc3bd2a-2281-474c-a357-5d1cdc449bed?api-version=2015-04-08
+  response:
+    body:
+      string: '{"status":"Dequeued","error":{}}'
+    headers:
+      cache-control:
+      - no-store, no-cache
+      content-length:
+      - '32'
+      content-location:
+      - https://management.documents.azure.com:450/subscriptions/fb3a3d6b-44c8-44f5-88c9-b20917c9b96b/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/9dc3bd2a-2281-474c-a357-5d1cdc449bed?api-version=2015-04-08
+      content-type:
+      - application/json
+      date:
+      - Tue, 08 Oct 2019 06:11:33 GMT
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-gatewayversion:
+      - version=2.7.0
+    status:
+      code: 200
+      message: Ok
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cosmosdb create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-cosmosdb/0.8.0 Azure-SDK-For-Python AZURECLI/2.0.74
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/9dc3bd2a-2281-474c-a357-5d1cdc449bed?api-version=2015-04-08
+  response:
+    body:
+      string: '{"status":"Dequeued","error":{}}'
+    headers:
+      cache-control:
+      - no-store, no-cache
+      content-length:
+      - '32'
+      content-location:
+      - https://management.documents.azure.com:450/subscriptions/fb3a3d6b-44c8-44f5-88c9-b20917c9b96b/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/9dc3bd2a-2281-474c-a357-5d1cdc449bed?api-version=2015-04-08
+      content-type:
+      - application/json
+      date:
+      - Tue, 08 Oct 2019 06:12:03 GMT
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-gatewayversion:
+      - version=2.7.0
+    status:
+      code: 200
+      message: Ok
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cosmosdb create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-cosmosdb/0.8.0 Azure-SDK-For-Python AZURECLI/2.0.74
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/9dc3bd2a-2281-474c-a357-5d1cdc449bed?api-version=2015-04-08
   response:
     body:
       string: '{"status":"Succeeded","error":{}}'
@@ -817,11 +1786,11 @@ interactions:
       content-length:
       - '33'
       content-location:
-      - https://management.documents.azure.com:450/subscriptions/85a6c256-e687-4281-9cca-84869cf6ef36/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/df1e1506-29cc-4388-936a-54f09a608301?api-version=2015-04-08
+      - https://management.documents.azure.com:450/subscriptions/fb3a3d6b-44c8-44f5-88c9-b20917c9b96b/providers/Microsoft.DocumentDB/locations/westus/operationsStatus/9dc3bd2a-2281-474c-a357-5d1cdc449bed?api-version=2015-04-08
       content-type:
       - application/json
       date:
-      - Wed, 21 Aug 2019 20:24:31 GMT
+      - Tue, 08 Oct 2019 06:12:33 GMT
       pragma:
       - no-cache
       server:
@@ -835,7 +1804,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-gatewayversion:
-      - version=2.5.1
+      - version=2.7.0
     status:
       code: 200
       message: Ok
@@ -853,14 +1822,14 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-cosmosdb/0.7.0
-        Azure-SDK-For-Python AZURECLI/2.0.71
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-cosmosdb/0.8.0 Azure-SDK-For-Python AZURECLI/2.0.74
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002?api-version=2015-04-08
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002","name":"cli000002","location":"West
-        US","type":"Microsoft.DocumentDB/databaseAccounts","kind":"GlobalDocumentDB","tags":{},"properties":{"provisioningState":"Succeeded","documentEndpoint":"https://cli000002.documents.azure.com:443/","ipRangeFilter":"","enableAutomaticFailover":false,"enableMultipleWriteLocations":false,"enablePartitionKeyMonitor":false,"isVirtualNetworkFilterEnabled":false,"virtualNetworkRules":[],"EnabledApiTypes":"Sql","databaseAccountOfferType":"Standard","consistencyPolicy":{"defaultConsistencyLevel":"Session","maxIntervalInSeconds":5,"maxStalenessPrefix":100},"configurationOverrides":{},"writeLocations":[{"id":"cli000002-westus","locationName":"West
+        US","type":"Microsoft.DocumentDB/databaseAccounts","kind":"GlobalDocumentDB","tags":{},"properties":{"provisioningState":"Succeeded","documentEndpoint":"https://cli000002.documents.azure.com:443/","ipRangeFilter":"","enableAutomaticFailover":false,"enableMultipleWriteLocations":false,"enablePartitionKeyMonitor":false,"isVirtualNetworkFilterEnabled":false,"virtualNetworkRules":[],"EnabledApiTypes":"Sql","disableKeyBasedMetadataWriteAccess":false,"databaseAccountOfferType":"Standard","consistencyPolicy":{"defaultConsistencyLevel":"Session","maxIntervalInSeconds":5,"maxStalenessPrefix":100},"configurationOverrides":{},"writeLocations":[{"id":"cli000002-westus","locationName":"West
         US","documentEndpoint":"https://cli000002-westus.documents.azure.com:443/","provisioningState":"Succeeded","failoverPriority":0,"isZoneRedundant":false}],"readLocations":[{"id":"cli000002-westus","locationName":"West
         US","documentEndpoint":"https://cli000002-westus.documents.azure.com:443/","provisioningState":"Succeeded","failoverPriority":0,"isZoneRedundant":false}],"locations":[{"id":"cli000002-westus","locationName":"West
         US","documentEndpoint":"https://cli000002-westus.documents.azure.com:443/","provisioningState":"Succeeded","failoverPriority":0,"isZoneRedundant":false}],"failoverPolicies":[{"id":"cli000002-westus","locationName":"West
@@ -869,13 +1838,13 @@ interactions:
       cache-control:
       - no-store, no-cache
       content-length:
-      - '1905'
+      - '1948'
       content-location:
-      - https://management.documents.azure.com:450/subscriptions/85a6c256-e687-4281-9cca-84869cf6ef36/resourceGroups/cli_test_cosmosdb_accountcp3xanzetosd7bybq7w37msiobz7lrd7wmow44xmq2dornj4af/providers/Microsoft.DocumentDB/databaseAccounts/cli4phfk35bcta5gzkgz4sbwisgjir5hqdvwbhjm?api-version=2015-04-08
+      - https://management.documents.azure.com:450/subscriptions/fb3a3d6b-44c8-44f5-88c9-b20917c9b96b/resourceGroups/cli_test_cosmosdb_account2vjr5hagwku2o63bqevaifykteln43mtphylojeyy3xp4scmc6/providers/Microsoft.DocumentDB/databaseAccounts/clicuuq4uw5xvjuyq3rngtmgfxcyxtw4gymun53z?api-version=2015-04-08
       content-type:
       - application/json
       date:
-      - Wed, 21 Aug 2019 20:24:32 GMT
+      - Tue, 08 Oct 2019 06:12:33 GMT
       pragma:
       - no-cache
       server:
@@ -889,7 +1858,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-gatewayversion:
-      - version=2.5.1
+      - version=2.7.0
     status:
       code: 200
       message: Ok
@@ -907,8 +1876,8 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-cosmosdb/0.7.0
-        Azure-SDK-For-Python AZURECLI/2.0.71
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-cosmosdb/0.8.0 Azure-SDK-For-Python AZURECLI/2.0.74
       accept-language:
       - en-US
     method: GET
@@ -916,7 +1885,7 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002","name":"cli000002","location":"West
-        US","type":"Microsoft.DocumentDB/databaseAccounts","kind":"GlobalDocumentDB","tags":{},"properties":{"provisioningState":"Succeeded","documentEndpoint":"https://cli000002.documents.azure.com:443/","ipRangeFilter":"","enableAutomaticFailover":false,"enableMultipleWriteLocations":false,"enablePartitionKeyMonitor":false,"isVirtualNetworkFilterEnabled":false,"virtualNetworkRules":[],"EnabledApiTypes":"Sql","databaseAccountOfferType":"Standard","consistencyPolicy":{"defaultConsistencyLevel":"Session","maxIntervalInSeconds":5,"maxStalenessPrefix":100},"configurationOverrides":{},"writeLocations":[{"id":"cli000002-westus","locationName":"West
+        US","type":"Microsoft.DocumentDB/databaseAccounts","kind":"GlobalDocumentDB","tags":{},"properties":{"provisioningState":"Succeeded","documentEndpoint":"https://cli000002.documents.azure.com:443/","ipRangeFilter":"","enableAutomaticFailover":false,"enableMultipleWriteLocations":false,"enablePartitionKeyMonitor":false,"isVirtualNetworkFilterEnabled":false,"virtualNetworkRules":[],"EnabledApiTypes":"Sql","disableKeyBasedMetadataWriteAccess":false,"databaseAccountOfferType":"Standard","consistencyPolicy":{"defaultConsistencyLevel":"Session","maxIntervalInSeconds":5,"maxStalenessPrefix":100},"configurationOverrides":{},"writeLocations":[{"id":"cli000002-westus","locationName":"West
         US","documentEndpoint":"https://cli000002-westus.documents.azure.com:443/","provisioningState":"Succeeded","failoverPriority":0,"isZoneRedundant":false}],"readLocations":[{"id":"cli000002-westus","locationName":"West
         US","documentEndpoint":"https://cli000002-westus.documents.azure.com:443/","provisioningState":"Succeeded","failoverPriority":0,"isZoneRedundant":false}],"locations":[{"id":"cli000002-westus","locationName":"West
         US","documentEndpoint":"https://cli000002-westus.documents.azure.com:443/","provisioningState":"Succeeded","failoverPriority":0,"isZoneRedundant":false}],"failoverPolicies":[{"id":"cli000002-westus","locationName":"West
@@ -925,13 +1894,13 @@ interactions:
       cache-control:
       - no-store, no-cache
       content-length:
-      - '1905'
+      - '1948'
       content-location:
-      - https://management.documents.azure.com:450/subscriptions/85a6c256-e687-4281-9cca-84869cf6ef36/resourceGroups/cli_test_cosmosdb_accountcp3xanzetosd7bybq7w37msiobz7lrd7wmow44xmq2dornj4af/providers/Microsoft.DocumentDB/databaseAccounts/cli4phfk35bcta5gzkgz4sbwisgjir5hqdvwbhjm?api-version=2015-04-08
+      - https://management.documents.azure.com:450/subscriptions/fb3a3d6b-44c8-44f5-88c9-b20917c9b96b/resourceGroups/cli_test_cosmosdb_account2vjr5hagwku2o63bqevaifykteln43mtphylojeyy3xp4scmc6/providers/Microsoft.DocumentDB/databaseAccounts/clicuuq4uw5xvjuyq3rngtmgfxcyxtw4gymun53z?api-version=2015-04-08
       content-type:
       - application/json
       date:
-      - Wed, 21 Aug 2019 20:24:33 GMT
+      - Tue, 08 Oct 2019 06:12:34 GMT
       pragma:
       - no-cache
       server:
@@ -945,7 +1914,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-gatewayversion:
-      - version=2.5.1
+      - version=2.7.0
     status:
       code: 200
       message: Ok
@@ -963,8 +1932,8 @@ interactions:
       ParameterSetName:
       - -n
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-cosmosdb/0.7.0
-        Azure-SDK-For-Python AZURECLI/2.0.71
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-cosmosdb/0.8.0 Azure-SDK-For-Python AZURECLI/2.0.74
       accept-language:
       - en-US
     method: HEAD
@@ -978,7 +1947,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Wed, 21 Aug 2019 20:24:34 GMT
+      - Tue, 08 Oct 2019 06:12:35 GMT
       pragma:
       - no-cache
       server:
@@ -988,7 +1957,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-activity-id:
-      - b011fdda-c451-11e9-b78f-2016b97d2bf8
+      - 9ee3eba2-e992-11e9-a176-000d3a3ab28a
     status:
       code: 200
       message: Ok
