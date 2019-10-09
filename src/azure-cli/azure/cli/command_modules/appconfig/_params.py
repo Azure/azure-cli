@@ -167,12 +167,12 @@ def load_arguments(self, _):
 
     with self.argument_context('appconfig feature delete') as c:
         c.argument('feature', help='Key of the feature to be deleted. Support star sign as filters, for instance * means all key and abc* means keys with abc as prefix. Similarly, *abc and *abc* are also supported.  Comma separated keys are not supported. Please provide escaped string if your feature name contains comma.')
-        c.argument('label', help="If no label specified, delete the feature flag with null label by default. Support star sign as filters, for instance * means all key and abc* means keys with abc as prefix. Similarly, *abc and *abc* are also supported.")
+        c.argument('label', help="If no label specified, delete the feature flag with null label by default. Support star sign as filters, for instance * means all labels and abc* means labels with abc as prefix. Similarly, *abc and *abc* are also supported.")
 
     with self.argument_context('appconfig feature list') as c:
         c.argument('name', id_part=None)
         c.argument('feature', help='Key of the feature to be listed. Support star sign as filters, for instance * means all key and abc* means keys with abc as prefix. Similarly, *abc and *abc* are also supported. Comma separated keys are not supported. Please provide escaped string if your feature name contains comma.')
-        c.argument('label', help="If no label specified, list the feature flag with null label by default. Support star sign as filters, for instance * means all key and abc* means keys with abc as prefix. Similarly, *abc and *abc* are also supported.")
+        c.argument('label', help="If no label specified, list all labels. Support star sign as filters, for instance * means all labels and abc* means labels with abc as prefix. Similarly, *abc and *abc* are also supported.")
         c.argument('fields', arg_type=feature_fields_arg_type)
 
     with self.argument_context('appconfig feature lock') as c:

@@ -340,11 +340,16 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
                                          self.check('state', default_state)]).get_output_in_json()
         assert len(response_dict) == 4
 
-        # List all features - should return Null since this checks for null labels only
-        self.cmd('appconfig feature list -n {config_store_name}',
+        # List all features with null labels
+        null_label_pattern = ""
+        self.kwargs.update({
+            'label': null_label_pattern
+        })
+
+        self.cmd('appconfig feature list -n {config_store_name} --label "{label}"',
                  checks=NoneCheck())
 
-        # List all features with any label
+        # List all features with any label with field filtering
         any_label_pattern = '*'
         self.kwargs.update({
             'label': any_label_pattern
@@ -355,6 +360,10 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
                                          self.check('[0].key', entry_feature),
                                          self.check('[0].label', entry_label),
                                          self.check('[0].state', default_state)]).get_output_in_json()
+        assert len(list_features) == 2
+
+        #  List all features with any label
+        list_features = self.cmd('appconfig feature list -n {config_store_name}').get_output_in_json()
         assert len(list_features) == 2
 
         # Add another feature with name starting with Beta, null label
@@ -422,7 +431,11 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         assert len(list_features) == 3
 
         # List all features starting with Beta, null label
-        list_features = self.cmd('appconfig feature list -n {config_store_name} --feature {feature}',
+        self.kwargs.update({
+            'label': null_label_pattern
+        })
+
+        list_features = self.cmd('appconfig feature list -n {config_store_name} --feature {feature} --label "{label}"',
                                  checks=[self.check('[0].key', prefix_feature),
                                          self.check('[0].label', null_label)]).get_output_in_json()
         assert len(list_features) == 1
@@ -433,11 +446,11 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
             'feature': suffix_feature_pattern
         })
 
-        list_features = self.cmd('appconfig feature list -n {config_store_name} --feature {feature} --label {label}').get_output_in_json()
+        list_features = self.cmd('appconfig feature list -n {config_store_name} --feature {feature}').get_output_in_json()
         assert len(list_features) == 3
 
         # List all features ending with Beta, null label
-        list_features = self.cmd('appconfig feature list -n {config_store_name} --feature {feature}',
+        list_features = self.cmd('appconfig feature list -n {config_store_name} --feature {feature} --label "{label}"',
                                  checks=[self.check('[0].key', suffix_feature),
                                          self.check('[0].label', null_label)]).get_output_in_json()
         assert len(list_features) == 1
@@ -448,11 +461,11 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
             'feature': contains_feature_pattern
         })
 
-        list_features = self.cmd('appconfig feature list -n {config_store_name} --feature {feature} --label {label}').get_output_in_json()
+        list_features = self.cmd('appconfig feature list -n {config_store_name} --feature {feature}').get_output_in_json()
         assert len(list_features) == 5
 
         # List all features containing Beta, null label
-        list_features = self.cmd('appconfig feature list -n {config_store_name} --feature {feature}',
+        list_features = self.cmd('appconfig feature list -n {config_store_name} --feature {feature} --label "{label}"',
                                  checks=[self.check('[0].key', prefix_feature),
                                          self.check('[0].label', null_label),
                                          self.check('[1].key', suffix_feature),

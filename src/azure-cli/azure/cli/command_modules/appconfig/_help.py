@@ -268,6 +268,9 @@ helps['appconfig feature list'] = """
         - name: List all feature flags.
           text:
             az appconfig feature list -n MyAppConfiguration
+        - name: List all feature flags with null labels.
+          text:
+            az appconfig feature list -n MyAppConfiguration --label ""
         - name: List a specfic feature for any label start with v1. using connection string.
           text:
             az appconfig feature list --feature color --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --label v1.*
