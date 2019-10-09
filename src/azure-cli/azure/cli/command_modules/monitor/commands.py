@@ -223,6 +223,8 @@ def load_command_table(self, _):
         g.command('list-usages', 'list_usages')
         g.command('list-management-groups', 'list_management_groups')
         g.command('get-shared-keys', 'get_shared_keys')
-        g.command('list-intelligence-packs', 'list_intelligence_packs')
-        g.command('enable-intelligence-pack', 'enable_intelligence_pack')
-        g.command('disable-intelligence-pack', 'disable_intelligence_pack')
+
+    with self.command_group('monitor log-analytics workspace pack', log_analytics_workspace_sdk, custom_command_type=log_analytics_workspace_custom, client_factory=cf_log_analytics_workspace) as g:
+        g.command('list', 'list_intelligence_packs')
+        g.command('enable', 'enable_intelligence_pack')
+        g.command('disable', 'disable_intelligence_pack')

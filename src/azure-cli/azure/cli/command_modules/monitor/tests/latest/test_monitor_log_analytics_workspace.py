@@ -42,13 +42,13 @@ class TestLogProfileScenarios(ScenarioTest):
             self.check('__metadata.resultType', 'schema')
         ])
 
-        self.cmd("monitor log-analytics workspace enable-intelligence-pack -g {rg} -n {name} --pack-name AzureSecurityOfThings")
-        self.cmd("monitor log-analytics workspace list-intelligence-packs -g {rg} -n {name}", checks=[
+        self.cmd("monitor log-analytics workspace pack enable -g {rg} --workspace-name {name} -n AzureSecurityOfThings")
+        self.cmd("monitor log-analytics workspace pack list -g {rg} --workspace-name {name}", checks=[
             self.check("@[?name=='AzureSecurityOfThings'].enabled", '[True]')
         ])
 
-        self.cmd("monitor log-analytics workspace disable-intelligence-pack -g {rg} -n {name} --pack-name AzureSecurityOfThings")
-        self.cmd("monitor log-analytics workspace list-intelligence-packs -g {rg} -n {name}", checks=[
+        self.cmd("monitor log-analytics workspace pack disable -g {rg} --workspace-name {name} -n AzureSecurityOfThings")
+        self.cmd("monitor log-analytics workspace pack list -g {rg} --workspace-name {name}", checks=[
             self.check("@[?name=='AzureSecurityOfThings'].enabled", '[False]')
         ])
 

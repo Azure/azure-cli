@@ -339,5 +339,8 @@ def load_arguments(self, _):
         c.argument('workspace_name', options_list=['--workspace-name', '-n'], help="Name of the Log Analytics Workspace.")
         c.argument('sku', deprecate_info=c.deprecate(hide=True), arg_type=get_enum_type([SkuNameEnum.per_gb2018.value]), help="The SKU of the workspace.", default=SkuNameEnum.per_gb2018.value)
         c.argument('retention_time', help="The workspace data retention in days.", type=int, default=30)
-        c.argument('intelligence_pack_name', options_list='--pack-name')
+
+    with self.argument_context('monitor log-analytics workspace pack') as c:
+        c.argument('intelligence_pack_name', options_list=['--name', '-n'])
+        c.argument('workspace_name', options_list='--workspace-name')
     # endregion

@@ -1000,3 +1000,8 @@ helps['monitor log-analytics workspace update'] = """
 type: command
 short-summary: Update a workspace instance
 """
+
+helps['monitor log-analytics workspace pack'] = """
+type: group
+short-summary: Manage intelligent packs for log analytics workspace.
+"""
