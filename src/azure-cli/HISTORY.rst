@@ -64,6 +64,10 @@ Release History
 
 * Fix the endpoint help text to refer to the right parameter (namely, to point to parameter `--endpoint` rather than `--endpoint-type` in event subscription commands).
 
+**IoT**
+
+* Add new routing source type: DigitalTwinChangeEvents
+
 **Key Vault**
 
 * Fix #8840: When using tenant domain name in `az login -t`, `keyvault create` fails. Tenant domain name is now resolved to GUID if it is not.
