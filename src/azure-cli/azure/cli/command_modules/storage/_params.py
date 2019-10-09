@@ -67,7 +67,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         validator=validate_storage_data_plane_list)
 
     large_file_share_type = CLIArgumentType(
-        arg_type=get_three_state_flag(), min_api='2019-04-01',
+        action='store_true', min_api='2019-04-01', is_preview=True,
         help='Enable large file shares for storage account. Note: It cannot be disabled once it is enabled.')
 
     sas_help = 'The permissions the SAS grants. Allowed values: {}. Do not use if a stored access policy is ' \
@@ -103,7 +103,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage account check-name') as c:
         c.argument('name', options_list=['--name', '-n'])
 
-    with self.argument_context('storage account create') as c:
+    with self.argument_context('storage account create', resource_type=ResourceType.MGMT_STORAGE) as c:
         t_account_type, t_sku_name, t_kind = self.get_models('AccountType', 'SkuName', 'Kind',
                                                              resource_type=ResourceType.MGMT_STORAGE)
 
@@ -118,10 +118,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('sku', help='The storage account SKU.', arg_type=get_enum_type(t_sku_name, default='standard_ragrs'))
         c.argument('enable_files_aadds', arg_type=get_three_state_flag(), min_api='2018-11-01',
                    help='Enable the identity based authentication settings for Azure Files.')
-        c.argument('enable_large_file_share', arg_type=get_three_state_flag(), min_api='2019-04-01',
-                   help='Enable large file shares for storage account. Note: It cannot be disabled once it is enabled.')           
+        c.argument('enable_large_file_share', large_file_share_type)
 
-    with self.argument_context('storage account update') as c:
+    with self.argument_context('storage account update', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.register_common_storage_account_options()
         c.argument('custom_domain',
                    help='User domain assigned to the storage account. Name is the CNAME source. Use "" to clear '
@@ -132,7 +131,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('tags', tags_type, default=None)
         c.argument('enable_files_aadds', arg_type=get_three_state_flag(), min_api='2018-11-01',
                    help='Enable the identity based authentication settings for Azure Files.')
-        c.argument('enable_large_file_share', arg_type=large_file_share_type)
+        c.argument('enable_large_file_share', large_file_share_type)
 
     with self.argument_context('storage account update', arg_group='Customer managed key', min_api='2017-06-01') as c:
         c.extra('encryption_key_name', help='The name of the KeyVault key', )

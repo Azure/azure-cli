@@ -39,7 +39,8 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
             directory_service_options='AADDS' if enable_files_aadds else 'None')
     if enable_large_file_share:
-        params.large_file_shares_state = "Enabled"
+        LargeFileSharesState = cmd.get_models('LargeFileSharesState')
+        params.large_file_shares_state = LargeFileSharesState("Enabled")
 
     if NetworkRuleSet and (bypass or default_action):
         if bypass and not default_action:
