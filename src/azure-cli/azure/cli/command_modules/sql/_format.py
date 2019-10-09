@@ -144,6 +144,7 @@ def db_table_format(result):
         Formats a single database as summary results for display with "-o table".
         '''
         from collections import OrderedDict
+        
         return OrderedDict([
             ('name', result['name']),
             ('tier', result['sku']['tier']),

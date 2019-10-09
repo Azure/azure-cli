@@ -6,7 +6,6 @@
 # pylint:disable=too-many-lines
 
 import itertools
-import traceback
 from enum import Enum
 
 from azure.mgmt.sql.models import (
@@ -272,7 +271,7 @@ def _configure_db_create_params(
             'capacity',
             'family',
             'name',
-            'tier'
+            'tier',
         ])
 
     arg_ctx.argument('name',  # Note: this is sku name, not database name
