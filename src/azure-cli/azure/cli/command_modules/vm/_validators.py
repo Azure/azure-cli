@@ -829,7 +829,7 @@ def _validate_vm_vmss_create_public_ip(cmd, namespace):
     PublicIPAddressSkuName, IPAllocationMethod = cmd.get_models('PublicIPAddressSkuName', 'IPAllocationMethod',
                                                                 resource_type=ResourceType.MGMT_NETWORK)
     # Use standard public IP address automatically when using zones.
-    if namespace.zone is not None:
+    if 'zone' in namespace and namespace.zone is not None:
         namespace.public_ip_sku = PublicIPAddressSkuName.standard.value
 
     # Public-IP SKU is only exposed for VM. VMSS has no such needs so far
