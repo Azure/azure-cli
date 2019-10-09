@@ -14,6 +14,7 @@ Release History
 **Compute**
 
 * vm create: Add --enable-agent configuration.
+* vm create: Use standard public IP SKU automatically when using zones.
 * vmss create: Add --computer-name-prefix parameter to support custom computer name prefix of virtual machines in the VMSS.
 
 **Network**
