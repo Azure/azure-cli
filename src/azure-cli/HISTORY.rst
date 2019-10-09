@@ -23,6 +23,10 @@ Release History
 
 * az network private-dns link vnet create/update: Fixes #9851. Support cross-tenant virtual network linking.
 
+**Monitor**
+
+* az monitor log-analytics workspace: Support CRUD for Azure log analytics workspace.
+
 2.0.74
 ++++++
 
