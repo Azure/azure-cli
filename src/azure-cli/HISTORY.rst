@@ -3,6 +3,23 @@
 Release History
 ===============
 
+**AMS**
+
+* BREAKING CHANGE:
+    content-key-policy create:
+        - Changed parameter --ask from utf-8 string to 32 character hex string.
+    job start:
+        - Changed the command from `job start` to `job create`.
+
+**Compute**
+
+* vm create: Add --enable-agent configuration.
+* vmss create: Add --computer-name-prefix parameter to support custom computer name prefix of virtual machines in the VMSS.
+
+**Network**
+
+* az network private-dns link vnet create/update: Fixes #9851. Support cross-tenant virtual network linking.
+
 2.0.74
 ++++++
 
@@ -16,6 +33,12 @@ Release History
 * Add `--load-balancer-sku`, `--load-balancer-managed-outbound-ip-count`, `--load-balancer-outbound-ips` and `--load-balancer-outbound-ip-prefixes` to `az aks create` command, which allows for creating AKS cluster with SLB.
 * Add `--load-balancer-managed-outbound-ip-count`, `--load-balancer-outbound-ips` and `--load-balancer-outbound-ip-prefixes` to `az aks update` command, which allows for updating load balancer profile of an AKS cluster with SLB.
 * Add `--vm-set-type` to `az aks create` command, which allows to specify vm types of an AKS Cluster (vmas or vmss).
+
+**AppService**
+
+* Added "webapp config access-restriction show | set | add | remove"
+* az webapp up updated for better error-handling
+* az appservice plan update support Isolated SKU
 
 **ARM**
 
@@ -83,7 +106,6 @@ Release History
 
 **AppService**
 
-* Added "webapp config access-restriction show | set | add | remove"
 * az webapp deployment source config-zip support for connection_verify
 * Add support for ACR images with az webapp create
 

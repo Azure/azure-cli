@@ -252,6 +252,10 @@ helps['ams content-key-policy'] = """
 helps['ams content-key-policy create'] = """
     type: command
     short-summary: Create a new content key policy.
+    examples:
+        - name: Create an content-key-policy with a FairPlay Configuration.
+          text: >
+            az ams content-key-policy create -a amsAccount -g resourceGroup -n contentKeyPolicyName --policy-option-name policyOptionName --open-restriction --ask "ask-32-chars-hex-string" --fair-play-pfx pfxPath --fair-play-pfx-password "pfxPassword" --rental-and-lease-key-type PersistentUnlimited --rental-duration 5000
 """
 
 helps['ams content-key-policy show'] = """
@@ -307,9 +311,9 @@ helps['ams job'] = """
     short-summary: Manage jobs for a transform.
 """
 
-helps['ams job start'] = """
+helps['ams job create'] = """
     type: command
-    short-summary: Start a job.
+    short-summary: Create and start a job.
 """
 
 helps['ams job update'] = """
