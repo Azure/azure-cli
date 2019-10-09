@@ -150,7 +150,8 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
     if assign_identity:
         params.identity = Identity()
     if enable_large_file_share:
-        params.large_file_shares_state = "Enabled"
+        LargeFileSharesState = cmd.get_models('LargeFileSharesState')
+        params.large_file_shares_state = LargeFileSharesState("Enabled")
     if NetworkRuleSet:
         acl = instance.network_rule_set
         if acl:
