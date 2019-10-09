@@ -6,6 +6,7 @@
 # pylint:disable=too-many-lines
 
 import itertools
+import traceback
 from enum import Enum
 
 from azure.mgmt.sql.models import (
@@ -149,6 +150,10 @@ elastic_pool_id_param_type = CLIArgumentType(
     arg_group=sku_arg_group,
     options_list=['--elastic-pool'])
 
+compute_model_param_type = CLIArgumentType(
+    arg_group=sku_arg_group,
+    options_list=['--compute-model'])
+
 max_size_bytes_param_type = CLIArgumentType(
     options_list=['--max-size'],
     type=SizeWithUnitConverter('B', result_type=int),
@@ -195,7 +200,7 @@ allow_data_loss_param_type = CLIArgumentType(
     help='Complete the failover even if doing so may result in data loss. '
     'This will allow the failover to proceed even if a primary database is unavailable.')
 
-db_service_objective_examples = 'Basic, S0, P1, GP_Gen4_1, BC_Gen5_2.'
+db_service_objective_examples = 'Basic, S0, P1, GP_Gen4_1, BC_Gen5_2, GP_Gen5_S_8.'
 dw_service_objective_examples = 'DW100, DW1000c'
 
 
@@ -256,6 +261,9 @@ def _configure_db_create_params(
             'source_database_deletion_date',
             'tags',
             'zone_redundant',
+            'auto_pause_delay',
+            'min_capacity',
+            'compute_model'
         ])
 
     # Create args that will be used to build up the Database's Sku object
@@ -264,7 +272,7 @@ def _configure_db_create_params(
             'capacity',
             'family',
             'name',
-            'tier',
+            'tier'
         ])
 
     arg_ctx.argument('name',  # Note: this is sku name, not database name
@@ -277,6 +285,10 @@ def _configure_db_create_params(
     arg_ctx.argument('elastic_pool_id',
                      arg_type=elastic_pool_id_param_type,
                      help='The name or resource id of the elastic pool to create the database in.')
+    
+    arg_ctx.argument('compute_model',
+                     arg_type=compute_model_param_type,
+                     help='The compute model of this database. Currently we support Provisioned and Serverless.')
 
     # Only applicable to default create mode. Also only applicable to db.
     if create_mode != CreateMode.default or engine != Engine.db:
@@ -313,6 +325,15 @@ def _configure_db_create_params(
 
         # Provisioning with capacity is not applicable to DataWarehouse
         arg_ctx.ignore('capacity')
+
+        # Provisioning with autoPauseDelay is not applicable to DataWarehouse
+        arg_ctx.ignore('auto_pause_delay')
+
+        # Provisioning with minCapacity is not applicable to DataWarehouse
+        arg_ctx.ignore('min_capacity')
+
+        # Provisioning with computeModel is not applicable to DataWarehouse
+        arg_ctx.ignore('compute_model')
 
 
 # pylint: disable=too-many-statements
@@ -477,6 +498,16 @@ def load_arguments(self, _):
                    help='The name or resource id of the elastic pool to move the database into.')
 
         c.argument('max_size_bytes', help='The new maximum size of the database expressed in bytes.')
+
+        c.argument('compute_model',
+                    arg_type=compute_model_param_type,
+                    help='The compute model of this database. Currently we support Provisioned and Serverless.')
+    
+        c.argument('auto_pause_delay', 
+                    help='Time in minutes after which database is automatically paused. A value of -1 means that automatic pause is disabled.')
+
+        c.argument('min_capacity', 
+                    help='Minimal capacity that database will always have allocated, if not paused')
 
     with self.argument_context('sql db export') as c:
         # Create args that will be used to build up the ExportRequest object
