@@ -43,7 +43,6 @@ def set_feature(cmd,
     key = FEATURE_FLAG_PREFIX + feature
 
     # when creating a new Feature flag, these defaults will be used
-    content_type = FEATURE_FLAG_CONTENT_TYPE
     tags = {}
     default_conditions = {'client_filters': []}
 
@@ -63,14 +62,18 @@ def set_feature(cmd,
     for i in range(0, retry_times):
         retrieved_kv = azconfig_client.get_keyvalue(key, query_options)
         try:
+            # if kv exists and only content-type is wrong, we can force correct it by updating the kv
             if retrieved_kv is None:
                 set_kv = KeyValue(
                     key,
                     json.dumps(default_value),
                     label,
                     tags,
-                    content_type)
+                    FEATURE_FLAG_CONTENT_TYPE)
             else:
+                if retrieved_kv.content_type != FEATURE_FLAG_CONTENT_TYPE:
+                    logger.warning(
+                        "This feature contains invalid content-type. If you proceed, the feature flag will be overwritten.")
                 # we make sure that value retrieved is a valid json and only has the fields supported by backend.
                 # if it's invalid, we catch appropriate exception that contains
                 # detailed message
@@ -85,7 +88,7 @@ def set_feature(cmd,
                     value=json.dumps(
                         feature_flag_value,
                         default=lambda o: o.__dict__),
-                    content_type=content_type,
+                    content_type=FEATURE_FLAG_CONTENT_TYPE,
                     tags=retrieved_kv.tags if retrieved_kv.tags else tags)
                 set_kv.etag = retrieved_kv.etag
                 set_kv.last_modified = retrieved_kv.last_modified
@@ -205,7 +208,7 @@ def show_feature(cmd,
         query_options = QueryKeyValueOptions(label=label)
         retrieved_kv = azconfig_client.get_keyvalue(key, query_options)
 
-        if retrieved_kv is None:
+        if retrieved_kv is None or retrieved_kv.content_type != FEATURE_FLAG_CONTENT_TYPE:
             raise CLIError(
                 "The feature flag '{}' does not exist.".format(feature))
 
@@ -294,7 +297,7 @@ def lock_feature(cmd,
     for i in range(0, retry_times):
         retrieved_kv = azconfig_client.get_keyvalue(
             key, QueryKeyValueOptions(label))
-        if retrieved_kv is None:
+        if retrieved_kv is None or retrieved_kv.content_type != FEATURE_FLAG_CONTENT_TYPE:
             raise CLIError(
                 "The feature '{}' you are trying to lock does not exist.".format(feature))
 
@@ -339,7 +342,7 @@ def unlock_feature(cmd,
     for i in range(0, retry_times):
         retrieved_kv = azconfig_client.get_keyvalue(
             key, QueryKeyValueOptions(label))
-        if retrieved_kv is None:
+        if retrieved_kv is None or retrieved_kv.content_type != FEATURE_FLAG_CONTENT_TYPE:
             raise CLIError(
                 "The feature '{}' you are trying to unlock does not exist.".format(feature))
 
@@ -386,7 +389,7 @@ def enable_feature(cmd,
             query_options = QueryKeyValueOptions(label=label)
             retrieved_kv = azconfig_client.get_keyvalue(key, query_options)
 
-            if retrieved_kv is None:
+            if retrieved_kv is None or retrieved_kv.content_type != FEATURE_FLAG_CONTENT_TYPE:
                 raise CLIError(
                     "The feature flag {} does not exist.".format(feature))
 
@@ -440,7 +443,7 @@ def disable_feature(cmd,
             query_options = QueryKeyValueOptions(label=label)
             retrieved_kv = azconfig_client.get_keyvalue(key, query_options)
 
-            if retrieved_kv is None:
+            if retrieved_kv is None or retrieved_kv.content_type != FEATURE_FLAG_CONTENT_TYPE:
                 raise CLIError(
                     "The feature flag {} does not exist.".format(feature))
 
@@ -505,7 +508,7 @@ def add_filter(cmd,
             query_options = QueryKeyValueOptions(label=label)
             retrieved_kv = azconfig_client.get_keyvalue(key, query_options)
 
-            if retrieved_kv is None:
+            if retrieved_kv is None or retrieved_kv.content_type != FEATURE_FLAG_CONTENT_TYPE:
                 raise CLIError(
                     "The feature flag {} does not exist.".format(feature))
 
@@ -571,7 +574,7 @@ def delete_filter(cmd,
             retrieved_kv = azconfig_client.get_keyvalue(
                 key, QueryKeyValueOptions(label=label))
 
-            if retrieved_kv is None:
+            if retrieved_kv is None or retrieved_kv.content_type != FEATURE_FLAG_CONTENT_TYPE:
                 raise CLIError(
                     "The feature flag {} does not exist.".format(feature))
 
@@ -666,7 +669,7 @@ def show_filter(cmd,
         query_options = QueryKeyValueOptions(label=label)
         retrieved_kv = azconfig_client.get_keyvalue(key, query_options)
 
-        if retrieved_kv is None:
+        if retrieved_kv is None or retrieved_kv.content_type != FEATURE_FLAG_CONTENT_TYPE:
             raise CLIError(
                 "The feature flag {} does not exist.".format(feature))
 
@@ -715,7 +718,7 @@ def list_filter(cmd,
         query_options = QueryKeyValueOptions(label=label)
         retrieved_kv = azconfig_client.get_keyvalue(key, query_options)
 
-        if retrieved_kv is None:
+        if retrieved_kv is None or retrieved_kv.content_type != FEATURE_FLAG_CONTENT_TYPE:
             raise CLIError(
                 "The feature flag {} does not exist.".format(feature))
 
@@ -753,7 +756,7 @@ def clear_filter(cmd,
             query_options = QueryKeyValueOptions(label=label)
             retrieved_kv = azconfig_client.get_keyvalue(key, query_options)
 
-            if retrieved_kv is None:
+            if retrieved_kv is None or retrieved_kv.content_type != FEATURE_FLAG_CONTENT_TYPE:
                 raise CLIError(
                     "The feature flag {} does not exist.".format(feature))
 
@@ -820,7 +823,7 @@ def __update_existing_key_value(azconfig_client,
                       value=updated_value,
                       label=retrieved_kv.label,
                       tags=retrieved_kv.tags,
-                      content_type=retrieved_kv.content_type)
+                      content_type=FEATURE_FLAG_CONTENT_TYPE)
     set_kv.etag = retrieved_kv.etag
     set_kv.last_modified = retrieved_kv.last_modified
 
@@ -872,10 +875,14 @@ def __list_all_keyvalues(azconfig_client,
     try:
         retrieved_kv = azconfig_client.get_keyvalues(query_option)
         if key != feature:
-            return retrieved_kv
-        return __custom_key_filtering(
-            retrieved_kv=retrieved_kv,
-            user_key_filter=feature)
+            valid_features = []
+            for kv in retrieved_kv:
+                if kv.content_type == FEATURE_FLAG_CONTENT_TYPE:
+                    valid_features.append(kv)
+            return valid_features
+
+        return __custom_key_filtering(retrieved_kv=retrieved_kv, user_key_filter=feature)
+
     except Exception as exception:
         raise CLIError(str(exception))
 
