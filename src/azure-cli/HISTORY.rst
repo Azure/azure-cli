@@ -39,6 +39,7 @@ Release History
 * Added "webapp config access-restriction show | set | add | remove"
 * az webapp up updated for better error-handling
 * az appservice plan update support Isolated SKU
+* `az functionapp create` support for private ACR images
 
 **ARM**
 
