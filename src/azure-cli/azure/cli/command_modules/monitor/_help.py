@@ -993,7 +993,7 @@ examples:
 
 helps['monitor log-analytics workspace list'] = """
 type: command
-short-summary: List a workspace instance
+short-summary: Get a list of workspaces under a resource group or a subscription.
 """
 
 helps['monitor log-analytics workspace update'] = """
@@ -1004,4 +1004,49 @@ short-summary: Update a workspace instance
 helps['monitor log-analytics workspace pack'] = """
 type: group
 short-summary: Manage intelligent packs for log analytics workspace.
+"""
+
+helps['monitor log-analytics workspace delete'] = """
+type: command
+short-summary: Delete a workspace instance.
+"""
+
+helps['monitor log-analytics workspace get-schema'] = """
+type: command
+short-summary: Get the schema for a given workspace.
+"""
+
+helps['monitor log-analytics workspace get-shared-keys'] = """
+type: command
+short-summary: Get the shared keys for a workspace.
+"""
+
+helps['monitor log-analytics workspace list-management-groups'] = """
+type: command
+short-summary: Get a list of management groups connected to a workspace.
+"""
+
+helps['monitor log-analytics workspace list-usages'] = """
+type: command
+short-summary: Get a list of usage metrics for a workspace.
+"""
+
+helps['monitor log-analytics workspace show'] = """
+type: command
+short-summary: Show a workspace instance.
+"""
+
+helps['monitor log-analytics workspace pack list'] = """
+type: command
+short-summary: List all the intelligence packs possible and whether they are enabled or disabled for a given workspace.
+"""
+
+helps['monitor log-analytics workspace pack enable'] = """
+type: command
+short-summary: Enable an intelligence pack for a given workspace.
+"""
+
+helps['monitor log-analytics workspace pack disable'] = """
+type: command
+short-summary: Disable an intelligence pack for a given workspace.
 """
