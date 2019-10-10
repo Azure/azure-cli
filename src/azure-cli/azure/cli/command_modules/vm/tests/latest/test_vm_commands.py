@@ -3489,5 +3489,24 @@ class VMPriorityEvictionBilling(ScenarioTest):
         ])
 
 
+class VMCreateSpecialName(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_create_special_name_')
+    def test_vm_create_special_name(self, resource_group):
+        """
+        Compose a valid computer name from VM name if computer name is not provided.
+        Remove special characters: '`~!@#$%^&*()=+_[]{}\\|;:\'\",<>/?'
+        """
+        self.kwargs.update({
+            'vm': 'vm_1'
+        })
+
+        self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('name', '{vm}'),
+            self.check('osProfile.computerName', 'vm1')
+        ])
+
+
 if __name__ == '__main__':
     unittest.main()
