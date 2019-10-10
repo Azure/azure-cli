@@ -212,7 +212,7 @@ def load_command_table(self, _):
         g.command('show', 'get')
         g.generic_update_command('update', custom_func_name='update_metric_alert', custom_func_type=alert_custom)
 
-    with self.command_group('monitor log-analytics workspace', log_analytics_workspace_sdk, custom_command_type=log_analytics_workspace_custom, client_factory=cf_log_analytics_workspace) as g:
+    with self.command_group('monitor log-analytics workspace', log_analytics_workspace_sdk, custom_command_type=log_analytics_workspace_custom) as g:
         g.custom_command('create', 'create_log_analytics_workspace')
         g.generic_update_command('update', custom_func_name='update_log_analytics_workspace')
         g.command('show', 'get')
@@ -224,7 +224,7 @@ def load_command_table(self, _):
         g.command('list-management-groups', 'list_management_groups')
         g.command('get-shared-keys', 'get_shared_keys')
 
-    with self.command_group('monitor log-analytics workspace pack', log_analytics_workspace_sdk, custom_command_type=log_analytics_workspace_custom, client_factory=cf_log_analytics_workspace) as g:
+    with self.command_group('monitor log-analytics workspace pack', log_analytics_workspace_sdk, custom_command_type=log_analytics_workspace_custom) as g:
         g.command('list', 'list_intelligence_packs')
         g.command('enable', 'enable_intelligence_pack')
         g.command('disable', 'disable_intelligence_pack')
