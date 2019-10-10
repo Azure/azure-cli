@@ -835,11 +835,15 @@ def _validate_vm_vmss_create_public_ip(cmd, namespace):
         namespace.public_ip_address_type = 'new'
         logger.debug('new public IP address will be created')
 
+    from azure.cli.core.profiles import ResourceType
+    PublicIPAddressSkuName, IPAllocationMethod = cmd.get_models('PublicIPAddressSkuName', 'IPAllocationMethod',
+                                                                resource_type=ResourceType.MGMT_NETWORK)
+    # Use standard public IP address automatically when using zones.
+    if hasattr(namespace, 'zone') and namespace.zone is not None:
+        namespace.public_ip_sku = PublicIPAddressSkuName.standard.value
+
     # Public-IP SKU is only exposed for VM. VMSS has no such needs so far
     if getattr(namespace, 'public_ip_sku', None):
-        from azure.cli.core.profiles import ResourceType
-        PublicIPAddressSkuName, IPAllocationMethod = cmd.get_models('PublicIPAddressSkuName', 'IPAllocationMethod',
-                                                                    resource_type=ResourceType.MGMT_NETWORK)
         if namespace.public_ip_sku == PublicIPAddressSkuName.standard.value:
             if not namespace.public_ip_address_allocation:
                 namespace.public_ip_address_allocation = IPAllocationMethod.static.value
