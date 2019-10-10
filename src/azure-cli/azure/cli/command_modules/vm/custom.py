@@ -982,6 +982,7 @@ def _prepare_workspace(cmd, resource_group_name, workspace):
     from msrestazure.tools import is_valid_resource_id
     from ._client_factory import cf_log_analytics
     from azure.cli.core.commands.client_factory import get_subscription_id
+    from msrestazure.azure_exceptions import CloudError
 
     workspace_id = None
     if not is_valid_resource_id(workspace):
@@ -991,7 +992,7 @@ def _prepare_workspace(cmd, resource_group_name, workspace):
         workspace_result = None
         try:
             workspace_result = log_client.get(resource_group_name, workspace_name)
-        except:  # pylint: disable=bare-except
+        except CloudError:
             from azure.mgmt.loganalytics.models import Workspace, Sku, SkuNameEnum
             sku = Sku(name=SkuNameEnum.per_gb2018.value)
             retention_time = 30  # default value
