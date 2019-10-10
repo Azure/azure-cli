@@ -6,7 +6,10 @@ Release History
 **AMS**
 
 * BREAKING CHANGE:
-    Changed job creation from "job start" to "job create".
+    content-key-policy create:
+        - Changed parameter --ask from utf-8 string to 32 character hex string.
+    job start:
+        - Changed the command from `job start` to `job create`.
     
 **SQL**
 
@@ -15,7 +18,9 @@ Release History
 **Compute**
 
 * vm create: Add --enable-agent configuration.
+* vm create: Use standard public IP SKU automatically when using zones.
 * vmss create: Add --computer-name-prefix parameter to support custom computer name prefix of virtual machines in the VMSS.
+* Update galleries API version to 2019-07-01.
 
 **Network**
 
@@ -64,6 +69,10 @@ Release History
 **EventGrid**
 
 * Fix the endpoint help text to refer to the right parameter (namely, to point to parameter `--endpoint` rather than `--endpoint-type` in event subscription commands).
+
+**IoT**
+
+* Fix #2116: Unexpected 'az iot hub show' error for resource not found.
 
 **Key Vault**
 
