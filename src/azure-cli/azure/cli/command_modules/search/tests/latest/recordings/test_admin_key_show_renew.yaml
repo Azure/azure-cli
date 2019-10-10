@@ -13,24 +13,24 @@ interactions:
       ParameterSetName:
       - -n -g --sku
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-resource/3.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.71
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/azure_search_cli_test000001?api-version=2019-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/azure_search_cli_test000001?api-version=2019-07-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001","name":"azure_search_cli_test000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-08-21T20:59:37Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001","name":"azure_search_cli_test000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-10-09T22:27:51Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '384'
+      - '428'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 21 Aug 2019 20:59:39 GMT
+      - Wed, 09 Oct 2019 22:27:53 GMT
       expires:
       - '-1'
       pragma:
@@ -63,8 +63,607 @@ interactions:
       ParameterSetName:
       - -n -g --sku
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-search/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.71
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-search/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.74
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2015-08-19
+  response:
+    body:
+      string: '{"error":{"code":"MissingSubscriptionRegistration","message":"The subscription
+        is not registered to use namespace ''Microsoft.Search''. See https://aka.ms/rps-not-found
+        for how to register subscriptions.","details":[{"code":"MissingSubscriptionRegistration","target":"Microsoft.Search","message":"The
+        subscription is not registered to use namespace ''Microsoft.Search''. See
+        https://aka.ms/rps-not-found for how to register subscriptions."}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '439'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 09 Oct 2019 22:27:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+    status:
+      code: 409
+      message: Conflict
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      User-Agent:
+      - python-requests/2.22.0
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Search/register?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Search","namespace":"Microsoft.Search","authorization":{"applicationId":"408992c7-2af6-4ff1-92e3-65b73d2b5092","roleDefinitionId":"20FA3191-87CF-4C3D-9510-74CCB594A310"},"resourceTypes":[{"resourceType":"searchServices","locations":["West
+        US","East US","North Europe","West Europe","Southeast Asia","East Asia","North
+        Central US","South Central US","Central US","Japan West","Japan East","Korea
+        Central","Australia East","Australia Southeast","Brazil South","South Africa
+        North","UAE North","West US 2","East US 2","Central India","West Central US","Canada
+        Central","UK South","France Central"],"apiVersions":["2015-08-19","2015-02-28"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"checkServiceNameAvailability","locations":[],"apiVersions":["2015-02-28","2014-07-31-Preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2015-08-19"]},{"resourceType":"resourceHealthMetadata","locations":["West
+        US","West US 2","East US","East US 2","North Europe","West Europe","Southeast
+        Asia","East Asia","North Central US","South Central US","Central US","Japan
+        West","Japan East","Korea Central","Australia East","Australia Southeast","Brazil
+        South","Central India","West Central US","Canada Central","UK South","France
+        Central","South Africa North","UAE North"],"apiVersions":["2015-08-19"]},{"resourceType":"operations","locations":[],"apiVersions":["2015-08-19","2015-02-28"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1594'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 09 Oct 2019 22:27:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Search?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Search","namespace":"Microsoft.Search","authorization":{"applicationId":"408992c7-2af6-4ff1-92e3-65b73d2b5092","roleDefinitionId":"20FA3191-87CF-4C3D-9510-74CCB594A310"},"resourceTypes":[{"resourceType":"searchServices","locations":["West
+        US","East US","North Europe","West Europe","Southeast Asia","East Asia","North
+        Central US","South Central US","Central US","Japan West","Japan East","Korea
+        Central","Australia East","Australia Southeast","Brazil South","South Africa
+        North","UAE North","West US 2","East US 2","Central India","West Central US","Canada
+        Central","UK South","France Central"],"apiVersions":["2015-08-19","2015-02-28"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"checkServiceNameAvailability","locations":[],"apiVersions":["2015-02-28","2014-07-31-Preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2015-08-19"]},{"resourceType":"resourceHealthMetadata","locations":["West
+        US","West US 2","East US","East US 2","North Europe","West Europe","Southeast
+        Asia","East Asia","North Central US","South Central US","Central US","Japan
+        West","Japan East","Korea Central","Australia East","Australia Southeast","Brazil
+        South","Central India","West Central US","Canada Central","UK South","France
+        Central","South Africa North","UAE North"],"apiVersions":["2015-08-19"]},{"resourceType":"operations","locations":[],"apiVersions":["2015-08-19","2015-02-28"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1594'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 09 Oct 2019 22:28:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Search?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Search","namespace":"Microsoft.Search","authorization":{"applicationId":"408992c7-2af6-4ff1-92e3-65b73d2b5092","roleDefinitionId":"20FA3191-87CF-4C3D-9510-74CCB594A310"},"resourceTypes":[{"resourceType":"searchServices","locations":["West
+        US","East US","North Europe","West Europe","Southeast Asia","East Asia","North
+        Central US","South Central US","Central US","Japan West","Japan East","Korea
+        Central","Australia East","Australia Southeast","Brazil South","South Africa
+        North","UAE North","West US 2","East US 2","Central India","West Central US","Canada
+        Central","UK South","France Central"],"apiVersions":["2015-08-19","2015-02-28"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"checkServiceNameAvailability","locations":[],"apiVersions":["2015-02-28","2014-07-31-Preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2015-08-19"]},{"resourceType":"resourceHealthMetadata","locations":["West
+        US","West US 2","East US","East US 2","North Europe","West Europe","Southeast
+        Asia","East Asia","North Central US","South Central US","Central US","Japan
+        West","Japan East","Korea Central","Australia East","Australia Southeast","Brazil
+        South","Central India","West Central US","Canada Central","UK South","France
+        Central","South Africa North","UAE North"],"apiVersions":["2015-08-19"]},{"resourceType":"operations","locations":[],"apiVersions":["2015-08-19","2015-02-28"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1594'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 09 Oct 2019 22:28:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Search?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Search","namespace":"Microsoft.Search","authorization":{"applicationId":"408992c7-2af6-4ff1-92e3-65b73d2b5092","roleDefinitionId":"20FA3191-87CF-4C3D-9510-74CCB594A310"},"resourceTypes":[{"resourceType":"searchServices","locations":["West
+        US","East US","North Europe","West Europe","Southeast Asia","East Asia","North
+        Central US","South Central US","Central US","Japan West","Japan East","Korea
+        Central","Australia East","Australia Southeast","Brazil South","South Africa
+        North","UAE North","West US 2","East US 2","Central India","West Central US","Canada
+        Central","UK South","France Central"],"apiVersions":["2015-08-19","2015-02-28"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"checkServiceNameAvailability","locations":[],"apiVersions":["2015-02-28","2014-07-31-Preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2015-08-19"]},{"resourceType":"resourceHealthMetadata","locations":["West
+        US","West US 2","East US","East US 2","North Europe","West Europe","Southeast
+        Asia","East Asia","North Central US","South Central US","Central US","Japan
+        West","Japan East","Korea Central","Australia East","Australia Southeast","Brazil
+        South","Central India","West Central US","Canada Central","UK South","France
+        Central","South Africa North","UAE North"],"apiVersions":["2015-08-19"]},{"resourceType":"operations","locations":[],"apiVersions":["2015-08-19","2015-02-28"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1594'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 09 Oct 2019 22:28:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Search?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Search","namespace":"Microsoft.Search","authorization":{"applicationId":"408992c7-2af6-4ff1-92e3-65b73d2b5092","roleDefinitionId":"20FA3191-87CF-4C3D-9510-74CCB594A310"},"resourceTypes":[{"resourceType":"searchServices","locations":["West
+        US","East US","North Europe","West Europe","Southeast Asia","East Asia","North
+        Central US","South Central US","Central US","Japan West","Japan East","Korea
+        Central","Australia East","Australia Southeast","Brazil South","South Africa
+        North","UAE North","West US 2","East US 2","Central India","West Central US","Canada
+        Central","UK South","France Central"],"apiVersions":["2015-08-19","2015-02-28"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"checkServiceNameAvailability","locations":[],"apiVersions":["2015-02-28","2014-07-31-Preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2015-08-19"]},{"resourceType":"resourceHealthMetadata","locations":["West
+        US","West US 2","East US","East US 2","North Europe","West Europe","Southeast
+        Asia","East Asia","North Central US","South Central US","Central US","Japan
+        West","Japan East","Korea Central","Australia East","Australia Southeast","Brazil
+        South","Central India","West Central US","Canada Central","UK South","France
+        Central","South Africa North","UAE North"],"apiVersions":["2015-08-19"]},{"resourceType":"operations","locations":[],"apiVersions":["2015-08-19","2015-02-28"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1594'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 09 Oct 2019 22:28:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Search?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Search","namespace":"Microsoft.Search","authorization":{"applicationId":"408992c7-2af6-4ff1-92e3-65b73d2b5092","roleDefinitionId":"20FA3191-87CF-4C3D-9510-74CCB594A310"},"resourceTypes":[{"resourceType":"searchServices","locations":["West
+        US","East US","North Europe","West Europe","Southeast Asia","East Asia","North
+        Central US","South Central US","Central US","Japan West","Japan East","Korea
+        Central","Australia East","Australia Southeast","Brazil South","South Africa
+        North","UAE North","West US 2","East US 2","Central India","West Central US","Canada
+        Central","UK South","France Central"],"apiVersions":["2015-08-19","2015-02-28"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"checkServiceNameAvailability","locations":[],"apiVersions":["2015-02-28","2014-07-31-Preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2015-08-19"]},{"resourceType":"resourceHealthMetadata","locations":["West
+        US","West US 2","East US","East US 2","North Europe","West Europe","Southeast
+        Asia","East Asia","North Central US","South Central US","Central US","Japan
+        West","Japan East","Korea Central","Australia East","Australia Southeast","Brazil
+        South","Central India","West Central US","Canada Central","UK South","France
+        Central","South Africa North","UAE North"],"apiVersions":["2015-08-19"]},{"resourceType":"operations","locations":[],"apiVersions":["2015-08-19","2015-02-28"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1594'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 09 Oct 2019 22:28:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Search?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Search","namespace":"Microsoft.Search","authorization":{"applicationId":"408992c7-2af6-4ff1-92e3-65b73d2b5092","roleDefinitionId":"20FA3191-87CF-4C3D-9510-74CCB594A310"},"resourceTypes":[{"resourceType":"searchServices","locations":["West
+        US","East US","North Europe","West Europe","Southeast Asia","East Asia","North
+        Central US","South Central US","Central US","Japan West","Japan East","Korea
+        Central","Australia East","Australia Southeast","Brazil South","South Africa
+        North","UAE North","West US 2","East US 2","Central India","West Central US","Canada
+        Central","UK South","France Central"],"apiVersions":["2015-08-19","2015-02-28"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"checkServiceNameAvailability","locations":[],"apiVersions":["2015-02-28","2014-07-31-Preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2015-08-19"]},{"resourceType":"resourceHealthMetadata","locations":["West
+        US","West US 2","East US","East US 2","North Europe","West Europe","Southeast
+        Asia","East Asia","North Central US","South Central US","Central US","Japan
+        West","Japan East","Korea Central","Australia East","Australia Southeast","Brazil
+        South","Central India","West Central US","Canada Central","UK South","France
+        Central","South Africa North","UAE North"],"apiVersions":["2015-08-19"]},{"resourceType":"operations","locations":[],"apiVersions":["2015-08-19","2015-02-28"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1594'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 09 Oct 2019 22:28:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Search?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Search","namespace":"Microsoft.Search","authorization":{"applicationId":"408992c7-2af6-4ff1-92e3-65b73d2b5092","roleDefinitionId":"20FA3191-87CF-4C3D-9510-74CCB594A310"},"resourceTypes":[{"resourceType":"searchServices","locations":["West
+        US","East US","North Europe","West Europe","Southeast Asia","East Asia","North
+        Central US","South Central US","Central US","Japan West","Japan East","Korea
+        Central","Australia East","Australia Southeast","Brazil South","South Africa
+        North","UAE North","West US 2","East US 2","Central India","West Central US","Canada
+        Central","UK South","France Central"],"apiVersions":["2015-08-19","2015-02-28"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"checkServiceNameAvailability","locations":[],"apiVersions":["2015-02-28","2014-07-31-Preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2015-08-19"]},{"resourceType":"resourceHealthMetadata","locations":["West
+        US","West US 2","East US","East US 2","North Europe","West Europe","Southeast
+        Asia","East Asia","North Central US","South Central US","Central US","Japan
+        West","Japan East","Korea Central","Australia East","Australia Southeast","Brazil
+        South","Central India","West Central US","Canada Central","UK South","France
+        Central","South Africa North","UAE North"],"apiVersions":["2015-08-19"]},{"resourceType":"operations","locations":[],"apiVersions":["2015-08-19","2015-02-28"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1594'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 09 Oct 2019 22:29:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Search?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Search","namespace":"Microsoft.Search","authorization":{"applicationId":"408992c7-2af6-4ff1-92e3-65b73d2b5092","roleDefinitionId":"20FA3191-87CF-4C3D-9510-74CCB594A310"},"resourceTypes":[{"resourceType":"searchServices","locations":["West
+        US","East US","North Europe","West Europe","Southeast Asia","East Asia","North
+        Central US","South Central US","Central US","Japan West","Japan East","Korea
+        Central","Australia East","Australia Southeast","Brazil South","South Africa
+        North","UAE North","West US 2","East US 2","Central India","West Central US","Canada
+        Central","UK South","France Central"],"apiVersions":["2015-08-19","2015-02-28"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"checkServiceNameAvailability","locations":[],"apiVersions":["2015-02-28","2014-07-31-Preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2015-08-19"]},{"resourceType":"resourceHealthMetadata","locations":["West
+        US","West US 2","East US","East US 2","North Europe","West Europe","Southeast
+        Asia","East Asia","North Central US","South Central US","Central US","Japan
+        West","Japan East","Korea Central","Australia East","Australia Southeast","Brazil
+        South","Central India","West Central US","Canada Central","UK South","France
+        Central","South Africa North","UAE North"],"apiVersions":["2015-08-19"]},{"resourceType":"operations","locations":[],"apiVersions":["2015-08-19","2015-02-28"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1594'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 09 Oct 2019 22:29:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Search?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Search","namespace":"Microsoft.Search","authorization":{"applicationId":"408992c7-2af6-4ff1-92e3-65b73d2b5092","roleDefinitionId":"20FA3191-87CF-4C3D-9510-74CCB594A310"},"resourceTypes":[{"resourceType":"searchServices","locations":["West
+        US","East US","North Europe","West Europe","Southeast Asia","East Asia","North
+        Central US","South Central US","Central US","Japan West","Japan East","Korea
+        Central","Australia East","Australia Southeast","Brazil South","South Africa
+        North","UAE North","West US 2","East US 2","Central India","West Central US","Canada
+        Central","UK South","France Central"],"apiVersions":["2015-08-19","2015-02-28"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"checkServiceNameAvailability","locations":[],"apiVersions":["2015-02-28","2014-07-31-Preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2015-08-19"]},{"resourceType":"resourceHealthMetadata","locations":["West
+        US","West US 2","East US","East US 2","North Europe","West Europe","Southeast
+        Asia","East Asia","North Central US","South Central US","Central US","Japan
+        West","Japan East","Korea Central","Australia East","Australia Southeast","Brazil
+        South","Central India","West Central US","Canada Central","UK South","France
+        Central","South Africa North","UAE North"],"apiVersions":["2015-08-19"]},{"resourceType":"operations","locations":[],"apiVersions":["2015-08-19","2015-02-28"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1594'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 09 Oct 2019 22:29:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Search?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Search","namespace":"Microsoft.Search","authorization":{"applicationId":"408992c7-2af6-4ff1-92e3-65b73d2b5092","roleDefinitionId":"20FA3191-87CF-4C3D-9510-74CCB594A310"},"resourceTypes":[{"resourceType":"searchServices","locations":["West
+        US","East US","North Europe","West Europe","Southeast Asia","East Asia","North
+        Central US","South Central US","Central US","Japan West","Japan East","Korea
+        Central","Australia East","Australia Southeast","Brazil South","South Africa
+        North","UAE North","West US 2","East US 2","Central India","West Central US","Canada
+        Central","UK South","France Central"],"apiVersions":["2015-08-19","2015-02-28"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"checkServiceNameAvailability","locations":[],"apiVersions":["2015-02-28","2014-07-31-Preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2015-08-19"]},{"resourceType":"resourceHealthMetadata","locations":["West
+        US","West US 2","East US","East US 2","North Europe","West Europe","Southeast
+        Asia","East Asia","North Central US","South Central US","Central US","Japan
+        West","Japan East","Korea Central","Australia East","Australia Southeast","Brazil
+        South","Central India","West Central US","Canada Central","UK South","France
+        Central","South Africa North","UAE North"],"apiVersions":["2015-08-19"]},{"resourceType":"operations","locations":[],"apiVersions":["2015-08-19","2015-02-28"]}],"registrationState":"Registered"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1593'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 09 Oct 2019 22:29:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "properties": {"replicaCount": 1, "partitionCount":
+      1, "hostingMode": "default"}, "sku": {"name": "standard"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - search service create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '133'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g --sku
+      User-Agent:
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-search/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.74
       accept-language:
       - en-US
     method: PUT
@@ -81,23 +680,23 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 21 Aug 2019 21:00:00 GMT
+      - Wed, 09 Oct 2019 22:30:12 GMT
       elapsed-time:
-      - '20940'
+      - '36030'
       etag:
-      - W/"datetime'2019-08-21T21%3A00%3A01.0404614Z'"
+      - W/"datetime'2019-10-09T22%3A30%3A12.5951992Z'"
       expires:
       - '-1'
       pragma:
       - no-cache
       request-id:
-      - 96fab45c-c456-11e9-8217-2016b97d2bf8
+      - 465b1a4c-eae4-11e9-a4f7-000d3a3ab28a
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '1198'
     status:
       code: 201
       message: Created
@@ -117,15 +716,15 @@ interactions:
       ParameterSetName:
       - --service-name -g
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-search/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.71
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-search/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.74
       accept-language:
       - en-US
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002/listAdminKeys?api-version=2015-08-19
   response:
     body:
-      string: '{"primaryKey":"5851113317E2A73B3F8A983E7C5A64E6","secondaryKey":"D801421A33F1D3352852D3EE7B893F70"}'
+      string: '{"primaryKey":"63B3CA629BB9BF716EEEA8179A8E875E","secondaryKey":"A8B6C86EAE87B0A75D13D64ADBD7E914"}'
     headers:
       cache-control:
       - no-cache
@@ -134,15 +733,15 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 21 Aug 2019 21:00:02 GMT
+      - Wed, 09 Oct 2019 22:30:13 GMT
       elapsed-time:
-      - '171'
+      - '189'
       expires:
       - '-1'
       pragma:
       - no-cache
       request-id:
-      - a4abbf06-c456-11e9-b882-2016b97d2bf8
+      - 5c1c9112-eae4-11e9-b43c-000d3a3ab28a
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -152,7 +751,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -172,15 +771,15 @@ interactions:
       ParameterSetName:
       - --service-name -g --key-kind
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-search/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.71
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-search/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.74
       accept-language:
       - en-US
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002/regenerateAdminKey/primary?api-version=2015-08-19
   response:
     body:
-      string: '{"primaryKey":"DD3B27CFE58E1585E64348F18ADAEB6A","secondaryKey":"D801421A33F1D3352852D3EE7B893F70"}'
+      string: '{"primaryKey":"8666E3587E4B9FF1EC3FCF63FD54CD00","secondaryKey":"A8B6C86EAE87B0A75D13D64ADBD7E914"}'
     headers:
       cache-control:
       - no-cache
@@ -189,15 +788,15 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 21 Aug 2019 21:00:03 GMT
+      - Wed, 09 Oct 2019 22:30:15 GMT
       elapsed-time:
-      - '283'
+      - '555'
       expires:
       - '-1'
       pragma:
       - no-cache
       request-id:
-      - a54592cc-c456-11e9-b331-2016b97d2bf8
+      - 5ca6db68-eae4-11e9-87ce-000d3a3ab28a
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -227,15 +826,15 @@ interactions:
       ParameterSetName:
       - --service-name -g
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-search/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.71
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-search/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.74
       accept-language:
       - en-US
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002/listAdminKeys?api-version=2015-08-19
   response:
     body:
-      string: '{"primaryKey":"DD3B27CFE58E1585E64348F18ADAEB6A","secondaryKey":"D801421A33F1D3352852D3EE7B893F70"}'
+      string: '{"primaryKey":"8666E3587E4B9FF1EC3FCF63FD54CD00","secondaryKey":"A8B6C86EAE87B0A75D13D64ADBD7E914"}'
     headers:
       cache-control:
       - no-cache
@@ -244,15 +843,15 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 21 Aug 2019 21:00:03 GMT
+      - Wed, 09 Oct 2019 22:30:15 GMT
       elapsed-time:
-      - '97'
+      - '192'
       expires:
       - '-1'
       pragma:
       - no-cache
       request-id:
-      - a5bc997a-c456-11e9-8b44-2016b97d2bf8
+      - 5d849864-eae4-11e9-b119-000d3a3ab28a
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -262,7 +861,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -282,15 +881,15 @@ interactions:
       ParameterSetName:
       - --service-name -g --key-kind
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-search/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.71
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-search/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.74
       accept-language:
       - en-US
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002/regenerateAdminKey/secondary?api-version=2015-08-19
   response:
     body:
-      string: '{"primaryKey":"DD3B27CFE58E1585E64348F18ADAEB6A","secondaryKey":"30F6DDD2A14C71AE4621E7B84A3C4260"}'
+      string: '{"primaryKey":"8666E3587E4B9FF1EC3FCF63FD54CD00","secondaryKey":"3D28A1CD51195579E86F6B0093AF170F"}'
     headers:
       cache-control:
       - no-cache
@@ -299,15 +898,15 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 21 Aug 2019 21:00:04 GMT
+      - Wed, 09 Oct 2019 22:30:17 GMT
       elapsed-time:
-      - '321'
+      - '433'
       expires:
       - '-1'
       pragma:
       - no-cache
       request-id:
-      - a627e3b8-c456-11e9-b454-2016b97d2bf8
+      - 5e186668-eae4-11e9-9a81-000d3a3ab28a
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -317,7 +916,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -337,15 +936,15 @@ interactions:
       ParameterSetName:
       - --service-name -g
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-search/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.71
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.1
+        azure-mgmt-search/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.74
       accept-language:
       - en-US
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002/listAdminKeys?api-version=2015-08-19
   response:
     body:
-      string: '{"primaryKey":"DD3B27CFE58E1585E64348F18ADAEB6A","secondaryKey":"30F6DDD2A14C71AE4621E7B84A3C4260"}'
+      string: '{"primaryKey":"8666E3587E4B9FF1EC3FCF63FD54CD00","secondaryKey":"3D28A1CD51195579E86F6B0093AF170F"}'
     headers:
       cache-control:
       - no-cache
@@ -354,15 +953,15 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 21 Aug 2019 21:00:05 GMT
+      - Wed, 09 Oct 2019 22:30:18 GMT
       elapsed-time:
-      - '85'
+      - '189'
       expires:
       - '-1'
       pragma:
       - no-cache
       request-id:
-      - a6c709d0-c456-11e9-803d-2016b97d2bf8
+      - 5ecffc4c-eae4-11e9-a331-000d3a3ab28a
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -372,7 +971,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 200
       message: OK
