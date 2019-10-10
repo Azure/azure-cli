@@ -179,6 +179,7 @@ def guess_content_type(file_path, original, settings_class):
     import mimetypes
     mimetypes.add_type('application/json', '.json')
     mimetypes.add_type('application/javascript', '.js')
+    mimetypes.add_type('application/wasm', '.wasm')
 
     content_type, _ = mimetypes.guess_type(file_path)
     return settings_class(
