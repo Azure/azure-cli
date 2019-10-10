@@ -103,7 +103,7 @@ DEPENDENCIES = [
     'azure-mgmt-media~=1.1,>=1.1.1',
     'azure-mgmt-monitor~=0.5.2',
     'azure-mgmt-msi~=0.2',
-    'azure-mgmt-network~=5.1',
+    'azure-mgmt-network~=6.0',
     'azure-mgmt-netapp~=0.5.0',
     'azure-mgmt-policyinsights~=0.3.1',
     'azure-mgmt-privatedns~=0.1.0',
