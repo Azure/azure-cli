@@ -255,8 +255,11 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
 
     def _build_os_profile():
 
+        special_chars = '`~!@#$%^&*()=+_[]{}\\|;:\'\",<>/?'
+
         os_profile = {
-            'computerName': computer_name or name,
+            # Use name as computer_name if it's not provided. Remove special characters from name.
+            'computerName': computer_name or ''.join(filter(lambda x: x not in special_chars, name)),
             'adminUsername': admin_username
         }
 

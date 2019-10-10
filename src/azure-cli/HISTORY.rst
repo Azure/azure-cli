@@ -15,6 +15,7 @@ Release History
 
 * vm create: Add --enable-agent configuration.
 * vm create: Use standard public IP SKU automatically when using zones.
+* vm create: Compose a valid computer name from VM name if computer name is not provided.
 * vmss create: Add --computer-name-prefix parameter to support custom computer name prefix of virtual machines in the VMSS.
 * Update galleries API version to 2019-07-01.
 
