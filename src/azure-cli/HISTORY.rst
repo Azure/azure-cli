@@ -3,6 +3,11 @@
 Release History
 ===============
 
+**AKS**
+
+* Set `--load-balancer-sku` default value to standard if supported by the kubernetes version
+* Set `--vm-set-type` default value to virtualmachinescalesets if supported by the kubernetes version
+
 **AMS**
 
 * BREAKING CHANGE:
