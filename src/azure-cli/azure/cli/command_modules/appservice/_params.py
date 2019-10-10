@@ -291,6 +291,9 @@ def load_arguments(self, _):
 
     with self.argument_context('webapp config connection-string') as c:
         c.argument('connection_string_type', options_list=['--connection-string-type', '-t'], help='connection string type', arg_type=get_enum_type(ConnectionStringType))
+        c.argument('ids', options_list=['--ids'], help="One or more resource IDs (space delimited). If provided no other 'Resource Id' arguments should be specified.", required=True)
+        c.argument('resource_group', options_list=['--resource-group', '-g'], help='Name of resource group. You can configure the default group using `az configure --default-group=<name>`. If `--ids` is provided this should NOT be specified.')
+        c.argument('name', options_list=['--name', '-n'], help='Name of the web app. You can configure the default using `az configure --defaults web=<name>`. If `--ids` is provided this should NOT be specified.')
 
     with self.argument_context('webapp config storage-account') as c:
         c.argument('custom_id', options_list=['--custom-id', '-i'], help='custom identifier')
