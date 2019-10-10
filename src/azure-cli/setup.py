@@ -112,8 +112,8 @@ DEPENDENCIES = [
     'azure-mgmt-recoveryservicesbackup~=0.4.0',
     'azure-mgmt-redis~=6.0',
     'azure-mgmt-relay~=0.1.0',
-    # 'azure-mgmt-reservations~=0.3.1',
-    'azure-mgmt-reservations==0.3.1',  # TODO: Use requirements.txt instead of '==' #9781
+    # 'azure-mgmt-reservations~=0.5.0',
+    'azure-mgmt-reservations==0.5.0',  # TODO: Use requirements.txt instead of '==' #9781
     'azure-mgmt-resource~=4.0',
     'azure-mgmt-search~=2.0',
     'azure-mgmt-security~=0.1.0',
