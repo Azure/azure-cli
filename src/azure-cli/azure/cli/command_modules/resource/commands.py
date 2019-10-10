@@ -9,7 +9,7 @@ from collections import OrderedDict
 
 from azure.cli.core.util import empty_on_404
 from azure.cli.core.profiles import ResourceType, PROFILE_TYPE
-from azure.cli.core.commands import CliCommandType
+from azure.cli.core.commands import CliCommandType, DeploymentOutputLongRunningOperation
 from azure.cli.core.commands.arm import handle_template_based_exception
 
 from azure.cli.command_modules.resource._client_factory import (
@@ -173,7 +173,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_locks')
         g.custom_show_command('show', 'get_lock')
         g.custom_command('update', 'update_lock')
-    from azure.cli.core.commands import DeploymentOutputLongRunningOperation
+
     with self.command_group('resource', resource_custom, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
         g.custom_command('create', 'create_resource')
         g.custom_command('delete', 'delete_resource')
