@@ -347,7 +347,7 @@ examples:
         az ad sp create-for-rbac -n "MyApp" --role contributor \\
             --scopes /subscriptions/{SubID}/resourceGroups/{ResourceGroup1} \\
             /subscriptions/{SubID}/resourceGroups/{ResourceGroup2}
-  - name: Create using a self-signed certificte.
+  - name: Create using a self-signed certificate.
     text: az ad sp create-for-rbac --create-cert
   - name: Create using a self-signed certificate, and store it within KeyVault.
     text: az ad sp create-for-rbac --keyvault MyVault --cert CertName --create-cert
