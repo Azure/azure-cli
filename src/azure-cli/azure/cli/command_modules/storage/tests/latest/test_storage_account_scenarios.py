@@ -137,6 +137,15 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('storage account check-name --name {}'.format(name),
                  checks=JMESPathCheck('nameAvailable', True))
 
+        large_file_name = self.create_random_name(prefix='cli', length=24)
+        self.cmd('storage account create -g {} -n {} --sku {} --enable-large-file-share'.format(
+            resource_group, large_file_name, 'Standard_LRS'))
+        self.cmd('az storage account show -n {} -g {}'.format(large_file_name, resource_group), checks=[
+            JMESPathCheck('name', large_file_name),
+            JMESPathCheck('sku.name', 'Standard_LRS'),
+            JMESPathCheck('largeFileSharesState', 'Enabled')
+        ])
+
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2017-10-01')
     @ResourceGroupPreparer(parameter_name_for_location='location', location='southcentralus')
     def test_create_storage_account_v2(self, resource_group, location):

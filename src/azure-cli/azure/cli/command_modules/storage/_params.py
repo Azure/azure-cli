@@ -67,11 +67,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         validator=validate_storage_data_plane_list)
 
     large_file_share_type = CLIArgumentType(
-        action='store_true', min_api='2019-04-01',
+        action='store_true', min_api='2019-04-01', is_preview=True,
         help='Enable the capability to support large file shares with more than 5 TiB capacity for storage account.'
-             'Once the property is enabled, the feature cannot be disabled. Currently only supported for LRS and ZRS '
-             'replication types, hence account conversions to geo-redundant accounts would not be possible. For more '
-             'information, please refer to https://go.microsoft.com/fwlink/?linkid=2086047.')
+             'Once the property is enabled, the feature cannot be disabled. Currently onis_preview=True,ly supported '
+             'for LRS and ZRS replication types, hence account conversions to geo-redundant accounts would not be '
+             'possible. For more information, please refer to https://go.microsoft.com/fwlink/?linkid=2086047.')
 
     sas_help = 'The permissions the SAS grants. Allowed values: {}. Do not use if a stored access policy is ' \
                'referenced with --id that specifies this value. Can be combined.'
