@@ -36,6 +36,7 @@ from ._util import (
     get_sql_failover_groups_operations,
     get_sql_firewall_rules_operations,
     get_sql_managed_databases_operations,
+    get_sql_managed_instance_azure_ad_administrators_operations,
     get_sql_managed_instance_encryption_protectors_operations,
     get_sql_managed_instance_keys_operations,
     get_sql_managed_instances_operations,
@@ -492,6 +493,19 @@ def load_command_table(self, _):
 
         g.show_command('show', 'get')
         g.custom_command('set', 'managed_instance_encryption_protector_update')
+
+    managed_instance_aadadmin_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#ManagedInstanceAdministratorsOperations.{}',
+        client_factory=get_sql_managed_instance_azure_ad_administrators_operations)
+
+    with self.command_group('sql mi ad-admin',
+                            managed_instance_aadadmin_operations,
+                            client_factory=get_sql_managed_instance_azure_ad_administrators_operations) as g:
+
+        g.custom_command('create', 'mi_ad_admin_set')
+        g.command('list', 'list_by_instance')
+        g.custom_command('delete', 'mi_ad_admin_delete')
+        g.custom_command('update', 'mi_ad_admin_set')
 
     ###############################################
     #                sql managed db               #

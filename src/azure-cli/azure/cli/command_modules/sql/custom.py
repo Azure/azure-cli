@@ -17,7 +17,6 @@ from azure.mgmt.sql.models import (
     CapabilityStatus,
     CreateMode,
     DatabaseEdition,
-    EncryptionProtector,
     FailoverGroup,
     FailoverGroupReadOnlyEndpoint,
     FailoverGroupReadWriteEndpoint,
@@ -326,6 +325,17 @@ def _db_elastic_pool_update_sku(
         instance.sku = find_sku_from_capabilities_func(
             cmd.cli_ctx, instance.location, instance.sku,
             allow_reset_family=allow_reset_family)
+
+
+def _get_tenant_id():
+    '''
+    Gets tenantId from current subscription.
+    '''
+    from azure.cli.core._profile import Profile
+
+    profile = Profile()
+    sub = profile.get_subscription()
+    return sub['tenantId']
 
 
 _DEFAULT_SERVER_VERSION = "12.0"
@@ -1777,7 +1787,6 @@ def server_update(
 
 
 def server_ad_admin_set(
-        cmd,
         client,
         resource_group_name,
         server_name,
@@ -1785,11 +1794,8 @@ def server_ad_admin_set(
     '''
     Sets a server's AD admin.
     '''
-    from azure.cli.core._profile import Profile
 
-    profile = Profile(cli_ctx=cmd.cli_ctx)
-    sub = profile.get_subscription()
-    kwargs['tenant_id'] = sub['tenantId']
+    kwargs['tenant_id'] = _get_tenant_id()
 
     return client.create_or_update(
         server_name=server_name,
@@ -2010,10 +2016,8 @@ def encryption_protector_update(
     return client.create_or_update(
         resource_group_name=resource_group_name,
         server_name=server_name,
-        parameters=EncryptionProtector(
-            server_key_type=server_key_type,
-            server_key_name=key_name
-        )
+        server_key_type=server_key_type,
+        server_key_name=key_name
     )
 
 ###############################################
@@ -2224,6 +2228,44 @@ def managed_instance_encryption_protector_update(
         managed_instance_name=managed_instance_name,
         server_key_type=server_key_type,
         server_key_name=key_name
+    )
+
+
+#####
+#           sql managed instance ad-admin
+#####
+
+
+def mi_ad_admin_set(
+        client,
+        resource_group_name,
+        managed_instance_name,
+        **kwargs):
+    '''
+    Creates a managed instance active directory administrator.
+    '''
+
+    kwargs['tenant_id'] = _get_tenant_id()
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        managed_instance_name=managed_instance_name,
+        administrator_name="ActiveDirectory",
+        parameters=kwargs
+    )
+
+
+def mi_ad_admin_delete(
+        client,
+        resource_group_name,
+        managed_instance_name):
+    '''
+    Deletes a managed instance active directory administrator.
+    '''
+    return client.delete(
+        resource_group_name=resource_group_name,
+        managed_instance_name=managed_instance_name,
+        administrator_name="ActiveDirectory"
     )
 
 ###############################################

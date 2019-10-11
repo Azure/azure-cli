@@ -15,6 +15,10 @@ Release History
         - Changed parameter --ask from utf-8 string to 32 character hex string.
     job start:
         - Changed the command from `job start` to `job create`.
+    
+**SQL**
+
+* New Cmdlets for sql mi ad-admin that supports setting AAD administrator on Managed instance
 
 **Compute**
 
