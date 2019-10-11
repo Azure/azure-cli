@@ -49,6 +49,10 @@ Release History
 
 * az monitor log-analytics workspace: Support CRUD for Azure log analytics workspace.
 
+**Storage**
+
+* az storage copy: Add --preserve-s2s-access-tier parameter to preserve access tier during service to service copy.
+
 2.0.74
 ++++++
 
