@@ -85,13 +85,14 @@ class ResourceGroupPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
 
 # pylint: disable=too-many-instance-attributes
 class StorageAccountPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
-    def __init__(self, name_prefix='clitest', sku='Standard_LRS', location='westus', parameter_name='storage_account',
+    def __init__(self, name_prefix='clitest', sku='Standard_LRS', location='westus', kind='Storage', parameter_name='storage_account',
                  resource_group_parameter_name='resource_group', skip_delete=True,
                  dev_setting_name='AZURE_CLI_TEST_DEV_STORAGE_ACCOUNT_NAME', key='sa'):
         super(StorageAccountPreparer, self).__init__(name_prefix, 24)
         self.cli_ctx = get_dummy_cli()
         self.location = location
         self.sku = sku
+        self.kind = kind
         self.resource_group_parameter_name = resource_group_parameter_name
         self.skip_delete = skip_delete
         self.parameter_name = parameter_name
@@ -102,8 +103,8 @@ class StorageAccountPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         group = self._get_resource_group(**kwargs)
 
         if not self.dev_setting_name:
-            template = 'az storage account create -n {} -g {} -l {} --sku {}'
-            self.live_only_execute(self.cli_ctx, template.format(name, group, self.location, self.sku))
+            template = 'az storage account create -n {} -g {} -l {} --sku {} --kind {}'
+            self.live_only_execute(self.cli_ctx, template.format(name, group, self.location, self.sku, self.kind))
         else:
             name = self.dev_setting_name
 
