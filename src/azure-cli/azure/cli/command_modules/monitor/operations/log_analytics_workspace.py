@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from azure.mgmt.loganalytics.models import SkuNameEnum
 
+
 def create_log_analytics_workspace(cmd, client, resource_group_name, workspace_name, location=None, tags=None,
                                    sku=SkuNameEnum.per_gb2018.value, retention_time=None):
     from azure.mgmt.loganalytics.models import Workspace, Sku

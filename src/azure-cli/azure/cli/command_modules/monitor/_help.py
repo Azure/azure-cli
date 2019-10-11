@@ -1015,7 +1015,7 @@ helps['monitor log-analytics workspace get-schema'] = """
 type: command
 short-summary: Get the schema for a given workspace.
 long-summary: >
-    Schema represents the internal structure of the workspace, which can be used during the query. 
+    Schema represents the internal structure of the workspace, which can be used during the query.
     For more information, visit: https://docs.microsoft.com/en-us/rest/api/loganalytics/workspaces%202015-03-20/getschema
 """
 
