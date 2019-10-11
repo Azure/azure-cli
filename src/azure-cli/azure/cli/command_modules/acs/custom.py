@@ -1614,7 +1614,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                service_cidr=None,
                dns_service_ip=None,
                docker_bridge_address=None,
-               load_balancer_sku="basic",
+               load_balancer_sku=None,
                load_balancer_managed_outbound_ip_count=None,
                load_balancer_outbound_ips=None,
                load_balancer_outbound_ip_prefixes=None,
@@ -1640,11 +1640,6 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     if location is None:
         location = rg_location
 
-    # Remove the below section when we change the default value for vm_set_type to vmss
-    if not vm_set_type:
-        vm_set_type = "AvailabilitySet"
-
-    # NOTE: add for future default behavior swap
     if not vm_set_type:
         if kubernetes_version and StrictVersion(kubernetes_version) < StrictVersion("1.12.9"):
             print('Setting vm_set_type to availabilityset as it is \
@@ -1662,7 +1657,6 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     if vm_set_type.lower() == "VirtualMachineScaleSets".lower():
         vm_set_type = "VirtualMachineScaleSets"
 
-    # NOTE: add for future default behavior swap
     if not load_balancer_sku:
         if kubernetes_version and StrictVersion(kubernetes_version) < StrictVersion("1.13.0"):
             print('Setting load_balancer_sku to basic as it is not specified and kubernetes \
