@@ -212,13 +212,12 @@ def load_command_table(self, _):
         g.command('show', 'get')
         g.generic_update_command('update', custom_func_name='update_metric_alert', custom_func_type=alert_custom)
 
-    with self.command_group('monitor log-analytics workspace', log_analytics_workspace_sdk, custom_command_type=log_analytics_workspace_custom) as g:
+    with self.command_group('monitor log-analytics workspace', log_analytics_workspace_sdk, custom_command_type=log_analytics_workspace_custom, is_preview=True) as g:
         g.custom_command('create', 'create_log_analytics_workspace')
         g.generic_update_command('update', custom_func_name='update_log_analytics_workspace')
         g.command('show', 'get')
         g.command('delete', 'delete')
         g.custom_command('list', 'list_log_analytics_workspace')
-        g.command('list-link-workspaces', 'list_link_targets')
         g.command('get-schema', 'get_schema')
         g.command('list-usages', 'list_usages')
         g.command('list-management-groups', 'list_management_groups')

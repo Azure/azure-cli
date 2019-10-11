@@ -334,10 +334,9 @@ def load_arguments(self, _):
 
     # region Log Analytics Workspace
     with self.argument_context('monitor log-analytics workspace') as c:
-        from azure.mgmt.loganalytics.models import SkuNameEnum
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
         c.argument('workspace_name', options_list=['--workspace-name', '-n'], help="Name of the Log Analytics Workspace.")
-        c.argument('sku', deprecate_info=c.deprecate(hide=True), arg_type=get_enum_type([SkuNameEnum.per_gb2018.value]), help="The SKU of the workspace.", default=SkuNameEnum.per_gb2018.value)
+        c.ignore('sku')
         c.argument('retention_time', help="The workspace data retention in days.", type=int, default=30)
 
     with self.argument_context('monitor log-analytics workspace pack') as c:

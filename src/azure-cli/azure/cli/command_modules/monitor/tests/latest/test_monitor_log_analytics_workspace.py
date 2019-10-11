@@ -38,7 +38,7 @@ class TestLogProfileScenarios(ScenarioTest):
             self.check("contains(keys(@), 'primarySharedKey')", True),
             self.check("contains(keys(@), 'secondarySharedKey')", True)
         ])
-        self.cmd("monitor log-analytics workspace list-link-workspaces")
+
         self.cmd("monitor log-analytics workspace get-schema -g {rg} -n {name}", checks=[
             self.check('__metadata.resultType', 'schema')
         ])

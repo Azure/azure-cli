@@ -2,10 +2,10 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
+from azure.mgmt.loganalytics.models import SkuNameEnum
 
 def create_log_analytics_workspace(cmd, client, resource_group_name, workspace_name, location=None, tags=None,
-                                   sku=None, retention_time=None):
+                                   sku=SkuNameEnum.per_gb2018.value, retention_time=None):
     from azure.mgmt.loganalytics.models import Workspace, Sku
     from azure.cli.core.commands import LongRunningOperation
     workspace_client = client
