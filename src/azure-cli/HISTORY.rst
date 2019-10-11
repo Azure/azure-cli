@@ -20,6 +20,10 @@ Release History
 
 * New Cmdlets for sql mi ad-admin that supports setting AAD administrator on Managed instance
 
+**ARM**
+
+* az deployment create: Add --handle-extended-json-format parameter to support multiline and comments in json template.
+
 **Compute**
 
 * vm create: Add --enable-agent configuration.
@@ -33,6 +37,7 @@ Release History
 
 * az network private-dns link vnet create/update: Fixes #9851. Support cross-tenant virtual network linking.
 * [BREAKING CHANGE] network vnet subnet list: Fix #10401. `--resource-group` and `--vnet-name` are required now.
+
 
 2.0.74
 ++++++
