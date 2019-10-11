@@ -3,6 +3,9 @@
 Release History
 ===============
 
+2.0.75
+++++++
+
 **AKS**
 
 * Set `--load-balancer-sku` default value to standard if supported by the kubernetes version
@@ -16,19 +19,15 @@ Release History
     job start:
         - Changed the command from `job start` to `job create`.
     
-**SQL**
-
-* New Cmdlets for sql mi ad-admin that supports setting AAD administrator on Managed instance
-
-**ARM**
-
-* az deployment create: Add --handle-extended-json-format parameter to support multiline and comments in json template.
-
 **AppConfig**
 
 * Using & in authorization header
 * Adding api-version to all requests
 * Upgrading SDK Version to 1.0.0
+
+**ARM**
+
+* az deployment create: Add --handle-extended-json-format parameter to support multiline and comments in json template.
 
 **Compute**
 
@@ -39,22 +38,22 @@ Release History
 * Update galleries API version to 2019-07-01.
 * vm create: Add --workspace to enable log analytics workspace automatically.
 
+**Monitor**
+
+* az monitor log-analytics workspace: Support CRUD for Azure log analytics workspace.
+
 **Network**
 
 * az network private-dns link vnet create/update: Fixes #9851. Support cross-tenant virtual network linking.
 * [BREAKING CHANGE] network vnet subnet list: Fix #10401. `--resource-group` and `--vnet-name` are required now.
 
+**SQL**
 
-**Monitor**
-
-* az monitor log-analytics workspace: Support CRUD for Azure log analytics workspace.
+* New Cmdlets for sql mi ad-admin that supports setting AAD administrator on Managed instance
 
 **Storage**
 
 * az storage copy: Add --preserve-s2s-access-tier parameter to preserve access tier during service to service copy.
-
-**Storage**
-
 * az storage account create/update: Add --enable-large-file-share parameter to support large file shares for storage account.
 
 2.0.74
