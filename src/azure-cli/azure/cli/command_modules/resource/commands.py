@@ -9,7 +9,7 @@ from collections import OrderedDict
 
 from azure.cli.core.util import empty_on_404
 from azure.cli.core.profiles import ResourceType, PROFILE_TYPE
-from azure.cli.core.commands import CliCommandType
+from azure.cli.core.commands import CliCommandType, DeploymentOutputLongRunningOperation
 from azure.cli.core.commands.arm import handle_template_based_exception
 
 from azure.cli.command_modules.resource._client_factory import (
@@ -19,6 +19,8 @@ from azure.cli.command_modules.resource._client_factory import (
 from azure.cli.command_modules.resource._validators import process_deployment_create_namespace
 
 from ._exception_handler import managementgroups_exception_handler
+from knack.log import get_logger
+logger = get_logger(__name__)
 
 
 # Resource group commands
@@ -179,7 +181,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_resources', table_transformer=transform_resource_list)
         g.custom_command('tag', 'tag_resource')
         g.custom_command('move', 'move_resource')
-        g.custom_command('invoke-action', 'invoke_resource_action')
+        g.custom_command('invoke-action', 'invoke_resource_action', transform=DeploymentOutputLongRunningOperation(self.cli_ctx))
         g.generic_update_command('update', getter_name='show_resource', setter_name='update_resource',
                                  client_factory=None)
         g.wait_command('wait', getter_name='show_resource')
