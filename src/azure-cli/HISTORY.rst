@@ -25,6 +25,12 @@ Release History
 * Adding api-version to all requests
 * Upgrading SDK Version to 1.0.0
 
+**AppService**
+
+* Added "webapp config access-restriction show | set | add | remove"
+* az webapp up updated for better error-handling
+* az appservice plan update support Isolated SKU
+
 **ARM**
 
 * az deployment create: Add --handle-extended-json-format parameter to support multiline and comments in json template.
@@ -37,6 +43,10 @@ Release History
 * vmss create: Add --computer-name-prefix parameter to support custom computer name prefix of virtual machines in the VMSS.
 * Update galleries API version to 2019-07-01.
 * vm create: Add --workspace to enable log analytics workspace automatically.
+
+**IoT**
+
+* Fix #2116: Unexpected 'az iot hub show' error for resource not found.
 
 **Monitor**
 
@@ -70,12 +80,6 @@ Release History
 * Add `--load-balancer-managed-outbound-ip-count`, `--load-balancer-outbound-ips` and `--load-balancer-outbound-ip-prefixes` to `az aks update` command, which allows for updating load balancer profile of an AKS cluster with SLB.
 * Add `--vm-set-type` to `az aks create` command, which allows to specify vm types of an AKS Cluster (vmas or vmss).
 
-**AppService**
-
-* Added "webapp config access-restriction show | set | add | remove"
-* az webapp up updated for better error-handling
-* az appservice plan update support Isolated SKU
-
 **ARM**
 
 * az group deployment create: Add --handle-extended-json-format to support multiline and comments in json template
@@ -99,10 +103,6 @@ Release History
 **EventGrid**
 
 * Fix the endpoint help text to refer to the right parameter (namely, to point to parameter `--endpoint` rather than `--endpoint-type` in event subscription commands).
-
-**IoT**
-
-* Fix #2116: Unexpected 'az iot hub show' error for resource not found.
 
 **Key Vault**
 
