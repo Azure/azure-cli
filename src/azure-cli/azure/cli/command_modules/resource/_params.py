@@ -39,6 +39,8 @@ def load_arguments(self, _):
     management_group_name_type = CLIArgumentType(options_list='--management-group', help='The name of the management group of the policy [set] definition.')
     identity_scope_type = CLIArgumentType(help="Scope that the system assigned identity can access")
     identity_role_type = CLIArgumentType(options_list=['--role'], help="Role name or id that will be assigned to the managed identity")
+    extended_json_format_type = CLIArgumentType(options_list=['--handle-extended-json-format', '-j'], action='store_true', is_preview=True,
+                                                help='Support to handle extended template content including multiline and comments in deployment')
 
     _PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''
 
@@ -178,8 +180,7 @@ def load_arguments(self, _):
     with self.argument_context('group deployment create') as c:
         c.argument('deployment_name', options_list=['--name', '-n'], required=False,
                    help='The deployment name. Default to template file base name')
-        c.argument('handle_extended_json_format', action='store_true', is_preview=True,
-                   help='Support to handle extended template content including multiline and comments in deployment')
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
 
     with self.argument_context('group deployment operation show') as c:
         c.argument('operation_ids', nargs='+', help='A list of operation ids to show')
@@ -194,6 +195,7 @@ def load_arguments(self, _):
     with self.argument_context('deployment create') as c:
         c.argument('deployment_name', options_list=['--name', '-n'], required=False,
                    help='The deployment name. Default to template file base name')
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
 
     with self.argument_context('deployment operation show') as c:
         c.argument('operation_ids', nargs='+', help='A list of operation ids to show')
