@@ -331,3 +331,15 @@ def load_arguments(self, _):
     with self.argument_context('monitor activity-log alert scope remove') as c:
         c.argument('scopes', options_list=['--scope', '-s'], nargs='+')
     # endregion
+
+    # region Log Analytics Workspace
+    with self.argument_context('monitor log-analytics workspace') as c:
+        c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
+        c.argument('workspace_name', options_list=['--workspace-name', '-n'], help="Name of the Log Analytics Workspace.")
+        c.ignore('sku')
+        c.argument('retention_time', help="The workspace data retention in days.", type=int, default=30)
+
+    with self.argument_context('monitor log-analytics workspace pack') as c:
+        c.argument('intelligence_pack_name', options_list=['--name', '-n'])
+        c.argument('workspace_name', options_list='--workspace-name')
+    # endregion

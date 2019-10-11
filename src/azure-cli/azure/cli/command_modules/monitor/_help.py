@@ -972,3 +972,84 @@ examples:
     text: az monitor metrics list-definitions --resource /subscriptions/{subscriptionID}/resourceGroups/Space1999/providers/Microsoft.Network/networkSecurityGroups/ADDS-NSG
     crafted: true
 """
+
+helps['monitor log-analytics'] = """
+type: group
+short-summary: Manage Azure log analytics
+"""
+
+helps['monitor log-analytics workspace'] = """
+type: group
+short-summary: Manage Azure log analytics workspace
+"""
+
+helps['monitor log-analytics workspace create'] = """
+type: command
+short-summary: Create a workspace instance
+examples:
+  - name: Create a workspace instance
+    text: az monitor log-analytics workspace create -g MyResourceGroup -n MyWorkspace
+"""
+
+helps['monitor log-analytics workspace list'] = """
+type: command
+short-summary: Get a list of workspaces under a resource group or a subscription.
+"""
+
+helps['monitor log-analytics workspace update'] = """
+type: command
+short-summary: Update a workspace instance
+"""
+
+helps['monitor log-analytics workspace pack'] = """
+type: group
+short-summary: Manage intelligent packs for log analytics workspace.
+"""
+
+helps['monitor log-analytics workspace delete'] = """
+type: command
+short-summary: Delete a workspace instance.
+"""
+
+helps['monitor log-analytics workspace get-schema'] = """
+type: command
+short-summary: Get the schema for a given workspace.
+long-summary: >
+    Schema represents the internal structure of the workspace, which can be used during the query.
+    For more information, visit: https://docs.microsoft.com/en-us/rest/api/loganalytics/workspaces%202015-03-20/getschema
+"""
+
+helps['monitor log-analytics workspace get-shared-keys'] = """
+type: command
+short-summary: Get the shared keys for a workspace.
+"""
+
+helps['monitor log-analytics workspace list-management-groups'] = """
+type: command
+short-summary: Get a list of management groups connected to a workspace.
+"""
+
+helps['monitor log-analytics workspace list-usages'] = """
+type: command
+short-summary: Get a list of usage metrics for a workspace.
+"""
+
+helps['monitor log-analytics workspace show'] = """
+type: command
+short-summary: Show a workspace instance.
+"""
+
+helps['monitor log-analytics workspace pack list'] = """
+type: command
+short-summary: List all the intelligence packs possible and whether they are enabled or disabled for a given workspace.
+"""
+
+helps['monitor log-analytics workspace pack enable'] = """
+type: command
+short-summary: Enable an intelligence pack for a given workspace.
+"""
+
+helps['monitor log-analytics workspace pack disable'] = """
+type: command
+short-summary: Disable an intelligence pack for a given workspace.
+"""
