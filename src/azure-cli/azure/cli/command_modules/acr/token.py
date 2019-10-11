@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.util import CLIError
-from ._utils import get_resource_group_name_by_registry_name
+from ._utils import get_resource_group_name_by_registry_name, validate_premium_registry
 
 SCOPE_MAPS = 'scopeMaps'
 TOKENS = 'tokens'
@@ -17,6 +17,8 @@ def acr_token_create(cmd,
                      scope_map_name,
                      status=None,
                      resource_group_name=None):
+
+    validate_premium_registry(cmd, registry_name, resource_group_name)
 
     resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
 
@@ -122,8 +124,7 @@ def acr_token_credential_generate(cmd,
                                   token_name,
                                   password1=False,
                                   password2=False,
-                                  expiry=None,
-                                  months=None,
+                                  days=None,
                                   resource_group_name=None):
 
     from ._utils import get_resource_id_by_registry_name
@@ -134,10 +135,10 @@ def acr_token_credential_generate(cmd,
 
     # We only want to specify a password if only one was passed.
     name = ("password1" if password1 else "password2") if password1 ^ password2 else None
-
-    if months and not expiry:
-        from ._utils import add_months_to_now
-        expiry = add_months_to_now(months).isoformat(sep='T')
+    expiry = None
+    if days:
+        from ._utils import add_days_to_now
+        expiry = add_days_to_now(days)
 
     GenerateCredentialsParameters = cmd.get_models('GenerateCredentialsParameters')
 

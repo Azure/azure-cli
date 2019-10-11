@@ -141,8 +141,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
     with self.command_group('acr', acr_custom_util) as g:
         g.command('check-name', 'acr_check_name', table_transformer=None)
         g.command('list', 'acr_list')
-        g.command('create', 'acr_create', supports_no_wait=True)
-        g.command('delete', 'acr_delete', supports_no_wait=True)
+        g.command('create', 'acr_create')
+        g.command('delete', 'acr_delete')
         g.show_command('show', 'acr_show')
         g.command('show-usage', 'acr_show_usage', table_transformer=usage_output_format)
         g.generic_update_command('update',

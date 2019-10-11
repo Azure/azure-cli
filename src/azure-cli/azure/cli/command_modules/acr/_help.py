@@ -983,16 +983,16 @@ examples:
 
 helps['acr scope-map delete'] = """
 type: command
-short-summary: Delete a scope map under an Azure Container Registry.
+short-summary: Delete a scope map for an Azure Container Registry.
 examples:
   - name: Delete the scope map 'MyScopeMap'.
     text: >
-        az acr scope-map delete -r MyRegistry -n MyScopeMap
+        az acr scope-map delete -n MyScopeMap -r MyRegistry
 """
 
 helps['acr scope-map update'] = """
 type: command
-short-summary: Update a scope map under an Azure Container Registry, appending/removing specified actions.
+short-summary: Update a scope map for an Azure Container Registry.
 examples:
   - name: Update the scope map 'MyScopeMap' removing metadata/read and content/read actions for `hello-world` repository, and metadata/write action for `hello-world-again`.
     text: >
@@ -1001,7 +1001,7 @@ examples:
 
 helps['acr scope-map show'] = """
 type: command
-short-summary: Show details and attributes for a scope map under an Azure Container Registry.
+short-summary: Show details and attributes of a scope map for an Azure Container Registry.
 examples:
   - name: Get information for the scope map 'MyScopeMap'.
     text: >
@@ -1010,7 +1010,7 @@ examples:
 
 helps['acr scope-map list'] = """
 type: command
-short-summary: List all scope maps under an Azure Container Registry.
+short-summary: List all scope maps for an Azure Container Registry.
 examples:
   - name: List scope maps under the registry 'MyRegistry'.
     text: >
@@ -1024,16 +1024,16 @@ short-summary: Manage tokens for an Azure Container Registry.
 
 helps['acr token create'] = """
 type: command
-short-summary: Create a token for an Azure Container Registry.
+short-summary: Create a token associated with a scope map for an Azure Container Registry.
 examples:
-  - name: Create a token associated to the scope map 'MyScopeMap', in 'disabled' status.
+  - name: Create a token associated with the scope map 'MyScopeMap' in the 'disabled' status.
     text: >
         az acr token create -n MyToken -r MyRegistry --scope-map MyScopeMap --status disabled
 """
 
 helps['acr token delete'] = """
 type: command
-short-summary: Delete a token under an Azure Container Registry.
+short-summary: Delete a token for an Azure Container Registry.
 examples:
   - name: Delete the token 'MyToken'.
     text: >
@@ -1042,7 +1042,7 @@ examples:
 
 helps['acr token update'] = """
 type: command
-short-summary: Update a token under an Azure Container Registry, replacing the scope map associated to it.
+short-summary: Update a token (replace associated scope map) for an Azure Container Registry.
 examples:
   - name: Update the token 'MyToken', making it associated with the scope map 'MyNewScopeMap'.
     text: >
@@ -1051,7 +1051,7 @@ examples:
 
 helps['acr token show'] = """
 type: command
-short-summary: Show details and attributes for a token under an Azure Container Registry.
+short-summary: Show details and attributes of a token for an Azure Container Registry.
 examples:
   - name: Get information for the token 'MyToken'.
     text: >
@@ -1060,7 +1060,7 @@ examples:
 
 helps['acr token list'] = """
 type: command
-short-summary: List all tokens under an Azure Container Registry.
+short-summary: List all tokens for an Azure Container Registry.
 examples:
   - name: List tokens under the registry 'MyRegistry'.
     text: >
@@ -1069,20 +1069,20 @@ examples:
 
 helps['acr token credential'] = """
 type: group
-short-summary: Manage credentials entities for a token under an Azure Container Registry.
+short-summary: Manage credentials of a token for an Azure Container Registry.
 """
 
 helps['acr token credential generate'] = """
 type: command
-short-summary: Generate both passwords for a token under an Azure Container Registry, unless one password is specified. Replaces old values if they already exists. If expiry is not specified, it will be defaulted to the max value "9999-12-31T23:59:59.9999+00:00".
+short-summary: Generate or replace one or both passwords of a token for an Azure Container Registry. For using token and password to access a container registry, see http://aka.ms/acr/token.
 examples:
-  - name: Generate password1 for the token 'MyToken', with expiration for 2 years.
-    text: az acr token credential generate -n MyToken -r MyRegistry --password1 --months 24
+  - name: Generate password1 for the token 'MyToken', with an expiration of 30 days.
+    text: az acr token credential generate -n MyToken -r MyRegistry --password1 --days 30
 """
 
 helps['acr token credential delete'] = """
 type: command
-short-summary: Delete a token credential. To be used upon expiration, loss or leak of information.
+short-summary: Delete a token credential.
 examples:
   - name: Delete both passwords for the token 'MyToken'.
     text: az acr token credential delete -n MyToken -r MyRegistry --password1 --password2

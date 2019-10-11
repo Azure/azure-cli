@@ -3,16 +3,18 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from ._utils import get_resource_group_name_by_registry_name
+from azure.cli.core.util import CLIError
+from ._utils import get_resource_group_name_by_registry_name, validate_premium_registry
 
 REPOSITORIES = 'repositories'
 
 
 def _parse_actions_from_repositories(allow_or_remove_repository):
     actions = []
-
     for rule in allow_or_remove_repository:
         repository = rule[0]
+        if len(rule) < 2:
+            raise CLIError('At least one action must be specified with the repository {}.'.format(repository))
         for action in rule[1:]:
             actions.append('{}/{}/{}'.format(REPOSITORIES, repository, action))
 
@@ -26,6 +28,8 @@ def acr_scope_map_create(cmd,
                          add_repository,
                          resource_group_name=None,
                          description=None):
+
+    validate_premium_registry(cmd, registry_name, resource_group_name)
 
     actions = _parse_actions_from_repositories(add_repository)
 

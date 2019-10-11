@@ -384,17 +384,14 @@ def remove_timer_trigger(task_name,
     return timer_triggers
 
 
-def add_months_to_now(months):
-    months = int(months)
-    if months <= 0:
-        raise CLIError('Number of months must be positive.')
-    from datetime import datetime
-    new_date = datetime.now()
-    total_months = new_date.month + months
-    additional_years = total_months // 12
-    new_month = total_months % 12
-    new_date = new_date.replace(year=min(new_date.year + additional_years, 9999), month=new_month)
-    return new_date
+def add_days_to_now(days):
+    if days <= 0:
+        raise CLIError('Days must be positive.')
+    from datetime import datetime, timedelta
+    try:
+        return datetime.utcnow() + timedelta(days=days)
+    except OverflowError:
+        return datetime.max
 
 
 def is_vault_secret(cmd, credential):

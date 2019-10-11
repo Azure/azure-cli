@@ -239,14 +239,24 @@ def _scope_map_format_group(item):
 
 def _token_format_group(item):
     scope_map_id = _get_value(item, 'scopeMapId')
-
-    return OrderedDict([
+    output = [
         ('NAME', _get_value(item, 'name')),
-        ('SCOPE MAP NAME', scope_map_id.split('/')[-1]),
-        ('PROVISIONING STATE', _get_value(item, 'provisioningState')),
+        ('SCOPE MAP', scope_map_id.split('/')[-1])
+    ]
+
+    passwords = _get_array_value(item, 'credentials', 'passwords')
+    for password in passwords:
+        password_name = _get_value(password, 'name').upper()
+        expiry_value = _get_value(password, 'expiry')
+        expiry_value = 'Never' if not expiry_value else _format_datetime(expiry_value)
+        output.append(('{} EXPIRY'.format(password_name), expiry_value))
+
+    output.extend([
         ('STATUS', _get_value(item, 'status').lower().title()),
+        ('PROVISIONING STATE', _get_value(item, 'provisioningState')),
         ('CREATION DATE', _format_datetime(_get_value(item, 'creationDate')))
     ])
+    return OrderedDict(output)
 
 
 def _token_password_format_group(item):
@@ -258,9 +268,10 @@ def _token_password_format_group(item):
         password_name = _get_value(password, 'name').upper()
         password_value = _get_value(password, 'value')
         expiry_value = _get_value(password, 'expiry')
-        password_expiry = "Never" if not expiry_value else _format_datetime(expiry_value)
+        # _get_value returns ' ' if item is none.
+        expiry_value = 'Never' if expiry_value == ' ' else _format_datetime(expiry_value)
         output.append((password_name, password_value))
-        output.append(('EXPIRY FOR {}'.format(password_name), password_expiry))
+        output.append(('{} EXPIRY'.format(password_name), expiry_value))
 
     return OrderedDict(output)
 
