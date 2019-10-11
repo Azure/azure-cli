@@ -53,6 +53,10 @@ Release History
 
 * az storage copy: Add --preserve-s2s-access-tier parameter to preserve access tier during service to service copy.
 
+**Storage**
+
+* az storage account create/update: Add --enable-large-file-share parameter to support large file shares for storage account.
+
 2.0.74
 ++++++
 
