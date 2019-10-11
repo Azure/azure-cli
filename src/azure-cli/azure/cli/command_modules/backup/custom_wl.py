@@ -286,7 +286,8 @@ def set_policy(client, resource_group_name, vault_name, policy, policy_name):
 
 
 def show_protectable_item(items, name, server_name, protectable_item_type):
-    protectable_item_type = protectable_item_type_map[protectable_item_type]
+    if protectable_item_type in protectable_item_type_map:
+        protectable_item_type = protectable_item_type_map[protectable_item_type]
     # Name filter
     if cust_help.is_native_name(name):
         filtered_items = [item for item in items if item.name.lower() == name.lower()]
@@ -345,7 +346,6 @@ def list_wl_recovery_points(cmd, client, resource_group_name, vault_name, item, 
         cust_help.is_range_valid(query_start_date, query_end_date)
 
     filter_string = cust_help.get_filter_string({
-        'restorePointQueryType': 'Full',
         'startDate': query_start_date,
         'endDate': query_end_date})
 
@@ -537,10 +537,11 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
 
     module_ = import_module("azure.mgmt.recoveryservicesbackup.models.azure_workload_" +
                             restore_module_map[item_type.lower()] + "_restore_request")
+    
     class_ = getattr(module_, "AzureWorkload" + item_type + "RestoreRequest")
-
     # Construct trigger restore request object
     trigger_restore_properties = class_(recovery_type=restore_mode)
+
     if restore_mode == 'AlternateLocation':
         setattr(trigger_restore_properties, 'source_resource_id', source_resource_id)
         setattr(trigger_restore_properties, 'target_info', TargetRestoreInfo(overwrite_option='Overwrite',
@@ -549,8 +550,8 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
         if 'sql' in item_type.lower():
             directory_map = []
             for i in alternate_directory_paths:
-                directory_map.append([SQLDataDirectoryMapping(mapping_type=i[0], source_path=i[1],
-                                                              source_logical_name=i[2], target_path=i[3])])
+                directory_map.append(SQLDataDirectoryMapping(mapping_type=i[0], source_path=i[1],
+                                                              source_logical_name=i[2], target_path=i[3]))
             setattr(trigger_restore_properties, 'alternate_directory_paths', directory_map)
 
     if log_point_in_time is not None:
@@ -560,7 +561,6 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
         setattr(trigger_restore_properties, 'should_use_alternate_target_location', True)
         setattr(trigger_restore_properties, 'is_non_recoverable', False)
     trigger_restore_request = RestoreRequestResource(properties=trigger_restore_properties)
-
     # Trigger restore and wait for completion
     result = sdk_no_wait(True, client.trigger,
                          vault_name, resource_group_name, fabric_name, container_uri, item_uri, recovery_point_id,
@@ -597,7 +597,7 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
     items_client = backup_protected_items_cf(cmd.cli_ctx)
     item = common.show_item(cmd, items_client, resource_group_name, vault_name, container_name, item_name, "AzureWorkload")
     cust_help.validate_item(item)
-    item_type = item.workload_type
+    item_type = item.properties.workload_type
     item_name = item.name
 
     if not cust_help.is_sql(item_type) and not cust_help.is_hana(item_type):
@@ -631,12 +631,12 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
     alternate_directory_paths = []
     if 'sql' in item_type.lower() and restore_mode == 'AlternateWorkloadRestore':
         items = list_workload_items(cmd, vault_name, resource_group_name, container_name)
-        for item in items:
-            if item.properties.friendly_name == protectable_item_object.properties.friendly_name:
-                if item.properties.server_name == protectable_item_object.properties.server_name:
+        for titem in items:
+            if titem.properties.friendly_name == protectable_item_object.properties.friendly_name:
+                if titem.properties.server_name == protectable_item_object.properties.server_name:
                     for path in recovery_point.properties.extended_info.data_directory_paths:
                         target_path = cust_help.get_target_path(path.type, path.path, path.logical_name,
-                                                                item.properties.data_directory_paths)
+                                                                titem.properties.data_directory_paths)
                         alternate_directory_paths.append((path.type, path.path, path.logical_name, target_path))
     
     db_name = None

@@ -204,13 +204,17 @@ def initialize_protectable_items(client, resource_group_name, vault_name, contai
 
 
 def unregister_container(cmd, client, vault_name, resource_group_name, container_name, backup_management_type=None):
-    container = show_container(cmd, client, container_name, resource_group_name, vault_name, backup_management_type)
+    container_type = custom_help.validate_and_extract_container_type(container_name, backup_management_type)
+    if not custom_help.is_native_name(container_name):
+        container = show_container(cmd, client, container_name, resource_group_name, vault_name,
+                                   backup_management_type)
+        container_name = container.name
 
-    if container.properties.backup_management_type.lower() == "azurestorage":
-        return custom_afs.unregister_afs_container(cmd, client, vault_name, resource_group_name, container.name)
+    if container_type.lower() == "azurestorage":
+        return custom_afs.unregister_afs_container(cmd, client, vault_name, resource_group_name, container_name)
 
-    if container.properties.backup_management_type.lower() == "azureworkload":
-        return custom_wl.unregister_wl_container(cmd, client, vault_name, resource_group_name, container.name)
+    if container_type.lower() == "azureworkload":
+        return custom_wl.unregister_wl_container(cmd, client, vault_name, resource_group_name, container_name)
     return None
 
 
@@ -241,7 +245,7 @@ def enable_protection_for_azure_wl(cmd, client, resource_group_name, vault_name,
 
 
 def auto_enable_for_azure_wl(cmd, client, resource_group_name, vault_name, policy_name, protectable_item):
-    policy_object = show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name, name)
+    policy_object = show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name, policy_name)
     return custom_wl.auto_enable_for_azure_wl(cmd, client, resource_group_name, vault_name, policy_object,
                                               protectable_item)
 

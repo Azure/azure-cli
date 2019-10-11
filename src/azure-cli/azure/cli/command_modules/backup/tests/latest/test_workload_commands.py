@@ -32,6 +32,7 @@ item1_hana = 'SAPHanaDatabase;H22;h22'
 item2_hana = 'SYSTEMDB'
 backup_entity_friendly_name_hana = 'H22/H22 [HANADemoIDC3]'
 backup_entity_friendly_name_sql = 'MSSQLSERVER/testdb1 [pstestwlvm1bca8]'
+item_id_hana_2 = '/Subscriptions/e3d2d341-4ddb-4c5d-9121-69b7e719485e/resourceGroups/IDCDemo/providers/Microsoft.RecoveryServices/vaults/IDCDemoVault/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;IDCDemo;HANADemoIDC3/protectedItems/SAPHanaDatabase;h22;h22_restored_sarath'
 
 
 class BackupTests(ScenarioTest, unittest.TestCase):
@@ -65,18 +66,17 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         wl_help.test_backup_wl_policy(self, container_name1, container_name2, resource_group, vault_name, policy_name,
                                       workload_type, subscription, item1, id, item_type, item_id, policy_new)
 
-    def test_backup_wl_sql_item(self, container_name1=container_sql, container_name2=container_friendly_sql,
-                                resource_group=rg_sql, vault_name=vault_sql, policy_name='HourlyLogBackup',
-                                workload_type='MSSQL', subscription=sub_sql, item1=item1_sql, id=id_sql, item_type='SQLDataBase',
+    def test_backup_wl_sql_item(self, container_name1="VMAppContainer;Compute;sarath-rg;sarathvm", container_name2="sarathvm",
+                                resource_group="sarath-rg", vault_name="sarath-vault", policy_name='HourlyLogBackup',
+                                workload_type='MSSQL', subscription=sub_sql, item1="sqldatabase;mssqlserver;msdb", id=id_sql, item_type='SQLDataBase',
                                 item_id=item_id_sql):
 
-        wl_help.test_backup_wl_item(self, container_name1, container_name2, resource_group, vault_name, policy_name,
-                                    workload_type, subscription, item1, id, item_type, item_id)
+        wl_help.test_backup_wl_sql_item(self, resource_group, vault_name, container_name1, container_name2, item1, policy_name)
 
     def test_backup_wl_hana_item(self, container_name1=container_hana, container_name2=container_friendly_hana,
-                                 resource_group=rg_hana, vault_name=vault_hana, policy_name='HourlyLogBackup',
-                                 workload_type='SAPHANA', subscription=sub_hana, item1=item1_hana, id=id_hana, item_type='HANADataBase',
-                                 item_id=item_id_hana):
+                                 resource_group="idcdemo", vault_name=vault_hana, policy_name='HourlyLogBackup',
+                                 workload_type='SAPHANA', subscription=sub_hana, item1="saphanadatabase;h22;h22_restored_sarath", id=id_hana, item_type='HANADataBase',
+                                 item_id=item_id_hana_2):
 
         wl_help.test_backup_wl_item(self, container_name1, container_name2, resource_group, vault_name, policy_name,
                                     workload_type, subscription, item1, id, item_type, item_id)
@@ -106,25 +106,25 @@ class BackupTests(ScenarioTest, unittest.TestCase):
                                   item_type, container_name2, policy_name, id, item_id)
 
     def test_backup_wl_hana_rp(self, container_name=container_hana, resource_group=rg_hana, vault_name=vault_hana,
-                               item_name=item1_hana, workload_type='SAPHANA', subscription=sub_hana, item_type='HANADatabase',
+                               item_name="saphanadatabase;h22;h22_restored_sarath", workload_type='SAPHANA', subscription=sub_hana, item_type='HANADatabase',
                                container_name2=container_friendly_hana, policy_name='HourlyLogBackup', id=id_hana,
                                item_id=item_id_hana):
 
         wl_help.test_backup_wl_rp(self, container_name, resource_group, vault_name, item_name, workload_type, subscription,
                                   item_type, container_name2, policy_name, id, item_id)
 
-    def test_backup_wl_sql_protection(self, container_name1=container_sql, container_name2=container_friendly_sql,
-                                      resource_group=rg_sql, vault_name=vault_sql, policy_name='HourlyLogBackup',
-                                      workload_type='MSSQL', subscription=sub_sql, item1=item1_sql, id=id_sql, item_type='SQLDataBase',
-                                      item_id=item_id_sql, backup_entity_friendly_name=backup_entity_friendly_name_sql):
+    def test_backup_wl_sql_protection(self, container_name1="VMAppContainer;Compute;sarath-rg;sarathvm", container_name2="sarathvm",
+                                      resource_group="sarath-rg", vault_name="sarath-vault", policy_name='HourlyLogBackup',
+                                      workload_type='MSSQL', subscription=sub_sql, item1="sqldatabase;mssqlserver;msdb", id=id_sql, item_type='SQLDataBase',
+                                      item_id=item_id_sql, backup_entity_friendly_name='MSSQLSERVER/msdb [sarathvm]'):
 
         wl_help.test_backup_wl_protection(self, container_name1, container_name2, resource_group, vault_name, policy_name,
                                           workload_type, subscription, item1, id, item_type, item_id, backup_entity_friendly_name)
 
     def test_backup_wl_hana_protection(self, container_name1=container_hana, container_name2=container_friendly_hana,
-                                       resource_group=rg_hana, vault_name=vault_hana, policy_name='HourlyLogBackup',
-                                       workload_type='SAPHANA', subscription=sub_hana, item1=item1_hana, id=id_hana,
-                                       item_type='HANADataBase', item_id=item_id_hana, backup_entity_friendly_name=backup_entity_friendly_name_hana):
+                                       resource_group="idcdemo", vault_name=vault_hana, policy_name='HourlyLogBackup',
+                                       workload_type='SAPHANA', subscription=sub_hana, item1="saphanadatabase;h22;h22_restored_sarath", id=id_hana,
+                                       item_type='HANADataBase', item_id=item_id_hana, backup_entity_friendly_name='H22/H22_RESTORED_SARATH [HANADemoIDC3]'):
 
         wl_help.test_backup_wl_protection(self, container_name1, container_name2, resource_group, vault_name, policy_name,
                                           workload_type, subscription, item1, id, item_type, item_id, backup_entity_friendly_name)
@@ -139,21 +139,20 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
     def test_backup_wl_hana_restore(self, container_name1=container_hana, container_name2=container_friendly_hana,
                                     resource_group=rg_hana, vault_name=vault_hana, policy_name='HourlyLogBackup',
-                                    workload_type='SAPHANA', subscription=sub_hana, item1=item1_hana, id=id_hana,
-                                    item_type='HANADataBase', item_id=item_id_hana, backup_entity_friendly_name=backup_entity_friendly_name_hana,
+                                    workload_type='SAPHANA', subscription=sub_hana, item1="saphanadatabase;h22;h22_restored_sarath", id=id_hana,
+                                    item_type='HANADataBase', item_id=item_id_hana, backup_entity_friendly_name='H22/H22_RESTORED_SARATH [HANADemoIDC3]',
                                     target_type='HANAInstance', target_item='H22'):
 
         wl_help.test_backup_wl_restore(self, container_name1, container_name2, resource_group, vault_name, policy_name,
                                        workload_type, subscription, item1, id, item_type, item_id, backup_entity_friendly_name, target_type,
                                        target_item)
 
-    def test_backup_wl_sql_restore(self, container_name1=container_sql, container_name2=container_friendly_sql,
-                                   resource_group=rg_sql, vault_name=vault_sql, policy_name='HourlyLogBackup',
-                                   workload_type='MSSQL', subscription=sub_sql, item1=item1_sql, id=id_sql, item_type='SQLDataBase',
-                                   item_id=item_id_sql, backup_entity_friendly_name=backup_entity_friendly_name_sql, target_type='SQLInstance',
+    def test_backup_wl_sql_restore(self, container_name1="VMAppContainer;Compute;sarath-rg;sarathvm", container_name2="sarathvm",
+                                   resource_group="sarath-rg", vault_name="sarath-vault", policy_name='HourlyLogBackup',
+                                   workload_type='MSSQL', subscription=sub_sql, item="sqldatabase;mssqlserver;msdb", id=id_sql, item_type='SQLDataBase',
+                                   item_id=item_id_sql, backup_entity_friendly_name='MSSQLSERVER/msdb [sarathvm]', target_type='SQLInstance',
                                    target_item='MSSQLSERVER'):
 
-        wl_help.test_backup_wl_restore(self, container_name1, container_name2, resource_group, vault_name, policy_name,
-                                       workload_type, subscription, item1, id, item_type, item_id, backup_entity_friendly_name, target_type,
-                                       target_item)
+        wl_help.test_backup_wl_sql_restore(self, resource_group, vault_name, container_name1, container_name2, item, policy_name, target_type, target_item,
+                                           backup_entity_friendly_name)
 

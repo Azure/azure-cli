@@ -139,6 +139,7 @@ def load_arguments(self, _):
             c.argument('item_name', item_name_type)
             c.argument('backup_management_type', options_list=['--backup-management-type'], help='Backup Management Type of the Item.')
             c.argument('workload_type', options_list=['--workload-type'], help='Workload Type of the Item.')
+            c.argument('enable_compression', arg_type=get_three_state_flag(), help='Option to enable compression')
 
     with self.argument_context('backup protection backup-now') as c:
         c.argument('retain_until', type=datetime_type, help='The date until which this backed up copy will be available for retrieval, in UTC (d-m-Y).')
