@@ -12,7 +12,7 @@ def load_command_table(self, _):
     from ._client_factory import (
         cf_alert_rules, cf_metric_def, cf_alert_rule_incidents, cf_log_profiles, cf_autoscale,
         cf_diagnostics, cf_activity_log, cf_action_groups, cf_activity_log_alerts, cf_event_categories,
-        cf_metric_alerts)
+        cf_metric_alerts, cf_log_analytics_workspace)
     from ._exception_handler import monitor_exception_handler, missing_resource_handler
     from .transformers import (action_group_list_table)
     from .validators import process_autoscale_create_namespace
@@ -105,6 +105,18 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.monitor.operations#MetricDefinitionsOperations.{}',
         client_factory=cf_metric_def,
         exception_handler=monitor_exception_handler)
+
+    log_analytics_workspace_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.loganalytics.operations#WorkspacesOperations.{}',
+        client_factory=cf_log_analytics_workspace,
+        exception_handler=monitor_exception_handler
+    )
+
+    log_analytics_workspace_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.monitor.operations.log_analytics_workspace#{}',
+        client_factory=cf_log_analytics_workspace,
+        exception_handler=monitor_exception_handler
+    )
 
     with self.command_group('monitor action-group', action_group_sdk, custom_command_type=action_group_custom) as g:
         g.show_command('show', 'get', table_transformer=action_group_list_table)
@@ -199,3 +211,19 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_metric_alerts', custom_command_type=alert_custom)
         g.command('show', 'get')
         g.generic_update_command('update', custom_func_name='update_metric_alert', custom_func_type=alert_custom)
+
+    with self.command_group('monitor log-analytics workspace', log_analytics_workspace_sdk, custom_command_type=log_analytics_workspace_custom, is_preview=True) as g:
+        g.custom_command('create', 'create_log_analytics_workspace')
+        g.generic_update_command('update', custom_func_name='update_log_analytics_workspace')
+        g.command('show', 'get')
+        g.command('delete', 'delete')
+        g.custom_command('list', 'list_log_analytics_workspace')
+        g.command('get-schema', 'get_schema')
+        g.command('list-usages', 'list_usages')
+        g.command('list-management-groups', 'list_management_groups')
+        g.command('get-shared-keys', 'get_shared_keys')
+
+    with self.command_group('monitor log-analytics workspace pack', log_analytics_workspace_sdk, custom_command_type=log_analytics_workspace_custom) as g:
+        g.command('list', 'list_intelligence_packs')
+        g.command('enable', 'enable_intelligence_pack')
+        g.command('disable', 'disable_intelligence_pack')
