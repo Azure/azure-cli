@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import azure.cli.command_modules.backup.custom_help as Helper
+import azure.cli.command_modules.backup.custom_help as helper
 # pylint: disable=import-error
 # pylint: disable=unused-argument
 
@@ -28,12 +28,12 @@ def enable_for_AzureFileShare(cmd, client, resource_group_name, vault_name, afs_
                               storage_account_name, policy_name):
     # refresh containers in the vault
     protection_containers_client = protection_containers_cf(cmd.cli_ctx)
-    filter_string = Helper.get_filter_string({
+    filter_string = helper.get_filter_string({
         'backupManagementType': "AzureStorage"})
 
     refresh_result = sdk_no_wait(True, protection_containers_client.refresh,
                                  vault_name, resource_group_name, fabric_name, filter=filter_string)
-    Helper.track_refresh_operation(cmd.cli_ctx, refresh_result, vault_name, resource_group_name)
+    helper.track_refresh_operation(cmd.cli_ctx, refresh_result, vault_name, resource_group_name)
 
     # get registered storage accounts
     storage_account = None
@@ -56,15 +56,15 @@ def enable_for_AzureFileShare(cmd, client, resource_group_name, vault_name, afs_
         param = ProtectionContainerResource(properties=properties)
         result = sdk_no_wait(True, protection_containers_client.register,
                              vault_name, resource_group_name, fabric_name, storage_account.name, param)
-        Helper.track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name, storage_account.name)
+        helper.track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name, storage_account.name)
 
     policy = common.show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name, policy_name)
 
     protectable_item = _get_protectable_item_for_afs(cmd.cli_ctx, vault_name, resource_group_name, afs_name,
                                                      storage_account)
 
-    container_uri = Helper.get_protection_container_uri_from_id(protectable_item.id)
-    item_uri = Helper.get_protectable_item_uri_from_id(protectable_item.id)
+    container_uri = helper.get_protection_container_uri_from_id(protectable_item.id)
+    item_uri = helper.get_protectable_item_uri_from_id(protectable_item.id)
     item_properties = AzureFileshareProtectedItem()
 
     item_properties.policy_id = policy.id
@@ -73,18 +73,18 @@ def enable_for_AzureFileShare(cmd, client, resource_group_name, vault_name, afs_
 
     result = sdk_no_wait(True, client.create_or_update,
                          vault_name, resource_group_name, fabric_name, container_uri, item_uri, item)
-    return Helper.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
+    return helper.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
 def backup_now(cmd, client, resource_group_name, vault_name, item, retain_until):
-    container_uri = Helper.get_protection_container_uri_from_id(item.id)
-    item_uri = Helper.get_protected_item_uri_from_id(item.id)
+    container_uri = helper.get_protection_container_uri_from_id(item.id)
+    item_uri = helper.get_protected_item_uri_from_id(item.id)
     trigger_backup_request = _get_backup_request(retain_until)
 
     result = sdk_no_wait(True, client.trigger,
                          vault_name, resource_group_name, fabric_name, container_uri, item_uri,
                          trigger_backup_request)
-    return Helper.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
+    return helper.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
 def _get_backup_request(retain_until):
@@ -98,14 +98,14 @@ def _get_protectable_item_for_afs(cli_ctx, vault_name, resource_group_name, afs_
     protection_containers_client = protection_containers_cf(cli_ctx)
     protectable_item = _try_get_protectable_item_for_afs(cli_ctx, vault_name, resource_group_name,
                                                          afs_name, storage_account_name)
-    filter_string = Helper.get_filter_string({
+    filter_string = helper.get_filter_string({
         'workloadType': "AzureFileShare"})
 
     if protectable_item is None:
         result = sdk_no_wait(True, protection_containers_client.inquire, vault_name, resource_group_name, fabric_name,
                              storage_account.name, filter=filter_string)
 
-        Helper.track_inquiry_operation(cli_ctx, result, vault_name, resource_group_name, storage_account.name)
+        helper.track_inquiry_operation(cli_ctx, result, vault_name, resource_group_name, storage_account.name)
 
     protectable_item = _try_get_protectable_item_for_afs(cli_ctx, vault_name, resource_group_name, afs_name,
                                                          storage_account_name)
@@ -115,20 +115,20 @@ def _get_protectable_item_for_afs(cli_ctx, vault_name, resource_group_name, afs_
 def _try_get_protectable_item_for_afs(cli_ctx, vault_name, resource_group_name, afs_name, storage_account_name):
     backup_protectable_items_client = backup_protectable_items_cf(cli_ctx)
 
-    filter_string = Helper.get_filter_string({
+    filter_string = helper.get_filter_string({
         'backupManagementType': backup_management_type,
         'workloadType': workload_type})
 
     protectable_items_paged = backup_protectable_items_client.list(vault_name, resource_group_name, filter_string)
-    protectable_items = Helper.get_list_from_paged_response(protectable_items_paged)
+    protectable_items = helper.get_list_from_paged_response(protectable_items_paged)
     result = protectable_items
-    if Helper.is_native_name(storage_account_name):
+    if helper.is_native_name(storage_account_name):
         result = [protectable_item for protectable_item in result
                   if protectable_item.id.split('/')[12] == storage_account_name.lower()]
     else:
         result = [protectable_item for protectable_item in result
                   if protectable_item.properties.parent_container_friendly_name.lower() == storage_account_name.lower()]
-    if Helper.is_native_name(afs_name):
+    if helper.is_native_name(afs_name):
         result = [protectable_item for protectable_item in result
                   if protectable_item.name.lower() == afs_name.lower()]
     else:
@@ -145,8 +145,8 @@ def restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name
                            resolve_conflict, restore_request_type, source_file_type=None, source_file_path=None,
                            target_storage_account_name=None, target_file_share_name=None, target_folder=None):
 
-    container_uri = Helper.get_protection_container_uri_from_id(item.id)
-    item_uri = Helper.get_protected_item_uri_from_id(item.id)
+    container_uri = helper.get_protection_container_uri_from_id(item.id)
+    item_uri = helper.get_protected_item_uri_from_id(item.id)
 
     sa_name = item.properties.container_name
     source_resource_id = _get_storage_account_id(cmd.cli_ctx, sa_name.split(';')[-1], sa_name.split(';')[-2])
@@ -176,23 +176,23 @@ def restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name
     result = sdk_no_wait(True, client.trigger, vault_name, resource_group_name, fabric_name,
                          container_uri, item_uri, rp_name, trigger_restore_request)
 
-    return Helper.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
+    return helper.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
 def list_recovery_points(cmd, client, resource_group_name, vault_name, item, start_date=None, end_date=None):
     # Get container and item URIs
-    container_uri = Helper.get_protection_container_uri_from_id(item.id)
-    item_uri = Helper.get_protected_item_uri_from_id(item.id)
+    container_uri = helper.get_protection_container_uri_from_id(item.id)
+    item_uri = helper.get_protected_item_uri_from_id(item.id)
 
-    query_end_date, query_start_date = Helper.get_query_dates(end_date, start_date)
+    query_end_date, query_start_date = helper.get_query_dates(end_date, start_date)
 
-    filter_string = Helper.get_filter_string({
+    filter_string = helper.get_filter_string({
         'startDate': query_start_date,
         'endDate': query_end_date})
 
     # Get recovery points
     recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri, filter_string)
-    paged_recovery_points = Helper.get_list_from_paged_response(recovery_points)
+    paged_recovery_points = helper.get_list_from_paged_response(recovery_points)
 
     return paged_recovery_points
 
@@ -206,8 +206,8 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
             """)
 
     # Get container and item URIs
-    container_uri = Helper.get_protection_container_uri_from_id(item.id)
-    item_uri = Helper.get_protected_item_uri_from_id(item.id)
+    container_uri = helper.get_protection_container_uri_from_id(item.id)
+    item_uri = helper.get_protected_item_uri_from_id(item.id)
 
     # Update policy request
     afs_item_properties = AzureFileshareProtectedItem()
@@ -218,20 +218,20 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
     # Update policy
     result = sdk_no_wait(True, client.create_or_update,
                          vault_name, resource_group_name, fabric_name, container_uri, item_uri, afs_item)
-    return Helper.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
+    return helper.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
 def disable_protection(cmd, client, resource_group_name, vault_name, item,
                        delete_backup_data=False, **kwargs):
     # Get container and item URIs
-    container_uri = Helper.get_protection_container_uri_from_id(item.id)
-    item_uri = Helper.get_protected_item_uri_from_id(item.id)
+    container_uri = helper.get_protection_container_uri_from_id(item.id)
+    item_uri = helper.get_protected_item_uri_from_id(item.id)
 
     # Trigger disable protection and wait for completion
     if delete_backup_data:
         result = sdk_no_wait(True, client.delete,
                              vault_name, resource_group_name, fabric_name, container_uri, item_uri)
-        return Helper.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
+        return helper.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
     afs_item_properties = AzureFileshareProtectedItem()
     afs_item_properties.policy_id = ''
@@ -240,14 +240,7 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item,
     afs_item = ProtectedItemResource(properties=afs_item_properties)
     result = sdk_no_wait(True, client.create_or_update,
                          vault_name, resource_group_name, fabric_name, container_uri, item_uri, afs_item)
-    return Helper.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
-
-
-def unregister_container(cmd, client, resource_group_name, vault_name, container_name):
-
-    result = sdk_no_wait(True, client.unregister,
-                         vault_name, resource_group_name, fabric_name, container_name)
-    return Helper.track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name, container_name)
+    return helper.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
 def resume_protection(cmd, client, resource_group_name, vault_name, item, policy):
@@ -281,16 +274,16 @@ def set_policy(client, resource_group_name, vault_name, policy, policy_name):
             Policy name is required for set policy.
             """)
 
-    policy_object = Helper.get_policy_from_json(client, policy)
+    policy_object = helper.get_policy_from_json(client, policy)
     policy_object.properties.work_load_type = workload_type
     existing_policy = common.show_policy(client, resource_group_name, vault_name, policy_name)
-    Helper.validate_update_policy_request(existing_policy, policy_object)
+    helper.validate_update_policy_request(existing_policy, policy_object)
 
     return client.create_or_update(vault_name, resource_group_name, policy_name, policy_object)
 
 
 def create_policy(client, resource_group_name, vault_name, name, policy):
-    policy_object = Helper.get_policy_from_json(client, policy)
+    policy_object = helper.get_policy_from_json(client, policy)
     policy_object.name = name
     if backup_management_type is not None:
         policy_object.properties.backup_management_type = backup_management_type
@@ -301,25 +294,25 @@ def create_policy(client, resource_group_name, vault_name, name, policy):
 def unregister_afs_container(cmd, client, vault_name, resource_group_name, container_name):
     result = sdk_no_wait(True, client.unregister,
                          vault_name, resource_group_name, fabric_name, container_name)
-    return Helper.track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name, container_name)
+    return helper.track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name, container_name)
 
 
 def list_protectable_containers(cli_ctx, resource_group_name, vault_name):
-    filter_string = Helper.get_filter_string({
+    filter_string = helper.get_filter_string({
         'backupManagementType': "AzureStorage"})
 
     client = protectable_containers_cf(cli_ctx)
     paged_containers = client.list(vault_name, resource_group_name, fabric_name, filter_string)
-    return Helper.get_list_from_paged_response(paged_containers)
+    return helper.get_list_from_paged_response(paged_containers)
 
 
 def _get_storage_account_from_list(container_list, storage_account_name):
     storage_account = None
     for container in container_list:
-        if Helper.is_native_name(storage_account_name) and container.name == storage_account_name:
+        if helper.is_native_name(storage_account_name) and container.name == storage_account_name:
             return container
         friendly_name = container.properties.friendly_name
-        if not Helper.is_native_name(storage_account_name) and friendly_name == storage_account_name:
+        if not helper.is_native_name(storage_account_name) and friendly_name == storage_account_name:
             if storage_account is not None:
                 raise CLIError("multiple storage accounts found. Please provide native names instead")
             storage_account = container

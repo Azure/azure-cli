@@ -159,6 +159,18 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("resourceGroup", '{rg}')
         ])
 
+        rp_list = self.cmd('backup recoverypoint list -g {rg} -v {vault} -c {container} -i {item1} --backup-management-type {type}').get_output_in_json()
+        rp_count1 = len(rp_list)
+
+        self.kwargs['retain_date'] = (datetime.utcnow() + timedelta(days=30)).strftime('%d-%m-%Y')
+        self.kwargs['job'] = self.cmd('backup protection backup-now -g {rg} -v {vault} -c {container} -i {item1} --retain-until {retain_date} --backup-management-type AzureStorage --query name').get_output_in_json()
+        self.cmd('backup job wait -g {rg} -v {vault} -n {job}')
+
+        rp_list = self.cmd('backup recoverypoint list -g {rg} -v {vault} -c {container} -i {item1} --backup-management-type {type}').get_output_in_json()
+        rp_count2 = len(rp_list)
+
+        self.assertTrue(rp_count1 + 1 == rp_count2)
+
     def test_afs_backup_restore(self):
         self.kwargs.update({
             'vault': vault_name,
@@ -221,6 +233,25 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup job wait -g {rg} -v {vault} -n {job3}')
 
         self.cmd('backup job show -g {rg} -v {vault} -n {job3}', checks=[
+            self.check("properties.entityFriendlyName", '{item1}'),
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ])
+
+        # item level recovery original location
+
+        trigger_restore_job4_json = self.cmd('backup restore restore-azurefiles -g {rg} -v {vault} -c {container} -i {item1} -r {rp1} --resolve-conflict Overwrite --restore-mode OriginalLocation --source-file-type File --source-file-path script.ps1', checks=[
+            self.check("properties.entityFriendlyName", '{item1}'),
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "InProgress"),
+            self.check("resourceGroup", '{rg}')
+        ]).get_output_in_json()
+
+        self.kwargs['job4'] = trigger_restore_job4_json['name']
+        self.cmd('backup job wait -g {rg} -v {vault} -n {job4}')
+
+        self.cmd('backup job show -g {rg} -v {vault} -n {job4}', checks=[
             self.check("properties.entityFriendlyName", '{item1}'),
             self.check("properties.operation", "Restore"),
             self.check("properties.status", "Completed"),
@@ -319,3 +350,31 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup policy show -g {rg} -v {vault} -n {policy2}', checks=[
             self.check("properties.retentionPolicy.dailySchedule.retentionDuration.count", 20),
         ]).get_output_in_json()
+
+    def test_afs_unregister_container(self):
+        self.kwargs.update({
+            'vault': vault_name,
+            'subscription_id': subscription_id,
+            'item': "afs1",
+            'container': "afstestsa5",
+            'rg': resource_group_name,
+            'type': "AzureStorage",
+            'policy': "afspolicy1",
+        })
+
+        container_json = self.cmd('backup container show -n {container} -v {vault} -g {rg} --backup-management-type {type}', checks=[
+            self.check('properties.friendlyName', '{container}'),
+            self.check('properties.healthStatus', 'Healthy'),
+            self.check('properties.registrationStatus', 'Registered'),
+            self.check('resourceGroup', '{rg}')
+        ]).get_output_in_json()
+
+        self.kwargs['container_name'] = container_json['name']
+
+        self.kwargs['item'] = self.cmd('backup item list -g {rg} -v {vault} -c {container} --query [0].name').get_output_in_json()
+        self.cmd('backup protection disable -g {rg} -v {vault} -c {container_name} -i {item} --backup-management-type AzureStorage --delete-backup-data true --yes')
+
+        self.cmd('backup container unregister -g {rg} -v {vault} -c {container_name} --yes')
+
+        self.cmd('backup container list -v {vault} -g {rg} --backup-management-type {type}', checks=[
+            self.check("length([?properties.friendlyName == '{container}'])", 0)])

@@ -11,10 +11,6 @@ from azure.cli.core.util import CLIError
 # pylint: disable=import-error
 
 fabric_name = "Azure"
-# Mapping of workload type
-workload_type_map = {'MSSQL': 'SQLDataBase',
-                     'SAPHANA': 'SAPHanaDatabase',
-                     'SAPASE': 'SAPAseDatabase'}
 # pylint: disable=unused-argument
 
 
@@ -36,9 +32,6 @@ def show_policy(client, resource_group_name, vault_name, name):
 
 
 def list_policies(client, resource_group_name, vault_name, workload_type=None, backup_management_type=None):
-    if workload_type and workload_type in workload_type_map:
-        workload_type = workload_type_map[workload_type]
-
     filter_string = custom_help.get_filter_string({
         'backupManagementType': backup_management_type,
         'workloadType': workload_type})
@@ -107,8 +100,6 @@ def delete_policy(client, resource_group_name, vault_name, name):
 
 
 def new_policy(client, resource_group_name, vault_name, policy, policy_name, container_type, workload_type):
-    workload_type = workload_type_map[workload_type]
-
     policy_object = custom_help.get_policy_from_json(client, policy)
     policy_object.properties.backup_management_type = container_type
     policy_object.properties.workload_type = workload_type

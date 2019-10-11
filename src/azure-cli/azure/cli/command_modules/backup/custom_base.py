@@ -74,7 +74,7 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, container
         return custom_afs.list_recovery_points(cmd, client, resource_group_name, vault_name, item, start_date,
                                                end_date)
 
-    return []
+    return None
 
 
 def backup_now(cmd, client, resource_group_name, vault_name, item_name, retain_until, container_name=None,
