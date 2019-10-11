@@ -23,6 +23,7 @@ Release History
 * vm create: Compose a valid computer name from VM name if computer name is not provided.
 * vmss create: Add --computer-name-prefix parameter to support custom computer name prefix of virtual machines in the VMSS.
 * Update galleries API version to 2019-07-01.
+* vm create: Add --workspace to enable log analytics workspace automatically.
 
 **Network**
 
