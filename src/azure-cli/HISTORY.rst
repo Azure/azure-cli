@@ -24,6 +24,12 @@ Release History
 
 * az deployment create: Add --handle-extended-json-format parameter to support multiline and comments in json template.
 
+**AppConfig**
+
+* Using & in authorization header
+* Adding api-version to all requests
+* Upgrading SDK Version to 1.0.0
+
 **Compute**
 
 * vm create: Add --enable-agent configuration.
