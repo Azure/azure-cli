@@ -45,6 +45,10 @@ Release History
 * [BREAKING CHANGE] network vnet subnet list: Fix #10401. `--resource-group` and `--vnet-name` are required now.
 
 
+**Monitor**
+
+* az monitor log-analytics workspace: Support CRUD for Azure log analytics workspace.
+
 2.0.74
 ++++++
 
