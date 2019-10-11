@@ -698,8 +698,11 @@ def load_arguments(self, _):
             c.argument('version', help='The version of the extension')
 
     with self.argument_context('vm extension set') as c:
+        c.argument('vm_extension_name', name_arg_type,
+                   completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines/extensions'),
+                   help='Name of the extension.', id_part=None)
         c.argument('force_update', action='store_true', help='force to update even if the extension configuration has not changed.')
-        c.argument('extension_instance_name', extension_instance_name_type, arg_group='Resource Id')
+        c.argument('extension_instance_name', extension_instance_name_type)
 
     with self.argument_context('vmss extension set', min_api='2017-12-01') as c:
         c.argument('force_update', action='store_true', help='force to update even if the extension configuration has not changed.')
