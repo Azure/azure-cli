@@ -4,6 +4,7 @@ Release History
 ===============
 
 * Add syntax check for --set parameter in generic update command.
+* Minor change in DeploymentOutputLongRunningOperation
 
 2.0.74
 ++++++
