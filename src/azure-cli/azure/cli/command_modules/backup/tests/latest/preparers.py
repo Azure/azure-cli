@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 from azure.cli.testsdk import CliTestError, ResourceGroupPreparer
 from azure.cli.testsdk.preparers import AbstractPreparer, SingleValueReplacer
 from azure.cli.testsdk.base import execute
+# pylint: disable=line-too-long
 
 
 class VaultPreparer(AbstractPreparer, SingleValueReplacer):
