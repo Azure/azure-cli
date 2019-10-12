@@ -32,6 +32,7 @@ class RouteSourceType(Enum):
     TwinChangeEvents = 'twinchangeevents'
     DeviceLifecycleEvents = 'devicelifecycleevents'
     DeviceJobLifecycleEvents = 'devicejoblifecycleevents'
+    DigitalTwinChangeEvents = 'digitaltwinchangeevents'
 
 
 # pylint: disable=too-few-public-methods
