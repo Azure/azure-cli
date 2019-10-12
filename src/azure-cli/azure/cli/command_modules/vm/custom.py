@@ -662,10 +662,11 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     if assign_identity is not None:
         vm_resource['identity'], _, _, enable_local_identity = _build_identities_info(assign_identity)
         role_assignment_guid = None
+        vm_api_version = cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machines')
         if identity_scope:
             role_assignment_guid = str(_gen_guid())
-            master_template.add_resource(build_msi_role_assignment(vm_name, vm_id, identity_role_id,
-                                                                   role_assignment_guid, identity_scope))
+            master_template.add_resource(build_msi_role_assignment(vm_name, vm_id, vm_api_version,
+                                                                   identity_role_id, role_assignment_guid, identity_scope))
 
     if workspace is not None:
         workspace_id = _prepare_workspace(cmd, resource_group_name, workspace)
@@ -2129,10 +2130,11 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
     if assign_identity is not None:
         vmss_resource['identity'], _, _, enable_local_identity = _build_identities_info(
             assign_identity)
+        vmss_api_version = cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machine_scale_sets')
         if identity_scope:
             role_assignment_guid = str(_gen_guid())
-            master_template.add_resource(build_msi_role_assignment(vmss_name, vmss_id, identity_role_id,
-                                                                   role_assignment_guid, identity_scope, False))
+            master_template.add_resource(build_msi_role_assignment(vmss_name, vmss_id, vmss_api_version,
+                                                                   identity_role_id, role_assignment_guid, identity_scope, False))
 
     master_template.add_resource(vmss_resource)
     master_template.add_output('VMSS', vmss_name, 'Microsoft.Compute', 'virtualMachineScaleSets',

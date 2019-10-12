@@ -212,8 +212,8 @@ def build_vnet_resource(_, name, location, tags, vnet_prefix=None, subnet=None,
     return vnet
 
 
-def build_msi_role_assignment(vm_vmss_name, vm_vmss_resource_id, role_definition_id,
-                              role_assignment_guid, identity_scope, is_vm=True):
+def build_msi_role_assignment(vm_vmss_name, vm_vmss_resource_id, vm_vmss_api_version,
+                              role_definition_id, role_assignment_guid, identity_scope, is_vm=True):
     from msrestazure.tools import parse_resource_id
     result = parse_resource_id(identity_scope)
     if result.get('type'):  # is a resource id?
@@ -224,7 +224,6 @@ def build_msi_role_assignment(vm_vmss_name, vm_vmss_resource_id, role_definition
         assignment_type = 'Microsoft.Authorization/roleAssignments'
 
     # pylint: disable=line-too-long
-    msi_rp_api_version = '2015-08-31-PREVIEW'
     return {
         'name': name,
         'type': assignment_type,
@@ -234,8 +233,8 @@ def build_msi_role_assignment(vm_vmss_name, vm_vmss_resource_id, role_definition
         ],
         'properties': {
             'roleDefinitionId': role_definition_id,
-            'principalId': "[reference('{}/providers/Microsoft.ManagedIdentity/Identities/default', '{}').principalId]".format(
-                vm_vmss_resource_id, msi_rp_api_version),
+            'principalId': "[reference('{}', '{}', 'Full').identity.principalId]".format(
+                vm_vmss_resource_id, vm_vmss_api_version),
             'scope': identity_scope
         }
     }
