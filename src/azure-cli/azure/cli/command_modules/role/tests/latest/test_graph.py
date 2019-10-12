@@ -41,7 +41,7 @@ class ServicePrincipalExpressCreateScenarioTest(ScenarioTest):
         self.cmd('ad sp credential reset -n {app_id_uri}',
                  checks=self.check('name', '{app_id_uri}'))
         # cleanup
-        self.cmd('ad sp delete --id {app_id_uri}')  # this whould auto-delete the app as well
+        self.cmd('ad sp delete --id {app_id_uri}')  # this would auto-delete the app as well
         self.cmd('ad sp list --spn {app_id_uri}',
                  checks=self.is_empty())
         self.cmd('ad app list --identifier-uri {app_id_uri}',
