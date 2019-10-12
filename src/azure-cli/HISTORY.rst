@@ -103,6 +103,7 @@ Release History
 
 **IoT**
 
+* Add new routing source type: DigitalTwinChangeEvents
 * Fix #2116: Unexpected 'az iot hub show' error for resource not found.
 
 **Key Vault**
