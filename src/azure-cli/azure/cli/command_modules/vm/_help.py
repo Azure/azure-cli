@@ -1129,7 +1129,7 @@ examples:
         az vm extension set -n VMAccessForLinux --publisher Microsoft.OSTCExtensions --version 1.4 \\
             --vm-name MyVm --resource-group MyResourceGroup \\
             --protected-settings '{"username":"user1", "ssh_key":"ssh_rsa ..."}'
-  - name: Add a customScript extension to a VM using --ids.
+  - name: Add a customScript extension to VM(s) specified by --ids.
     text: |
         az vm extension set -n customScript --publisher Microsoft.Azure.Extensions --ids {vm_id}
 parameters:
