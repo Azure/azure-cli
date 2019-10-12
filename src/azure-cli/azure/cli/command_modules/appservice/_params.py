@@ -445,6 +445,8 @@ def load_arguments(self, _):
         c.argument('app_insights_key', help="Instrumentation key of App Insights to be added.")
         c.argument('app_insights', help="Name of the existing App Insights project to be added to the Function app. Must be in the same resource group.")
         c.argument('disable_app_insights', arg_type=get_three_state_flag(return_label=True), help="Disable creating application insights resource during functionapp create. No logs will be available.")
+        c.argument('docker_registry_server_user', help='The container registry server username.')
+        c.argument('docker_registry_server_password', help='The container registry server password. Required for private registries.')
 
     # For commands with shared impl between web app and function app and has output, we apply type validation to avoid confusions
     with self.argument_context('functionapp show') as c:
