@@ -171,8 +171,6 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
         ag_properties.update({'customErrorConfigurations': custom_error_pages})
     if firewall_policy and cmd.supported_api_version(min_api='2018-12-01'):
         ag_properties.update({'firewallPolicy': {'id': firewall_policy}})
-        ag_properties.update({'webApplicationFirewallConfiguration': {'enabled': 'true',
-                                                                                        'firewallMode': 'Detection'}})
 
     ag = {
         'type': 'Microsoft.Network/applicationGateways',
