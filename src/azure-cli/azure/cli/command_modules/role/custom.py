@@ -1110,7 +1110,12 @@ def delete_service_principal(cmd, identifier):
     from azure.cli.core._profile import Profile
     client = _graph_client_factory(cmd.cli_ctx)
     sp_object_id = _resolve_service_principal(client.service_principals, identifier)
-    app_object_id = _get_app_object_id_from_sp_object_id(client, sp_object_id)
+
+    app_object_id = None
+    try:
+        app_object_id = _get_app_object_id_from_sp_object_id(client, sp_object_id)
+    except CLIError as ex:
+        logger.info("%s. Skip application deletion.", ex)
 
     profile = Profile()
     if not profile.is_tenant_level_account():
@@ -1120,6 +1125,7 @@ def delete_service_principal(cmd, identifier):
             delete_role_assignments(cmd, [a['id'] for a in assignments])
 
     if app_object_id:  # delete the application, and AAD service will automatically clean up the SP
+        logger.info("Deleting associated application %s", app_object_id)
         client.applications.delete(app_object_id)
     else:
         client.service_principals.delete(sp_object_id)

@@ -57,6 +57,10 @@ Release History
 
 * az storage account create/update: Add --enable-large-file-share parameter to support large file shares for storage account.
 
+**RBAC**
+
+* Fix #10493: az ad sp delete --id {} fails when application is not found. If not found, application deletion is skipped.
+
 2.0.74
 ++++++
 
