@@ -47,7 +47,6 @@ from ._util import (
     get_sql_managed_instances_operations
 )
 
-
 logger = get_logger(__name__)
 
 ###############################################
@@ -97,6 +96,14 @@ def _any_sku_values_specified(sku):
     '''
 
     return any(val for key, val in sku.__dict__.items())
+
+
+def _is_serverless_slo(sku_name):
+    '''
+    Returns True if the sku name is a serverless sku.
+    '''
+
+    return "_S_" in sku_name
 
 
 def _get_default_server_version(location_capabilities):
@@ -226,7 +233,7 @@ def _find_family_capability(sku, supported_families):
         return _get_default_capability(supported_families)
 
 
-def _find_performance_level_capability(sku, supported_service_level_objectives, allow_reset_family, requesting_serverless=False):
+def _find_performance_level_capability(sku, supported_service_level_objectives, allow_reset_family, compute_model=None):
     '''
     Finds the DB or elastic pool performance level (i.e. service objective) in the
     collection of supported service objectives that matches the requested sku's
@@ -236,21 +243,20 @@ def _find_performance_level_capability(sku, supported_service_level_objectives, 
     objective.
     '''
 
-    logger.debug('_find_performance_level_capability: %s, %s, allow_reset_family: %s',
-                 sku, supported_service_level_objectives, allow_reset_family)
+    logger.debug('_find_performance_level_capability: %s, %s, allow_reset_family: %s, compute_model: %s',
+                 sku, supported_service_level_objectives, allow_reset_family, compute_model)
 
     if sku.capacity:
         try:
             # Find requested service objective based on capacity & family.
             # Note that for non-vcore editions, family is None.
-            if requesting_serverless :
+            if compute_model == ComputeModelType.serverless:
                 return next(slo for slo in supported_service_level_objectives
-                        if ((slo.sku.family == sku.family) or
-                            (slo.sku.family is None and allow_reset_family)) and
-                        int(slo.sku.capacity) == int(sku.capacity) and
-                        "_S_" in slo.sku.name)
-            else: 
-                return next(slo for slo in supported_service_level_objectives
+                            if ((slo.sku.family == sku.family) or
+                                (slo.sku.family is None and allow_reset_family)) and
+                            int(slo.sku.capacity) == int(sku.capacity) and
+                            _is_serverless_slo(slo.sku.name))
+            return next(slo for slo in supported_service_level_objectives
                         if ((slo.sku.family == sku.family) or
                             (slo.sku.family is None and allow_reset_family)) and
                         int(slo.sku.capacity) == int(sku.capacity))
@@ -289,7 +295,8 @@ def _db_elastic_pool_update_sku(
         tier,
         family,
         capacity,
-        find_sku_from_capabilities_func):
+        find_sku_from_capabilities_func,
+        compute_model=None):
     '''
     Updates the sku of a DB or elastic pool.
     '''
@@ -327,12 +334,20 @@ def _db_elastic_pool_update_sku(
     if capacity:
         instance.sku.capacity = capacity
 
+    # Wipe out sku name if serverless vs provisioned db offerings changed,
+    # only if sku name has not be wiped by earlier logic, and new compute model has been requested.
+    if instance.sku.name is not None and compute_model is not None:
+        if _is_serverless_slo(instance.sku.name) and compute_model != ComputeModelType.serverless:
+            instance.sku.name = None
+        if compute_model == ComputeModelType.serverless and not _is_serverless_slo(instance.sku.name):
+            instance.sku.name = None
+
     # If sku name was wiped out by any of the above, resolve the requested sku name
     # using capabilities.
     if not instance.sku.name:
         instance.sku = find_sku_from_capabilities_func(
             cmd.cli_ctx, instance.location, instance.sku,
-            allow_reset_family=allow_reset_family)
+            allow_reset_family=allow_reset_family, compute_model=compute_model)
 
 
 _DEFAULT_SERVER_VERSION = "12.0"
@@ -390,6 +405,12 @@ class ClientAuthenticationType(Enum):
 class FailoverPolicyType(Enum):
     automatic = 'Automatic'
     manual = 'Manual'
+
+
+class ComputeModelType(str, Enum):
+
+    provisioned = "Provisioned"
+    serverless = "Serverless"
 
 
 def _get_server_dns_suffx(cli_ctx):
@@ -543,7 +564,7 @@ class DatabaseIdentity():  # pylint: disable=too-few-public-methods
             quote(self.database_name))
 
 
-def _find_db_sku_from_capabilities(cli_ctx, location, sku, allow_reset_family=False, requesting_serverless=False):
+def _find_db_sku_from_capabilities(cli_ctx, location, sku, allow_reset_family=False, compute_model=None):
     '''
     Given a requested sku which may have some properties filled in
     (e.g. tier and capacity), finds the canonical matching sku
@@ -580,7 +601,7 @@ def _find_db_sku_from_capabilities(cli_ctx, location, sku, allow_reset_family=Fa
     performance_level_capability = _find_performance_level_capability(
         sku, edition_capability.supported_service_level_objectives,
         allow_reset_family=allow_reset_family,
-        requesting_serverless=requesting_serverless)
+        compute_model=compute_model)
 
     # Ideally, we would return the sku object from capability (`return performance_level_capability.sku`).
     # However not all db create modes support using `capacity` to find slo, so instead we put
@@ -635,9 +656,12 @@ def _db_dw_create(
     Handles common concerns such as setting location and sku properties.
     '''
 
-    if kwargs['compute_model'] == "Serverless":
-        if sku == None or sku.tier == None or sku.family == None or sku.capacity == None:
-            raise CLIError('When creating a severless database, please pass in edition, family, and capacity parameters through -e -f -c')
+    # This check needs to be here, because server side logic of
+    # finding a default sku for Serverless is not yet implemented.
+    if kwargs['compute_model'] == ComputeModelType.serverless:
+        if sku is None or sku.tier is None or sku.family is None or sku.capacity is None:
+            raise CLIError('When creating a severless database, please pass in edition, '
+                           'family, and capacity parameters through -e -f -c')
 
     # Determine server location
     kwargs['location'] = _get_server_location(
@@ -651,10 +675,11 @@ def _db_dw_create(
 
     # If sku.name is not specified, resolve the requested sku name
     # using capabilities.
-    kwargs['sku'] = _find_db_sku_from_capabilities(cli_ctx, 
-        kwargs['location'], 
-        sku, 
-        requesting_serverless=(kwargs['compute_model'] == "Serverless"))
+    kwargs['sku'] = _find_db_sku_from_capabilities(
+        cli_ctx,
+        kwargs['location'],
+        sku,
+        compute_model=kwargs['compute_model'])
 
     # Validate elastic pool id
     kwargs['elastic_pool_id'] = _validate_elastic_pool_id(
@@ -1160,6 +1185,12 @@ def db_update(
         server_name,
         resource_group_name)
 
+    # Finding out requesting compute_model
+    if compute_model is None:
+        compute_model = (
+            ComputeModelType.serverless if _is_serverless_slo(instance.sku.name)
+            else ComputeModelType.provisioned)
+
     # Update sku
     _db_elastic_pool_update_sku(
         cmd,
@@ -1168,7 +1199,8 @@ def db_update(
         tier,
         family,
         capacity,
-        find_sku_from_capabilities_func=_find_db_sku_from_capabilities)
+        find_sku_from_capabilities_func=_find_db_sku_from_capabilities,
+        compute_model=compute_model)
 
     # TODO Temporary workaround for elastic pool sku name issue
     if instance.elastic_pool_id:
@@ -1192,21 +1224,6 @@ def db_update(
 
     if auto_pause_delay:
         instance.auto_pause_delay = auto_pause_delay
-
-    if compute_model is not None:
-        # Determine server location
-        server_location = _get_server_location(
-            cmd.cli_ctx,
-            server_name=server_name,
-            resource_group_name=resource_group_name)
-
-        # reset sku name for update
-        instance.sku.name = ""
-
-        instance.sku = _find_db_sku_from_capabilities(cmd.cli_ctx, 
-            server_location, 
-            instance.sku, 
-            requesting_serverless= compute_model == "Serverless")
 
     return instance
 
@@ -1546,7 +1563,7 @@ def dw_resume(
 ###############################################
 
 
-def _find_elastic_pool_sku_from_capabilities(cli_ctx, location, sku, allow_reset_family=False):
+def _find_elastic_pool_sku_from_capabilities(cli_ctx, location, sku, allow_reset_family=False, compute_model=None):
     '''
     Given a requested sku which may have some properties filled in
     (e.g. tier and capacity), finds the canonical matching sku
@@ -1581,7 +1598,8 @@ def _find_elastic_pool_sku_from_capabilities(cli_ctx, location, sku, allow_reset
     # Find performance level capability, based on requested sku properties
     performance_level_capability = _find_performance_level_capability(
         sku, edition_capability.supported_elastic_pool_performance_levels,
-        allow_reset_family=allow_reset_family)
+        allow_reset_family=allow_reset_family,
+        compute_model=compute_model)
 
     # Copy sku object from capability
     result = performance_level_capability.sku
