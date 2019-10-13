@@ -878,7 +878,7 @@ class VMAvailSetScenarioTest(ScenarioTest):
 
 class VMAvailSetLiveScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_availset_live')
-    @AllowLargeResponse(size_kb=8192)
+    @AllowLargeResponse(size_kb=16384)
     def test_vm_availset_convert(self, resource_group):
 
         self.kwargs.update({
@@ -1184,7 +1184,7 @@ class VMCreateMonitorTest(ScenarioTest):
 
         self.kwargs.update({
             'vm': 'monitorvm',
-            'workspace': 'vmlogworkspace20191009',
+            'workspace': 'vmlogworkspace20191013',
             'rg': resource_group
         })
 
