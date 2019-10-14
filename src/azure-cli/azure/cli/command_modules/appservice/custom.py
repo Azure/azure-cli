@@ -2118,12 +2118,15 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                     os_type=None, runtime=None, consumption_plan_location=None,
                     app_insights=None, app_insights_key=None, disable_app_insights=None, deployment_source_url=None,
                     deployment_source_branch='master', deployment_local_git=None,
+                    docker_registry_server_password=None, docker_registry_server_user=None,
                     deployment_container_image_name=None, tags=None):
     # pylint: disable=too-many-statements, too-many-branches
     if deployment_source_url and deployment_local_git:
         raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
     if bool(plan) == bool(consumption_plan_location):
         raise CLIError("usage error: --plan NAME_OR_ID | --consumption-plan-location LOCATION")
+
+    docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
 
     site_config = SiteConfig(app_settings=[])
     functionapp_def = Site(location=None, site_config=site_config, tags=tags)
@@ -2239,6 +2242,11 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
         except Exception:  # pylint: disable=broad-except
             logger.warning('Error while trying to create and configure an Application Insights for the Function App. '
                            'Please use the Azure Portal to create and configure the Application Insights, if needed.')
+
+    if deployment_container_image_name:
+        update_container_settings_functionapp(cmd, resource_group_name, name, docker_registry_server_url,
+                                              deployment_container_image_name, docker_registry_server_user,
+                                              docker_registry_server_password)
 
     return functionapp
 
@@ -2788,7 +2796,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
     site_config = None
     if not _create_new_app:  # App exists
         # Get the ASP & RG info, if the ASP & RG parameters are provided we use those else we need to find those
-        logger.warning("Webapp %s already exits. The command will deploy contents to the existing app", name)
+        logger.warning("Webapp %s already exists. The command will deploy contents to the existing app.", name)
         app_details = get_app_details(cmd, name)
         current_rg = app_details.resource_group
         if resource_group_name is not None and (resource_group_name.lower() != current_rg.lower()):

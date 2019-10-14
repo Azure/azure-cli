@@ -1177,6 +1177,20 @@ class VMCreateNoneOptionsTest(ScenarioTest):  # pylint: disable=too-many-instanc
         self.cmd('network public-ip show -n {vm}PublicIP -g {rg}', expect_failure=True)
 
 
+class VMCreateMonitorTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_create_with_monitor', location='centralus')
+    def test_vm_create_with_monitor(self, resource_group):
+
+        self.kwargs.update({
+            'vm': 'monitorvm',
+            'workspace': 'vmlogworkspace20191009',
+            'rg': resource_group
+        })
+
+        self.cmd('vm create -n {vm} -g {rg} --image UbuntuLTS --workspace {workspace}')
+
+
 class VMBootDiagnostics(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_diagnostics')
@@ -3486,6 +3500,25 @@ class VMPriorityEvictionBilling(ScenarioTest):
             self.check('vmss.virtualMachineProfile.priority', 'Low'),
             self.check('vmss.virtualMachineProfile.evictionPolicy', 'Deallocate'),
             self.check('vmss.virtualMachineProfile.billingProfile.maxPrice', 50)
+        ])
+
+
+class VMCreateSpecialName(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_create_special_name_')
+    def test_vm_create_special_name(self, resource_group):
+        """
+        Compose a valid computer name from VM name if computer name is not provided.
+        Remove special characters: '`~!@#$%^&*()=+_[]{}\\|;:\'\",<>/?'
+        """
+        self.kwargs.update({
+            'vm': 'vm_1'
+        })
+
+        self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('name', '{vm}'),
+            self.check('osProfile.computerName', 'vm1')
         ])
 
 

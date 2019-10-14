@@ -553,6 +553,90 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd('aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
     @AllowLargeResponse()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus')
+    @RoleBasedServicePrincipalPreparer()
+    def test_aks_create_default_setting(self, resource_group, resource_group_location, sp_name, sp_password):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
+            'location': resource_group_location,
+            'service_principal': sp_name,
+            'client_secret': sp_password,
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters'
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
+                     '--service-principal={service_principal} --client-secret={client_secret} ' \
+                     '--no-wait'
+
+        self.cmd(create_cmd, checks=[self.is_empty()])
+
+        # wait
+        self.cmd('aks wait -g {resource_group} -n {name} --created', checks=[self.is_empty()])
+
+        # list
+        self.cmd('aks list -g {resource_group}', checks=[
+            self.check('[0].type', '{resource_type}'),
+            StringContainCheck(aks_name),
+            StringContainCheck(resource_group)
+        ])
+
+        # list in tabular format
+        self.cmd('aks list -g {resource_group} -o table', checks=[
+            StringContainCheck(aks_name),
+            StringContainCheck(resource_group)
+        ])
+
+        # show
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+            self.check('type', '{resource_type}'),
+            self.check('name', '{name}'),
+            self.exists('nodeResourceGroup'),
+            self.check('resourceGroup', '{resource_group}'),
+            self.check('agentPoolProfiles[0].count', 1),
+            self.check('agentPoolProfiles[0].osType', 'Linux'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
+            self.check('agentPoolProfiles[0].type', 'VirtualMachineScaleSets'),
+            self.check('dnsPrefix', '{dns_name_prefix}'),
+            self.exists('kubernetesVersion'),
+            self.check('networkProfile.loadBalancerSku', 'Standard'),
+            self.check('networkProfile.loadBalancerProfile.managedOutboundIps.count', 1),
+            self.exists('networkProfile.loadBalancerProfile.effectiveOutboundIps')
+        ])
+
+        # get-credentials
+        fd, temp_path = tempfile.mkstemp()
+        self.kwargs.update({'file': temp_path})
+        try:
+            self.cmd('aks get-credentials -g {resource_group} -n {name} --file {file}')
+        finally:
+            os.close(fd)
+            os.remove(temp_path)
+
+        # get-credentials to stdout
+        self.cmd('aks get-credentials -g {resource_group} -n {name} -f -')
+
+        # get-credentials without directory in path
+        temp_path = 'kubeconfig.tmp'
+        self.kwargs.update({'file': temp_path})
+        try:
+            self.cmd('aks get-credentials -g {resource_group} -n {name} -f {file}')
+            self.assertGreater(os.path.getsize(temp_path), 0)
+        finally:
+            os.remove(temp_path)
+
+        #delete
+        self.cmd('aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
     @RoleBasedServicePrincipalPreparer()
     def test_aks_create_slb_vmss_with_default_mgd_outbound_ip_then_update(self, resource_group, resource_group_location, sp_name, sp_password):

@@ -474,26 +474,26 @@ parameters:
     type: string
     short-summary: The location to create the ACI container groups. Use the location of the MC_* resource group if it is not specified.
 examples:
-  - name: Install the ACI Connector for Linux to a managed Kubernetes cluster.
+  - name: Install the virtual Kubelet for Linux to a managed Kubernetes cluster.
     text: |-
         az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup
-  - name: Install the ACI Connector for Windows to a managed Kubernetes cluster.
+  - name: Install the virtual Kubelet for Windows to a managed Kubernetes cluster.
     text: |-
         az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup \\
-           --connector-name aci-connector --os-type Windows
-  - name: Install the ACI Connector for both Windows and Linux to a managed Kubernetes cluster.
+           --connector-name virtual-kubelet --os-type Windows
+  - name: Install the virtual Kubelet for both Windows and Linux to a managed Kubernetes cluster.
     text: |-
         az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup \\
-          --connector-name aci-connector --os-type Both
-  - name: Install the ACI Connector using a specific service principal in a specific resource group.
+          --connector-name virtual-kubelet --os-type Both
+  - name: Install the virtual Kubelet using a specific service principal in a specific resource group.
     text: |-
         az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup \\
-          --connector-name aci-connector --service-principal {SPN_ID} --client-secret {SPN_SECRET} \\
+          --connector-name virtual-kubelet --service-principal {SPN_ID} --client-secret {SPN_SECRET} \\
           --aci-resource-group ACI-resource-group
-  - name: Install the ACI Connector from a custom Helm chart with custom tag.
+  - name: Install the virtual Kubelet from a custom Helm chart with custom tag.
     text: |-
         az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup \\
-          --connector-name aci-connector --chart-url {CustomURL} --image-tag {VirtualKubeletImageTag}
+          --connector-name virtual-kubelet --chart-url {CustomURL} --image-tag {VirtualKubeletImageTag}
 """
 
 helps['aks list'] = """
@@ -646,24 +646,24 @@ examples:
   - name: Upgrade the ACI Connector for Linux to a managed Kubernetes cluster.
     text: |-
         az aks upgrade-connector --name MyManagedCluster --resource-group MyResourceGroup \\
-          --connector-name aci-connector
+          --connector-name virtual-kubelet
   - name: Upgrade the ACI Connector for Windows to a managed Kubernetes cluster.
     text: |-
         az aks upgrade-connector --name MyManagedCluster --resource-group MyResourceGroup \\
-           --connector-name aci-connector --os-type Windows
+           --connector-name virtual-kubelet --os-type Windows
   - name: Upgrade the ACI Connector for both Windows and Linux to a managed Kubernetes cluster.
     text: |-
         az aks upgrade-connector --name MyManagedCluster --resource-group MyResourceGroup \\
-          --connector-name aci-connector --os-type Both
+          --connector-name virtual-kubelet --os-type Both
   - name: Upgrade the ACI Connector to use a specific service principal in a specific resource group.
     text: |-
         az aks upgrade-connector --name MyManagedCluster --resource-group MyResourceGroup \\
-          --connector-name aci-connector --service-principal {SPN_ID} --client-secret {SPN_SECRET} \\
+          --connector-name virtual-kubelet --service-principal {SPN_ID} --client-secret {SPN_SECRET} \\
           --aci-resource-group ACI-resource-group
   - name: Upgrade the ACI Connector from a custom Helm chart with custom tag.
     text: |-
         az aks upgrade-connector --name MyManagedCluster --resource-group MyResourceGroup \\
-          --connector-name aci-connector --chart-url {CustomURL} --image-tag {VirtualKubeletImageTag}
+          --connector-name virtual-kubelet --chart-url {CustomURL} --image-tag {VirtualKubeletImageTag}
 """
 
 helps['aks use-dev-spaces'] = """

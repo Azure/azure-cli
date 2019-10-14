@@ -5,6 +5,7 @@ Release History
 
 * Add syntax check for --set parameter in generic update command.
 * Fix #10760: `az login` fails if subscription name is None
+* Minor change in DeploymentOutputLongRunningOperation
 
 2.0.74
 ++++++

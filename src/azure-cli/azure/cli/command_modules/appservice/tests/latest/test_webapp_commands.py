@@ -717,6 +717,45 @@ class FunctionappACRScenarioTest(ScenarioTest):
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp))
 
 
+class FunctionAppCreateUsingACR(ScenarioTest):
+    @ResourceGroupPreparer(location='japanwest')
+    @StorageAccountPreparer()
+    @AllowLargeResponse()
+    def test_acr_create_function_app(self, resource_group, storage_account):
+        plan = self.create_random_name(prefix='acrtestplanfunction', length=24)
+        functionapp = self.create_random_name(prefix='functionappacrtest', length=24)
+        runtime = 'node'
+        acr_registry_name = functionapp
+        self.cmd('acr create --admin-enabled -g {} -n {} --sku Basic'.format(resource_group, acr_registry_name))
+        acr_creds = self.cmd('acr credential show -n {}'.format(acr_registry_name)).get_output_in_json()
+        username = acr_creds['username']
+        password = acr_creds['passwords'][0]['value']
+        self.cmd('functionapp plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan))
+        self.cmd('functionapp create -g {} -n {} -s {} --plan {} --runtime {}'
+                 ' --deployment-container-image-name {}.azurecr.io/image-name:latest --docker-registry-server-user {}'
+                 ' --docker-registry-server-password {}'.format(resource_group, functionapp, storage_account, plan, runtime,
+                                                                acr_registry_name, username, password))
+
+        self.cmd('functionapp config container show -g {} -n {} '.format(resource_group, functionapp), checks=[
+            JMESPathCheck("[?name=='DOCKER_REGISTRY_SERVER_USERNAME']|[0].value", username),
+            JMESPathCheck("[?name=='DOCKER_REGISTRY_SERVER_URL']|[0].name", 'DOCKER_REGISTRY_SERVER_URL')
+        ])
+        self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp), checks=[
+            JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'node'),
+            JMESPathCheck("[?name=='DOCKER_REGISTRY_SERVER_USERNAME'].value|[0]", username)
+        ])
+
+        self.cmd('functionapp config container delete -g {} -n {} '.format(resource_group, functionapp))
+        json_result = self.cmd(
+            'functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp)).get_output_in_json()
+        all_settings = [setting['name'] for setting in json_result]
+        # Make sure the related settings are deleted
+        self.assertNotIn('DOCKER_REGISTRY_SERVER_USERNAME', all_settings)
+        self.assertNotIn('DOCKER_REGISTRY_SERVER_URL', all_settings)
+        self.assertNotIn('DOCKER_REGISTRY_SERVER_PASSWORD', all_settings)
+        self.assertIn('FUNCTIONS_WORKER_RUNTIME', all_settings)
+
+
 class FunctionappACRDeploymentScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='japanwest')
     @StorageAccountPreparer()

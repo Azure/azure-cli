@@ -291,6 +291,9 @@ def load_arguments(self, _):
 
     with self.argument_context('webapp config connection-string') as c:
         c.argument('connection_string_type', options_list=['--connection-string-type', '-t'], help='connection string type', arg_type=get_enum_type(ConnectionStringType))
+        c.argument('ids', options_list=['--ids'], help="One or more resource IDs (space delimited). If provided no other 'Resource Id' arguments should be specified.", required=True)
+        c.argument('resource_group', options_list=['--resource-group', '-g'], help='Name of resource group. You can configure the default group using `az configure --default-group=<name>`. If `--ids` is provided this should NOT be specified.')
+        c.argument('name', options_list=['--name', '-n'], help='Name of the web app. You can configure the default using `az configure --defaults web=<name>`. If `--ids` is provided this should NOT be specified.')
 
     with self.argument_context('webapp config storage-account') as c:
         c.argument('custom_id', options_list=['--custom-id', '-i'], help='custom identifier')
@@ -442,6 +445,8 @@ def load_arguments(self, _):
         c.argument('app_insights_key', help="Instrumentation key of App Insights to be added.")
         c.argument('app_insights', help="Name of the existing App Insights project to be added to the Function app. Must be in the same resource group.")
         c.argument('disable_app_insights', arg_type=get_three_state_flag(return_label=True), help="Disable creating application insights resource during functionapp create. No logs will be available.")
+        c.argument('docker_registry_server_user', help='The container registry server username.')
+        c.argument('docker_registry_server_password', help='The container registry server password. Required for private registries.')
 
     # For commands with shared impl between web app and function app and has output, we apply type validation to avoid confusions
     with self.argument_context('functionapp show') as c:

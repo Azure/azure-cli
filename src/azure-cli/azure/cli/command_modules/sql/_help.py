@@ -518,7 +518,7 @@ examples:
 
 helps['sql midb list'] = """
 type: command
-short-summary: List maanged databases on a managed instance.
+short-summary: List managed databases on a managed instance.
 examples:
   - name: List managed databases on a managed instance
     text: az sql midb list -g mygroup --mi myinstance
@@ -783,6 +783,26 @@ helps['sql mi tde-key'] = """
 helps['sql mi tde-key set'] = """
     type: command
     short-summary: Sets the SQL Instance's encryption protector.
+    """
+helps['sql mi ad-admin'] = """
+    type: group
+    short-summary: Manage a managed instance's Active Directory administrator.
+    """
+helps['sql mi ad-admin create'] = """
+    type: command
+    short-summary: Creates a new managed instance Active Directory administrator.
+    """
+helps['sql mi ad-admin update'] = """
+    type: command
+    short-summary: Updates an existing managed instance Active Directory administrator.
+    """
+helps['sql mi ad-admin list'] = """
+    type: command
+    short-summary: Returns a list of managed instance Active Directory Administrators.
+    """
+helps['sql mi ad-admin delete'] = """
+    type: command
+    short-summary: Deletes an existing managed instance Active Directory Administrator.
     """
 helps['sql instance-failover-group'] = """
     type: group
