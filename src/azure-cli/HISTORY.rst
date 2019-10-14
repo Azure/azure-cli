@@ -25,7 +25,7 @@ Release History
 
 **Storage**
 
-* Adds support for WebAssembly (.wasm) mimetype detection
+* Add support for WebAssembly (.wasm) mimetype detection
 
 2.0.74
 ++++++
