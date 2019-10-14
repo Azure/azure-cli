@@ -422,7 +422,7 @@ class CosmosDBTests(ScenarioTest):
         self.cmd('az cosmosdb create -n {acc} -g {rg}')
         self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
 
-        container_create = self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {ctn_name} -p {part} --ttl {ttl} --unique {unique_key} --conflict {conflict_resolution}').get_output_in_json()
+        container_create = self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {ctn_name} -p {part} --ttl {ttl} --unique-key-policy {unique_key} --conflict-resolution-policy {conflict_resolution}').get_output_in_json()
         assert container_create["sqlContainerId"] == ctn_name
         assert container_create["partitionKey"]["paths"][0] == partition_key
         assert container_create["defaultTtl"] == default_ttl
@@ -603,7 +603,7 @@ class CosmosDBTests(ScenarioTest):
         self.cmd('az cosmosdb create -n {acc} -g {rg} --capabilities EnableGremlin')
         self.cmd('az cosmosdb gremlin database create -g {rg} -a {acc} -n {db_name}')
 
-        graph_create = self.cmd('az cosmosdb gremlin graph create -g {rg} -a {acc} -d {db_name} -n {gp_name} --ttl {ttl} --conflict {conflict_resolution}').get_output_in_json()
+        graph_create = self.cmd('az cosmosdb gremlin graph create -g {rg} -a {acc} -d {db_name} -n {gp_name} --ttl {ttl} --conflict-resolution-policy {conflict_resolution}').get_output_in_json()
         assert graph_create["gremlinGraphId"] == gp_name
         assert graph_create["defaultTtl"] == default_ttl
         assert graph_create["conflictResolutionPolicy"]["mode"] == "lastWriterWins"
