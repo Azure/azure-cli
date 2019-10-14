@@ -613,10 +613,11 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         master_template.add_resource(nic_resource)
     else:
         # Using an existing NIC
-        invalid_parameters = [nsg, public_ip_address, subnet, vnet_name, application_security_groups]
+        invalid_parameters = [nsg, public_ip_address, subnet, vnet_name, application_security_groups,
+                              accelerated_networking]
         if any(invalid_parameters):
             raise CLIError('When specifying an existing NIC, do not specify NSG, '
-                           'public IP, ASGs, VNet or subnet.')
+                           'public IP, ASGs, VNet, subnet or accelerated networking.')
 
     os_vhd_uri = None
     if storage_profile in [StorageProfile.SACustomImage, StorageProfile.SAPirImage]:
