@@ -242,7 +242,7 @@ class Profile(object):
             if display_name is None:
                 display_name = ''
             try:
-                s.display_name.encode(sys.getdefaultencoding())
+                display_name.encode(sys.getdefaultencoding())
             except (UnicodeEncodeError, UnicodeDecodeError):  # mainly for Python 2.7 with ascii as the default encoding
                 display_name = re.sub(r'[^\x00-\x7f]', lambda x: '?', display_name)
 
