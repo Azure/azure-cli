@@ -377,7 +377,7 @@ examples:
   - name: Perform deployment by using zip file content.
     text: >
         az functionapp deployment source config-zip \\
-            -g {myRG}} -n {myAppName} \\
+            -g {myRG} -n {myAppName} \\
             --src {zipFilePathLocation}
 """
 
