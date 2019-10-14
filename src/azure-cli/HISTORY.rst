@@ -30,6 +30,10 @@ Release History
 * Adding api-version to all requests
 * Upgrading SDK Version to 1.0.0
 
+**Backup**
+
+* Enhanced error detail for vault delete in force mode.
+
 **Compute**
 
 * vm create: Add --enable-agent configuration.
