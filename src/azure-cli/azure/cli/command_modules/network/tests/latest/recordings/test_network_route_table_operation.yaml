@@ -1,55 +1,5 @@
 interactions:
 - request:
-    body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
-      "date": "2019-05-30T17:54:57Z"}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - group create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '110'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - --location --name --tag
-      User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_route_table000001?api-version=2019-05-10
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_route_table000001","name":"cli_test_route_table000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-05-30T17:54:57Z"},"properties":{"provisioningState":"Succeeded"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '384'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 30 May 2019 17:54:59 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 201
-      message: Created
-- request:
     body: null
     headers:
       Accept:
@@ -63,24 +13,24 @@ interactions:
       ParameterSetName:
       - -n -g --tags
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_route_table000001?api-version=2019-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_route_table000001?api-version=2019-07-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_route_table000001","name":"cli_test_route_table000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-05-30T17:54:57Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_route_table000001","name":"cli_test_route_table000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-10-13T09:02:00Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '384'
+      - '428'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 17:54:59 GMT
+      - Sun, 13 Oct 2019 09:02:00 GMT
       expires:
       - '-1'
       pragma:
@@ -112,8 +62,8 @@ interactions:
       ParameterSetName:
       - -n -g --tags
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
       accept-language:
       - en-US
     method: PUT
@@ -121,14 +71,14 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"cli-test-route-table\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_route_table000001/providers/Microsoft.Network/routeTables/cli-test-route-table\",\r\n
-        \ \"etag\": \"W/\\\"84e65b1d-059e-4473-b981-1563c70b48f7\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"6dcd2237-1282-4d33-83e5-a2441a3b1aab\\\"\",\r\n  \"type\":
         \"Microsoft.Network/routeTables\",\r\n  \"location\": \"westus\",\r\n  \"tags\":
         {\r\n    \"foo\": \"doo\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Updating\",\r\n    \"resourceGuid\": \"6395e676-f724-4fe6-9df7-ce9d4a731f35\",\r\n
+        \"Updating\",\r\n    \"resourceGuid\": \"266fa593-644f-4685-a01d-07518482717c\",\r\n
         \   \"disableBgpRoutePropagation\": false,\r\n    \"routes\": []\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/cf360d21-c6e8-4777-9d8f-d5ced033d2f8?api-version=2019-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/256a064a-3fee-4663-a89d-2d2fc3d99cc7?api-version=2019-04-01
       cache-control:
       - no-cache
       content-length:
@@ -136,7 +86,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 17:55:00 GMT
+      - Sun, 13 Oct 2019 09:02:01 GMT
       expires:
       - '-1'
       pragma:
@@ -148,8 +98,10 @@ interactions:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - cb4da727-4454-4df5-8e10-770e44d694f0
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1197'
     status:
       code: 201
       message: Created
@@ -167,10 +119,10 @@ interactions:
       ParameterSetName:
       - -n -g --tags
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/cf360d21-c6e8-4777-9d8f-d5ced033d2f8?api-version=2019-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/256a064a-3fee-4663-a89d-2d2fc3d99cc7?api-version=2019-04-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -182,7 +134,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 17:55:12 GMT
+      - Sun, 13 Oct 2019 09:02:12 GMT
       expires:
       - '-1'
       pragma:
@@ -198,6 +150,8 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - 15738aff-177f-4f96-99dc-82395bc5ed3d
     status:
       code: 200
       message: OK
@@ -215,17 +169,17 @@ interactions:
       ParameterSetName:
       - -n -g --tags
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_route_table000001/providers/Microsoft.Network/routeTables/cli-test-route-table?api-version=2019-04-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-test-route-table\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_route_table000001/providers/Microsoft.Network/routeTables/cli-test-route-table\",\r\n
-        \ \"etag\": \"W/\\\"33341765-87d0-4dde-a005-ea071cd32b6a\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"a9708d56-80d1-4ed0-8578-403c4906446b\\\"\",\r\n  \"type\":
         \"Microsoft.Network/routeTables\",\r\n  \"location\": \"westus\",\r\n  \"tags\":
         {\r\n    \"foo\": \"doo\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"6395e676-f724-4fe6-9df7-ce9d4a731f35\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"266fa593-644f-4685-a01d-07518482717c\",\r\n
         \   \"disableBgpRoutePropagation\": false,\r\n    \"routes\": []\r\n  }\r\n}"
     headers:
       cache-control:
@@ -235,9 +189,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 17:55:12 GMT
+      - Sun, 13 Oct 2019 09:02:12 GMT
       etag:
-      - W/"33341765-87d0-4dde-a005-ea071cd32b6a"
+      - W/"a9708d56-80d1-4ed0-8578-403c4906446b"
       expires:
       - '-1'
       pragma:
@@ -253,6 +207,8 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - eb7abf67-ee68-4930-84aa-e1708f098c32
     status:
       code: 200
       message: OK
@@ -270,8 +226,8 @@ interactions:
       ParameterSetName:
       - -n -g --tags --disable-bgp-route-propagation
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
       accept-language:
       - en-US
     method: GET
@@ -279,10 +235,10 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"cli-test-route-table\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_route_table000001/providers/Microsoft.Network/routeTables/cli-test-route-table\",\r\n
-        \ \"etag\": \"W/\\\"33341765-87d0-4dde-a005-ea071cd32b6a\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"a9708d56-80d1-4ed0-8578-403c4906446b\\\"\",\r\n  \"type\":
         \"Microsoft.Network/routeTables\",\r\n  \"location\": \"westus\",\r\n  \"tags\":
         {\r\n    \"foo\": \"doo\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"6395e676-f724-4fe6-9df7-ce9d4a731f35\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"266fa593-644f-4685-a01d-07518482717c\",\r\n
         \   \"disableBgpRoutePropagation\": false,\r\n    \"routes\": []\r\n  }\r\n}"
     headers:
       cache-control:
@@ -292,9 +248,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 17:55:13 GMT
+      - Sun, 13 Oct 2019 09:02:13 GMT
       etag:
-      - W/"33341765-87d0-4dde-a005-ea071cd32b6a"
+      - W/"a9708d56-80d1-4ed0-8578-403c4906446b"
       expires:
       - '-1'
       pragma:
@@ -310,13 +266,15 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - a2388c55-7787-44f9-ad47-0f8705079bab
     status:
       code: 200
       message: OK
 - request:
     body: 'b''{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_route_table000001/providers/Microsoft.Network/routeTables/cli-test-route-table",
       "location": "westus", "tags": {"foo": "boo"}, "properties": {"routes": [], "disableBgpRoutePropagation":
-      true, "provisioningState": "Succeeded"}, "etag": "W/\\"33341765-87d0-4dde-a005-ea071cd32b6a\\""}'''
+      true, "provisioningState": "Succeeded"}, "etag": "W/\\"a9708d56-80d1-4ed0-8578-403c4906446b\\""}'''
     headers:
       Accept:
       - application/json
@@ -333,8 +291,8 @@ interactions:
       ParameterSetName:
       - -n -g --tags --disable-bgp-route-propagation
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
       accept-language:
       - en-US
     method: PUT
@@ -342,14 +300,14 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"cli-test-route-table\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_route_table000001/providers/Microsoft.Network/routeTables/cli-test-route-table\",\r\n
-        \ \"etag\": \"W/\\\"54509d4e-d6fa-44c9-8409-76dff781cebf\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"23f2ea93-f8e0-414a-851b-ce4846b03cec\\\"\",\r\n  \"type\":
         \"Microsoft.Network/routeTables\",\r\n  \"location\": \"westus\",\r\n  \"tags\":
         {\r\n    \"foo\": \"boo\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Updating\",\r\n    \"resourceGuid\": \"6395e676-f724-4fe6-9df7-ce9d4a731f35\",\r\n
+        \"Updating\",\r\n    \"resourceGuid\": \"266fa593-644f-4685-a01d-07518482717c\",\r\n
         \   \"disableBgpRoutePropagation\": true,\r\n    \"routes\": []\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/b5443978-2ece-4497-b76d-7fd8d91cec49?api-version=2019-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/5aa829d2-95d8-4ec9-9992-0e44199938f0?api-version=2019-04-01
       cache-control:
       - no-cache
       content-length:
@@ -357,7 +315,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 17:55:14 GMT
+      - Sun, 13 Oct 2019 09:02:14 GMT
       expires:
       - '-1'
       pragma:
@@ -373,8 +331,10 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - f81f5997-2424-4d87-bb03-5e6b9cd22d66
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -392,10 +352,10 @@ interactions:
       ParameterSetName:
       - -n -g --tags --disable-bgp-route-propagation
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/b5443978-2ece-4497-b76d-7fd8d91cec49?api-version=2019-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/5aa829d2-95d8-4ec9-9992-0e44199938f0?api-version=2019-04-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -407,7 +367,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 17:55:24 GMT
+      - Sun, 13 Oct 2019 09:02:23 GMT
       expires:
       - '-1'
       pragma:
@@ -423,6 +383,8 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - a58f6579-d4de-4f5a-9429-a2041237df51
     status:
       code: 200
       message: OK
@@ -440,17 +402,17 @@ interactions:
       ParameterSetName:
       - -n -g --tags --disable-bgp-route-propagation
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_route_table000001/providers/Microsoft.Network/routeTables/cli-test-route-table?api-version=2019-04-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-test-route-table\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_route_table000001/providers/Microsoft.Network/routeTables/cli-test-route-table\",\r\n
-        \ \"etag\": \"W/\\\"a439f05c-35b9-4e4b-841d-f7eb0ee64915\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"a3d96b46-ccca-471a-bf5d-acec3fc18103\\\"\",\r\n  \"type\":
         \"Microsoft.Network/routeTables\",\r\n  \"location\": \"westus\",\r\n  \"tags\":
         {\r\n    \"foo\": \"boo\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"6395e676-f724-4fe6-9df7-ce9d4a731f35\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"266fa593-644f-4685-a01d-07518482717c\",\r\n
         \   \"disableBgpRoutePropagation\": true,\r\n    \"routes\": []\r\n  }\r\n}"
     headers:
       cache-control:
@@ -460,9 +422,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 17:55:26 GMT
+      - Sun, 13 Oct 2019 09:02:23 GMT
       etag:
-      - W/"a439f05c-35b9-4e4b-841d-f7eb0ee64915"
+      - W/"a3d96b46-ccca-471a-bf5d-acec3fc18103"
       expires:
       - '-1'
       pragma:
@@ -478,6 +440,8 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - 9bff6509-a12b-4707-8cc7-95fe7c906a6f
     status:
       code: 200
       message: OK
@@ -500,8 +464,8 @@ interactions:
       ParameterSetName:
       - --address-prefix -n -g --next-hop-type --route-table-name
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
       accept-language:
       - en-US
     method: PUT
@@ -509,12 +473,12 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"my-route\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_route_table000001/providers/Microsoft.Network/routeTables/cli-test-route-table/routes/my-route\",\r\n
-        \ \"etag\": \"W/\\\"1406623c-5327-430d-a9d9-674d43c5aaf8\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"3c0b0e85-a154-4f0b-a365-75827c447b01\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"10.0.5.0/24\",\r\n
         \   \"nextHopType\": \"None\"\r\n  },\r\n  \"type\": \"Microsoft.Network/routeTables/routes\"\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/5de8e346-ef79-488b-a60d-2cfab520f209?api-version=2019-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/2dcb10f1-6271-43e3-8aa9-186365bbff41?api-version=2019-04-01
       cache-control:
       - no-cache
       content-length:
@@ -522,7 +486,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 17:55:27 GMT
+      - Sun, 13 Oct 2019 09:02:25 GMT
       expires:
       - '-1'
       pragma:
@@ -534,6 +498,8 @@ interactions:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - 44d5dbc0-17af-431c-a707-bd89f201d3a6
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -553,10 +519,10 @@ interactions:
       ParameterSetName:
       - --address-prefix -n -g --next-hop-type --route-table-name
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/5de8e346-ef79-488b-a60d-2cfab520f209?api-version=2019-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/2dcb10f1-6271-43e3-8aa9-186365bbff41?api-version=2019-04-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -568,7 +534,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 17:55:38 GMT
+      - Sun, 13 Oct 2019 09:02:34 GMT
       expires:
       - '-1'
       pragma:
@@ -584,6 +550,8 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - 5bbc92de-7f23-415d-8b1b-b39c9656f90a
     status:
       code: 200
       message: OK
@@ -601,14 +569,14 @@ interactions:
       ParameterSetName:
       - --address-prefix -n -g --next-hop-type --route-table-name
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_route_table000001/providers/Microsoft.Network/routeTables/cli-test-route-table/routes/my-route?api-version=2019-04-01
   response:
     body:
       string: "{\r\n  \"name\": \"my-route\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_route_table000001/providers/Microsoft.Network/routeTables/cli-test-route-table/routes/my-route\",\r\n
-        \ \"etag\": \"W/\\\"2b6fd9fe-fc4f-4aa1-90b0-e7c9a547a740\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"7f36a711-fae4-4abe-bd76-85b03438da66\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.5.0/24\",\r\n
         \   \"nextHopType\": \"None\"\r\n  },\r\n  \"type\": \"Microsoft.Network/routeTables/routes\"\r\n}"
     headers:
@@ -619,9 +587,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 17:55:38 GMT
+      - Sun, 13 Oct 2019 09:02:34 GMT
       etag:
-      - W/"2b6fd9fe-fc4f-4aa1-90b0-e7c9a547a740"
+      - W/"7f36a711-fae4-4abe-bd76-85b03438da66"
       expires:
       - '-1'
       pragma:
@@ -637,6 +605,8 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - 9b1eed4a-4dad-4b9b-b70f-bddede12f5f8
     status:
       code: 200
       message: OK
@@ -652,8 +622,8 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
       accept-language:
       - en-US
     method: GET
@@ -662,14 +632,14 @@ interactions:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"cli-test-route-table\",\r\n
         \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_route_table000001/providers/Microsoft.Network/routeTables/cli-test-route-table\",\r\n
-        \     \"etag\": \"W/\\\"2b6fd9fe-fc4f-4aa1-90b0-e7c9a547a740\\\"\",\r\n      \"type\":
+        \     \"etag\": \"W/\\\"7f36a711-fae4-4abe-bd76-85b03438da66\\\"\",\r\n      \"type\":
         \"Microsoft.Network/routeTables\",\r\n      \"location\": \"westus\",\r\n
         \     \"tags\": {\r\n        \"foo\": \"boo\"\r\n      },\r\n      \"properties\":
         {\r\n        \"provisioningState\": \"Succeeded\",\r\n        \"resourceGuid\":
-        \"6395e676-f724-4fe6-9df7-ce9d4a731f35\",\r\n        \"disableBgpRoutePropagation\":
+        \"266fa593-644f-4685-a01d-07518482717c\",\r\n        \"disableBgpRoutePropagation\":
         true,\r\n        \"routes\": [\r\n          {\r\n            \"name\": \"my-route\",\r\n
         \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_route_table000001/providers/Microsoft.Network/routeTables/cli-test-route-table/routes/my-route\",\r\n
-        \           \"etag\": \"W/\\\"2b6fd9fe-fc4f-4aa1-90b0-e7c9a547a740\\\"\",\r\n
+        \           \"etag\": \"W/\\\"7f36a711-fae4-4abe-bd76-85b03438da66\\\"\",\r\n
         \           \"properties\": {\r\n              \"provisioningState\": \"Succeeded\",\r\n
         \             \"addressPrefix\": \"10.0.5.0/24\",\r\n              \"nextHopType\":
         \"None\"\r\n            },\r\n            \"type\": \"Microsoft.Network/routeTables/routes\"\r\n
@@ -682,7 +652,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 17:55:40 GMT
+      - Sun, 13 Oct 2019 09:02:36 GMT
       expires:
       - '-1'
       pragma:
@@ -698,6 +668,8 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - 65e20ad0-b5c5-4920-93a6-24ab7d3ebdba
     status:
       code: 200
       message: OK
@@ -715,8 +687,8 @@ interactions:
       ParameterSetName:
       - --resource-group
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
       accept-language:
       - en-US
     method: GET
@@ -725,14 +697,14 @@ interactions:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"cli-test-route-table\",\r\n
         \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_route_table000001/providers/Microsoft.Network/routeTables/cli-test-route-table\",\r\n
-        \     \"etag\": \"W/\\\"2b6fd9fe-fc4f-4aa1-90b0-e7c9a547a740\\\"\",\r\n      \"type\":
+        \     \"etag\": \"W/\\\"7f36a711-fae4-4abe-bd76-85b03438da66\\\"\",\r\n      \"type\":
         \"Microsoft.Network/routeTables\",\r\n      \"location\": \"westus\",\r\n
         \     \"tags\": {\r\n        \"foo\": \"boo\"\r\n      },\r\n      \"properties\":
         {\r\n        \"provisioningState\": \"Succeeded\",\r\n        \"resourceGuid\":
-        \"6395e676-f724-4fe6-9df7-ce9d4a731f35\",\r\n        \"disableBgpRoutePropagation\":
+        \"266fa593-644f-4685-a01d-07518482717c\",\r\n        \"disableBgpRoutePropagation\":
         true,\r\n        \"routes\": [\r\n          {\r\n            \"name\": \"my-route\",\r\n
         \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_route_table000001/providers/Microsoft.Network/routeTables/cli-test-route-table/routes/my-route\",\r\n
-        \           \"etag\": \"W/\\\"2b6fd9fe-fc4f-4aa1-90b0-e7c9a547a740\\\"\",\r\n
+        \           \"etag\": \"W/\\\"7f36a711-fae4-4abe-bd76-85b03438da66\\\"\",\r\n
         \           \"properties\": {\r\n              \"provisioningState\": \"Succeeded\",\r\n
         \             \"addressPrefix\": \"10.0.5.0/24\",\r\n              \"nextHopType\":
         \"None\"\r\n            },\r\n            \"type\": \"Microsoft.Network/routeTables/routes\"\r\n
@@ -745,7 +717,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 17:55:40 GMT
+      - Sun, 13 Oct 2019 09:02:36 GMT
       expires:
       - '-1'
       pragma:
@@ -761,6 +733,8 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - 2c7f142f-6201-4259-ac21-fbf495d3ef7a
     status:
       code: 200
       message: OK
@@ -778,8 +752,8 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
       accept-language:
       - en-US
     method: GET
@@ -787,13 +761,13 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"cli-test-route-table\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_route_table000001/providers/Microsoft.Network/routeTables/cli-test-route-table\",\r\n
-        \ \"etag\": \"W/\\\"2b6fd9fe-fc4f-4aa1-90b0-e7c9a547a740\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"7f36a711-fae4-4abe-bd76-85b03438da66\\\"\",\r\n  \"type\":
         \"Microsoft.Network/routeTables\",\r\n  \"location\": \"westus\",\r\n  \"tags\":
         {\r\n    \"foo\": \"boo\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"6395e676-f724-4fe6-9df7-ce9d4a731f35\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"266fa593-644f-4685-a01d-07518482717c\",\r\n
         \   \"disableBgpRoutePropagation\": true,\r\n    \"routes\": [\r\n      {\r\n
         \       \"name\": \"my-route\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_route_table000001/providers/Microsoft.Network/routeTables/cli-test-route-table/routes/my-route\",\r\n
-        \       \"etag\": \"W/\\\"2b6fd9fe-fc4f-4aa1-90b0-e7c9a547a740\\\"\",\r\n
+        \       \"etag\": \"W/\\\"7f36a711-fae4-4abe-bd76-85b03438da66\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.5.0/24\",\r\n          \"nextHopType\":
         \"None\"\r\n        },\r\n        \"type\": \"Microsoft.Network/routeTables/routes\"\r\n
@@ -806,9 +780,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 17:55:41 GMT
+      - Sun, 13 Oct 2019 09:02:37 GMT
       etag:
-      - W/"2b6fd9fe-fc4f-4aa1-90b0-e7c9a547a740"
+      - W/"7f36a711-fae4-4abe-bd76-85b03438da66"
       expires:
       - '-1'
       pragma:
@@ -824,6 +798,8 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - fb3e7280-e75e-4557-8aed-4d98d12a9ef2
     status:
       code: 200
       message: OK
@@ -841,8 +817,8 @@ interactions:
       ParameterSetName:
       - --resource-group --route-table-name
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
       accept-language:
       - en-US
     method: GET
@@ -851,7 +827,7 @@ interactions:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"my-route\",\r\n      \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_route_table000001/providers/Microsoft.Network/routeTables/cli-test-route-table/routes/my-route\",\r\n
-        \     \"etag\": \"W/\\\"2b6fd9fe-fc4f-4aa1-90b0-e7c9a547a740\\\"\",\r\n      \"properties\":
+        \     \"etag\": \"W/\\\"7f36a711-fae4-4abe-bd76-85b03438da66\\\"\",\r\n      \"properties\":
         {\r\n        \"provisioningState\": \"Succeeded\",\r\n        \"addressPrefix\":
         \"10.0.5.0/24\",\r\n        \"nextHopType\": \"None\"\r\n      },\r\n      \"type\":
         \"Microsoft.Network/routeTables/routes\"\r\n    }\r\n  ]\r\n}"
@@ -863,7 +839,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 17:55:42 GMT
+      - Sun, 13 Oct 2019 09:02:38 GMT
       expires:
       - '-1'
       pragma:
@@ -879,6 +855,8 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - 4abb3079-ec02-4ab8-9169-9386e3df7c0c
     status:
       code: 200
       message: OK
@@ -896,8 +874,8 @@ interactions:
       ParameterSetName:
       - --resource-group --route-table-name --name
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
       accept-language:
       - en-US
     method: GET
@@ -905,7 +883,7 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"my-route\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_route_table000001/providers/Microsoft.Network/routeTables/cli-test-route-table/routes/my-route\",\r\n
-        \ \"etag\": \"W/\\\"2b6fd9fe-fc4f-4aa1-90b0-e7c9a547a740\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"7f36a711-fae4-4abe-bd76-85b03438da66\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.5.0/24\",\r\n
         \   \"nextHopType\": \"None\"\r\n  },\r\n  \"type\": \"Microsoft.Network/routeTables/routes\"\r\n}"
     headers:
@@ -916,9 +894,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 17:55:43 GMT
+      - Sun, 13 Oct 2019 09:02:39 GMT
       etag:
-      - W/"2b6fd9fe-fc4f-4aa1-90b0-e7c9a547a740"
+      - W/"7f36a711-fae4-4abe-bd76-85b03438da66"
       expires:
       - '-1'
       pragma:
@@ -934,6 +912,8 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - de1684b6-0197-4fe8-836b-f3ba9149c74c
     status:
       code: 200
       message: OK
@@ -953,8 +933,8 @@ interactions:
       ParameterSetName:
       - --resource-group --route-table-name --name
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
       accept-language:
       - en-US
     method: DELETE
@@ -964,17 +944,17 @@ interactions:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/95115139-58c8-4c81-84ee-042fc2868447?api-version=2019-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/8f5f37f1-09d0-4b8e-a709-e48c776e6288?api-version=2019-04-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Thu, 30 May 2019 17:55:45 GMT
+      - Sun, 13 Oct 2019 09:02:39 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/95115139-58c8-4c81-84ee-042fc2868447?api-version=2019-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/8f5f37f1-09d0-4b8e-a709-e48c776e6288?api-version=2019-04-01
       pragma:
       - no-cache
       server:
@@ -984,6 +964,8 @@ interactions:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - a450986b-e455-452c-936b-3b1fad7a04b4
       x-ms-ratelimit-remaining-subscription-deletes:
       - '14999'
     status:
@@ -1003,10 +985,10 @@ interactions:
       ParameterSetName:
       - --resource-group --route-table-name --name
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/95115139-58c8-4c81-84ee-042fc2868447?api-version=2019-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/8f5f37f1-09d0-4b8e-a709-e48c776e6288?api-version=2019-04-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -1018,7 +1000,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 17:55:55 GMT
+      - Sun, 13 Oct 2019 09:02:50 GMT
       expires:
       - '-1'
       pragma:
@@ -1034,6 +1016,8 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - 6a697037-13c1-4fb9-a57b-534320aeb7f3
     status:
       code: 200
       message: OK
@@ -1051,8 +1035,8 @@ interactions:
       ParameterSetName:
       - --resource-group --route-table-name
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
       accept-language:
       - en-US
     method: GET
@@ -1068,7 +1052,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 17:55:57 GMT
+      - Sun, 13 Oct 2019 09:02:51 GMT
       expires:
       - '-1'
       pragma:
@@ -1084,6 +1068,8 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - 249b7766-5967-4279-86d9-7014d8194766
     status:
       code: 200
       message: OK
@@ -1103,8 +1089,8 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
       accept-language:
       - en-US
     method: DELETE
@@ -1114,17 +1100,17 @@ interactions:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/d6982a27-a4ae-40ea-953f-62bb833ddac1?api-version=2019-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/36568892-6353-4005-b879-30f603e6c9fc?api-version=2019-04-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Thu, 30 May 2019 17:56:01 GMT
+      - Sun, 13 Oct 2019 09:02:51 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/d6982a27-a4ae-40ea-953f-62bb833ddac1?api-version=2019-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/36568892-6353-4005-b879-30f603e6c9fc?api-version=2019-04-01
       pragma:
       - no-cache
       server:
@@ -1134,6 +1120,8 @@ interactions:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - 2c5b272a-fb5f-4ebd-a4ab-e02fe772365c
       x-ms-ratelimit-remaining-subscription-deletes:
       - '14999'
     status:
@@ -1153,10 +1141,10 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/d6982a27-a4ae-40ea-953f-62bb833ddac1?api-version=2019-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/36568892-6353-4005-b879-30f603e6c9fc?api-version=2019-04-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -1168,7 +1156,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 17:56:12 GMT
+      - Sun, 13 Oct 2019 09:03:01 GMT
       expires:
       - '-1'
       pragma:
@@ -1184,6 +1172,8 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - ad7a1c5c-39dd-475e-ba2f-f7308680c3d8
     status:
       code: 200
       message: OK
@@ -1201,35 +1191,30 @@ interactions:
       ParameterSetName:
       - --resource-group
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_route_table000001/providers/Microsoft.Network/routeTables?api-version=2019-04-01
   response:
     body:
-      string: "{\r\n  \"value\": []\r\n}"
+      string: '{"value":[]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '19'
+      - '12'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 17:56:13 GMT
+      - Sun, 13 Oct 2019 09:03:02 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
       vary:
       - Accept-Encoding
       x-content-type-options:
@@ -1237,51 +1222,4 @@ interactions:
     status:
       code: 200
       message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - group delete
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - --name --yes --no-wait
-      User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
-      accept-language:
-      - en-US
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_route_table000001?api-version=2019-05-10
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Thu, 30 May 2019 17:56:14 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGUk9VVEU6NUZUQUJMRTRMR1dLTEhST1JIUlhBNVRGUEZFNHxBNEQyRDQyMTk3ODhDRTdBLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2019-05-10
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-deletes:
-      - '14998'
-    status:
-      code: 202
-      message: Accepted
 version: 1
