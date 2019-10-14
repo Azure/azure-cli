@@ -39,11 +39,14 @@ Release History
 * Update galleries API version to 2019-07-01.
 * vm create: Add --workspace to enable log analytics workspace automatically.
 
+**Key Vault**
+
+Fix #9352: Unexpected error when certificate file does not exist.
+
 **Network**
 
 * az network private-dns link vnet create/update: Fixes #9851. Support cross-tenant virtual network linking.
 * [BREAKING CHANGE] network vnet subnet list: Fix #10401. `--resource-group` and `--vnet-name` are required now.
-
 
 **Monitor**
 
