@@ -171,10 +171,10 @@ def load_arguments(self, _):
     with self.argument_context('group deployment') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type, completer=get_resource_group_completion_list)
         c.argument('deployment_name', options_list=['--name', '-n'], required=True, help='The deployment name.')
-        c.argument('template_file', completer=FilesCompleter(), type=file_type, help="a template file path in the file system")
-        c.argument('template_uri', help='a uri to a remote template file')
+        c.argument('template_file', options_list=['--template-file', '-f'], completer=FilesCompleter(), type=file_type, help="a template file path in the file system")
+        c.argument('template_uri', options_list=['--template-uri', '-u'], help='a uri to a remote template file')
         c.argument('mode', arg_type=get_enum_type(DeploymentMode, default='incremental'), help='Incremental (only add resources to resource group) or Complete (remove extra resources from resource group)')
-        c.argument('parameters', action='append', nargs='+', completer=FilesCompleter())
+        c.argument('parameters', options_list=['--parameters', '-p'], action='append', nargs='+', completer=FilesCompleter())
         c.argument('rollback_on_error', nargs='?', action=RollbackAction, help='The name of a deployment to roll back to on error, or use as a flag to roll back to the last successful deployment.')
 
     with self.argument_context('group deployment create') as c:
@@ -191,9 +191,9 @@ def load_arguments(self, _):
         c.argument('management_group_id', options_list=['--management-group-id', '-m'], help='The management group id.')
         c.argument('deployment_name', options_list=['--name', '-n'], required=True, help='The deployment name.')
         c.argument('deployment_location', arg_type=get_location_type(self.cli_ctx))
-        c.argument('template_file', completer=FilesCompleter(), type=file_type, help="a template file path in the file system")
-        c.argument('template_uri', help='a uri to a remote template file')
-        c.argument('parameters', action='append', nargs='+', completer=FilesCompleter())
+        c.argument('template_file', options_list=['--template-file', '-f'], completer=FilesCompleter(), type=file_type, help="a template file path in the file system")
+        c.argument('template_uri', options_list=['--template-uri', '-u'], help='a uri to a remote template file')
+        c.argument('parameters', options_list=['--parameter', '-p'], action='append', nargs='+', completer=FilesCompleter())
 
     with self.argument_context('deployment create') as c:
         c.argument('deployment_name', options_list=['--name', '-n'], required=False,

@@ -300,8 +300,8 @@ def _remove_comments_from_json(template):
 
 # pylint: disable=too-many-locals, too-many-statements, too-few-public-methods
 def _deploy_arm_template_core_unmodified(cli_ctx, resource_group_name, template_file=None,
-                                    template_uri=None, deployment_name=None, parameters=None,
-                                    mode=None, rollback_on_error=None, validate_only=False, no_wait=False):
+                                         template_uri=None, deployment_name=None, parameters=None,
+                                         mode=None, rollback_on_error=None, validate_only=False, no_wait=False):
     DeploymentProperties, TemplateLink, OnErrorDeployment = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
                                                                     'DeploymentProperties', 'TemplateLink',
                                                                     'OnErrorDeployment', mod='models')
@@ -1058,7 +1058,7 @@ def deploy_arm_template(cmd, resource_group_name,
                         parameters=None, mode=None, rollback_on_error=None, no_wait=False, handle_extended_json_format=False):
     if handle_extended_json_format:
         return _deploy_arm_template_core_unmodified(cmd.cli_ctx, resource_group_name, template_file, template_uri,
-                                               deployment_name, parameters, mode, rollback_on_error, no_wait=no_wait)
+                                                    deployment_name, parameters, mode, rollback_on_error, no_wait=no_wait)
 
     return _deploy_arm_template_core(cmd.cli_ctx, resource_group_name, template_file, template_uri,
                                      deployment_name, parameters, mode, rollback_on_error, no_wait=no_wait)
