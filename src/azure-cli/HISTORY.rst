@@ -39,6 +39,10 @@ Release History
 * Update galleries API version to 2019-07-01.
 * vm create: Add --workspace to enable log analytics workspace automatically.
 
+**Backup**
+
+* Enhanced error detail for vault delete in force mode.
+
 **Network**
 
 * az network private-dns link vnet create/update: Fixes #9851. Support cross-tenant virtual network linking.
