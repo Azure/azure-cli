@@ -57,6 +57,10 @@ Release History
 
 * az monitor log-analytics workspace: Support CRUD for Azure log analytics workspace.
 
+**Profile**
+
+* Fix: `az account get-access-token --resource-type ms-graph` not working.
+
 **Storage**
 
 * az storage copy: Add --preserve-s2s-access-tier parameter to preserve access tier during service to service copy.
@@ -198,6 +202,7 @@ Release History
 **Policy**
 
 * Support for Policy new API version 2019-01-01
+
 
 **Storage**
 

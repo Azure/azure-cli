@@ -18,7 +18,7 @@ cloud_resource_type_mappings = {
     "oss-rdbms": "ossrdbms_resource_id",
     "arm": "active_directory_resource_id",
     "aad-graph": "active_directory_graph_resource_id",
-    "ms-graph": "microsoft_gragh_resource_id",
+    "ms-graph": "microsoft_graph_resource_id",
     "batch": "batch_resource_id",
     "media": "media_resource_id",
     "data-lake": "active_directory_data_lake_resource_id"
