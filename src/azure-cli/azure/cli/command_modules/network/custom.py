@@ -1031,7 +1031,10 @@ def list_ag_waf_rule_sets(client, _type=None, version=None, group=None):
 
 # region ApplicationGatewayWAFPolicy
 def create_ag_waf_policy(cmd, client, resource_group_name, policy_name, location=None, tags=None):
-    WebApplicationFirewallPolicy, ManagedRulesDefinition, ManagedRuleSet = cmd.get_models('WebApplicationFirewallPolicy', 'ManagedRulesDefinition', 'ManagedRuleSet')
+    WebApplicationFirewallPolicy, ManagedRulesDefinition, \
+        ManagedRuleSet = cmd.get_models('WebApplicationFirewallPolicy',
+                                        'ManagedRulesDefinition',
+                                        'ManagedRuleSet')
     #  https://docs.microsoft.com/en-us/azure/application-gateway/waf-overview
     managed_rule_set = ManagedRuleSet(rule_set_type='OWASP',
                                       rule_set_version='3.0')

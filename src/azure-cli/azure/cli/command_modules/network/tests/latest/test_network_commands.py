@@ -108,7 +108,6 @@ class NetworkPrivateEndpoints(ScenarioTest):
             self.check('provisioningState', 'Succeeded')
         ])
 
-
         # temporalily disable the test
         '''
         self.cmd('network private-endpoint update -g {rg} -n {pe} --request-message "test"', checks=[
