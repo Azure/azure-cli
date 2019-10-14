@@ -24,13 +24,13 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
     scf = storage_client_factory(cmd.cli_ctx)
     logger.warning("The default kind for created storage account will change to 'StorageV2' from 'Storage' in future")
     params = StorageAccountCreateParameters(sku=Sku(name=sku), kind=Kind(kind), location=location, tags=tags)
-    if custom_domain is not None:
+    if custom_domain:
         params.custom_domain = CustomDomain(name=custom_domain, use_sub_domain=None)
-    if encryption_services is not None:
+    if encryption_services:
         params.encryption = Encryption(services=encryption_services)
-    if access_tier is not None:
+    if access_tier:
         params.access_tier = AccessTier(access_tier)
-    if assign_identity is not None:
+    if assign_identity:
         params.identity = Identity()
     if https_only is not None:
         params.enable_https_traffic_only = https_only
@@ -38,7 +38,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         AzureFilesIdentityBasedAuthentication = cmd.get_models('AzureFilesIdentityBasedAuthentication')
         params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
             directory_service_options='AADDS' if enable_files_aadds else 'None')
-    if enable_large_file_share is not None:
+    if enable_large_file_share:
         LargeFileSharesState = cmd.get_models('LargeFileSharesState')
         params.large_file_shares_state = LargeFileSharesState("Enabled")
 
