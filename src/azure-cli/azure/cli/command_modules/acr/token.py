@@ -161,27 +161,33 @@ def acr_token_credential_delete(cmd,
                                 password2=False,
                                 resource_group_name=None):
 
+    if not (password1 or password2):
+        raise CLIError('No credentials to delete.')
+
     resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
 
-    if not (password1 or password2):
-        raise CLIError("Nothing to delete")
+    token = client.get(
+        resource_group_name,
+        registry_name,
+        token_name
+    )
+
+    # retrieve the set of existing Token password names. Eg: {'password1', 'password2'}
+    password_names = set(map(lambda password: password.name, token.credentials.passwords))
+
+    if password1 and 'password1' not in password_names:
+        raise CLIError('Unable to perform operation. Password1 credential doesn\'t exist.')
+    if password2 and 'password2' not in password_names:
+        raise CLIError('Unable to perform operation. Password2 credential doesn\'t exist.')
+
+    # remove the items which are supposed to be deleted
+    if password1:
+        password_names.remove('password1')
+    if password2:
+        password_names.remove('password2')
 
     TokenPassword = cmd.get_models('TokenPassword')
-
-    if password1 and password2:
-        new_password_payload = []
-    elif password1:
-        new_password_payload = [
-            TokenPassword(
-                name="password2"
-            )
-        ]
-    else:
-        new_password_payload = [
-            TokenPassword(
-                name="password1"
-            )
-        ]
+    new_password_payload = list(map(lambda name: TokenPassword(name=name), password_names))
 
     TokenUpdateParameters = cmd.get_models('TokenUpdateParameters')
     TokenCredentialsProperties = cmd.get_models('TokenCredentialsProperties')
