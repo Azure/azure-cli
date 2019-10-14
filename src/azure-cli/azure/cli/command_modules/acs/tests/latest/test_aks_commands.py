@@ -1089,19 +1089,21 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'client_secret': sp_password,
             'resource_type': 'Microsoft.ContainerService/ManagedClusters',
             'nodepool1_name': nodepool1_name,
-            'nodepool2_name': nodepool2_name
+            'nodepool2_name': nodepool2_name,
+            'zones': "1 2 3"
         })
 
         # create
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--dns-name-prefix={dns_name_prefix} --node-count=3 --ssh-key-value={ssh_key_value} ' \
-                     '--service-principal={service_principal} --client-secret={client_secret} --zones=3'
+                     '--service-principal={service_principal} --client-secret={client_secret} --zones {zones}'
         self.cmd(create_cmd, checks=[
             self.exists('fqdn'),
             self.exists('nodeResourceGroup'),
             self.check('provisioningState', 'Succeeded'),
-            self.check('agentPoolProfiles[0].availabilityZones[0]', '3')
-
+            self.check('agentPoolProfiles[0].availabilityZones[0]', '1'),
+            self.check('agentPoolProfiles[0].availabilityZones[1]', '2'),
+            self.check('agentPoolProfiles[0].availabilityZones[2]', '3'),
         ])
 
         # show
@@ -1113,7 +1115,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('agentPoolProfiles[0].count', 3),
             self.check('agentPoolProfiles[0].osType', 'Linux'),
             self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
-            self.check('agentPoolProfiles[0].availabilityZones[0]', '3'),
+            self.check('agentPoolProfiles[0].availabilityZones[0]', '1'),
+            self.check('agentPoolProfiles[0].availabilityZones[1]', '2'),
+            self.check('agentPoolProfiles[0].availabilityZones[2]', '3'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion')
         ])
@@ -1140,9 +1144,11 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             os.remove(temp_path)
 
         # nodepool add
-        self.cmd('aks nodepool add --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --node-count=3 --zones=2',checks=[
+        self.cmd('aks nodepool add --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --node-count=3 --zones {zones}',checks=[
             self.check('provisioningState', 'Succeeded'),
-            self.check('availabilityZones[0]', '2')
+            self.check('availabilityZones[0]', '1'),
+            self.check('availabilityZones[1]', '2'),
+            self.check('availabilityZones[2]', '3'),
             ])
 
         # delete
