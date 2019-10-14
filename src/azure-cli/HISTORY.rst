@@ -2,6 +2,10 @@
 
 Release History
 ===============
+**Reservations**
+*BREAKING CHANGE: Operation ReservationOrderOperations.get has a new signature
+*BREAKING CHANGE: Operation ReservationOperations.get has a new signature
+
 
 **AMS**
 
