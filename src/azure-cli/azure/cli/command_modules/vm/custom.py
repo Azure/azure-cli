@@ -666,7 +666,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         if identity_scope:
             role_assignment_guid = str(_gen_guid())
             master_template.add_resource(build_msi_role_assignment(vm_name, vm_id, vm_api_version,
-                                                                   identity_role_id, role_assignment_guid, identity_scope))
+                                                                   identity_role_id, role_assignment_guid,
+                                                                   identity_scope))
 
     if workspace is not None:
         workspace_id = _prepare_workspace(cmd, resource_group_name, workspace)
@@ -2134,7 +2135,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
         if identity_scope:
             role_assignment_guid = str(_gen_guid())
             master_template.add_resource(build_msi_role_assignment(vmss_name, vmss_id, vmss_api_version,
-                                                                   identity_role_id, role_assignment_guid, identity_scope, False))
+                                                                   identity_role_id, role_assignment_guid,
+                                                                   identity_scope, False))
 
     master_template.add_resource(vmss_resource)
     master_template.add_output('VMSS', vmss_name, 'Microsoft.Compute', 'virtualMachineScaleSets',

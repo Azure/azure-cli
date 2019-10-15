@@ -307,6 +307,11 @@ type: group
 short-summary: Manage deployment operations.
 """
 
+helps['deployment operation list'] = """
+type: command
+short-summary: List deployment operations.
+"""
+
 helps['deployment validate'] = """
 type: command
 short-summary: Validate whether a template is valid at the given scope.
