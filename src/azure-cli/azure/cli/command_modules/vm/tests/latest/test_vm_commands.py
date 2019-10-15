@@ -1424,7 +1424,7 @@ class VMCreateExistingOptions(ScenarioTest):
         })
 
         self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS')
-        self.cmd('vm create -g {rg} -n {vm} --vmss {vmss}')
+        self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --vmss {vmss}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_provision_vm_agent_')
     def test_vm_create_provision_vm_agent(self, resource_group):
