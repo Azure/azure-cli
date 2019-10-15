@@ -199,6 +199,9 @@ parameters:
   - name: --node-count -c
     type: int
     short-summary: Number of nodes in the Kubernetes node pool. After creating a cluster, you can change the size of its node pool with `az aks scale`.
+  - name: --zones -z
+    type: string array
+    short-summary: Availability zones where agent nodes will be placed.
   - name: --node-osdisk-size
     type: int
     short-summary: Size in GB of the OS disk for each node in the node pool. Minimum 30 GB.
@@ -399,6 +402,117 @@ examples:
     crafted: true
 """
 
+helps['aks nodepool'] = """
+    type: group
+    short-summary: Commands to manage node pools in Kubernetes kubernetes cluster.
+"""
+helps['aks nodepool show'] = """
+    type: command
+    short-summary: Show the details for a node pool in the managed Kubernetes cluster.
+"""
+
+helps['aks nodepool list'] = """
+    type: command
+    short-summary: List node pools in the managed Kubernetes cluster.
+"""
+
+helps['aks nodepool add'] = """
+    type: command
+    short-summary: Add a node pool to the managed Kubernetes cluster.
+    parameters:
+        - name: --node-vm-size -s
+          type: string
+          short-summary: Size of Virtual Machines to create as Kubernetes nodes.
+        - name: --node-count -c
+          type: int
+          short-summary: Number of nodes in the Kubernetes agent pool. After creating a cluster, you can change the
+                         size of its node pool with `az aks scale`.
+        - name: --kubernetes-version -k
+          type: string
+          short-summary: Version of Kubernetes to use for creating the cluster, such as "1.7.12" or "1.8.7".
+          populator-commands:
+          - "`az aks get-versions`"
+        - name: --node-osdisk-size
+          type: int
+          short-summary: Size in GB of the OS disk for each node in the agent pool. Minimum 30 GB.
+        - name: --max-pods -m
+          type: int
+          short-summary: The maximum number of pods deployable to a node.
+          long-summary: If not specified, defaults to 110, or 30 for advanced networking configurations.
+        - name: --zones -z
+          type: string array
+          short-summary: Availability zones where agent nodes will be placed.
+        - name: --vnet-subnet-id
+          type: string
+          short-summary: The ID of a subnet in an existing VNet into which to deploy the cluster.
+        - name: --os-type
+          type: string
+          short-summary: The OS Type. Linux or Windows.
+        - name: --enable-cluster-autoscaler -e
+          type: bool
+          short-summary: Enable cluster autoscaler.
+        - name: --min-count
+          type: int
+          short-summary: Minimun nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specifying the value in the range of [1, 100]
+        - name: --max-count
+          type: int
+          short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specifying the value in the range of [1, 100]
+        - name: --node-taints
+          type: string
+          short-summary: The node taints for the node pool. You can't change the node taints through CLI after the node pool is created.
+"""
+
+helps['aks nodepool scale'] = """
+    type: command
+    short-summary: Scale the node pool in a managed Kubernetes cluster.
+    parameters:
+        - name: --node-count -c
+          type: int
+          short-summary: Number of nodes in the Kubernetes node pool.
+"""
+
+helps['aks nodepool upgrade'] = """
+    type: command
+    short-summary: Upgrade the node pool in a managed Kubernetes cluster.
+    parameters:
+        - name: --kubernetes-version -k
+          type: string
+          short-summary: Version of Kubernetes to upgrade the node pool to, such as "1.11.12".
+"""
+
+helps['aks nodepool update'] = """
+    type: command
+    short-summary: Update a node pool to enable/disable cluster-autoscaler or change min-count or max-count
+    parameters:
+        - name: --enable-cluster-autoscaler -e
+          type: bool
+          short-summary: Enable cluster autoscaler.
+        - name: --disable-cluster-autoscaler -d
+          type: bool
+          short-summary: Disable cluster autoscaler.
+        - name: --update-cluster-autoscaler -u
+          type: bool
+          short-summary: Update min-count or max-count for cluster autoscaler.
+        - name: --min-count
+          type: int
+          short-summary: Minimun nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specifying the value in the range of [1, 100]
+        - name: --max-count
+          type: int
+          short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specifying the value in the range of [1, 100]
+    examples:
+      - name: Enable cluster-autoscaler within node count range [1,5]
+        text: az aks nodepool update --enable-cluster-autoscaler --min-count 1 --max-count 5 -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster
+      - name: Disable cluster-autoscaler for an existing cluster
+        text: az aks nodepool update --disable-cluster-autoscaler -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster
+      - name: Update min-count or max-count for cluster autoscaler.
+        text: az aks nodepool update --update-cluster-autoscaler --min-count 1 --max-count 10 -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster
+"""
+
+helps['aks nodepool delete'] = """
+    type: command
+    short-summary: Delete the agent pool in the managed Kubernetes cluster.
+"""
+
 helps['aks get-credentials'] = """
 type: command
 short-summary: Get access credentials for a managed Kubernetes cluster.
@@ -474,26 +588,26 @@ parameters:
     type: string
     short-summary: The location to create the ACI container groups. Use the location of the MC_* resource group if it is not specified.
 examples:
-  - name: Install the ACI Connector for Linux to a managed Kubernetes cluster.
+  - name: Install the virtual Kubelet for Linux to a managed Kubernetes cluster.
     text: |-
         az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup
-  - name: Install the ACI Connector for Windows to a managed Kubernetes cluster.
+  - name: Install the virtual Kubelet for Windows to a managed Kubernetes cluster.
     text: |-
         az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup \\
-           --connector-name aci-connector --os-type Windows
-  - name: Install the ACI Connector for both Windows and Linux to a managed Kubernetes cluster.
+           --connector-name virtual-kubelet --os-type Windows
+  - name: Install the virtual Kubelet for both Windows and Linux to a managed Kubernetes cluster.
     text: |-
         az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup \\
-          --connector-name aci-connector --os-type Both
-  - name: Install the ACI Connector using a specific service principal in a specific resource group.
+          --connector-name virtual-kubelet --os-type Both
+  - name: Install the virtual Kubelet using a specific service principal in a specific resource group.
     text: |-
         az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup \\
-          --connector-name aci-connector --service-principal {SPN_ID} --client-secret {SPN_SECRET} \\
+          --connector-name virtual-kubelet --service-principal {SPN_ID} --client-secret {SPN_SECRET} \\
           --aci-resource-group ACI-resource-group
-  - name: Install the ACI Connector from a custom Helm chart with custom tag.
+  - name: Install the virtual Kubelet from a custom Helm chart with custom tag.
     text: |-
         az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup \\
-          --connector-name aci-connector --chart-url {CustomURL} --image-tag {VirtualKubeletImageTag}
+          --connector-name virtual-kubelet --chart-url {CustomURL} --image-tag {VirtualKubeletImageTag}
 """
 
 helps['aks list'] = """
@@ -646,24 +760,24 @@ examples:
   - name: Upgrade the ACI Connector for Linux to a managed Kubernetes cluster.
     text: |-
         az aks upgrade-connector --name MyManagedCluster --resource-group MyResourceGroup \\
-          --connector-name aci-connector
+          --connector-name virtual-kubelet
   - name: Upgrade the ACI Connector for Windows to a managed Kubernetes cluster.
     text: |-
         az aks upgrade-connector --name MyManagedCluster --resource-group MyResourceGroup \\
-           --connector-name aci-connector --os-type Windows
+           --connector-name virtual-kubelet --os-type Windows
   - name: Upgrade the ACI Connector for both Windows and Linux to a managed Kubernetes cluster.
     text: |-
         az aks upgrade-connector --name MyManagedCluster --resource-group MyResourceGroup \\
-          --connector-name aci-connector --os-type Both
+          --connector-name virtual-kubelet --os-type Both
   - name: Upgrade the ACI Connector to use a specific service principal in a specific resource group.
     text: |-
         az aks upgrade-connector --name MyManagedCluster --resource-group MyResourceGroup \\
-          --connector-name aci-connector --service-principal {SPN_ID} --client-secret {SPN_SECRET} \\
+          --connector-name virtual-kubelet --service-principal {SPN_ID} --client-secret {SPN_SECRET} \\
           --aci-resource-group ACI-resource-group
   - name: Upgrade the ACI Connector from a custom Helm chart with custom tag.
     text: |-
         az aks upgrade-connector --name MyManagedCluster --resource-group MyResourceGroup \\
-          --connector-name aci-connector --chart-url {CustomURL} --image-tag {VirtualKubeletImageTag}
+          --connector-name virtual-kubelet --chart-url {CustomURL} --image-tag {VirtualKubeletImageTag}
 """
 
 helps['aks use-dev-spaces'] = """

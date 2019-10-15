@@ -52,7 +52,7 @@ def load_arguments(self, _):
                                      help="Scale set name. You can configure the default using `az configure --defaults vmss=<name>`",
                                      id_part='name')
 
-    extension_instance_name_type = CLIArgumentType(help="Name of the vm's instance of the extension. Default: name of the extension.")
+    extension_instance_name_type = CLIArgumentType(help="Name of extension instance, which can be customized. Default: name of the extension.")
     image_template_name_type = CLIArgumentType(overrides=name_arg_type, id_part='name')
 
     # StorageAccountTypes renamed to DiskStorageAccountTypes in 2018_06_01 of azure-mgmt-compute
@@ -698,8 +698,11 @@ def load_arguments(self, _):
             c.argument('version', help='The version of the extension')
 
     with self.argument_context('vm extension set') as c:
+        c.argument('vm_extension_name', name_arg_type,
+                   completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines/extensions'),
+                   help='Name of the extension.', id_part=None)
         c.argument('force_update', action='store_true', help='force to update even if the extension configuration has not changed.')
-        c.argument('extension_instance_name', extension_instance_name_type, arg_group='Resource Id')
+        c.argument('extension_instance_name', extension_instance_name_type)
 
     with self.argument_context('vmss extension set', min_api='2017-12-01') as c:
         c.argument('force_update', action='store_true', help='force to update even if the extension configuration has not changed.')

@@ -5,8 +5,7 @@
 
 from azure.cli.core.util import sdk_no_wait
 from azure.mgmt.apimanagement.models import (ApiManagementServiceResource, ApiManagementServiceIdentity,
-                                             ApiManagementServiceSkuProperties)
-from azure.mgmt.apimanagement.models.api_management_client_enums import (VirtualNetworkType, SkuType)
+                                             ApiManagementServiceSkuProperties, VirtualNetworkType, SkuType)
 
 # Service Operations
 

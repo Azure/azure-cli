@@ -995,6 +995,23 @@ class VMExtensionScenarioTest(ScenarioTest):
         ])
         self.cmd('vm extension delete --resource-group {rg} --vm-name {vm} --name {ext_name}')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_extension_with_id_')
+    @AllowLargeResponse()
+    def test_vm_extension_with_id(self, resource_group):
+        self.kwargs.update({
+            'vm': 'vm1'
+        })
+        vm_id = self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS').get_output_in_json()['id']
+        self.kwargs.update({
+            'vm_id': vm_id
+        })
+        vm_ext_id = self.cmd('vm extension set -n customScript --publisher Microsoft.Azure.Extensions --ids {vm_id}')\
+            .get_output_in_json()['id']
+        self.kwargs.update({
+            'vm_ext_id': vm_ext_id
+        })
+        self.cmd('vm extension delete --ids {vm_ext_id}')
+
 
 class VMMachineExtensionImageScenarioTest(ScenarioTest):
 
