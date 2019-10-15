@@ -101,7 +101,7 @@ def sign_request(method, url, body, connection_string):
     return {
         "x-ms-date": utc_now,
         "x-ms-content-sha256": content_hash,
-        "Authorization": "HMAC-SHA256 Credential=" + credential + ", SignedHeaders=" + signed_headers + ", Signature=" + signature
+        "Authorization": "HMAC-SHA256 Credential=" + credential + "&SignedHeaders=" + signed_headers + "&Signature=" + signature
     }
 
 

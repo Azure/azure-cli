@@ -66,6 +66,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         default=5000, help='Specifies the maximum number of results to return. Provide "*" to return all.',
         validator=validate_storage_data_plane_list)
 
+    large_file_share_type = CLIArgumentType(
+        action='store_true', min_api='2019-04-01', is_preview=True,
+        help='Enable the capability to support large file shares with more than 5 TiB capacity for storage account.'
+             'Once the property is enabled, the feature cannot be disabled. Currently only supported for LRS and '
+             'ZRS replication types, hence account conversions to geo-redundant accounts would not be possible. '
+             'For more information, please refer to https://go.microsoft.com/fwlink/?linkid=2086047.')
+
     sas_help = 'The permissions the SAS grants. Allowed values: {}. Do not use if a stored access policy is ' \
                'referenced with --id that specifies this value. Can be combined.'
 
@@ -99,7 +106,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage account check-name') as c:
         c.argument('name', options_list=['--name', '-n'])
 
-    with self.argument_context('storage account create') as c:
+    with self.argument_context('storage account create', resource_type=ResourceType.MGMT_STORAGE) as c:
         t_account_type, t_sku_name, t_kind = self.get_models('AccountType', 'SkuName', 'Kind',
                                                              resource_type=ResourceType.MGMT_STORAGE)
 
@@ -114,8 +121,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('sku', help='The storage account SKU.', arg_type=get_enum_type(t_sku_name, default='standard_ragrs'))
         c.argument('enable_files_aadds', arg_type=get_three_state_flag(), min_api='2018-11-01',
                    help='Enable the identity based authentication settings for Azure Files.')
+        c.argument('enable_large_file_share', arg_type=large_file_share_type)
 
-    with self.argument_context('storage account update') as c:
+    with self.argument_context('storage account update', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.register_common_storage_account_options()
         c.argument('custom_domain',
                    help='User domain assigned to the storage account. Name is the CNAME source. Use "" to clear '
@@ -126,6 +134,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('tags', tags_type, default=None)
         c.argument('enable_files_aadds', arg_type=get_three_state_flag(), min_api='2018-11-01',
                    help='Enable the identity based authentication settings for Azure Files.')
+        c.argument('enable_large_file_share', arg_type=large_file_share_type)
 
     with self.argument_context('storage account update', arg_group='Customer managed key', min_api='2017-06-01') as c:
         c.extra('encryption_key_name', help='The name of the KeyVault key', )
@@ -385,12 +394,20 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                        help='File path in file share of copy {} storage account'.format(item))
             c.argument('{}_local_path'.format(item), arg_group='Copy {}'.format(item),
                        help='Local file path')
-        c.argument('recursive', action='store_true', help='Look into sub-directories \
+        c.argument('recursive', arg_group='Additional Flags', action='store_true', help='Look into sub-directories \
                     recursively when uploading from local file system.')
-        c.argument('put_md5', action='store_true', help='Create an MD5 hash of each file, and save the hash \
-                    as the Content-MD5 property of the destination blob/file.Only available when uploading.')
-        c.argument('blob_type', arg_type=get_enum_type(["BlockBlob", "PageBlob", "AppendBlob"]),
+        c.argument('put_md5', arg_group='Additional Flags', action='store_true',
+                   help='Create an MD5 hash of each file, and save the hash as the Content-MD5 property of the '
+                   'destination blob/file.Only available when uploading.')
+        c.argument('blob_type', arg_group='Additional Flags',
+                   arg_type=get_enum_type(["BlockBlob", "PageBlob", "AppendBlob"]),
                    help='The type of blob at the destination.')
+        c.argument('preserve_s2s_access_tier', arg_group='Additional Flags', arg_type=get_three_state_flag(),
+                   help='Preserve access tier during service to service copy. '
+                   'Please refer to https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-storage-tiers '
+                   'to ensure destination storage account support setting access tier. In the cases that setting '
+                   'access tier is not supported, please use `--preserve-s2s-access-tier false` to bypass copying '
+                   'access tier. (Default true)')
 
     with self.argument_context('storage blob copy') as c:
         for item in ['destination', 'source']:

@@ -257,7 +257,7 @@ examples:
 helps['acr login'] = """
 type: command
 short-summary: Log in to an Azure Container Registry through the Docker CLI.
-long-summary: Docker must be installed on your machine.
+long-summary: Docker must be installed on your machine. Once done, use 'docker logout <registry url>' to log out.
 examples:
   - name: Log in to an Azure Container Registry
     text: >
