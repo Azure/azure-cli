@@ -42,10 +42,10 @@ Release History
 * vm create: Use standard public IP SKU automatically when using zones.
 * vm create: Compose a valid computer name from VM name if computer name is not provided.
 * vm create: Add --workspace to enable log analytics workspace automatically.
+* vm create: Add warning when specifying accelerated networking and an existing NIC together.
 * [BREAKING CHANGE] vm extension set: Fix bug where users could not set an extension on a VM with --ids.
 * vmss create: Add --computer-name-prefix parameter to support custom computer name prefix of virtual machines in the VMSS.
 * Update galleries API version to 2019-07-01.
-
 
 **Backup**
 
