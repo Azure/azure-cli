@@ -11,6 +11,12 @@ Release History
 
 * Add new routing source type: DigitalTwinChangeEvents
 
+**Network**
+
+* az network private-dns link vnet create/update: Fixes #9851. Support cross-tenant virtual network linking.
+* [BREAKING CHANGE] network vnet subnet list: Fix #10401. `--resource-group` and `--vnet-name` are required now.
+* az network public-ip prefix create: Fix #10757. Support to specify IP address version (IPv4, IPv6) when creation
+
 **Profile**
 
 * Fix: `az account get-access-token --resource-type ms-graph` not working.
