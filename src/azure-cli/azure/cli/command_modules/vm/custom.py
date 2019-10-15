@@ -613,11 +613,15 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         master_template.add_resource(nic_resource)
     else:
         # Using an existing NIC
-        invalid_parameters = [nsg, public_ip_address, subnet, vnet_name, application_security_groups,
-                              accelerated_networking]
+        invalid_parameters = [nsg, public_ip_address, subnet, vnet_name, application_security_groups]
         if any(invalid_parameters):
             raise CLIError('When specifying an existing NIC, do not specify NSG, '
-                           'public IP, ASGs, VNet, subnet or accelerated networking.')
+                           'public IP, ASGs, VNet or subnet.')
+        if accelerated_networking is not None:
+            logger.warning('When specifying an existing NIC, do not specify accelerated networking. '
+                           'Ignore --accelerated-networking now. '
+                           'This will be an error instead of a warning in future releases.')
+
 
     os_vhd_uri = None
     if storage_profile in [StorageProfile.SACustomImage, StorageProfile.SAPirImage]:
