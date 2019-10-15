@@ -84,6 +84,8 @@ class CLIPrintMixin(CLIHelp):
                 _print_indent(u'{0}'.format(e.long_summary), indent)
             _print_indent(u'{0}'.format(e.command), indent)
             print('')
+        indent = 0
+        _print_indent('For more specific examples, use: az find \'az {}\' \n'.format(help_file.command), indent)
 
     @staticmethod
     def _process_value_sources(p):
