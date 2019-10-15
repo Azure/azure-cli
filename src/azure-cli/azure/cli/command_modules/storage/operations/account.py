@@ -32,7 +32,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         params.access_tier = AccessTier(access_tier)
     if assign_identity:
         params.identity = Identity()
-    if https_only:
+    if https_only is not None:
         params.enable_https_traffic_only = https_only
     if enable_files_aadds is not None:
         AzureFilesIdentityBasedAuthentication = cmd.get_models('AzureFilesIdentityBasedAuthentication')

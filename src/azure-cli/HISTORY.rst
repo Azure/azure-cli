@@ -3,13 +3,26 @@
 Release History
 ===============
 
+**AppService**
+
+* Added "--build remote" flag for "az functionapp deployment source config-zip" to support remote build action during function app deployment.
+
+**IoT**
+
+* Add new routing source type: DigitalTwinChangeEvents
+
+**Profile**
+
+* Fix: `az account get-access-token --resource-type ms-graph` not working.
+
 2.0.75
-++++++
 
 **AKS**
 
 * Set `--load-balancer-sku` default value to standard if supported by the kubernetes version
 * Set `--vm-set-type` default value to virtualmachinescalesets if supported by the kubernetes version
+* Add `az aks nodepool add`,`az aks nodepool show`, `az aks nodepool list`, `az aks nodepool scale`, `az aks nodepool upgrade`, `az aks nodepool update` and `az aks nodepool delete` commmands to support multiple nodepools in aks
+* Add `--zones` to `az aks create` and `az aks nodepool add` commands to support availability zones for aks
 
 **AMS**
 
@@ -40,9 +53,15 @@ Release History
 * vm create: Add --enable-agent configuration.
 * vm create: Use standard public IP SKU automatically when using zones.
 * vm create: Compose a valid computer name from VM name if computer name is not provided.
+* vm create: Add --workspace to enable log analytics workspace automatically.
+* vm create: Add warning when specifying accelerated networking and an existing NIC together.
+* [BREAKING CHANGE] vm extension set: Fix bug where users could not set an extension on a VM with --ids.
 * vmss create: Add --computer-name-prefix parameter to support custom computer name prefix of virtual machines in the VMSS.
 * Update galleries API version to 2019-07-01.
-* vm create: Add --workspace to enable log analytics workspace automatically.
+
+**Backup**
+
+* Enhanced error detail for vault delete in force mode.
 
 **IoT**
 
@@ -65,6 +84,10 @@ Release History
 
 * az storage copy: Add --preserve-s2s-access-tier parameter to preserve access tier during service to service copy.
 * az storage account create/update: Add --enable-large-file-share parameter to support large file shares for storage account.
+
+**RBAC**
+
+* Fix #10493: az ad sp delete --id {} fails when application is not found. If not found, application deletion is skipped.
 
 2.0.74
 ++++++
@@ -183,6 +206,7 @@ Release History
 **Policy**
 
 * Support for Policy new API version 2019-01-01
+
 
 **Storage**
 

@@ -116,6 +116,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('account_name', acct_name_type, options_list=['--name', '-n'], completer=None)
         c.argument('kind', help='Indicates the type of storage account.',
                    arg_type=get_enum_type(t_kind, default='storage'))
+        c.argument('https_only', arg_type=get_three_state_flag(), min_api='2019-04-01',
+                   help='Allow https traffic only to storage service if set to true. The default value is true.')
+        c.argument('https_only', arg_type=get_three_state_flag(), max_api='2018-11-01',
+                   help='Allow https traffic only to storage service if set to true. The default value is false.')
         c.argument('tags', tags_type)
         c.argument('custom_domain', help='User domain assigned to the storage account. Name is the CNAME source.')
         c.argument('sku', help='The storage account SKU.', arg_type=get_enum_type(t_sku_name, default='standard_ragrs'))
