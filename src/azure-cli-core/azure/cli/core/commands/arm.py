@@ -796,6 +796,9 @@ def _split_key_value_pair(expression):
 def set_properties(instance, expression, force_string):
     key, value = _split_key_value_pair(expression)
 
+    if key is None or key.strip() == '':
+        raise CLIError('usage error: Empty key in --set. Correct syntax: --set KEY=VALUE [KEY=VALUE ...]')
+
     if not force_string:
         try:
             value = shell_safe_json_parse(value)

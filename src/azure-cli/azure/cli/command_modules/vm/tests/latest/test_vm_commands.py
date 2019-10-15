@@ -995,6 +995,23 @@ class VMExtensionScenarioTest(ScenarioTest):
         ])
         self.cmd('vm extension delete --resource-group {rg} --vm-name {vm} --name {ext_name}')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_extension_with_id_')
+    @AllowLargeResponse()
+    def test_vm_extension_with_id(self, resource_group):
+        self.kwargs.update({
+            'vm': 'vm1'
+        })
+        vm_id = self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS').get_output_in_json()['id']
+        self.kwargs.update({
+            'vm_id': vm_id
+        })
+        vm_ext_id = self.cmd('vm extension set -n customScript --publisher Microsoft.Azure.Extensions --ids {vm_id}')\
+            .get_output_in_json()['id']
+        self.kwargs.update({
+            'vm_ext_id': vm_ext_id
+        })
+        self.cmd('vm extension delete --ids {vm_ext_id}')
+
 
 class VMMachineExtensionImageScenarioTest(ScenarioTest):
 
@@ -1175,6 +1192,20 @@ class VMCreateNoneOptionsTest(ScenarioTest):  # pylint: disable=too-many-instanc
             self.check('osProfile.computerName', '{vm}')
         ])
         self.cmd('network public-ip show -n {vm}PublicIP -g {rg}', expect_failure=True)
+
+
+class VMCreateMonitorTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_create_with_monitor', location='centralus')
+    def test_vm_create_with_monitor(self, resource_group):
+
+        self.kwargs.update({
+            'vm': 'monitorvm',
+            'workspace': 'vmlogworkspace20191009',
+            'rg': resource_group
+        })
+
+        self.cmd('vm create -n {vm} -g {rg} --image UbuntuLTS --workspace {workspace}')
 
 
 class VMBootDiagnostics(ScenarioTest):
@@ -1385,6 +1416,24 @@ class VMCreateExistingOptions(ScenarioTest):
         self.cmd('vm show -n {vm} -g {rg}',
                  checks=self.check('storageProfile.osDisk.vhd.uri', 'https://{sa}.blob.core.windows.net/{container}/{disk}.vhd'))
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_create_provision_vm_agent_')
+    def test_vm_create_provision_vm_agent(self, resource_group):
+        self.kwargs.update({
+            'vm1': 'vm1',
+            'vm2': 'vm2',
+            'pswd': 'qpwWfn1qwernv#xnklwezxcvslkdfj'
+        })
+
+        self.cmd('vm create -g {rg} -n {vm1} --image UbuntuLTS --enable-agent')
+        self.cmd('vm show -g {rg} -n {vm1}', checks=[
+            self.check('osProfile.linuxConfiguration.provisionVmAgent', True)
+        ])
+
+        self.cmd('vm create -g {rg} -n {vm2} --image Win2019Datacenter --admin-password {pswd} --enable-agent false')
+        self.cmd('vm show -g {rg} -n {vm2}', checks=[
+            self.check('osProfile.windowsConfiguration.provisionVmAgent', False)
+        ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_existing')
     def test_vm_create_auth(self, resource_group):
         self.kwargs.update({
@@ -1575,7 +1624,6 @@ class VMDiskAttachDetachTest(ScenarioTest):
             self.check('storageProfile.dataDisks[3].managedDisk.storageAccountType', 'StandardSSD_LRS'),
         ])
 
-    """ No quota
     @ResourceGroupPreparer(name_prefix='cli-test-stdssdk', location='eastus2')
     def test_vm_ultra_ssd_storage_sku(self, resource_group):
 
@@ -1606,9 +1654,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
             self.check('storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
             self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'UltraSSD_LRS'),
         ])
-    """
 
-    """ No quota
     @ResourceGroupPreparer(name_prefix='cli-test-ultrassd', location='eastus2')
     def test_vm_ultra_ssd_disk_update(self, resource_group):
         self.kwargs.update({
@@ -1619,7 +1665,6 @@ class VMDiskAttachDetachTest(ScenarioTest):
             self.check('diskIopsReadWrite', 510),
             self.check('diskMbpsReadWrite', 10)
         ])
-    """
 
     @ResourceGroupPreparer(name_prefix='cli-test-std_zrs', location='eastus2')
     def test_vm_disk_create_with_standard_zrs_sku(self, resource_group):
@@ -1808,7 +1853,7 @@ class VMSSCreateOptions(ScenarioTest):
 
         self.cmd('network public-ip create --name {ip} -g {rg}')
 
-        self.cmd('vmss create --image Debian --admin-password testPassword0 -l westus -g {rg} -n {vmss} --disable-overprovision --instance-count {count} --os-disk-caching {caching} --upgrade-policy-mode {update} --authentication-type password --admin-username myadmin --public-ip-address {ip} --data-disk-sizes-gb 1 --vm-sku Standard_D2_v2')
+        self.cmd('vmss create --image Debian --admin-password testPassword0 -l westus -g {rg} -n {vmss} --disable-overprovision --instance-count {count} --os-disk-caching {caching} --upgrade-policy-mode {update} --authentication-type password --admin-username myadmin --public-ip-address {ip} --data-disk-sizes-gb 1 --vm-sku Standard_D2_v2 --computer-name-prefix vmss1')
         self.cmd('network lb show -g {rg} -n {vmss}lb ',
                  checks=self.check('frontendIpConfigurations[0].publicIpAddress.id.ends_with(@, \'{ip}\')', True))
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
@@ -1816,6 +1861,7 @@ class VMSSCreateOptions(ScenarioTest):
             self.check('virtualMachineProfile.storageProfile.osDisk.caching', '{caching}'),
             self.check('upgradePolicy.mode', self.kwargs['update'].title()),
             self.check('singlePlacementGroup', True),
+            self.check('virtualMachineProfile.osProfile.computerNamePrefix', 'vmss1')
         ])
         self.kwargs['id'] = self.cmd('vmss list-instances -g {rg} -n {vmss} --query "[].instanceId"').get_output_in_json()[0]
         self.cmd('vmss show -g {rg} -n {vmss} --instance-id {id}',
@@ -3471,6 +3517,25 @@ class VMPriorityEvictionBilling(ScenarioTest):
             self.check('vmss.virtualMachineProfile.priority', 'Low'),
             self.check('vmss.virtualMachineProfile.evictionPolicy', 'Deallocate'),
             self.check('vmss.virtualMachineProfile.billingProfile.maxPrice', 50)
+        ])
+
+
+class VMCreateSpecialName(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_create_special_name_')
+    def test_vm_create_special_name(self, resource_group):
+        """
+        Compose a valid computer name from VM name if computer name is not provided.
+        Remove special characters: '`~!@#$%^&*()=+_[]{}\\|;:\'\",<>/?'
+        """
+        self.kwargs.update({
+            'vm': 'vm_1'
+        })
+
+        self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('name', '{vm}'),
+            self.check('osProfile.computerName', 'vm1')
         ])
 
 

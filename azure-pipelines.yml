@@ -55,7 +55,7 @@ jobs:
   displayName: 'Verify src/azure-cli/requirements.*.Darwin.txt'
   condition: succeeded()
   pool:
-    vmImage: 'macOS-10.13'
+    vmImage: 'macOS-10.14'
 
   steps:
   - task: UsePythonVersion@0
@@ -332,6 +332,7 @@ jobs:
 - job: RunAutomationFullPython2
   displayName: Run Automation, Python 2
   dependsOn: BuildPythonWheel
+  timeoutInMinutes: 90
 
   pool:
     vmImage: 'ubuntu-16.04'
@@ -356,6 +357,7 @@ jobs:
 - job: RunAutomationReducedPython3
   displayName: Run Automation, Python 3
   dependsOn: BuildPythonWheel
+  timeoutInMinutes: 90
 
   pool:
     vmImage: 'ubuntu-16.04'
@@ -495,7 +497,7 @@ jobs:
   dependsOn: BuildHomebrewFormula
   condition: succeeded()
   pool:
-    vmImage: 'macOS-10.13'
+    vmImage: 'macOS-10.14'
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
@@ -583,8 +585,8 @@ jobs:
 
        echo "== Test yum package on CentOS =="
 
-       docker pull centos
-       docker run --rm -v $SYSTEM_ARTIFACTSDIRECTORY/yum:/mnt/yum centos /bin/bash -c "yum --nogpgcheck localinstall /mnt/yum/$YUM_NAME -y && time az self-test && time az --version && sleep 5"
+       docker pull centos:centos7
+       docker run --rm -v $SYSTEM_ARTIFACTSDIRECTORY/yum:/mnt/yum centos:centos7 /bin/bash -c "yum --nogpgcheck localinstall /mnt/yum/$YUM_NAME -y && time az self-test && time az --version && sleep 5"
 
     displayName: 'Bash Script'
 

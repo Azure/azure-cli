@@ -16,6 +16,7 @@ from azure.mgmt.sql.models import (
     ExportRequest,
     ManagedDatabase,
     ManagedInstance,
+    ManagedInstanceAdministrator,
     Server,
     ServerAzureADAdministrator,
     Sku,
@@ -214,6 +215,14 @@ grace_period_param_type = CLIArgumentType(
 allow_data_loss_param_type = CLIArgumentType(
     help='Complete the failover even if doing so may result in data loss. '
     'This will allow the failover to proceed even if a primary database is unavailable.')
+
+aad_admin_login_param_type = CLIArgumentType(
+    options_list=['--display-name', '-u'],
+    help='Display name of the Azure AD administrator user or group.')
+
+aad_admin_sid_param_type = CLIArgumentType(
+    options_list=['--object-id', '-i'],
+    help='The unique ID of the Azure AD administrator.')
 
 db_service_objective_examples = 'Basic, S0, P1, GP_Gen4_1, BC_Gen5_2, GP_Gen5_S_8.'
 dw_service_objective_examples = 'DW100, DW1000c'
@@ -983,12 +992,10 @@ def load_arguments(self, _):
                    options_list=['--server-name', '--server', '-s'])
 
         c.argument('login',
-                   options_list=['--display-name', '-u'],
-                   help='Display name of the Azure AD administrator user or group.')
+                   arg_type=aad_admin_login_param_type)
 
         c.argument('sid',
-                   options_list=['--object-id', '-i'],
-                   help='The unique ID of the Azure AD administrator ')
+                   arg_type=aad_admin_sid_param_type)
 
         c.ignore('tenant_id')
 
@@ -1244,6 +1251,35 @@ def load_arguments(self, _):
         c.argument('kid',
                    arg_type=kid_param_type,
                    required=True,)
+
+    #####
+    #           sql managed instance ad-admin
+    ######
+    with self.argument_context('sql mi ad-admin') as c:
+        c.argument('managed_instance_name',
+                   arg_type=managed_instance_param_type)
+
+        c.argument('login',
+                   arg_type=aad_admin_login_param_type)
+
+        c.argument('sid',
+                   arg_type=aad_admin_sid_param_type)
+
+    with self.argument_context('sql mi ad-admin create') as c:
+        # Create args that will be used to build up the ManagedInstanceAdministrator object
+        create_args_for_complex_type(
+            c, 'properties', ManagedInstanceAdministrator, [
+                'login',
+                'sid',
+            ])
+
+    with self.argument_context('sql mi ad-admin update') as c:
+        # Create args that will be used to build up the ManagedInstanceAdministrator object
+        create_args_for_complex_type(
+            c, 'properties', ManagedInstanceAdministrator, [
+                'login',
+                'sid',
+            ])
 
     #####
     #           sql server tde-key

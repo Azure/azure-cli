@@ -257,7 +257,7 @@ examples:
 helps['acr login'] = """
 type: command
 short-summary: Log in to an Azure Container Registry through the Docker CLI.
-long-summary: Docker must be installed on your machine.
+long-summary: Docker must be installed on your machine. Once done, use 'docker logout <registry url>' to log out.
 examples:
   - name: Log in to an Azure Container Registry
     text: >
@@ -807,7 +807,7 @@ helps['acr task timer add'] = """
 type: command
 short-summary: Add a timer trigger to a task.
 examples:
-  - name: Add a timer trigger to a task.
+  - name: Add a timer trigger which schedules the task at 09:30 (UTC) every day of the week from Monday through Friday.
     text: >
         az acr task timer add -n taskname -r registryname --timer-name t2 --schedule "30 9 * * 1-5"
 """

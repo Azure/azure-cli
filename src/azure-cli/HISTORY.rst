@@ -3,6 +3,107 @@
 Release History
 ===============
 
+**AppService**
+
+* Added "--build remote" flag for "az functionapp deployment source config-zip" to support remote build action during function app deployment.
+
+**IoT**
+
+* Add new routing source type: DigitalTwinChangeEvents
+
+**Network**
+
+* az network private-dns link vnet create/update: Fixes #9851. Support cross-tenant virtual network linking.
+* [BREAKING CHANGE] network vnet subnet list: Fix #10401. `--resource-group` and `--vnet-name` are required now.
+* az network public-ip prefix create: Fix #10757. Support to specify IP address version (IPv4, IPv6) when creation
+
+**Profile**
+
+* Fix: `az account get-access-token --resource-type ms-graph` not working.
+
+2.0.75
+++++++
+
+**AKS**
+
+* Set `--load-balancer-sku` default value to standard if supported by the kubernetes version
+* Set `--vm-set-type` default value to virtualmachinescalesets if supported by the kubernetes version
+* Add `az aks nodepool add`,`az aks nodepool show`, `az aks nodepool list`, `az aks nodepool scale`, `az aks nodepool upgrade`, `az aks nodepool update` and `az aks nodepool delete` commmands to support multiple nodepools in aks
+* Add `--zones` to `az aks create` and `az aks nodepool add` commands to support availability zones for aks
+
+**AMS**
+
+* BREAKING CHANGE:
+    content-key-policy create:
+        - Changed parameter --ask from utf-8 string to 32 character hex string.
+    job start:
+        - Changed the command from `job start` to `job create`.
+    
+**AppConfig**
+
+* Using & in authorization header
+* Adding api-version to all requests
+* Upgrading SDK Version to 1.0.0
+
+**AppService**
+
+* Added "webapp config access-restriction show | set | add | remove"
+* az webapp up updated for better error-handling
+* az appservice plan update support Isolated SKU
+
+**ARM**
+
+* az deployment create: Add --handle-extended-json-format parameter to support multiline and comments in json template.
+
+**Compute**
+
+* vm create: Add --enable-agent configuration.
+* vm create: Use standard public IP SKU automatically when using zones.
+* vm create: Compose a valid computer name from VM name if computer name is not provided.
+* vm create: Add --workspace to enable log analytics workspace automatically.
+* vm create: Add warning when specifying accelerated networking and an existing NIC together.
+* [BREAKING CHANGE] vm extension set: Fix bug where users could not set an extension on a VM with --ids.
+* vmss create: Add --computer-name-prefix parameter to support custom computer name prefix of virtual machines in the VMSS.
+* Update galleries API version to 2019-07-01.
+
+**Backup**
+
+* Enhanced error detail for vault delete in force mode.
+
+**IoT**
+
+* Fix #2116: Unexpected 'az iot hub show' error for resource not found.
+
+**Monitor**
+
+* az monitor log-analytics workspace: Support CRUD for Azure log analytics workspace.
+
+**Network**
+
+* az network private-dns link vnet create/update: Fixes #9851. Support cross-tenant virtual network linking.
+* [BREAKING CHANGE] network vnet subnet list: Fix #10401. `--resource-group` and `--vnet-name` are required now.
+
+**SQL**
+
+* New Cmdlets for sql mi ad-admin that supports setting AAD administrator on Managed instance
+
+**Storage**
+
+* az storage copy: Add --preserve-s2s-access-tier parameter to preserve access tier during service to service copy.
+* az storage account create/update: Add --enable-large-file-share parameter to support large file shares for storage account.
+
+**RBAC**
+
+* Fix #10493: az ad sp delete --id {} fails when application is not found. If not found, application deletion is skipped.
+
+2.0.74
+++++++
+
+**ACR**
+
+* Added a required `--type` parameter to command `az acr config retention update`
+* Param `-n, --name` changed to `-r, --registry` for `az acr config` command group.
+
 **AKS**
 
 * Add `--load-balancer-sku`, `--load-balancer-managed-outbound-ip-count`, `--load-balancer-outbound-ips` and `--load-balancer-outbound-ip-prefixes` to `az aks create` command, which allows for creating AKS cluster with SLB.
@@ -13,11 +114,6 @@ Release History
 
 * az group deployment create: Add --handle-extended-json-format to support multiline and comments in json template
 * Update azure-mgmt-resource package to use 4.0.0
-
-**ACR**
-
-* Added a required `--type` parameter to command `az acr config retention update`
-* Param `-n, --name` changed to `-r, --registry` for `az acr config` command group.
 
 **Compute**
 
@@ -80,7 +176,6 @@ Release History
 
 **AppService**
 
-* Added "webapp config access-restriction show | set | add | remove"
 * az webapp deployment source config-zip support for connection_verify
 * Add support for ACR images with az webapp create
 
@@ -118,6 +213,7 @@ Release History
 **Policy**
 
 * Support for Policy new API version 2019-01-01
+
 
 **Storage**
 
