@@ -622,7 +622,6 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                            'Ignore --accelerated-networking now. '
                            'This will be an error instead of a warning in future releases.')
 
-
     os_vhd_uri = None
     if storage_profile in [StorageProfile.SACustomImage, StorageProfile.SAPirImage]:
         storage_account_name = storage_account.rsplit('/', 1)
