@@ -3481,7 +3481,7 @@ def update_public_ip(cmd, instance, dns_name=None, allocation_method=None, versi
 
 
 def create_public_ip_prefix(cmd, client, resource_group_name, public_ip_prefix_name, prefix_length,
-                            location=None, tags=None, zone=None):
+                            version=None, location=None, tags=None, zone=None):
     PublicIPPrefix, PublicIPPrefixSku = cmd.get_models('PublicIPPrefix', 'PublicIPPrefixSku')
     prefix = PublicIPPrefix(
         location=location,
@@ -3490,6 +3490,10 @@ def create_public_ip_prefix(cmd, client, resource_group_name, public_ip_prefix_n
         tags=tags,
         zones=zone
     )
+
+    if cmd.supported_api_version(min_api='2019-08-01'):
+        prefix.public_ip_address_version = version if version is not None else 'ipv4'
+
     return client.create_or_update(resource_group_name, public_ip_prefix_name, prefix)
 
 

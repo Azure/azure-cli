@@ -285,6 +285,28 @@ class NetworkPublicIpPrefix(ScenarioTest):
         self.cmd('network public-ip create -g {rg} -n {pip} --public-ip-prefix {prefix} --sku Standard',
                  checks=self.check("publicIp.publicIpPrefix.id.contains(@, '{prefix}')", True))
 
+        # Test IP address version
+        self.kwargs.update({
+            'prefix_name_ipv4': 'public_ip_prefix_0',
+            'prefix_name_ipv5': 'public_ip_prefix_1',
+            'prefix_name_ipv6': 'public_ip_prefix_2'
+        })
+
+        # Check the default ip address version value
+        self.cmd('network public-ip prefix create -g {rg} -n {prefix_name_ipv4} --length 30', checks=[
+            self.check('publicIpAddressVersion', 'IPv4')
+        ])
+
+        # Check the creation of public IP prefix with IPv6 address option
+        # Note: prefix length for IPv6 is minimal 124 and maximal 127 respectively
+        self.cmd('network public-ip prefix create -g {rg} -n {prefix_name_ipv6} --length 127 --version IPv6', checks=[
+            self.check('publicIpAddressVersion', 'IPv6')
+        ])
+
+        # Check with unsupported IP address version: IPv5
+        with self.assertRaisesRegex(SystemExit, '2'):
+            self.cmd('network public-ip prefix create -g {rg} -n {prefix_name_ipv6} --length 127 --version IPv5')
+
 
 class NetworkMultiIdsShowScenarioTest(ScenarioTest):
     @live_only()
