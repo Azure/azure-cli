@@ -193,7 +193,7 @@ def load_arguments(self, _):
         c.argument('deployment_location', arg_type=get_location_type(self.cli_ctx))
         c.argument('template_file', options_list=['--template-file', '-f'], completer=FilesCompleter(), type=file_type, help="a template file path in the file system")
         c.argument('template_uri', options_list=['--template-uri', '-u'], help='a uri to a remote template file')
-        c.argument('parameters', options_list=['--parameter', '-p'], action='append', nargs='+', completer=FilesCompleter())
+        c.argument('parameters', options_list=['--parameters', '-p'], action='append', nargs='+', completer=FilesCompleter())
 
     with self.argument_context('deployment create') as c:
         c.argument('deployment_name', options_list=['--name', '-n'], required=False,

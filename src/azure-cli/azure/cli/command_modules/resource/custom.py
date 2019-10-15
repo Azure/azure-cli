@@ -1332,13 +1332,13 @@ def get_deployment_operations_at_scope(cmd, scope_type, deployment_name, operati
     """get a deployment's operation."""
 
     if scope_type == 'Subscription':
-        get_function = lambda op_id: get_deployment_operation_at_subscription_scope(cmd, deployment_name, op_id)
+        get_function = lambda op_id: get_deployment_operation_at_subscription_scope(cmd, deployment_name, op_id)  # noqa: E731
     elif scope_type == 'ResourceGroup':
-        get_function = lambda op_id: get_deployment_operation_at_resource_group(cmd, resource_group_name, deployment_name, op_id)
+        get_function = lambda op_id: get_deployment_operation_at_resource_group(cmd, resource_group_name, deployment_name, op_id)  # noqa: E731
     elif scope_type == 'ManagementGroup':
-        get_function = lambda op_id: get_deployment_operation_at_management_group(cmd, management_group_id, deployment_name, op_id)
+        get_function = lambda op_id: get_deployment_operation_at_management_group(cmd, management_group_id, deployment_name, op_id)  # noqa: E731
     else:
-        get_function = lambda op_id: get_deployment_operation_at_tenant_scope(cmd, deployment_name, op_id)
+        get_function = lambda op_id: get_deployment_operation_at_tenant_scope(cmd, deployment_name, op_id)  # noqa: E731
 
     result = []
     for op_id in operation_ids:
