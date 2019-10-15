@@ -52,7 +52,7 @@ def load_arguments(self, _):
                                      help="Scale set name. You can configure the default using `az configure --defaults vmss=<name>`",
                                      id_part='name')
 
-    extension_instance_name_type = CLIArgumentType(help="Name of the vm's instance of the extension. Default: name of the extension.")
+    extension_instance_name_type = CLIArgumentType(help="Name of extension instance, which can be customized. Default: name of the extension.")
     image_template_name_type = CLIArgumentType(overrides=name_arg_type, id_part='name')
 
     # StorageAccountTypes renamed to DiskStorageAccountTypes in 2018_06_01 of azure-mgmt-compute
@@ -261,7 +261,7 @@ def load_arguments(self, _):
         c.argument('nsg', help='The name to use when creating a new Network Security Group (default) or referencing an existing one. Can also reference an existing NSG by ID or specify "" for none.', arg_group='Network')
         c.argument('nsg_rule', help='NSG rule to create when creating a new NSG. Defaults to open ports for allowing RDP on Windows and allowing SSH on Linux.', arg_group='Network', arg_type=get_enum_type(['RDP', 'SSH']))
         c.argument('application_security_groups', min_api='2017-09-01', nargs='+', options_list=['--asgs'], help='Space-separated list of existing application security groups to associate with the VM.', arg_group='Network')
-
+        c.argument('workspace', is_preview=True, arg_group='Monitor', help='Name or ID of Log Analytics Workspace. If you specify the workspace through its name, the workspace should be in the same resource group with the vm, otherwise a new workspace will be created.')
     with self.argument_context('vm capture') as c:
         c.argument('overwrite', action='store_true')
 
@@ -660,7 +660,7 @@ def load_arguments(self, _):
             c.argument('public_ip_address_dns_name', help='Globally unique DNS name for a newly created public IP.')
             if self.supported_api_version(min_api='2017-08-01', resource_type=ResourceType.MGMT_NETWORK):
                 PublicIPAddressSkuName = self.get_models('PublicIPAddressSkuName', resource_type=ResourceType.MGMT_NETWORK)
-                c.argument('public_ip_sku', help='Sku', default=None, arg_type=get_enum_type(PublicIPAddressSkuName))
+                c.argument('public_ip_sku', help='Public IP SKU. It is set to Basic by default.', default=None, arg_type=get_enum_type(PublicIPAddressSkuName))
 
         with self.argument_context(scope, arg_group='Marketplace Image Plan') as c:
             c.argument('plan_name', help='plan name')
@@ -698,8 +698,11 @@ def load_arguments(self, _):
             c.argument('version', help='The version of the extension')
 
     with self.argument_context('vm extension set') as c:
+        c.argument('vm_extension_name', name_arg_type,
+                   completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines/extensions'),
+                   help='Name of the extension.', id_part=None)
         c.argument('force_update', action='store_true', help='force to update even if the extension configuration has not changed.')
-        c.argument('extension_instance_name', extension_instance_name_type, arg_group='Resource Id')
+        c.argument('extension_instance_name', extension_instance_name_type)
 
     with self.argument_context('vmss extension set', min_api='2017-12-01') as c:
         c.argument('force_update', action='store_true', help='force to update even if the extension configuration has not changed.')

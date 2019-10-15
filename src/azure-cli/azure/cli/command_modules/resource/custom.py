@@ -39,6 +39,9 @@ from knack.util import CLIError
 
 from ._validators import MSI_LOCAL_ID
 
+from msrest.serialization import Serializer
+from msrest.pipeline import SansIOHTTPPolicy
+
 logger = get_logger(__name__)
 
 deployment_command_notice = ('[**Upcoming breaking change**]: a new parameter "scope-type" will be introduced to commands in this group '
@@ -336,49 +339,12 @@ def _deploy_arm_template_unmodified(cli_ctx, resource_group_name, template_file=
 
     smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
 
-    class JsonCTemplate(object):
-        def __init__(self, template_as_bytes):
-            self.template_as_bytes = template_as_bytes
-
-    from msrest.serialization import Serializer
-
-    class MySerializer(Serializer):
-        def body(self, data, data_type, **kwargs):
-            if data_type == 'Deployment':
-                # Be sure to pass a DeploymentProperties
-                template = data.properties.template
-                if template:
-                    data.properties.template = None
-                    data_as_dict = data.serialize()
-                    data_as_dict["properties"]["template"] = JsonCTemplate(template)
-                    return data_as_dict
-            return super(MySerializer, self).body(data, data_type, **kwargs)
     deployments_operation_group = smc.deployments  # This solves the multi-api for you
 
     # pylint: disable=protected-access
-    deployments_operation_group._serialize = MySerializer(
+    deployments_operation_group._serialize = JSONSerializer(
         deployments_operation_group._serialize.dependencies
     )
-
-    # Now, you have a serializer that keeps a weird class inside it, you need to explain to the HTTP pipeline how to translate that into bytes
-    from msrest.pipeline import SansIOHTTPPolicy
-
-    class JsonCTemplatePolicy(SansIOHTTPPolicy):
-        def on_request(self, request, **kwargs):
-            http_request = request.http_request
-            logger.info(http_request.data)
-            if (getattr(http_request, 'data', {}) or {}).get('properties', {}).get('template'):
-                template = http_request.data["properties"]["template"]
-                if not isinstance(template, JsonCTemplate):
-                    raise ValueError()
-
-                del http_request.data["properties"]["template"]
-                # templateLink nad template cannot exist at the same time in deployment_dry_run mode
-                if "templateLink" in http_request.data["properties"].keys():
-                    del http_request.data["properties"]["templateLink"]
-                partial_request = json.dumps(http_request.data)
-
-                http_request.data = partial_request[:-2] + ", template:" + template.template_as_bytes + r"}}"
 
     # Plug this as default HTTP pipeline
     from msrest.pipeline import Pipeline
@@ -403,6 +369,107 @@ def _deploy_arm_template_unmodified(cli_ctx, resource_group_name, template_file=
     if validate_only:
         return sdk_no_wait(no_wait, deployments_operation_group.validate, resource_group_name, deployment_name, properties)
     return sdk_no_wait(no_wait, deployments_operation_group.create_or_update, resource_group_name, deployment_name, properties)
+
+
+class JsonCTemplate(object):
+    def __init__(self, template_as_bytes):
+        self.template_as_bytes = template_as_bytes
+
+
+class JSONSerializer(Serializer):
+    def body(self, data, data_type, **kwargs):
+        if data_type == 'Deployment':
+            # Be sure to pass a DeploymentProperties
+            template = data.properties.template
+            if template:
+                data.properties.template = None
+                data_as_dict = data.serialize()
+                data_as_dict["properties"]["template"] = JsonCTemplate(template)
+                return data_as_dict
+        return super(JSONSerializer, self).body(data, data_type, **kwargs)
+
+
+class JsonCTemplatePolicy(SansIOHTTPPolicy):
+    def on_request(self, request, **kwargs):
+        http_request = request.http_request
+        logger.info(http_request.data)
+        if (getattr(http_request, 'data', {}) or {}).get('properties', {}).get('template'):
+            template = http_request.data["properties"]["template"]
+            if not isinstance(template, JsonCTemplate):
+                raise ValueError()
+
+            del http_request.data["properties"]["template"]
+            # templateLink nad template cannot exist at the same time in deployment_dry_run mode
+            if "templateLink" in http_request.data["properties"].keys():
+                del http_request.data["properties"]["templateLink"]
+            partial_request = json.dumps(http_request.data)
+
+            http_request.data = partial_request[:-2] + ", template:" + template.template_as_bytes + r"}}"
+
+
+def _deploy_arm_template_subscription_scope_unmodified(cli_ctx,
+                                                       template_file=None, template_uri=None,
+                                                       deployment_name=None, deployment_location=None,
+                                                       parameters=None, mode=None, validate_only=False,
+                                                       no_wait=False):
+    DeploymentProperties, TemplateLink = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
+                                                 'DeploymentProperties', 'TemplateLink', mod='models')
+    template = None
+    template_link = None
+    template_obj = None
+    if template_uri:
+        template_link = TemplateLink(uri=template_uri)
+        template_content = _urlretrieve(template_uri).decode('utf-8')
+        template_obj = _remove_comments_from_json(template_content)
+    else:
+        template_content = read_file_content(template_file)
+        template_obj = _remove_comments_from_json(template_content)
+
+    template_param_defs = template_obj.get('parameters', {})
+    template_obj['resources'] = template_obj.get('resources', [])
+    parameters = _process_parameters(template_param_defs, parameters) or {}
+    parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters)
+
+    template = json.loads(json.dumps(template))
+    parameters = json.loads(json.dumps(parameters))
+
+    properties = DeploymentProperties(template=template, template_link=template_link,
+                                      parameters=parameters, mode=mode)
+
+    smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+
+    deployments_operation_group = smc.deployments  # This solves the multi-api for you
+
+    # pylint: disable=protected-access
+    deployments_operation_group._serialize = JSONSerializer(
+        deployments_operation_group._serialize.dependencies
+    )
+
+    # Plug this as default HTTP pipeline
+    from msrest.pipeline import Pipeline
+    from msrest.pipeline.requests import (
+        RequestsCredentialsPolicy,
+        RequestsPatchSession,
+        PipelineRequestsHTTPSender
+    )
+    from msrest.universal_http.requests import RequestsHTTPSender
+
+    smc.config.pipeline = Pipeline(
+        policies=[
+            JsonCTemplatePolicy(),
+            smc.config.user_agent_policy,
+            RequestsPatchSession(),
+            smc.config.http_logger_policy,
+            RequestsCredentialsPolicy(smc.config.credentials)
+        ],
+        sender=PipelineRequestsHTTPSender(RequestsHTTPSender(smc.config))
+    )
+
+    if validate_only:
+        return sdk_no_wait(no_wait, smc.deployments.validate_at_subscription_scope,
+                           deployment_name, properties, deployment_location)
+    return sdk_no_wait(no_wait, smc.deployments.create_or_update_at_subscription_scope,
+                       deployment_name, properties, deployment_location)
 
 
 def _deploy_arm_template_subscription_scope(cli_ctx,
@@ -887,8 +954,13 @@ def deploy_arm_template(cmd, resource_group_name,
 
 def deploy_arm_template_at_subscription_scope(cmd, template_file=None, template_uri=None,
                                               deployment_name=None, deployment_location=None,
-                                              parameters=None, no_wait=False):
+                                              parameters=None, no_wait=False, handle_extended_json_format=None):
     logger.warning(deployment_command_notice)
+    if handle_extended_json_format:
+        return _deploy_arm_template_subscription_scope_unmodified(cmd.cli_ctx, template_file, template_uri,
+                                                                  deployment_name, deployment_location,
+                                                                  parameters, 'Incremental', no_wait=no_wait)
+
     return _deploy_arm_template_subscription_scope(cmd.cli_ctx, template_file, template_uri,
                                                    deployment_name, deployment_location,
                                                    parameters, 'Incremental', no_wait=no_wait)

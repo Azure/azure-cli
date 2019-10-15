@@ -11,7 +11,7 @@ addons:
       - libssl-dev
       - libffi-dev
       - python-dev
-install: pip install tox
+install: pip install --upgrade pip tox six
 cache: pip
 jobs:
   include:
@@ -30,11 +30,10 @@ jobs:
       python: 2.7
       env: TOXENV=py27
       script: ./scripts/ci/unittest.sh
-    #  Disable it due to https://github.com/Azure/azure-cli/issues/10721
-    # - stage: verify
-    #  script: ./scripts/ci/test_profile_integration.sh
-    #  env: PURPOSE='Integration for profiles'
-    #  python: 3.6
+    - stage: verify
+      script: ./scripts/ci/test_profile_integration.sh
+      env: PURPOSE='Integration for profiles'
+      python: 3.6
     - stage: verify
       script: ./scripts/ci/test_profile_integration.sh
       env: PURPOSE='Integration for profiles'
