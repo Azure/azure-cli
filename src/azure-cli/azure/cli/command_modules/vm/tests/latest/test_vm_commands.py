@@ -1416,7 +1416,7 @@ class VMCreateExistingOptions(ScenarioTest):
         self.cmd('vm show -n {vm} -g {rg}',
                  checks=self.check('storageProfile.osDisk.vhd.uri', 'https://{sa}.blob.core.windows.net/{container}/{disk}.vhd'))
 
-    @ResourceGroupPreparer(name_prefix='test_vm_create_vmss_')
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_create_vmss_')
     def test_vm_create_vmss(self, resource_group):
         self.kwargs.update({
             'vmss': 'vmss1',

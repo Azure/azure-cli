@@ -387,6 +387,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
     if availability_set_id:
         vm_properties['availabilitySet'] = {'id': availability_set_id}
 
+    # vmss is ID
     if vmss is not None:
         vm_properties['virtualMachineScaleSet'] = {'id': vmss}
 
