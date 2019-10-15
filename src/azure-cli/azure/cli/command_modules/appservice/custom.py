@@ -308,7 +308,7 @@ def update_azure_storage_account(cmd, resource_group_name, name, custom_id, stor
     return result.properties
 
 
-def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, timeout=None, slot=None):
+def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_remote=False, timeout=None, slot=None):
     client = web_client_factory(cmd.cli_ctx)
     app = client.web_apps.get(resource_group_name, name)
     parse_plan_id = parse_resource_id(app.server_farm_id)
@@ -322,15 +322,35 @@ def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, timeout=N
         if plan_info is not None:
             break
         time.sleep(retry_delay)
-    if is_plan_consumption(plan_info) and app.reserved:
+
+    if build_remote and not app.reserved:
+        raise CLIError('Remote build is only available on Linux function apps')
+
+    is_consumption = is_plan_consumption(plan_info)
+    if (not build_remote) and is_consumption and app.reserved:
         return upload_zip_to_storage(cmd, resource_group_name, name, src, slot)
-    return enable_zip_deploy(cmd, resource_group_name, name, src, timeout, slot)
+
+    return enable_zip_deploy(cmd, resource_group_name, name, src, build_remote,
+                             timeout, slot)
 
 
-def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=None):
+def enable_zip_deploy_webapp(cmd, resource_group_name, name, src, timeout=None, slot=None):
+    return enable_zip_deploy(cmd, resource_group_name, name, src,
+                             is_remote_build=False,
+                             timeout=timeout,
+                             slot=slot)
+
+
+def enable_zip_deploy(cmd, resource_group_name, name, src, is_remote_build=False,
+                      timeout=None, slot=None):
     logger.warning("Getting scm site credentials for zip deployment")
     user_name, password = _get_site_credential(cmd.cli_ctx, resource_group_name, name, slot)
-    scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
+
+    try:
+        scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
+    except ValueError:
+        raise CLIError('Failed to fetch scm url for function app')
+
     zip_url = scm_url + '/api/zipdeploy?isAsync=true'
     deployment_status_url = scm_url + '/api/deployments/latest'
 
@@ -340,6 +360,11 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     headers['content-type'] = 'application/octet-stream'
     headers['User-Agent'] = UA_AGENT
 
+    if is_remote_build:
+        add_remote_build_app_settings(cmd, resource_group_name, name, slot)
+    else:
+        remove_remote_build_app_settings(cmd, resource_group_name, name, slot)
+
     import requests
     import os
     from azure.cli.core.util import should_disable_connection_verify
@@ -347,11 +372,71 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     with open(os.path.realpath(os.path.expanduser(src)), 'rb') as fs:
         zip_content = fs.read()
         logger.warning("Starting zip deployment. This operation can take a while to complete ...")
-        requests.post(zip_url, data=zip_content, headers=headers, verify=not should_disable_connection_verify())
+        res = requests.post(zip_url, data=zip_content, headers=headers, verify=not should_disable_connection_verify())
+        logger.warning("Deployment endpoint responses with status code %d", res.status_code)
+
+    # check if there's an ongoing process
+    if res.status_code == 409:
+        raise CLIError("There may be an ongoing deployment or your app setting has WEBSITE_RUN_FROM_PACKAGE. "
+                       "Please track your deployment in {} and ensure the WEBSITE_RUN_FROM_PACKAGE app setting "
+                       "is removed.".format(deployment_status_url))
+
     # check the status of async deployment
     response = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
                                             authorization, timeout)
     return response
+
+
+def add_remote_build_app_settings(cmd, resource_group_name, name, slot):
+    settings = get_app_settings(cmd, resource_group_name, name, slot)
+    enable_oryx_build = None
+    scm_do_build_during_deployment = None
+    website_run_from_package = None
+    for keyval in settings:
+        value = keyval['value'].lower()
+        if keyval['name'] == 'ENABLE_ORYX_BUILD':
+            enable_oryx_build = value in ('true', '1')
+        if keyval['name'] == 'SCM_DO_BUILD_DURING_DEPLOYMENT':
+            scm_do_build_during_deployment = value in ('true', '1')
+        if keyval['name'] == 'WEBSITE_RUN_FROM_PACKAGE':
+            website_run_from_package = value
+
+    if not ((enable_oryx_build is True) and (scm_do_build_during_deployment is True)):
+        logger.warning("Setting ENABLE_ORYX_BUILD to true")
+        logger.warning("Setting SCM_DO_BUILD_DURING_DEPLOYMENT to true")
+        update_app_settings(cmd, resource_group_name, name, [
+            "ENABLE_ORYX_BUILD=true",
+            "SCM_DO_BUILD_DURING_DEPLOYMENT=true"
+        ], slot)
+        time.sleep(5)
+
+    if website_run_from_package is not None:
+        logger.warning("Removing WEBSITE_RUN_FROM_PACKAGE app setting")
+        delete_app_settings(cmd, resource_group_name, name, [
+            "WEBSITE_RUN_FROM_PACKAGE"
+        ], slot)
+        time.sleep(5)
+
+
+def remove_remote_build_app_settings(cmd, resource_group_name, name, slot):
+    settings = get_app_settings(cmd, resource_group_name, name, slot)
+    enable_oryx_build = None
+    scm_do_build_during_deployment = None
+    for keyval in settings:
+        value = keyval['value'].lower()
+        if keyval['name'] == 'ENABLE_ORYX_BUILD':
+            enable_oryx_build = value in ('true', '1')
+        if keyval['name'] == 'SCM_DO_BUILD_DURING_DEPLOYMENT':
+            scm_do_build_during_deployment = value in ('true', '1')
+
+    if not ((enable_oryx_build is False) and (scm_do_build_during_deployment is False)):
+        logger.warning("Setting ENABLE_ORYX_BUILD to false")
+        logger.warning("Setting SCM_DO_BUILD_DURING_DEPLOYMENT to false")
+        update_app_settings(cmd, resource_group_name, name, [
+            "ENABLE_ORYX_BUILD=false",
+            "SCM_DO_BUILD_DURING_DEPLOYMENT=false"
+        ], slot)
+        time.sleep(5)
 
 
 def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
@@ -2118,12 +2203,15 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                     os_type=None, runtime=None, consumption_plan_location=None,
                     app_insights=None, app_insights_key=None, disable_app_insights=None, deployment_source_url=None,
                     deployment_source_branch='master', deployment_local_git=None,
+                    docker_registry_server_password=None, docker_registry_server_user=None,
                     deployment_container_image_name=None, tags=None):
     # pylint: disable=too-many-statements, too-many-branches
     if deployment_source_url and deployment_local_git:
         raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
     if bool(plan) == bool(consumption_plan_location):
         raise CLIError("usage error: --plan NAME_OR_ID | --consumption-plan-location LOCATION")
+
+    docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
 
     site_config = SiteConfig(app_settings=[])
     functionapp_def = Site(location=None, site_config=site_config, tags=tags)
@@ -2240,6 +2328,11 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
             logger.warning('Error while trying to create and configure an Application Insights for the Function App. '
                            'Please use the Azure Portal to create and configure the Application Insights, if needed.')
 
+    if deployment_container_image_name:
+        update_container_settings_functionapp(cmd, resource_group_name, name, docker_registry_server_url,
+                                              deployment_container_image_name, docker_registry_server_user,
+                                              docker_registry_server_password)
+
     return functionapp
 
 
@@ -2353,8 +2446,14 @@ def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, auth
         response = requests.get(deployment_status_url, headers=authorization,
                                 verify=not should_disable_connection_verify())
         time.sleep(2)
-        res_dict = response.json()
-        num_trials = num_trials + 1
+        try:
+            res_dict = response.json()
+        except json.decoder.JSONDecodeError:
+            logger.warning("Deployment status endpoint %s returns malformed data. Retrying...", deployment_status_url)
+            res_dict = {}
+        finally:
+            num_trials = num_trials + 1
+
         if res_dict.get('status', 0) == 3:
             _configure_default_logging(cmd, rg_name, name)
             raise CLIError("""Zip deployment failed. {}. Please run the command az webapp log tail
@@ -2766,7 +2865,7 @@ def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, sl
     return client.web_apps.list_triggered_web_job_history(resource_group_name, name, webjob_name)
 
 
-def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku='F1', dryrun=False, logs=False,  # pylint: disable=too-many-statements,
+def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku=None, dryrun=False, logs=False,  # pylint: disable=too-many-statements,
               launch_browser=False):
     import os
     src_dir = os.getcwd()
@@ -2788,7 +2887,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
     site_config = None
     if not _create_new_app:  # App exists
         # Get the ASP & RG info, if the ASP & RG parameters are provided we use those else we need to find those
-        logger.warning("Webapp %s already exits. The command will deploy contents to the existing app", name)
+        logger.warning("Webapp %s already exists. The command will deploy contents to the existing app.", name)
         app_details = get_app_details(cmd, name)
         current_rg = app_details.resource_group
         if resource_group_name is not None and (resource_group_name.lower() != current_rg.lower()):
@@ -2820,8 +2919,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
         site_config = client.web_apps.get_configuration(rg_name, name)
     else:  # need to create new app, check if we need to use default RG or use user entered values
         logger.warning("webapp %s doesn't exist", name)
-        sku_value = get_sku_to_use(src_dir, sku)
-        sku = get_sku_name(sku_value)
+        sku = get_sku_to_use(src_dir, sku)
         loc = set_location(cmd, sku, location)
         rg_name = get_rg_to_use(cmd, user, loc, os_name, resource_group_name)
         _is_linux = os_name.lower() == 'linux'
@@ -2838,7 +2936,8 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
                 "version_detected": "%s",
                 "runtime_version": "%s"
                 }
-                """ % (name, plan, rg_name, sku, os_name, loc, _src_path_escaped, detected_version, runtime_version)
+                """ % (name, plan, rg_name, get_sku_name(sku), os_name, loc, _src_path_escaped, detected_version,
+                       runtime_version)
     create_json = json.loads(dry_run_str)
 
     if dryrun:

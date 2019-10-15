@@ -41,7 +41,7 @@ def load_arguments(self, _):
     # PARAMETER REGISTRATION
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
     sku_arg_type = CLIArgumentType(help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1V2(Premium V2 Small), PC2 (Premium Container Small), PC3 (Premium Container Medium), PC4 (Premium Container Large)',
-                                   arg_type=get_enum_type(['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1V2', 'P2V2', 'P3V2', 'PC2', 'PC3', 'PC4']))
+                                   arg_type=get_enum_type(['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1V2', 'P2V2', 'P3V2', 'PC2', 'PC3', 'PC4', 'I1', 'I2', 'I3']))
     webapp_name_arg_type = CLIArgumentType(configured_default='web', options_list=['--name', '-n'], metavar='NAME',
                                            completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name',
                                            help="name of the web app. You can configure the default using 'az configure --defaults web=<name>'")
@@ -188,6 +188,7 @@ def load_arguments(self, _):
 
         with self.argument_context(scope + ' deployment source config-zip') as c:
             c.argument('src', help='a zip file path for deployment')
+            c.argument('build_remote', help='enable remote build during deployment', arg_type=get_three_state_flag(return_label=True))
             c.argument('timeout', type=int, options_list=['--timeout', '-t'], help='Configurable timeout in seconds for checking the status of deployment', validator=validate_timeout_value)
 
         with self.argument_context(scope + ' config appsettings list') as c:
@@ -291,6 +292,9 @@ def load_arguments(self, _):
 
     with self.argument_context('webapp config connection-string') as c:
         c.argument('connection_string_type', options_list=['--connection-string-type', '-t'], help='connection string type', arg_type=get_enum_type(ConnectionStringType))
+        c.argument('ids', options_list=['--ids'], help="One or more resource IDs (space delimited). If provided no other 'Resource Id' arguments should be specified.", required=True)
+        c.argument('resource_group', options_list=['--resource-group', '-g'], help='Name of resource group. You can configure the default group using `az configure --default-group=<name>`. If `--ids` is provided this should NOT be specified.')
+        c.argument('name', options_list=['--name', '-n'], help='Name of the web app. You can configure the default using `az configure --defaults web=<name>`. If `--ids` is provided this should NOT be specified.')
 
     with self.argument_context('webapp config storage-account') as c:
         c.argument('custom_id', options_list=['--custom-id', '-i'], help='custom identifier')
@@ -442,6 +446,8 @@ def load_arguments(self, _):
         c.argument('app_insights_key', help="Instrumentation key of App Insights to be added.")
         c.argument('app_insights', help="Name of the existing App Insights project to be added to the Function app. Must be in the same resource group.")
         c.argument('disable_app_insights', arg_type=get_three_state_flag(return_label=True), help="Disable creating application insights resource during functionapp create. No logs will be available.")
+        c.argument('docker_registry_server_user', help='The container registry server username.')
+        c.argument('docker_registry_server_password', help='The container registry server password. Required for private registries.')
 
     # For commands with shared impl between web app and function app and has output, we apply type validation to avoid confusions
     with self.argument_context('functionapp show') as c:

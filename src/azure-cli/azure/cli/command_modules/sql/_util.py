@@ -132,6 +132,10 @@ def get_sql_managed_instances_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).managed_instances
 
 
+def get_sql_managed_instance_azure_ad_administrators_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).managed_instance_administrators
+
+
 def get_sql_managed_databases_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).managed_databases
 

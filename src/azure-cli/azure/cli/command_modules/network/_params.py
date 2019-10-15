@@ -1033,6 +1033,9 @@ def load_arguments(self, _):
         c.argument('public_ip_prefix_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/publicIPPrefixes'), id_part='name', help='The name of the public IP prefix.')
         c.argument('prefix_length', options_list='--length', help='Length of the prefix (i.e. XX.XX.XX.XX/<Length>)')
         c.argument('zone', zone_type)
+
+    with self.argument_context('network public-ip prefix create') as c:
+        c.argument('version', min_api='2019-08-01', help='IP address type.', arg_type=get_enum_type(IPVersion, 'ipv4'))
     # endregion
 
     # region RouteFilters
@@ -1102,7 +1105,7 @@ def load_arguments(self, _):
         c.argument('monitor_path', help='Path to monitor. Use "" for none.', options_list=['--path', c.deprecate(target='--monitor-path', redirect='--path', hide=True)])
         c.argument('monitor_port', help='Port to monitor.', type=int, options_list=['--port', c.deprecate(target='--monitor-port', redirect='--port', hide=True)])
         c.argument('monitor_protocol', monitor_protocol_type, options_list=['--protocol', c.deprecate(target='--monitor-protocol', redirect='--protocol', hide=True)])
-        c.argument('timeout', help='The time in seconds allowed for endpoints to response to a health check.', type=int)
+        c.argument('timeout', help='The time in seconds allowed for endpoints to respond to a health check.', type=int)
         c.argument('interval', help='The interval in seconds at which health checks are conducted.', type=int)
         c.argument('max_failures', help='The number of consecutive failed health checks tolerated before an endpoint is considered degraded.', type=int)
         c.argument('monitor_custom_headers', options_list='--custom-headers', help='Space-separated list of NAME=VALUE pairs.', nargs='+', validator=validate_custom_headers)
@@ -1192,6 +1195,7 @@ def load_arguments(self, _):
     for scope in ['network vnet subnet list', 'network vnet peering list']:
         with self.argument_context(scope) as c:
             c.argument('ids', deprecate_info=c.deprecate(hide=True, expiration='2.1.0'))
+            c.argument('virtual_network_name', id_part=None)
 
     # endregion
 

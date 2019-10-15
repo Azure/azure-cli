@@ -15,6 +15,7 @@ def storage_copy(cmd, source=None,
                  put_md5=None,
                  recursive=None,
                  blob_type=None,
+                 preserve_s2s_access_tier=None,
                  source_account_name=None,
                  source_container=None,
                  source_blob=None,
@@ -91,6 +92,8 @@ def storage_copy(cmd, source=None,
         flags.append('--put-md5')
     if blob_type is not None:
         flags.append('--blob-type=' + blob_type)
+    if preserve_s2s_access_tier is not None:
+        flags.append('--s2s-preserve-access-tier=' + str(preserve_s2s_access_tier))
 
     azcopy.copy(full_source, full_destination, flags=flags)
 

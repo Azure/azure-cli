@@ -8,6 +8,7 @@ from __future__ import print_function
 from collections import Counter
 from knack.log import get_logger
 from msrestazure.azure_exceptions import CloudError
+from msrestazure.tools import parse_resource_id
 from azure.cli.core.util import CLIError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
@@ -43,26 +44,32 @@ def update_privatedns_zone(instance, tags=None):
 def create_privatedns_link(cmd, resource_group_name, private_zone_name, virtual_network_link_name, virtual_network, registration_enabled, tags=None):
     from azure.mgmt.privatedns import PrivateDnsManagementClient
     from azure.mgmt.privatedns.models import VirtualNetworkLink
-    client = get_mgmt_service_client(cmd.cli_ctx, PrivateDnsManagementClient).virtual_network_links
     link = VirtualNetworkLink(location='global', tags=tags)
 
     if registration_enabled is not None:
         link.registration_enabled = registration_enabled
+        aux_subscription = parse_resource_id(virtual_network.id)['subscription']
 
     if virtual_network is not None:
         link.virtual_network = virtual_network
 
+    client = get_mgmt_service_client(cmd.cli_ctx, PrivateDnsManagementClient, aux_subscriptions=[aux_subscription]).virtual_network_links
     return client.create_or_update(resource_group_name, private_zone_name, virtual_network_link_name, link, if_none_match='*')
 
 
-def update_privatedns_link(instance, registration_enabled=None, tags=None):
+def update_privatedns_link(cmd, resource_group_name, private_zone_name, virtual_network_link_name, registration_enabled=None, tags=None, if_match=None, **kwargs):
+    from azure.mgmt.privatedns import PrivateDnsManagementClient
+    link = kwargs['parameters']
+
     if registration_enabled is not None:
-        instance.registration_enabled = registration_enabled
+        link.registration_enabled = registration_enabled
 
     if tags is not None:
-        instance.tags = tags
+        link.tags = tags
 
-    return instance
+    aux_subscription = parse_resource_id(link.virtual_network.id)['subscription']
+    client = get_mgmt_service_client(cmd.cli_ctx, PrivateDnsManagementClient, aux_subscriptions=[aux_subscription]).virtual_network_links
+    return client.update(resource_group_name, private_zone_name, virtual_network_link_name, link, if_match=if_match)
 
 
 def create_privatedns_record_set(cmd, resource_group_name, private_zone_name, relative_record_set_name, record_type, metadata=None, ttl=3600):
