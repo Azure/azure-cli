@@ -8,6 +8,7 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.core.commands.parameters import get_enum_type
 
 from azure.cli.command_modules.profile._format import transform_account_list
+from ._validators import validate_tenant
 import azure.cli.command_modules.profile._help  # pylint: disable=unused-import
 
 cloud_resource_types = ["oss-rdbms", "arm", "aad-graph", "ms-graph", "batch", "media", "data-lake"]
@@ -47,7 +48,7 @@ class ProfileCommandsLoader(AzCommandsLoader):
             c.argument('password', options_list=['--password', '-p'], help="Credentials like user password, or for a service principal, provide client secret or a pem file with key and public certificate. Will prompt if not given.")
             c.argument('service_principal', action='store_true', help='The credential representing a service principal.')
             c.argument('username', options_list=['--username', '-u'], help='user name, service principal, or managed service identity ID')
-            c.argument('tenant', options_list=['--tenant', '-t'], help='The AAD tenant, must provide when using service principals.')
+            c.argument('tenant', options_list=['--tenant', '-t'], help='The AAD tenant, must provide when using service principals.', validator=validate_tenant)
             c.argument('allow_no_subscriptions', action='store_true', help="Support access tenants without subscriptions. It's uncommon but useful to run tenant level commands, such as 'az ad'")
             c.ignore('_subscription')  # hide the global subscription parameter
             c.argument('identity', options_list=('-i', '--identity'), action='store_true', help="Log in using the Virtual Machine's identity", arg_group='Managed Service Identity')

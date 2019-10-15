@@ -39,6 +39,8 @@ def load_arguments(self, _):
     management_group_name_type = CLIArgumentType(options_list='--management-group', help='The name of the management group of the policy [set] definition.')
     identity_scope_type = CLIArgumentType(help="Scope that the system assigned identity can access")
     identity_role_type = CLIArgumentType(options_list=['--role'], help="Role name or id that will be assigned to the managed identity")
+    extended_json_format_type = CLIArgumentType(options_list=['--handle-extended-json-format', '-j'], action='store_true', is_preview=True,
+                                                help='Support to handle extended template content including multiline and comments in deployment')
 
     _PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''
 
@@ -141,6 +143,9 @@ def load_arguments(self, _):
         c.argument('identity_scope', arg_type=identity_scope_type)
         c.argument('identity_role', arg_type=identity_role_type)
 
+    with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2019-06-01') as c:
+        c.argument('enforcement_mode', options_list=['--enforcement-mode', '-e'], help='Enforcement mode of the policy assignment, e.g. Default, DoNotEnforce. Please visit https://aka.ms/azure-policyAssignment-enforcement-mode for more information.', arg_type=get_enum_type(['Default', 'DoNotEnforce']))
+
     with self.argument_context('policy assignment identity', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2018-05-01') as c:
         c.argument('identity_scope', arg_type=identity_scope_type)
         c.argument('identity_role', arg_type=identity_role_type)
@@ -175,6 +180,7 @@ def load_arguments(self, _):
     with self.argument_context('group deployment create') as c:
         c.argument('deployment_name', options_list=['--name', '-n'], required=False,
                    help='The deployment name. Default to template file base name')
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
 
     with self.argument_context('group deployment operation show') as c:
         c.argument('operation_ids', nargs='+', help='A list of operation ids to show')
@@ -189,6 +195,7 @@ def load_arguments(self, _):
     with self.argument_context('deployment create') as c:
         c.argument('deployment_name', options_list=['--name', '-n'], required=False,
                    help='The deployment name. Default to template file base name')
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
 
     with self.argument_context('deployment operation show') as c:
         c.argument('operation_ids', nargs='+', help='A list of operation ids to show')
@@ -286,7 +293,7 @@ def load_arguments(self, _):
         c.argument('headers', nargs='+', help="Space-separated headers in KEY=VALUE format or JSON string. Use @{file} to load from a file")
         c.argument('uri_parameters', nargs='+', help='Space-separated queries in KEY=VALUE format or JSON string. Use @{file} to load from a file')
         c.argument('skip_authorization_header', action='store_true', help='do not auto append "Authorization" header')
-        c.argument('body', options_list=['--body', '-b'], help='request body')
+        c.argument('body', options_list=['--body', '-b'], help='request body. Use @{file} to load from a file')
         c.argument('output_file', help='save response payload to a file')
         c.argument('resource', help='Resource url for which CLI should acquire a token in order to access '
                    'the service. The token will be placed in the "Authorization" header. By default, '

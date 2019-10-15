@@ -1044,6 +1044,15 @@ examples:
   - name: Create a web app with a NodeJS 6.2 runtime and deployed from a local git repository.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "node|6.2" --deployment-local-git
+  - name: Create a web app with an image from DockerHub.
+    text: >
+        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName -i nginx
+  - name: Create a web app with an image from a private DockerHub registry.
+    text: >
+        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName -i MyImageName -s username -w password
+  - name: Create a web app with an image from a private Azure Container Registry.
+    text: >
+        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName -i myregistry.azurecr.io/docker-image:tag
 """
 
 helps['webapp delete'] = """
@@ -1683,4 +1692,94 @@ short-summary: remove a regional virtual network integration from functionapp
 examples:
   - name: remove a regional virtual network integration from functionapp
     text: az functionapp vnet-integration remove -g MyResourceGroup -n MyFunctionapp -s [slot]
+"""
+
+helps['webapp config access-restriction'] = """
+type: group
+short-summary: Methods that show, set, add, and remove access restrictions on a webapp
+"""
+
+helps['webapp config access-restriction set'] = """
+    type: command
+    short-summary: Sets if SCM site is using the same restrictions as the main site.
+    examples:
+        - name: Enable SCM site to use same access restrictions as main site.
+          text: az webapp config access-restriction set -g ResourceGroup -n AppName --use-same-restrictions-for-scm-site true
+"""
+
+helps['webapp config access-restriction show'] = """
+    type: command
+    short-summary: Show Access Restriction settings for webapp.
+    examples:
+        - name: Get Access Restriction settings for a webapp.
+          text: az webapp config access-restriction show -g ResourceGroup -n AppName
+"""
+
+helps['webapp config access-restriction add'] = """
+    type: command
+    short-summary: Adds an Access Restriction to the webapp, or updates if the Action of the Ip-Address or Subnet already exists.
+    examples:
+        - name: Add Access Restriction opening (Allow) named developers for IPv4 address 130.220.0.0/27 with priority 200 to main site.
+          text: az webapp config access-restriction add -g ResourceGroup -n AppName --rule-name developers --action Allow --ip-address 130.220.0.0/27 --priority 200
+        - name: Add Access Restriction opening (Allow) named build_server for IPv4 address 192.168.0.0/27 with priority 250 to scm site.
+          text: az webapp config access-restriction add -g ResourceGroup -n AppName --rule-name build_server --action Allow --ip-address 192.168.0.0/27 --priority 250 --scm-site true
+        - name: Add Access Restriction opening (Allow) named app_gateway for Subnet app_gw in vNet core_weu with priority 300 to main site.
+          text: az webapp config access-restriction add -g ResourceGroup -n AppName --rule-name app_gateway --action Allow --vnet-name core_weu --subnet app_gateway --priority 300
+        - name: Add Access Restriction opening (Allow) named internal_agents for Subnet build_agents in vNet corp01 with priority 500 to scm site; and ignore service endpoint registration on the Subnet.
+          text: az webapp config access-restriction add -g ResourceGroup -n AppName --rule-name internal_agents --action Allow --vnet-name corp01 --subnet build_agents --priority 500 --scm-site true --ignore-missing-endpoint true
+"""
+
+helps['webapp config access-restriction remove'] = """
+    type: command
+    short-summary: Removes an Access Restriction from the webapp.
+    examples:
+        - name: Remove Access Restriction named developers from the main site.
+          text: az webapp config access-restriction remove -g ResourceGroup -n AppName --rule-name developers
+        - name: Remove Access Restriction named internal_agents from the scm site.
+          text: az webapp config access-restriction remove -g ResourceGroup -n AppName --rule-name internal_agents --scm-site true
+"""
+
+helps['functionapp config access-restriction'] = """
+type: group
+short-summary: Methods that show, set, add, and remove access restrictions on a functionapp
+"""
+
+helps['functionapp config access-restriction set'] = """
+    type: command
+    short-summary: Sets if SCM site is using the same restrictions as the main site.
+    examples:
+        - name: Enable SCM site to use same access restrictions as main site.
+          text: az functionapp config access-restriction set -g ResourceGroup -n AppName --use-same-restrictions-for-scm-site true
+"""
+
+helps['functionapp config access-restriction show'] = """
+    type: command
+    short-summary: Show Access Restriction settings for functionapp.
+    examples:
+        - name: Get Access Restriction settings for a functionapp.
+          text: az functionapp config access-restriction show -g ResourceGroup -n AppName
+"""
+
+helps['functionapp config access-restriction add'] = """
+    type: command
+    short-summary: Adds an Access Restriction to the functionapp, or updates if the Action of the Ip-Address or Subnet already exists.
+    examples:
+        - name: Add Access Restriction opening (Allow) named developers for IPv4 address 130.220.0.0/27 with priority 200 to main site.
+          text: az functionapp config access-restriction add -g ResourceGroup -n AppName --rule-name developers --action Allow --ip-address 130.220.0.0/27 --priority 200
+        - name: Add Access Restriction opening (Allow) named build_server for IPv4 address 192.168.0.0/27 with priority 250 to scm site.
+          text: az functionapp config access-restriction add -g ResourceGroup -n AppName --rule-name build_server --action Allow --ip-address 192.168.0.0/27 --priority 250 --scm-site true
+        - name: Add Access Restriction opening (Allow) named app_gateway for Subnet app_gw in vNet core_weu with priority 300 to main site.
+          text: az functionapp config access-restriction add -g ResourceGroup -n AppName --rule-name app_gateway --action Allow --vnet-name core_weu --subnet app_gateway --priority 300
+        - name: Add Access Restriction opening (Allow) named internal_agents for Subnet build_agents in vNet corp01 with priority 500 to scm site; and ignore service endpoint registration on the Subnet.
+          text: az functionapp config access-restriction add -g ResourceGroup -n AppName --rule-name internal_agents --action Allow --vnet-name corp01 --subnet build_agents --priority 500 --scm-site true --ignore-missing-endpoint true
+"""
+
+helps['functionapp config access-restriction remove'] = """
+    type: command
+    short-summary: Removes an Access Restriction from the functionapp.
+    examples:
+        - name: Remove Access Restriction named developers from the main site.
+          text: az functionapp config access-restriction remove -g ResourceGroup -n AppName --rule-name developers
+        - name: Remove Access Restriction named internal_agents from the scm site.
+          text: az functionapp config access-restriction remove -g ResourceGroup -n AppName --rule-name internal_agents --scm-site true
 """

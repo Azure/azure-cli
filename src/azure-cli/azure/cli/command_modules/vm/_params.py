@@ -115,6 +115,8 @@ def load_arguments(self, _):
         c.argument('os_type', arg_type=get_enum_type(OperatingSystemTypes), help='The Operating System type of the Disk.')
         c.argument('disk_iops_read_write', type=int, min_api='2018-06-01', help='The number of IOPS allowed for this disk. Only settable for UltraSSD disks. One operation can transfer between 4k and 256k bytes')
         c.argument('disk_mbps_read_write', type=int, min_api='2018-06-01', help="The bandwidth allowed for this disk. Only settable for UltraSSD disks. MBps means millions of bytes per second with ISO notation of powers of 10")
+        c.argument('upload_size_bytes', type=int, min_api='2019-03-01',
+                   help='The size (in bytes) of the contents of the upload including the VHD footer. Min value: 20972032. Max value: 35183298347520')
     # endregion
 
     # region Snapshots
@@ -122,6 +124,8 @@ def load_arguments(self, _):
         c.argument('snapshot_name', existing_snapshot_name, id_part='name', completer=get_resource_name_completion_list('Microsoft.Compute/snapshots'))
         c.argument('name', arg_type=name_arg_type)
         c.argument('sku', arg_type=snapshot_sku)
+        c.argument('incremental', arg_type=get_three_state_flag(), min_api='2019-03-01',
+                   help='Whether a snapshot is incremental. Incremental snapshots on the same disk occupy less space than full snapshots and can be diffed')
     # endregion
 
     # region Images
@@ -257,7 +261,7 @@ def load_arguments(self, _):
         c.argument('nsg', help='The name to use when creating a new Network Security Group (default) or referencing an existing one. Can also reference an existing NSG by ID or specify "" for none.', arg_group='Network')
         c.argument('nsg_rule', help='NSG rule to create when creating a new NSG. Defaults to open ports for allowing RDP on Windows and allowing SSH on Linux.', arg_group='Network', arg_type=get_enum_type(['RDP', 'SSH']))
         c.argument('application_security_groups', min_api='2017-09-01', nargs='+', options_list=['--asgs'], help='Space-separated list of existing application security groups to associate with the VM.', arg_group='Network')
-
+        c.argument('workspace', is_preview=True, arg_group='Monitor', help='Name or ID of Log Analytics Workspace. If you specify the workspace through its name, the workspace should be in the same resource group with the vm, otherwise a new workspace will be created.')
     with self.argument_context('vm capture') as c:
         c.argument('overwrite', action='store_true')
 
@@ -279,6 +283,17 @@ def load_arguments(self, _):
                    help='pre-existing storage account name or its blob uri to capture boot diagnostics. Its sku should be one of Standard_GRS, Standard_LRS and Standard_RAGRS')
         c.argument('accelerated_networking', resource_type=ResourceType.MGMT_NETWORK, min_api='2016-09-01', arg_type=get_three_state_flag(), arg_group='Network',
                    help="enable accelerated networking. Unless specified, CLI will enable it based on machine image and size")
+        if self.supported_api_version(min_api='2019-03-01', resource_type=ResourceType.MGMT_COMPUTE):
+            VMPriorityTypes = self.get_models('VirtualMachinePriorityTypes', resource_type=ResourceType.MGMT_COMPUTE)
+            VirtualMachineEvictionPolicyTypes = self.get_models('VirtualMachineEvictionPolicyTypes', resource_type=ResourceType.MGMT_COMPUTE)
+            c.argument('priority', resource_type=ResourceType.MGMT_COMPUTE, min_api='2019-03-01',
+                       arg_type=get_enum_type(VMPriorityTypes, default=None),
+                       help="Priority. Use 'Low' to run short-lived workloads in a cost-effective way")
+            c.argument('eviction_policy', resource_type=ResourceType.MGMT_COMPUTE, min_api='2019-03-01',
+                       arg_type=get_enum_type(VirtualMachineEvictionPolicyTypes, default=None),
+                       help="The eviction policy for the low priority virtual machine.")
+        c.argument('enable_agent', arg_type=get_three_state_flag(), min_api='2018-06-01',
+                   help='Indicates whether virtual machine agent should be provisioned on the virtual machine. When this property is not specified, default behavior is to set it to true. This will ensure that VM Agent is installed on the VM so that extensions can be added to the VM later')
 
     with self.argument_context('vm create', arg_group='Storage') as c:
         c.argument('attach_os_disk', help='Attach an existing OS disk to the VM. Can use the name or ID of a managed disk or the URI to an unmanaged disk VHD.')
@@ -458,7 +473,7 @@ def load_arguments(self, _):
         VMPriorityTypes = self.get_models('VirtualMachinePriorityTypes', resource_type=ResourceType.MGMT_COMPUTE)
         VirtualMachineEvictionPolicyTypes = self.get_models('VirtualMachineEvictionPolicyTypes', resource_type=ResourceType.MGMT_COMPUTE)
         c.argument('name', name_arg_type)
-        c.argument('nat_backend_port', default=None, help='Backend port to open with NAT rules.  Defaults to 22 on Linux and 3389 on Windows.')
+        c.argument('nat_backend_port', default=None, help='Backend port to open with NAT rules. Defaults to 22 on Linux and 3389 on Windows.')
         c.argument('single_placement_group', arg_type=get_three_state_flag(), help="Limit the scale set to a single placement group."
                    " See https://docs.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-placement-groups for details")
         c.argument('platform_fault_domain_count', type=int, help='Fault Domain count for each placement group in the availability zone', min_api='2017-12-01')
@@ -474,6 +489,7 @@ def load_arguments(self, _):
         c.argument('eviction_policy', resource_type=ResourceType.MGMT_COMPUTE, min_api='2017-12-01', arg_type=get_enum_type(VirtualMachineEvictionPolicyTypes, default=None),
                    help="The eviction policy for virtual machines in a low priority scale set.", is_preview=True)
         c.argument('application_security_groups', resource_type=ResourceType.MGMT_COMPUTE, min_api='2018-06-01', nargs='+', options_list=['--asgs'], help='Space-separated list of existing application security groups to associate with the VM.', arg_group='Network', validator=validate_asg_names_or_ids)
+        c.argument('computer_name_prefix', help='Computer name prefix for all of the virtual machines in the scale set. Computer name prefixes must be 1 to 15 characters long')
 
     with self.argument_context('vmss create', arg_group='Network Balancer') as c:
         LoadBalancerSkuName = self.get_models('LoadBalancerSkuName', resource_type=ResourceType.MGMT_NETWORK)
@@ -500,6 +516,13 @@ def load_arguments(self, _):
 
         c.argument('protect_from_scale_in', arg_type=protection_policy_type, help="Protect the VM instance from scale-in operations.")
         c.argument('protect_from_scale_set_actions', arg_type=protection_policy_type, help="Protect the VM instance from scale set actions (including scale-in).")
+        c.argument('enable_terminate_notification', min_api='2019-03-01', arg_type=get_three_state_flag(),
+                   help='Enable terminate notification')
+
+    for scope in ['vmss create', 'vmss update']:
+        with self.argument_context(scope) as c:
+            c.argument('terminate_notification_time', min_api='2019-03-01',
+                       help='Length of time (in minutes, between 5 and 15) a notification to be sent to the VM on the instance metadata server till the VM gets deleted')
 
     for scope, help_prefix in [('vmss update', 'Update the'), ('vmss wait', 'Wait on the')]:
         with self.argument_context(scope) as c:
@@ -586,6 +609,8 @@ def load_arguments(self, _):
             c.argument('secrets', multi_ids_type, help='One or many Key Vault secrets as JSON strings or files via `@{path}` containing `[{ "sourceVault": { "id": "value" }, "vaultCertificates": [{ "certificateUrl": "value", "certificateStore": "cert store name (only on windows)"}] }]`', type=file_type, completer=FilesCompleter())
             c.argument('assign_identity', nargs='*', arg_group='Managed Service Identity', help="accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples")
             c.ignore('aux_subscriptions')
+            max_billing_help = 'The maximum price (in US Dollars) you are willing to pay for a low priority VM/VMSS. -1 indicates that the low priority VM/VMSS should not be evicted for price reasons'
+            c.argument('max_billing', help=max_billing_help, min_api='2019-03-01', type=float)
 
         with self.argument_context(scope, arg_group='Authentication') as c:
             c.argument('generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing. The keys will be stored in the ~/.ssh directory')
@@ -619,7 +644,7 @@ def load_arguments(self, _):
             c.argument('data_caching', options_list=['--data-disk-caching'], nargs='+',
                        help="storage caching type for data disk(s), including 'None', 'ReadOnly', 'ReadWrite', etc. Use a singular value to apply on all disks, or use '<lun>=<vaule1> <lun>=<value2>' to configure individual disk")
             c.argument('ultra_ssd_enabled', arg_type=get_three_state_flag(), min_api='2018-06-01',
-                       help='Enables or disables the capability to have 1 or more managed data disks with UltraSSD_LRS storage account', is_preview=True)
+                       help='Enables or disables the capability to have 1 or more managed data disks with UltraSSD_LRS storage account')
             c.argument('ephemeral_os_disk', arg_type=get_three_state_flag(), min_api='2018-06-01',
                        help='Allows you to create an OS disk directly on the host node, providing local disk performance and faster VM/VMSS reimage time.', is_preview=True)
 
@@ -635,7 +660,7 @@ def load_arguments(self, _):
             c.argument('public_ip_address_dns_name', help='Globally unique DNS name for a newly created public IP.')
             if self.supported_api_version(min_api='2017-08-01', resource_type=ResourceType.MGMT_NETWORK):
                 PublicIPAddressSkuName = self.get_models('PublicIPAddressSkuName', resource_type=ResourceType.MGMT_NETWORK)
-                c.argument('public_ip_sku', help='Sku', default=None, arg_type=get_enum_type(PublicIPAddressSkuName))
+                c.argument('public_ip_sku', help='Public IP SKU. It is set to Basic by default.', default=None, arg_type=get_enum_type(PublicIPAddressSkuName))
 
         with self.argument_context(scope, arg_group='Marketplace Image Plan') as c:
             c.argument('plan_name', help='plan name')

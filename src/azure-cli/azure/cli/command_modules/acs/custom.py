@@ -23,6 +23,7 @@ import threading
 import time
 import uuid
 import webbrowser
+from distutils.version import StrictVersion  # pylint: disable=no-name-in-module,import-error
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from six.moves.urllib.error import URLError  # pylint: disable=import-error
 
@@ -49,17 +50,25 @@ from azure.graphrbac.models import (ApplicationCreateParameters,
                                     ServicePrincipalCreateParameters,
                                     GetObjectsParameters,
                                     ResourceAccess, RequiredResourceAccess)
-from azure.mgmt.containerservice.models import ContainerServiceLinuxProfile
-from azure.mgmt.containerservice.models import ContainerServiceNetworkProfile
+
 from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes
-from azure.mgmt.containerservice.models import ContainerServiceServicePrincipalProfile
-from azure.mgmt.containerservice.models import ContainerServiceSshConfiguration
-from azure.mgmt.containerservice.models import ContainerServiceSshPublicKey
-from azure.mgmt.containerservice.models import ContainerServiceStorageProfileTypes
-from azure.mgmt.containerservice.v2018_03_31.models import ManagedCluster
-from azure.mgmt.containerservice.v2018_03_31.models import ManagedClusterAADProfile
-from azure.mgmt.containerservice.v2018_03_31.models import ManagedClusterAddonProfile
-from azure.mgmt.containerservice.v2018_03_31.models import ManagedClusterAgentPoolProfile
+
+from azure.mgmt.containerservice.v2019_08_01.models import ContainerServiceNetworkProfile
+from azure.mgmt.containerservice.v2019_08_01.models import ContainerServiceLinuxProfile
+from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterServicePrincipalProfile
+from azure.mgmt.containerservice.v2019_08_01.models import ContainerServiceSshConfiguration
+from azure.mgmt.containerservice.v2019_08_01.models import ContainerServiceSshPublicKey
+from azure.mgmt.containerservice.v2019_08_01.models import ContainerServiceStorageProfileTypes
+from azure.mgmt.containerservice.v2019_08_01.models import ManagedCluster
+from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterAADProfile
+from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterAddonProfile
+from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterAgentPoolProfile
+from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterLoadBalancerProfile
+from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterLoadBalancerProfileManagedOutboundIPs
+from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterLoadBalancerProfileOutboundIPPrefixes
+from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterLoadBalancerProfileOutboundIPs
+from azure.mgmt.containerservice.v2019_08_01.models import ResourceReference
+
 from azure.mgmt.containerservice.v2019_04_30.models import OpenShiftManagedClusterAgentPoolProfile
 from azure.mgmt.containerservice.v2019_04_30.models import OpenShiftAgentPoolProfileRole
 from azure.mgmt.containerservice.v2019_04_30.models import OpenShiftManagedClusterIdentityProvider
@@ -68,6 +77,7 @@ from azure.mgmt.containerservice.v2019_04_30.models import OpenShiftManagedClust
 from azure.mgmt.containerservice.v2019_04_30.models import OpenShiftRouterProfile
 from azure.mgmt.containerservice.v2019_04_30.models import OpenShiftManagedClusterAuthProfile
 from azure.mgmt.containerservice.v2019_04_30.models import NetworkProfile
+
 from ._client_factory import cf_container_services
 from ._client_factory import cf_resource_groups
 from ._client_factory import get_auth_management_client
@@ -1582,7 +1592,7 @@ def _validate_ssh_key(no_ssh_key, ssh_key_value):
             raise CLIError('Provided ssh key ({}) is invalid or non-existent'.format(shortened_key))
 
 
-# pylint: disable=too-many-statements
+# pylint: disable=too-many-statements,too-many-branches
 def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint: disable=too-many-locals
                dns_name_prefix=None,
                location=None,
@@ -1596,6 +1606,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                no_ssh_key=False,
                disable_rbac=None,
                enable_rbac=None,
+               vm_set_type=None,
                skip_subnet_role_assignment=False,
                network_plugin=None,
                network_policy=None,
@@ -1603,6 +1614,10 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                service_cidr=None,
                dns_service_ip=None,
                docker_bridge_address=None,
+               load_balancer_sku=None,
+               load_balancer_managed_outbound_ip_count=None,
+               load_balancer_outbound_ips=None,
+               load_balancer_outbound_ip_prefixes=None,
                enable_addons=None,
                workspace_resource_id=None,
                vnet_subnet_id=None,
@@ -1625,6 +1640,32 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     if location is None:
         location = rg_location
 
+    if not vm_set_type:
+        if kubernetes_version and StrictVersion(kubernetes_version) < StrictVersion("1.12.9"):
+            print('Setting vm_set_type to availabilityset as it is \
+            not specified and kubernetes version(%s) less than 1.12.9 only supports \
+            availabilityset\n' % (kubernetes_version))
+            vm_set_type = "AvailabilitySet"
+
+    if not vm_set_type:
+        vm_set_type = "VirtualMachineScaleSets"
+
+    # normalize as server validation is case-sensitive
+    if vm_set_type.lower() == "AvailabilitySet".lower():
+        vm_set_type = "AvailabilitySet"
+
+    if vm_set_type.lower() == "VirtualMachineScaleSets".lower():
+        vm_set_type = "VirtualMachineScaleSets"
+
+    if not load_balancer_sku:
+        if kubernetes_version and StrictVersion(kubernetes_version) < StrictVersion("1.13.0"):
+            print('Setting load_balancer_sku to basic as it is not specified and kubernetes \
+            version(%s) less than 1.13.0 only supports basic load balancer SKU\n' % (kubernetes_version))
+            load_balancer_sku = "basic"
+
+    if not load_balancer_sku:
+        load_balancer_sku = "standard"
+
     agent_pool_profile = ManagedClusterAgentPoolProfile(
         name=_trim_nodepoolname(nodepool_name),  # Must be 12 chars or less before ACS RP adds to it
         count=int(node_count),
@@ -1632,7 +1673,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         os_type="Linux",
         storage_profile=ContainerServiceStorageProfileTypes.managed_disks,
         vnet_subnet_id=vnet_subnet_id,
-        max_pods=int(max_pods) if max_pods else None
+        max_pods=int(max_pods) if max_pods else None,
+        type=vm_set_type
     )
     if node_osdisk_size:
         agent_pool_profile.os_disk_size_gb = int(node_osdisk_size)
@@ -1648,7 +1690,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                                                   service_principal=service_principal, client_secret=client_secret,
                                                   subscription_id=subscription_id, dns_name_prefix=dns_name_prefix,
                                                   location=location, name=name)
-    service_principal_profile = ContainerServiceServicePrincipalProfile(
+    service_principal_profile = ManagedClusterServicePrincipalProfile(
         client_id=principal_obj.get("service_principal"),
         secret=principal_obj.get("client_secret"),
         key_vault_secret_ref=None)
@@ -1660,6 +1702,11 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                                     service_principal_profile.client_id, scope=scope):
             logger.warning('Could not create a role assignment for subnet. '
                            'Are you an Owner on this subscription?')
+
+    load_balancer_profile = _get_load_balancer_profile(
+        load_balancer_managed_outbound_ip_count,
+        load_balancer_outbound_ips,
+        load_balancer_outbound_ip_prefixes)
 
     if attach_acr:
         _ensure_aks_acr(cmd.cli_ctx,
@@ -1679,8 +1726,18 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             service_cidr=service_cidr,
             dns_service_ip=dns_service_ip,
             docker_bridge_cidr=docker_bridge_address,
-            network_policy=network_policy
+            network_policy=network_policy,
+            load_balancer_sku=load_balancer_sku.lower(),
+            load_balancer_profile=load_balancer_profile,
         )
+    else:
+        if load_balancer_sku.lower() == "standard" or load_balancer_profile:
+            network_profile = ContainerServiceNetworkProfile(
+                network_plugin="kubenet",
+                load_balancer_sku=load_balancer_sku.lower(),
+                load_balancer_profile=load_balancer_profile,
+            )
+
     addon_profiles = _handle_addons_args(
         cmd,
         enable_addons,
@@ -1894,12 +1951,22 @@ def aks_scale(cmd, client, resource_group_name, name, node_count, nodepool_name=
     raise CLIError('The nodepool "{}" was not found.'.format(nodepool_name))
 
 
+# pylint: disable=inconsistent-return-statements
 def aks_update(cmd, client, resource_group_name, name,
+               load_balancer_managed_outbound_ip_count=None,
+               load_balancer_outbound_ips=None,
+               load_balancer_outbound_ip_prefixes=None,
                attach_acr=None,
                detach_acr=None,
                no_wait=False):
-    if not attach_acr and not detach_acr:
-        raise CLIError('Please sepcify "--attach-acr" or "--detach-acr".')
+    update_lb_profile = load_balancer_managed_outbound_ip_count is not None or \
+        load_balancer_outbound_ips is not None or load_balancer_outbound_ip_prefixes is not None
+
+    if not update_lb_profile and not attach_acr and not detach_acr:
+        raise CLIError('Please specify "--load-balancer-managed-outbound-ip-count" or '
+                       '"--load-balancer-outbound-ips" or '
+                       '"--load-balancer-outbound-ip-prefixes" or '
+                       '"--attach-acr" or "--dettach-acr"')
 
     if attach_acr and detach_acr:
         raise CLIError('Cannot specify "--attach-acr" and "--detach-acr" at the same time.')
@@ -1911,20 +1978,33 @@ def aks_update(cmd, client, resource_group_name, name,
         raise CLIError('Cannot get the AKS cluster\'s service principal.')
 
     if attach_acr:
-        _ensure_aks_acr(cmd.cli_ctx,
-                        client_id=client_id,
-                        acr_name_or_id=attach_acr,
-                        subscription_id=subscription_id)
+        return _ensure_aks_acr(cmd.cli_ctx,
+                               client_id=client_id,
+                               acr_name_or_id=attach_acr,
+                               subscription_id=subscription_id)
 
     if detach_acr:
-        _ensure_aks_acr(cmd.cli_ctx,
-                        client_id=client_id,
-                        acr_name_or_id=detach_acr,
-                        subscription_id=subscription_id,
-                        detach=True)
+        return _ensure_aks_acr(cmd.cli_ctx,
+                               client_id=client_id,
+                               acr_name_or_id=detach_acr,
+                               subscription_id=subscription_id,
+                               detach=True)
+
+    load_balancer_profile = _get_load_balancer_profile(
+        load_balancer_managed_outbound_ip_count,
+        load_balancer_outbound_ips,
+        load_balancer_outbound_ip_prefixes)
+
+    if load_balancer_profile:
+        instance.network_profile.load_balancer_profile = load_balancer_profile
+        return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
+
+    return
 
 
-def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, no_wait=False, **kwargs):  # pylint: disable=unused-argument
+# pylint: disable=unused-argument,inconsistent-return-statements
+def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, control_plane_only=False,
+                no_wait=False, **kwargs):
     instance = client.get(resource_group_name, name)
 
     if instance.kubernetes_version == kubernetes_version:
@@ -1936,7 +2016,41 @@ def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, no_w
             logger.warning("Cluster currently in failed state. Proceeding with upgrade to existing version %s to "
                            "attempt resolution of failed cluster state.", instance.kubernetes_version)
 
+    from knack.prompting import prompt_y_n
+
+    upgrade_all = False
     instance.kubernetes_version = kubernetes_version
+
+    vmas_cluster = False
+    for agent_profile in instance.agent_pool_profiles:
+        if agent_profile.type.lower() == "availabilityset":
+            vmas_cluster = True
+            break
+
+    # for legacy clusters, we always upgrade node pools with CCP.
+    if instance.max_agent_pools < 8 or vmas_cluster:
+        if control_plane_only:
+            msg = ("Legacy clusters do not support control plane only upgrade. All node pools will be "
+                   "upgraded to {} as well. Continue?").format(instance.kubernetes_version)
+            if not prompt_y_n(msg, default="n"):
+                return None
+        upgrade_all = True
+    else:
+        if not control_plane_only:
+            msg = ("Since control-plane-only argument is not specified, this will upgrade the control plane "
+                   "AND all nodepools to version {}. Continue?").format(instance.kubernetes_version)
+            if not prompt_y_n(msg, default="n"):
+                return None
+            upgrade_all = True
+        else:
+            msg = ("Since control-plane-only argument is specified, this will upgrade only the control plane to {}. "
+                   "Node pool will not change. Continue?").format(instance.kubernetes_version)
+            if not prompt_y_n(msg, default="n"):
+                return None
+
+    if upgrade_all:
+        for agent_profile in instance.agent_pool_profiles:
+            agent_profile.orchestrator_version = kubernetes_version
 
     # null out the SP and AAD profile because otherwise validation complains
     instance.service_principal_profile = None
@@ -2226,6 +2340,14 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
         "chinanorth2": "chinaeast2"
     }
 
+    # mapping for azure us governmner cloud
+    AzureFairfaxLocationToOmsRegionCodeMap = {
+        "usgovvirginia": "USGV"
+    }
+    AzureFairfaxRegionToOmsRegionMap = {
+        "usgovvirginia": "usgovvirginia"
+    }
+
     rg_location = _get_rg_location(cmd.cli_ctx, resource_group_name)
     cloud_name = cmd.cli_ctx.cloud.name
 
@@ -2234,9 +2356,19 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
 
     # sanity check that locations and clouds match.
     if ((cloud_name.lower() == 'azurecloud' and AzureChinaRegionToOmsRegionMap.get(rg_location, False)) or
-            (cloud_name.lower() == 'azurechinacloud' and AzureCloudRegionToOmsRegionMap.get(rg_location, False))):
-        raise CLIError('Wrong cloud ({}) setting for region {}, please use "az cloud set ..."'.format(
-            cloud_name.lower(), rg_location))
+            (cloud_name.lower() == 'azurecloud' and AzureFairfaxRegionToOmsRegionMap.get(rg_location, False))):
+        raise CLIError('Wrong cloud (azurecloud) setting for region {}, please use "az cloud set ..."'
+                       .format(rg_location))
+
+    if ((cloud_name.lower() == 'azurechinacloud' and AzureCloudRegionToOmsRegionMap.get(rg_location, False)) or
+            (cloud_name.lower() == 'azurechinacloud' and AzureFairfaxRegionToOmsRegionMap.get(rg_location, False))):
+        raise CLIError('Wrong cloud (azurechinacloud) setting for region {}, please use "az cloud set ..."'
+                       .format(rg_location))
+
+    if ((cloud_name.lower() == 'azureusgovernment' and AzureCloudRegionToOmsRegionMap.get(rg_location, False)) or
+            (cloud_name.lower() == 'azureusgovernment' and AzureChinaRegionToOmsRegionMap.get(rg_location, False))):
+        raise CLIError('Wrong cloud (azureusgovernment) setting for region {}, please use "az cloud set ..."'
+                       .format(rg_location))
 
     if cloud_name.lower() == 'azurecloud':
         workspace_region = AzureCloudRegionToOmsRegionMap.get(rg_location, "eastus")
@@ -2244,6 +2376,9 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
     elif cloud_name.lower() == 'azurechinacloud':
         workspace_region = AzureChinaRegionToOmsRegionMap.get(rg_location, "chinaeast2")
         workspace_region_code = AzureChinaLocationToOmsRegionCodeMap.get(workspace_region, "EAST2")
+    elif cloud_name.lower() == 'azureusgovernment':
+        workspace_region = AzureFairfaxRegionToOmsRegionMap.get(rg_location, "usgovvirginia")
+        workspace_region_code = AzureFairfaxLocationToOmsRegionCodeMap.get(workspace_region, "USGV")
     else:
         logger.error("AKS Monitoring addon not supported in cloud : %s", cloud_name)
 
@@ -2855,3 +2990,50 @@ def openshift_scale(cmd, client, resource_group_name, name, compute_count, no_wa
     instance.auth_profile = None
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
+
+
+def _get_load_balancer_outbound_ips(load_balancer_outbound_ips):
+    """parse load balancer profile outbound IP ids and return an array of references to the outbound IP resources"""
+    load_balancer_outbound_ip_resources = None
+    if load_balancer_outbound_ips:
+        load_balancer_outbound_ip_resources = \
+            [ResourceReference(id=x.strip()) for x in load_balancer_outbound_ips.split(',')]
+    return load_balancer_outbound_ip_resources
+
+
+def _get_load_balancer_outbound_ip_prefixes(load_balancer_outbound_ip_prefixes):
+    """parse load balancer profile outbound IP prefix ids and return an array \
+    of references to the outbound IP prefix resources"""
+    load_balancer_outbound_ip_prefix_resources = None
+    if load_balancer_outbound_ip_prefixes:
+        load_balancer_outbound_ip_prefix_resources = \
+            [ResourceReference(id=x.strip()) for x in load_balancer_outbound_ip_prefixes.split(',')]
+    return load_balancer_outbound_ip_prefix_resources
+
+
+def _get_load_balancer_profile(load_balancer_managed_outbound_ip_count,
+                               load_balancer_outbound_ips,
+                               load_balancer_outbound_ip_prefixes):
+    """parse and build load balancer profile"""
+    load_balancer_outbound_ip_resources = _get_load_balancer_outbound_ips(load_balancer_outbound_ips)
+    load_balancer_outbound_ip_prefix_resources = _get_load_balancer_outbound_ip_prefixes(
+        load_balancer_outbound_ip_prefixes)
+
+    load_balancer_profile = None
+    if any([load_balancer_managed_outbound_ip_count,
+            load_balancer_outbound_ip_resources,
+            load_balancer_outbound_ip_prefix_resources]):
+        load_balancer_profile = ManagedClusterLoadBalancerProfile()
+        if load_balancer_managed_outbound_ip_count:
+            load_balancer_profile.managed_outbound_ips = ManagedClusterLoadBalancerProfileManagedOutboundIPs(
+                count=load_balancer_managed_outbound_ip_count
+            )
+        if load_balancer_outbound_ip_resources:
+            load_balancer_profile.outbound_ips = ManagedClusterLoadBalancerProfileOutboundIPs(
+                public_ips=load_balancer_outbound_ip_resources
+            )
+        if load_balancer_outbound_ip_prefix_resources:
+            load_balancer_profile.outbound_ip_prefixes = ManagedClusterLoadBalancerProfileOutboundIPPrefixes(
+                public_ip_prefixes=load_balancer_outbound_ip_prefix_resources
+            )
+    return load_balancer_profile

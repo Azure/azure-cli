@@ -30,6 +30,7 @@ FTPS_STATE_TYPES = ['AllAllowed', 'FtpsOnly', 'Disabled']
 OS_TYPES = ['Windows', 'Linux']
 LINUX_RUNTIMES = ['dotnet', 'node', 'python']
 WINDOWS_RUNTIMES = ['dotnet', 'node', 'java', 'powershell']
+ACCESS_RESTRICTION_ACTION_TYPES = ['Allow', 'Deny']
 
 # pylint: disable=too-many-statements
 
@@ -40,7 +41,7 @@ def load_arguments(self, _):
     # PARAMETER REGISTRATION
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
     sku_arg_type = CLIArgumentType(help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1V2(Premium V2 Small), PC2 (Premium Container Small), PC3 (Premium Container Medium), PC4 (Premium Container Large)',
-                                   arg_type=get_enum_type(['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1V2', 'P2V2', 'P3V2', 'PC2', 'PC3', 'PC4']))
+                                   arg_type=get_enum_type(['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1V2', 'P2V2', 'P3V2', 'PC2', 'PC3', 'PC4', 'I1', 'I2', 'I3']))
     webapp_name_arg_type = CLIArgumentType(configured_default='web', options_list=['--name', '-n'], metavar='NAME',
                                            completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name',
                                            help="name of the web app. You can configure the default using 'az configure --defaults web=<name>'")
@@ -87,12 +88,16 @@ def load_arguments(self, _):
     with self.argument_context('webapp create') as c:
         c.argument('name', options_list=['--name', '-n'], help='name of the new web app', validator=validate_site_create)
         c.argument('startup_file', help="Linux only. The web's startup file")
+        c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-s'], help='the container registry server username')
+        c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-w'], help='The container registry server password. Required for private registries.')
         c.argument('multicontainer_config_type', options_list=['--multicontainer-config-type'], help="Linux only.", arg_type=get_enum_type(MULTI_CONTAINER_TYPES))
         c.argument('multicontainer_config_file', options_list=['--multicontainer-config-file'], help="Linux only. Config file for multicontainer apps. (local or remote)")
         c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework|Version, e.g. \"PHP|5.6\". Use 'az webapp list-runtimes' for available list")  # TODO ADD completer
         c.argument('plan', options_list=['--plan', '-p'], configured_default='appserviceplan',
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                    help="name or resource id of the app service plan. Use 'appservice plan create' to get one")
+        c.ignore('language')
+        c.ignore('using_webapp_up')
 
     with self.argument_context('webapp show') as c:
         c.argument('name', arg_type=webapp_name_arg_type)
@@ -286,6 +291,9 @@ def load_arguments(self, _):
 
     with self.argument_context('webapp config connection-string') as c:
         c.argument('connection_string_type', options_list=['--connection-string-type', '-t'], help='connection string type', arg_type=get_enum_type(ConnectionStringType))
+        c.argument('ids', options_list=['--ids'], help="One or more resource IDs (space delimited). If provided no other 'Resource Id' arguments should be specified.", required=True)
+        c.argument('resource_group', options_list=['--resource-group', '-g'], help='Name of resource group. You can configure the default group using `az configure --default-group=<name>`. If `--ids` is provided this should NOT be specified.')
+        c.argument('name', options_list=['--name', '-n'], help='Name of the web app. You can configure the default using `az configure --defaults web=<name>`. If `--ids` is provided this should NOT be specified.')
 
     with self.argument_context('webapp config storage-account') as c:
         c.argument('custom_id', options_list=['--custom-id', '-i'], help='custom identifier')
@@ -498,3 +506,39 @@ def load_arguments(self, _):
     with self.argument_context('functionapp deployment slot swap') as c:
         c.argument('action', help="swap types. use 'preview' to apply target slot's settings on the source slot first; use 'swap' to complete it; use 'reset' to reset the swap",
                    arg_type=get_enum_type(['swap', 'preview', 'reset']))
+
+
+# Access Resction Commands
+    for scope in ['webapp', 'functionapp']:
+        with self.argument_context(scope + ' config access-restriction show') as c:
+            c.argument('name', arg_type=webapp_name_arg_type)
+        with self.argument_context(scope + ' config access-restriction add') as c:
+            c.argument('name', arg_type=webapp_name_arg_type)
+            c.argument('rule_name', options_list=['--rule-name', '-r'],
+                       help='Name of the access restriction rule to add')
+            c.argument('priority', options_list=['--priority', '-p'],
+                       help="Priority of the access restriction rule")
+            c.argument('description', help='Description of the access restriction rule')
+            c.argument('action', arg_type=get_enum_type(ACCESS_RESTRICTION_ACTION_TYPES),
+                       help="Allow or deny access")
+            c.argument('ip_address', help="IP address or CIDR range")
+            c.argument('vnet_name', help="vNet name")
+            c.argument('subnet', help="Subnet name (requires vNet name) or subnet resource id")
+            c.argument('ignore_missing_vnet_service_endpoint',
+                       options_list=['--ignore-missing-endpoint', '-i'],
+                       help='Create access restriction rule with checking if the subnet has Microsoft.Web service endpoint enabled',
+                       arg_type=get_three_state_flag(),
+                       default=False)
+            c.argument('scm_site', help='True if access restrictions is added for scm site',
+                       arg_type=get_three_state_flag())
+        with self.argument_context(scope + ' config access-restriction remove') as c:
+            c.argument('name', arg_type=webapp_name_arg_type)
+            c.argument('rule_name', options_list=['--rule-name', '-r'],
+                       help='Name of the access restriction to remove')
+            c.argument('scm_site', help='True if access restriction should be removed from scm site',
+                       arg_type=get_three_state_flag())
+        with self.argument_context(scope + ' config access-restriction set') as c:
+            c.argument('name', arg_type=webapp_name_arg_type)
+            c.argument('use_same_restrictions_for_scm_site',
+                       help="Use same access restrictions for scm site",
+                       arg_type=get_three_state_flag())

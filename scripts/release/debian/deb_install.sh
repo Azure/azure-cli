@@ -36,24 +36,30 @@ function assert_consent {
 
 global_consent=0 # Artificially giving global consent after review-feedback. Remove this line to enable interactive mode
 
-assert_consent "Add packages necessary to modify your apt-package sources?" ${global_consent}
-set -v
-apt-get update
-apt-get install -y apt-transport-https lsb-release gnupg curl
-set +v
+setup() {
 
-assert_consent "Add Microsoft as a trusted package signer?" ${global_consent}
-set -v
-curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /etc/apt/trusted.gpg.d/microsoft.asc.gpg
-set +v
+    assert_consent "Add packages necessary to modify your apt-package sources?" ${global_consent}
+    set -v
+    apt-get update
+    apt-get install -y apt-transport-https lsb-release gnupg curl
+    set +v
 
-assert_consent "Add the Azure CLI Repository to your apt sources?" ${global_consent}
-set -v
-CLI_REPO=$(lsb_release -cs)
-echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ ${CLI_REPO} main" \
-    > /etc/apt/sources.list.d/azure-cli.list
-apt-get update
-set +v
+    assert_consent "Add Microsoft as a trusted package signer?" ${global_consent}
+    set -v
+    curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /etc/apt/trusted.gpg.d/microsoft.asc.gpg
+    set +v
 
-assert_consent "Install the Azure CLI?" ${global_consent}
-apt-get install -y azure-cli
+    assert_consent "Add the Azure CLI Repository to your apt sources?" ${global_consent}
+    set -v
+    CLI_REPO=$(lsb_release -cs)
+    echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ ${CLI_REPO} main" \
+        > /etc/apt/sources.list.d/azure-cli.list
+    apt-get update
+    set +v
+
+    assert_consent "Install the Azure CLI?" ${global_consent}
+    apt-get install -y azure-cli
+
+}
+
+setup  # ensure the whole file is downloaded before executing

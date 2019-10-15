@@ -4,7 +4,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.help_files import helps
+from knack.help_files import helps  # pylint: disable=unused-import
 # pylint: disable=line-too-long, too-many-lines
 
 helps['acs'] = """
@@ -233,6 +233,25 @@ parameters:
     type: string
     short-summary: A specific IP address and netmask for the Docker bridge, using standard CIDR notation.
     long-summary: This address must not be in any Subnet IP ranges, or the Kubernetes service address range. For example, 172.17.0.1/16.
+  - name: --load-balancer-sku
+    type: string
+    short-summary: Azure Load Balancer SKU selection for your cluster. basic or standard.
+    long-summary: Select between Basic or Standard Azure Load Balancer SKU for your AKS cluster.
+  - name: --load-balancer-managed-outbound-ip-count
+    type: int
+    short-summary: Load balancer managed outbound IP count.
+    long-summary: Desired number of managed outbound IPs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.
+  - name: --load-balancer-outbound-ips
+    type: string
+    short-summary: Load balancer outbound IP resource IDs.
+    long-summary: Comma-separated public IP resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.
+  - name: --load-balancer-outbound-ip-prefixes
+    type: string
+    short-summary: Load balancer outbound IP prefix resource IDs.
+    long-summary: Comma-separated public IP prefix resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.
+  - name: --vm-set-type
+    type: string
+    short-summary: Agent pool vm set type. VirtualMachineScaleSets or AvailabilitySet.
   - name: --enable-addons -a
     type: string
     short-summary: Enable the Kubernetes addons in a comma-separated list.
@@ -290,6 +309,51 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --kubernetes-version 1.12.6
   - name: Create a Kubernetes cluster with a larger node pool.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --node-count 7
+  - name: Create a kubernetes cluster with k8s 1.13.9 but use vmas.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --kubernetes-version 1.13.9 --vm-set-type AvailabilitySet
+  - name: Create a kubernetes cluster with default kubernetes vesrion, default SKU load balancer(basic) and default vm set type(AvailabilitySet).
+    text: az aks create -g MyResourceGroup -n MyManagedCluster
+  - name: Create a kubernetes cluster with standard SKU load balancer and two AKS created IPs for the load balancer outbound connection usage.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
+  - name: Create a kubernetes cluster with standard SKU load balancer and use the provided public IPs for the load balancer outbound connection usage.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-outbound-ips <ip-resource-id-1,ip-resource-id-2>
+  - name: Create a kubernetes cluster with standard SKU load balancer and use the provided public IP prefixes for the load balancer outbound connection usage.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-outbound-ip-prefixes <ip-prefix-resource-id-1,ip-prefix-resource-id-2>
+  - name: Create a kubernetes cluster with basic SKU load balancer and AvailabilitySet vm set type.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-sku basic --vm-set-type AvailabilitySet
+"""
+
+helps['aks update'] = """
+type: command
+short-summary: Update a managed Kubernetes cluster.
+parameters:
+  - name: --load-balancer-managed-outbound-ip-count
+    type: int
+    short-summary: Load balancer managed outbound IP count.
+    long-summary: Desired number of managed outbound IPs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.
+  - name: --load-balancer-outbound-ips
+    type: string
+    short-summary: Load balancer outbound IP resource IDs.
+    long-summary: Comma-separated public IP resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.
+  - name: --load-balancer-outbound-ip-prefixes
+    type: string
+    short-summary: Load balancer outbound IP prefix resource IDs.
+    long-summary: Comma-separated public IP prefix resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.
+  - name: --attach-acr
+    type: string
+    short-summary: Grant the 'acrpull' role assignment to the ACR specified by name or resource ID.
+  - name: --detach-acr
+    type: string
+    short-summary: Disable the 'acrpull' role assignment to the ACR specified by name or resource ID.
+examples:
+  - name: Update a kubernetes cluster with standard SKU load balancer to use two AKS created IPs for the load balancer outbound connection usage.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
+  - name: Update a kubernetes cluster with standard SKU load balancer to use the provided public IPs for the load balancer outbound connection usage.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-outbound-ips <ip-resource-id-1,ip-resource-id-2>
+  - name: Update a kubernetes cluster with standard SKU load balancer to use the provided public IP prefixes for the load balancer outbound connection usage.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-outbound-ip-prefixes <ip-prefix-resource-id-1,ip-prefix-resource-id-2>
+  - name: Attach AKS cluster to ACR by name "acrName"
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --attach-acr acrName
 """
 
 helps['aks delete'] = """
@@ -455,6 +519,9 @@ examples:
     text: |-
         az aks remove-connector --name MyManagedCluster --resource-group MyResourceGroup \\
           --connector-name MyConnector --graceful
+  - name: Remove the ACI Connector from a managed Kubernetes cluster. (autogenerated)
+    text: az aks remove-connector --connector-name MyConnector --name MyManagedCluster --os-type Windows --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['aks remove-dev-spaces'] = """
@@ -537,6 +604,9 @@ parameters:
     short-summary: Version of Kubernetes to upgrade the cluster to, such as "1.11.8" or "1.12.6".
     populator-commands:
       - "`az aks get-upgrades`"
+  - name: --control-plane-only
+    type: bool
+    short-summary: Upgrade the cluster control plane only. If not specified, both control plane AND all node pools will be upgraded.
 examples:
   - name: Upgrade a managed Kubernetes cluster to a newer version. (autogenerated)
     text: az aks upgrade --kubernetes-version 1.12.6 --name MyManagedCluster --resource-group MyResourceGroup
@@ -618,21 +688,6 @@ examples:
         az aks use-dev-spaces -g my-aks-group -n my-aks -s develop/my-space -y
 """
 
-helps['aks update'] = """
-type: command
-short-summary: Update a managed Kubernetes cluster to attach or detach ACR
-parameters:
-  - name: --attach-acr
-    type: string
-    short-summary: Grant the 'acrpull' role assignment to the ACR specified by name or resource ID.
-  - name: --detach-acr
-    type: string
-    short-summary: Disable the 'acrpull' role assignment to the ACR specified by name or resource ID.
-examples:
-  - name: Attach AKS cluster to ACR by name "acrName"
-    text: az aks update -g MyResourceGroup -n MyManagedCluster --attach-acr acrName
-"""
-
 helps['aks wait'] = """
 type: command
 short-summary: Wait for a managed Kubernetes cluster to reach a desired state.
@@ -641,6 +696,9 @@ examples:
   - name: Wait for a cluster to be upgraded, polling every minute for up to thirty minutes.
     text: |-
         az aks wait -g MyResourceGroup -n MyManagedCluster --updated --interval 60 --timeout 1800
+  - name: Wait for a managed Kubernetes cluster to reach a desired state (autogenerated)
+    text: az aks wait --created --interval 60 --name MyManagedCluster --resource-group MyResourceGroup --timeout 1800
+    crafted: true
 """
 
 helps['openshift'] = """

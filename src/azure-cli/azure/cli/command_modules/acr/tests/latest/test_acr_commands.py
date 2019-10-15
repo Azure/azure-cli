@@ -33,11 +33,11 @@ class AcrCommandsTests(ScenarioTest):
                          self.check('provisioningState', 'Succeeded')])
 
         # test retention
-        self.cmd('acr config retention update -n {} --status enabled --days 30'.format(registry_name),
+        self.cmd('acr config retention update -r {} --status enabled --days 30 --type UntaggedManifests'.format(registry_name),
                  checks=[self.check('status', "enabled"),
                          self.check('days', 30)])
 
-        self.cmd('acr config retention show -n {}'.format(registry_name),
+        self.cmd('acr config retention show -r {}'.format(registry_name),
                  checks=[self.check('status', "enabled"),
                          self.check('days', 30)])
 

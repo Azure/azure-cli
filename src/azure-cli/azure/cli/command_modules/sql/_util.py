@@ -132,9 +132,17 @@ def get_sql_managed_instances_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).managed_instances
 
 
+def get_sql_managed_instance_azure_ad_administrators_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).managed_instance_administrators
+
+
 def get_sql_managed_databases_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).managed_databases
 
 
 def get_sql_virtual_clusters_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).virtual_clusters
+
+
+def get_sql_instance_failover_groups_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).instance_failover_groups

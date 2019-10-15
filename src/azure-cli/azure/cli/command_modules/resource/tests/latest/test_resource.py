@@ -658,20 +658,22 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd('policy assignment delete -n {pan} -g {rg}')
         self.cmd('policy assignment list --disable-scope-strict-match', checks=self.check("length([?name=='{pan}'])", 0))
 
-    def applyPolicyAtScope(self, scope, policyId):
+    def applyPolicyAtScope(self, scope, policyId, enforcementMode='Default'):
         # create a policy assignment at the given scope
         self.kwargs.update({
             'pol': policyId,
             'pan': self.create_random_name('cli-test-polassg', 24),   # limit is 24 characters at MG scope
             'padn': self.create_random_name('test_assignment', 20),
-            'scope': scope
+            'scope': scope,
+            'em': enforcementMode
         })
 
-        self.cmd('policy assignment create --policy {pol} -n {pan} --display-name {padn} --params {params} --scope {scope}', checks=[
+        self.cmd('policy assignment create --policy {pol} -n {pan} --display-name {padn} --params {params} --scope {scope} --enforcement-mode {em}', checks=[
             self.check('name', '{pan}'),
             self.check('displayName', '{padn}'),
             self.check('sku.name', 'A0'),
-            self.check('sku.tier', 'Free')
+            self.check('sku.tier', 'Free'),
+            self.check('enforcementMode', '{em}')
         ])
 
         # delete the assignment and validate it's gone
@@ -748,7 +750,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.applyPolicyAtScope(scope, policy)
         elif subscription:
             policy = '/subscriptions/{sub}/providers/Microsoft.Authorization/policyDefinitions/{pn}'.format(sub=subscription, pn=self.kwargs['pn'])
-            self.applyPolicyAtScope('/subscriptions/{sub}'.format(sub=subscription), policy)
+            self.applyPolicyAtScope('/subscriptions/{sub}'.format(sub=subscription), policy, 'DoNotEnforce')
         else:
             self.applyPolicy()
 
@@ -783,6 +785,8 @@ class PolicyScenarioTest(ScenarioTest):
             self.kwargs.update({'mg': management_group})
         if (subscription):
             self.kwargs.update({'sub': subscription})
+
+        time.sleep(60)
 
         # create a policy
         cmd = self.cmdstring('policy definition create -n {pn} --rules {rf} --params {pdf} --display-name {pdn} --description {desc}', management_group, subscription)
@@ -912,11 +916,12 @@ class PolicyScenarioTest(ScenarioTest):
             'pan': self.create_random_name('azurecli-test-policy-assignment', 40),
             'bip': '06a78e20-9358-41c9-923c-fb736d382a4d',
             'sub': self.get_subscription_id(),
-            'location': resource_group_location
+            'location': resource_group_location,
+            'em': 'DoNotEnforce'
         })
 
         # create a policy assignment with managed identity using a built in policy definition
-        assignmentIdentity = self.cmd('policy assignment create --policy {bip} -n {pan} -g {rg} --location {location} --assign-identity', checks=[
+        assignmentIdentity = self.cmd('policy assignment create --policy {bip} -n {pan} -g {rg} --location {location} --assign-identity --enforcement-mode {em}', checks=[
             self.check('name', '{pan}'),
             self.check('location', '{location}'),
             self.check('identity.type', 'SystemAssigned'),

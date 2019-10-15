@@ -254,14 +254,18 @@ def _parse_image_argument(cmd, namespace):
 
     # 4 - attempt to match an URN alias (most likely)
     from azure.cli.command_modules.vm._actions import load_images_from_aliases_doc
-    images = load_images_from_aliases_doc(cmd.cli_ctx)
-    matched = next((x for x in images if x['urnAlias'].lower() == namespace.image.lower()), None)
-    if matched:
-        namespace.os_publisher = matched['publisher']
-        namespace.os_offer = matched['offer']
-        namespace.os_sku = matched['sku']
-        namespace.os_version = matched['version']
-        return 'urn'
+    import requests
+    try:
+        images = load_images_from_aliases_doc(cmd.cli_ctx)
+        matched = next((x for x in images if x['urnAlias'].lower() == namespace.image.lower()), None)
+        if matched:
+            namespace.os_publisher = matched['publisher']
+            namespace.os_offer = matched['offer']
+            namespace.os_sku = matched['sku']
+            namespace.os_version = matched['version']
+            return 'urn'
+    except requests.exceptions.ConnectionError:
+        pass
 
     # 5 - check if an existing managed disk image resource
     compute_client = _compute_client_factory(cmd.cli_ctx)
@@ -271,9 +275,15 @@ def _parse_image_argument(cmd, namespace):
                                            'images', 'Microsoft.Compute')
         return 'image_id'
     except CloudError:
-        err = 'Invalid image "{}". Use a valid image URN, custom image name, custom image id, VHD blob URI, or ' \
-              'pick an image from {}.\nSee vm create -h for more information on specifying an image.'
-        raise CLIError(err.format(namespace.image, [x['urnAlias'] for x in images]))
+        if images is not None:
+            err = 'Invalid image "{}". Use a valid image URN, custom image name, custom image id, ' \
+                  'VHD blob URI, or pick an image from {}.\nSee vm create -h for more information ' \
+                  'on specifying an image.'.format(namespace.image, [x['urnAlias'] for x in images])
+        else:
+            err = 'Failed to connect to remote source of image aliases. Invalid image "{}". Use a ' \
+                  'valid image URN, custom image name, custom image id, or VHD blob URI.\nSee vm ' \
+                  'create -h for more information on specifying an image.'.format(namespace.image)
+        raise CLIError(err)
 
 
 def _get_image_plan_info_if_exists(cmd, namespace):
@@ -825,11 +835,15 @@ def _validate_vm_vmss_create_public_ip(cmd, namespace):
         namespace.public_ip_address_type = 'new'
         logger.debug('new public IP address will be created')
 
+    from azure.cli.core.profiles import ResourceType
+    PublicIPAddressSkuName, IPAllocationMethod = cmd.get_models('PublicIPAddressSkuName', 'IPAllocationMethod',
+                                                                resource_type=ResourceType.MGMT_NETWORK)
+    # Use standard public IP address automatically when using zones.
+    if hasattr(namespace, 'zone') and namespace.zone is not None:
+        namespace.public_ip_sku = PublicIPAddressSkuName.standard.value
+
     # Public-IP SKU is only exposed for VM. VMSS has no such needs so far
     if getattr(namespace, 'public_ip_sku', None):
-        from azure.cli.core.profiles import ResourceType
-        PublicIPAddressSkuName, IPAllocationMethod = cmd.get_models('PublicIPAddressSkuName', 'IPAllocationMethod',
-                                                                    resource_type=ResourceType.MGMT_NETWORK)
         if namespace.public_ip_sku == PublicIPAddressSkuName.standard.value:
             if not namespace.public_ip_address_allocation:
                 namespace.public_ip_address_allocation = IPAllocationMethod.static.value
@@ -1287,6 +1301,7 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_vm_vmss_create_auth(namespace)
     _validate_vm_vmss_msi(cmd, namespace)
     _validate_proximity_placement_group(cmd, namespace)
+    _validate_vmss_terminate_notification(cmd, namespace)
 
     if namespace.secrets:
         _validate_secrets(namespace.secrets, namespace.os_type)
@@ -1306,6 +1321,7 @@ def validate_vmss_update_namespace(cmd, namespace):  # pylint: disable=unused-ar
         if namespace.protect_from_scale_in is not None or namespace.protect_from_scale_set_actions is not None:
             raise CLIError("usage error: protection policies can only be applied to VM instances within a VMSS."
                            " Please use --instance-id to specify a VM instance")
+    _validate_vmss_update_terminate_notification_related(cmd, namespace)
 # endregion
 
 
@@ -1489,3 +1505,24 @@ def process_vm_vmss_stop(cmd, namespace):  # pylint: disable=unused-argument
     else:
         logger.warning("About to power off the specified VM...\nIt will continue to be billed. "
                        "To deallocate a VM, run: az vm deallocate.")
+
+
+def _validate_vmss_update_terminate_notification_related(cmd, namespace):  # pylint: disable=unused-argument
+    """
+    Validate vmss update enable_terminate_notification and terminate_notification_time.
+    If terminate_notification_time is specified, enable_terminate_notification should not be false
+    If enable_terminate_notification is true, must specify terminate_notification_time
+    """
+    if namespace.enable_terminate_notification is False and namespace.terminate_notification_time is not None:
+        raise CLIError("usage error: please enable --enable-terminate-notification")
+    if namespace.enable_terminate_notification is True and namespace.terminate_notification_time is None:
+        raise CLIError("usage error: please set --terminate-notification-time")
+    _validate_vmss_terminate_notification(cmd, namespace)
+
+
+def _validate_vmss_terminate_notification(cmd, namespace):  # pylint: disable=unused-argument
+    """
+    Transform minutes to ISO 8601 formmat
+    """
+    if namespace.terminate_notification_time is not None:
+        namespace.terminate_notification_time = 'PT' + namespace.terminate_notification_time + 'M'

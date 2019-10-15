@@ -63,6 +63,12 @@ class MonitorTests(ScenarioTest):
         self.cmd('monitor metrics alert list -g {rg}',
                  checks=self.check('length(@)', 0))
 
+        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {sa_id} --action {ag1} --description "Test2" --condition "avg SuccessE2ELatency > 250 where ApiName includes GetBlob: or PutBlob"', checks=[
+            self.check('description', 'Test2'),
+            self.check('severity', 2),
+            self.check('length(criteria.allOf)', 1),
+            self.check('criteria.allOf[0].dimensions[0].values[0]', 'GetBlob:'),
+        ])
         # test appservice plan with dimensions *
         self.cmd('appservice plan create -g {rg} -n {plan}')
         self.kwargs['app_id'] = self.cmd('webapp create -g {rg} -n {app} -p plan1').get_output_in_json()['id']

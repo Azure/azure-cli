@@ -89,8 +89,7 @@ class AppConfigCredentialScenarioTest(ScenarioTest):
         })
 
         self.cmd('appconfig credential regenerate -n {config_store_name} -g {rg} --id {id}',
-                 checks=[self.check('name', credential_list[0]['name']),
-                         self.check('id', credential_list[0]['id'])])
+                 checks=[self.check('name', credential_list[0]['name'])])
 
 
 class AppConfigKVScenarioTest(ScenarioTest):

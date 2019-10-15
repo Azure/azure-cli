@@ -16,6 +16,7 @@ from azure.cli.core.commands.parameters import (
     get_enum_type
 )
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
+from .policy import RetentionType
 
 from ._constants import (
     REGISTRY_RESOURCE_TYPE,
@@ -77,11 +78,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('repository', help='The repository name for a manifest-only copy of images. Multiple copies supported by passing --repository multiple times.', action='append')
         c.argument('force', help='Overwrite the existing tag of the image to be imported.', action='store_true')
 
-    with self.argument_context('acr config') as c:
-        c.argument('status', help="Indicates whether content-trust is enabled or disabled.", arg_type=get_enum_type(PolicyStatus))
+    with self.argument_context('acr config content-trust') as c:
+        c.argument('registry_name', options_list=['--registry', '-r', c.deprecate(target='-n', redirect='-r', hide=True), c.deprecate(target='--name', redirect='--registry', hide=True)])
+        c.argument('status', help="Indicates whether content-trust is enabled.", arg_type=get_enum_type(PolicyStatus))
 
     with self.argument_context('acr config retention') as c:
+        c.argument('status', help="Indicates whether retention policy is enabled.", arg_type=get_enum_type(PolicyStatus))
+        c.argument('registry_name', options_list=['--registry', '-r'])
         c.argument('days', type=int, help='The number of days to retain an untagged manifest after which it gets purged (Range: 0 to 365). Value "0" will delete untagged manifests immediately.', validator=validate_retention_days, default=7)
+        c.argument('policy_type', options_list=['--type'], help='The type of retention policy.', arg_type=get_enum_type(RetentionType))
 
     with self.argument_context('acr login') as c:
         c.argument('resource_group_name', deprecate_info=c.deprecate(hide=True))

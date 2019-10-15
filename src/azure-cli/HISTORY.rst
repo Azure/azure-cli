@@ -3,6 +3,124 @@
 Release History
 ===============
 
+2.0.75
+++++++
+
+**AKS**
+
+* Set `--load-balancer-sku` default value to standard if supported by the kubernetes version
+* Set `--vm-set-type` default value to virtualmachinescalesets if supported by the kubernetes version
+
+**AMS**
+
+* BREAKING CHANGE:
+    content-key-policy create:
+        - Changed parameter --ask from utf-8 string to 32 character hex string.
+    job start:
+        - Changed the command from `job start` to `job create`.
+    
+**AppConfig**
+
+* Using & in authorization header
+* Adding api-version to all requests
+* Upgrading SDK Version to 1.0.0
+
+**AppService**
+
+* Added "webapp config access-restriction show | set | add | remove"
+* az webapp up updated for better error-handling
+* az appservice plan update support Isolated SKU
+
+**ARM**
+
+* az deployment create: Add --handle-extended-json-format parameter to support multiline and comments in json template.
+
+**Compute**
+
+* vm create: Add --enable-agent configuration.
+* vm create: Use standard public IP SKU automatically when using zones.
+* vm create: Compose a valid computer name from VM name if computer name is not provided.
+* vmss create: Add --computer-name-prefix parameter to support custom computer name prefix of virtual machines in the VMSS.
+* Update galleries API version to 2019-07-01.
+* vm create: Add --workspace to enable log analytics workspace automatically.
+
+**IoT**
+
+* Fix #2116: Unexpected 'az iot hub show' error for resource not found.
+
+**Monitor**
+
+* az monitor log-analytics workspace: Support CRUD for Azure log analytics workspace.
+
+**Network**
+
+* az network private-dns link vnet create/update: Fixes #9851. Support cross-tenant virtual network linking.
+* [BREAKING CHANGE] network vnet subnet list: Fix #10401. `--resource-group` and `--vnet-name` are required now.
+
+**SQL**
+
+* New Cmdlets for sql mi ad-admin that supports setting AAD administrator on Managed instance
+
+**Storage**
+
+* az storage copy: Add --preserve-s2s-access-tier parameter to preserve access tier during service to service copy.
+* az storage account create/update: Add --enable-large-file-share parameter to support large file shares for storage account.
+
+2.0.74
+++++++
+
+**ACR**
+
+* Added a required `--type` parameter to command `az acr config retention update`
+* Param `-n, --name` changed to `-r, --registry` for `az acr config` command group.
+
+**AKS**
+
+* Add `--load-balancer-sku`, `--load-balancer-managed-outbound-ip-count`, `--load-balancer-outbound-ips` and `--load-balancer-outbound-ip-prefixes` to `az aks create` command, which allows for creating AKS cluster with SLB.
+* Add `--load-balancer-managed-outbound-ip-count`, `--load-balancer-outbound-ips` and `--load-balancer-outbound-ip-prefixes` to `az aks update` command, which allows for updating load balancer profile of an AKS cluster with SLB.
+* Add `--vm-set-type` to `az aks create` command, which allows to specify vm types of an AKS Cluster (vmas or vmss).
+
+**ARM**
+
+* az group deployment create: Add --handle-extended-json-format to support multiline and comments in json template
+* Update azure-mgmt-resource package to use 4.0.0
+
+**Compute**
+
+* vmss create: Add --terminate-notification-time parameters to support terminate scheduled event configurability.
+* vmss update: Add --enable-terminate-notification and --terminate-notification-time parameters to support terminate scheduled event configurability.
+* Update azure-mgmt-compute version to 8.0.0.
+* vm/vmss create: Support --priority, --eviction-policy, --max-billing parameters.
+* disk create: Allow specifying the exact size of the upload for customers who upload their disks directly.
+* snapshot create: Support incremental snapshots for managed disks.
+
+**Cosmos DB**
+
+* Add `--type <key-type>` to `az cosmosdb keys list` command to show key, read only keys or connection strings
+* Add `regenerate` to `az cosmosdb keys` group
+* Deprecate `az cosmosdb list-connection-strings`, `az cosmosdb regenerate-key` and `az cosmosdb list-read-only-keys`
+
+**EventGrid**
+
+* Fix the endpoint help text to refer to the right parameter (namely, to point to parameter `--endpoint` rather than `--endpoint-type` in event subscription commands).
+
+**Key Vault**
+
+* Fix #8840: When using tenant domain name in `az login -t`, `keyvault create` fails. Tenant domain name is now resolved to GUID if it is not.
+
+**Monitor**
+
+* monitor metrics alert create: Fix #9901. Support special character `:` in `--condition` argument.
+
+**Policy**
+
+* Support for Policy new API version 2019-06-01.
+* az policy assignment create: Add `--enforcement-mode` parameter for `az policy assignment create` command.
+
+**Storage**
+
+* Add --blob-type parameter for `az storage copy` command
+
 2.0.73
 ++++++
 
@@ -29,6 +147,7 @@ Release History
 **AppService**
 
 * az webapp deployment source config-zip support for connection_verify
+* Add support for ACR images with az webapp create
 
 **Batch**
 
@@ -89,6 +208,10 @@ Release History
 
 * Fixed az webapp webjob continuous start command when specifying a slot.
 * az webapp up detects env folder and removes it from compressed file used for deployment
+
+**Backup**
+
+* Added Support for managed disk restore, InstantRP
 
 **keyvault**
 

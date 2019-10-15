@@ -21,8 +21,10 @@ DOCKER_PULL_SUCCEEDED = "Downloaded newer image for {}"
 DOCKER_IMAGE_UP_TO_DATE = "Image is up to date for {}"
 IMAGE = "mcr.microsoft.com/mcr/hello-world:latest"
 FAQ_MESSAGE = "\nPlease refer to https://aka.ms/acr/health-check for more information."
+ERROR_MSG_DEEP_LINK = "\nPlease refer to https://aka.ms/acr/errors#{} for more information."
 MIN_HELM_VERSION = "2.11.0"
 HELM_VERSION_REGEX = re.compile(r'SemVer:"v([.\d]+)"', re.I)
+ACR_CHECK_HEALTH_MSG = "Try running 'az acr check-health -n {} --yes' to diagnose this issue."
 
 
 # Utilities functions
@@ -36,7 +38,8 @@ def _handle_error(error, ignore_errors):
     if ignore_errors:
         logger.error(error.get_error_message())
     else:
-        raise CLIError(error.get_error_message(FAQ_MESSAGE))
+        error_msg = ERROR_MSG_DEEP_LINK.format(error.error_title.lower())
+        raise CLIError(error.get_error_message(error_msg))
 
 
 def _subprocess_communicate(command_parts, shell=False):
@@ -196,7 +199,7 @@ def _get_registry_status(login_server, registry_name, ignore_errors):
     print_pass("DNS lookup to {} at IP {}".format(login_server, registry_ip))
 
     import requests
-    from requests.exceptions import SSLError
+    from requests.exceptions import SSLError, RequestException
     from azure.cli.core.util import should_disable_connection_verify
 
     try:
@@ -204,6 +207,10 @@ def _get_registry_status(login_server, registry_name, ignore_errors):
     except SSLError:
         from ._errors import CONNECTIVITY_SSL_ERROR
         _handle_error(CONNECTIVITY_SSL_ERROR.format_error_message(login_server), ignore_errors)
+        return False
+    except RequestException:
+        from ._errors import CONNECTIVITY_CHALLENGE_ERROR
+        _handle_error(CONNECTIVITY_CHALLENGE_ERROR.format_error_message(login_server), ignore_errors)
         return False
 
     if challenge.status_code == 403:

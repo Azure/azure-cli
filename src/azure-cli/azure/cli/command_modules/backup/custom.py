@@ -114,6 +114,22 @@ def list_associated_items_for_policy(client, resource_group_name, vault_name, na
 def set_policy(client, resource_group_name, vault_name, policy):
     policy_object = _get_policy_from_json(client, policy)
 
+    error_message = "For SnapshotRetentionRangeInDays, the minimum value is 1 and"\
+                    "maximum is 5. For weekly backup policies, the only allowed value is 5 "\
+                    ". Please set the value accordingly."
+
+    if policy_object.properties.schedule_policy.schedule_run_frequency == "Weekly":
+        if policy_object.properties.instant_rp_retention_range_in_days is not None:
+            if policy_object.properties.instant_rp_retention_range_in_days != 5:
+                logger.error(error_message)
+        else:
+            policy_object.properties.instant_rp_retention_range_in_days = 5
+    else:
+        if policy_object.properties.instant_rp_retention_range_in_days is not None:
+            if not 1 <= policy_object.properties.instant_rp_retention_range_in_days <= 5:
+                logger.error(error_message)
+        else:
+            policy_object.properties.instant_rp_retention_range_in_days = 2
     return client.create_or_update(vault_name, resource_group_name, policy_object.name, policy_object)
 
 
@@ -239,6 +255,10 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, contain
             Use the relevant get-default policy command and use it to update the policy for the workload.
             """)
 
+    # throw error if policy has more than 100 protected VMs.
+    if policy.properties.protected_items_count >= 100:
+        raise CLIError("Cannot configure backup for more than 100 VMs per policy")
+
     # Get container and item URIs
     container_uri = _get_protection_container_uri_from_id(item.id)
     item_uri = _get_protected_item_uri_from_id(item.id)
@@ -340,7 +360,7 @@ def _should_use_original_storage_account(recovery_point, restore_to_staging_stor
 
 
 def restore_disks(cmd, client, resource_group_name, vault_name, container_name, item_name, rp_name, storage_account,
-                  restore_to_staging_storage_account=None):
+                  target_resource_group=None, restore_to_staging_storage_account=None):
     item = show_item(cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name, container_name,
                      item_name, "AzureIaasVM", "VM")
     _validate_item(item)
@@ -367,12 +387,16 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
     sa_name, sa_rg = _get_resource_name_and_rg(resource_group_name, storage_account)
     _storage_account_id = _get_storage_account_id(cmd.cli_ctx, sa_name, sa_rg)
     _source_resource_id = item.properties.source_resource_id
+    target_rg_id = None
+    if recovery_point.properties.is_managed_virtual_machine and target_resource_group is not None:
+        target_rg_id = '/'.join(_source_resource_id.split('/')[:4]) + "/" + target_resource_group
     trigger_restore_properties = IaasVMRestoreRequest(create_new_cloud_service=True,
                                                       recovery_point_id=rp_name,
                                                       recovery_type='RestoreDisks',
                                                       region=vault_location,
                                                       storage_account_id=_storage_account_id,
                                                       source_resource_id=_source_resource_id,
+                                                      target_resource_group_id=target_rg_id,
                                                       original_storage_account_option=use_original_storage_account)
     trigger_restore_request = RestoreRequestResource(properties=trigger_restore_properties)
 

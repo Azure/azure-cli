@@ -183,7 +183,7 @@ class ItemPreparer(AbstractPreparer, SingleValueReplacer):
 class PolicyPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='clitest-item', parameter_name='policy_name', vault_parameter_name='vault_name',
                  resource_group_parameter_name='resource_group',
-                 dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_POLICY_NAME'):
+                 instant_rp_days=None):
         super(PolicyPreparer, self).__init__(name_prefix, 24)
         from azure.cli.core.mock import DummyCli
         self.cli_ctx = DummyCli()
@@ -192,23 +192,25 @@ class PolicyPreparer(AbstractPreparer, SingleValueReplacer):
         self.resource_group_parameter_name = resource_group_parameter_name
         self.vault = None
         self.vault_parameter_name = vault_parameter_name
-        self.dev_setting_value = os.environ.get(dev_setting_name, None)
+        self.instant_rp_days = instant_rp_days
 
     def create_resource(self, name, **kwargs):
-        if not self.dev_setting_value:
+        if not os.environ.get('AZURE_CLI_TEST_DEV_BACKUP_POLICY_NAME', None):
             self.resource_group = self._get_resource_group(**kwargs)
             self.vault = self._get_vault(**kwargs)
 
             policy_json = execute(self.cli_ctx, 'az backup policy show -g {} -v {} -n {}'
                                   .format(self.resource_group, self.vault, 'DefaultPolicy')).get_output_in_json()
             policy_json['name'] = name
+            if self.instant_rp_days:
+                policy_json['properties']['instantRpRetentionRangeInDays'] = self.instant_rp_days
             policy_json = json.dumps(policy_json)
 
             execute(self.cli_ctx, 'az backup policy set -g {} -v {} --policy \'{}\''.format(self.resource_group,
                                                                                             self.vault,
                                                                                             policy_json))
             return {self.parameter_name: name}
-        return {self.parameter_name: self.dev_setting_value}
+        return {self.parameter_name: os.environ.get('AZURE_CLI_TEST_DEV_BACKUP_POLICY_NAME', None)}
 
     def remove_resource(self, name, **kwargs):
         # Vault deletion will take care of this.

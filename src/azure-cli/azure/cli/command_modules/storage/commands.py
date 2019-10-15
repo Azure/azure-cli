@@ -9,7 +9,7 @@ from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_co
                                                                cloud_storage_account_service_factory,
                                                                multi_service_properties_factory,
                                                                cf_mgmt_policy,
-                                                               cf_blob_data_gen_update)
+                                                               cf_blob_data_gen_update, cf_sa_for_keys)
 from azure.cli.command_modules.storage.sdkutil import cosmosdb_table_exists
 from azure.cli.command_modules.storage._format import transform_immutability_policy
 from azure.cli.core.commands import CliCommandType
@@ -21,6 +21,12 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     storage_account_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.storage.operations#StorageAccountsOperations.{}',
         client_factory=cf_sa,
+        resource_type=ResourceType.MGMT_STORAGE
+    )
+
+    storage_account_sdk_keys = CliCommandType(
+        operations_tmpl='azure.mgmt.storage.operations#StorageAccountsOperations.{}',
+        client_factory=cf_sa_for_keys,
         resource_type=ResourceType.MGMT_STORAGE
     )
 
@@ -71,6 +77,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                          'show_storage_account_connection_string')
         g.generic_update_command('update', getter_name='get_properties', setter_name='update',
                                  custom_func_name='update_storage_account', min_api='2016-12-01')
+
+    with self.command_group('storage account', storage_account_sdk_keys, resource_type=ResourceType.MGMT_STORAGE) as g:
         g.command('keys renew', 'regenerate_key',
                   transform=lambda x: getattr(x, 'keys', x))
         g.command('keys list', 'list_keys',

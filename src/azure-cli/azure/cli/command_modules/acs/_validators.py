@@ -129,3 +129,38 @@ def validate_max_pods(namespace):
     if namespace.max_pods != 0 and namespace.max_pods < minimum_pods_required:
         raise CLIError('--max-pods must be at least {} for a managed Kubernetes cluster to function.'
                        .format(minimum_pods_required))
+
+
+def validate_vm_set_type(namespace):
+    """Validates the vm set type string."""
+    if namespace.vm_set_type is not None:
+        if namespace.vm_set_type == '':
+            return
+        if namespace.vm_set_type.lower() != "availabilityset" and \
+                namespace.vm_set_type.lower() != "virtualmachinescalesets":
+            raise CLIError("--vm-set-type can only be VirtualMachineScaleSets or AvailabilitySet")
+
+
+def validate_load_balancer_sku(namespace):
+    """Validates the load balancer sku string."""
+    if namespace.load_balancer_sku is not None:
+        if namespace.load_balancer_sku == '':
+            return
+        if namespace.load_balancer_sku.lower() != "basic" and namespace.load_balancer_sku.lower() != "standard":
+            raise CLIError("--load-balancer-sku can only be standard or basic")
+
+
+def validate_load_balancer_outbound_ips(namespace):
+    """validate load balancer profile outbound IP ids"""
+    if namespace.load_balancer_outbound_ips is not None:
+        ip_id_list = [x.strip() for x in namespace.load_balancer_outbound_ips.split(',')]
+        if not all(ip_id_list):
+            raise CLIError("--load-balancer-outbound-ips cannot contain whitespace")
+
+
+def validate_load_balancer_outbound_ip_prefixes(namespace):
+    """validate load balancer profile outbound IP prefix ids"""
+    if namespace.load_balancer_outbound_ip_prefixes is not None:
+        ip_prefix_id_list = [x.strip() for x in namespace.load_balancer_outbound_ip_prefixes.split(',')]
+        if not all(ip_prefix_id_list):
+            raise CLIError("--load-balancer-outbound-ip-prefixes cannot contain whitespace")

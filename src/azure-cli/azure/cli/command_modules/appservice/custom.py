@@ -61,11 +61,11 @@ from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES, LINUX_RUNTIMES, WINDOWS_
 from ._client_factory import web_client_factory, ex_handler_factory
 from ._appservice_utils import _generic_site_operation
 from .utils import _normalize_sku, get_sku_name
-from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group,
-                           should_create_new_rg, set_location, should_create_new_app,
-                           get_lang_from_content, get_num_apps_in_asp)
-from ._constants import (NODE_RUNTIME_NAME, OS_DEFAULT, STATIC_RUNTIME_NAME, PYTHON_RUNTIME_NAME,
-                         RUNTIME_TO_IMAGE, NODE_VERSION_DEFAULT)
+from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
+                           should_create_new_rg, set_location, does_app_already_exist, get_profile_username,
+                           get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
+                           detect_os_form_src)
+from ._constants import (RUNTIME_TO_IMAGE, NODE_VERSION_DEFAULT)
 
 logger = get_logger(__name__)
 
@@ -75,12 +75,16 @@ logger = get_logger(__name__)
 # Please maintain compatibility in both interfaces and functionalities"
 
 
-def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_file=None,  # pylint: disable=too-many-statements
+def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_file=None,  # pylint: disable=too-many-statements,too-many-branches
                   deployment_container_image_name=None, deployment_source_url=None, deployment_source_branch='master',
-                  deployment_local_git=None, multicontainer_config_type=None, multicontainer_config_file=None,
-                  tags=None):
+                  deployment_local_git=None, docker_registry_server_password=None, docker_registry_server_user=None,
+                  multicontainer_config_type=None, multicontainer_config_file=None, tags=None,
+                  using_webapp_up=False, language=None):
     if deployment_source_url and deployment_local_git:
         raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
+
+    docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
+
     client = web_client_factory(cmd.cli_ctx)
     if is_valid_resource_id(plan):
         parse_result = parse_resource_id(plan)
@@ -144,6 +148,12 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     if site_config.app_settings:
         for setting in site_config.app_settings:
             logger.info('Will set appsetting %s', setting)
+    if using_webapp_up:  # when the routine is invoked as a help method for webapp up
+        logger.info("will set appsetting for enabling build")
+        site_config.app_settings.append(NameValuePair(name="SCM_DO_BUILD_DURING_DEPLOYMENT", value=True))
+    if language is not None and language.lower() == 'dotnetcore':
+        site_config.app_settings.append(NameValuePair(name='ANCM_ADDITIONAL_ERROR_PAGE_LINK',
+                                                      value='https://{}.scm.azurewebsites.net/detectors'.format(name)))
 
     poller = client.web_apps.create_or_update(resource_group_name, name, webapp_def)
     webapp = LongRunningOperation(cmd.cli_ctx)(poller)
@@ -154,6 +164,11 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
 
     _fill_ftp_publishing_url(cmd, webapp, resource_group_name, name)
 
+    if deployment_container_image_name:
+        update_container_settings(cmd, resource_group_name, name, docker_registry_server_url,
+                                  deployment_container_image_name, docker_registry_server_user,
+                                  docker_registry_server_password=docker_registry_server_password)
+
     return webapp
 
 
@@ -163,6 +178,16 @@ def validate_container_app_create_options(runtime=None, deployment_container_ima
         return False
     opts = [runtime, deployment_container_image_name, multicontainer_config_type]
     return len([x for x in opts if x]) == 1  # you can only specify one out the combinations
+
+
+def parse_docker_image_name(deployment_container_image_name):
+    if not deployment_container_image_name:
+        return None
+    slash_ix = deployment_container_image_name.rfind('/')
+    docker_registry_server_url = deployment_container_image_name[0:slash_ix]
+    if slash_ix == -1 or ("." not in docker_registry_server_url and ":" not in docker_registry_server_url):
+        return None
+    return docker_registry_server_url
 
 
 def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None, slot_settings=None):
@@ -2474,7 +2499,6 @@ def add_hc(cmd, name, resource_group_name, namespace, hybrid_connection, slot=No
 
     hy_co_keys = hy_co_client.list_keys(hy_co_resource_group, namespace, hybrid_connection, "defaultSender")
     hy_co_info = hy_co.id
-    print(hy_co.user_metadata)
     hy_co_metadata = ast.literal_eval(hy_co.user_metadata)
     hy_co_hostname = ''
     for x in hy_co_metadata:
@@ -2742,227 +2766,143 @@ def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, sl
     return client.web_apps.list_triggered_web_job_history(resource_group_name, name, webjob_name)
 
 
-def webapp_up(cmd, name, resource_group_name=None, plan=None,  # pylint: disable=too-many-statements, too-many-branches
-              location=None, sku=None, dryrun=False, logs=False, launch_browser=False):
+def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku=None, dryrun=False, logs=False,  # pylint: disable=too-many-statements,
+              launch_browser=False):
     import os
-    from azure.cli.core._profile import Profile
-    client = web_client_factory(cmd.cli_ctx)
-    # the code to deploy is expected to be the current directory the command is running from
     src_dir = os.getcwd()
-    user = Profile().get_current_account_user()
-    user = user.split('@', 1)[0]
-    if len(user.split('#', 1)) > 1:  # on cloudShell user is in format live.com#user@domain.com
-        user = user.split('#', 1)[1]
-    logger.info("UserPrefix to use '%s'", user)
-    # if dir is empty, show a message in dry run
-    do_deployment = not os.listdir(src_dir) == []
-    _create_new_rg = True
-    _create_new_asp = True
-    _create_new_app = True
-    _set_build_app_setting = False
-
-    # determine the details for app to be created from src contents
+    _src_path_escaped = "{}".format(src_dir.replace(os.sep, os.sep + os.sep))
+    client = web_client_factory(cmd.cli_ctx)
+    user = get_profile_username()
+    _create_new_rg = False
+    _create_new_app = does_app_already_exist(cmd, name)
+    os_name = detect_os_form_src(src_dir)
     lang_details = get_lang_from_content(src_dir)
-    # we support E2E create and deploy for selected stacks, any other stack, set defaults for os & runtime
-    # and skip deployment
     language = lang_details.get('language')
-    if not language:
-        do_deployment = False
-        sku = sku or 'F1'
-        os_val = OS_DEFAULT
-        detected_version = '-'
-        runtime_version = '-'
-    else:
-        # update SKU to user set value
-        if sku is None:
-            sku = lang_details.get("default_sku")
+
+    # detect the version
+    data = get_runtime_version_details(lang_details.get('file_loc'), language)
+    version_used_create = data.get('to_create')
+    detected_version = data.get('detected')
+    runtime_version = "{}|{}".format(language, version_used_create) if \
+        version_used_create != "-" else version_used_create
+    site_config = None
+    if not _create_new_app:  # App exists
+        # Get the ASP & RG info, if the ASP & RG parameters are provided we use those else we need to find those
+        logger.warning("Webapp %s already exits. The command will deploy contents to the existing app", name)
+        app_details = get_app_details(cmd, name)
+        current_rg = app_details.resource_group
+        if resource_group_name is not None and (resource_group_name.lower() != current_rg.lower()):
+            raise CLIError("The webapp {} exists in ResourceGroup {} and does not match the value entered {}. Please "
+                           "re-run command with the correct parameters.". format(name, current_rg, resource_group_name))
+        rg_name = resource_group_name or current_rg
+        if location is None:
+            loc = app_details.location.replace(" ", "").lower()
         else:
-            logger.info("Found sku argument, skipping use default sku")
-            sku = sku
-        is_skip_build = language.lower() == STATIC_RUNTIME_NAME
-        os_val = "Linux" if language.lower() == NODE_RUNTIME_NAME \
-            or language.lower() == PYTHON_RUNTIME_NAME else OS_DEFAULT
-        # detect the version
-        data = get_runtime_version_details(lang_details.get('file_loc'), language)
-        version_used_create = data.get('to_create')
-        detected_version = data.get('detected')
-        runtime_version = "{}|{}".format(language, version_used_create) if \
-            version_used_create != "-" else version_used_create
-    full_sku = get_sku_name(sku)
-    location = set_location(cmd, sku, location)
-    loc_name = location.replace(" ", "").lower()
-    is_linux = os_val == 'Linux'
-
-    if resource_group_name is None:
-        logger.info('Using default ResourceGroup value')
-        rg_name = "{}_rg_{}_{}".format(user, os_val, loc_name)
-    else:
-        logger.info("Found user input for ResourceGroup %s", resource_group_name)
-        rg_name = resource_group_name
-
-    if plan is None:
-        logger.info('Using default appserviceplan value')
-        asp = "{}_asp_{}_{}_0".format(user, os_val, loc_name)
-        _asp_generic = asp[:-len(asp.split("_")[4])]  # used to determine if a new ASP needs to be created
-    else:
-        asp = plan
-        _asp_generic = asp
-    _create_new_rg = should_create_new_rg(cmd, rg_name, is_linux)
-    logger.info("Should create new RG %s", _create_new_rg)
-    src_path = "{}".format(src_dir.replace("\\", "\\\\"))
-    rg_str = "{}".format(rg_name)
+            loc = location.replace(" ", "").lower()
+        plan_details = parse_resource_id(app_details.server_farm_id)
+        current_plan = plan_details['name']
+        if plan is not None and current_plan.lower() != plan.lower():
+            raise CLIError("The plan name entered {} does not match the plan name that the webapp is hosted in {}."
+                           "Please check if you have configured defaults for plan name and re-run command."
+                           .format(plan, current_plan))
+        plan = plan or plan_details['name']
+        plan_info = client.app_service_plans.get(rg_name, plan)
+        sku = plan_info.sku.name if isinstance(plan_info, AppServicePlan) else 'Free'
+        current_os = 'Linux' if plan_info.reserved else 'Windows'
+        # Raise error if current OS of the app is different from the current one
+        if current_os.lower() != os_name.lower():
+            raise CLIError("The webapp {} is a {} app. The code detected at '{}' will default to "
+                           "'{}'. "
+                           "Please create a new app to continue this operation.".format(name, current_os, src_dir, os))
+        _is_linux = plan_info.reserved
+        # for an existing app check if the runtime version needs to be updated
+        # Get site config to check the runtime version
+        site_config = client.web_apps.get_configuration(rg_name, name)
+    else:  # need to create new app, check if we need to use default RG or use user entered values
+        logger.warning("webapp %s doesn't exist", name)
+        sku = get_sku_to_use(src_dir, sku)
+        loc = set_location(cmd, sku, location)
+        rg_name = get_rg_to_use(cmd, user, loc, os_name, resource_group_name)
+        _is_linux = os_name.lower() == 'linux'
+        _create_new_rg = should_create_new_rg(cmd, rg_name, _is_linux)
+        plan = get_plan_to_use(cmd, user, os_name, loc, sku, rg_name, _create_new_rg, plan)
     dry_run_str = r""" {
-            "name" : "%s",
-            "appserviceplan" : "%s",
-            "resourcegroup" : "%s",
-            "sku": "%s",
-            "os": "%s",
-            "location" : "%s",
-            "src_path" : "%s",
-            "version_detected": "%s",
-            "runtime_version": "%s"
-            }
-            """ % (name, asp, rg_str, full_sku, os_val, location, src_path,
-                   detected_version, runtime_version)
+                "name" : "%s",
+                "appserviceplan" : "%s",
+                "resourcegroup" : "%s",
+                "sku": "%s",
+                "os": "%s",
+                "location" : "%s",
+                "src_path" : "%s",
+                "version_detected": "%s",
+                "runtime_version": "%s"
+                }
+                """ % (name, plan, rg_name, get_sku_name(sku), os_name, loc, _src_path_escaped, detected_version,
+                       runtime_version)
     create_json = json.loads(dry_run_str)
+
     if dryrun:
         logger.warning("Web app will be created with the below configuration,re-run command "
                        "without the --dryrun flag to create & deploy a new app")
         return create_json
 
-    # create RG if the RG doesn't already exist
     if _create_new_rg:
         logger.warning("Creating Resource group '%s' ...", rg_name)
         create_resource_group(cmd, rg_name, location)
         logger.warning("Resource group creation complete")
-        _create_new_asp = True
-    else:
-        logger.warning("Resource group '%s' already exists.", rg_name)
-        # get all asp in the RG
-        logger.warning("Verifying if the plan with the same sku exists or should create a new plan")
-        data = (list(filter(lambda x: _asp_generic in x.name,
-                            client.app_service_plans.list_by_resource_group(rg_name))))
-        data_sorted = (sorted(data, key=lambda x: x.name))
-        num_asps = len(data)
-        # check if any of these matches the SKU & location to be used
-        # and get FirstOrDefault
-        selected_asp = next((a for a in data if isinstance(a.sku, SkuDescription) and
-                             a.sku.tier.lower() == full_sku.lower() and
-                             (a.location.replace(" ", "").lower() == location.lower() or a.location == location)), None)
-        if selected_asp is not None:
-            asp = selected_asp.name
-            _create_new_asp = False
-        elif selected_asp is None and num_asps > 0:
-            # from the sorted data pick the last one & check if a new ASP needs to be created
-            # based on SKU or not
-            _plan_info = data_sorted[num_asps - 1]
-            if plan is None:
-                _asp_num = int(_plan_info.name.split('_')[4]) + 1
-                asp = "{}_asp_{}_{}_{}".format(user, os_val, loc_name, _asp_num)
-            else:
-                asp = plan
+        # create ASP
+        logger.warning("Creating AppServicePlan '%s' ...", plan)
+    # we will always call the ASP create or update API so that in case of re-deployment, if the SKU or plan setting are
+    # updated we update those
+    create_app_service_plan(cmd, rg_name, plan, _is_linux, False, sku, 1 if _is_linux else None, location)
 
-    # create new ASP if an existing one cannot be used
-    if _create_new_asp:
-        logger.warning("Creating App service plan '%s' ...", asp)
-        create_app_service_plan(cmd, rg_name, asp, is_linux, None, sku, 1 if is_linux else None, location)
-        logger.warning("App service plan creation complete")
-        create_json['appserviceplan'] = asp
-        _create_new_app = True
-        _show_too_many_apps_warn = False
-    else:
-        logger.warning("App service plan '%s' already exists.", asp)
-        _show_too_many_apps_warn = get_num_apps_in_asp(cmd, rg_name, asp) > 5
-        _create_new_app = should_create_new_app(cmd, rg_name, name)
-    # create the app
     if _create_new_app:
-        logger.warning("Creating app '%s' ...", name)
-        create_webapp(cmd, rg_name, name, asp, runtime_version if is_linux else None, tags={"cli": 'webapp_up'})
-        logger.warning("Webapp creation complete")
-        create_json['name'] = name
-        _set_build_app_setting = True
-        # Update appSettings for netcore apps
-        if language == 'dotnetcore':
-            update_app_settings(cmd, rg_name, name, ['ANCM_ADDITIONAL_ERROR_PAGE_LINK=' +
-                                                     'https://{}.scm.azurewebsites.net/detectors'.format(name)])
-
-        # Configure default logging
+        logger.warning("Creating webapp '%s' ...", name)
+        create_webapp(cmd, rg_name, name, plan, runtime_version if _is_linux else None, tags={"cli": 'webapp_up'},
+                      using_webapp_up=True, language=language)
         _configure_default_logging(cmd, rg_name, name)
-        if _show_too_many_apps_warn:
-            logger.warning("There are sites that have been deployed to the same hosting "
-                           "VM of this region, to prevent performance impact please "
-                           "delete existing site(s) or switch to a different default resource group "
-                           "using 'az configure' command")
-    else:
-        logger.warning("App '%s' already exists", name)
-        # for an existing app check if the runtime version needs to be updated
-        # Get site config to check the runtime version
-        site_config = client.web_apps.get_configuration(rg_name, name)
-        if os_val == 'Linux' and site_config.linux_fx_version != runtime_version:
+    else:  # for existing app if we might need to update the stack runtime settings
+        if os_name.lower() == 'linux' and site_config.linux_fx_version != runtime_version:
             logger.warning('Updating runtime version from %s to %s',
                            site_config.linux_fx_version, runtime_version)
             update_site_configs(cmd, rg_name, name, linux_fx_version=runtime_version)
-        elif os_val == 'Windows' and site_config.windows_fx_version != runtime_version:
+        elif os_name.lower() == 'windows' and site_config.windows_fx_version != runtime_version:
             logger.warning('Updating runtime version from %s to %s',
                            site_config.windows_fx_version, runtime_version)
             update_site_configs(cmd, rg_name, name, windows_fx_version=runtime_version)
         create_json['runtime_version'] = runtime_version
+    # Zip contents & Deploy
+    logger.warning("Creating zip with contents of dir %s ...", src_dir)
+    # zip contents & deploy
+    zip_file_path = zip_contents_from_dir(src_dir, language)
+    enable_zip_deploy(cmd, rg_name, name, zip_file_path)
+    # Remove the file after deployment, handling exception if user removed the file manually
+    try:
+        os.remove(zip_file_path)
+    except OSError:
+        pass
 
-    if do_deployment and not is_skip_build:
-        _set_build_app_setting = True
-        # app settings causes an app recycle so we avoid if not needed
-        application_settings = client.web_apps.list_application_settings(rg_name, name)
-        _app_settings = application_settings.properties
-        for key, value in _app_settings.items():
-            if key.upper() == 'SCM_DO_BUILD_DURING_DEPLOYMENT':
-                is_skip_build = value.upper() == "FALSE"
-                # if the value is already set just honor it
-                _set_build_app_setting = False
-                break
-
-    # update create_json to include the app_url
-    if _set_build_app_setting:
-        # setting to build after deployment
-        logger.warning("Updating app settings to enable build after deployment")
-        update_app_settings(cmd, rg_name, name, ["SCM_DO_BUILD_DURING_DEPLOYMENT=true"])
-        # wait for all the settings to completed
-        time.sleep(30)
-
-    if do_deployment:
-        logger.warning("Creating zip with contents of dir %s ...", src_dir)
-        # zip contents & deploy
-        zip_file_path = zip_contents_from_dir(src_dir, language)
-
-        logger.warning("Preparing to deploy %s contents to app.", '' if is_skip_build else 'and build')
-        enable_zip_deploy(cmd, rg_name, name, zip_file_path)
-        # Remove the file after deployment, handling exception if user removed the file manually
-        try:
-            os.remove(zip_file_path)
-        except OSError:
-            pass
-    logger.warning("All done.")
-    with ConfiguredDefaultSetter(cmd.cli_ctx.config, True):
-        cmd.cli_ctx.config.set_value('defaults', 'group', rg_name)
-        cmd.cli_ctx.config.set_value('defaults', 'sku', full_sku)
-        cmd.cli_ctx.config.set_value('defaults', 'appserviceplan', asp)
-        cmd.cli_ctx.config.set_value('defaults', 'location', location)
-        cmd.cli_ctx.config.set_value('defaults', 'web', name)
     if launch_browser:
         logger.warning("Launching app using default browser")
         view_in_browser(cmd, rg_name, name, None, logs)
     else:
         _url = _get_url(cmd, rg_name, name)
         logger.warning("You can launch the app at %s", _url)
-        create_json.update({'app_url': _url})
+        create_json.update({'URL': _url})
     if logs:
         _configure_default_logging(cmd, rg_name, name)
         return get_streaming_log(cmd, rg_name, name)
+    with ConfiguredDefaultSetter(cmd.cli_ctx.config, True):
+        cmd.cli_ctx.config.set_value('defaults', 'group', rg_name)
+        cmd.cli_ctx.config.set_value('defaults', 'sku', sku)
+        cmd.cli_ctx.config.set_value('defaults', 'appserviceplan', plan)
+        cmd.cli_ctx.config.set_value('defaults', 'location', loc)
+        cmd.cli_ctx.config.set_value('defaults', 'web', name)
     return create_json
 
 
 def _ping_scm_site(cmd, resource_group, name):
     from azure.cli.core.util import should_disable_connection_verify
-
     #  wake up kudu, by making an SCM call
     import requests
     #  work around until the timeout limits issue for linux is investigated & fixed

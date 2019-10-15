@@ -22,8 +22,7 @@ def _is_guid(guid):
         uuid.UUID(guid)
         return True
     except ValueError:
-        pass
-    return False
+        return False
 
 
 def parse_duration(str_duration):

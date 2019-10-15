@@ -245,7 +245,7 @@ class ExtensionUpdateLongRunningOperation(LongRunningOperation):  # pylint: disa
 # region Disks (Managed)
 def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # pylint: disable=too-many-locals
                         size_gb=None, sku='Premium_LRS', os_type=None,
-                        source=None, for_upload=None,  # pylint: disable=unused-argument
+                        source=None, for_upload=None, upload_size_bytes=None,  # pylint: disable=unused-argument
                         # below are generated internally from 'source'
                         source_blob_uri=None, source_disk=None, source_snapshot=None,
                         source_storage_account_id=None, no_wait=False, tags=None, zone=None,
@@ -262,13 +262,17 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
     else:
         option = DiskCreateOption.empty
 
+    if upload_size_bytes is not None and for_upload is not True:
+        raise CLIError('usage error: --upload-size-bytes should be used together with --for-upload')
+
     creation_data = CreationData(create_option=option, source_uri=source_blob_uri,
                                  image_reference=None,
                                  source_resource_id=source_disk or source_snapshot,
-                                 storage_account_id=source_storage_account_id)
+                                 storage_account_id=source_storage_account_id,
+                                 upload_size_bytes=upload_size_bytes)
 
-    if size_gb is None and (option == DiskCreateOption.empty or for_upload):
-        raise CLIError('usage error: --size-gb required to create an empty disk')
+    if size_gb is None and upload_size_bytes is None and (option == DiskCreateOption.empty or for_upload):
+        raise CLIError('usage error: --size-gb or --upload-size-bytes required to create an empty disk')
     disk = Disk(location=location, creation_data=creation_data, tags=(tags or {}),
                 sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb, os_type=os_type)
 
@@ -379,7 +383,7 @@ def list_images(cmd, resource_group_name=None):
 
 # region Snapshots
 def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size_gb=None, sku='Standard_LRS',
-                    source=None, for_upload=None,  # pylint: disable=unused-argument
+                    source=None, for_upload=None, incremental=None,  # pylint: disable=unused-argument
                     # below are generated internally from 'source'
                     source_blob_uri=None, source_disk=None, source_snapshot=None, source_storage_account_id=None,
                     hyper_v_generation=None, tags=None, no_wait=False):
@@ -403,7 +407,7 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
     if size_gb is None and option == DiskCreateOption.empty:
         raise CLIError('Please supply size for the snapshots')
     snapshot = Snapshot(location=location, creation_data=creation_data, tags=(tags or {}),
-                        sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb)
+                        sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb, incremental=incremental)
     if hyper_v_generation:
         snapshot.hyper_vgeneration = hyper_v_generation
 
@@ -517,7 +521,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               plan_promotion_code=None, license_type=None, assign_identity=None, identity_scope=None,
               identity_role='Contributor', identity_role_id=None, application_security_groups=None, zone=None,
               boot_diagnostics_storage=None, ultra_ssd_enabled=None, ephemeral_os_disk=None,
-              proximity_placement_group=None, dedicated_host=None, dedicated_host_group=None, aux_subscriptions=None):
+              proximity_placement_group=None, dedicated_host=None, dedicated_host_group=None, aux_subscriptions=None,
+              priority=None, max_billing=None, eviction_policy=None, enable_agent=None, workspace=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -525,7 +530,9 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                                                                 build_storage_account_resource, build_nic_resource,
                                                                 build_vnet_resource, build_nsg_resource,
                                                                 build_public_ip_resource, StorageProfile,
-                                                                build_msi_role_assignment)
+                                                                build_msi_role_assignment,
+                                                                build_vm_mmaExtension_resource,
+                                                                build_vm_daExtensionName_resource)
     from msrestazure.tools import resource_id, is_valid_resource_id
 
     storage_sku = disk_info['os'].get('storageAccountType')
@@ -637,7 +644,9 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         attach_os_disk=attach_os_disk, os_disk_size_gb=os_disk_size_gb, custom_data=custom_data, secrets=secrets,
         license_type=license_type, zone=zone, disk_info=disk_info,
         boot_diagnostics_storage_uri=boot_diagnostics_storage, ultra_ssd_enabled=ultra_ssd_enabled,
-        proximity_placement_group=proximity_placement_group, computer_name=computer_name, dedicated_host=dedicated_host)
+        proximity_placement_group=proximity_placement_group, computer_name=computer_name,
+        dedicated_host=dedicated_host, priority=priority, max_billing=max_billing, eviction_policy=eviction_policy,
+        enable_agent=enable_agent)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -657,6 +666,14 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
             role_assignment_guid = str(_gen_guid())
             master_template.add_resource(build_msi_role_assignment(vm_name, vm_id, identity_role_id,
                                                                    role_assignment_guid, identity_scope))
+
+    if workspace is not None:
+        workspace_id = _prepare_workspace(cmd, resource_group_name, workspace)
+        master_template.add_secure_parameter('workspaceId', workspace_id)
+        vm_mmaExtension_resource = build_vm_mmaExtension_resource(cmd, vm_name, location)
+        vm_daExtensionName_resource = build_vm_daExtensionName_resource(cmd, vm_name, location)
+        master_template.add_resource(vm_mmaExtension_resource)
+        master_template.add_resource(vm_daExtensionName_resource)
 
     master_template.add_resource(vm_resource)
 
@@ -682,8 +699,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     if no_wait:
         return sdk_no_wait(no_wait, client.create_or_update,
                            resource_group_name, deployment_name, properties)
-    LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(no_wait, client.create_or_update,
-                                                  resource_group_name, deployment_name, properties))
+    LongRunningOperation(cmd.cli_ctx)(client.create_or_update(resource_group_name, deployment_name, properties))
+
     vm = get_vm_details(cmd, resource_group_name, vm_name)
     if assign_identity is not None:
         if enable_local_identity and not identity_scope:
@@ -960,6 +977,36 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
     return sdk_no_wait(no_wait, _compute_client_factory(cmd.cli_ctx).virtual_machines.create_or_update,
                        resource_group_name, vm_name, **kwargs)
 
+
+def _prepare_workspace(cmd, resource_group_name, workspace):
+    from msrestazure.tools import is_valid_resource_id
+    from ._client_factory import cf_log_analytics
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from msrestazure.azure_exceptions import CloudError
+
+    workspace_id = None
+    if not is_valid_resource_id(workspace):
+        workspace_name = workspace
+        subscription_id = get_subscription_id(cmd.cli_ctx)
+        log_client = cf_log_analytics(cmd.cli_ctx, subscription_id)
+        workspace_result = None
+        try:
+            workspace_result = log_client.get(resource_group_name, workspace_name)
+        except CloudError:
+            from azure.mgmt.loganalytics.models import Workspace, Sku, SkuNameEnum
+            sku = Sku(name=SkuNameEnum.per_gb2018.value)
+            retention_time = 30  # default value
+            location = _get_resource_group_location(cmd.cli_ctx, resource_group_name)
+            workspace_instance = Workspace(location=location,
+                                           sku=sku,
+                                           retention_in_days=retention_time)
+            workspace_result = LongRunningOperation(cmd.cli_ctx)(log_client.create_or_update(resource_group_name,
+                                                                                             workspace_name,
+                                                                                             workspace_instance))
+        workspace_id = workspace_result.id
+    else:
+        workspace_id = workspace
+    return workspace_id
 # endregion
 
 
@@ -1858,7 +1905,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
                 assign_identity=None, identity_scope=None, identity_role='Contributor',
                 identity_role_id=None, zones=None, priority=None, eviction_policy=None,
                 application_security_groups=None, ultra_ssd_enabled=None, ephemeral_os_disk=None,
-                proximity_placement_group=None, aux_subscriptions=None):
+                proximity_placement_group=None, aux_subscriptions=None, terminate_notification_time=None,
+                max_billing=None, computer_name_prefix=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -2048,6 +2096,9 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
     if secrets:
         secrets = _merge_secrets([validate_file_or_dict(secret) for secret in secrets])
 
+    if computer_name_prefix is not None and isinstance(computer_name_prefix, str):
+        naming_prefix = computer_name_prefix
+
     vmss_resource = build_vmss_resource(
         cmd=cmd, name=vmss_name, naming_prefix=naming_prefix, location=location, tags=tags,
         overprovision=not disable_overprovision, upgrade_policy_mode=upgrade_policy_mode, vm_sku=vm_sku,
@@ -2062,7 +2113,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
         single_placement_group=single_placement_group, platform_fault_domain_count=platform_fault_domain_count,
         custom_data=custom_data, secrets=secrets, license_type=license_type, zones=zones, priority=priority,
         eviction_policy=eviction_policy, application_security_groups=application_security_groups,
-        ultra_ssd_enabled=ultra_ssd_enabled, proximity_placement_group=proximity_placement_group)
+        ultra_ssd_enabled=ultra_ssd_enabled, proximity_placement_group=proximity_placement_group,
+        terminate_notification_time=terminate_notification_time, max_billing=max_billing)
     vmss_resource['dependsOn'] = vmss_dependencies
 
     if plan_name:
@@ -2289,6 +2341,7 @@ def update_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_
 
 def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False, instance_id=None,
                 protect_from_scale_in=None, protect_from_scale_set_actions=None,
+                enable_terminate_notification=None, terminate_notification_time=None,
                 **kwargs):
     vmss = kwargs['parameters']
     client = _compute_client_factory(cmd.cli_ctx)
@@ -2315,6 +2368,12 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
     # else handle vmss update
     if license_type is not None:
         vmss.virtual_machine_profile.license_type = license_type
+
+    if enable_terminate_notification is not None or terminate_notification_time is not None:
+        TerminateNotificationProfile = cmd.get_models('TerminateNotificationProfile')
+        vmss.virtual_machine_profile.scheduled_events_profile.terminate_notification_profile =\
+            TerminateNotificationProfile(not_before_timeout=terminate_notification_time,
+                                         enable=enable_terminate_notification)
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.create_or_update,
                        resource_group_name, name, **kwargs)

@@ -1661,8 +1661,7 @@ def _is_guid(guid):
         uuid.UUID(guid)
         return True
     except ValueError:
-        pass
-    return False
+        return False
 
 
 def _get_object_stubs(graph_client, assignees):
