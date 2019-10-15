@@ -43,7 +43,6 @@ Release History
 * vmss create: Add --computer-name-prefix parameter to support custom computer name prefix of virtual machines in the VMSS.
 * Update galleries API version to 2019-07-01.
 
-
 **Backup**
 
 * Enhanced error detail for vault delete in force mode.
@@ -57,6 +56,10 @@ Release History
 **Monitor**
 
 * az monitor log-analytics workspace: Support CRUD for Azure log analytics workspace.
+
+**Profile**
+
+* Fix: `az account get-access-token --resource-type ms-graph` not working.
 
 **Storage**
 
@@ -199,6 +202,7 @@ Release History
 **Policy**
 
 * Support for Policy new API version 2019-01-01
+
 
 **Storage**
 
