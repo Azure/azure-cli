@@ -42,19 +42,12 @@ DEFAULT_INDEXING_POLICY = """{
   "automatic": true,
   "includedPaths": [
     {
-      "path": "/*",
-      "indexes": [
-        {
-          "kind": "Range",
-          "dataType": "String",
-          "precision": -1
-        },
-        {
-          "kind": "Range",
-          "dataType": "Number",
-          "precision": -1
-        }
-      ]
+      "path": "/*"
+    }
+  ],
+  "excludedPaths": [
+    {
+      "path": "/\\"_etag\\"/?"
     }
   ]
 }"""
@@ -309,7 +302,7 @@ def cli_cosmosdb_sql_container_create(client,
                                       account_name,
                                       database_name,
                                       container_name,
-                                      partition_key_path=None,
+                                      partition_key_path,
                                       default_ttl=None,
                                       indexing_policy=DEFAULT_INDEXING_POLICY,
                                       throughput=None,
@@ -421,7 +414,7 @@ def cli_cosmosdb_gremlin_graph_create(client,
                                       account_name,
                                       database_name,
                                       graph_name,
-                                      partition_key_path=None,
+                                      partition_key_path,
                                       default_ttl=None,
                                       indexing_policy=DEFAULT_INDEXING_POLICY,
                                       throughput=None,

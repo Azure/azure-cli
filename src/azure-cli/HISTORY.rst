@@ -16,6 +16,8 @@ Release History
 
 * Add unique key policy and conflict resolution policy parameters for az cosmosdb sql container create command
 * Add conflict resolution policy parameter for az cosmosdb gremlin graph create command
+* Update SQL container and Gremlin graph default indexing policy
+* Change partition key of SQL container and Gremlin graph from optional to required
 * Fix typo in help message
 
 **Network**

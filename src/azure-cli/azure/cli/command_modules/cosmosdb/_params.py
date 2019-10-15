@@ -20,7 +20,7 @@ from azure.cli.command_modules.cosmosdb.actions import (
 from azure.cli.command_modules.cosmosdb.custom import (
     CosmosKeyTypes)
 
-SQL_GREMLIN_INDEXING_POLICY_EXAMPLE = """--idx "{\\"indexingMode\\": \\"consistent\\", \\"includedPaths\\": [{\\"path\\": \\"/*\\", \\"indexes\\": [{\\"dataType\\": \\"String\\", \\"kind\\": \\"Range\\"}]}], \\"excludedPaths\\": [{ \\"path\\": \\"/headquarters/employees/?\\"}]}"
+SQL_GREMLIN_INDEXING_POLICY_EXAMPLE = """--idx "{\\"indexingMode\\": \\"consistent\\", \\"automatic\\": true, \\"includedPaths\\": [{\\"path\\": \\"/*\\"}], \\"excludedPaths\\": [{ \\"path\\": \\"/headquarters/employees/?\\"}, { \\"path\\": \\"/\\\\"_etag\\\\"/?\\"}]}"
 """
 
 SQL_UNIQUE_KEY_POLICY_EXAMPLE = """--unique-key-policy "{\\"uniqueKeys\\": [{\\"paths\\": [\\"/path/to/key1\\"]}, {\\"paths\\": [\\"/path/to/key2\\"]}]}"
