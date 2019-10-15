@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**AppService**
+
+* Added "--build remote" flag for "az functionapp deployment source config-zip" to support remote build action during function app deployment.
+
 **AKS**
 
 * Set `--load-balancer-sku` default value to standard if supported by the kubernetes version
