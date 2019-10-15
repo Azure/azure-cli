@@ -10,7 +10,7 @@ import platform
 
 from argcomplete.completers import FilesCompleter
 from azure.cli.core.commands.parameters import (
-    file_type, get_enum_type, get_resource_name_completion_list, name_type, tags_type)
+    file_type, get_enum_type, get_resource_name_completion_list, name_type, tags_type, zones_type)
 from azure.cli.core.commands.validators import validate_file_or_dict
 from knack.arguments import CLIArgumentType
 
@@ -20,7 +20,7 @@ from ._validators import (
     validate_create_parameters, validate_k8s_client_version, validate_k8s_version, validate_linux_host_name,
     validate_list_of_integers, validate_ssh_key, validate_connector_name, validate_max_pods, validate_nodepool_name,
     validate_vm_set_type, validate_load_balancer_sku, validate_load_balancer_outbound_ips,
-    validate_load_balancer_outbound_ip_prefixes)
+    validate_load_balancer_outbound_ip_prefixes, validate_taints)
 
 aci_connector_os_type = ['Windows', 'Linux', 'Both']
 
@@ -176,6 +176,7 @@ def load_arguments(self, _):
         c.argument('load_balancer_outbound_ips', type=str, validator=validate_load_balancer_outbound_ips)
         c.argument('load_balancer_outbound_ip_prefixes', type=str, validator=validate_load_balancer_outbound_ip_prefixes)
         c.argument('vm_set_type', type=str, validator=validate_vm_set_type)
+        c.argument('zones', zones_type, options_list=['--zones', '-z'], help='Space-separated list of availability zones where agent nodes will be placed.')
         c.argument('enable_addons', options_list=['--enable-addons', '-a'])
         c.argument('disable_rbac', action='store_true')
         c.argument('enable_rbac', action='store_true', options_list=['--enable-rbac', '-r'],
@@ -256,6 +257,28 @@ def load_arguments(self, _):
     with self.argument_context('aks scale') as c:
         c.argument('nodepool_name', type=str,
                    help='Node pool name, upto 12 alphanumeric characters', validator=validate_nodepool_name)
+
+    with self.argument_context('aks nodepool') as c:
+        c.argument('cluster_name', type=str, help='The cluster name.')
+
+    for scope in ['aks nodepool add']:
+        with self.argument_context(scope) as c:
+            c.argument('nodepool_name', type=str, options_list=['--name', '-n'], validator=validate_nodepool_name, help='The node pool name.')
+            c.argument('zones', zones_type, options_list=['--zones', '-z'], help='Space-separated list of availability zones where agent nodes will be placed.')
+            c.argument('node_vm_size', options_list=['--node-vm-size', '-s'], completer=get_vm_size_completion_list)
+            c.argument('max_pods', type=int, options_list=['--max-pods', '-m'], validator=validate_max_pods)
+            c.argument('os_type', type=str)
+            c.argument('enable_cluster_autoscaler', options_list=["--enable-cluster-autoscaler", "-e"], action='store_true')
+            c.argument('node_taints', type=str, validator=validate_taints)
+
+    for scope in ['aks nodepool show', 'aks nodepool delete', 'aks nodepool scale', 'aks nodepool upgrade', 'aks nodepool update']:
+        with self.argument_context(scope) as c:
+            c.argument('nodepool_name', type=str, options_list=['--name', '-n'], validator=validate_nodepool_name, help='The node pool name.')
+
+    with self.argument_context('aks nodepool update') as c:
+        c.argument('enable_cluster_autoscaler', options_list=["--enable-cluster-autoscaler", "-e"], action='store_true')
+        c.argument('disable_cluster_autoscaler', options_list=["--disable-cluster-autoscaler", "-d"], action='store_true')
+        c.argument('update_cluster_autoscaler', options_list=["--update-cluster-autoscaler", "-u"], action='store_true')
 
     with self.argument_context('aks upgrade-connector') as c:
         c.argument('aci_resource_group')

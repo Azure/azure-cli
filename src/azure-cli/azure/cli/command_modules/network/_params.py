@@ -1192,6 +1192,7 @@ def load_arguments(self, _):
     for scope in ['network vnet subnet list', 'network vnet peering list']:
         with self.argument_context(scope) as c:
             c.argument('ids', deprecate_info=c.deprecate(hide=True, expiration='2.1.0'))
+            c.argument('virtual_network_name', id_part=None)
 
     # endregion
 

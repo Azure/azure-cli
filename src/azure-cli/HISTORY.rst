@@ -3,18 +3,80 @@
 Release History
 ===============
 
+**AppService**
+
+* Added "--build remote" flag for "az functionapp deployment source config-zip" to support remote build action during function app deployment.
+
+**AKS**
+
+* Set `--load-balancer-sku` default value to standard if supported by the kubernetes version
+* Set `--vm-set-type` default value to virtualmachinescalesets if supported by the kubernetes version
+* Add `az aks nodepool add`,`az aks nodepool show`, `az aks nodepool list`, `az aks nodepool scale`, `az aks nodepool upgrade`, `az aks nodepool update` and `az aks nodepool delete` commmands to support multiple nodepools in aks
+* Add `--zones` to `az aks create` and `az aks nodepool add` commands to support availability zones for aks
+
 **AMS**
 
-* BREAKING CHANGE: Changed job creation from "job start" to "job create".
+* BREAKING CHANGE:
+    content-key-policy create:
+        - Changed parameter --ask from utf-8 string to 32 character hex string.
+    job start:
+        - Changed the command from `job start` to `job create`.
+    
+**SQL**
+
+* New Cmdlets for sql mi ad-admin that supports setting AAD administrator on Managed instance
+
+**ARM**
+
+* az deployment create: Add --handle-extended-json-format parameter to support multiline and comments in json template.
+
+**AppConfig**
+
+* Using & in authorization header
+* Adding api-version to all requests
+* Upgrading SDK Version to 1.0.0
 
 **Compute**
 
+* vm create: Add --enable-agent configuration.
+* vm create: Use standard public IP SKU automatically when using zones.
+* vm create: Compose a valid computer name from VM name if computer name is not provided.
+* vm create: Add --workspace to enable log analytics workspace automatically.
 * vm create: Add --vmss to specify virtual machine scale set that the virtual machine should be assigned to.
+* [BREAKING CHANGE] vm extension set: Fix bug where users could not set an extension on a VM with --ids.
 * vmss create: Add --computer-name-prefix parameter to support custom computer name prefix of virtual machines in the VMSS.
+* Update galleries API version to 2019-07-01.
+
+
+**Backup**
+
+* Enhanced error detail for vault delete in force mode.
 
 **Network**
 
 * az network private-dns link vnet create/update: Fixes #9851. Support cross-tenant virtual network linking.
+* [BREAKING CHANGE] network vnet subnet list: Fix #10401. `--resource-group` and `--vnet-name` are required now.
+
+
+**Monitor**
+
+* az monitor log-analytics workspace: Support CRUD for Azure log analytics workspace.
+
+**Profile**
+
+* Fix: `az account get-access-token --resource-type ms-graph` not working.
+
+**Storage**
+
+* az storage copy: Add --preserve-s2s-access-tier parameter to preserve access tier during service to service copy.
+
+**Storage**
+
+* az storage account create/update: Add --enable-large-file-share parameter to support large file shares for storage account.
+
+**RBAC**
+
+* Fix #10493: az ad sp delete --id {} fails when application is not found. If not found, application deletion is skipped.
 
 2.0.74
 ++++++
@@ -35,6 +97,7 @@ Release History
 * Added "webapp config access-restriction show | set | add | remove"
 * az webapp up updated for better error-handling
 * az appservice plan update support Isolated SKU
+* `az functionapp create` support for private ACR images
 
 **ARM**
 
@@ -59,6 +122,11 @@ Release History
 **EventGrid**
 
 * Fix the endpoint help text to refer to the right parameter (namely, to point to parameter `--endpoint` rather than `--endpoint-type` in event subscription commands).
+
+**IoT**
+
+* Add new routing source type: DigitalTwinChangeEvents
+* Fix #2116: Unexpected 'az iot hub show' error for resource not found.
 
 **Key Vault**
 
@@ -139,6 +207,7 @@ Release History
 **Policy**
 
 * Support for Policy new API version 2019-01-01
+
 
 **Storage**
 
