@@ -1,55 +1,5 @@
 interactions:
 - request:
-    body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
-      "date": "2019-04-16T22:13:07Z"}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - group create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '110'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - --location --name --tag
-      User-Agent:
-      - python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
-        resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.62
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-05-10
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-04-16T22:13:07Z"},"properties":{"provisioningState":"Succeeded"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '384'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 16 Apr 2019 22:13:07 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1195'
-    status:
-      code: 201
-      message: Created
-- request:
     body: null
     headers:
       Accept:
@@ -64,24 +14,24 @@ interactions:
       - -g --name --validate --image --disable-overprovision --instance-count --single-placement-group
         --admin-username --generate-ssh-keys
       User-Agent:
-      - python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
-        resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.62
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-05-10
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-04-16T22:13:07Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-10-13T13:39:23Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '384'
+      - '428'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 22:13:07 GMT
+      - Sun, 13 Oct 2019 13:39:27 GMT
       expires:
       - '-1'
       pragma:
@@ -105,49 +55,45 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python-requests/2.21.0
+      - python-requests/2.22.0
     method: GET
     uri: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json
   response:
     body:
-      string: "{\n  \"$schema\":\"http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json\"\
-        ,\n  \"contentVersion\":\"1.0.0.0\",\n  \"parameters\":{},\n  \"variables\"\
-        :{},\n  \"resources\":[],\n\n  \"outputs\":{\n    \"aliases\":{\n      \"\
-        type\":\"object\",\n      \"value\":{\n\n        \"Linux\":{\n          \"\
-        CentOS\":{\n            \"publisher\":\"OpenLogic\",\n            \"offer\"\
-        :\"CentOS\",\n            \"sku\":\"7.5\",\n            \"version\":\"latest\"\
-        \n          },\n          \"CoreOS\":{\n            \"publisher\":\"CoreOS\"\
-        ,\n            \"offer\":\"CoreOS\",\n            \"sku\":\"Stable\",\n  \
-        \          \"version\":\"latest\"\n          },\n          \"Debian\":{\n\
-        \            \"publisher\":\"credativ\",\n            \"offer\":\"Debian\"\
-        ,\n            \"sku\":\"9\",\n            \"version\":\"latest\"\n      \
-        \    },\n          \"openSUSE-Leap\": {\n            \"publisher\":\"SUSE\"\
-        ,\n            \"offer\":\"openSUSE-Leap\",\n            \"sku\":\"42.3\"\
-        ,\n            \"version\": \"latest\"\n          },\n          \"RHEL\":{\n\
-        \            \"publisher\":\"RedHat\",\n            \"offer\":\"RHEL\",\n\
-        \            \"sku\":\"7-RAW\",\n            \"version\":\"latest\"\n    \
-        \      },\n          \"SLES\":{\n            \"publisher\":\"SUSE\",\n   \
-        \         \"offer\":\"SLES\",\n            \"sku\":\"15\",\n            \"\
-        version\":\"latest\"\n          },\n          \"UbuntuLTS\":{\n          \
-        \  \"publisher\":\"Canonical\",\n            \"offer\":\"UbuntuServer\",\n\
-        \            \"sku\":\"18.04-LTS\",\n            \"version\":\"latest\"\n\
-        \          }\n        },\n\n        \"Windows\":{\n          \"Win2019Datacenter\"\
-        :{\n            \"publisher\":\"MicrosoftWindowsServer\",\n            \"\
-        offer\":\"WindowsServer\",\n            \"sku\":\"2019-Datacenter\",\n   \
-        \         \"version\":\"latest\"\n          },\n          \"Win2016Datacenter\"\
-        :{\n            \"publisher\":\"MicrosoftWindowsServer\",\n            \"\
-        offer\":\"WindowsServer\",\n            \"sku\":\"2016-Datacenter\",\n   \
-        \         \"version\":\"latest\"\n          },\n          \"Win2012R2Datacenter\"\
-        :{\n            \"publisher\":\"MicrosoftWindowsServer\",\n            \"\
-        offer\":\"WindowsServer\",\n            \"sku\":\"2012-R2-Datacenter\",\n\
-        \            \"version\":\"latest\"\n          },\n          \"Win2012Datacenter\"\
-        :{\n            \"publisher\":\"MicrosoftWindowsServer\",\n            \"\
-        offer\":\"WindowsServer\",\n            \"sku\":\"2012-Datacenter\",\n   \
-        \         \"version\":\"latest\"\n          },\n          \"Win2008R2SP1\"\
-        :{\n            \"publisher\":\"MicrosoftWindowsServer\",\n            \"\
-        offer\":\"WindowsServer\",\n            \"sku\":\"2008-R2-SP1\",\n       \
-        \     \"version\":\"latest\"\n          }\n        }\n      }\n    }\n  }\n\
-        }\n"
+      string: "{\n  \"$schema\": \"http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json\",\n
+        \ \"contentVersion\": \"1.0.0.0\",\n  \"parameters\": {},\n  \"variables\":
+        {},\n  \"resources\": [],\n  \"outputs\": {\n    \"aliases\": {\n      \"type\":
+        \"object\",\n      \"value\": {\n        \"Linux\": {\n          \"CentOS\":
+        {\n            \"publisher\": \"OpenLogic\",\n            \"offer\": \"CentOS\",\n
+        \           \"sku\": \"7.5\",\n            \"version\": \"latest\"\n          },\n
+        \         \"CoreOS\": {\n            \"publisher\": \"CoreOS\",\n            \"offer\":
+        \"CoreOS\",\n            \"sku\": \"Stable\",\n            \"version\": \"latest\"\n
+        \         },\n          \"Debian\": {\n            \"publisher\": \"Debian\",\n
+        \           \"offer\": \"debian-10\",\n            \"sku\": \"10\",\n            \"version\":
+        \"latest\"\n          },\n          \"openSUSE-Leap\": {\n            \"publisher\":
+        \"SUSE\",\n            \"offer\": \"openSUSE-Leap\",\n            \"sku\":
+        \"42.3\",\n            \"version\": \"latest\"\n          },\n          \"RHEL\":
+        {\n            \"publisher\": \"RedHat\",\n            \"offer\": \"RHEL\",\n
+        \           \"sku\": \"7-LVM\",\n            \"version\": \"latest\"\n          },\n
+        \         \"SLES\": {\n            \"publisher\": \"SUSE\",\n            \"offer\":
+        \"SLES\",\n            \"sku\": \"15\",\n            \"version\": \"latest\"\n
+        \         },\n          \"UbuntuLTS\": {\n            \"publisher\": \"Canonical\",\n
+        \           \"offer\": \"UbuntuServer\",\n            \"sku\": \"18.04-LTS\",\n
+        \           \"version\": \"latest\"\n          }\n        },\n        \"Windows\":
+        {\n          \"Win2019Datacenter\": {\n            \"publisher\": \"MicrosoftWindowsServer\",\n
+        \           \"offer\": \"WindowsServer\",\n            \"sku\": \"2019-Datacenter\",\n
+        \           \"version\": \"latest\"\n          },\n          \"Win2016Datacenter\":
+        {\n            \"publisher\": \"MicrosoftWindowsServer\",\n            \"offer\":
+        \"WindowsServer\",\n            \"sku\": \"2016-Datacenter\",\n            \"version\":
+        \"latest\"\n          },\n          \"Win2012R2Datacenter\": {\n            \"publisher\":
+        \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
+        \"2012-R2-Datacenter\",\n            \"version\": \"latest\"\n          },\n
+        \         \"Win2012Datacenter\": {\n            \"publisher\": \"MicrosoftWindowsServer\",\n
+        \           \"offer\": \"WindowsServer\",\n            \"sku\": \"2012-Datacenter\",\n
+        \           \"version\": \"latest\"\n          },\n          \"Win2008R2SP1\":
+        {\n            \"publisher\": \"MicrosoftWindowsServer\",\n            \"offer\":
+        \"WindowsServer\",\n            \"sku\": \"2008-R2-SP1\",\n            \"version\":
+        \"latest\"\n          }\n        }\n      }\n    }\n  }\n}\n"
     headers:
       accept-ranges:
       - bytes
@@ -158,43 +104,43 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '2433'
+      - '2501'
       content-security-policy:
       - default-src 'none'; style-src 'unsafe-inline'; sandbox
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 22:13:08 GMT
+      - Sun, 13 Oct 2019 13:39:29 GMT
       etag:
-      - '"f5944d69cdbfb4a2bb2ddda8c5f050bde5bbcb32"'
+      - W/"5d5b1214d514a7d1af3a6606ac1a74d9cadc7bb5"
       expires:
-      - Tue, 16 Apr 2019 22:18:08 GMT
+      - Sun, 13 Oct 2019 13:44:29 GMT
       source-age:
-      - '147'
+      - '0'
       strict-transport-security:
       - max-age=31536000
       vary:
-      - Authorization,Accept-Encoding
+      - Authorization,Accept-Encoding, Accept-Encoding
       via:
       - 1.1 varnish
       x-cache:
-      - HIT
+      - MISS
       x-cache-hits:
-      - '1'
+      - '0'
       x-content-type-options:
       - nosniff
       x-fastly-request-id:
-      - a78c4f763571203d54a85c341f2f343320a666b9
+      - fc8f880268899c562530fbf68368f95813580403
       x-frame-options:
       - deny
       x-geo-block-list:
       - ''
       x-github-request-id:
-      - 98D4:6C8C:2AB467:2E4AB7:5CB652E1
+      - DAE2:3BC9:8F734:A0C07:5DA3290F
       x-served-by:
-      - cache-sea1050-SEA
+      - cache-sin18047-SIN
       x-timer:
-      - S1555452789.807018,VS0,VE1
+      - S1570973969.871683,VS0,VE275
       x-xss-protection:
       - 1; mode=block
     status:
@@ -215,8 +161,8 @@ interactions:
       - -g --name --validate --image --disable-overprovision --instance-count --single-placement-group
         --admin-username --generate-ssh-keys
       User-Agent:
-      - python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
-        networkmanagementclient/2.6.0 Azure-SDK-For-Python AZURECLI/2.0.62
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/6.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
       accept-language:
       - en-US
     method: GET
@@ -232,7 +178,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 22:13:08 GMT
+      - Sun, 13 Oct 2019 13:39:29 GMT
       expires:
       - '-1'
       pragma:
@@ -283,12 +229,12 @@ interactions:
       "manual"}, "virtualMachineProfile": {"storageProfile": {"osDisk": {"createOption":
       "FromImage", "caching": "ReadWrite", "managedDisk": {"storageAccountType": null}},
       "imageReference": {"publisher": "Canonical", "offer": "UbuntuServer", "sku":
-      "18.04-LTS", "version": "latest"}}, "osProfile": {"computerNamePrefix": "vmss1914d",
+      "18.04-LTS", "version": "latest"}}, "osProfile": {"computerNamePrefix": "vmss162c2",
       "adminUsername": "ubuntuadmin", "linuxConfiguration": {"disablePasswordAuthentication":
       true, "ssh": {"publicKeys": [{"path": "/home/ubuntuadmin/.ssh/authorized_keys",
-      "keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCohExhkhhTIzPBXbjOPCmvaOnWm6BRAvuSXe6PWD1w4HEcsXTV7yoo3C6NPe6P3TCKHlzi7KnRzStqOftgK+SLx7gEW7/wAjnTHe2luP5Y8nNzMa8r5NifAGYvbHKa5qycpcuy4vsPp1RvjoH9N5y8lVQHcRUTfCrNMQNvTOcIFK56We9jeFNOXZxQE5dhPcaIQ7CMtcHqSKD7G5xHR2UqR4TK3xUTvdksTcInk6nCwuGiC3rL5b5S67fW61iBP35pBYPEXm0xWaekEBLrQv5en6BBX25+x4yVc9D9iQf/Dgh7HbFhPy+Rekye8KqExw/R0roVngORoVnBHucVX/L/"}]}}},
-      "networkProfile": {"networkInterfaceConfigurations": [{"name": "vmss1914dNic",
-      "properties": {"primary": "true", "ipConfigurations": [{"name": "vmss1914dIPConfig",
+      "keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEA4/w6+4x94vWRAvhQlDYBplbYODih6XktwyKJagSKUe7ya9OhGbTjMCsA7siSWEzdYM9MgVppBN8Z362JizzANvm6Cg968jgk0SdG2fH48Peu5oq49c3aXPUTFm8DDb9EDDBRG8fgJHJPphHx6X9fbXFDrYdWmmvGcFTD/+R1bMdEqrrBq1kYRbFshXjNbMHQl/A/UUvWPn4dzN06rUG0OV4jX/NpNgsuY9M9p0YPE7HN91z7hA7MmNurJ7yepzocLHtXudEYDbvtdDupWn2Y/giEfsP7dx0zC7Dz0ZVfFjBMAypScCkwIjklKMtTXvMXZtqW2jh6heImpXgLeYdv5w=="}]}}},
+      "networkProfile": {"networkInterfaceConfigurations": [{"name": "vmss162c2Nic",
+      "properties": {"primary": "true", "ipConfigurations": [{"name": "vmss162c2IPConfig",
       "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vmss1VNET/subnets/vmss1Subnet"},
       "loadBalancerBackendAddressPools": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/loadBalancers/vmss1LB/backendAddressPools/vmss1LBBEPool"}],
       "loadBalancerInboundNatPools": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/loadBalancers/vmss1LB/inboundNatPools/vmss1LBNatPool"}]}}],
@@ -314,8 +260,8 @@ interactions:
       - -g --name --validate --image --disable-overprovision --instance-count --single-placement-group
         --admin-username --generate-ssh-keys
       User-Agent:
-      - python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
-        resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.62
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
       accept-language:
       - en-US
     method: POST
@@ -323,21 +269,22 @@ interactions:
   response:
     body:
       string: '{"error":{"code":"InvalidTemplateDeployment","message":"The template
-        deployment ''vmss_deploy_UQdhdRTn9sEDZJci0d0knGAE3ZyP4BYm'' is not valid according
-        to the validation procedure. The tracking id is ''ab496a1b-9b54-428e-a19e-c765b18842a4''.
-        See inner errors for details. Please see https://aka.ms/arm-deploy for usage
-        details.","details":[{"code":"QuotaExceeded","message":"Operation results
-        in exceeding quota limits of Core. Maximum allowed: 100, Current in use: 19,
-        Additional requested: 101. Please read more about quota increase at https://aka.ms/ProdportalCRP/?#create/Microsoft.Support/Parameters/{\"subId\":\"00977cdb-163f-435f-9c32-39ec8ae61f4d\",\"pesId\":\"15621\",\"supportTopicId\":\"32447243\"}."}]}}'
+        deployment ''vmss_deploy_kTTk3WGkFdSFExT33EB0WRsLQkRleCdU'' is not valid according
+        to the validation procedure. The tracking id is ''e9d60cc4-34c4-4e39-81fd-e2a54b294db8''.
+        See inner errors for details.","details":[{"code":"QuotaExceeded","message":"The
+        operation couldn''t be completed as it results in exceeding quota limit of
+        Core. Maximum allowed: 100, Current in use: 52, Additional requested: 101.
+        Read more about quota limits at https://aka.ms/AzurePerVMQuotaLimits. Submit
+        a request for Quota increase using the link https://aka.ms/ProdportalCRP/?#create/Microsoft.Support/Parameters/%7B%22subId%22:%220b1f6471-1bf0-4dda-aec3-cb9272f09590%22,%22pesId%22:%2206bfd9d3-516b-d5c6-5802-169c800dec89%22,%22supportTopicId%22:%22e12e3d1d-7fa0-af33-c6d0-3c50df9658a3%22%7D."}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '711'
+      - '841'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 22:13:11 GMT
+      - Sun, 13 Oct 2019 13:39:31 GMT
       expires:
       - '-1'
       pragma:
@@ -349,55 +296,8 @@ interactions:
       x-ms-failure-cause:
       - gateway
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 400
       message: Bad Request
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - group delete
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - --name --yes --no-wait
-      User-Agent:
-      - python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
-        resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.62
-      accept-language:
-      - en-US
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-05-10
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Tue, 16 Apr 2019 22:13:12 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdBUUtWTEJRUjdOQjZCNUw2VEdHSFZIUENYVUNQQTRSUlA1Nnw0NDlDQTEwNTE1OTdCNDg2LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2019-05-10
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
-    status:
-      code: 202
-      message: Accepted
 version: 1

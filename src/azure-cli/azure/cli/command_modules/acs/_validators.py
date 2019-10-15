@@ -164,3 +164,17 @@ def validate_load_balancer_outbound_ip_prefixes(namespace):
         ip_prefix_id_list = [x.strip() for x in namespace.load_balancer_outbound_ip_prefixes.split(',')]
         if not all(ip_prefix_id_list):
             raise CLIError("--load-balancer-outbound-ip-prefixes cannot contain whitespace")
+
+
+def validate_taints(namespace):
+    """Validates that provided taint is a valid format"""
+
+    regex = re.compile(r"^[a-zA-Z\d][\w\-\.\/]{0,252}=[a-zA-Z\d][\w\-\.]{0,62}:(NoSchedule|PreferNoSchedule|NoExecute)$")  # pylint: disable=line-too-long
+
+    if namespace.node_taints is not None and namespace.node_taints != '':
+        for taint in namespace.node_taints.split(','):
+            if taint == "":
+                continue
+            found = regex.findall(taint)
+            if not found:
+                raise CLIError('Invalid node taint: %s' % taint)

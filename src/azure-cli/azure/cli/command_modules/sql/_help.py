@@ -518,7 +518,7 @@ examples:
 
 helps['sql midb list'] = """
 type: command
-short-summary: List maanged databases on a managed instance.
+short-summary: List managed databases on a managed instance.
 examples:
   - name: List managed databases on a managed instance
     text: az sql midb list -g mygroup --mi myinstance
