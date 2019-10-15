@@ -620,7 +620,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         if accelerated_networking is not None:
             logger.warning('When specifying an existing NIC, do not specify accelerated networking. '
                            'Ignore --accelerated-networking now. '
-                           'This will be an error instead of a warning in future releases.')
+                           'This will trigger an error instead of a warning in future releases.')
 
     os_vhd_uri = None
     if storage_profile in [StorageProfile.SACustomImage, StorageProfile.SAPirImage]:
