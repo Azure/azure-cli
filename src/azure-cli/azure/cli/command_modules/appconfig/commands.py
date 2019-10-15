@@ -92,4 +92,3 @@ def load_command_table(self, _):
         g.command('delete', 'delete_filter')
         g.command('show', 'show_filter')
         g.command('list', 'list_filter')
-        g.command('clear', 'clear_filter')

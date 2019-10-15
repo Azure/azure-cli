@@ -341,13 +341,13 @@ helps['appconfig feature filter add'] = """
     examples:
         - name: Add a filter for feature 'color' with label MyLabel with name 'MyFilter' and 2 parameters.
           text:
-            az appconfig feature filter add -n MyAppConfiguration --feature color --label MyLabel --filterName MyFilter --filterParameters Name=Value Name2=Value2
+            az appconfig feature filter add -n MyAppConfiguration --feature color --label MyLabel --filter-name MyFilter --filter-parameters Name=Value Name2=Value2
         - name: Insert a filter at index 2 (zero-based index) for feature 'color' with label MyLabel and filter name 'MyFilter' with no parameters
           text:
-            az appconfig feature filter add -n MyAppConfiguration --feature color --label MyLabel --filterName MyFilter --index 2
+            az appconfig feature filter add -n MyAppConfiguration --feature color --label MyLabel --filter-name MyFilter --index 2
         - name:  Add a filter with name 'MyFilter' using connection string.
           text:
-            az appconfig feature filter add --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --feature color --filterName MyFilter
+            az appconfig feature filter add --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --feature color --filter-name MyFilter
     """
 
 helps['appconfig feature filter delete'] = """
@@ -356,10 +356,13 @@ helps['appconfig feature filter delete'] = """
     examples:
         - name: Delete a filter from a feature using App Configuration name without confirmation.
           text:
-            az appconfig feature filter delete -n MyAppConfiguration --feature color --filterName MyFilter --yes
+            az appconfig feature filter delete -n MyAppConfiguration --feature color --filter-name MyFilter --yes
         - name: Delete a filter from a feature when you have multiple filters with that same name.
           text:
-            az appconfig feature filter delete --feature color --filterName MyFilter --index 2 --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx
+            az appconfig feature filter delete --feature color --filter-name MyFilter --index 2 --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx
+        - name: Delete all filters of a feature using App Configuration name without confirmation.
+          text:
+            az appconfig feature filter delete -n MyAppConfiguration --feature color --label MyLabel --all --yes
     """
 
 helps['appconfig feature filter show'] = """
@@ -368,10 +371,10 @@ helps['appconfig feature filter show'] = """
     examples:
         - name: Show one unique feature filter when you have multiple filters with that same name.
           text:
-            az appconfig feature filter show -n MyAppConfiguration --feature color --filterName MyFilter --index 2
+            az appconfig feature filter show -n MyAppConfiguration --feature color --filter-name MyFilter --index 2
         - name: Show all instances of a feature filter when you have multiple filters with that same name.
           text:
-            az appconfig feature filter show --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --feature color --filterName MyFilter
+            az appconfig feature filter show --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --feature color --filter-name MyFilter
     """
 
 helps['appconfig feature filter list'] = """
@@ -384,16 +387,4 @@ helps['appconfig feature filter list'] = """
         - name: List 150 filters for feature flag 'color'
           text:
             az appconfig feature filter list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx  --feature color --top 150
-    """
-
-helps['appconfig feature filter clear'] = """
-    type: command
-    short-summary: Delete all filters of a feature flag.
-    examples:
-        - name: Delete all filters of a feature using App Configuration name without confirmation.
-          text:
-            az appconfig feature filter clear -n MyAppConfiguration --feature color --label MyLabel --yes
-        - name: Delete all filters of a feature using connection string.
-          text:
-            az appconfig feature filter clear --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --feature color --label MyLabel
     """

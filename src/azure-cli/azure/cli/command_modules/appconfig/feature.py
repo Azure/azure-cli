@@ -485,21 +485,24 @@ def disable_feature(cmd,
 
 def add_filter(cmd,
                feature,
-               filterName,
+               filter_name,
                name=None,
                label=None,
-               filterParameters=None,
+               filter_parameters=None,
                yes=False,
-               index=float("-inf"),
+               index=None,
                connection_string=None):
     key = FEATURE_FLAG_PREFIX + feature
     connection_string = resolve_connection_string(cmd, name, connection_string)
     azconfig_client = AzconfigClient(connection_string)
 
+    if index is None:
+        index = float("-inf")
+
     # Construct feature filter to be added
-    if filterParameters is None:
-        filterParameters = {}
-    new_filter = FeatureFilter(filterName, filterParameters)
+    if filter_parameters is None:
+        filter_parameters = {}
+    new_filter = FeatureFilter(filter_name, filter_parameters)
 
     retry_times = 3
     retry_interval = 1
@@ -557,15 +560,24 @@ def add_filter(cmd,
 
 def delete_filter(cmd,
                   feature,
-                  filterName,
+                  filter_name=None,
                   name=None,
                   label=None,
-                  index=float("-inf"),
+                  index=None,
                   yes=False,
-                  connection_string=None):
+                  connection_string=None,
+                  all_=False):
     key = FEATURE_FLAG_PREFIX + feature
-    connection_string = resolve_connection_string(cmd, name, connection_string)
-    azconfig_client = AzconfigClient(connection_string)
+    azconfig_client = AzconfigClient(resolve_connection_string(cmd, name, connection_string))
+
+    if index is None:
+        index = float("-inf")
+
+    if all_:
+        return __clear_filter(azconfig_client, feature, label, yes)
+
+    if filter_name is None:
+        raise CLIError("Cannot delete filters because filter name is missing. To delete all filters, run the command again with --all option.")
 
     retry_times = 3
     retry_interval = 1
@@ -587,10 +599,9 @@ def delete_filter(cmd,
             display_filter = {}
             match_index = []
 
-            # get all filters where name matches filterName provided by
-            # user
+            # get all filters where name matches filter_name provided by user
             for idx, feature_filter in enumerate(feature_filters):
-                if feature_filter.name == filterName:
+                if feature_filter.name == filter_name:
                     if idx == index:
                         # name and index both match this filter - delete it.
                         # create a deep copy of the filter to display to the
@@ -610,7 +621,7 @@ def delete_filter(cmd,
                 # this means we have not deleted the filter yet
                 if len(match_index) == 1:
                     if index != float("-inf"):
-                        logger.warning("Found filter '%s' at index '%s'. Invalidating provided index '%s'", filterName, match_index[0], index)
+                        logger.warning("Found filter '%s' at index '%s'. Invalidating provided index '%s'", filter_name, match_index[0], index)
 
                     display_filter = copy.deepcopy(
                         feature_filters[match_index[0]])
@@ -622,13 +633,13 @@ def delete_filter(cmd,
                     del feature_filters[match_index[0]]
 
                 elif len(match_index) > 1:
-                    error_msg = "Feature '{0}' contains multiple instances of filter '{1}'. ".format(feature, filterName) +\
+                    error_msg = "Feature '{0}' contains multiple instances of filter '{1}'. ".format(feature, filter_name) +\
                                 "For resolving this conflict run the command again with the filter name and correct zero-based index of the filter you want to delete.\n"
                     raise CLIError(str(error_msg))
 
                 else:
                     raise CLIError(
-                        "No filter named '{0}' was found for feature '{1}'".format(filterName, feature))
+                        "No filter named '{0}' was found for feature '{1}'".format(filter_name, feature))
 
             __update_existing_key_value(azconfig_client=azconfig_client,
                                         retrieved_kv=retrieved_kv,
@@ -650,20 +661,23 @@ def delete_filter(cmd,
             raise CLIError(str(exception))
     raise CLIError(
         "Failed to delete filter '{}' for the feature flag '{}' due to a conflicting operation.".format(
-            filterName,
+            filter_name,
             feature))
 
 
 def show_filter(cmd,
                 feature,
-                filterName,
-                index=float("-inf"),
+                filter_name,
+                index=None,
                 name=None,
                 label=None,
                 connection_string=None):
     key = FEATURE_FLAG_PREFIX + feature
     connection_string = resolve_connection_string(cmd, name, connection_string)
     azconfig_client = AzconfigClient(connection_string)
+
+    if index is None:
+        index = float("-inf")
 
     try:
         query_options = QueryKeyValueOptions(label=label)
@@ -684,19 +698,19 @@ def show_filter(cmd,
         # If user has specified index, we use it as secondary check to display
         # a unique filter
         if 0 <= index < len(feature_filters):
-            if feature_filters[index].name == filterName:
+            if feature_filters[index].name == filter_name:
                 return feature_filters[index]
         if index != float("-inf"):
             logger.warning(
                 "Could not find filter with the index provided. Ignoring index and trying to find the filter by name.")
 
-        # get all filters where name matches filterName provided by user
+        # get all filters where name matches filter_name provided by user
         display_filters = [
-            featurefilter for featurefilter in feature_filters if featurefilter.name == filterName]
+            featurefilter for featurefilter in feature_filters if featurefilter.name == filter_name]
 
         if not display_filters:
             raise CLIError(
-                "No filter named '{0}' was found for feature '{1}'".format(filterName, feature))
+                "No filter named '{0}' was found for feature '{1}'".format(filter_name, feature))
         return display_filters
 
     except Exception as exception:
@@ -739,15 +753,14 @@ def list_filter(cmd,
         raise CLIError(str(exception))
 
 
-def clear_filter(cmd,
-                 feature,
-                 name=None,
-                 label=None,
-                 yes=False,
-                 connection_string=None):
+# Helper functions #
+
+
+def __clear_filter(azconfig_client,
+                   feature,
+                   label=None,
+                   yes=False):
     key = FEATURE_FLAG_PREFIX + feature
-    connection_string = resolve_connection_string(cmd, name, connection_string)
-    azconfig_client = AzconfigClient(connection_string)
 
     retry_times = 3
     retry_interval = 1
@@ -773,7 +786,7 @@ def clear_filter(cmd,
             # after deletion
             display_filters = []
             if feature_filters:
-                confirmation_message = "Are you sure you want to clear all filters for feature '{0}'?\n".format(feature)
+                confirmation_message = "Are you sure you want to delete all filters for feature '{0}'?\n".format(feature)
                 user_confirmation(confirmation_message, yes)
 
                 display_filters = copy.deepcopy(feature_filters)
@@ -790,7 +803,7 @@ def clear_filter(cmd,
         except HTTPException as exception:
             if exception.status == StatusCodes.PRECONDITION_FAILED:
                 logger.debug(
-                    'Retrying clearing filters %s times with exception: concurrent setting operations',
+                    'Retrying deleting filters %s times with exception: concurrent setting operations',
                     i + 1)
                 time.sleep(retry_interval)
             else:
@@ -799,10 +812,7 @@ def clear_filter(cmd,
         except Exception as exception:
             raise CLIError(str(exception))
     raise CLIError(
-        "Failed to clear filters for the feature flag '{}' due to a conflicting operation.".format(feature))
-
-
-# Helper functions #
+        "Failed to delete filters for the feature flag '{}' due to a conflicting operation.".format(feature))
 
 
 def __update_existing_key_value(azconfig_client,

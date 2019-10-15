@@ -632,11 +632,11 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
 
         # Add filters
         self.kwargs.update({
-            'filterName': first_filter_name,
-            'filterParameters': first_filter_params
+            'filter_name': first_filter_name,
+            'filter_parameters': first_filter_params
         })
 
-        self.cmd('appconfig feature filter add -n {config_store_name} --feature {feature} --label {label} --filterName {filterName} --filterParameters {filterParameters} -y',
+        self.cmd('appconfig feature filter add -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} --filter-parameters {filter_parameters} -y',
                  checks=[self.check('name', first_filter_name),
                          self.check('parameters', first_filter_params_output)])
 
@@ -650,30 +650,30 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
         }
 
         self.kwargs.update({
-            'filterName': second_filter_name,
-            'filterParameters': second_filter_params
+            'filter_name': second_filter_name,
+            'filter_parameters': second_filter_params
         })
 
-        self.cmd('appconfig feature filter add -n {config_store_name} --feature {feature} --label {label} --filterName {filterName} --filterParameters {filterParameters} -y',
+        self.cmd('appconfig feature filter add -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} --filter-parameters {filter_parameters} -y',
                  checks=[self.check('name', second_filter_name),
                          self.check('parameters', second_filter_params_output)])
 
         # Add duplicate of FirstFilter without any params
         self.kwargs.update({
-            'filterName': first_filter_name,
-            'filterParameters': ''
+            'filter_name': first_filter_name,
+            'filter_parameters': ''
         })
 
-        self.cmd('appconfig feature filter add -n {config_store_name} --feature {feature} --label {label} --filterName {filterName} --filterParameters {filterParameters} -y',
+        self.cmd('appconfig feature filter add -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} --filter-parameters {filter_parameters} -y',
                  checks=[self.check('name', first_filter_name),
                          self.check('parameters', {})])
 
         # Show FirstFilter without index will return both instances of this filter
-        filters = self.cmd('appconfig feature filter show -n {config_store_name} --feature {feature} --label {label} --filterName {filterName}').get_output_in_json()
+        filters = self.cmd('appconfig feature filter show -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name}').get_output_in_json()
         assert len(filters) == 2
 
         # Show FirstFilter with index will return only one instance of this filter at the specified index
-        self.cmd('appconfig feature filter show -n {config_store_name} --feature {feature} --label {label} --filterName {filterName} --index 2',
+        self.cmd('appconfig feature filter show -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} --index 2',
                  checks=[self.check('name', first_filter_name),
                          self.check('parameters', {})])
 
@@ -704,19 +704,19 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
 
         # Delete Filter without index should throw error when duplicates exist
         with self.assertRaisesRegexp(CLIError, "contains multiple instances of filter"):
-            self.cmd('appconfig feature filter delete -n {config_store_name} --feature {feature} --label {label} --filterName {filterName} -y')
+            self.cmd('appconfig feature filter delete -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} -y')
 
         # Delete Filter with index succeeds when correct index is provided
-        self.cmd('appconfig feature filter delete -n {config_store_name} --feature {feature} --label {label} --filterName {filterName} --index 2 -y',
+        self.cmd('appconfig feature filter delete -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} --index 2 -y',
                  checks=[self.check('name', first_filter_name),
                          self.check('parameters', {})])
 
-        # Clear all Filters
-        cleared_filters = self.cmd('appconfig feature filter clear -n {config_store_name} --feature {feature} --label {label} -y').get_output_in_json()
+        # Delete all Filters
+        cleared_filters = self.cmd('appconfig feature filter delete -n {config_store_name} --feature {feature} --label {label} --all -y').get_output_in_json()
         assert len(cleared_filters) == 2
 
-        # Clear Filters when no filters present
-        self.cmd('appconfig feature filter clear -n {config_store_name} --feature {feature} --label {label} -y',
+        # Delete Filters when no filters present
+        self.cmd('appconfig feature filter delete -n {config_store_name} --feature {feature} --label {label} --all -y',
                  checks=NoneCheck())
 
         # List Filters when no filters present

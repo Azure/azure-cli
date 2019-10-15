@@ -118,9 +118,9 @@ def validate_feature_query_fields(namespace):
 
 def validate_filter_parameters(namespace):
     """ Extracts multiple space-separated filter paramters in name[=value] format """
-    if isinstance(namespace.filterParameters, list):
+    if isinstance(namespace.filter_parameters, list):
         filter_parameters_dict = {}
-        for item in namespace.filterParameters:
+        for item in namespace.filter_parameters:
             param_tuple = validate_filter_parameter(item)
             if param_tuple:
                 param_name, param_value = param_tuple
@@ -133,7 +133,7 @@ def validate_filter_parameters(namespace):
                         filter_parameters_dict[param_name] = [old_param_value, param_value]
                 else:
                     filter_parameters_dict.update({param_name: param_value})
-        namespace.filterParameters = filter_parameters_dict
+        namespace.filter_parameters = filter_parameters_dict
 
 
 def validate_filter_parameter(string):
