@@ -3,6 +3,18 @@
 Release History
 ===============
 
+**AppService**
+
+* Added "--build remote" flag for "az functionapp deployment source config-zip" to support remote build action during function app deployment.
+
+**IoT**
+
+* Add new routing source type: DigitalTwinChangeEvents
+
+**Profile**
+
+* Fix: `az account get-access-token --resource-type ms-graph` not working.
+
 2.0.75
 ++++++
 
