@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**AppConfig**
+
+* Add appconfig feature command group to manage feature flags stored in an App Configuration.
+
 **AppService**
 
 * Added "--build remote" flag for "az functionapp deployment source config-zip" to support remote build action during function app deployment.

@@ -33,17 +33,15 @@ def load_command_table(self, _):
         client_factory=cf_configstore_operations
     )
 
-    configstore_feature_util = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.appconfig.feature#{}',
-        table_transformer=featureflag_entry_format,
-        client_factory=cf_configstore_operations
-    )
-
-    configstore_feature_filter_util = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.appconfig.feature#{}',
-        table_transformer=featurefilter_entry_format,
-        client_factory=cf_configstore_operations
-    )
+    def get_custom_sdk(custom_module, client_factory, table_transformer):
+        """Returns a CliCommandType instance with specified operation template based on the given custom module name.
+        This is useful when the command is not defined in the default 'custom' module but instead in a module under
+        'operations' package."""
+        return CliCommandType(
+            operations_tmpl='azure.cli.command_modules.appconfig.{}#'.format(custom_module) + '{}',
+            client_factory=client_factory,
+            table_transformer=table_transformer
+        )
 
     # Management Plane Commands
     with self.command_group('appconfig', configstore_custom_util, is_preview=True) as g:
@@ -77,18 +75,24 @@ def load_command_table(self, _):
         g.command('export', 'export_config')
 
     # FeatureManagement Commands
-    with self.command_group('appconfig feature', configstore_feature_util) as g:
-        g.command('set', 'set_feature')
-        g.command('delete', 'delete_feature')
-        g.command('show', 'show_feature')
-        g.command('list', 'list_feature')
-        g.command('lock', 'lock_feature')
-        g.command('unlock', 'unlock_feature')
-        g.command('enable', 'enable_feature')
-        g.command('disable', 'disable_feature')
+    with self.command_group('appconfig feature',
+                            custom_command_type=get_custom_sdk('feature',
+                                                               cf_configstore_operations,
+                                                               featureflag_entry_format)) as g:
+        g.custom_command('set', 'set_feature')
+        g.custom_command('delete', 'delete_feature')
+        g.custom_command('show', 'show_feature')
+        g.custom_command('list', 'list_feature')
+        g.custom_command('lock', 'lock_feature')
+        g.custom_command('unlock', 'unlock_feature')
+        g.custom_command('enable', 'enable_feature')
+        g.custom_command('disable', 'disable_feature')
 
-    with self.command_group('appconfig feature filter', configstore_feature_filter_util) as g:
-        g.command('add', 'add_filter')
-        g.command('delete', 'delete_filter')
-        g.command('show', 'show_filter')
-        g.command('list', 'list_filter')
+    with self.command_group('appconfig feature filter',
+                            custom_command_type=get_custom_sdk('feature',
+                                                               cf_configstore_operations,
+                                                               featurefilter_entry_format)) as g:
+        g.custom_command('add', 'add_filter')
+        g.custom_command('delete', 'delete_filter')
+        g.custom_command('show', 'show_filter')
+        g.custom_command('list', 'list_filter')
