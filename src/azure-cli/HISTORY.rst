@@ -43,15 +43,6 @@ Release History
     job start:
         - Changed the command from `job start` to `job create`.
 
-**SQL**
-
-* New Cmdlets for sql mi ad-admin that supports setting AAD administrator on Managed instance
-
-**ARM**
-
-* az deployment create: Add --handle-extended-json-format parameter to support multiline and comments in json template.
-
->>>>>>> origin/pack-tag-param
 **AppConfig**
 
 * Using & in authorization header
