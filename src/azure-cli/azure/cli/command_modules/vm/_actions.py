@@ -6,11 +6,14 @@
 import json
 
 from knack.util import CLIError
+from knack.log import get_logger
 
 from azure.cli.core.commands.parameters import get_one_of_subscription_locations
 from azure.cli.core.commands.arm import resource_exists
 
 from ._client_factory import _compute_client_factory
+
+logger = get_logger(__name__)
 
 
 def _resource_not_exists(cli_ctx, resource_type):
@@ -80,9 +83,15 @@ def load_images_from_aliases_doc(cli_ctx, publisher=None, offer=None, sku=None):
                        "it or use '--all' to retrieve images from server")
     # under hack mode(say through proxies with unsigned cert), opt out the cert verification
     response = requests.get(target_url, verify=(not should_disable_connection_verify()))
-    if response.status_code != 200:
-        raise CLIError("Failed to retrieve image alias doc '{}'. Error: '{}'".format(target_url, response))
-    dic = json.loads(response.content.decode())
+    if response.status_code == 200:
+        dic = json.loads(response.content.decode())
+    else:
+        # raise CLIError("Failed to retrieve image alias doc '{}'. Error: '{}'".format(target_url, response))
+        logger.warning("Failed to retrieve image alias doc '%s'. Error: '%s'. Use local copy instead.",
+                       target_url, response)
+        with open('resource/alias.json', 'r') as f:
+            content = f.read()
+        dic = json.loads(content)
     try:
         all_images = []
         result = (dic['outputs']['aliases']['value'])
@@ -101,7 +110,7 @@ def load_images_from_aliases_doc(cli_ctx, publisher=None, offer=None, sku=None):
                                                 _matched(sku, i['sku']))]
         return all_images
     except KeyError:
-        raise CLIError('Could not retrieve image list from {}'.format(target_url))
+        raise CLIError('Could not retrieve image list from {} or local copy'.format(target_url))
 
 
 def load_extension_images_thru_services(cli_ctx, publisher, name, version, location,
