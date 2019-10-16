@@ -58,6 +58,18 @@ def run_output_format(result):
     return _output_format(result, _run_format_group)
 
 
+def scope_map_output_format(result):
+    return _output_format(result, _scope_map_format_group)
+
+
+def token_output_format(result):
+    return _output_format(result, _token_format_group)
+
+
+def token_credential_output_format(result):
+    return _output_format(result, _token_password_format_group)
+
+
 def helm_list_output_format(result):
     if isinstance(result, dict):
         obj_list = []
@@ -212,6 +224,58 @@ def _helm_format_group(item):
     ])
 
 
+def _scope_map_format_group(item):
+    description = _get_value(item, 'description')
+    if len(description) > 57:
+        description = description[:57] + '...'
+
+    return OrderedDict([
+        ('NAME', _get_value(item, 'name')),
+        ('TYPE', _get_value(item, 'scopeMapType')),
+        ('CREATION DATE', _format_datetime(_get_value(item, 'creationDate'))),
+        ('DESCRIPTION', description),
+    ])
+
+
+def _token_format_group(item):
+    scope_map_id = _get_value(item, 'scopeMapId')
+    output = [
+        ('NAME', _get_value(item, 'name')),
+        ('SCOPE MAP', scope_map_id.split('/')[-1])
+    ]
+
+    passwords = _get_array_value(item, 'credentials', 'passwords')
+    for password in passwords:
+        password_name = _get_value(password, 'name').upper()
+        expiry_value = _get_value(password, 'expiry')
+        expiry_value = 'Never' if not expiry_value else _format_datetime(expiry_value)
+        output.append(('{} EXPIRY'.format(password_name), expiry_value))
+
+    output.extend([
+        ('STATUS', _get_value(item, 'status').lower().title()),
+        ('PROVISIONING STATE', _get_value(item, 'provisioningState')),
+        ('CREATION DATE', _format_datetime(_get_value(item, 'creationDate')))
+    ])
+    return OrderedDict(output)
+
+
+def _token_password_format_group(item):
+    username = _get_value(item, 'username')
+    passwords = _get_array_value(item, 'passwords')
+
+    output = [('USERNAME', username)]
+    for password in passwords:
+        password_name = _get_value(password, 'name').upper()
+        password_value = _get_value(password, 'value')
+        expiry_value = _get_value(password, 'expiry')
+        # _get_value returns ' ' if item is none.
+        expiry_value = 'Never' if expiry_value == ' ' else _format_datetime(expiry_value)
+        output.append((password_name, password_value))
+        output.append(('{} EXPIRY'.format(password_name), expiry_value))
+
+    return OrderedDict(output)
+
+
 def _get_triggers(item):
     """Get a nested value from a dict.
     :param dict item: The dict object
@@ -237,6 +301,18 @@ def _get_value(item, *args):
         return str(item) if item else ' '
     except (KeyError, TypeError, IndexError):
         return ' '
+
+
+def _get_array_value(item, *args):
+    """Get a nested array value from a dict.
+    :param dict item: The dict object
+    """
+    try:
+        for arg in args:
+            item = item[arg]
+        return list(item) if item else []
+    except (KeyError, TypeError, IndexError):
+        return []
 
 
 def _get_trigger_status(item, *args):

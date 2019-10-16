@@ -166,7 +166,7 @@ def load_command_table(self, _):
 
     with self.command_group('webapp deployment source') as g:
         g.custom_command('config-local-git', 'enable_local_git')
-        g.custom_command('config-zip', 'enable_zip_deploy')
+        g.custom_command('config-zip', 'enable_zip_deploy_webapp')
         g.custom_command('config', 'config_source_control', exception_handler=ex_handler_factory())
         g.custom_command('sync', 'sync_site_repo', exception_handler=ex_handler_factory())
         g.custom_show_command('show', 'show_source_control')

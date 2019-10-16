@@ -42,19 +42,12 @@ DEFAULT_INDEXING_POLICY = """{
   "automatic": true,
   "includedPaths": [
     {
-      "path": "/*",
-      "indexes": [
-        {
-          "kind": "Range",
-          "dataType": "String",
-          "precision": -1
-        },
-        {
-          "kind": "Range",
-          "dataType": "Number",
-          "precision": -1
-        }
-      ]
+      "path": "/*"
+    }
+  ],
+  "excludedPaths": [
+    {
+      "path": "/\\"_etag\\"/?"
     }
   ]
 }"""
@@ -273,8 +266,14 @@ def cli_cosmosdb_sql_database_create(client,
                                              options)
 
 
-def _populate_sql_container_definition(sql_container_resource, partition_key_path, default_ttl, indexing_policy):
-    if all(arg is None for arg in [partition_key_path, default_ttl, indexing_policy]):
+def _populate_sql_container_definition(sql_container_resource,
+                                       partition_key_path,
+                                       default_ttl,
+                                       indexing_policy,
+                                       unique_key_policy,
+                                       conflict_resolution_policy):
+    if all(arg is None for arg in
+           [partition_key_path, default_ttl, indexing_policy, unique_key_policy, conflict_resolution_policy]):
         return False
 
     if partition_key_path is not None:
@@ -289,6 +288,12 @@ def _populate_sql_container_definition(sql_container_resource, partition_key_pat
     if indexing_policy is not None:
         sql_container_resource.indexing_policy = indexing_policy
 
+    if unique_key_policy is not None:
+        sql_container_resource.unique_key_policy = unique_key_policy
+
+    if conflict_resolution_policy is not None:
+        sql_container_resource.conflict_resolution_policy = conflict_resolution_policy
+
     return True
 
 
@@ -297,14 +302,21 @@ def cli_cosmosdb_sql_container_create(client,
                                       account_name,
                                       database_name,
                                       container_name,
-                                      partition_key_path=None,
+                                      partition_key_path,
                                       default_ttl=None,
                                       indexing_policy=DEFAULT_INDEXING_POLICY,
-                                      throughput=None):
+                                      throughput=None,
+                                      unique_key_policy=None,
+                                      conflict_resolution_policy=None):
     """Creates an Azure Cosmos DB SQL container """
     sql_container_resource = SqlContainerResource(id=container_name)
 
-    _populate_sql_container_definition(sql_container_resource, partition_key_path, default_ttl, indexing_policy)
+    _populate_sql_container_definition(sql_container_resource,
+                                       partition_key_path,
+                                       default_ttl,
+                                       indexing_policy,
+                                       unique_key_policy,
+                                       conflict_resolution_policy)
 
     options = {}
     if throughput:
@@ -324,8 +336,7 @@ def cli_cosmosdb_sql_container_update(client,
                                       database_name,
                                       container_name,
                                       default_ttl=None,
-                                      indexing_policy=None
-                                      ):
+                                      indexing_policy=None):
     """Updates an Azure Cosmos DB SQL container """
     logger.debug('reading SQL container')
     sql_container = client.get_sql_container(resource_group_name, account_name, database_name, container_name)
@@ -337,7 +348,12 @@ def cli_cosmosdb_sql_container_update(client,
     sql_container_resource.unique_key_policy = sql_container.unique_key_policy
     sql_container_resource.conflict_resolution_policy = sql_container.conflict_resolution_policy
 
-    if _populate_sql_container_definition(sql_container_resource, None, default_ttl, indexing_policy):
+    if _populate_sql_container_definition(sql_container_resource,
+                                          None,
+                                          default_ttl,
+                                          indexing_policy,
+                                          None,
+                                          None):
         logger.debug('replacing SQL container')
 
     return client.create_update_sql_container(resource_group_name,
@@ -367,8 +383,12 @@ def cli_cosmosdb_gremlin_database_create(client,
                                                  options)
 
 
-def _populate_gremlin_graph_definition(gremlin_graph_resource, partition_key_path, default_ttl, indexing_policy):
-    if all(arg is None for arg in [partition_key_path, default_ttl, indexing_policy]):
+def _populate_gremlin_graph_definition(gremlin_graph_resource,
+                                       partition_key_path,
+                                       default_ttl,
+                                       indexing_policy,
+                                       conflict_resolution_policy):
+    if all(arg is None for arg in [partition_key_path, default_ttl, indexing_policy, conflict_resolution_policy]):
         return False
 
     if partition_key_path is not None:
@@ -383,6 +403,9 @@ def _populate_gremlin_graph_definition(gremlin_graph_resource, partition_key_pat
     if indexing_policy is not None:
         gremlin_graph_resource.indexing_policy = indexing_policy
 
+    if conflict_resolution_policy is not None:
+        gremlin_graph_resource.conflict_resolution_policy = conflict_resolution_policy
+
     return True
 
 
@@ -391,14 +414,19 @@ def cli_cosmosdb_gremlin_graph_create(client,
                                       account_name,
                                       database_name,
                                       graph_name,
-                                      partition_key_path=None,
+                                      partition_key_path,
                                       default_ttl=None,
                                       indexing_policy=DEFAULT_INDEXING_POLICY,
-                                      throughput=None):
+                                      throughput=None,
+                                      conflict_resolution_policy=None):
     """Creates an Azure Cosmos DB Gremlin graph """
     gremlin_graph_resource = GremlinGraphResource(id=graph_name)
 
-    _populate_gremlin_graph_definition(gremlin_graph_resource, partition_key_path, default_ttl, indexing_policy)
+    _populate_gremlin_graph_definition(gremlin_graph_resource,
+                                       partition_key_path,
+                                       default_ttl,
+                                       indexing_policy,
+                                       conflict_resolution_policy)
 
     options = {}
     if throughput:
@@ -418,8 +446,7 @@ def cli_cosmosdb_gremlin_graph_update(client,
                                       database_name,
                                       graph_name,
                                       default_ttl=None,
-                                      indexing_policy=None
-                                      ):
+                                      indexing_policy=None):
     """Updates an Azure Cosmos DB Gremlin graph """
     logger.debug('reading Gremlin graph')
     gremlin_graph = client.get_gremlin_graph(resource_group_name, account_name, database_name, graph_name)
@@ -431,7 +458,11 @@ def cli_cosmosdb_gremlin_graph_update(client,
     gremlin_graph_resource.unique_key_policy = gremlin_graph.unique_key_policy
     gremlin_graph_resource.conflict_resolution_policy = gremlin_graph.conflict_resolution_policy
 
-    if _populate_gremlin_graph_definition(gremlin_graph_resource, None, default_ttl, indexing_policy):
+    if _populate_gremlin_graph_definition(gremlin_graph_resource,
+                                          None,
+                                          default_ttl,
+                                          indexing_policy,
+                                          None):
         logger.debug('replacing Gremlin graph')
 
     return client.create_update_gremlin_graph(resource_group_name,

@@ -13,7 +13,7 @@ Release History
 
 **Key Vault**
 
-Fix #9352: Unexpected error when certificate file does not exist.
+* Fix #9352: Unexpected error when certificate file does not exist.
 
 **Network**
 
@@ -59,6 +59,10 @@ Fix #9352: Unexpected error when certificate file does not exist.
 
 * az deployment create: Add --handle-extended-json-format parameter to support multiline and comments in json template.
 
+**Backup**
+
+* Enhanced error detail for vault delete in force mode.
+
 **Compute**
 
 * vm create: Add --enable-agent configuration.
@@ -69,10 +73,6 @@ Fix #9352: Unexpected error when certificate file does not exist.
 * [BREAKING CHANGE] vm extension set: Fix bug where users could not set an extension on a VM with --ids.
 * vmss create: Add --computer-name-prefix parameter to support custom computer name prefix of virtual machines in the VMSS.
 * Update galleries API version to 2019-07-01.
-
-**Backup**
-
-* Enhanced error detail for vault delete in force mode.
 
 **IoT**
 

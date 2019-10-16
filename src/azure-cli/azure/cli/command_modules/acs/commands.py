@@ -8,9 +8,12 @@ from azure.cli.core.commands.arm import deployment_validate_table_format
 
 from ._client_factory import cf_container_services
 from ._client_factory import cf_managed_clusters
+from ._client_factory import cf_agent_pools
 from ._client_factory import cf_openshift_managed_clusters
 from ._format import aks_list_table_format
 from ._format import aks_show_table_format
+from ._format import aks_agentpool_show_table_format
+from ._format import aks_agentpool_list_table_format
 from ._format import osa_list_table_format
 from ._format import aks_upgrades_table_format
 from ._format import aks_versions_table_format
@@ -28,6 +31,12 @@ def load_command_table(self, _):
     managed_clusters_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.containerservice.v2019_08_01.operations.'
                         '_managed_clusters_operations#ManagedClustersOperations.{}',
+        client_factory=cf_managed_clusters
+    )
+
+    agent_pools_sdk = CliCommandType(
+        operations_tmpl='azext_aks_preview.vendored_sdks.azure_mgmt_preview_aks.'
+                        'operations._agent_pools_operations#AgentPoolsOperations.{}',
         client_factory=cf_managed_clusters
     )
 
@@ -91,6 +100,16 @@ def load_command_table(self, _):
 
     with self.command_group('aks', container_services_sdk, client_factory=cf_container_services) as g:
         g.custom_command('get-versions', 'aks_get_versions', table_transformer=aks_versions_table_format)
+
+    # AKS agent pool commands
+    with self.command_group('aks nodepool', agent_pools_sdk, client_factory=cf_agent_pools) as g:
+        g.custom_command('list', 'aks_agentpool_list', table_transformer=aks_agentpool_list_table_format)
+        g.custom_show_command('show', 'aks_agentpool_show', table_transformer=aks_agentpool_show_table_format)
+        g.custom_command('add', 'aks_agentpool_add', supports_no_wait=True)
+        g.custom_command('scale', 'aks_agentpool_scale', supports_no_wait=True)
+        g.custom_command('upgrade', 'aks_agentpool_upgrade', supports_no_wait=True)
+        g.custom_command('update', 'aks_agentpool_update', supports_no_wait=True)
+        g.custom_command('delete', 'aks_agentpool_delete', supports_no_wait=True)
 
     # OSA commands
     with self.command_group('openshift', openshift_managed_clusters_sdk,
