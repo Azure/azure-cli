@@ -97,6 +97,19 @@ def _any_sku_values_specified(sku):
     return any(val for key, val in sku.__dict__.items())
 
 
+def _compute_model_matches(sku_name, compute_model):
+    '''
+    Returns True if sku name matches the compute model.
+    Please update is function if compute_model has more than 2 enums.
+    '''
+
+    if (_is_serverless_slo(sku_name) and compute_model == ComputeModelType.serverless):
+        return True
+    if (not _is_serverless_slo(sku_name) and compute_model != ComputeModelType.serverless):
+        return True
+    return False
+
+
 def _is_serverless_slo(sku_name):
     '''
     Returns True if the sku name is a serverless sku.
@@ -249,16 +262,11 @@ def _find_performance_level_capability(sku, supported_service_level_objectives, 
         try:
             # Find requested service objective based on capacity & family.
             # Note that for non-vcore editions, family is None.
-            if compute_model == ComputeModelType.serverless:
-                return next(slo for slo in supported_service_level_objectives
-                            if ((slo.sku.family == sku.family) or
-                                (slo.sku.family is None and allow_reset_family)) and
-                            int(slo.sku.capacity) == int(sku.capacity) and
-                            _is_serverless_slo(slo.sku.name))
             return next(slo for slo in supported_service_level_objectives
                         if ((slo.sku.family == sku.family) or
                             (slo.sku.family is None and allow_reset_family)) and
-                        int(slo.sku.capacity) == int(sku.capacity))
+                        int(slo.sku.capacity) == int(sku.capacity) and
+                        _compute_model_matches(slo.sku.name, compute_model))
         except StopIteration:
             if allow_reset_family:
                 raise CLIError(
@@ -336,9 +344,7 @@ def _db_elastic_pool_update_sku(
     # Wipe out sku name if serverless vs provisioned db offerings changed,
     # only if sku name has not be wiped by earlier logic, and new compute model has been requested.
     if instance.sku.name is not None and compute_model is not None:
-        if _is_serverless_slo(instance.sku.name) and compute_model != ComputeModelType.serverless:
-            instance.sku.name = None
-        if compute_model == ComputeModelType.serverless and not _is_serverless_slo(instance.sku.name):
+        if not _compute_model_matches(instance.sku.name, compute_model):
             instance.sku.name = None
 
     # If sku name was wiped out by any of the above, resolve the requested sku name

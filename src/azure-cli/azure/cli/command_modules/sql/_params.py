@@ -53,10 +53,10 @@ from knack.arguments import CLIArgumentType, ignore_type
 from .custom import (
     ClientAuthenticationType,
     ClientType,
+    ComputeModelType,
     DatabaseCapabilitiesAdditionalDetails,
     ElasticPoolCapabilitiesAdditionalDetails,
-    FailoverPolicyType,
-    ComputeModelType
+    FailoverPolicyType
 )
 
 from ._validators import (
