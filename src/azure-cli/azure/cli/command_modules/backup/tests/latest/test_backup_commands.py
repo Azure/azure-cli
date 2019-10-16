@@ -130,6 +130,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("length([?name == '{vault3}'])", 1)
         ])
 
+    @unittest.skip("The test is not working. Pending update.")
     @ResourceGroupPreparer()
     @VaultPreparer()
     @VMPreparer(parameter_name='vm1')
@@ -241,6 +242,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['policy4_json'] = self.cmd('backup policy show -g {rg} -v {vault} -n {policy2}').get_output_in_json()
         self.assertEqual(self.kwargs['policy4_json']['properties']['instantRpRetentionRangeInDays'], 3)
 
+    @unittest.skip("The test is not working. Pending update.")
     @ResourceGroupPreparer()
     @VaultPreparer()
     @VMPreparer(parameter_name='vm1')

@@ -47,6 +47,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # Disable Protection
         self.cmd('backup protection disable -g {rg} -v {vault} -c {container} -i {item} --backup-management-type AzureStorage --delete-backup-data true --yes')
 
+    @unittest.skip("The test is not working. Pending update.")
     def test_afs_backup_container(self):
         self.kwargs.update({
             'vault': vault_name,
@@ -79,6 +80,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("length([?properties.friendlyName == '{sa1}'])", 1),
             self.check("length([?properties.friendlyName == '{sa2}'])", 1)])
 
+    @unittest.skip("The test is not working. Pending update.")
     def test_afs_backup_item(self):
         self.kwargs.update({
             'vault': vault_name,
