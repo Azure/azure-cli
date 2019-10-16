@@ -249,3 +249,34 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('acr check-health') as c:
         c.argument('ignore_errors', options_list=['--ignore-errors'], help='Provide all health checks, even if errors are found', action='store_true', required=False)
+
+    with self.argument_context('acr scope-map') as c:
+        c.argument('registry_name', options_list=['--registry', '-r'])
+        c.argument('description', options_list=['--description'], help='Description for the scope map. Maximum 256 characters are allowed.', required=False)
+        c.argument('add_repository', options_list=['--add'], nargs='+', help='Actions to be added. Use the format "--add REPO [ACTION1 ACTION2 ...]" per flag. Valid actions are metadata/read, metadata/write, content/read, content/write and content/delete', action='append', required=False)
+        c.argument('remove_repository', options_list=['--remove'], nargs='+', help='Actions to be removed. Use the format "--remove REPO [ACTION1 ACTION2 ...]" per flag. Valid actions are metadata/read, metadata/write, content/read, content/write and content/delete', action='append', required=False)
+        c.argument('scope_map_name', options_list=['--name', '-n'], help='The name of the scope map.', required=True)
+
+    with self.argument_context('acr scope-map create') as c:
+        c.argument('add_repository', options_list=['--add'], nargs='+', help='Actions to be added. Use the format "--add REPO [ACTION1 ACTION2 ...]" per flag. Valid actions are metadata/read, metadata/write, content/read, content/write and content/delete', action='append', required=True)
+
+    with self.argument_context('acr token') as c:
+        c.argument('registry_name', options_list=['--registry', '-r'])
+        c.argument('token_name', options_list=['--name', '-n'], help='The name of the token.', required=True)
+        c.argument('scope_map_name', options_list=['--scope-map'], help='The name of the scope map associated with the token', required=False)
+        c.argument('status', options_list=['--status'], help='The status of the token. Allowed values are "enabled" or "disabled".', required=False, default="enabled")
+
+    with self.argument_context('acr token create') as c:
+        c.argument('scope_map_name', options_list=['--scope-map'], help='The name of the scope map associated with the token', required=True)
+
+    with self.argument_context('acr token update') as c:
+        c.argument('scope_map_name', options_list=['--scope-map'], help='The name of the scope map associated with the token. If not specified, running this command will disassociate the current scope map related to the token.', required=False)
+
+    with self.argument_context('acr token credential generate') as c:
+        c.argument('password1', options_list=['--password1'], help='Flag indicating if password1 should be generated.', action='store_true', required=False)
+        c.argument('password2', options_list=['--password2'], help='Flag indicating if password2 should be generated.', action='store_true', required=False)
+        c.argument('days', options_list=['--days'], help='Number of days for which the credentials will be valid. If not specified, the expiration will default to the max value "9999-12-31T23:59:59.999999+00:00"', type=int, required=False)
+
+    with self.argument_context('acr token credential delete') as c:
+        c.argument('password1', options_list=['--password1'], help='Flag indicating if first password should be deleted', action='store_true', required=False)
+        c.argument('password2', options_list=['--password2'], help='Flag indicating if second password should be deleted.', action='store_true', required=False)

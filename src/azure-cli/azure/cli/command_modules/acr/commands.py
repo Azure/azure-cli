@@ -19,14 +19,20 @@ from ._format import (
     task_output_format,
     run_output_format,
     helm_list_output_format,
-    helm_show_output_format
+    helm_show_output_format,
+    scope_map_output_format,
+    token_output_format,
+    token_credential_output_format
 )
 from ._client_factory import (
     cf_acr_registries,
     cf_acr_replications,
     cf_acr_webhooks,
     cf_acr_tasks,
-    cf_acr_runs
+    cf_acr_runs,
+    cf_acr_scope_maps,
+    cf_acr_tokens,
+    cf_acr_token_credentials
 )
 
 
@@ -110,6 +116,26 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
 
     acr_check_health_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.acr.check_health#{}'
+    )
+
+    acr_scope_map_util = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.acr.scope_map#{}',
+        table_transformer=scope_map_output_format,
+        client_factory=cf_acr_scope_maps,
+        operation_group='scope_map'
+    )
+
+    acr_token_util = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.acr.token#{}',
+        table_transformer=token_output_format,
+        client_factory=cf_acr_tokens,
+        operation_group='token'
+    )
+
+    acr_token_credential_generate_util = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.acr.token#{}',
+        table_transformer=token_credential_output_format,
+        client_factory=cf_acr_token_credentials
     )
 
     with self.command_group('acr', acr_custom_util) as g:
@@ -233,3 +259,21 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
 
     with self.command_group('acr', acr_check_health_util) as g:
         g.command('check-health', 'acr_check_health')
+
+    with self.command_group('acr scope-map', acr_scope_map_util, is_preview=True) as g:
+        g.command('create', 'acr_scope_map_create')
+        g.command('delete', 'acr_scope_map_delete')
+        g.command('update', 'acr_scope_map_update')
+        g.command('show', 'acr_scope_map_show')
+        g.command('list', 'acr_scope_map_list')
+
+    with self.command_group('acr token', acr_token_util, is_preview=True) as g:
+        g.command('create', 'acr_token_create')
+        g.command('delete', 'acr_token_delete')
+        g.command('update', 'acr_token_update')
+        g.command('show', 'acr_token_show')
+        g.command('list', 'acr_token_list')
+        g.command('credential delete', 'acr_token_credential_delete')
+
+    with self.command_group('acr token credential', acr_token_credential_generate_util) as g:
+        g.command('generate', 'acr_token_credential_generate')

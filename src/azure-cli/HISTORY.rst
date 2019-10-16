@@ -7,6 +7,23 @@ Release History
 
 * Added "--build remote" flag for "az functionapp deployment source config-zip" to support remote build action during function app deployment.
 
+**IoT**
+
+* Add new routing source type: DigitalTwinChangeEvents
+
+**Network**
+
+* az network private-dns link vnet create/update: Fixes #9851. Support cross-tenant virtual network linking.
+* [BREAKING CHANGE] network vnet subnet list: Fix #10401. `--resource-group` and `--vnet-name` are required now.
+* az network public-ip prefix create: Fix #10757. Support to specify IP address version (IPv4, IPv6) when creation
+
+**Profile**
+
+* Fix: `az account get-access-token --resource-type ms-graph` not working.
+
+2.0.75
+++++++
+
 **AKS**
 
 * Set `--load-balancer-sku` default value to standard if supported by the kubernetes version
@@ -22,19 +39,21 @@ Release History
     job start:
         - Changed the command from `job start` to `job create`.
     
-**SQL**
-
-* New Cmdlets for sql mi ad-admin that supports setting AAD administrator on Managed instance
-
-**ARM**
-
-* az deployment create: Add --handle-extended-json-format parameter to support multiline and comments in json template.
-
 **AppConfig**
 
 * Using & in authorization header
 * Adding api-version to all requests
 * Upgrading SDK Version to 1.0.0
+
+**AppService**
+
+* Added "webapp config access-restriction show | set | add | remove"
+* az webapp up updated for better error-handling
+* az appservice plan update support Isolated SKU
+
+**ARM**
+
+* az deployment create: Add --handle-extended-json-format parameter to support multiline and comments in json template.
 
 **Compute**
 
@@ -51,26 +70,26 @@ Release History
 
 * Enhanced error detail for vault delete in force mode.
 
-**Network**
+**IoT**
 
-* az network private-dns link vnet create/update: Fixes #9851. Support cross-tenant virtual network linking.
-* [BREAKING CHANGE] network vnet subnet list: Fix #10401. `--resource-group` and `--vnet-name` are required now.
-* az network public-ip prefix create: Fix #10757. Support to specify IP address version (IPv4, IPv6) when creation
+* Fix #2116: Unexpected 'az iot hub show' error for resource not found.
 
 **Monitor**
 
 * az monitor log-analytics workspace: Support CRUD for Azure log analytics workspace.
 
-**Profile**
+**Network**
 
-* Fix: `az account get-access-token --resource-type ms-graph` not working.
+* az network private-dns link vnet create/update: Fixes #9851. Support cross-tenant virtual network linking.
+* [BREAKING CHANGE] network vnet subnet list: Fix #10401. `--resource-group` and `--vnet-name` are required now.
+
+**SQL**
+
+* New Cmdlets for sql mi ad-admin that supports setting AAD administrator on Managed instance
 
 **Storage**
 
 * az storage copy: Add --preserve-s2s-access-tier parameter to preserve access tier during service to service copy.
-
-**Storage**
-
 * az storage account create/update: Add --enable-large-file-share parameter to support large file shares for storage account.
 
 **RBAC**
@@ -90,13 +109,6 @@ Release History
 * Add `--load-balancer-sku`, `--load-balancer-managed-outbound-ip-count`, `--load-balancer-outbound-ips` and `--load-balancer-outbound-ip-prefixes` to `az aks create` command, which allows for creating AKS cluster with SLB.
 * Add `--load-balancer-managed-outbound-ip-count`, `--load-balancer-outbound-ips` and `--load-balancer-outbound-ip-prefixes` to `az aks update` command, which allows for updating load balancer profile of an AKS cluster with SLB.
 * Add `--vm-set-type` to `az aks create` command, which allows to specify vm types of an AKS Cluster (vmas or vmss).
-
-**AppService**
-
-* Added "webapp config access-restriction show | set | add | remove"
-* az webapp up updated for better error-handling
-* az appservice plan update support Isolated SKU
-* `az functionapp create` support for private ACR images
 
 **ARM**
 
@@ -121,11 +133,6 @@ Release History
 **EventGrid**
 
 * Fix the endpoint help text to refer to the right parameter (namely, to point to parameter `--endpoint` rather than `--endpoint-type` in event subscription commands).
-
-**IoT**
-
-* Add new routing source type: DigitalTwinChangeEvents
-* Fix #2116: Unexpected 'az iot hub show' error for resource not found.
 
 **Key Vault**
 
