@@ -19,7 +19,8 @@ Release History
 
 **Profile**
 
-* Fix: `az account get-access-token --resource-type ms-graph` not working.
+* Fix: `az account get-access-token --resource-type ms-graph` not working
+* Remove warning from `az login`
 
 2.0.75
 ++++++
