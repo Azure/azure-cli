@@ -256,6 +256,7 @@ def _parse_image_argument(cmd, namespace):
     from azure.cli.command_modules.vm._actions import load_images_from_aliases_doc
     import requests
     try:
+        images = None
         images = load_images_from_aliases_doc(cmd.cli_ctx)
         matched = next((x for x in images if x['urnAlias'].lower() == namespace.image.lower()), None)
         if matched:
@@ -280,8 +281,8 @@ def _parse_image_argument(cmd, namespace):
                   'VHD blob URI, or pick an image from {}.\nSee vm create -h for more information ' \
                   'on specifying an image.'.format(namespace.image, [x['urnAlias'] for x in images])
         else:
-            err = 'Failed to connect to remote source of image aliases. Invalid image "{}". Use a ' \
-                  'valid image URN, custom image name, custom image id, or VHD blob URI.\nSee vm ' \
+            err = 'Failed to connect to remote source of image aliases or find a local copy. Invalid image "{}". ' \
+                  'Use a valid image URN, custom image name, custom image id, or VHD blob URI.\nSee vm ' \
                   'create -h for more information on specifying an image.'.format(namespace.image)
         raise CLIError(err)
 
