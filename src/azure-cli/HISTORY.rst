@@ -7,10 +7,6 @@ Release History
 
 * Added a preview parameter `--pack-image-tag` to command `az acr pack build`.
 
-**AppService**
-
-* Added "--build remote" flag for "az functionapp deployment source config-zip" to support remote build action during function app deployment.
-
 **IoT**
 
 * Add new routing source type: DigitalTwinChangeEvents
@@ -42,7 +38,23 @@ Release History
         - Changed parameter --ask from utf-8 string to 32 character hex string.
     job start:
         - Changed the command from `job start` to `job create`.
+<<<<<<< HEAD
     
+=======
+
+**AppService**
+
+* Added "--build remote" flag for "az functionapp deployment source config-zip" to support remote build action during function app deployment.
+
+**SQL**
+
+* New Cmdlets for sql mi ad-admin that supports setting AAD administrator on Managed instance
+
+**ARM**
+
+* az deployment create: Add --handle-extended-json-format parameter to support multiline and comments in json template.
+
+>>>>>>> origin/pack-tag-param
 **AppConfig**
 
 * Using & in authorization header
