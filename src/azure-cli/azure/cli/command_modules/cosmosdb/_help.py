@@ -289,7 +289,7 @@ type: command
 short-summary: Create an Gremlin graph under an Azure Cosmos DB Gremlin database.
 examples:
   - name: Create an Azure Cosmos DB Gremlin graph.
-    text: az cosmosdb gremlin graph create -g MyResourceGroup -a MyAccount -d MyDatabase -n MyGraph --part "/my/path" --idx @policy-file.json --ttl 1000 --throughput "700"
+    text: az cosmosdb gremlin graph create -g MyResourceGroup -a MyAccount -d MyDatabase -n MyGraph --partition-key-path "/my/path" --idx @policy-file.json --ttl 1000 --throughput "700"
     crafted: true
 """
 
@@ -519,7 +519,7 @@ type: command
 short-summary: Create an SQL container under an Azure Cosmos DB SQL database.
 examples:
   - name: Create an Azure Cosmos DB SQL container.
-    text: az cosmosdb sql container create -g MyResourceGroup -a MyAccount -d MyDatabase -n MyContainer --part "/my/path" --idx @policy-file.json --ttl 1000 --throughput "700"
+    text: az cosmosdb sql container create -g MyResourceGroup -a MyAccount -d MyDatabase -n MyContainer --partition-key-path "/my/path" --idx @policy-file.json --ttl 1000 --throughput "700"
     crafted: true
 """
 
