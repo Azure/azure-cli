@@ -89,7 +89,7 @@ def load_images_from_aliases_doc(cli_ctx, publisher=None, offer=None, sku=None):
         # raise CLIError("Failed to retrieve image alias doc '{}'. Error: '{}'".format(target_url, response))
         logger.warning("Failed to retrieve image alias doc '%s'. Error: '%s'. Use local copy instead.",
                        target_url, response)
-        with open('resource/alias.json', 'r') as f:
+        with open('resource/aliases.json', 'r') as f:
             content = f.read()
         dic = json.loads(content)
     try:
