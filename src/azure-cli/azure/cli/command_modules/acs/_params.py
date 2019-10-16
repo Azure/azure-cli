@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long,too-many-statements
+# pylint: disable=line-too-long,too-many-statements,no-name-in-module,import-error
 
 import os.path
 import platform
@@ -20,7 +20,7 @@ from ._validators import (
     validate_create_parameters, validate_k8s_client_version, validate_k8s_version, validate_linux_host_name,
     validate_list_of_integers, validate_ssh_key, validate_connector_name, validate_max_pods, validate_nodepool_name,
     validate_vm_set_type, validate_load_balancer_sku, validate_load_balancer_outbound_ips,
-    validate_load_balancer_outbound_ip_prefixes, validate_taints)
+    validate_load_balancer_outbound_ip_prefixes, validate_taints, validate_ip_ranges, validate_acr, validate_ip_ranges_on_create)
 
 aci_connector_os_type = ['Windows', 'Linux', 'Both']
 
@@ -190,16 +190,18 @@ def load_arguments(self, _):
         c.argument('vnet_subnet_id')
         c.argument('workspace_resource_id')
         c.argument('skip_subnet_role_assignment', action='store_true')
+        c.argument('api_server_authorized_ip_ranges', type=str, validator=validate_ip_ranges_on_create)
         c.argument('attach_acr', acr_arg_type)
 
     with self.argument_context('aks update') as c:
-        c.argument('attach_acr', acr_arg_type)
-        c.argument('detach_acr', acr_arg_type)
+        c.argument('attach_acr', acr_arg_type, validator=validate_acr)
+        c.argument('detach_acr', acr_arg_type, validator=validate_acr)
 
     with self.argument_context('aks update') as c:
         c.argument('load_balancer_managed_outbound_ip_count', type=int)
         c.argument('load_balancer_outbound_ips', type=str, validator=validate_load_balancer_outbound_ips)
         c.argument('load_balancer_outbound_ip_prefixes', type=str, validator=validate_load_balancer_outbound_ip_prefixes)
+        c.argument('api_server_authorized_ip_ranges', type=str, validator=validate_ip_ranges)
 
     with self.argument_context('aks disable-addons') as c:
         c.argument('addons', options_list=['--addons', '-a'])

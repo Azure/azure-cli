@@ -4,7 +4,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.help_files import helps  # pylint: disable=unused-import
+from knack.help_files import helps  # pylint: disable=import-error
 # pylint: disable=line-too-long, too-many-lines
 
 helps['acs'] = """
@@ -305,6 +305,9 @@ parameters:
   - name: --attach-acr
     type: string
     short-summary: Grant the 'acrpull' role assignment to the ACR specified by name or resource ID.
+  - name: --api-server-authorized-ip-ranges
+    type: str
+    short-summary: Comma seperated list of authorized apiserver IP ranges. Set to "" to disable. If left unset, all external traffic will be allowed.
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
@@ -324,6 +327,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-outbound-ip-prefixes <ip-prefix-resource-id-1,ip-prefix-resource-id-2>
   - name: Create a kubernetes cluster with basic SKU load balancer and AvailabilitySet vm set type.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-sku basic --vm-set-type AvailabilitySet
+  - name: Create a kubernetes cluster with authorized apiserver ip ranges.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --api-server-authorized-ip-ranges 193.168.1.0/24,194.168.1.0/24
 """
 
 helps['aks update'] = """
@@ -348,6 +353,9 @@ parameters:
   - name: --detach-acr
     type: string
     short-summary: Disable the 'acrpull' role assignment to the ACR specified by name or resource ID.
+  - name: --api-server-authorized-ip-ranges
+    type: str
+    short-summary: Comma seperated list of authorized apiserver IP ranges. Set to "" to disable. Set to 0.0.0.0/32 to allow all traffic in a previously restricted cluster.
 examples:
   - name: Update a kubernetes cluster with standard SKU load balancer to use two AKS created IPs for the load balancer outbound connection usage.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
@@ -357,6 +365,12 @@ examples:
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-outbound-ip-prefixes <ip-prefix-resource-id-1,ip-prefix-resource-id-2>
   - name: Attach AKS cluster to ACR by name "acrName"
     text: az aks update -g MyResourceGroup -n MyManagedCluster --attach-acr acrName
+  - name: Update a kubernetes cluster with authorized apiserver ip ranges.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --api-server-authorized-ip-ranges 193.168.1.0/24,194.168.1.0/24
+  - name: Disable authorized apiserver ip ranges feature for a kubernetes cluster.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --api-server-authorized-ip-ranges ""
+  - name: Allow all traffic to an apiserver in a kubernetes cluster but don't disable authorized ip ranges feature to allow for future use.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --api-server-authorized-ip-ranges 0.0.0.0/32
 """
 
 helps['aks delete'] = """

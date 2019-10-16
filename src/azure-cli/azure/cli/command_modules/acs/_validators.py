@@ -7,7 +7,9 @@ import os
 import os.path
 import re
 from math import ceil
+from ipaddress import ip_network
 
+# pylint: disable=no-name-in-module,import-error
 from knack.log import get_logger
 
 from azure.cli.core.util import CLIError
@@ -71,6 +73,31 @@ def validate_create_parameters(namespace):
         raise CLIError('--name has no value')
     if namespace.dns_name_prefix is not None and not namespace.dns_name_prefix:
         raise CLIError('--dns-prefix has no value')
+
+
+def validate_ip_ranges_on_create(namespace):
+    if (namespace.api_server_authorized_ip_ranges and
+            namespace.load_balancer_sku and
+            namespace.load_balancer_sku.lower() == "basic"):
+        raise CLIError('--api-server-authorized-ip-ranges can only be used with standard load balancer')
+
+    return validate_ip_ranges(namespace)
+
+
+def validate_ip_ranges(namespace):
+    if not namespace.api_server_authorized_ip_ranges:
+        return
+
+    allowAllTraffic = "0.0.0.0/32"
+    for ip in namespace.api_server_authorized_ip_ranges.split(','):
+        if ip == allowAllTraffic:
+            continue
+        try:
+            ip = ip_network(ip)
+            if not ip.is_global:
+                raise CLIError("--api-server-authorized-ip-ranges must be global non-reserved addresses or CIDRs")
+        except ValueError:
+            raise CLIError("--api-server-authorized-ip-ranges should be a list of IPv4 addresses or CIDRs")
 
 
 def validate_k8s_version(namespace):
@@ -178,3 +205,8 @@ def validate_taints(namespace):
             found = regex.findall(taint)
             if not found:
                 raise CLIError('Invalid node taint: %s' % taint)
+
+
+def validate_acr(namespace):
+    if namespace.attach_acr and namespace.detach_acr:
+        raise CLIError('Cannot specify "--attach-acr" and "--detach-acr" at the same time.')
