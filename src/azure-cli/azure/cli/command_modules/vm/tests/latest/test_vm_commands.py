@@ -995,6 +995,23 @@ class VMExtensionScenarioTest(ScenarioTest):
         ])
         self.cmd('vm extension delete --resource-group {rg} --vm-name {vm} --name {ext_name}')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_extension_with_id_')
+    @AllowLargeResponse()
+    def test_vm_extension_with_id(self, resource_group):
+        self.kwargs.update({
+            'vm': 'vm1'
+        })
+        vm_id = self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS').get_output_in_json()['id']
+        self.kwargs.update({
+            'vm_id': vm_id
+        })
+        vm_ext_id = self.cmd('vm extension set -n customScript --publisher Microsoft.Azure.Extensions --ids {vm_id}')\
+            .get_output_in_json()['id']
+        self.kwargs.update({
+            'vm_ext_id': vm_ext_id
+        })
+        self.cmd('vm extension delete --ids {vm_ext_id}')
+
 
 class VMMachineExtensionImageScenarioTest(ScenarioTest):
 
@@ -1175,6 +1192,20 @@ class VMCreateNoneOptionsTest(ScenarioTest):  # pylint: disable=too-many-instanc
             self.check('osProfile.computerName', '{vm}')
         ])
         self.cmd('network public-ip show -n {vm}PublicIP -g {rg}', expect_failure=True)
+
+
+class VMCreateMonitorTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_create_with_monitor', location='centralus')
+    def test_vm_create_with_monitor(self, resource_group):
+
+        self.kwargs.update({
+            'vm': 'monitorvm',
+            'workspace': 'vmlogworkspace20191009',
+            'rg': resource_group
+        })
+
+        self.cmd('vm create -n {vm} -g {rg} --image UbuntuLTS --workspace {workspace}')
 
 
 class VMBootDiagnostics(ScenarioTest):
@@ -3486,6 +3517,25 @@ class VMPriorityEvictionBilling(ScenarioTest):
             self.check('vmss.virtualMachineProfile.priority', 'Low'),
             self.check('vmss.virtualMachineProfile.evictionPolicy', 'Deallocate'),
             self.check('vmss.virtualMachineProfile.billingProfile.maxPrice', 50)
+        ])
+
+
+class VMCreateSpecialName(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_create_special_name_')
+    def test_vm_create_special_name(self, resource_group):
+        """
+        Compose a valid computer name from VM name if computer name is not provided.
+        Remove special characters: '`~!@#$%^&*()=+_[]{}\\|;:\'\",<>/?'
+        """
+        self.kwargs.update({
+            'vm': 'vm_1'
+        })
+
+        self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('name', '{vm}'),
+            self.check('osProfile.computerName', 'vm1')
         ])
 
 

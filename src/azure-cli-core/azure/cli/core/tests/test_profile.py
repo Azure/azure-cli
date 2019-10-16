@@ -122,6 +122,21 @@ class TestProfile(unittest.TestCase):
                                                      False)
         self.assertTrue(consolidated[0]['name'] in [polished_display_name, test_display_name])
 
+    def test_normalize_with_none_subscription_name(self):
+        cli = DummyCli()
+        storage_mock = {'subscriptions': None}
+        test_display_name = None
+        polished_display_name = ''
+        test_subscription = SubscriptionStub('sub1',
+                                             test_display_name,
+                                             SubscriptionState.enabled,
+                                             'tenant1')
+        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
+        consolidated = profile._normalize_properties(self.user1,
+                                                     [test_subscription],
+                                                     False)
+        self.assertTrue(consolidated[0]['name'] == polished_display_name)
+
     def test_update_add_two_different_subscriptions(self):
         cli = DummyCli()
         storage_mock = {'subscriptions': None}

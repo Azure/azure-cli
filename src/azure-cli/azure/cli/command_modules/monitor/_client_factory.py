@@ -57,3 +57,13 @@ def cf_event_categories(cli_ctx, _):
 
 def cf_metric_alerts(cli_ctx, _):
     return cf_monitor(cli_ctx, _).metric_alerts
+
+
+def _log_analytics_client_factory(cli_ctx, _):
+    from azure.mgmt.loganalytics import LogAnalyticsManagementClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    return get_mgmt_service_client(cli_ctx, LogAnalyticsManagementClient)
+
+
+def cf_log_analytics_workspace(cli_ctx, _):
+    return _log_analytics_client_factory(cli_ctx, _).workspaces

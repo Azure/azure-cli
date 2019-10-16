@@ -717,6 +717,45 @@ class FunctionappACRScenarioTest(ScenarioTest):
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp))
 
 
+class FunctionAppCreateUsingACR(ScenarioTest):
+    @ResourceGroupPreparer(location='japanwest')
+    @StorageAccountPreparer()
+    @AllowLargeResponse()
+    def test_acr_create_function_app(self, resource_group, storage_account):
+        plan = self.create_random_name(prefix='acrtestplanfunction', length=24)
+        functionapp = self.create_random_name(prefix='functionappacrtest', length=24)
+        runtime = 'node'
+        acr_registry_name = functionapp
+        self.cmd('acr create --admin-enabled -g {} -n {} --sku Basic'.format(resource_group, acr_registry_name))
+        acr_creds = self.cmd('acr credential show -n {}'.format(acr_registry_name)).get_output_in_json()
+        username = acr_creds['username']
+        password = acr_creds['passwords'][0]['value']
+        self.cmd('functionapp plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan))
+        self.cmd('functionapp create -g {} -n {} -s {} --plan {} --runtime {}'
+                 ' --deployment-container-image-name {}.azurecr.io/image-name:latest --docker-registry-server-user {}'
+                 ' --docker-registry-server-password {}'.format(resource_group, functionapp, storage_account, plan, runtime,
+                                                                acr_registry_name, username, password))
+
+        self.cmd('functionapp config container show -g {} -n {} '.format(resource_group, functionapp), checks=[
+            JMESPathCheck("[?name=='DOCKER_REGISTRY_SERVER_USERNAME']|[0].value", username),
+            JMESPathCheck("[?name=='DOCKER_REGISTRY_SERVER_URL']|[0].name", 'DOCKER_REGISTRY_SERVER_URL')
+        ])
+        self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp), checks=[
+            JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'node'),
+            JMESPathCheck("[?name=='DOCKER_REGISTRY_SERVER_USERNAME'].value|[0]", username)
+        ])
+
+        self.cmd('functionapp config container delete -g {} -n {} '.format(resource_group, functionapp))
+        json_result = self.cmd(
+            'functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp)).get_output_in_json()
+        all_settings = [setting['name'] for setting in json_result]
+        # Make sure the related settings are deleted
+        self.assertNotIn('DOCKER_REGISTRY_SERVER_USERNAME', all_settings)
+        self.assertNotIn('DOCKER_REGISTRY_SERVER_URL', all_settings)
+        self.assertNotIn('DOCKER_REGISTRY_SERVER_PASSWORD', all_settings)
+        self.assertIn('FUNCTIONS_WORKER_RUNTIME', all_settings)
+
+
 class FunctionappACRDeploymentScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='japanwest')
     @StorageAccountPreparer()
@@ -1433,6 +1472,24 @@ class WebappZipDeployScenarioTest(ScenarioTest):
         ])
 
 
+# Disabled due to issue https://github.com/Azure/azure-cli/issues/10705
+# class FunctionappRemoteBuildScenarioTest(ScenarioTest):
+#    @ResourceGroupPreparer()
+#    @StorageAccountPreparer()
+#    def test_functionapp_remote_build(self, resource_group, storage_account):
+#        functionapp_name = self.create_random_name(prefix='faremotebuildapp', length=24)
+#        plan_name = self.create_random_name(prefix='faremotebuildplan', length=24)
+#        zip_file = os.path.join(TEST_DIR, 'test_remote_build.zip')
+#        self.cmd('functionapp plan create -g {} -n {} --sku S1 --is-linux true'.format(resource_group, plan_name))
+#        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --os-type Linux --runtime python'.format(resource_group, functionapp_name, plan_name, storage_account))
+#        self.cmd('functionapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, functionapp_name, zip_file)).assert_with_checks([
+#            JMESPathCheck('status', 4),
+#            JMESPathCheck('deployer', 'Push-Deployer'),
+#           JMESPathCheck('message', 'Created via a push deployment'),
+#            JMESPathCheck('complete', True)
+#        ])
+
+
 class WebappImplictIdentityTest(ScenarioTest):
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer()
@@ -1611,7 +1668,7 @@ class WebappNetworkConnectionTests(ScenarioTest):
         vnet_name = self.create_random_name('swiftname', 24)
 
         self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(resource_group, vnet_name, subnet_name))
-        self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan))
+        self.cmd('appservice plan create -g {} -n {} --sku P1V2'.format(resource_group, plan))
         self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan))
         self.cmd('webapp vnet-integration add -g {} -n {} --vnet {} --subnet {}'.format(resource_group, webapp_name, vnet_name, subnet_name))
         self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
