@@ -1116,7 +1116,7 @@ def _get_authorization_code_worker(authority_url, resource, results):
         web_server.server_close()
         results['no_browser'] = True
         return
-        
+
     # wait for callback from browser.
     while True:
         web_server.handle_request()
