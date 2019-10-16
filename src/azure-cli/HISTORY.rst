@@ -14,10 +14,12 @@ Release History
 
 **CosmosDB**
 
-* Add unique key policy and conflict resolution policy parameters for az cosmosdb sql container create command
-* Add conflict resolution policy parameter for az cosmosdb gremlin graph create command
-* Update SQL container and Gremlin graph default indexing policy
-* Change partition key of SQL container and Gremlin graph from optional to required
+* [BREAKING] sql container create: Change --partition-key-path to required parameter
+* [BREAKING] gremlin graph create: Change --partition-key-path to required parameter
+* sql container create: Add --unique-key-policy and --conflict-resolution-policy
+* sql container create/update: Update the --idx default schema
+* gremlin graph create: Add --conflict-resolution-policy
+* gremlin graph create/update: Update the --idx default schema
 * Fix typo in help message
 
 **Network**
