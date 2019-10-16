@@ -11,6 +11,10 @@ Release History
 
 * Add new routing source type: DigitalTwinChangeEvents
 
+**Key Vault**
+
+* Fix #9352: Unexpected error when certificate file does not exist.
+
 **Network**
 
 * az network private-dns link vnet create/update: Fixes #9851. Support cross-tenant virtual network linking.
@@ -39,7 +43,7 @@ Release History
         - Changed parameter --ask from utf-8 string to 32 character hex string.
     job start:
         - Changed the command from `job start` to `job create`.
-    
+
 **AppConfig**
 
 * Using & in authorization header
