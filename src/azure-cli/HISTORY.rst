@@ -26,6 +26,10 @@ Release History
 * Fix: `az account get-access-token --resource-type ms-graph` not working
 * Remove warning from `az login`
 
+**RBAC**
+
+* Fix #10807: `az ad app update --id {} --display-name {}` doesn't work
+
 2.0.75
 ++++++
 
