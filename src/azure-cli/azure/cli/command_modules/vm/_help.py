@@ -1405,6 +1405,35 @@ examples:
     crafted: true
 """
 
+helps['vm image terms'] = """
+type: group
+short-summary: Manage Azure Marketplace terms.
+"""
+
+helps['vm image terms accept'] = """
+type: command
+short-summary: Accept Azure Marketplace terms so that the image can be used to create VMs
+examples:
+  - name: Accept Azure Marketplace terms so that the image can be used to create VMs.
+    text: az vm image terms accept --urn publisher:offer:sku:version
+"""
+
+helps['vm image terms cancel'] = """
+type: command
+short-summary: Cancel Azure Marketplace terms.
+examples:
+  - name: Cancel Azure Marketplace terms.
+    text: az vm image terms cancel --urn publisher:offer:sku:version
+"""
+
+helps['vm image terms show'] = """
+type: command
+short-summary: Get the details of Azure Marketplace terms.
+examples:
+  - name: Get the details of Azure Marketplace terms.
+    text: az vm image terms show --urn publisher:offer:sku:version
+"""
+
 helps['vm list'] = """
 type: command
 short-summary: List details of Virtual Machines.

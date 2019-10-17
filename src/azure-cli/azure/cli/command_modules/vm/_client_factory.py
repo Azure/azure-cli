@@ -50,6 +50,13 @@ def cf_vm_image(cli_ctx, _):
     return _compute_client_factory(cli_ctx).virtual_machine_images
 
 
+def cf_vm_image_term(cli_ctx, _):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.mgmt.marketplaceordering import MarketplaceOrderingAgreements
+    market_place_client = get_mgmt_service_client(cli_ctx, MarketplaceOrderingAgreements)
+    return market_place_client.marketplace_agreements
+
+
 def cf_usage(cli_ctx, _):
     return _compute_client_factory(cli_ctx).usage
 

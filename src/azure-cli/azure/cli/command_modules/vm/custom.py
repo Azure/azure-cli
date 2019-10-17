@@ -32,7 +32,7 @@ from ._vm_diagnostics_templates import get_default_diag_config
 
 from ._actions import (load_images_from_aliases_doc, load_extension_images_thru_services,
                        load_images_thru_services, _get_latest_image_version)
-from ._client_factory import _compute_client_factory, cf_public_ip_addresses
+from ._client_factory import _compute_client_factory, cf_public_ip_addresses, cf_vm_image_term
 
 logger = get_logger(__name__)
 
@@ -1439,6 +1439,77 @@ def accept_market_ordering_terms(cmd, urn=None, publisher=None, offer=None, plan
     term.accepted = True
     return market_place_client.marketplace_agreements.create(publisher, offer, plan, term)
 # endregion
+
+
+def _terms_prepare(cmd, urn, publisher, offer, plan):
+    usage_err = 'usage error: --plan STRING --offer STRING --publish STRING |--urn STRING'
+    if urn:
+        if any([publisher, offer, plan]):
+            raise CLIError(usage_err)
+        publisher, offer, _, _ = urn.split(':')
+        image = show_vm_image(cmd, urn)
+        if not image.plan:
+            logger.warning("Image '%s' has no terms to accept.", urn)
+            return '', '', ''
+        plan = image.plan.name
+    else:
+        if not publisher or not offer or not plan:
+            raise CLIError(usage_err)
+    return publisher, offer, plan
+
+
+def _accept_cancel_terms(cmd, urn, publisher, offer, plan, accept):
+    publisher, offer, plan = _terms_prepare(cmd, urn, publisher, offer, plan)
+    if publisher == '':
+        return
+    op = cf_vm_image_term(cmd.cli_ctx, '')
+    terms = op.get(publisher, offer, plan)
+    terms.accepted = accept
+    return op.create(publisher, offer, plan, terms)
+
+
+def accept_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
+    """
+    Accept market ordering terms.
+    :param cmd:cmd
+    :param urn:URN, in format of 'publisher:offer:sku:version'. If specified, other argument values can be omitted
+    :param publisher:Image publisher
+    :param offer:Image offer
+    :param plan:Image billing plan
+    :return:
+    """
+    return _accept_cancel_terms(cmd, urn, publisher, offer, plan, True)
+
+
+def cancel_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
+    """
+    Cancel market ordering terms.
+    :param cmd:cmd
+    :param urn:URN, in format of 'publisher:offer:sku:version'. If specified, other argument values can be omitted
+    :param publisher:Image publisher
+    :param offer:Image offer
+    :param plan:Image billing plan
+    :return:
+    """
+    return _accept_cancel_terms(cmd, urn, publisher, offer, plan, False)
+
+
+def get_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
+    """
+    Get the details of market ordering terms.
+    :param cmd:cmd
+    :param urn:URN, in format of 'publisher:offer:sku:version'. If specified, other argument values can be omitted
+    :param publisher:Image publisher
+    :param offer:Image offer
+    :param plan:Image billing plan
+    :return:
+    """
+    publisher, offer, plan = _terms_prepare(cmd, urn, publisher, offer, plan)
+    if publisher is None:
+        return
+    op = cf_vm_image_term(cmd.cli_ctx, '')
+    terms = op.get(publisher, offer, plan)
+    return terms
 
 
 # region VirtualMachines NetworkInterfaces (NICs)
