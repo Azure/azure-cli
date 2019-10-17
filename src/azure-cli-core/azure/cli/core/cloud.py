@@ -22,7 +22,7 @@ from knack.config import get_config_parser
 logger = get_logger(__name__)
 
 CLOUD_CONFIG_FILE = os.path.join(GLOBAL_CONFIG_DIR, 'clouds.config')
-
+ARM_CLOUD_METADATA_URL = 'https://management.azure.com/metadata/endpoints?api-version=2019-05-01'
 
 class CloudNotRegisteredException(Exception):
     def __init__(self, cloud_name):
@@ -146,19 +146,39 @@ def _ssl_context():
     return ssl.create_default_context()
 
 
-def _urlretrieve(url):
+def urlretrieve(url):
     req = urlopen(url, context=_ssl_context())
     return req.read()
 
 
-def convert_arm_to_cli(cloud_metadata):
-    cloud_dict = {}
-    for d in cloud_metadata:
-        cloud_dict[d['name']] = arm_to_cli_mapping(d)
-    return cloud_dict
+def get_ossrdbms_resource_id(cloud_name):
+    ossrdbms_mapper = {
+        'AzureCloud' : 'https://ossrdbms-aad.database.windows.net',
+        'AzureChinaCloud' : 'https://ossrdbms-aad.database.chinacloudapi.cn',
+        'AzureUSGovernment' : 'https://ossrdbms-aad.database.usgovcloudapi.net',
+        'AzureGermanCloud' : 'https://ossrdbms-aad.database.cloudapi.de'
+    }
+    return ossrdbms_mapper.get(cloud_name, 'not available')
 
 
-def arm_to_cli_mapping(arm_dict):
+def get_microsoft_graph_resource_id(cloud_name):
+    graph_endpoint_mapper = {
+        'AzureCloud' : 'https://graph.microsoft.com/',
+        'AzureChinaCloud' : 'https://microsoftgraph.chinacloudapi.cn/',
+        'AzureUSGovernment' : 'https://graph.microsoft.us/',
+        'AzureGermanCloud' : 'https://graph.microsoft.de/'
+    }
+    return graph_endpoint_mapper.get(cloud_name, None)
+
+
+def convert_arm_to_cli(arm_cloud_metadata_dict):
+    cli_cloud_metadata_dict = {}
+    for cloud in arm_cloud_metadata_dict:
+        cli_cloud_metadata_dict[cloud['name']] = arm_to_cli_mapper(cloud)
+    return cli_cloud_metadata_dict
+
+
+def arm_to_cli_mapper(arm_dict):
     return Cloud(
         arm_dict['name'],
         endpoints=CloudEndpoints(        
@@ -170,17 +190,18 @@ def arm_to_cli_mapping(arm_dict):
             active_directory=arm_dict['authentication']['loginEndpoint'],
             active_directory_resource_id=arm_dict['authentication']['audiences'][0],
             active_directory_graph_resource_id=arm_dict['graphAudience'],
-            microsoft_graph_resource_id=arm_dict['graph'], # TODO, BUG in FF
+            microsoft_graph_resource_id=get_microsoft_graph_resource_id(arm_dict['name']), # change once microsoft_graph_resource_id is fixed in ARM
             vm_image_alias_doc=arm_dict['vmImageAliasDoc'],  # pylint: disable=line-too-long
             media_resource_id=arm_dict['media'],
-            ossrdbms_resource_id='https://ossrdbms-aad.database.usgovcloudapi.net'), # TODO: needs to be exposed by ARM
+            activeDirectoryDataLakeResourceId=arm_dict['activeDirectoryDataLake'],
+            ossrdbms_resource_id=get_ossrdbms_resource_id(arm_dict['name'])), # change once ossrdbms_resource_id is available via ARM # pylint: disable=line-too-long
         suffixes=CloudSuffixes(
             storage_endpoint=arm_dict['suffixes']['storage'],
             keyvault_dns=arm_dict['suffixes']['keyVaultDns'],
             sql_server_hostname=arm_dict['suffixes']['sqlServerHostname'],
-            azure_datalake_store_file_system_endpoint=arm_dict['suffixes']['azureDataLakeStoreFileSystem'] if 'azureDataLakeStoreFileSystem' in arm_dict['suffixes'] else 'none',
-            azure_datalake_analytics_catalog_and_job_endpoint=arm_dict['suffixes']['azureDataLakeAnalyticsCatalogAndJob'] if 'azureDataLakeAnalyticsCatalogAndJob' in arm_dict['suffixes'] else 'none',
-            acr_login_server_endpoint=arm_dict['suffixes']['acrLoginServer'] if 'acrLoginServer' in arm_dict['suffixes'] else 'none'))
+            azure_datalake_store_file_system_endpoint=arm_dict['suffixes']['azureDataLakeStoreFileSystem'] if 'azureDataLakeStoreFileSystem' in arm_dict['suffixes'] else None, # pylint: disable=line-too-long
+            azure_datalake_analytics_catalog_and_job_endpoint=arm_dict['suffixes']['azureDataLakeAnalyticsCatalogAndJob'] if 'azureDataLakeAnalyticsCatalogAndJob' in arm_dict['suffixes'] else None, # pylint: disable=line-too-long
+            acr_login_server_endpoint=arm_dict['suffixes']['acrLoginServer'] if 'acrLoginServer' in arm_dict['suffixes'] else None)) # pylint: disable=line-too-long
 
 
 class Cloud(object):  # pylint: disable=too-few-public-methods
@@ -209,9 +230,10 @@ class Cloud(object):  # pylint: disable=too-few-public-methods
         return pformat(o)
 
 try:
-    arm_cloud_dict = json.loads(_urlretrieve('https://management.usgovcloudapi.net/metadata/endpoints?api-version=2019-05-01')) # TODO pylint: disable=line-too-long
+    arm_cloud_dict = json.loads(urlretrieve(ARM_CLOUD_METADATA_URL)) 
     cli_cloud_dict = convert_arm_to_cli(arm_cloud_dict)
     AZURE_PUBLIC_CLOUD = cli_cloud_dict['AzureCloud']
+    AZURE_PUBLIC_CLOUD.CloudEndpoints.active_directory = 'https://login.microsoftonline.com' # change once active_directory is fixed in ARM for the public cloud
     AZURE_CHINA_CLOUD = cli_cloud_dict['AzureChinaCloud']
     AZURE_US_GOV_CLOUD = cli_cloud_dict['AzureUSGovernment']
     AZURE_GERMAN_CLOUD = cli_cloud_dict['AzureGermanCloud']
