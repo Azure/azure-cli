@@ -105,7 +105,7 @@ def export_config(cmd,
     if not yes:
         # fetch key values from destination
         if destination == 'file':
-            dest_kvs = []  # if target file does not exist / is problematic, then treat as empty file
+            dest_kvs = []  # treat as empty file and overwrite exported key values
         elif destination == 'appconfig':
             dest_kvs = __read_kv_from_config_store(
                 cmd, name=dest_name, connection_string=dest_connection_string, key=None, label=dest_label)

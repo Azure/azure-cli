@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**AppConfig**
+
+* Minor bug fix for appconfig kv export to file command. Stop reading dest file contents during export.
+
 **AppService**
 
 * Added "--build remote" flag for "az functionapp deployment source config-zip" to support remote build action during function app deployment.
