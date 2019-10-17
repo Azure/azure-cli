@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**ACR**
+
+* Added a preview parameter `--pack-image-tag` to command `az acr pack build`.
+
 **AppService**
 
 * Added "--build remote" flag for "az functionapp deployment source config-zip" to support remote build action during function app deployment.
@@ -10,6 +14,10 @@ Release History
 **IoT**
 
 * Add new routing source type: DigitalTwinChangeEvents
+
+**Key Vault**
+
+* Fix #9352: Unexpected error when certificate file does not exist.
 
 **Network**
 
@@ -39,7 +47,7 @@ Release History
         - Changed parameter --ask from utf-8 string to 32 character hex string.
     job start:
         - Changed the command from `job start` to `job create`.
-    
+
 **AppConfig**
 
 * Using & in authorization header
@@ -106,6 +114,10 @@ Release History
 **RBAC**
 
 * Fix #10493: az ad sp delete --id {} fails when application is not found. If not found, application deletion is skipped.
+
+**Storage**
+
+* Add support for WebAssembly (.wasm) mimetype detection
 
 2.0.74
 ++++++
@@ -261,7 +273,7 @@ Release History
 
 **Network**
 
-* az network lb create/frontend-ip create: Fixes #10018. Support `--private-ip-address-version` argument to create IPv6 based private-ip-address 
+* az network lb create/frontend-ip create: Fixes #10018. Support `--private-ip-address-version` argument to create IPv6 based private-ip-address
 * az network private-endpoint create/update/list-types: Fixes #9474. Support create/update/list-types commands for private endpoint.
 * az network private-link-service: Fixes #9475. Onboard commands for private link service.
 * az network vnet subnet update: Support `--private-endpoint-network-policies` and `--private-link-service-network-policies` arguments for update command.
@@ -317,7 +329,7 @@ Release History
 * BREAKING CHANGE:
     create:
         - Renamed --storage-default-container to --storage-container and --storage-default-filesystem to --storage-filesystem
-    application create: 
+    application create:
         - Changed the --name/-n argument to represent the application name instead of the cluster name and added a separate --cluster-name argument
         - Renamed --application-type to --type/-t
         - Renamed --marketplace-identifier to --marketplace-id
@@ -339,7 +351,7 @@ Release History
     Added this command to list the execution history for all script action executions
 * monitor enable:
     Enabled the --workspace argument to accept a Log Analytics workspace ID or workspace name as the parameter
-    Added the --primary-key argument, which is needed if a workspace ID is provided as the parameter 
+    Added the --primary-key argument, which is needed if a workspace ID is provided as the parameter
 * Added more examples and updated descriptions for help messages
 
 **interactive**
@@ -348,7 +360,7 @@ Release History
 
 **Network**
 
-* az network dns record-set cname delete: Fixes #10166. Support `--yes` argument to align the behavior with other dns type. 
+* az network dns record-set cname delete: Fixes #10166. Support `--yes` argument to align the behavior with other dns type.
 
 **Profile**
 
@@ -365,7 +377,7 @@ Release History
 
 **Kubernetes**
 
-* Use https if dashboard container port is using https 
+* Use https if dashboard container port is using https
 
 
 2.0.70

@@ -145,6 +145,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('registry_name', options_list=['--registry', '-r'])
         c.argument('image_name', options_list=['--image', '-t'], help="The name and tag of the image using the format: '-t repo/image:tag'.")
         c.argument('builder', options_list=['--builder', '-b'], help="The name and tag of a Buildpack builder image.")
+        c.argument('pack_image_tag', options_list=['--pack-image-tag'], help="The tag of the 'pack' runner image ('mcr.microsoft.com/oryx/pack').", is_preview=True)
         c.argument('pull', options_list=['--pull'], help="Pull the latest builder and run images before use.", action='store_true')
         c.positional('source_location', help="The local source code directory path (e.g., './src') or the URL to a git repository (e.g., 'https://github.com/Azure-Samples/acr-build-helloworld-node.git') or a remote tarball (e.g., 'http://server/context.tar.gz').", completer=FilesCompleter())
 
