@@ -73,7 +73,7 @@ def set_feature(cmd,
             else:
                 if retrieved_kv.content_type != FEATURE_FLAG_CONTENT_TYPE:
                     logger.warning(
-                        "This feature contains invalid content-type. If you proceed, the feature flag will be overwritten.")
+                        "This feature contains invalid content-type. The feature flag will be overwritten.")
                 # we make sure that value retrieved is a valid json and only has the fields supported by backend.
                 # if it's invalid, we catch appropriate exception that contains
                 # detailed message
