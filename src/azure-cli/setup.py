@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -169,10 +167,11 @@ setup(
     zip_safe=False,
     classifiers=CLASSIFIERS,
     scripts=[
-        'az',
         'az.completion.sh',
-        'az.bat',
     ],
+    entry_points={
+        'console_scripts': ['az=azure.cli:__main__']
+    },
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     install_requires=DEPENDENCIES,
     package_data={
