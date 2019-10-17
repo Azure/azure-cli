@@ -86,7 +86,7 @@ class CLIPrintMixin(CLIHelp):
             _print_indent(u'{0}'.format(e.command), indent)
             print('')
         indent = 0
-        message = 'For more specific examples, use: az find \'az {}\''.format(help_file.command)
+        message = 'For more specific examples, use: az find "az {}"'.format(help_file.command)
         _print_indent(Style.BRIGHT + message + Style.RESET_ALL + '\n', indent)
 
     @staticmethod
