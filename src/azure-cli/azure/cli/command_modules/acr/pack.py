@@ -20,7 +20,7 @@ from .run import prepare_source_location
 
 PACK_TASK_YAML_FMT = '''version: v1.0.0
 steps:
-  - cmd: mcr.microsoft.com/oryx/pack:stable build {image_name} --builder {builder} {no_pull} --env REGISTRY_NAME={{{{.Run.Registry}}}} -p .
+  - cmd: mcr.microsoft.com/oryx/pack:{pack_image_tag} build {image_name} --builder {builder} {no_pull} --env REGISTRY_NAME={{{{.Run.Registry}}}} -p .
     timeout: 28800
   - push: ["{image_name}"]
     timeout: 1800
@@ -35,6 +35,7 @@ def acr_pack_build(cmd,  # pylint: disable=too-many-locals
                    image_name,
                    source_location,
                    builder,
+                   pack_image_tag='stable',
                    pull=False,
                    no_format=False,
                    no_logs=False,
@@ -67,7 +68,10 @@ def acr_pack_build(cmd,  # pylint: disable=too-many-locals
         logger.debug('Modified image name from %s to %s', original_image_name, image_name)
 
     yaml_body = PACK_TASK_YAML_FMT.format(
-        image_name=image_name, builder=builder, no_pull='--no-pull' if not pull else '')
+        image_name=image_name,
+        builder=builder,
+        pack_image_tag=pack_image_tag,
+        no_pull='--no-pull' if not pull else '')
 
     EncodedTaskRunRequest, PlatformProperties = cmd.get_models('EncodedTaskRunRequest', 'PlatformProperties')
 

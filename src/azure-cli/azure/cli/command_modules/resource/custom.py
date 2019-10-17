@@ -967,15 +967,23 @@ def deploy_arm_template_at_subscription_scope(cmd, template_file=None, template_
 
 
 def validate_arm_template(cmd, resource_group_name, template_file=None, template_uri=None,
-                          parameters=None, mode=None, rollback_on_error=None):
-
+                          parameters=None, mode=None, rollback_on_error=None, handle_extended_json_format=None):
+    if handle_extended_json_format:
+        return _deploy_arm_template_unmodified(cmd.cli_ctx, resource_group_name, template_file, template_uri,
+                                               'deployment_dry_run', parameters, mode, rollback_on_error, validate_only=True)
     return _deploy_arm_template_core(cmd.cli_ctx, resource_group_name, template_file, template_uri,
                                      'deployment_dry_run', parameters, mode, rollback_on_error, validate_only=True)
 
 
 def validate_arm_template_at_subscription_scope(cmd, template_file=None, template_uri=None, deployment_location=None,
-                                                parameters=None):
+                                                parameters=None, handle_extended_json_format=None):
     logger.warning(deployment_command_notice)
+    if handle_extended_json_format:
+        return _deploy_arm_template_subscription_scope_unmodified(cmd.cli_ctx, template_file, template_uri,
+                                                                  'deployment_dry_run', deployment_location,
+                                                                  parameters,
+                                                                  'Incremental',
+                                                                  validate_only=True)
     return _deploy_arm_template_subscription_scope(cmd.cli_ctx, template_file, template_uri,
                                                    'deployment_dry_run', deployment_location,
                                                    parameters,
