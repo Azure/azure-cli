@@ -7,13 +7,35 @@ Release History
 
 * Added "--compute-model", "--auto-pause-delay", and "--min-capacity" parameters to support CRUD operations for new SQL Database offering: Serverless compute model."
 
+**ACR**
+
+* Added a preview parameter `--pack-image-tag` to command `az acr pack build`.
+
 **AppService**
 
 * Added "--build remote" flag for "az functionapp deployment source config-zip" to support remote build action during function app deployment.
 
+**ARM**
+
+* deployment/group deployment validate: Add --handle-extended-json-format parameter to support multiline and comments in json template when deployment.
+
+**CosmosDB**
+
+* [BREAKING] sql container create: Change --partition-key-path to required parameter
+* [BREAKING] gremlin graph create: Change --partition-key-path to required parameter
+* sql container create: Add --unique-key-policy and --conflict-resolution-policy
+* sql container create/update: Update the --idx default schema
+* gremlin graph create: Add --conflict-resolution-policy
+* gremlin graph create/update: Update the --idx default schema
+* Fix typo in help message
+
 **IoT**
 
 * Add new routing source type: DigitalTwinChangeEvents
+
+**Key Vault**
+
+* Fix #9352: Unexpected error when certificate file does not exist.
 
 **Network**
 
@@ -23,7 +45,8 @@ Release History
 
 **Profile**
 
-* Fix: `az account get-access-token --resource-type ms-graph` not working.
+* Fix: `az account get-access-token --resource-type ms-graph` not working
+* Remove warning from `az login`
 
 2.0.75
 ++++++
@@ -59,6 +82,10 @@ Release History
 
 * az deployment create: Add --handle-extended-json-format parameter to support multiline and comments in json template.
 
+**Backup**
+
+* Enhanced error detail for vault delete in force mode.
+
 **Compute**
 
 * vm create: Add --enable-agent configuration.
@@ -69,10 +96,6 @@ Release History
 * [BREAKING CHANGE] vm extension set: Fix bug where users could not set an extension on a VM with --ids.
 * vmss create: Add --computer-name-prefix parameter to support custom computer name prefix of virtual machines in the VMSS.
 * Update galleries API version to 2019-07-01.
-
-**Backup**
-
-* Enhanced error detail for vault delete in force mode.
 
 **IoT**
 
@@ -99,6 +122,10 @@ Release History
 **RBAC**
 
 * Fix #10493: az ad sp delete --id {} fails when application is not found. If not found, application deletion is skipped.
+
+**Storage**
+
+* Add support for WebAssembly (.wasm) mimetype detection
 
 2.0.74
 ++++++

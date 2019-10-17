@@ -33,5 +33,5 @@ def validate_tenant(cmd, namespace):
         # Example issuer: https://sts.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47/
         tenant_id = metadata['issuer'].split("/")[3]
 
-        logger.warning('Resolve tenant domain name %s to GUID %s', namespace.tenant, tenant_id)
+        logger.debug('Resolve tenant domain name %s to GUID %s', namespace.tenant, tenant_id)
         namespace.tenant = tenant_id

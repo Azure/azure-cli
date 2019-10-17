@@ -7,7 +7,12 @@ from knack.util import CLIError
 from knack.log import get_logger
 
 from ._utils import user_confirmation
-from ._docker_utils import get_access_credentials, request_data_from_registry, RegistryException
+from ._docker_utils import (
+    get_access_credentials,
+    request_data_from_registry,
+    RegistryException,
+    HelmAccessTokenPermission
+)
 
 
 logger = get_logger(__name__)
@@ -27,7 +32,7 @@ def acr_helm_list(cmd,
         username=username,
         password=password,
         artifact_repository=repository,
-        permission='pull')
+        permission=HelmAccessTokenPermission.PULL.value)
 
     return request_data_from_registry(
         http_method='get',
@@ -53,7 +58,7 @@ def acr_helm_show(cmd,
         username=username,
         password=password,
         artifact_repository=repository,
-        permission='pull')
+        permission=HelmAccessTokenPermission.PULL.value)
 
     return request_data_from_registry(
         http_method='get',
@@ -88,7 +93,7 @@ def acr_helm_delete(cmd,
         username=username,
         password=password,
         artifact_repository=repository,
-        permission='delete')
+        permission=HelmAccessTokenPermission.DELETE.value)
 
     return request_data_from_registry(
         http_method='delete',
@@ -119,7 +124,7 @@ def acr_helm_push(cmd,
         username=username,
         password=password,
         artifact_repository=repository,
-        permission='push,pull')
+        permission=HelmAccessTokenPermission.PUSH_PULL.value)
 
     path = _get_blobs_path(repository, basename(chart_package))
 
@@ -161,7 +166,7 @@ def acr_helm_repo_add(cmd,
         username=username,
         password=password,
         artifact_repository=repository,
-        permission='pull')
+        permission=HelmAccessTokenPermission.PULL.value)
 
     from subprocess import Popen
     p = Popen([helm_command, 'repo', 'add', registry_name,
