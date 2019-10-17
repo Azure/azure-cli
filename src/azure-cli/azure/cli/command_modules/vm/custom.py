@@ -1449,10 +1449,10 @@ def _terms_prepare(cmd, urn, publisher, offer, plan):
         publisher, offer, _, _ = urn.split(':')
         image = show_vm_image(cmd, urn)
         if not image.plan:
-            raise CLIError("Image '%s' has no terms to accept.", urn)
+            raise CLIError("Image '%s' has no terms to accept." % urn)
         plan = image.plan.name
     else:
-        if not publisher or not offer or not plan:
+        if not all([publisher, offer, plan]):
             raise CLIError(usage_err)
     return publisher, offer, plan
 
