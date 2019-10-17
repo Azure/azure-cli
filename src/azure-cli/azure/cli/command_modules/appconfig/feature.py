@@ -146,7 +146,7 @@ def delete_feature(cmd,
     try:
         retrieved_keyvalues = __list_all_keyvalues(azconfig_client,
                                                    feature=feature,
-                                                   label=label if label is not None else "")
+                                                   label=QueryKeyValueCollectionOptions.empty_label if label is None else label)
     except HTTPException as exception:
         raise CLIError('Delete operation failed. ' + str(exception))
 
