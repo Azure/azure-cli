@@ -11,6 +11,20 @@ Release History
 
 * Added "--build remote" flag for "az functionapp deployment source config-zip" to support remote build action during function app deployment.
 
+**ARM**
+
+* deployment/group deployment validate: Add --handle-extended-json-format parameter to support multiline and comments in json template when deployment.
+
+**CosmosDB**
+
+* [BREAKING] sql container create: Change --partition-key-path to required parameter
+* [BREAKING] gremlin graph create: Change --partition-key-path to required parameter
+* sql container create: Add --unique-key-policy and --conflict-resolution-policy
+* sql container create/update: Update the --idx default schema
+* gremlin graph create: Add --conflict-resolution-policy
+* gremlin graph create/update: Update the --idx default schema
+* Fix typo in help message
+
 **IoT**
 
 * Add new routing source type: DigitalTwinChangeEvents
@@ -86,16 +100,6 @@ Release History
 **Monitor**
 
 * az monitor log-analytics workspace: Support CRUD for Azure log analytics workspace.
-
-**CosmosDB**
-
-* [BREAKING] sql container create: Change --partition-key-path to required parameter
-* [BREAKING] gremlin graph create: Change --partition-key-path to required parameter
-* sql container create: Add --unique-key-policy and --conflict-resolution-policy
-* sql container create/update: Update the --idx default schema
-* gremlin graph create: Add --conflict-resolution-policy
-* gremlin graph create/update: Update the --idx default schema
-* Fix typo in help message
 
 **Network**
 
