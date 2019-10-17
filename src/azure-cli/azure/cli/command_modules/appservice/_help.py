@@ -4,12 +4,25 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.help_files import helps
+from knack.help_files import helps  # pylint: disable=unused-import
 # pylint: disable=line-too-long, too-many-lines
 
 helps['appservice'] = """
 type: group
 short-summary: Manage App Service plans.
+"""
+
+helps['appservice hybrid-connection'] = """
+type: group
+short-summary: a method that sets the key a hybrid-connection uses
+"""
+
+helps['appservice hybrid-connection set-key'] = """
+type: command
+short-summary: set the key that all apps in an appservice plan use to connect to the hybrid-connections in that appservice plan
+examples:
+  - name: set the key that all apps in an appservice plan use to connect to the hybrid-connections in that appservice plan
+    text: az appservice hybrid-connection set-key -g MyResourceGroup --plan MyAppServicePlan --namespace [HybridConectionNamespace] --hybrid-connection [HybridConnectionName] --key-type ["primary"/"secondary"]
 """
 
 helps['appservice list-locations'] = """
@@ -75,6 +88,19 @@ examples:
     crafted: true
 """
 
+helps['appservice vnet-integration'] = """
+type: group
+short-summary: a method that lists the virtual network integrations used in an appservice plan
+"""
+
+helps['appservice vnet-integration list'] = """
+type: command
+short-summary: list the virtual network integrations used in an appservice plan
+examples:
+  - name: list the virtual network integrations used in an appservice plan
+    text: az appservice vnet-integration list -g MyResourceGroup --plan MyAppServicePlan
+"""
+
 helps['functionapp'] = """
 type: group
 short-summary: Manage function apps. To install the Azure Functions Core tools see https://github.com/Azure/azure-functions-core-tools
@@ -83,6 +109,51 @@ short-summary: Manage function apps. To install the Azure Functions Core tools s
 helps['functionapp config'] = """
 type: group
 short-summary: Configure a function app.
+"""
+
+helps['functionapp config access-restriction'] = """
+type: group
+short-summary: Methods that show, set, add, and remove access restrictions on a functionapp
+"""
+
+helps['functionapp config access-restriction add'] = """
+type: command
+short-summary: Adds an Access Restriction to the functionapp, or updates if the Action of the Ip-Address or Subnet already exists.
+examples:
+  - name: Add Access Restriction opening (Allow) named developers for IPv4 address 130.220.0.0/27 with priority 200 to main site.
+    text: az functionapp config access-restriction add -g ResourceGroup -n AppName --rule-name developers --action Allow --ip-address 130.220.0.0/27 --priority 200
+  - name: Add Access Restriction opening (Allow) named build_server for IPv4 address 192.168.0.0/27 with priority 250 to scm site.
+    text: az functionapp config access-restriction add -g ResourceGroup -n AppName --rule-name build_server --action Allow --ip-address 192.168.0.0/27 --priority 250 --scm-site true
+  - name: Add Access Restriction opening (Allow) named app_gateway for Subnet app_gw in vNet core_weu with priority 300 to main site.
+    text: az functionapp config access-restriction add -g ResourceGroup -n AppName --rule-name app_gateway --action Allow --vnet-name core_weu --subnet app_gateway --priority 300
+  - name: Add Access Restriction opening (Allow) named internal_agents for Subnet build_agents in vNet corp01 with priority 500 to scm site; and ignore service endpoint registration on the Subnet.
+    text: az functionapp config access-restriction add -g ResourceGroup -n AppName --rule-name internal_agents --action Allow --vnet-name corp01 --subnet build_agents --priority 500 --scm-site true --ignore-missing-endpoint true
+"""
+
+helps['functionapp config access-restriction remove'] = """
+type: command
+short-summary: Removes an Access Restriction from the functionapp.
+examples:
+  - name: Remove Access Restriction named developers from the main site.
+    text: az functionapp config access-restriction remove -g ResourceGroup -n AppName --rule-name developers
+  - name: Remove Access Restriction named internal_agents from the scm site.
+    text: az functionapp config access-restriction remove -g ResourceGroup -n AppName --rule-name internal_agents --scm-site true
+"""
+
+helps['functionapp config access-restriction set'] = """
+type: command
+short-summary: Sets if SCM site is using the same restrictions as the main site.
+examples:
+  - name: Enable SCM site to use same access restrictions as main site.
+    text: az functionapp config access-restriction set -g ResourceGroup -n AppName --use-same-restrictions-for-scm-site true
+"""
+
+helps['functionapp config access-restriction show'] = """
+type: command
+short-summary: Show Access Restriction settings for functionapp.
+examples:
+  - name: Get Access Restriction settings for a functionapp.
+    text: az functionapp config access-restriction show -g ResourceGroup -n AppName
 """
 
 helps['functionapp config appsettings'] = """
@@ -336,6 +407,53 @@ examples:
     crafted: true
 """
 
+helps['functionapp deployment slot'] = """
+type: group
+short-summary: Manage function app deployment slots.
+"""
+
+helps['functionapp deployment slot auto-swap'] = """
+type: command
+short-summary: Configure deployment slot auto swap.
+"""
+
+helps['functionapp deployment slot create'] = """
+type: command
+short-summary: Create a deployment slot.
+examples:
+  - name: Create a deployment slot. (autogenerated)
+    text: az functionapp deployment slot create --name MyFunctionapp --resource-group MyResourceGroup --slot staging
+    crafted: true
+"""
+
+helps['functionapp deployment slot delete'] = """
+type: command
+short-summary: Delete a deployment slot.
+examples:
+  - name: Delete a deployment slot. (autogenerated)
+    text: az functionapp deployment slot delete --name MyFunctionapp --resource-group MyResourceGroup --slot staging
+    crafted: true
+"""
+
+helps['functionapp deployment slot list'] = """
+type: command
+short-summary: List all deployment slots.
+examples:
+  - name: List all deployment slots. (autogenerated)
+    text: az functionapp deployment slot list --name MyFunctionapp --resource-group MyResourceGroup
+    crafted: true
+"""
+
+helps['functionapp deployment slot swap'] = """
+type: command
+short-summary: Change deployment slots for a function app.
+examples:
+  - name: Swap a staging slot into production for the MyUniqueApp function app.
+    text: >
+        az functionapp deployment slot swap  -g MyResourceGroup -n MyUniqueApp --slot staging \\
+            --target-slot production
+"""
+
 helps['functionapp deployment source'] = """
 type: group
 short-summary: Manage function app deployment via source control.
@@ -419,53 +537,6 @@ examples:
         az functionapp deployment user set --user-name MyUserName
 """
 
-helps['functionapp deployment slot'] = """
-type: group
-short-summary: Manage function app deployment slots.
-"""
-
-helps['functionapp deployment slot auto-swap'] = """
-type: command
-short-summary: Configure deployment slot auto swap.
-"""
-
-helps['functionapp deployment slot create'] = """
-type: command
-short-summary: Create a deployment slot.
-examples:
-  - name: Create a deployment slot. (autogenerated)
-    text: az functionapp deployment slot create --name MyFunctionapp --resource-group MyResourceGroup --slot staging
-    crafted: true
-"""
-
-helps['functionapp deployment slot delete'] = """
-type: command
-short-summary: Delete a deployment slot.
-examples:
-  - name: Delete a deployment slot. (autogenerated)
-    text: az functionapp deployment slot delete --name MyFunctionapp --resource-group MyResourceGroup --slot staging
-    crafted: true
-"""
-
-helps['functionapp deployment slot list'] = """
-type: command
-short-summary: List all deployment slots.
-examples:
-  - name: List all deployment slots. (autogenerated)
-    text: az functionapp deployment slot list --name MyFunctionapp --resource-group MyResourceGroup
-    crafted: true
-"""
-
-helps['functionapp deployment slot swap'] = """
-type: command
-short-summary: Change deployment slots for a function app.
-examples:
-  - name: Swap a staging slot into production for the MyUniqueApp function app.
-    text: >
-        az functionapp deployment slot swap  -g MyResourceGroup -n MyUniqueApp --slot staging \\
-            --target-slot production
-"""
-
 helps['functionapp devops-pipeline'] = """
 type: group
 short-summary: Azure Function specific integration with Azure DevOps. Please visit https://aka.ms/functions-azure-devops for more information.
@@ -475,15 +546,44 @@ helps['functionapp devops-pipeline create'] = """
 type: command
 short-summary: Create an Azure DevOps pipeline for a function app.
 examples:
-    - name: create an Azure Pipeline to a function app.
-      text: >
-          az functionapp devops-pipeline create --functionapp-name FunctionApp
-    - name: create an Azure Pipeline from a Github function app repository.
-      text: >
-          az functionapp devops-pipeline create --github-repository GithubOrganization/GithubRepository --github-pat GithubPersonalAccessToken
-    - name: create an Azure Pipeline with specific Azure DevOps organization and project
-      text: >
-          az functionapp devops-pipeline create --organization-name AzureDevOpsOrganization --project-name AzureDevOpsProject
+  - name: create an Azure Pipeline to a function app.
+    text: >
+        az functionapp devops-pipeline create --functionapp-name FunctionApp
+  - name: create an Azure Pipeline from a Github function app repository.
+    text: >
+        az functionapp devops-pipeline create --github-repository GithubOrganization/GithubRepository --github-pat GithubPersonalAccessToken
+  - name: create an Azure Pipeline with specific Azure DevOps organization and project
+    text: >
+        az functionapp devops-pipeline create --organization-name AzureDevOpsOrganization --project-name AzureDevOpsProject
+"""
+
+helps['functionapp hybrid-connection'] = """
+type: group
+short-summary: methods that list, add and remove hybrid-connections from functionapp
+"""
+
+helps['functionapp hybrid-connection add'] = """
+type: command
+short-summary: add a hybrid-connection to a functionapp
+examples:
+  - name: add a hybrid-connection to a functionapp
+    text: az functionapp hybrid-connection add -g MyResourceGroup -n MyWebapp --namespace [HybridConnectionNamespace] --hybrid-connection [HybridConnectionName] -s [slot]
+"""
+
+helps['functionapp hybrid-connection list'] = """
+type: command
+short-summary: list the hybrid-connections on a functionapp
+examples:
+  - name: list the hybrid-connections on a functionapp
+    text: az functionapp hybrid-connection list -g MyResourceGroup -n MyWebapp -s [slot]
+"""
+
+helps['functionapp hybrid-connection remove'] = """
+type: command
+short-summary: remove a hybrid-connection from a functionapp
+examples:
+  - name: remove a hybrid-connection from a functionapp
+    text: az functionapp hybrid-connection remove -g MyResourceGroup -n MyWebapp --namespace [HybridConnectionNamespace] --hybrid-connection [HybridConnectionName] -s [slot]
 """
 
 helps['functionapp identity'] = """
@@ -628,6 +728,35 @@ examples:
     crafted: true
 """
 
+helps['functionapp vnet-integration'] = """
+type: group
+short-summary: methods that list, add, and remove virtual networks integrations from a functionapp
+"""
+
+helps['functionapp vnet-integration add'] = """
+type: command
+short-summary: add a regional virtual network integration to a functionapp
+examples:
+  - name: add a regional virtual network integration to a functionapp
+    text: az functionapp vnet-integration add -g MyResourceGroup -n MyFunctionapp --vnet MyVnetName --subnet MySubnetName -s [slot]
+"""
+
+helps['functionapp vnet-integration list'] = """
+type: command
+short-summary: list the virtual network integrations on a functionapp
+examples:
+  - name: list the virtual networks integrations on a functionapp
+    text: az functionapp vnet-integration list -g MyResourceGroup -n MyFunctionapp -s [slot]
+"""
+
+helps['functionapp vnet-integration remove'] = """
+type: command
+short-summary: remove a regional virtual network integration from functionapp
+examples:
+  - name: remove a regional virtual network integration from functionapp
+    text: az functionapp vnet-integration remove -g MyResourceGroup -n MyFunctionapp -s [slot]
+"""
+
 helps['webapp'] = """
 type: group
 short-summary: Manage web apps.
@@ -677,6 +806,51 @@ examples:
 helps['webapp config'] = """
 type: group
 short-summary: Configure a web app.
+"""
+
+helps['webapp config access-restriction'] = """
+type: group
+short-summary: Methods that show, set, add, and remove access restrictions on a webapp
+"""
+
+helps['webapp config access-restriction add'] = """
+type: command
+short-summary: Adds an Access Restriction to the webapp, or updates if the Action of the Ip-Address or Subnet already exists.
+examples:
+  - name: Add Access Restriction opening (Allow) named developers for IPv4 address 130.220.0.0/27 with priority 200 to main site.
+    text: az webapp config access-restriction add -g ResourceGroup -n AppName --rule-name developers --action Allow --ip-address 130.220.0.0/27 --priority 200
+  - name: Add Access Restriction opening (Allow) named build_server for IPv4 address 192.168.0.0/27 with priority 250 to scm site.
+    text: az webapp config access-restriction add -g ResourceGroup -n AppName --rule-name build_server --action Allow --ip-address 192.168.0.0/27 --priority 250 --scm-site true
+  - name: Add Access Restriction opening (Allow) named app_gateway for Subnet app_gw in vNet core_weu with priority 300 to main site.
+    text: az webapp config access-restriction add -g ResourceGroup -n AppName --rule-name app_gateway --action Allow --vnet-name core_weu --subnet app_gateway --priority 300
+  - name: Add Access Restriction opening (Allow) named internal_agents for Subnet build_agents in vNet corp01 with priority 500 to scm site; and ignore service endpoint registration on the Subnet.
+    text: az webapp config access-restriction add -g ResourceGroup -n AppName --rule-name internal_agents --action Allow --vnet-name corp01 --subnet build_agents --priority 500 --scm-site true --ignore-missing-endpoint true
+"""
+
+helps['webapp config access-restriction remove'] = """
+type: command
+short-summary: Removes an Access Restriction from the webapp.
+examples:
+  - name: Remove Access Restriction named developers from the main site.
+    text: az webapp config access-restriction remove -g ResourceGroup -n AppName --rule-name developers
+  - name: Remove Access Restriction named internal_agents from the scm site.
+    text: az webapp config access-restriction remove -g ResourceGroup -n AppName --rule-name internal_agents --scm-site true
+"""
+
+helps['webapp config access-restriction set'] = """
+type: command
+short-summary: Sets if SCM site is using the same restrictions as the main site.
+examples:
+  - name: Enable SCM site to use same access restrictions as main site.
+    text: az webapp config access-restriction set -g ResourceGroup -n AppName --use-same-restrictions-for-scm-site true
+"""
+
+helps['webapp config access-restriction show'] = """
+type: command
+short-summary: Show Access Restriction settings for webapp.
+examples:
+  - name: Get Access Restriction settings for a webapp.
+    text: az webapp config access-restriction show -g ResourceGroup -n AppName
 """
 
 helps['webapp config appsettings'] = """
@@ -862,9 +1036,9 @@ examples:
   - name: turn on "alwaysOn"
     text: >
         az webapp config set -g MyResourceGroup -n MyUniqueApp --always-on true
-  - name: turn on "alwaysOn" through a json with content "{\"alwaysOn\", true}"
+  - name: turn on "alwaysOn" through a json with content "{"alwaysOn", true}"
     text: >
-        az webapp config set -g MyResourceGroup -n MyUniqueApp --generic-configurations "{\"alwaysOn\": true}"
+        az webapp config set -g MyResourceGroup -n MyUniqueApp --generic-configurations "{"alwaysOn": true}"
 
 """
 
@@ -1056,6 +1230,11 @@ examples:
   - name: Create a web app with an image from a private Azure Container Registry.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName -i myregistry.azurecr.io/docker-image:tag
+"""
+
+helps['webapp create-remote-connection'] = """
+type: command
+short-summary: Creates a remote connection using a tcp tunnel to your web app
 """
 
 helps['webapp delete'] = """
@@ -1270,6 +1449,35 @@ examples:
         az webapp deployment user set --user-name MyUserName
 """
 
+helps['webapp hybrid-connection'] = """
+type: group
+short-summary: methods that list, add and remove hybrid-connections from webapps
+"""
+
+helps['webapp hybrid-connection add'] = """
+type: command
+short-summary: add a hybrid-connection to a webapp
+examples:
+  - name: add a hybrid-connection to a webapp
+    text: az webapp hybrid-connection add -g MyResourceGroup -n MyWebapp --namespace [HybridConnectionNamespace] --hybrid-connection [HybridConnectionName] -s [slot]
+"""
+
+helps['webapp hybrid-connection list'] = """
+type: command
+short-summary: list the hybrid-connections on a webapp
+examples:
+  - name: list the hybrid-connections on a webapp
+    text: az webapp hybrid-connection list -g MyResourceGroup -n MyWebapp -s [slot]
+"""
+
+helps['webapp hybrid-connection remove'] = """
+type: command
+short-summary: remove a hybrid-connection from a webapp
+examples:
+  - name: remove a hybrid-connection from a webapp
+    text: az webapp hybrid-connection remove  -g MyResourceGroup -n MyWebapp --namespace [HybridConnectionNamespace] --hybrid-connection [HybridConnectionName] -s [slot]
+"""
+
 helps['webapp identity'] = """
 type: group
 short-summary: manage web app's managed service identity
@@ -1433,27 +1641,24 @@ examples:
 helps['webapp up'] = """
 type: command
 short-summary: >
-  Create a webapp and deploy code from a local workspace to the app. The command is required to run from the folder
-  where the code is present. Current support includes Node, Python, .NET Core and ASP.NET, staticHtml. Node,
-  Python apps are created as Linux apps. .Net Core, ASP.NET and static HTML apps are created as Windows apps. If command
-  is run from an empty folder, an empty windows web app is created.
+    Create a webapp and deploy code from a local workspace to the app. The command is required to run from the folder
+    where the code is present. Current support includes Node, Python, .NET Core and ASP.NET, staticHtml. Node,
+    Python apps are created as Linux apps. .Net Core, ASP.NET and static HTML apps are created as Windows apps. If command
+    is run from an empty folder, an empty windows web app is created.
 examples:
   - name: View the details of the app that will be created, without actually running the operation
     text: >
         az webapp up -n MyUniqueAppName --dryrun
-  - name: Create a web app with the default configuration, by running the command from the folder where the code to
-          deployed exists.
+  - name: Create a web app with the default configuration, by running the command from the folder where the code to deployed exists.
     text: >
         az webapp up -n MyUniqueAppName
-  - name: Create a web app in a specific region, by running the command from the folder where the code to deployed
-          exists.
+  - name: Create a web app in a specific region, by running the command from the folder where the code to deployed exists.
     text: >
         az webapp up -n MyUniqueAppName -l locationName
   - name: Deploy new code to an app that was originally created using the same command
     text: >
         az webapp up -n MyUniqueAppName -l locationName
-  - name: Create a web app and enable log streaming after the deployment operation is complete. This will enable the
-          default configuration required to enable log streaming.
+  - name: Create a web app and enable log streaming after the deployment operation is complete. This will enable the default configuration required to enable log streaming.
     text: >
         az webapp up -n MyUniqueAppName --logs
 """
@@ -1465,6 +1670,35 @@ examples:
   - name: Update the tags of a web app.
     text: >
         az webapp update -g MyResourceGroup -n MyAppName --set tags.tagName=tagValue
+"""
+
+helps['webapp vnet-integration'] = """
+type: group
+short-summary: methods that list, add, and remove virtual network integrations from a webapp
+"""
+
+helps['webapp vnet-integration add'] = """
+type: command
+short-summary: add a regional virtual network integration to a webapp
+examples:
+  - name: add a regional virtual network integration to a webapp
+    text: az webapp vnet-integration add -g MyResourceGroup -n MyWebapp --vnet MyVnetName --subnet MySubnetName -s [slot]
+"""
+
+helps['webapp vnet-integration list'] = """
+type: command
+short-summary: list the virtual network integrations on a webapp
+examples:
+  - name: list the virtual network integrations on a webapp
+    text: az webapp vnet-integration list -g MyResourceGroup -n MyWebapp -s [slot]
+"""
+
+helps['webapp vnet-integration remove'] = """
+type: command
+short-summary: remove a regional virtual network integration from webapp
+examples:
+  - name: remove a regional virtual network integration from webapp
+    text: az webapp vnet-integration remove -g MyResourceGroup -n MyWebapp -s [slot]
 """
 
 helps['webapp webjob'] = """
@@ -1548,241 +1782,4 @@ examples:
 helps['webapp webjob triggered run'] = """
 type: command
 short-summary: Run a specific triggered webjob hosted on a web app.
-"""
-
-helps['webapp create-remote-connection'] = """
-    type: command
-    short-summary: Creates a remote connection using a tcp tunnel to your web app
-"""
-
-helps['webapp hybrid-connection'] = """
-type: group
-short-summary: methods that list, add and remove hybrid-connections from webapps
-"""
-
-helps['webapp hybrid-connection list'] = """
-type: command
-short-summary: list the hybrid-connections on a webapp
-examples:
-  - name: list the hybrid-connections on a webapp
-    text: az webapp hybrid-connection list -g MyResourceGroup -n MyWebapp -s [slot]
-"""
-
-helps['webapp hybrid-connection add'] = """
-type: command
-short-summary: add a hybrid-connection to a webapp
-examples:
-  - name: add a hybrid-connection to a webapp
-    text: az webapp hybrid-connection add -g MyResourceGroup -n MyWebapp --namespace [HybridConnectionNamespace] --hybrid-connection [HybridConnectionName] -s [slot]
-"""
-
-helps['webapp hybrid-connection remove'] = """
-type: command
-short-summary: remove a hybrid-connection from a webapp
-examples:
-  - name: remove a hybrid-connection from a webapp
-    text: az webapp hybrid-connection remove  -g MyResourceGroup -n MyWebapp --namespace [HybridConnectionNamespace] --hybrid-connection [HybridConnectionName] -s [slot]
-"""
-
-helps['functionapp hybrid-connection'] = """
-type: group
-short-summary: methods that list, add and remove hybrid-connections from functionapp
-"""
-
-helps['functionapp hybrid-connection list'] = """
-type: command
-short-summary: list the hybrid-connections on a functionapp
-examples:
-  - name: list the hybrid-connections on a functionapp
-    text: az functionapp hybrid-connection list -g MyResourceGroup -n MyWebapp -s [slot]
-"""
-
-helps['functionapp hybrid-connection add'] = """
-type: command
-short-summary: add a hybrid-connection to a functionapp
-examples:
-  - name: add a hybrid-connection to a functionapp
-    text: az functionapp hybrid-connection add -g MyResourceGroup -n MyWebapp --namespace [HybridConnectionNamespace] --hybrid-connection [HybridConnectionName] -s [slot]
-"""
-
-helps['functionapp hybrid-connection remove'] = """
-type: command
-short-summary: remove a hybrid-connection from a functionapp
-examples:
-  - name: remove a hybrid-connection from a functionapp
-    text: az functionapp hybrid-connection remove -g MyResourceGroup -n MyWebapp --namespace [HybridConnectionNamespace] --hybrid-connection [HybridConnectionName] -s [slot]
-"""
-
-helps['appservice hybrid-connection'] = """
-type: group
-short-summary: a method that sets the key a hybrid-connection uses
-"""
-
-helps['appservice hybrid-connection set-key'] = """
-type: command
-short-summary: set the key that all apps in an appservice plan use to connect to the hybrid-connections in that appservice plan
-examples:
-  - name:  set the key that all apps in an appservice plan use to connect to the hybrid-connections in that appservice plan
-    text: az appservice hybrid-connection set-key -g MyResourceGroup --plan MyAppServicePlan --namespace [HybridConectionNamespace] --hybrid-connection [HybridConnectionName] --key-type ["primary"/"secondary"]
-"""
-
-helps['appservice vnet-integration'] = """
-type: group
-short-summary: a method that lists the virtual network integrations used in an appservice plan
-"""
-
-helps['appservice vnet-integration list'] = """
-type: command
-short-summary: list the virtual network integrations used in an appservice plan
-examples:
-  - name: list the virtual network integrations used in an appservice plan
-    text: az appservice vnet-integration list -g MyResourceGroup --plan MyAppServicePlan
-"""
-
-helps['webapp vnet-integration'] = """
-type: group
-short-summary: methods that list, add, and remove virtual network integrations from a webapp
-"""
-
-helps['webapp vnet-integration list'] = """
-type: command
-short-summary: list the virtual network integrations on a webapp
-examples:
-  - name: list the virtual network integrations on a webapp
-    text: az webapp vnet-integration list -g MyResourceGroup -n MyWebapp -s [slot]
-"""
-
-helps['webapp vnet-integration add'] = """
-type: command
-short-summary: add a regional virtual network integration to a webapp
-examples:
-  - name: add a regional virtual network integration to a webapp
-    text: az webapp vnet-integration add -g MyResourceGroup -n MyWebapp --vnet MyVnetName --subnet MySubnetName -s [slot]
-"""
-
-helps['webapp vnet-integration remove'] = """
-type: command
-short-summary: remove a regional virtual network integration from webapp
-examples:
-  - name: remove a regional virtual network integration from webapp
-    text: az webapp vnet-integration remove -g MyResourceGroup -n MyWebapp -s [slot]
-"""
-
-helps['functionapp vnet-integration'] = """
-type: group
-short-summary: methods that list, add, and remove virtual networks integrations from a functionapp
-"""
-
-helps['functionapp vnet-integration list'] = """
-type: command
-short-summary: list the virtual network integrations on a functionapp
-examples:
-  - name: list the virtual networks integrations on a functionapp
-    text: az functionapp vnet-integration list -g MyResourceGroup -n MyFunctionapp -s [slot]
-"""
-
-helps['functionapp vnet-integration add'] = """
-type: command
-short-summary: add a regional virtual network integration to a functionapp
-examples:
-  - name: add a regional virtual network integration to a functionapp
-    text: az functionapp vnet-integration add -g MyResourceGroup -n MyFunctionapp --vnet MyVnetName --subnet MySubnetName -s [slot]
-"""
-
-helps['functionapp vnet-integration remove'] = """
-type: command
-short-summary: remove a regional virtual network integration from functionapp
-examples:
-  - name: remove a regional virtual network integration from functionapp
-    text: az functionapp vnet-integration remove -g MyResourceGroup -n MyFunctionapp -s [slot]
-"""
-
-helps['webapp config access-restriction'] = """
-type: group
-short-summary: Methods that show, set, add, and remove access restrictions on a webapp
-"""
-
-helps['webapp config access-restriction set'] = """
-    type: command
-    short-summary: Sets if SCM site is using the same restrictions as the main site.
-    examples:
-        - name: Enable SCM site to use same access restrictions as main site.
-          text: az webapp config access-restriction set -g ResourceGroup -n AppName --use-same-restrictions-for-scm-site true
-"""
-
-helps['webapp config access-restriction show'] = """
-    type: command
-    short-summary: Show Access Restriction settings for webapp.
-    examples:
-        - name: Get Access Restriction settings for a webapp.
-          text: az webapp config access-restriction show -g ResourceGroup -n AppName
-"""
-
-helps['webapp config access-restriction add'] = """
-    type: command
-    short-summary: Adds an Access Restriction to the webapp, or updates if the Action of the Ip-Address or Subnet already exists.
-    examples:
-        - name: Add Access Restriction opening (Allow) named developers for IPv4 address 130.220.0.0/27 with priority 200 to main site.
-          text: az webapp config access-restriction add -g ResourceGroup -n AppName --rule-name developers --action Allow --ip-address 130.220.0.0/27 --priority 200
-        - name: Add Access Restriction opening (Allow) named build_server for IPv4 address 192.168.0.0/27 with priority 250 to scm site.
-          text: az webapp config access-restriction add -g ResourceGroup -n AppName --rule-name build_server --action Allow --ip-address 192.168.0.0/27 --priority 250 --scm-site true
-        - name: Add Access Restriction opening (Allow) named app_gateway for Subnet app_gw in vNet core_weu with priority 300 to main site.
-          text: az webapp config access-restriction add -g ResourceGroup -n AppName --rule-name app_gateway --action Allow --vnet-name core_weu --subnet app_gateway --priority 300
-        - name: Add Access Restriction opening (Allow) named internal_agents for Subnet build_agents in vNet corp01 with priority 500 to scm site; and ignore service endpoint registration on the Subnet.
-          text: az webapp config access-restriction add -g ResourceGroup -n AppName --rule-name internal_agents --action Allow --vnet-name corp01 --subnet build_agents --priority 500 --scm-site true --ignore-missing-endpoint true
-"""
-
-helps['webapp config access-restriction remove'] = """
-    type: command
-    short-summary: Removes an Access Restriction from the webapp.
-    examples:
-        - name: Remove Access Restriction named developers from the main site.
-          text: az webapp config access-restriction remove -g ResourceGroup -n AppName --rule-name developers
-        - name: Remove Access Restriction named internal_agents from the scm site.
-          text: az webapp config access-restriction remove -g ResourceGroup -n AppName --rule-name internal_agents --scm-site true
-"""
-
-helps['functionapp config access-restriction'] = """
-type: group
-short-summary: Methods that show, set, add, and remove access restrictions on a functionapp
-"""
-
-helps['functionapp config access-restriction set'] = """
-    type: command
-    short-summary: Sets if SCM site is using the same restrictions as the main site.
-    examples:
-        - name: Enable SCM site to use same access restrictions as main site.
-          text: az functionapp config access-restriction set -g ResourceGroup -n AppName --use-same-restrictions-for-scm-site true
-"""
-
-helps['functionapp config access-restriction show'] = """
-    type: command
-    short-summary: Show Access Restriction settings for functionapp.
-    examples:
-        - name: Get Access Restriction settings for a functionapp.
-          text: az functionapp config access-restriction show -g ResourceGroup -n AppName
-"""
-
-helps['functionapp config access-restriction add'] = """
-    type: command
-    short-summary: Adds an Access Restriction to the functionapp, or updates if the Action of the Ip-Address or Subnet already exists.
-    examples:
-        - name: Add Access Restriction opening (Allow) named developers for IPv4 address 130.220.0.0/27 with priority 200 to main site.
-          text: az functionapp config access-restriction add -g ResourceGroup -n AppName --rule-name developers --action Allow --ip-address 130.220.0.0/27 --priority 200
-        - name: Add Access Restriction opening (Allow) named build_server for IPv4 address 192.168.0.0/27 with priority 250 to scm site.
-          text: az functionapp config access-restriction add -g ResourceGroup -n AppName --rule-name build_server --action Allow --ip-address 192.168.0.0/27 --priority 250 --scm-site true
-        - name: Add Access Restriction opening (Allow) named app_gateway for Subnet app_gw in vNet core_weu with priority 300 to main site.
-          text: az functionapp config access-restriction add -g ResourceGroup -n AppName --rule-name app_gateway --action Allow --vnet-name core_weu --subnet app_gateway --priority 300
-        - name: Add Access Restriction opening (Allow) named internal_agents for Subnet build_agents in vNet corp01 with priority 500 to scm site; and ignore service endpoint registration on the Subnet.
-          text: az functionapp config access-restriction add -g ResourceGroup -n AppName --rule-name internal_agents --action Allow --vnet-name corp01 --subnet build_agents --priority 500 --scm-site true --ignore-missing-endpoint true
-"""
-
-helps['functionapp config access-restriction remove'] = """
-    type: command
-    short-summary: Removes an Access Restriction from the functionapp.
-    examples:
-        - name: Remove Access Restriction named developers from the main site.
-          text: az functionapp config access-restriction remove -g ResourceGroup -n AppName --rule-name developers
-        - name: Remove Access Restriction named internal_agents from the scm site.
-          text: az functionapp config access-restriction remove -g ResourceGroup -n AppName --rule-name internal_agents --scm-site true
 """
