@@ -416,9 +416,55 @@ type: command
 short-summary: Updates the failover group.
 """
 
+helps['sql instance-failover-group'] = """
+type: group
+short-summary: Manage SQL Instance Failover Groups.
+"""
+
+helps['sql instance-failover-group create'] = """
+type: command
+short-summary: Creates an instance failover group between two connected managed instances.
+long-summary: If an outage occurs on the primary server, the grace period indicates that Azure SQL Managed Database will not initiate automatic failover before the grace period expires. Please note that failover operation with --allow-data-loss option might cause data loss due to the nature of asynchronous synchronization.
+"""
+
+helps['sql instance-failover-group set-primary'] = """
+type: command
+short-summary: Set the primary of the instance failover group by failing over all databases from the current primary managed instance.
+"""
+
+helps['sql instance-failover-group update'] = """
+type: command
+short-summary: Updates the instance failover group.
+"""
+
 helps['sql mi'] = """
 type: group
 short-summary: Manage SQL managed instances.
+"""
+
+helps['sql mi ad-admin'] = """
+type: group
+short-summary: Manage a managed instance's Active Directory administrator.
+"""
+
+helps['sql mi ad-admin create'] = """
+type: command
+short-summary: Creates a new managed instance Active Directory administrator.
+"""
+
+helps['sql mi ad-admin delete'] = """
+type: command
+short-summary: Deletes an existing managed instance Active Directory Administrator.
+"""
+
+helps['sql mi ad-admin list'] = """
+type: command
+short-summary: Returns a list of managed instance Active Directory Administrators.
+"""
+
+helps['sql mi ad-admin update'] = """
+type: command
+short-summary: Updates an existing managed instance Active Directory administrator.
 """
 
 helps['sql mi create'] = """
@@ -747,81 +793,9 @@ examples:
 """
 
 helps['sql virtual-cluster show'] = """
-    type: command
-    short-summary: Get the details for a virtual cluster.
-    examples:
-        - name: Get the details for a virtual cluster
-          text: az sql virtual-cluster show -g mygroup -n mycluster
-    """
-helps['sql virtual-cluster delete'] = """
-    type: command
-    short-summary: Delete a virtual cluster.
-    examples:
-        - name: Delete a virtual cluster
-          text: az sql virtual-cluster delete -g mygroup -n mycluster
-    """
-helps['sql mi key'] = """
-    type: group
-    short-summary: Manage a SQL Instance's keys.
-    """
-helps['sql mi key create'] = """
-    type: command
-    short-summary: Creates a SQL Instance key.
-    """
-helps['sql mi key show'] = """
-    type: command
-    short-summary: Shows a SQL Instance key.
-    """
-helps['sql mi key delete'] = """
-    type: command
-    short-summary: Deletes a SQL Instance key.
-    """
-helps['sql mi tde-key'] = """
-    type: group
-    short-summary: Manage a SQL Instance's encryption protector.
-    """
-helps['sql mi tde-key set'] = """
-    type: command
-    short-summary: Sets the SQL Instance's encryption protector.
-    """
-helps['sql mi ad-admin'] = """
-    type: group
-    short-summary: Manage a managed instance's Active Directory administrator.
-    """
-helps['sql mi ad-admin create'] = """
-    type: command
-    short-summary: Creates a new managed instance Active Directory administrator.
-    """
-helps['sql mi ad-admin update'] = """
-    type: command
-    short-summary: Updates an existing managed instance Active Directory administrator.
-    """
-helps['sql mi ad-admin list'] = """
-    type: command
-    short-summary: Returns a list of managed instance Active Directory Administrators.
-    """
-helps['sql mi ad-admin delete'] = """
-    type: command
-    short-summary: Deletes an existing managed instance Active Directory Administrator.
-    """
-helps['sql instance-failover-group'] = """
-    type: group
-    short-summary: Manage SQL Instance Failover Groups.
-    """
-helps['sql instance-failover-group create'] = """
-    type: command
-    short-summary: Creates an instance failover group between two connected managed instances.
-    long-summary: If an outage occurs on the primary server,
-                  the grace period indicates that Azure SQL Managed Database will not initiate
-                  automatic failover before the grace period expires.
-                  Please note that failover operation with --allow-data-loss option
-                  might cause data loss due to the nature of asynchronous synchronization.
-    """
-helps['sql instance-failover-group update'] = """
-    type: command
-    short-summary: Updates the instance failover group.
-    """
-helps['sql instance-failover-group set-primary'] = """
-    type: command
-    short-summary: Set the primary of the instance failover group by failing over all databases from the current primary managed instance.
-    """
+type: command
+short-summary: Get the details for a virtual cluster.
+examples:
+  - name: Get the details for a virtual cluster
+    text: az sql virtual-cluster show -g mygroup -n mycluster
+"""
