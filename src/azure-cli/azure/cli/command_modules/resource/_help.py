@@ -215,30 +215,6 @@ long-summary: >
     Adding this parameter allows us to use one command for all Azure Resource Manager template deployments but still determine the intended level of scope.
 """
 
-helps['deployment list'] = """
-type: command
-short-summary: List deployments at subscription scope.
-examples:
-  - name: List deployments at subscription scope.
-    text: az deployment list
-"""
-
-helps['deployment show'] = """
-type: command
-short-summary: Show a deployment at subscription scope.
-examples:
-  - name: Show a deployment at subscription scope.
-    text: az deployment show -n deployment01
-"""
-
-helps['deployment delete'] = """
-type: command
-short-summary: Delete a deployment at subscription scope.
-examples:
-  - name: Delete a deployment at subscription scope.
-    text: az deployment delete -n deployment01
-"""
-
 helps['deployment create'] = """
 type: command
 short-summary: Start a deployment.
@@ -265,6 +241,14 @@ examples:
             --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json
 """
 
+helps['deployment delete'] = """
+type: command
+short-summary: Delete a deployment at subscription scope.
+examples:
+  - name: Delete a deployment at subscription scope.
+    text: az deployment delete -n deployment01
+"""
+
 helps['deployment export'] = """
 type: command
 short-summary: Export the template used for a deployment.
@@ -274,9 +258,25 @@ examples:
     crafted: true
 """
 
+helps['deployment list'] = """
+type: command
+short-summary: List deployments at subscription scope.
+examples:
+  - name: List deployments at subscription scope.
+    text: az deployment list
+"""
+
 helps['deployment operation'] = """
 type: group
 short-summary: Manage deployment operations.
+"""
+
+helps['deployment show'] = """
+type: command
+short-summary: Show a deployment at subscription scope.
+examples:
+  - name: Show a deployment at subscription scope.
+    text: az deployment show -n deployment01
 """
 
 helps['deployment validate'] = """
