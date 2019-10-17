@@ -9,6 +9,7 @@ Release History
 
 **AppService**
 
+* Fixing an issue where webapp config ssl bind operation was removing existing tags from the resource
 * Added "--build remote" flag for "az functionapp deployment source config-zip" to support remote build action during function app deployment.
 
 **ARM**
