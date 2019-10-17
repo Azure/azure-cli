@@ -287,7 +287,8 @@ def load_command_table(self, _):
         g.command('list-publishers', 'list_publishers')
         g.command('list-skus', 'list_skus')
         g.custom_command('list', 'list_vm_images')
-        g.custom_command('accept-terms', 'accept_market_ordering_terms')
+        g.custom_command('accept-terms', 'accept_market_ordering_terms',
+                         deprecate_info=g.deprecate(redirect='az vm image terms accept', expiration='2.0.82'))
         g.custom_show_command('show', 'show_vm_image')
 
     with self.command_group('vm image terms', compute_vm_image_term_sdk, validator=None) as g:
