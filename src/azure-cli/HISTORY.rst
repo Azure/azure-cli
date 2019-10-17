@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**ACR**
+
+* Added a preview parameter `--pack-image-tag` to command `az acr pack build`.
+
 **AppService**
 
 * Added "--build remote" flag for "az functionapp deployment source config-zip" to support remote build action during function app deployment.
