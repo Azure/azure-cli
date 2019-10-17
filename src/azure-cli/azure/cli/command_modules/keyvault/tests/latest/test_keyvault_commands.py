@@ -651,6 +651,17 @@ class KeyVaultCertificateImportScenario(ScenarioTest):
 
         _create_keyvault(self, self.kwargs)
 
+        # Create certificate with encrypted key
+        # openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 3650 -out cert.pem
+        # openssl pkcs8 -in key.pem -topk8 -v1 PBE-SHA1-3DES -out key.pem
+        # type key.pem cert.pem > import_pem_encrypted_pwd_1234.pem
+        # del key.pem cert.pem
+
+        # Create certificate with plain key
+        # openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 3650 -out cert.pem
+        # type key.pem cert.pem > import_pem_plain.pem
+        # del key.pem cert.pem
+
         # test certificate import
         self.kwargs.update({
             'pem_encrypted_file': os.path.join(TEST_DIR, 'import_pem_encrypted_pwd_1234.pem'),
@@ -661,6 +672,10 @@ class KeyVaultCertificateImportScenario(ScenarioTest):
 
         self.cmd('keyvault certificate import --vault-name {kv} -n pem-cert1 --file "{pem_plain_file}" -p @"{pem_policy_path}"')
         self.cmd('keyvault certificate import --vault-name {kv} -n pem-cert2 --file "{pem_encrypted_file}" --password {pem_encrypted_password} -p @"{pem_policy_path}"')
+
+        # Test certificate file not exist
+        with self.assertRaises(CLIError):
+            self.cmd('keyvault certificate import --vault-name {kv} -n pem-cert2 --file "notexist.json" -p @"{pem_policy_path}"')
 
         # self.kwargs.update({
         #     'pfx_plain_file': os.path.join(TEST_DIR, 'import_pfx.pfx'),

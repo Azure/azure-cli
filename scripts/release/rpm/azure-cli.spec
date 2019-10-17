@@ -52,7 +52,11 @@ for d in %{buildroot}%{cli_lib_dir}/bin/*; do perl -p -i -e "s#%{buildroot}##g" 
 # Create executable
 mkdir -p %{buildroot}%{_bindir}
 python_version=$(ls %{buildroot}%{cli_lib_dir}/lib/ | head -n 1)
+<<<<<<< HEAD
 printf "#!/usr/bin/env bash\nPYTHONPATH=%{cli_lib_dir}/lib/${python_version}/site-packages ${python_version} -sm azure.cli \"\$@\"" > %{buildroot}%{_bindir}/az
+=======
+printf "#!/usr/bin/env bash\nPYTHONPATH=%{cli_lib_dir}/lib/${python_version}/site-packages %{python_version} -sm azure.cli \"\$@\"" > %{buildroot}%{_bindir}/az
+>>>>>>> dev
 rm %{buildroot}%{cli_lib_dir}/bin/python* %{buildroot}%{cli_lib_dir}/bin/pip*
 
 # Set up tab completion

@@ -33,6 +33,8 @@ from azure.cli.command_modules.acr._docker_utils import (
     get_login_credentials,
     get_access_credentials,
     get_authorization_header,
+    RepoAccessTokenPermission,
+    HelmAccessTokenPermission,
     EMPTY_GUID
 )
 from azure.cli.command_modules.acr._docker_utils import ResourceNotFound
@@ -442,12 +444,12 @@ class AcrMockCommandsTests(unittest.TestCase):
         self._validate_refresh_token_request(mock_requests_get, mock_requests_post, login_server)
 
         # Test get access token for container image repository
-        get_access_credentials(cmd, registry_name, tenant_suffix=tenant_suffix, repository=TEST_REPOSITORY, permission='pull')
-        self._validate_access_token_request(mock_requests_get, mock_requests_post, login_server, 'repository:{}:pull'.format(TEST_REPOSITORY))
+        get_access_credentials(cmd, registry_name, tenant_suffix=tenant_suffix, repository=TEST_REPOSITORY, permission=RepoAccessTokenPermission.METADATA_READ.value)
+        self._validate_access_token_request(mock_requests_get, mock_requests_post, login_server, 'repository:{}:{}'.format(TEST_REPOSITORY, RepoAccessTokenPermission.METADATA_READ.value))
 
         # Test get access token for artifact image repository
-        get_access_credentials(cmd, registry_name, tenant_suffix=tenant_suffix, artifact_repository=TEST_REPOSITORY, permission='pull')
-        self._validate_access_token_request(mock_requests_get, mock_requests_post, login_server, 'artifact-repository:{}:pull'.format(TEST_REPOSITORY))
+        get_access_credentials(cmd, registry_name, tenant_suffix=tenant_suffix, artifact_repository=TEST_REPOSITORY, permission=HelmAccessTokenPermission.PULL.value)
+        self._validate_access_token_request(mock_requests_get, mock_requests_post, login_server, 'artifact-repository:{}:{}'.format(TEST_REPOSITORY, HelmAccessTokenPermission.PULL.value))
 
     def _setup_mock_token_requests(self, mock_get_aad_token, mock_requests_get, mock_requests_post, login_server):
         # Set up AAD token with only access token

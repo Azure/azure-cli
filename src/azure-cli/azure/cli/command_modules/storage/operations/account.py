@@ -22,7 +22,8 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
     scf = storage_client_factory(cmd.cli_ctx)
-    logger.warning("The default kind for created storage account will change to 'StorageV2' from 'Storage' in future")
+    logger.warning("The default kind for created storage account will change to 'StorageV2' from 'Storage' "
+                   "in the future")
     params = StorageAccountCreateParameters(sku=Sku(name=sku), kind=Kind(kind), location=location, tags=tags)
     if custom_domain:
         params.custom_domain = CustomDomain(name=custom_domain, use_sub_domain=None)
@@ -32,7 +33,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         params.access_tier = AccessTier(access_tier)
     if assign_identity:
         params.identity = Identity()
-    if https_only:
+    if https_only is not None:
         params.enable_https_traffic_only = https_only
     if enable_files_aadds is not None:
         AzureFilesIdentityBasedAuthentication = cmd.get_models('AzureFilesIdentityBasedAuthentication')
