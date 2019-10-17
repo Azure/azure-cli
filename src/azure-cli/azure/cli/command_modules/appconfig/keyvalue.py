@@ -28,6 +28,8 @@ from ._azconfig.models import (KeyValue,
                                QueryKeyValueOptions)
 
 logger = get_logger(__name__)
+FEATURE_FLAG_PREFIX = ".appconfig.featureflag/"
+FEATURE_FLAG_CONTENT_TYPE = "application/vnd.microsoft.appconfig.ff+json;charset=utf-8"
 
 
 def import_config(cmd,
