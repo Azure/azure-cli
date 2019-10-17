@@ -1449,8 +1449,7 @@ def _terms_prepare(cmd, urn, publisher, offer, plan):
         publisher, offer, _, _ = urn.split(':')
         image = show_vm_image(cmd, urn)
         if not image.plan:
-            logger.warning("Image '%s' has no terms to accept.", urn)
-            return '', '', ''
+            raise CLIError("Image '%s' has no terms to accept.", urn)
         plan = image.plan.name
     else:
         if not publisher or not offer or not plan:
@@ -1460,8 +1459,6 @@ def _terms_prepare(cmd, urn, publisher, offer, plan):
 
 def _accept_cancel_terms(cmd, urn, publisher, offer, plan, accept):
     publisher, offer, plan = _terms_prepare(cmd, urn, publisher, offer, plan)
-    if publisher == '':
-        return
     op = cf_vm_image_term(cmd.cli_ctx, '')
     terms = op.get(publisher, offer, plan)
     terms.accepted = accept
