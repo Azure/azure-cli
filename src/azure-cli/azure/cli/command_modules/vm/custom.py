@@ -1442,18 +1442,20 @@ def accept_market_ordering_terms(cmd, urn=None, publisher=None, offer=None, plan
 
 
 def _terms_prepare(cmd, urn, publisher, offer, plan):
-    usage_err = 'usage error: --plan STRING --offer STRING --publish STRING |--urn STRING'
     if urn:
         if any([publisher, offer, plan]):
-            raise CLIError(usage_err)
-        publisher, offer, _, _ = urn.split(':')
+            raise CLIError('usage error: If using --urn, do not use any of --plan, --offer, --publisher.')
+        terms = urn.split(':')
+        if len(terms) != 4:
+            raise CLIError('usage error: urn format is wrong. It should be in format of publisher:offer:sku:version.')
+        publisher, offer = terms[0], terms[1]
         image = show_vm_image(cmd, urn)
         if not image.plan:
             raise CLIError("Image '%s' has no terms to accept." % urn)
         plan = image.plan.name
     else:
         if not all([publisher, offer, plan]):
-            raise CLIError(usage_err)
+            raise CLIError('usage error: Please provide --plan, --offer and --publisher, or --urn instead.')
     return publisher, offer, plan
 
 
@@ -1467,7 +1469,7 @@ def _accept_cancel_terms(cmd, urn, publisher, offer, plan, accept):
 
 def accept_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
     """
-    Accept market ordering terms.
+    Accept terms.
     :param cmd:cmd
     :param urn:URN, in format of 'publisher:offer:sku:version'. If specified, other argument values can be omitted
     :param publisher:Image publisher
@@ -1480,7 +1482,7 @@ def accept_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
 
 def cancel_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
     """
-    Cancel market ordering terms.
+    Cancel terms.
     :param cmd:cmd
     :param urn:URN, in format of 'publisher:offer:sku:version'. If specified, other argument values can be omitted
     :param publisher:Image publisher
@@ -1493,7 +1495,7 @@ def cancel_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
 
 def get_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
     """
-    Get the details of market ordering terms.
+    Get the details of terms.
     :param cmd:cmd
     :param urn:URN, in format of 'publisher:offer:sku:version'. If specified, other argument values can be omitted
     :param publisher:Image publisher
@@ -1502,8 +1504,6 @@ def get_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
     :return:
     """
     publisher, offer, plan = _terms_prepare(cmd, urn, publisher, offer, plan)
-    if publisher is None:
-        return
     op = cf_vm_image_term(cmd.cli_ctx, '')
     terms = op.get(publisher, offer, plan)
     return terms
