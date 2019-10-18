@@ -11,11 +11,25 @@ Release History
 
 * Added "--build remote" flag for "az functionapp deployment source config-zip" to support remote build action during function app deployment.
 
+**ARM**
+
+* deployment/group deployment validate: Add --handle-extended-json-format parameter to support multiline and comments in json template when deployment.
+
 **Compute**
 
 * vm create: Add warning when specifying accelerated networking and an existing NIC together.
 * [BREAKING CHANGE] vm extension set: Fix bug where users could not set an extension on a VM with --ids.
 * New commands `az vm image terms accept/cancel/show` to manage Azure Marketplace image terms.
+
+**CosmosDB**
+
+* [BREAKING] sql container create: Change --partition-key-path to required parameter
+* [BREAKING] gremlin graph create: Change --partition-key-path to required parameter
+* sql container create: Add --unique-key-policy and --conflict-resolution-policy
+* sql container create/update: Update the --idx default schema
+* gremlin graph create: Add --conflict-resolution-policy
+* gremlin graph create/update: Update the --idx default schema
+* Fix typo in help message
 
 **IoT**
 
@@ -35,6 +49,10 @@ Release History
 
 * Fix: `az account get-access-token --resource-type ms-graph` not working
 * Remove warning from `az login`
+
+**RBAC**
+
+* Fix #10807: `az ad app update --id {} --display-name {}` doesn't work
 
 2.0.75
 ++++++
@@ -90,16 +108,6 @@ Release History
 **Monitor**
 
 * az monitor log-analytics workspace: Support CRUD for Azure log analytics workspace.
-
-**CosmosDB**
-
-* [BREAKING] sql container create: Change --partition-key-path to required parameter
-* [BREAKING] gremlin graph create: Change --partition-key-path to required parameter
-* sql container create: Add --unique-key-policy and --conflict-resolution-policy
-* sql container create/update: Update the --idx default schema
-* gremlin graph create: Add --conflict-resolution-policy
-* gremlin graph create/update: Update the --idx default schema
-* Fix typo in help message
 
 **Network**
 
