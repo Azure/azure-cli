@@ -618,6 +618,10 @@ def load_arguments(self, _):
 
     with self.argument_context('network express-route port location', min_api='2018-08-01') as c:
         c.argument('location_name', options_list=['--location', '-l'])
+
+    with self.argument_context('network express-route port identity assign', arg_group='Identity', min_api='2019-08-01') as c:
+        c.argument('user_assigned_identity', options_list='--identity',
+                   help="Name or ID of the ManagedIdentity Resource", validator=validate_application_gateway_identity)
     # endregion
 
     # region PrivateEndpoint

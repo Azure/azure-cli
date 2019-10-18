@@ -1219,6 +1219,12 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
         self.cmd('network express-route list --resource-group {rg}', checks=self.is_empty())
 
 
+class NetworkExpressRoutePortScenarioTest(ScenarioTest):
+
+    def test_network_express_route_identity(self):
+        pass
+
+
 class NetworkExpressRouteIPv6PeeringScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_express_route_ipv6_peering')

@@ -587,6 +587,11 @@ def load_command_table(self, _):
         g.show_command('show')
         g.generic_update_command('update', custom_func_name='update_express_route_port')
 
+    with self.command_group('network express-route port identity', min_api='2019-08-01') as g:
+        g.custom_command('assign', 'assign_express_route_port_identity', supports_no_wait=True)
+        g.custom_command('remove', 'remove_express_route_port_identity', supports_no_wait=True)
+        g.custom_show_command('show', 'show_express_route_port_identity')
+
     with self.command_group('network express-route port link', network_er_links_sdk) as g:
         g.command('list', 'list')
         g.show_command('show')

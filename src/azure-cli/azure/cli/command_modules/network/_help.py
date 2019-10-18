@@ -2385,6 +2385,35 @@ type: command
 short-summary: Update settings of an ExpressRoute port.
 """
 
+helps['network express-route port identity'] = """
+type: group
+short-summary: Manage the managed service identity of an ExpressRoute Port
+"""
+
+helps['network express-route port identity assign'] = """
+type: command
+short-summary: Assign a managed service identity to an ExpressRoute Port
+examples:
+  - name: Assign an identity to the ExpressRoute Port
+    text: az network express-route identity assign -g MyResourceGroup --name MyExpressRoutePortName \\ --identity /subscriptions/*-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id1
+"""
+
+helps['network express-route port identity remove'] = """
+type: command
+short-summary: Remove the managed service identity of an ExpressRoute Port
+examples:
+  - name: Remove an identity of the ExpressRoute Port
+    text: az network application-gateway identity remove -g MyResourceGroup --name MyExpressRoutePortName
+"""
+
+helps['network express-route port identity show'] = """
+type: command
+short-summary: Show the managed service identity of an ExpressRoute Port
+examples:
+  - name: Show an identity of the ExpressRoute Port
+    text: az network application-gateway identity show -g MyResourceGroup --name MyExpressRoutePortName
+"""
+
 helps['network express-route show'] = """
 type: command
 short-summary: Get the details of an ExpressRoute circuit.
