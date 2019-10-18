@@ -343,7 +343,7 @@ def _db_elastic_pool_update_sku(
 
     # Wipe out sku name if serverless vs provisioned db offerings changed,
     # only if sku name has not be wiped by earlier logic, and new compute model has been requested.
-    if instance.sku.name is not None and compute_model is not None:
+    if instance.sku.name and compute_model:
         if not _compute_model_matches(instance.sku.name, compute_model):
             instance.sku.name = None
 
@@ -675,7 +675,7 @@ def _db_dw_create(
     # This check needs to be here, because server side logic of
     # finding a default sku for Serverless is not yet implemented.
     if kwargs['compute_model'] == ComputeModelType.serverless:
-        if sku is None or sku.tier is None or sku.family is None or sku.capacity is None:
+        if not sku or not sku.tier or not sku.family or not sku.capacity:
             raise CLIError('When creating a severless database, please pass in edition, '
                            'family, and capacity parameters through -e -f -c')
 
@@ -1202,7 +1202,7 @@ def db_update(
         resource_group_name)
 
     # Finding out requesting compute_model
-    if compute_model is None:
+    if not compute_model:
         compute_model = (
             ComputeModelType.serverless if _is_serverless_slo(instance.sku.name)
             else ComputeModelType.provisioned)
