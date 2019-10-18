@@ -1447,7 +1447,7 @@ def _terms_prepare(cmd, urn, publisher, offer, plan):
             raise CLIError('usage error: If using --urn, do not use any of --plan, --offer, --publisher.')
         terms = urn.split(':')
         if len(terms) != 4:
-            raise CLIError('usage error: urn format is wrong. It should be in format of publisher:offer:sku:version.')
+            raise CLIError('usage error: urn should be in the format of publisher:offer:sku:version.')
         publisher, offer = terms[0], terms[1]
         image = show_vm_image(cmd, urn)
         if not image.plan:
@@ -1455,7 +1455,8 @@ def _terms_prepare(cmd, urn, publisher, offer, plan):
         plan = image.plan.name
     else:
         if not all([publisher, offer, plan]):
-            raise CLIError('usage error: Please provide --plan, --offer and --publisher, or --urn instead.')
+            raise CLIError(
+                'usage error: If not using --urn, all of --plan, --offer and --publisher should be provided.')
     return publisher, offer, plan
 
 
@@ -1469,9 +1470,9 @@ def _accept_cancel_terms(cmd, urn, publisher, offer, plan, accept):
 
 def accept_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
     """
-    Accept terms.
+    Accept Azure Marketplace image terms so that the image can be used to create VMs.
     :param cmd:cmd
-    :param urn:URN, in format of 'publisher:offer:sku:version'. If specified, other argument values can be omitted
+    :param urn:URN, in the format of 'publisher:offer:sku:version'. If specified, other argument values can be omitted
     :param publisher:Image publisher
     :param offer:Image offer
     :param plan:Image billing plan
@@ -1482,9 +1483,9 @@ def accept_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
 
 def cancel_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
     """
-    Cancel terms.
+    Cancel Azure Marketplace image terms.
     :param cmd:cmd
-    :param urn:URN, in format of 'publisher:offer:sku:version'. If specified, other argument values can be omitted
+    :param urn:URN, in the format of 'publisher:offer:sku:version'. If specified, other argument values can be omitted
     :param publisher:Image publisher
     :param offer:Image offer
     :param plan:Image billing plan
@@ -1495,9 +1496,9 @@ def cancel_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
 
 def get_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
     """
-    Get the details of terms.
+    Get the details of Azure Marketplace image terms.
     :param cmd:cmd
-    :param urn:URN, in format of 'publisher:offer:sku:version'. If specified, other argument values can be omitted
+    :param urn:URN, in the format of 'publisher:offer:sku:version'. If specified, other argument values can be omitted
     :param publisher:Image publisher
     :param offer:Image offer
     :param plan:Image billing plan

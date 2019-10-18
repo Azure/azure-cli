@@ -1412,7 +1412,7 @@ short-summary: Manage Azure Marketplace image terms.
 
 helps['vm image terms accept'] = """
 type: command
-short-summary: Accept Azure Marketplace image terms so that the image can be used to create VMs
+short-summary: Accept Azure Marketplace image terms so that the image can be used to create VMs.
 examples:
   - name: Accept Azure Marketplace image terms so that the image can be used to create VMs.
     text: az vm image terms accept --urn publisher:offer:sku:version
