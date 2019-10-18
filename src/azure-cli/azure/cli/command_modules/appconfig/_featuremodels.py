@@ -43,8 +43,6 @@ class FeatureFlagValue(object):
         Description of Feature Flag
     :ivar bool enabled:
         Represents if the Feature flag is On/Off/Conditionally On
-    :ivar str label:
-        Label of the entry.
     :ivar dict {string, FeatureFilter[]} conditions:
         Dictionary that contains client_filters List (and server_filters List in future)
     '''
@@ -53,12 +51,10 @@ class FeatureFlagValue(object):
                  id_,
                  description=None,
                  enabled=None,
-                 label=None,
                  conditions=None):
         self.id = id_
         self.description = description
         self.enabled = enabled
-        self.label = label
         self.conditions = conditions
 
     def __repr__(self):
@@ -66,7 +62,6 @@ class FeatureFlagValue(object):
             "id": self.id,
             "description": self.description,
             "enabled": self.enabled,
-            "label": self.label,
             "conditions": custom_serialize_conditions(self.conditions)
         }
 
@@ -239,7 +234,6 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
             'id',
             'description',
             'enabled',
-            'label',
             'conditions'}
         if valid_fields != feature_flag_dict.keys():
             logger.debug("'%s' feature flag is missing required values or it contains ", feature_name +
@@ -267,7 +261,6 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
                                                   'description', ''),
                                               enabled=feature_flag_dict.get(
                                                   'enabled', False),
-                                              label=keyvalue.label,
                                               conditions=conditions)
 
     except ValueError as exception:

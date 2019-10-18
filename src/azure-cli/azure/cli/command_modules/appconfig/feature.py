@@ -50,7 +50,6 @@ def set_feature(cmd,
         "id": feature,
         "description": description,
         "enabled": False,
-        "label": label,
         "conditions": default_conditions
     }
 
