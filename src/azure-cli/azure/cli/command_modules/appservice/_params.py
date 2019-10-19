@@ -83,6 +83,10 @@ def load_arguments(self, _):
         c.argument('sku', arg_type=sku_arg_type)
         c.argument('is_linux', action='store_true', required=False, help='host web app on Linux worker')
         c.argument('hyper_v', action='store_true', required=False, help='Host web app on Windows container', is_preview=True)
+        c.argument('per_site_scaling', action='store_true', required=False, help='EnablepPer-app scaling at the '
+                                                                                 'App Service plan level to allow for '
+                                                                                 'scaling an app independently from '
+                                                                                 'the App Service plan that hosts it.')
         c.argument('tags', arg_type=tags_type)
 
     with self.argument_context('appservice plan update') as c:

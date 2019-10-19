@@ -1380,8 +1380,8 @@ def list_app_service_plans(cmd, resource_group_name=None):
     return plans
 
 
-def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, sku='B1', number_of_workers=None,
-                            location=None, tags=None):
+def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, per_site_scaling, sku='B1',
+                            number_of_workers=None, location=None, tags=None):
     if is_linux and hyper_v:
         raise CLIError('usage error: --is-linux | --hyper-v')
     client = web_client_factory(cmd.cli_ctx)
