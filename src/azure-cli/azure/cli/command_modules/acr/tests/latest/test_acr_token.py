@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import unittest
 from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 
@@ -11,6 +12,7 @@ class AcrTokenCommandsTests(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer()
+    @unittest.skip('blocked till the feature gets deployed to production')
     def test_repository_token_create(self):
         self.kwargs.update({
             'registry': self.create_random_name('clireg', 20),
