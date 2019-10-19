@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**DLS**
+
+* Update ADLS version (0.0.48).
+
 **ACR**
 
 * Added a preview parameter `--pack-image-tag` to command `az acr pack build`.
