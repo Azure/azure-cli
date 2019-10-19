@@ -2395,8 +2395,11 @@ type: command
 short-summary: Assign a managed service identity to an ExpressRoute Port
 examples:
   - name: Assign an identity to the ExpressRoute Port
-    text: az network express-route port identity assign --resource-group MyResourceGroup --name MyExpressRoutePort
-            --identity MyUserAssignedManagedServiceIdentity
+    text: |-
+        az network express-route port identity assign \\
+        --resource-group MyResourceGroupg \\
+        --name MyExpressRoutePort \\
+        --identity MyUserAssignedManagedServiceIdentity
 """
 
 helps['network express-route port identity remove'] = """
