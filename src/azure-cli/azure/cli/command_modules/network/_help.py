@@ -2395,7 +2395,8 @@ type: command
 short-summary: Assign a managed service identity to an ExpressRoute Port
 examples:
   - name: Assign an identity to the ExpressRoute Port
-    text: az network express-route identity assign -g MyResourceGroup --name MyExpressRoutePortName \\ --identity /subscriptions/*-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id1
+    text: az network express-route port identity assign --resource-group MyResourceGroup --name MyExpressRoutePort
+            --identity MyUserAssignedManagedServiceIdentity
 """
 
 helps['network express-route port identity remove'] = """
@@ -2403,7 +2404,7 @@ type: command
 short-summary: Remove the managed service identity of an ExpressRoute Port
 examples:
   - name: Remove an identity of the ExpressRoute Port
-    text: az network application-gateway identity remove -g MyResourceGroup --name MyExpressRoutePortName
+    text: az network express-route port identity remove -g MyResourceGroup --name MyExpressRoutePort
 """
 
 helps['network express-route port identity show'] = """
@@ -2411,7 +2412,7 @@ type: command
 short-summary: Show the managed service identity of an ExpressRoute Port
 examples:
   - name: Show an identity of the ExpressRoute Port
-    text: az network application-gateway identity show -g MyResourceGroup --name MyExpressRoutePortName
+    text: az network express-route port identity show -g MyResourceGroup --name MyExpressRoutePort
 """
 
 helps['network express-route show'] = """
