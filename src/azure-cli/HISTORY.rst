@@ -3,18 +3,129 @@
 Release History
 ===============
 
-**AMS**
+**ACR**
 
-* BREAKING CHANGE: Changed job creation from "job start" to "job create".
+* Added a preview parameter `--pack-image-tag` to command `az acr pack build`.
 
-**Compute**
+**AppService**
 
-* vm create: Add --enable-agent configuration.
-* vmss create: Add --computer-name-prefix parameter to support custom computer name prefix of virtual machines in the VMSS.
+* Added "--build remote" flag for "az functionapp deployment source config-zip" to support remote build action during function app deployment.
+
+**ARM**
+
+* deployment/group deployment validate: Add --handle-extended-json-format parameter to support multiline and comments in json template when deployment.
+
+**CosmosDB**
+
+* [BREAKING] sql container create: Change --partition-key-path to required parameter
+* [BREAKING] gremlin graph create: Change --partition-key-path to required parameter
+* sql container create: Add --unique-key-policy and --conflict-resolution-policy
+* sql container create/update: Update the --idx default schema
+* gremlin graph create: Add --conflict-resolution-policy
+* gremlin graph create/update: Update the --idx default schema
+* Fix typo in help message
+
+**IoT**
+
+* Add new routing source type: DigitalTwinChangeEvents
+
+**Key Vault**
+
+* Fix #9352: Unexpected error when certificate file does not exist.
 
 **Network**
 
 * az network private-dns link vnet create/update: Fixes #9851. Support cross-tenant virtual network linking.
+* [BREAKING CHANGE] network vnet subnet list: Fix #10401. `--resource-group` and `--vnet-name` are required now.
+* az network public-ip prefix create: Fix #10757. Support to specify IP address version (IPv4, IPv6) when creation
+
+**Profile**
+
+* Fix: `az account get-access-token --resource-type ms-graph` not working
+* Remove warning from `az login`
+
+**RBAC**
+
+* Fix #10807: `az ad app update --id {} --display-name {}` doesn't work
+
+2.0.75
+++++++
+
+**AKS**
+
+* Set `--load-balancer-sku` default value to standard if supported by the kubernetes version
+* Set `--vm-set-type` default value to virtualmachinescalesets if supported by the kubernetes version
+* Add `az aks nodepool add`,`az aks nodepool show`, `az aks nodepool list`, `az aks nodepool scale`, `az aks nodepool upgrade`, `az aks nodepool update` and `az aks nodepool delete` commmands to support multiple nodepools in aks
+* Add `--zones` to `az aks create` and `az aks nodepool add` commands to support availability zones for aks
+
+**AMS**
+
+* BREAKING CHANGE:
+    content-key-policy create:
+        - Changed parameter --ask from utf-8 string to 32 character hex string.
+    job start:
+        - Changed the command from `job start` to `job create`.
+
+**AppConfig**
+
+* Using & in authorization header
+* Adding api-version to all requests
+* Upgrading SDK Version to 1.0.0
+
+**AppService**
+
+* Added "webapp config access-restriction show | set | add | remove"
+* az webapp up updated for better error-handling
+* az appservice plan update support Isolated SKU
+
+**ARM**
+
+* az deployment create: Add --handle-extended-json-format parameter to support multiline and comments in json template.
+
+**Backup**
+
+* Enhanced error detail for vault delete in force mode.
+
+**Compute**
+
+* vm create: Add --enable-agent configuration.
+* vm create: Use standard public IP SKU automatically when using zones.
+* vm create: Compose a valid computer name from VM name if computer name is not provided.
+* vm create: Add --workspace to enable log analytics workspace automatically.
+* vm create: Add warning when specifying accelerated networking and an existing NIC together.
+* [BREAKING CHANGE] vm extension set: Fix bug where users could not set an extension on a VM with --ids.
+* vmss create: Add --computer-name-prefix parameter to support custom computer name prefix of virtual machines in the VMSS.
+* Update galleries API version to 2019-07-01.
+
+**IoT**
+
+* Fix #2116: Unexpected 'az iot hub show' error for resource not found.
+
+**Monitor**
+
+* az monitor log-analytics workspace: Support CRUD for Azure log analytics workspace.
+
+**Network**
+
+* az network private-dns link vnet create/update: Fixes #9851. Support cross-tenant virtual network linking.
+* [BREAKING CHANGE] network vnet subnet list: Fix #10401. `--resource-group` and `--vnet-name` are required now.
+
+**SQL**
+
+* New Cmdlets for sql mi ad-admin that supports setting AAD administrator on Managed instance
+
+**Storage**
+
+* az storage copy: Add --preserve-s2s-access-tier parameter to preserve access tier during service to service copy.
+* az storage account create/update: Add --enable-large-file-share parameter to support large file shares for storage account.
+
+**RBAC**
+
+* Fix #10493: az ad sp delete --id {} fails when application is not found. If not found, application deletion is skipped.
+
+**Storage**
+
+* Add support for WebAssembly (.wasm) mimetype detection
 
 2.0.74
 ++++++
@@ -29,12 +140,6 @@ Release History
 * Add `--load-balancer-sku`, `--load-balancer-managed-outbound-ip-count`, `--load-balancer-outbound-ips` and `--load-balancer-outbound-ip-prefixes` to `az aks create` command, which allows for creating AKS cluster with SLB.
 * Add `--load-balancer-managed-outbound-ip-count`, `--load-balancer-outbound-ips` and `--load-balancer-outbound-ip-prefixes` to `az aks update` command, which allows for updating load balancer profile of an AKS cluster with SLB.
 * Add `--vm-set-type` to `az aks create` command, which allows to specify vm types of an AKS Cluster (vmas or vmss).
-
-**AppService**
-
-* Added "webapp config access-restriction show | set | add | remove"
-* az webapp up updated for better error-handling
-* az appservice plan update support Isolated SKU
 
 **ARM**
 
@@ -140,6 +245,7 @@ Release History
 
 * Support for Policy new API version 2019-01-01
 
+
 **Storage**
 
 * [BREAKING CHANGE] `az storage remove`: remove --auth-mode argument
@@ -175,7 +281,7 @@ Release History
 
 **Network**
 
-* az network lb create/frontend-ip create: Fixes #10018. Support `--private-ip-address-version` argument to create IPv6 based private-ip-address 
+* az network lb create/frontend-ip create: Fixes #10018. Support `--private-ip-address-version` argument to create IPv6 based private-ip-address
 * az network private-endpoint create/update/list-types: Fixes #9474. Support create/update/list-types commands for private endpoint.
 * az network private-link-service: Fixes #9475. Onboard commands for private link service.
 * az network vnet subnet update: Support `--private-endpoint-network-policies` and `--private-link-service-network-policies` arguments for update command.
@@ -231,7 +337,7 @@ Release History
 * BREAKING CHANGE:
     create:
         - Renamed --storage-default-container to --storage-container and --storage-default-filesystem to --storage-filesystem
-    application create: 
+    application create:
         - Changed the --name/-n argument to represent the application name instead of the cluster name and added a separate --cluster-name argument
         - Renamed --application-type to --type/-t
         - Renamed --marketplace-identifier to --marketplace-id
@@ -253,7 +359,7 @@ Release History
     Added this command to list the execution history for all script action executions
 * monitor enable:
     Enabled the --workspace argument to accept a Log Analytics workspace ID or workspace name as the parameter
-    Added the --primary-key argument, which is needed if a workspace ID is provided as the parameter 
+    Added the --primary-key argument, which is needed if a workspace ID is provided as the parameter
 * Added more examples and updated descriptions for help messages
 
 **interactive**
@@ -262,7 +368,7 @@ Release History
 
 **Network**
 
-* az network dns record-set cname delete: Fixes #10166. Support `--yes` argument to align the behavior with other dns type. 
+* az network dns record-set cname delete: Fixes #10166. Support `--yes` argument to align the behavior with other dns type.
 
 **Profile**
 
@@ -279,7 +385,7 @@ Release History
 
 **Kubernetes**
 
-* Use https if dashboard container port is using https 
+* Use https if dashboard container port is using https
 
 
 2.0.70

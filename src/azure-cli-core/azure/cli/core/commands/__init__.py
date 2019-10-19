@@ -92,7 +92,7 @@ def _expand_file_prefixed_files(args):
             try:
                 return _load_file(poss_file)
             except IOError:
-                logger.debug("Failed to load @'%s', assume not a file", arg)
+                logger.debug("Failed to load '%s', assume not a file", arg)
                 return arg
 
         # if @ not at the start it can't be a file
@@ -920,14 +920,20 @@ class DeploymentOutputLongRunningOperation(LongRunningOperation):
             result = super(DeploymentOutputLongRunningOperation, self).__call__(result)
             outputs = None
             try:
-                outputs = result.properties.outputs
+                if isinstance(result, str) and result:
+                    try:
+                        obj = json.loads(result)
+                        return obj
+                    except json.decoder.JSONDecodeError:
+                        logger.info("Fail to transform result \"%s\" to dictionary", result)
+                else:
+                    outputs = result.properties.outputs
             except AttributeError:  # super.__call__ might return a ClientRawResponse
                 pass
             return {key: val['value'] for key, val in outputs.items()} if outputs else {}
         if isinstance(result, ClientRawResponse):
             # --no-wait returns a ClientRawResponse
             return {}
-
         # --validate returns a 'normal' response
         return result
 

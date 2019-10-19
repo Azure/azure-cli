@@ -9,7 +9,7 @@ from collections import OrderedDict
 
 from azure.cli.core.util import empty_on_404
 from azure.cli.core.profiles import ResourceType, PROFILE_TYPE
-from azure.cli.core.commands import CliCommandType
+from azure.cli.core.commands import CliCommandType, DeploymentOutputLongRunningOperation
 from azure.cli.core.commands.arm import handle_template_based_exception
 
 from azure.cli.command_modules.resource._client_factory import (
@@ -19,6 +19,8 @@ from azure.cli.command_modules.resource._client_factory import (
 from azure.cli.command_modules.resource._validators import process_deployment_create_namespace
 
 from ._exception_handler import managementgroups_exception_handler
+from knack.log import get_logger
+logger = get_logger(__name__)
 
 
 # Resource group commands
@@ -179,7 +181,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_resources', table_transformer=transform_resource_list)
         g.custom_command('tag', 'tag_resource')
         g.custom_command('move', 'move_resource')
-        g.custom_command('invoke-action', 'invoke_resource_action')
+        g.custom_command('invoke-action', 'invoke_resource_action', transform=DeploymentOutputLongRunningOperation(self.cli_ctx))
         g.generic_update_command('update', getter_name='show_resource', setter_name='update_resource',
                                  client_factory=None)
         g.wait_command('wait', getter_name='show_resource')
@@ -232,16 +234,16 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'get_deployment_operations', client_factory=cf_deployment_operations)
 
     with self.command_group('deployment', resource_deployment_sdk, min_api='2018-05-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
-        g.command('list', 'list_at_subscription_scope', table_transformer=transform_deployments_list)
-        g.show_command('show', 'get_at_subscription_scope')
-        g.command('delete', 'delete_at_subscription_scope', supports_no_wait=True)
+        g.custom_command('list', 'list_deployments_at_subscription_scope', table_transformer=transform_deployments_list)
+        g.custom_show_command('show', 'get_deployment_at_subscription_scope')
+        g.custom_command('delete', 'delete_deployment_at_subscription_scope', supports_no_wait=True)
         g.custom_command('validate', 'validate_arm_template_at_subscription_scope', table_transformer=deployment_validate_table_format, exception_handler=handle_template_based_exception)
         g.custom_command('create', 'deploy_arm_template_at_subscription_scope', supports_no_wait=True, validator=process_deployment_create_namespace, exception_handler=handle_template_based_exception)
         g.custom_command('export', 'export_subscription_deployment_template')
-        g.wait_command('wait', getter_name='get_at_subscription_scope')
+        g.custom_wait_command('wait', 'wait_deployment_at_subscription_scope')
 
     with self.command_group('deployment operation', resource_deployment_operation_sdk, min_api='2018-05-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
-        g.command('list', 'list_at_subscription_scope')
+        g.custom_command('list', 'list_deployment_operations_at_subscription_scope')
         g.custom_show_command('show', 'get_deployment_operations_at_subscription_scope', client_factory=cf_deployment_operations)
 
     with self.command_group('policy assignment', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as g:
