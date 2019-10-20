@@ -21,7 +21,8 @@ from azure.cli.command_modules.backup._validators import \
 # ARGUMENT DEFINITIONS
 
 allowed_container_types = ['AzureIaasVM']
-allowed_workload_types = ['VM']
+allowed_workload_types = ['VM', 'AzureFileShare']
+allowed_backup_management_types = ['AzureIaasVM', 'AzureStorage']
 
 backup_management_type_help = """Specifies the backup management type. Defines how Azure Backup manages the backup of entities within the ARM resource. For eg: AzureWorkloads refers to workloads installed within Azure VMs, AzureStorage refers to entities within Storage account. Accepts 'AzureWorkload', 'AzureStorage'. Required only if friendly name is used as Container name."""
 container_name_help = """Name of the backup container. Accepts 'Name' or 'FriendlyName' from the output of az backup container list command. If 'FriendlyName' is passed then BackupManagementType is required."""
@@ -32,6 +33,8 @@ item_name_type = CLIArgumentType(help='Name of the backed up item.', options_lis
 policy_name_type = CLIArgumentType(help='Name of the backup policy.', options_list=['--policy-name', '-p'])
 job_name_type = CLIArgumentType(help='Name of the job.', options_list=['--name', '-n'])
 rp_name_type = CLIArgumentType(help='Name of the recovery point.', options_list=['--rp-name', '-r'])
+backup_management_type = CLIArgumentType(help=backup_management_type_help, arg_type=get_enum_type(allowed_backup_management_types), options_list=['--backup-management-type'])
+workload_type = CLIArgumentType(help=workload_type_help, arg_type=get_enum_type(allowed_workload_types), options_list=['--workload-type'])
 
 
 # pylint: disable=too-many-statements
@@ -55,15 +58,14 @@ def load_arguments(self, _):
 
     with self.argument_context('backup container show') as c:
         c.argument('name', container_name_type, options_list=['--name', '-n'], help='Name of the container. You can use the backup container list command to get the name of a container.')
-        c.argument('backup_management_type', options_list=['--backup-management-type'], help=backup_management_type_help)
-
+        c.argument('backup_management_type', backup_management_type)
     with self.argument_context('backup container list') as c:
         c.argument('vault_name', vault_name_type, id_part=None)
-        c.argument('backup_management_type', options_list=['--backup-management-type'], help=backup_management_type_help)
+        c.argument('backup_management_type', backup_management_type)
 
     with self.argument_context('backup container unregister') as c:
-        c.argument('backup_management_type', options_list=['--backup-management-type'], help=backup_management_type_help)
-        c.argument('container_name', options_list=['--container-name', '-c'], help='Name of the container.')
+        c.argument('backup_management_type', backup_management_type)
+        c.argument('container_name', container_name_type)
 
     # Item
     with self.argument_context('backup item') as c:
@@ -72,20 +74,20 @@ def load_arguments(self, _):
 
     with self.argument_context('backup item show') as c:
         c.argument('name', item_name_type, options_list=['--name', '-n'], help='Name of the backed up item. You can use the backup item list command to get the name of a backed up item.')
-        c.argument('backup_management_type', options_list=['--backup-management-type'], help=backup_management_type_help)
-        c.argument('workload_type', options_list=['--workload-type'], help='Workload Type of the Container.')
+        c.argument('backup_management_type', backup_management_type)
+        c.argument('workload_type', workload_type)
 
     # TODO: Need to use item.id once https://github.com/Azure/msrestazure-for-python/issues/80 is fixed.
     with self.argument_context('backup item set-policy') as c:
         c.argument('item_name', item_name_type, options_list=['--name', '-n'], id_part='name', help='Name of the backed up item. You can use the backup item list command to get the name of a backed up item.')
         c.argument('policy_name', policy_name_type, help='Name of the Backup policy. You can use the backup policy list command to get the name of a backup policy.')
         c.argument('backup_management_type', options_list=['--backup-management-type'], help=backup_management_type_help)
-        c.argument('workload_type', options_list=['--workload-type'], help=workload_type_help)
+        c.argument('workload_type', workload_type)
 
     with self.argument_context('backup item list') as c:
         c.argument('vault_name', vault_name_type, id_part=None)
-        c.argument('backup_management_type', options_list=['--backup-management-type'], help='Backup Management Typr of the Container.')
-        c.argument('workload_type', options_list=['--workload-type'], help='Workload Type of the item.')
+        c.argument('backup_management_type', backup_management_type)
+        c.argument('workload_type', workload_type)
 
     # Policy
     with self.argument_context('backup policy') as c:
@@ -105,8 +107,8 @@ def load_arguments(self, _):
 
     with self.argument_context('backup policy list') as c:
         c.argument('vault_name', vault_name_type, id_part=None)
-        c.argument('backup_management_type', options_list=['--backup-management-type'], help='Backup Management Type of the Policy.')
-        c.argument('workload_type', options_list=['--workload-type'], help='Workload Type of the Policy.')
+        c.argument('backup_management_type', backup_management_type)
+        c.argument('workload_type', workload_type)
 
     # Recovery Point
     # TODO: Need to use item.id once https://github.com/Azure/msrestazure-for-python/issues/80 is fixed.
@@ -119,15 +121,15 @@ def load_arguments(self, _):
         c.argument('vault_name', vault_name_type, id_part=None)
         c.argument('start_date', type=datetime_type, help='The start date of the range in UTC (d-m-Y).')
         c.argument('end_date', type=datetime_type, help='The end date of the range in UTC (d-m-Y).')
-        c.argument('backup_management_type', options_list=['--backup-management-type'], help='Backup Management Typr of the Container.')
-        c.argument('container_name', options_list=['--container-name', '-c'], help='Name of the container.')
-        c.argument('workload_type', options_list=['--workload-type'], help=workload_type_help)
+        c.argument('backup_management_type', backup_management_type)
+        c.argument('container_name', container_name_type)
+        c.argument('workload_type', workload_type)
 
     with self.argument_context('backup recoverypoint show') as c:
         c.argument('name', rp_name_type, options_list=['--name', '-n'], help='Name of the recovery point. You can use the backup recovery point list command to get the name of a backed up item.')
-        c.argument('backup_management_type', options_list=['--backup-management-type'], help='Backup Management Typr of the Container.')
-        c.argument('container_name', options_list=['--container-name', '-c'], help='Name of the container.')
-        c.argument('workload_type', options_list=['--workload-type'], help=workload_type_help)
+        c.argument('backup_management_type', backup_management_type)
+        c.argument('container_name', container_name_type)
+        c.argument('workload_type', workload_type)
 
     # Protection
     with self.argument_context('backup protection') as c:
@@ -140,16 +142,16 @@ def load_arguments(self, _):
         with self.argument_context('backup protection ' + command) as c:
             c.argument('container_name', container_name_type)
             c.argument('item_name', item_name_type)
-            c.argument('backup_management_type', options_list=['--backup-management-type'], help='Backup Management Type of the Item.')
-            c.argument('workload_type', options_list=['--workload-type'], help=workload_type_help)
+            c.argument('backup_management_type', backup_management_type)
+            c.argument('workload_type', workload_type)
 
     with self.argument_context('backup protection backup-now') as c:
         c.argument('retain_until', type=datetime_type, help='The date until which this backed up copy will be available for retrieval, in UTC (d-m-Y).')
 
     with self.argument_context('backup protection disable') as c:
         c.argument('delete_backup_data', arg_type=get_three_state_flag(), help='Option to delete existing backed up data in the Recovery services vault.')
-        c.argument('backup_management_type', options_list=['--backup-management-type'], help='Backup Management Type of the Item.')
-        c.argument('workload_type', options_list=['--workload-type'], help=workload_type_help)
+        c.argument('backup_management_type', backup_management_type)
+        c.argument('workload_type', workload_type)
 
     with self.argument_context('backup protection check-vm') as c:
         c.argument('vm_id', help='ID of the virtual machine to be checked for protection.')
@@ -172,19 +174,19 @@ def load_arguments(self, _):
         c.argument('target_resource_group', options_list=['--target-resource-group', '-t'], help='Use this to specify the target resource group in which the restored disks will be saved')
 
     with self.argument_context('backup restore restore-azurefileshare') as c:
-        c.argument('resolve_conflict', options_list=['--resolve-conflict'], help="Instruction if there's a conflict with the restored data. Accepts Overwrite or Skip.")
-        c.argument('restore_mode', options_list=['--restore-mode'], help='Accepts OriginalLocation or AlternateLocation.')
+        c.argument('resolve_conflict', arg_type=get_enum_type(['Overwrite', 'Skip']), options_list=['--resolve-conflict'], help="Instruction if there's a conflict with the restored data. Accepts Overwrite or Skip.")
+        c.argument('restore_mode', arg_type=get_enum_type(['OriginalLocation', 'AlternateLocation']), options_list=['--restore-mode'], help='Accepts OriginalLocation or AlternateLocation.')
         c.argument('target_file_share', options_list=['--target-file-share'], help='Destination file share to which content will be restored')
         c.argument('target_folder', options_list=['--target-folder'], help='Destination folder to which content will be restored. To restore content to root , leave the folder name empty')
         c.argument('target_storage_account', options_list=['--target-storage-account'], help='Destination storage account to which content will be restored')
 
     with self.argument_context('backup restore restore-azurefiles') as c:
-        c.argument('resolve_conflict', options_list=['--resolve-conflict'], help="Instruction if there's a conflict with the restored data. Accepts Overwrite or Skip.")
-        c.argument('restore_mode', options_list=['--restore-mode'], help='Accepts OriginalLocation or AlternateLocation.')
+        c.argument('resolve_conflict', arg_type=get_enum_type(['Overwrite', 'Skip']), options_list=['--resolve-conflict'], help="Instruction if there's a conflict with the restored data. Accepts Overwrite or Skip.")
+        c.argument('restore_mode', arg_type=get_enum_type(['OriginalLocation', 'AlternateLocation']), options_list=['--restore-mode'], help='Accepts OriginalLocation or AlternateLocation.')
         c.argument('target_file_share', options_list=['--target-file-share'], help='Destination file share to which content will be restored')
         c.argument('target_folder', options_list=['--target-folder'], help='Destination folder to which content will be restored. To restore content to root , leave the folder name empty')
         c.argument('target_storage_account', options_list=['--target-storage-account'], help='Destination storage account to which content will be restored')
-        c.argument('source_file_type', options_list=['--source-file-type'], help='Whether a directory or a file is selected. Accepts Directory or File.')
+        c.argument('source_file_type', arg_type=get_enum_type(['File', 'Directory']), options_list=['--source-file-type'], help='Whether a directory or a file is selected. Accepts Directory or File.')
         c.argument('source_file_path', options_list=['--source-file-path'], help="""The absolute path of the file, to be restored within the file share, as a string. This path is the same path used in the 'az storage file download' or 'az storage file show' CLI commands.""")
 
     # Job

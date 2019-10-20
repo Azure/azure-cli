@@ -294,3 +294,284 @@ class RPPreparer(AbstractPreparer, SingleValueReplacer):
             template = 'To create an rp, a VM is required. Please add ' \
                        'decorator @{} in front of this RP preparer.'
             raise CliTestError(template.format(ItemPreparer.__name__, self.vm_parameter_name))
+
+
+class AFSPolicyPreparer(AbstractPreparer, SingleValueReplacer):
+    def __init__(self, name_prefix='clitest-item', parameter_name='policy_name', vault_parameter_name='vault_name',
+                 resource_group_parameter_name='resource_group',
+                 instant_rp_days=None):
+        super(AFSPolicyPreparer, self).__init__(name_prefix, 24)
+        from azure.cli.core.mock import DummyCli
+        self.cli_ctx = DummyCli()
+        self.parameter_name = parameter_name
+        self.resource_group = None
+        self.resource_group_parameter_name = resource_group_parameter_name
+        self.vault = None
+        self.vault_parameter_name = vault_parameter_name
+        self.instant_rp_days = instant_rp_days
+
+    def create_resource(self, name, **kwargs):
+        if not os.environ.get('AZURE_CLI_TEST_DEV_BACKUP_POLICY_NAME', None):
+            self.resource_group = self._get_resource_group(**kwargs)
+            self.vault = self._get_vault(**kwargs)
+
+            policy_json = execute(self.cli_ctx, 'az backup policy show -g {} -v {} -n {}'
+                                  .format(self.resource_group, self.vault, 'DefaultPolicy')).get_output_in_json()
+            policy_json['name'] = name
+            if self.instant_rp_days:
+                policy_json['properties']['instantRpRetentionRangeInDays'] = self.instant_rp_days
+            policy_json['properties']['backupManagementType'] = "AzureStorage"
+            policy_json = json.dumps(policy_json)
+
+            command_string = 'az backup policy create -g {} -v {} --policy \'{}\' -n {}'
+            command_string = command_string.format(self.resource_group, self.vault, policy_json, name)
+            execute(self.cli_ctx, command_string)
+            return {self.parameter_name: name}
+        return {self.parameter_name: os.environ.get('AZURE_CLI_TEST_DEV_BACKUP_POLICY_NAME', None)}
+
+    def remove_resource(self, name, **kwargs):
+        # Vault deletion will take care of this.
+        pass
+
+    def _get_resource_group(self, **kwargs):
+        try:
+            return kwargs.get(self.resource_group_parameter_name)
+        except KeyError:
+            template = 'To create an item, a resource group is required. Please add ' \
+                       'decorator @{} in front of this Policy preparer.'
+            raise CliTestError(template.format(ResourceGroupPreparer.__name__,
+                                               self.resource_group_parameter_name))
+
+    def _get_vault(self, **kwargs):
+        try:
+            return kwargs.get(self.vault_parameter_name)
+        except KeyError:
+            template = 'To create an item, a vault is required. Please add ' \
+                       'decorator @{} in front of this Policy preparer.'
+            raise CliTestError(template.format(VaultPreparer.__name__,
+                                               self.vault_parameter_name))
+
+
+class FileSharePreparer(AbstractPreparer, SingleValueReplacer):
+    def __init__(self, name_prefix='clitest-item', storage_account_parameter_name='storage_account',
+                 resource_group_parameter_name='resource_group',
+                 parameter_name='afs_name'):
+        super(FileSharePreparer, self).__init__(name_prefix, 24)
+        from azure.cli.core.mock import DummyCli
+        self.cli_ctx = DummyCli()
+        self.parameter_name = parameter_name
+        self.resource_group = None
+        self.resource_group_parameter_name = resource_group_parameter_name
+        self.storage_account_parameter_name = storage_account_parameter_name
+
+    def create_resource(self, name, **kwargs):
+        if not os.environ.get('AZURE_CLI_TEST_DEV_BACKUP_POLICY_NAME', None):
+            self.resource_group = self._get_resource_group(**kwargs)
+            storage_account = self._get_storage_account(**kwargs)
+
+            connection_string_command = 'az storage account show-connection-string -n {} -g {}'
+            connection_string_command = connection_string_command.format(storage_account, self.resource_group)
+            connection_string = execute(self.cli_ctx, connection_string_command).get_output_in_json()
+            connection_string = connection_string['connectionString']
+            
+            command_string = 'az storage share create --name {} --quota 1 --connection-string {}'
+            command_string = command_string.format(name, connection_string)
+            execute(self.cli_ctx, command_string)
+            return {self.parameter_name: name}
+        return {self.parameter_name: os.environ.get('AZURE_CLI_TEST_DEV_BACKUP_POLICY_NAME', None)}
+
+    def remove_resource(self, name, **kwargs):
+        # Vault deletion will take care of this.
+        pass
+
+    def _get_resource_group(self, **kwargs):
+        try:
+            return kwargs.get(self.resource_group_parameter_name)
+        except KeyError:
+            template = 'To create an item, a resource group is required. Please add ' \
+                       'decorator @{} in front of this Policy preparer.'
+            raise CliTestError(template.format(ResourceGroupPreparer.__name__,
+                                               self.resource_group_parameter_name))
+
+    def _get_vault(self, **kwargs):
+        try:
+            return kwargs.get(self.vault_parameter_name)
+        except KeyError:
+            template = 'To create an item, a vault is required. Please add ' \
+                       'decorator @{} in front of this Policy preparer.'
+            raise CliTestError(template.format(VaultPreparer.__name__,
+                                               self.vault_parameter_name))
+
+    def _get_storage_account(self, **kwargs):
+        try:
+            return kwargs.get(self.storage_account_parameter_name)
+        except KeyError:
+            template = 'To create an item, a vault is required. Please add ' \
+                       'decorator @StorageAccountPreparer in front of this Policy preparer.'
+            raise CliTestError(template)
+
+
+class AFSItemPreparer(AbstractPreparer, SingleValueReplacer):
+    def __init__(self, name_prefix='clitest-item', storage_account_parameter_name='storage_account',
+                 resource_group_parameter_name='resource_group', vault_parameter_name='vault_name',
+                 parameter_name='item_name', afs_parameter_name='afs_name',
+                 policy_parameter_name='policy_name'):
+        super(AFSItemPreparer, self).__init__(name_prefix, 24)
+        from azure.cli.core.mock import DummyCli
+        self.cli_ctx = DummyCli()
+        self.parameter_name = parameter_name
+        self.resource_group = None
+        self.resource_group_parameter_name = resource_group_parameter_name
+        self.storage_account_parameter_name = storage_account_parameter_name
+        self.vault_parameter_name = vault_parameter_name
+        self.afs_parameter_name = afs_parameter_name
+        self.policy_parameter_name = policy_parameter_name
+
+    def create_resource(self, name, **kwargs):
+        if not os.environ.get('AZURE_CLI_TEST_DEV_BACKUP_ITEM_NAME', None):
+            self.resource_group = self._get_resource_group(**kwargs)
+            storage_account = self._get_storage_account(**kwargs)
+            vault = self._get_vault(**kwargs)
+            afs = self._get_file_share(**kwargs)
+            policy = self._get_policy(**kwargs)
+
+            command_string = 'az backup protection enable-for-azurefileshare'
+            command_string += ' -g {} -v {} --azure-file-share {} --storage-account {} -p {}'
+            command_string = command_string.format(self.resource_group, vault, afs, storage_account, policy)
+            execute(self.cli_ctx, command_string)
+            return {self.parameter_name: name}
+        return {self.parameter_name: os.environ.get('AZURE_CLI_TEST_DEV_BACKUP_ITEM_NAME', None)}
+
+    def remove_resource(self, name, **kwargs):
+        # Vault deletion will take care of this.
+        pass
+
+    def _get_resource_group(self, **kwargs):
+        try:
+            return kwargs.get(self.resource_group_parameter_name)
+        except KeyError:
+            template = 'To create an item, a resource group is required. Please add ' \
+                       'decorator @{} in front of this Policy preparer.'
+            raise CliTestError(template.format(ResourceGroupPreparer.__name__,
+                                               self.resource_group_parameter_name))
+
+    def _get_vault(self, **kwargs):
+        try:
+            return kwargs.get(self.vault_parameter_name)
+        except KeyError:
+            template = 'To create an item, a vault is required. Please add ' \
+                       'decorator @{} in front of this Policy preparer.'
+            raise CliTestError(template.format(VaultPreparer.__name__,
+                                               self.vault_parameter_name))
+
+    def _get_storage_account(self, **kwargs):
+        try:
+            return kwargs.get(self.storage_account_parameter_name)
+        except KeyError:
+            template = 'To create an item, a vault is required. Please add ' \
+                       'decorator @StorageAccountPreparer in front of this Policy preparer.'
+            raise CliTestError(template)
+
+    def _get_file_share(self, **kwargs):
+        try:
+            return kwargs.get(self.afs_parameter_name)
+        except KeyError:
+            template = 'To create an item, a fileshare is required. Please add ' \
+                       'decorator @FileSharePreparer in front of this Policy preparer.'
+            raise CliTestError(template)
+
+    def _get_policy(self, **kwargs):
+        try:
+            return kwargs.get(self.policy_parameter_name)
+        except KeyError:
+            template = 'To create an item, a policy is required. Please add ' \
+                       'decorator @AFSPolicyPreparer in front of this Policy preparer.'
+            raise CliTestError(template)
+
+
+class AFSRPPreparer(AbstractPreparer, SingleValueReplacer):
+    def __init__(self, name_prefix='clitest-item', storage_account_parameter_name='storage_account',
+                 resource_group_parameter_name='resource_group', vault_parameter_name='vault_name',
+                 parameter_name='rp_name', item_parameter_name='item_name', afs_parameter_name='afs_name'):
+        super(AFSRPPreparer, self).__init__(name_prefix, 24)
+        from azure.cli.core.mock import DummyCli
+        self.cli_ctx = DummyCli()
+        self.parameter_name = parameter_name
+        self.resource_group = None
+        self.resource_group_parameter_name = resource_group_parameter_name
+        self.storage_account_parameter_name = storage_account_parameter_name
+        self.vault_parameter_name = vault_parameter_name
+        self.item_parameter_name = item_parameter_name
+        self.afs_parameter_name = afs_parameter_name
+
+    def create_resource(self, name, **kwargs):
+        if not os.environ.get('AZURE_CLI_TEST_DEV_BACKUP_RP_NAME', None):
+            self.resource_group = self._get_resource_group(**kwargs)
+            storage_account = self._get_storage_account(**kwargs)
+            vault = self._get_vault(**kwargs)
+            item = self._get_item(**kwargs)
+            afs = self._get_file_share(**kwargs)
+
+            retain_date = datetime.utcnow() + timedelta(days=30)
+            retain_date = retain_date.strftime('%d-%m-%Y')
+            command_string = 'az backup protection backup-now'
+            command_string += ' -g {} -v {} -i {} -c {} --backup-management-type AzureStorage --retain-until {} --query name'
+            command_string = command_string.format(self.resource_group, vault, afs, storage_account, retain_date)
+            backup_job = execute(self.cli_ctx, command_string).get_output_in_json()
+            execute(self.cli_ctx, 'az backup job wait -g {} -v {} -n {}'.format(self.resource_group, vault, backup_job))
+            return {self.parameter_name: name}
+        return {self.parameter_name: os.environ.get('AZURE_CLI_TEST_DEV_BACKUP_RP_NAME', None)}
+
+    def remove_resource(self, name, **kwargs):
+        # Vault deletion will take care of this.
+        pass
+
+    def _get_resource_group(self, **kwargs):
+        try:
+            return kwargs.get(self.resource_group_parameter_name)
+        except KeyError:
+            template = 'To create an item, a resource group is required. Please add ' \
+                       'decorator @{} in front of this Policy preparer.'
+            raise CliTestError(template.format(ResourceGroupPreparer.__name__,
+                                               self.resource_group_parameter_name))
+
+    def _get_vault(self, **kwargs):
+        try:
+            return kwargs.get(self.vault_parameter_name)
+        except KeyError:
+            template = 'To create an item, a vault is required. Please add ' \
+                       'decorator @{} in front of this Policy preparer.'
+            raise CliTestError(template.format(VaultPreparer.__name__,
+                                               self.vault_parameter_name))
+
+    def _get_storage_account(self, **kwargs):
+        try:
+            return kwargs.get(self.storage_account_parameter_name)
+        except KeyError:
+            template = 'To create a RP, an item is required. Please add ' \
+                       'decorator @AFSItemPreparer in front of this Policy preparer.'
+            raise CliTestError(template)
+
+    def _get_item(self, **kwargs):
+        try:
+            return kwargs.get(self.item_parameter_name)
+        except KeyError:
+            template = 'To create an item, a fileshare is required. Please add ' \
+                       'decorator @FileSharePreparer in front of this Policy preparer.'
+            raise CliTestError(template)
+
+    def _get_policy(self, **kwargs):
+        try:
+            return kwargs.get(self.policy_parameter_name)
+        except KeyError:
+            template = 'To create an item, a policy is required. Please add ' \
+                       'decorator @AFSPolicyPreparer in front of this Policy preparer.'
+            raise CliTestError(template)
+
+    def _get_file_share(self, **kwargs):
+        try:
+            return kwargs.get(self.afs_parameter_name)
+        except KeyError:
+            template = 'To create an item, a fileshare is required. Please add ' \
+                       'decorator @FileSharePreparer in front of this Policy preparer.'
+            raise CliTestError(template)
