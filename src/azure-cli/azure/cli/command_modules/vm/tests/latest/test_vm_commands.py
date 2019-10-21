@@ -3539,5 +3539,44 @@ class VMCreateSpecialName(ScenarioTest):
         ])
 
 
+class VMImageTermsTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_image_terms_')
+    def test_vm_image_terms(self, resource_group):
+        """
+        Test `accept`, `cancel`, `show` in `az vm image terms`
+        """
+        self.kwargs.update({
+            'publisher': 'fortinet',
+            'offer': 'fortinet_fortigate-vm_v5',
+            'plan': 'fortinet_fg-vm_payg',
+            'urn': 'fortinet:fortinet_fortigate-vm_v5:fortinet_fg-vm_payg:5.6.5'
+        })
+        self.cmd('vm image terms accept --urn {urn}', checks=[
+            self.check('accepted', True)
+        ])
+        self.cmd('vm image terms show --urn {urn}', checks=[
+            self.check('accepted', True)
+        ])
+        self.cmd('vm image terms cancel --urn {urn}', checks=[
+            self.check('accepted', False)
+        ])
+        self.cmd('vm image terms show --urn {urn}', checks=[
+            self.check('accepted', False)
+        ])
+        self.cmd('vm image terms accept --publisher {publisher} --offer {offer} --plan {plan}', checks=[
+            self.check('accepted', True)
+        ])
+        self.cmd('vm image terms show --publisher {publisher} --offer {offer} --plan {plan}', checks=[
+            self.check('accepted', True)
+        ])
+        self.cmd('vm image terms cancel --publisher {publisher} --offer {offer} --plan {plan}', checks=[
+            self.check('accepted', False)
+        ])
+        self.cmd('vm image terms show --publisher {publisher} --offer {offer} --plan {plan}', checks=[
+            self.check('accepted', False)
+        ])
+
+
 if __name__ == '__main__':
     unittest.main()
