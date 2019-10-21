@@ -68,10 +68,10 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, container
         raise CLIError("Multiple items found. Please give native names instead.")
 
     if item.properties.backup_management_type.lower() == "azureiaasvm":
-        return custom.list_recovery_points(cmd, client, resource_group_name, vault_name, item, start_date, end_date)
+        return custom.list_recovery_points(client, resource_group_name, vault_name, item, start_date, end_date)
 
     if item.properties.backup_management_type.lower() == "azurestorage":
-        return custom_afs.list_recovery_points(cmd, client, resource_group_name, vault_name, item, start_date,
+        return custom_afs.list_recovery_points(client, resource_group_name, vault_name, item, start_date,
                                                end_date)
 
     return None

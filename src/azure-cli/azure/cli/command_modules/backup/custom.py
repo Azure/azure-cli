@@ -36,7 +36,6 @@ os_windows = 'Windows'
 os_linux = 'Linux'
 password_offset = 33
 password_length = 15
-# pylint: disable=unused-argument
 # pylint: disable=too-many-function-args
 
 
@@ -310,7 +309,7 @@ def show_recovery_point(cmd, client, resource_group_name, vault_name, container_
     return client.get(vault_name, resource_group_name, fabric_name, container_uri, item_uri, name)
 
 
-def list_recovery_points(cmd, client, resource_group_name, vault_name, item, start_date=None, end_date=None):
+def list_recovery_points(client, resource_group_name, vault_name, item, start_date=None, end_date=None):
     # Get container and item URIs
     container_uri = _get_protection_container_uri_from_id(item.id)
     item_uri = _get_protected_item_uri_from_id(item.id)
