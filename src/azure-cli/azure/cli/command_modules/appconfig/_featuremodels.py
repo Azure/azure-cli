@@ -6,6 +6,7 @@
 from enum import Enum
 import json
 from knack.log import get_logger
+from azure.cli.core.util import shell_safe_json_parse
 
 # pylint: disable=too-few-public-methods
 # pylint: disable=too-many-instance-attributes
@@ -226,7 +227,7 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
 
     try:
         # Make sure value string is a valid json
-        feature_flag_dict = json.loads(keyvalue.value)
+        feature_flag_dict = shell_safe_json_parse(keyvalue.value)
         feature_name = keyvalue.key[len(FEATURE_FLAG_PREFIX):]
 
         # Make sure value json has all the fields we support in the backend
