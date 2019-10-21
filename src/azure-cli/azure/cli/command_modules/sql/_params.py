@@ -25,6 +25,7 @@ from azure.mgmt.sql.models import (
     CatalogCollationType,
     CreateMode,
     DatabaseLicenseType,
+    DatabaseReadScale,
     ElasticPoolLicenseType,
     SampleName,
     SecurityAlertPolicyState,
@@ -224,6 +225,18 @@ aad_admin_sid_param_type = CLIArgumentType(
     options_list=['--object-id', '-i'],
     help='The unique ID of the Azure AD administrator.')
 
+read_scale_param_type = CLIArgumentType(
+    options_list=['--read-scale'],
+    help='If enabled, connections that have application intent set to readonly in their connection string may be routed to a readonly secondary replica. '
+    'This property is only settable for Premium and Business Critical databases.',
+    arg_type=get_enum_type(DatabaseReadScale))
+
+read_replicas_param_type = CLIArgumentType(
+    options_list=['--read-replicas'],
+    type=SizeWithUnitConverter('B', result_type=int),
+    help='The number of readonly replicas to provision for the database. '
+    'Only settable for Hyerpscale edition.')
+
 db_service_objective_examples = 'Basic, S0, P1, GP_Gen4_1, BC_Gen5_2, GP_Gen5_S_8.'
 dw_service_objective_examples = 'DW100, DW1000c'
 
@@ -287,7 +300,9 @@ def _configure_db_create_params(
             'zone_redundant',
             'auto_pause_delay',
             'min_capacity',
-            'compute_model'
+            'compute_model',
+            'read_scale',
+            'read_replica_count'
         ])
 
     # Create args that will be used to build up the Database's Sku object
@@ -323,7 +338,6 @@ def _configure_db_create_params(
     if create_mode != CreateMode.default or engine != Engine.db:
         arg_ctx.ignore('sample_name')
         arg_ctx.ignore('catalog_collation')
-        arg_ctx.ignore('read_scale')
 
     # Only applicable to point in time restore or deleted restore create mode.
     if create_mode not in [CreateMode.restore, CreateMode.point_in_time_restore]:
@@ -400,12 +414,11 @@ def load_arguments(self, _):
         c.argument('license_type',
                    arg_type=get_enum_type(DatabaseLicenseType))
 
-        # Needs testing
-        c.ignore('read_scale')
-        # c.argument('read_scale',
-        #            arg_type=get_three_state_flag(DatabaseReadScale.enabled.value,
-        #                                         DatabaseReadScale.disabled.value,
-        #                                         return_label=True))
+        c.argument('read_scale',
+                   arg_type=get_enum_type(DatabaseReadScale))
+
+        c.argument('read_replica_count',
+                   arg_type=read_replicas_param_type)
 
         c.argument('zone_redundant',
                    arg_type=zone_redundant_param_type)
@@ -524,6 +537,15 @@ def load_arguments(self, _):
 
         c.argument('max_size_bytes', help='The new maximum size of the database expressed in bytes.')
 
+        c.argument('read_scale',
+                   arg_type=read_scale_param_type,
+                   help='If enabled, connections that have application intent set to readonly in their connection string may be routed to a readonly secondary replica. '
+                   'This property is only settable for Premium and Business Critical databases.')
+        
+        c.argument('read_replica_count', 
+                   help='The number of readonly replicas to provision for the database. '
+                   'Only settable for Hyerpscale edition.')
+                   
         c.argument('compute_model',
                    arg_type=compute_model_param_type)
 
