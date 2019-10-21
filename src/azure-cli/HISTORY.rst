@@ -9,7 +9,7 @@ Release History
 * Set `--vm-set-type` default value to virtualmachinescalesets if supported by the kubernetes version
 * Add `az aks nodepool add`,`az aks nodepool show`, `az aks nodepool list`, `az aks nodepool scale`, `az aks nodepool upgrade`, `az aks nodepool update` and `az aks nodepool delete` commmands to support multiple nodepools in aks
 * Add `--zones` to `az aks create` and `az aks nodepool add` commands to support availability zones for aks
-* Enable GA support of apiserver authorized IP ranges
+* Enable GA support of apiserver authorized IP ranges via paramater `--api-server-authorized-ip-ranges` in `az aks create` and `az aks update
 
 **AMS**
 
