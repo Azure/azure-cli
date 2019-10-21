@@ -651,7 +651,7 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
                         single_placement_group=None, platform_fault_domain_count=None, custom_data=None,
                         secrets=None, license_type=None, zones=None, priority=None, eviction_policy=None,
                         application_security_groups=None, ultra_ssd_enabled=None, proximity_placement_group=None,
-                        terminate_notification_time=None, max_billing=None):
+                        terminate_notification_time=None, max_billing=None, empty=None):
 
     # Build IP configuration
     ip_configuration = {
@@ -851,6 +851,22 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
     }
     if zones:
         vmss['zones'] = zones
+    # vmss without vm profile
+    if empty:
+        if platform_fault_domain_count is None:
+            platform_fault_domain_count = 2
+        vmss = {
+            'type': 'Microsoft.Compute/virtualMachineScaleSets',
+            'name': name,
+            'location': location,
+            'tags': tags,
+            'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machine_scale_sets'),
+            'properties': {
+                'singlePlacementGroup': True,
+                'provisioningState': 0,
+                'platformFaultDomainCount': platform_fault_domain_count
+            }
+        }
     return vmss
 
 
