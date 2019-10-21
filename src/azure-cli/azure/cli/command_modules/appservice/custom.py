@@ -209,6 +209,7 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
                     for t in temp:
                         if t.get('slotSetting', True):
                             slot_result[t['name']] = t['value']
+                            # Mark each setting as the slot setting
                         else:
                             result[t['name']] = t['value']
                 else:
@@ -1983,13 +1984,13 @@ def delete_ssl_cert(cmd, resource_group_name, certificate_thumbprint):
     raise CLIError("Certificate for thumbprint '{}' not found".format(certificate_thumbprint))
 
 
-def _update_host_name_ssl_state(cli_ctx, resource_group_name, webapp_name, location,
+def _update_host_name_ssl_state(cli_ctx, resource_group_name, webapp_name, webapp,
                                 host_name, ssl_state, thumbprint, slot=None):
     updated_webapp = Site(host_name_ssl_states=[HostNameSslState(name=host_name,
                                                                  ssl_state=ssl_state,
                                                                  thumbprint=thumbprint,
                                                                  to_update=True)],
-                          location=location)
+                          location=webapp.location, tags=webapp.tags)
     return _generic_site_operation(cli_ctx, resource_group_name, webapp_name, 'create_or_update',
                                    slot, updated_webapp)
 
@@ -2005,7 +2006,7 @@ def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, 
     for webapp_cert in webapp_certs:
         if webapp_cert.thumbprint == certificate_thumbprint:
             if len(webapp_cert.host_names) == 1 and not webapp_cert.host_names[0].startswith('*'):
-                return _update_host_name_ssl_state(cmd.cli_ctx, resource_group_name, name, webapp.location,
+                return _update_host_name_ssl_state(cmd.cli_ctx, resource_group_name, name, webapp,
                                                    webapp_cert.host_names[0], ssl_type,
                                                    certificate_thumbprint, slot)
 
@@ -2013,7 +2014,7 @@ def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, 
             hostnames_in_webapp = [x.name.split('/')[-1] for x in query_result]
             to_update = _match_host_names_from_cert(webapp_cert.host_names, hostnames_in_webapp)
             for h in to_update:
-                _update_host_name_ssl_state(cmd.cli_ctx, resource_group_name, name, webapp.location,
+                _update_host_name_ssl_state(cmd.cli_ctx, resource_group_name, name, webapp,
                                             h, ssl_type, certificate_thumbprint, slot)
 
             return show_webapp(cmd, resource_group_name, name, slot)
