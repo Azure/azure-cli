@@ -3,35 +3,20 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.util import CLIError
-from ._utils import get_resource_group_name_by_registry_name, validate_premium_registry
-
-REPOSITORIES = 'repositories'
-
-
-def _parse_actions_from_repositories(allow_or_remove_repository):
-    actions = []
-    for rule in allow_or_remove_repository:
-        repository = rule[0]
-        if len(rule) < 2:
-            raise CLIError('At least one action must be specified with the repository {}.'.format(repository))
-        for action in rule[1:]:
-            actions.append('{}/{}/{}'.format(REPOSITORIES, repository, action))
-
-    return actions
+from ._utils import get_resource_group_name_by_registry_name, validate_premium_registry, parse_actions_from_repositories
 
 
 def acr_scope_map_create(cmd,
                          client,
                          registry_name,
                          scope_map_name,
-                         add_repository,
+                         repository_actions_list,
                          resource_group_name=None,
                          description=None):
 
     validate_premium_registry(cmd, registry_name, resource_group_name)
 
-    actions = _parse_actions_from_repositories(add_repository)
+    actions = parse_actions_from_repositories(repository_actions_list)
 
     resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
 
@@ -77,7 +62,7 @@ def acr_scope_map_update(cmd,
     current_actions = current_scope_map.actions
 
     if remove_repository:
-        removed_actions = _parse_actions_from_repositories(remove_repository)
+        removed_actions = parse_actions_from_repositories(remove_repository)
         # We have to treat actions case-insensitively but list them case-sensitively
         lower_current_actions = {action.lower() for action in current_actions}
         lower_removed_actions = {action.lower() for action in removed_actions}
@@ -85,7 +70,7 @@ def acr_scope_map_update(cmd,
                            if action.lower() in lower_current_actions - lower_removed_actions]
 
     if add_repository:
-        added_actions = _parse_actions_from_repositories(add_repository)
+        added_actions = parse_actions_from_repositories(add_repository)
         # We have to avoid duplicates and give preference to user input casing
         lower_action_to_action = {}
         for action in current_actions:
