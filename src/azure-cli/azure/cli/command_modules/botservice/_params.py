@@ -182,6 +182,7 @@ def load_arguments(self, _):
         c.argument('client_id', help='The client ID from Slack.')
         c.argument('verification_token', help='The verification token from Slack.')
         c.argument('landing_page_url', help='The landing page url to redirect to after login.')
+        c.argument('signing_secret', help='The signing secret from Slack. Used to auto-register the Slack channel.')
 
     with self.argument_context('bot authsetting') as c:
         c.argument('connection_name', options_list=['--setting-name', '-c'], help='Name of the oauth connection setting.', id_part='child_name_1')

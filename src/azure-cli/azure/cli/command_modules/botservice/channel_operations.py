@@ -133,7 +133,7 @@ def sms_create(client, resource_group_name, resource_name, phone, account_sid, a
 
 
 def slack_create(client, resource_group_name, resource_name, client_id, client_secret, verification_token,
-                 is_disabled=None, landing_page_url=None):
+                 is_disabled=None, landing_page_url=None, signing_secret=None):
     from azure.mgmt.botservice.models import SlackChannel, SlackChannelProperties
     channel = SlackChannel(
         properties=SlackChannelProperties(
@@ -141,7 +141,9 @@ def slack_create(client, resource_group_name, resource_name, client_id, client_s
             client_secret=client_secret,
             verification_token=verification_token,
             landing_page_url=landing_page_url,
-            is_enabled=not is_disabled
+            is_enabled=not is_disabled,
+            signing_secret=signing_secret,
+            register_before_oauth_flow=True if signing_secret else False
         )
     )
     return create_channel(client, channel, 'SlackChannel', resource_group_name, resource_name)
