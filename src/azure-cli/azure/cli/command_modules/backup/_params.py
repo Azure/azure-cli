@@ -24,9 +24,9 @@ allowed_container_types = ['AzureIaasVM']
 allowed_workload_types = ['VM', 'AzureFileShare']
 allowed_backup_management_types = ['AzureIaasVM', 'AzureStorage']
 
-backup_management_type_help = """Specifies the backup management type. Defines how Azure Backup manages the backup of entities within the ARM resource. For eg: AzureWorkloads refers to workloads installed within Azure VMs, AzureStorage refers to entities within Storage account. Accepts 'AzureWorkload', 'AzureStorage'. Required only if friendly name is used as Container name."""
+backup_management_type_help = """Specifiy the backup management type. Defines how Azure Backup manages the backup of entities within the ARM resource. For eg: AzureWorkloads refers to workloads installed within Azure VMs, AzureStorage refers to entities within Storage account. Accepts 'AzureWorkload', 'AzureStorage'. Required only if friendly name is used as Container name."""
 container_name_help = """Name of the backup container. Accepts 'Name' or 'FriendlyName' from the output of az backup container list command. If 'FriendlyName' is passed then BackupManagementType is required."""
-workload_type_help = """Specifies the type of applications within the Resource which should be discovered and protected by Azure Backup. """
+workload_type_help = """Specifiy the type of applications within the Resource which should be discovered and protected by Azure Backup. """
 vault_name_type = CLIArgumentType(help='Name of the Recovery services vault.', options_list=['--vault-name', '-v'], completer=get_resource_name_completion_list('Microsoft.RecoveryServices/vaults'))
 container_name_type = CLIArgumentType(help=container_name_help, options_list=['--container-name', '-c'])
 item_name_type = CLIArgumentType(help='Name of the backed up item.', options_list=['--item-name', '-i'])

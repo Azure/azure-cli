@@ -48,16 +48,20 @@ def load_command_table(self, _):
         g.show_command('show', 'show_policy')
         g.command('list', 'list_policies', client_factory=backup_policies_cf, table_transformer=transform_policy_list)
         g.command('list-associated-items', 'list_associated_items_for_policy', client_factory=backup_protected_items_cf, table_transformer=transform_item_list)
-        g.command('set', 'set_policy')
-        g.command('delete', 'delete_policy')
-        g.command('create', 'create_policy')
+
+    with self.command_group('backup policy', custom_command_type=backup_custom_base, client_factory=protection_policies_cf) as g:
+        g.custom_command('set', 'set_policy')
+        g.custom_command('delete', 'delete_policy')
+        g.custom_command('create', 'create_policy')
 
     with self.command_group('backup protection', backup_custom_base, client_factory=protected_items_cf) as g:
         g.command('check-vm', 'check_protection_enabled_for_vm')
         g.command('enable-for-vm', 'enable_protection_for_vm')
-        g.command('backup-now', 'backup_now', client_factory=backups_cf)
-        g.command('disable', 'disable_protection', confirmation=True)
-        g.command('enable-for-azurefileshare', 'enable_for_azurefileshare')
+
+    with self.command_group('backup protection', custom_command_type=backup_custom_base, client_factory=protected_items_cf) as g:
+        g.custom_command('backup-now', 'backup_now', client_factory=backups_cf)
+        g.custom_command('disable', 'disable_protection', confirmation=True)
+        g.custom_command('enable-for-azurefileshare', 'enable_for_azurefileshare')
 
     with self.command_group('backup item', backup_custom_base, client_factory=protected_items_cf) as g:
         g.show_command('show', 'show_item', client_factory=backup_protected_items_cf, table_transformer=transform_item)
@@ -76,8 +80,10 @@ def load_command_table(self, _):
 
     with self.command_group('backup restore', backup_custom_base, client_factory=restores_cf) as g:
         g.command('restore-disks', 'restore_disks')
-        g.command('restore-azurefileshare', 'restore_azurefileshare')
-        g.command('restore-azurefiles', 'restore_azurefiles')
+
+    with self.command_group('backup restore', custom_command_type=backup_custom_base, client_factory=restores_cf) as g:
+        g.custom_command('restore-azurefileshare', 'restore_azurefileshare')
+        g.custom_command('restore-azurefiles', 'restore_azurefiles')
 
     with self.command_group('backup restore files', backup_custom, client_factory=item_level_recovery_connections_cf) as g:
         g.command('mount-rp', 'restore_files_mount_rp')
