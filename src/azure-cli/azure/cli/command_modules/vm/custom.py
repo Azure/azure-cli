@@ -1951,7 +1951,7 @@ def assign_vmss_identity(cmd, resource_group_name, vmss_name, assign_identity=No
 
 
 # pylint: disable=too-many-locals, too-many-statements
-def create_vmss(cmd, vmss_name, resource_group_name, image,
+def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 disable_overprovision=False, instance_count=2,
                 location=None, tags=None, upgrade_policy_mode='manual', validate=False,
                 admin_username=None, admin_password=None, authentication_type=None,

@@ -1301,6 +1301,8 @@ def get_network_lb(cli_ctx, resource_group_name, lb_name):
 
 
 def process_vmss_create_namespace(cmd, namespace):
+    if namespace.empty is True:
+        namespace.image = 'centos'  # Will be ignored. Just aim to pass validation.
     validate_tags(namespace)
     if namespace.vm_sku is None:
         from azure.cli.core.cloud import AZURE_US_GOV_CLOUD
