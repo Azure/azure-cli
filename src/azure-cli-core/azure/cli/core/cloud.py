@@ -158,7 +158,7 @@ def get_ossrdbms_resource_id(cloud_name):
         'AzureUSGovernment' : 'https://ossrdbms-aad.database.usgovcloudapi.net',
         'AzureGermanCloud' : 'https://ossrdbms-aad.database.cloudapi.de'
     }
-    return ossrdbms_mapper.get(cloud_name, 'not available')
+    return ossrdbms_mapper.get(cloud_name, None)
 
 
 def get_microsoft_graph_resource_id(cloud_name):
@@ -181,7 +181,7 @@ def convert_arm_to_cli(arm_cloud_metadata_dict):
 def arm_to_cli_mapper(arm_dict):
     return Cloud(
         arm_dict['name'],
-        endpoints=CloudEndpoints(        
+        endpoints=CloudEndpoints(
             management=arm_dict['authentication']['audiences'][0],
             resource_manager=arm_dict['resourceManager'],
             sql_management=arm_dict['sqlManagement'],
@@ -190,11 +190,11 @@ def arm_to_cli_mapper(arm_dict):
             active_directory=arm_dict['authentication']['loginEndpoint'],
             active_directory_resource_id=arm_dict['authentication']['audiences'][0],
             active_directory_graph_resource_id=arm_dict['graphAudience'],
-            microsoft_graph_resource_id=get_microsoft_graph_resource_id(arm_dict['name']), # change once microsoft_graph_resource_id is fixed in ARM
+            microsoft_graph_resource_id=get_microsoft_graph_resource_id(arm_dict['name']), # pylint: disable=line-too-long # change once microsoft_graph_resource_id is fixed in ARM
             vm_image_alias_doc=arm_dict['vmImageAliasDoc'],  # pylint: disable=line-too-long
             media_resource_id=arm_dict['media'],
-            activeDirectoryDataLakeResourceId=arm_dict['activeDirectoryDataLake'],
-            ossrdbms_resource_id=get_ossrdbms_resource_id(arm_dict['name'])), # change once ossrdbms_resource_id is available via ARM # pylint: disable=line-too-long
+            ossrdbms_resource_id=get_ossrdbms_resource_id(arm_dict['name']), # pylint: disable=line-too-long # change once ossrdbms_resource_id is available via ARM
+            active_directory_data_lake_resource_id=arm_dict['activeDirectoryDataLake']),
         suffixes=CloudSuffixes(
             storage_endpoint=arm_dict['suffixes']['storage'],
             keyvault_dns=arm_dict['suffixes']['keyVaultDns'],
@@ -230,7 +230,7 @@ class Cloud(object):  # pylint: disable=too-few-public-methods
         return pformat(o)
 
 try:
-    arm_cloud_dict = json.loads(urlretrieve(ARM_CLOUD_METADATA_URL)) 
+    arm_cloud_dict = json.loads(urlretrieve(ARM_CLOUD_METADATA_URL))
     cli_cloud_dict = convert_arm_to_cli(arm_cloud_dict)
     AZURE_PUBLIC_CLOUD = cli_cloud_dict['AzureCloud']
     AZURE_PUBLIC_CLOUD.CloudEndpoints.active_directory = 'https://login.microsoftonline.com' # change once active_directory is fixed in ARM for the public cloud
