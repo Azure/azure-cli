@@ -154,20 +154,20 @@ def urlretrieve(url):
 
 def get_ossrdbms_resource_id(cloud_name):
     ossrdbms_mapper = {
-        'AzureCloud':'https://ossrdbms-aad.database.windows.net',
-        'AzureChinaCloud':'https://ossrdbms-aad.database.chinacloudapi.cn',
-        'AzureUSGovernment':'https://ossrdbms-aad.database.usgovcloudapi.net',
-        'AzureGermanCloud':'https://ossrdbms-aad.database.cloudapi.de'
+        'AzureCloud': 'https://ossrdbms-aad.database.windows.net',
+        'AzureChinaCloud': 'https://ossrdbms-aad.database.chinacloudapi.cn',
+        'AzureUSGovernment': 'https://ossrdbms-aad.database.usgovcloudapi.net',
+        'AzureGermanCloud': 'https://ossrdbms-aad.database.cloudapi.de'
     }
     return ossrdbms_mapper.get(cloud_name, None)
 
 
 def get_microsoft_graph_resource_id(cloud_name):
     graph_endpoint_mapper = {
-        'AzureCloud':'https://graph.microsoft.com/',
-        'AzureChinaCloud':'https://microsoftgraph.chinacloudapi.cn/',
-        'AzureUSGovernment':'https://graph.microsoft.us/',
-        'AzureGermanCloud':'https://graph.microsoft.de/'
+        'AzureCloud': 'https://graph.microsoft.com/',
+        'AzureChinaCloud': 'https://microsoftgraph.chinacloudapi.cn/',
+        'AzureUSGovernment': 'https://graph.microsoft.us/',
+        'AzureGermanCloud': 'https://graph.microsoft.de/'
     }
     return graph_endpoint_mapper.get(cloud_name, None)
 
@@ -220,7 +220,6 @@ class Cloud(object):  # pylint: disable=too-few-public-methods
         self.profile = profile
         self.is_active = is_active
 
-
     def __str__(self):
         o = {
             'profile': self.profile,
@@ -230,6 +229,7 @@ class Cloud(object):  # pylint: disable=too-few-public-methods
             'suffixes': vars(self.suffixes),
         }
         return pformat(o)
+
 
 try:
     arm_cloud_dict = json.loads(urlretrieve(ARM_CLOUD_METADATA_URL))
