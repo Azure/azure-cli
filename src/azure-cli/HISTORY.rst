@@ -25,6 +25,7 @@ Release History
 **BotService**
 
 * Added "--signing-secret" parameter for "az bot slack create" to support auto-registering the Slack Channel.
+
 **Compute**
 
 * vm create: Add warning when specifying accelerated networking and an existing NIC together.
