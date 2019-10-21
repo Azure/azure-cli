@@ -486,6 +486,56 @@ examples:
         az acr run -r MyRegistry https://github.com/Azure-Samples/acr-tasks.git -f build-hello-world.yaml --platform linux
 """
 
+helps['acr scope-map'] = """
+type: group
+short-summary: Manage scope access maps for Azure Container Registries.
+"""
+
+helps['acr scope-map create'] = """
+type: command
+short-summary: Create a scope map for an Azure Container Registry.
+examples:
+  - name: Create a scope map that allows content/write and metadata/read actions for `hello-world` repository, and content/read action for `hello-world-again`.
+    text: >
+        az acr scope-map create -n MyScopeMap -r MyRegistry --repository hello-world content/write metadata/read --repository hello-world-again content/read --description "Sample scope map."
+"""
+
+helps['acr scope-map delete'] = """
+type: command
+short-summary: Delete a scope map for an Azure Container Registry.
+examples:
+  - name: Delete the scope map 'MyScopeMap'.
+    text: >
+        az acr scope-map delete -n MyScopeMap -r MyRegistry
+"""
+
+helps['acr scope-map list'] = """
+type: command
+short-summary: List all scope maps for an Azure Container Registry.
+examples:
+  - name: List scope maps under the registry 'MyRegistry'.
+    text: >
+        az acr scope-map list -r MyRegistry
+"""
+
+helps['acr scope-map show'] = """
+type: command
+short-summary: Show details and attributes of a scope map for an Azure Container Registry.
+examples:
+  - name: Get information for the scope map 'MyScopeMap'.
+    text: >
+        az acr scope-map show -n MyScopeMap -r MyRegistry
+"""
+
+helps['acr scope-map update'] = """
+type: command
+short-summary: Update a scope map for an Azure Container Registry.
+examples:
+  - name: Update the scope map 'MyScopeMap' removing metadata/read and content/read actions for `hello-world` repository, and metadata/write action for `hello-world-again`.
+    text: >
+        az acr scope-map update -n MyScopeMap -r MyRegistry --remove hello-world metadata/read content/read --remove hello-world-again metadata/write
+"""
+
 helps['acr show'] = """
 type: command
 short-summary: Get the details of an Azure Container Registry.
@@ -866,6 +916,86 @@ examples:
         az acr task update-run -r MyRegistry --run-id runId --no-archive false
 """
 
+helps['acr token'] = """
+type: group
+short-summary: Manage tokens for an Azure Container Registry.
+"""
+
+helps['acr token create'] = """
+type: command
+short-summary: Create a token associated with a scope map for an Azure Container Registry.
+examples:
+  - name: Create a token with repository permissions defined in the scope map 'MyScopeMap'.
+    text: >
+        az acr token create -n MyToken -r MyRegistry --scope-map MyScopeMap
+  - name: Create a token which has read permissions on hello-world repository.
+    text: >
+        az acr token create -n myToken -r MyRegistry --repository hello-world content/read metadata/read
+  - name: Create a token without credentials.
+    text: >
+        az acr token create -n myToken -r MyRegistry --repository hello-world content/read --no-passwords
+  - name: Create a token in disabled status.
+    text: >
+        az acr token create -n MyToken -r MyRegistry --scope-map MyScopeMap --status disabled
+"""
+
+helps['acr token credential'] = """
+type: group
+short-summary: Manage credentials of a token for an Azure Container Registry.
+"""
+
+helps['acr token credential delete'] = """
+type: command
+short-summary: Delete a token credential.
+examples:
+  - name: Delete both passwords for the token 'MyToken'.
+    text: az acr token credential delete -n MyToken -r MyRegistry --password1 --password2
+"""
+
+helps['acr token credential generate'] = """
+type: command
+short-summary: Generate or replace one or both passwords of a token for an Azure Container Registry. For using token and password to access a container registry, see http://aka.ms/acr/token.
+examples:
+  - name: Generate password1 for the token 'MyToken', with an expiration of 30 days.
+    text: az acr token credential generate -n MyToken -r MyRegistry --password1 --days 30
+"""
+
+helps['acr token delete'] = """
+type: command
+short-summary: Delete a token for an Azure Container Registry.
+examples:
+  - name: Delete the token 'MyToken'.
+    text: >
+        az acr token delete -n MyToken -r MyRegistry
+"""
+
+helps['acr token list'] = """
+type: command
+short-summary: List all tokens for an Azure Container Registry.
+examples:
+  - name: List tokens under the registry 'MyRegistry'.
+    text: >
+        az acr token list -r MyRegistry
+"""
+
+helps['acr token show'] = """
+type: command
+short-summary: Show details and attributes of a token for an Azure Container Registry.
+examples:
+  - name: Get information for the token 'MyToken'.
+    text: >
+        az acr token show -n MyToken -r MyRegistry
+"""
+
+helps['acr token update'] = """
+type: command
+short-summary: Update a token (replace associated scope map) for an Azure Container Registry.
+examples:
+  - name: Update the token 'MyToken', making it associated with the scope map 'MyNewScopeMap'.
+    text: >
+        az acr token update -n MyToken -r MyRegistry --scope-map MyNewScopeMap
+"""
+
 helps['acr update'] = """
 type: command
 short-summary: Update an Azure Container Registry.
@@ -965,125 +1095,4 @@ examples:
   - name: Disable a webhook.
     text: >
         az acr webhook update -n MyWebhook -r MyRegistry --status disabled
-"""
-
-helps['acr scope-map'] = """
-type: group
-short-summary: Manage scope access maps for Azure Container Registries.
-"""
-
-helps['acr scope-map create'] = """
-type: command
-short-summary: Create a scope map for an Azure Container Registry.
-examples:
-  - name: Create a scope map that allows content/write and metadata/read actions for `hello-world` repository, and content/read action for `hello-world-again`.
-    text: >
-        az acr scope-map create -n MyScopeMap -r MyRegistry --add hello-world content/write metadata/read --add hello-world-again content/read --description "Sample scope map."
-"""
-
-helps['acr scope-map delete'] = """
-type: command
-short-summary: Delete a scope map for an Azure Container Registry.
-examples:
-  - name: Delete the scope map 'MyScopeMap'.
-    text: >
-        az acr scope-map delete -n MyScopeMap -r MyRegistry
-"""
-
-helps['acr scope-map update'] = """
-type: command
-short-summary: Update a scope map for an Azure Container Registry.
-examples:
-  - name: Update the scope map 'MyScopeMap' removing metadata/read and content/read actions for `hello-world` repository, and metadata/write action for `hello-world-again`.
-    text: >
-        az acr scope-map update -n MyScopeMap -r MyRegistry --remove hello-world metadata/read content/read --remove hello-world-again metadata/write
-"""
-
-helps['acr scope-map show'] = """
-type: command
-short-summary: Show details and attributes of a scope map for an Azure Container Registry.
-examples:
-  - name: Get information for the scope map 'MyScopeMap'.
-    text: >
-        az acr scope-map show -n MyScopeMap -r MyRegistry
-"""
-
-helps['acr scope-map list'] = """
-type: command
-short-summary: List all scope maps for an Azure Container Registry.
-examples:
-  - name: List scope maps under the registry 'MyRegistry'.
-    text: >
-        az acr scope-map list -r MyRegistry
-"""
-
-helps['acr token'] = """
-type: group
-short-summary: Manage tokens for an Azure Container Registry.
-"""
-
-helps['acr token create'] = """
-type: command
-short-summary: Create a token associated with a scope map for an Azure Container Registry.
-examples:
-  - name: Create a token associated with the scope map 'MyScopeMap' in the 'disabled' status.
-    text: >
-        az acr token create -n MyToken -r MyRegistry --scope-map MyScopeMap --status disabled
-"""
-
-helps['acr token delete'] = """
-type: command
-short-summary: Delete a token for an Azure Container Registry.
-examples:
-  - name: Delete the token 'MyToken'.
-    text: >
-        az acr token delete -n MyToken -r MyRegistry
-"""
-
-helps['acr token update'] = """
-type: command
-short-summary: Update a token (replace associated scope map) for an Azure Container Registry.
-examples:
-  - name: Update the token 'MyToken', making it associated with the scope map 'MyNewScopeMap'.
-    text: >
-        az acr token update -n MyToken -r MyRegistry --scope-map MyNewScopeMap
-"""
-
-helps['acr token show'] = """
-type: command
-short-summary: Show details and attributes of a token for an Azure Container Registry.
-examples:
-  - name: Get information for the token 'MyToken'.
-    text: >
-        az acr token show -n MyToken -r MyRegistry
-"""
-
-helps['acr token list'] = """
-type: command
-short-summary: List all tokens for an Azure Container Registry.
-examples:
-  - name: List tokens under the registry 'MyRegistry'.
-    text: >
-        az acr token list -r MyRegistry
-"""
-
-helps['acr token credential'] = """
-type: group
-short-summary: Manage credentials of a token for an Azure Container Registry.
-"""
-
-helps['acr token credential generate'] = """
-type: command
-short-summary: Generate or replace one or both passwords of a token for an Azure Container Registry. For using token and password to access a container registry, see http://aka.ms/acr/token.
-examples:
-  - name: Generate password1 for the token 'MyToken', with an expiration of 30 days.
-    text: az acr token credential generate -n MyToken -r MyRegistry --password1 --days 30
-"""
-
-helps['acr token credential delete'] = """
-type: command
-short-summary: Delete a token credential.
-examples:
-  - name: Delete both passwords for the token 'MyToken'.
-    text: az acr token credential delete -n MyToken -r MyRegistry --password1 --password2
 """
