@@ -143,7 +143,7 @@ def slack_create(client, resource_group_name, resource_name, client_id, client_s
             landing_page_url=landing_page_url,
             is_enabled=not is_disabled,
             signing_secret=signing_secret,
-            register_before_oauth_flow=True if signing_secret else False
+            register_before_oauth_flow=bool(signing_secret)
         )
     )
     return create_channel(client, channel, 'SlackChannel', resource_group_name, resource_name)
