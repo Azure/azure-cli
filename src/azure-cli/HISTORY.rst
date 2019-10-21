@@ -6,9 +6,6 @@ Release History
 **SQL**
 
 * Added "--read-scale" and "--read-replicas", parameters to support read scale management with SQL Database CRUD operations."
-
-**SQL**
-
 * Added "--compute-model", "--auto-pause-delay", and "--min-capacity" parameters to support CRUD operations for new SQL Database offering: Serverless compute model."
 
 **ACR**

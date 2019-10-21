@@ -471,8 +471,6 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     def test_sql_db_read_replica_mgmt(self, resource_group, resource_group_location, server):
         database_name = "cliautomationdb01"
-        read_scale_disabled = 'Disabled'
-        read_scale_enabled = 'Enabled'
 
         # Create database with Hyperscale edition
         edition = 'Hyperscale'
@@ -488,12 +486,19 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('readScale', 'Enabled'),
                      JMESPathCheck('readReplicaCount', '1')])
 
-        # Update read replicas
+        # Increase read replicas
         self.cmd('sql db update -g {} --server {} --name {} --read-replicas {}'
-                 .format(resource_group, server, database_name, 4),
+                 .format(resource_group, server, database_name, 3),
                  checks=[
                      JMESPathCheck('readScale', 'Enabled'),
-                     JMESPathCheck('readReplicaCount', '4')])
+                     JMESPathCheck('readReplicaCount', '3')])
+
+        # Decrease read replicas
+        self.cmd('sql db update -g {} --server {} --name {} --read-replicas {}'
+                 .format(resource_group, server, database_name, 0),
+                 checks=[
+                     JMESPathCheck('readScale', 'Disabled'),
+                     JMESPathCheck('readReplicaCount', '0')])
 
 class SqlServerServerlessDbMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='westus2')

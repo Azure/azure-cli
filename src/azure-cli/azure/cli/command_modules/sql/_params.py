@@ -233,9 +233,8 @@ read_scale_param_type = CLIArgumentType(
 
 read_replicas_param_type = CLIArgumentType(
     options_list=['--read-replicas'],
-    type=SizeWithUnitConverter('B', result_type=int),
     help='The number of readonly replicas to provision for the database. '
-    'Only settable for Hyerpscale edition.')
+    'Only settable for Hyperscale edition.')
 
 db_service_objective_examples = 'Basic, S0, P1, GP_Gen4_1, BC_Gen5_2, GP_Gen5_S_8.'
 dw_service_objective_examples = 'DW100, DW1000c'
@@ -334,6 +333,12 @@ def _configure_db_create_params(
     arg_ctx.argument('min_capacity',
                      arg_type=min_capacity_param_type)
 
+    arg_ctx.argument('read_scale',
+                     arg_type=read_scale_param_type)
+
+    arg_ctx.argument('read_replicas',
+                     arg_type=read_replicas_param_type)
+
     # Only applicable to default create mode. Also only applicable to db.
     if create_mode != CreateMode.default or engine != Engine.db:
         arg_ctx.ignore('sample_name')
@@ -373,6 +378,10 @@ def _configure_db_create_params(
         arg_ctx.ignore('auto_pause_delay')
         arg_ctx.ignore('min_capacity')
         arg_ctx.ignore('compute_model')
+
+        # ReadScale properties are not valid for DataWarehouse
+        arg_ctx.ignore('read_scale')
+        arg_ctx.ignore('read_replicas')
 
 
 # pylint: disable=too-many-statements
@@ -536,15 +545,6 @@ def load_arguments(self, _):
                    help='The name or resource id of the elastic pool to move the database into.')
 
         c.argument('max_size_bytes', help='The new maximum size of the database expressed in bytes.')
-
-        c.argument('read_scale',
-                   arg_type=read_scale_param_type,
-                   help='If enabled, connections that have application intent set to readonly in their connection string may be routed to a readonly secondary replica. '
-                   'This property is only settable for Premium and Business Critical databases.')
-        
-        c.argument('read_replica_count', 
-                   help='The number of readonly replicas to provision for the database. '
-                   'Only settable for Hyerpscale edition.')
                    
         c.argument('compute_model',
                    arg_type=compute_model_param_type)
