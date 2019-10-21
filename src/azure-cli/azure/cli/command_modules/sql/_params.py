@@ -424,7 +424,7 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(DatabaseLicenseType))
 
         c.argument('read_scale',
-                   arg_type=get_enum_type(DatabaseReadScale))
+                   arg_type=read_scale_param_type)
 
         c.argument('read_replica_count',
                    arg_type=read_replicas_param_type)
