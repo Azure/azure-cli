@@ -15,6 +15,10 @@ Release History
 
 * deployment/group deployment validate: Add --handle-extended-json-format parameter to support multiline and comments in json template when deployment.
 
+**BotService**
+
+* Added "--signing-secret" parameter for "az bot slack create" to support auto-registering the Slack Channel.
+
 **CosmosDB**
 
 * [BREAKING] sql container create: Change --partition-key-path to required parameter
