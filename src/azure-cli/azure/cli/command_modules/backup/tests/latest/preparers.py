@@ -354,8 +354,8 @@ class AFSPolicyPreparer(AbstractPreparer, SingleValueReplacer):
 
 class FileSharePreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='clitest-item', storage_account_parameter_name='storage_account',
-                 resource_group_parameter_name='resource_group',
-                 parameter_name='afs_name'):
+                 resource_group_parameter_name='resource_group', file_parameter_name='file_name',
+                 parameter_name='afs_name', file_upload=False):
         super(FileSharePreparer, self).__init__(name_prefix, 24)
         from azure.cli.core.mock import DummyCli
         self.cli_ctx = DummyCli()
@@ -363,20 +363,30 @@ class FileSharePreparer(AbstractPreparer, SingleValueReplacer):
         self.resource_group = None
         self.resource_group_parameter_name = resource_group_parameter_name
         self.storage_account_parameter_name = storage_account_parameter_name
+        self.file_parameter_name = file_parameter_name
+        self.file_upload = file_upload
 
     def create_resource(self, name, **kwargs):
         if not os.environ.get('AZURE_CLI_TEST_DEV_BACKUP_POLICY_NAME', None):
             self.resource_group = self._get_resource_group(**kwargs)
             storage_account = self._get_storage_account(**kwargs)
 
+            storage_keys_command = 'az storage account keys list --resource-group {} --account-name {} --query [0].value'
+            storage_keys_command = storage_keys_command.format(self.resource_group, storage_account)
+            if self.file_upload:
+                storage_key = execute(self.cli_ctx, storage_keys_command).get_output_in_json()
             connection_string_command = 'az storage account show-connection-string -n {} -g {}'
             connection_string_command = connection_string_command.format(storage_account, self.resource_group)
             connection_string = execute(self.cli_ctx, connection_string_command).get_output_in_json()
             connection_string = connection_string['connectionString']
-            
             command_string = 'az storage share create --name {} --quota 1 --connection-string {}'
             command_string = command_string.format(name, connection_string)
             execute(self.cli_ctx, command_string)
+            file_upload_command = 'az storage file upload --account-name {} --account-key {} --share-name {} --source {}'
+            if self.file_upload:
+                file = self._get_file(**kwargs)
+                file_upload_command = file_upload_command.format(storage_account, storage_key, name, file)
+                execute(self.cli_ctx, file_upload_command)
             return {self.parameter_name: name}
         return {self.parameter_name: os.environ.get('AZURE_CLI_TEST_DEV_BACKUP_POLICY_NAME', None)}
 
@@ -393,14 +403,11 @@ class FileSharePreparer(AbstractPreparer, SingleValueReplacer):
             raise CliTestError(template.format(ResourceGroupPreparer.__name__,
                                                self.resource_group_parameter_name))
 
-    def _get_vault(self, **kwargs):
+    def _get_file(self, **kwargs):
         try:
-            return kwargs.get(self.vault_parameter_name)
+            return kwargs.get(self.file_parameter_name)
         except KeyError:
-            template = 'To create an item, a vault is required. Please add ' \
-                       'decorator @{} in front of this Policy preparer.'
-            raise CliTestError(template.format(VaultPreparer.__name__,
-                                               self.vault_parameter_name))
+            raise CliTestError("File not Found")
 
     def _get_storage_account(self, **kwargs):
         try:
@@ -420,7 +427,6 @@ class AFSItemPreparer(AbstractPreparer, SingleValueReplacer):
         from azure.cli.core.mock import DummyCli
         self.cli_ctx = DummyCli()
         self.parameter_name = parameter_name
-        self.resource_group = None
         self.resource_group_parameter_name = resource_group_parameter_name
         self.storage_account_parameter_name = storage_account_parameter_name
         self.vault_parameter_name = vault_parameter_name
@@ -429,7 +435,7 @@ class AFSItemPreparer(AbstractPreparer, SingleValueReplacer):
 
     def create_resource(self, name, **kwargs):
         if not os.environ.get('AZURE_CLI_TEST_DEV_BACKUP_ITEM_NAME', None):
-            self.resource_group = self._get_resource_group(**kwargs)
+            resource_group = self._get_resource_group(**kwargs)
             storage_account = self._get_storage_account(**kwargs)
             vault = self._get_vault(**kwargs)
             afs = self._get_file_share(**kwargs)
@@ -437,7 +443,7 @@ class AFSItemPreparer(AbstractPreparer, SingleValueReplacer):
 
             command_string = 'az backup protection enable-for-azurefileshare'
             command_string += ' -g {} -v {} --azure-file-share {} --storage-account {} -p {}'
-            command_string = command_string.format(self.resource_group, vault, afs, storage_account, policy)
+            command_string = command_string.format(resource_group, vault, afs, storage_account, policy)
             execute(self.cli_ctx, command_string)
             return {self.parameter_name: name}
         return {self.parameter_name: os.environ.get('AZURE_CLI_TEST_DEV_BACKUP_ITEM_NAME', None)}
@@ -492,7 +498,7 @@ class AFSItemPreparer(AbstractPreparer, SingleValueReplacer):
 class AFSRPPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='clitest-item', storage_account_parameter_name='storage_account',
                  resource_group_parameter_name='resource_group', vault_parameter_name='vault_name',
-                 parameter_name='rp_name', item_parameter_name='item_name', afs_parameter_name='afs_name'):
+                 parameter_name='rp_name', afs_parameter_name='afs_name'):
         super(AFSRPPreparer, self).__init__(name_prefix, 24)
         from azure.cli.core.mock import DummyCli
         self.cli_ctx = DummyCli()
@@ -501,7 +507,6 @@ class AFSRPPreparer(AbstractPreparer, SingleValueReplacer):
         self.resource_group_parameter_name = resource_group_parameter_name
         self.storage_account_parameter_name = storage_account_parameter_name
         self.vault_parameter_name = vault_parameter_name
-        self.item_parameter_name = item_parameter_name
         self.afs_parameter_name = afs_parameter_name
 
     def create_resource(self, name, **kwargs):
@@ -509,7 +514,6 @@ class AFSRPPreparer(AbstractPreparer, SingleValueReplacer):
             self.resource_group = self._get_resource_group(**kwargs)
             storage_account = self._get_storage_account(**kwargs)
             vault = self._get_vault(**kwargs)
-            item = self._get_item(**kwargs)
             afs = self._get_file_share(**kwargs)
 
             retain_date = datetime.utcnow() + timedelta(days=30)
@@ -552,22 +556,6 @@ class AFSRPPreparer(AbstractPreparer, SingleValueReplacer):
                        'decorator @AFSItemPreparer in front of this Policy preparer.'
             raise CliTestError(template)
 
-    def _get_item(self, **kwargs):
-        try:
-            return kwargs.get(self.item_parameter_name)
-        except KeyError:
-            template = 'To create an item, a fileshare is required. Please add ' \
-                       'decorator @FileSharePreparer in front of this Policy preparer.'
-            raise CliTestError(template)
-
-    def _get_policy(self, **kwargs):
-        try:
-            return kwargs.get(self.policy_parameter_name)
-        except KeyError:
-            template = 'To create an item, a policy is required. Please add ' \
-                       'decorator @AFSPolicyPreparer in front of this Policy preparer.'
-            raise CliTestError(template)
-
     def _get_file_share(self, **kwargs):
         try:
             return kwargs.get(self.afs_parameter_name)
@@ -575,3 +563,19 @@ class AFSRPPreparer(AbstractPreparer, SingleValueReplacer):
             template = 'To create an item, a fileshare is required. Please add ' \
                        'decorator @FileSharePreparer in front of this Policy preparer.'
             raise CliTestError(template)
+
+
+class FilePreparer(AbstractPreparer, SingleValueReplacer):
+    def __init__(self, name_prefix='clitest-file', parameter_name='file_name'):
+        super(FilePreparer, self).__init__(name_prefix, 24)
+        self.parameter_name = parameter_name
+
+    def create_resource(self, name, **kwargs):
+        if not os.environ.get('AZURE_CLI_TEST_DEV_BACKUP_RP_NAME', None):
+            f = open(name, "a")
+            f.close()
+            return {self.parameter_name: name}
+        return {self.parameter_name: os.environ.get('AZURE_CLI_TEST_DEV_BACKUP_RP_NAME', None)}
+
+    def remove_resource(self, name, **kwargs):
+        os.remove(name)

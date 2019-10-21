@@ -11,7 +11,7 @@ from azure.cli.testsdk import ScenarioTest, JMESPathCheckExists, ResourceGroupPr
     StorageAccountPreparer
 from azure.mgmt.recoveryservicesbackup.models import StorageType
 from .preparers import VaultPreparer, FileSharePreparer, AFSPolicyPreparer, AFSItemPreparer, \
-    AFSRPPreparer
+    AFSRPPreparer, FilePreparer
 
 subscription_id = "da364f0f-307b-41c9-9d47-b7413ec45535"
 unprotected_afs = "clitestafs"
@@ -206,14 +206,24 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup protection disable -g {rg} -v {vault} -c {container} -i {item1} --backup-management-type AzureStorage --delete-backup-data true --yes').get_output_in_json()
         self.cmd('backup container unregister -g {rg} -v {vault} -c {container} --yes --backup-management-type AzureStorage')
 
-    def test_afs_backup_restore(self):
+    @ResourceGroupPreparer(location="southeastasia", random_name_length=20)
+    @VaultPreparer()
+    @StorageAccountPreparer(location="southeastasia")
+    @FilePreparer()
+    @FileSharePreparer(file_upload=True)
+    @AFSPolicyPreparer()
+    @AFSItemPreparer()
+    @AFSRPPreparer()
+    @FileSharePreparer(parameter_name="afs2")
+    def test_afs_backup_restore(self, resource_group, vault_name, storage_account, file_name, afs_name, afs2):
         self.kwargs.update({
             'vault': vault_name,
-            'item1': protected_afs1,
-            'item2': protected_afs2,
+            'item1': afs_name,
+            'item2': afs2,
             'container': storage_account,
-            'rg': resource_group_name,
+            'rg': resource_group,
             'type': "AzureStorage",
+            'file': file_name
         })
 
         # full share restore original location
@@ -257,7 +267,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         # item level recovery alternate location
 
-        trigger_restore_job3_json = self.cmd('backup restore restore-azurefiles -g {rg} -v {vault} -c {container} -i {item1} -r {rp1} --resolve-conflict Overwrite --restore-mode AlternateLocation --source-file-type File --source-file-path script.ps1 --target-storage-account {container} --target-file-share {item2} --target-folder folder1', checks=[
+        trigger_restore_job3_json = self.cmd('backup restore restore-azurefiles -g {rg} -v {vault} -c {container} -i {item1} -r {rp1} --resolve-conflict Overwrite --restore-mode AlternateLocation --source-file-type File --source-file-path {file} --target-storage-account {container} --target-file-share {item2} --target-folder folder1', checks=[
             self.check("properties.entityFriendlyName", '{item1}'),
             self.check("properties.operation", "Restore"),
             self.check("properties.status", "InProgress"),
@@ -275,7 +285,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         # item level recovery original location
 
-        trigger_restore_job4_json = self.cmd('backup restore restore-azurefiles -g {rg} -v {vault} -c {container} -i {item1} -r {rp1} --resolve-conflict Overwrite --restore-mode OriginalLocation --source-file-type File --source-file-path script.ps1', checks=[
+        trigger_restore_job4_json = self.cmd('backup restore restore-azurefiles -g {rg} -v {vault} -c {container} -i {item1} -r {rp1} --resolve-conflict Overwrite --restore-mode OriginalLocation --source-file-type File --source-file-path {file}', checks=[
             self.check("properties.entityFriendlyName", '{item1}'),
             self.check("properties.operation", "Restore"),
             self.check("properties.status", "InProgress"),
@@ -291,6 +301,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("properties.status", "Completed"),
             self.check("resourceGroup", '{rg}')
         ])
+        self.cmd('backup protection disable -g {rg} -v {vault} -c {container} -i {item1} --backup-management-type AzureStorage --delete-backup-data true --yes').get_output_in_json()
+        self.cmd('backup container unregister -g {rg} -v {vault} -c {container} --yes --backup-management-type AzureStorage')
 
     @ResourceGroupPreparer(location="southeastasia", random_name_length=20)
     @VaultPreparer()
