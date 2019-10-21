@@ -132,13 +132,11 @@ class CacheObject(object):
 
         if len(args) > 2:
             raise CLIError('expected 2 args, got {}: {}'.format(len(args), args))
-        if len(copy_kwargs) > 1:
-            raise CLIError('expected 1 kwarg, got {}: {}'.format(len(copy_kwargs), copy_kwargs))
 
         try:
             resource_name = args[-1]
         except IndexError:
-            resource_name = list(copy_kwargs.values())[0]
+            resource_name = '_'.join(list(copy_kwargs.values()))
 
         self._resource_group = resource_group
         self._resource_name = resource_name
