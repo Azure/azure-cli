@@ -61,6 +61,10 @@ Release History
 
 * Fix #10807: `az ad app update --id {} --display-name {}` doesn't work
 
+**ServiceFabric**
+
+* az sf cluster create: fix #10916 modify service fabric linux and windows template.json compute vmss from standard to managed disks
+
 2.0.75
 ++++++
 
