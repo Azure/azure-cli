@@ -233,7 +233,7 @@ try:
     arm_cloud_dict = json.loads(urlretrieve(ARM_CLOUD_METADATA_URL))
     cli_cloud_dict = convert_arm_to_cli(arm_cloud_dict)
     AZURE_PUBLIC_CLOUD = cli_cloud_dict['AzureCloud']
-    AZURE_PUBLIC_CLOUD.CloudEndpoints.active_directory = 'https://login.microsoftonline.com' # change once active_directory is fixed in ARM for the public cloud
+    AZURE_PUBLIC_CLOUD.CloudEndpoints.active_directory = 'https://login.microsoftonline.com'  # pylint: disable=line-too-long # change once active_directory is fixed in ARM for the public cloud
     AZURE_CHINA_CLOUD = cli_cloud_dict['AzureChinaCloud']
     AZURE_US_GOV_CLOUD = cli_cloud_dict['AzureUSGovernment']
     AZURE_GERMAN_CLOUD = cli_cloud_dict['AzureGermanCloud']
