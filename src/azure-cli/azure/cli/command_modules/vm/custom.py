@@ -32,7 +32,7 @@ from ._vm_diagnostics_templates import get_default_diag_config
 
 from ._actions import (load_images_from_aliases_doc, load_extension_images_thru_services,
                        load_images_thru_services, _get_latest_image_version)
-from ._client_factory import _compute_client_factory, cf_public_ip_addresses
+from ._client_factory import _compute_client_factory, cf_public_ip_addresses, cf_vm_image_term
 
 logger = get_logger(__name__)
 
@@ -1439,6 +1439,75 @@ def accept_market_ordering_terms(cmd, urn=None, publisher=None, offer=None, plan
     term.accepted = True
     return market_place_client.marketplace_agreements.create(publisher, offer, plan, term)
 # endregion
+
+
+def _terms_prepare(cmd, urn, publisher, offer, plan):
+    if urn:
+        if any([publisher, offer, plan]):
+            raise CLIError('usage error: If using --urn, do not use any of --plan, --offer, --publisher.')
+        terms = urn.split(':')
+        if len(terms) != 4:
+            raise CLIError('usage error: urn should be in the format of publisher:offer:sku:version.')
+        publisher, offer = terms[0], terms[1]
+        image = show_vm_image(cmd, urn)
+        if not image.plan:
+            raise CLIError("Image '%s' has no terms to accept." % urn)
+        plan = image.plan.name
+    else:
+        if not all([publisher, offer, plan]):
+            raise CLIError(
+                'usage error: If not using --urn, all of --plan, --offer and --publisher should be provided.')
+    return publisher, offer, plan
+
+
+def _accept_cancel_terms(cmd, urn, publisher, offer, plan, accept):
+    publisher, offer, plan = _terms_prepare(cmd, urn, publisher, offer, plan)
+    op = cf_vm_image_term(cmd.cli_ctx, '')
+    terms = op.get(publisher, offer, plan)
+    terms.accepted = accept
+    return op.create(publisher, offer, plan, terms)
+
+
+def accept_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
+    """
+    Accept Azure Marketplace image terms so that the image can be used to create VMs.
+    :param cmd:cmd
+    :param urn:URN, in the format of 'publisher:offer:sku:version'. If specified, other argument values can be omitted
+    :param publisher:Image publisher
+    :param offer:Image offer
+    :param plan:Image billing plan
+    :return:
+    """
+    return _accept_cancel_terms(cmd, urn, publisher, offer, plan, True)
+
+
+def cancel_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
+    """
+    Cancel Azure Marketplace image terms.
+    :param cmd:cmd
+    :param urn:URN, in the format of 'publisher:offer:sku:version'. If specified, other argument values can be omitted
+    :param publisher:Image publisher
+    :param offer:Image offer
+    :param plan:Image billing plan
+    :return:
+    """
+    return _accept_cancel_terms(cmd, urn, publisher, offer, plan, False)
+
+
+def get_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
+    """
+    Get the details of Azure Marketplace image terms.
+    :param cmd:cmd
+    :param urn:URN, in the format of 'publisher:offer:sku:version'. If specified, other argument values can be omitted
+    :param publisher:Image publisher
+    :param offer:Image offer
+    :param plan:Image billing plan
+    :return:
+    """
+    publisher, offer, plan = _terms_prepare(cmd, urn, publisher, offer, plan)
+    op = cf_vm_image_term(cmd.cli_ctx, '')
+    terms = op.get(publisher, offer, plan)
+    return terms
 
 
 # region VirtualMachines NetworkInterfaces (NICs)
