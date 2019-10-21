@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**SQL**
+
+* Added "--compute-model", "--auto-pause-delay", and "--min-capacity" parameters to support CRUD operations for new SQL Database offering: Serverless compute model."
+
 **ACR**
 
 * Added a preview parameter `--pack-image-tag` to command `az acr pack build`.
