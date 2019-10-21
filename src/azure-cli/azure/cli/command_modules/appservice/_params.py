@@ -13,7 +13,7 @@ from azure.cli.core.commands.parameters import (resource_group_name_type, get_lo
 from azure.mgmt.web.models import DatabaseType, ConnectionStringType, BuiltInAuthenticationProvider, AzureStorageType
 
 from ._completers import get_hostname_completion_list
-
+from ._constants import RUNTIME_TO_IMAGE_FUNCTIONAPP
 from ._validators import validate_timeout_value, validate_site_create, validate_asp_create, validate_add_vnet
 
 
@@ -45,6 +45,10 @@ def load_arguments(self, _):
     webapp_name_arg_type = CLIArgumentType(configured_default='web', options_list=['--name', '-n'], metavar='NAME',
                                            completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name',
                                            help="name of the web app. You can configure the default using 'az configure --defaults web=<name>'")
+
+    functionapp_runtime_to_version_texts = []
+    for runtime, val in RUNTIME_TO_IMAGE_FUNCTIONAPP.items():
+        functionapp_runtime_to_version_texts.append(runtime + ' -> [' + ', '.join(val.keys()) + ']')
 
     # use this hidden arg to give a command the right instance, that functionapp commands
     # work on function app and webapp ones work on web app
@@ -442,6 +446,8 @@ def load_arguments(self, _):
         c.argument('consumption_plan_location', options_list=['--consumption-plan-location', '-c'],
                    help="Geographic location where Function App will be hosted. Use 'functionapp list-consumption-locations' to view available locations.")
         c.argument('runtime', help='The functions runtime stack.', arg_type=get_enum_type(set(LINUX_RUNTIMES).union(set(WINDOWS_RUNTIMES))))
+        c.argument('runtime_version', help='The version of the functions runtime stack. '
+                                           'Allowed values for each --runtime are: ' + ', '.join(functionapp_runtime_to_version_texts))
         c.argument('os_type', arg_type=get_enum_type(OS_TYPES), help="Set the OS type for the app to be created.")
         c.argument('app_insights_key', help="Instrumentation key of App Insights to be added.")
         c.argument('app_insights', help="Name of the existing App Insights project to be added to the Function app. Must be in the same resource group.")
