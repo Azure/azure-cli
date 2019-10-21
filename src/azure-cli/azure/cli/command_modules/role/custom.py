@@ -972,6 +972,8 @@ def update_application(instance, display_name=None, homepage=None,  # pylint: di
         app_patch_param.oauth2_allow_implicit_flow = oauth2_allow_implicit_flow
     if identifier_uris is not None:
         app_patch_param.identifier_uris = identifier_uris
+    if display_name is not None:
+        app_patch_param.display_name = display_name
     if reply_urls is not None:
         app_patch_param.reply_urls = reply_urls
     if homepage is not None:

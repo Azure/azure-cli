@@ -141,11 +141,14 @@ class ApplicationSetScenarioTest(ScenarioTest):
         result = self.cmd('ad app credential reset --id {app} --append --password "test" --years 2').get_output_in_json()
         app_id = result['appId']
         self.assertTrue(app_id)
+        self.kwargs['app_id'] = app_id
 
         try:
-            # show/list app
-            self.cmd('ad app show --id {app}',
-                     checks=self.check('identifierUris[0]', '{app}'))
+            # show by identifierUri
+            self.cmd('ad app show --id {app}', checks=self.check('identifierUris[0]', '{app}'))
+            # show by appId
+            self.cmd('ad app show --id {app_id}', checks=self.check('appId', '{app_id}'))
+
             self.cmd('ad app list --display-name {name}', checks=[
                 self.check('[0].identifierUris[0]', '{app}'),
                 self.check('length([*])', 1)
@@ -157,6 +160,8 @@ class ApplicationSetScenarioTest(ScenarioTest):
             self.cmd('ad app update --id {app} --reply-urls {reply_uri}')
             self.cmd('ad app show --id {app}',
                      checks=self.check('replyUrls[0]', '{reply_uri}'))
+
+            # add and remove replyUrl
             self.cmd('ad app update --id {app} --add replyUrls {reply_uri2}')
             self.cmd('ad app show --id {app}', checks=self.check('length(replyUrls)', 2))
             self.cmd('ad app update --id {app} --remove replyUrls 1')
@@ -164,6 +169,17 @@ class ApplicationSetScenarioTest(ScenarioTest):
                 self.check('length(replyUrls)', 1),
                 self.check('replyUrls[0]', '{reply_uri2}')
             ])
+
+            # update displayName
+            name2 = self.create_random_name(prefix='cli-graph', length=14)
+            self.kwargs['name2'] = name2
+            self.cmd('ad app update --id {app} --display-name {name2}')
+            self.cmd('ad app show --id {app}', checks=self.check('displayName', '{name2}'))
+
+            # update homepage
+            self.kwargs['homepage2'] = 'http://' + name2
+            self.cmd('ad app update --id {app} --homepage {homepage2}')
+            self.cmd('ad app show --id {app}', checks=self.check('homepage', '{homepage2}'))
 
             # invoke generic update
             self.cmd('ad app update --id {app} --set oauth2AllowUrlPathMatching=true')

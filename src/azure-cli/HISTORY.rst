@@ -3,13 +3,20 @@
 Release History
 ===============
 
+**SQL**
+
+* Added "--compute-model", "--auto-pause-delay", and "--min-capacity" parameters to support CRUD operations for new SQL Database offering: Serverless compute model."
+
 **ACR**
 
 * Added a preview parameter `--pack-image-tag` to command `az acr pack build`.
 
 **AppService**
 
+* Fixing an issue where webapp config ssl bind operation was removing existing tags from the resource
 * Added "--build remote" flag for "az functionapp deployment source config-zip" to support remote build action during function app deployment.
+* Change default node version on function apps to ~10 for Windows
+* Add --runtime-version property to `az functionapp create`
 
 **ARM**
 
@@ -18,6 +25,11 @@ Release History
 **BotService**
 
 * Added "--signing-secret" parameter for "az bot slack create" to support auto-registering the Slack Channel.
+**Compute**
+
+* vm create: Add warning when specifying accelerated networking and an existing NIC together.
+* [BREAKING CHANGE] vm extension set: Fix bug where users could not set an extension on a VM with --ids.
+* New commands `az vm image terms accept/cancel/show` to manage Azure Marketplace image terms.
 
 **CosmosDB**
 
@@ -47,6 +59,14 @@ Release History
 
 * Fix: `az account get-access-token --resource-type ms-graph` not working
 * Remove warning from `az login`
+
+**RBAC**
+
+* Fix #10807: `az ad app update --id {} --display-name {}` doesn't work
+
+**ServiceFabric**
+
+* az sf cluster create: fix #10916 modify service fabric linux and windows template.json compute vmss from standard to managed disks
 
 2.0.75
 ++++++
@@ -92,8 +112,6 @@ Release History
 * vm create: Use standard public IP SKU automatically when using zones.
 * vm create: Compose a valid computer name from VM name if computer name is not provided.
 * vm create: Add --workspace to enable log analytics workspace automatically.
-* vm create: Add warning when specifying accelerated networking and an existing NIC together.
-* [BREAKING CHANGE] vm extension set: Fix bug where users could not set an extension on a VM with --ids.
 * vmss create: Add --computer-name-prefix parameter to support custom computer name prefix of virtual machines in the VMSS.
 * Update galleries API version to 2019-07-01.
 
