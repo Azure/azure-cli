@@ -4537,3 +4537,37 @@ def list_vpn_conn_ipsec_policies(cmd, resource_group_name, connection_name):
     ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateway_connections
     return ncf.get(resource_group_name, connection_name).ipsec_policies
 # endregion
+
+# region VirtualRouter
+def create_virtual_router(cmd, resource_group_name, virtual_router_name, hosted_gateway, location=None, tags=None):
+    VirtualRouter, SubResource = cmd.get_models('VirtualRouter', 'SubResource')
+    client = network_client_factory(cmd.cli_ctx).virtual_routers
+    virtual_router = VirtualRouter(virtual_router_asn=None,
+                                   virtual_router_ips=[],
+                                   hosted_subnet=None,
+                                   hosted_gateway=SubResource(id=hosted_gateway),
+                                   location=location,
+                                   tags=tags)
+    return client.create_or_update(resource_group_name, virtual_router_name, virtual_router)
+
+
+def update_virtual_router_peering(cmd, instance, tags=None):
+    with cmd.update_context(instance) as c:
+        c.set_param('tags', tags)
+    return instance
+
+
+def create_virtual_router_peering(cmd, resource_group_name, virtual_router_name, peering_name, peer_asn, peer_ip):
+    VirtualRouterPeering = cmd.get_models('VirtualRouterPeering')
+    client = network_client_factory(cmd.cli_ctx).virtual_router_peerings
+    virtual_router_peering = VirtualRouterPeering(peer_asn=peer_asn,
+                                                  peer_ip=peer_ip)
+    return client.create_or_update(resource_group_name, virtual_router_name, peering_name, virtual_router_peering)
+
+
+def update_virtual_router_peering(cmd, instance, peer_asn=None, peer_ip=None):
+    with cmd.update_context(instance) as c:
+        c.set_param('peer_asn', peer_asn)
+        c.set_param('peer_ip', peer_ip)
+    return instance
+# endregion
