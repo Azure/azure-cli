@@ -112,6 +112,7 @@ Release History
 
 * Fix: `az account get-access-token --resource-type ms-graph` not working
 * Remove warning from `az login`
+* Fix #10578: `az login` hangs when more than one instances are launched at the same time on Windows or WSL
 
 **RBAC**
 
