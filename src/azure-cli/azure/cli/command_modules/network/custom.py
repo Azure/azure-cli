@@ -2150,8 +2150,8 @@ def update_express_route_port_link(cmd, instance, express_route_port_name, link_
     """
     :param cmd:
     :param instance: an instance of ExpressRoutePort
-    :param express_route_port_name
-    :param link_name
+    :param express_route_port_name:
+    :param link_name:
     :param macsec_cak_secret_identifier:
     :param macsec_ckn_secret_identifier:
     :param macsec_cipher:

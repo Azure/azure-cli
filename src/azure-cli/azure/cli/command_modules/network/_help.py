@@ -2362,9 +2362,9 @@ examples:
         --resource-group MyResourceGroup \\
         --port-name MyExpressRoutePort \\
         --name MyExpressRouteLink \\
-        --ckn-secret-identifier MacSecCKNSecretID \\
-        --cak-secret-identifier MacSecCAKSecretID \\
-        --cipher gcm-aes-128
+        --macsec-ckn-secret-identifier MacSecCKNSecretID \\
+        --macsec-cak-secret-identifier MacSecCAKSecretID \\
+        --macsec-cipher gcm-aes-128
   - name: Enable administrative state of an ExpressRoute Link.
     text: |-
         az network express-route port link update \\

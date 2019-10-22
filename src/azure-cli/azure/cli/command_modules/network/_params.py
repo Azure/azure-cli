@@ -615,7 +615,8 @@ def load_arguments(self, _):
 
     with self.argument_context('network express-route port link', min_api='2018-08-01') as c:
         c.argument('express_route_port_name', er_port_name_type)
-        c.argument('link_name', options_list=['--name', '-n'], id_part='child_name_1')
+        c.argument('link_name', options_list=['--name', '-n'], id_part='child_name_1',
+                   help='The link name of the ExpressRoute Port')
 
     with self.argument_context('network express-route port link list', min_api='2018-08-01') as c:
         c.argument('express_route_port_name', er_port_name_type, id_part=None)
