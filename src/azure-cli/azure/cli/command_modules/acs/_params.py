@@ -190,7 +190,7 @@ def load_arguments(self, _):
         c.argument('vnet_subnet_id')
         c.argument('workspace_resource_id')
         c.argument('skip_subnet_role_assignment', action='store_true')
-        c.argument('api_server_authorized_ip_ranges', type=str, validator=validate_ip_ranges_on_create)
+        c.argument('api_server_authorized_ip_ranges', type=str, validator=validate_ip_ranges)
         c.argument('attach_acr', acr_arg_type)
 
     with self.argument_context('aks update') as c:

@@ -27,7 +27,7 @@ from distutils.version import StrictVersion  # pylint: disable=no-name-in-module
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from six.moves.urllib.error import URLError  # pylint: disable=import-error
 
-from ._helpers import _populate_api_server_access_profile
+from ._helpers import _populate_api_server_access_profile, _set_load_balancer_sku, _set_vm_set_type
 
 # pylint: disable=import-error
 import yaml
@@ -1647,31 +1647,11 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     if location is None:
         location = rg_location
 
-    if not vm_set_type:
-        if kubernetes_version and StrictVersion(kubernetes_version) < StrictVersion("1.12.9"):
-            print('Setting vm_set_type to availabilityset as it is \
-            not specified and kubernetes version(%s) less than 1.12.9 only supports \
-            availabilityset\n' % (kubernetes_version))
-            vm_set_type = "AvailabilitySet"
+    vm_set_type = _set_vm_set_type(vm_set_type, kubernetes_version)
+    load_balancer_sku = _set_load_balancer_sku(load_balancer_sku, kubernetes_version)
 
-    if not vm_set_type:
-        vm_set_type = "VirtualMachineScaleSets"
-
-    # normalize as server validation is case-sensitive
-    if vm_set_type.lower() == "AvailabilitySet".lower():
-        vm_set_type = "AvailabilitySet"
-
-    if vm_set_type.lower() == "VirtualMachineScaleSets".lower():
-        vm_set_type = "VirtualMachineScaleSets"
-
-    if not load_balancer_sku:
-        if kubernetes_version and StrictVersion(kubernetes_version) < StrictVersion("1.13.0"):
-            print('Setting load_balancer_sku to basic as it is not specified and kubernetes \
-            version(%s) less than 1.13.0 only supports basic load balancer SKU\n' % (kubernetes_version))
-            load_balancer_sku = "basic"
-
-    if not load_balancer_sku:
-        load_balancer_sku = "standard"
+    if api_server_authorized_ip_ranges and load_balancer_sku == "basic":
+        raise CLIError('--api-server-authorized-ip-ranges can only be used with standard load balancer')
 
     agent_pool_profile = ManagedClusterAgentPoolProfile(
         name=_trim_nodepoolname(nodepool_name),  # Must be 12 chars or less before ACS RP adds to it

@@ -306,8 +306,8 @@ parameters:
     type: string
     short-summary: Grant the 'acrpull' role assignment to the ACR specified by name or resource ID.
   - name: --api-server-authorized-ip-ranges
-    type: str
-    short-summary: Comma seperated list of authorized apiserver IP ranges. Set to "" to disable. If left unset, all external traffic will be allowed.
+    type: string
+    short-summary: Comma seperated list of authorized apiserver IP ranges. If left unset, all external traffic will be allowed.
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
@@ -355,7 +355,7 @@ parameters:
     short-summary: Disable the 'acrpull' role assignment to the ACR specified by name or resource ID.
   - name: --api-server-authorized-ip-ranges
     type: str
-    short-summary: Comma seperated list of authorized apiserver IP ranges. Set to "" to disable. Set to 0.0.0.0/32 to allow all traffic in a previously restricted cluster.
+    short-summary: Comma seperated list of authorized apiserver IP ranges. Set to "" to allow all traffic on a previously restricted cluster. Set to 0.0.0.0/32 to restrict apiserver traffic to node pools.
 examples:
   - name: Update a kubernetes cluster with standard SKU load balancer to use two AKS created IPs for the load balancer outbound connection usage.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2

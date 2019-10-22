@@ -75,22 +75,13 @@ def validate_create_parameters(namespace):
         raise CLIError('--dns-prefix has no value')
 
 
-def validate_ip_ranges_on_create(namespace):
-    if (namespace.api_server_authorized_ip_ranges and
-            namespace.load_balancer_sku and
-            namespace.load_balancer_sku.lower() == "basic"):
-        raise CLIError('--api-server-authorized-ip-ranges can only be used with standard load balancer')
-
-    return validate_ip_ranges(namespace)
-
-
 def validate_ip_ranges(namespace):
     if not namespace.api_server_authorized_ip_ranges:
         return
 
-    allowAllTraffic = "0.0.0.0/32"
+    allow_all_traffic = "0.0.0.0/32"
     for ip in namespace.api_server_authorized_ip_ranges.split(','):
-        if ip == allowAllTraffic:
+        if ip == allow_all_traffic:
             continue
         try:
             ip = ip_network(ip)
