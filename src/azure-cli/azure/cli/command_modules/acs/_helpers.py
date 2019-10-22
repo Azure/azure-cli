@@ -7,6 +7,7 @@ from distutils.version import StrictVersion  # pylint: disable=no-name-in-module
 # pylint: disable=no-name-in-module,import-error
 from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterAPIServerAccessProfile
 
+
 def _populate_api_server_access_profile(api_server_authorized_ip_ranges):
     access_profile = None
     if api_server_authorized_ip_ranges:
@@ -24,6 +25,7 @@ def _set_load_balancer_sku(load_balancer_sku, kubernetes_version):
         version(%s) less than 1.13.0 only supports basic load balancer SKU\n' % (kubernetes_version))
         return "basic"
     return "standard"
+
 
 def _set_vm_set_type(vm_set_type, kubernetes_version):
     if not vm_set_type:

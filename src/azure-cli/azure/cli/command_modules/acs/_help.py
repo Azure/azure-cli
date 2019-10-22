@@ -354,7 +354,7 @@ parameters:
     type: string
     short-summary: Disable the 'acrpull' role assignment to the ACR specified by name or resource ID.
   - name: --api-server-authorized-ip-ranges
-    type: str
+    type: string
     short-summary: Comma seperated list of authorized apiserver IP ranges. Set to "" to allow all traffic on a previously restricted cluster. Set to 0.0.0.0/32 to restrict apiserver traffic to node pools.
 examples:
   - name: Update a kubernetes cluster with standard SKU load balancer to use two AKS created IPs for the load balancer outbound connection usage.
