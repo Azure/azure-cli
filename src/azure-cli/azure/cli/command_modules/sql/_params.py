@@ -227,7 +227,8 @@ aad_admin_sid_param_type = CLIArgumentType(
 
 read_scale_param_type = CLIArgumentType(
     options_list=['--read-scale'],
-    help='If enabled, connections that have application intent set to readonly in their connection string may be routed to a readonly secondary replica. '
+    help='If enabled, connections that have application intent set to readonly '
+    'in their connection string may be routed to a readonly secondary replica. '
     'This property is only settable for Premium and Business Critical databases.',
     arg_type=get_enum_type(DatabaseReadScale))
 

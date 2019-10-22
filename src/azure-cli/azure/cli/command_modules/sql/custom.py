@@ -1239,7 +1239,7 @@ def db_update(
 
     if read_replica_count is not None:
         instance.read_replica_count = read_replica_count
-        
+
     #####
     # Set other (serverless related) properties
     #####

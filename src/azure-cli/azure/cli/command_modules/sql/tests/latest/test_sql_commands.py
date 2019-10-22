@@ -296,7 +296,7 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                            JMESPathCheck('status', 'Online'),
                            JMESPathCheck('zoneRedundant', False),
                            JMESPathCheck('readScale', 'Disabled'),
-                           JMESPathCheck('readReplicaCount', '0'),]).get_output_in_json()
+                           JMESPathCheck('readReplicaCount', '0')]).get_output_in_json()
 
         self.cmd('sql db list -g {} --server {}'
                  .format(resource_group, server),
@@ -337,7 +337,7 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('maxSizeBytes', update_storage_bytes),
                      JMESPathCheck('tags.key1', 'value1'),
                      JMESPathCheck('readScale', 'Enabled'),
-                     JMESPathCheck('readReplicaCount', '1'),])
+                     JMESPathCheck('readReplicaCount', '1')])
 
         # Update by id
         self.cmd('sql db update --id {} --set tags.key2=value2'
@@ -466,8 +466,8 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('sku.capacity', vcore_capacity_updated),
                      JMESPathCheck('sku.family', vcore_family_updated)])
 
-    @ResourceGroupPreparer(name_prefix='clitest',location='eastus2')
-    @SqlServerPreparer(name_prefix='clitest',location='eastus2')
+    @ResourceGroupPreparer(name_prefix='clitest', location='eastus2')
+    @SqlServerPreparer(name_prefix='clitest', location='eastus2')
     @AllowLargeResponse()
     def test_sql_db_read_replica_mgmt(self, resource_group, resource_group_location, server):
         database_name = "cliautomationdb01"
@@ -499,6 +499,7 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('readScale', 'Disabled'),
                      JMESPathCheck('readReplicaCount', '0')])
+
 
 class SqlServerServerlessDbMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='westus2')
