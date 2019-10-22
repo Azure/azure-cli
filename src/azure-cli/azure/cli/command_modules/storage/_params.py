@@ -169,9 +169,18 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         for item in ['blob', 'file', 'queue', 'table']:
             c.argument('{}_endpoint'.format(item), help='Custom endpoint for {}s.'.format(item))
 
-    with self.argument_context('storage account keys renew') as c:
-        c.argument('key_name', options_list=['--key'], help='The key to regenerate.', validator=validate_key,
-                   arg_type=get_enum_type(list(storage_account_key_options.keys())))
+    with self.argument_context('storage account keys list', resource_type=ResourceType.MGMT_STORAGE) as c:
+        c.argument("expand", options_list=['--key-type'], help='Specify type of the key to be listed.',
+                   arg_type=get_enum_type(['kerb']), min_api='2019-04-01', is_preview=True)
+
+    if self.supported_api_version(resource_type=ResourceType.MGMT_STORAGE, min_api='2019-04-01'):
+        keys_type = CLIArgumentType(options_list=['--key'], help='One of the access keys or Kerberos keys to regenerate.',
+                                    arg_type=get_enum_type(["key1", "key2", "kerb1", "kerb2"]), is_preview=True)
+    else:
+        keys_type = CLIArgumentType(options_list=['--key'], help='The key to regenerate.',
+                                    arg_type=get_enum_type(["key1", "key2"]))
+    with self.argument_context('storage account keys renew', resource_type=ResourceType.MGMT_STORAGE) as c:
+        c.argument('key_name', keys_type)
         c.argument('account_name', acct_name_type, id_part=None)
 
     with self.argument_context('storage account management-policy create') as c:

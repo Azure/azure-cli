@@ -75,11 +75,20 @@ short-summary: Manage storage account keys.
 
 helps['storage account keys list'] = """
 type: command
-short-summary: List the primary and secondary keys for a storage account.
+short-summary: List the access keys or Kerberos keys (if active directory enabled) for a storage account.
 examples:
-  - name: List the primary and secondary keys for a storage account.
+  - name: List the access keys or Kerberos keys (if active directory enabled) for a storage account.
     text: az storage account keys list -g MyResourceGroup -n MyStorageAccount
 """
+
+helps['storage account keys renew'] = """
+type: command
+short-summary: Regenerates one of the access keys or Kerberos keys (if active directory enabled) for a storage account.
+examples:
+  - name: Regenerate one of the access keys or Kerberos keys (if active directory enabled) for a storage account.
+    text: az storage account keys renew -g MyResourceGroup -n MyStorageAccount --key key1
+"""
+
 
 helps['storage account list'] = """
 type: command
