@@ -1219,6 +1219,33 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
         self.cmd('network express-route list --resource-group {rg}', checks=self.is_empty())
 
 
+class NetworkExpressRoutePortScenarioTest(ScenarioTest):
+
+    def test_network_express_route_port_identity(self):
+        """
+        Since the resource ExpressRoute Port is rare currently, it's very expensive to write test.
+        We run test manually for now. Any changes related to this command, please contract to Service team for help.
+        For ussage, run `az network express-route port identity --help` to get help.
+        """
+        pass
+
+    def test_network_express_route_port_config_macsec(self):
+        """
+        Since the resource ExpressRoute Port is rare currently, it's very expensive to write test.
+        We run test manually for now. Any changes related to this command, please contract to Service team for help.
+        For ussage, run `az network express-route port link update --help` to get help.
+        """
+        pass
+
+    def test_network_express_route_port_config_adminstate(self):
+        """
+        Since the resource ExpressRoute Port is rare currently, it's very expensive to write test.
+        We run test manually for now. Any changes related to this command, please contract to Service team for help.
+        For ussage, run `az network express-route port link update --help` to get help.
+        """
+        pass
+
+
 class NetworkExpressRouteIPv6PeeringScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_express_route_ipv6_peering')
