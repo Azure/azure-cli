@@ -545,7 +545,7 @@ def load_arguments(self, _):
                    help='The name or resource id of the elastic pool to move the database into.')
 
         c.argument('max_size_bytes', help='The new maximum size of the database expressed in bytes.')
-                   
+
         c.argument('compute_model',
                    arg_type=compute_model_param_type)
 
