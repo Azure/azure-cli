@@ -11,6 +11,10 @@ Release History
 
 * Added a preview parameter `--pack-image-tag` to command `az acr pack build`.
 
+**AppConfig**
+
+* Minor bug fix for appconfig kv export to file command. Stop reading dest file contents during export.
+
 **AppService**
 
 * Fixing an issue where webapp config ssl bind operation was removing existing tags from the resource
