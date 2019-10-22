@@ -65,7 +65,8 @@ from ._create_util import (zip_contents_from_dir, get_runtime_version_details, c
                            should_create_new_rg, set_location, does_app_already_exist, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
                            detect_os_form_src)
-from ._constants import (RUNTIME_TO_IMAGE, NODE_VERSION_DEFAULT)
+from ._constants import (RUNTIME_TO_DEFAULT_VERSION, NODE_VERSION_DEFAULT_FUNCTIONAPP,
+                         RUNTIME_TO_IMAGE_FUNCTIONAPP, NODE_VERSION_DEFAULT)
 
 logger = get_logger(__name__)
 
@@ -209,6 +210,7 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
                     for t in temp:
                         if t.get('slotSetting', True):
                             slot_result[t['name']] = t['value']
+                            # Mark each setting as the slot setting
                         else:
                             result[t['name']] = t['value']
                 else:
@@ -1983,13 +1985,13 @@ def delete_ssl_cert(cmd, resource_group_name, certificate_thumbprint):
     raise CLIError("Certificate for thumbprint '{}' not found".format(certificate_thumbprint))
 
 
-def _update_host_name_ssl_state(cli_ctx, resource_group_name, webapp_name, location,
+def _update_host_name_ssl_state(cli_ctx, resource_group_name, webapp_name, webapp,
                                 host_name, ssl_state, thumbprint, slot=None):
     updated_webapp = Site(host_name_ssl_states=[HostNameSslState(name=host_name,
                                                                  ssl_state=ssl_state,
                                                                  thumbprint=thumbprint,
                                                                  to_update=True)],
-                          location=location)
+                          location=webapp.location, tags=webapp.tags)
     return _generic_site_operation(cli_ctx, resource_group_name, webapp_name, 'create_or_update',
                                    slot, updated_webapp)
 
@@ -2005,7 +2007,7 @@ def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, 
     for webapp_cert in webapp_certs:
         if webapp_cert.thumbprint == certificate_thumbprint:
             if len(webapp_cert.host_names) == 1 and not webapp_cert.host_names[0].startswith('*'):
-                return _update_host_name_ssl_state(cmd.cli_ctx, resource_group_name, name, webapp.location,
+                return _update_host_name_ssl_state(cmd.cli_ctx, resource_group_name, name, webapp,
                                                    webapp_cert.host_names[0], ssl_type,
                                                    certificate_thumbprint, slot)
 
@@ -2013,7 +2015,7 @@ def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, 
             hostnames_in_webapp = [x.name.split('/')[-1] for x in query_result]
             to_update = _match_host_names_from_cert(webapp_cert.host_names, hostnames_in_webapp)
             for h in to_update:
-                _update_host_name_ssl_state(cmd.cli_ctx, resource_group_name, name, webapp.location,
+                _update_host_name_ssl_state(cmd.cli_ctx, resource_group_name, name, webapp,
                                             h, ssl_type, certificate_thumbprint, slot)
 
             return show_webapp(cmd, resource_group_name, name, slot)
@@ -2200,7 +2202,7 @@ def validate_range_of_int_flag(flag_name, value, min_val, max_val):
 
 
 def create_function(cmd, resource_group_name, name, storage_account, plan=None,
-                    os_type=None, runtime=None, consumption_plan_location=None,
+                    os_type=None, runtime=None, runtime_version=None, consumption_plan_location=None,
                     app_insights=None, app_insights_key=None, disable_app_insights=None, deployment_source_url=None,
                     deployment_source_branch='master', deployment_local_git=None,
                     docker_registry_server_password=None, docker_registry_server_user=None,
@@ -2217,6 +2219,8 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
     functionapp_def = Site(location=None, site_config=site_config, tags=tags)
     client = web_client_factory(cmd.cli_ctx)
     plan_info = None
+    if runtime is not None:
+        runtime = runtime.lower()
 
     if consumption_plan_location:
         locations = list_consumption_locations(cmd)
@@ -2254,12 +2258,22 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                            .format(', '.join(WINDOWS_RUNTIMES)))
         site_config.app_settings.append(NameValuePair(name='FUNCTIONS_WORKER_RUNTIME', value=runtime))
 
+    if runtime_version is not None:
+        if runtime is None:
+            raise CLIError('Must specify --runtime to use --runtime-version')
+        allowed_versions = RUNTIME_TO_IMAGE_FUNCTIONAPP[runtime].keys()
+        if runtime_version not in allowed_versions:
+            raise CLIError('--runtime-version {} is not supported for the selected --runtime {}. '
+                           'Supported versions are: {}'
+                           .format(runtime_version, runtime, ', '.join(allowed_versions)))
+
     con_string = _validate_and_get_connection_string(cmd.cli_ctx, resource_group_name, storage_account)
 
     if is_linux:
         functionapp_def.kind = 'functionapp,linux'
         functionapp_def.reserved = True
-        if consumption_plan_location:
+        is_consumption = consumption_plan_location is not None
+        if is_consumption:
             site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION', value='~2'))
         else:
             site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION', value='~2'))
@@ -2276,16 +2290,18 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
             else:
                 site_config.app_settings.append(NameValuePair(name='WEBSITES_ENABLE_APP_SERVICE_STORAGE',
                                                               value='true'))
-                if runtime.lower() not in RUNTIME_TO_IMAGE:
+                if runtime not in RUNTIME_TO_IMAGE_FUNCTIONAPP.keys():
                     raise CLIError("An appropriate linux image for runtime:'{}' was not found".format(runtime))
-                site_config.linux_fx_version = _format_fx_version(RUNTIME_TO_IMAGE[runtime.lower()])
+        site_config.linux_fx_version = _get_linux_fx_functionapp(is_consumption, runtime, runtime_version)
     else:
         functionapp_def.kind = 'functionapp'
         site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION', value='~2'))
     # adding appsetting to site to make it a function
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsStorage', value=con_string))
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
-    site_config.app_settings.append(NameValuePair(name='WEBSITE_NODE_DEFAULT_VERSION', value='10.14.1'))
+    site_config.app_settings.append(NameValuePair(name='WEBSITE_NODE_DEFAULT_VERSION',
+                                                  value=_get_website_node_version_functionapp(runtime,
+                                                                                              runtime_version)))
 
     # If plan is not consumption or elastic premium, we need to set always on
     if consumption_plan_location is None and not is_plan_elastic_premium(plan_info):
@@ -2334,6 +2350,23 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                                               docker_registry_server_password)
 
     return functionapp
+
+
+def _get_linux_fx_functionapp(is_consumption, runtime, runtime_version):
+    if runtime_version is None:
+        runtime_version = RUNTIME_TO_DEFAULT_VERSION[runtime]
+    if is_consumption:
+        return '{}|{}'.format(runtime.upper(), runtime_version)
+    # App service or Elastic Premium
+    return _format_fx_version(RUNTIME_TO_IMAGE_FUNCTIONAPP[runtime][runtime_version])
+
+
+def _get_website_node_version_functionapp(runtime, runtime_version):
+    if runtime is None or runtime != 'node':
+        return NODE_VERSION_DEFAULT_FUNCTIONAPP
+    if runtime_version is not None:
+        return '~{}'.format(runtime_version)
+    return NODE_VERSION_DEFAULT_FUNCTIONAPP
 
 
 def try_create_application_insights(cmd, functionapp):

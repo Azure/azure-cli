@@ -376,6 +376,12 @@ def load_arguments(self, _):
     with self.argument_context('vm image show') as c:
         c.argument('skus', options_list=['--sku', '-s'])
 
+    with self.argument_context('vm image terms') as c:
+        c.argument('urn', help='URN, in the format of \'publisher:offer:sku:version\'. If specified, other argument values can be omitted')
+        c.argument('publisher', help='Image publisher')
+        c.argument('offer', help='Image offer')
+        c.argument('plan', help='Image billing plan')
+
     with self.argument_context('vm nic') as c:
         c.argument('vm_name', existing_vm_name, options_list=['--vm-name'], id_part=None)
         c.argument('nics', nargs='+', help='Names or IDs of NICs.', validator=validate_vm_nics)
