@@ -52,7 +52,8 @@ def load_arguments(self, _):
      FlowLogFormatType, HTTPMethod, IPAllocationMethod,
      IPVersion, LoadBalancerSkuName, LoadDistribution, ProbeProtocol, ProcessorArchitecture, Protocol, PublicIPAddressSkuName,
      RouteNextHopType, SecurityRuleAccess, SecurityRuleProtocol, SecurityRuleDirection, TransportProtocol,
-     VirtualNetworkGatewaySkuName, VirtualNetworkGatewayType, VpnClientProtocol, VpnType, ZoneType) = self.get_models(
+     VirtualNetworkGatewaySkuName, VirtualNetworkGatewayType, VpnClientProtocol, VpnType, ZoneType,
+     ExpressRouteLinkMacSecCipher, ExpressRouteLinkAdminState) = self.get_models(
          'Access', 'ApplicationGatewayFirewallMode', 'ApplicationGatewayProtocol', 'ApplicationGatewayRedirectType',
          'ApplicationGatewayRequestRoutingRuleType', 'ApplicationGatewaySkuName', 'ApplicationGatewaySslProtocol', 'AuthenticationMethod',
          'Direction',
@@ -60,7 +61,8 @@ def load_arguments(self, _):
          'FlowLogFormatType', 'HTTPMethod', 'IPAllocationMethod',
          'IPVersion', 'LoadBalancerSkuName', 'LoadDistribution', 'ProbeProtocol', 'ProcessorArchitecture', 'Protocol', 'PublicIPAddressSkuName',
          'RouteNextHopType', 'SecurityRuleAccess', 'SecurityRuleProtocol', 'SecurityRuleDirection', 'TransportProtocol',
-         'VirtualNetworkGatewaySkuName', 'VirtualNetworkGatewayType', 'VpnClientProtocol', 'VpnType', 'ZoneType')
+         'VirtualNetworkGatewaySkuName', 'VirtualNetworkGatewayType', 'VpnClientProtocol', 'VpnType', 'ZoneType',
+         'ExpressRouteLinkMacSecCipher', 'ExpressRouteLinkAdminState')
 
     if self.supported_api_version(min_api='2018-02-01'):
         ExpressRoutePeeringType = self.get_models('ExpressRoutePeeringType')
@@ -85,6 +87,8 @@ def load_arguments(self, _):
     http_protocol_type = CLIArgumentType(get_enum_type(ApplicationGatewayProtocol))
     ag_servers_type = CLIArgumentType(nargs='+', help='Space-separated list of IP addresses or DNS names corresponding to backend servers.', validator=get_servers_validator())
     app_gateway_name_type = CLIArgumentType(help='Name of the application gateway.', options_list='--gateway-name', completer=get_resource_name_completion_list('Microsoft.Network/applicationGateways'), id_part='name')
+    express_route_link_macsec_cipher_type = CLIArgumentType(get_enum_type(ExpressRouteLinkMacSecCipher))
+    express_route_link_admin_state_type = CLIArgumentType(get_enum_type(ExpressRouteLinkAdminState))
 
     # region NetworkRoot
     with self.argument_context('network') as c:
@@ -611,13 +615,30 @@ def load_arguments(self, _):
 
     with self.argument_context('network express-route port link', min_api='2018-08-01') as c:
         c.argument('express_route_port_name', er_port_name_type)
-        c.argument('link_name', options_list=['--name', '-n'], id_part='child_name_1')
+        c.argument('link_name', options_list=['--name', '-n'], id_part='child_name_1',
+                   help='The link name of the ExpressRoute Port')
 
     with self.argument_context('network express-route port link list', min_api='2018-08-01') as c:
         c.argument('express_route_port_name', er_port_name_type, id_part=None)
 
+    with self.argument_context('network express-route port link update', min_api='2019-08-01') as c:
+        c.argument('admin_state',
+                   arg_type=express_route_link_admin_state_type,
+                   help='Enable/Disable administrative state of an ExpressRoute Link')
+
+    with self.argument_context('network express-route port link update', arg_group='MACsec', min_api='2019-08-01') as c:
+        c.argument('macsec_cak_secret_identifier',
+                   help='The connectivity association key (CAK) ID that stored in the KeyVault.')
+        c.argument('macsec_ckn_secret_identifier',
+                   help='The connectivity key name (CKN) that stored in the KeyVault.')
+        c.argument('macsec_cipher', arg_type=express_route_link_macsec_cipher_type, help='Cipher Method')
+
     with self.argument_context('network express-route port location', min_api='2018-08-01') as c:
         c.argument('location_name', options_list=['--location', '-l'])
+
+    with self.argument_context('network express-route port identity assign', arg_group='Identity', min_api='2019-08-01') as c:
+        c.argument('user_assigned_identity', options_list='--identity',
+                   help="Name or ID of the ManagedIdentity Resource", validator=validate_application_gateway_identity)
     # endregion
 
     # region PrivateEndpoint
