@@ -422,7 +422,7 @@ def parse_actions_from_repositories(allow_or_remove_repository):
         if len(rule) < 2:
             raise CLIError('At least one action must be specified with the repository {}.'.format(repository))
         for action in rule[1:]:
-            actions.append('{}/{}/{}'.format(REPOSITORIES, repository, action))
+            actions.append('{}/{}/{}'.format(REPOSITORIES, repository, action.lower()))
 
     return actions
 

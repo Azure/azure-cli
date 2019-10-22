@@ -28,8 +28,8 @@ def acr_token_create(cmd,
     if bool(repository_actions_list) == bool(scope_map_name):
         raise CLIError("usage error: --repository | --scope-map-name")
 
-    validate_premium_registry(cmd, registry_name, resource_group_name)
     resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
+    validate_premium_registry(cmd, registry_name, resource_group_name)
 
     logger = get_logger(__name__)
     if repository_actions_list:
@@ -69,12 +69,12 @@ def _create_default_scope_map(cmd, resource_group_name, registry_name, token_nam
         # for command idempotency, if the actions are the same, we accept it
         if sorted(existing_scope_map.actions) == sorted(actions):
             return existing_scope_map.id
-        raise CLIError('The default scope map was already configured with different respository permissions. Please'
-                       ' use "az acr scope-map update -r {} -n {} --add <REPO> --remove <REPO>" to update'.format(
-                           registry_name, scope_map_name))
+        raise CLIError('The default scope map was already configured with different respository permissions.'
+                       '\nPlease use "az acr scope-map update -r {} -n {} --add <REPO> --remove <REPO>" to update.'
+                       .format(registry_name, scope_map_name))
     except CloudError:
         pass
-    logger.warning('Creating a scope map of "%s" for provided respository permissions', scope_map_name)
+    logger.warning('Creating a scope map of "%s" for provided respository permissions.', scope_map_name)
     poller = scope_map_client.create(resource_group_name, registry_name, scope_map_name,
                                      actions, "Token {}'s scope map".format(token_name))
     scope_map = LongRunningOperation(cmd.cli_ctx)(poller)
@@ -93,7 +93,7 @@ def _create_default_passwords(cmd, resource_group_name, registry_name, token, lo
     registry_client = cf_acr_registries(cmd.cli_ctx)
     login_server = registry_client.get(resource_group_name, registry_name).login_server
     logger.warning('Please store your generated credentials safely. Meanwhile you can use it through'
-                   ' "docker login %s -u %s -p %s"', login_server, token.credentials.username,
+                   ' "docker login %s -u %s -p %s".', login_server, token.credentials.username,
                    token.credentials.passwords[0].value)
 
 
