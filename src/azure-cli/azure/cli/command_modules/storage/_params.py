@@ -72,7 +72,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
              'Once the property is enabled, the feature cannot be disabled. Currently only supported for LRS and '
              'ZRS replication types, hence account conversions to geo-redundant accounts would not be possible. '
              'For more information, please refer to https://go.microsoft.com/fwlink/?linkid=2086047.')
-
+    adds_type = CLIArgumentType(arg_type=get_three_state_flag(), min_api='2019-04-01',
+                                help='Enable Azure Active Directory authentication settings for Azure Files.', is_preview=True)
+    aadds_type = CLIArgumentType(arg_type=get_three_state_flag(), min_api='2018-11-01',
+                                 help='Enable Azure Active Directory Domain Services authentication for Azure Files')
     sas_help = 'The permissions the SAS grants. Allowed values: {}. Do not use if a stored access policy is ' \
                'referenced with --id that specifies this value. Can be combined.'
 
@@ -123,8 +126,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('tags', tags_type)
         c.argument('custom_domain', help='User domain assigned to the storage account. Name is the CNAME source.')
         c.argument('sku', help='The storage account SKU.', arg_type=get_enum_type(t_sku_name, default='standard_ragrs'))
-        c.argument('enable_files_aadds', arg_type=get_three_state_flag(), min_api='2018-11-01',
-                   help='Enable the identity based authentication settings for Azure Files.')
+        c.argument('enable_files_aadds', aadds_type)
+        c.argument('enable_files_adds', adds_type)
         c.argument('enable_large_file_share', arg_type=large_file_share_type)
 
     with self.argument_context('storage account update', resource_type=ResourceType.MGMT_STORAGE) as c:
@@ -136,8 +139,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('use_subdomain', help='Specify whether to use indirect CNAME validation.',
                    arg_type=get_enum_type(['true', 'false']))
         c.argument('tags', tags_type, default=None)
-        c.argument('enable_files_aadds', arg_type=get_three_state_flag(), min_api='2018-11-01',
-                   help='Enable the identity based authentication settings for Azure Files.')
+        c.argument('enable_files_aadds', aadds_type)
+        c.argument('enable_files_adds', adds_type)
         c.argument('enable_large_file_share', arg_type=large_file_share_type)
 
     with self.argument_context('storage account update', arg_group='Customer managed key', min_api='2017-06-01') as c:
