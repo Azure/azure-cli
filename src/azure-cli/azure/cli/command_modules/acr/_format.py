@@ -255,7 +255,6 @@ def _token_format_group(item):
         # _get_value returns ' ' if item is none.
         expiry_value = _get_value(password, 'expiry')
         expiry_value = 'Never' if expiry_value == ' ' else _format_datetime(expiry_value)
-
         output_password_column = '{} EXPIRY'.format(password_name)
         if output_password_column in output:
             output[output_password_column] = expiry_value
