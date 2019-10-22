@@ -45,7 +45,7 @@ def _print_cur_configuration(file_config):
     env_vars = [ev for ev in os.environ if ev.startswith(ENV_VAR_PREFIX)]
     if env_vars:
         print(MSG_HEADING_ENV_VARS)
-        print('\n'.join(['{} = {}'.format(ev, os.environ[ev]) for ev in env_vars]))
+        print('\n'.join(['{}'.format(ev) for ev in env_vars]))
 
 
 def _config_env_public_azure(cli_ctx, _):
