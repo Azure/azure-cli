@@ -4,12 +4,14 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.util import CLIError
-from msrestazure.tools import is_valid_resource_id
+from knack.log import get_logger
+from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
 from ._utils import (
-    validate_managed_registry,
-    get_registry_from_name_or_login_server
+    validate_managed_registry, get_registry_from_name_or_login_server, get_registry_by_name
 )
+
+logger = get_logger(__name__)
 
 SOURCE_REGISTRY_NOT_FOUND = "The source container registry can not be found in the current subscription. " \
                             "Please provide a valid address and/or credentials."
@@ -44,13 +46,24 @@ def acr_import(cmd,
 
     if source_registry:
         if is_valid_resource_id(source_registry):
+            registry, _ = get_registry_by_name(cmd.cli_ctx, parse_resource_id(source_registry)["name"])
             source = ImportSource(resource_id=source_registry, source_image=source_image)
+
         else:
             registry = get_registry_from_name_or_login_server(cmd.cli_ctx, source_registry, source_registry)
             if registry:
                 source = ImportSource(resource_id=registry.id, source_image=source_image)
             else:
                 raise CLIError(SOURCE_REGISTRY_NOT_FOUND)
+
+        try:
+            if registry.login_server.lower() in source_image.lower():
+                logger.warning("\nImporting image '%s/%s'...\nPlease ensure that '--source' is a source image and "
+                               "not a fully qualified source, as the source registry was specified via '--registry'",
+                               registry.login_server, source_image)
+        except AttributeError:
+            pass
+
     else:
         slash = source_image.find('/')
         if slash > 0:
