@@ -2351,6 +2351,29 @@ type: command
 short-summary: Get the details of an ExpressRoute link.
 """
 
+
+helps['network express-route port link update'] = """
+type: command
+short-summary: Manage MACsec configuration of an ExpressRoute Link.
+examples:
+  - name: Enable MACsec on ExpressRoute Direct Ports once at a time.
+    text: |-
+        az network express-route port link update \\
+        --resource-group MyResourceGroup \\
+        --port-name MyExpressRoutePort \\
+        --name MyExpressRouteLink \\
+        --ckn-secret-identifier MacSecCKNSecretID \\
+        --cak-secret-identifier MacSecCAKSecretID \\
+        --cipher gcm-aes-128
+  - name: Enable administrative state of an ExpressRoute Link.
+    text: |-
+        az network express-route port link update \\
+        --resource-group MyResourceGroup \\
+        --port-name MyExpressRoutePort \\
+        --name MyExpressRouteLink \\
+        --admin-state Enabled
+"""
+
 helps['network express-route port list'] = """
 type: command
 short-summary: List ExpressRoute ports.

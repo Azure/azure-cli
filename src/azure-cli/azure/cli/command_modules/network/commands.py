@@ -596,6 +596,12 @@ def load_command_table(self, _):
         g.command('list', 'list')
         g.show_command('show')
 
+    with self.command_group('network express-route port link', network_er_ports_sdk) as g:
+        g.generic_update_command('update',
+                                 custom_func_name='update_express_route_port_link',
+                                 supports_no_wait=True,
+                                 min_api='2019-08-01')
+
     with self.command_group('network express-route port location', network_er_port_locations_sdk) as g:
         g.command('list', 'list')
         g.show_command('show')
