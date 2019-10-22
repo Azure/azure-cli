@@ -105,13 +105,7 @@ def export_config(cmd,
     if not yes:
         # fetch key values from destination
         if destination == 'file':
-            try:
-                dest_kvs = __read_kv_from_file(
-                    file_path=path, format_=format_, separator=separator, prefix_to_add="", depth=None)
-            except CLIError as exception:
-                logger.debug(
-                    'Can not read content from the target file for preview: %s', str(exception))
-                dest_kvs = []  # if target file does not exist / is problematic, then treat as empty file
+            dest_kvs = []  # treat as empty file and overwrite exported key values
         elif destination == 'appconfig':
             dest_kvs = __read_kv_from_config_store(
                 cmd, name=dest_name, connection_string=dest_connection_string, key=None, label=dest_label)
@@ -874,26 +868,6 @@ def __export_keyvalues(fetched_items, format_, separator, prefix=None):
         return __compact_key_values(exported_dict if not exported_list else exported_list)
     except Exception as exception:
         raise CLIError("Fail to export key-values." + str(exception))
-
-
-def __set_keyvalues(connection_string, loaded_keyvalues, label):
-    azconfig_client = AzconfigClient(connection_string)
-
-    not_imported_entries = []
-    imported_entries = []
-    for key in loaded_keyvalues:
-        try:
-            keyvalue = KeyValue(key=key,
-                                label=label,
-                                value=None if loaded_keyvalues[key] is None else str(loaded_keyvalues[key]))
-            imported_entries.append(azconfig_client.set_keyvalue(
-                keyvalue, ModifyKeyValueOptions()))
-        except HTTPException as exception:
-            logger.debug(
-                "Fail to set keyvalues. Reason: %s", str(exception))
-            not_imported_entries.append({key: loaded_keyvalues[key]})
-
-    return imported_entries, not_imported_entries
 
 
 def __check_file_encoding(file_path):
