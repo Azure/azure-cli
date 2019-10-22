@@ -279,7 +279,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='The name of the scope map with pre-configured repository permissions. Use "--repository" if you would like CLI to configure one for you')
         c.argument('repository_actions_list', options_list=['--repository'], nargs='+', action='append',
                    help='repository permissions. Use the format "--repository REPO [ACTION1 ACTION2 ...]" per flag. ' + valid_actions)
-        c.argument('no_passwords', arg_type=get_three_state_flag(), help='Do not generate passwords, instead use "az acr token credentials regenerate"')
+        c.argument('no_passwords', arg_type=get_three_state_flag(), help='Do not generate passwords, instead use "az acr token credential generate"')
 
     with self.argument_context('acr token update') as c:
         c.argument('scope_map_name', options_list=['--scope-map'], help='The name of the scope map associated with the token. If not specified, running this command will disassociate the current scope map related to the token.', required=False)
