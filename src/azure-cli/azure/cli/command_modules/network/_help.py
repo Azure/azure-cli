@@ -2361,7 +2361,7 @@ examples:
         az network express-route port link update \\
         --resource-group MyResourceGroup \\
         --port-name MyExpressRoutePort \\
-        --name MyExpressRouteLink \\
+        --name link1 \\
         --macsec-ckn-secret-identifier MacSecCKNSecretID \\
         --macsec-cak-secret-identifier MacSecCAKSecretID \\
         --macsec-cipher gcm-aes-128
@@ -2370,7 +2370,7 @@ examples:
         az network express-route port link update \\
         --resource-group MyResourceGroup \\
         --port-name MyExpressRoutePort \\
-        --name MyExpressRouteLink \\
+        --name link2 \\
         --admin-state Enabled
 """
 
