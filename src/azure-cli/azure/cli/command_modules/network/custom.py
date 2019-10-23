@@ -4557,6 +4557,13 @@ def update_virtual_router(cmd, instance, tags=None):
     return instance
 
 
+def list_virtual_router(cmd, resource_group_name=None):
+    client = network_client_factory(cmd.cli_ctx).virtual_routers
+    if resource_group_name is not None:
+        return client.list_by_resource_group(resource_group_name)
+    return client.list()
+
+
 def create_virtual_router_peering(cmd, resource_group_name, virtual_router_name, peering_name, peer_asn, peer_ip):
     VirtualRouterPeering = cmd.get_models('VirtualRouterPeering')
     client = network_client_factory(cmd.cli_ctx).virtual_router_peerings

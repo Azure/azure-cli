@@ -2315,6 +2315,38 @@ class NetworkVnetGatewayIpSecPolicy(ScenarioTest):
         self.cmd('network vnet-gateway ipsec-policy list -g {rg} --gateway-name {gw}')
 
 
+class NetworkVirtualRouter(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_virtual_router', location=SouthCentralUS)
+    def test_network_virtual_router_scenario(self, resource_group, location):
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'location': location,
+            'vnet': 'vnet1',
+            'ip': 'pip1',
+            'gw': 'gw1',
+            'gw_sku': 'HighPerformance',
+            'vrouter': 'vrouter1',
+            'vrouter_peering': 'peering1'
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name GatewaySubnet -l {location}')
+        self.cmd('network public-ip create -g {rg} -n {ip} -l {location}')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw} --public-ip-address {ip} --vnet {vnet} --sku {gw_sku} --gateway-type ExpressRoute -l {location}')
+
+        self.cmd('network vrouter create -n {vrouter} -l {location} -g {rg} --hosted-gateway {gw}', checks=[
+            self.check('type', 'Microsoft.Network/VirtualRouters'),
+            self.check('name', '{vrouter}')
+        ])
+
+        self.cmd('network vrouter show -n {vrouter} -g {rg}', checks=[
+            self.check('name', '{vrouter}')
+        ])
+
+        self.cmd()
+
+
 class NetworkSubnetScenarioTests(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_subnet_set_test')
