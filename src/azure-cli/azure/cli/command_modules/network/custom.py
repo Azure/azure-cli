@@ -74,6 +74,11 @@ def list_express_route_circuits(cmd, resource_group_name=None):
     return _generic_list(cmd.cli_ctx, 'express_route_circuits', resource_group_name)
 
 
+def create_express_route_auth(cmd, resource_group_name, circuit_name, authorization_name):
+    client = network_client_factory(cmd.cli_ctx).express_route_circuit_authorizations
+    return client.create_or_update(resource_group_name, circuit_name, authorization_name)
+
+
 def list_lbs(cmd, resource_group_name=None):
     return _generic_list(cmd.cli_ctx, 'load_balancers', resource_group_name)
 
