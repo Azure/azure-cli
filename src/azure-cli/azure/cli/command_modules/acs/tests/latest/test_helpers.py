@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
-import mock
 from azure.cli.command_modules.acs import _helpers as helpers
 
 
