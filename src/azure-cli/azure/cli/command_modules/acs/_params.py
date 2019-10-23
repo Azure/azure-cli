@@ -20,7 +20,7 @@ from ._validators import (
     validate_create_parameters, validate_k8s_client_version, validate_k8s_version, validate_linux_host_name,
     validate_list_of_integers, validate_ssh_key, validate_connector_name, validate_max_pods, validate_nodepool_name,
     validate_vm_set_type, validate_load_balancer_sku, validate_load_balancer_outbound_ips,
-    validate_load_balancer_outbound_ip_prefixes, validate_taints, validate_ip_ranges, validate_acr, validate_ip_ranges_on_create)
+    validate_load_balancer_outbound_ip_prefixes, validate_taints, validate_ip_ranges, validate_acr)
 
 aci_connector_os_type = ['Windows', 'Linux', 'Both']
 

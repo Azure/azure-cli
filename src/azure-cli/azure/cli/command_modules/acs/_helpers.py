@@ -12,7 +12,7 @@ def _populate_api_server_access_profile(api_server_authorized_ip_ranges):
     access_profile = None
     if api_server_authorized_ip_ranges:
         access_profile = ManagedClusterAPIServerAccessProfile(
-            authorized_ip_ranges=api_server_authorized_ip_ranges.split(",")
+            authorized_ip_ranges=[ip.strip() for ip in api_server_authorized_ip_ranges.split(",")]
         )
     return access_profile
 

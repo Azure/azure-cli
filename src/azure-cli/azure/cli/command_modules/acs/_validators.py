@@ -79,14 +79,26 @@ def validate_ip_ranges(namespace):
     if not namespace.api_server_authorized_ip_ranges:
         return
 
-    allow_all_traffic = "0.0.0.0/32"
-    for ip in namespace.api_server_authorized_ip_ranges.split(','):
-        if ip == allow_all_traffic:
+    restrict_traffic_to_agentnodes = "0.0.0.0/32"
+    ip_ranges = [ip.strip() for ip in namespace.api_server_authorized_ip_ranges.split(",")]
+    allow_all_traffic = ""
+
+    if restrict_traffic_to_agentnodes in ip_ranges and len(ip_ranges) > 1:
+        raise CLIError("--api-server-authorized-ip-ranges of 0.0.0.0/32 cannot \
+            be set in tandem with other IPv4 address or CIDRs since it explicitly restricts traffic")
+
+    if allow_all_traffic in ip_ranges and len(ip_ranges) > 1:
+        raise CLIError("--api-server-authorized-ip-ranges cannot be disabled and simultaneously enabled")
+
+    for ip in ip_ranges:
+        if ip in [restrict_traffic_to_agentnodes, allow_all_traffic]:
             continue
         try:
             ip = ip_network(ip)
             if not ip.is_global:
                 raise CLIError("--api-server-authorized-ip-ranges must be global non-reserved addresses or CIDRs")
+            if ip.version == 6:
+                raise CLIError("--api-server-authorized-ip-ranges cannot be IPv6 addresses")
         except ValueError:
             raise CLIError("--api-server-authorized-ip-ranges should be a list of IPv4 addresses or CIDRs")
 
