@@ -478,6 +478,28 @@ Release History
 **ServiceFabric**
 
 * az sf cluster create: fix #10916 modify service fabric linux and windows template.json compute vmss from standard to managed disks
+* Adding new commands to manage appliaction and services.
+    - sf application-type-version
+        - list
+        - delete
+        - show
+        - create
+    - sf application-type
+        - list
+        - delete
+        - show
+        - create
+    - sf application
+        - list
+        - delete
+        - show
+        - create
+        - update
+    - sf service
+        - list
+        - delete
+        - show
+        - create
 
 **SQL**
 
@@ -565,10 +587,6 @@ Release History
 **Storage**
 
 * Add support for WebAssembly (.wasm) mimetype detection
-
-**ServiceFabric**
-
-* Adding new commands to manage appliaction and services.
 
 2.0.74
 ++++++
