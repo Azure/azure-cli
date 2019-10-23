@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.util import CLIError
-from ._utils import get_resource_group_name_by_registry_name, validate_premium_registry, parse_actions_from_repositories
+from ._utils import get_resource_group_name_by_registry_name, parse_actions_from_repositories
 
 
 def acr_scope_map_create(cmd,
@@ -16,7 +16,6 @@ def acr_scope_map_create(cmd,
                          description=None):
 
     resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
-    validate_premium_registry(cmd, registry_name, resource_group_name)
 
     actions = parse_actions_from_repositories(repository_actions_list)
 
