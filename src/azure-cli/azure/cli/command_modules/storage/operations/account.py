@@ -17,7 +17,9 @@ logger = get_logger(__name__)
 def create_storage_account(cmd, resource_group_name, account_name, sku=None, location=None, kind=None,
                            tags=None, custom_domain=None, encryption_services=None, access_tier=None, https_only=None,
                            enable_files_aadds=None, bypass=None, default_action=None, assign_identity=False,
-                           enable_large_file_share=None, enable_files_adds=None):
+                           enable_large_file_share=None, enable_files_adds=None,domain_name=None,
+                           net_bios_domain_name=None, forest_name=None, domain_guid=None, domain_sid=None,
+                           azure_storage_sid=None):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
@@ -40,8 +42,13 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
             directory_service_options='AADDS' if enable_files_aadds else 'None')
     if enable_files_adds is not None:
+        ActiveDirectoryProperties = cmd.get_models('ActiveDirectoryProperties')
+        active_directory_properties = ActiveDirectoryProperties(domain_name=domain_name, net_bios_domain_name=net_bios_domain_name,
+                                                                forest_name=forest_name, domain_guid=domain_guid, domain_sid=domain_sid,
+                                                                azure_storage_sid=azure_storage_sid)
+        directory_service_options = 'AD' if enable_files_adds else 'None'
         params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
-            directory_service_options='AD' if enable_files_adds else 'None')
+            directory_service_options=directory_service_options, active_directory_properties=active_directory_properties)
     if enable_large_file_share:
         LargeFileSharesState = cmd.get_models('LargeFileSharesState')
         params.large_file_shares_state = LargeFileSharesState("Enabled")
@@ -116,7 +123,9 @@ def show_storage_account_usage_no_location(cmd):
 def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=None, use_subdomain=None,
                            encryption_services=None, encryption_key_source=None, encryption_key_vault_properties=None,
                            access_tier=None, https_only=None, enable_files_aadds=None, assign_identity=False,
-                           bypass=None, default_action=None, enable_large_file_share=None, enable_files_adds=None):
+                           bypass=None, default_action=None, enable_large_file_share=None, enable_files_adds=None,
+                           domain_name=None, net_bios_domain_name=None, forest_name=None, domain_guid=None, domain_sid=None,
+                           azure_storage_sid=None):
     StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
@@ -152,8 +161,15 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
         params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
             directory_service_options='AADDS' if enable_files_aadds else 'None')
     if enable_files_adds is not None:
+        ActiveDirectoryProperties = cmd.get_models('ActiveDirectoryProperties')
+        active_directory_properties = ActiveDirectoryProperties(domain_name=domain_name, net_bios_domain_name=net_bios_domain_name,
+                                                                forest_name=forest_name, domain_guid=domain_guid, domain_sid=domain_sid,
+                                                                azure_storage_sid=azure_storage_sid)
+        directory_service_options = 'AD' if enable_files_adds else 'None'
+
         params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
-            directory_service_options='AD' if enable_files_adds else 'None')
+            directory_service_options=directory_service_options, active_directory_properties=active_directory_properties)
+
     if assign_identity:
         params.identity = Identity()
     if enable_large_file_share:
