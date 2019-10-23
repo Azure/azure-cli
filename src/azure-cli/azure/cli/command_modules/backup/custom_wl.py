@@ -46,6 +46,10 @@ protectable_item_type_map = {'SQLDatabase': 'SQLDataBase',
                              'SQLInstance': 'SQLInstance',
                              'SQLAG': 'SQLAG'}
 
+item_type_map = {'SQLDatabase': 'SQLDataBase',             
+                  'HANAInstance': 'SAPHanaSystem',
+                  'SQLInstance': 'SQLInstance',
+                  'SQLAG': 'SQLAG'}
 
 def show_wl_policy(client, resource_group_name, vault_name, name):
     return [client.get(vault_name, resource_group_name, name)]
