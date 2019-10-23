@@ -20,6 +20,7 @@ def _get_vm_version(vm_type):
     elif vm_type == 'Microsoft.ClassicCompute/virtualMachines':
         return 'Classic'
 
+
 @unittest.skip("Bad soft delete")
 class BackupTests(ScenarioTest, unittest.TestCase):
     @ResourceGroupPreparer()
