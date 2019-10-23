@@ -1019,7 +1019,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         fd, temp_path = tempfile.mkstemp()
         self.kwargs.update({'file': temp_path})
         try:
-            self.cmd('aks get-credentials -g {resource_group} -n {name} --file {file}')
+            self.cmd('aks get-credentials -g {resource_group} -n {name} --file "{file}"')
         finally:
             os.close(fd)
             os.remove(temp_path)
