@@ -1423,7 +1423,7 @@ class VMCreateExistingOptions(ScenarioTest):
             'vmss': 'vmss1'
         })
 
-        self.cmd('vmss create -g {rg} -n {vmss} --empty')
+        self.cmd('vmss create -g {rg} -n {vmss} --orchestrator VM')
         self.cmd('vm create -g {rg} -n {vm} --image ubuntults --vmss {vmss}')
         vmss_id = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()['id']
         self.cmd('vm show -g {rg} -n {vm}', checks=[
