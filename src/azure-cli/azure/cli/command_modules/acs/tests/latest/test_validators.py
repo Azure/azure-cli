@@ -12,8 +12,8 @@ class TestValidateIPRanges(unittest.TestCase):
         api_server_authorized_ip_ranges = " 0.0.0.0/32 , 129.1.1.1.1 "
         namespace = Namespace(api_server_authorized_ip_ranges)
         err = ("Setting --api-server-authorized-ip-ranges to 0.0.0.0/32 is not allowed with other IP ranges."
-                        "Refer to https://aka.ms/aks/whitelist for more details")
-        
+               "Refer to https://aka.ms/aks/whitelist for more details")
+
         with self.assertRaises(CLIError) as cm:
             validators.validate_ip_ranges(namespace)
         self.assertEqual(str(cm.exception), err)
@@ -37,7 +37,7 @@ class TestValidateIPRanges(unittest.TestCase):
         api_server_authorized_ip_ranges = "192.168.0.0,192.168.0.0/16"
         namespace = Namespace(api_server_authorized_ip_ranges)
         err = "--api-server-authorized-ip-ranges must be global non-reserved addresses or CIDRs"
-        
+
         with self.assertRaises(CLIError) as cm:
             validators.validate_ip_ranges(namespace)
         self.assertEqual(str(cm.exception), err)
@@ -46,7 +46,7 @@ class TestValidateIPRanges(unittest.TestCase):
         api_server_authorized_ip_ranges = "193.168.0"
         namespace = Namespace(api_server_authorized_ip_ranges)
         err = "--api-server-authorized-ip-ranges should be a list of IPv4 addresses or CIDRs"
-       
+
         with self.assertRaises(CLIError) as cm:
             validators.validate_ip_ranges(namespace)
         self.assertEqual(str(cm.exception), err)
@@ -55,7 +55,7 @@ class TestValidateIPRanges(unittest.TestCase):
         api_server_authorized_ip_ranges = "3ffe:1900:4545:3:200:f8ff:fe21:67cf"
         namespace = Namespace(api_server_authorized_ip_ranges)
         err = "--api-server-authorized-ip-ranges cannot be IPv6 addresses"
-        
+
         with self.assertRaises(CLIError) as cm:
             validators.validate_ip_ranges(namespace)
         self.assertEqual(str(cm.exception), err)
