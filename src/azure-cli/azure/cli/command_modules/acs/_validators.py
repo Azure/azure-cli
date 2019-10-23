@@ -80,12 +80,12 @@ def validate_ip_ranges(namespace):
         return
 
     restrict_traffic_to_agentnodes = "0.0.0.0/32"
-    ip_ranges = [ip.strip() for ip in namespace.api_server_authorized_ip_ranges.split(",")]
     allow_all_traffic = ""
+    ip_ranges = [ip.strip() for ip in namespace.api_server_authorized_ip_ranges.split(",")]
 
     if restrict_traffic_to_agentnodes in ip_ranges and len(ip_ranges) > 1:
-        raise CLIError("--api-server-authorized-ip-ranges of 0.0.0.0/32 cannot \
-            be set in tandem with other IPv4 address or CIDRs since it explicitly restricts traffic")
+        raise CLIError("--api-server-authorized-ip-ranges cannot restrict traffic via 0.0.0.0/32 and \
+            simultaneously enable traffic by setting other IPv4 addresses or CIDRs")
 
     if allow_all_traffic in ip_ranges and len(ip_ranges) > 1:
         raise CLIError("--api-server-authorized-ip-ranges cannot be disabled and simultaneously enabled")
