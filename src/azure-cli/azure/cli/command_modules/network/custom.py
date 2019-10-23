@@ -4551,7 +4551,7 @@ def create_virtual_router(cmd, resource_group_name, virtual_router_name, hosted_
     return client.create_or_update(resource_group_name, virtual_router_name, virtual_router)
 
 
-def update_virtual_router_peering(cmd, instance, tags=None):
+def update_virtual_router(cmd, instance, tags=None):
     with cmd.update_context(instance) as c:
         c.set_param('tags', tags)
     return instance

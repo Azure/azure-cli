@@ -33,7 +33,7 @@ from azure.cli.command_modules.network._validators import (
     validate_express_route_port, bandwidth_validator_factory,
     get_header_configuration_validator, validate_nat_gateway, validate_match_variables,
     validate_waf_policy, get_subscription_list_validator, validate_frontend_ip_configs,
-    validate_application_gateway_identity, validate_express_route_gateway)
+    validate_application_gateway_identity, validate_virtul_network_gateway)
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 from azure.cli.command_modules.network._completers import (
     subnet_completion_list, get_lb_subresource_completion_list, get_ag_subresource_completion_list,
@@ -1295,7 +1295,7 @@ def load_arguments(self, _):
 
     with self.argument_context('network vrouter') as c:
         c.argument('virtual_router_name', options_list=['--name', '-n'], help='The name of the Virtual Router.')
-        c.argument('hosted_gateway', help='Name or ID of the virtual network gateway with ExpressRouter on which VirtualRouter is hosted.', validator=validate_express_route_gateway)
+        c.argument('hosted_gateway', help='Name or ID of the virtual network gateway with ExpressRouter on which VirtualRouter is hosted.', validator=validate_virtul_network_gateway)
 
     with self.argument_context('network vrouter peering') as c:
         c.argument('virtual_router_name', options_list=['--vrouter-name'], help='The name of the Virtual Router.')
