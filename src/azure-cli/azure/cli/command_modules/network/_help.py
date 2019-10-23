@@ -2351,6 +2351,29 @@ type: command
 short-summary: Get the details of an ExpressRoute link.
 """
 
+
+helps['network express-route port link update'] = """
+type: command
+short-summary: Manage MACsec configuration of an ExpressRoute Link.
+examples:
+  - name: Enable MACsec on ExpressRoute Direct Ports once at a time.
+    text: |-
+        az network express-route port link update \\
+        --resource-group MyResourceGroup \\
+        --port-name MyExpressRoutePort \\
+        --name link1 \\
+        --macsec-ckn-secret-identifier MacSecCKNSecretID \\
+        --macsec-cak-secret-identifier MacSecCAKSecretID \\
+        --macsec-cipher gcm-aes-128
+  - name: Enable administrative state of an ExpressRoute Link.
+    text: |-
+        az network express-route port link update \\
+        --resource-group MyResourceGroup \\
+        --port-name MyExpressRoutePort \\
+        --name link2 \\
+        --admin-state Enabled
+"""
+
 helps['network express-route port list'] = """
 type: command
 short-summary: List ExpressRoute ports.
@@ -2383,6 +2406,39 @@ short-summary: Get the details of an ExpressRoute port.
 helps['network express-route port update'] = """
 type: command
 short-summary: Update settings of an ExpressRoute port.
+"""
+
+helps['network express-route port identity'] = """
+type: group
+short-summary: Manage the managed service identity of an ExpressRoute Port
+"""
+
+helps['network express-route port identity assign'] = """
+type: command
+short-summary: Assign a managed service identity to an ExpressRoute Port
+examples:
+  - name: Assign an identity to the ExpressRoute Port
+    text: |-
+        az network express-route port identity assign \\
+        --resource-group MyResourceGroupg \\
+        --name MyExpressRoutePort \\
+        --identity MyUserAssignedManagedServiceIdentity
+"""
+
+helps['network express-route port identity remove'] = """
+type: command
+short-summary: Remove the managed service identity of an ExpressRoute Port
+examples:
+  - name: Remove an identity of the ExpressRoute Port
+    text: az network express-route port identity remove -g MyResourceGroup --name MyExpressRoutePort
+"""
+
+helps['network express-route port identity show'] = """
+type: command
+short-summary: Show the managed service identity of an ExpressRoute Port
+examples:
+  - name: Show an identity of the ExpressRoute Port
+    text: az network express-route port identity show -g MyResourceGroup --name MyExpressRoutePort
 """
 
 helps['network express-route show'] = """

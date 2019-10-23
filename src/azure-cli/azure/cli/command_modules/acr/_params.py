@@ -254,21 +254,32 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('acr scope-map') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])
         c.argument('description', options_list=['--description'], help='Description for the scope map. Maximum 256 characters are allowed.', required=False)
-        c.argument('add_repository', options_list=['--add'], nargs='+', help='Actions to be added. Use the format "--add REPO [ACTION1 ACTION2 ...]" per flag. Valid actions are metadata/read, metadata/write, content/read, content/write and content/delete', action='append', required=False)
-        c.argument('remove_repository', options_list=['--remove'], nargs='+', help='Actions to be removed. Use the format "--remove REPO [ACTION1 ACTION2 ...]" per flag. Valid actions are metadata/read, metadata/write, content/read, content/write and content/delete', action='append', required=False)
         c.argument('scope_map_name', options_list=['--name', '-n'], help='The name of the scope map.', required=True)
 
+    valid_actions = "Valid actions are metadata/read, metadata/write, content/read, content/write and content/delete"
+    with self.argument_context('acr scope-map update') as c:
+        c.argument('add_repository', options_list=['--add'], nargs='+', action='append', required=False,
+                   help='repository permissions to be added. Use the format "--add REPO [ACTION1 ACTION2 ...]" per flag. ' + valid_actions)
+        c.argument('remove_repository', options_list=['--remove'], nargs='+', action='append', required=False,
+                   help='respsitory permissions to be removed. Use the format "--remove REPO [ACTION1 ACTION2 ...]" per flag. ' + valid_actions)
+
     with self.argument_context('acr scope-map create') as c:
-        c.argument('add_repository', options_list=['--add'], nargs='+', help='Actions to be added. Use the format "--add REPO [ACTION1 ACTION2 ...]" per flag. Valid actions are metadata/read, metadata/write, content/read, content/write and content/delete', action='append', required=True)
+        c.argument('repository_actions_list', options_list=['--repository'], nargs='+', action='append', required=True,
+                   help='repository permissions. Use the format "--repository REPO [ACTION1 ACTION2 ...]" per flag. ' + valid_actions)
 
     with self.argument_context('acr token') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])
         c.argument('token_name', options_list=['--name', '-n'], help='The name of the token.', required=True)
         c.argument('scope_map_name', options_list=['--scope-map'], help='The name of the scope map associated with the token', required=False)
-        c.argument('status', options_list=['--status'], help='The status of the token. Allowed values are "enabled" or "disabled".', required=False, default="enabled")
+        c.argument('status', options_list=['--status'], arg_type=get_enum_type(['enabled', 'disabled']),
+                   help='The status of the token', required=False, default="enabled")
 
     with self.argument_context('acr token create') as c:
-        c.argument('scope_map_name', options_list=['--scope-map'], help='The name of the scope map associated with the token', required=True)
+        c.argument('scope_map_name', options_list=['--scope-map'],
+                   help='The name of the scope map with pre-configured repository permissions. Use "--repository" if you would like CLI to configure one for you')
+        c.argument('repository_actions_list', options_list=['--repository'], nargs='+', action='append',
+                   help='repository permissions. Use the format "--repository REPO [ACTION1 ACTION2 ...]" per flag. ' + valid_actions)
+        c.argument('no_passwords', arg_type=get_three_state_flag(), help='Do not generate passwords, instead use "az acr token credential generate"')
 
     with self.argument_context('acr token update') as c:
         c.argument('scope_map_name', options_list=['--scope-map'], help='The name of the scope map associated with the token. If not specified, running this command will disassociate the current scope map related to the token.', required=False)

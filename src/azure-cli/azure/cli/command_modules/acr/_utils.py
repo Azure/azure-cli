@@ -414,6 +414,19 @@ def get_task_id_from_task_name(cli_ctx, resource_group, registry_name, task_name
     )
 
 
+def parse_actions_from_repositories(allow_or_remove_repository):
+    REPOSITORIES = 'repositories'
+    actions = []
+    for rule in allow_or_remove_repository:
+        repository = rule[0]
+        if len(rule) < 2:
+            raise CLIError('At least one action must be specified with the repository {}.'.format(repository))
+        for action in rule[1:]:
+            actions.append('{}/{}/{}'.format(REPOSITORIES, repository, action.lower()))
+
+    return actions
+
+
 class ResourceNotFound(CLIError):
     """For exceptions that a resource couldn't be found in user's subscription
     """
