@@ -26,6 +26,7 @@ from ._azconfig.models import (KeyValue,
                                ModifyKeyValueOptions,
                                QueryKeyValueCollectionOptions,
                                QueryKeyValueOptions)
+from .feature import list_feature
 
 logger = get_logger(__name__)
 FEATURE_FLAG_PREFIX = ".appconfig.featureflag/"
@@ -50,7 +51,8 @@ def import_config(cmd,
                   src_key=None,
                   src_label=None,
                   # from-appservice parameters
-                  appservice_account=None):
+                  appservice_account=None,
+                  skip_features=False):
     # fetch key values from source
     if source == 'file':
         src_kvs = __read_kv_from_file(
@@ -98,41 +100,75 @@ def export_config(cmd,
                   dest_connection_string=None,
                   dest_label=None,
                   # to-app-service parameters
-                  appservice_account=None):
+                  appservice_account=None,
+                  skip_features=False):
     # fetch key values from user's configstore
     src_kvs = __read_kv_from_config_store(
         cmd, name=name, connection_string=connection_string, key=key, label=label, prefix_to_remove=prefix)
+    
+    # We need to separate KV from feature flags
+    __discard_features_from_retrieved_kv(src_kvs)
 
-    # if customer needs preview & confirmation
-    if not yes:
-        # fetch key values from destination
+    src_features = []
+    dest_kvs = []
+
+    if skip_features:
+        if destination == 'appconfig':            
+            # dest_kvs contains features and KV that match the label. We discard only features.
+            dest_kvs = __read_kv_from_config_store(
+                cmd, name=dest_name, connection_string=dest_connection_string, key=None, label=dest_label)
+            __discard_features_from_retrieved_kv(dest_kvs)
+            
+        elif destination == 'appservice':
+            dest_kvs = __read_kv_from_app_service(
+                cmd, appservice_account=appservice_account, prefix_to_add="")
+    else:
         if destination == 'file':
-            dest_kvs = []  # treat as empty file and overwrite exported key values
+            all_features_pattern = '*'
+            # Get all Feature flags with matching label
+            src_features = __read_features_from_config_store(
+                cmd, name=name, connection_string=connection_string, key=all_features_pattern, label=label)
         elif destination == 'appconfig':
+            # Append all features to src_kvs list
+            all_features_pattern = FEATURE_FLAG_PREFIX + '*'
+            all_features = __read_kv_from_config_store(
+                cmd, name=name, connection_string=connection_string, key=all_features_pattern, label=label)
+            for feature in all_features:
+                if feature.content_type == FEATURE_FLAG_CONTENT_TYPE:
+                    src_kvs.append(feature)
+            
+            # dest_kvs already contains features and KV that match the label
             dest_kvs = __read_kv_from_config_store(
                 cmd, name=dest_name, connection_string=dest_connection_string, key=None, label=dest_label)
         elif destination == 'appservice':
             dest_kvs = __read_kv_from_app_service(
                 cmd, appservice_account=appservice_account, prefix_to_add="")
-
+    
+    # if customer needs preview & confirmation
+    if not yes:
         # generate preview and wait for user confirmation
-        src_json = __serialize_kv_list_to_comparable_json_object(
-            keyvalues=src_kvs, level=destination)
-        dest_json = __serialize_kv_list_to_comparable_json_object(
-            keyvalues=dest_kvs, level=destination)
-        need_change = __print_preview(old_json=dest_json, new_json=src_json)
-        if need_change is False:
+        src_kv_json = __serialize_kv_list_to_comparable_json_object(keyvalues=src_kvs, level=destination)
+        dest_kv_json = __serialize_kv_list_to_comparable_json_object(keyvalues=dest_kvs, level=destination)
+        need_kv_change = __print_preview(old_json=dest_kv_json, new_json=src_kv_json)
+
+        src_features_json = __serialize_feature_list_to_comparable_json_object(features=src_features, level=destination)
+        # Currently, we only overwrite features to file. So dest features will always be empty.
+        dest_features_json = {}
+        need_feature_change = __print_features_preview(old_json=dest_features_json, new_json=src_features_json)
+
+        if not need_kv_change and not need_feature_change:
             return
 
     # export to destination
     if destination == 'file':
-        __write_kv_to_file(file_path=path, key_values=src_kvs, format_=format_, separator=separator)
+        __write_kv_and_features_to_file(file_path=path, key_values=src_kvs, features=src_features,
+                                        format_=format_, separator=separator)
+
     elif destination == 'appconfig':
         __write_kv_to_config_store(cmd, key_values=src_kvs, name=dest_name,
-                                   connection_string=dest_connection_string, label=dest_label)
+                                                connection_string=dest_connection_string, label=dest_label)
     elif destination == 'appservice':
-        __write_kv_to_app_service(
-            cmd, key_values=src_kvs, appservice_account=appservice_account)
+        __write_kv_to_app_service(cmd, key_values=src_kvs, appservice_account=appservice_account)
 
 
 def set_key(cmd,
@@ -505,7 +541,7 @@ def __read_kv_from_file(file_path, format_, separator=None, prefix_to_add="", de
             if format_ == 'json':
                 config_data = json.load(config_file)
             elif format_ == 'yaml':
-                for yaml_data in list(yaml.load_all(config_file)):
+                for yaml_data in list(yaml.safe_load_all(config_file)):
                     config_data.update(yaml_data)
             elif format_ == 'properties':
                 config_data = javaproperties.load(config_file)
@@ -533,18 +569,20 @@ def __read_kv_from_file(file_path, format_, separator=None, prefix_to_add="", de
     return key_values
 
 
-def __write_kv_to_file(file_path, key_values=None, format_=None, separator=None):
+def __write_kv_and_features_to_file(file_path, key_values=None, features=None, format_=None, separator=None):
     try:
-        exported_keyvalues = __export_keyvalues(
-            key_values, format_, separator, None)
+        exported_keyvalues = __export_keyvalues(key_values, format_, separator, None)
+        exported_features = __export_features(features, format_)
         with open(file_path, 'w') as fp:
             if format_ == 'json':
                 json.dump(exported_keyvalues, fp, indent=2)
+                json.dump(exported_features, fp, indent=2)
             elif format_ == 'yaml':
                 yaml.dump(exported_keyvalues, fp)
+                yaml.dump(exported_features, fp)
             elif format_ == 'properties':
-                with open(file_path, 'w') as fp:
-                    javaproperties.dump(exported_keyvalues, fp)
+                javaproperties.dump(exported_keyvalues, fp)
+                javaproperties.dump(exported_features, fp)
     except Exception as exception:
         raise CLIError("Fail to export key-values to file." + str(exception))
 
@@ -574,6 +612,20 @@ def __read_kv_from_config_store(cmd, name=None, connection_string=None, key=None
     return key_values
 
 
+
+def __read_features_from_config_store(cmd, name=None, connection_string=None, key=None, label=None):
+    try:
+        # fetch list of all FeatureFlag objects matching the given label
+        return list_feature(cmd,
+                            feature=key,
+                            label=label,
+                            name=name,
+                            connection_string=connection_string,
+                            all_=True)
+    except Exception as exception:
+        raise CLIError(str(exception))
+
+
 def __write_kv_to_config_store(cmd, key_values, name=None, connection_string=None, label=None):
     if not key_values:
         return
@@ -589,6 +641,15 @@ def __write_kv_to_config_store(cmd, key_values, name=None, connection_string=Non
         raise CLIError(str(exception))
 
 
+def  __discard_features_from_retrieved_kv(src_kvs):
+    try:
+        for kv in src_kvs:
+            if kv.key.startswith(FEATURE_FLAG_PREFIX) and kv.content_type == FEATURE_FLAG_CONTENT_TYPE:
+                del kv
+    except Exception as exception:
+        raise CLIError(str(exception))
+
+
 # App Service <-> List of KeyValue object
 
 def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add=""):
@@ -600,7 +661,7 @@ def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add=""):
         for item in settings:
             key = prefix_to_add + item['name']
             value = item['value']
-            tags = {'AppService:SlotSetting': str(item['slotSetting']).lower()}
+            tags = {'AppService:SlotSetting': str(item['slotSetting']).lower()} if item['slotSetting'] else {}
             kv = KeyValue(key=key, value=value, tags=tags)
             key_values.append(kv)
         return key_values
@@ -616,11 +677,7 @@ def __write_kv_to_app_service(cmd, key_values, appservice_account):
         for kv in key_values:
             name = kv.key
             value = kv.value
-            if 'AppService:SlotSetting' not in kv.tags:
-                raise CLIError(
-                    "key-values must contain 'AppService:SlotSetting' tag in order to export to AppService correctly.")
-            is_slot_setting = (kv.tags['AppService:SlotSetting'] == 'true')
-            if is_slot_setting:
+            if 'AppService:SlotSetting' in kv.tags and kv.tags['AppService:SlotSetting'] == 'true':
                 slot_settings.append(name + '=' + value)
             else:
                 non_slot_settings.append(name + '=' + value)
@@ -672,6 +729,20 @@ def __serialize_kv_list_to_comparable_json_object(keyvalues, level):
     return res
 
 
+def __serialize_feature_list_to_comparable_json_object(features, level):
+    res = {}
+    for feature in features:
+        # state
+        feature_json = {'state': feature.state}
+        # description
+        feature_json['description'] = feature.description
+        # conditions
+        feature_json['conditions'] = feature.conditions
+        # key
+        res[feature.key] = feature_json
+    return res
+
+
 def __serialize_kv_list_to_comparable_json_list(keyvalues):
     res = []
     for kv in keyvalues:
@@ -689,6 +760,52 @@ def __serialize_kv_list_to_comparable_json_list(keyvalues):
         kv_json['tags'] = tag_json
         res.append(kv_json)
     return res
+
+
+def __print_features_preview(old_json, new_json):
+    error_print('\n---------------- Preview Feature Flags (Beta) ----------------')
+    if not new_json:
+        error_print('\nSource configuration is empty. No changes will be made.')
+        return False
+
+    # perform diff operation
+    # to simplify output, add one shared key in src and dest configuration
+    new_json['@base'] = ''
+    old_json['@base'] = ''
+    differ = JsonDiffer(syntax='explicit')
+    res = differ.diff(old_json, new_json)
+    keys = str(res.keys())
+    if res == {} or (('update' not in keys) and ('insert' not in keys)):
+        error_print('\nTarget configuration already contains all feature flags in source. No changes will be made.')
+        return False
+
+    # format result printing
+    for action, changes in res.items():
+        if action.label == 'delete':
+            continue  # we do not delete KVs while importing/exporting
+        elif action.label == 'insert':
+            error_print('\nAdding:')
+            for key, adding in changes.items():
+                record = {'feature': key}
+                for attribute, value in adding.items():
+                    record[str(attribute)] = str(value)
+                error_print(json.dumps(record))
+        elif action.label == 'update':
+            error_print('\nUpdating:')
+            for key, updates in changes.items():
+                updates = list(updates.values())[0]
+                attributes = list(updates.keys())
+                old_record = {'feature': key}
+                new_record = {'feature': key}
+                for attribute in attributes:
+                    old_record[attribute] = old_json[key][attribute]
+                    new_record[attribute] = new_json[key][attribute]
+                error_print('- ' + json.dumps(old_record))
+                error_print('+ ' + json.dumps(new_record))
+    error_print("")  # printing an empty line for formatting purpose
+    confirmation_message = "Do you want to continue? \n"
+    user_confirmation(confirmation_message)
+    return True
 
 
 def __print_preview(old_json, new_json):
@@ -870,6 +987,63 @@ def __export_keyvalues(fetched_items, format_, separator, prefix=None):
         return __compact_key_values(exported_dict if not exported_list else exported_list)
     except Exception as exception:
         raise CLIError("Fail to export key-values." + str(exception))
+
+
+def __flatten_dict_to_properties(exported_dict, separator='.', prefix=''):
+    flattened_properties_dict = {}
+    if isinstance(exported_dict, dict):
+        for keys, values in exported_dict.items():
+            for key, value in __flatten_dict_to_properties(values, separator, keys).items():
+                flattened_properties_dict = {prefix+separator+key : value} if prefix else {key:value} 
+    else:
+        flattened_properties_dict = { prefix : exported_dict } 
+
+    return flattened_properties_dict
+
+
+def __export_features(retrieved_features, format_):
+    exported_dict = {}
+    if format_ == 'json':
+        exported_dict["FeatureManagement"] = {}
+    
+    if format_ == 'yaml':
+        featureSetValues = {}
+        featureSetValues["features"] = {}
+        exported_dict["feature-management"] = {"featureSet" : featureSetValues}
+    
+    try:
+        for feature in retrieved_features:
+
+            # if feature state is on or off, it means there are no filters
+            # if feature state is off or conditional
+            if feature.state == "on":
+                feature_state = True 
+
+            elif feature.state == "off":
+                feature_state = False 
+
+            elif feature.state == "conditional":
+                feature_state = {}
+                feature_state["EnabledFor"] = feature.conditions['client_filters']
+
+            feature_entry = {}
+            feature_entry[feature.key] = feature_state
+
+            if format_ == 'json':
+                exported_dict["FeatureManagement"] = feature_entry
+
+            if format_ == 'yaml' or format_ == 'properties':
+                featureSetValues = {}
+                featureSetValues["features"] = feature_entry
+                exported_dict["feature-management"] = {"featureSet" : featureSetValues}
+
+            if format_ == 'properties':
+                exported_dict = __flatten_dict_to_properties(exported_dict)
+
+        return __compact_key_values(exported_dict)
+
+    except Exception as exception:
+        raise CLIError("Failed to export feature flags." + str(exception))
 
 
 def __check_file_encoding(file_path):
