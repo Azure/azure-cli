@@ -3,6 +3,75 @@
 Release History
 ===============
 
+**SQL**
+
+* Added "--compute-model", "--auto-pause-delay", and "--min-capacity" parameters to support CRUD operations for new SQL Database offering: Serverless compute model."
+
+**ACR**
+
+* Added a preview parameter `--pack-image-tag` to command `az acr pack build`.
+
+**AppConfig**
+
+* Minor bug fix for appconfig kv export to file command. Stop reading dest file contents during export.
+
+**AppService**
+
+* Fixing an issue where webapp config ssl bind operation was removing existing tags from the resource
+* Added "--build remote" flag for "az functionapp deployment source config-zip" to support remote build action during function app deployment.
+* Change default node version on function apps to ~10 for Windows
+* Add --runtime-version property to `az functionapp create`
+
+**ARM**
+
+* deployment/group deployment validate: Add --handle-extended-json-format parameter to support multiline and comments in json template when deployment.
+
+**Compute**
+
+* vm create: Add warning when specifying accelerated networking and an existing NIC together.
+* [BREAKING CHANGE] vm extension set: Fix bug where users could not set an extension on a VM with --ids.
+* New commands `az vm image terms accept/cancel/show` to manage Azure Marketplace image terms.
+
+**CosmosDB**
+
+* [BREAKING] sql container create: Change --partition-key-path to required parameter
+* [BREAKING] gremlin graph create: Change --partition-key-path to required parameter
+* sql container create: Add --unique-key-policy and --conflict-resolution-policy
+* sql container create/update: Update the --idx default schema
+* gremlin graph create: Add --conflict-resolution-policy
+* gremlin graph create/update: Update the --idx default schema
+* Fix typo in help message
+
+**IoT**
+
+* Add new routing source type: DigitalTwinChangeEvents
+
+**Key Vault**
+
+* Fix #9352: Unexpected error when certificate file does not exist.
+
+**Network**
+
+* az network private-dns link vnet create/update: Fixes #9851. Support cross-tenant virtual network linking.
+* [BREAKING CHANGE] network vnet subnet list: Fix #10401. `--resource-group` and `--vnet-name` are required now.
+* az network public-ip prefix create: Fix #10757. Support to specify IP address version (IPv4, IPv6) when creation
+
+**Profile**
+
+* Fix: `az account get-access-token --resource-type ms-graph` not working
+* Remove warning from `az login`
+
+**RBAC**
+
+* Fix #10807: `az ad app update --id {} --display-name {}` doesn't work
+
+**ServiceFabric**
+
+* az sf cluster create: fix #10916 modify service fabric linux and windows template.json compute vmss from standard to managed disks
+
+2.0.75
+++++++
+
 **AKS**
 
 * Set `--load-balancer-sku` default value to standard if supported by the kubernetes version
@@ -18,14 +87,6 @@ Release History
         - Changed parameter --ask from utf-8 string to 32 character hex string.
     job start:
         - Changed the command from `job start` to `job create`.
-    
-**SQL**
-
-* New Cmdlets for sql mi ad-admin that supports setting AAD administrator on Managed instance
-
-**ARM**
-
-* az deployment create: Add --handle-extended-json-format parameter to support multiline and comments in json template.
 
 **AppConfig**
 
@@ -33,46 +94,58 @@ Release History
 * Adding api-version to all requests
 * Upgrading SDK Version to 1.0.0
 
+**AppService**
+
+* Added "webapp config access-restriction show | set | add | remove"
+* az webapp up updated for better error-handling
+* az appservice plan update support Isolated SKU
+
+**ARM**
+
+* az deployment create: Add --handle-extended-json-format parameter to support multiline and comments in json template.
+
+**Backup**
+
+* Enhanced error detail for vault delete in force mode.
+
 **Compute**
 
 * vm create: Add --enable-agent configuration.
 * vm create: Use standard public IP SKU automatically when using zones.
 * vm create: Compose a valid computer name from VM name if computer name is not provided.
 * vm create: Add --workspace to enable log analytics workspace automatically.
-* [BREAKING CHANGE] vm extension set: Fix bug where users could not set an extension on a VM with --ids.
 * vmss create: Add --computer-name-prefix parameter to support custom computer name prefix of virtual machines in the VMSS.
 * Update galleries API version to 2019-07-01.
 
+**IoT**
 
-**Backup**
+* Fix #2116: Unexpected 'az iot hub show' error for resource not found.
 
-* Enhanced error detail for vault delete in force mode.
+**Monitor**
+
+* az monitor log-analytics workspace: Support CRUD for Azure log analytics workspace.
 
 **Network**
 
 * az network private-dns link vnet create/update: Fixes #9851. Support cross-tenant virtual network linking.
 * [BREAKING CHANGE] network vnet subnet list: Fix #10401. `--resource-group` and `--vnet-name` are required now.
 
+**SQL**
 
-**Monitor**
-
-* az monitor log-analytics workspace: Support CRUD for Azure log analytics workspace.
-
-**Profile**
-
-* Fix: `az account get-access-token --resource-type ms-graph` not working.
+* New Cmdlets for sql mi ad-admin that supports setting AAD administrator on Managed instance
 
 **Storage**
 
 * az storage copy: Add --preserve-s2s-access-tier parameter to preserve access tier during service to service copy.
-
-**Storage**
-
 * az storage account create/update: Add --enable-large-file-share parameter to support large file shares for storage account.
 
 **RBAC**
 
 * Fix #10493: az ad sp delete --id {} fails when application is not found. If not found, application deletion is skipped.
+
+**Storage**
+
+* Add support for WebAssembly (.wasm) mimetype detection
 
 2.0.74
 ++++++
@@ -87,13 +160,6 @@ Release History
 * Add `--load-balancer-sku`, `--load-balancer-managed-outbound-ip-count`, `--load-balancer-outbound-ips` and `--load-balancer-outbound-ip-prefixes` to `az aks create` command, which allows for creating AKS cluster with SLB.
 * Add `--load-balancer-managed-outbound-ip-count`, `--load-balancer-outbound-ips` and `--load-balancer-outbound-ip-prefixes` to `az aks update` command, which allows for updating load balancer profile of an AKS cluster with SLB.
 * Add `--vm-set-type` to `az aks create` command, which allows to specify vm types of an AKS Cluster (vmas or vmss).
-
-**AppService**
-
-* Added "webapp config access-restriction show | set | add | remove"
-* az webapp up updated for better error-handling
-* az appservice plan update support Isolated SKU
-* `az functionapp create` support for private ACR images
 
 **ARM**
 
@@ -118,11 +184,6 @@ Release History
 **EventGrid**
 
 * Fix the endpoint help text to refer to the right parameter (namely, to point to parameter `--endpoint` rather than `--endpoint-type` in event subscription commands).
-
-**IoT**
-
-* Add new routing source type: DigitalTwinChangeEvents
-* Fix #2116: Unexpected 'az iot hub show' error for resource not found.
 
 **Key Vault**
 
@@ -199,6 +260,8 @@ Release History
 * az network application-gateway ssl-cert: Fix #8244. Add support for setting key vault id in application-gateway ssl-cert.
 * az network express-route peering peer-connection: Fix #9404. Onboard `show` and `list` command for Azure express route peering peer connection resource.
 * az network vnet-gateway create/update: Fix #9327. Support `--custom-routes` argument to set custom routes address space for VNet gateway and VPN client.
+* az network express-route port identity: Fix #10747. Support to configure identity.
+* az network express-route port link update: Fix #10747. Support to configure MACsec and enable/disable admin state.
 
 **Policy**
 
@@ -240,7 +303,7 @@ Release History
 
 **Network**
 
-* az network lb create/frontend-ip create: Fixes #10018. Support `--private-ip-address-version` argument to create IPv6 based private-ip-address 
+* az network lb create/frontend-ip create: Fixes #10018. Support `--private-ip-address-version` argument to create IPv6 based private-ip-address
 * az network private-endpoint create/update/list-types: Fixes #9474. Support create/update/list-types commands for private endpoint.
 * az network private-link-service: Fixes #9475. Onboard commands for private link service.
 * az network vnet subnet update: Support `--private-endpoint-network-policies` and `--private-link-service-network-policies` arguments for update command.
@@ -296,7 +359,7 @@ Release History
 * BREAKING CHANGE:
     create:
         - Renamed --storage-default-container to --storage-container and --storage-default-filesystem to --storage-filesystem
-    application create: 
+    application create:
         - Changed the --name/-n argument to represent the application name instead of the cluster name and added a separate --cluster-name argument
         - Renamed --application-type to --type/-t
         - Renamed --marketplace-identifier to --marketplace-id
@@ -318,7 +381,7 @@ Release History
     Added this command to list the execution history for all script action executions
 * monitor enable:
     Enabled the --workspace argument to accept a Log Analytics workspace ID or workspace name as the parameter
-    Added the --primary-key argument, which is needed if a workspace ID is provided as the parameter 
+    Added the --primary-key argument, which is needed if a workspace ID is provided as the parameter
 * Added more examples and updated descriptions for help messages
 
 **interactive**
@@ -327,7 +390,7 @@ Release History
 
 **Network**
 
-* az network dns record-set cname delete: Fixes #10166. Support `--yes` argument to align the behavior with other dns type. 
+* az network dns record-set cname delete: Fixes #10166. Support `--yes` argument to align the behavior with other dns type.
 
 **Profile**
 
@@ -344,7 +407,7 @@ Release History
 
 **Kubernetes**
 
-* Use https if dashboard container port is using https 
+* Use https if dashboard container port is using https
 
 
 2.0.70

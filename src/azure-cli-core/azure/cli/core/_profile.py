@@ -1117,10 +1117,6 @@ def _get_authorization_code_worker(authority_url, resource, results):
         results['no_browser'] = True
         return
 
-    # emit a warning for transitioning to the new experience
-    logger.warning('Note, we have launched a browser for you to login. For old experience'
-                   ' with device code, use "az login --use-device-code"')
-
     # wait for callback from browser.
     while True:
         web_server.handle_request()

@@ -182,6 +182,9 @@ def load_arguments(self, _):
                    help='The deployment name. Default to template file base name')
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
 
+    with self.argument_context('group deployment validate') as c:
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
+
     with self.argument_context('group deployment operation show') as c:
         c.argument('operation_ids', nargs='+', help='A list of operation ids to show')
 
@@ -195,6 +198,9 @@ def load_arguments(self, _):
     with self.argument_context('deployment create') as c:
         c.argument('deployment_name', options_list=['--name', '-n'], required=False,
                    help='The deployment name. Default to template file base name')
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
+
+    with self.argument_context('deployment validate') as c:
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
 
     with self.argument_context('deployment operation show') as c:

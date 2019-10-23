@@ -285,6 +285,28 @@ class NetworkPublicIpPrefix(ScenarioTest):
         self.cmd('network public-ip create -g {rg} -n {pip} --public-ip-prefix {prefix} --sku Standard',
                  checks=self.check("publicIp.publicIpPrefix.id.contains(@, '{prefix}')", True))
 
+        # Test IP address version
+        self.kwargs.update({
+            'prefix_name_ipv4': 'public_ip_prefix_0',
+            'prefix_name_ipv5': 'public_ip_prefix_1',
+            'prefix_name_ipv6': 'public_ip_prefix_2'
+        })
+
+        # Check the default ip address version value
+        self.cmd('network public-ip prefix create -g {rg} -n {prefix_name_ipv4} --length 30', checks=[
+            self.check('publicIpAddressVersion', 'IPv4')
+        ])
+
+        # Check the creation of public IP prefix with IPv6 address option
+        # Note: prefix length for IPv6 is minimal 124 and maximal 127 respectively
+        self.cmd('network public-ip prefix create -g {rg} -n {prefix_name_ipv6} --length 127 --version IPv6', checks=[
+            self.check('publicIpAddressVersion', 'IPv6')
+        ])
+
+        # Check with unsupported IP address version: IPv5
+        with self.assertRaisesRegexp(SystemExit, '2'):
+            self.cmd('network public-ip prefix create -g {rg} -n {prefix_name_ipv6} --length 127 --version IPv5')
+
 
 class NetworkMultiIdsShowScenarioTest(ScenarioTest):
     @live_only()
@@ -1195,6 +1217,33 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
         self.cmd('network express-route delete --resource-group {rg} --name {er}')
         # Expecting no results as we just deleted the only express route in the resource group
         self.cmd('network express-route list --resource-group {rg}', checks=self.is_empty())
+
+
+class NetworkExpressRoutePortScenarioTest(ScenarioTest):
+
+    def test_network_express_route_port_identity(self):
+        """
+        Since the resource ExpressRoute Port is rare currently, it's very expensive to write test.
+        We run test manually for now. Any changes related to this command, please contract to Service team for help.
+        For ussage, run `az network express-route port identity --help` to get help.
+        """
+        pass
+
+    def test_network_express_route_port_config_macsec(self):
+        """
+        Since the resource ExpressRoute Port is rare currently, it's very expensive to write test.
+        We run test manually for now. Any changes related to this command, please contract to Service team for help.
+        For ussage, run `az network express-route port link update --help` to get help.
+        """
+        pass
+
+    def test_network_express_route_port_config_adminstate(self):
+        """
+        Since the resource ExpressRoute Port is rare currently, it's very expensive to write test.
+        We run test manually for now. Any changes related to this command, please contract to Service team for help.
+        For ussage, run `az network express-route port link update --help` to get help.
+        """
+        pass
 
 
 class NetworkExpressRouteIPv6PeeringScenarioTest(ScenarioTest):

@@ -12,7 +12,12 @@ from knack.util import CLIError
 from knack.log import get_logger
 
 from ._utils import user_confirmation
-from ._docker_utils import request_data_from_registry, get_access_credentials, RegistryException
+from ._docker_utils import (
+    request_data_from_registry,
+    get_access_credentials,
+    RegistryException,
+    RepoAccessTokenPermission
+)
 
 logger = get_logger(__name__)
 
@@ -154,7 +159,7 @@ def acr_repository_show_tags(cmd,
         username=username,
         password=password,
         repository=repository,
-        permission='pull')
+        permission=RepoAccessTokenPermission.METADATA_READ.value)
 
     try:
         raw_result = _obtain_data_from_registry(
@@ -206,7 +211,7 @@ def acr_repository_show_manifests(cmd,
         username=username,
         password=password,
         repository=repository,
-        permission='pull')
+        permission=RepoAccessTokenPermission.METADATA_READ.value)
 
     raw_result = _obtain_data_from_registry(
         login_server=login_server,
@@ -241,7 +246,7 @@ def acr_repository_show(cmd,
         registry_name=registry_name,
         http_method='get',
         json_payload=None,
-        permission='pull',
+        permission=RepoAccessTokenPermission.METADATA_READ.value,
         repository=repository,
         image=image,
         tenant_suffix=tenant_suffix,
@@ -280,12 +285,14 @@ def acr_repository_update(cmd,
             'writeEnabled': write_enabled
         })
 
+    permission = RepoAccessTokenPermission.META_WRITE_META_READ.value if json_payload \
+        else RepoAccessTokenPermission.METADATA_READ.value
     return _acr_repository_attributes_helper(
         cmd=cmd,
         registry_name=registry_name,
         http_method='patch' if json_payload else 'get',
         json_payload=json_payload,
-        permission='push,pull' if json_payload else 'pull',
+        permission=permission,
         repository=repository,
         image=image,
         tenant_suffix=tenant_suffix,
@@ -357,7 +364,7 @@ def acr_repository_untag(cmd,
         username=username,
         password=password,
         repository=repository,
-        permission='delete')
+        permission=RepoAccessTokenPermission.DELETE.value)
 
     return request_data_from_registry(
         http_method='delete',
@@ -392,7 +399,7 @@ def acr_repository_delete(cmd,
         username=username,
         password=password,
         repository=repository,
-        permission='delete,pull')
+        permission=RepoAccessTokenPermission.DELETE_META_READ.value)
 
     if tag or manifest:
         manifest = _delete_manifest_confirmation(
@@ -492,7 +499,7 @@ def get_image_digest(cmd, registry_name, image):
         cmd=cmd,
         registry_name=registry_name,
         repository=repository,
-        permission='pull')
+        permission=RepoAccessTokenPermission.METADATA_READ.value)
 
     manifest = _get_manifest_digest(
         login_server=login_server,
