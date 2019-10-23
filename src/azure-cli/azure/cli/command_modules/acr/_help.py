@@ -497,7 +497,7 @@ short-summary: Create a scope map for an Azure Container Registry.
 examples:
   - name: Create a scope map that allows content/write and metadata/read actions for `hello-world` repository, and content/read action for `hello-world-again`.
     text: >
-        az acr scope-map create -n MyScopeMap -r MyRegistry --add hello-world content/write metadata/read --add hello-world-again content/read --description "Sample scope map."
+        az acr scope-map create -n MyScopeMap -r MyRegistry --repository hello-world content/write metadata/read --repository hello-world-again content/read --description "Sample scope map."
 """
 
 helps['acr scope-map delete'] = """
@@ -925,7 +925,16 @@ helps['acr token create'] = """
 type: command
 short-summary: Create a token associated with a scope map for an Azure Container Registry.
 examples:
-  - name: Create a token associated with the scope map 'MyScopeMap' in the 'disabled' status.
+  - name: Create a token with repository permissions defined in the scope map 'MyScopeMap'.
+    text: >
+        az acr token create -n MyToken -r MyRegistry --scope-map MyScopeMap
+  - name: Create a token which has read permissions on hello-world repository.
+    text: >
+        az acr token create -n myToken -r MyRegistry --repository hello-world content/read metadata/read
+  - name: Create a token without credentials.
+    text: >
+        az acr token create -n myToken -r MyRegistry --repository hello-world content/read --no-passwords
+  - name: Create a token in disabled status.
     text: >
         az acr token create -n MyToken -r MyRegistry --scope-map MyScopeMap --status disabled
 """

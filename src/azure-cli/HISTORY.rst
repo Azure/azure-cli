@@ -7,6 +7,10 @@ Release History
 
 * Added a preview parameter `--pack-image-tag` to command `az acr pack build`.
 
+**AppConfig**
+
+* Minor bug fix for appconfig kv export to file command. Stop reading dest file contents during export.
+
 **AppService**
 
 * Fixing an issue where webapp config ssl bind operation was removing existing tags from the resource
@@ -57,6 +61,10 @@ Release History
 **RBAC**
 
 * Fix #10807: `az ad app update --id {} --display-name {}` doesn't work
+
+**ServiceFabric**
+
+* az sf cluster create: fix #10916 modify service fabric linux and windows template.json compute vmss from standard to managed disks
 
 **SQL**
 
@@ -252,6 +260,8 @@ Release History
 * az network application-gateway ssl-cert: Fix #8244. Add support for setting key vault id in application-gateway ssl-cert.
 * az network express-route peering peer-connection: Fix #9404. Onboard `show` and `list` command for Azure express route peering peer connection resource.
 * az network vnet-gateway create/update: Fix #9327. Support `--custom-routes` argument to set custom routes address space for VNet gateway and VPN client.
+* az network express-route port identity: Fix #10747. Support to configure identity.
+* az network express-route port link update: Fix #10747. Support to configure MACsec and enable/disable admin state.
 
 **Policy**
 
