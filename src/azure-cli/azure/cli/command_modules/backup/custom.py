@@ -45,6 +45,16 @@ def create_vault(client, vault_name, resource_group_name, location):
     vault = Vault(location=location, sku=vault_sku, properties=vault_properties)
     return client.create_or_update(resource_group_name, vault_name, vault)
 
+def create_vault_v2(client, vault_name, resource_group_name, location):
+    vault_sku = Sku(name=SkuName.standard)
+    vault_properties = VaultProperties()
+    backup_item_client = backup_protected_items_cf(cmd.cli_ctx)
+    item_client = protected_items_cf(cmd.cli_ctx)
+    
+    vault_client = vaults_cf(cmd.cli_ctx)
+    vault = Vault(location=location, sku=vault_sku, properties=vault_properties)
+    return client.create_or_update(resource_group_name, vault_name, vault)
+
 
 def _force_delete_vault(cmd, vault_name, resource_group_name):
     logger.warning('Attemping to force delete vault: %s', vault_name)
