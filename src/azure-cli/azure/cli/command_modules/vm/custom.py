@@ -2414,7 +2414,7 @@ def update_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_
 
 def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False, instance_id=None,
                 protect_from_scale_in=None, protect_from_scale_set_actions=None,
-                enable_terminate_notification=None, terminate_notification_time=None,
+                enable_terminate_notification=None, terminate_notification_time=None, ultra_ssd_enabled=None,
                 **kwargs):
     vmss = kwargs['parameters']
     client = _compute_client_factory(cmd.cli_ctx)

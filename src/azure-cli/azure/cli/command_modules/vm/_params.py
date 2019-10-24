@@ -82,6 +82,10 @@ def load_arguments(self, _):
     else:
         hyper_v_gen_sku = CLIArgumentType(arg_type=get_enum_type(["V1", "V2"], default="V1"))
 
+    ultra_ssd_enabled_type = CLIArgumentType(
+        arg_type=get_three_state_flag(), min_api='2018-06-01',
+        help='Enables or disables the capability to have 1 or more managed data disks with UltraSSD_LRS storage account')
+
     # region MixedScopes
     for scope in ['vm', 'disk', 'snapshot', 'image', 'sig']:
         with self.argument_context(scope) as c:
@@ -270,6 +274,7 @@ def load_arguments(self, _):
         c.argument('write_accelerator', nargs='*', min_api='2017-12-01',
                    help="enable/disable disk write accelerator. Use singular value 'true/false' to apply across, or specify individual disks, e.g.'os=true 1=true 2=true' for os disk and data disks with lun of 1 & 2")
         c.argument('disk_caching', nargs='*', help="Use singular value to apply across, or specify individual disks, e.g. 'os=ReadWrite 0=None 1=ReadOnly' should enable update os disk and 2 data disks")
+        c.argument('ultra_ssd_enabled', ultra_ssd_enabled_type)
 
     with self.argument_context('vm create') as c:
         c.argument('name', name_arg_type, validator=_resource_not_exists(self.cli_ctx, 'Microsoft.Compute/virtualMachines'))
@@ -519,11 +524,11 @@ def load_arguments(self, _):
 
     with self.argument_context('vmss update') as c:
         protection_policy_type = CLIArgumentType(overrides=get_three_state_flag(), arg_group="Protection Policy", min_api='2019-03-01')
-
         c.argument('protect_from_scale_in', arg_type=protection_policy_type, help="Protect the VM instance from scale-in operations.")
         c.argument('protect_from_scale_set_actions', arg_type=protection_policy_type, help="Protect the VM instance from scale set actions (including scale-in).")
         c.argument('enable_terminate_notification', min_api='2019-03-01', arg_type=get_three_state_flag(),
                    help='Enable terminate notification')
+        c.argument('ultra_ssd_enabled', ultra_ssd_enabled_type)
 
     for scope in ['vmss create', 'vmss update']:
         with self.argument_context(scope) as c:
@@ -649,8 +654,7 @@ def load_arguments(self, _):
             c.argument('os_caching', options_list=[self.deprecate(target='--storage-caching', redirect='--os-disk-caching', hide=True), '--os-disk-caching'], help='Storage caching type for the VM OS disk. Default: ReadWrite', arg_type=get_enum_type(CachingTypes))
             c.argument('data_caching', options_list=['--data-disk-caching'], nargs='+',
                        help="storage caching type for data disk(s), including 'None', 'ReadOnly', 'ReadWrite', etc. Use a singular value to apply on all disks, or use '<lun>=<vaule1> <lun>=<value2>' to configure individual disk")
-            c.argument('ultra_ssd_enabled', arg_type=get_three_state_flag(), min_api='2018-06-01',
-                       help='Enables or disables the capability to have 1 or more managed data disks with UltraSSD_LRS storage account')
+            c.argument('ultra_ssd_enabled', ultra_ssd_enabled_type)
             c.argument('ephemeral_os_disk', arg_type=get_three_state_flag(), min_api='2018-06-01',
                        help='Allows you to create an OS disk directly on the host node, providing local disk performance and faster VM/VMSS reimage time.', is_preview=True)
 
