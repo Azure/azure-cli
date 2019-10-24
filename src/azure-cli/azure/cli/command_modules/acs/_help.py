@@ -258,10 +258,10 @@ parameters:
     long-summary: If specified, please make sure the kubernetes version is larger than 1.10.6.
   - name: --min-count
     type: int
-    short-summary: Minimun nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specifying the value in the range of [1, 100].
+    short-summary: Minimum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100].
   - name: --max-count
     type: int
-    short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specifying the value in the range of [1, 100].
+    short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100].
   - name: --vm-set-type
     type: string
     short-summary: Agent pool vm set type. VirtualMachineScaleSets or AvailabilitySet.
@@ -345,6 +345,21 @@ helps['aks update'] = """
 type: command
 short-summary: Update a managed Kubernetes cluster.
 parameters:
+  - name: --enable-cluster-autoscaler -e
+    type: bool
+    short-summary: Enable cluster autoscaler.
+  - name: --disable-cluster-autoscaler -d
+    type: bool
+    short-summary: Disable cluster autoscaler.
+  - name: --update-cluster-autoscaler -u
+    type: bool
+    short-summary: Update min-count or max-count for cluster autoscaler.
+  - name: --min-count
+    type: int
+    short-summary: Minimum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100]
+  - name: --max-count
+    type: int
+    short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100]
   - name: --load-balancer-managed-outbound-ip-count
     type: int
     short-summary: Load balancer managed outbound IP count.
@@ -569,10 +584,10 @@ parameters:
     short-summary: Enable cluster autoscaler.
   - name: --min-count
     type: int
-    short-summary: Minimun nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specifying the value in the range of [1, 100]
+    short-summary: Minimum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100]
   - name: --max-count
     type: int
-    short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specifying the value in the range of [1, 100]
+    short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100]
   - name: --node-taints
     type: string
     short-summary: The node taints for the node pool. You can't change the node taints through CLI after the node pool is created.
@@ -617,10 +632,10 @@ parameters:
     short-summary: Update min-count or max-count for cluster autoscaler.
   - name: --min-count
     type: int
-    short-summary: Minimun nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specifying the value in the range of [1, 100]
+    short-summary: Minimum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100]
   - name: --max-count
     type: int
-    short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specifying the value in the range of [1, 100]
+    short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100]
 examples:
   - name: Enable cluster-autoscaler within node count range [1,5]
     text: az aks nodepool update --enable-cluster-autoscaler --min-count 1 --max-count 5 -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster
