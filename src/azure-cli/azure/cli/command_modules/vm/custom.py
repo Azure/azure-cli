@@ -979,7 +979,11 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
         vm.license_type = license_type
 
     if ultra_ssd_enabled is not None:
-        vm.additional_capabilities.ultra_ssd_enabled = ultra_ssd_enabled
+        if vm.additional_capabilities is None:
+            AdditionalCapabilities = cmd.get_models('AdditionalCapabilities')
+            vm.additional_capabilities = AdditionalCapabilities(ultra_ssd_enabled=ultra_ssd_enabled)
+        else:
+            vm.additional_capabilities.ultra_ssd_enabled = ultra_ssd_enabled
 
     return sdk_no_wait(no_wait, _compute_client_factory(cmd.cli_ctx).virtual_machines.create_or_update,
                        resource_group_name, vm_name, **kwargs)
@@ -2453,9 +2457,18 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
 
     if ultra_ssd_enabled is not None:
         if cmd.supported_api_version(min_api='2019-03-01', operation_group='virtual_machine_scale_sets'):
-            vmss.additional_capabilities.ultra_ssd_enabled = ultra_ssd_enabled
+            if vmss.additional_capabilities is None:
+                AdditionalCapabilities = cmd.get_models('AdditionalCapabilities')
+                vmss.additional_capabilities = AdditionalCapabilities(ultra_ssd_enabled=ultra_ssd_enabled)
+            else:
+                vmss.additional_capabilities.ultra_ssd_enabled = ultra_ssd_enabled
         else:
-            vmss.virtual_machine_profile.additional_capabilities.ultra_ssd_enabled = ultra_ssd_enabled
+            if vmss.virtual_machine_profile.additional_capabilities is None:
+                AdditionalCapabilities = cmd.get_models('AdditionalCapabilities')
+                vmss.virtual_machine_profile.additional_capabilities = AdditionalCapabilities(
+                    ultra_ssd_enabled=ultra_ssd_enabled)
+            else:
+                vmss.virtual_machine_profile.additional_capabilities.ultra_ssd_enabled = ultra_ssd_enabled
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.create_or_update,
                        resource_group_name, name, **kwargs)
