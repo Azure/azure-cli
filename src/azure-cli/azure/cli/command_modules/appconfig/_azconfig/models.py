@@ -50,7 +50,7 @@ class KeyValue(object):
                "\netag: " + self.etag + \
                "\nLast Modified: " + self.last_modified + \
                "\nContent Type: " + self.content_type + \
-               "\nTags: " + '{!s}'.format(self.tags)
+               "\nTags: " + (str(self.tags) if self.tags else '')
 
 
 class QueryFields(Enum):
