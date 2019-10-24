@@ -2660,7 +2660,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                 raise CLIError('Taint does not match allowed values. Expect value such as "special=true:NoSchedule".')
 
     if node_vm_size is None:
-        if os_type == "Windows":
+        if os_type.lower() == "windows":
             raise CLIError('Windows nodepool is not supported')
         node_vm_size = "Standard_DS2_v2"
 
