@@ -9,8 +9,13 @@ from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterAPIServ
 
 
 def _populate_api_server_access_profile(api_server_authorized_ip_ranges):
+    if api_server_authorized_ip_ranges == "":
+        authorized_ip_ranges = []
+    else:
+        authorized_ip_ranges = [ip.strip() for ip in api_server_authorized_ip_ranges.split(",")]
+
     return ManagedClusterAPIServerAccessProfile(
-        authorized_ip_ranges=[ip.strip() for ip in api_server_authorized_ip_ranges.split(",")]
+        authorized_ip_ranges=authorized_ip_ranges
     )
 
 
@@ -31,6 +36,14 @@ def _set_vm_set_type(vm_set_type, kubernetes_version):
             not specified and kubernetes version(%s) less than 1.12.9 only supports \
             availabilityset\n' % (kubernetes_version))
             vm_set_type = "AvailabilitySet"
-        else:
-            vm_set_type = "VirtualMachineScaleSets"
-    return vm_set_type.capitalize()
+
+    if not vm_set_type:
+        vm_set_type = "VirtualMachineScaleSets"
+
+    # normalize as server validation is case-sensitive
+    if vm_set_type.lower() == "AvailabilitySet".lower():
+        vm_set_type = "AvailabilitySet"
+
+    if vm_set_type.lower() == "VirtualMachineScaleSets".lower():
+        vm_set_type = "VirtualMachineScaleSets"
+    return vm_set_type
