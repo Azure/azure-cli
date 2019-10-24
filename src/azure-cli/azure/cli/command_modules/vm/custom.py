@@ -805,7 +805,7 @@ def list_vm_ip_addresses(cmd, resource_group_name=None, vm_name=None):
         nic_resource_group, nic_vm_name = _parse_rg_name(nic.virtual_machine.id)
 
         # If provided, make sure that resource group name and vm name match the NIC we are
-        # looking at before adding it to the result...
+        # looking at before addifng it to the result...
         same_resource_group_name = (resource_group_name is None or
                                     resource_group_name.lower() == nic_resource_group.lower())
         same_vm_name = (vm_name is None or
@@ -954,7 +954,7 @@ def show_vm(cmd, resource_group_name, vm_name, show_details=False):
 
 
 def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None,
-              write_accelerator=None, license_type=None, no_wait=False, **kwargs):
+              write_accelerator=None, license_type=None, no_wait=False, ultra_ssd_enabled=None, **kwargs):
     from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
     vm = kwargs['parameters']
@@ -977,6 +977,9 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
 
     if license_type is not None:
         vm.license_type = license_type
+
+    if ultra_ssd_enabled is not None:
+        vm.additional_capabilities.ultra_ssd_enabled = ultra_ssd_enabled
 
     return sdk_no_wait(no_wait, _compute_client_factory(cmd.cli_ctx).virtual_machines.create_or_update,
                        resource_group_name, vm_name, **kwargs)
@@ -2447,6 +2450,12 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         vmss.virtual_machine_profile.scheduled_events_profile.terminate_notification_profile =\
             TerminateNotificationProfile(not_before_timeout=terminate_notification_time,
                                          enable=enable_terminate_notification)
+
+    if ultra_ssd_enabled is not None:
+        if cmd.supported_api_version(min_api='2019-03-01', operation_group='virtual_machine_scale_sets'):
+            vmss.additional_capabilities.ultra_ssd_enabled = ultra_ssd_enabled
+        else:
+            vmss.virtual_machine_profile.additional_capabilities.ultra_ssd_enabled = ultra_ssd_enabled
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.create_or_update,
                        resource_group_name, name, **kwargs)
