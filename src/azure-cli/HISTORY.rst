@@ -25,8 +25,8 @@ Release History
 **Compute**
 
 * vm create: Add warning when specifying accelerated networking and an existing NIC together.
-* vm create: Add --vmss to specify virtual machine scale set that the virtual machine should be assigned to.
-* vmss create: Add --empty to create a VMSS without VM profile, which can be then referenced in `vm create`.
+* vm create: Add --vmss to specify an existing virtual machine scale set that the virtual machine should be assigned to.
+* vmss create: Add --orchestrator to specify how virtual machines are managed by the scale set.
 * [BREAKING CHANGE] vm extension set: Fix bug where users could not set an extension on a VM with --ids.
 * New commands `az vm image terms accept/cancel/show` to manage Azure Marketplace image terms.
 
