@@ -19,7 +19,7 @@ from ._archive_utils import upload_source_code, check_remote_source_code
 
 logger = get_logger(__name__)
 
-
+DEFAULT_TIMEOUT_IN_SEC = 60 * 60  # 60 minutes
 BUILD_NOT_SUPPORTED = 'Builds are only supported for managed registries.'
 
 
@@ -29,7 +29,7 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
               source_location,
               image_names=None,
               resource_group_name=None,
-              timeout=None,
+              timeout=DEFAULT_TIMEOUT_IN_SEC,
               arg=None,
               secret_arg=None,
               docker_file_path='',
