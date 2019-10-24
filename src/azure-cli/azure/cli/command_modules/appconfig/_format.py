@@ -18,6 +18,14 @@ def keyvalue_entry_format(result):
     return _output_format(result, _keyvalue_entry_format_group)
 
 
+def featureflag_entry_format(result):
+    return _output_format(result, _featureflag_entry_format_group)
+
+
+def featurefilter_entry_format(result):
+    return _output_format(result, _featurefilter_entry_format_group)
+
+
 def _output_format(result, format_group):
     if 'value' in result and isinstance(result['value'], list):
         result = result['value']
@@ -56,6 +64,25 @@ def _keyvalue_entry_format_group(item):
         ('TAGS', _get_value(item, 'tags')),
         ('LABEL', _get_value(item, 'label')),
         ('LOCKED', _get_value(item, 'locked'))
+    ])
+
+
+def _featureflag_entry_format_group(item):
+    return OrderedDict([
+        ('KEY', _get_value(item, 'key')),
+        ('LABEL', _get_value(item, 'label')),
+        ('STATE', _get_value(item, 'state')),
+        ('LOCKED', _get_value(item, 'locked')),
+        ('DESCRIPTION', _get_value(item, 'description')),
+        ('LAST MODIFIED', _format_datetime(_get_value(item, 'lastModified'))),
+        ('CONDITIONS', _get_value(item, 'conditions'))
+    ])
+
+
+def _featurefilter_entry_format_group(item):
+    return OrderedDict([
+        ('NAME', _get_value(item, 'name')),
+        ('PARAMETERS', _get_value(item, 'parameters'))
     ])
 
 

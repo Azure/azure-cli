@@ -3,16 +3,13 @@
 Release History
 ===============
 
-**SQL**
-
-* Added "--compute-model", "--auto-pause-delay", and "--min-capacity" parameters to support CRUD operations for new SQL Database offering: Serverless compute model."
-
 **ACR**
 
 * Added a preview parameter `--pack-image-tag` to command `az acr pack build`.
 
 **AppConfig**
 
+* Add appconfig feature command group to manage feature flags stored in an App Configuration.
 * Minor bug fix for appconfig kv export to file command. Stop reading dest file contents during export.
 
 **AppService**
@@ -25,6 +22,7 @@ Release History
 **ARM**
 
 * deployment/group deployment validate: Add --handle-extended-json-format parameter to support multiline and comments in json template when deployment.
+* bump azure-mgmt-resource to 2019-07-01
 
 **Compute**
 
@@ -69,6 +67,10 @@ Release History
 
 * az sf cluster create: fix #10916 modify service fabric linux and windows template.json compute vmss from standard to managed disks
 
+**SQL**
+
+* Add "--compute-model", "--auto-pause-delay", and "--min-capacity" parameters to support CRUD operations for new SQL Database offering: Serverless compute model."
+
 2.0.75
 ++++++
 
@@ -78,6 +80,7 @@ Release History
 * Set `--vm-set-type` default value to virtualmachinescalesets if supported by the kubernetes version
 * Add `az aks nodepool add`,`az aks nodepool show`, `az aks nodepool list`, `az aks nodepool scale`, `az aks nodepool upgrade`, `az aks nodepool update` and `az aks nodepool delete` commmands to support multiple nodepools in aks
 * Add `--zones` to `az aks create` and `az aks nodepool add` commands to support availability zones for aks
+* Enable GA support of apiserver authorized IP ranges via paramater `--api-server-authorized-ip-ranges` in `az aks create` and `az aks update`
 
 **AMS**
 
@@ -259,6 +262,8 @@ Release History
 * az network application-gateway ssl-cert: Fix #8244. Add support for setting key vault id in application-gateway ssl-cert.
 * az network express-route peering peer-connection: Fix #9404. Onboard `show` and `list` command for Azure express route peering peer connection resource.
 * az network vnet-gateway create/update: Fix #9327. Support `--custom-routes` argument to set custom routes address space for VNet gateway and VPN client.
+* az network express-route port identity: Fix #10747. Support to configure identity.
+* az network express-route port link update: Fix #10747. Support to configure MACsec and enable/disable admin state.
 
 **Policy**
 

@@ -2104,6 +2104,84 @@ def list_express_route_ports(cmd, resource_group_name=None):
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
     return client.list()
+
+
+def assign_express_route_port_identity(cmd, resource_group_name, express_route_port_name,
+                                       user_assigned_identity, no_wait=False):
+    client = network_client_factory(cmd.cli_ctx).express_route_ports
+    ports = client.get(resource_group_name, express_route_port_name)
+
+    ManagedServiceIdentity, ManagedServiceIdentityUserAssignedIdentitiesValue = \
+        cmd.get_models('ManagedServiceIdentity', 'ManagedServiceIdentityUserAssignedIdentitiesValue')
+
+    user_assigned_identity_instance = ManagedServiceIdentityUserAssignedIdentitiesValue()
+    user_assigned_identities_instance = dict()
+    user_assigned_identities_instance[user_assigned_identity] = user_assigned_identity_instance
+
+    identity_instance = ManagedServiceIdentity(type="UserAssigned",
+                                               user_assigned_identities=user_assigned_identities_instance)
+    ports.identity = identity_instance
+
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, express_route_port_name, ports)
+
+
+def remove_express_route_port_identity(cmd, resource_group_name, express_route_port_name, no_wait=False):
+    client = network_client_factory(cmd.cli_ctx).express_route_ports
+    ports = client.get(resource_group_name, express_route_port_name)
+
+    if ports.identity is None:
+        logger.warning("The identity of the ExpressRoute Port doesn't exist.")
+        return ports
+
+    ports.identity = None
+
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, express_route_port_name, ports)
+
+
+def show_express_route_port_identity(cmd, resource_group_name, express_route_port_name):
+    client = network_client_factory(cmd.cli_ctx).express_route_ports
+    ports = client.get(resource_group_name, express_route_port_name)
+    return ports.identity
+
+
+def update_express_route_port_link(cmd, instance, express_route_port_name, link_name,
+                                   macsec_cak_secret_identifier=None, macsec_ckn_secret_identifier=None,
+                                   macsec_cipher=None, admin_state=None):
+    """
+    :param cmd:
+    :param instance: an instance of ExpressRoutePort
+    :param express_route_port_name:
+    :param link_name:
+    :param macsec_cak_secret_identifier:
+    :param macsec_ckn_secret_identifier:
+    :param macsec_cipher:
+    :param admin_state:
+    :return:
+    """
+    if len(instance.links) != 2:
+        raise CLIError("The number of ExpressRoute Links should be 2. "
+                       "Code may not perform as expected. Please contact us to update CLI.")
+
+    try:
+        link_index = [index for index, link in enumerate(instance.links) if link.name == link_name][0]
+    except Exception:
+        raise CLIError('ExpressRoute Link "{}" not found'.format(link_name))
+
+    if any([macsec_cak_secret_identifier, macsec_ckn_secret_identifier, macsec_cipher]):
+        instance.links[link_index].mac_sec_config.cak_secret_identifier = macsec_cak_secret_identifier
+        instance.links[link_index].mac_sec_config.ckn_secret_identifier = macsec_ckn_secret_identifier
+
+        # TODO https://github.com/Azure/azure-rest-api-specs/issues/7569
+        # need to remove this conversion when the issue is fixed.
+        if macsec_cipher is not None:
+            macsec_ciphers_tmp = {'gcm-aes-128': 'GcmAes128', 'gcm-aes-256': 'GcmAes256'}
+            macsec_cipher = macsec_ciphers_tmp[macsec_cipher]
+        instance.links[link_index].mac_sec_config.cipher = macsec_cipher
+
+    if admin_state is not None:
+        instance.links[link_index].admin_state = admin_state
+
+    return instance
 # endregion
 
 
