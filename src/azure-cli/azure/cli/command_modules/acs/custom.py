@@ -1939,7 +1939,13 @@ def aks_update_credentials(cmd, client, resource_group_name, name,
 
 def aks_scale(cmd, client, resource_group_name, name, node_count, nodepool_name="", no_wait=False):
     instance = client.get(resource_group_name, name)
-    # TODO: change this approach when we support multiple agent pools.
+
+    if len(instance.agent_pool_profiles) > 1 and nodepool_name == "":
+        raise CLIError('There are more than one node pool in the cluster. '
+                       'Please specify nodepool name or use az aks nodepool command to scale node pool')
+
+    if node_count == 0:
+        raise CLIError("Can't scale down to 0 nodes.")
     for agent_profile in instance.agent_pool_profiles:
         if agent_profile.name == nodepool_name or (nodepool_name == "" and len(instance.agent_pool_profiles) == 1):
             agent_profile.count = int(node_count)  # pylint: disable=no-member
@@ -1984,38 +1990,38 @@ def aks_update(cmd, client, resource_group_name, name,
     instance = client.get(resource_group_name, name)
     # For multi-agent pool, use the az aks nodepool command
     if update_autoscaler > 0 and len(instance.agent_pool_profiles) > 1:
-        raise CLIError('Please use "az aks nodepool command to update per node pool auto scaler settings"')
+        raise CLIError('There are more than one node pool in the cluster. Please use "az aks nodepool" command '
+                       'to update per node pool auto scaler settings')
 
-    agent_pool_profile = instance.agent_pool_profiles[0]
-    node_count = agent_pool_profile.count
+    node_count = instance.agent_pool_profiles[0].count
     _validate_autoscaler_update_counts(min_count, max_count, node_count, enable_cluster_autoscaler or
                                        update_cluster_autoscaler)
 
     if enable_cluster_autoscaler:
-        if agent_pool_profile.enable_auto_scaling:
-            logger.warning('Autoscaler is already enabled for this node pool.\n'
+        if instance.agent_pool_profiles[0].enable_auto_scaling:
+            logger.warning('Cluster autoscaler is already enabled for this node pool.\n'
                            'Please run "az aks --update-cluster-autoscaler" '
                            'if you want to update min-count or max-count.')
             return None
-        agent_pool_profile.min_count = int(min_count)
-        agent_pool_profile.max_count = int(max_count)
-        agent_pool_profile.enable_auto_scaling = True
+        instance.agent_pool_profiles[0].min_count = int(min_count)
+        instance.agent_pool_profiles[0].max_count = int(max_count)
+        instance.agent_pool_profiles[0].enable_auto_scaling = True
 
     if update_cluster_autoscaler:
-        if not agent_pool_profile.enable_auto_scaling:
-            raise CLIError('Autoscaler is not enabled for this node pool.\n'
+        if not instance.agent_pool_profiles[0].enable_auto_scaling:
+            raise CLIError('Cluster autoscaler is not enabled for this node pool.\n'
                            'Run "az aks nodepool update --enable-cluster-autoscaler" '
                            'to enable cluster with min-count and max-count.')
-        agent_pool_profile.min_count = int(min_count)
-        agent_pool_profile.max_count = int(max_count)
+        instance.agent_pool_profiles[0].min_count = int(min_count)
+        instance.agent_pool_profiles[0].max_count = int(max_count)
 
     if disable_cluster_autoscaler:
-        if not agent_pool_profile.enable_auto_scaling:
-            logger.warning('Autoscaler is already disabled for this node pool.')
+        if not instance.agent_pool_profiles[0].enable_auto_scaling:
+            logger.warning('Cluster autoscaler is already disabled for this node pool.')
             return None
-        agent_pool_profile.enable_auto_scaling = False
-        agent_pool_profile.min_count = None
-        agent_pool_profile.max_count = None
+        instance.agent_pool_profiles[0].enable_auto_scaling = False
+        instance.agent_pool_profiles[0].min_count = None
+        instance.agent_pool_profiles[0].max_count = None
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
     client_id = instance.service_principal_profile.client_id
