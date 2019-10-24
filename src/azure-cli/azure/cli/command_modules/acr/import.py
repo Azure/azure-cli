@@ -11,6 +11,8 @@ from ._utils import (
     validate_managed_registry, get_registry_from_name_or_login_server, get_registry_by_name
 )
 
+from azure.cli.core.commands import LongRunningOperation
+
 logger = get_logger(__name__)
 
 SOURCE_REGISTRY_NOT_FOUND = "The source container registry can not be found in the current subscription. " \
@@ -44,9 +46,9 @@ def acr_import(cmd,
     ImportImageParameters, ImportSource, ImportMode = cmd.get_models(
         'ImportImageParameters', 'ImportSource', 'ImportMode')
 
+    registry = None
     if source_registry:
         if is_valid_resource_id(source_registry):
-            registry, _ = get_registry_by_name(cmd.cli_ctx, parse_resource_id(source_registry)["name"])
             source = ImportSource(resource_id=source_registry, source_image=source_image)
 
         else:
@@ -55,14 +57,6 @@ def acr_import(cmd,
                 source = ImportSource(resource_id=registry.id, source_image=source_image)
             else:
                 raise CLIError(SOURCE_REGISTRY_NOT_FOUND)
-
-        try:
-            if registry.login_server.lower() in source_image.lower():
-                logger.warning("\nImporting image '%s/%s'...\nPlease ensure that '--source' is a source image and "
-                               "not a fully qualified source, as the source registry was specified via '--registry'",
-                               registry.login_server, source_image)
-        except AttributeError:
-            pass
 
     else:
         slash = source_image.find('/')
@@ -99,7 +93,39 @@ def acr_import(cmd,
                                               target_tags=target_tags,
                                               untagged_target_repositories=repository,
                                               mode=ImportMode.force.value if force else ImportMode.no_force.value)
-    return client.import_image(
+    result_poller = client.import_image(
         resource_group_name=resource_group_name,
         registry_name=registry_name,
         parameters=import_parameters)
+
+    return _handle_result(cmd, result_poller, source_registry, source_image, registry)
+
+
+def _handle_result(cmd, result_poller, source_registry, source_image, registry):
+    try:
+        result = LongRunningOperation(cmd.cli_ctx, 'Importing image...')(result_poller)
+    except CLIError as e:
+        try:
+            # if command fails, it might be because user specified registry twice in --source and --registry
+            if source_registry:
+
+                if not hasattr(registry, 'login_server'):
+                    if is_valid_resource_id(source_registry):
+                        registry, _ = get_registry_by_name(cmd.cli_ctx, parse_resource_id(source_registry)["name"])
+                    else:
+                        registry = get_registry_from_name_or_login_server(cmd.cli_ctx, source_registry, source_registry)
+
+                if registry.login_server.lower() in source_image.lower():
+                    logger.warning("\nImport failed. Please check that fully qualified image specified by "
+                                 "'--source' and '--registry' is a valid tag:\n\t%s\n", "{}/{}"
+                                 .format(registry.login_server, source_image))
+        except Exception as unexpected_ex:  # pylint: disable=broad-except
+            logger.debug("Unexpected exception: %s", unexpected_ex)
+        finally:
+            logger.debug("Re-raise exception: %s", e)
+            raise e  # regardless reraise the CLIError as this is an error from the service
+    except AttributeError:
+        # in the unlikely event that import_image's api changes and no longer returns a poller, return result
+        return result_poller
+
+    return result
