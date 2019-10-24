@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=no-name-in-module,import-error
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.commands.arm import deployment_validate_table_format
 

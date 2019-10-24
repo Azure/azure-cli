@@ -80,7 +80,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         fd, temp_path = tempfile.mkstemp()
         self.kwargs.update({'file': temp_path})
         try:
-            self.cmd('aks get-credentials -g {resource_group} -n {name} --file {file}')
+            self.cmd('aks get-credentials -g {resource_group} -n {name} --file "{file}"')
         finally:
             os.close(fd)
             os.remove(temp_path)
@@ -92,7 +92,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         temp_path = 'kubeconfig.tmp'
         self.kwargs.update({'file': temp_path})
         try:
-            self.cmd('aks get-credentials -g {resource_group} -n {name} -f {file}')
+            self.cmd('aks get-credentials -g {resource_group} -n {name} -f "{file}"')
             self.assertGreater(os.path.getsize(temp_path), 0)
         finally:
             os.remove(temp_path)
@@ -532,7 +532,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         fd, temp_path = tempfile.mkstemp()
         self.kwargs.update({'file': temp_path})
         try:
-            self.cmd('aks get-credentials -g {resource_group} -n {name} --file {file}')
+            self.cmd('aks get-credentials -g {resource_group} -n {name} --file "{file}"')
         finally:
             os.close(fd)
             os.remove(temp_path)
@@ -544,7 +544,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         temp_path = 'kubeconfig.tmp'
         self.kwargs.update({'file': temp_path})
         try:
-            self.cmd('aks get-credentials -g {resource_group} -n {name} -f {file}')
+            self.cmd('aks get-credentials -g {resource_group} -n {name} -f "{file}"')
             self.assertGreater(os.path.getsize(temp_path), 0)
         finally:
             os.remove(temp_path)
@@ -616,7 +616,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         fd, temp_path = tempfile.mkstemp()
         self.kwargs.update({'file': temp_path})
         try:
-            self.cmd('aks get-credentials -g {resource_group} -n {name} --file {file}')
+            self.cmd('aks get-credentials -g {resource_group} -n {name} --file "{file}"')
         finally:
             os.close(fd)
             os.remove(temp_path)
@@ -628,7 +628,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         temp_path = 'kubeconfig.tmp'
         self.kwargs.update({'file': temp_path})
         try:
-            self.cmd('aks get-credentials -g {resource_group} -n {name} -f {file}')
+            self.cmd('aks get-credentials -g {resource_group} -n {name} -f "{file}"')
             self.assertGreater(os.path.getsize(temp_path), 0)
         finally:
             os.remove(temp_path)
@@ -700,7 +700,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         fd, temp_path = tempfile.mkstemp()
         self.kwargs.update({'file': temp_path})
         try:
-            self.cmd('aks get-credentials -g {resource_group} -n {name} --file {file}')
+            self.cmd('aks get-credentials -g {resource_group} -n {name} --file "{file}"')
         finally:
             os.close(fd)
             os.remove(temp_path)
@@ -712,7 +712,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         temp_path = 'kubeconfig.tmp'
         self.kwargs.update({'file': temp_path})
         try:
-            self.cmd('aks get-credentials -g {resource_group} -n {name} -f {file}')
+            self.cmd('aks get-credentials -g {resource_group} -n {name} -f "{file}"')
             self.assertGreater(os.path.getsize(temp_path), 0)
         finally:
             os.remove(temp_path)
@@ -822,7 +822,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         fd, temp_path = tempfile.mkstemp()
         self.kwargs.update({'file': temp_path})
         try:
-            self.cmd('aks get-credentials -g {resource_group} -n {name} --file {file}')
+            self.cmd('aks get-credentials -g {resource_group} -n {name} --file "{file}"')
         finally:
             os.close(fd)
             os.remove(temp_path)
@@ -834,7 +834,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         temp_path = 'kubeconfig.tmp'
         self.kwargs.update({'file': temp_path})
         try:
-            self.cmd('aks get-credentials -g {resource_group} -n {name} -f {file}')
+            self.cmd('aks get-credentials -g {resource_group} -n {name} -f "{file}"')
             self.assertGreater(os.path.getsize(temp_path), 0)
         finally:
             os.remove(temp_path)
@@ -937,7 +937,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         fd, temp_path = tempfile.mkstemp()
         self.kwargs.update({'file': temp_path})
         try:
-            self.cmd('aks get-credentials -g {resource_group} -n {name} --file {file}')
+            self.cmd('aks get-credentials -g {resource_group} -n {name} --file "{file}"')
         finally:
             os.close(fd)
             os.remove(temp_path)
@@ -949,7 +949,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         temp_path = 'kubeconfig.tmp'
         self.kwargs.update({'file': temp_path})
         try:
-            self.cmd('aks get-credentials -g {resource_group} -n {name} -f {file}')
+            self.cmd('aks get-credentials -g {resource_group} -n {name} -f "{file}"')
             self.assertGreater(os.path.getsize(temp_path), 0)
         finally:
             os.remove(temp_path)
@@ -1019,7 +1019,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         fd, temp_path = tempfile.mkstemp()
         self.kwargs.update({'file': temp_path})
         try:
-            self.cmd('aks get-credentials -g {resource_group} -n {name} --file {file}')
+            self.cmd('aks get-credentials -g {resource_group} -n {name} --file "{file}"')
         finally:
             os.close(fd)
             os.remove(temp_path)
@@ -1031,7 +1031,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         temp_path = 'kubeconfig.tmp'
         self.kwargs.update({'file': temp_path})
         try:
-            self.cmd('aks get-credentials -g {resource_group} -n {name} -f {file}')
+            self.cmd('aks get-credentials -g {resource_group} -n {name} -f "{file}"')
             self.assertGreater(os.path.getsize(temp_path), 0)
         finally:
             os.remove(temp_path)
@@ -1126,7 +1126,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         fd, temp_path = tempfile.mkstemp()
         self.kwargs.update({'file': temp_path})
         try:
-            self.cmd('aks get-credentials -g {resource_group} -n {name} --file {file}')
+            self.cmd('aks get-credentials -g {resource_group} -n {name} --file "{file}"')
         finally:
             os.close(fd)
             os.remove(temp_path)
@@ -1138,7 +1138,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         temp_path = 'kubeconfig.tmp'
         self.kwargs.update({'file': temp_path})
         try:
-            self.cmd('aks get-credentials -g {resource_group} -n {name} -f {file}')
+            self.cmd('aks get-credentials -g {resource_group} -n {name} -f "{file}"')
             self.assertGreater(os.path.getsize(temp_path), 0)
         finally:
             os.remove(temp_path)
