@@ -21,7 +21,6 @@ def _get_vm_version(vm_type):
         return 'Classic'
 
 
-@unittest.skip("Bad soft delete")
 class BackupTests(ScenarioTest, unittest.TestCase):
     @ResourceGroupPreparer()
     @VaultPreparer()
