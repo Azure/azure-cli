@@ -79,18 +79,23 @@ class CLIPrintMixin(CLIHelp):
     def _print_examples(help_file):
         indent = 0
         _print_indent('Examples', indent)
-        # TODO: Once Python 3.8 support is added, use an Assignment Expressions to 
-        # also check if the the generated example list is not empty. That way it 
-        # can fall back to the default one if there was a server error.
+        use_default_examples = True
+        # TODO: Once Python 3.8 support is added, switch to an Assignment 
+        # Expressions to check if the the generated example list is not empty.
+        # That way it can fall back to the default one if there was a server
+        # error more elegantly.
         if in_cloud_console():
             examples = get_generated_examples(help_file.command)
-            for e in examples:
-                indent = 1
-                _print_indent(u'{0}'.format(e.title), indent)
-                indent = 2
-                _print_indent(u'{0}'.format(e.snippet), indent)
-                print('')
-        else:
+            if examples:
+                use_default_examples = False
+                for e in examples:
+                    indent = 1
+                    _print_indent(u'{0}'.format(e.title), indent)
+                    indent = 2
+                    _print_indent(u'{0}'.format(e.snippet), indent)
+                    print('')
+
+        if use_default_examples:
             for e in help_file.examples:
                 indent = 1
                 _print_indent(u'{0}'.format(e.short_summary), indent)
