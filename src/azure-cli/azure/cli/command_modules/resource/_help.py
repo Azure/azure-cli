@@ -209,10 +209,6 @@ examples:
 helps['deployment'] = """
 type: group
 short-summary: Manage Azure Resource Manager deployments at subscription scope.
-long-summary: >
-    [**Upcoming breaking change**]: a new parameter "scope-type" will be introduced to commands in this group and will be mandatory.
-    Scope type will be an enum with four values: ResourceGroup, Subscription, ManagementGroup, Tenant.
-    Adding this parameter allows us to use one command for all Azure Resource Manager template deployments but still determine the intended level of scope.
 """
 
 helps['deployment create'] = """
