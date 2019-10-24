@@ -2317,12 +2317,12 @@ class NetworkVnetGatewayIpSecPolicy(ScenarioTest):
 
 class NetworkVirtualRouter(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_virtual_router', location=WestCentralUS)
-    def test_network_virtual_router_scenario(self, resource_group, location):
+    @ResourceGroupPreparer(name_prefix='cli_test_virtual_router', location='WestCentralUS')
+    def test_network_virtual_router_scenario(self, resource_group, resource_group_location):
 
         self.kwargs.update({
             'rg': resource_group,
-            'location': location,
+            'location': resource_group_location,
             'vnet': 'vnet1',
             'ip': 'pip1',
             'gw': 'gw1',
@@ -2348,28 +2348,25 @@ class NetworkVirtualRouter(ScenarioTest):
             self.check('@[0].name', '{vrouter}')
         ])
 
-        self.cmd('network vrouter peering create -n {vrouter_peering} --peer-asn 10000 --peer-ip 10.0.0.0 -g {g} --vrouter-name {vrouter}', checks=[
+        self.cmd('network vrouter peering create -n {vrouter_peering} --peer-asn 10000 --peer-ip 10.0.0.0 -g {rg} --vrouter-name {vrouter}', checks=[
             self.check('name', '{vrouter_peering}')
         ])
 
-        self.cmd('network vrouter peering update -n {vrouter_peering} --peer-asn 11000 --peer-ip 11.0.0.0 -g {g} --vrouter-name {vrouter}', checks=[
+        self.cmd('network vrouter peering update -n {vrouter_peering} --peer-asn 11000 --peer-ip 11.0.0.0 -g {rg} --vrouter-name {vrouter}', checks=[
             self.check('peerAsn', '11000'),
             self.check('peerIp', '11.0.0.0')
         ])
 
-        self.cmd('network vrouter peering show -n {vrouter_peering} -g {g} --vrouter-name {vrouter}', checks=[
+        self.cmd('network vrouter peering show -n {vrouter_peering} -g {rg} --vrouter-name {vrouter}', checks=[
             self.check('name', '{vrouter_peering}')
         ])
 
-        self.cmd('network vrouter peering list -g {g} --vrouter-name {vrouter}', checks=[
+        self.cmd('network vrouter peering list -g {rg} --vrouter-name {vrouter}', checks=[
             self.check('@[0].name', '{vrouter_peering}'),
             self.check('length(@)', 1)
         ])
 
-        self.cmd('network vrouter peering delete -n {vrouter_peering} -g {g} --vrouter-name {vrouter}', checks=[
-            self.check('@[0].name', '{vrouter_peering}'),
-            self.check('length(@)', 1)
-        ])
+        self.cmd('network vrouter peering delete -n {vrouter_peering} -g {rg} --vrouter-name {vrouter}')
 
         self.cmd('network vrouter delete -g {rg} -n {vrouter}')
 
