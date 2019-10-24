@@ -3,10 +3,6 @@
 Release History
 ===============
 
-**SQL**
-
-* Added "--compute-model", "--auto-pause-delay", and "--min-capacity" parameters to support CRUD operations for new SQL Database offering: Serverless compute model."
-
 **ACR**
 
 * Added a preview parameter `--pack-image-tag` to command `az acr pack build`.
@@ -25,6 +21,7 @@ Release History
 **ARM**
 
 * deployment/group deployment validate: Add --handle-extended-json-format parameter to support multiline and comments in json template when deployment.
+* bump azure-mgmt-resource to 2019-07-01
 
 **Compute**
 
@@ -68,6 +65,10 @@ Release History
 **ServiceFabric**
 
 * az sf cluster create: fix #10916 modify service fabric linux and windows template.json compute vmss from standard to managed disks
+
+**SQL**
+
+* Add "--compute-model", "--auto-pause-delay", and "--min-capacity" parameters to support CRUD operations for new SQL Database offering: Serverless compute model."
 
 2.0.75
 ++++++
