@@ -28,8 +28,6 @@ def process_query(cli_term):
     if not cli_term:
         logger.error('Please provide a search term e.g. az find "vm"')
     else:
-        response = call_aladdin_service(cli_term)
-
         print(random.choice(WAIT_MESSAGE), file=sys.stderr)
         response = call_aladdin_service(cli_term)
 
@@ -50,21 +48,23 @@ def process_query(cli_term):
                 print("\nHere are the most common ways to use [" + cli_term + "]: \n", file=sys.stderr)
 
                 for answer in answer_list:
-                    current_title = answer['title'].strip()
-                    current_snippet = answer['snippet'].strip()
-                    if current_title.startswith("az "):
-                        current_title, current_snippet = current_snippet, current_title
-                        current_title = current_title.split('\r\n')[0]
-                    elif '```azurecli\r\n' in current_snippet:
-                        start_index = current_snippet.index('```azurecli\r\n') + len('```azurecli\r\n')
-                        current_snippet = current_snippet[start_index:]
-                    current_snippet = current_snippet.replace('```', '').replace(current_title, '').strip()
-                    current_snippet = re.sub(r'\[.*\]', '', current_snippet).strip()
-                    print(style_message(current_title))
-                    print(current_snippet + '\n')
+                    cleaned_answer = Example.clean_from_http_answer(answer)
+                    print(style_message(cleaned_answer.title))
+                    print(cleaned_answer.snippet + '\n')
                 if has_pruned_answer:
                     print(style_message("More commands and examples are available in the latest version of the CLI. "
                                         "Please update for the best experience.\n"))
+
+
+def get_generated_examples(cli_term):
+    examples = []
+    response = call_aladdin_service(cli_term)
+
+    if response.status_code == 200:
+        for answer in json.loads(response.content):
+            examples.append(Example.clean_from_http_answer(answer))
+
+    return examples
 
 
 def style_message(msg):
@@ -118,3 +118,26 @@ def call_aladdin_service(query):
         headers=headers)
 
     return response
+
+
+class Example:
+    'Common format for example information'
+
+    def __init__(self, title, snippet):
+        self.title = title
+        self.snippet = snippet
+
+    # Used to clean up the HTTP response
+    @staticmethod
+    def clean_from_http_answer(http_answer):
+        current_title = http_answer['title'].strip()
+        current_snippet = http_answer['snippet'].strip()
+        if current_title.startswith("az "):
+            current_title, current_snippet = current_snippet, current_title
+            current_title = current_title.split('\r\n')[0]
+        elif '```azurecli\r\n' in current_snippet:
+            start_index = current_snippet.index('```azurecli\r\n') + len('```azurecli\r\n')
+            current_snippet = current_snippet[start_index:]
+        current_snippet = current_snippet.replace('```', '').replace(current_title, '').strip()
+        current_snippet = re.sub(r'\[.*\]', '', current_snippet).strip()
+        return Example(current_title, current_snippet)
