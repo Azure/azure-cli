@@ -132,7 +132,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("length([?name == '{vault3}'])", 1)
         ])
 
-    @unittest.skip("skipping for now")
     @ResourceGroupPreparer(location="southeastasia")
     @VaultPreparer()
     @VMPreparer(parameter_name='vm1')

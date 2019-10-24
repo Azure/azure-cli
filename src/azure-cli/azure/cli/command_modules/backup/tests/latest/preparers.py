@@ -95,7 +95,7 @@ class VMPreparer(AbstractPreparer, SingleValueReplacer):
             param_string = param_format.format(name, self.resource_group, 'Win2012R2Datacenter', name,
                                                '%j^VYw9Q3Z@Cu$*h', param_tags)
             cmd = 'az vm create {}'.format(param_string)
-            execute(self.cli_ctx, cmd.format(name, self.resource_group, name))
+            execute(self.cli_ctx, cmd)
             return {self.parameter_name: name}
         return {self.parameter_name: self.dev_setting_value}
 
