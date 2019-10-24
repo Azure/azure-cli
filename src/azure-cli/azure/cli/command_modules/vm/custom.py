@@ -805,7 +805,7 @@ def list_vm_ip_addresses(cmd, resource_group_name=None, vm_name=None):
         nic_resource_group, nic_vm_name = _parse_rg_name(nic.virtual_machine.id)
 
         # If provided, make sure that resource group name and vm name match the NIC we are
-        # looking at before addifng it to the result...
+        # looking at before adding it to the result...
         same_resource_group_name = (resource_group_name is None or
                                     resource_group_name.lower() == nic_resource_group.lower())
         same_vm_name = (vm_name is None or
