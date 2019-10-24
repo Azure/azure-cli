@@ -46,7 +46,8 @@ Release History
 
 **Key Vault**
 
-* Fix #9352: Unexpected error when certificate file does not exist.
+* Fix #9352: Unexpected error when certificate file does not exist
+* Fix #7048: `az keyvault recover/purge` not working
 
 **Network**
 
