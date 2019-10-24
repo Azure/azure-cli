@@ -1698,6 +1698,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_vmss_update_ultra_ssd_enabled_', location='eastus2')
+    @AllowLargeResponse(size_kb=18192)
     def test_vm_vmss_update_ultra_ssd_enabled(self, resource_group):
         self.kwargs.update({
             'vm': 'vm1',
@@ -1707,13 +1708,13 @@ class VMDiskAttachDetachTest(ScenarioTest):
         self.cmd('vm create -g {rg} -n {vm} --image centos --size Standard_D2s_v3 --zone 2')
         self.cmd('vm deallocate -g {rg} -n {vm}')
         self.cmd('vm update -g {rg} -n {vm} --ultra-ssd-enabled', checks=[
-            self.check('ultraSSDEnabled', True)
+            self.check('additionalCapabilities.ultraSsdEnabled', True)
         ])
 
         self.cmd('vmss create -g {rg} -n {vmss} --image centos --vm-sku Standard_D2s_v3 --zone 2')
         self.cmd('vmss deallocate -g {rg} -n {vmss}')
         self.cmd('vmss update -g {rg} -n {vmss} --ultra-ssd-enabled', checks=[
-            self.check('ultraSSDEnabled', True)
+            self.check('additionalCapabilities.ultraSsdEnabled', True)
         ])
 
 
