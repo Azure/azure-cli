@@ -23,10 +23,12 @@ import threading
 import time
 import uuid
 import webbrowser
-from distutils.version import StrictVersion  # pylint: disable=no-name-in-module,import-error
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from six.moves.urllib.error import URLError  # pylint: disable=import-error
 
+from ._helpers import _populate_api_server_access_profile, _set_load_balancer_sku, _set_vm_set_type
+
+# pylint: disable=import-error
 import yaml
 import dateutil.parser
 from dateutil.relativedelta import relativedelta
@@ -35,6 +37,7 @@ from knack.util import CLIError
 from msrestazure.azure_exceptions import CloudError
 import requests
 
+# pylint: disable=no-name-in-module,import-error
 from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.acs._params import regions_in_preview, regions_in_prod
 from azure.cli.core.api import get_config_dir
@@ -1630,6 +1633,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                tags=None,
                zones=None,
                generate_ssh_keys=False,  # pylint: disable=unused-argument
+               api_server_authorized_ip_ranges=None,
                attach_acr=None,
                no_wait=False):
     _validate_ssh_key(no_ssh_key, ssh_key_value)
@@ -1642,31 +1646,11 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     if location is None:
         location = rg_location
 
-    if not vm_set_type:
-        if kubernetes_version and StrictVersion(kubernetes_version) < StrictVersion("1.12.9"):
-            print('Setting vm_set_type to availabilityset as it is \
-            not specified and kubernetes version(%s) less than 1.12.9 only supports \
-            availabilityset\n' % (kubernetes_version))
-            vm_set_type = "AvailabilitySet"
+    vm_set_type = _set_vm_set_type(vm_set_type, kubernetes_version)
+    load_balancer_sku = _set_load_balancer_sku(load_balancer_sku, kubernetes_version)
 
-    if not vm_set_type:
-        vm_set_type = "VirtualMachineScaleSets"
-
-    # normalize as server validation is case-sensitive
-    if vm_set_type.lower() == "AvailabilitySet".lower():
-        vm_set_type = "AvailabilitySet"
-
-    if vm_set_type.lower() == "VirtualMachineScaleSets".lower():
-        vm_set_type = "VirtualMachineScaleSets"
-
-    if not load_balancer_sku:
-        if kubernetes_version and StrictVersion(kubernetes_version) < StrictVersion("1.13.0"):
-            print('Setting load_balancer_sku to basic as it is not specified and kubernetes \
-            version(%s) less than 1.13.0 only supports basic load balancer SKU\n' % (kubernetes_version))
-            load_balancer_sku = "basic"
-
-    if not load_balancer_sku:
-        load_balancer_sku = "standard"
+    if api_server_authorized_ip_ranges and load_balancer_sku == "basic":
+        raise CLIError('--api-server-authorized-ip-ranges can only be used with standard load balancer')
 
     agent_pool_profile = ManagedClusterAgentPoolProfile(
         name=_trim_nodepoolname(nodepool_name),  # Must be 12 chars or less before ACS RP adds to it
@@ -1767,12 +1751,17 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             tenant_id=aad_tenant_id
         )
 
+    api_server_access_profile = None
+    if api_server_authorized_ip_ranges:
+        api_server_access_profile = _populate_api_server_access_profile(api_server_authorized_ip_ranges)
+
     # Check that both --disable-rbac and --enable-rbac weren't provided
     if all([disable_rbac, enable_rbac]):
         raise CLIError('specify either "--disable-rbac" or "--enable-rbac", not both.')
 
     mc = ManagedCluster(
-        location=location, tags=tags,
+        location=location,
+        tags=tags,
         dns_prefix=dns_name_prefix,
         kubernetes_version=kubernetes_version,
         enable_rbac=not disable_rbac,
@@ -1781,7 +1770,9 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         service_principal_profile=service_principal_profile,
         network_profile=network_profile,
         addon_profiles=addon_profiles,
-        aad_profile=aad_profile)
+        aad_profile=aad_profile,
+        api_server_access_profile=api_server_access_profile
+    )
 
     # Due to SPN replication latency, we do a few retries here
     max_retry = 30
@@ -1961,18 +1952,20 @@ def aks_update(cmd, client, resource_group_name, name,
                load_balancer_outbound_ip_prefixes=None,
                attach_acr=None,
                detach_acr=None,
+               api_server_authorized_ip_ranges=None,
                no_wait=False):
     update_lb_profile = load_balancer_managed_outbound_ip_count is not None or \
         load_balancer_outbound_ips is not None or load_balancer_outbound_ip_prefixes is not None
 
-    if not update_lb_profile and not attach_acr and not detach_acr:
-        raise CLIError('Please specify "--load-balancer-managed-outbound-ip-count" or '
-                       '"--load-balancer-outbound-ips" or '
-                       '"--load-balancer-outbound-ip-prefixes" or '
-                       '"--attach-acr" or "--dettach-acr"')
-
-    if attach_acr and detach_acr:
-        raise CLIError('Cannot specify "--attach-acr" and "--detach-acr" at the same time.')
+    if (not update_lb_profile and
+            not attach_acr and
+            not detach_acr and
+            api_server_authorized_ip_ranges is None):
+        raise CLIError('Please specify one or more of "--load-balancer-managed-outbound-ip-count",'
+                       '"--load-balancer-outbound-ips",'
+                       '"--load-balancer-outbound-ip-prefixes",'
+                       '"--attach-acr" or "--dettach-acr",'
+                       '"--"api-server-authorized-ip-ranges')
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
     instance = client.get(resource_group_name, name)
@@ -1981,17 +1974,17 @@ def aks_update(cmd, client, resource_group_name, name,
         raise CLIError('Cannot get the AKS cluster\'s service principal.')
 
     if attach_acr:
-        return _ensure_aks_acr(cmd.cli_ctx,
-                               client_id=client_id,
-                               acr_name_or_id=attach_acr,
-                               subscription_id=subscription_id)
+        _ensure_aks_acr(cmd.cli_ctx,
+                        client_id=client_id,
+                        acr_name_or_id=attach_acr,
+                        subscription_id=subscription_id)
 
     if detach_acr:
-        return _ensure_aks_acr(cmd.cli_ctx,
-                               client_id=client_id,
-                               acr_name_or_id=detach_acr,
-                               subscription_id=subscription_id,
-                               detach=True)
+        _ensure_aks_acr(cmd.cli_ctx,
+                        client_id=client_id,
+                        acr_name_or_id=detach_acr,
+                        subscription_id=subscription_id,
+                        detach=True)
 
     load_balancer_profile = _get_load_balancer_profile(
         load_balancer_managed_outbound_ip_count,
@@ -2000,9 +1993,12 @@ def aks_update(cmd, client, resource_group_name, name,
 
     if load_balancer_profile:
         instance.network_profile.load_balancer_profile = load_balancer_profile
-        return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
-    return
+    # empty string is valid as it disables ip whitelisting
+    if api_server_authorized_ip_ranges is not None:
+        instance.api_server_access_profile = _populate_api_server_access_profile(api_server_authorized_ip_ranges)
+
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
 
 # pylint: disable=unused-argument,inconsistent-return-statements
