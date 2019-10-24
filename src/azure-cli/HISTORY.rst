@@ -48,6 +48,14 @@ Release History
 
 * Fix #9352: Unexpected error when certificate file does not exist.
 
+**NetAppFiles**
+
+* Upgrade azure-mgmt-netapp to 0.6.0 to use API version 2019-07-01. This new API version includes:
+
+    - Volume creation --protocol-types accepts now "NFSv4.1" not "NFSv4"
+    - Volume export policy property now named 'nfsv41' not 'nfsv4'
+    - Snapshot creation date now named just 'created'
+
 **Network**
 
 * az network private-dns link vnet create/update: Fixes #9851. Support cross-tenant virtual network linking.

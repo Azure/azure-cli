@@ -17,31 +17,31 @@ from ._exception_handler import netappfiles_exception_handler
 
 def load_command_table(self, _):
     netappfiles_accounts_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.netapp.operations.accounts_operations#AccountsOperations.{}',
+        operations_tmpl='azure.mgmt.netapp.operations._accounts_operations#AccountsOperations.{}',
         client_factory=accounts_mgmt_client_factory,
         exception_handler=netappfiles_exception_handler
     )
 
     netappfiles_pools_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.netapp.operations.pools_operations#PoolsOperations.{}',
+        operations_tmpl='azure.mgmt.netapp.operations._pools_operations#PoolsOperations.{}',
         client_factory=pools_mgmt_client_factory,
         exception_handler=netappfiles_exception_handler
     )
 
     netappfiles_volumes_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.netapp.operations.volumes_operations#VolumesOperations.{}',
+        operations_tmpl='azure.mgmt.netapp.operations._volumes_operations#VolumesOperations.{}',
         client_factory=volumes_mgmt_client_factory,
         exception_handler=netappfiles_exception_handler
     )
 
     netappfiles_mount_targets_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.netapp.operations.mount_targets_operations#MountTargetsOperations.{}',
+        operations_tmpl='azure.mgmt.netapp.operations._mount_targets_operations#MountTargetsOperations.{}',
         client_factory=mount_targets_mgmt_client_factory,
         exception_handler=netappfiles_exception_handler
     )
 
     netappfiles_snapshots_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.netapp.operations.snapshots_operations#SnapshotsOperations.{}',
+        operations_tmpl='azure.mgmt.netapp.operations._snapshots_operations#SnapshotsOperations.{}',
         client_factory=snapshots_mgmt_client_factory,
         exception_handler=netappfiles_exception_handler
     )
