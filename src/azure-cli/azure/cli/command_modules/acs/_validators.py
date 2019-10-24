@@ -196,6 +196,14 @@ def validate_load_balancer_outbound_ip_prefixes(namespace):
         if not all(ip_prefix_id_list):
             raise CLIError("--load-balancer-outbound-ip-prefixes cannot contain whitespace")
 
+def validate_nodes_count(namespace):
+    """Validates that min_count and max_count is set between 1-100"""
+    if namespace.min_count is not None:
+        if namespace.min_count < 1 or namespace.min_count > 100:
+            raise CLIError('--min-count must be in the range [1,100]')
+    if namespace.max_count is not None:
+        if namespace.max_count < 1 or namespace.max_count > 100:
+            raise CLIError('--max-count must be in the range [1,100]')
 
 def validate_taints(namespace):
     """Validates that provided taint is a valid format"""

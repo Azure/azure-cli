@@ -252,6 +252,16 @@ parameters:
     type: string
     short-summary: Load balancer outbound IP prefix resource IDs.
     long-summary: Comma-separated public IP prefix resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.
+  - name: --enable-cluster-autoscaler
+    type: bool
+    short-summary: Enable cluster autoscaler, default value is false.
+    long-summary: If specified, please make sure the kubernetes version is larger than 1.10.6.
+  - name: --min-count
+    type: int
+    short-summary: Minimun nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specifying the value in the range of [1, 100].
+  - name: --max-count
+    type: int
+    short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specifying the value in the range of [1, 100].
   - name: --vm-set-type
     type: string
     short-summary: Agent pool vm set type. VirtualMachineScaleSets or AvailabilitySet.

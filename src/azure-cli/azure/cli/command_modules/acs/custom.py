@@ -1612,6 +1612,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                enable_rbac=None,
                vm_set_type=None,
                skip_subnet_role_assignment=False,
+               enable_cluster_autoscaler=False,
                network_plugin=None,
                network_policy=None,
                pod_cidr=None,
@@ -1626,6 +1627,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                workspace_resource_id=None,
                vnet_subnet_id=None,
                max_pods=0,
+               min_count=None,
+               max_count=None,
                aad_client_app_id=None,
                aad_server_app_id=None,
                aad_server_app_secret=None,
@@ -1665,6 +1668,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     )
     if node_osdisk_size:
         agent_pool_profile.os_disk_size_gb = int(node_osdisk_size)
+
+    _check_cluster_autoscaler_flag(enable_cluster_autoscaler, min_count, max_count, node_count, agent_pool_profile)
 
     linux_profile = None
     # LinuxProfile is just used for SSH access to VMs, so omit it if --no-ssh-key was specified.
