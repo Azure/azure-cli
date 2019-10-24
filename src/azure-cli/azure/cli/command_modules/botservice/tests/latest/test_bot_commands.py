@@ -407,6 +407,7 @@ class BotTests(ScenarioTest):
                      self.check('type', 'Microsoft.BotService/botServices')
                  })
 
+
     @ResourceGroupPreparer(random_name_length=20)
     def test_botservice_create_should_remove_invalid_char_from_name_when_webapp(self, resource_group):
         bot_name = self.create_random_name(prefix='cli.', length=15)
