@@ -9,6 +9,7 @@ Release History
 
 **AppConfig**
 
+* Add appconfig feature command group to manage feature flags stored in an App Configuration.
 * Minor bug fix for appconfig kv export to file command. Stop reading dest file contents during export.
 
 **AppService**
