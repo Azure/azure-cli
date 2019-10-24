@@ -9,12 +9,9 @@ from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterAPIServ
 
 
 def _populate_api_server_access_profile(api_server_authorized_ip_ranges):
-    access_profile = None
-    if api_server_authorized_ip_ranges:
-        access_profile = ManagedClusterAPIServerAccessProfile(
-            authorized_ip_ranges=[ip.strip() for ip in api_server_authorized_ip_ranges.split(",")]
-        )
-    return access_profile
+    return ManagedClusterAPIServerAccessProfile(
+        authorized_ip_ranges=[ip.strip() for ip in api_server_authorized_ip_ranges.split(",")]
+    )
 
 
 def _set_load_balancer_sku(load_balancer_sku, kubernetes_version):

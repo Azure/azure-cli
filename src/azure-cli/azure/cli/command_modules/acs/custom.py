@@ -1751,7 +1751,9 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             tenant_id=aad_tenant_id
         )
 
-    api_server_access_profile = _populate_api_server_access_profile(api_server_authorized_ip_ranges)
+    api_server_access_profile = None
+    if api_server_authorized_ip_ranges:
+        api_server_access_profile = _populate_api_server_access_profile(api_server_authorized_ip_ranges)
 
     # Check that both --disable-rbac and --enable-rbac weren't provided
     if all([disable_rbac, enable_rbac]):
