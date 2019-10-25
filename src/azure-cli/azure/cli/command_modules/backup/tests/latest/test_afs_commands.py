@@ -9,7 +9,6 @@ import unittest
 
 from azure.cli.testsdk import ScenarioTest, JMESPathCheckExists, ResourceGroupPreparer, \
     StorageAccountPreparer
-from azure.mgmt.recoveryservicesbackup.models import StorageType
 from .preparers import VaultPreparer, FileSharePreparer, AFSPolicyPreparer, AFSItemPreparer, \
     AFSRPPreparer, FilePreparer
 
