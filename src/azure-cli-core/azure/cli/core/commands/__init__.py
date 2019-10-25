@@ -136,7 +136,7 @@ class CacheObject(object):
         try:
             resource_name = args[-1]
         except IndexError:
-            resource_name = '_'.join(list(copy_kwargs.values()))
+            resource_name = list(copy_kwargs.values())[-1]
 
         self._resource_group = resource_group
         self._resource_name = resource_name
