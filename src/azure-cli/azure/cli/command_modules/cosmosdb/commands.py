@@ -22,6 +22,7 @@ DATABASE_DEPRECATION_INFO = 'cosmosdb sql database, cosmosdb mongodb database, c
 
 COLLECTION_DEPRECATON_INFO = 'cosmosdb sql container, cosmosdb mongodb collection, cosmosdb cassandra table, cosmosdb gremlin graph or cosmosdb table'
 
+
 def load_command_table(self, _):
 
     cosmosdb_sdk = CliCommandType(
