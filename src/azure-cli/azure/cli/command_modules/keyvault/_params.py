@@ -81,12 +81,12 @@ def load_arguments(self, _):
                    validator=validate_deleted_vault_name)
         c.argument('resource_group_name', resource_group_name_type, id_part=None, required=False,
                    help='Resource group of the deleted vault')
-        c.argument('location', help='Location of the deleted vault to be recovered', required=False)
+        c.argument('location', help='Location of the deleted vault', required=False)
 
     with self.argument_context('keyvault purge') as c:
         c.argument('vault_name', help='Name of the deleted vault', required=True, completer=None,
                    validator=validate_deleted_vault_name)
-        c.argument('location', help='Location of the deleted vault to be purged.', required=False)
+        c.argument('location', help='Location of the deleted vault', required=False)
 
     with self.argument_context('keyvault list') as c:
         c.argument('resource_group_name', resource_group_name_type, validator=None)

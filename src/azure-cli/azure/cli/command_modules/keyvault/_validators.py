@@ -174,6 +174,9 @@ def validate_principal(ns):
 
 
 def validate_resource_group_name(cmd, ns):
+    """
+    Populate resource_group_name, if not provided
+    """
     if not ns.resource_group_name:
         vault_name = ns.vault_name
         group_name = _get_resource_group_from_vault_name(cmd.cli_ctx, vault_name)
