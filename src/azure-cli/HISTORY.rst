@@ -27,6 +27,7 @@ Release History
 **Compute**
 
 * vm create: Add warning when specifying accelerated networking and an existing NIC together.
+* vm/vmss update: Add --ultra-ssd-enabled to allow updating ultra SSD setting.
 * [BREAKING CHANGE] vm extension set: Fix bug where users could not set an extension on a VM with --ids.
 * New commands `az vm image terms accept/cancel/show` to manage Azure Marketplace image terms.
 
