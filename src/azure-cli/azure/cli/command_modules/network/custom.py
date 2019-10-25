@@ -4538,6 +4538,7 @@ def list_vpn_conn_ipsec_policies(cmd, resource_group_name, connection_name):
     return ncf.get(resource_group_name, connection_name).ipsec_policies
 # endregion
 
+
 # region VirtualRouter
 def create_virtual_router(cmd, resource_group_name, virtual_router_name, hosted_gateway, location=None, tags=None):
     VirtualRouter, SubResource = cmd.get_models('VirtualRouter', 'SubResource')
