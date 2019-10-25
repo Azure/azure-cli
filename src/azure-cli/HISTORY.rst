@@ -6,6 +6,7 @@ Release History
 **ACR**
 
 * Added a preview parameter `--pack-image-tag` to command `az acr pack build`.
+* Add a default timeout in seconds to `az acr run` and `az acr build`.
 
 **AppConfig**
 
