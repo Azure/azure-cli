@@ -8,15 +8,17 @@ from distutils.version import StrictVersion  # pylint: disable=no-name-in-module
 from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterAPIServerAccessProfile
 
 
-def _populate_api_server_access_profile(api_server_authorized_ip_ranges):
+def _populate_api_server_access_profile(api_server_authorized_ip_ranges, instance=None):
+    if instance is None or instance.api_server_access_profile:
+        profile = ManagedClusterAPIServerAccessProfile()
+
     if api_server_authorized_ip_ranges == "":
         authorized_ip_ranges = []
     else:
         authorized_ip_ranges = [ip.strip() for ip in api_server_authorized_ip_ranges.split(",")]
 
-    return ManagedClusterAPIServerAccessProfile(
-        authorized_ip_ranges=authorized_ip_ranges
-    )
+    profile.authorized_ip_ranges = authorized_ip_ranges
+    return profile
 
 
 def _set_load_balancer_sku(load_balancer_sku, kubernetes_version):
