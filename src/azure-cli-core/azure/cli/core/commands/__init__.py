@@ -133,10 +133,13 @@ class CacheObject(object):
         if len(args) > 2:
             raise CLIError('expected 2 args, got {}: {}'.format(len(args), args))
 
+        directory_appendix = None
         try:
             resource_name = args[-1]
         except IndexError:
-            resource_name = list(copy_kwargs.values())[-1]
+            resource_list = list(copy_kwargs.values())
+            resource_name = resource_list.pop()
+            directory_appendix = resource_list
 
         self._resource_group = resource_group
         self._resource_name = resource_name
@@ -149,6 +152,10 @@ class CacheObject(object):
             self._resource_group,
             self._model_name
         )
+
+        if directory_appendix:
+            directory = os.path.join(directory, *directory_appendix)
+
         filename = '{}.json'.format(resource_name)
         return directory, filename
 
