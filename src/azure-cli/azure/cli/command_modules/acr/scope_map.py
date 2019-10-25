@@ -3,8 +3,17 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from enum import Enum
 from azure.cli.core.util import CLIError
 from ._utils import get_resource_group_name_by_registry_name, parse_actions_from_repositories
+
+
+class ScopeMapActions(Enum):
+    CONTENT_DELETE = 'content/delete'
+    CONTENT_READ = 'content/read'
+    CONTENT_WRITE = 'content/write'
+    METADATA_READ = 'metadata/read'
+    METADATA_WRITE = 'metadata/write'
 
 
 def acr_scope_map_create(cmd,
@@ -72,7 +81,11 @@ def acr_scope_map_update(cmd,
         # Eg: ({A, B} - {B}) U {B, C} = {A, B, C},  ({A, B} U {B, C}) - {B}  = {A, C}
         duplicate_actions = set.intersection(add_actions_set, remove_actions_set)
         if duplicate_actions:
-            raise CLIError('Update ambiguity. Duplicate actions were provided with --add and --remove arguments.')
+            # Display these actions to users: remove 'repositories/' prefix from 'repositories/<repo>/<action>'
+            errors = sorted(map(lambda action: action[action.find('/') + 1:], duplicate_actions))
+            raise CLIError(
+                'Update ambiguity. Duplicate actions were provided with --add and --remove arguments.\n{}'
+                .format(errors))
 
         final_actions_set = set(current_scope_map.actions).union(add_actions_set).difference(remove_actions_set)
         current_actions = list(final_actions_set)
