@@ -757,14 +757,14 @@ class KeyVaultSoftDeleteScenarioTest(ScenarioTest):
 
         # recover and purge
         self.cmd('keyvault delete -n {kv}')
-        self.cmd('keyvault recover -n {kv}')
+        self.cmd('keyvault recover -n {kv}', checks=self.check('name', '{kv}'))
         self.cmd('keyvault delete -n {kv}')
         self.cmd('keyvault purge -n {kv}')
 
         # recover and purge with location
         _create_keyvault(self, self.kwargs, additional_args=' --enable-soft-delete true').get_output_in_json()
         self.cmd('keyvault delete -n {kv}')
-        self.cmd('keyvault recover -n {kv} -l {loc}')
+        self.cmd('keyvault recover -n {kv} -l {loc}', checks=self.check('name', '{kv}'))
         self.cmd('keyvault delete -n {kv}')
         self.cmd('keyvault purge -n {kv} -l {loc}')
 
