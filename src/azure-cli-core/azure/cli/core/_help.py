@@ -9,8 +9,6 @@ import argparse
 from azure.cli.core.commands import ExtensionCommandSource
 from azure.cli.core.util import in_cloud_console
 
-from azure.cli.command_modules.find.custom import get_generated_examples
-
 from knack.help import (HelpFile as KnackHelpFile, CommandHelpFile as KnackCommandHelpFile,
                         GroupHelpFile as KnackGroupHelpFile, ArgumentGroupRegistry as KnackArgumentGroupRegistry,
                         HelpExample as KnackHelpExample, HelpParameter as KnackHelpParameter,
@@ -85,7 +83,7 @@ class CLIPrintMixin(CLIHelp):
         # That way it can fall back to the default one if there was a server
         # error more elegantly.
         if in_cloud_console():
-            examples = get_generated_examples(help_file.command)
+            examples = AzCliHelp.get_generated_examples(help_file.command)
             if examples:
                 use_default_examples = False
                 for e in examples:
@@ -203,6 +201,11 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
             for name in file_names:
                 file_contents[name] = self._name_to_content[name]
             self.versioned_loaders[ldr_cls_name].update_file_contents(file_contents)
+
+    # This method is meant to be overridden by one in the Find module.
+    @staticmethod
+    def get_generated_examples(command):
+        return []
 
 
 class CliHelpFile(KnackHelpFile):

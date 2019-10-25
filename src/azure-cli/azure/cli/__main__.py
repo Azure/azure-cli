@@ -10,7 +10,7 @@ import timeit
 from knack.completion import ARGCOMPLETE_ENV_NAME
 from knack.log import get_logger
 
-from azure.cli.core import get_default_cli
+from azure.cli.utils import get_default_cli
 
 import azure.cli.core.telemetry as telemetry
 
