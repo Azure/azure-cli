@@ -545,7 +545,8 @@ def load_command_table(self, _):
         g.wait_command('wait')
 
     with self.command_group('network express-route auth', network_erca_sdk) as g:
-        g.custom_command('create', 'create_express_route_auth')
+        g.custom_command('create', 'create_express_route_auth', min_api='2019-09-01')
+        g.command('create', 'create_or_update', max_api='2019-08-01', validator=process_auth_create_namespace)
         g.command('delete', 'delete')
         g.show_command('show', 'get')
         g.command('list', 'list')
