@@ -954,7 +954,7 @@ examples:
 
 helps['acr token credential generate'] = """
 type: command
-short-summary: Generate or replace one or both passwords of a token for an Azure Container Registry. For using token and password to access a container registry, see http://aka.ms/acr/token.
+short-summary: Generate or replace one or both passwords of a token for an Azure Container Registry. For using token and password to access a container registry, see https://aka.ms/acr/repo-permissions.
 examples:
   - name: Generate password1 for the token 'MyToken', with an expiration of 30 days.
     text: az acr token credential generate -n MyToken -r MyRegistry --password1 --days 30
