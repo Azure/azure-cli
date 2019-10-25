@@ -9,8 +9,10 @@ from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterAPIServ
 
 
 def _populate_api_server_access_profile(api_server_authorized_ip_ranges, instance=None):
-    if instance is None or instance.api_server_access_profile:
+    if instance is None or instance.api_server_access_profile is None:
         profile = ManagedClusterAPIServerAccessProfile()
+    else:
+        profile = instance.api_server_access_profile
 
     if api_server_authorized_ip_ranges == "":
         authorized_ip_ranges = []
