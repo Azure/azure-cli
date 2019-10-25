@@ -245,13 +245,13 @@ def get_validate_platform(cmd, platform):
 
 def get_yaml_template(cmd_value, timeout, file):
     """Generates yaml template
-    :param str cmd_value: The command to execute in each step
+    :param str cmd_value: The command to execute in each step. Task version defaults to v1.1.0
     :param str timeout: The timeout for each step
     :param str file: The task definition
     """
-    yaml_template = ""
+    yaml_template = "version: v1.1.0\n"
     if cmd_value:
-        yaml_template = "steps: \n  - cmd: {0}\n".format(cmd_value)
+        yaml_template += "steps: \n  - cmd: {0}\n".format(cmd_value)
         if timeout:
             yaml_template += "    timeout: {0}\n".format(timeout)
     else:
