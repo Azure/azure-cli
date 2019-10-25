@@ -415,6 +415,8 @@ def get_task_id_from_task_name(cli_ctx, resource_group, registry_name, task_name
 
 
 def parse_actions_from_repositories(allow_or_remove_repository):
+    from .scope_map import ScopeMapActions
+    valid_actions = {action.value for action in ScopeMapActions}
     REPOSITORIES = 'repositories'
     actions = []
     for rule in allow_or_remove_repository:
@@ -422,7 +424,10 @@ def parse_actions_from_repositories(allow_or_remove_repository):
         if len(rule) < 2:
             raise CLIError('At least one action must be specified with the repository {}.'.format(repository))
         for action in rule[1:]:
-            actions.append('{}/{}/{}'.format(REPOSITORIES, repository, action.lower()))
+            action = action.lower()
+            if action not in valid_actions:
+                raise CLIError('Invalid action "{}" provided. \nValid actions are {}.'.format(action, valid_actions))
+            actions.append('{}/{}/{}'.format(REPOSITORIES, repository, action))
 
     return actions
 
