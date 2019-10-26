@@ -41,6 +41,8 @@ Release History
 * gremlin graph create: Add --conflict-resolution-policy
 * gremlin graph create/update: Update the --idx default schema
 * Fix typo in help message
+* database: Add deprecation infomation
+* collection: Add deprecation infomation
 
 **IoT**
 
