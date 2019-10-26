@@ -21,6 +21,7 @@ from ._utils import (
 from ._client_factory import cf_acr_registries_tasks
 from ._archive_utils import upload_source_code, check_remote_source_code
 
+DEFAULT_TIMEOUT_IN_SEC = 60 * 60  # 60 minutes
 RUN_NOT_SUPPORTED = 'Run is only available for managed registries.'
 NULL_SOURCE_LOCATION = "/dev/null"
 
@@ -39,7 +40,7 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
             no_format=False,
             no_logs=False,
             no_wait=False,
-            timeout=None,
+            timeout=DEFAULT_TIMEOUT_IN_SEC,
             resource_group_name=None,
             platform=None,
             auth_mode=None):

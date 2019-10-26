@@ -3,16 +3,14 @@
 Release History
 ===============
 
-**SQL**
-
-* Added "--compute-model", "--auto-pause-delay", and "--min-capacity" parameters to support CRUD operations for new SQL Database offering: Serverless compute model."
-
 **ACR**
 
 * Added a preview parameter `--pack-image-tag` to command `az acr pack build`.
+* Add a default timeout in seconds to `az acr run` and `az acr build`.
 
 **AppConfig**
 
+* Add appconfig feature command group to manage feature flags stored in an App Configuration.
 * Minor bug fix for appconfig kv export to file command. Stop reading dest file contents during export.
 
 **AppService**
@@ -25,10 +23,12 @@ Release History
 **ARM**
 
 * deployment/group deployment validate: Add --handle-extended-json-format parameter to support multiline and comments in json template when deployment.
+* bump azure-mgmt-resource to 2019-07-01
 
 **Compute**
 
 * vm create: Add warning when specifying accelerated networking and an existing NIC together.
+* vm/vmss update: Add --ultra-ssd-enabled to allow updating ultra SSD setting.
 * [BREAKING CHANGE] vm extension set: Fix bug where users could not set an extension on a VM with --ids.
 * New commands `az vm image terms accept/cancel/show` to manage Azure Marketplace image terms.
 
@@ -48,13 +48,15 @@ Release History
 
 **Key Vault**
 
-* Fix #9352: Unexpected error when certificate file does not exist.
+* Fix #9352: Unexpected error when certificate file does not exist
+* Fix #7048: `az keyvault recover/purge` not working
 
 **Network**
 
 * az network private-dns link vnet create/update: Fixes #9851. Support cross-tenant virtual network linking.
 * [BREAKING CHANGE] network vnet subnet list: Fix #10401. `--resource-group` and `--vnet-name` are required now.
 * az network public-ip prefix create: Fix #10757. Support to specify IP address version (IPv4, IPv6) when creation
+* Bump azure-mgmt-network to 7.0.0 and api-version to 2019-09-01
 
 **Profile**
 
@@ -69,6 +71,10 @@ Release History
 
 * az sf cluster create: fix #10916 modify service fabric linux and windows template.json compute vmss from standard to managed disks
 
+**SQL**
+
+* Add "--compute-model", "--auto-pause-delay", and "--min-capacity" parameters to support CRUD operations for new SQL Database offering: Serverless compute model."
+
 2.0.75
 ++++++
 
@@ -78,6 +84,7 @@ Release History
 * Set `--vm-set-type` default value to virtualmachinescalesets if supported by the kubernetes version
 * Add `az aks nodepool add`,`az aks nodepool show`, `az aks nodepool list`, `az aks nodepool scale`, `az aks nodepool upgrade`, `az aks nodepool update` and `az aks nodepool delete` commmands to support multiple nodepools in aks
 * Add `--zones` to `az aks create` and `az aks nodepool add` commands to support availability zones for aks
+* Enable GA support of apiserver authorized IP ranges via paramater `--api-server-authorized-ip-ranges` in `az aks create` and `az aks update`
 
 **AMS**
 
