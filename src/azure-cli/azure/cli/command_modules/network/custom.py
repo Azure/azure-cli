@@ -2010,7 +2010,8 @@ def update_express_route_peering(cmd, instance, peer_asn=None, primary_peer_addr
 # region ExpressRoute Connection
 # pylint: disable=unused-argument
 def create_express_route_connection(cmd, resource_group_name, express_route_gateway_name, connection_name,
-                                    peering, circuit_name=None, authorization_key=None, routing_weight=None):
+                                    peering, circuit_name=None, authorization_key=None, routing_weight=None,
+                                    enable_internet_security=None):
     ExpressRouteConnection, SubResource = cmd.get_models('ExpressRouteConnection', 'SubResource')
     client = network_client_factory(cmd.cli_ctx).express_route_connections
     connection = ExpressRouteConnection(
@@ -2019,12 +2020,16 @@ def create_express_route_connection(cmd, resource_group_name, express_route_gate
         authorization_key=authorization_key,
         routing_weight=routing_weight
     )
+
+    if enable_internet_security and cmd.supported_api_version(min_api='2019-09-01'):
+        connection.enable_internet_security = enable_internet_security
+
     return client.create_or_update(resource_group_name, express_route_gateway_name, connection_name, connection)
 
 
 # pylint: disable=unused-argument
 def update_express_route_connection(instance, cmd, circuit_name=None, peering=None, authorization_key=None,
-                                    routing_weight=None):
+                                    routing_weight=None, enable_internet_security=None):
     SubResource = cmd.get_models('SubResource')
     if peering is not None:
         instance.express_route_connection_id = SubResource(id=peering)
@@ -2032,6 +2037,9 @@ def update_express_route_connection(instance, cmd, circuit_name=None, peering=No
         instance.authorization_key = authorization_key
     if routing_weight is not None:
         instance.routing_weight = routing_weight
+    if enable_internet_security is not None and cmd.supported_api_version(min_api='2019-09-01'):
+        instance.enable_internet_security = enable_internet_security
+
     return instance
 # endregion
 
