@@ -245,13 +245,13 @@ def get_validate_platform(cmd, platform):
 
 def get_yaml_template(cmd_value, timeout, file):
     """Generates yaml template
-    :param str cmd_value: The command to execute in each step
+    :param str cmd_value: The command to execute in each step. Task version defaults to v1.1.0
     :param str timeout: The timeout for each step
     :param str file: The task definition
     """
-    yaml_template = ""
+    yaml_template = "version: v1.1.0\n"
     if cmd_value:
-        yaml_template = "steps: \n  - cmd: {0}\n".format(cmd_value)
+        yaml_template += "steps: \n  - cmd: {0}\n".format(cmd_value)
         if timeout:
             yaml_template += "    timeout: {0}\n".format(timeout)
     else:
@@ -415,6 +415,8 @@ def get_task_id_from_task_name(cli_ctx, resource_group, registry_name, task_name
 
 
 def parse_actions_from_repositories(allow_or_remove_repository):
+    from .scope_map import ScopeMapActions
+    valid_actions = {action.value for action in ScopeMapActions}
     REPOSITORIES = 'repositories'
     actions = []
     for rule in allow_or_remove_repository:
@@ -422,7 +424,10 @@ def parse_actions_from_repositories(allow_or_remove_repository):
         if len(rule) < 2:
             raise CLIError('At least one action must be specified with the repository {}.'.format(repository))
         for action in rule[1:]:
-            actions.append('{}/{}/{}'.format(REPOSITORIES, repository, action.lower()))
+            action = action.lower()
+            if action not in valid_actions:
+                raise CLIError('Invalid action "{}" provided. \nValid actions are {}.'.format(action, valid_actions))
+            actions.append('{}/{}/{}'.format(REPOSITORIES, repository, action))
 
     return actions
 
