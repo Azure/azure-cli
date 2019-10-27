@@ -1969,6 +1969,7 @@ def aks_update(cmd, client, resource_group_name, name,
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
     instance = client.get(resource_group_name, name)
+
     client_id = instance.service_principal_profile.client_id
     if not client_id:
         raise CLIError('Cannot get the AKS cluster\'s service principal.')
@@ -1996,7 +1997,8 @@ def aks_update(cmd, client, resource_group_name, name,
 
     # empty string is valid as it disables ip whitelisting
     if api_server_authorized_ip_ranges is not None:
-        instance.api_server_access_profile = _populate_api_server_access_profile(api_server_authorized_ip_ranges)
+        instance.api_server_access_profile = \
+            _populate_api_server_access_profile(api_server_authorized_ip_ranges, instance)
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
