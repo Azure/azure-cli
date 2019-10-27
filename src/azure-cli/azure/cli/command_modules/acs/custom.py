@@ -2959,7 +2959,7 @@ def _check_cluster_autoscaler_flag(enable_cluster_autoscaler,
         if min_count is None or max_count is None:
             raise CLIError('Please specify both min-count and max-count when --enable-cluster-autoscaler enabled')
         if int(min_count) > int(max_count):
-            raise CLIError('value of min-count should be less than or equal to value of max-count')
+            raise CLIError('Value of min-count should be less than or equal to value of max-count')
         if int(node_count) < int(min_count) or int(node_count) > int(max_count):
             raise CLIError('node-count is not in the range of min-count and max-count')
         agent_pool_profile.min_count = int(min_count)
@@ -2980,9 +2980,9 @@ def _validate_autoscaler_update_counts(min_count, max_count, node_count, is_enab
                            '--update-cluster-autoscaler is set.')
     if min_count is not None and max_count is not None:
         if int(min_count) > int(max_count):
-            raise CLIError('value of min-count should be less than or equal to value of max-count.')
+            raise CLIError('Value of min-count should be less than or equal to value of max-count.')
         if int(node_count) < int(min_count) or int(node_count) > int(max_count):
-            raise CLIError("current node count '{}' is not in the range of min-count and max-count.".format(node_count))
+            raise CLIError("Current node count '{}' is not in the range of min-count and max-count.".format(node_count))
 
 
 def _print_or_merge_credentials(path, kubeconfig, overwrite_existing, context_name):
