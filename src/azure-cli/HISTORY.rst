@@ -59,6 +59,8 @@ Release History
 * [BREAKING CHANGE] network vnet subnet list: Fix #10401. `--resource-group` and `--vnet-name` are required now.
 * az network public-ip prefix create: Fix #10757. Support to specify IP address version (IPv4, IPv6) when creation
 * Bump azure-mgmt-network to 7.0.0 and api-version to 2019-09-01
+* az network vrouter: Support new service virtual router and virtual router peering
+* az network express-route gateway connection: Support `--internet-security`
 
 **Profile**
 
