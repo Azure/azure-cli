@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+
 def get_default_cli():
     from azure.cli.core.azlogging import AzCliLogging
     from azure.cli.core.commands import AzCliCommandInvoker
