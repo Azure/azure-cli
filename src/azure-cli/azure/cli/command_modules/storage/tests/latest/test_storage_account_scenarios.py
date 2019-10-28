@@ -417,7 +417,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             'domain_sid': 'S-1-5-21-1234567890-1234567890-1234567890',
             'azure_storage_sid': 'S-1-5-21-1234567890-1234567890-1234567890-1234'
         })
-        create_cmd = """storage account create -n {sc} -g {rg} -l eastus2euap --enable-files-adds true --domain-name {domain_name} 
+        create_cmd = """storage account create -n {sc} -g {rg} -l eastus2euap --enable-files-adds --domain-name {domain_name} 
         --net-bios-domain-name {net_bios_domain_name} --forest-name {forest_name} --domain-guid {domain_guid} 
         --domain-sid {domain_sid} --azure-storage-sid {azure_storage_sid}"""
         result = self.cmd(create_cmd).get_output_in_json()
@@ -431,6 +431,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(activeDirectoryProperties['domainSid'], self.kwargs['domain_sid'])
         self.assertEqual(activeDirectoryProperties['forestName'], self.kwargs['forest_name'])
         self.assertEqual(activeDirectoryProperties['netBiosDomainName'], self.kwargs['net_bios_domain_name'])
+
 
 
 class RoleScenarioTest(LiveScenarioTest):
