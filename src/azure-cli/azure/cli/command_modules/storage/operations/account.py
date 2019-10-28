@@ -223,8 +223,10 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
             from msrestazure.tools import parse_resource_id
             rg = parse_resource_id(instance.id)['resource_group']
             origin_storage_account = scf.storage_accounts.get_properties(rg, instance.name)
-            if origin_storage_account.azure_files_identity_based_authentication.directory_service_options == 'AD':
-                params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(directory_service_options='None')
+            if not origin_storage_account.azure_files_identity_based_authentication or \
+                    origin_storage_account.azure_files_identity_based_authentication.directory_service_options == 'AD':
+                params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
+                    directory_service_options='None')
             else:
                 params.azure_files_identity_based_authentication = origin_storage_account.azure_files_identity_based_authentication
 
