@@ -79,7 +79,7 @@ class CLIPrintMixin(CLIHelp):
         indent = 0
         _print_indent('Examples', indent)
         use_default_examples = True
-        # TODO: Once Python 3.8 support is added, switch to an Assignment 
+        # TODO: Once Python 3.8 support is added, switch to an Assignment
         # Expressions to check if the the generated example list is not empty.
         # That way it can fall back to the default one if there was a server
         # error more elegantly.
@@ -208,7 +208,7 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
 
     # This method is meant to be overridden by one in the Find module.
     @staticmethod
-    def get_generated_examples(command):
+    def get_generated_examples():
         return []
 
 

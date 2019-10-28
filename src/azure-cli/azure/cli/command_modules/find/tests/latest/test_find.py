@@ -8,7 +8,8 @@ import unittest
 import mock
 import requests
 
-from azure.cli.command_modules.find.custom import Example, call_aladdin_service, get_generated_examples
+from azure.cli.command_modules.find.custom import (Example, call_aladdin_service,
+                                                   get_generated_examples, clean_from_http_answer)
 
 
 def create_valid_http_response():
@@ -48,7 +49,7 @@ class FindCustomCommandTest(unittest.TestCase):
         mock_response = create_valid_http_response()
 
         for response in json.loads(mock_response.content):
-            cleaned_responses.append(Example.clean_from_http_answer(response))
+            cleaned_responses.append(clean_from_http_answer(response))
 
         self.assertEqual('RunTestAutomation', cleaned_responses[0].title)
         self.assertEqual('az find', cleaned_responses[0].snippet)
