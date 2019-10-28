@@ -651,7 +651,7 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
                         single_placement_group=None, platform_fault_domain_count=None, custom_data=None,
                         secrets=None, license_type=None, zones=None, priority=None, eviction_policy=None,
                         application_security_groups=None, ultra_ssd_enabled=None, proximity_placement_group=None,
-                        terminate_notification_time=None, max_billing=None, orchestrator=None):
+                        terminate_notification_time=None, max_billing=None, orchestration_mode=None):
 
     # Build IP configuration
     ip_configuration = {
@@ -852,7 +852,7 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
     if zones:
         vmss['zones'] = zones
     # vmss without vm profile
-    if orchestrator == 'VM':
+    if orchestration_mode == 'VM':
         if platform_fault_domain_count is None:
             platform_fault_domain_count = 2
         vmss = {
