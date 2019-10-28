@@ -42,13 +42,35 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
             directory_service_options='AADDS' if enable_files_aadds else 'None')
     if enable_files_adds is not None:
+        from knack.util import CLIError
         ActiveDirectoryProperties = cmd.get_models('ActiveDirectoryProperties')
-        active_directory_properties = ActiveDirectoryProperties(domain_name=domain_name, net_bios_domain_name=net_bios_domain_name,
-                                                                forest_name=forest_name, domain_guid=domain_guid, domain_sid=domain_sid,
-                                                                azure_storage_sid=azure_storage_sid)
-        directory_service_options = 'AD' if enable_files_adds else 'None'
-        params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
-            directory_service_options=directory_service_options, active_directory_properties=active_directory_properties)
+        if enable_files_adds:  # enable AD
+            if not (
+                    domain_name and net_bios_domain_name and forest_name and domain_guid and domain_sid and azure_storage_sid):
+                raise CLIError("To enable ActiveDirectoryDomainServicesForFile, user must specify all of: "
+                               "--domain-name, --net-bios-domain-name, --forest-name, --domain-guid, --domain-sid and "
+                               "--azure_storage_sid arguments in Azure Active Directory Properties Argument group.")
+
+            active_directory_properties = ActiveDirectoryProperties(domain_name=domain_name,
+                                                                    net_bios_domain_name=net_bios_domain_name,
+                                                                    forest_name=forest_name, domain_guid=domain_guid,
+                                                                    domain_sid=domain_sid,
+                                                                    azure_storage_sid=azure_storage_sid)
+            # TODO: Enabling AD will automatically disable AADDS. Maybe we should throw error message
+
+            params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
+                directory_service_options='AD',
+                active_directory_properties=active_directory_properties)
+
+        else:  # disable AD
+            if domain_name or net_bios_domain_name or forest_name or domain_guid or domain_sid or azure_storage_sid:
+                raise CLIError("To disable ActiveDirectoryDomainServicesForFile, user can't specify any of: "
+                               "--domain-name, --net-bios-domain-name, --forest-name, --domain-guid, --domain-sid and "
+                               "--azure_storage_sid arguments in Azure Active Directory Properties Argument group.")
+
+            params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
+                directory_service_options='None')
+
     if enable_large_file_share:
         LargeFileSharesState = cmd.get_models('LargeFileSharesState')
         params.large_file_shares_state = LargeFileSharesState("Enabled")

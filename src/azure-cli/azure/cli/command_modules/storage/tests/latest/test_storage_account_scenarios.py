@@ -432,7 +432,18 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(activeDirectoryProperties['forestName'], self.kwargs['forest_name'])
         self.assertEqual(activeDirectoryProperties['netBiosDomainName'], self.kwargs['net_bios_domain_name'])
 
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
+    @ResourceGroupPreparer()
+    def test_create_storage_account_with_files_adds_false(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        self.kwargs.update({
+            'rg': resource_group,
+            'sc': name
+        })
+        result = self.cmd("storage account create -n {sc} -g {rg} -l eastus2euap --enable-files-adds false").get_output_in_json()
 
+        self.assertIn('azureFilesIdentityBasedAuthentication', result)
+        self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'None')
 
 class RoleScenarioTest(LiveScenarioTest):
     def run_under_service_principal(self):
