@@ -93,7 +93,7 @@ def resource_file_format(value):
         message = ("Incorrectly formatted resource reference. "
                    "Argument values should be in the format filename=blobsource")
         raise ValueError(message)
-    return {'file_path': file_name, 'blob_source': blob_source}
+    return {'file_path': file_name, 'http_url': blob_source}
 
 
 # COMMAND NAMESPACE VALIDATORS
