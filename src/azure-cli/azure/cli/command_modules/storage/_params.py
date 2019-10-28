@@ -72,26 +72,26 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
              'Once the property is enabled, the feature cannot be disabled. Currently only supported for LRS and '
              'ZRS replication types, hence account conversions to geo-redundant accounts would not be possible. '
              'For more information, please refer to https://go.microsoft.com/fwlink/?linkid=2086047.')
-    adds_type = CLIArgumentType(arg_type=get_three_state_flag(), min_api='2019-04-01', is_preview=True,
+    adds_type = CLIArgumentType(arg_type=get_three_state_flag(), min_api='2019-04-01',
                                 help='Enable Azure Files Active Directory Domain Service Authentication for '
                                      'storage account. When --enable-files-adds is set to true, Azure Active '
                                      'Directory Properties arguments must be provided.')
     aadds_type = CLIArgumentType(arg_type=get_three_state_flag(), min_api='2018-11-01',
                                  help='Enable Azure Active Directory Domain Services authentication for Azure Files')
-    domain_name_type = CLIArgumentType(min_api='2019-04-01', is_preview=True, arg_group="Azure Active Directory Properties",
+    domain_name_type = CLIArgumentType(min_api='2019-04-01', arg_group="Azure Active Directory Properties",
                                        help="Specify the primary domain that the AD DNS server is authoritative for. "
                                             "Required when --enable-files-adds is set to True")
-    net_bios_domain_name_type = CLIArgumentType(min_api='2019-04-01', is_preview=True, arg_group="Azure Active Directory Properties",
+    net_bios_domain_name_type = CLIArgumentType(min_api='2019-04-01', arg_group="Azure Active Directory Properties",
                                                 help="Specify the NetBIOS domain name. "
                                                      "Required when --enable-files-adds is set to True")
-    forest_name_type = CLIArgumentType(min_api='2019-04-01', is_preview=True, arg_group="Azure Active Directory Properties",
+    forest_name_type = CLIArgumentType(min_api='2019-04-01', arg_group="Azure Active Directory Properties",
                                        help="Specify the Active Directory forest to get. "
                                             "Required when --enable-files-adds is set to True")
-    domain_guid_type = CLIArgumentType(min_api='2019-04-01', is_preview=True, arg_group="Azure Active Directory Properties",
+    domain_guid_type = CLIArgumentType(min_api='2019-04-01', arg_group="Azure Active Directory Properties",
                                        help="Specify the domain GUID. Required when --enable-files-adds is set to True")
-    domain_sid_type = CLIArgumentType(min_api='2019-04-01', is_preview=True, arg_group="Azure Active Directory Properties",
+    domain_sid_type = CLIArgumentType(min_api='2019-04-01', arg_group="Azure Active Directory Properties",
                                       help="Specify the security identifier (SID). Required when --enable-files-adds is set to True")
-    azure_storage_sid_type = CLIArgumentType(min_api='2019-04-01', is_preview=True, arg_group="Azure Active Directory Properties",
+    azure_storage_sid_type = CLIArgumentType(min_api='2019-04-01', arg_group="Azure Active Directory Properties",
                                              help="Specify the security identifier (SID) for Azure Storage. "
                                                   "Required when --enable-files-adds is set to True")
     sas_help = 'The permissions the SAS grants. Allowed values: {}. Do not use if a stored access policy is ' \

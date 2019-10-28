@@ -385,6 +385,101 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.assertIn('azureFilesIdentityBasedAuthentication', result)
         self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'AADDS')
 
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
+    @ResourceGroupPreparer()
+    def test_create_storage_account_with_files_aadds(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        create_cmd = 'az storage account create -n {} -g {} --enable-files-adds'.format(name, resource_group)
+        result = self.cmd(create_cmd).get_output_in_json()
+
+        self.assertIn('azureFilesIdentityBasedAuthentication', result)
+        self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'AD')
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
+    @ResourceGroupPreparer()
+    def test_create_storage_account_with_files_adds_false(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        self.kwargs.update({
+            'name': 'name',
+            'domain_name': 'mydomain.com',
+            'net_bios_domain_name': 'mydomain.com',
+            'forest_name': 'mydomain.com',
+            'domain_guid': '12345678-1234-1234-1234-123456789012',
+            'domain_sid': 'S-1-5-21-1234567890-1234567890-1234567890',
+            'azure_storage_sid': 'S-1-5-21-1234567890-1234567890-1234567890-1234'
+        })
+        create_cmd = 'az storage account create -n {name} -g {rg} --enable-files-aadds false'
+        result = self.cmd(create_cmd).get_output_in_json()
+
+        self.assertIn('azureFilesIdentityBasedAuthentication', result)
+        self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'None')
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
+    @ResourceGroupPreparer()
+    def test_create_storage_account_with_files_adds_true(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        self.kwargs.update({
+            'name': 'name',
+            'domain_name': 'mydomain.com',
+            'net_bios_domain_name': 'mydomain.com',
+            'forest_name': 'mydomain.com',
+            'domain_guid': '12345678-1234-1234-1234-123456789012',
+            'domain_sid': 'S-1-5-21-1234567890-1234567890-1234567890',
+            'azure_storage_sid': 'S-1-5-21-1234567890-1234567890-1234567890-1234'
+        })
+        create_cmd = 'az storage account create -n {name} -g {rg} --enable-files-adds true --domain-name {domain_name} '
+        '--net-bios-domain-name {net_bios_domain_name} --forest-name {forest_name} --domain-guid {domain_guid} '
+        '--domain-sid {domain_sid} --azure-storage-sid {forest_name}'
+
+        result = self.cmd(create_cmd).get_output_in_json()
+
+        self.assertIn('azureFilesIdentityBasedAuthentication', result)
+        self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'AD')
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
+    @ResourceGroupPreparer()
+    def test_update_storage_account_with_files_adds(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        self.kwargs.update({
+            'name': 'name',
+            'domain_name': 'mydomain.com',
+            'net_bios_domain_name': 'mydomain.com',
+            'forest_name': 'mydomain.com',
+            'domain_guid': '12345678-1234-1234-1234-123456789012',
+            'domain_sid': 'S-1-5-21-1234567890-1234567890-1234567890',
+            'azure_storage_sid': 'S-1-5-21-1234567890-1234567890-1234567890-1234'
+        })
+        # Create a storage account with ActiveDirectoryDomainService enabled
+        create_cmd = 'az storage account create -n {name} -g {rg} -l eastus2euap --enable-files-adds true --domain-name'
+        ' {domain_name} --net-bios-domain-name {net_bios_domain_name} --forest-name {forest_name} --domain-guid '
+        '{domain_guid} --domain-sid {domain_sid} --azure-storage-sid {azure-storage-sid}'
+        self.cmd(create_cmd, checks=[
+            JMESPathCheck('azureFilesIdentityBasedAuthentication.directoryServiceOptions', 'AD'),
+            JMESPathCheck('azureFilesIdentityBasedAuthentication.activeDirectoryProperties.azureStorageSid', self.kwargs['azure_storage_sid']),
+            JMESPathCheck('azureFilesIdentityBasedAuthentication.activeDirectoryProperties.domainGuid', self.kwargs['domain_guid']),
+            JMESPathCheck('azureFilesIdentityBasedAuthentication.activeDirectoryProperties.domainName', self.kwargs['domain_name']),
+            JMESPathCheck('azureFilesIdentityBasedAuthentication.activeDirectoryProperties.domainSid', self.kwargs['domain_sid']),
+            JMESPathCheck('azureFilesIdentityBasedAuthentication.activeDirectoryProperties.forestName', self.kwargs['forest_name']),
+            JMESPathCheck('azureFilesIdentityBasedAuthentication.activeDirectoryProperties.netBiosDomainName', self.kwargs['net_bios_domain_name'])
+        ])
+
+        update_cmd = 'az storage account update -n {name} -g {rg} --enable-files-adds false'
+        self.cmd(update_cmd, checks=[
+            JMESPathCheck('azureFilesIdentityBasedAuthentication.directoryServiceOptions', 'None')])
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
+    @ResourceGroupPreparer()
+    def test_update_storage_account_with_files_aadds_true(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        create_cmd = 'az storage account create -n {} -g {}'.format(name, resource_group)
+        self.cmd(create_cmd, checks=[JMESPathCheck('azureFilesIdentityBasedAuthentication', None)])
+
+        update_cmd = 'az storage account update -n {} -g {} --enable-files-aadds true'.format(name, resource_group)
+        result = self.cmd(update_cmd).get_output_in_json()
+
+        self.assertIn('azureFilesIdentityBasedAuthentication', result)
+        self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'AD')
+
 
 class RoleScenarioTest(LiveScenarioTest):
     def run_under_service_principal(self):
