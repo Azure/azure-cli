@@ -445,6 +445,35 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.assertIn('azureFilesIdentityBasedAuthentication', result)
         self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'None')
 
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
+    @ResourceGroupPreparer()
+    def test_create_storage_account_with_files_adds_true(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        self.kwargs.update({
+            'rg': resource_group,
+            'sc': name,
+            'domain_name': 'mydomain.com',
+            'net_bios_domain_name': 'mydomain.com',
+            'forest_name': 'mydomain.com',
+            'domain_guid': '12345678-1234-1234-1234-123456789012',
+            'domain_sid': 'S-1-5-21-1234567890-1234567890-1234567890',
+            'azure_storage_sid': 'S-1-5-21-1234567890-1234567890-1234567890-1234'
+        })
+        create_cmd = """storage account create -n {sc} -g {rg} -l eastus2euap --enable-files-adds true --domain-name {domain_name} 
+        --net-bios-domain-name {net_bios_domain_name} --forest-name {forest_name} --domain-guid {domain_guid} 
+        --domain-sid {domain_sid} --azure-storage-sid {azure_storage_sid}"""
+        result = self.cmd(create_cmd).get_output_in_json()
+
+        self.assertIn('azureFilesIdentityBasedAuthentication', result)
+        self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'AD')
+        activeDirectoryProperties = result['azureFilesIdentityBasedAuthentication']['activeDirectoryProperties']
+        self.assertEqual(activeDirectoryProperties['azureStorageSid'], self.kwargs['azure_storage_sid'])
+        self.assertEqual(activeDirectoryProperties['domainGuid'], self.kwargs['domain_guid'])
+        self.assertEqual(activeDirectoryProperties['domainName'], self.kwargs['domain_name'])
+        self.assertEqual(activeDirectoryProperties['domainSid'], self.kwargs['domain_sid'])
+        self.assertEqual(activeDirectoryProperties['forestName'], self.kwargs['forest_name'])
+        self.assertEqual(activeDirectoryProperties['netBiosDomainName'], self.kwargs['net_bios_domain_name'])
+
 class RoleScenarioTest(LiveScenarioTest):
     def run_under_service_principal(self):
         account_info = self.cmd('account show').get_output_in_json()
