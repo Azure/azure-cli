@@ -158,8 +158,18 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
     )
     AzureFilesIdentityBasedAuthentication = cmd.get_models('AzureFilesIdentityBasedAuthentication')
     if enable_files_aadds is not None:
-        params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
-            directory_service_options='AADDS' if enable_files_aadds else 'None')
+        if enable_files_aadds: # enable AADDS
+            params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
+                directory_service_options='AADDS' if enable_files_aadds else 'None')
+        else: # Only disable AADDS and keep others unchanged
+            scf = storage_client_factory(cmd.cli_ctx)
+            from msrestazure.tools import parse_resource_id
+            rg = parse_resource_id(instance.id)['resource_group']
+            origin_storage_account = scf.storage_accounts.get_properties(rg, instance.name)
+            if origin_storage_account.azure_files_identity_based_authentication.directory_service_options == 'AADDS':
+                params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(directory_service_options='None')
+            else:
+                params.azure_files_identity_based_authentication = origin_storage_account.azure_files_identity_based_authentication
 
     if enable_files_adds is not None:
         from knack.util import CLIError
@@ -186,7 +196,7 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                 raise CLIError("To disable ActiveDirectoryDomainServicesForFile, user can't specify any of: "
                                "--domain-name, --net-bios-domain-name, --forest-name, --domain-guid, --domain-sid and "
                                "--azure_storage_sid arguments in Azure Active Directory Properties Argument group.")
-            # Only disable AD and keep ActiveDirectoryProperties unchanged
+            # Only disable AD and keep others unchanged
             scf = storage_client_factory(cmd.cli_ctx)
             from msrestazure.tools import parse_resource_id
             rg = parse_resource_id(instance.id)['resource_group']
