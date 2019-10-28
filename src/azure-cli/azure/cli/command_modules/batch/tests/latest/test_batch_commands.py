@@ -104,7 +104,7 @@ class TestBatchValidators(unittest.TestCase):
         self.assertEqual(meta, {
             'file_path': 'TestData.zip',
             'http_url': ("https://teststorage.blob.core.windows.net/fgrp-47197bb4/"
-                            "TestData.zip?sv=2015-04-05&sr=b&sig=lk72w%3D&se=2017-07-28T21%3A14%3A12Z&sp=rwd")})
+                         "TestData.zip?sv=2015-04-05&sr=b&sig=lk72w%3D&se=2017-07-28T21%3A14%3A12Z&sp=rwd")})
 
         with self.assertRaises(ValueError):
             _validators.resource_file_format("file")
