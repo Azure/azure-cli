@@ -41,7 +41,9 @@ def load_command_table(self, _):
     with self.command_group('backup container', backup_custom_base, client_factory=protection_containers_cf) as g:
         g.show_command('show', 'show_container', client_factory=backup_protection_containers_cf, table_transformer=transform_container)
         g.command('list', 'list_containers', table_transformer=transform_container_list, client_factory=backup_protection_containers_cf)
-        g.command('unregister', 'unregister_container', confirmation=True)
+
+    with self.command_group('backup container', custom_command_type=backup_custom_base, client_factory=protection_containers_cf) as g:
+        g.custom_command('unregister', 'unregister_container', confirmation=True)
 
     with self.command_group('backup policy', backup_custom_base, client_factory=protection_policies_cf) as g:
         g.command('get-default-for-vm', 'get_default_policy_for_vm')
@@ -88,3 +90,6 @@ def load_command_table(self, _):
     with self.command_group('backup restore files', backup_custom, client_factory=item_level_recovery_connections_cf) as g:
         g.command('mount-rp', 'restore_files_mount_rp')
         g.command('unmount-rp', 'restore_files_unmount_rp')
+
+    with self.command_group('backup', is_preview=True):
+        pass

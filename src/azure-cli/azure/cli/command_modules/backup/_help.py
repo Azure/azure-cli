@@ -37,7 +37,7 @@ examples:
 
 helps['backup container unregister'] = """
 type: command
-short-summary: This command allows Azure Backup to unregister a ‘Backup Container’ so that the underlying 'resource' can be protected to another vault, if required. The existing backup data in this vault should be deleted before 'unregister' can be performed.
+short-summary: Unregister a Backup Container to make the underlying 'resource' be protected by another vault.
 examples:
   - name: This command allows Azure Backup to unregister a ‘Backup Container’ so that the underlying 'resource' can be protected to another vault, if required. The existing backup data in this vault should be deleted before 'unregister' can be performed.
     text: az backup container unregister --container-name MyContainer --resource-group MyResourceGroup --vault-name MyVault --backup-management-type AzureStorage
@@ -125,7 +125,7 @@ short-summary: A backup policy defines when you want to take a backup and for ho
 
 helps['backup policy delete'] = """
 type: command
-short-summary: Before you can delete a Backup protection policy, the policy must not have any associated Backup items. To associate another policy with a Backup item, use the backup item set-policy command.
+short-summary: Delete a backup policy which doesn't have any associated backup items.
 examples:
   - name: Before you can delete a Backup protection policy, the policy must not have any associated Backup items. To associate another policy with a Backup item, use the backup item set-policy command.
     text: az backup policy delete --name MyBackupPolicy --resource-group MyResourceGroup --vault-name MyVault
@@ -227,7 +227,7 @@ examples:
 
 helps['backup protection enable-for-azurefileshare'] = """
 type: command
-short-summary: Start protecting a previously unprotected Azure File share within an Azure Storage account as per the specified policy to a Recovery services vault. Provide the Azure File share name and the parent storage account name.
+short-summary: Start protecting a previously unprotected Azure File share within an Azure Storage account as per the specified policy to a Recovery services vault.
 examples:
   - name: Start protecting a previously unprotected Azure File share within an Azure Storage account as per the specified policy to a Recovery services vault. Provide the Azure File share name and the parent storage account name.
     text: az backup protection enable-for-azurefileshare --policy-name MyPolicy --resource-group MyResourceGroup --vault-name MyVault --storage-account MyStorageAccount --azure-file-share MyAzureFileShare

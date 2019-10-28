@@ -24,9 +24,11 @@ allowed_container_types = ['AzureIaasVM']
 allowed_workload_types = ['VM', 'AzureFileShare']
 allowed_backup_management_types = ['AzureIaasVM', 'AzureStorage']
 
-backup_management_type_help = """Specifiy the backup management type. Defines how Azure Backup manages the backup of entities within the ARM resource. For eg: AzureWorkloads refers to workloads installed within Azure VMs, AzureStorage refers to entities within Storage account. Accepts 'AzureWorkload', 'AzureStorage'. Required only if friendly name is used as Container name."""
+backup_management_type_help = """Specifiy the backup management type. Define how Azure Backup manages the backup of entities within the ARM resource. For eg: AzureWorkloads refers to workloads installed within Azure VMs, AzureStorage refers to entities within Storage account. Required only if friendly name is used as Container name."""
 container_name_help = """Name of the backup container. Accepts 'Name' or 'FriendlyName' from the output of az backup container list command. If 'FriendlyName' is passed then BackupManagementType is required."""
 workload_type_help = """Specifiy the type of applications within the Resource which should be discovered and protected by Azure Backup. """
+restore_mode_help = """Accepts OriginalLocation or AlternateLocation"""
+resolve_conflict_help = "Instruction if there's a conflict with the restored data."
 vault_name_type = CLIArgumentType(help='Name of the Recovery services vault.', options_list=['--vault-name', '-v'], completer=get_resource_name_completion_list('Microsoft.RecoveryServices/vaults'))
 container_name_type = CLIArgumentType(help=container_name_help, options_list=['--container-name', '-c'])
 item_name_type = CLIArgumentType(help='Name of the backed up item.', options_list=['--item-name', '-i'])
@@ -35,6 +37,8 @@ job_name_type = CLIArgumentType(help='Name of the job.', options_list=['--name',
 rp_name_type = CLIArgumentType(help='Name of the recovery point.', options_list=['--rp-name', '-r'])
 backup_management_type = CLIArgumentType(help=backup_management_type_help, arg_type=get_enum_type(allowed_backup_management_types), options_list=['--backup-management-type'])
 workload_type = CLIArgumentType(help=workload_type_help, arg_type=get_enum_type(allowed_workload_types), options_list=['--workload-type'])
+restore_mode_type = CLIArgumentType(help=restore_mode_help, arg_type=get_enum_type(['OriginalLocation', 'AlternateLocation']), options_list=['--restore-mode'])
+resolve_conflict_type = CLIArgumentType(help=resolve_conflict_help, arg_type=get_enum_type(['Overwrite', 'Skip']), options_list=['--resolve-conflict'])
 
 
 # pylint: disable=too-many-statements
@@ -174,19 +178,19 @@ def load_arguments(self, _):
         c.argument('target_resource_group', options_list=['--target-resource-group', '-t'], help='Use this to specify the target resource group in which the restored disks will be saved')
 
     with self.argument_context('backup restore restore-azurefileshare') as c:
-        c.argument('resolve_conflict', arg_type=get_enum_type(['Overwrite', 'Skip']), options_list=['--resolve-conflict'], help="Instruction if there's a conflict with the restored data. Accepts Overwrite or Skip.")
-        c.argument('restore_mode', arg_type=get_enum_type(['OriginalLocation', 'AlternateLocation']), options_list=['--restore-mode'], help='Accepts OriginalLocation or AlternateLocation.')
+        c.argument('resolve_conflict', resolve_conflict_type)
+        c.argument('restore_mode', restore_mode_type)
         c.argument('target_file_share', options_list=['--target-file-share'], help='Destination file share to which content will be restored')
         c.argument('target_folder', options_list=['--target-folder'], help='Destination folder to which content will be restored. To restore content to root , leave the folder name empty')
         c.argument('target_storage_account', options_list=['--target-storage-account'], help='Destination storage account to which content will be restored')
 
     with self.argument_context('backup restore restore-azurefiles') as c:
-        c.argument('resolve_conflict', arg_type=get_enum_type(['Overwrite', 'Skip']), options_list=['--resolve-conflict'], help="Instruction if there's a conflict with the restored data. Accepts Overwrite or Skip.")
-        c.argument('restore_mode', arg_type=get_enum_type(['OriginalLocation', 'AlternateLocation']), options_list=['--restore-mode'], help='Accepts OriginalLocation or AlternateLocation.')
+        c.argument('resolve_conflict', resolve_conflict_type)
+        c.argument('restore_mode', restore_mode_type)
         c.argument('target_file_share', options_list=['--target-file-share'], help='Destination file share to which content will be restored')
         c.argument('target_folder', options_list=['--target-folder'], help='Destination folder to which content will be restored. To restore content to root , leave the folder name empty')
         c.argument('target_storage_account', options_list=['--target-storage-account'], help='Destination storage account to which content will be restored')
-        c.argument('source_file_type', arg_type=get_enum_type(['File', 'Directory']), options_list=['--source-file-type'], help='Whether a directory or a file is selected. Accepts Directory or File.')
+        c.argument('source_file_type', arg_type=get_enum_type(['File', 'Directory']), options_list=['--source-file-type'], help='Specify the source file type to be selected')
         c.argument('source_file_path', options_list=['--source-file-path'], help="""The absolute path of the file, to be restored within the file share, as a string. This path is the same path used in the 'az storage file download' or 'az storage file show' CLI commands.""")
 
     # Job
