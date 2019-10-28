@@ -4565,6 +4565,41 @@ examples:
     crafted: true
 """
 
+helps['network vrouter'] = """
+type: group
+short-summary: Manage the virtual router.
+"""
+
+helps['network vrouter create'] = """
+type: command
+short-summary: Create a virtual router.
+"""
+
+helps['network vrouter update'] = """
+type: command
+short-summary: Update a virtual router.
+"""
+
+helps['network vrouter list'] = """
+type: command
+short-summary: List all virtual routers under a subscription or a resource group.
+"""
+
+helps['network vrouter peering'] = """
+type: group
+short-summary: Manage the virtual router peering.
+"""
+
+helps['network vrouter peering create'] = """
+type: command
+short-summary: Create a virtual router peering.
+"""
+
+helps['network vrouter peering update'] = """
+type: command
+short-summary: Update a virtual router peering.
+"""
+
 helps['network watcher'] = """
 type: group
 short-summary: Manage the Azure Network Watcher.
