@@ -562,6 +562,26 @@ def _validate_vm_create_availability_set(cmd, namespace):
         logger.debug("adding to specified availability set '%s'", namespace.availability_set)
 
 
+def _validate_vm_create_vmss(cmd, namespace):
+    from msrestazure.tools import parse_resource_id, resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    if namespace.vmss:
+        as_id = parse_resource_id(namespace.vmss)
+        name = as_id['name']
+        rg = as_id.get('resource_group', namespace.resource_group_name)
+
+        if not check_existence(cmd.cli_ctx, name, rg, 'Microsoft.Compute', 'virtualMachineScaleSets'):
+            raise CLIError("virtual machine scale set '{}' does not exist.".format(name))
+
+        namespace.vmss = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=rg,
+            namespace='Microsoft.Compute',
+            type='virtualMachineScaleSets',
+            name=name)
+        logger.debug("adding to specified virtual machine scale set '%s'", namespace.vmss)
+
+
 def _validate_vm_create_dedicated_host(cmd, namespace):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
@@ -1108,6 +1128,7 @@ def process_vm_create_namespace(cmd, namespace):
         _validate_vm_create_storage_account(cmd, namespace)
 
     _validate_vm_create_availability_set(cmd, namespace)
+    _validate_vm_create_vmss(cmd, namespace)
     _validate_vm_vmss_create_vnet(cmd, namespace)
     _validate_vm_create_nsg(cmd, namespace)
     _validate_vm_vmss_create_public_ip(cmd, namespace)
@@ -1280,6 +1301,8 @@ def get_network_lb(cli_ctx, resource_group_name, lb_name):
 
 
 def process_vmss_create_namespace(cmd, namespace):
+    if namespace.orchestrator == 'VM':
+        namespace.image = 'centos'  # Will be ignored. Just aim to pass validation.
     validate_tags(namespace)
     if namespace.vm_sku is None:
         from azure.cli.core.cloud import AZURE_US_GOV_CLOUD

@@ -1416,6 +1416,20 @@ class VMCreateExistingOptions(ScenarioTest):
         self.cmd('vm show -n {vm} -g {rg}',
                  checks=self.check('storageProfile.osDisk.vhd.uri', 'https://{sa}.blob.core.windows.net/{container}/{disk}.vhd'))
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_reference_vmss_')
+    def test_vm_reference_vmss(self, resource_group):
+        self.kwargs.update({
+            'vm': 'vm1',
+            'vmss': 'vmss1'
+        })
+
+        self.cmd('vmss create -g {rg} -n {vmss} --orchestrator VM')
+        self.cmd('vm create -g {rg} -n {vm} --image ubuntults --vmss {vmss}')
+        vmss_id = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()['id']
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('virtualMachineScaleSet.id', vmss_id)
+        ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_provision_vm_agent_')
     def test_vm_create_provision_vm_agent(self, resource_group):
         self.kwargs.update({
@@ -3514,7 +3528,7 @@ class VMSSTerminateNotificationScenarioTest(ScenarioTest):
             self.cmd('vmss update -g {rg} -n {vm} --enable-terminate-notification')
 
 
-class VMPriorityEvictionBilling(ScenarioTest):
+class VMPriorityEvictionBillingTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_priority_eviction_billing_')
     def test_vm_priority_eviction_billing(self, resource_group):
