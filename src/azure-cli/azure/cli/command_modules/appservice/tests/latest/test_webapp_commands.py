@@ -745,6 +745,9 @@ class FunctionAppCreateUsingACR(ScenarioTest):
             JMESPathCheck("[?name=='DOCKER_REGISTRY_SERVER_USERNAME'].value|[0]", username)
         ])
 
+        self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
+            JMESPathCheck('linuxFxVersion', 'DOCKER|{}.azurecr.io/image-name:latest'.format(acr_registry_name))])
+
         self.cmd('functionapp config container delete -g {} -n {} '.format(resource_group, functionapp))
         json_result = self.cmd(
             'functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp)).get_output_in_json()
