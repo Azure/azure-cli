@@ -734,7 +734,7 @@ class KeyVaultSoftDeleteScenarioTest(ScenarioTest):
         self.cmd('keyvault certificate import --vault-name {kv} -n cert1 --file "{pem_plain_file}" -p @"{pem_policy_path}"')
         self.cmd('keyvault certificate import --vault-name {kv} -n cert2 --file "{pem_plain_file}" -p @"{pem_policy_path}"')
 
-        # delete the secrets keys and certficates
+        # delete the secrets keys and certificates
         self.cmd('keyvault secret delete --vault-name {kv} -n secret1')
         self.cmd('keyvault secret delete --vault-name {kv} -n secret2')
         self.cmd('keyvault key delete --vault-name {kv} -n key1')
@@ -755,7 +755,16 @@ class KeyVaultSoftDeleteScenarioTest(ScenarioTest):
         self.cmd('keyvault key purge --vault-name {kv} -n key2')
         self.cmd('keyvault certificate purge --vault-name {kv} -n cert2')
 
-        # delete and purge the vault
+        # recover and purge
+        self.cmd('keyvault delete -n {kv}')
+        self.cmd('keyvault recover -n {kv}', checks=self.check('name', '{kv}'))
+        self.cmd('keyvault delete -n {kv}')
+        self.cmd('keyvault purge -n {kv}')
+
+        # recover and purge with location
+        _create_keyvault(self, self.kwargs, additional_args=' --enable-soft-delete true').get_output_in_json()
+        self.cmd('keyvault delete -n {kv}')
+        self.cmd('keyvault recover -n {kv} -l {loc}', checks=self.check('name', '{kv}'))
         self.cmd('keyvault delete -n {kv}')
         self.cmd('keyvault purge -n {kv} -l {loc}')
 

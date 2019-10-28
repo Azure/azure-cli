@@ -18,6 +18,10 @@ from azure.cli.command_modules.cosmosdb._format import (
     list_connection_strings_output
 )
 
+DATABASE_DEPRECATION_INFO = 'cosmosdb sql database, cosmosdb mongodb database, cosmosdb cassandra keyspace or cosmosdb gremlin database'
+
+COLLECTION_DEPRECATON_INFO = 'cosmosdb sql container, cosmosdb mongodb collection, cosmosdb cassandra table, cosmosdb gremlin graph or cosmosdb table'
+
 
 def load_command_table(self, _):
 
@@ -163,7 +167,7 @@ def load_command_table(self, _):
         g.command('regenerate', 'regenerate_key')
 
     # # database operations
-    with self.command_group('cosmosdb database') as g:
+    with self.command_group('cosmosdb database', deprecate_info=self.deprecate(redirect=DATABASE_DEPRECATION_INFO)) as g:
         g.cosmosdb_custom('show', 'cli_cosmosdb_database_show', table_transformer=database_output)
         g.cosmosdb_custom('list', 'cli_cosmosdb_database_list', table_transformer=list_database_output)
         g.cosmosdb_custom('exists', 'cli_cosmosdb_database_exists')
@@ -171,7 +175,7 @@ def load_command_table(self, _):
         g.cosmosdb_custom('delete', 'cli_cosmosdb_database_delete')
 
     # collection operations
-    with self.command_group('cosmosdb collection') as g:
+    with self.command_group('cosmosdb collection', deprecate_info=self.deprecate(redirect=COLLECTION_DEPRECATON_INFO)) as g:
         g.cosmosdb_custom('show', 'cli_cosmosdb_collection_show', table_transformer=collection_output)
         g.cosmosdb_custom('list', 'cli_cosmosdb_collection_list', table_transformer=list_collection_output)
         g.cosmosdb_custom('exists', 'cli_cosmosdb_collection_exists')

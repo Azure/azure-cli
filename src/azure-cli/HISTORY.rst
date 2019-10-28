@@ -25,6 +25,10 @@ Release History
 * deployment/group deployment validate: Add --handle-extended-json-format parameter to support multiline and comments in json template when deployment.
 * bump azure-mgmt-resource to 2019-07-01
 
+**AKS**
+* Add `--enable-cluster-autoscaler`, `--min-count` and `--max-count` to the `az aks create` command, which enables cluster autoscaler for the node pool.
+* Add the above flags as well as `--update-cluster-autoscaler` and `--disable-cluster-autoscaler` to the `az aks update` command, allowing updates to cluster autoscaler.
+
 **Compute**
 
 * vm create: Add warning when specifying accelerated networking and an existing NIC together.
@@ -43,6 +47,8 @@ Release History
 * gremlin graph create: Add --conflict-resolution-policy
 * gremlin graph create/update: Update the --idx default schema
 * Fix typo in help message
+* database: Add deprecation infomation
+* collection: Add deprecation infomation
 
 **IoT**
 
@@ -50,13 +56,15 @@ Release History
 
 **Key Vault**
 
-* Fix #9352: Unexpected error when certificate file does not exist.
+* Fix #9352: Unexpected error when certificate file does not exist
+* Fix #7048: `az keyvault recover/purge` not working
 
 **Network**
 
 * az network private-dns link vnet create/update: Fixes #9851. Support cross-tenant virtual network linking.
 * [BREAKING CHANGE] network vnet subnet list: Fix #10401. `--resource-group` and `--vnet-name` are required now.
 * az network public-ip prefix create: Fix #10757. Support to specify IP address version (IPv4, IPv6) when creation
+* Bump azure-mgmt-network to 7.0.0 and api-version to 2019-09-01
 
 **Profile**
 
