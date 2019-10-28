@@ -29,6 +29,9 @@ Release History
 * Add `--enable-cluster-autoscaler`, `--min-count` and `--max-count` to the `az aks create` command, which enables cluster autoscaler for the node pool.
 * Add the above flags as well as `--update-cluster-autoscaler` and `--disable-cluster-autoscaler` to the `az aks update` command, allowing updates to cluster autoscaler.
 
+**Backup**
+* Added AzureFiles backup support
+
 **Compute**
 
 * vm create: Add warning when specifying accelerated networking and an existing NIC together.
