@@ -112,6 +112,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('registry_name', completer=None)
         c.argument('deployment_name', validator=None)
         c.argument('location', validator=get_default_location_from_resource_group)
+        c.argument('workspace', is_preview=True,
+                   help='Name or ID of the Log Analytics workspace to send registry diagnostic logs to. All events will be enabled. You can use "az monitor log-analytics workspace create" to create one. Extra billing may apply.')
 
     with self.argument_context('acr check-name') as c:
         c.argument('registry_name', completer=None)
