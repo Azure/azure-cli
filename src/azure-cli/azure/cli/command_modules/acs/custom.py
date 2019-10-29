@@ -56,22 +56,22 @@ from azure.graphrbac.models import (ApplicationCreateParameters,
 
 from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes
 
-from azure.mgmt.containerservice.v2019_10_01.models import ContainerServiceNetworkProfile
-from azure.mgmt.containerservice.v2019_10_01.models import ContainerServiceLinuxProfile
-from azure.mgmt.containerservice.v2019_10_01.models import ManagedClusterServicePrincipalProfile
-from azure.mgmt.containerservice.v2019_10_01.models import ContainerServiceSshConfiguration
-from azure.mgmt.containerservice.v2019_10_01.models import ContainerServiceSshPublicKey
-from azure.mgmt.containerservice.v2019_10_01.models import ContainerServiceStorageProfileTypes
-from azure.mgmt.containerservice.v2019_10_01.models import ManagedCluster
-from azure.mgmt.containerservice.v2019_10_01.models import ManagedClusterAADProfile
-from azure.mgmt.containerservice.v2019_10_01.models import ManagedClusterAddonProfile
-from azure.mgmt.containerservice.v2019_10_01.models import ManagedClusterAgentPoolProfile
-from azure.mgmt.containerservice.v2019_10_01.models import ManagedClusterLoadBalancerProfile
-from azure.mgmt.containerservice.v2019_10_01.models import ManagedClusterLoadBalancerProfileManagedOutboundIPs
-from azure.mgmt.containerservice.v2019_10_01.models import ManagedClusterLoadBalancerProfileOutboundIPPrefixes
-from azure.mgmt.containerservice.v2019_10_01.models import ManagedClusterLoadBalancerProfileOutboundIPs
-from azure.mgmt.containerservice.v2019_10_01.models import AgentPool
-from azure.mgmt.containerservice.v2019_10_01.models import ResourceReference
+from azure.mgmt.containerservice.v2019_08_01.models import ContainerServiceNetworkProfile
+from azure.mgmt.containerservice.v2019_08_01.models import ContainerServiceLinuxProfile
+from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterServicePrincipalProfile
+from azure.mgmt.containerservice.v2019_08_01.models import ContainerServiceSshConfiguration
+from azure.mgmt.containerservice.v2019_08_01.models import ContainerServiceSshPublicKey
+from azure.mgmt.containerservice.v2019_08_01.models import ContainerServiceStorageProfileTypes
+from azure.mgmt.containerservice.v2019_08_01.models import ManagedCluster
+from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterAADProfile
+from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterAddonProfile
+from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterAgentPoolProfile
+from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterLoadBalancerProfile
+from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterLoadBalancerProfileManagedOutboundIPs
+from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterLoadBalancerProfileOutboundIPPrefixes
+from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterLoadBalancerProfileOutboundIPs
+from azure.mgmt.containerservice.v2019_08_01.models import AgentPool
+from azure.mgmt.containerservice.v2019_08_01.models import ResourceReference
 
 from azure.mgmt.containerservice.v2019_04_30.models import OpenShiftManagedClusterAgentPoolProfile
 from azure.mgmt.containerservice.v2019_04_30.models import OpenShiftAgentPoolProfileRole
