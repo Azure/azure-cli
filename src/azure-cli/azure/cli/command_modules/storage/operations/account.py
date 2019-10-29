@@ -141,6 +141,13 @@ def show_storage_account_usage_no_location(cmd):
     return next((x for x in scf.usage.list() if x.name.value == 'StorageAccounts'), None)  # pylint: disable=no-member
 
 
+def get_storage_account_properties(cli_ctx, account_id):
+    scf = storage_client_factory(cli_ctx)
+    from msrestazure.tools import parse_resource_id
+    result = parse_resource_id(account_id)
+    return scf.storage_accounts.get_properties(result['resource_group'], result['name'])
+
+
 # pylint: disable=too-many-locals, too-many-statements, too-many-branches, too-many-boolean-expressions
 def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=None, use_subdomain=None,
                            encryption_services=None, encryption_key_source=None, encryption_key_vault_properties=None,
@@ -184,10 +191,7 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
             params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
                 directory_service_options='AADDS' if enable_files_aadds else 'None')
         else:  # Only disable AADDS and keep others unchanged
-            scf = storage_client_factory(cmd.cli_ctx)
-            from msrestazure.tools import parse_resource_id
-            rg = parse_resource_id(instance.id)['resource_group']
-            origin_storage_account = scf.storage_accounts.get_properties(rg, instance.name)
+            origin_storage_account = get_storage_account_properties(cmd.cli_ctx, instance.id)
             if not origin_storage_account.azure_files_identity_based_authentication or \
                     origin_storage_account.azure_files_identity_based_authentication.directory_service_options\
                     == 'AADDS':
@@ -224,10 +228,7 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                                "--domain-name, --net-bios-domain-name, --forest-name, --domain-guid, --domain-sid and "
                                "--azure_storage_sid arguments in Azure Active Directory Properties Argument group.")
             # Only disable AD and keep others unchanged
-            scf = storage_client_factory(cmd.cli_ctx)
-            from msrestazure.tools import parse_resource_id
-            rg = parse_resource_id(instance.id)['resource_group']
-            origin_storage_account = scf.storage_accounts.get_properties(rg, instance.name)
+            origin_storage_account = get_storage_account_properties(cmd.cli_ctx, instance.id)
             if not origin_storage_account.azure_files_identity_based_authentication or \
                     origin_storage_account.azure_files_identity_based_authentication.directory_service_options == 'AD':
                 params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
