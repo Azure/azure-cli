@@ -546,7 +546,7 @@ def validate_included_datasets(cmd, namespace):
 
 def validate_key_name(namespace):
     key_options = {'primary': '1', 'secondary': '2'}
-    if namespace.key_type:
+    if hasattr(namespace, 'key_type') and namespace.key_type:
         namespace.key_name = namespace.key_type + key_options[namespace.key_name]
     else:
         namespace.key_name = storage_account_key_options[namespace.key_name]
