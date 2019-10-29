@@ -90,8 +90,10 @@ long-summary: >
     password of the identity registered in the domain service that represents the storage account. Kerberos key does not
     provide access permission to perform any control or data plane read or write operations against the storage account.
 examples:
-  - name: Regenerate one of the access keys or Kerberos keys (if active directory enabled) for a storage account.
-    text: az storage account keys renew -g MyResourceGroup -n MyStorageAccount -k key1
+  - name: Regenerate one of the access keys for a storage account.
+    text: az storage account keys renew -g MyResourceGroup -n MyStorageAccount --key primary
+  - name: Regenerate one of the Kerberos keys for a storage account.
+    text: az storage account keys renew -g MyResourceGroup -n MyStorageAccount --key primary --key-type kerb
 """
 
 
