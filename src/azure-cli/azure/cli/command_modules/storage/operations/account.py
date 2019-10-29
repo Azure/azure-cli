@@ -186,8 +186,15 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
         enable_https_traffic_only=https_only if https_only is not None else instance.enable_https_traffic_only
     )
     AzureFilesIdentityBasedAuthentication = cmd.get_models('AzureFilesIdentityBasedAuthentication')
+    from knack.util import CLIError
     if enable_files_aadds is not None:
         if enable_files_aadds:  # enable AADDS
+            origin_storage_account = get_storage_account_properties(cmd.cli_ctx, instance.id)
+            if not origin_storage_account.azure_files_identity_based_authentication or \
+                    origin_storage_account.azure_files_identity_based_authentication.directory_service_options == 'AD':
+                raise CLIError("The Storage account already enabled ActiveDirectoryDomainServicesForFile, "
+                               "please disable it by running this cmdlets with \"--enable-files-adds false\" "
+                               "before enable AzureActiveDirectoryDomainServicesForFile.")
             params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
                 directory_service_options='AADDS' if enable_files_aadds else 'None')
         else:  # Only disable AADDS and keep others unchanged
@@ -202,7 +209,6 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                     origin_storage_account.azure_files_identity_based_authentication
 
     if enable_files_adds is not None:
-        from knack.util import CLIError
         ActiveDirectoryProperties = cmd.get_models('ActiveDirectoryProperties')
         if enable_files_adds:  # enable AD
             if not(domain_name and net_bios_domain_name and forest_name and domain_guid and domain_sid and
@@ -210,7 +216,13 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                 raise CLIError("To enable ActiveDirectoryDomainServicesForFile, user must specify all of: "
                                "--domain-name, --net-bios-domain-name, --forest-name, --domain-guid, --domain-sid and "
                                "--azure_storage_sid arguments in Azure Active Directory Properties Argument group.")
-
+            origin_storage_account = get_storage_account_properties(cmd.cli_ctx, instance.id)
+            if not origin_storage_account.azure_files_identity_based_authentication or \
+                    origin_storage_account.azure_files_identity_based_authentication.directory_service_options \
+                    == 'AADDS':
+                raise CLIError("The Storage account already enabled AzureActiveDirectoryDomainServicesForFile, "
+                               "please disable it by running this cmdlets with \"--enable-files-aadds false\" "
+                               "before enable ActiveDirectoryDomainServicesForFile.")
             active_directory_properties = ActiveDirectoryProperties(domain_name=domain_name,
                                                                     net_bios_domain_name=net_bios_domain_name,
                                                                     forest_name=forest_name, domain_guid=domain_guid,
@@ -253,7 +265,6 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
             acl = NetworkRuleSet(bypass=bypass, virtual_network_rules=None, ip_rules=None,
                                  default_action=default_action)
         elif bypass:
-            from knack.util import CLIError
             raise CLIError('incorrect usage: --default-action ACTION [--bypass SERVICE ...]')
         params.network_rule_set = acl
 
