@@ -2292,7 +2292,8 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                                                               value='true'))
                 if runtime not in RUNTIME_TO_IMAGE_FUNCTIONAPP.keys():
                     raise CLIError("An appropriate linux image for runtime:'{}' was not found".format(runtime))
-        site_config.linux_fx_version = _get_linux_fx_functionapp(is_consumption, runtime, runtime_version)
+        if deployment_container_image_name is None:
+            site_config.linux_fx_version = _get_linux_fx_functionapp(is_consumption, runtime, runtime_version)
     else:
         functionapp_def.kind = 'functionapp'
         site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION', value='~2'))
