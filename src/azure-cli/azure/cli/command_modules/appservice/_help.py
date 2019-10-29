@@ -1697,16 +1697,15 @@ helps['webapp up'] = """
 type: command
 short-summary: >
     Create a webapp and deploy code from a local workspace to the app. The command is required to run from the folder
-    where the code is present. Current support includes Node, Python, .NET Core and ASP.NET, staticHtml. Node,
-    Python apps are created as Linux apps. .Net Core, ASP.NET and static HTML apps are created as Windows apps. If command
-    is run from an empty folder, an empty windows web app is created.
+    where the code is present. Current support includes Node, Python, .NET Core and ASP.NET. Node,
+    Python apps are created as Linux apps. .Net Core, ASP.NET apps are created as Windows apps.
 examples:
   - name: View the details of the app that will be created, without actually running the operation
     text: >
         az webapp up -n MyUniqueAppName --dryrun
   - name: Create a web app with the default configuration, by running the command from the folder where the code to deployed exists.
     text: >
-        az webapp up -n MyUniqueAppName
+        az webapp up -n MyUniqueAppName -l locationName
   - name: Create a web app in a specific region, by running the command from the folder where the code to deployed exists.
     text: >
         az webapp up -n MyUniqueAppName -l locationName
