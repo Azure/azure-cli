@@ -38,6 +38,7 @@ Release History
 * vm/vmss update: Add --ultra-ssd-enabled to allow updating ultra SSD setting.
 * [BREAKING CHANGE] vm extension set: Fix bug where users could not set an extension on a VM with --ids.
 * New commands `az vm image terms accept/cancel/show` to manage Azure Marketplace image terms.
+* Update VMAccessForLinux to version 1.5
 
 **CosmosDB**
 
