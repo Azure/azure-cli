@@ -6,8 +6,8 @@ Release History
 **ACR**
 
 * Added a preview parameter `--pack-image-tag` to command `az acr pack build`.
-* Add a default timeout in seconds to `az acr run` and `az acr build`.
 * Support enabling auditing on creating a registry
+* Support Repository-scoped RBAC 
 
 **AppConfig**
 
@@ -27,8 +27,13 @@ Release History
 * bump azure-mgmt-resource to 2019-07-01
 
 **AKS**
+
 * Add `--enable-cluster-autoscaler`, `--min-count` and `--max-count` to the `az aks create` command, which enables cluster autoscaler for the node pool.
 * Add the above flags as well as `--update-cluster-autoscaler` and `--disable-cluster-autoscaler` to the `az aks update` command, allowing updates to cluster autoscaler.
+
+**Backup**
+
+* Add AzureFiles backup support
 
 **Compute**
 
@@ -38,6 +43,7 @@ Release History
 * vm/vmss update: Add --ultra-ssd-enabled to allow updating ultra SSD setting.
 * [BREAKING CHANGE] vm extension set: Fix bug where users could not set an extension on a VM with --ids.
 * New commands `az vm image terms accept/cancel/show` to manage Azure Marketplace image terms.
+* Update VMAccessForLinux to version 1.5
 
 **CosmosDB**
 
@@ -54,6 +60,7 @@ Release History
 **IoT**
 
 * Add new routing source type: DigitalTwinChangeEvents
+* Fix #2826: Missing features in "az iot hub create" 
 
 **Key Vault**
 
@@ -66,6 +73,8 @@ Release History
 * [BREAKING CHANGE] network vnet subnet list: Fix #10401. `--resource-group` and `--vnet-name` are required now.
 * az network public-ip prefix create: Fix #10757. Support to specify IP address version (IPv4, IPv6) when creation
 * Bump azure-mgmt-network to 7.0.0 and api-version to 2019-09-01
+* az network vrouter: Support new service virtual router and virtual router peering
+* az network express-route gateway connection: Support `--internet-security`
 
 **Profile**
 

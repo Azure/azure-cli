@@ -47,7 +47,7 @@ _LINUX_DIAG_EXT = 'LinuxDiagnostic'
 _WINDOWS_DIAG_EXT = 'IaaSDiagnostics'
 extension_mappings = {
     _LINUX_ACCESS_EXT: {
-        'version': '1.4',
+        'version': '1.5',
         'publisher': 'Microsoft.OSTCExtensions'
     },
     _WINDOWS_ACCESS_EXT: {
