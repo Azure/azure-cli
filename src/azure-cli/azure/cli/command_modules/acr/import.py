@@ -102,6 +102,7 @@ def acr_import(cmd,
 
 
 def _handle_result(cmd, result_poller, source_registry, source_image, registry):
+    from msrestazure.azure_exceptions import ClientException
     try:
         result = LongRunningOperation(cmd.cli_ctx, 'Importing image...')(result_poller)
     except CLIError as e:
@@ -116,14 +117,14 @@ def _handle_result(cmd, result_poller, source_registry, source_image, registry):
                         registry = get_registry_from_name_or_login_server(cmd.cli_ctx, source_registry, source_registry)
 
                 if registry.login_server.lower() in source_image.lower():
-                    logger.warning("\nImport failed. Please check that fully qualified image specified by "
-                                 "'--source' and '--registry' is a valid tag:\n\t%s\n", "{}/{}"
-                                 .format(registry.login_server, source_image))
-        except Exception as unexpected_ex:  # pylint: disable=broad-except
+                    logger.warning("Import from source failed.\n\tsource image: '%s'", "{}/{}"
+                                   .format(registry.login_server, source_image))
+        except (ClientException, CLIError) as unexpected_ex:  # raise exception
             logger.debug("Unexpected exception: %s", unexpected_ex)
-        finally:
-            logger.debug("Re-raise exception: %s", e)
-            raise e  # regardless reraise the CLIError as this is an error from the service
+
+        logger.debug("Re-raise exception: %s", e)
+        raise e  # regardless reraise the CLIError as this is an error from the service
+
     except AttributeError:
         # in the unlikely event that import_image's api changes and no longer returns a poller, return result
         return result_poller
