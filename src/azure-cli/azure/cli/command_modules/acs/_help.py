@@ -857,7 +857,7 @@ examples:
 helps['aks rotate-certs'] = """
     type: command
     short-summary: Rotate certificates and keys on a managed Kubernetes cluster
-    long-summary: "Kubernetes will be unavailable during cluster certificate rotation."
+    long-summary: Kubernetes will be unavailable during cluster certificate rotation.
 """
 
 helps['openshift'] = """
