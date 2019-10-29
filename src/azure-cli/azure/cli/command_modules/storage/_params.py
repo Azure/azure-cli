@@ -11,7 +11,7 @@ from azure.cli.core.commands.parameters import (tags_type, file_type, get_locati
 from ._validators import (get_datetime_type, validate_metadata, get_permission_validator, get_permission_help_string,
                           resource_type_type, services_type, validate_entity, validate_select, validate_blob_type,
                           validate_included_datasets, validate_custom_domain, validate_container_public_access,
-                          validate_table_payload_format,  add_progress_callback, process_resource_group,
+                          validate_table_payload_format, add_progress_callback, process_resource_group,
                           storage_account_key_options, process_file_download_namespace, process_metric_update_namespace,
                           get_char_options_validator, validate_bypass, validate_encryption_source, validate_marker,
                           validate_storage_data_plane_list, validate_azcopy_upload_destination_url,
@@ -90,7 +90,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     domain_guid_type = CLIArgumentType(min_api='2019-04-01', arg_group="Azure Active Directory Properties",
                                        help="Specify the domain GUID. Required when --enable-files-adds is set to True")
     domain_sid_type = CLIArgumentType(min_api='2019-04-01', arg_group="Azure Active Directory Properties",
-                                      help="Specify the security identifier (SID). Required when --enable-files-adds is set to True")
+                                      help="Specify the security identifier (SID). Required when --enable-files-adds "
+                                           "is set to True")
     azure_storage_sid_type = CLIArgumentType(min_api='2019-04-01', arg_group="Azure Active Directory Properties",
                                              help="Specify the security identifier (SID) for Azure Storage. "
                                                   "Required when --enable-files-adds is set to True")
@@ -149,7 +150,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('enable_large_file_share', arg_type=large_file_share_type)
         c.argument('domain_name', domain_name_type)
         c.argument('net_bios_domain_name', net_bios_domain_name_type)
-        c.argument('forest_name', forest_name_type )
+        c.argument('forest_name', forest_name_type)
         c.argument('domain_guid', domain_guid_type)
         c.argument('domain_sid', domain_sid_type)
         c.argument('azure_storage_sid', azure_storage_sid_type)
@@ -168,7 +169,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('enable_large_file_share', arg_type=large_file_share_type)
         c.argument('domain_name', domain_name_type)
         c.argument('net_bios_domain_name', net_bios_domain_name_type)
-        c.argument('forest_name', forest_name_type )
+        c.argument('forest_name', forest_name_type)
         c.argument('domain_guid', domain_guid_type)
         c.argument('domain_sid', domain_sid_type)
         c.argument('azure_storage_sid', azure_storage_sid_type)

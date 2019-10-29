@@ -17,7 +17,7 @@ logger = get_logger(__name__)
 def create_storage_account(cmd, resource_group_name, account_name, sku=None, location=None, kind=None,
                            tags=None, custom_domain=None, encryption_services=None, access_tier=None, https_only=None,
                            enable_files_aadds=None, bypass=None, default_action=None, assign_identity=False,
-                           enable_large_file_share=None, enable_files_adds=None,domain_name=None,
+                           enable_large_file_share=None, enable_files_adds=None, domain_name=None,
                            net_bios_domain_name=None, forest_name=None, domain_guid=None, domain_sid=None,
                            azure_storage_sid=None):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
@@ -45,8 +45,8 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         from knack.util import CLIError
         ActiveDirectoryProperties = cmd.get_models('ActiveDirectoryProperties')
         if enable_files_adds:  # enable AD
-            if not (
-                    domain_name and net_bios_domain_name and forest_name and domain_guid and domain_sid and azure_storage_sid):
+            if not (domain_name and net_bios_domain_name and forest_name and domain_guid and domain_sid and
+                    azure_storage_sid):
                 raise CLIError("To enable ActiveDirectoryDomainServicesForFile, user must specify all of: "
                                "--domain-name, --net-bios-domain-name, --forest-name, --domain-guid, --domain-sid and "
                                "--azure_storage_sid arguments in Azure Active Directory Properties Argument group.")
@@ -63,7 +63,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                 active_directory_properties=active_directory_properties)
 
         else:  # disable AD
-            if domain_name or net_bios_domain_name or forest_name or domain_guid or domain_sid or azure_storage_sid:
+            if domain_name or net_bios_domain_name or forest_name or domain_guid or domain_sid or azure_storage_sid:  # pylint: disable=too-many-boolean-expressions
                 raise CLIError("To disable ActiveDirectoryDomainServicesForFile, user can't specify any of: "
                                "--domain-name, --net-bios-domain-name, --forest-name, --domain-guid, --domain-sid and "
                                "--azure_storage_sid arguments in Azure Active Directory Properties Argument group.")
@@ -141,13 +141,13 @@ def show_storage_account_usage_no_location(cmd):
     return next((x for x in scf.usage.list() if x.name.value == 'StorageAccounts'), None)  # pylint: disable=no-member
 
 
-# pylint: disable=too-many-locals
+# pylint: disable=too-many-locals, too-many-statements, too-many-branches, too-many-boolean-expressions
 def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=None, use_subdomain=None,
                            encryption_services=None, encryption_key_source=None, encryption_key_vault_properties=None,
                            access_tier=None, https_only=None, enable_files_aadds=None, assign_identity=False,
                            bypass=None, default_action=None, enable_large_file_share=None, enable_files_adds=None,
-                           domain_name=None, net_bios_domain_name=None, forest_name=None, domain_guid=None, domain_sid=None,
-                           azure_storage_sid=None):
+                           domain_name=None, net_bios_domain_name=None, forest_name=None, domain_guid=None,
+                           domain_sid=None, azure_storage_sid=None):
     StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
@@ -180,24 +180,27 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
     )
     AzureFilesIdentityBasedAuthentication = cmd.get_models('AzureFilesIdentityBasedAuthentication')
     if enable_files_aadds is not None:
-        if enable_files_aadds: # enable AADDS
+        if enable_files_aadds:  # enable AADDS
             params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
                 directory_service_options='AADDS' if enable_files_aadds else 'None')
-        else: # Only disable AADDS and keep others unchanged
+        else:  # Only disable AADDS and keep others unchanged
             scf = storage_client_factory(cmd.cli_ctx)
             from msrestazure.tools import parse_resource_id
             rg = parse_resource_id(instance.id)['resource_group']
             origin_storage_account = scf.storage_accounts.get_properties(rg, instance.name)
             if origin_storage_account.azure_files_identity_based_authentication.directory_service_options == 'AADDS':
-                params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(directory_service_options='None')
+                params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
+                    directory_service_options='None')
             else:
-                params.azure_files_identity_based_authentication = origin_storage_account.azure_files_identity_based_authentication
+                params.azure_files_identity_based_authentication = \
+                    origin_storage_account.azure_files_identity_based_authentication
 
     if enable_files_adds is not None:
         from knack.util import CLIError
         ActiveDirectoryProperties = cmd.get_models('ActiveDirectoryProperties')
-        if enable_files_adds: # enable AD
-            if not(domain_name and net_bios_domain_name and forest_name and domain_guid and domain_sid and azure_storage_sid):
+        if enable_files_adds:  # enable AD
+            if not(domain_name and net_bios_domain_name and forest_name and domain_guid and domain_sid and
+                   azure_storage_sid):
                 raise CLIError("To enable ActiveDirectoryDomainServicesForFile, user must specify all of: "
                                "--domain-name, --net-bios-domain-name, --forest-name, --domain-guid, --domain-sid and "
                                "--azure_storage_sid arguments in Azure Active Directory Properties Argument group.")
@@ -213,7 +216,7 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                 directory_service_options='AD',
                 active_directory_properties=active_directory_properties)
 
-        else: # disable AD
+        else:  # disable AD
             if domain_name or net_bios_domain_name or forest_name or domain_guid or domain_sid or azure_storage_sid:
                 raise CLIError("To disable ActiveDirectoryDomainServicesForFile, user can't specify any of: "
                                "--domain-name, --net-bios-domain-name, --forest-name, --domain-guid, --domain-sid and "
@@ -228,7 +231,8 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                 params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
                     directory_service_options='None')
             else:
-                params.azure_files_identity_based_authentication = origin_storage_account.azure_files_identity_based_authentication
+                params.azure_files_identity_based_authentication = \
+                    origin_storage_account.azure_files_identity_based_authentication
 
     if assign_identity:
         params.identity = Identity()
@@ -313,6 +317,7 @@ def update_management_policies(client, resource_group_name, account_name, parame
     if parameters:
         parameters = parameters.policy
     return client.create_or_update(resource_group_name, account_name, policy=parameters)
+
 
 def list_expand(client, resource_group_name, account_name, parameters=None):
     if parameters:

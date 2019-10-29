@@ -85,8 +85,8 @@ helps['storage account keys renew'] = """
 type: command
 short-summary: Regenerate one of the access keys or Kerberos keys (if active directory enabled) for a storage account.
 long-summary: >
-    Kerberos key is generated per storage account for Azure Files identity based authentication either with 
-    Azure Active Directory Domain Service (Azure AD DS) or Active Directory Domain Service (AD DS). It is used as the 
+    Kerberos key is generated per storage account for Azure Files identity based authentication either with
+    Azure Active Directory Domain Service (Azure AD DS) or Active Directory Domain Service (AD DS). It is used as the
     password of the identity registered in the domain service that represents the storage account. Kerberos key does not
     provide access permission to perform any control or data plane read or write operations against the storage account.
 examples:

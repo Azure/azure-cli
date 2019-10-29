@@ -244,11 +244,11 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
     def test_renew_account_kerb_key(self, resource_group):
         name = self.create_random_name(prefix='clistoragekerbkey', length=24)
-        self.kwargs={'sc': name, 'rg':resource_group}
+        self.kwargs = {'sc': name, 'rg': resource_group}
         self.cmd('storage account create -g {rg} -n {sc} -l eastus2euap --enable-files-aadds')
         self.cmd('storage account keys list -g {rg} -n {sc}', checks=JMESPathCheck('length(@)', 2))
         original_keys = self.cmd('storage account keys list -g {rg} -n {sc} --expand-key-type kerb',
-                 checks=JMESPathCheck('length(@)', 4)).get_output_in_json()
+                                 checks=JMESPathCheck('length(@)', 4)).get_output_in_json()
 
         renewed_access_keys = self.cmd('storage account keys renew -g {rg} -n {sc} --key secondary').get_output_in_json()
         assert renewed_access_keys[0] == original_keys[0]
@@ -257,7 +257,6 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             'storage account keys renew -g {rg} -n {sc} --key primary --key-type kerb').get_output_in_json()
         assert renewed_kerb_keys[2] != original_keys[2]
         assert renewed_kerb_keys[3] == original_keys[3]
-
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
@@ -417,9 +416,9 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             'domain_sid': 'S-1-5-21-1234567890-1234567890-1234567890',
             'azure_storage_sid': 'S-1-5-21-1234567890-1234567890-1234567890-1234'
         })
-        create_cmd = """storage account create -n {sc} -g {rg} -l eastus2euap --enable-files-adds --domain-name {domain_name} 
-        --net-bios-domain-name {net_bios_domain_name} --forest-name {forest_name} --domain-guid {domain_guid} 
-        --domain-sid {domain_sid} --azure-storage-sid {azure_storage_sid}"""
+        create_cmd = """storage account create -n {sc} -g {rg} -l eastus2euap --enable-files-adds --domain-name
+        {domain_name} --net-bios-domain-name {net_bios_domain_name} --forest-name {forest_name} --domain-guid
+        {domain_guid} --domain-sid {domain_sid} --azure-storage-sid {azure_storage_sid}"""
         result = self.cmd(create_cmd).get_output_in_json()
 
         self.assertIn('azureFilesIdentityBasedAuthentication', result)
@@ -459,9 +458,9 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             'domain_sid': 'S-1-5-21-1234567890-1234567890-1234567890',
             'azure_storage_sid': 'S-1-5-21-1234567890-1234567890-1234567890-1234'
         })
-        create_cmd = """storage account create -n {sc} -g {rg} -l eastus2euap --enable-files-adds true --domain-name {domain_name} 
-        --net-bios-domain-name {net_bios_domain_name} --forest-name {forest_name} --domain-guid {domain_guid} 
-        --domain-sid {domain_sid} --azure-storage-sid {azure_storage_sid}"""
+        create_cmd = """storage account create -n {sc} -g {rg} -l eastus2euap --enable-files-adds true --domain-name
+        {domain_name} --net-bios-domain-name {net_bios_domain_name} --forest-name {forest_name} --domain-guid
+        {domain_guid} --domain-sid {domain_sid} --azure-storage-sid {azure_storage_sid}"""
         result = self.cmd(create_cmd).get_output_in_json()
 
         self.assertIn('azureFilesIdentityBasedAuthentication', result)
@@ -490,8 +489,8 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             'domain_sid': 'S-1-5-21-1234567890-1234567890-1234567890',
             'azure_storage_sid': 'S-1-5-21-1234567890-1234567890-1234567890-1234'
         })
-        update_cmd = """storage account update -n {sc} -g {rg} --enable-files-adds --domain-name {domain_name} 
-        --net-bios-domain-name {net_bios_domain_name} --forest-name {forest_name} --domain-guid {domain_guid} 
+        update_cmd = """storage account update -n {sc} -g {rg} --enable-files-adds --domain-name {domain_name}
+        --net-bios-domain-name {net_bios_domain_name} --forest-name {forest_name} --domain-guid {domain_guid}
         --domain-sid {domain_sid} --azure-storage-sid {azure_storage_sid}"""
         result = self.cmd(update_cmd).get_output_in_json()
 
@@ -534,8 +533,8 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             'domain_sid': 'S-1-5-21-1234567890-1234567890-1234567890',
             'azure_storage_sid': 'S-1-5-21-1234567890-1234567890-1234567890-1234'
         })
-        update_cmd = """storage account update -n {sc} -g {rg} --enable-files-adds true --domain-name {domain_name} 
-        --net-bios-domain-name {net_bios_domain_name} --forest-name {forest_name} --domain-guid {domain_guid} 
+        update_cmd = """storage account update -n {sc} -g {rg} --enable-files-adds true --domain-name {domain_name}
+        --net-bios-domain-name {net_bios_domain_name} --forest-name {forest_name} --domain-guid {domain_guid}
         --domain-sid {domain_sid} --azure-storage-sid {azure_storage_sid}"""
         result = self.cmd(update_cmd).get_output_in_json()
 
@@ -548,6 +547,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(activeDirectoryProperties['domainSid'], self.kwargs['domain_sid'])
         self.assertEqual(activeDirectoryProperties['forestName'], self.kwargs['forest_name'])
         self.assertEqual(activeDirectoryProperties['netBiosDomainName'], self.kwargs['net_bios_domain_name'])
+
 
 class RoleScenarioTest(LiveScenarioTest):
     def run_under_service_principal(self):
