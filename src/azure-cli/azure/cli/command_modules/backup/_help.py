@@ -39,7 +39,7 @@ helps['backup container unregister'] = """
 type: command
 short-summary: Unregister a Backup Container to make the underlying 'resource' be protected by another vault.
 examples:
-  - name: This command allows Azure Backup to unregister a ‘Backup Container’ so that the underlying 'resource' can be protected to another vault, if required. The existing backup data in this vault should be deleted before 'unregister' can be performed.
+  - name: If you are backing up Azure File shares, and want to clean-up, you need to delete backups for those shares and unregister the parent Azure Storage account.
     text: az backup container unregister --container-name MyContainer --resource-group MyResourceGroup --vault-name MyVault --backup-management-type AzureStorage
 """
 
