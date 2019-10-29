@@ -77,8 +77,10 @@ helps['storage account keys list'] = """
 type: command
 short-summary: List the access keys or Kerberos keys (if active directory enabled) for a storage account.
 examples:
-  - name: List the access keys or Kerberos keys (if active directory enabled) for a storage account.
+  - name: List the access keys for a storage account.
     text: az storage account keys list -g MyResourceGroup -n MyStorageAccount
+  - name: List the access keys and Kerberos keys (if active directory enabled) for a storage account.
+    text: az storage account keys list -g MyResourceGroup -n MyStorageAccount --expand-key-type kerb
 """
 
 helps['storage account keys renew'] = """
@@ -93,7 +95,7 @@ examples:
   - name: Regenerate one of the access keys for a storage account.
     text: az storage account keys renew -g MyResourceGroup -n MyStorageAccount --key primary
   - name: Regenerate one of the Kerberos keys for a storage account.
-    text: az storage account keys renew -g MyResourceGroup -n MyStorageAccount --key primary --key-type kerb
+    text: az storage account keys renew -g MyResourceGroup -n MyStorageAccount --key secondary --key-type kerb
 """
 
 
