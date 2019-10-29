@@ -209,7 +209,7 @@ def load_arguments(self, _):
             c.argument('allowed_origins', options_list=['--allowed-origins', '-a'], nargs='*', help='space separated origins that should be allowed to make cross-origin calls (for example: http://example.com:12345). To allow all, use "*" and remove all other origins from the list')
 
         with self.argument_context(scope + ' config set') as c:
-            c.argument('number_of_workers', options_list=['--number-of-workers'], help='The number of workers to be allocated.', type=int)
+            c.argument('number_of_workers', help='The number of workers to be allocated.', type=int)
             c.argument('remote_debugging_enabled', help='enable or disable remote debugging', arg_type=get_three_state_flag(return_label=True))
             c.argument('web_sockets_enabled', help='enable or disable web sockets', arg_type=get_three_state_flag(return_label=True))
             c.argument('always_on', help='ensure web app gets loaded all the time, rather unloaded after been idle. Recommended when you have continuous web jobs running', arg_type=get_three_state_flag(return_label=True))
