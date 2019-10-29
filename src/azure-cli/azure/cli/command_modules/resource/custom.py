@@ -44,11 +44,6 @@ from msrest.pipeline import SansIOHTTPPolicy
 
 logger = get_logger(__name__)
 
-deployment_command_notice = ('[**Upcoming breaking change**]: a new parameter "scope-type" will be introduced to commands in this group '
-                             'and will be mandatory. Scope type will be an enum with four values: ResourceGroup, Subscription, ManagementGroup, Tenant. '
-                             'Adding this parameter allows us to use one command for all Azure Resource Manager template deployments but still determine the '
-                             'intended level of scope.')
-
 
 def _build_resource_id(**kwargs):
     from msrestazure.tools import resource_id as resource_id_from_dict
@@ -909,34 +904,21 @@ def list_applications(cmd, resource_group_name=None):
 
 
 def list_deployments_at_subscription_scope(cmd):
-    logger.warning(deployment_command_notice)
-
     rcf = _resource_client_factory(cmd.cli_ctx)
     return rcf.deployments.list_at_subscription_scope()
 
 
 def get_deployment_at_subscription_scope(cmd, deployment_name):
-    logger.warning(deployment_command_notice)
-
     rcf = _resource_client_factory(cmd.cli_ctx)
     return rcf.deployments.get_at_subscription_scope(deployment_name)
 
 
 def wait_deployment_at_subscription_scope(cmd, deployment_name):
-    if wait_deployment_at_subscription_scope.first_run:
-        logger.warning(deployment_command_notice)
-        wait_deployment_at_subscription_scope.first_run = False
-
     rcf = _resource_client_factory(cmd.cli_ctx)
     return rcf.deployments.get_at_subscription_scope(deployment_name)
 
 
-wait_deployment_at_subscription_scope.first_run = True
-
-
 def delete_deployment_at_subscription_scope(cmd, deployment_name):
-    logger.warning(deployment_command_notice)
-
     rcf = _resource_client_factory(cmd.cli_ctx)
     return rcf.deployments.delete_at_subscription_scope(deployment_name)
 
@@ -955,7 +937,6 @@ def deploy_arm_template(cmd, resource_group_name,
 def deploy_arm_template_at_subscription_scope(cmd, template_file=None, template_uri=None,
                                               deployment_name=None, deployment_location=None,
                                               parameters=None, no_wait=False, handle_extended_json_format=None):
-    logger.warning(deployment_command_notice)
     if handle_extended_json_format:
         return _deploy_arm_template_subscription_scope_unmodified(cmd.cli_ctx, template_file, template_uri,
                                                                   deployment_name, deployment_location,
@@ -977,7 +958,6 @@ def validate_arm_template(cmd, resource_group_name, template_file=None, template
 
 def validate_arm_template_at_subscription_scope(cmd, template_file=None, template_uri=None, deployment_location=None,
                                                 parameters=None, handle_extended_json_format=None):
-    logger.warning(deployment_command_notice)
     if handle_extended_json_format:
         return _deploy_arm_template_subscription_scope_unmodified(cmd.cli_ctx, template_file, template_uri,
                                                                   'deployment_dry_run', deployment_location,
@@ -992,8 +972,6 @@ def validate_arm_template_at_subscription_scope(cmd, template_file=None, templat
 
 
 def export_subscription_deployment_template(cmd, deployment_name):
-    logger.warning(deployment_command_notice)
-
     smc = _resource_client_factory(cmd.cli_ctx)
     result = smc.deployments.export_template_at_subscription_scope(deployment_name)
     print(json.dumps(result.template, indent=2))  # pylint: disable=no-member
@@ -1194,7 +1172,6 @@ def get_deployment_operations(client, resource_group_name, deployment_name, oper
 
 def list_deployment_operations_at_subscription_scope(cmd, deployment_name):
     """list a deployment's operations."""
-    logger.warning(deployment_command_notice)
 
     rcf = _resource_client_factory(cmd.cli_ctx)
     return rcf.deployment_operations.list_at_subscription_scope(deployment_name)
@@ -1202,7 +1179,6 @@ def list_deployment_operations_at_subscription_scope(cmd, deployment_name):
 
 def get_deployment_operations_at_subscription_scope(client, deployment_name, operation_ids):
     """get a deployment's operation."""
-    logger.warning(deployment_command_notice)
 
     result = []
     for op_id in operation_ids:
