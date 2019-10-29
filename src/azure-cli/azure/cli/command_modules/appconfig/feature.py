@@ -57,7 +57,10 @@ def set_feature(cmd,
     azconfig_client = AzconfigClient(connection_string)
     retry_times = 3
     retry_interval = 1
+
+    label = label if label and label != ModifyKeyValueOptions.empty_label else None
     query_options = QueryKeyValueOptions(label=label)
+
     for i in range(0, retry_times):
         retrieved_kv = azconfig_client.get_keyvalue(key, query_options)
         try:
@@ -300,10 +303,7 @@ def lock_feature(cmd,
             raise CLIError(
                 "The feature '{}' you are trying to lock does not exist.".format(feature))
 
-        feature_flag = map_keyvalue_to_featureflag(
-            retrieved_kv, show_conditions=False)
-        entry = json.dumps(feature_flag, default=lambda o: o.__dict__, indent=2, sort_keys=True)
-        confirmation_message = "Are you sure you want to lock the feature: \n" + entry + "\n"
+        confirmation_message = "Are you sure you want to lock the feature '{}'".format(feature)
         user_confirmation(confirmation_message, yes)
 
         try:
@@ -345,10 +345,7 @@ def unlock_feature(cmd,
             raise CLIError(
                 "The feature '{}' you are trying to unlock does not exist.".format(feature))
 
-        feature_flag = map_keyvalue_to_featureflag(
-            retrieved_kv, show_conditions=False)
-        entry = json.dumps(feature_flag, default=lambda o: o.__dict__, indent=2, sort_keys=True)
-        confirmation_message = "Are you sure you want to unlock the feature: \n" + entry + "\n"
+        confirmation_message = "Are you sure you want to unlock the feature '{}'".format(feature)
         user_confirmation(confirmation_message, yes)
 
         try:
