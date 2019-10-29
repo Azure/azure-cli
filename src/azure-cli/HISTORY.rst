@@ -87,7 +87,7 @@ Release History
 **Storage**
 
 * storage account create/update: Add --enable-files-adds parameter and Azure Active Directory Properties Argument group to support Azure Files Active Directory Domain Service Authentication
-* Expand `az storage account keys list/renew` to support list or regenerate Kerberos keys of Storage account.
+* Expand `az storage account keys list/renew` to support listing or regenerating Kerberos keys of storage account.
 
 2.0.75
 ++++++
