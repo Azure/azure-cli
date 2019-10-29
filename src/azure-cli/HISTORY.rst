@@ -94,6 +94,7 @@ Release History
 
 * Fix: `az account get-access-token --resource-type ms-graph` not working
 * Remove warning from `az login`
+* Polish error when using `az login -u {} -p {}` with Microsoft account
 
 **RBAC**
 
