@@ -83,7 +83,7 @@ def load_arguments(self, _):
         c.argument('sku', arg_type=sku_arg_type)
         c.argument('is_linux', action='store_true', required=False, help='host web app on Linux worker')
         c.argument('hyper_v', action='store_true', required=False, help='Host web app on Windows container', is_preview=True)
-        c.argument('per_site_scaling', action='store_true', required=False, help='EnablepPer-app scaling at the '
+        c.argument('per_site_scaling', action='store_true', required=False, help='Enable per-app scaling at the '
                                                                                  'App Service plan level to allow for '
                                                                                  'scaling an app independently from '
                                                                                  'the App Service plan that hosts it.')
@@ -209,6 +209,7 @@ def load_arguments(self, _):
             c.argument('allowed_origins', options_list=['--allowed-origins', '-a'], nargs='*', help='space separated origins that should be allowed to make cross-origin calls (for example: http://example.com:12345). To allow all, use "*" and remove all other origins from the list')
 
         with self.argument_context(scope + ' config set') as c:
+            c.argument('number_of_workers', options_list=['--number-of-workers'], help='The number of workers to be allocated.', type=int)
             c.argument('remote_debugging_enabled', help='enable or disable remote debugging', arg_type=get_three_state_flag(return_label=True))
             c.argument('web_sockets_enabled', help='enable or disable web sockets', arg_type=get_three_state_flag(return_label=True))
             c.argument('always_on', help='ensure web app gets loaded all the time, rather unloaded after been idle. Recommended when you have continuous web jobs running', arg_type=get_three_state_flag(return_label=True))
