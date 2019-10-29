@@ -54,6 +54,7 @@ Release History
 **IoT**
 
 * Add new routing source type: DigitalTwinChangeEvents
+* Fix #2826: Missing features in "az iot hub create" 
 
 **Key Vault**
 
