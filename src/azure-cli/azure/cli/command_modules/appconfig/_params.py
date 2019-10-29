@@ -82,7 +82,8 @@ def load_arguments(self, _):
         c.argument('path', help='Local configuration file path. Required for file arguments.')
         c.argument('format_', options_list=['--format'], choices=['json', 'yaml', 'properties'], help='Imported file format. Required for file arguments.')
         c.argument('depth', validator=validate_import_depth, help="Depth for flatterning the json or yaml file to key-value paris. Flattern to the deepest level by default.")
-        c.argument('separator', arg_type=get_enum_type(['.', ',', ';', '-', '_', '__', '/']), help="Delimiter for flatterning the json or yaml file to key-value pairs. Required for importing hierarchical structure. Not applicable for property files.")
+        # bypass cli allowed values limition
+        c.argument('separator', validator=validate_separator, help="Delimiter for flatterning the json or yaml file to key-value pairs. Required for importing hierarchical structure. Not applicable for property files. Supported values: '.', ',', ';', '-', '_', '__', '/', ':' ")
 
     with self.argument_context('appconfig kv import', arg_group='AppConfig') as c:
         c.argument('src_name', help='The name of the source App Configuration.')
@@ -104,7 +105,8 @@ def load_arguments(self, _):
         c.argument('path', help='Local configuration file path. Required for file arguments.')
         c.argument('format_', options_list=['--format'], choices=['json', 'yaml', 'properties'], help='File format exporting to. Required for file arguments.')
         c.argument('depth', validator=validate_import_depth, help="Depth for flatterning the json or yaml file to key-value paris. Flattern to the deepest level by default.")
-        c.argument('separator', validator=validate_separator, help="Delimiter for flatterning the json or yaml file to key-value pairs. Required for importing hierarchical structure. Not applicable for property files. Supported values: '.', ',', ';', '-', '_', '__', '/', ':', '' ")
+        # bypass cli allowed values limition
+        c.argument('separator', validator=validate_separator, help="Delimiter for flatterning the json or yaml file to key-value pairs. Required for importing hierarchical structure. Not applicable for property files. Supported values: '.', ',', ';', '-', '_', '__', '/', ':' ")
 
     with self.argument_context('appconfig kv export', arg_group='AppConfig') as c:
         c.argument('dest_name', help='The name of the destination App Configuration.')
