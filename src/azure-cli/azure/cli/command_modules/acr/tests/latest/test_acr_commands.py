@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, record_only
+from azure.cli.command_modules.acr.custom import DEF_DIAG_SETTINGS_NAME_TEMPLATE
 
 
 class AcrCommandsTests(ScenarioTest):
@@ -318,3 +319,24 @@ class AcrCommandsTests(ScenarioTest):
 
         # Case 9: Import image from an Azure Container Registry with personal access token
         self.cmd('acr import -n {registry_name} --source {resource_imageV2} -p {token}')
+
+    @ResourceGroupPreparer()
+    def test_acr_create_with_audits(self, resource_group):
+        registry_name = self.create_random_name('clireg', 20)
+        workspace_name = self.create_random_name('wprkspace', 20)
+        self.kwargs.update({
+            'registry_name': registry_name,
+            'sku': 'basic',
+            'workspace': workspace_name,
+            'diagnostic-settings': DEF_DIAG_SETTINGS_NAME_TEMPLATE.format(registry_name)
+        })
+
+        self.cmd('monitor log-analytics workspace create -g {rg} -n {workspace}')
+
+        result = self.cmd('acr create -n {registry_name} -g {rg} --sku {sku} --workspace {workspace}')
+        self.kwargs['registry_id'] = result.get_output_in_json()['id']
+        self.cmd('monitor diagnostic-settings show -g {rg} --resource {registry_id} -n {diagnostic-settings}', checks=[
+            self.check('logs[0].category', 'ContainerRegistryRepositoryEvents'),
+            self.check('logs[1].category', 'ContainerRegistryLoginEvents'),
+            self.check('metrics[0].category', 'AllMetrics'),
+        ])

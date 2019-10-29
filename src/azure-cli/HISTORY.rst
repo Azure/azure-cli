@@ -7,6 +7,7 @@ Release History
 
 * Added a preview parameter `--pack-image-tag` to command `az acr pack build`.
 * Add a default timeout in seconds to `az acr run` and `az acr build`.
+* Support enabling auditing on creating a registry
 
 **AppConfig**
 
@@ -33,7 +34,7 @@ Release History
 
 * vm create: Add warning when specifying accelerated networking and an existing NIC together.
 * vm create: Add --vmss to specify an existing virtual machine scale set that the virtual machine should be assigned to.
-* vmss create: Add --orchestrator to specify how virtual machines are managed by the scale set.
+* vmss create: Add --orchestration-mode to specify how virtual machines are managed by the scale set.
 * vm/vmss update: Add --ultra-ssd-enabled to allow updating ultra SSD setting.
 * [BREAKING CHANGE] vm extension set: Fix bug where users could not set an extension on a VM with --ids.
 * New commands `az vm image terms accept/cancel/show` to manage Azure Marketplace image terms.
