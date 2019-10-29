@@ -82,7 +82,7 @@ def load_images_from_aliases_doc(cli_ctx, publisher=None, offer=None, sku=None):
         raise CLIError("'endpoint_vm_image_alias_doc' isn't configured. Please invoke 'az cloud update' to configure "
                        "it or use '--all' to retrieve images from server")
     # under hack mode(say through proxies with unsigned cert), opt out the cert verification
-    aliases_filename = 'src/azure-cli/azure/cli/command_modules/vm/resource/aliases.json'
+    from azure.cli.command_modules.vm._alias import alias_json
     try:
         response = requests.get(target_url, verify=(not should_disable_connection_verify()))
         if response.status_code == 200:
@@ -90,13 +90,11 @@ def load_images_from_aliases_doc(cli_ctx, publisher=None, offer=None, sku=None):
         else:
             logger.warning("Failed to retrieve image alias doc '%s'. Error: '%s'. Use local copy instead.",
                            target_url, response)
-            with open(aliases_filename, 'r') as f:
-                dic = json.loads(f.read())
+            dic = json.loads(alias_json)
     except requests.exceptions.ConnectionError:
         logger.warning("Failed to retrieve image alias doc '%s'. Error: 'ConnectionError'. Use local copy instead.",
                        target_url)
-        with open(aliases_filename, 'r') as f:
-            dic = json.loads(f.read())
+        dic = json.loads(alias_json)
     try:
         all_images = []
         result = (dic['outputs']['aliases']['value'])

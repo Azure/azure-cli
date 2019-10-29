@@ -1,3 +1,12 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+
+# Alias for image
+# https://github.com/Azure/azure-rest-api-specs/blob/master/arm-compute/quickstart-templates/aliases.json
+
+alias_json = """
 {
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
   "contentVersion": "1.0.0.0",
@@ -88,3 +97,5 @@
     }
   }
 }
+
+"""
