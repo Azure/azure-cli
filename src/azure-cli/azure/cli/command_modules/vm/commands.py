@@ -4,8 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set, cf_ni,
-                                                          cf_vm_ext,
-                                                          cf_vm_ext_image, cf_vm_image, cf_usage,
+                                                          cf_vm_ext, cf_vm_ext_image,
+                                                          cf_vm_image, cf_vm_image_term, cf_usage,
                                                           cf_vmss, cf_vmss_vm,
                                                           cf_vm_sizes, cf_disks, cf_snapshots,
                                                           cf_images, cf_run_commands,
@@ -87,6 +87,11 @@ def load_command_table(self, _):
     compute_vm_image_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#VirtualMachineImagesOperations.{}',
         client_factory=cf_vm_image
+    )
+
+    compute_vm_image_term_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.marketplaceordering.operations#MarketplaceAgreementsOperations.{}',
+        client_factory=cf_vm_image_term
     )
 
     compute_vm_usage_sdk = CliCommandType(
@@ -282,8 +287,14 @@ def load_command_table(self, _):
         g.command('list-publishers', 'list_publishers')
         g.command('list-skus', 'list_skus')
         g.custom_command('list', 'list_vm_images')
-        g.custom_command('accept-terms', 'accept_market_ordering_terms')
+        g.custom_command('accept-terms', 'accept_market_ordering_terms',
+                         deprecate_info=g.deprecate(redirect='az vm image terms accept', expiration='2.0.82'))
         g.custom_show_command('show', 'show_vm_image')
+
+    with self.command_group('vm image terms', compute_vm_image_term_sdk, validator=None) as g:
+        g.custom_command('accept', 'accept_terms')
+        g.custom_command('cancel', 'cancel_terms')
+        g.custom_show_command('show', 'get_terms')
 
     with self.command_group('vm nic', compute_vm_sdk) as g:
         g.custom_command('add', 'add_vm_nic')

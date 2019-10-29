@@ -21,7 +21,16 @@ from azure.cli.command_modules.iot.shared import (EndpointType,
                                                   RenewKeyType,
                                                   UserRole)
 from .custom import KeyType, SimpleAccessRights
-from ._validators import validate_policy_permissions
+from ._validators import (validate_policy_permissions,
+                          validate_retention_days,
+                          validate_fileupload_notification_max_delivery_count,
+                          validate_fileupload_notification_ttl,
+                          validate_fileupload_sas_ttl,
+                          validate_feedback_ttl,
+                          validate_feedback_lock_duration,
+                          validate_feedback_max_delivery_count,
+                          validate_c2d_max_delivery_count,
+                          validate_c2d_ttl)
 
 
 hub_name_type = CLIArgumentType(
@@ -101,6 +110,59 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('iot hub') as c:
         c.argument('hub_name', hub_name_type, options_list=['--name', '-n'], id_part='name')
         c.argument('etag', options_list=['--etag', '-e'], help='Entity Tag (etag) of the object.')
+        c.argument('sku', arg_type=get_enum_type(IotHubSku),
+                   help='Pricing tier for Azure IoT Hub. Default value is F1, which is free. '
+                        'Note that only one free IoT hub instance is allowed in each '
+                        'subscription. Exception will be thrown if free instances exceed one.')
+        c.argument('unit', help='Units in your IoT Hub.', type=int)
+        c.argument('partition_count',
+                   help='The number of partitions of the backing Event Hub for device-to-cloud messages.', type=int)
+        c.argument('retention_day', options_list=['--retention-day', '--rd'],
+                   type=int, validator=validate_retention_days,
+                   help='Specifies how long this IoT hub will maintain device-to-cloud events, between 1 and 7 days.')
+        c.argument('c2d_ttl', options_list=['--c2d-ttl', '--ct'],
+                   type=int, validator=validate_c2d_ttl,
+                   help='The amount of time a message is available for the device to consume before it is expired'
+                        ' by IoT Hub, between 1 and 48 hours.')
+        c.argument('c2d_max_delivery_count', options_list=['--c2d-max-delivery-count', '--cdd'],
+                   type=int, validator=validate_c2d_max_delivery_count,
+                   help='The number of times the IoT hub will attempt to deliver a cloud-to-device'
+                        ' message to a device, between 1 and 100.')
+        c.argument('feedback_ttl', options_list=['--feedback-ttl', '--ft'],
+                   type=int, validator=validate_feedback_ttl,
+                   help='The period of time for which the IoT hub will maintain the feedback for expiration'
+                        ' or delivery of cloud-to-device messages, between 1 and 48 hours.')
+        c.argument('feedback_lock_duration', options_list=['--feedback-lock-duration', '--fld'],
+                   type=int, validator=validate_feedback_lock_duration,
+                   help='The lock duration for the feedback queue, between 5 and 300 seconds.')
+        c.argument('feedback_max_delivery_count', options_list=['--feedback-max-delivery-count', '--fd'],
+                   type=int, validator=validate_feedback_max_delivery_count,
+                   help='The number of times the IoT hub attempts to'
+                        ' deliver a message on the feedback queue, between 1 and 100.')
+        c.argument('enable_fileupload_notifications', options_list=['--fileupload-notifications', '--fn'],
+                   arg_type=get_three_state_flag(),
+                   help='A boolean indicating whether to log information about uploaded files to the'
+                        ' messages/servicebound/filenotifications IoT Hub endpoint.')
+        c.argument('fileupload_notification_max_delivery_count', type=int,
+                   options_list=['--fileupload-notification-max-delivery-count', '--fnd'],
+                   validator=validate_fileupload_notification_max_delivery_count,
+                   help='The number of times the IoT hub will attempt to deliver a file notification message,'
+                        ' between 1 and 100.')
+        c.argument('fileupload_notification_ttl', options_list=['--fileupload-notification-ttl', '--fnt'],
+                   type=int, validator=validate_fileupload_notification_ttl,
+                   help='The amount of time a file upload notification is available for the service to'
+                        ' consume before it is expired by IoT Hub, between 1 and 48 hours.')
+        c.argument('fileupload_storage_connectionstring',
+                   options_list=['--fileupload-storage-connectionstring', '--fcs'],
+                   help='The connection string for the Azure Storage account to which files are uploaded.')
+        c.argument('fileupload_storage_container_name',
+                   options_list=['--fileupload-storage-container-name', '--fc'],
+                   help='The name of the root container where you upload files. The container need not exist but'
+                        ' should be creatable using the connectionString specified.')
+        c.argument('fileupload_sas_ttl', options_list=['--fileupload-sas-ttl', '--fst'],
+                   type=int, validator=validate_fileupload_sas_ttl,
+                   help='The amount of time a SAS URI generated by IoT Hub is valid before it expires,'
+                        ' between 1 and 24 hours.')
 
     for subgroup in ['consumer-group', 'policy', 'job', 'certificate', 'routing-endpoint', 'route']:
         with self.argument_context('iot hub {}'.format(subgroup)) as c:
@@ -170,13 +232,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('hub_name', completer=None)
         c.argument('location', get_location_type(self.cli_ctx),
                    help='Location of your IoT Hub. Default is the location of target resource group.')
-        c.argument('sku', arg_type=get_enum_type(IotHubSku),
-                   help='Pricing tier for Azure IoT Hub. Default value is F1, which is free. '
-                        'Note that only one free IoT hub instance is allowed in each '
-                        'subscription. Exception will be thrown if free instances exceed one.')
-        c.argument('unit', help='Units in your IoT Hub.', type=int)
-        c.argument('partition_count',
-                   help='The number of partitions of the backing Event Hub for device-to-cloud messages.', type=int)
 
     with self.argument_context('iot hub show-connection-string') as c:
         c.argument('show_all', options_list=['--all'], help='Allow to show all shared access policies.')

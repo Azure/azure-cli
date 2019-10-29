@@ -22,12 +22,26 @@ class IoTHubTest(ScenarioTest):
         subscription_id = self._get_current_subscription()
 
         # Test 'az iot hub create'
-        self.cmd('iot hub create -n {0} -g {1} --sku S1 --partition-count 4'.format(hub, rg),
+        self.cmd('iot hub create -n {0} -g {1} --sku S1 --fn true'.format(hub, rg), expect_failure=True)
+        self.cmd('iot hub create -n {0} -g {1} --sku S1 --fn true --fc containerName'
+                 .format(hub, rg), expect_failure=True)
+        self.cmd('iot hub create -n {0} -g {1} --sku S1 --partition-count 4 --retention-day 3'
+                 ' --c2d-ttl 23 --c2d-max-delivery-count 89 --feedback-ttl 29 --feedback-lock-duration 35'
+                 ' --feedback-max-delivery-count 40 --fileupload-notification-max-delivery-count 79'
+                 ' --fileupload-notification-ttl 20'.format(hub, rg),
                  checks=[self.check('resourcegroup', rg),
                          self.check('location', location),
                          self.check('name', hub),
                          self.check('sku.name', 'S1'),
-                         self.check('properties.eventHubEndpoints.events.partitionCount', '4')])
+                         self.check('properties.eventHubEndpoints.events.partitionCount', '4'),
+                         self.check('properties.eventHubEndpoints.events.retentionTimeInDays', '3'),
+                         self.check('properties.cloudToDevice.feedback.maxDeliveryCount', '40'),
+                         self.check('properties.cloudToDevice.feedback.lockDurationAsIso8601', '0:00:35'),
+                         self.check('properties.cloudToDevice.feedback.ttlAsIso8601', '1 day, 5:00:00'),
+                         self.check('properties.cloudToDevice.maxDeliveryCount', '89'),
+                         self.check('properties.cloudToDevice.defaultTtlAsIso8601', '23:00:00'),
+                         self.check('properties.messagingEndpoints.fileNotifications.ttlAsIso8601', '20:00:00'),
+                         self.check('properties.messagingEndpoints.fileNotifications.maxDeliveryCount', '79')])
 
         # Test 'az iot hub show-connection-string'
         conn_str_pattern = r'^HostName={0}.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey='.format(

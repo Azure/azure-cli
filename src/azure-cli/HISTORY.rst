@@ -3,9 +3,54 @@
 Release History
 ===============
 
+**ACR**
+
+* Added a preview parameter `--pack-image-tag` to command `az acr pack build`.
+* Support enabling auditing on creating a registry
+* Support Repository-scoped RBAC 
+
+**AppConfig**
+
+* Add appconfig feature command group to manage feature flags stored in an App Configuration.
+* Minor bug fix for appconfig kv export to file command. Stop reading dest file contents during export.
+
 **AppService**
 
+* Fixing an issue where webapp config ssl bind operation was removing existing tags from the resource
 * Added "--build remote" flag for "az functionapp deployment source config-zip" to support remote build action during function app deployment.
+* Change default node version on function apps to ~10 for Windows
+* Add --runtime-version property to `az functionapp create`
+
+**ARM**
+
+* deployment/group deployment validate: Add --handle-extended-json-format parameter to support multiline and comments in json template when deployment.
+* bump azure-mgmt-resource to 2019-07-01
+
+**AKS**
+* Add `--enable-cluster-autoscaler`, `--min-count` and `--max-count` to the `az aks create` command, which enables cluster autoscaler for the node pool.
+* Add the above flags as well as `--update-cluster-autoscaler` and `--disable-cluster-autoscaler` to the `az aks update` command, allowing updates to cluster autoscaler.
+
+**Compute**
+
+* vm create: Add warning when specifying accelerated networking and an existing NIC together.
+* vm create: Add --vmss to specify an existing virtual machine scale set that the virtual machine should be assigned to.
+* vmss create: Add --orchestration-mode to specify how virtual machines are managed by the scale set.
+* vm/vmss update: Add --ultra-ssd-enabled to allow updating ultra SSD setting.
+* [BREAKING CHANGE] vm extension set: Fix bug where users could not set an extension on a VM with --ids.
+* New commands `az vm image terms accept/cancel/show` to manage Azure Marketplace image terms.
+* Update VMAccessForLinux to version 1.5
+
+**CosmosDB**
+
+* [BREAKING] sql container create: Change --partition-key-path to required parameter
+* [BREAKING] gremlin graph create: Change --partition-key-path to required parameter
+* sql container create: Add --unique-key-policy and --conflict-resolution-policy
+* sql container create/update: Update the --idx default schema
+* gremlin graph create: Add --conflict-resolution-policy
+* gremlin graph create/update: Update the --idx default schema
+* Fix typo in help message
+* database: Add deprecation infomation
+* collection: Add deprecation infomation
 
 **Compute**
 
@@ -16,16 +61,36 @@ Release History
 **IoT**
 
 * Add new routing source type: DigitalTwinChangeEvents
+* Fix #2826: Missing features in "az iot hub create" 
+
+**Key Vault**
+
+* Fix #9352: Unexpected error when certificate file does not exist
+* Fix #7048: `az keyvault recover/purge` not working
 
 **Network**
 
 * az network private-dns link vnet create/update: Fixes #9851. Support cross-tenant virtual network linking.
 * [BREAKING CHANGE] network vnet subnet list: Fix #10401. `--resource-group` and `--vnet-name` are required now.
 * az network public-ip prefix create: Fix #10757. Support to specify IP address version (IPv4, IPv6) when creation
+* Bump azure-mgmt-network to 7.0.0 and api-version to 2019-09-01
 
 **Profile**
 
-* Fix: `az account get-access-token --resource-type ms-graph` not working.
+* Fix: `az account get-access-token --resource-type ms-graph` not working
+* Remove warning from `az login`
+
+**RBAC**
+
+* Fix #10807: `az ad app update --id {} --display-name {}` doesn't work
+
+**ServiceFabric**
+
+* az sf cluster create: fix #10916 modify service fabric linux and windows template.json compute vmss from standard to managed disks
+
+**SQL**
+
+* Add "--compute-model", "--auto-pause-delay", and "--min-capacity" parameters to support CRUD operations for new SQL Database offering: Serverless compute model."
 
 2.0.75
 ++++++
@@ -36,6 +101,7 @@ Release History
 * Set `--vm-set-type` default value to virtualmachinescalesets if supported by the kubernetes version
 * Add `az aks nodepool add`,`az aks nodepool show`, `az aks nodepool list`, `az aks nodepool scale`, `az aks nodepool upgrade`, `az aks nodepool update` and `az aks nodepool delete` commmands to support multiple nodepools in aks
 * Add `--zones` to `az aks create` and `az aks nodepool add` commands to support availability zones for aks
+* Enable GA support of apiserver authorized IP ranges via paramater `--api-server-authorized-ip-ranges` in `az aks create` and `az aks update`
 
 **AMS**
 
@@ -44,7 +110,7 @@ Release History
         - Changed parameter --ask from utf-8 string to 32 character hex string.
     job start:
         - Changed the command from `job start` to `job create`.
-    
+
 **AppConfig**
 
 * Using & in authorization header
@@ -61,6 +127,10 @@ Release History
 
 * az deployment create: Add --handle-extended-json-format parameter to support multiline and comments in json template.
 
+**Backup**
+
+* Enhanced error detail for vault delete in force mode.
+
 **Compute**
 
 * vm create: Add --enable-agent configuration.
@@ -69,10 +139,6 @@ Release History
 * vm create: Add --workspace to enable log analytics workspace automatically.
 * vmss create: Add --computer-name-prefix parameter to support custom computer name prefix of virtual machines in the VMSS.
 * Update galleries API version to 2019-07-01.
-
-**Backup**
-
-* Enhanced error detail for vault delete in force mode.
 
 **IoT**
 
@@ -99,6 +165,10 @@ Release History
 **RBAC**
 
 * Fix #10493: az ad sp delete --id {} fails when application is not found. If not found, application deletion is skipped.
+
+**Storage**
+
+* Add support for WebAssembly (.wasm) mimetype detection
 
 2.0.74
 ++++++
@@ -213,6 +283,8 @@ Release History
 * az network application-gateway ssl-cert: Fix #8244. Add support for setting key vault id in application-gateway ssl-cert.
 * az network express-route peering peer-connection: Fix #9404. Onboard `show` and `list` command for Azure express route peering peer connection resource.
 * az network vnet-gateway create/update: Fix #9327. Support `--custom-routes` argument to set custom routes address space for VNet gateway and VPN client.
+* az network express-route port identity: Fix #10747. Support to configure identity.
+* az network express-route port link update: Fix #10747. Support to configure MACsec and enable/disable admin state.
 
 **Policy**
 
@@ -254,7 +326,7 @@ Release History
 
 **Network**
 
-* az network lb create/frontend-ip create: Fixes #10018. Support `--private-ip-address-version` argument to create IPv6 based private-ip-address 
+* az network lb create/frontend-ip create: Fixes #10018. Support `--private-ip-address-version` argument to create IPv6 based private-ip-address
 * az network private-endpoint create/update/list-types: Fixes #9474. Support create/update/list-types commands for private endpoint.
 * az network private-link-service: Fixes #9475. Onboard commands for private link service.
 * az network vnet subnet update: Support `--private-endpoint-network-policies` and `--private-link-service-network-policies` arguments for update command.
@@ -310,7 +382,7 @@ Release History
 * BREAKING CHANGE:
     create:
         - Renamed --storage-default-container to --storage-container and --storage-default-filesystem to --storage-filesystem
-    application create: 
+    application create:
         - Changed the --name/-n argument to represent the application name instead of the cluster name and added a separate --cluster-name argument
         - Renamed --application-type to --type/-t
         - Renamed --marketplace-identifier to --marketplace-id
@@ -332,7 +404,7 @@ Release History
     Added this command to list the execution history for all script action executions
 * monitor enable:
     Enabled the --workspace argument to accept a Log Analytics workspace ID or workspace name as the parameter
-    Added the --primary-key argument, which is needed if a workspace ID is provided as the parameter 
+    Added the --primary-key argument, which is needed if a workspace ID is provided as the parameter
 * Added more examples and updated descriptions for help messages
 
 **interactive**
@@ -341,7 +413,7 @@ Release History
 
 **Network**
 
-* az network dns record-set cname delete: Fixes #10166. Support `--yes` argument to align the behavior with other dns type. 
+* az network dns record-set cname delete: Fixes #10166. Support `--yes` argument to align the behavior with other dns type.
 
 **Profile**
 
@@ -358,7 +430,7 @@ Release History
 
 **Kubernetes**
 
-* Use https if dashboard container port is using https 
+* Use https if dashboard container port is using https
 
 
 2.0.70

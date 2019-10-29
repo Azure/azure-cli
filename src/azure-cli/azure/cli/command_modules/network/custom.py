@@ -74,6 +74,11 @@ def list_express_route_circuits(cmd, resource_group_name=None):
     return _generic_list(cmd.cli_ctx, 'express_route_circuits', resource_group_name)
 
 
+def create_express_route_auth(cmd, resource_group_name, circuit_name, authorization_name):
+    client = network_client_factory(cmd.cli_ctx).express_route_circuit_authorizations
+    return client.create_or_update(resource_group_name, circuit_name, authorization_name)
+
+
 def list_lbs(cmd, resource_group_name=None):
     return _generic_list(cmd.cli_ctx, 'load_balancers', resource_group_name)
 
@@ -2104,6 +2109,84 @@ def list_express_route_ports(cmd, resource_group_name=None):
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
     return client.list()
+
+
+def assign_express_route_port_identity(cmd, resource_group_name, express_route_port_name,
+                                       user_assigned_identity, no_wait=False):
+    client = network_client_factory(cmd.cli_ctx).express_route_ports
+    ports = client.get(resource_group_name, express_route_port_name)
+
+    ManagedServiceIdentity, ManagedServiceIdentityUserAssignedIdentitiesValue = \
+        cmd.get_models('ManagedServiceIdentity', 'ManagedServiceIdentityUserAssignedIdentitiesValue')
+
+    user_assigned_identity_instance = ManagedServiceIdentityUserAssignedIdentitiesValue()
+    user_assigned_identities_instance = dict()
+    user_assigned_identities_instance[user_assigned_identity] = user_assigned_identity_instance
+
+    identity_instance = ManagedServiceIdentity(type="UserAssigned",
+                                               user_assigned_identities=user_assigned_identities_instance)
+    ports.identity = identity_instance
+
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, express_route_port_name, ports)
+
+
+def remove_express_route_port_identity(cmd, resource_group_name, express_route_port_name, no_wait=False):
+    client = network_client_factory(cmd.cli_ctx).express_route_ports
+    ports = client.get(resource_group_name, express_route_port_name)
+
+    if ports.identity is None:
+        logger.warning("The identity of the ExpressRoute Port doesn't exist.")
+        return ports
+
+    ports.identity = None
+
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, express_route_port_name, ports)
+
+
+def show_express_route_port_identity(cmd, resource_group_name, express_route_port_name):
+    client = network_client_factory(cmd.cli_ctx).express_route_ports
+    ports = client.get(resource_group_name, express_route_port_name)
+    return ports.identity
+
+
+def update_express_route_port_link(cmd, instance, express_route_port_name, link_name,
+                                   macsec_cak_secret_identifier=None, macsec_ckn_secret_identifier=None,
+                                   macsec_cipher=None, admin_state=None):
+    """
+    :param cmd:
+    :param instance: an instance of ExpressRoutePort
+    :param express_route_port_name:
+    :param link_name:
+    :param macsec_cak_secret_identifier:
+    :param macsec_ckn_secret_identifier:
+    :param macsec_cipher:
+    :param admin_state:
+    :return:
+    """
+    if len(instance.links) != 2:
+        raise CLIError("The number of ExpressRoute Links should be 2. "
+                       "Code may not perform as expected. Please contact us to update CLI.")
+
+    try:
+        link_index = [index for index, link in enumerate(instance.links) if link.name == link_name][0]
+    except Exception:
+        raise CLIError('ExpressRoute Link "{}" not found'.format(link_name))
+
+    if any([macsec_cak_secret_identifier, macsec_ckn_secret_identifier, macsec_cipher]):
+        instance.links[link_index].mac_sec_config.cak_secret_identifier = macsec_cak_secret_identifier
+        instance.links[link_index].mac_sec_config.ckn_secret_identifier = macsec_ckn_secret_identifier
+
+        # TODO https://github.com/Azure/azure-rest-api-specs/issues/7569
+        # need to remove this conversion when the issue is fixed.
+        if macsec_cipher is not None:
+            macsec_ciphers_tmp = {'gcm-aes-128': 'GcmAes128', 'gcm-aes-256': 'GcmAes256'}
+            macsec_cipher = macsec_ciphers_tmp[macsec_cipher]
+        instance.links[link_index].mac_sec_config.cipher = macsec_cipher
+
+    if admin_state is not None:
+        instance.links[link_index].admin_state = admin_state
+
+    return instance
 # endregion
 
 
@@ -4453,4 +4536,46 @@ def clear_vpn_conn_ipsec_policies(cmd, resource_group_name, connection_name, no_
 def list_vpn_conn_ipsec_policies(cmd, resource_group_name, connection_name):
     ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateway_connections
     return ncf.get(resource_group_name, connection_name).ipsec_policies
+# endregion
+
+
+# region VirtualRouter
+def create_virtual_router(cmd, resource_group_name, virtual_router_name, hosted_gateway, location=None, tags=None):
+    VirtualRouter, SubResource = cmd.get_models('VirtualRouter', 'SubResource')
+    client = network_client_factory(cmd.cli_ctx).virtual_routers
+    virtual_router = VirtualRouter(virtual_router_asn=None,
+                                   virtual_router_ips=[],
+                                   hosted_subnet=None,
+                                   hosted_gateway=SubResource(id=hosted_gateway),
+                                   location=location,
+                                   tags=tags)
+    return client.create_or_update(resource_group_name, virtual_router_name, virtual_router)
+
+
+def update_virtual_router(cmd, instance, tags=None):
+    with cmd.update_context(instance) as c:
+        c.set_param('tags', tags)
+    return instance
+
+
+def list_virtual_router(cmd, resource_group_name=None):
+    client = network_client_factory(cmd.cli_ctx).virtual_routers
+    if resource_group_name is not None:
+        return client.list_by_resource_group(resource_group_name)
+    return client.list()
+
+
+def create_virtual_router_peering(cmd, resource_group_name, virtual_router_name, peering_name, peer_asn, peer_ip):
+    VirtualRouterPeering = cmd.get_models('VirtualRouterPeering')
+    client = network_client_factory(cmd.cli_ctx).virtual_router_peerings
+    virtual_router_peering = VirtualRouterPeering(peer_asn=peer_asn,
+                                                  peer_ip=peer_ip)
+    return client.create_or_update(resource_group_name, virtual_router_name, peering_name, virtual_router_peering)
+
+
+def update_virtual_router_peering(cmd, instance, peer_asn=None, peer_ip=None):
+    with cmd.update_context(instance) as c:
+        c.set_param('peer_asn', peer_asn)
+        c.set_param('peer_ip', peer_ip)
+    return instance
 # endregion
