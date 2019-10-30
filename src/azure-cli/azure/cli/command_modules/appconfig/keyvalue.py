@@ -151,8 +151,10 @@ def set_key(cmd,
 
     label = label if label and label != ModifyKeyValueOptions.empty_label else None
     for i in range(0, retry_times):
-        retrieved_kv = azconfig_client.get_keyvalue(
-            key, QueryKeyValueOptions(label))
+        try:
+            retrieved_kv = azconfig_client.get_keyvalue(key, QueryKeyValueOptions(label))
+        except HTTPException as exception:
+            raise CLIError(str(exception))
 
         if retrieved_kv is None:
             set_kv = KeyValue(key, value, label, tags, content_type)
@@ -246,8 +248,10 @@ def lock_key(cmd, key, label=None, name=None, connection_string=None, yes=False)
     retry_times = 3
     retry_interval = 1
     for i in range(0, retry_times):
-        retrieved_kv = azconfig_client.get_keyvalue(
-            key, QueryKeyValueOptions(label))
+        try:
+            retrieved_kv = azconfig_client.get_keyvalue(key, QueryKeyValueOptions(label))
+        except HTTPException as exception:
+            raise CLIError(exception)
         if retrieved_kv is None:
             raise CLIError("The key you are trying to lock does not exist.")
 
@@ -277,8 +281,10 @@ def unlock_key(cmd, key, label=None, name=None, connection_string=None, yes=Fals
     retry_times = 3
     retry_interval = 1
     for i in range(0, retry_times):
-        retrieved_kv = azconfig_client.get_keyvalue(
-            key, QueryKeyValueOptions(label))
+        try:
+            retrieved_kv = azconfig_client.get_keyvalue(key, QueryKeyValueOptions(label))
+        except HTTPException as exception:
+            raise CLIError(exception)
         if retrieved_kv is None:
             raise CLIError("The key you are trying to unlock does not exist.")
 

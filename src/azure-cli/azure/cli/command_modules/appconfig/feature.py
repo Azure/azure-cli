@@ -62,7 +62,11 @@ def set_feature(cmd,
     query_options = QueryKeyValueOptions(label=label)
 
     for i in range(0, retry_times):
-        retrieved_kv = azconfig_client.get_keyvalue(key, query_options)
+        try:
+            retrieved_kv = azconfig_client.get_keyvalue(key, query_options)
+        except HTTPException as exception:
+            raise CLIError(str(exception))
+
         try:
             # if kv exists and only content-type is wrong, we can force correct it by updating the kv
             if retrieved_kv is None:
@@ -297,8 +301,11 @@ def lock_feature(cmd,
     retry_times = 3
     retry_interval = 1
     for i in range(0, retry_times):
-        retrieved_kv = azconfig_client.get_keyvalue(
-            key, QueryKeyValueOptions(label))
+        try:
+            retrieved_kv = azconfig_client.get_keyvalue(key, QueryKeyValueOptions(label))
+        except HTTPException as exception:
+            raise CLIError(str(exception))
+
         if retrieved_kv is None or retrieved_kv.content_type != FEATURE_FLAG_CONTENT_TYPE:
             raise CLIError(
                 "The feature '{}' you are trying to lock does not exist.".format(feature))
@@ -339,8 +346,11 @@ def unlock_feature(cmd,
     retry_times = 3
     retry_interval = 1
     for i in range(0, retry_times):
-        retrieved_kv = azconfig_client.get_keyvalue(
-            key, QueryKeyValueOptions(label))
+        try:
+            retrieved_kv = azconfig_client.get_keyvalue(key, QueryKeyValueOptions(label))
+        except HTTPException as exception:
+            raise CLIError(str(exception))
+
         if retrieved_kv is None or retrieved_kv.content_type != FEATURE_FLAG_CONTENT_TYPE:
             raise CLIError(
                 "The feature '{}' you are trying to unlock does not exist.".format(feature))

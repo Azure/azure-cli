@@ -92,8 +92,8 @@ helps['appconfig kv list'] = """
 type: command
 short-summary: List key-values.
 examples:
-  - name: List all key-values.
-    text: az appconfig kv list -n MyAppConfiguration
+  - name: List all key-values with null label.
+    text: az appconfig kv list -n MyAppConfiguration --label \\0
   - name: List a specfic key for any label start with v1. using connection string.
     text: az appconfig kv list --key color --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --label v1.*
   - name: List all keys with any labels and query only key, value and tags.

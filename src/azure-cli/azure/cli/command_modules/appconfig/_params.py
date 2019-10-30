@@ -129,7 +129,7 @@ def load_arguments(self, _):
 
     with self.argument_context('appconfig kv show') as c:
         c.argument('key', help='Key to be showed.')
-        c.argument('label', help="If no label specified, show entry with null label. Does NOT support filters like other commands")
+        c.argument('label', help="If no label specified, show entry with null label. Does NOT support filters like list command")
 
     with self.argument_context('appconfig kv list') as c:
         c.argument('key', help='If no key specified, return all keys by default. Support star sign as filters, for instance abc* means keys with abc as prefix. Similarly, *abc and *abc* are also supported.')
@@ -141,11 +141,11 @@ def load_arguments(self, _):
 
     with self.argument_context('appconfig kv lock') as c:
         c.argument('key', help='Key to be locked.')
-        c.argument('label', help="If no label specified, lock entry with null label. Does NOT support filters like other commands")
+        c.argument('label', help="If no label specified, lock entry with null label. Does NOT support filters like list command")
 
     with self.argument_context('appconfig kv unlock') as c:
         c.argument('key', help='Key to be unlocked.')
-        c.argument('label', help="If no label specified, unlock entry with null label. Does NOT support filters like other commands")
+        c.argument('label', help="If no label specified, unlock entry with null label. Does NOT support filters like list command")
 
     with self.argument_context('appconfig revision list') as c:
         c.argument('key', help='If no key specified, return all keys by default. Support star sign as filters, for instance abc* means keys with abc as prefix. Similarly, *abc and *abc* are also supported.')
@@ -153,7 +153,7 @@ def load_arguments(self, _):
 
     with self.argument_context('appconfig feature show') as c:
         c.argument('feature', help='Name of the feature flag to be retrieved')
-        c.argument('label', help="If no label specified, show entry with null label. Does NOT support filters like other commands.")
+        c.argument('label', help="If no label specified, show entry with null label. Does NOT support filters like list command.")
         c.argument('fields', arg_type=feature_fields_arg_type)
 
     with self.argument_context('appconfig feature set') as c:
