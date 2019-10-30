@@ -3,11 +3,19 @@
 Release History
 ===============
 
+2.0.76
+++++++
+
 **ACR**
 
 * Added a preview parameter `--pack-image-tag` to command `az acr pack build`.
 * Support enabling auditing on creating a registry
 * Support Repository-scoped RBAC
+
+**AKS**
+
+* Add `--enable-cluster-autoscaler`, `--min-count` and `--max-count` to the `az aks create` command, which enables cluster autoscaler for the node pool.
+* Add the above flags as well as `--update-cluster-autoscaler` and `--disable-cluster-autoscaler` to the `az aks update` command, allowing updates to cluster autoscaler.
 
 **AppConfig**
 
@@ -26,11 +34,6 @@ Release History
 
 * deployment/group deployment validate: Add --handle-extended-json-format parameter to support multiline and comments in json template when deployment.
 * bump azure-mgmt-resource to 2019-07-01
-
-**AKS**
-
-* Add `--enable-cluster-autoscaler`, `--min-count` and `--max-count` to the `az aks create` command, which enables cluster autoscaler for the node pool.
-* Add the above flags as well as `--update-cluster-autoscaler` and `--disable-cluster-autoscaler` to the `az aks update` command, allowing updates to cluster autoscaler.
 
 **Backup**
 
