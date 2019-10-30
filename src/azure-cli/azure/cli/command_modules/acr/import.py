@@ -122,6 +122,6 @@ def _handle_result(cmd, result_poller, source_registry, source_image, registry):
         except (ClientException, CLIError) as unexpected_ex:  # raise exception
             logger.debug("Unexpected exception: %s", unexpected_ex)
 
-        logger.debug("Re-raise exception: %s", e)
-        raise e  # regardless reraise the CLIError as this is an error from the service
+        raise e  # regardless re-raise the CLIError as this is an error from the service
+
     return result
