@@ -124,9 +124,4 @@ def _handle_result(cmd, result_poller, source_registry, source_image, registry):
 
         logger.debug("Re-raise exception: %s", e)
         raise e  # regardless reraise the CLIError as this is an error from the service
-
-    except AttributeError:
-        # in the unlikely event that import_image's api changes and no longer returns a poller, return result
-        return result_poller
-
     return result
