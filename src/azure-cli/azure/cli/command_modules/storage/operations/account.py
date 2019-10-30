@@ -190,7 +190,7 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
     if enable_files_aadds is not None:
         if enable_files_aadds:  # enable AADDS
             origin_storage_account = get_storage_account_properties(cmd.cli_ctx, instance.id)
-            if not origin_storage_account.azure_files_identity_based_authentication or \
+            if origin_storage_account.azure_files_identity_based_authentication and \
                     origin_storage_account.azure_files_identity_based_authentication.directory_service_options == 'AD':
                 raise CLIError("The Storage account already enabled ActiveDirectoryDomainServicesForFile, "
                                "please disable it by running this cmdlets with \"--enable-files-adds false\" "
