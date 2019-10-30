@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**RBAC**
+
+* Fix #10996: Polish error for `--force-change-password-next-login` in `az ad user update` when `--password` is not specified
+
 2.0.76
 
 
@@ -98,7 +102,6 @@ Release History
 **RBAC**
 
 * Fix #10807: `az ad app update --id {} --display-name {}` doesn't work
-* Fix #10996: Polish error for `--force-change-password-next-login` in `az ad user update` when `--password` is not specified
 
 **ServiceFabric**
 
