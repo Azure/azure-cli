@@ -98,7 +98,7 @@ examples:
     text: az appconfig kv list --key color --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --label v1.*
   - name: List all keys with any labels and query only key, value and tags.
     text: az appconfig kv list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --fields key value tags --datetime "2019-05-01T11:24:12Z"
-  - name: List 150 key-values.
+  - name: List 150 key-values with any labels.
     text: az appconfig kv list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx  --top 150
   - name: List key-values with multiple labels.
     text: az appconfig kv list --label test,prod,\\0 -n MyAppConfiguration
@@ -252,7 +252,7 @@ helps['appconfig feature list'] = """
         - name: List all features with any labels and query only key, state and conditions.
           text:
             az appconfig feature list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --fields key state conditions
-        - name: List 150 feature flags.
+        - name: List 150 feature flags with any labels.
           text:
             az appconfig feature list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx  --top 150
         - name: List feature flags with multiple labels.
