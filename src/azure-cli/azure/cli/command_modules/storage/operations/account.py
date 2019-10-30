@@ -217,7 +217,7 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                                "--domain-name, --net-bios-domain-name, --forest-name, --domain-guid, --domain-sid and "
                                "--azure_storage_sid arguments in Azure Active Directory Properties Argument group.")
             origin_storage_account = get_storage_account_properties(cmd.cli_ctx, instance.id)
-            if not origin_storage_account.azure_files_identity_based_authentication or \
+            if origin_storage_account.azure_files_identity_based_authentication and \
                     origin_storage_account.azure_files_identity_based_authentication.directory_service_options \
                     == 'AADDS':
                 raise CLIError("The Storage account already enabled AzureActiveDirectoryDomainServicesForFile, "
