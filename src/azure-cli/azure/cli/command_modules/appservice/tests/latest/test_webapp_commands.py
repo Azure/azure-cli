@@ -32,12 +32,18 @@ class WebappBasicE2ETest(ScenarioTest):
         plan = self.create_random_name(prefix='webapp-e2e-plan', length=24)
 
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
-        self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))  # test idempotency
+        self.cmd('appservice plan list -g {}'.format(resource_group), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', plan),
+            JMESPathCheck('[0].perSiteScaling', False)
+        ])
+        self.cmd('appservice plan create -g {} -n {} --per-site-scaling'.format(resource_group, plan))  # test idempotency
         self.cmd('appservice plan list -g {}'.format(resource_group), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', plan),
             JMESPathCheck('[0].sku.tier', 'Basic'),
-            JMESPathCheck('[0].sku.name', 'B1')
+            JMESPathCheck('[0].sku.name', 'B1'),
+            JMESPathCheck('[0].perSiteScaling', True)
         ])
         self.cmd('appservice plan list', checks=[
             JMESPathCheck("length([?name=='{}' && resourceGroup=='{}'])".format(plan, resource_group), 1)
