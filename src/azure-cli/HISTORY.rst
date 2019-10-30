@@ -103,6 +103,11 @@ Release History
 
 * Add "--compute-model", "--auto-pause-delay", and "--min-capacity" parameters to support CRUD operations for new SQL Database offering: Serverless compute model."
 
+**Storage**
+
+* storage account create/update: Add --enable-files-adds parameter and Azure Active Directory Properties Argument group to support Azure Files Active Directory Domain Service Authentication
+* Expand `az storage account keys list/renew` to support listing or regenerating Kerberos keys of storage account.
+
 2.0.75
 ++++++
 
