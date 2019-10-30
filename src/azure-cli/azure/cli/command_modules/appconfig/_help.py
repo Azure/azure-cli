@@ -98,8 +98,10 @@ examples:
     text: az appconfig kv list --key color --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --label v1.*
   - name: List all keys with any labels and query only key, value and tags.
     text: az appconfig kv list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --fields key value tags --datetime "2019-05-01T11:24:12Z"
-  - name: List 150 key-values with no label.
-    text: az appconfig kv list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx  --top  --label \0
+  - name: List 150 key-values.
+    text: az appconfig kv list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx  --top 150
+  - name: List key-values with multiple labels.
+    text: az appconfig kv list --label test,prod,\\0 -n MyAppConfiguration
 """
 
 helps['appconfig kv lock'] = """
@@ -169,8 +171,10 @@ helps['appconfig revision list'] = """
 type: command
 short-summary: Lists revision history of key-values.
 examples:
-  - name: List revision history of key "color" label "test" using App Configuration name.
+  - name: List revision history of a key-value using App Configuration name.
     text: az appconfig revision list -n MyAppConfiguration --key color --label test
+  - name: List revision history of a key-value with multiple labels.
+    text: az appconfig revision list -n MyAppConfiguration --key color --label test,prod,//0
   - name: List revision history for key "color" with any labels using connection string
     text: az appconfig revision list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --key color --datetime "2019-05-01T11:24:12Z"
 """
@@ -241,16 +245,19 @@ helps['appconfig feature list'] = """
             az appconfig feature list -n MyAppConfiguration
         - name: List all feature flags with null labels.
           text:
-            az appconfig feature list -n MyAppConfiguration --label ""
+            az appconfig feature list -n MyAppConfiguration --label \\0
         - name: List a specfic feature for any label start with v1. using connection string.
           text:
             az appconfig feature list --feature color --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --label v1.*
         - name: List all features with any labels and query only key, state and conditions.
           text:
             az appconfig feature list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --fields key state conditions
-        - name: List 150 feature flags with no label.
+        - name: List 150 feature flags.
           text:
-            az appconfig feature list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx  --top 150 --label \0
+            az appconfig feature list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx  --top 150
+        - name: List feature flags with multiple labels.
+          text:
+            az appconfig feature list --label test,prod,\\0 -n MyAppConfiguration
     """
 
 helps['appconfig feature lock'] = """

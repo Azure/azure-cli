@@ -133,7 +133,7 @@ def load_arguments(self, _):
 
     with self.argument_context('appconfig kv list') as c:
         c.argument('key', help='If no key specified, return all keys by default. Support star sign as filters, for instance abc* means keys with abc as prefix. Similarly, *abc and *abc* are also supported.')
-        c.argument('label', help="If no label specified, list all labels. Support star sign as filters, for instance abc* means labels with abc as prefix. Similarly, *abc and *abc* are also supported.")
+        c.argument('label', help="If no label specified, list all labels. Support star sign as filters, for instance abc* means labels with abc as prefix. Similarly, *abc and *abc* are also supported. Use \\0 for null label.")
 
     with self.argument_context('appconfig kv restore') as c:
         c.argument('key', help='If no key specified, restore all keys by default. Support star sign as filters, for instance abc* means keys with abc as prefix. Similarly, *abc and *abc* are also supported.')
@@ -149,7 +149,7 @@ def load_arguments(self, _):
 
     with self.argument_context('appconfig revision list') as c:
         c.argument('key', help='If no key specified, return all keys by default. Support star sign as filters, for instance abc* means keys with abc as prefix. Similarly, *abc and *abc* are also supported.')
-        c.argument('label', help="If no label specified, list all labels. Support star sign as filters, for instance abc* means labels with abc as prefix. Similarly, *abc and *abc* are also supported.")
+        c.argument('label', help="If no label specified, list all labels. Support star sign as filters, for instance abc* means labels with abc as prefix. Similarly, *abc and *abc* are also supported. Use \\0 for null label.")
 
     with self.argument_context('appconfig feature show') as c:
         c.argument('feature', help='Name of the feature flag to be retrieved')
@@ -167,7 +167,7 @@ def load_arguments(self, _):
 
     with self.argument_context('appconfig feature list') as c:
         c.argument('feature', help='Key of the feature to be listed. Support star sign as filters, for instance * means all key and abc* means keys with abc as prefix. Similarly, *abc and *abc* are also supported. Comma separated keys are not supported. Please provide escaped string if your feature name contains comma.')
-        c.argument('label', help="If no label specified, list all labels. Support star sign as filters, for instance * means all labels and abc* means labels with abc as prefix. Similarly, *abc and *abc* are also supported.")
+        c.argument('label', help="If no label specified, list all labels. Support star sign as filters, for instance * means all labels and abc* means labels with abc as prefix. Similarly, *abc and *abc* are also supported. Use \\0 for null label.")
         c.argument('fields', arg_type=feature_fields_arg_type)
         c.argument('all_', help="List all feature flags.")
 
