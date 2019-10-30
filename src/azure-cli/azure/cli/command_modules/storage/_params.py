@@ -11,7 +11,7 @@ from azure.cli.core.commands.parameters import (tags_type, file_type, get_locati
 from ._validators import (get_datetime_type, validate_metadata, get_permission_validator, get_permission_help_string,
                           resource_type_type, services_type, validate_entity, validate_select, validate_blob_type,
                           validate_included_datasets, validate_custom_domain, validate_container_public_access,
-                          validate_table_payload_format, validate_key, add_progress_callback, process_resource_group,
+                          validate_table_payload_format, add_progress_callback, process_resource_group,
                           storage_account_key_options, process_file_download_namespace, process_metric_update_namespace,
                           get_char_options_validator, validate_bypass, validate_encryption_source, validate_marker,
                           validate_storage_data_plane_list, validate_azcopy_upload_destination_url,
@@ -72,7 +72,29 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
              'Once the property is enabled, the feature cannot be disabled. Currently only supported for LRS and '
              'ZRS replication types, hence account conversions to geo-redundant accounts would not be possible. '
              'For more information, please refer to https://go.microsoft.com/fwlink/?linkid=2086047.')
-
+    adds_type = CLIArgumentType(arg_type=get_three_state_flag(), min_api='2019-04-01',
+                                help='Enable Azure Files Active Directory Domain Service Authentication for '
+                                     'storage account. When --enable-files-adds is set to true, Azure Active '
+                                     'Directory Properties arguments must be provided.')
+    aadds_type = CLIArgumentType(arg_type=get_three_state_flag(), min_api='2018-11-01',
+                                 help='Enable Azure Active Directory Domain Services authentication for Azure Files')
+    domain_name_type = CLIArgumentType(min_api='2019-04-01', arg_group="Azure Active Directory Properties",
+                                       help="Specify the primary domain that the AD DNS server is authoritative for. "
+                                            "Required when --enable-files-adds is set to True")
+    net_bios_domain_name_type = CLIArgumentType(min_api='2019-04-01', arg_group="Azure Active Directory Properties",
+                                                help="Specify the NetBIOS domain name. "
+                                                     "Required when --enable-files-adds is set to True")
+    forest_name_type = CLIArgumentType(min_api='2019-04-01', arg_group="Azure Active Directory Properties",
+                                       help="Specify the Active Directory forest to get. "
+                                            "Required when --enable-files-adds is set to True")
+    domain_guid_type = CLIArgumentType(min_api='2019-04-01', arg_group="Azure Active Directory Properties",
+                                       help="Specify the domain GUID. Required when --enable-files-adds is set to True")
+    domain_sid_type = CLIArgumentType(min_api='2019-04-01', arg_group="Azure Active Directory Properties",
+                                      help="Specify the security identifier (SID). Required when --enable-files-adds "
+                                           "is set to True")
+    azure_storage_sid_type = CLIArgumentType(min_api='2019-04-01', arg_group="Azure Active Directory Properties",
+                                             help="Specify the security identifier (SID) for Azure Storage. "
+                                                  "Required when --enable-files-adds is set to True")
     sas_help = 'The permissions the SAS grants. Allowed values: {}. Do not use if a stored access policy is ' \
                'referenced with --id that specifies this value. Can be combined.'
 
@@ -123,9 +145,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('tags', tags_type)
         c.argument('custom_domain', help='User domain assigned to the storage account. Name is the CNAME source.')
         c.argument('sku', help='The storage account SKU.', arg_type=get_enum_type(t_sku_name, default='standard_ragrs'))
-        c.argument('enable_files_aadds', arg_type=get_three_state_flag(), min_api='2018-11-01',
-                   help='Enable the identity based authentication settings for Azure Files.')
+        c.argument('enable_files_aadds', aadds_type)
+        c.argument('enable_files_adds', adds_type)
         c.argument('enable_large_file_share', arg_type=large_file_share_type)
+        c.argument('domain_name', domain_name_type)
+        c.argument('net_bios_domain_name', net_bios_domain_name_type)
+        c.argument('forest_name', forest_name_type)
+        c.argument('domain_guid', domain_guid_type)
+        c.argument('domain_sid', domain_sid_type)
+        c.argument('azure_storage_sid', azure_storage_sid_type)
 
     with self.argument_context('storage account update', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.register_common_storage_account_options()
@@ -136,9 +164,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('use_subdomain', help='Specify whether to use indirect CNAME validation.',
                    arg_type=get_enum_type(['true', 'false']))
         c.argument('tags', tags_type, default=None)
-        c.argument('enable_files_aadds', arg_type=get_three_state_flag(), min_api='2018-11-01',
-                   help='Enable the identity based authentication settings for Azure Files.')
+        c.argument('enable_files_aadds', aadds_type)
+        c.argument('enable_files_adds', adds_type)
         c.argument('enable_large_file_share', arg_type=large_file_share_type)
+        c.argument('domain_name', domain_name_type)
+        c.argument('net_bios_domain_name', net_bios_domain_name_type)
+        c.argument('forest_name', forest_name_type)
+        c.argument('domain_guid', domain_guid_type)
+        c.argument('domain_sid', domain_sid_type)
+        c.argument('azure_storage_sid', azure_storage_sid_type)
 
     with self.argument_context('storage account update', arg_group='Customer managed key', min_api='2017-06-01') as c:
         c.extra('encryption_key_name', help='The name of the KeyVault key', )
@@ -169,9 +203,16 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         for item in ['blob', 'file', 'queue', 'table']:
             c.argument('{}_endpoint'.format(item), help='Custom endpoint for {}s.'.format(item))
 
-    with self.argument_context('storage account keys renew') as c:
-        c.argument('key_name', options_list=['--key'], help='The key to regenerate.', validator=validate_key,
+    with self.argument_context('storage account keys list', resource_type=ResourceType.MGMT_STORAGE) as c:
+        t_expand_key_type = self.get_models('ListKeyExpand', resource_type=ResourceType.MGMT_STORAGE)
+        c.argument("expand", options_list=['--expand-key-type'], help='Specify the expanded key types to be listed.',
+                   arg_type=get_enum_type(t_expand_key_type), min_api='2019-04-01', is_preview=True)
+
+    with self.argument_context('storage account keys renew', resource_type=ResourceType.MGMT_STORAGE) as c:
+        c.argument('key_name', options_list=['--key'], help='The key options to regenerate.',
                    arg_type=get_enum_type(list(storage_account_key_options.keys())))
+        c.extra('key_type', help='The key type to regenerate. If --key-type is not specified, one of access keys will '
+                'be regenerated by default.', arg_type=get_enum_type(['kerb']), min_api='2019-04-01')
         c.argument('account_name', acct_name_type, id_part=None)
 
     with self.argument_context('storage account management-policy create') as c:
