@@ -39,6 +39,7 @@ Release History
 
 * vm create: Add warning when specifying accelerated networking and an existing NIC together.
 * vm create: Add --vmss to specify an existing virtual machine scale set that the virtual machine should be assigned to.
+* vm/vmss create: Add a local copy of image alias file so that it can be accessed in a restricted network environment.
 * vmss create: Add --orchestration-mode to specify how virtual machines are managed by the scale set.
 * vm/vmss update: Add --ultra-ssd-enabled to allow updating ultra SSD setting.
 * [BREAKING CHANGE] vm extension set: Fix bug where users could not set an extension on a VM with --ids.
