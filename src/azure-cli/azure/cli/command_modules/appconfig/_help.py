@@ -174,7 +174,7 @@ examples:
   - name: List revision history of a key-value using App Configuration name.
     text: az appconfig revision list -n MyAppConfiguration --key color --label test
   - name: List revision history of a key-value with multiple labels.
-    text: az appconfig revision list -n MyAppConfiguration --key color --label test,prod,//0
+    text: az appconfig revision list -n MyAppConfiguration --key color --label test,prod,\\0
   - name: List revision history for key "color" with any labels using connection string
     text: az appconfig revision list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --key color --datetime "2019-05-01T11:24:12Z"
 """
