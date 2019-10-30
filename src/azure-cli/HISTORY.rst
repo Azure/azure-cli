@@ -8,7 +8,7 @@ Release History
 
 **ACR**
 
-* Added a preview parameter `--pack-image-tag` to command `az acr pack build`.
+* Add a preview parameter `--pack-image-tag` to command `az acr pack build`.
 * Support enabling auditing on creating a registry
 * Support Repository-scoped RBAC
 
