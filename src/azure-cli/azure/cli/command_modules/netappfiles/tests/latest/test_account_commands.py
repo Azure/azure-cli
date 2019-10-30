@@ -13,7 +13,7 @@ LOCATION = "westcentralus"
 
 
 class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(name_prefix='cli_tests_rg_')
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_')
     def test_create_delete_account(self):
         account_name = self.create_random_name(prefix='cli', length=24)
         tags = 'Tag1=Value1 Tag2=Value2'
@@ -45,7 +45,7 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
         account_list = self.cmd("netappfiles account list --resource-group {rg}").get_output_in_json()
         assert len(account_list) == 0
 
-    @ResourceGroupPreparer(name_prefix='cli_tests_rg_')
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_')
     def test_list_accounts(self):
         accounts = [self.create_random_name(prefix='cli', length=24), self.create_random_name(prefix='cli', length=24)]
 
@@ -61,7 +61,7 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
         account_list = self.cmd("netappfiles account list --resource-group {rg}").get_output_in_json()
         assert len(account_list) == 0
 
-    @ResourceGroupPreparer(name_prefix='cli_tests_rg_')
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_')
     def test_get_account_by_name(self):
         account_name = self.create_random_name(prefix='cli', length=24)
         account = self.cmd("az netappfiles account create -g {rg} -a %s -l %s" % (account_name, LOCATION)).get_output_in_json()
@@ -70,7 +70,7 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
         account_from_id = self.cmd("az netappfiles account show --ids %s" % account['id']).get_output_in_json()
         assert account_from_id['name'] == account_name
 
-    @ResourceGroupPreparer(name_prefix='cli_tests_rg_')
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_')
     def test_update_account(self):
         # only tags are checked here due to complications of active directory in automated test
         account_name = self.create_random_name(prefix='cli', length=24)
@@ -82,8 +82,8 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
         assert account['tags']['Tag1'] == 'Value1'
         assert account['activeDirectories'] is None
 
-    @ResourceGroupPreparer(name_prefix='cli_tests_rg_')
-    def test_active_directory(self):
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_')
+    def atest_active_directory(self):
         account_name = self.create_random_name(prefix='cli', length=24)
 
         # create an account as normal

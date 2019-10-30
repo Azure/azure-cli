@@ -7,7 +7,7 @@ Release History
 
 * Added a preview parameter `--pack-image-tag` to command `az acr pack build`.
 * Support enabling auditing on creating a registry
-* Support Repository-scoped RBAC 
+* Support Repository-scoped RBAC
 
 **AppConfig**
 
@@ -60,12 +60,21 @@ Release History
 **IoT**
 
 * Add new routing source type: DigitalTwinChangeEvents
-* Fix #2826: Missing features in "az iot hub create" 
+* Fix #2826: Missing features in "az iot hub create"
 
 **Key Vault**
 
 * Fix #9352: Unexpected error when certificate file does not exist
 * Fix #7048: `az keyvault recover/purge` not working
+
+**NetAppFiles**
+
+* Upgrade azure-mgmt-netapp to 0.6.0 to use API version 2019-07-01. This new API version includes:
+
+    - Volume creation --protocol-types accepts now "NFSv4.1" not "NFSv4"
+    - Volume export policy property now named 'nfsv41' not 'nfsv4'
+    - Volume creation-token renamed to file-path
+    - Snapshot creation date now named just 'created'
 
 **Network**
 
