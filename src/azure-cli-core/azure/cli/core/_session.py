@@ -43,12 +43,8 @@ class Session(collections.MutableMapping):
         try:
             if max_age > 0:
                 st = os.stat(self.filename)
-                try:
-                    if st.st_mtime + max_age < time.process_time():
-                        self.save()
-                except AttributeError:  # in Python 2.7
-                    if st.st_mtime + max_age < time.clock():
-                        self.save()
+                if st.st_mtime + max_age < time.time():
+                    self.save()
             with codecs_open(self.filename, 'r', encoding=self._encoding) as f:
                 self.data = json.load(f)
         except (OSError, IOError, t_JSONDecodeError) as load_exception:
