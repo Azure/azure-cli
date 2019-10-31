@@ -632,8 +632,6 @@ def update_user(client, upn_or_object_id, display_name=None, force_change_passwo
     if password is not None:
         password_profile = PasswordProfile(password=password,
                                            force_change_password_next_login=force_change_password_next_login)
-    elif force_change_password_next_login is not None:
-        raise CLIError("--force-change-password-next-login is only valid when --password is specified")
 
     update_parameters = UserUpdateParameters(display_name=display_name, password_profile=password_profile,
                                              account_enabled=account_enabled, mail_nickname=mail_nickname)
