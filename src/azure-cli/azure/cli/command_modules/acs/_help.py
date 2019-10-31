@@ -4,7 +4,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.help_files import helps  # pylint: disable=unused-import
+from knack.help_files import helps  # pylint: disable=import-error
 # pylint: disable=line-too-long, too-many-lines
 
 helps['acs'] = """
@@ -252,6 +252,16 @@ parameters:
     type: string
     short-summary: Load balancer outbound IP prefix resource IDs.
     long-summary: Comma-separated public IP prefix resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.
+  - name: --enable-cluster-autoscaler
+    type: bool
+    short-summary: Enable cluster autoscaler, default value is false.
+    long-summary: If specified, please make sure the kubernetes version is larger than 1.10.6.
+  - name: --min-count
+    type: int
+    short-summary: Minimum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100].
+  - name: --max-count
+    type: int
+    short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100].
   - name: --vm-set-type
     type: string
     short-summary: Agent pool vm set type. VirtualMachineScaleSets or AvailabilitySet.
@@ -305,6 +315,9 @@ parameters:
   - name: --attach-acr
     type: string
     short-summary: Grant the 'acrpull' role assignment to the ACR specified by name or resource ID.
+  - name: --api-server-authorized-ip-ranges
+    type: string
+    short-summary: Comma seperated list of authorized apiserver IP ranges. Set to 0.0.0.0/32 to restrict apiserver traffic to node pools.
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
@@ -314,7 +327,7 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --node-count 7
   - name: Create a kubernetes cluster with k8s 1.13.9 but use vmas.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --kubernetes-version 1.13.9 --vm-set-type AvailabilitySet
-  - name: Create a kubernetes cluster with default kubernetes vesrion, default SKU load balancer(basic) and default vm set type(AvailabilitySet).
+  - name: Create a kubernetes cluster with default kubernetes version, default SKU load balancer(basic) and default vm set type(AvailabilitySet).
     text: az aks create -g MyResourceGroup -n MyManagedCluster
   - name: Create a kubernetes cluster with standard SKU load balancer and two AKS created IPs for the load balancer outbound connection usage.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
@@ -324,6 +337,65 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-outbound-ip-prefixes <ip-prefix-resource-id-1,ip-prefix-resource-id-2>
   - name: Create a kubernetes cluster with basic SKU load balancer and AvailabilitySet vm set type.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-sku basic --vm-set-type AvailabilitySet
+  - name: Create a kubernetes cluster with authorized apiserver IP ranges.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --api-server-authorized-ip-ranges 193.168.1.0/24,194.168.1.0/24,195.168.1.0
+"""
+
+helps['aks update'] = """
+type: command
+short-summary: Update a managed Kubernetes cluster.
+parameters:
+  - name: --enable-cluster-autoscaler -e
+    type: bool
+    short-summary: Enable cluster autoscaler.
+  - name: --disable-cluster-autoscaler -d
+    type: bool
+    short-summary: Disable cluster autoscaler.
+  - name: --update-cluster-autoscaler -u
+    type: bool
+    short-summary: Update min-count or max-count for cluster autoscaler.
+  - name: --min-count
+    type: int
+    short-summary: Minimum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100]
+  - name: --max-count
+    type: int
+    short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100]
+  - name: --load-balancer-managed-outbound-ip-count
+    type: int
+    short-summary: Load balancer managed outbound IP count.
+    long-summary: Desired number of managed outbound IPs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.
+  - name: --load-balancer-outbound-ips
+    type: string
+    short-summary: Load balancer outbound IP resource IDs.
+    long-summary: Comma-separated public IP resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.
+  - name: --load-balancer-outbound-ip-prefixes
+    type: string
+    short-summary: Load balancer outbound IP prefix resource IDs.
+    long-summary: Comma-separated public IP prefix resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.
+  - name: --attach-acr
+    type: string
+    short-summary: Grant the 'acrpull' role assignment to the ACR specified by name or resource ID.
+  - name: --detach-acr
+    type: string
+    short-summary: Disable the 'acrpull' role assignment to the ACR specified by name or resource ID.
+  - name: --api-server-authorized-ip-ranges
+    type: string
+    short-summary: Comma seperated list of authorized apiserver IP ranges. Set to "" to allow all traffic on a previously restricted cluster. Set to 0.0.0.0/32 to restrict apiserver traffic to node pools.
+examples:
+  - name: Update a kubernetes cluster with standard SKU load balancer to use two AKS created IPs for the load balancer outbound connection usage.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
+  - name: Update a kubernetes cluster with standard SKU load balancer to use the provided public IPs for the load balancer outbound connection usage.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-outbound-ips <ip-resource-id-1,ip-resource-id-2>
+  - name: Update a kubernetes cluster with standard SKU load balancer to use the provided public IP prefixes for the load balancer outbound connection usage.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-outbound-ip-prefixes <ip-prefix-resource-id-1,ip-prefix-resource-id-2>
+  - name: Attach AKS cluster to ACR by name "acrName"
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --attach-acr acrName
+  - name: Update a kubernetes cluster with authorized apiserver ip ranges.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --api-server-authorized-ip-ranges 193.168.1.0/24,194.168.1.0/24
+  - name: Disable authorized apiserver ip ranges feature for a kubernetes cluster.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --api-server-authorized-ip-ranges ""
+  - name: Restrict apiserver traffic in a kubernetes cluster to agentpool nodes.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --api-server-authorized-ip-ranges 0.0.0.0/32
 """
 
 helps['aks delete'] = """
@@ -512,10 +584,10 @@ parameters:
     short-summary: Enable cluster autoscaler.
   - name: --min-count
     type: int
-    short-summary: Minimun nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specifying the value in the range of [1, 100]
+    short-summary: Minimum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100]
   - name: --max-count
     type: int
-    short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specifying the value in the range of [1, 100]
+    short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100]
   - name: --node-taints
     type: string
     short-summary: The node taints for the node pool. You can't change the node taints through CLI after the node pool is created.
@@ -560,10 +632,10 @@ parameters:
     short-summary: Update min-count or max-count for cluster autoscaler.
   - name: --min-count
     type: int
-    short-summary: Minimun nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specifying the value in the range of [1, 100]
+    short-summary: Minimum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100]
   - name: --max-count
     type: int
-    short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specifying the value in the range of [1, 100]
+    short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100]
 examples:
   - name: Enable cluster-autoscaler within node count range [1,5]
     text: az aks nodepool update --enable-cluster-autoscaler --min-count 1 --max-count 5 -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster
@@ -637,39 +709,6 @@ examples:
   - name: Show the details for a managed Kubernetes cluster
     text: az aks show --name MyManagedCluster --resource-group MyResourceGroup
     crafted: true
-"""
-
-helps['aks update'] = """
-type: command
-short-summary: Update a managed Kubernetes cluster.
-parameters:
-  - name: --load-balancer-managed-outbound-ip-count
-    type: int
-    short-summary: Load balancer managed outbound IP count.
-    long-summary: Desired number of managed outbound IPs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.
-  - name: --load-balancer-outbound-ips
-    type: string
-    short-summary: Load balancer outbound IP resource IDs.
-    long-summary: Comma-separated public IP resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.
-  - name: --load-balancer-outbound-ip-prefixes
-    type: string
-    short-summary: Load balancer outbound IP prefix resource IDs.
-    long-summary: Comma-separated public IP prefix resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.
-  - name: --attach-acr
-    type: string
-    short-summary: Grant the 'acrpull' role assignment to the ACR specified by name or resource ID.
-  - name: --detach-acr
-    type: string
-    short-summary: Disable the 'acrpull' role assignment to the ACR specified by name or resource ID.
-examples:
-  - name: Update a kubernetes cluster with standard SKU load balancer to use two AKS created IPs for the load balancer outbound connection usage.
-    text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
-  - name: Update a kubernetes cluster with standard SKU load balancer to use the provided public IPs for the load balancer outbound connection usage.
-    text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-outbound-ips <ip-resource-id-1,ip-resource-id-2>
-  - name: Update a kubernetes cluster with standard SKU load balancer to use the provided public IP prefixes for the load balancer outbound connection usage.
-    text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-outbound-ip-prefixes <ip-prefix-resource-id-1,ip-prefix-resource-id-2>
-  - name: Attach AKS cluster to ACR by name "acrName"
-    text: az aks update -g MyResourceGroup -n MyManagedCluster --attach-acr acrName
 """
 
 helps['aks update-credentials'] = """

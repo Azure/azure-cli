@@ -24,7 +24,8 @@ from ._validators import (
     validate_principal, validate_resource_group_name,
     validate_x509_certificate_chain,
     secret_text_encoding_values, secret_binary_encoding_values, validate_subnet,
-    validate_vault_id, validate_sas_definition_id, validate_storage_account_id, validate_storage_disabled_attribute)
+    validate_vault_id, validate_sas_definition_id, validate_storage_account_id, validate_storage_disabled_attribute,
+    validate_deleted_vault_name)
 
 # CUSTOM CHOICE LISTS
 
@@ -74,6 +75,18 @@ def load_arguments(self, _):
         c.argument('sku', arg_type=get_enum_type(SkuName, default=SkuName.standard.value))
         c.argument('no_self_perms', arg_type=get_three_state_flag(), help="Don't add permissions for the current user/service principal in the new vault.")
         c.argument('location', validator=get_default_location_from_resource_group)
+
+    with self.argument_context('keyvault recover') as c:
+        c.argument('vault_name', help='Name of the deleted vault', required=True, completer=None,
+                   validator=validate_deleted_vault_name)
+        c.argument('resource_group_name', resource_group_name_type, id_part=None, required=False,
+                   help='Resource group of the deleted vault')
+        c.argument('location', help='Location of the deleted vault', required=False)
+
+    with self.argument_context('keyvault purge') as c:
+        c.argument('vault_name', help='Name of the deleted vault', required=True, completer=None,
+                   validator=validate_deleted_vault_name)
+        c.argument('location', help='Location of the deleted vault', required=False)
 
     with self.argument_context('keyvault list') as c:
         c.argument('resource_group_name', resource_group_name_type, validator=None)

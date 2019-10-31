@@ -854,7 +854,7 @@ def _get_linux_multicontainer_encoded_config_from_file(file_name):
 
 # for any modifications to the non-optional parameters, adjust the reflection logic accordingly
 # in the method
-def update_site_configs(cmd, resource_group_name, name, slot=None,
+def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_workers=None,
                         linux_fx_version=None, windows_fx_version=None, reserved_instance_count=None, php_version=None,  # pylint: disable=unused-argument
                         python_version=None, net_framework_version=None,  # pylint: disable=unused-argument
                         java_version=None, java_container=None, java_container_version=None,  # pylint: disable=unused-argument
@@ -867,6 +867,8 @@ def update_site_configs(cmd, resource_group_name, name, slot=None,
                         ftps_state=None,  # pylint: disable=unused-argument
                         generic_configurations=None):
     configs = get_site_configs(cmd, resource_group_name, name, slot)
+    if number_of_workers is not None:
+        number_of_workers = validate_range_of_int_flag('--number-of-workers', number_of_workers, min_val=0, max_val=20)
     if linux_fx_version:
         if linux_fx_version.strip().lower().startswith('docker|'):
             update_app_settings(cmd, resource_group_name, name, ["WEBSITES_ENABLE_APP_SERVICE_STORAGE=false"])
@@ -880,7 +882,7 @@ def update_site_configs(cmd, resource_group_name, name, slot=None,
     frame = inspect.currentframe()
     bool_flags = ['remote_debugging_enabled', 'web_sockets_enabled', 'always_on',
                   'auto_heal_enabled', 'use32_bit_worker_process', 'http20_enabled']
-    int_flags = ['reserved_instance_count']
+    int_flags = ['reserved_instance_count', 'number_of_workers']
     # note: getargvalues is used already in azure.cli.core.commands.
     # and no simple functional replacement for this deprecating method for 3.5
     args, _, _, values = inspect.getargvalues(frame)  # pylint: disable=deprecated-method
@@ -1380,8 +1382,8 @@ def list_app_service_plans(cmd, resource_group_name=None):
     return plans
 
 
-def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, sku='B1', number_of_workers=None,
-                            location=None, tags=None):
+def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, per_site_scaling=False, sku='B1',
+                            number_of_workers=None, location=None, tags=None):
     if is_linux and hyper_v:
         raise CLIError('usage error: --is-linux | --hyper-v')
     client = web_client_factory(cmd.cli_ctx)
@@ -1391,7 +1393,8 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, s
     # the api is odd on parameter naming, have to live with it for now
     sku_def = SkuDescription(tier=get_sku_name(sku), name=sku, capacity=number_of_workers)
     plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
-                              reserved=(is_linux or None), hyper_v=(hyper_v or None), name=name)
+                              reserved=(is_linux or None), hyper_v=(hyper_v or None), name=name,
+                              per_site_scaling=per_site_scaling)
     return client.app_service_plans.create_or_update(resource_group_name, name, plan_def)
 
 
@@ -2292,7 +2295,8 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                                                               value='true'))
                 if runtime not in RUNTIME_TO_IMAGE_FUNCTIONAPP.keys():
                     raise CLIError("An appropriate linux image for runtime:'{}' was not found".format(runtime))
-        site_config.linux_fx_version = _get_linux_fx_functionapp(is_consumption, runtime, runtime_version)
+        if deployment_container_image_name is None:
+            site_config.linux_fx_version = _get_linux_fx_functionapp(is_consumption, runtime, runtime_version)
     else:
         functionapp_def.kind = 'functionapp'
         site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION', value='~2'))

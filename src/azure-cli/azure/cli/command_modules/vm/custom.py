@@ -47,7 +47,7 @@ _LINUX_DIAG_EXT = 'LinuxDiagnostic'
 _WINDOWS_DIAG_EXT = 'IaaSDiagnostics'
 extension_mappings = {
     _LINUX_ACCESS_EXT: {
-        'version': '1.4',
+        'version': '1.5',
         'publisher': 'Microsoft.OSTCExtensions'
     },
     _WINDOWS_ACCESS_EXT: {
@@ -522,7 +522,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               identity_role='Contributor', identity_role_id=None, application_security_groups=None, zone=None,
               boot_diagnostics_storage=None, ultra_ssd_enabled=None, ephemeral_os_disk=None,
               proximity_placement_group=None, dedicated_host=None, dedicated_host_group=None, aux_subscriptions=None,
-              priority=None, max_billing=None, eviction_policy=None, enable_agent=None, workspace=None):
+              priority=None, max_billing=None, eviction_policy=None, enable_agent=None, workspace=None, vmss=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -650,7 +650,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         boot_diagnostics_storage_uri=boot_diagnostics_storage, ultra_ssd_enabled=ultra_ssd_enabled,
         proximity_placement_group=proximity_placement_group, computer_name=computer_name,
         dedicated_host=dedicated_host, priority=priority, max_billing=max_billing, eviction_policy=eviction_policy,
-        enable_agent=enable_agent)
+        enable_agent=enable_agent, vmss=vmss)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -954,7 +954,7 @@ def show_vm(cmd, resource_group_name, vm_name, show_details=False):
 
 
 def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None,
-              write_accelerator=None, license_type=None, no_wait=False, **kwargs):
+              write_accelerator=None, license_type=None, no_wait=False, ultra_ssd_enabled=None, **kwargs):
     from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
     vm = kwargs['parameters']
@@ -977,6 +977,13 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
 
     if license_type is not None:
         vm.license_type = license_type
+
+    if ultra_ssd_enabled is not None:
+        if vm.additional_capabilities is None:
+            AdditionalCapabilities = cmd.get_models('AdditionalCapabilities')
+            vm.additional_capabilities = AdditionalCapabilities(ultra_ssd_enabled=ultra_ssd_enabled)
+        else:
+            vm.additional_capabilities.ultra_ssd_enabled = ultra_ssd_enabled
 
     return sdk_no_wait(no_wait, _compute_client_factory(cmd.cli_ctx).virtual_machines.create_or_update,
                        resource_group_name, vm_name, **kwargs)
@@ -1951,7 +1958,7 @@ def assign_vmss_identity(cmd, resource_group_name, vmss_name, assign_identity=No
 
 
 # pylint: disable=too-many-locals, too-many-statements
-def create_vmss(cmd, vmss_name, resource_group_name, image,
+def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 disable_overprovision=False, instance_count=2,
                 location=None, tags=None, upgrade_policy_mode='manual', validate=False,
                 admin_username=None, admin_password=None, authentication_type=None,
@@ -1979,7 +1986,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
                 identity_role_id=None, zones=None, priority=None, eviction_policy=None,
                 application_security_groups=None, ultra_ssd_enabled=None, ephemeral_os_disk=None,
                 proximity_placement_group=None, aux_subscriptions=None, terminate_notification_time=None,
-                max_billing=None, computer_name_prefix=None):
+                max_billing=None, computer_name_prefix=None, orchestration_mode='ScaleSetVM'):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -2187,7 +2194,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
         custom_data=custom_data, secrets=secrets, license_type=license_type, zones=zones, priority=priority,
         eviction_policy=eviction_policy, application_security_groups=application_security_groups,
         ultra_ssd_enabled=ultra_ssd_enabled, proximity_placement_group=proximity_placement_group,
-        terminate_notification_time=terminate_notification_time, max_billing=max_billing)
+        terminate_notification_time=terminate_notification_time, max_billing=max_billing,
+        orchestration_mode=orchestration_mode)
     vmss_resource['dependsOn'] = vmss_dependencies
 
     if plan_name:
@@ -2414,7 +2422,7 @@ def update_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_
 
 def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False, instance_id=None,
                 protect_from_scale_in=None, protect_from_scale_set_actions=None,
-                enable_terminate_notification=None, terminate_notification_time=None,
+                enable_terminate_notification=None, terminate_notification_time=None, ultra_ssd_enabled=None,
                 **kwargs):
     vmss = kwargs['parameters']
     client = _compute_client_factory(cmd.cli_ctx)
@@ -2447,6 +2455,21 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         vmss.virtual_machine_profile.scheduled_events_profile.terminate_notification_profile =\
             TerminateNotificationProfile(not_before_timeout=terminate_notification_time,
                                          enable=enable_terminate_notification)
+
+    if ultra_ssd_enabled is not None:
+        if cmd.supported_api_version(min_api='2019-03-01', operation_group='virtual_machine_scale_sets'):
+            if vmss.additional_capabilities is None:
+                AdditionalCapabilities = cmd.get_models('AdditionalCapabilities')
+                vmss.additional_capabilities = AdditionalCapabilities(ultra_ssd_enabled=ultra_ssd_enabled)
+            else:
+                vmss.additional_capabilities.ultra_ssd_enabled = ultra_ssd_enabled
+        else:
+            if vmss.virtual_machine_profile.additional_capabilities is None:
+                AdditionalCapabilities = cmd.get_models('AdditionalCapabilities')
+                vmss.virtual_machine_profile.additional_capabilities = AdditionalCapabilities(
+                    ultra_ssd_enabled=ultra_ssd_enabled)
+            else:
+                vmss.virtual_machine_profile.additional_capabilities.ultra_ssd_enabled = ultra_ssd_enabled
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.create_or_update,
                        resource_group_name, name, **kwargs)

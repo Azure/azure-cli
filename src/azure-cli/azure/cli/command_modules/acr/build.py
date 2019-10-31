@@ -19,7 +19,6 @@ from ._archive_utils import upload_source_code, check_remote_source_code
 
 logger = get_logger(__name__)
 
-
 BUILD_NOT_SUPPORTED = 'Builds are only supported for managed registries.'
 
 

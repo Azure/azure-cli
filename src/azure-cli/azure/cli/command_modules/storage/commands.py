@@ -79,7 +79,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                  custom_func_name='update_storage_account', min_api='2016-12-01')
 
     with self.command_group('storage account', storage_account_sdk_keys, resource_type=ResourceType.MGMT_STORAGE) as g:
-        g.command('keys renew', 'regenerate_key',
+        from ._validators import validate_key_name
+        g.command('keys renew', 'regenerate_key', validator=validate_key_name,
                   transform=lambda x: getattr(x, 'keys', x))
         g.command('keys list', 'list_keys',
                   transform=lambda x: getattr(x, 'keys', x))

@@ -1,209 +1,253 @@
 interactions:
 - request:
-    body: !!python/unicode '{"location": "westus", "tags": {"date": "2019-03-06T17:38:50Z",
-      "product": "azurecli", "cause": "automation"}}'
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group create]
-      Connection: [keep-alive]
-      Content-Length: ['110']
-      Content-Type: [application/json; charset=utf-8]
-      ParameterSetName: [--location --name --tag]
-      User-Agent: [python/2.7.10 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.4 msrest_azure/0.4.34
-          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.60]
-      accept-language: [en-US]
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-05-10
-  response:
-    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"date":"2019-03-06T17:38:50Z","product":"azurecli","cause":"automation"},"properties":{"provisioningState":"Succeeded"}}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['384']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Mar 2019 17:38:52 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 201, message: Created}
-- request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [container create]
-      Connection: [keep-alive]
-      ParameterSetName: [-g -n --image]
-      User-Agent: [python/2.7.10 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.4 msrest_azure/0.4.34
-          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.60]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - container create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      accept-language:
+      - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-07-01
   response:
-    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"date":"2019-03-06T17:38:50Z","product":"azurecli","cause":"automation"},"properties":{"provisioningState":"Succeeded"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-10-21T11:35:39Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['384']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Mar 2019 17:38:52 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '428'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 21 Oct 2019 11:35:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
-    body: !!python/unicode '{"location": "westus", "properties": {"osType": "Linux",
-      "restartPolicy": "Always", "containers": [{"name": "clicontainer000002", "properties":
-      {"image": "nginx:latest", "resources": {"requests": {"cpu": 1.0, "memoryInGB":
-      1.5}}}}]}, "tags": {}}'
+    body: '{"location": "westus", "tags": {}, "properties": {"containers": [{"name":
+      "clicontainer000002", "properties": {"image": "nginx:latest", "resources": {"requests":
+      {"memoryInGB": 1.5, "cpu": 1.0}}}}], "restartPolicy": "Always", "osType": "Linux"}}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [container create]
-      Connection: [keep-alive]
-      Content-Length: ['243']
-      Content-Type: [application/json; charset=utf-8]
-      ParameterSetName: [-g -n --image]
-      User-Agent: [python/2.7.10 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.4 msrest_azure/0.4.34
-          azure-mgmt-containerinstance/1.4.0 Azure-SDK-For-Python AZURECLI/2.0.60]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - container create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '243'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --image
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-containerinstance/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      accept-language:
+      - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002?api-version=2018-10-01
   response:
-    body: {string: !!python/unicode '{"properties":{"provisioningState":"Pending","containers":[{"name":"clicontainer000002","properties":{"image":"nginx:latest","ports":[],"environmentVariables":[],"resources":{"requests":{"memoryInGB":1.5,"cpu":1.0}}}}],"restartPolicy":"Always","osType":"Linux","instanceView":{"events":[],"state":"Pending"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002","name":"clicontainer000002","type":"Microsoft.ContainerInstance/containerGroups","location":"westus","tags":{}}'}
+    body:
+      string: '{"properties":{"provisioningState":"Pending","containers":[{"name":"clicontainer000002","properties":{"image":"nginx:latest","ports":[],"environmentVariables":[],"resources":{"requests":{"memoryInGB":1.5,"cpu":1.0}}}}],"restartPolicy":"Always","osType":"Linux","instanceView":{"events":[],"state":"Pending"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002","name":"clicontainer000002","type":"Microsoft.ContainerInstance/containerGroups","location":"westus","tags":{}}'
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerInstance/locations/westus/operations/34b97431-7973-432c-87a0-92c172c96a70?api-version=2018-06-01']
-      cache-control: [no-cache]
-      content-length: ['637']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Mar 2019 17:38:54 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests-pt1h: ['294']
-      x-ms-ratelimit-remaining-subscription-resource-requests-pt5m: ['98']
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 201, message: Created}
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerInstance/locations/westus/operations/b36a145b-fe64-4bc5-9463-8890f29deadd?api-version=2018-06-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '637'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 21 Oct 2019 11:35:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests-pt1h:
+      - '295'
+      x-ms-ratelimit-remaining-subscription-resource-requests-pt5m:
+      - '99'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1168'
+    status:
+      code: 201
+      message: Created
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [container create]
-      Connection: [keep-alive]
-      ParameterSetName: [-g -n --image]
-      User-Agent: [python/2.7.10 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.4 msrest_azure/0.4.34
-          azure-mgmt-containerinstance/1.4.0 Azure-SDK-For-Python AZURECLI/2.0.60]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - container create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-containerinstance/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.75
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerInstance/locations/westus/operations/34b97431-7973-432c-87a0-92c172c96a70?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerInstance/locations/westus/operations/b36a145b-fe64-4bc5-9463-8890f29deadd?api-version=2018-06-01
   response:
-    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002","status":"Succeeded","startTime":"2019-03-06T17:38:54.9731875Z","properties":{"events":[{"count":1,"firstTimestamp":"2019-03-06T17:39:12Z","lastTimestamp":"2019-03-06T17:39:12Z","name":"Pulling","message":"pulling
-        image \"nginx:latest\"","type":"Normal"},{"count":1,"firstTimestamp":"2019-03-06T17:39:17Z","lastTimestamp":"2019-03-06T17:39:17Z","name":"Pulled","message":"Successfully
-        pulled image \"nginx:latest\"","type":"Normal"},{"count":1,"firstTimestamp":"2019-03-06T17:39:20Z","lastTimestamp":"2019-03-06T17:39:20Z","name":"Created","message":"Created
-        container","type":"Normal"},{"count":1,"firstTimestamp":"2019-03-06T17:39:21Z","lastTimestamp":"2019-03-06T17:39:21Z","name":"Started","message":"Started
-        container","type":"Normal"}]}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002","status":"Succeeded","startTime":"2019-10-21T11:35:51.0931773Z","properties":{"events":[{"count":1,"firstTimestamp":"2019-10-21T11:36:00Z","lastTimestamp":"2019-10-21T11:36:00Z","name":"Pulling","message":"pulling
+        image \"nginx:latest\"","type":"Normal"},{"count":1,"firstTimestamp":"2019-10-21T11:36:08Z","lastTimestamp":"2019-10-21T11:36:08Z","name":"Pulled","message":"Successfully
+        pulled image \"nginx:latest\"","type":"Normal"},{"count":1,"firstTimestamp":"2019-10-21T11:36:11Z","lastTimestamp":"2019-10-21T11:36:11Z","name":"Created","message":"Created
+        container","type":"Normal"},{"count":1,"firstTimestamp":"2019-10-21T11:36:11Z","lastTimestamp":"2019-10-21T11:36:11Z","name":"Started","message":"Started
+        container","type":"Normal"}]}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['965']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Mar 2019 17:39:25 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '965'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 21 Oct 2019 11:36:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [container create]
-      Connection: [keep-alive]
-      ParameterSetName: [-g -n --image]
-      User-Agent: [python/2.7.10 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.4 msrest_azure/0.4.34
-          azure-mgmt-containerinstance/1.4.0 Azure-SDK-For-Python AZURECLI/2.0.60]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - container create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-containerinstance/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.75
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002?api-version=2018-10-01
   response:
-    body: {string: !!python/unicode '{"properties":{"provisioningState":"Succeeded","containers":[{"name":"clicontainer000002","properties":{"image":"nginx:latest","ports":[],"environmentVariables":[],"instanceView":{"restartCount":0,"currentState":{"state":"Running","startTime":"2019-03-06T17:39:21Z","detailStatus":""},"events":[{"count":1,"firstTimestamp":"2019-03-06T17:39:12Z","lastTimestamp":"2019-03-06T17:39:12Z","name":"Pulling","message":"pulling
-        image \"nginx:latest\"","type":"Normal"},{"count":1,"firstTimestamp":"2019-03-06T17:39:17Z","lastTimestamp":"2019-03-06T17:39:17Z","name":"Pulled","message":"Successfully
-        pulled image \"nginx:latest\"","type":"Normal"},{"count":1,"firstTimestamp":"2019-03-06T17:39:20Z","lastTimestamp":"2019-03-06T17:39:20Z","name":"Created","message":"Created
-        container","type":"Normal"},{"count":1,"firstTimestamp":"2019-03-06T17:39:21Z","lastTimestamp":"2019-03-06T17:39:21Z","name":"Started","message":"Started
-        container","type":"Normal"}]},"resources":{"requests":{"memoryInGB":1.5,"cpu":1.0}}}}],"restartPolicy":"Always","osType":"Linux","instanceView":{"events":[],"state":"Running"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002","name":"clicontainer000002","type":"Microsoft.ContainerInstance/containerGroups","location":"westus","tags":{}}'}
+    body:
+      string: '{"properties":{"provisioningState":"Succeeded","containers":[{"name":"clicontainer000002","properties":{"image":"nginx:latest","ports":[],"environmentVariables":[],"instanceView":{"restartCount":0,"currentState":{"state":"Running","startTime":"2019-10-21T11:36:11Z","detailStatus":""},"events":[{"count":1,"firstTimestamp":"2019-10-21T11:36:00Z","lastTimestamp":"2019-10-21T11:36:00Z","name":"Pulling","message":"pulling
+        image \"nginx:latest\"","type":"Normal"},{"count":1,"firstTimestamp":"2019-10-21T11:36:08Z","lastTimestamp":"2019-10-21T11:36:08Z","name":"Pulled","message":"Successfully
+        pulled image \"nginx:latest\"","type":"Normal"},{"count":1,"firstTimestamp":"2019-10-21T11:36:11Z","lastTimestamp":"2019-10-21T11:36:11Z","name":"Created","message":"Created
+        container","type":"Normal"},{"count":1,"firstTimestamp":"2019-10-21T11:36:11Z","lastTimestamp":"2019-10-21T11:36:11Z","name":"Started","message":"Started
+        container","type":"Normal"}]},"resources":{"requests":{"memoryInGB":1.5,"cpu":1.0}}}}],"restartPolicy":"Always","osType":"Linux","instanceView":{"events":[],"state":"Running"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002","name":"clicontainer000002","type":"Microsoft.ContainerInstance/containerGroups","location":"westus","tags":{}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['1425']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Mar 2019 17:39:26 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '1425'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 21 Oct 2019 11:36:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [container export]
-      Connection: [keep-alive]
-      ParameterSetName: [-g -n -f]
-      User-Agent: [python/2.7.10 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.4 msrest_azure/0.4.34
-          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.60]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - container export
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -f
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002?api-version=2018-10-01
   response:
-    body: {string: !!python/unicode '{"properties":{"provisioningState":"Succeeded","containers":[{"name":"clicontainer000002","properties":{"image":"nginx:latest","ports":[],"environmentVariables":[],"instanceView":{"restartCount":0,"currentState":{"state":"Running","startTime":"2019-03-06T17:39:21Z","detailStatus":""},"events":[{"count":1,"firstTimestamp":"2019-03-06T17:39:12Z","lastTimestamp":"2019-03-06T17:39:12Z","name":"Pulling","message":"pulling
-        image \"nginx:latest\"","type":"Normal"},{"count":1,"firstTimestamp":"2019-03-06T17:39:17Z","lastTimestamp":"2019-03-06T17:39:17Z","name":"Pulled","message":"Successfully
-        pulled image \"nginx:latest\"","type":"Normal"},{"count":1,"firstTimestamp":"2019-03-06T17:39:20Z","lastTimestamp":"2019-03-06T17:39:20Z","name":"Created","message":"Created
-        container","type":"Normal"},{"count":1,"firstTimestamp":"2019-03-06T17:39:21Z","lastTimestamp":"2019-03-06T17:39:21Z","name":"Started","message":"Started
-        container","type":"Normal"}]},"resources":{"requests":{"memoryInGB":1.5,"cpu":1.0}}}}],"restartPolicy":"Always","osType":"Linux","instanceView":{"events":[],"state":"Running"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002","name":"clicontainer000002","type":"Microsoft.ContainerInstance/containerGroups","location":"westus","tags":{}}'}
+    body:
+      string: '{"properties":{"provisioningState":"Succeeded","containers":[{"name":"clicontainer000002","properties":{"image":"nginx:latest","ports":[],"environmentVariables":[],"instanceView":{"restartCount":0,"currentState":{"state":"Running","startTime":"2019-10-21T11:36:11Z","detailStatus":""},"events":[{"count":1,"firstTimestamp":"2019-10-21T11:36:00Z","lastTimestamp":"2019-10-21T11:36:00Z","name":"Pulling","message":"pulling
+        image \"nginx:latest\"","type":"Normal"},{"count":1,"firstTimestamp":"2019-10-21T11:36:08Z","lastTimestamp":"2019-10-21T11:36:08Z","name":"Pulled","message":"Successfully
+        pulled image \"nginx:latest\"","type":"Normal"},{"count":1,"firstTimestamp":"2019-10-21T11:36:11Z","lastTimestamp":"2019-10-21T11:36:11Z","name":"Created","message":"Created
+        container","type":"Normal"},{"count":1,"firstTimestamp":"2019-10-21T11:36:11Z","lastTimestamp":"2019-10-21T11:36:11Z","name":"Started","message":"Started
+        container","type":"Normal"}]},"resources":{"requests":{"memoryInGB":1.5,"cpu":1.0}}}}],"restartPolicy":"Always","osType":"Linux","instanceView":{"events":[],"state":"Running"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002","name":"clicontainer000002","type":"Microsoft.ContainerInstance/containerGroups","location":"westus","tags":{}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['1425']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Mar 2019 17:39:26 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group delete]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      ParameterSetName: [--name --yes --no-wait]
-      User-Agent: [python/2.7.10 (Darwin-18.2.0-x86_64-i386-64bit) msrest/0.6.4 msrest_azure/0.4.34
-          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.60]
-      accept-language: [en-US]
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-05-10
-  response:
-    body: {string: !!python/unicode ''}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Wed, 06 Mar 2019 17:39:28 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdBQjU3WVI1NFlWTlMyM0k1TVZEMzdVUUMySkczWDNMTTdVVHxCRTA2ODU4NEYwOEY0MjRFLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2019-05-10']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-deletes: ['14999']
-    status: {code: 202, message: Accepted}
+      cache-control:
+      - no-cache
+      content-length:
+      - '1425'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 21 Oct 2019 11:36:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 version: 1
