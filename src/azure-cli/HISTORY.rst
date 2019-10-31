@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**Profile**
+
+* Polish error when using `az login -u {} -p {}` with Microsoft account
+
 2.0.76
 
 
