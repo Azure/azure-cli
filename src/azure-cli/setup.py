@@ -102,7 +102,7 @@ DEPENDENCIES = [
     'azure-mgmt-maps~=0.1.0',
     'azure-mgmt-marketplaceordering~=0.1',
     'azure-mgmt-media~=1.1,>=1.1.1',
-    'azure-mgmt-monitor~=0.5.2',
+    'azure-mgmt-monitor~=0.7.0',
     'azure-mgmt-msi~=0.2',
     'azure-mgmt-network~=7.0.0',
     'azure-mgmt-netapp~=0.6.0',
