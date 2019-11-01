@@ -32,6 +32,16 @@ Release History
 
 * Fix #2902: Avoid setting memory configs while updating Basic SKU cache
 
+**Reservations**
+
+* Upgrading SDK Version to 0.6.0
+* Add billingplan details info after calling Get-Gatalogs
+
+**Storage**
+
+* storage account create: Add --enable-hierarchical-namespace to support filesystem semantics in blob service.
+
+
 2.0.76
 ++++++
 
@@ -41,10 +51,6 @@ Release History
 * Support enabling auditing on creating a registry
 * Support Repository-scoped RBAC
 
-**Reservations**
-
-* Upgrading SDK Version to 0.6.0
-* Add billingplan details info after calling Get-Gatalogs
 
 **AKS**
 
