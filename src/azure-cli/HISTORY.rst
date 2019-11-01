@@ -461,6 +461,26 @@ Release History
     job start:
         - Changed the command from `job start` to `job create`.
 
+**AppConfig**	
+
+* Using & in authorization header	
+* Adding api-version to all requests	
+* Upgrading SDK Version to 1.0.0	
+
+**AppService**	
+
+* Added "webapp config access-restriction show | set | add | remove"	
+* az webapp up updated for better error-handling	
+* az appservice plan update support Isolated SKU	
+
+**ARM**	
+
+* az deployment create: Add --handle-extended-json-format parameter to support multiline and comments in json template.	
+
+**Backup**	
+
+* Enhanced error detail for vault delete in force mode.
+
 **Compute**
 
 * vm create: Add --enable-agent configuration.
