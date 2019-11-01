@@ -279,6 +279,11 @@ Release History
 * Rewrite the az wrapper in Python
 * Support Python 3.8
 * Use Python 3 for RPM package
+=======
+**AppService**
+
+* * Azure Stack: surface commands under the profile of 2019-03-01-hybrid
+>>>>>>> update release note
 
 **Profile**
 
@@ -342,7 +347,10 @@ Release History
 * Added "--build remote" flag for "az functionapp deployment source config-zip" to support remote build action during function app deployment.
 * Change default node version on function apps to ~10 for Windows
 * Add --runtime-version property to `az functionapp create`
+<<<<<<< HEAD
 * az appservice vnet-integration add: Fixed so that subnet delegation is case insensitive and delegating subnets does not overwrite previous data.
+=======
+>>>>>>> update release note
 
 **ARM**
 
