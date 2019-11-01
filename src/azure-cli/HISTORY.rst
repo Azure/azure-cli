@@ -7,6 +7,10 @@ Release History
 
 * Polish error when using `az login -u {} -p {}` with Microsoft account
 
+**RBAC**
+
+* Fix #10996: Polish error for `--force-change-password-next-login` in `az ad user update` when `--password` is not specified
+
 2.0.76
 
 
