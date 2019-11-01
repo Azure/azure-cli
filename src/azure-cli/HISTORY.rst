@@ -282,8 +282,12 @@ Release History
 =======
 **AppService**
 
+<<<<<<< HEAD
 * * Azure Stack: surface commands under the profile of 2019-03-01-hybrid
 >>>>>>> update release note
+=======
+* Azure Stack: surface commands under the profile of 2019-03-01-hybrid
+>>>>>>> fix typo
 
 **Profile**
 
