@@ -419,11 +419,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage copy') as c:
         c.argument('destination', options_list=['--destination', '-d'], help="The path/url of copy destination. "
-                   "It can be local path, an url to azure storage server. If you provide destination parameter "
+                   "It can be a local path, an url to azure storage server. If you provide destination parameter "
                    "here, you do not need to provide arguments in copy destination arguments group and copy "
-                   "destination arguments will be deprecated  in future.")
-        c.argument('source', options_list=['--source', '-s'], help="The path/url of copy source. It can be local "
-                   "path, an url to azure storage server or AWS S3 buckets. If you provide source parameter here,"
+                   "destination arguments will be deprecated in future.")
+        c.argument('source', options_list=['--source', '-s'], help="The path/url of copy source. It can be a local"
+                   " path, an url to azure storage server or AWS S3 buckets. If you provide source parameter here,"
                    " you do not need to provide arguments in copy source arguments group and copy source arguments"
                    " will be deprecated in future.")
         for item in ['destination', 'source']:
