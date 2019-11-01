@@ -2,6 +2,11 @@
 
 For clarity, Bash scripts are used inline. Windows batch or PowerScript examples are listed in the appendix, which you can use to build similiar examples.
 
+## Understand different behavior of Command Prompt, Powershell and Bash
+  1. Powershell treats special characters like double quotes differently compared with other shells. The stop-parsing symbol (--%), introduced in PowerShell 3.0, directs PowerShell to refrain from interpreting input as PowerShell commands or expressions. You can use this symbol after az so that you can avoid strange problems. Link: https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_parsing?view=powershell-6
+  
+         az --% vm create --nsg ""
+
 ## Use the right output mode for your work (json, table, or tsv) ##
   1. `json` format is the CLI's default, and is intended to give you the most comprehensive information. If you prefer a different format, use the `--output` argument to override for an individual command invocation, or use `az configure` to update your global default. Note that JSON format preserves the double quotes, generally making in unsuitable for scripting purposes.
   
