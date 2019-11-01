@@ -468,7 +468,7 @@ short-summary: Queues a quick run providing streamed logs for an Azure Container
 examples:
   - name: Queue a run to execute a container command.
     text: >
-        az acr run -r MyRegistry --cmd MyImage /dev/null
+        az acr run -r MyRegistry --cmd '$Registry/myimage' /dev/null
   - name: Queue a run with the task definition from the standard input. Either 'Ctrl + Z'(Windows) or 'Ctrl + D'(Linux) terminates the input stream.
     text: >
         az acr run -r MyRegistry -f - /dev/null
@@ -577,10 +577,10 @@ short-summary: Creates a series of steps for building, testing and OS & Framewor
 examples:
   - name: Create a task without the source location.
     text: >
-        az acr task create -n hello-world -r MyRegistry --cmd MyImage -c /dev/null
+        az acr task create -n hello-world -r MyRegistry --cmd '$Registry/myimage' -c /dev/null
   - name: Create a task without the source location and with a timer trigger that runs the image `MyImage` at the top of every hour using the default trigger name.
     text: >
-        az acr task create -n hello-world -r MyRegistry --cmd MyImage -c /dev/null --schedule "0 */1 * * *"
+        az acr task create -n hello-world -r MyRegistry --cmd '$Registry/myimage' -c /dev/null --schedule "0 */1 * * *"
   - name: Create a task with the definition from the standard input. Either 'Ctrl + Z'(Windows) or 'Ctrl + D'(Linux) terminates the input stream.
     text: >
         az acr task create -n hello-world -r MyRegistry -f - -c /dev/null
