@@ -34,6 +34,7 @@ resource_id_help = """ID of the Azure Resource containing items to be protected 
 policy_help = """JSON encoded policy definition. Use the show command with JSON output to obtain a policy object. Modify the values using a file editor and pass the object."""
 target_server_type_help = """Specify the type of the server which should be discovered."""
 protectable_item_name_type_help = """Specify the resource name to be protected by Azure Backup service."""
+backup_type_help = """'Full, Differential, Log, Copy-only-full' for backup Item type 'MSSQL'. 'Full, Differential' for backup item type 'SAPHANA'."""
 
 vault_name_type = CLIArgumentType(help='Name of the Recovery services vault.', options_list=['--vault-name', '-v'], completer=get_resource_name_completion_list('Microsoft.RecoveryServices/vaults'))
 container_name_type = CLIArgumentType(help=container_name_help, options_list=['--container-name', '-c'])
@@ -173,6 +174,7 @@ def load_arguments(self, _):
             c.argument('backup_management_type', backup_management_type)
             c.argument('workload_type', workload_type)
             c.argument('enable_compression', arg_type=get_three_state_flag(), help='Option to enable compression')
+            c.argument('backup_type', help=backup_type_help, options_list=['--backup-type'])
 
     with self.argument_context('backup protection backup-now') as c:
         c.argument('retain_until', type=datetime_type, help='The date until which this backed up copy will be available for retrieval, in UTC (d-m-Y).')

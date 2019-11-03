@@ -31,7 +31,7 @@ type: command
 short-summary: This command allows Azure Backup to register a Resource to the given Recovery Services Vault.
 examples:
   - name: This command allows Azure Backup to convert the 'Resource' to a 'Backup Container' which is then registered to the given Recovery services vault. The Azure Backup service can then discover workloads of the given workload type within this container to be protected later.
-    text: az backup container register --resource-group MyResourceGroup --vault-name MyVault --resource-id MyResourceId --workload-type MSSQL --backup-management-type AzureWorkload
+    text: az backup container register --resource-group MyResourceGroup --vault-name MyVault --resource-id MyResourceId --workload-type MSSQL --backup-management-type AzureWorkload --resource-id MyResourceID
 """
 
 helps['backup container re-register'] = """
@@ -39,7 +39,7 @@ type: command
 short-summary: Resets the registration details for a given container.
 examples:
   - name: Resets the registration details for a given container. To be used only in error scenarios as specified here (https://docs.microsoft.com/azure/backup/backup-sql-server-azure-troubleshoot#re-registration-failures). Understanding the failure symptoms and causes before attempting re-registration.
-    text: az backup container register --resource-group MyResourceGroup --vault-name MyVault --container-name MyContainer --workload-type MSSQL --backup-management-type AzureWorkload --yes
+    text: az backup container re-register --resource-group MyResourceGroup --vault-name MyVault --container-name MyContainer --workload-type MSSQL --backup-management-type AzureWorkload --yes
 """
 
 helps['backup container show'] = """

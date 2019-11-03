@@ -376,10 +376,14 @@ def enable_protection_for_azure_wl(cmd, client, resource_group_name, vault_name,
     container_name = protectable_item_object.id.split('/')[12]
     cust_help.validate_policy(policy_object)
     policy_id = policy_object.id
-
+    from platform import python_version
+    version = python_version()
+    version_suffix = ""
+    if version[0] == '3':
+        version_suffix = "_py3"
     # Dynamically instantiating class based on item type
     module_ = import_module("azure.mgmt.recoveryservicesbackup.models.azure_vm_workload_" +
-                            module_map[protectable_item_type.lower()] + "_protected_item")
+                            module_map[protectable_item_type.lower()] + "_protected_item" + version_suffix)
     class_ = getattr(module_, "AzureVmWorkload" + attr_map[protectable_item_type.lower()] + "ProtectedItem")
 
     # Construct enable protection request object
@@ -439,9 +443,14 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item, delet
                              vault_name, resource_group_name, fabric_name, container_uri, item_uri)
         return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
+    from platform import python_version
+    version = python_version()
+    version_suffix = ""
+    if version[0] == '3':
+        version_suffix = "_py3"
     # Dynamically instantiating class based on item type
     module_ = import_module("azure.mgmt.recoveryservicesbackup.models.azure_vm_workload_" +
-                            module_map[backup_item_type.lower()] + "_protected_item")
+                            module_map[backup_item_type.lower()] + "_protected_item" + version_suffix)
     class_ = getattr(module_, "AzureVmWorkload" + attr_map[backup_item_type.lower()] + "ProtectedItem")
 
     properties = class_(protection_state='ProtectionStopped', policy_id='')
@@ -533,8 +542,13 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
     if log_point_in_time is not None:
         item_type = item_type + 'PointInTime'
 
+    from platform import python_version
+    version = python_version()
+    version_suffix = ""
+    if version[0] == '3':
+        version_suffix = "_py3"
     module_ = import_module("azure.mgmt.recoveryservicesbackup.models.azure_workload_" +
-                            restore_module_map[item_type.lower()] + "_restore_request")
+                            restore_module_map[item_type.lower()] + "_restore_request" + version_suffix)
     class_ = getattr(module_, "AzureWorkload" + item_type + "RestoreRequest")
     # Construct trigger restore request object
     trigger_restore_properties = class_(recovery_type=restore_mode)
