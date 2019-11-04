@@ -163,7 +163,7 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
         raise CLIError(err)
     except requests.exceptions.SSLError as err:
         raise CLIError('Certificate verification failed. Please typically happens when using Azure CLI behind a proxy '
-                       'that intercepts traffic with a root certificate. '
+                       'that intercepts traffic with a self-signed certificate. '
                        # pylint: disable=line-too-long
                        'Please add this certificate to the trusted CA bundle: https://github.com/Azure/azure-cli/blob/dev/doc/use_cli_effectively.md#working-behind-a-proxy. '
                        'Error detail: ' + str(err))
