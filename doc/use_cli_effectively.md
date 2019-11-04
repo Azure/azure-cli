@@ -153,6 +153,18 @@ If you are using az on a build machine, and multiple jobs can be run in parallel
            az vm stop --ids $vm_id
        }
 
+
+### Argument parsing issue in PowerShell
+On Windows, `az` is a batch script (at `C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\wbin\az.cmd`). Invoking it with PowerShell may have issues because arguments are parsed twice by both PowerShell and Command Prompt. For example, `az "a&b"` behaves differently in PowerShell and Command Prompt. In PowerShell, `b` is treated as a separate command instead of part of the argument.
+
+To prevent this, you may use [stop-parsing symbol `--%`](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_parsing) between `az` and arguments like `az --% vm create --nsg "" ...`
+
+> The stop-parsing symbol (--%), introduced in PowerShell 3.0, directs PowerShell to refrain from interpreting input as PowerShell commands or expressions.
+>
+> When it encounters a stop-parsing symbol, PowerShell treats the remaining characters in the line as a literal. 
+
+This issue is tracked at https://github.com/PowerShell/PowerShell/issues/1995#issuecomment-539822061
+
 ### CLI Environment Variables
 
 |  Environment Variable          | Description            |
