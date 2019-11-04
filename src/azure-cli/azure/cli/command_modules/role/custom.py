@@ -629,7 +629,7 @@ def create_user(client, user_principal_name, display_name, password,
 def update_user(client, upn_or_object_id, display_name=None, force_change_password_next_login=None, password=None,
                 account_enabled=None, mail_nickname=None):
     password_profile = None
-    if force_change_password_next_login is not None or password is not None:
+    if password is not None:
         password_profile = PasswordProfile(password=password,
                                            force_change_password_next_login=force_change_password_next_login)
 

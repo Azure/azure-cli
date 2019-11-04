@@ -10,6 +10,7 @@ import dateutil
 import dateutil.parser
 from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import ScenarioTest, AADGraphUserReplacer, MOCKED_USER_NAME
+from knack.util import CLIError
 
 
 class ServicePrincipalExpressCreateScenarioTest(ScenarioTest):
@@ -271,6 +272,10 @@ class GraphGroupScenarioTest(ScenarioTest):
             self.cmd('ad user update --display-name {user1}_new --account-enabled false --id {user1}@{domain} --mail-nickname {new_mail_nick_name}')
             user1_update_result = self.cmd('ad user show --upn-or-object-id {user1}@{domain}', checks=[self.check("displayName", '{user1}_new'),
                                                                                                        self.check("accountEnabled", False)]).get_output_in_json()
+            self.cmd('ad user update --id {user1}@{domain} --password {pass}')
+            self.cmd('ad user update --id {user1}@{domain} --password {pass} --force-change-password-next-login true')
+            with self.assertRaises(CLIError):
+                self.cmd('ad user update --id {user1}@{domain} --force-change-password-next-login false')
             self.kwargs['user1_id'] = user1_update_result['objectId']
 
             # create user2

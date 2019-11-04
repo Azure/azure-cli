@@ -3,6 +3,18 @@
 Release History
 ===============
 
+**AKS**
+
+* Support cluster certificate rotation operation using "az aks rotate-certs".
+
+**Profile**
+
+* Polish error when using `az login -u {} -p {}` with Microsoft account
+
+**RBAC**
+
+* Fix #10996: Polish error for `--force-change-password-next-login` in `az ad user update` when `--password` is not specified
+
 2.0.76
 ++++++
 
@@ -66,6 +78,7 @@ Release History
 
 * Add new routing source type: DigitalTwinChangeEvents
 * Fix #2826: Missing features in "az iot hub create"
+* Bug Fixed: Return more descriptive message on raised exception. 
 
 **Key Vault**
 
