@@ -40,6 +40,7 @@ def create_policy(client, resource_group_name, vault_name, name, policy, backup_
         if workload_type is None:
             raise CLIError("Please provide workload type.")
         return custom_wl.create_policy(client, resource_group_name, vault_name, name, policy, workload_type)
+    return None
 
 
 def show_item(cmd, client, resource_group_name, vault_name, container_name, name, backup_management_type=None,
@@ -81,7 +82,7 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, container
                                                end_date)
     if item.properties.backup_management_type.lower() == "azureworkload":
         return custom_wl.list_wl_recovery_points(cmd, client, resource_group_name, vault_name, item,
-                                                start_date, end_date)
+                                                 start_date, end_date)
 
     return None
 
@@ -187,10 +188,10 @@ def list_protectable_items(cmd, client, resource_group_name, vault_name, workloa
         else:
             container_client = backup_protection_containers_cf(cmd.cli_ctx)
             container = show_container(cmd, container_client, container_name, resource_group_name, vault_name,
-                                      "AzureWorkload")
+                                       "AzureWorkload")
             custom_help.validate_container(container)
             container_uri = container.name
-    return custom_wl.list_protectable_items(cmd, client, resource_group_name, vault_name, workload_type, container_uri)
+    return custom_wl.list_protectable_items(client, resource_group_name, vault_name, workload_type, container_uri)
 
 
 def show_protectable_item(cmd, client, resource_group_name, vault_name, name, server_name, protectable_item_type,
@@ -217,6 +218,7 @@ def unregister_container(cmd, client, vault_name, resource_group_name, container
         return custom_afs.unregister_afs_container(cmd, client, vault_name, resource_group_name, container_name)
     if container_type.lower() == "azureworkload":
         return custom_wl.unregister_wl_container(cmd, client, vault_name, resource_group_name, container_name)
+    return None
 
 
 def register_wl_container(cmd, client, vault_name, resource_group_name, workload_type, resource_id,
@@ -255,7 +257,7 @@ def auto_enable_for_azure_wl(cmd, client, resource_group_name, vault_name, polic
     protectable_items_client = backup_protectable_items_cf(cmd.cli_ctx)
     protectable_item = show_protectable_item(cmd, protectable_items_client, resource_group_name, vault_name,
                                              protectable_item_name, server_name, protectable_item_type, workload_type)
-    return custom_wl.auto_enable_for_azure_wl(cmd, client, resource_group_name, vault_name, policy_object,
+    return custom_wl.auto_enable_for_azure_wl(client, resource_group_name, vault_name, policy_object,
                                               protectable_item)
 
 
@@ -341,8 +343,8 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
     if target_item_name is not None:
         protectable_items_client = backup_protectable_items_cf(cmd.cli_ctx)
         target_item = show_protectable_item(cmd, protectable_items_client, resource_group_name, vault_name,
-                                                 target_item_name, target_server_name, target_server_type,
-                                                 workload_type)
+                                            target_item_name, target_server_name, target_server_type,
+                                            workload_type)
     return custom_wl.show_recovery_config(cmd, client, resource_group_name, vault_name, restore_mode, container_name,
                                           item_name, rp_name, target_item, log_point_in_time)
 
