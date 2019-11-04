@@ -2749,7 +2749,13 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                                             target_regions=target_regions or [TargetRegion(name=location)],
                                             source=source, replica_count=replica_count,
                                             storage_account_type=storage_account_type)
-    image_version = ImageVersion(publishing_profile=profile, location=location, tags=(tags or {}))
+    if cmd.supported_api_version(min_api='2019-07-01', operation_group='gallery_image_versions'):
+        GalleryImageVersionStorageProfile = cmd.get_models('GalleryImageVersionStorageProfile')
+        storage_profile = GalleryImageVersionStorageProfile()
+        image_version = ImageVersion(publishing_profile=profile, location=location, tags=(tags or {}),
+                                     storage_profile=storage_profile)
+    else:
+        image_version = ImageVersion(publishing_profile=profile, location=location, tags=(tags or {}))
 
     return client.gallery_image_versions.create_or_update(resource_group_name=resource_group_name,
                                                           gallery_name=gallery_name,
