@@ -7,6 +7,7 @@ import azure.cli.command_modules.backup.custom_help as cust_help
 import azure.cli.command_modules.backup.custom_common as common
 import json
 # pylint: disable=import-error
+# pylint: disable=broad-except
 
 from datetime import datetime
 from uuid import uuid4
