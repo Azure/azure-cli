@@ -9,7 +9,8 @@ Release History
 
 **Profile**
 
-* Polish error when using `az login -u {} -p {}` with Microsoft account
+* Polish error when running `az login -u {} -p {}` with Microsoft account
+* Polish `SSLError` when running `az login` behind a proxy with custom root certificate
 
 **RBAC**
 
