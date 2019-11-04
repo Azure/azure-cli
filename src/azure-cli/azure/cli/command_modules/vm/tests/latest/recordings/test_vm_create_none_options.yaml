@@ -1,55 +1,5 @@
 interactions:
 - request:
-    body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
-      "date": "2019-05-30T17:59:57Z"}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - group create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '110'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - --location --name --tag
-      User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_none_options000001?api-version=2019-05-10
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001","name":"cli_test_vm_create_none_options000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-05-30T17:59:57Z"},"properties":{"provisioningState":"Succeeded"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '384'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 30 May 2019 17:59:59 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
-    status:
-      code: 201
-      message: Created
-- request:
     body: null
     headers:
       Accept:
@@ -64,38 +14,40 @@ interactions:
     uri: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json
   response:
     body:
-      string: "{\n  \"$schema\":\"http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json\",\n
-        \ \"contentVersion\":\"1.0.0.0\",\n  \"parameters\":{},\n  \"variables\":{},\n
-        \ \"resources\":[],\n\n  \"outputs\":{\n    \"aliases\":{\n      \"type\":\"object\",\n
-        \     \"value\":{\n\n        \"Linux\":{\n          \"CentOS\":{\n            \"publisher\":\"OpenLogic\",\n
-        \           \"offer\":\"CentOS\",\n            \"sku\":\"7.5\",\n            \"version\":\"latest\"\n
-        \         },\n          \"CoreOS\":{\n            \"publisher\":\"CoreOS\",\n
-        \           \"offer\":\"CoreOS\",\n            \"sku\":\"Stable\",\n            \"version\":\"latest\"\n
-        \         },\n          \"Debian\":{\n            \"publisher\":\"credativ\",\n
-        \           \"offer\":\"Debian\",\n            \"sku\":\"9\",\n            \"version\":\"latest\"\n
-        \         },\n          \"openSUSE-Leap\": {\n            \"publisher\":\"SUSE\",\n
-        \           \"offer\":\"openSUSE-Leap\",\n            \"sku\":\"42.3\",\n
-        \           \"version\": \"latest\"\n          },\n          \"RHEL\":{\n
-        \           \"publisher\":\"RedHat\",\n            \"offer\":\"RHEL\",\n            \"sku\":\"7-RAW\",\n
-        \           \"version\":\"latest\"\n          },\n          \"SLES\":{\n            \"publisher\":\"SUSE\",\n
-        \           \"offer\":\"SLES\",\n            \"sku\":\"15\",\n            \"version\":\"latest\"\n
-        \         },\n          \"UbuntuLTS\":{\n            \"publisher\":\"Canonical\",\n
-        \           \"offer\":\"UbuntuServer\",\n            \"sku\":\"18.04-LTS\",\n
-        \           \"version\":\"latest\"\n          }\n        },\n\n        \"Windows\":{\n
-        \         \"Win2019Datacenter\":{\n            \"publisher\":\"MicrosoftWindowsServer\",\n
-        \           \"offer\":\"WindowsServer\",\n            \"sku\":\"2019-Datacenter\",\n
-        \           \"version\":\"latest\"\n          },\n          \"Win2016Datacenter\":{\n
-        \           \"publisher\":\"MicrosoftWindowsServer\",\n            \"offer\":\"WindowsServer\",\n
-        \           \"sku\":\"2016-Datacenter\",\n            \"version\":\"latest\"\n
-        \         },\n          \"Win2012R2Datacenter\":{\n            \"publisher\":\"MicrosoftWindowsServer\",\n
-        \           \"offer\":\"WindowsServer\",\n            \"sku\":\"2012-R2-Datacenter\",\n
-        \           \"version\":\"latest\"\n          },\n          \"Win2012Datacenter\":{\n
-        \           \"publisher\":\"MicrosoftWindowsServer\",\n            \"offer\":\"WindowsServer\",\n
-        \           \"sku\":\"2012-Datacenter\",\n            \"version\":\"latest\"\n
-        \         },\n          \"Win2008R2SP1\":{\n            \"publisher\":\"MicrosoftWindowsServer\",\n
-        \           \"offer\":\"WindowsServer\",\n            \"sku\":\"2008-R2-SP1\",\n
-        \           \"version\":\"latest\"\n          }\n        }\n      }\n    }\n
-        \ }\n}\n"
+      string: "{\n  \"$schema\": \"http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json\",\n
+        \ \"contentVersion\": \"1.0.0.0\",\n  \"parameters\": {},\n  \"variables\":
+        {},\n  \"resources\": [],\n  \"outputs\": {\n    \"aliases\": {\n      \"type\":
+        \"object\",\n      \"value\": {\n        \"Linux\": {\n          \"CentOS\":
+        {\n            \"publisher\": \"OpenLogic\",\n            \"offer\": \"CentOS\",\n
+        \           \"sku\": \"7.5\",\n            \"version\": \"latest\"\n          },\n
+        \         \"CoreOS\": {\n            \"publisher\": \"CoreOS\",\n            \"offer\":
+        \"CoreOS\",\n            \"sku\": \"Stable\",\n            \"version\": \"latest\"\n
+        \         },\n          \"Debian\": {\n            \"publisher\": \"Debian\",\n
+        \           \"offer\": \"debian-10\",\n            \"sku\": \"10\",\n            \"version\":
+        \"latest\"\n          },\n          \"openSUSE-Leap\": {\n            \"publisher\":
+        \"SUSE\",\n            \"offer\": \"openSUSE-Leap\",\n            \"sku\":
+        \"42.3\",\n            \"version\": \"latest\"\n          },\n          \"RHEL\":
+        {\n            \"publisher\": \"RedHat\",\n            \"offer\": \"RHEL\",\n
+        \           \"sku\": \"7-LVM\",\n            \"version\": \"latest\"\n          },\n
+        \         \"SLES\": {\n            \"publisher\": \"SUSE\",\n            \"offer\":
+        \"SLES\",\n            \"sku\": \"15\",\n            \"version\": \"latest\"\n
+        \         },\n          \"UbuntuLTS\": {\n            \"publisher\": \"Canonical\",\n
+        \           \"offer\": \"UbuntuServer\",\n            \"sku\": \"18.04-LTS\",\n
+        \           \"version\": \"latest\"\n          }\n        },\n        \"Windows\":
+        {\n          \"Win2019Datacenter\": {\n            \"publisher\": \"MicrosoftWindowsServer\",\n
+        \           \"offer\": \"WindowsServer\",\n            \"sku\": \"2019-Datacenter\",\n
+        \           \"version\": \"latest\"\n          },\n          \"Win2016Datacenter\":
+        {\n            \"publisher\": \"MicrosoftWindowsServer\",\n            \"offer\":
+        \"WindowsServer\",\n            \"sku\": \"2016-Datacenter\",\n            \"version\":
+        \"latest\"\n          },\n          \"Win2012R2Datacenter\": {\n            \"publisher\":
+        \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
+        \"2012-R2-Datacenter\",\n            \"version\": \"latest\"\n          },\n
+        \         \"Win2012Datacenter\": {\n            \"publisher\": \"MicrosoftWindowsServer\",\n
+        \           \"offer\": \"WindowsServer\",\n            \"sku\": \"2012-Datacenter\",\n
+        \           \"version\": \"latest\"\n          },\n          \"Win2008R2SP1\":
+        {\n            \"publisher\": \"MicrosoftWindowsServer\",\n            \"offer\":
+        \"WindowsServer\",\n            \"sku\": \"2008-R2-SP1\",\n            \"version\":
+        \"latest\"\n          }\n        }\n      }\n    }\n  }\n}\n"
     headers:
       accept-ranges:
       - bytes
@@ -106,23 +58,23 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '2433'
+      - '2501'
       content-security-policy:
       - default-src 'none'; style-src 'unsafe-inline'; sandbox
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Thu, 30 May 2019 18:00:00 GMT
+      - Mon, 21 Oct 2019 15:45:59 GMT
       etag:
-      - '"f5944d69cdbfb4a2bb2ddda8c5f050bde5bbcb32"'
+      - W/"5d5b1214d514a7d1af3a6606ac1a74d9cadc7bb5"
       expires:
-      - Thu, 30 May 2019 18:05:00 GMT
+      - Mon, 21 Oct 2019 15:50:59 GMT
       source-age:
-      - '195'
+      - '179'
       strict-transport-security:
       - max-age=31536000
       vary:
-      - Authorization,Accept-Encoding
+      - Authorization,Accept-Encoding, Accept-Encoding
       via:
       - 1.1 varnish
       x-cache:
@@ -132,17 +84,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-fastly-request-id:
-      - 48630c28868c219125e07abdafe3475d6265129c
+      - 901a41e896c9a93f110ead6ab067581ecbe9b9e1
       x-frame-options:
       - deny
       x-geo-block-list:
       - ''
       x-github-request-id:
-      - 443C:25EC:BBE8:D72E:5CF0195C
+      - EFF4:7E37:7BC00D:84F44A:5DADD203
       x-served-by:
-      - cache-dfw18629-DFW
+      - cache-sin18040-SIN
       x-timer:
-      - S1559239200.325318,VS0,VE0
+      - S1571672759.209322,VS0,VE1
       x-xss-protection:
       - 1; mode=block
     status:
@@ -163,8 +115,8 @@ interactions:
       - -n -g --computer-name --image --availability-set --nsg --ssh-key-value --public-ip-address
         --tags --location --admin-username
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/6.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
       accept-language:
       - en-US
     method: GET
@@ -180,7 +132,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 18:00:00 GMT
+      - Mon, 21 Oct 2019 15:46:00 GMT
       expires:
       - '-1'
       pragma:
@@ -211,7 +163,7 @@ interactions:
       {"networkInterfaces": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/networkInterfaces/nooptvmVMNic"}]},
       "storageProfile": {"osDisk": {"createOption": "fromImage", "name": null, "caching":
       "ReadWrite", "managedDisk": {"storageAccountType": null}}, "imageReference":
-      {"publisher": "credativ", "offer": "Debian", "sku": "9", "version": "latest"}},
+      {"publisher": "Debian", "offer": "debian-10", "sku": "10", "version": "latest"}},
       "osProfile": {"computerName": "nooptvm", "adminUsername": "user11", "linuxConfiguration":
       {"disablePasswordAuthentication": true, "ssh": {"publicKeys": [{"keyData": "ssh-rsa
       AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ==
@@ -227,33 +179,33 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '2850'
+      - '2852'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -n -g --computer-name --image --availability-set --nsg --ssh-key-value --public-ip-address
         --tags --location --admin-username
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_none_options000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2019-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_none_options000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2019-07-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Resources/deployments/vm_deploy_GPsLsJodKvcmcY7y1j45v1Xc0L2aIXuk","name":"vm_deploy_GPsLsJodKvcmcY7y1j45v1Xc0L2aIXuk","properties":{"templateHash":"12737938446158134579","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2019-05-30T18:00:02.3078939Z","duration":"PT1.384046S","correlationId":"e814a89c-8537-4486-a6c1-eb777839d0d5","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["eastus"]},{"resourceType":"networkInterfaces","locations":["eastus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/virtualNetworks/nooptvmVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"nooptvmVNET"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/networkInterfaces/nooptvmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"nooptvmVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/networkInterfaces/nooptvmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"nooptvmVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Compute/virtualMachines/nooptvm","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"nooptvm"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Resources/deployments/vm_deploy_C04uw2EkVFTVNp26Ix8L9iKnK7gWMzLo","name":"vm_deploy_C04uw2EkVFTVNp26Ix8L9iKnK7gWMzLo","type":"Microsoft.Resources/deployments","properties":{"templateHash":"18217937009945716031","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2019-10-21T15:46:08.2205468Z","duration":"PT2.3755711S","correlationId":"c9ed323d-bffa-457b-82a5-e3819a13797b","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["eastus"]},{"resourceType":"networkInterfaces","locations":["eastus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/virtualNetworks/nooptvmVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"nooptvmVNET"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/networkInterfaces/nooptvmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"nooptvmVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/networkInterfaces/nooptvmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"nooptvmVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Compute/virtualMachines/nooptvm","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"nooptvm"}]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_none_options000001/providers/Microsoft.Resources/deployments/vm_deploy_GPsLsJodKvcmcY7y1j45v1Xc0L2aIXuk/operationStatuses/08586423676845537866?api-version=2019-05-10
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_none_options000001/providers/Microsoft.Resources/deployments/vm_deploy_C04uw2EkVFTVNp26Ix8L9iKnK7gWMzLo/operationStatuses/08586299341196326439?api-version=2019-07-01
       cache-control:
       - no-cache
       content-length:
-      - '2027'
+      - '2069'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 18:00:01 GMT
+      - Mon, 21 Oct 2019 15:46:09 GMT
       expires:
       - '-1'
       pragma:
@@ -263,7 +215,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1194'
+      - '1193'
     status:
       code: 201
       message: Created
@@ -282,10 +234,10 @@ interactions:
       - -n -g --computer-name --image --availability-set --nsg --ssh-key-value --public-ip-address
         --tags --location --admin-username
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_none_options000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586423676845537866?api-version=2019-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_none_options000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586299341196326439?api-version=2019-07-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -297,7 +249,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 18:00:32 GMT
+      - Mon, 21 Oct 2019 15:46:41 GMT
       expires:
       - '-1'
       pragma:
@@ -326,10 +278,10 @@ interactions:
       - -n -g --computer-name --image --availability-set --nsg --ssh-key-value --public-ip-address
         --tags --location --admin-username
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_none_options000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586423676845537866?api-version=2019-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_none_options000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586299341196326439?api-version=2019-07-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -341,7 +293,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 18:01:03 GMT
+      - Mon, 21 Oct 2019 15:47:12 GMT
       expires:
       - '-1'
       pragma:
@@ -370,10 +322,10 @@ interactions:
       - -n -g --computer-name --image --availability-set --nsg --ssh-key-value --public-ip-address
         --tags --location --admin-username
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_none_options000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586423676845537866?api-version=2019-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_none_options000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586299341196326439?api-version=2019-07-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -385,7 +337,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 18:01:33 GMT
+      - Mon, 21 Oct 2019 15:47:44 GMT
       expires:
       - '-1'
       pragma:
@@ -414,54 +366,10 @@ interactions:
       - -n -g --computer-name --image --availability-set --nsg --ssh-key-value --public-ip-address
         --tags --location --admin-username
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_none_options000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586423676845537866?api-version=2019-05-10
-  response:
-    body:
-      string: '{"status":"Running"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '20'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 30 May 2019 18:02:04 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vm create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --computer-name --image --availability-set --nsg --ssh-key-value --public-ip-address
-        --tags --location --admin-username
-      User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_none_options000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586423676845537866?api-version=2019-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_none_options000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586299341196326439?api-version=2019-07-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -473,7 +381,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 18:02:34 GMT
+      - Mon, 21 Oct 2019 15:48:15 GMT
       expires:
       - '-1'
       pragma:
@@ -502,22 +410,22 @@ interactions:
       - -n -g --computer-name --image --availability-set --nsg --ssh-key-value --public-ip-address
         --tags --location --admin-username
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_none_options000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2019-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_none_options000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2019-07-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Resources/deployments/vm_deploy_GPsLsJodKvcmcY7y1j45v1Xc0L2aIXuk","name":"vm_deploy_GPsLsJodKvcmcY7y1j45v1Xc0L2aIXuk","properties":{"templateHash":"12737938446158134579","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2019-05-30T18:02:16.4530458Z","duration":"PT2M15.5291979S","correlationId":"e814a89c-8537-4486-a6c1-eb777839d0d5","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["eastus"]},{"resourceType":"networkInterfaces","locations":["eastus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/virtualNetworks/nooptvmVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"nooptvmVNET"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/networkInterfaces/nooptvmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"nooptvmVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/networkInterfaces/nooptvmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"nooptvmVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Compute/virtualMachines/nooptvm","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"nooptvm"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Compute/virtualMachines/nooptvm"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/networkInterfaces/nooptvmVMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/virtualNetworks/nooptvmVNET"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Resources/deployments/vm_deploy_C04uw2EkVFTVNp26Ix8L9iKnK7gWMzLo","name":"vm_deploy_C04uw2EkVFTVNp26Ix8L9iKnK7gWMzLo","type":"Microsoft.Resources/deployments","properties":{"templateHash":"18217937009945716031","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2019-10-21T15:47:48.7140723Z","duration":"PT1M42.8690966S","correlationId":"c9ed323d-bffa-457b-82a5-e3819a13797b","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["eastus"]},{"resourceType":"networkInterfaces","locations":["eastus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/virtualNetworks/nooptvmVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"nooptvmVNET"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/networkInterfaces/nooptvmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"nooptvmVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/networkInterfaces/nooptvmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"nooptvmVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Compute/virtualMachines/nooptvm","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"nooptvm"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Compute/virtualMachines/nooptvm"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/networkInterfaces/nooptvmVMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/virtualNetworks/nooptvmVNET"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2688'
+      - '2729'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 18:02:34 GMT
+      - Mon, 21 Oct 2019 15:48:17 GMT
       expires:
       - '-1'
       pragma:
@@ -546,23 +454,25 @@ interactions:
       - -n -g --computer-name --image --availability-set --nsg --ssh-key-value --public-ip-address
         --tags --location --admin-username
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 computemanagementclient/5.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-compute/8.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Compute/virtualMachines/nooptvm?$expand=instanceView&api-version=2019-03-01
   response:
     body:
-      string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"d6f694dc-45ea-4bf8-82b3-43a2e0a95cb7\",\r\n
+      string: "{\r\n  \"name\": \"nooptvm\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Compute/virtualMachines/nooptvm\",\r\n
+        \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"eastus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"68ca6c7e-e899-41cf-a232-6865e89a9dc3\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
-        \"credativ\",\r\n        \"offer\": \"Debian\",\r\n        \"sku\": \"9\",\r\n
+        \"Debian\",\r\n        \"offer\": \"debian-10\",\r\n        \"sku\": \"10\",\r\n
         \       \"version\": \"latest\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
-        \"Linux\",\r\n        \"name\": \"nooptvm_OsDisk_1_25571de9b1124053ab06b1c5e2879f95\",\r\n
+        \"Linux\",\r\n        \"name\": \"nooptvm_OsDisk_1_6b5718c522f94a5899b250c1ff82c80f\",\r\n
         \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n
         \       \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n
-        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Compute/disks/nooptvm_OsDisk_1_25571de9b1124053ab06b1c5e2879f95\"\r\n
+        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Compute/disks/nooptvm_OsDisk_1_6b5718c522f94a5899b250c1ff82c80f\"\r\n
         \       },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\":
         []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"nooptvm\",\r\n
         \     \"adminUsername\": \"user11\",\r\n      \"linuxConfiguration\": {\r\n
@@ -574,34 +484,32 @@ interactions:
         true,\r\n      \"requireGuestProvisionSignal\": true\r\n    },\r\n    \"networkProfile\":
         {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/networkInterfaces/nooptvmVMNic\"}]},\r\n
         \   \"provisioningState\": \"Succeeded\",\r\n    \"instanceView\": {\r\n      \"computerName\":
-        \"nooptvm\",\r\n      \"osName\": \"debian\",\r\n      \"osVersion\": \"9.9\",\r\n
+        \"nooptvm\",\r\n      \"osName\": \"debian\",\r\n      \"osVersion\": \"10.1\",\r\n
         \     \"vmAgent\": {\r\n        \"vmAgentVersion\": \"2.2.34\",\r\n        \"statuses\":
         [\r\n          {\r\n            \"code\": \"ProvisioningState/succeeded\",\r\n
         \           \"level\": \"Info\",\r\n            \"displayStatus\": \"Ready\",\r\n
         \           \"message\": \"Guest Agent is running\",\r\n            \"time\":
-        \"2019-05-30T18:02:35+00:00\"\r\n          }\r\n        ],\r\n        \"extensionHandlers\":
-        []\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\": \"nooptvm_OsDisk_1_25571de9b1124053ab06b1c5e2879f95\",\r\n
+        \"2019-10-21T15:48:18+00:00\"\r\n          }\r\n        ],\r\n        \"extensionHandlers\":
+        []\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\": \"nooptvm_OsDisk_1_6b5718c522f94a5899b250c1ff82c80f\",\r\n
         \         \"statuses\": [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
         \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning
-        succeeded\",\r\n              \"time\": \"2019-05-30T18:00:31.7768136+00:00\"\r\n
+        succeeded\",\r\n              \"time\": \"2019-10-21T15:46:51.9582881+00:00\"\r\n
         \           }\r\n          ]\r\n        }\r\n      ],\r\n      \"hyperVGeneration\":
         \"V1\",\r\n      \"statuses\": [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded\",\r\n
         \         \"level\": \"Info\",\r\n          \"displayStatus\": \"Provisioning
-        succeeded\",\r\n          \"time\": \"2019-05-30T18:02:12.7455799+00:00\"\r\n
+        succeeded\",\r\n          \"time\": \"2019-10-21T15:47:42.8489502+00:00\"\r\n
         \       },\r\n        {\r\n          \"code\": \"PowerState/running\",\r\n
         \         \"level\": \"Info\",\r\n          \"displayStatus\": \"VM running\"\r\n
-        \       }\r\n      ]\r\n    }\r\n  },\r\n  \"type\": \"Microsoft.Compute/virtualMachines\",\r\n
-        \ \"location\": \"eastus\",\r\n  \"tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Compute/virtualMachines/nooptvm\",\r\n
-        \ \"name\": \"nooptvm\"\r\n}"
+        \       }\r\n      ]\r\n    }\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '4080'
+      - '4083'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 18:02:35 GMT
+      - Mon, 21 Oct 2019 15:48:21 GMT
       expires:
       - '-1'
       pragma:
@@ -618,7 +526,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3991,Microsoft.Compute/LowCostGet30Min;31991
+      - Microsoft.Compute/LowCostGet3Min;3996,Microsoft.Compute/LowCostGet30Min;31981
     status:
       code: 200
       message: OK
@@ -637,8 +545,8 @@ interactions:
       - -n -g --computer-name --image --availability-set --nsg --ssh-key-value --public-ip-address
         --tags --location --admin-username
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/6.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
       accept-language:
       - en-US
     method: GET
@@ -646,12 +554,12 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"nooptvmVMNic\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/networkInterfaces/nooptvmVMNic\",\r\n
-        \ \"etag\": \"W/\\\"4649d56d-c065-483b-b500-20faff62500c\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"67801009-1eb0-492b-83af-8e41a6fa4fd7\\\"\",\r\n  \"location\":
         \"eastus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"41f27362-ce19-41b1-8e36-18b9380cb3c3\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"afdde4f0-4d48-4664-9120-0277e5cd4fdb\",\r\n
         \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfignooptvm\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/networkInterfaces/nooptvmVMNic/ipConfigurations/ipconfignooptvm\",\r\n
-        \       \"etag\": \"W/\\\"4649d56d-c065-483b-b500-20faff62500c\\\"\",\r\n
+        \       \"etag\": \"W/\\\"67801009-1eb0-492b-83af-8e41a6fa4fd7\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
@@ -659,8 +567,8 @@ interactions:
         \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
         \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
         [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
-        \"4q5hfjzy1keepb3plvyofdjcmb.bx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
-        \"00-0D-3A-4F-3D-68\",\r\n    \"enableAcceleratedNetworking\": false,\r\n
+        \"klda0awgoifeboe335b23pq14a.bx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
+        \"00-0D-3A-18-0F-FA\",\r\n    \"enableAcceleratedNetworking\": false,\r\n
         \   \"enableIPForwarding\": false,\r\n    \"primary\": true,\r\n    \"virtualMachine\":
         {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Compute/virtualMachines/nooptvm\"\r\n
         \   }\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\"\r\n}"
@@ -672,9 +580,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 18:02:35 GMT
+      - Mon, 21 Oct 2019 15:48:24 GMT
       etag:
-      - W/"4649d56d-c065-483b-b500-20faff62500c"
+      - W/"67801009-1eb0-492b-83af-8e41a6fa4fd7"
       expires:
       - '-1'
       pragma:
@@ -690,6 +598,8 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - 476ac840-47dc-4919-a1a0-2a4102586152
     status:
       code: 200
       message: OK
@@ -707,23 +617,25 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 computemanagementclient/5.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-compute/8.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Compute/virtualMachines/nooptvm?api-version=2019-03-01
   response:
     body:
-      string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"d6f694dc-45ea-4bf8-82b3-43a2e0a95cb7\",\r\n
+      string: "{\r\n  \"name\": \"nooptvm\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Compute/virtualMachines/nooptvm\",\r\n
+        \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"eastus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"68ca6c7e-e899-41cf-a232-6865e89a9dc3\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
-        \"credativ\",\r\n        \"offer\": \"Debian\",\r\n        \"sku\": \"9\",\r\n
+        \"Debian\",\r\n        \"offer\": \"debian-10\",\r\n        \"sku\": \"10\",\r\n
         \       \"version\": \"latest\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
-        \"Linux\",\r\n        \"name\": \"nooptvm_OsDisk_1_25571de9b1124053ab06b1c5e2879f95\",\r\n
+        \"Linux\",\r\n        \"name\": \"nooptvm_OsDisk_1_6b5718c522f94a5899b250c1ff82c80f\",\r\n
         \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n
         \       \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n
-        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Compute/disks/nooptvm_OsDisk_1_25571de9b1124053ab06b1c5e2879f95\"\r\n
+        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Compute/disks/nooptvm_OsDisk_1_6b5718c522f94a5899b250c1ff82c80f\"\r\n
         \       },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\":
         []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"nooptvm\",\r\n
         \     \"adminUsername\": \"user11\",\r\n      \"linuxConfiguration\": {\r\n
@@ -734,18 +646,16 @@ interactions:
         true\r\n      },\r\n      \"secrets\": [],\r\n      \"allowExtensionOperations\":
         true,\r\n      \"requireGuestProvisionSignal\": true\r\n    },\r\n    \"networkProfile\":
         {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/networkInterfaces/nooptvmVMNic\"}]},\r\n
-        \   \"provisioningState\": \"Succeeded\"\r\n  },\r\n  \"type\": \"Microsoft.Compute/virtualMachines\",\r\n
-        \ \"location\": \"eastus\",\r\n  \"tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Compute/virtualMachines/nooptvm\",\r\n
-        \ \"name\": \"nooptvm\"\r\n}"
+        \   \"provisioningState\": \"Succeeded\"\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2782'
+      - '2784'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 18:02:36 GMT
+      - Mon, 21 Oct 2019 15:48:27 GMT
       expires:
       - '-1'
       pragma:
@@ -762,7 +672,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3990,Microsoft.Compute/LowCostGet30Min;31990
+      - Microsoft.Compute/LowCostGet3Min;3995,Microsoft.Compute/LowCostGet30Min;31980
     status:
       code: 200
       message: OK
@@ -780,12 +690,12 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/6.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/publicIPAddresses/nooptvmPublicIP?api-version=2019-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_none_options000001/providers/Microsoft.Network/publicIPAddresses/nooptvmPublicIP?api-version=2019-09-01
   response:
     body:
       string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''Microsoft.Network/publicIPAddresses/nooptvmPublicIP''
@@ -798,7 +708,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 30 May 2019 18:02:36 GMT
+      - Mon, 21 Oct 2019 15:48:31 GMT
       expires:
       - '-1'
       pragma:
@@ -812,51 +722,4 @@ interactions:
     status:
       code: 404
       message: Not Found
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - group delete
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - --name --yes --no-wait
-      User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
-      accept-language:
-      - en-US
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_none_options000001?api-version=2019-05-10
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Thu, 30 May 2019 18:02:38 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGVk06NUZDUkVBVEU6NUZOT05FOjVGT1BUSU9OU1lEVUlESXxBMTJBQjk2ODU3OTNCMEMyLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2019-05-10
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
-    status:
-      code: 202
-      message: Accepted
 version: 1

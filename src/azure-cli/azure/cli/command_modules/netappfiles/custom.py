@@ -89,7 +89,7 @@ def patch_pool(cmd, instance, size=None, service_level=None, tags=None):
     return body
 
 
-def create_volume(cmd, client, account_name, pool_name, volume_name, resource_group_name, location, creation_token, usage_threshold, vnet, subnet='default', service_level=None, protocol_types=None, tags=None):
+def create_volume(cmd, client, account_name, pool_name, volume_name, resource_group_name, location, file_path, usage_threshold, vnet, subnet='default', service_level=None, protocol_types=None, tags=None):
     subs_id = get_subscription_id(cmd.cli_ctx)
 
     # determine vnet - supplied value can be name or ARM resource Id
@@ -97,19 +97,37 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
         resource_parts = parse_resource_id(vnet)
         vnet = resource_parts['resource_name']
 
+    # default the resource group of the subnet to the volume's rg unless the subnet is specified by id
+    subnet_rg = resource_group_name
+
     # determine subnet - supplied value can be name or ARM reource Id
     if is_valid_resource_id(subnet):
         resource_parts = parse_resource_id(subnet)
         subnet = resource_parts['resource_name']
+        subnet_rg = resource_parts['resource_group']
 
-    subnet_id = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/virtualNetworks/%s/subnets/%s" % (subs_id, resource_group_name, vnet, subnet)
+    # if NFSv4 is specified then the export policy must reflect this
+    # the RP ordinarily only creates a default setting NFSv3. Export
+    # policy is not settable directly on creation in CLI only via the
+    # add export policy subcommand
+    if (protocol_types is not None) and ("NFSv4.1" in protocol_types):
+        rules = []
+        export_policy = ExportPolicyRule(rule_index=1, unix_read_only=False, unix_read_write=True, cifs=False, nfsv3=False, nfsv41=True, allowed_clients="0.0.0.0/0")
+        rules.append(export_policy)
+
+        volume_export_policy = VolumePropertiesExportPolicy(rules=rules)
+    else:
+        volume_export_policy = None
+
+    subnet_id = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/virtualNetworks/%s/subnets/%s" % (subs_id, subnet_rg, vnet, subnet)
     body = Volume(
         usage_threshold=int(usage_threshold) * gib_scale,
-        creation_token=creation_token,
+        creation_token=file_path,
         service_level=service_level,
         location=location,
         subnet_id=subnet_id,
         protocol_types=protocol_types,
+        export_policy=volume_export_policy,
         tags=tags)
 
     return client.create_or_update(body, resource_group_name, account_name, pool_name, volume_name)
@@ -127,10 +145,10 @@ def patch_volume(cmd, instance, usage_threshold=None, service_level=None, protoc
 
 
 # add new rule to policy
-def add_export_policy_rule(cmd, instance, allowed_clients, rule_index, unix_read_only, unix_read_write, cifs, nfsv3, nfsv4):
+def add_export_policy_rule(cmd, instance, allowed_clients, rule_index, unix_read_only, unix_read_write, cifs, nfsv3, nfsv41):
     rules = []
 
-    export_policy = ExportPolicyRule(rule_index=rule_index, unix_read_only=unix_read_only, unix_read_write=unix_read_write, cifs=cifs, nfsv3=nfsv3, nfsv4=nfsv4, allowed_clients=allowed_clients)
+    export_policy = ExportPolicyRule(rule_index=rule_index, unix_read_only=unix_read_only, unix_read_write=unix_read_write, cifs=cifs, nfsv3=nfsv3, nfsv41=nfsv41, allowed_clients=allowed_clients)
 
     rules.append(export_policy)
     for rule in instance.export_policy.rules:

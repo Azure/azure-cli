@@ -241,6 +241,8 @@ def recover_keyvault(cmd, client, vault_name, resource_group_name, location):
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
                                                    resource_type=ResourceType.MGMT_KEYVAULT)
     CreateMode = cmd.get_models('CreateMode', resource_type=ResourceType.MGMT_KEYVAULT)
+
+    # tenantId and sku shouldn't be required
     Sku = cmd.get_models('Sku', resource_type=ResourceType.MGMT_KEYVAULT)
     SkuName = cmd.get_models('SkuName', resource_type=ResourceType.MGMT_KEYVAULT)
     profile = Profile(cli_ctx=cmd.cli_ctx)

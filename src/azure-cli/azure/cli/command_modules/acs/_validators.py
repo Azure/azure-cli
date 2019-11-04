@@ -3,11 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from __future__ import unicode_literals
 import os
 import os.path
 import re
 from math import ceil
+from ipaddress import ip_network
 
+# pylint: disable=no-name-in-module,import-error
 from knack.log import get_logger
 
 from azure.cli.core.util import CLIError
@@ -71,6 +74,34 @@ def validate_create_parameters(namespace):
         raise CLIError('--name has no value')
     if namespace.dns_name_prefix is not None and not namespace.dns_name_prefix:
         raise CLIError('--dns-prefix has no value')
+
+
+def validate_ip_ranges(namespace):
+    if not namespace.api_server_authorized_ip_ranges:
+        return
+
+    restrict_traffic_to_agentnodes = "0.0.0.0/32"
+    allow_all_traffic = ""
+    ip_ranges = [ip.strip() for ip in namespace.api_server_authorized_ip_ranges.split(",")]
+
+    if restrict_traffic_to_agentnodes in ip_ranges and len(ip_ranges) > 1:
+        raise CLIError(("Setting --api-server-authorized-ip-ranges to 0.0.0.0/32 is not allowed with other IP ranges."
+                        "Refer to https://aka.ms/aks/whitelist for more details"))
+
+    if allow_all_traffic in ip_ranges and len(ip_ranges) > 1:
+        raise CLIError("--api-server-authorized-ip-ranges cannot be disabled and simultaneously enabled")
+
+    for ip in ip_ranges:
+        if ip in [restrict_traffic_to_agentnodes, allow_all_traffic]:
+            continue
+        try:
+            ip = ip_network(ip)
+            if not ip.is_global:
+                raise CLIError("--api-server-authorized-ip-ranges must be global non-reserved addresses or CIDRs")
+            if ip.version == 6:
+                raise CLIError("--api-server-authorized-ip-ranges cannot be IPv6 addresses")
+        except ValueError:
+            raise CLIError("--api-server-authorized-ip-ranges should be a list of IPv4 addresses or CIDRs")
 
 
 def validate_k8s_version(namespace):
@@ -166,6 +197,16 @@ def validate_load_balancer_outbound_ip_prefixes(namespace):
             raise CLIError("--load-balancer-outbound-ip-prefixes cannot contain whitespace")
 
 
+def validate_nodes_count(namespace):
+    """Validates that min_count and max_count is set between 1-100"""
+    if namespace.min_count is not None:
+        if namespace.min_count < 1 or namespace.min_count > 100:
+            raise CLIError('--min-count must be in the range [1,100]')
+    if namespace.max_count is not None:
+        if namespace.max_count < 1 or namespace.max_count > 100:
+            raise CLIError('--max-count must be in the range [1,100]')
+
+
 def validate_taints(namespace):
     """Validates that provided taint is a valid format"""
 
@@ -178,3 +219,8 @@ def validate_taints(namespace):
             found = regex.findall(taint)
             if not found:
                 raise CLIError('Invalid node taint: %s' % taint)
+
+
+def validate_acr(namespace):
+    if namespace.attach_acr and namespace.detach_acr:
+        raise CLIError('Cannot specify "--attach-acr" and "--detach-acr" at the same time.')

@@ -544,8 +544,12 @@ def validate_included_datasets(cmd, namespace):
         namespace.include = t_blob_include('s' in include, 'm' in include, False, 'c' in include, 'd' in include)
 
 
-def validate_key(namespace):
-    namespace.key_name = storage_account_key_options[namespace.key_name]
+def validate_key_name(namespace):
+    key_options = {'primary': '1', 'secondary': '2'}
+    if hasattr(namespace, 'key_type') and namespace.key_type:
+        namespace.key_name = namespace.key_type + key_options[namespace.key_name]
+    else:
+        namespace.key_name = storage_account_key_options[namespace.key_name]
 
 
 def validate_metadata(namespace):

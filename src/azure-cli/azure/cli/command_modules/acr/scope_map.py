@@ -3,7 +3,17 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from ._utils import get_resource_group_name_by_registry_name, validate_premium_registry, parse_actions_from_repositories
+from enum import Enum
+from azure.cli.core.util import CLIError
+from ._utils import get_resource_group_name_by_registry_name, parse_actions_from_repositories
+
+
+class ScopeMapActions(Enum):
+    CONTENT_DELETE = 'content/delete'
+    CONTENT_READ = 'content/read'
+    CONTENT_WRITE = 'content/write'
+    METADATA_READ = 'metadata/read'
+    METADATA_WRITE = 'metadata/write'
 
 
 def acr_scope_map_create(cmd,
@@ -14,11 +24,9 @@ def acr_scope_map_create(cmd,
                          resource_group_name=None,
                          description=None):
 
-    validate_premium_registry(cmd, registry_name, resource_group_name)
+    resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
 
     actions = parse_actions_from_repositories(repository_actions_list)
-
-    resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
 
     return client.create(
         resource_group_name,
@@ -57,27 +65,30 @@ def acr_scope_map_update(cmd,
                          resource_group_name=None,
                          description=None):
 
+    if not (add_repository or remove_repository or description):
+        raise CLIError('No scope map properties to update.')
+
     resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
+
     current_scope_map = acr_scope_map_show(cmd, client, registry_name, scope_map_name, resource_group_name)
     current_actions = current_scope_map.actions
 
-    if remove_repository:
-        removed_actions = parse_actions_from_repositories(remove_repository)
-        # We have to treat actions case-insensitively but list them case-sensitively
-        lower_current_actions = {action.lower() for action in current_actions}
-        lower_removed_actions = {action.lower() for action in removed_actions}
-        current_actions = [action for action in current_actions
-                           if action.lower() in lower_current_actions - lower_removed_actions]
+    if add_repository or remove_repository:
+        add_actions_set = set(parse_actions_from_repositories(add_repository)) if add_repository else set()
+        remove_actions_set = set(parse_actions_from_repositories(remove_repository)) if remove_repository else set()
 
-    if add_repository:
-        added_actions = parse_actions_from_repositories(add_repository)
-        # We have to avoid duplicates and give preference to user input casing
-        lower_action_to_action = {}
-        for action in current_actions:
-            lower_action_to_action[action.lower()] = action
-        for action in added_actions:
-            lower_action_to_action[action.lower()] = action
-        current_actions = [lower_action_to_action[action] for action in lower_action_to_action]
+        # Duplicate actions can lead to inconsistency based on order of operations (set subtraction isn't associative).
+        # Eg: ({A, B} - {B}) U {B, C} = {A, B, C},  ({A, B} U {B, C}) - {B}  = {A, C}
+        duplicate_actions = set.intersection(add_actions_set, remove_actions_set)
+        if duplicate_actions:
+            # Display these actions to users: remove 'repositories/' prefix from 'repositories/<repo>/<action>'
+            errors = sorted(map(lambda action: action[action.find('/') + 1:], duplicate_actions))
+            raise CLIError(
+                'Update ambiguity. Duplicate actions were provided with --add and --remove arguments.\n{}'
+                .format(errors))
+
+        final_actions_set = set(current_scope_map.actions).union(add_actions_set).difference(remove_actions_set)
+        current_actions = list(final_actions_set)
 
     return client.update(
         resource_group_name,
