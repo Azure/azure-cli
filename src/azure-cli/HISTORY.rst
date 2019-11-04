@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**AKS**
+
+* Support cluster certificate rotation operation using "az aks rotate-certs".
+
 **Profile**
 
 * Polish error when using `az login -u {} -p {}` with Microsoft account
@@ -12,7 +16,7 @@ Release History
 * Fix #10996: Polish error for `--force-change-password-next-login` in `az ad user update` when `--password` is not specified
 
 2.0.76
-
+++++++
 
 **ACR**
 
@@ -24,10 +28,6 @@ Release History
 
 * Add `--enable-cluster-autoscaler`, `--min-count` and `--max-count` to the `az aks create` command, which enables cluster autoscaler for the node pool.
 * Add the above flags as well as `--update-cluster-autoscaler` and `--disable-cluster-autoscaler` to the `az aks update` command, allowing updates to cluster autoscaler.
-
-**AKS**
-
-* Support cluster certificate rotation operation using "az aks rotate-certs".
 
 **AppConfig**
 
