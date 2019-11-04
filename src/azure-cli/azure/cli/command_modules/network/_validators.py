@@ -313,6 +313,18 @@ def validate_express_route_port(cmd, namespace):
         )
 
 
+def validate_virtul_network_gateway(cmd, namespace):
+    from msrestazure.tools import is_valid_resource_id, resource_id
+    if namespace.hosted_gateway and not is_valid_resource_id(namespace.hosted_gateway):
+        namespace.hosted_gateway = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=namespace.resource_group_name,
+            namespace='Microsoft.Network',
+            type='virtualNetworkGateways',
+            name=namespace.hosted_gateway
+        )
+
+
 def validate_virtual_hub(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, resource_id
     if namespace.virtual_hub and not is_valid_resource_id(namespace.virtual_hub):

@@ -254,14 +254,19 @@ def _parse_image_argument(cmd, namespace):
 
     # 4 - attempt to match an URN alias (most likely)
     from azure.cli.command_modules.vm._actions import load_images_from_aliases_doc
-    images = load_images_from_aliases_doc(cmd.cli_ctx)
-    matched = next((x for x in images if x['urnAlias'].lower() == namespace.image.lower()), None)
-    if matched:
-        namespace.os_publisher = matched['publisher']
-        namespace.os_offer = matched['offer']
-        namespace.os_sku = matched['sku']
-        namespace.os_version = matched['version']
-        return 'urn'
+    import requests
+    try:
+        images = None
+        images = load_images_from_aliases_doc(cmd.cli_ctx)
+        matched = next((x for x in images if x['urnAlias'].lower() == namespace.image.lower()), None)
+        if matched:
+            namespace.os_publisher = matched['publisher']
+            namespace.os_offer = matched['offer']
+            namespace.os_sku = matched['sku']
+            namespace.os_version = matched['version']
+            return 'urn'
+    except requests.exceptions.ConnectionError:
+        pass
 
     # 5 - check if an existing managed disk image resource
     compute_client = _compute_client_factory(cmd.cli_ctx)
@@ -271,9 +276,15 @@ def _parse_image_argument(cmd, namespace):
                                            'images', 'Microsoft.Compute')
         return 'image_id'
     except CloudError:
-        err = 'Invalid image "{}". Use a valid image URN, custom image name, custom image id, VHD blob URI, or ' \
-              'pick an image from {}.\nSee vm create -h for more information on specifying an image.'
-        raise CLIError(err.format(namespace.image, [x['urnAlias'] for x in images]))
+        if images is not None:
+            err = 'Invalid image "{}". Use a valid image URN, custom image name, custom image id, ' \
+                  'VHD blob URI, or pick an image from {}.\nSee vm create -h for more information ' \
+                  'on specifying an image.'.format(namespace.image, [x['urnAlias'] for x in images])
+        else:
+            err = 'Failed to connect to remote source of image aliases or find a local copy. Invalid image "{}". ' \
+                  'Use a valid image URN, custom image name, custom image id, or VHD blob URI.\nSee vm ' \
+                  'create -h for more information on specifying an image.'.format(namespace.image)
+        raise CLIError(err)
 
 
 def _get_image_plan_info_if_exists(cmd, namespace):
@@ -552,6 +563,26 @@ def _validate_vm_create_availability_set(cmd, namespace):
         logger.debug("adding to specified availability set '%s'", namespace.availability_set)
 
 
+def _validate_vm_create_vmss(cmd, namespace):
+    from msrestazure.tools import parse_resource_id, resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    if namespace.vmss:
+        as_id = parse_resource_id(namespace.vmss)
+        name = as_id['name']
+        rg = as_id.get('resource_group', namespace.resource_group_name)
+
+        if not check_existence(cmd.cli_ctx, name, rg, 'Microsoft.Compute', 'virtualMachineScaleSets'):
+            raise CLIError("virtual machine scale set '{}' does not exist.".format(name))
+
+        namespace.vmss = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=rg,
+            namespace='Microsoft.Compute',
+            type='virtualMachineScaleSets',
+            name=name)
+        logger.debug("adding to specified virtual machine scale set '%s'", namespace.vmss)
+
+
 def _validate_vm_create_dedicated_host(cmd, namespace):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
@@ -825,11 +856,15 @@ def _validate_vm_vmss_create_public_ip(cmd, namespace):
         namespace.public_ip_address_type = 'new'
         logger.debug('new public IP address will be created')
 
+    from azure.cli.core.profiles import ResourceType
+    PublicIPAddressSkuName, IPAllocationMethod = cmd.get_models('PublicIPAddressSkuName', 'IPAllocationMethod',
+                                                                resource_type=ResourceType.MGMT_NETWORK)
+    # Use standard public IP address automatically when using zones.
+    if hasattr(namespace, 'zone') and namespace.zone is not None:
+        namespace.public_ip_sku = PublicIPAddressSkuName.standard.value
+
     # Public-IP SKU is only exposed for VM. VMSS has no such needs so far
     if getattr(namespace, 'public_ip_sku', None):
-        from azure.cli.core.profiles import ResourceType
-        PublicIPAddressSkuName, IPAllocationMethod = cmd.get_models('PublicIPAddressSkuName', 'IPAllocationMethod',
-                                                                    resource_type=ResourceType.MGMT_NETWORK)
         if namespace.public_ip_sku == PublicIPAddressSkuName.standard.value:
             if not namespace.public_ip_address_allocation:
                 namespace.public_ip_address_allocation = IPAllocationMethod.static.value
@@ -1094,6 +1129,7 @@ def process_vm_create_namespace(cmd, namespace):
         _validate_vm_create_storage_account(cmd, namespace)
 
     _validate_vm_create_availability_set(cmd, namespace)
+    _validate_vm_create_vmss(cmd, namespace)
     _validate_vm_vmss_create_vnet(cmd, namespace)
     _validate_vm_create_nsg(cmd, namespace)
     _validate_vm_vmss_create_public_ip(cmd, namespace)
@@ -1266,6 +1302,8 @@ def get_network_lb(cli_ctx, resource_group_name, lb_name):
 
 
 def process_vmss_create_namespace(cmd, namespace):
+    if namespace.orchestration_mode == 'VM':
+        namespace.image = 'centos'  # Will be ignored. Just aim to pass validation.
     validate_tags(namespace)
     if namespace.vm_sku is None:
         from azure.cli.core.cloud import AZURE_US_GOV_CLOUD

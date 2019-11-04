@@ -124,17 +124,18 @@ class SDKProfile(object):  # pylint: disable=too-few-public-methods
 AZURE_API_PROFILES = {
     'latest': {
         ResourceType.MGMT_STORAGE: '2019-04-01',
-        ResourceType.MGMT_NETWORK: '2019-04-01',
+        ResourceType.MGMT_NETWORK: '2019-09-01',
         ResourceType.MGMT_COMPUTE: SDKProfile('2019-03-01', {
             'resource_skus': '2019-04-01',
             'disks': '2019-03-01',
-            'snapshots': '2019-03-01'
+            'snapshots': '2019-03-01',
+            'galleries': '2019-07-01'
         }),
         ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_POLICY: '2019-06-01',
-        ResourceType.MGMT_RESOURCE_RESOURCES: '2019-05-10',
+        ResourceType.MGMT_RESOURCE_RESOURCES: '2019-07-01',
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
         ResourceType.MGMT_NETWORK_DNS: '2018-05-01',
         ResourceType.MGMT_KEYVAULT: '2018-02-14',
