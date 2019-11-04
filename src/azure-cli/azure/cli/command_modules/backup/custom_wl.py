@@ -16,7 +16,9 @@ from azure.cli.command_modules.backup._validators import datetime_type
 from azure.mgmt.recoveryservicesbackup.models import AzureVMAppContainerProtectionContainer, \
     AzureWorkloadBackupRequest, ProtectedItemResource, AzureRecoveryServiceVaultProtectionIntent, TargetRestoreInfo, \
     RestoreRequestResource, BackupRequestResource, ProtectionIntentResource, SQLDataDirectoryMapping, \
-    ProtectionContainerResource
+    ProtectionContainerResource, AzureWorkloadSAPHanaRestoreRequest, AzureWorkloadSQLRestoreRequest, \
+    AzureWorkloadSAPHanaPointInTimeRestoreRequest, AzureWorkloadSQLPointInTimeRestoreRequest, \
+    AzureVmWorkloadSAPHanaDatabaseProtectedItem, AzureVmWorkloadSQLDatabaseProtectedItem
 
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.command_modules.backup._client_factory import backup_workload_items_cf, \
@@ -376,19 +378,11 @@ def enable_protection_for_azure_wl(cmd, client, resource_group_name, vault_name,
     container_name = protectable_item_object.id.split('/')[12]
     cust_help.validate_policy(policy_object)
     policy_id = policy_object.id
-    from platform import python_version
-    version = python_version()
-    version_suffix = ""
-    if version[0] == '3':
-        version_suffix = "_py3"
-    # Dynamically instantiating class based on item type
-    module_ = import_module("azure.mgmt.recoveryservicesbackup.models.azure_vm_workload_" +
-                            module_map[protectable_item_type.lower()] + "_protected_item" + version_suffix)
-    class_ = getattr(module_, "AzureVmWorkload" + attr_map[protectable_item_type.lower()] + "ProtectedItem")
 
-    # Construct enable protection request object
-    properties = class_(backup_management_type='AzureWorkload',
-                        policy_id=policy_id, workload_type=protectable_item_type)
+    properties = _get_protected_item_instance(protectable_item_type)
+    properties.backup_management_type = 'AzureWorkload'
+    properties.policy_id = policy_id
+    properties.workload_type = protectable_item_type
     param = ProtectionContainerResource(properties=properties)
 
     # Trigger enable protection and wait for completion
@@ -443,17 +437,9 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item, delet
                              vault_name, resource_group_name, fabric_name, container_uri, item_uri)
         return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
-    from platform import python_version
-    version = python_version()
-    version_suffix = ""
-    if version[0] == '3':
-        version_suffix = "_py3"
-    # Dynamically instantiating class based on item type
-    module_ = import_module("azure.mgmt.recoveryservicesbackup.models.azure_vm_workload_" +
-                            module_map[backup_item_type.lower()] + "_protected_item" + version_suffix)
-    class_ = getattr(module_, "AzureVmWorkload" + attr_map[backup_item_type.lower()] + "ProtectedItem")
-
-    properties = class_(protection_state='ProtectionStopped', policy_id='')
+    properties = _get_protected_item_instance(backup_item_type)
+    properties.protection_state = 'ProtectionStopped'
+    properties.policy_id = ''
     param = ProtectedItemResource(properties=properties)
 
     # Trigger disable protection and wait for completion
@@ -539,19 +525,9 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
     container_id = recovery_config_object['container_id']
     alternate_directory_paths = recovery_config_object['alternate_directory_paths']
 
-    if log_point_in_time is not None:
-        item_type = item_type + 'PointInTime'
-
-    from platform import python_version
-    version = python_version()
-    version_suffix = ""
-    if version[0] == '3':
-        version_suffix = "_py3"
-    module_ = import_module("azure.mgmt.recoveryservicesbackup.models.azure_workload_" +
-                            restore_module_map[item_type.lower()] + "_restore_request" + version_suffix)
-    class_ = getattr(module_, "AzureWorkload" + item_type + "RestoreRequest")
     # Construct trigger restore request object
-    trigger_restore_properties = class_(recovery_type=restore_mode)
+    trigger_restore_properties = _get_restore_request_instance(item_type, log_point_in_time)
+    trigger_restore_properties.recovery_type = restore_mode
 
     if restore_mode == 'AlternateLocation':
         setattr(trigger_restore_properties, 'source_resource_id', source_resource_id)
@@ -674,3 +650,23 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
         'database_name': db_name,
         'container_id': container_id,
         'alternate_directory_paths': alternate_directory_paths})
+
+
+def _get_restore_request_instance(item_type, log_point_in_time):
+    if item_type.lower() == "saphana":
+        if log_point_in_time is not None:
+            return AzureWorkloadSAPHanaRestoreRequest()
+        else:
+            return AzureWorkloadSAPHanaPointInTimeRestoreRequest()
+    else:
+        if log_point_in_time is not None:
+            return AzureWorkloadSQLRestoreRequest()
+        else:
+            return AzureWorkloadSQLPointInTimeRestoreRequest()
+
+
+def _get_protected_item_instance(item_type):
+    if item_type.lower() == "saphanadatabase":
+        return AzureVmWorkloadSAPHanaDatabaseProtectedItem()
+    else:
+        return AzureVmWorkloadSQLDatabaseProtectedItem()
