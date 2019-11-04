@@ -2,11 +2,6 @@
 
 For clarity, Bash scripts are used inline. Windows batch or PowerScript examples are listed in the appendix, which you can use to build similiar examples.
 
-## Understand different behavior of Command Prompt, Powershell and Bash
-  1. Powershell treats special characters like double quotes differently compared with other shells. The stop-parsing symbol (--%), introduced in PowerShell 3.0, directs PowerShell to refrain from interpreting input as PowerShell commands or expressions. You can use this symbol after az so that you can avoid strange problems. Link: https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_parsing?view=powershell-6
-  
-         az --% vm create --nsg ""
-
 ## Use the right output mode for your work (json, table, or tsv) ##
   1. `json` format is the CLI's default, and is intended to give you the most comprehensive information. If you prefer a different format, use the `--output` argument to override for an individual command invocation, or use `az configure` to update your global default. Note that JSON format preserves the double quotes, generally making in unsuitable for scripting purposes.
   
@@ -157,6 +152,18 @@ If you are using az on a build machine, and multiple jobs can be run in parallel
            Write-Output "Stopping $vm_id"
            az vm stop --ids $vm_id
        }
+
+
+## Argument parsing issue in PowerShell
+On Windows, `az` is a batch script (at `C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\wbin\az.cmd`). Invoking it with PowerShell may have issues because arguments are parsed twice by both PowerShell and Command Prompt. For example, `az "a&b"` behaves differently in PowerShell and Command Prompt. In PowerShell, `b` is treated as a separate command instead of part of the argument.
+
+To prevent this, you may use [stop-parsing symbol `--%`](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_parsing) between `az` and arguments like `az --% vm create --nsg "" ...`
+
+> The stop-parsing symbol (--%), introduced in PowerShell 3.0, directs PowerShell to refrain from interpreting input as PowerShell commands or expressions.
+>
+> When it encounters a stop-parsing symbol, PowerShell treats the remaining characters in the line as a literal. 
+
+This issue is tracked at https://github.com/PowerShell/PowerShell/issues/1995#issuecomment-539822061
 
 ### CLI Environment Variables
 
