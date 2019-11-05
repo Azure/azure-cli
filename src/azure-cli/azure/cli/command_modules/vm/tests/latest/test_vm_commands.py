@@ -928,7 +928,7 @@ class ComputeListSkusScenarioTest(ScenarioTest):
         self.assertTrue(size_found)
         self.assertTrue(zone_found)
 
-    @AllowLargeResponse(size_kb=8144)
+    @AllowLargeResponse(size_kb=99999)
     def test_list_compute_skus_filter(self):
         result = self.cmd('vm list-skus -l eastus2 --size Standard_DS1_V2 --zone').get_output_in_json()
         self.assertTrue(result and len(result) == len([x for x in result if x['name'] == 'Standard_DS1_v2' and x['locationInfo'][0]['zones']]))
@@ -1700,7 +1700,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
             'vmss2': 'vm-ultrassd2'
         })
         self.cmd('vmss create -g {rg} -n {vmss} --admin-username admin123 --admin-password testPassword0 --image debian --storage-sku UltraSSD_LRS '
-                 ' --data-disk-sizes-gb 4 --zone 2 --location eastus2 --vm-sku Standard_D2s_v3')
+                 ' --data-disk-sizes-gb 4 --zone 2 --location eastus2 --vm-sku Standard_D2s_v3 --instance-count 1')
 
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
