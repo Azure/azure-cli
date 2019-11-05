@@ -12,7 +12,7 @@ For clarity, Bash scripts are used inline. Windows batch or PowerScript examples
          ------  ------------
          my_vm   UbuntuServer
 
-  3. `tsv` for concise output and scripting purposes. The will strip double quotes that the JSON format preserves. To specify the format you want for TSV, use the `--query` argument.
+  3. `tsv` is useful for concise output and scripting purposes. The tsv will strip double quotes that the JSON format preserves. To specify the format you want for TSV, use the `--query` argument.
 
          export vm_ids=$(az vm list -d -g my_rg --query "[?powerState=='VM running'].id" -o tsv)  
          az vm stop --ids $vm_ids
@@ -133,7 +133,7 @@ If you are using az on a build machine, and multiple jobs can be run in parallel
        )
        az vm stop --ids %vm_ids% :: CLI stops all VMs in parallel 
 
-### Windows PowerShell scrips for saving to variables and using it later
+### Windows PowerShell scripts for saving to variables and using it later
 
        $vm_ids=(az vm list -d -g my_rg --query "[?powerState=='VM running'].id" -o tsv)
        az vm stop --ids $vm_ids # CLI stops all VMs in parallel 
@@ -146,7 +146,7 @@ If you are using az on a build machine, and multiple jobs can be run in parallel
            az vm stop --ids %%F
        )
 
-### Windows PowerShell scrips to loop through a list
+### Windows PowerShell scripts to loop through a list
        $vm_ids=(az vm list -d -g my_rg --query "[?powerState=='VM running'].id" -o tsv)
        foreach ($vm_id in $vm_ids) {
            Write-Output "Stopping $vm_id"
