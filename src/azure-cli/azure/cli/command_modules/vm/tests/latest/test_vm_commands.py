@@ -880,7 +880,7 @@ class VMAvailSetScenarioTest(ScenarioTest):
 
 class VMAvailSetLiveScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_availset_live')
-    @AllowLargeResponse(size_kb=8192)
+    @AllowLargeResponse(size_kb=99999)
     def test_vm_availset_convert(self, resource_group):
 
         self.kwargs.update({
