@@ -249,14 +249,17 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
         attach_os_disk=None, os_disk_size_gb=None, custom_data=None, secrets=None, license_type=None, zone=None,
         disk_info=None, boot_diagnostics_storage_uri=None, ultra_ssd_enabled=None, proximity_placement_group=None,
         computer_name=None, dedicated_host=None, priority=None, max_billing=None, eviction_policy=None,
-        enable_agent=None):
+        enable_agent=None, vmss=None):
 
     os_caching = disk_info['os'].get('caching')
 
     def _build_os_profile():
 
+        special_chars = '`~!@#$%^&*()=+_[]{}\\|;:\'\",<>/?'
+
         os_profile = {
-            'computerName': computer_name or name,
+            # Use name as computer_name if it's not provided. Remove special characters from name.
+            'computerName': computer_name or ''.join(filter(lambda x: x not in special_chars, name)),
             'adminUsername': admin_username
         }
 
@@ -383,6 +386,10 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
 
     if availability_set_id:
         vm_properties['availabilitySet'] = {'id': availability_set_id}
+
+    # vmss is ID
+    if vmss is not None:
+        vm_properties['virtualMachineScaleSet'] = {'id': vmss}
 
     if not attach_os_disk:
         vm_properties['osProfile'] = _build_os_profile()
@@ -644,7 +651,7 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
                         single_placement_group=None, platform_fault_domain_count=None, custom_data=None,
                         secrets=None, license_type=None, zones=None, priority=None, eviction_policy=None,
                         application_security_groups=None, ultra_ssd_enabled=None, proximity_placement_group=None,
-                        terminate_notification_time=None, max_billing=None):
+                        terminate_notification_time=None, max_billing=None, orchestration_mode=None):
 
     # Build IP configuration
     ip_configuration = {
@@ -844,6 +851,22 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
     }
     if zones:
         vmss['zones'] = zones
+    # vmss without vm profile
+    if orchestration_mode == 'VM':
+        if platform_fault_domain_count is None:
+            platform_fault_domain_count = 2
+        vmss = {
+            'type': 'Microsoft.Compute/virtualMachineScaleSets',
+            'name': name,
+            'location': location,
+            'tags': tags,
+            'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machine_scale_sets'),
+            'properties': {
+                'singlePlacementGroup': True,
+                'provisioningState': 0,
+                'platformFaultDomainCount': platform_fault_domain_count
+            }
+        }
     return vmss
 
 
@@ -873,3 +896,48 @@ def build_av_set_resource(cmd, name, location, tags, platform_update_domain_coun
         av_set['properties']['proximityPlacementGroup'] = {'id': proximity_placement_group}
 
     return av_set
+
+
+# used for log analytics workspace
+def build_vm_mmaExtension_resource(_, vm_name, location):
+    mmaExtension_resource = {
+        'type': 'Microsoft.Compute/virtualMachines/extensions',
+        'apiVersion': '2018-10-01',
+        'properties': {
+            'publisher': 'Microsoft.EnterpriseCloud.Monitoring',
+            'type': 'OmsAgentForLinux',
+            'typeHandlerVersion': '1.4',
+            'autoUpgradeMinorVersion': 'true',
+            'settings': {
+                'workspaceId': "[reference(parameters('workspaceId'), '2015-11-01-preview').customerId]",
+                'stopOnMultipleConnections': 'true'
+            },
+            'protectedSettings': {
+                'workspaceKey': "[listKeys(parameters('workspaceId'), '2015-11-01-preview').primarySharedKey]"
+            }
+        }
+    }
+
+    mmaExtension_resource['name'] = vm_name + '/OMSExtension'
+    mmaExtension_resource['location'] = location
+    mmaExtension_resource['dependsOn'] = ['Microsoft.Compute/virtualMachines/' + vm_name]
+    return mmaExtension_resource
+
+
+# used for log analytics workspace
+def build_vm_daExtensionName_resource(_, vm_name, location):
+    daExtensionName_resource = {
+        'type': 'Microsoft.Compute/virtualMachines/extensions',
+        'apiVersion': '2018-10-01',
+        'properties': {
+            'publisher': 'Microsoft.Azure.Monitoring.DependencyAgent',
+            'type': 'DependencyAgentLinux',
+            'typeHandlerVersion': '9.5',
+            'autoUpgradeMinorVersion': 'true'
+        }
+    }
+
+    daExtensionName_resource['name'] = vm_name + '/DependencyAgentLinux'
+    daExtensionName_resource['location'] = location
+    daExtensionName_resource['dependsOn'] = ['Microsoft.Compute/virtualMachines/{0}/extensions/OMSExtension'.format(vm_name)]  # pylint: disable=line-too-long
+    return daExtensionName_resource

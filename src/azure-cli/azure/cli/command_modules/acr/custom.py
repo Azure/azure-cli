@@ -17,6 +17,7 @@ from ._docker_utils import get_login_credentials
 from .network_rule import NETWORK_RULE_NOT_SUPPORTED
 
 logger = get_logger(__name__)
+DEF_DIAG_SETTINGS_NAME_TEMPLATE = '{}-diagnostic-settings'
 
 
 def acr_check_name(client, registry_name):
@@ -37,7 +38,8 @@ def acr_create(cmd,
                location=None,
                admin_enabled=False,
                default_action=None,
-               tags=None):
+               tags=None,
+               workspace=None):
     if default_action and sku not in get_premium_sku(cmd):
         raise CLIError(NETWORK_RULE_NOT_SUPPORTED)
 
@@ -48,7 +50,21 @@ def acr_create(cmd,
     registry = Registry(location=location, sku=Sku(name=sku), admin_user_enabled=admin_enabled, tags=tags)
     if default_action:
         registry.network_rule_set = NetworkRuleSet(default_action=default_action)
-    return client.create(resource_group_name, registry_name, registry)
+    lro_poller = client.create(resource_group_name, registry_name, registry)
+    if workspace:
+        from azure.cli.core.commands import LongRunningOperation
+        from msrestazure.tools import is_valid_resource_id, resource_id
+        from azure.cli.core.commands.client_factory import get_subscription_id
+        acr = LongRunningOperation(cmd.cli_ctx)(lro_poller)
+        if not is_valid_resource_id(workspace):
+            workspace = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
+                                    resource_group=resource_group_name,
+                                    namespace='microsoft.OperationalInsights',
+                                    type='workspaces',
+                                    name=workspace)
+        _create_diagnostic_settings(cmd.cli_ctx, acr, workspace)
+        return acr
+    return lro_poller
 
 
 def acr_delete(cmd, client, registry_name, resource_group_name=None):
@@ -245,3 +261,22 @@ def _check_wincred(login_server):
         return True
 
     return False
+
+
+def _create_diagnostic_settings(cli_ctx, acr, workspace):
+    from azure.mgmt.monitor import MonitorManagementClient
+    from azure.mgmt.monitor.models import (DiagnosticSettingsResource, RetentionPolicy,
+                                           LogSettings, MetricSettings)
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+
+    client = get_mgmt_service_client(cli_ctx, MonitorManagementClient)
+    def_retention_policy = RetentionPolicy(enabled=True, days=0)
+    logs = [
+        LogSettings(enabled=True, category="ContainerRegistryRepositoryEvents", retention_policy=def_retention_policy),
+        LogSettings(enabled=True, category="ContainerRegistryLoginEvents", retention_policy=def_retention_policy)
+    ]
+    metrics = [MetricSettings(enabled=True, category="AllMetrics", retention_policy=def_retention_policy)]
+    parameters = DiagnosticSettingsResource(workspace_id=workspace, metrics=metrics, logs=logs)
+
+    client.diagnostic_settings.create_or_update(resource_uri=acr.id, parameters=parameters,
+                                                name=DEF_DIAG_SETTINGS_NAME_TEMPLATE.format(acr.name))

@@ -27,7 +27,8 @@ from azure.cli.testsdk.preparers import (
     SingleValueReplacer)
 from azure.cli.command_modules.sql.custom import (
     ClientAuthenticationType,
-    ClientType)
+    ClientType,
+    ComputeModelType)
 from datetime import datetime, timedelta
 from time import sleep
 
@@ -457,6 +458,93 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('sku.tier', vcore_edition_updated),
                      JMESPathCheck('sku.capacity', vcore_capacity_updated),
                      JMESPathCheck('sku.family', vcore_family_updated)])
+
+
+class SqlServerServerlessDbMgmtScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(location='westus2')
+    @SqlServerPreparer(location='westus2')
+    @AllowLargeResponse()
+    def test_sql_db_serverless_mgmt(self, resource_group, resource_group_location, server):
+        database_name = "cliautomationdb01"
+        compute_model_serverless = ComputeModelType.serverless
+        compute_model_provisioned = ComputeModelType.provisioned
+
+        # Create database with vcore edition
+        vcore_edition = 'GeneralPurpose'
+        self.cmd('sql db create -g {} --server {} --name {} --edition {}'
+                 .format(resource_group, server, database_name, vcore_edition),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('edition', vcore_edition),
+                     JMESPathCheck('sku.tier', vcore_edition)])
+
+        # Update database to serverless offering
+        self.cmd('sql db update -g {} --server {} --name {} --compute-model {}'
+                 .format(resource_group, server, database_name, compute_model_serverless),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('edition', vcore_edition),
+                     JMESPathCheck('sku.tier', vcore_edition),
+                     JMESPathCheck('sku.name', 'GP_S_Gen5')])
+
+        # Update auto pause delay and min capacity
+        auto_pause_delay = 120
+        min_capacity = 1.0
+        self.cmd('sql db update -g {} -s {} -n {} --auto-pause-delay {} --min-capacity {}'
+                 .format(resource_group, server, database_name, auto_pause_delay, min_capacity),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('edition', vcore_edition),
+                     JMESPathCheck('sku.tier', vcore_edition),
+                     JMESPathCheck('autoPauseDelay', auto_pause_delay),
+                     JMESPathCheck('minCapacity', min_capacity)])
+
+        # Update only vCores
+        vCores = 8
+        self.cmd('sql db update -g {} -s {} -n {} -c {}'
+                 .format(resource_group, server, database_name, vCores),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('edition', vcore_edition),
+                     JMESPathCheck('sku.tier', vcore_edition),
+                     JMESPathCheck('sku.capacity', vCores)])
+
+        # Update back to provisioned database offering
+        self.cmd('sql db update -g {} --server {} --name {} --compute-model {}'
+                 .format(resource_group, server, database_name, compute_model_provisioned),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('edition', vcore_edition),
+                     JMESPathCheck('sku.tier', vcore_edition),
+                     JMESPathCheck('sku.name', 'GP_Gen5')])
+
+        # Create database with vcore edition with everything specified for Serverless
+        database_name_2 = 'cliautomationdb02'
+        vcore_edition = 'GeneralPurpose'
+        vcore_family = 'Gen5'
+        vcore_capacity = 4
+        auto_pause_delay = 120
+        min_capacity = 1.0
+
+        self.cmd('sql db create -g {} --server {} --name {} -e {} -c {} -f {} --compute-model {} --auto-pause-delay {} --min-capacity {}'
+                 .format(resource_group, server, database_name_2,
+                         vcore_edition, vcore_capacity,
+                         vcore_family, compute_model_serverless, auto_pause_delay, min_capacity),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_2),
+                     JMESPathCheck('edition', vcore_edition),
+                     JMESPathCheck('sku.tier', vcore_edition),
+                     JMESPathCheck('sku.capacity', vcore_capacity),
+                     JMESPathCheck('sku.family', vcore_family),
+                     JMESPathCheck('sku.name', 'GP_S_Gen5'),
+                     JMESPathCheck('autoPauseDelay', auto_pause_delay),
+                     JMESPathCheck('minCapacity', min_capacity)])
 
 
 class SqlServerDbOperationMgmtScenarioTest(ScenarioTest):
@@ -2925,6 +3013,109 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
 
         self.cmd('sql mi delete --id {} --yes'
                  .format(managed_instance_1['id']), checks=NoneCheck())
+
+
+class SqlManagedInstanceAzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
+    def test_sql_mi_aad_admin(self, resource_group, resource_group_location):
+
+        print('Test is started...\n')
+
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'vnet_name': 'vcCliTestVnet',
+            'subnet_name': 'vcCliTestSubnet',
+            'route_table_name': 'vcCliTestRouteTable',
+            'route_name_internet': 'vcCliTestRouteInternet',
+            'route_name_vnetlocal': 'vcCliTestRouteVnetLoc',
+            'managed_instance_name': self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length),
+            'admin_login': 'admin123',
+            'admin_password': 'SecretPassword123',
+            'license_type': 'LicenseIncluded',
+            'v_cores': 8,
+            'storage_size_in_gb': '32',
+            'edition': 'GeneralPurpose',
+            'family': 'Gen5',
+            'collation': "Serbian_Cyrillic_100_CS_AS",
+            'proxy_override': "Proxy"
+        })
+
+        # Create and prepare VNet and subnet for new virtual cluster
+        self.cmd('network route-table create -g {rg} -n {route_table_name}')
+        self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_internet} --next-hop-type Internet --address-prefix 0.0.0.0/0')
+        self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_vnetlocal} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
+        self.cmd('network vnet create -g {rg} -n {vnet_name} --location {loc} --address-prefix 10.0.0.0/16')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name}')
+        subnet = self.cmd('network vnet subnet show -g {rg} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
+
+        print('Vnet is created...\n')
+
+        self.kwargs.update({
+            'subnet_id': subnet['id']
+        })
+
+        # create sql managed_instance
+        self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
+                 '-u {admin_login} -p {admin_password} --subnet {subnet_id} --license-type {license_type} '
+                 '--capacity {v_cores} --storage {storage_size_in_gb} --edition {edition} --family {family} '
+                 '--collation {collation} --proxy-override {proxy_override} --public-data-endpoint-enabled',
+                 checks=[
+                     self.check('name', '{managed_instance_name}'),
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('administratorLogin', '{admin_login}'),
+                     self.check('vCores', '{v_cores}'),
+                     self.check('storageSizeInGb', '{storage_size_in_gb}'),
+                     self.check('licenseType', '{license_type}'),
+                     self.check('sku.tier', '{edition}'),
+                     self.check('sku.family', '{family}'),
+                     self.check('sku.capacity', '{v_cores}'),
+                     self.check('identity', None),
+                     self.check('collation', '{collation}'),
+                     self.check('proxyOverride', '{proxy_override}'),
+                     self.check('publicDataEndpointEnabled', 'True')])
+
+        print('Managed instance is created...\n')
+
+        self.kwargs.update({
+            'oid': '5e90ef3b-9b42-4777-819b-25c36961ea4d',
+            'oid2': 'e4d43337-d52c-4a0c-b581-09055e0359a0',
+            'user': 'DSEngAll',
+            'user2': 'TestUser'
+        })
+
+        print('Arguments are updated with login and sid data')
+
+        self.cmd('sql mi ad-admin create --mi {managed_instance_name} -g {rg} -i {oid} -u {user}',
+                 checks=[
+                     self.check('login', '{user}'),
+                     self.check('sid', '{oid}')])
+
+        print('Aad admin is set...\n')
+
+        self.cmd('sql mi ad-admin list --mi {managed_instance_name} -g {rg}',
+                 checks=[
+                     self.check('[0].login', '{user}'),
+                     self.check('[0].sid', '{oid}')])
+
+        print('Get aad admin...\n')
+
+        self.cmd('sql mi ad-admin update --mi {managed_instance_name} -g {rg} -u {user2} -i {oid2}',
+                 checks=[
+                     self.check('login', '{user2}'),
+                     self.check('sid', '{oid2}')])
+
+        print('Aad admin is updated...\n')
+
+        self.cmd('sql mi ad-admin delete --mi {managed_instance_name} -g {rg}')
+
+        print('Aad admin is deleted...\n')
+
+        self.cmd('sql mi ad-admin list --mi {managed_instance_name} -g {rg}',
+                 checks=[
+                     self.check('login', None)])
+
+        print('Test is finished...\n')
 
 
 class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):

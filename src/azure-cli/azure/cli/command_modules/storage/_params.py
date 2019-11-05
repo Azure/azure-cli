@@ -11,7 +11,7 @@ from azure.cli.core.commands.parameters import (tags_type, file_type, get_locati
 from ._validators import (get_datetime_type, validate_metadata, get_permission_validator, get_permission_help_string,
                           resource_type_type, services_type, validate_entity, validate_select, validate_blob_type,
                           validate_included_datasets, validate_custom_domain, validate_container_public_access,
-                          validate_table_payload_format, validate_key, add_progress_callback, process_resource_group,
+                          validate_table_payload_format, add_progress_callback, process_resource_group,
                           storage_account_key_options, process_file_download_namespace, process_metric_update_namespace,
                           get_char_options_validator, validate_bypass, validate_encryption_source, validate_marker,
                           validate_storage_data_plane_list, validate_azcopy_upload_destination_url,
@@ -66,6 +66,35 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         default=5000, help='Specifies the maximum number of results to return. Provide "*" to return all.',
         validator=validate_storage_data_plane_list)
 
+    large_file_share_type = CLIArgumentType(
+        action='store_true', min_api='2019-04-01', is_preview=True,
+        help='Enable the capability to support large file shares with more than 5 TiB capacity for storage account.'
+             'Once the property is enabled, the feature cannot be disabled. Currently only supported for LRS and '
+             'ZRS replication types, hence account conversions to geo-redundant accounts would not be possible. '
+             'For more information, please refer to https://go.microsoft.com/fwlink/?linkid=2086047.')
+    adds_type = CLIArgumentType(arg_type=get_three_state_flag(), min_api='2019-04-01',
+                                help='Enable Azure Files Active Directory Domain Service Authentication for '
+                                     'storage account. When --enable-files-adds is set to true, Azure Active '
+                                     'Directory Properties arguments must be provided.')
+    aadds_type = CLIArgumentType(arg_type=get_three_state_flag(), min_api='2018-11-01',
+                                 help='Enable Azure Active Directory Domain Services authentication for Azure Files')
+    domain_name_type = CLIArgumentType(min_api='2019-04-01', arg_group="Azure Active Directory Properties",
+                                       help="Specify the primary domain that the AD DNS server is authoritative for. "
+                                            "Required when --enable-files-adds is set to True")
+    net_bios_domain_name_type = CLIArgumentType(min_api='2019-04-01', arg_group="Azure Active Directory Properties",
+                                                help="Specify the NetBIOS domain name. "
+                                                     "Required when --enable-files-adds is set to True")
+    forest_name_type = CLIArgumentType(min_api='2019-04-01', arg_group="Azure Active Directory Properties",
+                                       help="Specify the Active Directory forest to get. "
+                                            "Required when --enable-files-adds is set to True")
+    domain_guid_type = CLIArgumentType(min_api='2019-04-01', arg_group="Azure Active Directory Properties",
+                                       help="Specify the domain GUID. Required when --enable-files-adds is set to True")
+    domain_sid_type = CLIArgumentType(min_api='2019-04-01', arg_group="Azure Active Directory Properties",
+                                      help="Specify the security identifier (SID). Required when --enable-files-adds "
+                                           "is set to True")
+    azure_storage_sid_type = CLIArgumentType(min_api='2019-04-01', arg_group="Azure Active Directory Properties",
+                                             help="Specify the security identifier (SID) for Azure Storage. "
+                                                  "Required when --enable-files-adds is set to True")
     sas_help = 'The permissions the SAS grants. Allowed values: {}. Do not use if a stored access policy is ' \
                'referenced with --id that specifies this value. Can be combined.'
 
@@ -99,7 +128,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage account check-name') as c:
         c.argument('name', options_list=['--name', '-n'])
 
-    with self.argument_context('storage account create') as c:
+    with self.argument_context('storage account create', resource_type=ResourceType.MGMT_STORAGE) as c:
         t_account_type, t_sku_name, t_kind = self.get_models('AccountType', 'SkuName', 'Kind',
                                                              resource_type=ResourceType.MGMT_STORAGE)
 
@@ -109,13 +138,24 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('account_name', acct_name_type, options_list=['--name', '-n'], completer=None)
         c.argument('kind', help='Indicates the type of storage account.',
                    arg_type=get_enum_type(t_kind, default='storage'))
+        c.argument('https_only', arg_type=get_three_state_flag(), min_api='2019-04-01',
+                   help='Allow https traffic only to storage service if set to true. The default value is true.')
+        c.argument('https_only', arg_type=get_three_state_flag(), max_api='2018-11-01',
+                   help='Allow https traffic only to storage service if set to true. The default value is false.')
         c.argument('tags', tags_type)
         c.argument('custom_domain', help='User domain assigned to the storage account. Name is the CNAME source.')
         c.argument('sku', help='The storage account SKU.', arg_type=get_enum_type(t_sku_name, default='standard_ragrs'))
-        c.argument('enable_files_aadds', arg_type=get_three_state_flag(), min_api='2018-11-01',
-                   help='Enable the identity based authentication settings for Azure Files.')
+        c.argument('enable_files_aadds', aadds_type)
+        c.argument('enable_files_adds', adds_type)
+        c.argument('enable_large_file_share', arg_type=large_file_share_type)
+        c.argument('domain_name', domain_name_type)
+        c.argument('net_bios_domain_name', net_bios_domain_name_type)
+        c.argument('forest_name', forest_name_type)
+        c.argument('domain_guid', domain_guid_type)
+        c.argument('domain_sid', domain_sid_type)
+        c.argument('azure_storage_sid', azure_storage_sid_type)
 
-    with self.argument_context('storage account update') as c:
+    with self.argument_context('storage account update', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.register_common_storage_account_options()
         c.argument('custom_domain',
                    help='User domain assigned to the storage account. Name is the CNAME source. Use "" to clear '
@@ -124,8 +164,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('use_subdomain', help='Specify whether to use indirect CNAME validation.',
                    arg_type=get_enum_type(['true', 'false']))
         c.argument('tags', tags_type, default=None)
-        c.argument('enable_files_aadds', arg_type=get_three_state_flag(), min_api='2018-11-01',
-                   help='Enable the identity based authentication settings for Azure Files.')
+        c.argument('enable_files_aadds', aadds_type)
+        c.argument('enable_files_adds', adds_type)
+        c.argument('enable_large_file_share', arg_type=large_file_share_type)
+        c.argument('domain_name', domain_name_type)
+        c.argument('net_bios_domain_name', net_bios_domain_name_type)
+        c.argument('forest_name', forest_name_type)
+        c.argument('domain_guid', domain_guid_type)
+        c.argument('domain_sid', domain_sid_type)
+        c.argument('azure_storage_sid', azure_storage_sid_type)
 
     with self.argument_context('storage account update', arg_group='Customer managed key', min_api='2017-06-01') as c:
         c.extra('encryption_key_name', help='The name of the KeyVault key', )
@@ -156,9 +203,16 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         for item in ['blob', 'file', 'queue', 'table']:
             c.argument('{}_endpoint'.format(item), help='Custom endpoint for {}s.'.format(item))
 
-    with self.argument_context('storage account keys renew') as c:
-        c.argument('key_name', options_list=['--key'], help='The key to regenerate.', validator=validate_key,
+    with self.argument_context('storage account keys list', resource_type=ResourceType.MGMT_STORAGE) as c:
+        t_expand_key_type = self.get_models('ListKeyExpand', resource_type=ResourceType.MGMT_STORAGE)
+        c.argument("expand", options_list=['--expand-key-type'], help='Specify the expanded key types to be listed.',
+                   arg_type=get_enum_type(t_expand_key_type), min_api='2019-04-01', is_preview=True)
+
+    with self.argument_context('storage account keys renew', resource_type=ResourceType.MGMT_STORAGE) as c:
+        c.argument('key_name', options_list=['--key'], help='The key options to regenerate.',
                    arg_type=get_enum_type(list(storage_account_key_options.keys())))
+        c.extra('key_type', help='The key type to regenerate. If --key-type is not specified, one of access keys will '
+                'be regenerated by default.', arg_type=get_enum_type(['kerb']), min_api='2019-04-01')
         c.argument('account_name', acct_name_type, id_part=None)
 
     with self.argument_context('storage account management-policy create') as c:
@@ -364,14 +418,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('blob_name', arg_type=blob_name_type)
 
     with self.argument_context('storage copy') as c:
-        c.argument('destination', options_list=['--destination', '-d'], help="The path/url of copy destination. \
-            It can be local path, an url to azure storage server. For more imformation, please refer to [link here]. \
-            If you provide destination parameter here, you do not need to provide arguments in copy \
-            destination arguments group and copy destination arguments will be deprecated  in future.")
-        c.argument('source', options_list=['--source', '-s'], help="The path/url of copy source. \
-            It can be local path, an url to azure storage server or AWS S3 buckets. For more imformation, please refer to [link here]. \
-            If you provide source parameter here, you do not need to provide arguments in copy source arguments group and copy source \
-            arguments will be deprecated in future.")
+        c.argument('destination', options_list=['--destination', '-d'], help="The path/url of copy destination. "
+                   "It can be a local path, an url to azure storage server. If you provide destination parameter "
+                   "here, you do not need to provide arguments in copy destination arguments group and copy "
+                   "destination arguments will be deprecated in future.")
+        c.argument('source', options_list=['--source', '-s'], help="The path/url of copy source. It can be a local"
+                   " path, an url to azure storage server or AWS S3 buckets. If you provide source parameter here,"
+                   " you do not need to provide arguments in copy source arguments group and copy source arguments"
+                   " will be deprecated in future.")
         for item in ['destination', 'source']:
             c.argument('{}_account_name'.format(item), arg_group='Copy {}'.format(item),
                        help='Storage account name of copy {}'.format(item))
@@ -385,12 +439,20 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                        help='File path in file share of copy {} storage account'.format(item))
             c.argument('{}_local_path'.format(item), arg_group='Copy {}'.format(item),
                        help='Local file path')
-        c.argument('recursive', action='store_true', help='Look into sub-directories \
+        c.argument('recursive', arg_group='Additional Flags', action='store_true', help='Look into sub-directories \
                     recursively when uploading from local file system.')
-        c.argument('put_md5', action='store_true', help='Create an MD5 hash of each file, and save the hash \
-                    as the Content-MD5 property of the destination blob/file.Only available when uploading.')
-        c.argument('blob_type', arg_type=get_enum_type(["BlockBlob", "PageBlob", "AppendBlob"]),
+        c.argument('put_md5', arg_group='Additional Flags', action='store_true',
+                   help='Create an MD5 hash of each file, and save the hash as the Content-MD5 property of the '
+                   'destination blob/file.Only available when uploading.')
+        c.argument('blob_type', arg_group='Additional Flags',
+                   arg_type=get_enum_type(["BlockBlob", "PageBlob", "AppendBlob"]),
                    help='The type of blob at the destination.')
+        c.argument('preserve_s2s_access_tier', arg_group='Additional Flags', arg_type=get_three_state_flag(),
+                   help='Preserve access tier during service to service copy. '
+                   'Please refer to https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-storage-tiers '
+                   'to ensure destination storage account support setting access tier. In the cases that setting '
+                   'access tier is not supported, please use `--preserve-s2s-access-tier false` to bypass copying '
+                   'access tier. (Default true)')
 
     with self.argument_context('storage blob copy') as c:
         for item in ['destination', 'source']:

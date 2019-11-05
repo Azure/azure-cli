@@ -52,7 +52,7 @@ def load_arguments(self, _):
                                      help="Scale set name. You can configure the default using `az configure --defaults vmss=<name>`",
                                      id_part='name')
 
-    extension_instance_name_type = CLIArgumentType(help="Name of the vm's instance of the extension. Default: name of the extension.")
+    extension_instance_name_type = CLIArgumentType(help="Name of extension instance, which can be customized. Default: name of the extension.")
     image_template_name_type = CLIArgumentType(overrides=name_arg_type, id_part='name')
 
     # StorageAccountTypes renamed to DiskStorageAccountTypes in 2018_06_01 of azure-mgmt-compute
@@ -81,6 +81,10 @@ def load_arguments(self, _):
         hyper_v_gen_sku = CLIArgumentType(arg_type=get_enum_type(HyperVGenerationTypes, default="V1"))
     else:
         hyper_v_gen_sku = CLIArgumentType(arg_type=get_enum_type(["V1", "V2"], default="V1"))
+
+    ultra_ssd_enabled_type = CLIArgumentType(
+        arg_type=get_three_state_flag(), min_api='2018-06-01',
+        help='Enables or disables the capability to have 1 or more managed data disks with UltraSSD_LRS storage account')
 
     # region MixedScopes
     for scope in ['vm', 'disk', 'snapshot', 'image', 'sig']:
@@ -261,7 +265,7 @@ def load_arguments(self, _):
         c.argument('nsg', help='The name to use when creating a new Network Security Group (default) or referencing an existing one. Can also reference an existing NSG by ID or specify "" for none.', arg_group='Network')
         c.argument('nsg_rule', help='NSG rule to create when creating a new NSG. Defaults to open ports for allowing RDP on Windows and allowing SSH on Linux.', arg_group='Network', arg_type=get_enum_type(['RDP', 'SSH']))
         c.argument('application_security_groups', min_api='2017-09-01', nargs='+', options_list=['--asgs'], help='Space-separated list of existing application security groups to associate with the VM.', arg_group='Network')
-
+        c.argument('workspace', is_preview=True, arg_group='Monitor', help='Name or ID of Log Analytics Workspace. If you specify the workspace through its name, the workspace should be in the same resource group with the vm, otherwise a new workspace will be created.')
     with self.argument_context('vm capture') as c:
         c.argument('overwrite', action='store_true')
 
@@ -270,12 +274,14 @@ def load_arguments(self, _):
         c.argument('write_accelerator', nargs='*', min_api='2017-12-01',
                    help="enable/disable disk write accelerator. Use singular value 'true/false' to apply across, or specify individual disks, e.g.'os=true 1=true 2=true' for os disk and data disks with lun of 1 & 2")
         c.argument('disk_caching', nargs='*', help="Use singular value to apply across, or specify individual disks, e.g. 'os=ReadWrite 0=None 1=ReadOnly' should enable update os disk and 2 data disks")
+        c.argument('ultra_ssd_enabled', ultra_ssd_enabled_type)
 
     with self.argument_context('vm create') as c:
         c.argument('name', name_arg_type, validator=_resource_not_exists(self.cli_ctx, 'Microsoft.Compute/virtualMachines'))
         c.argument('vm_name', name_arg_type, id_part=None, help='Name of the virtual machine.', completer=None)
         c.argument('os_disk_size_gb', type=int, help='the size of the os disk in GB', arg_group='Storage')
         c.argument('availability_set', help='Name or ID of an existing availability set to add the VM to. None by default.')
+        c.argument('vmss', help='Name or ID of an existing virtual machine scale set that the virtual machine should be assigned to. None by default.')
         c.argument('nsg', help='The name to use when creating a new Network Security Group (default) or referencing an existing one. Can also reference an existing NSG by ID or specify "" for none.', arg_group='Network')
         c.argument('nsg_rule', help='NSG rule to create when creating a new NSG. Defaults to open ports for allowing RDP on Windows and allowing SSH on Linux.', arg_group='Network', arg_type=get_enum_type(['RDP', 'SSH']))
         c.argument('application_security_groups', resource_type=ResourceType.MGMT_NETWORK, min_api='2017-09-01', nargs='+', options_list=['--asgs'], help='Space-separated list of existing application security groups to associate with the VM.', arg_group='Network', validator=validate_asg_names_or_ids)
@@ -375,6 +381,12 @@ def load_arguments(self, _):
 
     with self.argument_context('vm image show') as c:
         c.argument('skus', options_list=['--sku', '-s'])
+
+    with self.argument_context('vm image terms') as c:
+        c.argument('urn', help='URN, in the format of \'publisher:offer:sku:version\'. If specified, other argument values can be omitted')
+        c.argument('publisher', help='Image publisher')
+        c.argument('offer', help='Image offer')
+        c.argument('plan', help='Image billing plan')
 
     with self.argument_context('vm nic') as c:
         c.argument('vm_name', existing_vm_name, options_list=['--vm-name'], id_part=None)
@@ -490,6 +502,8 @@ def load_arguments(self, _):
                    help="The eviction policy for virtual machines in a low priority scale set.", is_preview=True)
         c.argument('application_security_groups', resource_type=ResourceType.MGMT_COMPUTE, min_api='2018-06-01', nargs='+', options_list=['--asgs'], help='Space-separated list of existing application security groups to associate with the VM.', arg_group='Network', validator=validate_asg_names_or_ids)
         c.argument('computer_name_prefix', help='Computer name prefix for all of the virtual machines in the scale set. Computer name prefixes must be 1 to 15 characters long')
+        c.argument('orchestration_mode', help='Choose how virtual machines are managed by the scale set. In VM mode, you manually create and add a virtual machine of any configuration to the scale set. In ScaleSetVM mode, you define a virtual machine model and Azure will generate identical instances based on that model.',
+                   arg_type=get_enum_type(['VM', 'ScaleSetVM']))
 
     with self.argument_context('vmss create', arg_group='Network Balancer') as c:
         LoadBalancerSkuName = self.get_models('LoadBalancerSkuName', resource_type=ResourceType.MGMT_NETWORK)
@@ -513,11 +527,11 @@ def load_arguments(self, _):
 
     with self.argument_context('vmss update') as c:
         protection_policy_type = CLIArgumentType(overrides=get_three_state_flag(), arg_group="Protection Policy", min_api='2019-03-01')
-
         c.argument('protect_from_scale_in', arg_type=protection_policy_type, help="Protect the VM instance from scale-in operations.")
         c.argument('protect_from_scale_set_actions', arg_type=protection_policy_type, help="Protect the VM instance from scale set actions (including scale-in).")
         c.argument('enable_terminate_notification', min_api='2019-03-01', arg_type=get_three_state_flag(),
                    help='Enable terminate notification')
+        c.argument('ultra_ssd_enabled', ultra_ssd_enabled_type)
 
     for scope in ['vmss create', 'vmss update']:
         with self.argument_context(scope) as c:
@@ -643,8 +657,7 @@ def load_arguments(self, _):
             c.argument('os_caching', options_list=[self.deprecate(target='--storage-caching', redirect='--os-disk-caching', hide=True), '--os-disk-caching'], help='Storage caching type for the VM OS disk. Default: ReadWrite', arg_type=get_enum_type(CachingTypes))
             c.argument('data_caching', options_list=['--data-disk-caching'], nargs='+',
                        help="storage caching type for data disk(s), including 'None', 'ReadOnly', 'ReadWrite', etc. Use a singular value to apply on all disks, or use '<lun>=<vaule1> <lun>=<value2>' to configure individual disk")
-            c.argument('ultra_ssd_enabled', arg_type=get_three_state_flag(), min_api='2018-06-01',
-                       help='Enables or disables the capability to have 1 or more managed data disks with UltraSSD_LRS storage account')
+            c.argument('ultra_ssd_enabled', ultra_ssd_enabled_type)
             c.argument('ephemeral_os_disk', arg_type=get_three_state_flag(), min_api='2018-06-01',
                        help='Allows you to create an OS disk directly on the host node, providing local disk performance and faster VM/VMSS reimage time.', is_preview=True)
 
@@ -660,7 +673,7 @@ def load_arguments(self, _):
             c.argument('public_ip_address_dns_name', help='Globally unique DNS name for a newly created public IP.')
             if self.supported_api_version(min_api='2017-08-01', resource_type=ResourceType.MGMT_NETWORK):
                 PublicIPAddressSkuName = self.get_models('PublicIPAddressSkuName', resource_type=ResourceType.MGMT_NETWORK)
-                c.argument('public_ip_sku', help='Sku', default=None, arg_type=get_enum_type(PublicIPAddressSkuName))
+                c.argument('public_ip_sku', help='Public IP SKU. It is set to Basic by default.', default=None, arg_type=get_enum_type(PublicIPAddressSkuName))
 
         with self.argument_context(scope, arg_group='Marketplace Image Plan') as c:
             c.argument('plan_name', help='plan name')
@@ -698,8 +711,11 @@ def load_arguments(self, _):
             c.argument('version', help='The version of the extension')
 
     with self.argument_context('vm extension set') as c:
+        c.argument('vm_extension_name', name_arg_type,
+                   completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines/extensions'),
+                   help='Name of the extension.', id_part=None)
         c.argument('force_update', action='store_true', help='force to update even if the extension configuration has not changed.')
-        c.argument('extension_instance_name', extension_instance_name_type, arg_group='Resource Id')
+        c.argument('extension_instance_name', extension_instance_name_type)
 
     with self.argument_context('vmss extension set', min_api='2017-12-01') as c:
         c.argument('force_update', action='store_true', help='force to update even if the extension configuration has not changed.')

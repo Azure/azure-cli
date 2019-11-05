@@ -192,7 +192,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='first_account')
-    @StorageAccountPreparer(parameter_name='second_account')
+    @StorageAccountPreparer(parameter_name='second_account', sku='Premium_LRS', kind='BlockBlobStorage')
     @StorageTestFilesPreparer()
     def test_storage_azcopy_blob_url(self, resource_group, first_account, second_account, test_dir):
 
@@ -246,19 +246,23 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.assertEqual(21, sum(len(f) for r, d, f in os.walk(local_folder)))
 
         # Copy a single blob to another single blob
-        self.cmd('storage copy -s "{}" -d "{}"'.format(
+        self.cmd('storage account show -n {}'.format(second_account), checks=[
+            self.check('kind', 'BlockBlobStorage')
+        ])
+
+        self.cmd('storage copy -s "{}" -d "{}" --preserve-s2s-access-tier false'.format(
             '{}/readme'.format(first_container_url), second_container_url))
         self.cmd('storage blob list -c {} --account-name {}'
                  .format(second_container, second_account), checks=JMESPathCheck('length(@)', 1))
 
         # Copy an entire directory from blob virtual directory to another blob virtual directory
-        self.cmd('storage copy -s "{}" -d "{}" --recursive'.format(
+        self.cmd('storage copy -s "{}" -d "{}" --recursive --preserve-s2s-access-tier false'.format(
             '{}/apple'.format(first_container_url), second_container_url))
         self.cmd('storage blob list -c {} --account-name {}'
                  .format(second_container, second_account), checks=JMESPathCheck('length(@)', 11))
 
         # Copy an entire storage account data to another blob account
-        self.cmd('storage copy -s "{}" -d "{}" --recursive'.format(
+        self.cmd('storage copy -s "{}" -d "{}" --recursive --preserve-s2s-access-tier false'.format(
             first_account_url, second_account_url))
         self.cmd('storage container list --account-name {}'
                  .format(second_account), checks=JMESPathCheck('length(@)', 2))
@@ -267,8 +271,8 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
 
         # Upload to managed disk
         diskname = self.create_random_name(prefix='disk', length=12)
-        local_file = self.create_temp_file(1024)
-        self.cmd('disk create -n {} -g {} --for-upload -z 1'
+        local_file = self.create_temp_file(20480)
+        self.cmd('disk create -n {} -g {} --for-upload --upload-size-bytes 20972032'
                  .format(diskname, resource_group))
         sasURL = self.cmd(
             'disk grant-access --access-level Write --duration-in-seconds 3600 -n {} -g {} --query accessSas'
@@ -278,7 +282,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='first_account')
-    @StorageAccountPreparer(parameter_name='second_account')
+    @StorageAccountPreparer(parameter_name='second_account', sku='Premium_LRS', kind='BlockBlobStorage')
     @StorageTestFilesPreparer()
     def test_storage_azcopy_blob_account(self, resource_group, first_account, second_account, test_dir):
 
@@ -327,20 +331,20 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
 
         # Copy a single blob to another single blob
         self.cmd('storage copy --source-account-name {} --source-container {} --source-blob {} \
-                 --destination-account-name {} --destination-container {}'
+                 --destination-account-name {} --destination-container {} --preserve-s2s-access-tier false'
                  .format(first_account, first_container, 'readme', second_account, second_container))
         self.cmd('storage blob list -c {} --account-name {}'
                  .format(second_container, second_account), checks=JMESPathCheck('length(@)', 1))
 
         # Copy an entire directory from blob virtual directory to another blob virtual directory
         self.cmd('storage copy --source-account-name {} --source-container {} --source-blob {} \
-                 --destination-account-name {} --destination-container {} --recursive'
+                 --destination-account-name {} --destination-container {} --recursive --preserve-s2s-access-tier false'
                  .format(first_account, first_container, 'apple', second_account, second_container))
         self.cmd('storage blob list -c {} --account-name {}'
                  .format(second_container, second_account), checks=JMESPathCheck('length(@)', 11))
 
         # Copy an entire storage account data to another blob account
-        self.cmd('storage copy --source-account-name {} --destination-account-name {} --recursive'
+        self.cmd('storage copy --source-account-name {} --destination-account-name {} --recursive --preserve-s2s-access-tier false'
                  .format(first_account, second_account))
         self.cmd('storage container list --account-name {}'
                  .format(second_account), checks=JMESPathCheck('length(@)', 2))

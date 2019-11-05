@@ -32,7 +32,7 @@ from ._vm_diagnostics_templates import get_default_diag_config
 
 from ._actions import (load_images_from_aliases_doc, load_extension_images_thru_services,
                        load_images_thru_services, _get_latest_image_version)
-from ._client_factory import _compute_client_factory, cf_public_ip_addresses
+from ._client_factory import _compute_client_factory, cf_public_ip_addresses, cf_vm_image_term
 
 logger = get_logger(__name__)
 
@@ -47,7 +47,7 @@ _LINUX_DIAG_EXT = 'LinuxDiagnostic'
 _WINDOWS_DIAG_EXT = 'IaaSDiagnostics'
 extension_mappings = {
     _LINUX_ACCESS_EXT: {
-        'version': '1.4',
+        'version': '1.5',
         'publisher': 'Microsoft.OSTCExtensions'
     },
     _WINDOWS_ACCESS_EXT: {
@@ -522,7 +522,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               identity_role='Contributor', identity_role_id=None, application_security_groups=None, zone=None,
               boot_diagnostics_storage=None, ultra_ssd_enabled=None, ephemeral_os_disk=None,
               proximity_placement_group=None, dedicated_host=None, dedicated_host_group=None, aux_subscriptions=None,
-              priority=None, max_billing=None, eviction_policy=None, enable_agent=None):
+              priority=None, max_billing=None, eviction_policy=None, enable_agent=None, workspace=None, vmss=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -530,7 +530,9 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                                                                 build_storage_account_resource, build_nic_resource,
                                                                 build_vnet_resource, build_nsg_resource,
                                                                 build_public_ip_resource, StorageProfile,
-                                                                build_msi_role_assignment)
+                                                                build_msi_role_assignment,
+                                                                build_vm_mmaExtension_resource,
+                                                                build_vm_daExtensionName_resource)
     from msrestazure.tools import resource_id, is_valid_resource_id
 
     storage_sku = disk_info['os'].get('storageAccountType')
@@ -615,6 +617,10 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         if any(invalid_parameters):
             raise CLIError('When specifying an existing NIC, do not specify NSG, '
                            'public IP, ASGs, VNet or subnet.')
+        if accelerated_networking is not None:
+            logger.warning('When specifying an existing NIC, do not specify accelerated networking. '
+                           'Ignore --accelerated-networking now. '
+                           'This will trigger an error instead of a warning in future releases.')
 
     os_vhd_uri = None
     if storage_profile in [StorageProfile.SACustomImage, StorageProfile.SAPirImage]:
@@ -644,7 +650,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         boot_diagnostics_storage_uri=boot_diagnostics_storage, ultra_ssd_enabled=ultra_ssd_enabled,
         proximity_placement_group=proximity_placement_group, computer_name=computer_name,
         dedicated_host=dedicated_host, priority=priority, max_billing=max_billing, eviction_policy=eviction_policy,
-        enable_agent=enable_agent)
+        enable_agent=enable_agent, vmss=vmss)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -664,6 +670,14 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
             role_assignment_guid = str(_gen_guid())
             master_template.add_resource(build_msi_role_assignment(vm_name, vm_id, identity_role_id,
                                                                    role_assignment_guid, identity_scope))
+
+    if workspace is not None:
+        workspace_id = _prepare_workspace(cmd, resource_group_name, workspace)
+        master_template.add_secure_parameter('workspaceId', workspace_id)
+        vm_mmaExtension_resource = build_vm_mmaExtension_resource(cmd, vm_name, location)
+        vm_daExtensionName_resource = build_vm_daExtensionName_resource(cmd, vm_name, location)
+        master_template.add_resource(vm_mmaExtension_resource)
+        master_template.add_resource(vm_daExtensionName_resource)
 
     master_template.add_resource(vm_resource)
 
@@ -689,8 +703,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     if no_wait:
         return sdk_no_wait(no_wait, client.create_or_update,
                            resource_group_name, deployment_name, properties)
-    LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(no_wait, client.create_or_update,
-                                                  resource_group_name, deployment_name, properties))
+    LongRunningOperation(cmd.cli_ctx)(client.create_or_update(resource_group_name, deployment_name, properties))
+
     vm = get_vm_details(cmd, resource_group_name, vm_name)
     if assign_identity is not None:
         if enable_local_identity and not identity_scope:
@@ -940,7 +954,7 @@ def show_vm(cmd, resource_group_name, vm_name, show_details=False):
 
 
 def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None,
-              write_accelerator=None, license_type=None, no_wait=False, **kwargs):
+              write_accelerator=None, license_type=None, no_wait=False, ultra_ssd_enabled=None, **kwargs):
     from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
     vm = kwargs['parameters']
@@ -964,9 +978,46 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
     if license_type is not None:
         vm.license_type = license_type
 
+    if ultra_ssd_enabled is not None:
+        if vm.additional_capabilities is None:
+            AdditionalCapabilities = cmd.get_models('AdditionalCapabilities')
+            vm.additional_capabilities = AdditionalCapabilities(ultra_ssd_enabled=ultra_ssd_enabled)
+        else:
+            vm.additional_capabilities.ultra_ssd_enabled = ultra_ssd_enabled
+
     return sdk_no_wait(no_wait, _compute_client_factory(cmd.cli_ctx).virtual_machines.create_or_update,
                        resource_group_name, vm_name, **kwargs)
 
+
+def _prepare_workspace(cmd, resource_group_name, workspace):
+    from msrestazure.tools import is_valid_resource_id
+    from ._client_factory import cf_log_analytics
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from msrestazure.azure_exceptions import CloudError
+
+    workspace_id = None
+    if not is_valid_resource_id(workspace):
+        workspace_name = workspace
+        subscription_id = get_subscription_id(cmd.cli_ctx)
+        log_client = cf_log_analytics(cmd.cli_ctx, subscription_id)
+        workspace_result = None
+        try:
+            workspace_result = log_client.get(resource_group_name, workspace_name)
+        except CloudError:
+            from azure.mgmt.loganalytics.models import Workspace, Sku, SkuNameEnum
+            sku = Sku(name=SkuNameEnum.per_gb2018.value)
+            retention_time = 30  # default value
+            location = _get_resource_group_location(cmd.cli_ctx, resource_group_name)
+            workspace_instance = Workspace(location=location,
+                                           sku=sku,
+                                           retention_in_days=retention_time)
+            workspace_result = LongRunningOperation(cmd.cli_ctx)(log_client.create_or_update(resource_group_name,
+                                                                                             workspace_name,
+                                                                                             workspace_instance))
+        workspace_id = workspace_result.id
+    else:
+        workspace_id = workspace
+    return workspace_id
 # endregion
 
 
@@ -1395,6 +1446,75 @@ def accept_market_ordering_terms(cmd, urn=None, publisher=None, offer=None, plan
     term.accepted = True
     return market_place_client.marketplace_agreements.create(publisher, offer, plan, term)
 # endregion
+
+
+def _terms_prepare(cmd, urn, publisher, offer, plan):
+    if urn:
+        if any([publisher, offer, plan]):
+            raise CLIError('usage error: If using --urn, do not use any of --plan, --offer, --publisher.')
+        terms = urn.split(':')
+        if len(terms) != 4:
+            raise CLIError('usage error: urn should be in the format of publisher:offer:sku:version.')
+        publisher, offer = terms[0], terms[1]
+        image = show_vm_image(cmd, urn)
+        if not image.plan:
+            raise CLIError("Image '%s' has no terms to accept." % urn)
+        plan = image.plan.name
+    else:
+        if not all([publisher, offer, plan]):
+            raise CLIError(
+                'usage error: If not using --urn, all of --plan, --offer and --publisher should be provided.')
+    return publisher, offer, plan
+
+
+def _accept_cancel_terms(cmd, urn, publisher, offer, plan, accept):
+    publisher, offer, plan = _terms_prepare(cmd, urn, publisher, offer, plan)
+    op = cf_vm_image_term(cmd.cli_ctx, '')
+    terms = op.get(publisher, offer, plan)
+    terms.accepted = accept
+    return op.create(publisher, offer, plan, terms)
+
+
+def accept_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
+    """
+    Accept Azure Marketplace image terms so that the image can be used to create VMs.
+    :param cmd:cmd
+    :param urn:URN, in the format of 'publisher:offer:sku:version'. If specified, other argument values can be omitted
+    :param publisher:Image publisher
+    :param offer:Image offer
+    :param plan:Image billing plan
+    :return:
+    """
+    return _accept_cancel_terms(cmd, urn, publisher, offer, plan, True)
+
+
+def cancel_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
+    """
+    Cancel Azure Marketplace image terms.
+    :param cmd:cmd
+    :param urn:URN, in the format of 'publisher:offer:sku:version'. If specified, other argument values can be omitted
+    :param publisher:Image publisher
+    :param offer:Image offer
+    :param plan:Image billing plan
+    :return:
+    """
+    return _accept_cancel_terms(cmd, urn, publisher, offer, plan, False)
+
+
+def get_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
+    """
+    Get the details of Azure Marketplace image terms.
+    :param cmd:cmd
+    :param urn:URN, in the format of 'publisher:offer:sku:version'. If specified, other argument values can be omitted
+    :param publisher:Image publisher
+    :param offer:Image offer
+    :param plan:Image billing plan
+    :return:
+    """
+    publisher, offer, plan = _terms_prepare(cmd, urn, publisher, offer, plan)
+    op = cf_vm_image_term(cmd.cli_ctx, '')
+    terms = op.get(publisher, offer, plan)
+    return terms
 
 
 # region VirtualMachines NetworkInterfaces (NICs)
@@ -1838,7 +1958,7 @@ def assign_vmss_identity(cmd, resource_group_name, vmss_name, assign_identity=No
 
 
 # pylint: disable=too-many-locals, too-many-statements
-def create_vmss(cmd, vmss_name, resource_group_name, image,
+def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 disable_overprovision=False, instance_count=2,
                 location=None, tags=None, upgrade_policy_mode='manual', validate=False,
                 admin_username=None, admin_password=None, authentication_type=None,
@@ -1866,7 +1986,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
                 identity_role_id=None, zones=None, priority=None, eviction_policy=None,
                 application_security_groups=None, ultra_ssd_enabled=None, ephemeral_os_disk=None,
                 proximity_placement_group=None, aux_subscriptions=None, terminate_notification_time=None,
-                max_billing=None, computer_name_prefix=None):
+                max_billing=None, computer_name_prefix=None, orchestration_mode='ScaleSetVM'):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -2074,7 +2194,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
         custom_data=custom_data, secrets=secrets, license_type=license_type, zones=zones, priority=priority,
         eviction_policy=eviction_policy, application_security_groups=application_security_groups,
         ultra_ssd_enabled=ultra_ssd_enabled, proximity_placement_group=proximity_placement_group,
-        terminate_notification_time=terminate_notification_time, max_billing=max_billing)
+        terminate_notification_time=terminate_notification_time, max_billing=max_billing,
+        orchestration_mode=orchestration_mode)
     vmss_resource['dependsOn'] = vmss_dependencies
 
     if plan_name:
@@ -2301,7 +2422,7 @@ def update_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_
 
 def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False, instance_id=None,
                 protect_from_scale_in=None, protect_from_scale_set_actions=None,
-                enable_terminate_notification=None, terminate_notification_time=None,
+                enable_terminate_notification=None, terminate_notification_time=None, ultra_ssd_enabled=None,
                 **kwargs):
     vmss = kwargs['parameters']
     client = _compute_client_factory(cmd.cli_ctx)
@@ -2334,6 +2455,21 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         vmss.virtual_machine_profile.scheduled_events_profile.terminate_notification_profile =\
             TerminateNotificationProfile(not_before_timeout=terminate_notification_time,
                                          enable=enable_terminate_notification)
+
+    if ultra_ssd_enabled is not None:
+        if cmd.supported_api_version(min_api='2019-03-01', operation_group='virtual_machine_scale_sets'):
+            if vmss.additional_capabilities is None:
+                AdditionalCapabilities = cmd.get_models('AdditionalCapabilities')
+                vmss.additional_capabilities = AdditionalCapabilities(ultra_ssd_enabled=ultra_ssd_enabled)
+            else:
+                vmss.additional_capabilities.ultra_ssd_enabled = ultra_ssd_enabled
+        else:
+            if vmss.virtual_machine_profile.additional_capabilities is None:
+                AdditionalCapabilities = cmd.get_models('AdditionalCapabilities')
+                vmss.virtual_machine_profile.additional_capabilities = AdditionalCapabilities(
+                    ultra_ssd_enabled=ultra_ssd_enabled)
+            else:
+                vmss.virtual_machine_profile.additional_capabilities.ultra_ssd_enabled = ultra_ssd_enabled
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.create_or_update,
                        resource_group_name, name, **kwargs)

@@ -32,6 +32,7 @@ from ._validators import (
     validate_set_secret,
     validate_retention_days
 )
+from .scope_map import ScopeMapActions
 
 image_by_tag_or_digest_type = CLIArgumentType(
     options_list=['--image', '-t'],
@@ -40,7 +41,8 @@ image_by_tag_or_digest_type = CLIArgumentType(
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-statements
-    SkuName, PasswordName, DefaultAction, PolicyStatus, WebhookAction, WebhookStatus, TaskStatus, BaseImageTriggerType, RunStatus, SourceRegistryLoginMode, UpdateTriggerPayloadType = self.get_models('SkuName', 'PasswordName', 'DefaultAction', 'PolicyStatus', 'WebhookAction', 'WebhookStatus', 'TaskStatus', 'BaseImageTriggerType', 'RunStatus', 'SourceRegistryLoginMode', 'UpdateTriggerPayloadType')
+    SkuName, PasswordName, DefaultAction, PolicyStatus, WebhookAction, WebhookStatus, TaskStatus, BaseImageTriggerType, RunStatus, SourceRegistryLoginMode, UpdateTriggerPayloadType, TokenStatus = self.get_models(
+        'SkuName', 'PasswordName', 'DefaultAction', 'PolicyStatus', 'WebhookAction', 'WebhookStatus', 'TaskStatus', 'BaseImageTriggerType', 'RunStatus', 'SourceRegistryLoginMode', 'UpdateTriggerPayloadType', 'TokenStatus')
     with self.argument_context('acr') as c:
         c.argument('tags', arg_type=tags_type)
         c.argument('registry_name', options_list=['--name', '-n'], help='The name of the container registry. You can configure the default registry name using `az configure --defaults acr=<registry name>`', completer=get_resource_name_completion_list(REGISTRY_RESOURCE_TYPE), configured_default='acr')
@@ -110,6 +112,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('registry_name', completer=None)
         c.argument('deployment_name', validator=None)
         c.argument('location', validator=get_default_location_from_resource_group)
+        c.argument('workspace', is_preview=True,
+                   help='Name or ID of the Log Analytics workspace to send registry diagnostic logs to. All events will be enabled. You can use "az monitor log-analytics workspace create" to create one. Extra billing may apply.')
 
     with self.argument_context('acr check-name') as c:
         c.argument('registry_name', completer=None)
@@ -145,6 +149,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('registry_name', options_list=['--registry', '-r'])
         c.argument('image_name', options_list=['--image', '-t'], help="The name and tag of the image using the format: '-t repo/image:tag'.")
         c.argument('builder', options_list=['--builder', '-b'], help="The name and tag of a Buildpack builder image.")
+        c.argument('pack_image_tag', options_list=['--pack-image-tag'], help="The tag of the 'pack' runner image ('mcr.microsoft.com/oryx/pack').", is_preview=True)
         c.argument('pull', options_list=['--pull'], help="Pull the latest builder and run images before use.", action='store_true')
         c.positional('source_location', help="The local source code directory path (e.g., './src') or the URL to a git repository (e.g., 'https://github.com/Azure-Samples/acr-build-helloworld-node.git') or a remote tarball (e.g., 'http://server/context.tar.gz').", completer=FilesCompleter())
 
@@ -249,3 +254,45 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('acr check-health') as c:
         c.argument('ignore_errors', options_list=['--ignore-errors'], help='Provide all health checks, even if errors are found', action='store_true', required=False)
+
+    with self.argument_context('acr scope-map') as c:
+        c.argument('registry_name', options_list=['--registry', '-r'])
+        c.argument('description', options_list=['--description'], help='Description for the scope map. Maximum 256 characters are allowed.', required=False)
+        c.argument('scope_map_name', options_list=['--name', '-n'], help='The name of the scope map.', required=True)
+
+    valid_actions = "Valid actions are {}".format({action.value for action in ScopeMapActions})
+    with self.argument_context('acr scope-map update') as c:
+        c.argument('add_repository', options_list=['--add'], nargs='+', action='append', required=False,
+                   help='repository permissions to be added. Use the format "--add REPO [ACTION1 ACTION2 ...]" per flag. ' + valid_actions)
+        c.argument('remove_repository', options_list=['--remove'], nargs='+', action='append', required=False,
+                   help='respsitory permissions to be removed. Use the format "--remove REPO [ACTION1 ACTION2 ...]" per flag. ' + valid_actions)
+
+    with self.argument_context('acr scope-map create') as c:
+        c.argument('repository_actions_list', options_list=['--repository'], nargs='+', action='append', required=True,
+                   help='repository permissions. Use the format "--repository REPO [ACTION1 ACTION2 ...]" per flag. ' + valid_actions)
+
+    with self.argument_context('acr token') as c:
+        c.argument('registry_name', options_list=['--registry', '-r'])
+        c.argument('token_name', options_list=['--name', '-n'], help='The name of the token.', required=True)
+        c.argument('scope_map_name', options_list=['--scope-map'], help='The name of the scope map associated with the token', required=False)
+        c.argument('status', options_list=['--status'], arg_type=get_enum_type(TokenStatus),
+                   help='The status of the token', required=False, default="enabled")
+
+    with self.argument_context('acr token create') as c:
+        c.argument('scope_map_name', options_list=['--scope-map'],
+                   help='The name of the scope map with pre-configured repository permissions. Use "--repository" if you would like CLI to configure one for you')
+        c.argument('repository_actions_list', options_list=['--repository'], nargs='+', action='append',
+                   help='repository permissions. Use the format "--repository REPO [ACTION1 ACTION2 ...]" per flag. ' + valid_actions)
+        c.argument('no_passwords', arg_type=get_three_state_flag(), help='Do not generate passwords, instead use "az acr token credential generate"')
+
+    with self.argument_context('acr token update') as c:
+        c.argument('scope_map_name', options_list=['--scope-map'], help='The name of the scope map associated with the token. If not specified, running this command will disassociate the current scope map related to the token.', required=False)
+
+    with self.argument_context('acr token credential generate') as c:
+        c.argument('password1', options_list=['--password1'], help='Flag indicating if password1 should be generated.', action='store_true', required=False)
+        c.argument('password2', options_list=['--password2'], help='Flag indicating if password2 should be generated.', action='store_true', required=False)
+        c.argument('days', options_list=['--days'], help='Number of days for which the credentials will be valid. If not specified, the expiration will default to the max value "9999-12-31T23:59:59.999999+00:00"', type=int, required=False)
+
+    with self.argument_context('acr token credential delete') as c:
+        c.argument('password1', options_list=['--password1'], help='Flag indicating if first password should be deleted', action='store_true', required=False)
+        c.argument('password2', options_list=['--password2'], help='Flag indicating if second password should be deleted.', action='store_true', required=False)

@@ -74,6 +74,7 @@ class CLIPrintMixin(CLIHelp):
 
     @staticmethod
     def _print_examples(help_file):
+        from colorama import Style
         indent = 0
         _print_indent('Examples', indent)
         for e in help_file.examples:
@@ -84,6 +85,9 @@ class CLIPrintMixin(CLIHelp):
                 _print_indent(u'{0}'.format(e.long_summary), indent)
             _print_indent(u'{0}'.format(e.command), indent)
             print('')
+        indent = 0
+        message = 'For more specific examples, use: az find "az {}"'.format(help_file.command)
+        _print_indent(Style.BRIGHT + message + Style.RESET_ALL + '\n', indent)
 
     @staticmethod
     def _process_value_sources(p):
