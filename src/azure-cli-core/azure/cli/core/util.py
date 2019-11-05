@@ -19,6 +19,12 @@ logger = get_logger(__name__)
 CLI_PACKAGE_NAME = 'azure-cli'
 COMPONENT_PREFIX = 'azure-cli-'
 
+SSLERROR_TEMPLATE = ('Certificate verification failed. This typically happens when using Azure CLI behind a proxy '
+                     'that intercepts traffic with a self-signed certificate. '
+                     # pylint: disable=line-too-long
+                     'Please add this certificate to the trusted CA bundle: https://github.com/Azure/azure-cli/blob/dev/doc/use_cli_effectively.md#working-behind-a-proxy. '
+                     'Error detail: {}')
+
 
 def handle_exception(ex):  # pylint: disable=too-many-return-statements
     # For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
@@ -40,7 +46,11 @@ def handle_exception(ex):  # pylint: disable=too-many-return-statements
             logger.error('validation error: %s', ex)
             return 1
         if isinstance(ex, ClientRequestError):
-            logger.error("request failed: %s", ex)
+            msg = str(ex)
+            if 'SSLError' in msg:
+                logger.error("request failed: %s", SSLERROR_TEMPLATE.format(msg))
+            else:
+                logger.error("request failed: %s", ex)
             return 1
         if isinstance(ex, KeyboardInterrupt):
             return 1
