@@ -103,7 +103,7 @@ class VMShowListSizesListIPAddressesScenarioTest(ScenarioTest):
         self.kwargs.update({
             'loc': 'centralus',
             'vm': 'vm-with-public-ip',
-            'allocation': 'dynamic',
+            'allocation': 'static',
             'zone': 2
         })
         # Expecting no results at the beginning
