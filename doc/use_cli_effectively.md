@@ -103,7 +103,7 @@ For clarity, Bash scripts are used inline. Windows batch or PowerScript examples
   2. Check out the Rest API reference for the request payload, URL and API version. As an examplee, check out the community's comments on [how to create AppInsights](https://github.com/Azure/azure-cli/issues/5543).
 
 ## Working behind a proxy
-Proxy is common behind corporate network or introduced by tracing tools like Fiddler, mitmproxy, etc. If the proxy uses self-signed certificates, the Python [requests library](https://github.com/kennethreitz/requests) which CLI depends on will throw `SSLError("bad handshake: Error([('SSL routines', 'tls_process_server_certificate', 'certificate verify failed')],)",)`. There are 2 ways to handle this error:
+Proxy is common behind corporate network or introduced by tracing tools like Fiddler, mitmproxy, etc. If the proxy uses self-signed certificates, the Python [Requests](https://github.com/kennethreitz/requests) library which CLI uses will throw `SSLError("bad handshake: Error([('SSL routines', 'tls_process_server_certificate', 'certificate verify failed')],)",)`. There are 2 ways to handle this error:
 
 1. Set environment variable `REQUESTS_CA_BUNDLE` to the path of CA bundle certificate file in PEM format. This is recommended if you use CLI frequently behind a corporate proxy. The default CA bundle which CLI uses is located at `C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\Lib\site-packages\certifi\cacert.pem` on Windows and ` /opt/az/lib/python3.6/site-packages/certifi/cacert.pem` on Linux. You may append the proxy server's certificate to this file or copy the contents to another certificate file, then set `REQUESTS_CA_BUNDLE` to it. For example:
   
@@ -119,7 +119,7 @@ Proxy is common behind corporate network or introduced by tracing tools like Fid
 
    For other details, check out [Stefan's blog](https://blog.jhnr.ch/2018/05/16/working-with-azure-cli-behind-ssl-intercepting-proxy-server/).
   
-2. Disable the certificate check across Azure CLI by setting environment variable `AZURE_CLI_DISABLE_CONNECTION_VERIFICATION` to 1. This is not safe, but good for a short period like capturing a network trace for a specific command and promptly turning it off when finished. This may not work for some data-plane commands due to underlying SDK limitations.
+2. Disable the certificate check across Azure CLI by setting environment variable `AZURE_CLI_DISABLE_CONNECTION_VERIFICATION=1`. This is not safe, but good for a short period like capturing a network trace for a specific command and promptly turning it off when finished. This may not work for some data-plane commands due to underlying SDK limitations.
 
 ## Concurrent builds
 
