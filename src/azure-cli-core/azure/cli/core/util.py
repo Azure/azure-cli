@@ -367,9 +367,9 @@ def sdk_no_wait(no_wait, func, *args, **kwargs):
 def open_page_in_browser(url):
     import subprocess
     import webbrowser
-    platform_name, release = _get_platform_info()
+    platform_name, _ = _get_platform_info()
 
-    if _is_wsl(platform_name, release):   # windows 10 linux subsystem
+    if is_wsl():   # windows 10 linux subsystem
         try:
             return subprocess.call(['cmd.exe', '/c', "start {}".format(url.replace('&', '^&'))])
         except OSError:  # WSL might be too old  # FileNotFoundError introduced in Python 3
@@ -395,16 +395,21 @@ def _get_platform_info():
     return platform_name.lower(), release.lower()
 
 
-def _is_wsl(platform_name, release):
+def is_wsl():
     platform_name, release = _get_platform_info()
     return platform_name == 'linux' and release.split('-')[-1] == 'microsoft'
+
+
+def is_windows():
+    platform_name, _ = _get_platform_info()
+    return platform_name == 'windows'
 
 
 def can_launch_browser():
     import os
     import webbrowser
-    platform_name, release = _get_platform_info()
-    if _is_wsl(platform_name, release) or platform_name != 'linux':
+    platform_name, _ = _get_platform_info()
+    if is_wsl() or platform_name != 'linux':
         return True
     # per https://unix.stackexchange.com/questions/46305/is-there-a-way-to-retrieve-the-name-of-the-desktop-environment
     # and https://unix.stackexchange.com/questions/193827/what-is-display-0
