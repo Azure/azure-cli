@@ -10,6 +10,7 @@ del baseline_deps.txt
 
 Rem Install everything from our repository first.
 call .\scripts\install_full.bat
+if %errorlevel% neq 0 exit /b %errorlevel%
 
 pip check
 if %errorlevel% neq 0 exit /b %errorlevel%
