@@ -61,14 +61,13 @@ class IoTHubTest(ScenarioTest):
         ])
 
         # Test 'az iot hub update'
-        property_to_update = 'properties.messagingEndpoints.fileNotifications.maxDeliveryCount'
-        updated_value = '20'
-        self.cmd('iot hub update -n {0} --set {1}="{2}"'.format(hub, property_to_update, updated_value),
+        self.cmd('iot hub update -n {0} --fnd 80 --rd 4'.format(hub),
                  checks=[self.check('resourcegroup', rg),
                          self.check('location', location),
                          self.check('name', hub),
                          self.check('sku.name', 'S1'),
-                         self.check(property_to_update, updated_value)])
+                         self.check('properties.eventHubEndpoints.events.retentionTimeInDays', '4'),
+                         self.check('properties.messagingEndpoints.fileNotifications.maxDeliveryCount', '80')])
 
         # Test 'az iot hub show'
         self.cmd('iot hub show -n {0}'.format(hub), checks=[
@@ -76,7 +75,15 @@ class IoTHubTest(ScenarioTest):
             self.check('location', location),
             self.check('name', hub),
             self.check('sku.name', 'S1'),
-            self.check(property_to_update, updated_value)
+            self.check('properties.eventHubEndpoints.events.partitionCount', '4'),
+            self.check('properties.eventHubEndpoints.events.retentionTimeInDays', '4'),
+            self.check('properties.cloudToDevice.feedback.maxDeliveryCount', '40'),
+            self.check('properties.cloudToDevice.feedback.lockDurationAsIso8601', '0:00:35'),
+            self.check('properties.cloudToDevice.feedback.ttlAsIso8601', '1 day, 5:00:00'),
+            self.check('properties.cloudToDevice.maxDeliveryCount', '89'),
+            self.check('properties.cloudToDevice.defaultTtlAsIso8601', '23:00:00'),
+            self.check('properties.messagingEndpoints.fileNotifications.ttlAsIso8601', '20:00:00'),
+            self.check('properties.messagingEndpoints.fileNotifications.maxDeliveryCount', '80')
         ])
 
         # Test 'az iot hub list'
