@@ -18,7 +18,8 @@ from six.moves import BaseHTTPServer
 
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._session import ACCOUNT
-from azure.cli.core.util import get_file_json, in_cloud_console, open_page_in_browser, can_launch_browser
+from azure.cli.core.util import get_file_json, in_cloud_console, open_page_in_browser, can_launch_browser,\
+    is_windows, is_wsl
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
 
 from knack.log import get_logger
@@ -1089,6 +1090,16 @@ def _get_authorization_code_worker(authority_url, resource, results):
     import random
 
     reply_url = None
+
+    # On Windows, HTTPServer by default doesn't throw error if the port is in-use
+    # https://github.com/Azure/azure-cli/issues/10578
+    if is_windows():
+        logger.debug('Windows is detected. Set HTTPServer.allow_reuse_address to False')
+        ClientRedirectServer.allow_reuse_address = False
+    elif is_wsl():
+        logger.debug('WSL is detected. Set HTTPServer.allow_reuse_address to False')
+        ClientRedirectServer.allow_reuse_address = False
+
     for port in range(8400, 9000):
         try:
             web_server = ClientRedirectServer(('localhost', port), ClientRedirectHandler)
