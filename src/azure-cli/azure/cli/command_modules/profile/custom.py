@@ -161,6 +161,9 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
                                # pylint: disable=line-too-long
                                "More details are available at https://github.com/AzureAD/microsoft-authentication-library-for-python/wiki/Username-Password-Authentication")
         raise CLIError(err)
+    except requests.exceptions.SSLError as err:
+        from azure.cli.core.util import SSLERROR_TEMPLATE
+        raise CLIError(SSLERROR_TEMPLATE.format(str(err)))
     except requests.exceptions.ConnectionError as err:
         raise CLIError('Please ensure you have network connection. Error detail: ' + str(err))
     all_subscriptions = list(subscriptions)
