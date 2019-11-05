@@ -904,7 +904,7 @@ class VMAvailSetLiveScenarioTest(ScenarioTest):
 
 class ComputeListSkusScenarioTest(ScenarioTest):
 
-    @AllowLargeResponse(size_kb=8144)
+    @AllowLargeResponse(size_kb=99999)
     def test_list_compute_skus_table_output(self):
         result = self.cmd('vm list-skus -l eastus2 -otable')
         lines = result.output.split('\n')
