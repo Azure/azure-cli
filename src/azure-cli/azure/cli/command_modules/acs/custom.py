@@ -2167,6 +2167,10 @@ def aks_remove_dev_spaces(cmd, client, name, resource_group_name, prompt=False):
             raise CLIError(ae)
 
 
+def aks_rotate_certs(cmd, client, resource_group_name, name, no_wait=True):
+    return sdk_no_wait(no_wait, client.rotate_cluster_certificates, resource_group_name, name)
+
+
 def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, enable, workspace_resource_id=None,
                    subnet_name=None, no_wait=False):
     # parse the comma-separated addons argument
@@ -3229,7 +3233,13 @@ def openshift_show(cmd, client, resource_group_name, name):
 def openshift_scale(cmd, client, resource_group_name, name, compute_count, no_wait=False):
     instance = client.get(resource_group_name, name)
     # TODO: change this approach when we support multiple agent pools.
-    instance.agent_pool_profiles[0].count = int(compute_count)  # pylint: disable=no-member
+    idx = 0
+    for i in range(len(instance.agent_pool_profiles)):
+        if instance.agent_pool_profiles[i].name.lower() == "compute":
+            idx = i
+            break
+
+    instance.agent_pool_profiles[idx].count = int(compute_count)  # pylint: disable=no-member
 
     # null out the AAD profile and add manually the masterAP name because otherwise validation complains
     instance.master_pool_profile.name = "master"

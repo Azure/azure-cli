@@ -3,12 +3,26 @@
 Release History
 ===============
 
+**AKS**
+
+* Support cluster certificate rotation operation using "az aks rotate-certs".
+
+**Packaging**
+
+* Rewrite the az wrapper in python
+
 **Profile**
 
-* Polish error when using `az login -u {} -p {}` with Microsoft account
+* Polish error when running `az login -u {} -p {}` with Microsoft account
+* Polish `SSLError` when running `az login` behind a proxy with self-signed root certificate
+* Fix #10578: `az login` hangs when more than one instances are launched at the same time on Windows or WSL
+
+**RBAC**
+
+* Fix #10996: Polish error for `--force-change-password-next-login` in `az ad user update` when `--password` is not specified
 
 2.0.76
-
+++++++
 
 **ACR**
 
@@ -70,6 +84,7 @@ Release History
 
 * Add new routing source type: DigitalTwinChangeEvents
 * Fix #2826: Missing features in "az iot hub create"
+* Bug Fixed: Return more descriptive message on raised exception. 
 
 **Key Vault**
 
