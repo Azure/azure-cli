@@ -409,6 +409,7 @@ class VMImageWithPlanTest(ScenarioTest):
 
     # Disable temporarily. You cannot purchase reservation because required AAD tenant information is missing.
     # Please ask your tenant admin to fill this form: https://aka.ms/orgprofile
+    """
     @ResourceGroupPreparer()
     def test_vm_create_with_market_place_image(self, resource_group, resource_group_location):
         # test 2 scenarios, 1. create vm from market place image, 2. create from a custom image captured from such vms
@@ -443,6 +444,7 @@ class VMImageWithPlanTest(ScenarioTest):
 
         self.cmd('vm create -g {rg} -n {vm2} --image {image} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password --plan-publisher {plan_publisher} --plan-name {plan_name} --plan-product {plan_product}')
         self.cmd('vm show -g {rg} -n {vm2}', checks=self.check('provisioningState', 'Succeeded'))
+    """
 
 
 class VMCreateFromUnmanagedDiskTest(ScenarioTest):
