@@ -7,6 +7,10 @@ Release History
 
 * Support cluster certificate rotation operation using "az aks rotate-certs".
 
+**Packaging**
+
+* Rewrite the az wrapper in python
+
 **Profile**
 
 * Polish error when using `az login -u {} -p {}` with Microsoft account
