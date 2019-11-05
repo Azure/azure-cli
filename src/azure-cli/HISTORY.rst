@@ -10,7 +10,7 @@ Release History
 **Profile**
 
 * Polish error when running `az login -u {} -p {}` with Microsoft account
-* Polish `SSLError` when running `az login` behind a proxy with custom root certificate
+* Polish `SSLError` when running `az login` behind a proxy with self-signed root certificate
 
 **RBAC**
 
