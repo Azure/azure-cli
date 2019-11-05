@@ -900,7 +900,7 @@ parameters:
   - name: --condition
     short-summary: The condition which triggers the rule.
     long-summary: |
-        Usage:  --conditon {avg,min,max,total,count} [NAMESPACE.]METRIC {=,!=,>,>=,<,<=} THRESHOLD
+        Usage:  --condition {avg,min,max,total,count} [NAMESPACE.]METRIC {=,!=,>,>=,<,<=} THRESHOLD
                            [where DIMENSION {includes,excludes} VALUE [or VALUE ...]
                            [and   DIMENSION {includes,excludes} VALUE [or VALUE ...] ...]]
 
@@ -908,7 +908,7 @@ parameters:
 
         Values for METRIC, DIMENSION and appropriate THRESHOLD values can be obtained from `az monitor metrics list-definitions` command.
 
-        Multiple conditons can be specified by using more than one `--condition` argument.
+        Multiple conditions can be specified by using more than one `--condition` argument.
 examples:
   - name: Create a high CPU usage alert on a VM with no actions.
     text: >
@@ -960,7 +960,7 @@ parameters:
   - name: --add-condition
     short-summary: Add a condition which triggers the rule.
     long-summary: |
-        Usage:  --add-conditon {avg,min,max,total,count} [NAMESPACE.]METRIC {=,!=,>,>=,<,<=} THRESHOLD
+        Usage:  --add-condition {avg,min,max,total,count} [NAMESPACE.]METRIC {=,!=,>,>=,<,<=} THRESHOLD
                                [where DIMENSION {includes,excludes} VALUE [or VALUE ...]
                                [and   DIMENSION {includes,excludes} VALUE [or VALUE ...] ...]]
 
@@ -968,7 +968,7 @@ parameters:
 
         Values for METRIC, DIMENSION and appropriate THRESHOLD values can be obtained from `az monitor metrics list-definitions` command.
 
-        Multiple conditons can be specified by using more than one `--condition` argument.
+        Multiple conditions can be specified by using more than one `--condition` argument.
   - name: --remove-conditions
     short-summary: Space-separated list of condition names to remove.
   - name: --add-action
