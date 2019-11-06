@@ -320,7 +320,7 @@ class ActionGroupReceiverParameterAction(MultiObjectsDeserializeAction):
             VoiceReceiver, LogicAppReceiver, AzureFunctionReceiver
         syntax = {
             'email': 'NAME EMAIL_ADDRESS [usecommonalertschema]',
-            'sms':  'NAME COUNTRY_CODE PHONE_NUMBER',
+            'sms': 'NAME COUNTRY_CODE PHONE_NUMBER',
             'webhook': 'NAME URI [usecommonalertschema] [useaadauth]',
             'armrole': 'NAME ROLE_ID [usecommonalertschema]',
             'azureapppush': 'NAME EMAIL_ADDRESS',
