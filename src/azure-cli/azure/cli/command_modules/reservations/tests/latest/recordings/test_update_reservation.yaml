@@ -1,67 +1,301 @@
 interactions:
 - request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Charset:
+      - utf-8
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+      return-client-request-id:
+      - 'true'
+      x-client-CPU:
+      - x64
+      x-client-OS:
+      - win32
+      x-client-SKU:
+      - Python
+      x-client-Ver:
+      - 1.2.2
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F84d1dc3d-cdcd-4bdd-9f5d-9290b7d1a3f2%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body:
+      string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/84d1dc3d-cdcd-4bdd-9f5d-9290b7d1a3f2/.well-known/openid-configuration"}'
+    headers:
+      access-control-allow-methods:
+      - GET, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - private, max-age=86400
+      content-length:
+      - '131'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 05 Nov 2019 07:56:48 GMT
+      p3p:
+      - CP="DSP CUR OTPi IND OTRi ONL FIN"
+      set-cookie:
+      - fpc=AnfqYOprXGFJu_cOh7u5Tu0; expires=Thu, 05-Dec-2019 07:56:49 GMT; path=/;
+        secure; HttpOnly; SameSite=None
+      - esctx=AQABAAAAAACQN9QBRU3jT6bcBQLZNUj76sgIKhmjiU9DZs2Y52ZOQTq605lRqaThJ1yOO_WGVEc-NdSGXFxWq1R7jP41PA0Q76_S94chNyea7swc9XeZFpOsNnIY_twH5FPGx7fOyJ5JosBEF-VVaCZCyUW3sS1_yyVsqf5jFPBGE8v1ieB2tgFcInWTQPp4rRvmafZHEqUgAA;
+        domain=.login.windows.net; path=/; secure; HttpOnly; SameSite=None
+      - x-ms-gateway-slice=corp; path=/; SameSite=None; secure; HttpOnly
+      - stsservicecookie=estscorp; path=/; SameSite=None; secure; HttpOnly
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ests-server:
+      - 2.1.9645.6 - WST ProdSlices
+    status:
+      code: 200
+      message: OK
+- request:
+    body: grant_type=refresh_token&client_id=04b07795-8ddb-461a-bbee-02f9e1bf7b46&resource=https%3A%2F%2Fmanagement.core.windows.net%2F&refresh_token=AgABAAAAAABbeHeS3-u1T5niRGZqjgpSAADs_wEA7__KZOIPGmPqDRwNkX8ETcQZ3_GyjOxCZpG8-uJrgVX_GUsB2nfwIC84CYxD8-AHUChLzL33_pKN_wjgJg5H8AjIITfcFjH-bNb7XAXJLpgBwEOQR-7o_JdhpdR-N-qf8FxtCtUv51wJGRj_CGYn6Sd9u0wf4bpVwom74kwOKJ7m6xlPjYREdlz2_5gbJYwOlHfI6j6eJa9DdmwjBAvIpRbUHGQn7wHv9Rbz1mtBl9Ut9xUdm1IjP__G98QEaPjJTho7m3S5tzNy1A7L4ENhWjWiFquCbFoIyerxBwFY-YQJc2mNZtwKuDKm-eZk-VxbP4-LETcIEeFJ8nnbbeSz3Flppx816GKtJDX0sXJ37Wef9I3xkyx09CaZfQ7c-of959q0Z1vVbahX3wjKJ9xBo7X3LwA99T5EjwRpGKKzKOPhalwXQplNTMkGBQX7i22V9bdbR2hCiyhNzF1wvKVmgojGCMK7425Oef8UKSCYREgX_P6CvR69JEQXj5Ds6RJlEkViw-2Xiwb9prnEMkUJO_6HWqD6IlaA1LL1b4N31GLkDXWeqofKDIK4ythdCJ_MXxcfGeBYR5jTe6WLS445B0Svhk6b3nNN2dL1j0I9VgToxlmZnOpRGNY9SHt3Qk2R8_PH2C3FjvT41oxVvmuTVkQSXlzs3Y51l8WSsvdQFYy6-u4x9677kNTuiV-lJiZTNdXdaXvcUXtsC1VnKdAzmvsyicYHNHQdT6mMxWD1OYXgQdGIo2tSoaLeYOT00uPdTzbgQKI8r5fMxGiBl0Azjw
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Charset:
+      - utf-8
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '970'
+      User-Agent:
+      - python-requests/2.22.0
+      content-type:
+      - application/x-www-form-urlencoded
+      return-client-request-id:
+      - 'true'
+      x-client-CPU:
+      - x64
+      x-client-OS:
+      - win32
+      x-client-SKU:
+      - Python
+      x-client-Ver:
+      - 1.2.2
+    method: POST
+    uri: https://login.windows-ppe.net/84d1dc3d-cdcd-4bdd-9f5d-9290b7d1a3f2/oauth2/token
+  response:
+    body:
+      string: '{"token_type":"Bearer","scope":"user_impersonation","expires_in":"3600","ext_expires_in":"3600","expires_on":"1572944210","not_before":"1572940310","resource":"https://management.core.windows.net/","access_token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6ImhHWlNoZFVfM0pROU5zNXFLd0loSUtHcXpKWSIsImtpZCI6ImhHWlNoZFVfM0pROU5zNXFLd0loSUtHcXpKWSJ9.eyJhdWQiOiJodHRwczovL21hbmFnZW1lbnQuY29yZS53aW5kb3dzLm5ldC8iLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLXBwZS5uZXQvODRkMWRjM2QtY2RjZC00YmRkLTlmNWQtOTI5MGI3ZDFhM2YyLyIsImlhdCI6MTU3Mjk0MDMxMCwibmJmIjoxNTcyOTQwMzEwLCJleHAiOjE1NzI5NDQyMTAsImFjciI6IjEiLCJhaW8iOiJFMkJnWU5oUjNpNGdKWFQyZm5DVVpuLzJuYTYyVHh2ZHJmUkx2elBNYTNGblV4Qngrd0FBIiwiYW1yIjpbInB3ZCJdLCJhcHBpZCI6IjA0YjA3Nzk1LThkZGItNDYxYS1iYmVlLTAyZjllMWJmN2I0NiIsImFwcGlkYWNyIjoiMCIsImdyb3VwcyI6WyIxZWYyOGYxYS0zNmQyLTQwYjAtOTM1Yi02ZDI1ZGZiMWU0MGIiLCJlYzFhZGNkNC1hNmRmLTQ2NjYtYTQ2Zi0yNTVhNzRiYmIyY2IiLCJjODQxMTBhZC01MjU4LTQ5MTctYmUwZC0yZjMxZjhhZmE0MzMiLCI2ZjI4N2U1MS03NGYxLTRhNTMtOGQ3My0zZjkwZWFjMGNmYjMiLCI3ODhkMjQzYy03N2VlLTQ3MTQtYWJmZC05MmFjY2U4YjJiOGQiXSwiaXBhZGRyIjoiMTMxLjEwNy4xNjAuMTA3IiwibmFtZSI6InhwIHNoYW5nIiwib2lkIjoiMTFmYzNhNGQtZjNiNC00ZjI5LWIzM2ItODI1YjRmMGNiZDc3IiwicHVpZCI6IjEwMDNERkZEMDAxNjFGMEEiLCJzY3AiOiJ1c2VyX2ltcGVyc29uYXRpb24iLCJzdWIiOiJxYmkxaUxETWwtc0pGS1Z6d1UwcnRhWDFWNEg1OXpIUEdaMnR5b1k2NjhRIiwidGlkIjoiODRkMWRjM2QtY2RjZC00YmRkLTlmNWQtOTI5MGI3ZDFhM2YyIiwidW5pcXVlX25hbWUiOiJ4cEBiaWxsdGVzdDExNTk3NGxpdmUuY2NzY3RwLm5ldCIsInVwbiI6InhwQGJpbGx0ZXN0MTE1OTc0bGl2ZS5jY3NjdHAubmV0IiwidXRpIjoiS3cyQTA2bXpKMC1OOWhFWG5xcG5BQSIsInZlciI6IjEuMCIsIndpZHMiOlsiODhkOGUzZTMtOGY1NS00YTFlLTk1M2EtOWI5ODk4Yjg4NzZiIiwiZDI0YWVmNTctMTUwMC00MDcwLTg0ZGItMjY2NmYyOWNmOTY2IiwiZmU5MzBiZTctNWU2Mi00N2RiLTkxYWYtOThjM2E0OWEzOGIxIiwiYzRlMzliZDktMTEwMC00NmQzLThjNjUtZmIxNjBkYTAwNzFmIiwiOWI4OTVkOTItMmNkMy00NGM3LTlkMDItYTZhYzJkNWVhNWMzIl19.CyGBqZXjH0wUhzp6BkDBFXfNBbH4PA1LBp1gNYpNyLeiZfu84IVBtV1-qXEUV8yi_S6uzebtUGT8oYsxztiZAhxq-RqlX3LtsEDpyw6kTa_FcFfuBAGVqxfEcD2nbcjQ2TlKZIX6hj2fnEZb65BSyGpmVTiAL1hQmTKQUKY9uM7dGaomXOnFKrqtH-cJtHM7TTWDMAha88JjG1RHVEImMI3r4zcoc1ZdwRV9ccyIH2x67_B7G_2wO-utK4P9RN7vdClVuub13y9uioVFMOiGisq0YLfnMz-pprTB-NdXVbtJkTEQEiqunMacIG-3JQsCeeiktqOA9WInWeTW39Frvw","refresh_token":"AgABAAAAAABbeHeS3-u1T5niRGZqjgpSAADs_wEA7_8o80WW8RxrxNxlFy-xsBD6NTCteD-sy2SouLFVYlfoXPrLtpsOFCcA8Zyx7TETlR2meWSN68L1UjqTZ7X_mVYwhVNULvm4Mu4SmA08Ts_OWuov3anAnRMn88Vj7kj4VQaH8i8Z0KftUtmTS4ZT9pDKqSM7BjEzwKKz1jm_h0BPkVYEWQ1z1gX4A_Rv4Gsx-yiXIGCF5yHIFJi0Qbn5b41JWSmipakZ55WTUiC30T2qEZ4LhWTPeQRHCIKy5Lqez4k5E3tYUN6mdOCAmv_KlCjZpTDeuOB1JvT6bGDOVrs6-TNgkmlB1JjxijO7fysHYQCG_gg4DclxdCGEmZ0hu9uKWiKxEjDRJBXO1tpQiit_nb3wgnXhCOSuQE7rgiPdU9KXWHsnCwlIxDEG-cGqBdSk3o_XB2CO7AfpC8_1gerEe78Rr2p0vPiXWFexngAraH6_TBqjTAQAyaYou0bV43Du016_dCbd_SQjP45GWDEg_FgJujHELnaDbmFJVMJvMrd331seBfaLQlvSQ7jCb5LaNddIviScfRNzrgiuWwj0tt10O-cCctKFoO3-DOl-wVArgInprdZZIvh458fQWQYPHf-0G2ygF6TbRnYlvOaf3E8ab-_XOZDWHxtnfnYjtBBTn6A1Ri505lvarThKh09eMI4CYl95vb_bwbiQ9Y-qHKZDv0JifA4YPOH2QGb9zLAlFKV1eN1ua3IYj_wELejz_JHcqn46dfGrGn3ptihl2Yu31d9ye1USduA4ouAovcMPYyZburdN1iRcR1pWxA","foci":"1"}'
+    headers:
+      cache-control:
+      - no-cache, no-store
+      content-length:
+      - '3020'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 05 Nov 2019 07:56:49 GMT
+      expires:
+      - '-1'
+      p3p:
+      - CP="DSP CUR OTPi IND OTRi ONL FIN"
+      pragma:
+      - no-cache
+      set-cookie:
+      - fpc=Ajom67NsVExGiQO51xWp5JFodTLtAQAAAEEiU9UOAAAA; expires=Thu, 05-Dec-2019
+        07:56:50 GMT; path=/; secure; HttpOnly; SameSite=None
+      - stsservicecookie=estsppe; path=/; SameSite=None; secure; HttpOnly
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-clitelem:
+      - 1,0,0,3583579.4737,
+      x-ms-ests-server:
+      - 2.1.9677.0 - CHY PPE
+    status:
+      code: 200
+      message: OK
+- request:
     body: '{"properties": {"appliedScopeType": "Single", "appliedScopes": ["/subscriptions/00000000-0000-0000-0000-000000000000"],
       "instanceFlexibility": "Off"}}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [reservations reservation update]
-      Connection: [keep-alive]
-      Content-Length: ['150']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.0
-          msrest_azure/0.4.32 azure-mgmt-reservations/0.2.1 Azure-SDK-For-Python AZURECLI/2.0.38]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - reservations reservation update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '150'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --reservation-order-id --reservation-id -t -s --instance-flexibility
+      User-Agent:
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-reservations/0.6.0 Azure-SDK-For-Python AZURECLI/2.0.76
+      accept-language:
+      - en-US
     method: PATCH
-    uri: https://management.azure.com/providers/Microsoft.Capacity/reservationOrders/98e884a1-2e01-4c9a-987e-e4e8be8f2775/reservations/e208f907-6d08-4b07-b857-91071cac521b?api-version=2018-06-01
+    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Capacity/reservationOrders/7c2f2e2d-3186-45fe-ac35-e60925b6f4b6/reservations/e102433b-39fe-4b02-a52f-e14e0323bd3b?api-version=2019-04-01
   response:
-    body: {string: '{"sku":{"name":"Standard_B1ms"},"id":"/providers/microsoft.capacity/reservationOrders/98e884a1-2e01-4c9a-987e-e4e8be8f2775/reservations/e208f907-6d08-4b07-b857-91071cac521b","type":"Microsoft.Capacity/reservationOrders/reservations","name":"98e884a1-2e01-4c9a-987e-e4e8be8f2775/e208f907-6d08-4b07-b857-91071cac521b","etag":9,"location":"eastasia","properties":{"appliedScopes":["/subscriptions/00000000-0000-0000-0000-000000000000"],"appliedScopeType":"Single","quantity":2,"provisioningState":"Succeeded","expiryDate":"2019-06-12","displayName":"CLI_testing","effectiveDateTime":"2018-06-12T18:59:59.1283664Z","lastUpdatedDateTime":"2018-06-12T19:00:10.1553804Z","reservedResourceType":"VirtualMachines","instanceFlexibility":"On","skuDescription":"Standard_B1ms","mergeProperties":{"mergeSources":["/providers/microsoft.capacity/reservationOrders/98e884a1-2e01-4c9a-987e-e4e8be8f2775/reservations/c379d4f5-44e6-4990-90fc-2999fafcec3a","/providers/microsoft.capacity/reservationOrders/98e884a1-2e01-4c9a-987e-e4e8be8f2775/reservations/010139b6-c3f4-4b3a-9530-f928616507dc"]}}}'}
+    body:
+      string: '{"sku":{"name":"Standard_D1"},"id":"/providers/microsoft.capacity/reservationOrders/7c2f2e2d-3186-45fe-ac35-e60925b6f4b6/reservations/e102433b-39fe-4b02-a52f-e14e0323bd3b","type":"Microsoft.Capacity/reservationOrders/reservations","name":"7c2f2e2d-3186-45fe-ac35-e60925b6f4b6/e102433b-39fe-4b02-a52f-e14e0323bd3b","etag":11,"location":"westus","properties":{"appliedScopes":["/subscriptions/00000000-0000-0000-0000-000000000000"],"appliedScopeType":"Single","quantity":2,"provisioningState":"Succeeded","expiryDate":"2022-11-05","displayName":"VM_RI_11-04-2019_23-34","effectiveDateTime":"2019-11-05T07:56:56.1334239Z","lastUpdatedDateTime":"2019-11-05T07:57:03.2965935Z","reservedResourceType":"VirtualMachines","instanceFlexibility":"Off","skuDescription":"Reserved
+        VM Instance, Standard_D1, US West, 3 Years","renew":false}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['1007']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 20 Jun 2018 22:57:44 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-tenant-writes: ['1198']
-      x-ms-test: ['{"contact":"kgautam","scenarios":"SqlSusePurchase","retention":"6/22/2018
-          1:11:40 AM"}']
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '827'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 05 Nov 2019 07:57:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-tenant-writes:
+      - '1199'
+      x-ms-test:
+      - '{"contact":"xishan","scenarios":"AeoEmailTest,CSZ,GtmRiPurchase","retention":"2/3/2020
+        7:34:57 AM"}'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Charset:
+      - utf-8
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+      return-client-request-id:
+      - 'true'
+      x-client-CPU:
+      - x64
+      x-client-OS:
+      - win32
+      x-client-SKU:
+      - Python
+      x-client-Ver:
+      - 1.2.2
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F84d1dc3d-cdcd-4bdd-9f5d-9290b7d1a3f2%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body:
+      string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/84d1dc3d-cdcd-4bdd-9f5d-9290b7d1a3f2/.well-known/openid-configuration"}'
+    headers:
+      access-control-allow-methods:
+      - GET, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - private, max-age=86400
+      content-length:
+      - '131'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 05 Nov 2019 07:57:04 GMT
+      p3p:
+      - CP="DSP CUR OTPi IND OTRi ONL FIN"
+      set-cookie:
+      - fpc=Ai3BC8Ha0QFCvPO2s-027lM; expires=Thu, 05-Dec-2019 07:57:04 GMT; path=/;
+        secure; HttpOnly; SameSite=None
+      - esctx=AQABAAAAAACQN9QBRU3jT6bcBQLZNUj7tNYHT-H2AjDocQa57HJZ4gDuxFw5jNEjHlTzIPPV_U9MIH-dHPzyKK5_HnHGHGwFwIy8WBiouj0rwRBhHCpYvac55N53FelMgQ7ffCN7ycgVC4Of8-T_l-FQfGQ3Vfb76GQ1uzDU99yzYoS6noTCKaKgIWXaBp2qrEYKIi-AWC8gAA;
+        domain=.login.windows.net; path=/; secure; HttpOnly; SameSite=None
+      - x-ms-gateway-slice=corp; path=/; SameSite=None; secure; HttpOnly
+      - stsservicecookie=estscorp; path=/; SameSite=None; secure; HttpOnly
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ests-server:
+      - 2.1.9645.6 - WST ProdSlices
+    status:
+      code: 200
+      message: OK
 - request:
     body: '{"properties": {"appliedScopeType": "Shared", "instanceFlexibility": "Off"}}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [reservations reservation update]
-      Connection: [keep-alive]
-      Content-Length: ['76']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.0
-          msrest_azure/0.4.32 azure-mgmt-reservations/0.2.1 Azure-SDK-For-Python AZURECLI/2.0.38]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - reservations reservation update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '76'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --reservation-order-id --reservation-id -t --instance-flexibility
+      User-Agent:
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-reservations/0.6.0 Azure-SDK-For-Python AZURECLI/2.0.76
+      accept-language:
+      - en-US
     method: PATCH
-    uri: https://management.azure.com/providers/Microsoft.Capacity/reservationOrders/98e884a1-2e01-4c9a-987e-e4e8be8f2775/reservations/e208f907-6d08-4b07-b857-91071cac521b?api-version=2018-06-01
+    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Capacity/reservationOrders/7c2f2e2d-3186-45fe-ac35-e60925b6f4b6/reservations/e102433b-39fe-4b02-a52f-e14e0323bd3b?api-version=2019-04-01
   response:
-    body: {string: '{"sku":{"name":"Standard_B1ms"},"id":"/providers/microsoft.capacity/reservationOrders/98e884a1-2e01-4c9a-987e-e4e8be8f2775/reservations/e208f907-6d08-4b07-b857-91071cac521b","type":"Microsoft.Capacity/reservationOrders/reservations","name":"98e884a1-2e01-4c9a-987e-e4e8be8f2775/e208f907-6d08-4b07-b857-91071cac521b","etag":8,"location":"eastasia","properties":{"appliedScopeType":"Shared","quantity":2,"provisioningState":"Succeeded","expiryDate":"2019-06-12","displayName":"CLI_testing","effectiveDateTime":"2018-06-20T22:56:34.4495261Z","lastUpdatedDateTime":"2018-06-20T22:56:38.2110255Z","reservedResourceType":"VirtualMachines","instanceFlexibility":"Off","skuDescription":"Standard_B1ms","mergeProperties":{"mergeSources":["/providers/microsoft.capacity/reservationOrders/98e884a1-2e01-4c9a-987e-e4e8be8f2775/reservations/c379d4f5-44e6-4990-90fc-2999fafcec3a","/providers/microsoft.capacity/reservationOrders/98e884a1-2e01-4c9a-987e-e4e8be8f2775/reservations/010139b6-c3f4-4b3a-9530-f928616507dc"]}}}'}
+    body:
+      string: '{"sku":{"name":"Standard_D1"},"id":"/providers/microsoft.capacity/reservationOrders/7c2f2e2d-3186-45fe-ac35-e60925b6f4b6/reservations/e102433b-39fe-4b02-a52f-e14e0323bd3b","type":"Microsoft.Capacity/reservationOrders/reservations","name":"7c2f2e2d-3186-45fe-ac35-e60925b6f4b6/e102433b-39fe-4b02-a52f-e14e0323bd3b","etag":13,"location":"westus","properties":{"appliedScopeType":"Shared","quantity":2,"provisioningState":"Succeeded","expiryDate":"2022-11-05","displayName":"VM_RI_11-04-2019_23-34","effectiveDateTime":"2019-11-05T07:57:26.9781205Z","lastUpdatedDateTime":"2019-11-05T07:57:29.3285081Z","reservedResourceType":"VirtualMachines","instanceFlexibility":"Off","skuDescription":"Reserved
+        VM Instance, Standard_D1, US West, 3 Years","renew":false}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['1006']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 20 Jun 2018 22:56:39 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-tenant-writes: ['1199']
-      x-ms-test: ['{"contact":"kgautam","scenarios":"SqlSusePurchase","retention":"6/22/2018
-          1:11:40 AM"}']
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '755'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 05 Nov 2019 07:57:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-tenant-writes:
+      - '1199'
+      x-ms-test:
+      - '{"contact":"xishan","scenarios":"AeoEmailTest,CSZ,GtmRiPurchase","retention":"2/3/2020
+        7:34:57 AM"}'
+    status:
+      code: 200
+      message: OK
 version: 1

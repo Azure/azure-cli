@@ -24,6 +24,11 @@ Release History
 * Support enabling auditing on creating a registry
 * Support Repository-scoped RBAC
 
+**Reservations**
+
+* [BREAKING CHANGE] Operation ReservationOrderOperations.get has a new signature
+* [BREAKING CHANGE] Operation ReservationOperations.get has a new signature
+
 **AKS**
 
 * Add `--enable-cluster-autoscaler`, `--min-count` and `--max-count` to the `az aks create` command, which enables cluster autoscaler for the node pool.
