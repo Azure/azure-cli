@@ -7,6 +7,10 @@ Release History
 
 * Support cluster certificate rotation operation using "az aks rotate-certs".
 
+**Key Vault**
+
+* Fix #11121: When using `az keyvault certificate`, passing `--include-parameter` now doesn't require a value of `true` or `false`
+
 **Packaging**
 
 * Rewrite the az wrapper in python
