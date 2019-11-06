@@ -31,7 +31,7 @@ DEPENDENCIES = [
     'requests',
     'pyyaml',
     'knack',
-    'six~=1.12.0',
+    'six>=1.10.0',
     'tabulate>=0.7.7',
     'colorama>=0.3.7'
 ]
