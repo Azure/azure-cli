@@ -5,8 +5,8 @@
 
 from azure.cli.testsdk import ScenarioTest
 
-class AzureReservationsTests(ScenarioTest):
 
+class AzureReservationsTests(ScenarioTest):
 
     def _validate_reservation_order(self, reservation_order):
         self.assertIsNotNone(reservation_order)
@@ -170,4 +170,3 @@ class AzureReservationsTests(ScenarioTest):
             self._validate_reservation(item)
             if 'Succeeded' in item['properties']['provisioningState']:
                 self.assertEqual(quantity_sum, item['properties']['quantity'])
-				
