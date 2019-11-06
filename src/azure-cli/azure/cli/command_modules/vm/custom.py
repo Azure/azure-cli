@@ -2751,7 +2751,11 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                                             storage_account_type=storage_account_type)
     if cmd.supported_api_version(min_api='2019-07-01', operation_group='gallery_image_versions'):
         GalleryImageVersionStorageProfile = cmd.get_models('GalleryImageVersionStorageProfile')
-        storage_profile = GalleryImageVersionStorageProfile()
+        GalleryArtifactVersionSource = cmd.get_models('GalleryArtifactVersionSource')
+        GalleryOSDiskImage = cmd.get_models('GalleryOSDiskImage')
+        GalleryDataDiskImage = cmd.get_models('GalleryDataDiskImage')
+        source = GalleryArtifactVersionSource(id=managed_image)
+        storage_profile = GalleryImageVersionStorageProfile(source=source)
         image_version = ImageVersion(publishing_profile=profile, location=location, tags=(tags or {}),
                                      storage_profile=storage_profile)
     else:
@@ -2776,6 +2780,8 @@ def update_image_version(instance, target_regions=None, replica_count=None):
         instance.publishing_profile.target_regions = target_regions
     if replica_count:
         instance.publishing_profile.replica_count = replica_count
+    if instance.storage_profile.source is not None:
+        instance.storage_profile.os_disk_image = instance.storage_profile.data_disk_images = None
     return instance
 # endregion
 
