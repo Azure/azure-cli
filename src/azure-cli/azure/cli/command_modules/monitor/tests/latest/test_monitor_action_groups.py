@@ -36,7 +36,7 @@ class TestActionGroupScenarios(ScenarioTest):
                  '-a sms alice_sms 1 5551234567 -a webhook alice_web https://www.example.com/alert?name=alice useAadAuth '
                  '-a armrole alicearmrole abcde usecommonAlertSchema '
                  '-a azureapppush alice_apppush alice@example.com '
-                 '-a itsm alice_itsm test_workspace test_conn ticket_blob eastus ' 
+                 '-a itsm alice_itsm test_workspace test_conn ticket_blob eastus '
                  '-a automationrunbook alice_runbook test_account test_runbook test_webhook http://example.com isglobalrunbook '
                  '-a voice alice_voice 1 5551234567 '
                  '-a logicapp alice_logicapp test_resource http://callback '

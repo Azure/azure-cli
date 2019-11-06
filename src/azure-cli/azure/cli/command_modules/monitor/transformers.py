@@ -45,8 +45,8 @@ def action_group_list_table(results):
                                      ('emailReceivers', 'email'), ('smsReceivers', 'sms'),
                                      ('webhookReceivers', 'webhook'), ('armRoleReceivers', 'armrole'),
                                      ('azureAppPushReceivers', 'azureapppush'), ('itsmReceivers', 'itsm'),
-                                     ('automationRunbookReceivers', 'automationrunbook'), ('voiceReceivers','voice'),
-                                     ('logicAppReceivers','logicapp'), ('azureFunctionReceivers', 'azurefunction'))
+                                     ('automationRunbookReceivers', 'automationrunbook'), ('voiceReceivers', 'voice'),
+                                     ('logicAppReceivers', 'logicapp'), ('azureFunctionReceivers', 'azurefunction'))
 
         output_results.append(data)
 

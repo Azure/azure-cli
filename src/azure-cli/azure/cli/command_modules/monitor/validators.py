@@ -212,7 +212,9 @@ def _validate_tag(string):
 
 
 def process_action_group_detail_for_creation(namespace):
-    from azure.mgmt.monitor.models import ActionGroupResource, EmailReceiver, SmsReceiver, WebhookReceiver, ArmRoleReceiver, AzureAppPushReceiver, ItsmReceiver, AutomationRunbookReceiver, VoiceReceiver, LogicAppReceiver, AzureFunctionReceiver
+    from azure.mgmt.monitor.models import ActionGroupResource, EmailReceiver, SmsReceiver, WebhookReceiver, \
+        ArmRoleReceiver, AzureAppPushReceiver, ItsmReceiver, AutomationRunbookReceiver, \
+        VoiceReceiver, LogicAppReceiver, AzureFunctionReceiver
 
     _validate_tags(namespace)
 

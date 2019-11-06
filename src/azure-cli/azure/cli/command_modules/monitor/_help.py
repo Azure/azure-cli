@@ -25,18 +25,18 @@ parameters:
     short-summary: Add receivers to the action group during the creation
     long-summary: |
         Usage:   --action TYPE NAME [ARG ...]
-        Email:   
+        Email:
             Format:     --action email NAME EMAIL_ADDRESS [usecommonalertschema]
             Example:    --action email bob bob@contoso.com
-        SMS: 
+        SMS:
             Format:     --action sms NAME COUNTRY_CODE PHONE_NUMBER
             Example:    --action sms charli 1 5551234567
-        Webhook: 
+        Webhook:
             Format:     --action webhook NAME URI [useaadauth] [usecommonalertschema]
             Example:    --action webhook alert_hook https://www.contoso.com/alert useaadauth usecommonalertschema
         Arm Role:
             Format:     --action armrole NAME ROLE_ID [usecommonalertschema]
-            Example:    --action armole owner_role 8e3af657-a8ff-443c-a75c-2fe8c4bcb635 
+            Example:    --action armole owner_role 8e3af657-a8ff-443c-a75c-2fe8c4bcb635
         Azure App Push:
             Format:     --action azureapppush NAME EMAIL_ADDRESS
             Example:    --action azureapppush test_apppush bob@contoso.com
@@ -51,7 +51,7 @@ parameters:
             Example:    --action voice charli 1 4441234567
         Logic App:
             Format:     --action logicapp NAME RESOURCE_ID CALLBACK_URL [usecommonalertschema]
-            Example:    --action logicapp test_logicapp test_rsrc http://callback 
+            Example:    --action logicapp test_logicapp test_rsrc http://callback
         Azure Function:
             Format:     --action azurefunction NAME FUNCTION_APP_RESOURCE_ID FUNCTION_NAME HTTP_TRIGGER_URL [usecommonalertschema]
             Example:    --action azurefunction test_function test_rsrc test_func http://trigger usecommonalertschema
@@ -95,18 +95,18 @@ parameters:
     short-summary: Add receivers to the action group
     long-summary: |
         Usage:   --add-action TYPE NAME [ARG ...]
-        Email:   
+        Email:
             Format:     --add-action email NAME EMAIL_ADDRESS [usecommonalertschema]
             Example:    --add-action email bob bob@contoso.com
-        SMS: 
+        SMS:
             Format:     --add-action sms NAME COUNTRY_CODE PHONE_NUMBER
             Example:    --add-action sms charli 1 5551234567
-        Webhook: 
+        Webhook:
             Format:     --add-action webhook NAME URI [useaadauth] [usecommonalertschema]
             Example:    --add-action https://www.contoso.com/alert useaadauth usecommonalertschema
         Arm Role:
             Format:     --add-action armrole NAME ROLE_ID [usecommonalertschema]
-            Example:    --add-action armole owner_role 8e3af657-a8ff-443c-a75c-2fe8c4bcb635 
+            Example:    --add-action armole owner_role 8e3af657-a8ff-443c-a75c-2fe8c4bcb635
         Azure App Push:
             Format:     --add-action azureapppush NAME EMAIL_ADDRESS
             Example:    --add-action azureapppush test_apppush bob@contoso.com
@@ -121,7 +121,7 @@ parameters:
             Example:    --add-action voice charli 1 4441234567
         Logic App:
             Format:     --add-action logicapp NAME RESOURCE_ID CALLBACK_URL [usecommonalertschema]
-            Example:    --add-action logicapp test_logicapp test_rsrc http://callback 
+            Example:    --add-action logicapp test_logicapp test_rsrc http://callback
         Azure Function:
             Format:     --add-action azurefunction NAME FUNCTION_APP_RESOURCE_ID FUNCTION_NAME HTTP_TRIGGER_URL [usecommonalertschema]
             Example:    --add-action azurefunction test_function test_rsrc test_func http://trigger usecommonalertschema

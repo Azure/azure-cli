@@ -315,81 +315,76 @@ class MultiObjectsDeserializeAction(argparse._AppendAction):  # pylint: disable=
 
 class ActionGroupReceiverParameterAction(MultiObjectsDeserializeAction):
     def deserialize_object(self, type_name, type_properties):
-        from azure.mgmt.monitor.models import EmailReceiver, SmsReceiver, WebhookReceiver, ArmRoleReceiver, AzureAppPushReceiver, ItsmReceiver, AutomationRunbookReceiver, VoiceReceiver, LogicAppReceiver, AzureFunctionReceiver
+        from azure.mgmt.monitor.models import EmailReceiver, SmsReceiver, WebhookReceiver, \
+            ArmRoleReceiver, AzureAppPushReceiver, ItsmReceiver, AutomationRunbookReceiver, \
+            VoiceReceiver, LogicAppReceiver, AzureFunctionReceiver
+        syntax = {
+            'email': 'NAME EMAIL_ADDRESS [usecommonalertschema]',
+            'sms':  'NAME COUNTRY_CODE PHONE_NUMBER',
+            'webhook': 'NAME URI [usecommonalertschema] [useaadauth]',
+            'armrole': 'NAME ROLE_ID [usecommonalertschema]',
+            'azureapppush': 'NAME EMAIL_ADDRESS',
+            'itsm': 'NAME WORKSPACE_ID CONNECTION_ID TICKET_CONFIG REGION',
+            'automationrunbook': 'NAME AUTOMATION_ACCOUNT_ID RUNBOOK_NAME WEBHOOK_RESOURCE_ID '
+                                 'SERVICE_URI [isglobalrunbook] [usecommonalertschema]',
+            'voice': 'NAME COUNTRY_CODE PHONE_NUMBER',
+            'logicapp': 'NAME RESOURCE_ID CALLBACK_URL [usecommonalertschema]',
+            'azurefunction': 'NAME FUNCTION_APP_RESOURCE_ID '
+                             'FUNCTION_NAME HTTP_TRIGGER_URL [usecommonalertschema]'
+        }
 
-        if type_name == 'email':
-            try:
-                useCommonAlertSchema = 'usecommonalertschema' in (property.lower() for property in type_properties)
-                return EmailReceiver(name=type_properties[0], email_address=type_properties[1],
-                                     use_common_alert_schema=useCommonAlertSchema)
-            except IndexError:
-                raise CLIError('usage error: --action email NAME EMAIL_ADDRESS [usecommonalertschema]')
-        elif type_name == 'sms':
-            try:
-                return SmsReceiver(
+        receiver = None
+        useCommonAlertSchema = 'usecommonalertschema' in (property.lower() for property in type_properties)
+        try:
+            if type_name == 'email':
+                receiver = EmailReceiver(name=type_properties[0], email_address=type_properties[1],
+                                         use_common_alert_schema=useCommonAlertSchema)
+            elif type_name == 'sms':
+                receiver = SmsReceiver(
                     name=type_properties[0],
                     country_code=type_properties[1],
                     phone_number=type_properties[2]
                 )
-            except IndexError:
-                raise CLIError('usage error: --action sms NAME COUNTRY_CODE PHONE_NUMBER')
-        elif type_name == 'webhook':
-            try:
+            elif type_name == 'webhook':
                 useAadAuth = 'useaadauth' in (property.lower() for property in type_properties)
-                useCommonAlertSchema = 'usecommonalertschema' in (property.lower() for property in type_properties)
-                return WebhookReceiver(name=type_properties[0], service_uri=type_properties[1],
-                                       use_common_alert_schema=useCommonAlertSchema,
-                                       use_aad_auth=useAadAuth)
-            except IndexError:
-                raise CLIError('usage error: --action webhook NAME URI [usecommonalertschema] [useaadauth]')
-        elif type_name == 'armrole':
-            try:
-                useCommonAlertSchema = 'usecommonalertschema' in (property.lower() for property in type_properties)
-                return ArmRoleReceiver(name=type_properties[0], role_id=type_properties[1],
-                                        use_common_alert_schema=useCommonAlertSchema)
-            except IndexError:
-                raise CLIError('usage error: --action armrole NAME ROLE_ID [usecommonalertschema]')
-        elif type_name == 'azureapppush':
-            try:
-                return AzureAppPushReceiver(name=type_properties[0], email_address=type_properties[1])
-            except IndexError:
-                raise CLIError('usage error: --action azureapppush NAME EMAIL_ADDRESS')
-        elif type_name == 'itsm':
-            try:
-                return ItsmReceiver(name=type_properties[0], workspace_id=type_properties[1], connection_id=type_properties[2],
-                                    ticket_configuration=type_properties[3], region=type_properties[4])
-            except IndexError:
-                raise CLIError('usage error: --action itsm NAME WORKSPACE_ID CONNECTION_ID TICKET_CONFIGURATION REGION')
-        elif type_name == 'automationrunbook':
-            try:
-                useCommonAlertSchema = 'usecommonalertschema' in (property.lower() for property in type_properties)
+                receiver = WebhookReceiver(name=type_properties[0], service_uri=type_properties[1],
+                                           use_common_alert_schema=useCommonAlertSchema,
+                                           use_aad_auth=useAadAuth)
+            elif type_name == 'armrole':
+                receiver = ArmRoleReceiver(name=type_properties[0], role_id=type_properties[1],
+                                           use_common_alert_schema=useCommonAlertSchema)
+            elif type_name == 'azureapppush':
+                receiver = AzureAppPushReceiver(name=type_properties[0], email_address=type_properties[1])
+            elif type_name == 'itsm':
+                receiver = ItsmReceiver(name=type_properties[0], workspace_id=type_properties[1],
+                                        connection_id=type_properties[2], ticket_configuration=type_properties[3],
+                                        region=type_properties[4])
+            elif type_name == 'automationrunbook':
                 isGlobalRunbook = 'isglobalrunbook' in (property.lower() for property in type_properties)
-                return AutomationRunbookReceiver(name=type_properties[0], automation_account_id=type_properties[1], runbook_name=type_properties[2], webhook_resource_id=type_properties[3],
-                                    service_uri=type_properties[4], is_global_runbook=isGlobalRunbook, use_common_alert_schema=useCommonAlertSchema)
-            except IndexError:
-                raise CLIError('usage error: --action automationrunbook NAME AUTOMATION_ACCOUNT_ID RUNBOOK_NAME WEBHOOK_RESOURCE_ID'
-                ' SERVICE_URI [isglobalrunbook] [usecommonalertschema]')        
-        elif type_name == 'voice':
-            try:
-                return VoiceReceiver(
+                receiver = AutomationRunbookReceiver(name=type_properties[0], automation_account_id=type_properties[1],
+                                                     runbook_name=type_properties[2],
+                                                     webhook_resource_id=type_properties[3],
+                                                     service_uri=type_properties[4],
+                                                     is_global_runbook=isGlobalRunbook,
+                                                     use_common_alert_schema=useCommonAlertSchema)
+            elif type_name == 'voice':
+                receiver = VoiceReceiver(
                     name=type_properties[0],
                     country_code=type_properties[1],
                     phone_number=type_properties[2]
                 )
-            except IndexError:
-                raise CLIError('usage error: --action voice NAME COUNTRY_CODE PHONE_NUMBER')
-        elif type_name == 'logicapp':
-            try:
-                useCommonAlertSchema = 'usecommonalertschema' in (property.lower() for property in type_properties)
-                return LogicAppReceiver(name=type_properties[0], resource_id=type_properties[1], callback_url=type_properties[2], use_common_alert_schema=useCommonAlertSchema)
-            except IndexError:
-                raise CLIError('usage error: --action logicapp NAME RESOURCE_ID CALLBACK_URL [usecommonalertschema]')        
-        elif type_name == 'azurefunction':
-            try:
-                useCommonAlertSchema = 'usecommonalertschema' in (property.lower() for property in type_properties)
-                return AzureFunctionReceiver(name=type_properties[0], function_app_resource_id=type_properties[1], function_name=type_properties[2],
-                                            http_trigger_url=type_properties[3], use_common_alert_schema=useCommonAlertSchema)
-            except IndexError:
-                raise CLIError('usage error: --action azurefunction NAME FUNCTION_APP_RESOURCE_ID FUNCTION_NAME HTTP_TRIGGER_URL [usecommonalertschema]')
-        else:
-            raise ValueError('usage error: the type "{}" is not recognizable.'.format(type_name))
+            elif type_name == 'logicapp':
+                receiver = LogicAppReceiver(name=type_properties[0], resource_id=type_properties[1],
+                                            callback_url=type_properties[2],
+                                            use_common_alert_schema=useCommonAlertSchema)
+            elif type_name == 'azurefunction':
+                receiver = AzureFunctionReceiver(name=type_properties[0], function_app_resource_id=type_properties[1],
+                                                 function_name=type_properties[2],
+                                                 http_trigger_url=type_properties[3],
+                                                 use_common_alert_schema=useCommonAlertSchema)
+            else:
+                raise ValueError('usage error: the type "{}" is not recognizable.'.format(type_name))
+
+        except IndexError:
+            raise CLIError('usage error: --action {}'.format(syntax[type_name]))
+        return receiver
