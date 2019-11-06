@@ -7,6 +7,7 @@ from azure.cli.testsdk import ScenarioTest
 
 class AzureReservationsTests(ScenarioTest):
 
+
     def _validate_reservation_order(self, reservation_order):
         self.assertIsNotNone(reservation_order)
         self.assertTrue(reservation_order['etag'])
@@ -19,7 +20,6 @@ class AzureReservationsTests(ScenarioTest):
         self.assertTrue(reservation_order['term'])
         self.assertTrue(reservation_order['type'])
         self.assertTrue(reservation_order['type'] == 'Microsoft.Capacity/reservationOrders')
-
 
     def _validate_reservation(self, reservation):
         self.assertIsNotNone(reservation)
@@ -100,7 +100,7 @@ class AzureReservationsTests(ScenarioTest):
             name_format = '{}/{}'.format(self.kwargs['reservation_order_id'], self.kwargs['reservation_id'])
             self.assertIn(name_format, entry['name'])
 
-    def test_get_catalog(self):        
+    def test_get_catalog(self):
         self.kwargs.update({
             'subscription': '00000000-0000-0000-0000-000000000000',
             'type': 'VirtualMachines',
@@ -170,3 +170,4 @@ class AzureReservationsTests(ScenarioTest):
             self._validate_reservation(item)
             if 'Succeeded' in item['properties']['provisioningState']:
                 self.assertEqual(quantity_sum, item['properties']['quantity'])
+				
