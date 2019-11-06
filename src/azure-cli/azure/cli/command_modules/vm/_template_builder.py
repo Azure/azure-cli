@@ -925,3 +925,78 @@ def build_vm_daExtensionName_resource(_, vm_name, location):
     daExtensionName_resource['location'] = location
     daExtensionName_resource['dependsOn'] = ['Microsoft.Compute/virtualMachines/{0}/extensions/OMSExtension'.format(vm_name)]  # pylint: disable=line-too-long
     return daExtensionName_resource
+
+
+# used for creating default monitor alert rules
+def build_vm_alert_rules_resource(cmd, resource_group_name, vm_name):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from msrestazure.tools import resource_id
+    import copy
+    vm_alert_rule_resources = []
+    vm_id = resource_id(
+        subscription=get_subscription_id(cmd.cli_ctx),
+        resource_group=resource_group_name,
+        namespace='Microsoft.Compute',
+        type='virtualMachines',
+        name=vm_name
+    )
+    alert_rule_resource_template = {
+        "type": "microsoft.insights/metricAlerts",
+        "apiVersion": "2018-03-01",
+        "location": "global",
+        "properties": {
+            "severity": 3,
+            "enabled": 'true',
+            "scopes": [
+                "{}".format(vm_id)
+            ],
+            "evaluationFrequency": "PT1M",
+            "windowSize": "PT5M",
+            "criteria": {
+                "odata.type": "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria"
+            },
+            "actions": []
+        },
+        'dependsOn': ['Microsoft.Compute/virtualMachines/' + vm_name]
+    }
+    # add two default rules
+    alert_rule_resource_cpu = copy.deepcopy(alert_rule_resource_template)
+    alert_rule_resource_cpu['name'] = "default-cpu-alert-rule-" + vm_name
+    alert_rule_resource_cpu['properties']['criteria']['allOf'] = [
+        {
+            "criterionType": "StaticThresholdCriterion",
+            "dimensions": [],
+            "metricName": "Percentage CPU",
+            "metricNamespace": "Microsoft.Compute/virtualMachines",
+            "monitorTemplateType": 8,
+            "name": "Metric1",
+            "operator": "GreaterThan",
+            "threshold": 10.0,
+            "timeAggregation": "Average"
+        }
+    ]
+    alert_rule_resource_cpu['properties']['description'] = "Default CPU alert rule."
+    vm_alert_rule_resources.append(alert_rule_resource_cpu)
+
+    alert_rule_resource_disk = copy.deepcopy(alert_rule_resource_template)
+    alert_rule_resource_disk['name'] = "default-disk-alert-rule-" + vm_name
+    alert_rule_resource_disk['properties']['criteria']['allOf'] = [
+        {
+            "alertSensitivity": "Medium",
+            "criterionType": "DynamicThresholdCriterion",
+            "dimensions": [],
+            "failingPeriods": {
+                "minFailingPeriodsToAlert": 4,
+                "numberOfEvaluationPeriods": 4
+            },
+            "metricName": "Disk Write Bytes",
+            "metricNamespace": "Microsoft.Compute/virtualMachines",
+            "monitorTemplateType": 13,
+            "name": "Metric1",
+            "operator": "GreaterOrLessThan",
+            "timeAggregation": "Total"
+        }
+    ]
+    alert_rule_resource_disk['properties']['description'] = "Default Disk alert rule."
+    vm_alert_rule_resources.append(alert_rule_resource_disk)
+    return vm_alert_rule_resources

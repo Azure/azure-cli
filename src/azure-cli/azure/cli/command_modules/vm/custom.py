@@ -532,7 +532,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               identity_role='Contributor', identity_role_id=None, application_security_groups=None, zone=None,
               boot_diagnostics_storage=None, ultra_ssd_enabled=None, ephemeral_os_disk=None,
               proximity_placement_group=None, dedicated_host=None, dedicated_host_group=None, aux_subscriptions=None,
-              priority=None, max_price=None, eviction_policy=None, enable_agent=None, workspace=None, vmss=None):
+              priority=None, max_price=None, eviction_policy=None, enable_agent=None, workspace=None, vmss=None,
+              enable_default_alert_rules=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -542,7 +543,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                                                                 build_public_ip_resource, StorageProfile,
                                                                 build_msi_role_assignment,
                                                                 build_vm_mmaExtension_resource,
-                                                                build_vm_daExtensionName_resource)
+                                                                build_vm_daExtensionName_resource,
+                                                                build_vm_alert_rules_resource)
     from msrestazure.tools import resource_id, is_valid_resource_id
 
     storage_sku = disk_info['os'].get('storageAccountType')
@@ -688,6 +690,11 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         vm_daExtensionName_resource = build_vm_daExtensionName_resource(cmd, vm_name, location)
         master_template.add_resource(vm_mmaExtension_resource)
         master_template.add_resource(vm_daExtensionName_resource)
+
+    if enable_default_alert_rules:
+        alert_rules = build_vm_alert_rules_resource(cmd, resource_group_name, vm_name)
+        for rule in alert_rules:
+            master_template.add_resource(rule)
 
     master_template.add_resource(vm_resource)
 
