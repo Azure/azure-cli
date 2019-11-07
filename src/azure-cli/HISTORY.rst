@@ -9,7 +9,7 @@ Release History
 
 **Key Vault**
 
-* Fix #11121: When using `az keyvault certificate`, passing `--include-parameter` now doesn't require a value of `true` or `false`
+* Fix #11121: When using `az keyvault certificate list`, passing `--include-pending` now doesn't require a value of `true` or `false`
 
 **Packaging**
 
