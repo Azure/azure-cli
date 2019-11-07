@@ -33,7 +33,7 @@ class TestActionGroupScenarios(ScenarioTest):
                                                                      JMESPathCheck('groupShortName', 'new_name')])
 
         self.cmd('monitor action-group update -n {} -g {} -ojson -a email alice alice@example.com usecommonalertsChema '
-                 '-a sms alice_sms 1 5551234567 ' 
+                 '-a sms alice_sms 1 5551234567 '
                  '-a webhook alice_web https://www.example.com/alert?name=alice useAadAuth testobjid http://iduri usecommonalertschema '
                  '-a armrole alicearmrole abcde usecommonAlertSchema '
                  '-a azureapppush alice_apppush alice@example.com '
@@ -51,8 +51,7 @@ class TestActionGroupScenarios(ScenarioTest):
                                                                      JMESPathCheck('length(automationRunbookReceivers)', 1),
                                                                      JMESPathCheck('length(voiceReceivers)', 1),
                                                                      JMESPathCheck('length(logicAppReceivers)', 1),
-                                                                     JMESPathCheck('length(azureFunctionReceivers)', 1)
-                                                               ])
+                                                                     JMESPathCheck('length(azureFunctionReceivers)', 1)])
 
         self.cmd('monitor action-group update -n {} -g {} -ojson -r alice_sms'
                  .format(action_group_name, resource_group), checks=[JMESPathCheck('length(emailReceivers)', 1),
