@@ -2752,8 +2752,8 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
     if cmd.supported_api_version(min_api='2019-07-01', operation_group='gallery_image_versions'):
         GalleryImageVersionStorageProfile = cmd.get_models('GalleryImageVersionStorageProfile')
         GalleryArtifactVersionSource = cmd.get_models('GalleryArtifactVersionSource')
-        GalleryOSDiskImage = cmd.get_models('GalleryOSDiskImage')
-        GalleryDataDiskImage = cmd.get_models('GalleryDataDiskImage')
+        # GalleryOSDiskImage = cmd.get_models('GalleryOSDiskImage')
+        # GalleryDataDiskImage = cmd.get_models('GalleryDataDiskImage')
         source = GalleryArtifactVersionSource(id=managed_image)
         storage_profile = GalleryImageVersionStorageProfile(source=source)
         image_version = ImageVersion(publishing_profile=profile, location=location, tags=(tags or {}),
