@@ -262,7 +262,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
     else:
         option = DiskCreateOption.empty
 
-    if source_storage_account_id is None:
+    if source_storage_account_id is None and source_blob_uri is not None:
         from azure.cli.core.commands.client_factory import get_subscription_id
         from msrestazure.tools import resource_id
         subscription_id = get_subscription_id(cmd.cli_ctx)
