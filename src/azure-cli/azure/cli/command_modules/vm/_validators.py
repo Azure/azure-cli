@@ -1373,11 +1373,6 @@ def process_disk_or_snapshot_create_namespace(cmd, namespace):
         try:
             namespace.source_blob_uri, namespace.source_disk, namespace.source_snapshot = _figure_out_storage_source(
                 cmd.cli_ctx, namespace.resource_group_name, namespace.source)
-            if namespace.source_blob_uri is not None and cmd.supported_api_version(min_api='2019-07-01'):
-                storage_account_name = namespace.source_blob_uri.split('.')[0].split('/')[-1]
-                namespace.source_storage_account_id = _get_resource_id(
-                    cmd.cli_ctx, storage_account_name, namespace.resource_group_name,
-                    'storageAccounts', 'Microsoft.Storage')
             if not namespace.source_blob_uri and namespace.source_storage_account_id:
                 raise CLIError(usage_error)
         except CloudError:

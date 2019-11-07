@@ -262,6 +262,15 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
     else:
         option = DiskCreateOption.empty
 
+    if source_storage_account_id is None:
+        from azure.cli.core.commands.client_factory import get_subscription_id
+        from msrestazure.tools import resource_id
+        subscription_id = get_subscription_id(cmd.cli_ctx)
+        storage_account_name = source_blob_uri.split('.')[0].split('/')[-1]
+        source_storage_account_id = resource_id(
+            subscription=subscription_id, resource_group=resource_group_name,
+            namespace='Microsoft.Storage', type='storageAccounts', name=storage_account_name)
+
     if upload_size_bytes is not None and for_upload is not True:
         raise CLIError('usage error: --upload-size-bytes should be used together with --for-upload')
 
