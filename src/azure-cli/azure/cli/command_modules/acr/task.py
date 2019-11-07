@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import re
 from msrest.exceptions import ValidationError
 from knack.log import get_logger
 from knack.util import CLIError
@@ -53,7 +54,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     commit_trigger_enabled=True,
                     pull_request_trigger_enabled=False,
                     schedule=None,
-                    branch='master',
+                    branch=None,
                     no_push=False,
                     no_cache=False,
                     arg=None,
@@ -114,8 +115,12 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
     source_trigger_events = _get_trigger_event_list_put(cmd,
                                                         commit_trigger_enabled,
                                                         pull_request_trigger_enabled)
-    # if source_trigger_events contains any event types we know they are enabled
+    # if source_trigger_events contains any event types we assume they are enabled
     if source_trigger_events:
+        if not branch:
+            branch = _get_branch_name(context_path)
+            if not branch:
+                branch = 'master'
         SourceTrigger, SourceProperties, AuthInfo, TriggerStatus = cmd.get_models(
             'SourceTrigger', 'SourceProperties', 'AuthInfo', 'TriggerStatus')
         source_triggers = [
@@ -383,6 +388,8 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
         source_triggers = task.trigger.source_triggers
         base_image_trigger = task.trigger.base_image_trigger
         if (commit_trigger_enabled or pull_request_trigger_enabled) or source_triggers:
+            if not branch:
+                branch = _get_branch_name(context_path)
             SourceTriggerUpdateParameters, SourceUpdateParameters, AuthInfoUpdateParameters = cmd.get_models(
                 'SourceTriggerUpdateParameters', 'SourceUpdateParameters', 'AuthInfoUpdateParameters')
 
@@ -982,3 +989,11 @@ def _get_trigger_event_list_patch(cmd,
             if SourceTriggerEvent.pullrequest.value in source_trigger_events:
                 source_trigger_events.remove(SourceTriggerEvent.pullrequest.value)
     return source_trigger_events
+
+
+def _get_branch_name(context_path):
+    # Context Path formats https://docs.docker.com/engine/reference/commandline/build/#git-repositories
+    branch = re.search(r'(?<=.git#)([^:/\n\s]*)', context_path)
+    if branch:
+        return branch.group()
+    return None
