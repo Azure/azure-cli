@@ -53,10 +53,10 @@ class TestActionGroupScenarios(ScenarioTest):
                                                                      JMESPathCheck('length(logicAppReceivers)', 1),
                                                                      JMESPathCheck('length(azureFunctionReceivers)', 1)])
 
-        self.cmd('monitor action-group update -n {} -g {} -ojson -r alice_sms'
+        self.cmd('monitor action-group update -n {} -g {} -ojson -r alice_web'
                  .format(action_group_name, resource_group), checks=[JMESPathCheck('length(emailReceivers)', 1),
-                                                                     JMESPathCheck('length(smsReceivers)', 0),
-                                                                     JMESPathCheck('length(webhookReceivers)', 1)])
+                                                                     JMESPathCheck('length(smsReceivers)', 1),
+                                                                     JMESPathCheck('length(webhookReceivers)', 0)])
 
         self.cmd('monitor action-group enable-receiver -n nonexist --action-group {} -g {}'
                  .format(action_group_name, resource_group), expect_failure=True)
