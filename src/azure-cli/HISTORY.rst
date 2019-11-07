@@ -7,6 +7,10 @@ Release History
 
 * Support cluster certificate rotation operation using "az aks rotate-certs".
 
+**AppService**
+
+* Fix issue #11100: AttributeError for az webapp up when create service plan
+
 **Packaging**
 
 * Rewrite the az wrapper in python
