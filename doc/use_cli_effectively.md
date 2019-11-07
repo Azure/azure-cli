@@ -12,7 +12,7 @@ For clarity, Bash scripts are used inline. Windows batch or PowerScript examples
          ------  ------------
          my_vm   UbuntuServer
 
-  3. `tsv` for concise output and scripting purposes. The will strip double quotes that the JSON format preserves. To specify the format you want for TSV, use the `--query` argument.
+  3. `tsv` is useful for concise output and scripting purposes. The tsv will strip double quotes that the JSON format preserves. To specify the format you want for TSV, use the `--query` argument.
 
          export vm_ids=$(az vm list -d -g my_rg --query "[?powerState=='VM running'].id" -o tsv)  
          az vm stop --ids $vm_ids
@@ -103,21 +103,23 @@ For clarity, Bash scripts are used inline. Windows batch or PowerScript examples
   2. Check out the Rest API reference for the request payload, URL and API version. As an examplee, check out the community's comments on [how to create AppInsights](https://github.com/Azure/azure-cli/issues/5543).
 
 ## Working behind a proxy
-  Proxy is common behind corporate network or introduced by tracing tools like Fiddler, mitmproxy, etc. If the proxy uses self-signed certificates, the Python [requests library](https://github.com/kennethreitz/requests) which CLI depends on will throw `SSLError("bad handshake: Error([('SSL routines', 'tls_process_server_certificate', 'certificate verify failed')],)",)`.  There are 2 ways to handle this error:
-  1. Disable the certificate check across the CLI by setting the env var of `AZURE_CLI_DISABLE_CONNECTION_VERIFICATION` to any value. This is not safe, but good for a short period like you want to capture a trace for a specific command and promptly turn it off after done.
-  2. Set env var of `REQUESTS_CA_BUNDLE` to the CA bundle certificate in PEM format. This is recommended if you use CLI frequently behind a corporate proxy. The default CA bundle which CLI uses is located at `C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\Lib\site-packages\certifi\cacert.pem` on Windows and ` /opt/az/lib/python3.6/site-packages/certifi/cacert.pem` on Linux. You may append the proxy server's certificate to this file or copy the contents to another certificate file, then set `REQUESTS_CA_BUNDLE` to it. For example:
+Proxy is common behind corporate network or introduced by tracing tools like Fiddler, mitmproxy, etc. If the proxy uses self-signed certificates, the Python [Requests](https://github.com/kennethreitz/requests) library which CLI uses will throw `SSLError("bad handshake: Error([('SSL routines', 'tls_process_server_certificate', 'certificate verify failed')],)",)`. There are 2 ways to handle this error:
+
+1. Set environment variable `REQUESTS_CA_BUNDLE` to the path of CA bundle certificate file in PEM format. This is recommended if you use CLI frequently behind a corporate proxy. The default CA bundle which CLI uses is located at `C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\Lib\site-packages\certifi\cacert.pem` on Windows and ` /opt/az/lib/python3.6/site-packages/certifi/cacert.pem` on Linux. You may append the proxy server's certificate to this file or copy the contents to another certificate file, then set `REQUESTS_CA_BUNDLE` to it. For example:
   
-```
-<Original cacert.pem>
+    ```
+    <Original cacert.pem>
+    
+    -----BEGIN CERTIFICATE-----
+    <Your proxy's certificate here> 
+    -----END CERTIFICATE-----
+    ```
 
------BEGIN CERTIFICATE-----
-<Your proxy's certificate here> 
------END CERTIFICATE-----
-```
+   A frequent ask is whether or not `HTTP_PROXY` or `HTTPS_PROXY` environment variables should be set, the answer is it depends. For Fiddler on Windows, by default it acts as system proxy on start, you don't need to set anything. If the option is off or using other tools which don't work as system proxy, you should set them. Since almost all traffic from CLI is SSL-based, only `HTTPS_PROXY` should be set. If you are not sure, just set them, but do remember to unset it after the proxy is shut down. For fiddler, the default value is `http://localhost:8888`.
 
-  A frequent ask is whether or not `HTTP_PROXY` or `HTTPS_PROXY` envionment variables should be set, the answer is it depends. For fiddler on Windows, by default it acts as system proxy on start, you don't need to set anything. If the option is off or using other tools which don't work as system proxy, you should set them. Since almost all traffics from CLI are SSL based, so only `HTTPS_PROXY` should be set. If you are not sure, just set them, but do remember to unset it after the proxy is shut down. For fiddler, the default value is `http://localhost:8888`.
-
-  For other details, check out [Stefan's blog](https://blog.jhnr.ch/2018/05/16/working-with-azure-cli-behind-ssl-intercepting-proxy-server/).
+   For other details, check out [Stefan's blog](https://blog.jhnr.ch/2018/05/16/working-with-azure-cli-behind-ssl-intercepting-proxy-server/).
+  
+2. Disable the certificate check across Azure CLI by setting environment variable `AZURE_CLI_DISABLE_CONNECTION_VERIFICATION=1`. This is not safe, but good for a short period like capturing a network trace for a specific command and promptly turning it off when finished. This may not work for some data-plane commands due to underlying SDK limitations.
 
 ## Concurrent builds
 
@@ -133,7 +135,7 @@ If you are using az on a build machine, and multiple jobs can be run in parallel
        )
        az vm stop --ids %vm_ids% :: CLI stops all VMs in parallel 
 
-### Windows PowerShell scrips for saving to variables and using it later
+### Windows PowerShell scripts for saving to variables and using it later
 
        $vm_ids=(az vm list -d -g my_rg --query "[?powerState=='VM running'].id" -o tsv)
        az vm stop --ids $vm_ids # CLI stops all VMs in parallel 
@@ -146,12 +148,24 @@ If you are using az on a build machine, and multiple jobs can be run in parallel
            az vm stop --ids %%F
        )
 
-### Windows PowerShell scrips to loop through a list
+### Windows PowerShell scripts to loop through a list
        $vm_ids=(az vm list -d -g my_rg --query "[?powerState=='VM running'].id" -o tsv)
        foreach ($vm_id in $vm_ids) {
            Write-Output "Stopping $vm_id"
            az vm stop --ids $vm_id
        }
+
+
+### Argument parsing issue in PowerShell
+On Windows, `az` is a batch script (at `C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\wbin\az.cmd`). Invoking it with PowerShell may have issues because arguments are parsed twice by both PowerShell and Command Prompt. For example, `az "a&b"` behaves differently in PowerShell and Command Prompt. In PowerShell, `b` is treated as a separate command instead of part of the argument.
+
+To prevent this, you may use [stop-parsing symbol `--%`](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_parsing) between `az` and arguments like `az --% vm create --nsg "" ...`
+
+> The stop-parsing symbol (--%), introduced in PowerShell 3.0, directs PowerShell to refrain from interpreting input as PowerShell commands or expressions.
+>
+> When it encounters a stop-parsing symbol, PowerShell treats the remaining characters in the line as a literal. 
+
+This issue is tracked at https://github.com/PowerShell/PowerShell/issues/1995#issuecomment-539822061
 
 ### CLI Environment Variables
 

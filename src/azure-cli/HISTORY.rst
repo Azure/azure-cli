@@ -3,16 +3,26 @@
 Release History
 ===============
 
+**AKS**
+
+* Support cluster certificate rotation operation using "az aks rotate-certs".
+
+**Packaging**
+
+* Rewrite the az wrapper in python
+
 **Profile**
 
-* Polish error when using `az login -u {} -p {}` with Microsoft account
+* Polish error when running `az login -u {} -p {}` with Microsoft account
+* Polish `SSLError` when running `az login` behind a proxy with self-signed root certificate
+* Fix #10578: `az login` hangs when more than one instances are launched at the same time on Windows or WSL
 
 **RBAC**
 
 * Fix #10996: Polish error for `--force-change-password-next-login` in `az ad user update` when `--password` is not specified
 
 2.0.76
-
+++++++
 
 **ACR**
 
@@ -24,10 +34,6 @@ Release History
 
 * Add `--enable-cluster-autoscaler`, `--min-count` and `--max-count` to the `az aks create` command, which enables cluster autoscaler for the node pool.
 * Add the above flags as well as `--update-cluster-autoscaler` and `--disable-cluster-autoscaler` to the `az aks update` command, allowing updates to cluster autoscaler.
-
-**AKS**
-
-* Support cluster certificate rotation operation using "az aks rotate-certs".
 
 **AppConfig**
 
