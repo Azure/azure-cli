@@ -32,8 +32,8 @@ parameters:
             Format:     --action sms NAME COUNTRY_CODE PHONE_NUMBER
             Example:    --action sms charli 1 5551234567
         Webhook:
-            Format:     --action webhook NAME URI [useaadauth] [usecommonalertschema]
-            Example:    --action webhook alert_hook https://www.contoso.com/alert useaadauth usecommonalertschema
+            Format:     --action webhook NAME URI [useaadauth OBJECT_ID IDENTIFIER URI] [usecommonalertschema]
+            Example:    --action webhook alert_hook https://www.contoso.com/alert useaadauth testobj http://identifier usecommonalertschema
         Arm Role:
             Format:     --action armrole NAME ROLE_ID [usecommonalertschema]
             Example:    --action armole owner_role 8e3af657-a8ff-443c-a75c-2fe8c4bcb635
@@ -56,7 +56,8 @@ parameters:
             Format:     --action azurefunction NAME FUNCTION_APP_RESOURCE_ID FUNCTION_NAME HTTP_TRIGGER_URL [usecommonalertschema]
             Example:    --action azurefunction test_function test_rsrc test_func http://trigger usecommonalertschema
         Multiple actions can be specified by using more than one `--add-action` argument.
-        'useaadauth', 'isglobalrunbook' and 'usecommonalertschema' are optional arguements, that only need to be passed to set the respective parameter to True.
+        'useaadauth', 'isglobalrunbook' and 'usecommonalertschema' are optional arguements that only need to be passed to set the respective parameter to True.
+        If the 'useaadauth' argument is passed, then the OBJECT_ID and IDENTIFIER_URI values are required as well.
   - name: --short-name
     short-summary: The short name of the action group
 example:
@@ -102,8 +103,8 @@ parameters:
             Format:     --add-action sms NAME COUNTRY_CODE PHONE_NUMBER
             Example:    --add-action sms charli 1 5551234567
         Webhook:
-            Format:     --add-action webhook NAME URI [useaadauth] [usecommonalertschema]
-            Example:    --add-action https://www.contoso.com/alert useaadauth usecommonalertschema
+            Format:     --add-action webhook NAME URI [useaadauth OBJECT_ID IDENTIFIER URI] [usecommonalertschema]
+            Example:    --add-action https://www.contoso.com/alert useaadauth testobj http://identifier usecommonalertschema
         Arm Role:
             Format:     --add-action armrole NAME ROLE_ID [usecommonalertschema]
             Example:    --add-action armole owner_role 8e3af657-a8ff-443c-a75c-2fe8c4bcb635
@@ -126,7 +127,8 @@ parameters:
             Format:     --add-action azurefunction NAME FUNCTION_APP_RESOURCE_ID FUNCTION_NAME HTTP_TRIGGER_URL [usecommonalertschema]
             Example:    --add-action azurefunction test_function test_rsrc test_func http://trigger usecommonalertschema
         Multiple actions can be specified by using more than one `--add-action` argument.
-        'useaadauth', 'isglobalrunbook' and 'usecommonalertschema' are optional arguements, that only need to be passed to set the respective parameter to True.
+        'useaadauth', 'isglobalrunbook' and 'usecommonalertschema' are optional arguements that only need to be passed to set the respective parameter to True.
+        If the 'useaadauth' argument is passed, then the OBJECT_ID and IDENTIFIER_URI values are required as well.
   - name: --remove-action -r
     short-summary: Remove receivers from the action group. Accept space-separated list of receiver names.
 examples:

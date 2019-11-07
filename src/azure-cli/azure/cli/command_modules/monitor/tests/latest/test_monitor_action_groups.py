@@ -33,7 +33,8 @@ class TestActionGroupScenarios(ScenarioTest):
                                                                      JMESPathCheck('groupShortName', 'new_name')])
 
         self.cmd('monitor action-group update -n {} -g {} -ojson -a email alice alice@example.com usecommonalertsChema '
-                 '-a sms alice_sms 1 5551234567 -a webhook alice_web https://www.example.com/alert?name=alice useAadAuth '
+                 '-a sms alice_sms 1 5551234567 ' 
+                 '-a webhook alice_web https://www.example.com/alert?name=alice useAadAuth testobjid http://iduri usecommonalertschema '
                  '-a armrole alicearmrole abcde usecommonAlertSchema '
                  '-a azureapppush alice_apppush alice@example.com '
                  '-a itsm alice_itsm test_workspace test_conn ticket_blob eastus '
@@ -50,12 +51,13 @@ class TestActionGroupScenarios(ScenarioTest):
                                                                      JMESPathCheck('length(automationRunbookReceivers)', 1),
                                                                      JMESPathCheck('length(voiceReceivers)', 1),
                                                                      JMESPathCheck('length(logicAppReceivers)', 1),
-                                                                     JMESPathCheck('length(azureFunctionReceivers)', 1)])
+                                                                     JMESPathCheck('length(azureFunctionReceivers)', 1)
+                                                               ])
 
-        self.cmd('monitor action-group update -n {} -g {} -ojson -r alice_web'
+        self.cmd('monitor action-group update -n {} -g {} -ojson -r alice_sms'
                  .format(action_group_name, resource_group), checks=[JMESPathCheck('length(emailReceivers)', 1),
-                                                                     JMESPathCheck('length(smsReceivers)', 1),
-                                                                     JMESPathCheck('length(webhookReceivers)', 0)])
+                                                                     JMESPathCheck('length(smsReceivers)', 0),
+                                                                     JMESPathCheck('length(webhookReceivers)', 1)])
 
         self.cmd('monitor action-group enable-receiver -n nonexist --action-group {} -g {}'
                  .format(action_group_name, resource_group), expect_failure=True)

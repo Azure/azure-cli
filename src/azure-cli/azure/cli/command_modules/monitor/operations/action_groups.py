@@ -32,7 +32,7 @@ def update_action_groups(instance, tags=None, short_name=None, add_receivers=Non
         instance.automation_runbook_receivers = filter_receivers(instance.automation_runbook_receivers)
         instance.voice_receivers = filter_receivers(instance.voice_receivers)
         instance.logic_app_receivers = filter_receivers(instance.logic_app_receivers)
-        instance.azure_function_receivers = filter_receivers(instance.logic_app_receivers)
+        instance.azure_function_receivers = filter_receivers(instance.azure_function_receivers)
 
     if add_receivers:
         from azure.mgmt.monitor.models import EmailReceiver, SmsReceiver, WebhookReceiver, \
@@ -45,19 +45,19 @@ def update_action_groups(instance, tags=None, short_name=None, add_receivers=Non
                 instance.sms_receivers.append(r)
             elif isinstance(r, WebhookReceiver):
                 instance.webhook_receivers.append(r)
-            if isinstance(r, ArmRoleReceiver):
+            elif isinstance(r, ArmRoleReceiver):
                 instance.arm_role_receivers.append(r)
-            if isinstance(r, AzureAppPushReceiver):
+            elif isinstance(r, AzureAppPushReceiver):
                 instance.azure_app_push_receivers.append(r)
-            if isinstance(r, ItsmReceiver):
+            elif isinstance(r, ItsmReceiver):
                 instance.itsm_receivers.append(r)
-            if isinstance(r, AutomationRunbookReceiver):
+            elif isinstance(r, AutomationRunbookReceiver):
                 instance.automation_runbook_receivers.append(r)
-            if isinstance(r, VoiceReceiver):
+            elif isinstance(r, VoiceReceiver):
                 instance.voice_receivers.append(r)
-            if isinstance(r, LogicAppReceiver):
+            elif isinstance(r, LogicAppReceiver):
                 instance.logic_app_receivers.append(r)
-            if isinstance(r, AzureFunctionReceiver):
+            elif isinstance(r, AzureFunctionReceiver):
                 instance.azure_function_receivers.append(r)
 
     return instance

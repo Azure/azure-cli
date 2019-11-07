@@ -321,7 +321,7 @@ class ActionGroupReceiverParameterAction(MultiObjectsDeserializeAction):
         syntax = {
             'email': 'NAME EMAIL_ADDRESS [usecommonalertschema]',
             'sms': 'NAME COUNTRY_CODE PHONE_NUMBER',
-            'webhook': 'NAME URI [usecommonalertschema] [useaadauth]',
+            'webhook': 'NAME URI [useaadauth OBJECT_ID IDENTIFIER URI] [usecommonalertschema]',
             'armrole': 'NAME ROLE_ID [usecommonalertschema]',
             'azureapppush': 'NAME EMAIL_ADDRESS',
             'itsm': 'NAME WORKSPACE_ID CONNECTION_ID TICKET_CONFIG REGION',
@@ -346,10 +346,13 @@ class ActionGroupReceiverParameterAction(MultiObjectsDeserializeAction):
                     phone_number=type_properties[2]
                 )
             elif type_name == 'webhook':
-                useAadAuth = 'useaadauth' in (property.lower() for property in type_properties)
+                useAadAuth = len(type_properties) >= 3 and type_properties[2] == 'useaadauth'
+                object_id = type_properties[3] if useAadAuth else None
+                identifier_uri = type_properties[4] if useAadAuth else None
                 receiver = WebhookReceiver(name=type_properties[0], service_uri=type_properties[1],
                                            use_common_alert_schema=useCommonAlertSchema,
-                                           use_aad_auth=useAadAuth)
+                                           use_aad_auth=useAadAuth, object_id=object_id,
+                                           identifier_uri=identifier_uri)
             elif type_name == 'armrole':
                 receiver = ArmRoleReceiver(name=type_properties[0], role_id=type_properties[1],
                                            use_common_alert_schema=useCommonAlertSchema)
