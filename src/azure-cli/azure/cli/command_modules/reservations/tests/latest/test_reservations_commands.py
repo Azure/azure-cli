@@ -116,12 +116,12 @@ class AzureReservationsTests(ScenarioTest):
 
     def test_update_reservation(self):
         self.kwargs.update({
-            'reservation_order_id': "7c2f2e2d-3186-45fe-ac35-e60925b6f4b6",
-            'reservation_id': 'e102433b-39fe-4b02-a52f-e14e0323bd3b',
+            'reservation_order_id': "c2152650-9ae0-4cc1-bd6c-afd872f297fd",
+            'reservation_id': '9cd38589-b906-46b0-a7da-0e0349d9078f',
             'scope': '/subscriptions/08072ea6-0c9c-4860-8d0b-3e86e6c298a9',
             'instance_flexibility': "Off"
         })
-
+			
         single_reservation = self.cmd('reservations reservation update --reservation-order-id {reservation_order_id}'
                                       ' --reservation-id {reservation_id} -t Single -s {scope}'
                                       ' --instance-flexibility {instance_flexibility}').get_output_in_json()
@@ -135,7 +135,7 @@ class AzureReservationsTests(ScenarioTest):
     def test_split_and_merge(self):
         self.kwargs.update({
             'reservation_order_id': "7c2f2e2d-3186-45fe-ac35-e60925b6f4b6",
-            'reservation_id': 'e102433b-39fe-4b02-a52f-e14e0323bd3b',
+            'reservation_id': '69c59535-a242-489b-8a0b-9d535318fab9',
             'quantity1': 1,
             'quantity2': 1
         })

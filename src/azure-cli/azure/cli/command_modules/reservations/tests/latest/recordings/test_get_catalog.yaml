@@ -23,10 +23,10 @@ interactions:
       x-client-Ver:
       - 1.2.2
     method: GET
-    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Fd7eab3c1-437d-43b4-bf78-ef68f26cc9b4%2Foauth2%2Fauthorize&api-version=1.0
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F84d1dc3d-cdcd-4bdd-9f5d-9290b7d1a3f2%2Foauth2%2Fauthorize&api-version=1.0
   response:
     body:
-      string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/d7eab3c1-437d-43b4-bf78-ef68f26cc9b4/.well-known/openid-configuration"}'
+      string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/84d1dc3d-cdcd-4bdd-9f5d-9290b7d1a3f2/.well-known/openid-configuration"}'
     headers:
       access-control-allow-methods:
       - GET, OPTIONS
@@ -39,13 +39,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 06 Nov 2019 01:33:21 GMT
+      - Fri, 08 Nov 2019 02:03:51 GMT
       p3p:
       - CP="DSP CUR OTPi IND OTRi ONL FIN"
       set-cookie:
-      - fpc=ArOHO2MNEGVJkKtiEB1zUZY; expires=Fri, 06-Dec-2019 01:33:22 GMT; path=/;
+      - fpc=Atajk406r-JGnSg12MzDDkI; expires=Sun, 08-Dec-2019 02:03:51 GMT; path=/;
         secure; HttpOnly; SameSite=None
-      - esctx=AQABAAAAAACQN9QBRU3jT6bcBQLZNUj7l4XtUQrZNKP3TjHtlzq0m279bGb2ET5LHePebhu3I7vHNKxWE50PXPKb-SgLg-WZviPGMFkxkVGfKLCI9bOHSfnStKknOMgIGk7CUqhw0gAF9mU0YSVdzIrKPlU4SjYhyldnL4DeMEuPTzHtPr-WRPZ7GbTKhIvpuFS8DZ0Xm9MgAA;
+      - esctx=AQABAAAAAACQN9QBRU3jT6bcBQLZNUj79ouw-NWPLD_LpAvQlzs48xjDLtPCSeSDabfKlCeAXl8uvRWbbLCBEE63BbywpPBytDrrHkvwFIZopZpM-uk76Fdlz0qimW45CthhjoHgNiv0BY4H1YgO7icyfTPRvagXpM-yJY3MdN5GK1JVlOn2hk1uTyTMWe5FHhVLCzeBdKsgAA;
         domain=.login.windows.net; path=/; secure; HttpOnly; SameSite=None
       - x-ms-gateway-slice=corp; path=/; SameSite=None; secure; HttpOnly
       - stsservicecookie=estscorp; path=/; SameSite=None; secure; HttpOnly
@@ -77,19 +77,19 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Capacity/catalogs?api-version=2019-04-01&reservedResourceType=VirtualMachines&location=westus
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Capacity/catalogs?api-version=2019-04-01&reservedResourceType=VirtualMachines&location=westus
   response:
     body:
-      string: '[{"resourceType":"virtualMachines","name":"Standard_F2","terms":["P1Y","P3Y"],"locations":["westus"],"billingPlans":{"p1Y":["Upfront","Monthly"],"p3Y":["Upfront","Monthly"]},"skuProperties":[{"name":"Cores","value":"2"},{"name":"RAM","value":"4"},{"name":"ReservationsAutofitGroup","value":"F
-        Series"},{"name":"ReservationSwappableArmSkuName","value":"Standard_F2s"},{"name":"vCpu","value":"2"},{"name":"ReservationsAutofitRatio","value":"2"},{"name":"ProductShortName","value":"F
-        Series VM"},{"name":"ProductTitle","value":"Virtual Machines F Series"},{"name":"SkuName","value":"F2"},{"name":"MeterId","value":"efdb48e1-6e65-4d8a-ba65-f7b6a04d05ee"},{"name":"MeterType","value":"1
-        Compute Hour"},{"name":"SkuDisplayName","value":"F2"},{"name":"billingPlans","value":"[\r\n  \"Upfront\",\r\n  \"Monthly\"\r\n]"}],"restrictions":[{"type":"Location","values":["westus"],"reasonCode":"NotAvailableForSubscription"}]},{"resourceType":"virtualMachines","name":"Standard_D1","terms":["P1Y","P3Y"],"locations":["westus"],"billingPlans":{"p1Y":["Upfront","Monthly"],"p3Y":["Upfront","Monthly"]},"skuProperties":[{"name":"Cores","value":"1"},{"name":"RAM","value":"3.5"},{"name":"ReservationsAutofitGroup","value":"D
+      string: '[{"resourceType":"virtualMachines","name":"Standard_D1","terms":["P1Y","P3Y"],"locations":["westus"],"billingPlans":{"p1Y":["Upfront","Monthly"],"p3Y":["Upfront","Monthly"]},"skuProperties":[{"name":"Cores","value":"1"},{"name":"RAM","value":"3.5"},{"name":"ReservationsAutofitGroup","value":"D
         Series"},{"name":"ReservationSwappableArmSkuName","value":"Standard_DS1"},{"name":"vCpu","value":"1"},{"name":"ReservationsAutofitRatio","value":"1"},{"name":"ProductShortName","value":"D
         Series VM"},{"name":"ProductTitle","value":"Virtual Machines D Series"},{"name":"SkuName","value":"D1"},{"name":"MeterId","value":"9a721778-24e6-40c4-a4e5-02014fd8f6ee"},{"name":"MeterType","value":"1
         Compute Hour"},{"name":"SkuDisplayName","value":"D1"},{"name":"billingPlans","value":"[\r\n  \"Upfront\",\r\n  \"Monthly\"\r\n]"}],"restrictions":[]},{"resourceType":"virtualMachines","name":"Standard_DS1","terms":["P1Y","P3Y"],"locations":["westus"],"billingPlans":{"p1Y":["Upfront","Monthly"],"p3Y":["Upfront","Monthly"]},"skuProperties":[{"name":"Cores","value":"1"},{"name":"RAM","value":"3.5"},{"name":"ReservationsAutofitGroup","value":"DS
         Series"},{"name":"ReservationSwappableArmSkuName","value":"Standard_D1"},{"name":"vCpu","value":"1"},{"name":"ReservationsAutofitRatio","value":"1"},{"name":"ProductShortName","value":"DS
         Series VM"},{"name":"ProductTitle","value":"Virtual Machines DS Series"},{"name":"SkuName","value":"DS1"},{"name":"MeterId","value":"9a721778-24e6-40c4-a4e5-02014fd8f6ee"},{"name":"MeterType","value":"1
-        Compute Hour"},{"name":"SkuDisplayName","value":"DS1"},{"name":"billingPlans","value":"[\r\n  \"Upfront\",\r\n  \"Monthly\"\r\n]"}],"restrictions":[]}]'
+        Compute Hour"},{"name":"SkuDisplayName","value":"DS1"},{"name":"billingPlans","value":"[\r\n  \"Upfront\",\r\n  \"Monthly\"\r\n]"}],"restrictions":[]},{"resourceType":"virtualMachines","name":"Standard_F2","terms":["P1Y","P3Y"],"locations":["westus"],"billingPlans":{"p1Y":["Upfront","Monthly"],"p3Y":["Upfront","Monthly"]},"skuProperties":[{"name":"Cores","value":"2"},{"name":"RAM","value":"4"},{"name":"ReservationsAutofitGroup","value":"F
+        Series"},{"name":"ReservationSwappableArmSkuName","value":"Standard_F2s"},{"name":"vCpu","value":"2"},{"name":"ReservationsAutofitRatio","value":"2"},{"name":"ProductShortName","value":"F
+        Series VM"},{"name":"ProductTitle","value":"Virtual Machines F Series"},{"name":"SkuName","value":"F2"},{"name":"MeterId","value":"efdb48e1-6e65-4d8a-ba65-f7b6a04d05ee"},{"name":"MeterType","value":"1
+        Compute Hour"},{"name":"SkuDisplayName","value":"F2"},{"name":"billingPlans","value":"[\r\n  \"Upfront\",\r\n  \"Monthly\"\r\n]"}],"restrictions":[{"type":"Location","values":["westus"],"reasonCode":"NotAvailableForSubscription"}]}]'
     headers:
       cache-control:
       - no-cache
@@ -98,7 +98,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 06 Nov 2019 01:33:23 GMT
+      - Fri, 08 Nov 2019 02:03:53 GMT
       expires:
       - '-1'
       pragma:
@@ -114,7 +114,8 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-test:
-      - '{"contact":"acesles@microsoft.com","scenarios":"CSZ,GtmRiPurchase","retention":"2020-01-29T21:30:44.2791405Z"}'
+      - '{"contact":"xishan","scenarios":"AeoEmailTest,CSZ,GtmRiPurchase","retention":"2/6/2020
+        2:03:53 AM"}'
     status:
       code: 200
       message: OK
