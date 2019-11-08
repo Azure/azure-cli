@@ -33,7 +33,7 @@ Release History
 **Reservations**
 
 * Upgrading SDK Version to 0.6.0
-* Add billingplan details info after calling get-catalogs
+* Add billingplan details info after calling Get-Gatalogs
 
 **AKS**
 
