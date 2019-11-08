@@ -993,7 +993,9 @@ def _get_trigger_event_list_patch(cmd,
 
 def _get_branch_name(context_path):
     # Context Path formats https://docs.docker.com/engine/reference/commandline/build/#git-repositories
-    branch = re.search(r'(?<=.git#)([^:/\n\s]*)', context_path)
+    # The regex matches from the first '#' to the next ':', space, or end of line.
+    # It doesn't consider pull and tags scenarios.
+    branch = re.search(r'(?<=#)([^:\n\s]*)', context_path)
     if branch:
         return branch.group()
     return None
