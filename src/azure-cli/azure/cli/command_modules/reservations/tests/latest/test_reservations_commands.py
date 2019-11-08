@@ -121,8 +121,8 @@ class AzureReservationsTests(ScenarioTest):
             'scope': '/subscriptions/d3ae48e5-dbb2-4618-afd4-fb1b8559cb80',
             'instance_flexibility': "Off"
         })
-	
-        single_reservation = self.cmd('reservations reservation update --reservation-order-id {reservation_order_id}'
+
+		single_reservation = self.cmd('reservations reservation update --reservation-order-id {reservation_order_id}'
                                       ' --reservation-id {reservation_id} -t Single -s {scope}'
                                       ' --instance-flexibility {instance_flexibility}').get_output_in_json()
         self.assertEqual('Single', single_reservation['properties']['appliedScopeType'])
