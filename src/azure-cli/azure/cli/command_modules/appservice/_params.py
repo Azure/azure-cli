@@ -449,7 +449,7 @@ def load_arguments(self, _):
         c.argument('storage_account', options_list=['--storage-account', '-s'],
                    help='Provide a string value of a Storage Account in the provided Resource Group. Or Resource ID of a Storage Account in a different Resource Group')
         c.argument('consumption_plan_location', options_list=['--consumption-plan-location', '-c'],
-                   help="Geographic location where Function App will be hosted. Use 'functionapp list-consumption-locations' to view available locations.")
+                   help="Geographic location where Function App will be hosted. Use 'az functionapp list-consumption-locations' to view available locations.")
         c.argument('runtime', help='The functions runtime stack.', arg_type=get_enum_type(set(LINUX_RUNTIMES).union(set(WINDOWS_RUNTIMES))))
         c.argument('runtime_version', help='The version of the functions runtime stack. '
                                            'Allowed values for each --runtime are: ' + ', '.join(functionapp_runtime_to_version_texts))
