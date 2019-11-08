@@ -477,7 +477,7 @@ examples:
         cat task.yaml | az acr run -r MyRegistry -f - /dev/null
   - name: Queue a local context, pushed to ACR with streaming logs.
     text: >
-        az acr run -r MyRegistry -f bash-echo.yaml .
+        az acr run -r MyRegistry -f bash-echo.yaml ./workspace
   - name: Queue a remote git context with streaming logs.
     text: >
         az acr run -r MyRegistry https://github.com/Azure-Samples/acr-tasks.git -f hello-world.yaml
