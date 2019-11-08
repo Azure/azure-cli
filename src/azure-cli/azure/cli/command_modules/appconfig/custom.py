@@ -10,9 +10,9 @@ from ._utils import resolve_resource_group, user_confirmation
 
 
 def create_configstore(client, resource_group_name, name, location):
-    configstore_params = ConfigurationStore(location.lower(),
+    configstore_params = ConfigurationStore(location=location.lower(),
                                             identity=None,
-                                            sku=Sku("Free"))
+                                            sku=Sku(name="Free"))
     return client.create(resource_group_name, name, configstore_params)
 
 

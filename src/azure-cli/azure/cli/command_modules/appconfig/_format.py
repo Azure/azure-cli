@@ -39,8 +39,9 @@ def _configstore_format_group(item):
         ('ENDPOINT', _get_value(item, 'endpoint')),
         ('LOCATION', _get_value(item, 'location')),
         ('NAME', _get_value(item, 'name')),
-        ('PROVISIONINGSTATE', _get_value(_get_value(item, 'provisioningState'))),
-        ('RESOURCEGROUP', _get_value(item, 'resourceGroup'))
+        ('PROVISIONINGSTATE', _get_value(item, 'provisioningState')),
+        ('RESOURCEGROUP', _get_value(item, 'resourceGroup')),
+        ('SKU', _get_value(_get_value(item, 'sku'), "name"))
     ])
 
 
