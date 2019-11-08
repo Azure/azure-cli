@@ -35,7 +35,6 @@ Release History
 * Upgrading SDK Version to 0.6.0
 * Add billingplan details info after calling get-catalogs
 
-
 **AKS**
 
 * Add `--enable-cluster-autoscaler`, `--min-count` and `--max-count` to the `az aks create` command, which enables cluster autoscaler for the node pool.
