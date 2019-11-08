@@ -12,7 +12,7 @@ from ._utils import resolve_resource_group, user_confirmation
 def create_configstore(client, resource_group_name, name, location):
     configstore_params = ConfigurationStore(location=location.lower(),
                                             identity=None,
-                                            sku=Sku(name="Free"))
+                                            sku=Sku(name="Free")) # hard code the sku as it is not public facing yet
     return client.create(resource_group_name, name, configstore_params)
 
 
@@ -49,9 +49,10 @@ def configstore_update_set(cmd,
     if resource_group_name is None:
         resource_group_name, _ = resolve_resource_group(cmd, name)
 
+    update_params = ConfigurationStoreUpdateParameters(tags=parameters.tags)
     return client.update(resource_group_name=resource_group_name,
                          config_store_name=name,
-                         tags=parameters.tags)
+                         config_store_update_parameters=update_params)
 
 
 def configstore_update_custom(instance, tags=None):
