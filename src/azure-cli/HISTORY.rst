@@ -91,6 +91,13 @@ Release History
 * Fix #9352: Unexpected error when certificate file does not exist
 * Fix #7048: `az keyvault recover/purge` not working
 
+**Monitor**
+
+* Updated azure-mgmt-monitor to 0.7.0
+* az monitor action-group create/update: Added suport for following new receivers: Arm role, Azure app push, ITSM, automation runbook, voice, logic app and Azure function
+* Included parameter usecommonalertschema for supported receivers
+* Included parameter useaadwebhook for webhook receiver
+
 **NetAppFiles**
 
 * Upgrade azure-mgmt-netapp to 0.6.0 to use API version 2019-07-01. This new API version includes:
