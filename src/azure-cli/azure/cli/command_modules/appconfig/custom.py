@@ -2,13 +2,18 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-from azure.mgmt.appconfiguration.models import ConfigurationStoreUpdateParameters
+from azure.mgmt.appconfiguration.models import (ConfigurationStoreUpdateParameters,
+                                                ConfigurationStore,
+                                                Sku)
 
 from ._utils import resolve_resource_group, user_confirmation
 
 
 def create_configstore(client, resource_group_name, name, location):
-    return client.create(resource_group_name, name, location.lower())
+    configstore_params = ConfigurationStore(location.lower(),
+                                            identity=None,
+                                            sku=Sku("Free"))
+    return client.create(resource_group_name, name, configstore_params)
 
 
 def delete_configstore(cmd, client, name, resource_group_name=None, yes=False):
