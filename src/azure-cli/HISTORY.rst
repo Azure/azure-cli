@@ -32,8 +32,9 @@ Release History
 
 **Reservations**
 
-* [BREAKING CHANGE] Operation ReservationOrderOperations.get has a new signature
-* [BREAKING CHANGE] Operation ReservationOperations.get has a new signature
+* Upgrading SDK Version to 0.6.0
+* Add billingplan details info after calling get-catalogs
+
 
 **AKS**
 
