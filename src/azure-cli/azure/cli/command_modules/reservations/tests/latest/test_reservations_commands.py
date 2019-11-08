@@ -55,7 +55,7 @@ class AzureReservationsTests(ScenarioTest):
 
     def test_get_reservation_order(self):
         self.kwargs.update({
-            'reservation_order_id': "d1c3f4a1-96b5-4f69-a6c3-9ab159267192"
+            'reservation_order_id': "0a47417c-cd30-4f67-add6-d631583e09f3"
         })
         command = 'reservations reservation-order show --reservation-order-id {reservation_order_id}'
         reservation_order = self.cmd(command).get_output_in_json()
@@ -65,7 +65,7 @@ class AzureReservationsTests(ScenarioTest):
 
     def test_list_reservation(self):
         self.kwargs.update({
-            'reservation_order_id': "d1c3f4a1-96b5-4f69-a6c3-9ab159267192"
+            'reservation_order_id': "0a47417c-cd30-4f67-add6-d631583e09f3"
         })
         reservation_list = self.cmd('reservations reservation list --reservation-order-id {reservation_order_id}') \
                                .get_output_in_json()
@@ -77,8 +77,8 @@ class AzureReservationsTests(ScenarioTest):
 
     def test_get_reservation(self):
         self.kwargs.update({
-            'reservation_order_id': "d1c3f4a1-96b5-4f69-a6c3-9ab159267192",
-            'reservation_id': 'fd845ee0-2d76-47d3-b584-3b4819225f99'
+            'reservation_order_id': "0a47417c-cd30-4f67-add6-d631583e09f3",
+            'reservation_id': 'ae1fbdad-6333-4964-9f4c-83f7e2b7f44f'
         })
         reservation = self.cmd('reservations reservation show  --reservation-order-id {reservation_order_id} '
                                '--reservation-id {reservation_id}').get_output_in_json()
@@ -89,8 +89,8 @@ class AzureReservationsTests(ScenarioTest):
 
     def test_list_reservation_history(self):
         self.kwargs.update({
-            'reservation_order_id': "d1c3f4a1-96b5-4f69-a6c3-9ab159267192",
-            'reservation_id': 'fd845ee0-2d76-47d3-b584-3b4819225f99'
+            'reservation_order_id': "0a47417c-cd30-4f67-add6-d631583e09f3",
+            'reservation_id': 'ae1fbdad-6333-4964-9f4c-83f7e2b7f44f'
         })
         history = self.cmd('reservations reservation list-history --reservation-order-id {reservation_order_id}'
                            ' --reservation-id {reservation_id}').get_output_in_json()
@@ -116,12 +116,12 @@ class AzureReservationsTests(ScenarioTest):
 
     def test_update_reservation(self):
         self.kwargs.update({
-            'reservation_order_id': "c2152650-9ae0-4cc1-bd6c-afd872f297fd",
-            'reservation_id': '9cd38589-b906-46b0-a7da-0e0349d9078f',
-            'scope': '/subscriptions/08072ea6-0c9c-4860-8d0b-3e86e6c298a9',
+            'reservation_order_id': "0a47417c-cd30-4f67-add6-d631583e09f3",
+            'reservation_id': 'ae1fbdad-6333-4964-9f4c-83f7e2b7f44f',
+            'scope': '/subscriptions/d3ae48e5-dbb2-4618-afd4-fb1b8559cb80',
             'instance_flexibility': "Off"
         })
-			
+	
         single_reservation = self.cmd('reservations reservation update --reservation-order-id {reservation_order_id}'
                                       ' --reservation-id {reservation_id} -t Single -s {scope}'
                                       ' --instance-flexibility {instance_flexibility}').get_output_in_json()
@@ -134,10 +134,10 @@ class AzureReservationsTests(ScenarioTest):
 
     def test_split_and_merge(self):
         self.kwargs.update({
-            'reservation_order_id': "7c2f2e2d-3186-45fe-ac35-e60925b6f4b6",
-            'reservation_id': '69c59535-a242-489b-8a0b-9d535318fab9',
+            'reservation_order_id': "0a47417c-cd30-4f67-add6-d631583e09f3",
+            'reservation_id': 'ae1fbdad-6333-4964-9f4c-83f7e2b7f44f',
             'quantity1': 1,
-            'quantity2': 1
+            'quantity2': 2
         })
 
         original_reservation = self.cmd('reservations reservation show  --reservation-order-id {reservation_order_id}'
