@@ -37,7 +37,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         params.identity = Identity()
     if https_only is not None:
         params.enable_https_traffic_only = https_only
-    if enable_hierarchical_namespace:
+    if enable_hierarchical_namespace is not None:
         params.is_hns_enabled = enable_hierarchical_namespace
 
     AzureFilesIdentityBasedAuthentication = cmd.get_models('AzureFilesIdentityBasedAuthentication')
