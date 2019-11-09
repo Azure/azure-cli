@@ -65,7 +65,8 @@ class IoTHubTest(ScenarioTest):
         storage_cs_pattern = 'DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName='
         # Test 'az iot hub update'
         updated_hub = self.cmd('iot hub update -n {0} --fnd 80 --rd 4 --ct 34 --cdd 46 --ft 43 --fld 10 --fd 76'
-                               ' --fn true --fnt 32 --fst 3'.format(hub,)).get_output_in_json()
+                               ' --fn true --fnt 32 --fst 3 --fcs {1} --fc {2}'
+                               .format(hub, storageConnectionString, containerName)).get_output_in_json()
 
         assert updated_hub['properties']['eventHubEndpoints']['events']['partitionCount'] == 4
         assert updated_hub['properties']['eventHubEndpoints']['events']['retentionTimeInDays'] == 4
