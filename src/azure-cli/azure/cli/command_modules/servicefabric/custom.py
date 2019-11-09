@@ -773,8 +773,9 @@ def add_cluster_node_type(cmd,
                                                       capacity),
                                                   durability_level=durability_level,
                                                   application_ports=EndpointRangeDescription(
-                                                      DEFAULT_APPLICATION_START_PORT, DEFAULT_APPLICATION_END_PORT),
-                                                  ephemeral_ports=EndpointRangeDescription(DEFAULT_EPHEMERAL_START, DEFAULT_EPHEMERAL_END)))
+                                                      start_port=DEFAULT_APPLICATION_START_PORT, end_port=DEFAULT_APPLICATION_END_PORT),
+                                                  ephemeral_ports=EndpointRangeDescription(
+                                                      start_port=DEFAULT_EPHEMERAL_START, end_port=DEFAULT_EPHEMERAL_END)))
 
     patch_request = ClusterUpdateParameters(node_types=cluster.node_types)
     poller = client.update(resource_group_name, cluster_name, patch_request)
