@@ -788,6 +788,7 @@ def _add_node_type_to_sfrp(cmd, client, resource_group_name, cluster_name, clust
     poller = client.update(resource_group_name, cluster_name, patch_request)
     LongRunningOperation(cmd.cli_ctx)(poller)
 
+
 def _create_vmss(cmd, resource_group_name, cluster_name, cluster, node_type_name, durability_level, vm_password, vm_user_name, vm_sku, vm_tier, capacity):
     cli_ctx = cmd.cli_ctx
     subnet_name = "subnet_{}".format(1)
@@ -1026,7 +1027,7 @@ def _create_vmss(cmd, resource_group_name, cluster_name, cluster, node_type_name
 
     fabric_ext.settings['nodeTypeRef'] = node_type_name
     fabric_ext.settings['durabilityLevel'] = durability_level
-    if not 'nicPrefixOverride' in fabric_ext.settings:
+    if 'nicPrefixOverride' not in fabric_ext.settings:
         fabric_ext.settings['nicPrefixOverride'] = address_prefix
     storage_client = storage_client_factory(cli_ctx)
     list_results = storage_client.storage_accounts.list_keys(
