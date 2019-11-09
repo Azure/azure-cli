@@ -449,21 +449,21 @@ def iot_hub_list(client, resource_group_name=None):
     return client.iot_hub_resource.list_by_resource_group(resource_group_name)
 
 
-def iot_hub_custom(instance,
-                   sku=None,
-                   unit=None,
-                   retention_day=None,
-                   c2d_ttl=None,
-                   c2d_max_delivery_count=None,
-                   feedback_lock_duration=None,
-                   feedback_ttl=None,
-                   feedback_max_delivery_count=None,
-                   enable_fileupload_notifications=None,
-                   fileupload_notification_max_delivery_count=None,
-                   fileupload_notification_ttl=None,
-                   fileupload_storage_connectionstring=None,
-                   fileupload_storage_container_name=None,
-                   fileupload_sas_ttl=None):
+def update_iot_hub_custom(instance,
+                          sku=None,
+                          unit=None,
+                          retention_day=None,
+                          c2d_ttl=None,
+                          c2d_max_delivery_count=None,
+                          feedback_lock_duration=None,
+                          feedback_ttl=None,
+                          feedback_max_delivery_count=None,
+                          enable_fileupload_notifications=None,
+                          fileupload_notification_max_delivery_count=None,
+                          fileupload_notification_ttl=None,
+                          fileupload_storage_connectionstring=None,
+                          fileupload_storage_container_name=None,
+                          fileupload_sas_ttl=None):
     from datetime import timedelta
     if sku is not None:
         instance.sku.name = sku

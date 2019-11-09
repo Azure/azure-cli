@@ -28,7 +28,8 @@ class IoTHubTest(ScenarioTest):
         self.cmd('iot hub create -n {0} -g {1} --sku S1 --partition-count 4 --retention-day 3'
                  ' --c2d-ttl 23 --c2d-max-delivery-count 89 --feedback-ttl 29 --feedback-lock-duration 35'
                  ' --feedback-max-delivery-count 40 --fileupload-notification-max-delivery-count 79'
-                 ' --fileupload-notification-ttl 20'.format(hub, rg),
+                 ' --fileupload-notification-ttl 20 --fcs {2} --fc {3}'
+                 .format(hub, rg, storageConnectionString, containerName),
                  checks=[self.check('resourcegroup', rg),
                          self.check('location', location),
                          self.check('name', hub),
@@ -60,14 +61,24 @@ class IoTHubTest(ScenarioTest):
             self.check_pattern('connectionString[0]', conn_str_pattern)
         ])
 
+        # Storage Connection String Pattern
+        storage_cs_pattern = 'DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName='
         # Test 'az iot hub update'
-        self.cmd('iot hub update -n {0} --fnd 80 --rd 4'.format(hub),
-                 checks=[self.check('resourcegroup', rg),
-                         self.check('location', location),
-                         self.check('name', hub),
-                         self.check('sku.name', 'S1'),
-                         self.check('properties.eventHubEndpoints.events.retentionTimeInDays', '4'),
-                         self.check('properties.messagingEndpoints.fileNotifications.maxDeliveryCount', '80')])
+        updated_hub = self.cmd('iot hub update -n {0} --fnd 80 --rd 4 --ct 34 --cdd 46 --ft 43 --fld 10 --fd 76'
+                               ' --fn true --fnt 32 --fst 3'.format(hub,)).get_output_in_json()
+
+        assert updated_hub['properties']['eventHubEndpoints']['events']['partitionCount'] == 4
+        assert updated_hub['properties']['eventHubEndpoints']['events']['retentionTimeInDays'] == 4
+        assert updated_hub['properties']['cloudToDevice']['feedback']['maxDeliveryCount'] == 76
+        assert updated_hub['properties']['cloudToDevice']['feedback']['lockDurationAsIso8601'] == '0:00:10'
+        assert updated_hub['properties']['cloudToDevice']['feedback']['ttlAsIso8601'] == '1 day, 19:00:00'
+        assert updated_hub['properties']['cloudToDevice']['maxDeliveryCount'] == 46
+        assert updated_hub['properties']['cloudToDevice']['defaultTtlAsIso8601'] == '1 day, 10:00:00'
+        assert updated_hub['properties']['messagingEndpoints']['fileNotifications']['ttlAsIso8601'] == '1 day, 8:00:00'
+        assert updated_hub['properties']['messagingEndpoints']['fileNotifications']['maxDeliveryCount'] == 80
+        assert storage_cs_pattern in updated_hub['properties']['storageEndpoints']['$default']['connectionString']
+        assert updated_hub['properties']['storageEndpoints']['$default']['containerName'] == containerName
+        assert updated_hub['properties']['storageEndpoints']['$default']['sasTtlAsIso8601'] == '3:00:00'
 
         # Test 'az iot hub show'
         self.cmd('iot hub show -n {0}'.format(hub), checks=[
@@ -77,12 +88,12 @@ class IoTHubTest(ScenarioTest):
             self.check('sku.name', 'S1'),
             self.check('properties.eventHubEndpoints.events.partitionCount', '4'),
             self.check('properties.eventHubEndpoints.events.retentionTimeInDays', '4'),
-            self.check('properties.cloudToDevice.feedback.maxDeliveryCount', '40'),
-            self.check('properties.cloudToDevice.feedback.lockDurationAsIso8601', '0:00:35'),
-            self.check('properties.cloudToDevice.feedback.ttlAsIso8601', '1 day, 5:00:00'),
-            self.check('properties.cloudToDevice.maxDeliveryCount', '89'),
-            self.check('properties.cloudToDevice.defaultTtlAsIso8601', '23:00:00'),
-            self.check('properties.messagingEndpoints.fileNotifications.ttlAsIso8601', '20:00:00'),
+            self.check('properties.cloudToDevice.feedback.maxDeliveryCount', '76'),
+            self.check('properties.cloudToDevice.feedback.lockDurationAsIso8601', '0:00:10'),
+            self.check('properties.cloudToDevice.feedback.ttlAsIso8601', '1 day, 19:00:00'),
+            self.check('properties.cloudToDevice.maxDeliveryCount', '46'),
+            self.check('properties.cloudToDevice.defaultTtlAsIso8601', '1 day, 10:00:00'),
+            self.check('properties.messagingEndpoints.fileNotifications.ttlAsIso8601', '1 day, 8:00:00'),
             self.check('properties.messagingEndpoints.fileNotifications.maxDeliveryCount', '80')
         ])
 
