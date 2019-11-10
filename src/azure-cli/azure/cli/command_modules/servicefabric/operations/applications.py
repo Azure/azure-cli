@@ -80,7 +80,7 @@ def update_app(client,
                max_percent_unhealthy_deployed_applications=None,
                service_type_health_policy_map=None):
     try:
-        currentApp: ApplicationResource = client.applications.get(resource_group_name, cluster_name, application_name)
+        currentApp = client.applications.get(resource_group_name, cluster_name, application_name)
         appResource = currentApp
         # TODO: change to patch once the fix is deployed in the rp
         # appResourceUpdate: ApplicationResourceUpdate = ApplicationResourceUpdate()
@@ -118,7 +118,7 @@ def update_app(client,
         raise
 
 
-def create_app_type(client: ServiceFabricManagementClient, resource_group_name, cluster_name, application_type_name):
+def create_app_type(client, resource_group_name, cluster_name, application_type_name):
     try:
         appTypes = client.application_types.list(resource_group_name, cluster_name)
         for appType in appTypes.value:
@@ -133,7 +133,7 @@ def create_app_type(client: ServiceFabricManagementClient, resource_group_name, 
         raise
 
 
-def create_app_type_version(client: ServiceFabricManagementClient,
+def create_app_type_version(client,
                             resource_group_name,
                             cluster_name,
                             application_type_name,
