@@ -338,7 +338,7 @@ def get_clouds(cli_ctx):
     clouds = []
     config = get_config_parser()
     # Start off with known clouds and apply config file on top of current config
-    for c in KNOWN_CLOUDS:        
+    for c in KNOWN_CLOUDS:    
         _config_add_cloud(config, c)
     try:
         config.read(CLOUD_CONFIG_FILE)
