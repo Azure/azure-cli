@@ -16,7 +16,6 @@ from azure.mgmt.servicefabric.models import (ErrorModelException,
                                              ArmRollingUpgradeMonitoringPolicy,
                                              ArmApplicationHealthPolicy,
                                              ArmServiceTypeHealthPolicy)
-from azure.mgmt.servicefabric import ServiceFabricManagementClient
 from azure.cli.command_modules.servicefabric._arm_deployment_utils import validate_and_deploy_arm_template
 
 from knack.log import get_logger
