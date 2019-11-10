@@ -9,8 +9,11 @@ import json
 import getpass
 import base64
 import binascii
+import platform
+import ssl
 import six
 
+from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from knack.log import get_logger
 from knack.util import CLIError, to_snake_case
 
@@ -601,3 +604,18 @@ class ConfiguredDefaultSetter(object):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         setattr(self.cli_config, 'use_local_config', self.original_use_local_config)
+
+
+def _ssl_context():
+    if sys.version_info < (3, 4) or (in_cloud_console() and platform.system() == 'Windows'):
+        try:
+            return ssl.SSLContext(ssl.PROTOCOL_TLS)  # added in python 2.7.13 and 3.6
+        except AttributeError:
+            return ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+
+    return ssl.create_default_context()
+
+
+def urlretrieve(url):
+    req = urlopen(url, context=_ssl_context())
+    return req.read()

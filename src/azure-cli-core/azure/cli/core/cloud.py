@@ -5,15 +5,12 @@
 
 import os
 import json
-import platform
-import ssl
-import sys
 from pprint import pformat
 from six.moves import configparser
-from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 
 from azure.cli.core.profiles import API_PROFILES
 from azure.cli.core._config import GLOBAL_CONFIG_DIR
+from azure.cli.core.util import urlretrieve
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -130,25 +127,6 @@ class CloudSuffixes(object):  # pylint: disable=too-few-public-methods
                                              "{} may be corrupt or invalid.\nResolve the error or delete this file "
                                              "and try again.".format(name, CLOUD_CONFIG_FILE))
         return val
-
-
-def in_cloud_console():
-    return os.environ.get('ACC_CLOUD', None)
-
-
-def _ssl_context():
-    if sys.version_info < (3, 4) or (in_cloud_console() and platform.system() == 'Windows'):
-        try:
-            return ssl.SSLContext(ssl.PROTOCOL_TLS)  # added in python 2.7.13 and 3.6
-        except AttributeError:
-            return ssl.SSLContext(ssl.PROTOCOL_TLSv1)
-
-    return ssl.create_default_context()
-
-
-def urlretrieve(url):
-    req = urlopen(url, context=_ssl_context())
-    return req.read()
 
 
 def get_ossrdbms_resource_id(cloud_name):
