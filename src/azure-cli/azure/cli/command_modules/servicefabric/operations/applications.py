@@ -8,7 +8,7 @@
 import os
 import time
 
-from azure.cli.core.util import CLIError, get_file_json
+from azure.cli.core.util import get_file_json
 from azure.mgmt.servicefabric.models import (ErrorModelException,
                                              ApplicationTypeVersionResource,
                                              ApplicationResource,
@@ -24,7 +24,7 @@ from knack.log import get_logger
 logger = get_logger(__name__)
 
 
-def create_app(client: ServiceFabricManagementClient,
+def create_app(client,
                resource_group_name,
                cluster_name,
                application_type_name,
@@ -57,7 +57,7 @@ def create_app(client: ServiceFabricManagementClient,
         raise
 
 
-def update_app(client: ServiceFabricManagementClient,
+def update_app(client,
                resource_group_name,
                cluster_name,
                application_name,
@@ -160,7 +160,7 @@ def create_app_type_version(client: ServiceFabricManagementClient,
 
 
 def create_service(cmd,
-                   client: ServiceFabricManagementClient,
+                   client,
                    resource_group_name,
                    cluster_name,
                    application_name,
@@ -171,9 +171,6 @@ def create_service(cmd,
                    stateful=False,
                    target_replica_set_size=None,
                    min_replica_set_size=None,
-                   replica_restart_wait_duration=None,
-                   quorum_loss_wait_duration=None,
-                   stand_by_replica_keep_duration=None,
                    default_move_cost=None,
                    partition_scheme_singleton=False,
                    partition_scheme_uniformInt64=False,
@@ -236,7 +233,7 @@ def _set_parameters(parameters, name, value):
     parameters[name]["value"] = value
 
 
-def _set_uprade_policy(current_upgrade_policy: ApplicationUpgradePolicy,
+def _set_uprade_policy(current_upgrade_policy,
                        force_restart,
                        upgrade_replica_set_check_timeout,
                        failure_action,
@@ -262,7 +259,7 @@ def _set_uprade_policy(current_upgrade_policy: ApplicationUpgradePolicy,
     # RollingUpgradeMonitoringPolicy
     if current_upgrade_policy.rolling_upgrade_monitoring_policy is None:
         # initialize with defaults
-        current_upgrade_policy.rolling_upgrade_monitoring_policy: ArmRollingUpgradeMonitoringPolicy \
+        current_upgrade_policy.rolling_upgrade_monitoring_policy \
             = ArmRollingUpgradeMonitoringPolicy(failure_action='Manual',
                                                 health_check_stable_duration=time.strftime('%H:%M:%S', time.gmtime(120)),
                                                 health_check_retry_timeout=time.strftime('%H:%M:%S', time.gmtime(600)),
@@ -285,7 +282,7 @@ def _set_uprade_policy(current_upgrade_policy: ApplicationUpgradePolicy,
 
     # ApplicationHealthPolicy
     if current_upgrade_policy.application_health_policy is None:
-        current_upgrade_policy.application_health_policy: ArmApplicationHealthPolicy = ArmApplicationHealthPolicy()
+        current_upgrade_policy.application_health_policy = ArmApplicationHealthPolicy()
 
     if consider_warning_as_error:
         current_upgrade_policy.application_health_policy.consider_warning_as_error = True

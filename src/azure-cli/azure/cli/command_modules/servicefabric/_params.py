@@ -195,9 +195,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='Indicates that the service uses the UniformInt64 partition scheme. This means that each partition owns a range of int64 keys.')
         c.argument('partition_scheme_named',
                    help='Indicates that the service uses the named partition scheme. Services using this model usually have data that can be bucketed, within a bounded set. Some common examples of data fields used as named partition keys would be regions, postal codes, customer groups, or other business boundaries.')
-        c.argument('quorum_loss_wait_duration', help='Specify the quorum loss wait duration for the service.')
-        c.argument('replica_restart_wait_duration', help='Specify the replica restart wait duration for the service.')
-        c.argument('stand_by_replica_keep_duration', help='Specify the stand by replica duration for the service.')
 
 
 # pylint: disable=protected-access
