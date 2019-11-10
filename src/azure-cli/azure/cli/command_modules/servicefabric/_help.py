@@ -17,6 +17,35 @@ type: group
 short-summary: Manage applications running on an Azure Service Fabric cluster.
 """
 
+helps['sf application create'] = """
+type: command
+short-summary: Create a new application on an Azure Service Fabric cluster.
+examples:
+  - name: Create application "testApp" with parameters. The application type "TestAppType" version "v1" should already exist in the cluster, and the application parameters should be defined in the application manifest.
+    text: >
+        az sf application create -g testRG -n testCluster --application-name testApp --application-type-name TestAppType \\
+          --application-type-version v1 --application-parameters key0=value0
+  - name: Create application "testApp" and app type version using the package url provided.
+    text: >
+        az sf application create -g testRG -n testCluster --application-name testApp --application-type-name TestAppType \\
+          --application-type-version v1 --package-url "https://sftestapp.blob.core.windows.net/sftestapp/testApp_1.0.sfpkg" \\
+            --application-parameters key0=value0
+"""
+
+helps['sf application update'] = """
+type: command
+short-summary: Update a Azure Service Fabric application. This allows updating the application parameters and/or upgrade the application type version which will trigger an application upgrade.
+examples:
+  - name: Update application parameters and upgreade policy values and app type version to v2.
+    text: >
+        az sf application update -g testRG -n testCluster --application-name testApp --application-type-version v2 \\
+          --application-parameters key0=value0 --health-check-stable-duration 0 --health-check-wait-duration 0 --health-check-retry-timeout 0 \\
+            --upgrade-domain-timeout 5000 --upgrade-timeout 7000 --failure-action Rollback --upgrade-replica-set-check-timeout 300 --force-restart
+  - name: Update application minimum and maximum nodes.
+    text: >
+        az sf application update -g testRG -n testCluster --application-name testApp --minimum-nodes 1 --maximum-nodes 3
+"""
+
 helps['sf application certificate'] = """
 type: group
 short-summary: Manage the certificate of an application.
@@ -29,6 +58,54 @@ examples:
   - name: Add an application certificate.
     text: >
         az sf application certificate add -g group-name -n cluster1  --secret-identifier 'https://{KeyVault}.vault.azure.net/secrets/{Secret}'
+"""
+
+helps['sf application-type'] = """
+type: group
+short-summary: Manage application types on an Azure Service Fabric cluster.
+"""
+
+helps['sf application-type create'] = """
+type: command
+short-summary: Create a new application type on an Azure Service Fabric cluster.
+examples:
+  - name: Create new application type.
+    text: >
+        az sf application-type create -g testRG -n testCluster --application-type-name testAppType
+"""
+
+helps['sf application-type-version'] = """
+type: group
+short-summary: Manage application type versions on an Azure Service Fabric cluster.
+"""
+
+helps['sf application-type-version create'] = """
+type: command
+short-summary: Create a new application type on an Azure Service Fabric cluster.
+examples:
+  - name: Create new application type version using the provided package url. The version in the application manifest contained in the package should have the same version as the one specified in --version.
+    text: >
+        az sf application-type-version create -g testRG -n testCluster --application-type-name testAppType \\
+          --version v1 --package-url "https://sftestapp.blob.core.windows.net/sftestapp/testApp_1.0.sfpkg"
+"""
+
+helps['sf service'] = """
+type: group
+short-summary: Manage services running on an Azure Service Fabric cluster.
+"""
+
+helps['sf service create'] = """
+type: command
+short-summary: Create a new service on an Azure Service Fabric cluster.
+examples:
+  - name: Create a new stateless service "testApp~testService1" with instance count -1 (on all the nodes).
+    text: >
+        az sf service create -g testRG -n testCluster --application-name testApp --stateless --service-name testApp~testService \\
+          --service-type testStateless --instance-count -1 --partition-scheme-singleton
+  - name: Create a new stateful service "testApp~testService2" with a target of 5 nodes.
+    text: >
+        az sf service create -g testRG -n testCluster --application-name testApp --stateful --service-name testApp~testService2 \\
+          --service-type testStatefulType --min-replica-set-size 3 --target-replica-set-size 5
 """
 
 helps['sf cluster'] = """
