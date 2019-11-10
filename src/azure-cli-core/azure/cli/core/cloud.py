@@ -22,7 +22,6 @@ from knack.config import get_config_parser
 logger = get_logger(__name__)
 
 CLOUD_CONFIG_FILE = os.path.join(GLOBAL_CONFIG_DIR, 'clouds.config')
-ARM_CLOUD_METADATA_URL = 'https://management.azure.com/metadata/endpoints?api-version=2019-05-01'
 
 
 class CloudNotRegisteredException(Exception):
@@ -195,7 +194,7 @@ def arm_to_cli_mapper(arm_dict):
             vm_image_alias_doc=arm_dict['vmImageAliasDoc'],  # pylint: disable=line-too-long
             media_resource_id=arm_dict['media'],
             ossrdbms_resource_id=get_ossrdbms_resource_id(arm_dict['name']),  # pylint: disable=line-too-long # change once ossrdbms_resource_id is available via ARM
-            active_directory_data_lake_resource_id=arm_dict['activeDirectoryDataLake']),
+            active_directory_data_lake_resource_id=arm_dict['activeDirectoryDataLake'] if 'activeDirectoryDataLake' in arm_dict else None),  # pylint: disable=line-too-long
         suffixes=CloudSuffixes(
             storage_endpoint=arm_dict['suffixes']['storage'],
             keyvault_dns=arm_dict['suffixes']['keyVaultDns'],
@@ -232,13 +231,11 @@ class Cloud(object):  # pylint: disable=too-few-public-methods
 
 
 try:
-    arm_cloud_dict = json.loads(urlretrieve(ARM_CLOUD_METADATA_URL))
+    arm_cloud_dict = json.loads(urlretrieve(os.getenv('ARM_CLOUD_METADATA_URL')))
     cli_cloud_dict = convert_arm_to_cli(arm_cloud_dict)
-    AZURE_PUBLIC_CLOUD = cli_cloud_dict['AzureCloud']
-    AZURE_PUBLIC_CLOUD.CloudEndpoints.active_directory = 'https://login.microsoftonline.com'  # pylint: disable=line-too-long # change once active_directory is fixed in ARM for the public cloud
-    AZURE_CHINA_CLOUD = cli_cloud_dict['AzureChinaCloud']
-    AZURE_US_GOV_CLOUD = cli_cloud_dict['AzureUSGovernment']
-    AZURE_GERMAN_CLOUD = cli_cloud_dict['AzureGermanCloud']
+    if 'AzureCloud' in cli_cloud_dict:
+        cli_cloud_dict['AzureCloud'].endpoints.active_directory = 'https://login.microsoftonline.com'  # pylint: disable=line-too-long # change once active_directory is fixed in ARM for the public cloud
+    KNOWN_CLOUDS = list(cli_cloud_dict.values())
 except Exception:  # pylint: disable=broad-except
     AZURE_PUBLIC_CLOUD = Cloud(
         'AzureCloud',
@@ -326,8 +323,7 @@ except Exception:  # pylint: disable=broad-except
             keyvault_dns='.vault.microsoftazure.de',
             sql_server_hostname='.database.cloudapi.de'))
 
-
-KNOWN_CLOUDS = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_GERMAN_CLOUD]
+    KNOWN_CLOUDS = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_GERMAN_CLOUD]
 
 
 def _set_active_cloud(cli_ctx, cloud_name):
@@ -364,7 +360,7 @@ def get_clouds(cli_ctx):
     clouds = []
     config = get_config_parser()
     # Start off with known clouds and apply config file on top of current config
-    for c in KNOWN_CLOUDS:
+    for c in KNOWN_CLOUDS:        
         _config_add_cloud(config, c)
     try:
         config.read(CLOUD_CONFIG_FILE)
