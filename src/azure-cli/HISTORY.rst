@@ -15,6 +15,7 @@ Release History
 **AppService**
 
 * Fix issue #11100: AttributeError for az webapp up when create service plan
+* az webapp up: Forcing the creation or deployment to a site for supported languages, no defaults used.
 
 **Compute**
 
@@ -76,7 +77,6 @@ Release History
 
 **AppService**
 
-* az webapp up: Forcing the creation or deployment to a site for supported languages, no defaults used.
 * az appservice plan create: Adding support to set 'persitescaling' on appservice plan create.
 * Fixing an issue where webapp config ssl bind operation was removing existing tags from the resource
 * Added "--build remote" flag for "az functionapp deployment source config-zip" to support remote build action during function app deployment.
