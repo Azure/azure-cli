@@ -896,7 +896,7 @@ parameters:
   - name: --customer-admin-group-id
     type: string
     short-summary: The Object ID of an Azure Active Directory Group that memberships will get synced into the OpenShift group "osa-customer-admins". If not specified, no cluster admin access will be granted.
-  - name: --loganalytics-workspace-resource-id
+  - name: --workspace-resource-id
     type: string
     short-summary: The resource ID of an existing Log Analytics Workspace to use for storing monitoring data.
 
@@ -911,7 +911,7 @@ examples:
   - name: Create an Openshift cluster using a custom vnet
     text: az openshift create -g MyResourceGroup -n MyManagedCluster --vnet-peer "/subscriptions/0000000-0000-0000-0000-000000000000/resourceGroups/openshift-vnet/providers/Microsoft.Network/virtualNetworks/test"
   - name: Create an Openshift cluster with Log Analytics monitoring enabled
-    text: az openshift create -g MyResourceGroup -n MyManagedCluster --loganalytics-workspace-resource-id {LOGANALYTICS_WORKSPACE_RESOURCE_ID}
+    text: az openshift create -g MyResourceGroup -n MyManagedCluster --workspace-resource-id {WORKSPACE_RESOURCE_ID}
 """
 
 helps['openshift delete'] = """

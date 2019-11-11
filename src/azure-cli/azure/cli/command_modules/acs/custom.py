@@ -3126,7 +3126,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
                      vnet_peer=None,
                      tags=None,
                      no_wait=False,
-                     loganalytics_workspace_resource_id=None,
+                     workspace_resource_id=None,
                      customer_admin_group_id=None):
 
     if location is None:
@@ -3197,13 +3197,13 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
                 namespace='Microsoft.Network', type='virtualNetwork',
                 name=vnet_peer
             )
-    if loganalytics_workspace_resource_id is not None:
-        loganalytics_workspace_resource_id = loganalytics_workspace_resource_id.strip()
-        if not loganalytics_workspace_resource_id.startswith('/'):
-            loganalytics_workspace_resource_id = '/' + loganalytics_workspace_resource_id
-        if loganalytics_workspace_resource_id.endswith('/'):
-            loganalytics_workspace_resource_id = loganalytics_workspace_resource_id.rstrip('/')
-        monitor_profile = OpenShiftManagedClusterMonitorProfile(enabled=True, loganalytics_workspace_resource_id=loganalytics_workspace_resource_id)  # pylint: disable=line-too-long
+    if workspace_resource_id is not None:
+        workspace_resource_id = workspace_resource_id.strip()
+        if not workspace_resource_id.startswith('/'):
+            workspace_resource_id = '/' + workspace_resource_id
+        if workspace_resource_id.endswith('/'):
+            workspace_resource_id = workspace_resource_id.rstrip('/')
+        monitor_profile = OpenShiftManagedClusterMonitorProfile(enabled=True, workspace_resource_id=workspace_resource_id)  # pylint: disable=line-too-long
     else:
         monitor_profile = None
 
