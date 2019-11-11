@@ -7,6 +7,10 @@ Release History
 
 * Support cluster certificate rotation operation using "az aks rotate-certs".
 
+**AppService**
+
+* Fix issue #11100: AttributeError for az webapp up when create service plan
+
 **Packaging**
 
 * Rewrite the az wrapper in python
@@ -29,6 +33,11 @@ Release History
 * Add a preview parameter `--pack-image-tag` to command `az acr pack build`.
 * Support enabling auditing on creating a registry
 * Support Repository-scoped RBAC
+
+**Reservations**
+
+* Upgrading SDK Version to 0.6.0
+* Add billingplan details info after calling Get-Gatalogs
 
 **AKS**
 
@@ -90,6 +99,13 @@ Release History
 
 * Fix #9352: Unexpected error when certificate file does not exist
 * Fix #7048: `az keyvault recover/purge` not working
+
+**Monitor**
+
+* Updated azure-mgmt-monitor to 0.7.0
+* az monitor action-group create/update: Added suport for following new receivers: Arm role, Azure app push, ITSM, automation runbook, voice, logic app and Azure function
+* Included parameter usecommonalertschema for supported receivers
+* Included parameter useaadwebhook for webhook receiver
 
 **NetAppFiles**
 

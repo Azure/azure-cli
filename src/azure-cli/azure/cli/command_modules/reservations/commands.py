@@ -26,7 +26,7 @@ def load_command_table(self, _):
     )
 
     reservations_client_sdk = reservations_type(
-        operations_tmpl='azure.mgmt.reservations.azure_reservation_api#AzureReservationAPI.{}',
+        operations_tmpl='azure.mgmt.reservations#AzureReservationAPI.{}',
         client_factory=base_mgmt_client_factory
     )
 
