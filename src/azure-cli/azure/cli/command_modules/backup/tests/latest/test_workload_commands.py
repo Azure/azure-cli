@@ -269,8 +269,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
             self.check("length([?name == '{name}'])", 1)])
 
-        # self.kwargs['protectable_item'] = json.dumps(self.cmd('backup protectable-item show --vault-name {vault} -g {rg} --protectable-item-type {pit} --server-name {fname} --name {item} --workload-type {wt}').get_output_in_json(), separators=(',', ':')).replace('"', '\\"')
-        self.cmd('backup protection enable-for-AzureWL -v {vault} -g {rg} -p {policy} --protectable-item-type {pit} --protectable-item-name {item} --server-name {fname} --workload-type {wt}')
+        self.cmd('backup protection enable-for-azurewl -v {vault} -g {rg} -p {policy} --protectable-item-type {pit} --protectable-item-name {item} --server-name {fname} --workload-type {wt}')
 
         self.kwargs['container1'] = self.cmd('backup container show -n {name} -v {vault} -g {rg} --backup-management-type AzureWorkload --query name').get_output_in_json()
 
@@ -355,8 +354,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
             self.check("length([?name == '{name}'])", 1)])
 
-        # self.kwargs['protectable_item'] = json.dumps(self.cmd('backup protectable-item show --vault-name {vault} -g {rg} --protectable-item-type {pit} --server-name {fname} --name {item} --workload-type {wt}').get_output_in_json(), separators=(',', ':')).replace('"', '\\"')
-        self.cmd('backup protection enable-for-AzureWL -v {vault} -g {rg} -p {policy} --protectable-item-type {pit} --protectable-item-name {item} --server-name {fname} --workload-type {wt}')
+        self.cmd('backup protection enable-for-azurewl -v {vault} -g {rg} -p {policy} --protectable-item-type {pit} --protectable-item-name {item} --server-name {fname} --workload-type {wt}')
 
         self.kwargs['container1'] = self.cmd('backup container show -n {name} -v {vault} -g {rg} --backup-management-type AzureWorkload --query name').get_output_in_json()
 
@@ -601,9 +599,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
             self.check("length([?name == '{name}'])", 1)])
 
-        # self.kwargs['protectable_item'] = json.dumps(self.cmd('backup protectable-item show --vault-name {vault} -g {rg} --protectable-item-type {pit} --server-name {fname} --name {item} --workload-type {wt}').get_output_in_json(), separators=(',', ':')).replace('"', '\\"')
-
-        self.cmd('backup protection enable-for-AzureWL -v {vault} -g {rg} -p {policy} --protectable-item-type {pit} --protectable-item-name {item} --server-name {fname} --workload-type {wt}', checks=[
+        self.cmd('backup protection enable-for-azurewl -v {vault} -g {rg} -p {policy} --protectable-item-type {pit} --protectable-item-name {item} --server-name {fname} --workload-type {wt}', checks=[
             self.check("properties.entityFriendlyName", '{fitem}'),
             self.check("properties.operation", "ConfigureBackup"),
             self.check("properties.status", "Completed"),
@@ -666,9 +662,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
             self.check("length([?name == '{name}'])", 1)])
 
-        # self.kwargs['protectable_item'] = json.dumps(self.cmd('backup protectable-item show --vault-name {vault} -g {rg} --protectable-item-type {pit} --server-name {fname} --name {item} --workload-type {wt}').get_output_in_json(), separators=(',', ':')).replace('"', '\\"')
-
-        self.cmd('backup protection enable-for-AzureWL -v {vault} -g {rg} -p {policy} --protectable-item-type {pit} --protectable-item-name {item} --server-name {fname} --workload-type {wt}', checks=[
+        self.cmd('backup protection enable-for-azurewl -v {vault} -g {rg} -p {policy} --protectable-item-type {pit} --protectable-item-name {item} --server-name {fname} --workload-type {wt}', checks=[
             self.check("properties.entityFriendlyName", '{fitem}'),
             self.check("properties.operation", "ConfigureBackup"),
             self.check("properties.status", "Completed"),
@@ -733,15 +727,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
             self.check("length([?name == '{name}'])", 1)])
 
-        # self.kwargs['protectable_item'] = self.cmd('backup protectable-item show --vault-name {vault} -g {rg} --protectable-item-type {pit} --server-name {fname} --name {item} --workload-type {wt}').get_output_in_json()
+        self.cmd('backup protection auto-enable-for-azurewl -v {vault} -g {rg} -p {policy} --protectable-item-name {item} --protectable-item-type {pit} --server-name {fname} --workload-type {wt}')
 
-        # self.kwargs['protectable_item_name'] = self.kwargs['protectable_item']['name']
-
-        # self.kwargs['protectable_item'] = json.dumps(self.kwargs['protectable_item'], separators=(',', ':')).replace('"', '\\"')
-
-        self.cmd('backup protection auto-enable-for-AzureWL -v {vault} -g {rg} -p {policy} --protectable-item-name {item} --protectable-item-type {pit} --server-name {fname} --workload-type {wt}')
-
-        self.cmd('backup protection auto-disable-for-AzureWL -v {vault} -g {rg} --item-name {item}')
+        self.cmd('backup protection auto-disable-for-azurewl -v {vault} -g {rg} --item-name {item}')
 
         self.cmd('backup container unregister -v {vault} -g {rg} -c {name} -y')
 
@@ -773,9 +761,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
             self.check("length([?name == '{name}'])", 1)])
 
-        # self.kwargs['protectable_item'] = json.dumps(self.cmd('backup protectable-item show --vault-name {vault} -g {rg} --protectable-item-type {pit} --server-name {fname} --name {item} --workload-type {wt}').get_output_in_json(), separators=(',', ':')).replace('"', '\\"')
-
-        self.cmd('backup protection enable-for-AzureWL --vault-name {vault} -g {rg} -p {policy} --protectable-item-type {pit} --protectable-item-name {item} --server-name {fname} --workload-type {wt}', checks=[
+        self.cmd('backup protection enable-for-azurewl --vault-name {vault} -g {rg} -p {policy} --protectable-item-type {pit} --protectable-item-name {item} --server-name {fname} --workload-type {wt}', checks=[
             self.check("properties.entityFriendlyName", '{fitem}'),
             self.check("properties.operation", "ConfigureBackup"),
             self.check("properties.status", "Completed"),
@@ -806,8 +792,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['rp'] = self.cmd('backup recoverypoint list -g {rg} -v {vault} -c {name} -i {item} --workload-type {wt} --query [0]').get_output_in_json()
 
         self.kwargs['rp'] = self.kwargs['rp']['name']
-
-        # self.kwargs['ti'] = json.dumps(self.cmd('backup protectable-item show --vault-name {vault} -g {rg} --protectable-item-type {tpit} --server-name {fname} --name {titem} --workload-type {wt}').get_output_in_json(), separators=(',', ':')).replace('"', '\\"')
 
         self.kwargs['rc'] = json.dumps(self.cmd('backup recoveryconfig show --vault-name {vault} -g {rg} --restore-mode AlternateWorkloadRestore --rp-name {rp} --item-name {item} --container-name {container1} --target-item-name {titem} --target-server-type {tpit} --target-server-name {fname} --workload-type {wt}').get_output_in_json(), separators=(',', ':'))
 
@@ -884,8 +868,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['rp'] = self.cmd('backup recoverypoint list -g {rg} -v {vault} -c {name} -i {item} --workload-type {wt} --query [0]').get_output_in_json()
 
         self.kwargs['rp'] = self.kwargs['rp']['name']
-
-        # self.kwargs['ti'] = json.dumps(self.cmd('backup protectable-item show --vault-name {vault} -g {rg} --protectable-item-type SQLInstance --server-name {fname} --name {titem} --workload-type {wt}').get_output_in_json(), separators=(',', ':')).replace('"', '\\"')
 
         self.kwargs['rc'] = json.dumps(self.cmd('backup recoveryconfig show --vault-name {vault} -g {rg} --restore-mode AlternateWorkloadRestore --rp-name {rp} --item-name {item} --container-name {container1} --target-item-name {titem} --target-server-type SQLInstance --target-server-name {fname} --workload-type {wt}').get_output_in_json(), separators=(',', ':'))
 
