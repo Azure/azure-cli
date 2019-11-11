@@ -3,11 +3,46 @@
 Release History
 ===============
 
+**AKS**
+
+* Support cluster certificate rotation operation using "az aks rotate-certs".
+
+**AppService**
+
+* Fix issue #11100: AttributeError for az webapp up when create service plan
+
+**Packaging**
+
+* Rewrite the az wrapper in python
+
+**Profile**
+
+* Polish error when running `az login -u {} -p {}` with Microsoft account
+* Polish `SSLError` when running `az login` behind a proxy with self-signed root certificate
+* Fix #10578: `az login` hangs when more than one instances are launched at the same time on Windows or WSL
+
+**RBAC**
+
+* Fix #10996: Polish error for `--force-change-password-next-login` in `az ad user update` when `--password` is not specified
+
+2.0.76
+++++++
+
 **ACR**
 
-* Added a preview parameter `--pack-image-tag` to command `az acr pack build`.
+* Add a preview parameter `--pack-image-tag` to command `az acr pack build`.
 * Support enabling auditing on creating a registry
-* Support Repository-scoped RBAC 
+* Support Repository-scoped RBAC
+
+**Reservations**
+
+* Upgrading SDK Version to 0.6.0
+* Add billingplan details info after calling Get-Gatalogs
+
+**AKS**
+
+* Add `--enable-cluster-autoscaler`, `--min-count` and `--max-count` to the `az aks create` command, which enables cluster autoscaler for the node pool.
+* Add the above flags as well as `--update-cluster-autoscaler` and `--disable-cluster-autoscaler` to the `az aks update` command, allowing updates to cluster autoscaler.
 
 **AppConfig**
 
@@ -16,6 +51,7 @@ Release History
 
 **AppService**
 
+* az appservice plan create: Adding support to set 'persitescaling' on appservice plan create.
 * Fixing an issue where webapp config ssl bind operation was removing existing tags from the resource
 * Added "--build remote" flag for "az functionapp deployment source config-zip" to support remote build action during function app deployment.
 * Change default node version on function apps to ~10 for Windows
@@ -26,11 +62,6 @@ Release History
 * deployment/group deployment validate: Add --handle-extended-json-format parameter to support multiline and comments in json template when deployment.
 * bump azure-mgmt-resource to 2019-07-01
 
-**AKS**
-
-* Add `--enable-cluster-autoscaler`, `--min-count` and `--max-count` to the `az aks create` command, which enables cluster autoscaler for the node pool.
-* Add the above flags as well as `--update-cluster-autoscaler` and `--disable-cluster-autoscaler` to the `az aks update` command, allowing updates to cluster autoscaler.
-
 **Backup**
 
 * Add AzureFiles backup support
@@ -39,6 +70,7 @@ Release History
 
 * vm create: Add warning when specifying accelerated networking and an existing NIC together.
 * vm create: Add --vmss to specify an existing virtual machine scale set that the virtual machine should be assigned to.
+* vm/vmss create: Add a local copy of image alias file so that it can be accessed in a restricted network environment.
 * vmss create: Add --orchestration-mode to specify how virtual machines are managed by the scale set.
 * vm/vmss update: Add --ultra-ssd-enabled to allow updating ultra SSD setting.
 * [BREAKING CHANGE] vm extension set: Fix bug where users could not set an extension on a VM with --ids.
@@ -60,12 +92,29 @@ Release History
 **IoT**
 
 * Add new routing source type: DigitalTwinChangeEvents
-* Fix #2826: Missing features in "az iot hub create" 
+* Fix #2826: Missing features in "az iot hub create"
+* Bug Fixed: Return more descriptive message on raised exception. 
 
 **Key Vault**
 
 * Fix #9352: Unexpected error when certificate file does not exist
 * Fix #7048: `az keyvault recover/purge` not working
+
+**Monitor**
+
+* Updated azure-mgmt-monitor to 0.7.0
+* az monitor action-group create/update: Added suport for following new receivers: Arm role, Azure app push, ITSM, automation runbook, voice, logic app and Azure function
+* Included parameter usecommonalertschema for supported receivers
+* Included parameter useaadwebhook for webhook receiver
+
+**NetAppFiles**
+
+* Upgrade azure-mgmt-netapp to 0.6.0 to use API version 2019-07-01. This new API version includes:
+
+    - Volume creation --protocol-types accepts now "NFSv4.1" not "NFSv4"
+    - Volume export policy property now named 'nfsv41' not 'nfsv4'
+    - Volume creation-token renamed to file-path
+    - Snapshot creation date now named just 'created'
 
 **Network**
 
@@ -92,6 +141,11 @@ Release History
 **SQL**
 
 * Add "--compute-model", "--auto-pause-delay", and "--min-capacity" parameters to support CRUD operations for new SQL Database offering: Serverless compute model."
+
+**Storage**
+
+* storage account create/update: Add --enable-files-adds parameter and Azure Active Directory Properties Argument group to support Azure Files Active Directory Domain Service Authentication
+* Expand `az storage account keys list/renew` to support listing or regenerating Kerberos keys of storage account.
 
 2.0.75
 ++++++
