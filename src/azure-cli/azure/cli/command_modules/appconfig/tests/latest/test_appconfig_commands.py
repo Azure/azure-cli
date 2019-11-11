@@ -35,7 +35,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('location', '{rg_loc}'),
                          self.check('resourceGroup', resource_group),
                          self.check('provisioningState', 'Succeeded'),
-                         self.check('sku.name', 'free')])   # hard code the sku as it is not public facing yet. 
+                         self.check('sku.name', 'free')])   # hard code the sku as it is not public facing yet.
         self.cmd('appconfig list -g {rg}',
                  checks=[self.check('[0].name', '{config_store_name}'),
                          self.check('[0].location', '{rg_loc}'),

@@ -12,7 +12,7 @@ from ._utils import resolve_resource_group, user_confirmation
 def create_configstore(client, resource_group_name, name, location):
     configstore_params = ConfigurationStore(location=location.lower(),
                                             identity=None,
-                                            sku=Sku(name="Free")) # hard code the sku as it is not public facing yet
+                                            sku=Sku(name="Free"))   # hard code the sku as it is not public facing yet
     return client.create(resource_group_name, name, configstore_params)
 
 
