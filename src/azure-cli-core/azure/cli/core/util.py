@@ -122,7 +122,6 @@ def _update_latest_from_pypi(versions):
 
 
 def get_az_version_string():
-    import platform
     from azure.cli.core.extension import get_extensions, EXTENSIONS_DIR, DEV_EXTENSION_SOURCES
 
     output = six.StringIO()
@@ -380,7 +379,6 @@ def open_page_in_browser(url):
 
 
 def _get_platform_info():
-    import platform
     uname = platform.uname()
     # python 2, `platform.uname()` returns: tuple(system, node, release, version, machine, processor)
     platform_name = getattr(uname, 'system', None) or uname[0]
