@@ -11,6 +11,10 @@ Release History
 
 * Fix issue #11100: AttributeError for az webapp up when create service plan
 
+**Backup**
+
+* Added Backup support for SQL and SAP Hana workload.
+
 **Packaging**
 
 * Rewrite the az wrapper in python
