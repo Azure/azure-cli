@@ -590,12 +590,12 @@ examples:
   - name: Create a Linux task using a specific branch of a private Azure DevOps repository which builds the hello-world image on Arm architecture (V7 variant) and has triggers enabled.
     text: |
         az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry \\
-            -c https://msazure.visualstudio.com/DefaultCollection/Project/_git/Repo#branch \\
+            -c https://msazure.visualstudio.com/DefaultCollection/Project/_git/Repo#Branch:Folder \\
             -f Dockerfile --git-access-token <Personal Access Token> --platform linux/arm/v7
   - name: Create a Linux task from a public GitHub repository which builds the hello-world image with only a git pull request trigger. Note that this task does not use Source Registry (MyRegistry), so we can explicitly set Auth mode as None for it.
     text: |
         az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry  -f Dockerfile \\
-            --auth-mode None -c https://github.com/Azure-Samples/acr-build-helloworld-node.git\\
+            --auth-mode None -c https://github.com/Azure-Samples/acr-build-helloworld-node.git \\
             --commit-trigger-enabled false --git-access-token 00000000000000000000000000000000000000
   - name: Create a Windows task from a public GitHub repository which builds the Azure Container Builder image on Amd64 architecture without triggers.
     text: |
@@ -606,8 +606,8 @@ examples:
   - name: Create a Linux multi-step task from a public GitHub repository with with both system-assigned and user-assigned managed identities and with a git commit, pull request, base image, and timer trigger that runs the task at noon on Mondays through Fridays with the trigger name provided.
     text: |
         az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry \\
-            -c https://github.com/Azure-Samples/acr-tasks.git#:multipleRegistries\\
-            -f testtask.yaml --assign-identity [system] "<myACRTasksResourceId>" 
+            -c https://github.com/Azure-Samples/acr-tasks.git#:multipleRegistries \\
+            -f testtask.yaml --assign-identity [system] "<myIdentityResourceId>" 
             --schedule "dailyTimer:0 12 * * Mon-Fri" 
 """
 
