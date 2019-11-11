@@ -25,6 +25,14 @@ Release History
 
 * Fix #10996: Polish error for `--force-change-password-next-login` in `az ad user update` when `--password` is not specified
 
+2.0.77
+++++++
+
+**AppService**
+
+* az appservice vnet-integration add: Fixed so that subnet delegation is case insensitive and delegating subnets does not overwrite previous data.
+
+
 2.0.76
 ++++++
 
