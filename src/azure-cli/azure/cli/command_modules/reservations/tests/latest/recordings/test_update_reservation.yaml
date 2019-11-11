@@ -3,65 +3,119 @@ interactions:
     body: '{"properties": {"appliedScopeType": "Single", "appliedScopes": ["/subscriptions/00000000-0000-0000-0000-000000000000"],
       "instanceFlexibility": "Off"}}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [reservations reservation update]
-      Connection: [keep-alive]
-      Content-Length: ['150']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.0
-          msrest_azure/0.4.32 azure-mgmt-reservations/0.2.1 Azure-SDK-For-Python AZURECLI/2.0.38]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - reservations reservation update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '150'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --reservation-order-id --reservation-id -t -s --instance-flexibility
+      User-Agent:
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-reservations/0.6.0 Azure-SDK-For-Python AZURECLI/2.0.76
+      accept-language:
+      - en-US
     method: PATCH
-    uri: https://management.azure.com/providers/Microsoft.Capacity/reservationOrders/98e884a1-2e01-4c9a-987e-e4e8be8f2775/reservations/e208f907-6d08-4b07-b857-91071cac521b?api-version=2018-06-01
+    uri: https://management.azure.com/providers/Microsoft.Capacity/reservationOrders/0a47417c-cd30-4f67-add6-d631583e09f3/reservations/ae1fbdad-6333-4964-9f4c-83f7e2b7f44f?api-version=2019-04-01
   response:
-    body: {string: '{"sku":{"name":"Standard_B1ms"},"id":"/providers/microsoft.capacity/reservationOrders/98e884a1-2e01-4c9a-987e-e4e8be8f2775/reservations/e208f907-6d08-4b07-b857-91071cac521b","type":"Microsoft.Capacity/reservationOrders/reservations","name":"98e884a1-2e01-4c9a-987e-e4e8be8f2775/e208f907-6d08-4b07-b857-91071cac521b","etag":9,"location":"eastasia","properties":{"appliedScopes":["/subscriptions/00000000-0000-0000-0000-000000000000"],"appliedScopeType":"Single","quantity":2,"provisioningState":"Succeeded","expiryDate":"2019-06-12","displayName":"CLI_testing","effectiveDateTime":"2018-06-12T18:59:59.1283664Z","lastUpdatedDateTime":"2018-06-12T19:00:10.1553804Z","reservedResourceType":"VirtualMachines","instanceFlexibility":"On","skuDescription":"Standard_B1ms","mergeProperties":{"mergeSources":["/providers/microsoft.capacity/reservationOrders/98e884a1-2e01-4c9a-987e-e4e8be8f2775/reservations/c379d4f5-44e6-4990-90fc-2999fafcec3a","/providers/microsoft.capacity/reservationOrders/98e884a1-2e01-4c9a-987e-e4e8be8f2775/reservations/010139b6-c3f4-4b3a-9530-f928616507dc"]}}}'}
+    body:
+      string: '{"sku":{"name":"Standard_D1"},"id":"/providers/microsoft.capacity/reservationOrders/0a47417c-cd30-4f67-add6-d631583e09f3/reservations/ae1fbdad-6333-4964-9f4c-83f7e2b7f44f","type":"Microsoft.Capacity/reservationOrders/reservations","name":"0a47417c-cd30-4f67-add6-d631583e09f3/ae1fbdad-6333-4964-9f4c-83f7e2b7f44f","etag":4,"location":"westus","properties":{"appliedScopes":["/subscriptions/00000000-0000-0000-0000-000000000000"],"appliedScopeType":"Single","quantity":3,"provisioningState":"Succeeded","expiryDate":"2020-08-23","displayName":"TestPurchaseReservation","effectiveDateTime":"2019-11-08T04:56:49.2849104Z","lastUpdatedDateTime":"2019-11-08T04:56:53.7764659Z","reservedResourceType":"VirtualMachines","instanceFlexibility":"Off","skuDescription":"Reserved
+        VM Instance, Standard_D1, US West, 1 Year","mergeProperties":{"mergeSources":["/providers/microsoft.capacity/reservationOrders/0a47417c-cd30-4f67-add6-d631583e09f3/reservations/8a835b02-2dac-4c48-928d-403ea989ab2f","/providers/microsoft.capacity/reservationOrders/0a47417c-cd30-4f67-add6-d631583e09f3/reservations/56a3ec1d-3b6e-4639-b8dd-8f9b0a0edda6"]},"renew":false}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['1007']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 20 Jun 2018 22:57:44 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-tenant-writes: ['1198']
-      x-ms-test: ['{"contact":"kgautam","scenarios":"SqlSusePurchase","retention":"6/22/2018
-          1:11:40 AM"}']
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '1137'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 08 Nov 2019 04:56:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-tenant-writes:
+      - '1199'
+      x-ms-test:
+      - '{"contact":"kgautam","scenarios":"RITesting","retention":"11/21/2019 4:08:12
+        AM"}'
+    status:
+      code: 200
+      message: OK
 - request:
     body: '{"properties": {"appliedScopeType": "Shared", "instanceFlexibility": "Off"}}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [reservations reservation update]
-      Connection: [keep-alive]
-      Content-Length: ['76']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.0
-          msrest_azure/0.4.32 azure-mgmt-reservations/0.2.1 Azure-SDK-For-Python AZURECLI/2.0.38]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - reservations reservation update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '76'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --reservation-order-id --reservation-id -t --instance-flexibility
+      User-Agent:
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-reservations/0.6.0 Azure-SDK-For-Python AZURECLI/2.0.76
+      accept-language:
+      - en-US
     method: PATCH
-    uri: https://management.azure.com/providers/Microsoft.Capacity/reservationOrders/98e884a1-2e01-4c9a-987e-e4e8be8f2775/reservations/e208f907-6d08-4b07-b857-91071cac521b?api-version=2018-06-01
+    uri: https://management.azure.com/providers/Microsoft.Capacity/reservationOrders/0a47417c-cd30-4f67-add6-d631583e09f3/reservations/ae1fbdad-6333-4964-9f4c-83f7e2b7f44f?api-version=2019-04-01
   response:
-    body: {string: '{"sku":{"name":"Standard_B1ms"},"id":"/providers/microsoft.capacity/reservationOrders/98e884a1-2e01-4c9a-987e-e4e8be8f2775/reservations/e208f907-6d08-4b07-b857-91071cac521b","type":"Microsoft.Capacity/reservationOrders/reservations","name":"98e884a1-2e01-4c9a-987e-e4e8be8f2775/e208f907-6d08-4b07-b857-91071cac521b","etag":8,"location":"eastasia","properties":{"appliedScopeType":"Shared","quantity":2,"provisioningState":"Succeeded","expiryDate":"2019-06-12","displayName":"CLI_testing","effectiveDateTime":"2018-06-20T22:56:34.4495261Z","lastUpdatedDateTime":"2018-06-20T22:56:38.2110255Z","reservedResourceType":"VirtualMachines","instanceFlexibility":"Off","skuDescription":"Standard_B1ms","mergeProperties":{"mergeSources":["/providers/microsoft.capacity/reservationOrders/98e884a1-2e01-4c9a-987e-e4e8be8f2775/reservations/c379d4f5-44e6-4990-90fc-2999fafcec3a","/providers/microsoft.capacity/reservationOrders/98e884a1-2e01-4c9a-987e-e4e8be8f2775/reservations/010139b6-c3f4-4b3a-9530-f928616507dc"]}}}'}
+    body:
+      string: '{"sku":{"name":"Standard_D1"},"id":"/providers/microsoft.capacity/reservationOrders/0a47417c-cd30-4f67-add6-d631583e09f3/reservations/ae1fbdad-6333-4964-9f4c-83f7e2b7f44f","type":"Microsoft.Capacity/reservationOrders/reservations","name":"0a47417c-cd30-4f67-add6-d631583e09f3/ae1fbdad-6333-4964-9f4c-83f7e2b7f44f","etag":6,"location":"westus","properties":{"appliedScopeType":"Shared","quantity":3,"provisioningState":"Succeeded","expiryDate":"2020-08-23","displayName":"TestPurchaseReservation","effectiveDateTime":"2019-11-08T04:56:57.4087645Z","lastUpdatedDateTime":"2019-11-08T04:56:59.3775643Z","reservedResourceType":"VirtualMachines","instanceFlexibility":"Off","skuDescription":"Reserved
+        VM Instance, Standard_D1, US West, 1 Year","mergeProperties":{"mergeSources":["/providers/microsoft.capacity/reservationOrders/0a47417c-cd30-4f67-add6-d631583e09f3/reservations/8a835b02-2dac-4c48-928d-403ea989ab2f","/providers/microsoft.capacity/reservationOrders/0a47417c-cd30-4f67-add6-d631583e09f3/reservations/56a3ec1d-3b6e-4639-b8dd-8f9b0a0edda6"]},"renew":false}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['1006']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 20 Jun 2018 22:56:39 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-tenant-writes: ['1199']
-      x-ms-test: ['{"contact":"kgautam","scenarios":"SqlSusePurchase","retention":"6/22/2018
-          1:11:40 AM"}']
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '1065'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 08 Nov 2019 04:57:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-tenant-writes:
+      - '1199'
+      x-ms-test:
+      - '{"contact":"kgautam","scenarios":"RITesting","retention":"11/21/2019 4:08:12
+        AM"}'
+    status:
+      code: 200
+      message: OK
 version: 1

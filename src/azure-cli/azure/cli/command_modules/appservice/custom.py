@@ -2990,7 +2990,8 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
         logger.warning("Creating AppServicePlan '%s' ...", plan)
     # we will always call the ASP create or update API so that in case of re-deployment, if the SKU or plan setting are
     # updated we update those
-    create_app_service_plan(cmd, rg_name, plan, _is_linux, False, sku, 1 if _is_linux else None, location)
+    create_app_service_plan(cmd, rg_name, plan, _is_linux, False, sku=sku, number_of_workers=1 if _is_linux else None,
+                            location=location)
 
     if _create_new_app:
         logger.warning("Creating webapp '%s' ...", name)

@@ -43,7 +43,10 @@ def action_group_list_table(results):
     for result in results:
         data = _item_to_ordered_dict(result, 'name', 'resourceGroup', 'groupShortName', 'enabled', 'location',
                                      ('emailReceivers', 'email'), ('smsReceivers', 'sms'),
-                                     ('webhookReceivers', 'webhook'))
+                                     ('webhookReceivers', 'webhook'), ('armRoleReceivers', 'armrole'),
+                                     ('azureAppPushReceivers', 'azureapppush'), ('itsmReceivers', 'itsm'),
+                                     ('automationRunbookReceivers', 'automationrunbook'), ('voiceReceivers', 'voice'),
+                                     ('logicAppReceivers', 'logicapp'), ('azureFunctionReceivers', 'azurefunction'))
 
         output_results.append(data)
 
