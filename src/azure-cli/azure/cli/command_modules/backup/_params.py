@@ -28,7 +28,7 @@ allowed_protectable_item_type = ['SQLAG', 'SQLInstance', 'SQLDatabase', 'HANAIns
 backup_management_type_help = """Specifiy the backup management type. Define how Azure Backup manages the backup of entities within the ARM resource. For eg: AzureWorkloads refers to workloads installed within Azure VMs, AzureStorage refers to entities within Storage account. Required only if friendly name is used as Container name."""
 container_name_help = """Name of the backup container. Accepts 'Name' or 'FriendlyName' from the output of az backup container list command. If 'FriendlyName' is passed then BackupManagementType is required."""
 workload_type_help = """Specifiy the type of applications within the Resource which should be discovered and protected by Azure Backup. """
-restore_mode_help = """Accepts OriginalLocation or AlternateLocation"""
+restore_mode_help = """Specify the restore mode."""
 resolve_conflict_help = "Instruction if there's a conflict with the restored data."
 resource_id_help = """ID of the Azure Resource containing items to be protected by Azure Backup service. Currently, only Azure VM resource IDs are supported."""
 policy_help = """JSON encoded policy definition. Use the show command with JSON output to obtain a policy object. Modify the values using a file editor and pass the object."""
@@ -44,7 +44,8 @@ job_name_type = CLIArgumentType(help='Name of the job.', options_list=['--name',
 rp_name_type = CLIArgumentType(help='Name of the recovery point.', options_list=['--rp-name', '-r'])
 backup_management_type = CLIArgumentType(help=backup_management_type_help, arg_type=get_enum_type(allowed_backup_management_types), options_list=['--backup-management-type'])
 workload_type = CLIArgumentType(help=workload_type_help, arg_type=get_enum_type(allowed_workload_types), options_list=['--workload-type'])
-restore_mode_type = CLIArgumentType(help=restore_mode_help, arg_type=get_enum_type(['OriginalLocation', 'AlternateLocation', 'AlternateWorkloadRestore', 'OriginalWorkloadRestore']), options_list=['--restore-mode'])
+restore_mode_type = CLIArgumentType(help=restore_mode_help, arg_type=get_enum_type(['OriginalLocation', 'AlternateLocation']), options_list=['--restore-mode'])
+restore_mode_workload_type = CLIArgumentType(help=restore_mode_help, arg_type=get_enum_type(['AlternateWorkloadRestore', 'OriginalWorkloadRestore']), options_list=['--restore-mode'])
 resolve_conflict_type = CLIArgumentType(help=resolve_conflict_help, arg_type=get_enum_type(['Overwrite', 'Skip']), options_list=['--resolve-conflict'])
 resource_id_type = CLIArgumentType(help=resource_id_help, options_list=['--resource-id'])
 policy_type = CLIArgumentType(help=policy_help, options_list=['--policy'], completer=FilesCompleter(), type=file_type)
@@ -245,7 +246,7 @@ def load_arguments(self, _):
     with self.argument_context('backup recoveryconfig show') as c:
         c.argument('container_name', container_name_type)
         c.argument('item_name', item_name_type)
-        c.argument('restore_mode', restore_mode_type)
+        c.argument('restore_mode', restore_mode_workload_type)
         c.argument('vault_name', vault_name_type)
         c.argument('log_point_in_time', options_list=['--log-point-in-time'], help="""Specify the point-in-time which will be restored.""")
         c.argument('rp_name', rp_name_type)

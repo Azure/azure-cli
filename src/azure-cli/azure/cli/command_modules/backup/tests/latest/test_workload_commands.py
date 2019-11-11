@@ -5,7 +5,7 @@
 
 import unittest
 
-from azure.cli.testsdk import ScenarioTest
+from azure.cli.testsdk import ScenarioTest, record_only
 import json
 
 
@@ -35,6 +35,7 @@ item_id_hana_2 = '/Subscriptions/e3d2d341-4ddb-4c5d-9121-69b7e719485e/resourceGr
 
 
 class BackupTests(ScenarioTest, unittest.TestCase):
+    @record_only()
     def test_backup_wl_sql_container(self):
 
         self.kwargs.update({
@@ -85,6 +86,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
             self.check("length([?name == '{name}'])", 0)])
 
+    @record_only()
     def test_backup_wl_hana_container(self, container_name1=container_hana, container_name2=container_friendly_hana,
                                       resource_group=rg_hana, vault_name=vault_hana, workload_type='SAPHANA',
                                       subscription=sub_hana, id=id_hana):
@@ -137,6 +139,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
             self.check("length([?name == '{name}'])", 0)])
 
+    @record_only()
     def test_backup_wl_sql_policy(self):
 
         self.kwargs.update({
@@ -195,6 +198,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("length([?name == '{policy_new}'])", 0)
         ])
 
+    @record_only()
     def test_backup_wl_hana_policy(self):
 
         self.kwargs.update({
@@ -248,6 +252,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("length([?name == '{policy_new}'])", 0)
         ])
 
+    @record_only()
     def test_backup_wl_sql_item(self):
 
         self.kwargs.update({
@@ -333,6 +338,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.cmd('backup protection disable -v {vault} -g {rg} -c {container1} --backup-management-type AzureWorkload --workload-type {wt} -i {item} -y --delete-backup-data true')
 
+    @record_only()
     def test_backup_wl_hana_item(self):
 
         self.kwargs.update({
@@ -418,6 +424,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.cmd('backup protection disable -v {vault} -g {rg} -c {container1} --backup-management-type AzureWorkload --workload-type {wt} -i {item} -y --delete-backup-data true')
 
+    @record_only()
     def test_backup_wl_sql_protectable_item(self):
 
         self.kwargs.update({
@@ -466,6 +473,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
             self.check("length([?name == '{name}'])", 0)])
 
+    @record_only()
     def test_backup_wl_hana_protectable_item(self):
 
         self.kwargs.update({
@@ -514,6 +522,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
             self.check("length([?name == '{name}'])", 0)])
 
+    @record_only()
     def test_backup_wl_sql_rp(self):
         resource_group = rg_sql.lower()
         self.kwargs.update({
@@ -545,6 +554,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertIn(vault_sql.lower(), rp2_json[0]['id'].lower())
         self.assertIn(container_sql.lower(), rp2_json[0]['id'].lower())
 
+    @record_only()
     def test_backup_wl_hana_rp(self):
 
         resource_group = rg_hana.lower()
@@ -577,6 +587,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertIn(vault_hana.lower(), rp2_json[0]['id'].lower())
         self.assertIn(container_hana.lower(), rp2_json[0]['id'].lower())
 
+    @record_only()
     def test_backup_wl_sql_protection(self):
 
         self.kwargs.update({
@@ -640,6 +651,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("resourceGroup", '{rg}')
         ])
 
+    @record_only()
     def test_backup_wl_hana_protection(self):
 
         self.kwargs.update({
@@ -703,6 +715,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("resourceGroup", '{rg}')
         ])
 
+    @record_only()
     def test_backup_wl_sql_auto_protection(self):
 
         self.kwargs.update({
@@ -736,6 +749,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
             self.check("length([?name == '{name}'])", 0)])
 
+    @record_only()
     def test_backup_wl_hana_restore(self):
 
         resource_group = rg_hana.lower()
@@ -832,6 +846,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("resourceGroup", '{rg}')
         ])
 
+    @record_only()
     def test_backup_wl_sql_restore(self):
         self.kwargs.update({
             'vault': "sarath-vault",
