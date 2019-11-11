@@ -25,6 +25,10 @@ Release History
 
 * Fix #10996: Polish error for `--force-change-password-next-login` in `az ad user update` when `--password` is not specified
 
+**Redis**
+
+* Fix #2902: Avoid setting memory configs while updating Basic SKU cache
+
 2.0.76
 ++++++
 
