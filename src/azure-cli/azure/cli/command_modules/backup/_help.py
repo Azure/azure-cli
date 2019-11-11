@@ -28,7 +28,7 @@ examples:
 
 helps['backup container register'] = """
 type: command
-short-summary: This command allows Azure Backup to register a Resource to the given Recovery Services Vault.
+short-summary: Register a Resource to the given Recovery Services Vault.
 examples:
   - name: This command allows Azure Backup to convert the 'Resource' to a 'Backup Container' which is then registered to the given Recovery services vault. The Azure Backup service can then discover workloads of the given workload type within this container to be protected later.
     text: az backup container register --resource-group MyResourceGroup --vault-name MyVault --resource-id MyResourceId --workload-type MSSQL --backup-management-type AzureWorkload --resource-id MyResourceID
@@ -36,9 +36,9 @@ examples:
 
 helps['backup container re-register'] = """
 type: command
-short-summary: Resets the registration details for a given container.
+short-summary: Reset the registration details for a given container.
 examples:
-  - name: Resets the registration details for a given container. To be used only in error scenarios as specified here (https://docs.microsoft.com/azure/backup/backup-sql-server-azure-troubleshoot#re-registration-failures). Understanding the failure symptoms and causes before attempting re-registration.
+  - name: Reset the registration details for a given container. To be used only in error scenarios as specified here (https://docs.microsoft.com/azure/backup/backup-sql-server-azure-troubleshoot#re-registration-failures). Understand the failure symptoms and causes before attempting re-registration.
     text: az backup container re-register --resource-group MyResourceGroup --vault-name MyVault --container-name MyContainer --workload-type MSSQL --backup-management-type AzureWorkload --yes
 """
 
@@ -207,25 +207,25 @@ short-summary: An item which can be protected or backed up to an Azure Recovery 
 
 helps['backup protectable-item initialize'] = """
 type: command
-short-summary: This command triggers the discovery of any unprotected items of the given workload type in the given container. Use this command to manually discover new DBs and proceed to protect them.
+short-summary: Trigger the discovery of any unprotected items of the given workload type in the given container.
 examples:
-  - name: This command triggers the discovery of any unprotected items of the given workload type in the given container. Use this command to manually discover new DBs and proceed to protect them.
+  - name: Trigger the discovery of any unprotected items of the given workload type in the given container. Use this command to manually discover new DBs and proceed to protect them.
     text: az backup protectable-item initialize --resource-group MyResourceGroup --vault-name MyVault --workload-type MSSQL --container-name MyContainer
 """
 
 helps['backup protectable-item list'] = """
 type: command
-short-summary: This command retrieves all protectable items within a certain container or across all registered containers. It consists of all the elements in the hierarchy of the application. Returns DBs and their upper tier entities like Instance, AvailabilityGroup etc.
+short-summary: Retrieve all protectable items within a certain container or across all registered containers.
 examples:
-  - name: This command retrieves all protectable items within a certain container or across all registered containers. It consists of all the elements in the hierarchy of the application. Returns DBs and their upper tier entities like Instance, AvailabilityGroup etc.
+  - name: Retrieve all protectable items within a certain container or across all registered containers. It consists of all the elements in the hierarchy of the application. Returns DBs and their upper tier entities like Instance, AvailabilityGroup etc.
     text: az backup protectable-item list --resource-group MyResourceGroup --vault-name MyVault --workload-type MSSQL --container-name MyContainer
 """
 
 helps['backup protectable-item show'] = """
 type: command
-short-summary: This command retrieves the specified protectable item within the given container.
+short-summary: Retrieve the specified protectable item within the given container.
 examples:
-  - name: This command retrieves the specified protectable item within the given container.
+  - name: Retrieve the specified protectable item within the given container.
     text: az backup protectable-item show --resource-group MyResourceGroup --vault-name MyVault --workload-type MSSQL --protectable-item-type SQLAG --name Name  --server-name MyServerName
 """
 
@@ -288,30 +288,30 @@ examples:
 
 helps['backup protection auto-enable-for-azurewl'] = """
 type: command
-short-summary: Automatically protect all existing unprotected DBs and any DB which will be added later with the given policy. Azure backup service will regularly scan auto-protected containers for any new DBs and automatically protect them.
+short-summary: Automatically protect all existing unprotected DBs and any DB which will be added later with the given policy.
 examples:
-  - name: This commands allows users to automatically protect all existing unprotected DBs and any DB which will be added later with the given policy.  Azure backup service will then regularly scan auto-protected containers for any new DBs and automatically protect them.
+  - name: Automatically protect all existing unprotected DBs and any DB which will be added later with the given policy.  Azure backup service will then regularly scan auto-protected containers for any new DBs and automatically protect them.
     text: az backup protection auto-enable-for-azurewl --policy-name MyPolicy --resource-group MyResourceGroup --vault-name MyVault  --protectable-item-name ItemName --protectable-item-type SQLInstance --server-name Myserver --workload-type MSSQL
 """
 
 helps['backup protection auto-disable-for-azurewl'] = """
 type: command
-short-summary: Disables auto-protection for the specified item.
+short-summary: Disable auto-protection for the specified item.
 examples:
-  - name: Disables auto-protection for the specified item.
+  - name: Disable auto-protection for the specified item.
     text: az backup protection auto-disable-for-azurewl --resource-group MyResourceGroup --vault-name MyVault --item-name MyItemName
 """
 
 helps['backup recoveryconfig'] = """
 type: group
-short-summary: Recovery configuration of a backed up item.
+short-summary: Manage recovery configuration of an Azure workload backed up item.
 """
 
 helps['backup recoveryconfig show'] = """
 type: command
-short-summary: This command constructs the recovery configuration of a backed up item such as SQL DB.
+short-summary: Construct the recovery configuration of an Azure workload backed up item.
 examples:
-  - name: This command constructs the recovery configuration of a backed up item such as SQL DB. The configuration object stores all details such as the recovery mode, target destinations for the restore and application specific parameters like target physical paths for SQL.
+  - name: Construct the recovery configuration of an Azure workload backed up item. The configuration object stores all details such as the recovery mode, target destinations for the restore and application specific parameters like target physical paths for SQL.
     text: az backup recoveryconfig show --container-name MyContainer --item-name MyItem --resource-group MyResourceGroup --vault-name MyVault --restore-mode OriginalWorkloadRestore
 """
 
@@ -340,9 +340,9 @@ examples:
 
 helps['backup recoverypoint show-log-chain'] = """
 type: command
-short-summary: This command lists the start and end points of the unbroken log chain(s) of the given backup item.
+short-summary: List the start and end points of the unbroken log chain(s) of the given backup item.
 examples:
-  - name: This command lists the start and end points of the unbroken log chain(s) of the given backup item. Use it to determine whether the point-in-time, to which the user wants the DB to be restored, is valid or not.
+  - name: List the start and end points of the unbroken log chain(s) of the given backup item. Use it to determine whether the point-in-time, to which the user wants the DB to be restored, is valid or not.
     text: az backup recoverypoint show-log-chain --container-name MyContainer --item-name MyItem --resource-group MyResourceGroup --vault-name MyVault
 """
 
