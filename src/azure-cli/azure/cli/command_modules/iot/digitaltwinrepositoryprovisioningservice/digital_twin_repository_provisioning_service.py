@@ -13,6 +13,7 @@
 from msrest.service_client import ServiceClient
 from msrest import Configuration, Serializer, Deserializer
 from .version import VERSION
+from msrestazure.azure_exceptions import CloudError
 from msrest.pipeline import ClientRawResponse
 from msrest.exceptions import HttpOperationError
 from . import models
@@ -103,7 +104,7 @@ class DigitalTwinRepositoryProvisioningService(object):
         response = self._client.send(request, header_parameters, stream=False, **operation_config)
 
         if response.status_code not in [200]:
-            raise HttpOperationError(self._deserialize, response)
+            raise CloudError(response)
 
         deserialized = None
 
@@ -175,7 +176,7 @@ class DigitalTwinRepositoryProvisioningService(object):
             request, header_parameters, body_content, stream=False, **operation_config)
 
         if response.status_code not in [200, 404]:
-            raise HttpOperationError(self._deserialize, response)
+            raise CloudError(response)
 
         deserialized = None
 
@@ -237,7 +238,7 @@ class DigitalTwinRepositoryProvisioningService(object):
         response = self._client.send(request, header_parameters, stream=False, **operation_config)
 
         if response.status_code not in [200, 404]:
-            raise HttpOperationError(self._deserialize, response)
+            raise CloudError(response)
 
         deserialized = None
 
@@ -294,7 +295,7 @@ class DigitalTwinRepositoryProvisioningService(object):
         response = self._client.send(request, header_parameters, stream=False, **operation_config)
 
         if response.status_code not in [204]:
-            raise HttpOperationError(self._deserialize, response)
+            raise CloudError(response)
 
         if raw:
             client_raw_response = ClientRawResponse(None, response)
@@ -337,7 +338,7 @@ class DigitalTwinRepositoryProvisioningService(object):
         response = self._client.send(request, header_parameters, stream=False, **operation_config)
 
         if response.status_code not in [200]:
-            raise HttpOperationError(self._deserialize, response)
+            raise CloudError(response)
 
         deserialized = None
 
@@ -405,7 +406,7 @@ class DigitalTwinRepositoryProvisioningService(object):
             request, header_parameters, body_content, stream=False, **operation_config)
 
         if response.status_code not in [200]:
-            raise HttpOperationError(self._deserialize, response)
+            raise CloudError(response)
 
         deserialized = None
 
@@ -461,7 +462,7 @@ class DigitalTwinRepositoryProvisioningService(object):
         response = self._client.send(request, header_parameters, stream=False, **operation_config)
 
         if response.status_code not in [200]:
-            raise HttpOperationError(self._deserialize, response)
+            raise CloudError(response)
 
         deserialized = None
 
@@ -518,7 +519,7 @@ class DigitalTwinRepositoryProvisioningService(object):
         response = self._client.send(request, header_parameters, stream=False, **operation_config)
 
         if response.status_code not in [200]:
-            raise HttpOperationError(self._deserialize, response)
+            raise CloudError(response)
 
         deserialized = None
 
@@ -578,7 +579,7 @@ class DigitalTwinRepositoryProvisioningService(object):
         response = self._client.send(request, header_parameters, stream=False, **operation_config)
 
         if response.status_code not in [200, 404]:
-            raise HttpOperationError(self._deserialize, response)
+            raise CloudError(response)
 
         deserialized = None
 

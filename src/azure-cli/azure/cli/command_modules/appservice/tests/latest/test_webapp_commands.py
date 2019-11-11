@@ -32,12 +32,18 @@ class WebappBasicE2ETest(ScenarioTest):
         plan = self.create_random_name(prefix='webapp-e2e-plan', length=24)
 
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
-        self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))  # test idempotency
+        self.cmd('appservice plan list -g {}'.format(resource_group), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', plan),
+            JMESPathCheck('[0].perSiteScaling', False)
+        ])
+        self.cmd('appservice plan create -g {} -n {} --per-site-scaling'.format(resource_group, plan))  # test idempotency
         self.cmd('appservice plan list -g {}'.format(resource_group), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', plan),
             JMESPathCheck('[0].sku.tier', 'Basic'),
-            JMESPathCheck('[0].sku.name', 'B1')
+            JMESPathCheck('[0].sku.name', 'B1'),
+            JMESPathCheck('[0].perSiteScaling', True)
         ])
         self.cmd('appservice plan list', checks=[
             JMESPathCheck("length([?name=='{}' && resourceGroup=='{}'])".format(plan, resource_group), 1)
@@ -717,6 +723,48 @@ class FunctionappACRScenarioTest(ScenarioTest):
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp))
 
 
+class FunctionAppCreateUsingACR(ScenarioTest):
+    @ResourceGroupPreparer(location='japanwest')
+    @StorageAccountPreparer()
+    @AllowLargeResponse()
+    def test_acr_create_function_app(self, resource_group, storage_account):
+        plan = self.create_random_name(prefix='acrtestplanfunction', length=24)
+        functionapp = self.create_random_name(prefix='functionappacrtest', length=24)
+        runtime = 'node'
+        acr_registry_name = functionapp
+        self.cmd('acr create --admin-enabled -g {} -n {} --sku Basic'.format(resource_group, acr_registry_name))
+        acr_creds = self.cmd('acr credential show -n {}'.format(acr_registry_name)).get_output_in_json()
+        username = acr_creds['username']
+        password = acr_creds['passwords'][0]['value']
+        self.cmd('functionapp plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan))
+        self.cmd('functionapp create -g {} -n {} -s {} --plan {} --runtime {}'
+                 ' --deployment-container-image-name {}.azurecr.io/image-name:latest --docker-registry-server-user {}'
+                 ' --docker-registry-server-password {}'.format(resource_group, functionapp, storage_account, plan, runtime,
+                                                                acr_registry_name, username, password))
+
+        self.cmd('functionapp config container show -g {} -n {} '.format(resource_group, functionapp), checks=[
+            JMESPathCheck("[?name=='DOCKER_REGISTRY_SERVER_USERNAME']|[0].value", username),
+            JMESPathCheck("[?name=='DOCKER_REGISTRY_SERVER_URL']|[0].name", 'DOCKER_REGISTRY_SERVER_URL')
+        ])
+        self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp), checks=[
+            JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'node'),
+            JMESPathCheck("[?name=='DOCKER_REGISTRY_SERVER_USERNAME'].value|[0]", username)
+        ])
+
+        self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
+            JMESPathCheck('linuxFxVersion', 'DOCKER|{}.azurecr.io/image-name:latest'.format(acr_registry_name))])
+
+        self.cmd('functionapp config container delete -g {} -n {} '.format(resource_group, functionapp))
+        json_result = self.cmd(
+            'functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp)).get_output_in_json()
+        all_settings = [setting['name'] for setting in json_result]
+        # Make sure the related settings are deleted
+        self.assertNotIn('DOCKER_REGISTRY_SERVER_USERNAME', all_settings)
+        self.assertNotIn('DOCKER_REGISTRY_SERVER_URL', all_settings)
+        self.assertNotIn('DOCKER_REGISTRY_SERVER_PASSWORD', all_settings)
+        self.assertIn('FUNCTIONS_WORKER_RUNTIME', all_settings)
+
+
 class FunctionappACRDeploymentScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='japanwest')
     @StorageAccountPreparer()
@@ -960,10 +1008,13 @@ class WebappSSLCertTest(ScenarioTest):
             JMESPathCheck("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].sslState".format(webapp_name), 'SniEnabled'),
             JMESPathCheck("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].thumbprint".format(webapp_name), cert_thumbprint)
         ])
+        self.cmd('webapp show -g {} -n {}'.format(resource_group, webapp_name), self.check('tags.web', 'web1'))
         self.cmd('webapp config ssl unbind -g {} -n {} --certificate-thumbprint {}'.format(resource_group, webapp_name, cert_thumbprint), checks=[
             JMESPathCheck("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].sslState".format(webapp_name), 'Disabled'),
         ])
+        self.cmd('webapp show -g {} -n {}'.format(resource_group, webapp_name), self.check('tags.web', 'web1'))
         self.cmd('webapp config ssl delete -g {} --certificate-thumbprint {}'.format(resource_group, cert_thumbprint))
+        self.cmd('webapp show -g {} -n {}'.format(resource_group, webapp_name), self.check('tags.web', 'web1'))
         self.cmd('webapp delete -g {} -n {}'.format(resource_group, webapp_name))
 
 
@@ -1061,9 +1112,9 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
             JMESPathCheck('kind', 'functionapp'),
             JMESPathCheck('name', functionapp_name)
         ])
-        self.cmd('functionapp update -g {} -n {} --set clientAffinityEnabled=true'.format(resource_group, functionapp_name), checks=[
-            self.check('clientAffinityEnabled', True)
-        ])
+        self.cmd('functionapp update -g {} -n {} --set clientAffinityEnabled=true'.format(resource_group, functionapp_name),
+                 checks=[self.check('clientAffinityEnabled', True)]
+                 )
 
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
 
@@ -1120,7 +1171,32 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
             JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'node')])
 
+    @ResourceGroupPreparer(location='westus')
+    @StorageAccountPreparer()
+    def test_functionapp_windows_runtime_version(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name('functionappwindowsruntime', 40)
+
+        self.cmd('functionapp create -g {} -n {} -c westus -s {} --os-type Windows --runtime node --runtime-version 8'
+                 .format(resource_group, functionapp_name, storage_account)).assert_with_checks([
+                     JMESPathCheck('state', 'Running'),
+                     JMESPathCheck('name', functionapp_name),
+                     JMESPathCheck('kind', 'functionapp'),
+                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+        self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+                 JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'node'),
+                 JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION'].value|[0]", '~8')])
+
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
+
+    @ResourceGroupPreparer(location='westus')
+    @StorageAccountPreparer()
+    def test_functionapp_windows_runtime_version_invalid(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name('functionappwindowsruntime', 40)
+
+        self.cmd('functionapp create -g {} -n {} -c westus -s {} '
+                 '--os-type Windows --runtime node --runtime-version 8.2'
+                 .format(resource_group, functionapp_name, storage_account), expect_failure=True)
 
 
 class FunctionAppOnWindowsWithoutRuntime(ScenarioTest):
@@ -1217,6 +1293,54 @@ class FunctionAppOnLinux(ScenarioTest):
             JMESPathCheck('linuxFxVersion', 'DOCKER|mcr.microsoft.com/azure-functions/node:2.0-node8-appservice')])
 
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp))
+
+    @ResourceGroupPreparer(location='southcentralus')
+    @StorageAccountPreparer()
+    def test_functionapp_on_linux_version(self, resource_group, storage_account):
+        plan = self.create_random_name(prefix='funcapplinplan', length=24)
+        functionapp = self.create_random_name(prefix='functionapp-linux', length=24)
+        self.cmd('functionapp plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan), checks=[
+            JMESPathCheck('reserved', True),  # this weird field means it is a linux
+            JMESPathCheck('sku.name', 'S1'),
+        ])
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime node --runtime-version 10'
+                 .format(resource_group, functionapp, plan, storage_account),
+                 checks=[
+                     JMESPathCheck('name', functionapp)
+                 ])
+        result = self.cmd('functionapp list -g {}'.format(resource_group), checks=[
+            JMESPathCheck('length([])', 1),
+            JMESPathCheck('[0].name', functionapp)
+        ]).get_output_in_json()
+        self.assertTrue('functionapp,linux' in result[0]['kind'])
+
+        self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
+            JMESPathCheck('linuxFxVersion', 'DOCKER|mcr.microsoft.com/azure-functions/node:2.0-node10-appservice')])
+
+    @ResourceGroupPreparer(location='westus')
+    @StorageAccountPreparer()
+    def test_functionapp_on_linux_version_consumption(self, resource_group, storage_account):
+        functionapp = self.create_random_name(prefix='functionapp-linux', length=24)
+        self.cmd('functionapp create -g {} -n {} -c westus -s {} --os-type linux --runtime python --runtime-version 3.7'
+                 .format(resource_group, functionapp, storage_account), checks=[
+                     JMESPathCheck('name', functionapp)
+                 ])
+
+        self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
+            JMESPathCheck('linuxFxVersion', 'PYTHON|3.7')])
+
+    @ResourceGroupPreparer(location='southcentralus')
+    @StorageAccountPreparer()
+    def test_functionapp_on_linux_version_error(self, resource_group, storage_account):
+        plan = self.create_random_name(prefix='funcapplinplan', length=24)
+        functionapp = self.create_random_name(prefix='functionapp-linux', length=24)
+        self.cmd('functionapp plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan), checks=[
+            JMESPathCheck('reserved', True),
+            JMESPathCheck('sku.name', 'S1'),
+        ])
+
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime python --runtime-version 3.8'
+                 .format(resource_group, functionapp, plan, storage_account), expect_failure=True)
 
 
 class FunctionAppServicePlan(ScenarioTest):
@@ -1433,6 +1557,24 @@ class WebappZipDeployScenarioTest(ScenarioTest):
         ])
 
 
+# Disabled due to issue https://github.com/Azure/azure-cli/issues/10705
+# class FunctionappRemoteBuildScenarioTest(ScenarioTest):
+#    @ResourceGroupPreparer()
+#    @StorageAccountPreparer()
+#    def test_functionapp_remote_build(self, resource_group, storage_account):
+#        functionapp_name = self.create_random_name(prefix='faremotebuildapp', length=24)
+#        plan_name = self.create_random_name(prefix='faremotebuildplan', length=24)
+#        zip_file = os.path.join(TEST_DIR, 'test_remote_build.zip')
+#        self.cmd('functionapp plan create -g {} -n {} --sku S1 --is-linux true'.format(resource_group, plan_name))
+#        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --os-type Linux --runtime python'.format(resource_group, functionapp_name, plan_name, storage_account))
+#        self.cmd('functionapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, functionapp_name, zip_file)).assert_with_checks([
+#            JMESPathCheck('status', 4),
+#            JMESPathCheck('deployer', 'Push-Deployer'),
+#           JMESPathCheck('message', 'Created via a push deployment'),
+#            JMESPathCheck('complete', True)
+#        ])
+
+
 class WebappImplictIdentityTest(ScenarioTest):
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer()
@@ -1611,7 +1753,7 @@ class WebappNetworkConnectionTests(ScenarioTest):
         vnet_name = self.create_random_name('swiftname', 24)
 
         self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(resource_group, vnet_name, subnet_name))
-        self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan))
+        self.cmd('appservice plan create -g {} -n {} --sku P1V2'.format(resource_group, plan))
         self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan))
         self.cmd('webapp vnet-integration add -g {} -n {} --vnet {} --subnet {}'.format(resource_group, webapp_name, vnet_name, subnet_name))
         self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[

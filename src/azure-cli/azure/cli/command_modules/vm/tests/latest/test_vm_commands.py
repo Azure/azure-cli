@@ -995,6 +995,23 @@ class VMExtensionScenarioTest(ScenarioTest):
         ])
         self.cmd('vm extension delete --resource-group {rg} --vm-name {vm} --name {ext_name}')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_extension_with_id_')
+    @AllowLargeResponse()
+    def test_vm_extension_with_id(self, resource_group):
+        self.kwargs.update({
+            'vm': 'vm1'
+        })
+        vm_id = self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS').get_output_in_json()['id']
+        self.kwargs.update({
+            'vm_id': vm_id
+        })
+        vm_ext_id = self.cmd('vm extension set -n customScript --publisher Microsoft.Azure.Extensions --ids {vm_id}')\
+            .get_output_in_json()['id']
+        self.kwargs.update({
+            'vm_ext_id': vm_ext_id
+        })
+        self.cmd('vm extension delete --ids {vm_ext_id}')
+
 
 class VMMachineExtensionImageScenarioTest(ScenarioTest):
 
@@ -1399,6 +1416,20 @@ class VMCreateExistingOptions(ScenarioTest):
         self.cmd('vm show -n {vm} -g {rg}',
                  checks=self.check('storageProfile.osDisk.vhd.uri', 'https://{sa}.blob.core.windows.net/{container}/{disk}.vhd'))
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_reference_vmss_')
+    def test_vm_reference_vmss(self, resource_group):
+        self.kwargs.update({
+            'vm': 'vm1',
+            'vmss': 'vmss1'
+        })
+
+        self.cmd('vmss create -g {rg} -n {vmss} --orchestration-mode VM')
+        self.cmd('vm create -g {rg} -n {vm} --image ubuntults --vmss {vmss}')
+        vmss_id = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()['id']
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('virtualMachineScaleSet.id', vmss_id)
+        ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_provision_vm_agent_')
     def test_vm_create_provision_vm_agent(self, resource_group):
         self.kwargs.update({
@@ -1678,6 +1709,26 @@ class VMDiskAttachDetachTest(ScenarioTest):
         self.cmd('vmss show -g {rg} -n {vmss2}', checks=[
             self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
             self.check('virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.storageAccountType', 'UltraSSD_LRS'),
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_vmss_update_ultra_ssd_enabled_', location='eastus2')
+    @AllowLargeResponse(size_kb=18192)
+    def test_vm_vmss_update_ultra_ssd_enabled(self, resource_group):
+        self.kwargs.update({
+            'vm': 'vm1',
+            'vmss': 'vmss1'
+        })
+
+        self.cmd('vm create -g {rg} -n {vm} --image centos --size Standard_D2s_v3 --zone 2')
+        self.cmd('vm deallocate -g {rg} -n {vm}')
+        self.cmd('vm update -g {rg} -n {vm} --ultra-ssd-enabled', checks=[
+            self.check('additionalCapabilities.ultraSsdEnabled', True)
+        ])
+
+        self.cmd('vmss create -g {rg} -n {vmss} --image centos --vm-sku Standard_D2s_v3 --zone 2')
+        self.cmd('vmss deallocate -g {rg} -n {vmss}')
+        self.cmd('vmss update -g {rg} -n {vmss} --ultra-ssd-enabled', checks=[
+            self.check('additionalCapabilities.ultraSsdEnabled', True)
         ])
 
 
@@ -3477,7 +3528,7 @@ class VMSSTerminateNotificationScenarioTest(ScenarioTest):
             self.cmd('vmss update -g {rg} -n {vm} --enable-terminate-notification')
 
 
-class VMPriorityEvictionBilling(ScenarioTest):
+class VMPriorityEvictionBillingTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_priority_eviction_billing_')
     def test_vm_priority_eviction_billing(self, resource_group):
@@ -3519,6 +3570,45 @@ class VMCreateSpecialName(ScenarioTest):
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('name', '{vm}'),
             self.check('osProfile.computerName', 'vm1')
+        ])
+
+
+class VMImageTermsTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_image_terms_')
+    def test_vm_image_terms(self, resource_group):
+        """
+        Test `accept`, `cancel`, `show` in `az vm image terms`
+        """
+        self.kwargs.update({
+            'publisher': 'fortinet',
+            'offer': 'fortinet_fortigate-vm_v5',
+            'plan': 'fortinet_fg-vm_payg',
+            'urn': 'fortinet:fortinet_fortigate-vm_v5:fortinet_fg-vm_payg:5.6.5'
+        })
+        self.cmd('vm image terms accept --urn {urn}', checks=[
+            self.check('accepted', True)
+        ])
+        self.cmd('vm image terms show --urn {urn}', checks=[
+            self.check('accepted', True)
+        ])
+        self.cmd('vm image terms cancel --urn {urn}', checks=[
+            self.check('accepted', False)
+        ])
+        self.cmd('vm image terms show --urn {urn}', checks=[
+            self.check('accepted', False)
+        ])
+        self.cmd('vm image terms accept --publisher {publisher} --offer {offer} --plan {plan}', checks=[
+            self.check('accepted', True)
+        ])
+        self.cmd('vm image terms show --publisher {publisher} --offer {offer} --plan {plan}', checks=[
+            self.check('accepted', True)
+        ])
+        self.cmd('vm image terms cancel --publisher {publisher} --offer {offer} --plan {plan}', checks=[
+            self.check('accepted', False)
+        ])
+        self.cmd('vm image terms show --publisher {publisher} --offer {offer} --plan {plan}', checks=[
+            self.check('accepted', False)
         ])
 
 

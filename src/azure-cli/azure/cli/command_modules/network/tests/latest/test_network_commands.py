@@ -85,7 +85,8 @@ class NetworkPrivateEndpoints(ScenarioTest):
             'ip': 'pubip1',
             'lks1': 'lks1',
             'lks2': 'lks2',
-            'pe': 'pe1'
+            'pe': 'pe1',
+            'rg': resource_group
         })
 
         # Create PLS
@@ -107,9 +108,12 @@ class NetworkPrivateEndpoints(ScenarioTest):
             self.check('provisioningState', 'Succeeded')
         ])
 
+        # temporalily disable the test
+        '''
         self.cmd('network private-endpoint update -g {rg} -n {pe} --request-message "test"', checks=[
             self.check('privateLinkServiceConnections[0].requestMessage', 'test')
         ])
+        '''
 
         self.cmd('network private-endpoint list')
         self.cmd('network private-endpoint list -g {rg}', checks=[
@@ -280,6 +284,28 @@ class NetworkPublicIpPrefix(ScenarioTest):
         self.cmd('network public-ip prefix create -g {rg} -n {prefix} --length 30')
         self.cmd('network public-ip create -g {rg} -n {pip} --public-ip-prefix {prefix} --sku Standard',
                  checks=self.check("publicIp.publicIpPrefix.id.contains(@, '{prefix}')", True))
+
+        # Test IP address version
+        self.kwargs.update({
+            'prefix_name_ipv4': 'public_ip_prefix_0',
+            'prefix_name_ipv5': 'public_ip_prefix_1',
+            'prefix_name_ipv6': 'public_ip_prefix_2'
+        })
+
+        # Check the default ip address version value
+        self.cmd('network public-ip prefix create -g {rg} -n {prefix_name_ipv4} --length 30', checks=[
+            self.check('publicIpAddressVersion', 'IPv4')
+        ])
+
+        # Check the creation of public IP prefix with IPv6 address option
+        # Note: prefix length for IPv6 is minimal 124 and maximal 127 respectively
+        self.cmd('network public-ip prefix create -g {rg} -n {prefix_name_ipv6} --length 127 --version IPv6', checks=[
+            self.check('publicIpAddressVersion', 'IPv6')
+        ])
+
+        # Check with unsupported IP address version: IPv5
+        with self.assertRaisesRegexp(SystemExit, '2'):
+            self.cmd('network public-ip prefix create -g {rg} -n {prefix_name_ipv6} --length 127 --version IPv5')
 
 
 class NetworkMultiIdsShowScenarioTest(ScenarioTest):
@@ -927,7 +953,8 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
             'wafp': 'agp1',
             'rule': 'rule1',
             'ip': 'pip1',
-            'ag': 'ag1'
+            'ag': 'ag1',
+            'rg': resource_group
         })
         self.cmd('network application-gateway waf-policy create -g {rg} -n {wafp}')
         self.cmd('network application-gateway waf-policy update -g {rg} -n {wafp} --tags test=best',
@@ -957,8 +984,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         ])
 
         self.cmd('network public-ip create -g {rg} -n {ip} --sku standard')
-        self.cmd('network application-gateway create -g {rg} -n {ag} --subnet subnet1 --vnet-name vnet1 --public-ip-address {ip} --sku WAF_v2 --waf-policy {wafp} --no-wait')
-        self.cmd('network application-gateway wait -g {rg} -n {ag} --exists')
+        self.cmd('network application-gateway create -g {rg} -n {ag} --subnet subnet1 --vnet-name vnet1 --public-ip-address {ip} --sku WAF_v2 --waf-policy {wafp}')
         self.cmd('network application-gateway show -g {rg} -n {ag}',
                  checks=self.check("firewallPolicy.contains(id, '{wafp}')", True))
         self.cmd('network application-gateway delete -g {rg} -n {ag}')
@@ -1032,9 +1058,9 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
             self.check('publicIp.publicIpAllocationMethod', 'Dynamic'),
             self.check('publicIp.dnsSettings', None)
         ])
-        self.cmd('network public-ip update -g {rg} -n {ip2} --allocation-method static --dns-name wowza --idle-timeout 10 --tags foo=doo', checks=[
+        self.cmd('network public-ip update -g {rg} -n {ip2} --allocation-method static --dns-name wowza2 --idle-timeout 10 --tags foo=doo', checks=[
             self.check('publicIpAllocationMethod', 'Static'),
-            self.check('dnsSettings.domainNameLabel', 'wowza'),
+            self.check('dnsSettings.domainNameLabel', 'wowza2'),
             self.check('idleTimeoutInMinutes', 10),
             self.check('tags.foo', 'doo')
         ])
@@ -1073,12 +1099,14 @@ class NetworkRouteFilterScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_network_route_filter')
     def test_network_route_filter(self, resource_group):
         self.kwargs['filter'] = 'filter1'
+        self.kwargs['rg'] = resource_group
         self.cmd('network route-filter create -g {rg} -n {filter} --tags foo=doo')
         self.cmd('network route-filter update -g {rg} -n {filter}')
         self.cmd('network route-filter show -g {rg} -n {filter}')
         self.cmd('network route-filter list -g {rg}')
 
-        self.cmd('network route-filter rule list-service-communities')
+        # temporalily disable this test
+        # self.cmd('network route-filter rule list-service-communities')
         self.cmd('network route-filter rule create -g {rg} --filter-name {filter} -n rule1 --communities 12076:5040 12076:5030 --access allow')
         self.cmd('network route-filter rule update -g {rg} --filter-name {filter} -n rule1 --set access=Deny')
         self.cmd('network route-filter rule show -g {rg} --filter-name {filter} -n rule1')
@@ -1189,6 +1217,33 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
         self.cmd('network express-route delete --resource-group {rg} --name {er}')
         # Expecting no results as we just deleted the only express route in the resource group
         self.cmd('network express-route list --resource-group {rg}', checks=self.is_empty())
+
+
+class NetworkExpressRoutePortScenarioTest(ScenarioTest):
+
+    def test_network_express_route_port_identity(self):
+        """
+        Since the resource ExpressRoute Port is rare currently, it's very expensive to write test.
+        We run test manually for now. Any changes related to this command, please contract to Service team for help.
+        For ussage, run `az network express-route port identity --help` to get help.
+        """
+        pass
+
+    def test_network_express_route_port_config_macsec(self):
+        """
+        Since the resource ExpressRoute Port is rare currently, it's very expensive to write test.
+        We run test manually for now. Any changes related to this command, please contract to Service team for help.
+        For ussage, run `az network express-route port link update --help` to get help.
+        """
+        pass
+
+    def test_network_express_route_port_config_adminstate(self):
+        """
+        Since the resource ExpressRoute Port is rare currently, it's very expensive to write test.
+        We run test manually for now. Any changes related to this command, please contract to Service team for help.
+        For ussage, run `az network express-route port link update --help` to get help.
+        """
+        pass
 
 
 class NetworkExpressRouteIPv6PeeringScenarioTest(ScenarioTest):
@@ -2260,6 +2315,62 @@ class NetworkVnetGatewayIpSecPolicy(ScenarioTest):
         self.cmd('network vnet-gateway ipsec-policy list -g {rg} --gateway-name {gw}')
 
 
+class NetworkVirtualRouter(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_virtual_router', location='WestCentralUS')
+    def test_network_virtual_router_scenario(self, resource_group, resource_group_location):
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'location': resource_group_location,
+            'vnet': 'vnet1',
+            'ip': 'pip1',
+            'gw': 'gw1',
+            'gw_sku': 'HighPerformance',
+            'vrouter': 'vrouter1',
+            'vrouter_peering': 'peering1'
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name GatewaySubnet -l {location} --subnet-name GatewaySubnet')
+        self.cmd('network public-ip create -g {rg} -n {ip} -l {location}')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw} --public-ip-address {ip} --vnet {vnet} --sku {gw_sku} --gateway-type ExpressRoute -l {location}')
+
+        self.cmd('network vrouter create -n {vrouter} -l {location} -g {rg} --hosted-gateway {gw}', checks=[
+            self.check('type', 'Microsoft.Network/VirtualRouters'),
+            self.check('name', '{vrouter}')
+        ])
+
+        self.cmd('network vrouter show -n {vrouter} -g {rg}', checks=[
+            self.check('name', '{vrouter}')
+        ])
+
+        self.cmd('network vrouter list -g {rg}', checks=[
+            self.check('@[0].name', '{vrouter}')
+        ])
+
+        self.cmd('network vrouter peering create -n {vrouter_peering} --peer-asn 10000 --peer-ip 10.0.0.0 -g {rg} --vrouter-name {vrouter}', checks=[
+            self.check('name', '{vrouter_peering}')
+        ])
+
+        self.cmd('network vrouter peering update -n {vrouter_peering} --peer-asn 11000 --peer-ip 11.0.0.0 -g {rg} --vrouter-name {vrouter}', checks=[
+            self.check('peerAsn', '11000'),
+            self.check('peerIp', '11.0.0.0')
+        ])
+
+        self.cmd('network vrouter peering show -n {vrouter_peering} -g {rg} --vrouter-name {vrouter}', checks=[
+            self.check('name', '{vrouter_peering}')
+        ])
+
+        self.cmd('network vrouter peering list -g {rg} --vrouter-name {vrouter}', checks=[
+            self.check('@[0].name', '{vrouter_peering}'),
+            self.check('length(@)', 1)
+        ])
+
+        self.cmd('network vrouter peering delete -n {vrouter_peering} -g {rg} --vrouter-name {vrouter}')
+
+        self.cmd('network vrouter delete -g {rg} -n {vrouter}')
+
+
 class NetworkSubnetScenarioTests(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_subnet_set_test')
@@ -2321,13 +2432,12 @@ class NetworkSubnetScenarioTests(ScenarioTest):
         self.assertTrue(len(result) > 1, True)
 
         self.cmd('network vnet create -g {rg} -n {vnet} -l westcentralus')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefix 10.0.0.0/24 --delegations Microsoft.Sql/servers', checks=[
-            self.check('delegations[0].serviceName', 'Microsoft.Sql/servers'),
-            self.check('purpose', 'PrivateEndpoints')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefix 10.0.0.0/24 --delegations Microsoft.Web.serverFarms', checks=[
+            self.check('delegations[0].serviceName', 'Microsoft.Web/serverFarms')
         ])
         # verify the update command, and that CLI validation will accept either serviceName or Name
-        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --delegations Microsoft.Sql.Servers',
-                 checks=self.check('delegations[0].serviceName', 'Microsoft.Sql/Servers'))
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --delegations Microsoft.Sql/managedInstances',
+                 checks=self.check('delegations[0].serviceName', 'Microsoft.Sql/managedInstances'))
 
 
 class NetworkActiveActiveCrossPremiseScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
