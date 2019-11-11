@@ -230,3 +230,11 @@ def cf_route_filter_rules(cli_ctx, _):
 
 def cf_service_community(cli_ctx, _):
     return network_client_factory(cli_ctx).bgp_service_communities
+
+
+def cf_virtual_router(cli_ctx, _):
+    return network_client_factory(cli_ctx).virtual_routers
+
+
+def cf_virtual_router_peering(cli_ctx, _):
+    return network_client_factory(cli_ctx).virtual_router_peerings

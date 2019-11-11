@@ -13,7 +13,7 @@ from azure.cli.core.commands.parameters import (resource_group_name_type, get_lo
 from azure.mgmt.web.models import DatabaseType, ConnectionStringType, BuiltInAuthenticationProvider, AzureStorageType
 
 from ._completers import get_hostname_completion_list
-
+from ._constants import RUNTIME_TO_IMAGE_FUNCTIONAPP
 from ._validators import validate_timeout_value, validate_site_create, validate_asp_create, validate_add_vnet
 
 
@@ -45,6 +45,10 @@ def load_arguments(self, _):
     webapp_name_arg_type = CLIArgumentType(configured_default='web', options_list=['--name', '-n'], metavar='NAME',
                                            completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name',
                                            help="name of the web app. You can configure the default using 'az configure --defaults web=<name>'")
+
+    functionapp_runtime_to_version_texts = []
+    for runtime, val in RUNTIME_TO_IMAGE_FUNCTIONAPP.items():
+        functionapp_runtime_to_version_texts.append(runtime + ' -> [' + ', '.join(val.keys()) + ']')
 
     # use this hidden arg to give a command the right instance, that functionapp commands
     # work on function app and webapp ones work on web app
@@ -79,6 +83,10 @@ def load_arguments(self, _):
         c.argument('sku', arg_type=sku_arg_type)
         c.argument('is_linux', action='store_true', required=False, help='host web app on Linux worker')
         c.argument('hyper_v', action='store_true', required=False, help='Host web app on Windows container', is_preview=True)
+        c.argument('per_site_scaling', action='store_true', required=False, help='Enable per-app scaling at the '
+                                                                                 'App Service plan level to allow for '
+                                                                                 'scaling an app independently from '
+                                                                                 'the App Service plan that hosts it.')
         c.argument('tags', arg_type=tags_type)
 
     with self.argument_context('appservice plan update') as c:
@@ -188,6 +196,7 @@ def load_arguments(self, _):
 
         with self.argument_context(scope + ' deployment source config-zip') as c:
             c.argument('src', help='a zip file path for deployment')
+            c.argument('build_remote', help='enable remote build during deployment', arg_type=get_three_state_flag(return_label=True))
             c.argument('timeout', type=int, options_list=['--timeout', '-t'], help='Configurable timeout in seconds for checking the status of deployment', validator=validate_timeout_value)
 
         with self.argument_context(scope + ' config appsettings list') as c:
@@ -200,6 +209,7 @@ def load_arguments(self, _):
             c.argument('allowed_origins', options_list=['--allowed-origins', '-a'], nargs='*', help='space separated origins that should be allowed to make cross-origin calls (for example: http://example.com:12345). To allow all, use "*" and remove all other origins from the list')
 
         with self.argument_context(scope + ' config set') as c:
+            c.argument('number_of_workers', help='The number of workers to be allocated.', type=int)
             c.argument('remote_debugging_enabled', help='enable or disable remote debugging', arg_type=get_three_state_flag(return_label=True))
             c.argument('web_sockets_enabled', help='enable or disable web sockets', arg_type=get_three_state_flag(return_label=True))
             c.argument('always_on', help='ensure web app gets loaded all the time, rather unloaded after been idle. Recommended when you have continuous web jobs running', arg_type=get_three_state_flag(return_label=True))
@@ -441,10 +451,14 @@ def load_arguments(self, _):
         c.argument('consumption_plan_location', options_list=['--consumption-plan-location', '-c'],
                    help="Geographic location where Function App will be hosted. Use 'functionapp list-consumption-locations' to view available locations.")
         c.argument('runtime', help='The functions runtime stack.', arg_type=get_enum_type(set(LINUX_RUNTIMES).union(set(WINDOWS_RUNTIMES))))
+        c.argument('runtime_version', help='The version of the functions runtime stack. '
+                                           'Allowed values for each --runtime are: ' + ', '.join(functionapp_runtime_to_version_texts))
         c.argument('os_type', arg_type=get_enum_type(OS_TYPES), help="Set the OS type for the app to be created.")
         c.argument('app_insights_key', help="Instrumentation key of App Insights to be added.")
         c.argument('app_insights', help="Name of the existing App Insights project to be added to the Function app. Must be in the same resource group.")
         c.argument('disable_app_insights', arg_type=get_three_state_flag(return_label=True), help="Disable creating application insights resource during functionapp create. No logs will be available.")
+        c.argument('docker_registry_server_user', help='The container registry server username.')
+        c.argument('docker_registry_server_password', help='The container registry server password. Required for private registries.')
 
     # For commands with shared impl between web app and function app and has output, we apply type validation to avoid confusions
     with self.argument_context('functionapp show') as c:

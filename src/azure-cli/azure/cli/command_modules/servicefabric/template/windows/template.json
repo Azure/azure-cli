@@ -168,7 +168,6 @@
     "variables": {
         "computeLocation": "[parameters('clusterLocation')]",
         "dnsName": "[parameters('clusterName')]",
-        "vmStorageAccountName": "[toLower(concat(uniqueString(resourceGroup().id), '1' ))]",
         "vmName": "vm",
         "publicIPAddressName": "PublicIP-VM",
         "publicIPAddressType": "Dynamic",
@@ -182,7 +181,7 @@
         "maxPercentUpgradeDomainDeltaUnhealthyNodes": "100",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
         "overProvision": "false",
-        "vmssApiVersion": "2016-03-30",
+        "vmssApiVersion": "2017-03-30",
         "lbApiVersion": "2015-06-15",
         "vNetApiVersion": "2015-06-15",
         "storageApiVersion": "2016-01-01",
@@ -196,7 +195,7 @@
         "subnet0Name": "Subnet-0",
         "subnet0Prefix": "10.0.0.0/24",
         "subnet0Ref": "[concat(variables('vnetID'),'/subnets/',variables('subnet0Name'))]",
-        "supportLogStorageAccountName": "[toLower( concat( uniqueString(resourceGroup().id),'2'))]",
+        "supportLogStorageAccountName": "[toLower( concat('sflogs', uniqueString(resourceGroup().id),'2'))]",
         "applicationDiagnosticsStorageAccountName": "[toLower(concat(uniqueString(resourceGroup().id), '3' ))]",
         "lbID0": "[resourceId('Microsoft.Network/loadBalancers',concat('LB','-', parameters('clusterName'),'-',variables('vmNodeType0Name')))]",
         "lbIPConfig0": "[concat(variables('lbID0'),'/frontendIPConfigurations/LoadBalancerIPConfig')]",
@@ -205,15 +204,7 @@
         "lbHttpProbeID0": "[concat(variables('lbID0'),'/probes/FabricHttpGatewayProbe')]",
         "lbNatPoolID0": "[concat(variables('lbID0'),'/inboundNatPools/LoadBalancerBEAddressNatPool')]",
         "vmNodeType0Name": "[toLower(concat('NT1', variables('vmName')))]",
-        "vmNodeType0Size": "[parameters('vmSku')]",
-        "vmStorageAccountName0": "[toLower(concat(uniqueString(resourceGroup().id), '1', '0' ))]",
-        "uniqueStringArray0": [
-            "[concat(variables('vmStorageAccountName0'), '0')]",
-            "[concat(variables('vmStorageAccountName0'), '1')]",
-            "[concat(variables('vmStorageAccountName0'), '2')]",
-            "[concat(variables('vmStorageAccountName0'), '3')]",
-            "[concat(variables('vmStorageAccountName0'), '4')]"
-        ]
+        "vmNodeType0Size": "[parameters('vmSku')]"
     },
     "resources": [
         {
@@ -451,37 +442,12 @@
             }
         },
         {
-            "apiVersion": "[variables('storageApiVersion')]",
-            "type": "Microsoft.Storage/storageAccounts",
-            "name": "[variables('uniqueStringArray0')[copyIndex()]]",
-            "location": "[variables('computeLocation')]",
-            "dependsOn": [],
-            "properties": {},
-            "copy": {
-                "name": "storageLoop",
-                "count": 5
-            },
-            "kind": "Storage",
-            "sku": {
-                "name": "[parameters('storageAccountType')]"
-            },
-            "tags": {
-                "resourceType": "Service Fabric",
-                "clusterName": "[parameters('clusterName')]"
-            }
-        },
-        {
             "apiVersion": "[variables('vmssApiVersion')]",
             "type": "Microsoft.Compute/virtualMachineScaleSets",
             "name": "[variables('vmNodeType0Name')]",
             "location": "[variables('computeLocation')]",
             "dependsOn": [
                 "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
-                "[concat('Microsoft.Storage/storageAccounts/', variables('uniqueStringArray0')[0])]",
-                "[concat('Microsoft.Storage/storageAccounts/', variables('uniqueStringArray0')[1])]",
-                "[concat('Microsoft.Storage/storageAccounts/', variables('uniqueStringArray0')[2])]",
-                "[concat('Microsoft.Storage/storageAccounts/', variables('uniqueStringArray0')[3])]",
-                "[concat('Microsoft.Storage/storageAccounts/', variables('uniqueStringArray0')[4])]",
                 "[concat('Microsoft.Network/loadBalancers/', concat('LB','-', parameters('clusterName'),'-',variables('vmNodeType0Name')))]",
                 "[concat('Microsoft.Storage/storageAccounts/', variables('supportLogStorageAccountName'))]",
                 "[concat('Microsoft.Storage/storageAccounts/', variables('applicationDiagnosticsStorageAccountName'))]"
@@ -628,17 +594,12 @@
                             "version": "[parameters('vmImageVersion')]"
                         },
                         "osDisk": {
-                            "vhdContainers": [
-                                "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStringArray0')[0]), variables('storageApiVersion')).primaryEndpoints.blob, variables('vmStorageAccountContainerName'))]",
-                                "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStringArray0')[1]), variables('storageApiVersion')).primaryEndpoints.blob, variables('vmStorageAccountContainerName'))]",
-                                "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStringArray0')[2]), variables('storageApiVersion')).primaryEndpoints.blob, variables('vmStorageAccountContainerName'))]",
-                                "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStringArray0')[3]), variables('storageApiVersion')).primaryEndpoints.blob, variables('vmStorageAccountContainerName'))]",
-                                "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('uniqueStringArray0')[4]), variables('storageApiVersion')).primaryEndpoints.blob, variables('vmStorageAccountContainerName'))]"
-                            ],
-                            "name": "vmssosdisk",
                             "caching": "ReadOnly",
-                            "createOption": "FromImage"
-                        }
+                            "createOption": "FromImage",
+                            "managedDisk": {
+                                "storageAccountType": "[parameters('storageAccountType')]"
+                            }
+                        }                    
                     }
                 }
             },

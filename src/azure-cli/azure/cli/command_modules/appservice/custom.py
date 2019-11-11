@@ -65,7 +65,8 @@ from ._create_util import (zip_contents_from_dir, get_runtime_version_details, c
                            should_create_new_rg, set_location, does_app_already_exist, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
                            detect_os_form_src)
-from ._constants import (RUNTIME_TO_IMAGE, NODE_VERSION_DEFAULT)
+from ._constants import (RUNTIME_TO_DEFAULT_VERSION, NODE_VERSION_DEFAULT_FUNCTIONAPP,
+                         RUNTIME_TO_IMAGE_FUNCTIONAPP, NODE_VERSION_DEFAULT)
 
 logger = get_logger(__name__)
 
@@ -209,6 +210,7 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
                     for t in temp:
                         if t.get('slotSetting', True):
                             slot_result[t['name']] = t['value']
+                            # Mark each setting as the slot setting
                         else:
                             result[t['name']] = t['value']
                 else:
@@ -308,7 +310,7 @@ def update_azure_storage_account(cmd, resource_group_name, name, custom_id, stor
     return result.properties
 
 
-def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, timeout=None, slot=None):
+def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_remote=False, timeout=None, slot=None):
     client = web_client_factory(cmd.cli_ctx)
     app = client.web_apps.get(resource_group_name, name)
     parse_plan_id = parse_resource_id(app.server_farm_id)
@@ -322,15 +324,35 @@ def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, timeout=N
         if plan_info is not None:
             break
         time.sleep(retry_delay)
-    if is_plan_consumption(plan_info) and app.reserved:
+
+    if build_remote and not app.reserved:
+        raise CLIError('Remote build is only available on Linux function apps')
+
+    is_consumption = is_plan_consumption(plan_info)
+    if (not build_remote) and is_consumption and app.reserved:
         return upload_zip_to_storage(cmd, resource_group_name, name, src, slot)
-    return enable_zip_deploy(cmd, resource_group_name, name, src, timeout, slot)
+
+    return enable_zip_deploy(cmd, resource_group_name, name, src, build_remote,
+                             timeout, slot)
 
 
-def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=None):
+def enable_zip_deploy_webapp(cmd, resource_group_name, name, src, timeout=None, slot=None):
+    return enable_zip_deploy(cmd, resource_group_name, name, src,
+                             is_remote_build=False,
+                             timeout=timeout,
+                             slot=slot)
+
+
+def enable_zip_deploy(cmd, resource_group_name, name, src, is_remote_build=False,
+                      timeout=None, slot=None):
     logger.warning("Getting scm site credentials for zip deployment")
     user_name, password = _get_site_credential(cmd.cli_ctx, resource_group_name, name, slot)
-    scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
+
+    try:
+        scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
+    except ValueError:
+        raise CLIError('Failed to fetch scm url for function app')
+
     zip_url = scm_url + '/api/zipdeploy?isAsync=true'
     deployment_status_url = scm_url + '/api/deployments/latest'
 
@@ -340,6 +362,11 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     headers['content-type'] = 'application/octet-stream'
     headers['User-Agent'] = UA_AGENT
 
+    if is_remote_build:
+        add_remote_build_app_settings(cmd, resource_group_name, name, slot)
+    else:
+        remove_remote_build_app_settings(cmd, resource_group_name, name, slot)
+
     import requests
     import os
     from azure.cli.core.util import should_disable_connection_verify
@@ -347,11 +374,71 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     with open(os.path.realpath(os.path.expanduser(src)), 'rb') as fs:
         zip_content = fs.read()
         logger.warning("Starting zip deployment. This operation can take a while to complete ...")
-        requests.post(zip_url, data=zip_content, headers=headers, verify=not should_disable_connection_verify())
+        res = requests.post(zip_url, data=zip_content, headers=headers, verify=not should_disable_connection_verify())
+        logger.warning("Deployment endpoint responses with status code %d", res.status_code)
+
+    # check if there's an ongoing process
+    if res.status_code == 409:
+        raise CLIError("There may be an ongoing deployment or your app setting has WEBSITE_RUN_FROM_PACKAGE. "
+                       "Please track your deployment in {} and ensure the WEBSITE_RUN_FROM_PACKAGE app setting "
+                       "is removed.".format(deployment_status_url))
+
     # check the status of async deployment
     response = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
                                             authorization, timeout)
     return response
+
+
+def add_remote_build_app_settings(cmd, resource_group_name, name, slot):
+    settings = get_app_settings(cmd, resource_group_name, name, slot)
+    enable_oryx_build = None
+    scm_do_build_during_deployment = None
+    website_run_from_package = None
+    for keyval in settings:
+        value = keyval['value'].lower()
+        if keyval['name'] == 'ENABLE_ORYX_BUILD':
+            enable_oryx_build = value in ('true', '1')
+        if keyval['name'] == 'SCM_DO_BUILD_DURING_DEPLOYMENT':
+            scm_do_build_during_deployment = value in ('true', '1')
+        if keyval['name'] == 'WEBSITE_RUN_FROM_PACKAGE':
+            website_run_from_package = value
+
+    if not ((enable_oryx_build is True) and (scm_do_build_during_deployment is True)):
+        logger.warning("Setting ENABLE_ORYX_BUILD to true")
+        logger.warning("Setting SCM_DO_BUILD_DURING_DEPLOYMENT to true")
+        update_app_settings(cmd, resource_group_name, name, [
+            "ENABLE_ORYX_BUILD=true",
+            "SCM_DO_BUILD_DURING_DEPLOYMENT=true"
+        ], slot)
+        time.sleep(5)
+
+    if website_run_from_package is not None:
+        logger.warning("Removing WEBSITE_RUN_FROM_PACKAGE app setting")
+        delete_app_settings(cmd, resource_group_name, name, [
+            "WEBSITE_RUN_FROM_PACKAGE"
+        ], slot)
+        time.sleep(5)
+
+
+def remove_remote_build_app_settings(cmd, resource_group_name, name, slot):
+    settings = get_app_settings(cmd, resource_group_name, name, slot)
+    enable_oryx_build = None
+    scm_do_build_during_deployment = None
+    for keyval in settings:
+        value = keyval['value'].lower()
+        if keyval['name'] == 'ENABLE_ORYX_BUILD':
+            enable_oryx_build = value in ('true', '1')
+        if keyval['name'] == 'SCM_DO_BUILD_DURING_DEPLOYMENT':
+            scm_do_build_during_deployment = value in ('true', '1')
+
+    if not ((enable_oryx_build is False) and (scm_do_build_during_deployment is False)):
+        logger.warning("Setting ENABLE_ORYX_BUILD to false")
+        logger.warning("Setting SCM_DO_BUILD_DURING_DEPLOYMENT to false")
+        update_app_settings(cmd, resource_group_name, name, [
+            "ENABLE_ORYX_BUILD=false",
+            "SCM_DO_BUILD_DURING_DEPLOYMENT=false"
+        ], slot)
+        time.sleep(5)
 
 
 def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
@@ -767,7 +854,7 @@ def _get_linux_multicontainer_encoded_config_from_file(file_name):
 
 # for any modifications to the non-optional parameters, adjust the reflection logic accordingly
 # in the method
-def update_site_configs(cmd, resource_group_name, name, slot=None,
+def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_workers=None,
                         linux_fx_version=None, windows_fx_version=None, reserved_instance_count=None, php_version=None,  # pylint: disable=unused-argument
                         python_version=None, net_framework_version=None,  # pylint: disable=unused-argument
                         java_version=None, java_container=None, java_container_version=None,  # pylint: disable=unused-argument
@@ -780,6 +867,8 @@ def update_site_configs(cmd, resource_group_name, name, slot=None,
                         ftps_state=None,  # pylint: disable=unused-argument
                         generic_configurations=None):
     configs = get_site_configs(cmd, resource_group_name, name, slot)
+    if number_of_workers is not None:
+        number_of_workers = validate_range_of_int_flag('--number-of-workers', number_of_workers, min_val=0, max_val=20)
     if linux_fx_version:
         if linux_fx_version.strip().lower().startswith('docker|'):
             update_app_settings(cmd, resource_group_name, name, ["WEBSITES_ENABLE_APP_SERVICE_STORAGE=false"])
@@ -793,7 +882,7 @@ def update_site_configs(cmd, resource_group_name, name, slot=None,
     frame = inspect.currentframe()
     bool_flags = ['remote_debugging_enabled', 'web_sockets_enabled', 'always_on',
                   'auto_heal_enabled', 'use32_bit_worker_process', 'http20_enabled']
-    int_flags = ['reserved_instance_count']
+    int_flags = ['reserved_instance_count', 'number_of_workers']
     # note: getargvalues is used already in azure.cli.core.commands.
     # and no simple functional replacement for this deprecating method for 3.5
     args, _, _, values = inspect.getargvalues(frame)  # pylint: disable=deprecated-method
@@ -1293,8 +1382,8 @@ def list_app_service_plans(cmd, resource_group_name=None):
     return plans
 
 
-def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, sku='B1', number_of_workers=None,
-                            location=None, tags=None):
+def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, per_site_scaling=False, sku='B1',
+                            number_of_workers=None, location=None, tags=None):
     if is_linux and hyper_v:
         raise CLIError('usage error: --is-linux | --hyper-v')
     client = web_client_factory(cmd.cli_ctx)
@@ -1304,7 +1393,8 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, s
     # the api is odd on parameter naming, have to live with it for now
     sku_def = SkuDescription(tier=get_sku_name(sku), name=sku, capacity=number_of_workers)
     plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
-                              reserved=(is_linux or None), hyper_v=(hyper_v or None), name=name)
+                              reserved=(is_linux or None), hyper_v=(hyper_v or None), name=name,
+                              per_site_scaling=per_site_scaling)
     return client.app_service_plans.create_or_update(resource_group_name, name, plan_def)
 
 
@@ -1898,13 +1988,13 @@ def delete_ssl_cert(cmd, resource_group_name, certificate_thumbprint):
     raise CLIError("Certificate for thumbprint '{}' not found".format(certificate_thumbprint))
 
 
-def _update_host_name_ssl_state(cli_ctx, resource_group_name, webapp_name, location,
+def _update_host_name_ssl_state(cli_ctx, resource_group_name, webapp_name, webapp,
                                 host_name, ssl_state, thumbprint, slot=None):
     updated_webapp = Site(host_name_ssl_states=[HostNameSslState(name=host_name,
                                                                  ssl_state=ssl_state,
                                                                  thumbprint=thumbprint,
                                                                  to_update=True)],
-                          location=location)
+                          location=webapp.location, tags=webapp.tags)
     return _generic_site_operation(cli_ctx, resource_group_name, webapp_name, 'create_or_update',
                                    slot, updated_webapp)
 
@@ -1920,7 +2010,7 @@ def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, 
     for webapp_cert in webapp_certs:
         if webapp_cert.thumbprint == certificate_thumbprint:
             if len(webapp_cert.host_names) == 1 and not webapp_cert.host_names[0].startswith('*'):
-                return _update_host_name_ssl_state(cmd.cli_ctx, resource_group_name, name, webapp.location,
+                return _update_host_name_ssl_state(cmd.cli_ctx, resource_group_name, name, webapp,
                                                    webapp_cert.host_names[0], ssl_type,
                                                    certificate_thumbprint, slot)
 
@@ -1928,7 +2018,7 @@ def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, 
             hostnames_in_webapp = [x.name.split('/')[-1] for x in query_result]
             to_update = _match_host_names_from_cert(webapp_cert.host_names, hostnames_in_webapp)
             for h in to_update:
-                _update_host_name_ssl_state(cmd.cli_ctx, resource_group_name, name, webapp.location,
+                _update_host_name_ssl_state(cmd.cli_ctx, resource_group_name, name, webapp,
                                             h, ssl_type, certificate_thumbprint, slot)
 
             return show_webapp(cmd, resource_group_name, name, slot)
@@ -2115,9 +2205,10 @@ def validate_range_of_int_flag(flag_name, value, min_val, max_val):
 
 
 def create_function(cmd, resource_group_name, name, storage_account, plan=None,
-                    os_type=None, runtime=None, consumption_plan_location=None,
+                    os_type=None, runtime=None, runtime_version=None, consumption_plan_location=None,
                     app_insights=None, app_insights_key=None, disable_app_insights=None, deployment_source_url=None,
                     deployment_source_branch='master', deployment_local_git=None,
+                    docker_registry_server_password=None, docker_registry_server_user=None,
                     deployment_container_image_name=None, tags=None):
     # pylint: disable=too-many-statements, too-many-branches
     if deployment_source_url and deployment_local_git:
@@ -2125,10 +2216,14 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
     if bool(plan) == bool(consumption_plan_location):
         raise CLIError("usage error: --plan NAME_OR_ID | --consumption-plan-location LOCATION")
 
+    docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
+
     site_config = SiteConfig(app_settings=[])
     functionapp_def = Site(location=None, site_config=site_config, tags=tags)
     client = web_client_factory(cmd.cli_ctx)
     plan_info = None
+    if runtime is not None:
+        runtime = runtime.lower()
 
     if consumption_plan_location:
         locations = list_consumption_locations(cmd)
@@ -2166,12 +2261,22 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                            .format(', '.join(WINDOWS_RUNTIMES)))
         site_config.app_settings.append(NameValuePair(name='FUNCTIONS_WORKER_RUNTIME', value=runtime))
 
+    if runtime_version is not None:
+        if runtime is None:
+            raise CLIError('Must specify --runtime to use --runtime-version')
+        allowed_versions = RUNTIME_TO_IMAGE_FUNCTIONAPP[runtime].keys()
+        if runtime_version not in allowed_versions:
+            raise CLIError('--runtime-version {} is not supported for the selected --runtime {}. '
+                           'Supported versions are: {}'
+                           .format(runtime_version, runtime, ', '.join(allowed_versions)))
+
     con_string = _validate_and_get_connection_string(cmd.cli_ctx, resource_group_name, storage_account)
 
     if is_linux:
         functionapp_def.kind = 'functionapp,linux'
         functionapp_def.reserved = True
-        if consumption_plan_location:
+        is_consumption = consumption_plan_location is not None
+        if is_consumption:
             site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION', value='~2'))
         else:
             site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION', value='~2'))
@@ -2188,16 +2293,19 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
             else:
                 site_config.app_settings.append(NameValuePair(name='WEBSITES_ENABLE_APP_SERVICE_STORAGE',
                                                               value='true'))
-                if runtime.lower() not in RUNTIME_TO_IMAGE:
+                if runtime not in RUNTIME_TO_IMAGE_FUNCTIONAPP.keys():
                     raise CLIError("An appropriate linux image for runtime:'{}' was not found".format(runtime))
-                site_config.linux_fx_version = _format_fx_version(RUNTIME_TO_IMAGE[runtime.lower()])
+        if deployment_container_image_name is None:
+            site_config.linux_fx_version = _get_linux_fx_functionapp(is_consumption, runtime, runtime_version)
     else:
         functionapp_def.kind = 'functionapp'
         site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION', value='~2'))
     # adding appsetting to site to make it a function
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsStorage', value=con_string))
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
-    site_config.app_settings.append(NameValuePair(name='WEBSITE_NODE_DEFAULT_VERSION', value='10.14.1'))
+    site_config.app_settings.append(NameValuePair(name='WEBSITE_NODE_DEFAULT_VERSION',
+                                                  value=_get_website_node_version_functionapp(runtime,
+                                                                                              runtime_version)))
 
     # If plan is not consumption or elastic premium, we need to set always on
     if consumption_plan_location is None and not is_plan_elastic_premium(plan_info):
@@ -2240,7 +2348,29 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
             logger.warning('Error while trying to create and configure an Application Insights for the Function App. '
                            'Please use the Azure Portal to create and configure the Application Insights, if needed.')
 
+    if deployment_container_image_name:
+        update_container_settings_functionapp(cmd, resource_group_name, name, docker_registry_server_url,
+                                              deployment_container_image_name, docker_registry_server_user,
+                                              docker_registry_server_password)
+
     return functionapp
+
+
+def _get_linux_fx_functionapp(is_consumption, runtime, runtime_version):
+    if runtime_version is None:
+        runtime_version = RUNTIME_TO_DEFAULT_VERSION[runtime]
+    if is_consumption:
+        return '{}|{}'.format(runtime.upper(), runtime_version)
+    # App service or Elastic Premium
+    return _format_fx_version(RUNTIME_TO_IMAGE_FUNCTIONAPP[runtime][runtime_version])
+
+
+def _get_website_node_version_functionapp(runtime, runtime_version):
+    if runtime is None or runtime != 'node':
+        return NODE_VERSION_DEFAULT_FUNCTIONAPP
+    if runtime_version is not None:
+        return '~{}'.format(runtime_version)
+    return NODE_VERSION_DEFAULT_FUNCTIONAPP
 
 
 def try_create_application_insights(cmd, functionapp):
@@ -2353,8 +2483,14 @@ def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, auth
         response = requests.get(deployment_status_url, headers=authorization,
                                 verify=not should_disable_connection_verify())
         time.sleep(2)
-        res_dict = response.json()
-        num_trials = num_trials + 1
+        try:
+            res_dict = response.json()
+        except json.decoder.JSONDecodeError:
+            logger.warning("Deployment status endpoint %s returns malformed data. Retrying...", deployment_status_url)
+            res_dict = {}
+        finally:
+            num_trials = num_trials + 1
+
         if res_dict.get('status', 0) == 3:
             _configure_default_logging(cmd, rg_name, name)
             raise CLIError("""Zip deployment failed. {}. Please run the command az webapp log tail
@@ -2788,7 +2924,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
     site_config = None
     if not _create_new_app:  # App exists
         # Get the ASP & RG info, if the ASP & RG parameters are provided we use those else we need to find those
-        logger.warning("Webapp %s already exits. The command will deploy contents to the existing app", name)
+        logger.warning("Webapp %s already exists. The command will deploy contents to the existing app.", name)
         app_details = get_app_details(cmd, name)
         current_rg = app_details.resource_group
         if resource_group_name is not None and (resource_group_name.lower() != current_rg.lower()):

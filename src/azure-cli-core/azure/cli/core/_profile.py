@@ -239,8 +239,10 @@ class Profile(object):
         consolidated = []
         for s in subscriptions:
             display_name = s.display_name
+            if display_name is None:
+                display_name = ''
             try:
-                s.display_name.encode(sys.getdefaultencoding())
+                display_name.encode(sys.getdefaultencoding())
             except (UnicodeEncodeError, UnicodeDecodeError):  # mainly for Python 2.7 with ascii as the default encoding
                 display_name = re.sub(r'[^\x00-\x7f]', lambda x: '?', display_name)
 
@@ -1114,10 +1116,6 @@ def _get_authorization_code_worker(authority_url, resource, results):
         web_server.server_close()
         results['no_browser'] = True
         return
-
-    # emit a warning for transitioning to the new experience
-    logger.warning('Note, we have launched a browser for you to login. For old experience'
-                   ' with device code, use "az login --use-device-code"')
 
     # wait for callback from browser.
     while True:

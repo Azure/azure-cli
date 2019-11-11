@@ -58,7 +58,7 @@ class TestVmCustom(unittest.TestCase):
         publisher, version, auto_upgrade = _get_access_extension_upgrade_info(
             None, _LINUX_ACCESS_EXT)
         self.assertEqual('Microsoft.OSTCExtensions', publisher)
-        self.assertEqual('1.4', version)
+        self.assertEqual('1.5', version)
         self.assertEqual(None, auto_upgrade)
 
         # when there is no extension installed on windows vm, use the version we like
@@ -85,7 +85,7 @@ class TestVmCustom(unittest.TestCase):
         extentions = [FakedAccessExtensionEntity(True, '1.0')]
         publisher, version, auto_upgrade = _get_access_extension_upgrade_info(
             extentions, _LINUX_ACCESS_EXT)
-        self.assertEqual('1.4', version)
+        self.assertEqual('1.5', version)
         self.assertEqual(True, auto_upgrade)
 
     @mock.patch('azure.cli.command_modules.vm.custom.get_vm', autospec=True)
