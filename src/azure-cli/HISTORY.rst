@@ -11,6 +11,9 @@ Release History
 
 * Fix issue #11100: AttributeError for az webapp up when create service plan
 
+**Compute**
+* Upgrade API version of compute, disks, snapshots to 2019-07-01
+
 **Packaging**
 
 * Rewrite the az wrapper in python
