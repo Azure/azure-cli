@@ -224,7 +224,7 @@ def build_msi_role_assignment(vm_vmss_name, vm_vmss_resource_id, role_definition
         assignment_type = 'Microsoft.Authorization/roleAssignments'
 
     # pylint: disable=line-too-long
-    msi_rp_api_version = '2015-08-31-PREVIEW'
+    msi_rp_api_version = '2019-07-01'
     return {
         'name': name,
         'type': assignment_type,
@@ -234,7 +234,7 @@ def build_msi_role_assignment(vm_vmss_name, vm_vmss_resource_id, role_definition
         ],
         'properties': {
             'roleDefinitionId': role_definition_id,
-            'principalId': "[reference('{}/providers/Microsoft.ManagedIdentity/Identities/default', '{}').principalId]".format(
+            'principalId': "[reference('{}', '{}', 'Full').identity.principalId]".format(
                 vm_vmss_resource_id, msi_rp_api_version),
             'scope': identity_scope
         }
