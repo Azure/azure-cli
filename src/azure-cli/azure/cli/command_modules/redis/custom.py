@@ -35,6 +35,15 @@ def cli_redis_update(cmd, instance, sku=None, vm_size=None):
         instance.sku.family = vm_size[0]
         instance.sku.capacity = vm_size[1:]
 
+    # avoid setting memory configs for basic sku
+    if instance.sku.name == 'Basic':
+        if 'maxmemory-reserved' in instance.redis_configuration:
+            instance.redis_configuration.pop('maxmemory-reserved')
+        if 'maxfragmentationmemory-reserved' in instance.redis_configuration:
+            instance.redis_configuration.pop('maxfragmentationmemory-reserved')
+        if 'maxmemory-delta' in instance.redis_configuration:
+            instance.redis_configuration.pop('maxmemory-delta')
+
     # pylint: disable=too-many-function-args
     update_params = RedisUpdateParameters(
         redis_configuration=instance.redis_configuration,

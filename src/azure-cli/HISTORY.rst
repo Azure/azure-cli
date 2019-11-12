@@ -11,6 +11,9 @@ Release History
 
 * Fix issue #11100: AttributeError for az webapp up when create service plan
 
+**Compute**
+* Upgrade API version of compute, disks, snapshots to 2019-07-01
+
 **Packaging**
 
 * Rewrite the az wrapper in python
@@ -24,6 +27,10 @@ Release History
 **RBAC**
 
 * Fix #10996: Polish error for `--force-change-password-next-login` in `az ad user update` when `--password` is not specified
+
+**Redis**
+
+* Fix #2902: Avoid setting memory configs while updating Basic SKU cache
 
 2.0.76
 ++++++
@@ -93,7 +100,8 @@ Release History
 
 * Add new routing source type: DigitalTwinChangeEvents
 * Fix #2826: Missing features in "az iot hub create"
-* Bug Fixed: Return more descriptive message on raised exception. 
+* Bug Fixed: Return more descriptive message on raised exception.
+* Fix #2531: Add convenience arguments for hub update.
 
 **Key Vault**
 

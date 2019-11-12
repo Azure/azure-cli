@@ -262,6 +262,15 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
     else:
         option = DiskCreateOption.empty
 
+    if source_storage_account_id is None and source_blob_uri is not None:
+        from azure.cli.core.commands.client_factory import get_subscription_id
+        from msrestazure.tools import resource_id
+        subscription_id = get_subscription_id(cmd.cli_ctx)
+        storage_account_name = source_blob_uri.split('.')[0].split('/')[-1]
+        source_storage_account_id = resource_id(
+            subscription=subscription_id, resource_group=resource_group_name,
+            namespace='Microsoft.Storage', type='storageAccounts', name=storage_account_name)
+
     if upload_size_bytes is not None and for_upload is not True:
         raise CLIError('usage error: --upload-size-bytes should be used together with --for-upload')
 
@@ -2749,7 +2758,17 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                                             target_regions=target_regions or [TargetRegion(name=location)],
                                             source=source, replica_count=replica_count,
                                             storage_account_type=storage_account_type)
-    image_version = ImageVersion(publishing_profile=profile, location=location, tags=(tags or {}))
+    if cmd.supported_api_version(min_api='2019-07-01', operation_group='gallery_image_versions'):
+        GalleryImageVersionStorageProfile = cmd.get_models('GalleryImageVersionStorageProfile')
+        GalleryArtifactVersionSource = cmd.get_models('GalleryArtifactVersionSource')
+        # GalleryOSDiskImage = cmd.get_models('GalleryOSDiskImage')
+        # GalleryDataDiskImage = cmd.get_models('GalleryDataDiskImage')
+        source = GalleryArtifactVersionSource(id=managed_image)
+        storage_profile = GalleryImageVersionStorageProfile(source=source)
+        image_version = ImageVersion(publishing_profile=profile, location=location, tags=(tags or {}),
+                                     storage_profile=storage_profile)
+    else:
+        image_version = ImageVersion(publishing_profile=profile, location=location, tags=(tags or {}))
 
     return client.gallery_image_versions.create_or_update(resource_group_name=resource_group_name,
                                                           gallery_name=gallery_name,
@@ -2770,6 +2789,8 @@ def update_image_version(instance, target_regions=None, replica_count=None):
         instance.publishing_profile.target_regions = target_regions
     if replica_count:
         instance.publishing_profile.replica_count = replica_count
+    if instance.storage_profile.source is not None:
+        instance.storage_profile.os_disk_image = instance.storage_profile.data_disk_images = None
     return instance
 # endregion
 
