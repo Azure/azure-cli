@@ -2754,7 +2754,7 @@ class NetworkWatcherScenarioTest(ScenarioTest):
         return 1
 
     @mock.patch('azure.cli.command_modules.vm._actions._get_thread_count', _mock_thread_count)
-    @ResourceGroupPreparer(name_prefix='cli_test_nw_vm', location='westcentralus')
+    @ResourceGroupPreparer(name_prefix='cli_test_nw_vm', location='westus')
     @AllowLargeResponse()
     def test_network_watcher_vm(self, resource_group, resource_group_location):
 
@@ -2827,7 +2827,7 @@ class NetworkWatcherScenarioTest(ScenarioTest):
         self.cmd('network watcher flow-log configure -g {rg} --nsg {nsg} --enabled --retention 5 --storage-account {sa}')
 
     @mock.patch('azure.cli.command_modules.vm._actions._get_thread_count', _mock_thread_count)
-    @ResourceGroupPreparer(name_prefix='cli_test_nw_packet_capture', location='westcentralus')
+    @ResourceGroupPreparer(name_prefix='cli_test_nw_packet_capture', location='westus')
     @AllowLargeResponse()
     def test_network_watcher_packet_capture(self, resource_group, resource_group_location):
 
