@@ -25,14 +25,6 @@ Release History
 
 * Fix #10996: Polish error for `--force-change-password-next-login` in `az ad user update` when `--password` is not specified
 
-2.0.77
-++++++
-
-**AppService**
-
-* az appservice vnet-integration add: Fixed so that subnet delegation is case insensitive and delegating subnets does not overwrite previous data.
-
-
 2.0.76
 ++++++
 
@@ -64,6 +56,8 @@ Release History
 * Added "--build remote" flag for "az functionapp deployment source config-zip" to support remote build action during function app deployment.
 * Change default node version on function apps to ~10 for Windows
 * Add --runtime-version property to `az functionapp create`
+* az appservice vnet-integration add: Fixed so that subnet delegation is case insensitive and delegating subnets does not overwrite previous data.
+
 
 **ARM**
 
