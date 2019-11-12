@@ -47,7 +47,6 @@ Release History
 
 * storage account create: Add --enable-hierarchical-namespace to support filesystem semantics in blob service.
 
-
 2.0.76
 ++++++
 
