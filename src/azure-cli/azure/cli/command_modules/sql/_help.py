@@ -72,7 +72,7 @@ examples:
   - name: Create a database with zone redundancy explicitly disabled
     text: az sql db create -g mygroup -s myserver -n mydb -z false
   - name: Create a serverless database with auto pause delay of 120 minutes
-    text: az sql db create -g mygroup -s myserver -n mydb --compute-model Serverless --auto-pause-delay 120
+    text: az sql db create -g mygroup -s myserver -n mydb -e GeneralPurpose -f Gen5 -c 2 --compute-model Serverless --auto-pause-delay 120
 """
 
 helps['sql db delete'] = """
@@ -297,8 +297,8 @@ examples:
     text: az sql db update -g mygroup -s myserver -n mydb -z
   - name: Update database with zone redundancy explicitly disabled
     text: az sql db update -g mygroup -s myserver -n mydb -z false
-  - name: Update database to serverless compute model
-    text: az sql db update -g mygroup -s myserver -n mydb --compute-model Serverless
+  - name: Update database to serverless compute model, General Purpose, Gen5, 2vCore
+    text: az sql db update -g mygroup -s myserver -n mydb --edition GeneralPurpose --capacity 2 --family Gen5 --compute-model Serverless
 
 """
 
