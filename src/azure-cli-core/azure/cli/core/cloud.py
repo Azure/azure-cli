@@ -20,6 +20,7 @@ logger = get_logger(__name__)
 
 CLOUD_CONFIG_FILE = os.path.join(GLOBAL_CONFIG_DIR, 'clouds.config')
 
+
 class CloudNotRegisteredException(Exception):
     def __init__(self, cloud_name):
         super(CloudNotRegisteredException, self).__init__(cloud_name)
