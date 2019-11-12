@@ -869,7 +869,6 @@ def acr_task_list_runs(cmd,
 def _add_run_filter(orig_filter, name, value, operator):
     if not value:
         return orig_filter
-
     if operator == 'contains':
         new_filter_str = "contains({}, '{}')".format(name, value)
     elif operator == 'eq':
@@ -877,7 +876,6 @@ def _add_run_filter(orig_filter, name, value, operator):
     else:
         raise ValueError(
             "Allowed filter operator: {}".format(['contains', 'eq']))
-
     return "{} and {}".format(orig_filter, new_filter_str) if orig_filter else new_filter_str
 
 
@@ -969,7 +967,6 @@ def _get_trigger_event_list_patch(cmd,
                                   commit_trigger_enabled=None,
                                   pull_request_trigger_enabled=None):
     TriggerStatus, SourceTriggerEvent = cmd.get_models('TriggerStatus', 'SourceTriggerEvent')
-
     source_trigger_events = set()
     # perform merge with server-side event list
     if source_triggers:
@@ -992,7 +989,7 @@ def _get_trigger_event_list_patch(cmd,
 
 
 def _get_branch_name(context_path):
-    # Context Path formats https://docs.docker.com/engine/reference/commandline/build/#git-repositories
+    # Context formats https://docs.docker.com/engine/reference/commandline/build/#git-repositories
     # The regex matches from the first '#' to the next ':', space, or end of line.
     # It doesn't consider pull and tags scenarios.
     branch = re.search(r'(?<=#)([^:\n\s]*)', context_path)
