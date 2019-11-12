@@ -19,7 +19,6 @@ Release History
 
 * Fix #2531: Add convenience arguments for hub update.
 
-
 **Packaging**
 
 * Rewrite the az wrapper in python
