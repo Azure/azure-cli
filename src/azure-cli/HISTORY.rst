@@ -12,7 +12,12 @@ Release History
 * Fix issue #11100: AttributeError for az webapp up when create service plan
 
 **Compute**
+
 * Upgrade API version of compute, disks, snapshots to 2019-07-01
+
+**Key Vault**
+
+* Fix #11121: When using `az keyvault certificate list`, passing `--include-pending` now doesn't require a value of `true` or `false`
 
 **Packaging**
 
