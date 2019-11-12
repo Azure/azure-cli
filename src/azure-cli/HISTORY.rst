@@ -11,6 +11,14 @@ Release History
 
 * Fix issue #11100: AttributeError for az webapp up when create service plan
 
+**Compute**
+
+* Upgrade API version of compute, disks, snapshots to 2019-07-01
+
+**Key Vault**
+
+* Fix #11121: When using `az keyvault certificate list`, passing `--include-pending` now doesn't require a value of `true` or `false`
+
 **Packaging**
 
 * Rewrite the az wrapper in python
@@ -97,7 +105,8 @@ Release History
 
 * Add new routing source type: DigitalTwinChangeEvents
 * Fix #2826: Missing features in "az iot hub create"
-* Bug Fixed: Return more descriptive message on raised exception. 
+* Bug Fixed: Return more descriptive message on raised exception.
+* Fix #2531: Add convenience arguments for hub update.
 
 **Key Vault**
 
