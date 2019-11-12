@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.76
+++++++
+* no changes
+
 2.0.75
 ++++++
 * Add syntax check for --set parameter in generic update command.

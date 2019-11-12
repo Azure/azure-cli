@@ -27,7 +27,8 @@ from azure.cli.testsdk.preparers import (
     SingleValueReplacer)
 from azure.cli.command_modules.sql.custom import (
     ClientAuthenticationType,
-    ClientType)
+    ClientType,
+    ComputeModelType)
 from datetime import datetime, timedelta
 from time import sleep
 
@@ -457,6 +458,93 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('sku.tier', vcore_edition_updated),
                      JMESPathCheck('sku.capacity', vcore_capacity_updated),
                      JMESPathCheck('sku.family', vcore_family_updated)])
+
+
+class SqlServerServerlessDbMgmtScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(location='westus2')
+    @SqlServerPreparer(location='westus2')
+    @AllowLargeResponse()
+    def test_sql_db_serverless_mgmt(self, resource_group, resource_group_location, server):
+        database_name = "cliautomationdb01"
+        compute_model_serverless = ComputeModelType.serverless
+        compute_model_provisioned = ComputeModelType.provisioned
+
+        # Create database with vcore edition
+        vcore_edition = 'GeneralPurpose'
+        self.cmd('sql db create -g {} --server {} --name {} --edition {}'
+                 .format(resource_group, server, database_name, vcore_edition),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('edition', vcore_edition),
+                     JMESPathCheck('sku.tier', vcore_edition)])
+
+        # Update database to serverless offering
+        self.cmd('sql db update -g {} --server {} --name {} --compute-model {}'
+                 .format(resource_group, server, database_name, compute_model_serverless),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('edition', vcore_edition),
+                     JMESPathCheck('sku.tier', vcore_edition),
+                     JMESPathCheck('sku.name', 'GP_S_Gen5')])
+
+        # Update auto pause delay and min capacity
+        auto_pause_delay = 120
+        min_capacity = 1.0
+        self.cmd('sql db update -g {} -s {} -n {} --auto-pause-delay {} --min-capacity {}'
+                 .format(resource_group, server, database_name, auto_pause_delay, min_capacity),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('edition', vcore_edition),
+                     JMESPathCheck('sku.tier', vcore_edition),
+                     JMESPathCheck('autoPauseDelay', auto_pause_delay),
+                     JMESPathCheck('minCapacity', min_capacity)])
+
+        # Update only vCores
+        vCores = 8
+        self.cmd('sql db update -g {} -s {} -n {} -c {}'
+                 .format(resource_group, server, database_name, vCores),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('edition', vcore_edition),
+                     JMESPathCheck('sku.tier', vcore_edition),
+                     JMESPathCheck('sku.capacity', vCores)])
+
+        # Update back to provisioned database offering
+        self.cmd('sql db update -g {} --server {} --name {} --compute-model {}'
+                 .format(resource_group, server, database_name, compute_model_provisioned),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('edition', vcore_edition),
+                     JMESPathCheck('sku.tier', vcore_edition),
+                     JMESPathCheck('sku.name', 'GP_Gen5')])
+
+        # Create database with vcore edition with everything specified for Serverless
+        database_name_2 = 'cliautomationdb02'
+        vcore_edition = 'GeneralPurpose'
+        vcore_family = 'Gen5'
+        vcore_capacity = 4
+        auto_pause_delay = 120
+        min_capacity = 1.0
+
+        self.cmd('sql db create -g {} --server {} --name {} -e {} -c {} -f {} --compute-model {} --auto-pause-delay {} --min-capacity {}'
+                 .format(resource_group, server, database_name_2,
+                         vcore_edition, vcore_capacity,
+                         vcore_family, compute_model_serverless, auto_pause_delay, min_capacity),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_2),
+                     JMESPathCheck('edition', vcore_edition),
+                     JMESPathCheck('sku.tier', vcore_edition),
+                     JMESPathCheck('sku.capacity', vcore_capacity),
+                     JMESPathCheck('sku.family', vcore_family),
+                     JMESPathCheck('sku.name', 'GP_S_Gen5'),
+                     JMESPathCheck('autoPauseDelay', auto_pause_delay),
+                     JMESPathCheck('minCapacity', min_capacity)])
 
 
 class SqlServerDbOperationMgmtScenarioTest(ScenarioTest):
