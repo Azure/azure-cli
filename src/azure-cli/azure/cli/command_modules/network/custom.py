@@ -74,6 +74,11 @@ def list_express_route_circuits(cmd, resource_group_name=None):
     return _generic_list(cmd.cli_ctx, 'express_route_circuits', resource_group_name)
 
 
+def create_express_route_auth(cmd, resource_group_name, circuit_name, authorization_name):
+    client = network_client_factory(cmd.cli_ctx).express_route_circuit_authorizations
+    return client.create_or_update(resource_group_name, circuit_name, authorization_name)
+
+
 def list_lbs(cmd, resource_group_name=None):
     return _generic_list(cmd.cli_ctx, 'load_balancers', resource_group_name)
 
@@ -2005,7 +2010,8 @@ def update_express_route_peering(cmd, instance, peer_asn=None, primary_peer_addr
 # region ExpressRoute Connection
 # pylint: disable=unused-argument
 def create_express_route_connection(cmd, resource_group_name, express_route_gateway_name, connection_name,
-                                    peering, circuit_name=None, authorization_key=None, routing_weight=None):
+                                    peering, circuit_name=None, authorization_key=None, routing_weight=None,
+                                    enable_internet_security=None):
     ExpressRouteConnection, SubResource = cmd.get_models('ExpressRouteConnection', 'SubResource')
     client = network_client_factory(cmd.cli_ctx).express_route_connections
     connection = ExpressRouteConnection(
@@ -2014,12 +2020,16 @@ def create_express_route_connection(cmd, resource_group_name, express_route_gate
         authorization_key=authorization_key,
         routing_weight=routing_weight
     )
+
+    if enable_internet_security and cmd.supported_api_version(min_api='2019-09-01'):
+        connection.enable_internet_security = enable_internet_security
+
     return client.create_or_update(resource_group_name, express_route_gateway_name, connection_name, connection)
 
 
 # pylint: disable=unused-argument
 def update_express_route_connection(instance, cmd, circuit_name=None, peering=None, authorization_key=None,
-                                    routing_weight=None):
+                                    routing_weight=None, enable_internet_security=None):
     SubResource = cmd.get_models('SubResource')
     if peering is not None:
         instance.express_route_connection_id = SubResource(id=peering)
@@ -2027,6 +2037,9 @@ def update_express_route_connection(instance, cmd, circuit_name=None, peering=No
         instance.authorization_key = authorization_key
     if routing_weight is not None:
         instance.routing_weight = routing_weight
+    if enable_internet_security is not None and cmd.supported_api_version(min_api='2019-09-01'):
+        instance.enable_internet_security = enable_internet_security
+
     return instance
 # endregion
 
@@ -4531,4 +4544,46 @@ def clear_vpn_conn_ipsec_policies(cmd, resource_group_name, connection_name, no_
 def list_vpn_conn_ipsec_policies(cmd, resource_group_name, connection_name):
     ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateway_connections
     return ncf.get(resource_group_name, connection_name).ipsec_policies
+# endregion
+
+
+# region VirtualRouter
+def create_virtual_router(cmd, resource_group_name, virtual_router_name, hosted_gateway, location=None, tags=None):
+    VirtualRouter, SubResource = cmd.get_models('VirtualRouter', 'SubResource')
+    client = network_client_factory(cmd.cli_ctx).virtual_routers
+    virtual_router = VirtualRouter(virtual_router_asn=None,
+                                   virtual_router_ips=[],
+                                   hosted_subnet=None,
+                                   hosted_gateway=SubResource(id=hosted_gateway),
+                                   location=location,
+                                   tags=tags)
+    return client.create_or_update(resource_group_name, virtual_router_name, virtual_router)
+
+
+def update_virtual_router(cmd, instance, tags=None):
+    with cmd.update_context(instance) as c:
+        c.set_param('tags', tags)
+    return instance
+
+
+def list_virtual_router(cmd, resource_group_name=None):
+    client = network_client_factory(cmd.cli_ctx).virtual_routers
+    if resource_group_name is not None:
+        return client.list_by_resource_group(resource_group_name)
+    return client.list()
+
+
+def create_virtual_router_peering(cmd, resource_group_name, virtual_router_name, peering_name, peer_asn, peer_ip):
+    VirtualRouterPeering = cmd.get_models('VirtualRouterPeering')
+    client = network_client_factory(cmd.cli_ctx).virtual_router_peerings
+    virtual_router_peering = VirtualRouterPeering(peer_asn=peer_asn,
+                                                  peer_ip=peer_ip)
+    return client.create_or_update(resource_group_name, virtual_router_name, peering_name, virtual_router_peering)
+
+
+def update_virtual_router_peering(cmd, instance, peer_asn=None, peer_ip=None):
+    with cmd.update_context(instance) as c:
+        c.set_param('peer_asn', peer_asn)
+        c.set_param('peer_ip', peer_ip)
+    return instance
 # endregion

@@ -33,7 +33,7 @@ from azure.cli.command_modules.network._validators import (
     validate_express_route_port, bandwidth_validator_factory,
     get_header_configuration_validator, validate_nat_gateway, validate_match_variables,
     validate_waf_policy, get_subscription_list_validator, validate_frontend_ip_configs,
-    validate_application_gateway_identity)
+    validate_application_gateway_identity, validate_virtul_network_gateway)
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 from azure.cli.command_modules.network._completers import (
     subnet_completion_list, get_lb_subresource_completion_list, get_ag_subresource_completion_list,
@@ -598,6 +598,7 @@ def load_arguments(self, _):
         c.argument('connection_name', options_list=['--name', '-n'], help='ExpressRoute connection name.', id_part='child_name_1')
         c.argument('routing_weight', help='Routing weight associated with the connection.', type=int)
         c.argument('authorization_key', help='Authorization key to establish the connection.')
+        c.argument('enable_internet_security', options_list='--internet-security', arg_type=get_three_state_flag(), help='Enable internet security. A virtual hub can have the ability to propagate a learned default route to this ExpressRoute connection. This ref https://review.docs.microsoft.com/en-us/azure/virtual-wan/effective-routes-virtual-hub?branch=pr-en-us-91866#aboutdefaultroute might be helpful.', min_api='2019-09-01')
 
     with self.argument_context('network express-route gateway connection', arg_group='Peering', min_api='2018-08-01') as c:
         c.argument('peering', help='Name or ID of an ExpressRoute peering.', validator=validate_express_route_peering)
@@ -1292,6 +1293,16 @@ def load_arguments(self, _):
         c.argument('connection_shared_key_name', options_list=['--name', '-n'], id_part='name')
         c.argument('virtual_network_gateway_connection_name', options_list='--connection-name', metavar='NAME', id_part='name')
         c.argument('key_length', type=int)
+
+    with self.argument_context('network vrouter') as c:
+        c.argument('virtual_router_name', options_list=['--name', '-n'], help='The name of the Virtual Router.')
+        c.argument('hosted_gateway', help='Name or ID of the virtual network gateway with ExpressRouter on which VirtualRouter is hosted.', validator=validate_virtul_network_gateway)
+
+    with self.argument_context('network vrouter peering') as c:
+        c.argument('virtual_router_name', options_list=['--vrouter-name'], help='The name of the Virtual Router.')
+        c.argument('peering_name', options_list=['--name', '-n'], help='The name of the Virtual Router Peering')
+        c.argument('peer_asn', type=int, help='Peer ASN. Its range is from 1 to 4294967295.')
+        c.argument('peer_ip', help='Peer IP address.')
 
     param_map = {
         'dh_group': 'DhGroup',

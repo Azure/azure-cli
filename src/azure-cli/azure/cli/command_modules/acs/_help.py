@@ -252,6 +252,16 @@ parameters:
     type: string
     short-summary: Load balancer outbound IP prefix resource IDs.
     long-summary: Comma-separated public IP prefix resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.
+  - name: --enable-cluster-autoscaler
+    type: bool
+    short-summary: Enable cluster autoscaler, default value is false.
+    long-summary: If specified, please make sure the kubernetes version is larger than 1.10.6.
+  - name: --min-count
+    type: int
+    short-summary: Minimum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100].
+  - name: --max-count
+    type: int
+    short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100].
   - name: --vm-set-type
     type: string
     short-summary: Agent pool vm set type. VirtualMachineScaleSets or AvailabilitySet.
@@ -317,7 +327,7 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --node-count 7
   - name: Create a kubernetes cluster with k8s 1.13.9 but use vmas.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --kubernetes-version 1.13.9 --vm-set-type AvailabilitySet
-  - name: Create a kubernetes cluster with default kubernetes vesrion, default SKU load balancer(basic) and default vm set type(AvailabilitySet).
+  - name: Create a kubernetes cluster with default kubernetes version, default SKU load balancer(basic) and default vm set type(AvailabilitySet).
     text: az aks create -g MyResourceGroup -n MyManagedCluster
   - name: Create a kubernetes cluster with standard SKU load balancer and two AKS created IPs for the load balancer outbound connection usage.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
@@ -335,6 +345,21 @@ helps['aks update'] = """
 type: command
 short-summary: Update a managed Kubernetes cluster.
 parameters:
+  - name: --enable-cluster-autoscaler -e
+    type: bool
+    short-summary: Enable cluster autoscaler.
+  - name: --disable-cluster-autoscaler -d
+    type: bool
+    short-summary: Disable cluster autoscaler.
+  - name: --update-cluster-autoscaler -u
+    type: bool
+    short-summary: Update min-count or max-count for cluster autoscaler.
+  - name: --min-count
+    type: int
+    short-summary: Minimum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100]
+  - name: --max-count
+    type: int
+    short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100]
   - name: --load-balancer-managed-outbound-ip-count
     type: int
     short-summary: Load balancer managed outbound IP count.
@@ -559,10 +584,10 @@ parameters:
     short-summary: Enable cluster autoscaler.
   - name: --min-count
     type: int
-    short-summary: Minimun nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specifying the value in the range of [1, 100]
+    short-summary: Minimum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100]
   - name: --max-count
     type: int
-    short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specifying the value in the range of [1, 100]
+    short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100]
   - name: --node-taints
     type: string
     short-summary: The node taints for the node pool. You can't change the node taints through CLI after the node pool is created.
@@ -607,10 +632,10 @@ parameters:
     short-summary: Update min-count or max-count for cluster autoscaler.
   - name: --min-count
     type: int
-    short-summary: Minimun nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specifying the value in the range of [1, 100]
+    short-summary: Minimum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100]
   - name: --max-count
     type: int
-    short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specifying the value in the range of [1, 100]
+    short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100]
 examples:
   - name: Enable cluster-autoscaler within node count range [1,5]
     text: az aks nodepool update --enable-cluster-autoscaler --min-count 1 --max-count 5 -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster
@@ -829,6 +854,12 @@ examples:
     crafted: true
 """
 
+helps['aks rotate-certs'] = """
+    type: command
+    short-summary: Rotate certificates and keys on a managed Kubernetes cluster
+    long-summary: Kubernetes will be unavailable during cluster certificate rotation.
+"""
+
 helps['openshift'] = """
 type: group
 short-summary: Manage Azure Red Hat OpenShift Services.
@@ -865,6 +896,9 @@ parameters:
   - name: --customer-admin-group-id
     type: string
     short-summary: The Object ID of an Azure Active Directory Group that memberships will get synced into the OpenShift group "osa-customer-admins". If not specified, no cluster admin access will be granted.
+  - name: --workspace-resource-id
+    type: string
+    short-summary: The resource ID of an existing Log Analytics Workspace to use for storing monitoring data.
 
 
 examples:
@@ -876,6 +910,8 @@ examples:
     text: az openshift create -g MyResourceGroup -n MyManagedCluster --aad-client-app-id {APP_ID} --aad-client-app-secret {APP_SECRET} --aad-tenant-id {TENANT_ID} --compute-count 5
   - name: Create an Openshift cluster using a custom vnet
     text: az openshift create -g MyResourceGroup -n MyManagedCluster --vnet-peer "/subscriptions/0000000-0000-0000-0000-000000000000/resourceGroups/openshift-vnet/providers/Microsoft.Network/virtualNetworks/test"
+  - name: Create an Openshift cluster with Log Analytics monitoring enabled
+    text: az openshift create -g MyResourceGroup -n MyManagedCluster --workspace-resource-id {WORKSPACE_RESOURCE_ID}
 """
 
 helps['openshift delete'] = """

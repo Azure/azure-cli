@@ -4,12 +4,16 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.util import CLIError
-from msrestazure.tools import is_valid_resource_id
+from knack.log import get_logger
+from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
 from ._utils import (
-    validate_managed_registry,
-    get_registry_from_name_or_login_server
+    validate_managed_registry, get_registry_from_name_or_login_server, get_registry_by_name
 )
+
+from azure.cli.core.commands import LongRunningOperation
+
+logger = get_logger(__name__)
 
 SOURCE_REGISTRY_NOT_FOUND = "The source container registry can not be found in the current subscription. " \
                             "Please provide a valid address and/or credentials."
@@ -42,15 +46,18 @@ def acr_import(cmd,
     ImportImageParameters, ImportSource, ImportMode = cmd.get_models(
         'ImportImageParameters', 'ImportSource', 'ImportMode')
 
+    registry = None
     if source_registry:
         if is_valid_resource_id(source_registry):
             source = ImportSource(resource_id=source_registry, source_image=source_image)
+
         else:
             registry = get_registry_from_name_or_login_server(cmd.cli_ctx, source_registry, source_registry)
             if registry:
                 source = ImportSource(resource_id=registry.id, source_image=source_image)
             else:
                 raise CLIError(SOURCE_REGISTRY_NOT_FOUND)
+
     else:
         slash = source_image.find('/')
         if slash > 0:
@@ -86,7 +93,35 @@ def acr_import(cmd,
                                               target_tags=target_tags,
                                               untagged_target_repositories=repository,
                                               mode=ImportMode.force.value if force else ImportMode.no_force.value)
-    return client.import_image(
+    result_poller = client.import_image(
         resource_group_name=resource_group_name,
         registry_name=registry_name,
         parameters=import_parameters)
+
+    return _handle_result(cmd, result_poller, source_registry, source_image, registry)
+
+
+def _handle_result(cmd, result_poller, source_registry, source_image, registry):
+    from msrestazure.azure_exceptions import ClientException
+    try:
+        result = LongRunningOperation(cmd.cli_ctx, 'Importing image...')(result_poller)
+    except CLIError as e:
+        try:
+            # if command fails, it might be because user specified registry twice in --source and --registry
+            if source_registry:
+
+                if not hasattr(registry, 'login_server'):
+                    if is_valid_resource_id(source_registry):
+                        registry, _ = get_registry_by_name(cmd.cli_ctx, parse_resource_id(source_registry)["name"])
+                    else:
+                        registry = get_registry_from_name_or_login_server(cmd.cli_ctx, source_registry, source_registry)
+
+                if registry.login_server.lower() in source_image.lower():
+                    logger.warning("Import from source failed.\n\tsource image: '%s'", "{}/{}"
+                                   .format(registry.login_server, source_image))
+        except (ClientException, CLIError) as unexpected_ex:  # raise exception
+            logger.debug("Unexpected exception: %s", unexpected_ex)
+
+        raise e  # regardless re-raise the CLIError as this is an error from the service
+
+    return result

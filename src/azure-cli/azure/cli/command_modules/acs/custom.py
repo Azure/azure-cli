@@ -81,6 +81,8 @@ from azure.mgmt.containerservice.v2019_04_30.models import OpenShiftManagedClust
 from azure.mgmt.containerservice.v2019_04_30.models import OpenShiftRouterProfile
 from azure.mgmt.containerservice.v2019_04_30.models import OpenShiftManagedClusterAuthProfile
 from azure.mgmt.containerservice.v2019_04_30.models import NetworkProfile
+from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedCluster as OpenShiftManagedClusterMonitor  # pylint: disable=line-too-long
+from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedClusterMonitorProfile
 
 from ._client_factory import cf_container_services
 from ._client_factory import cf_resource_groups
@@ -1612,6 +1614,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                enable_rbac=None,
                vm_set_type=None,
                skip_subnet_role_assignment=False,
+               enable_cluster_autoscaler=False,
                network_plugin=None,
                network_policy=None,
                pod_cidr=None,
@@ -1626,6 +1629,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                workspace_resource_id=None,
                vnet_subnet_id=None,
                max_pods=0,
+               min_count=None,
+               max_count=None,
                aad_client_app_id=None,
                aad_server_app_id=None,
                aad_server_app_secret=None,
@@ -1665,6 +1670,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     )
     if node_osdisk_size:
         agent_pool_profile.os_disk_size_gb = int(node_osdisk_size)
+
+    _check_cluster_autoscaler_flag(enable_cluster_autoscaler, min_count, max_count, node_count, agent_pool_profile)
 
     linux_profile = None
     # LinuxProfile is just used for SSH access to VMs, so omit it if --no-ssh-key was specified.
@@ -1934,7 +1941,13 @@ def aks_update_credentials(cmd, client, resource_group_name, name,
 
 def aks_scale(cmd, client, resource_group_name, name, node_count, nodepool_name="", no_wait=False):
     instance = client.get(resource_group_name, name)
-    # TODO: change this approach when we support multiple agent pools.
+
+    if len(instance.agent_pool_profiles) > 1 and nodepool_name == "":
+        raise CLIError('There are more than one node pool in the cluster. '
+                       'Please specify nodepool name or use az aks nodepool command to scale node pool')
+
+    if node_count == 0:
+        raise CLIError("Can't scale down to 0 nodes.")
     for agent_profile in instance.agent_pool_profiles:
         if agent_profile.name == nodepool_name or (nodepool_name == "" and len(instance.agent_pool_profiles) == 1):
             agent_profile.count = int(node_count)  # pylint: disable=no-member
@@ -1947,6 +1960,10 @@ def aks_scale(cmd, client, resource_group_name, name, node_count, nodepool_name=
 
 # pylint: disable=inconsistent-return-statements
 def aks_update(cmd, client, resource_group_name, name,
+               enable_cluster_autoscaler=False,
+               disable_cluster_autoscaler=False,
+               update_cluster_autoscaler=False,
+               min_count=None, max_count=None,
                load_balancer_managed_outbound_ip_count=None,
                load_balancer_outbound_ips=None,
                load_balancer_outbound_ip_prefixes=None,
@@ -1954,21 +1971,62 @@ def aks_update(cmd, client, resource_group_name, name,
                detach_acr=None,
                api_server_authorized_ip_ranges=None,
                no_wait=False):
+    update_autoscaler = enable_cluster_autoscaler + disable_cluster_autoscaler + update_cluster_autoscaler
+
     update_lb_profile = load_balancer_managed_outbound_ip_count is not None or \
         load_balancer_outbound_ips is not None or load_balancer_outbound_ip_prefixes is not None
 
-    if (not update_lb_profile and
+    if (update_autoscaler != 1 and not update_lb_profile and
             not attach_acr and
             not detach_acr and
             api_server_authorized_ip_ranges is None):
-        raise CLIError('Please specify one or more of "--load-balancer-managed-outbound-ip-count",'
+        raise CLIError('Please specify one or more of "--enable-cluster-autoscaler" or '
+                       '"--disable-cluster-autoscaler" or '
+                       '"--update-cluster-autoscaler" or '
+                       '"--load-balancer-managed-outbound-ip-count",'
                        '"--load-balancer-outbound-ips",'
                        '"--load-balancer-outbound-ip-prefixes",'
                        '"--attach-acr" or "--dettach-acr",'
                        '"--"api-server-authorized-ip-ranges')
 
-    subscription_id = get_subscription_id(cmd.cli_ctx)
     instance = client.get(resource_group_name, name)
+    # For multi-agent pool, use the az aks nodepool command
+    if update_autoscaler > 0 and len(instance.agent_pool_profiles) > 1:
+        raise CLIError('There are more than one node pool in the cluster. Please use "az aks nodepool" command '
+                       'to update per node pool auto scaler settings')
+
+    node_count = instance.agent_pool_profiles[0].count
+    _validate_autoscaler_update_counts(min_count, max_count, node_count, enable_cluster_autoscaler or
+                                       update_cluster_autoscaler)
+
+    if enable_cluster_autoscaler:
+        if instance.agent_pool_profiles[0].enable_auto_scaling:
+            logger.warning('Cluster autoscaler is already enabled for this node pool.\n'
+                           'Please run "az aks --update-cluster-autoscaler" '
+                           'if you want to update min-count or max-count.')
+            return None
+        instance.agent_pool_profiles[0].min_count = int(min_count)
+        instance.agent_pool_profiles[0].max_count = int(max_count)
+        instance.agent_pool_profiles[0].enable_auto_scaling = True
+
+    if update_cluster_autoscaler:
+        if not instance.agent_pool_profiles[0].enable_auto_scaling:
+            raise CLIError('Cluster autoscaler is not enabled for this node pool.\n'
+                           'Run "az aks nodepool update --enable-cluster-autoscaler" '
+                           'to enable cluster with min-count and max-count.')
+        instance.agent_pool_profiles[0].min_count = int(min_count)
+        instance.agent_pool_profiles[0].max_count = int(max_count)
+
+    if disable_cluster_autoscaler:
+        if not instance.agent_pool_profiles[0].enable_auto_scaling:
+            logger.warning('Cluster autoscaler is already disabled for this node pool.')
+            return None
+        instance.agent_pool_profiles[0].enable_auto_scaling = False
+        instance.agent_pool_profiles[0].min_count = None
+        instance.agent_pool_profiles[0].max_count = None
+
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+
     client_id = instance.service_principal_profile.client_id
     if not client_id:
         raise CLIError('Cannot get the AKS cluster\'s service principal.')
@@ -1996,7 +2054,8 @@ def aks_update(cmd, client, resource_group_name, name,
 
     # empty string is valid as it disables ip whitelisting
     if api_server_authorized_ip_ranges is not None:
-        instance.api_server_access_profile = _populate_api_server_access_profile(api_server_authorized_ip_ranges)
+        instance.api_server_access_profile = \
+            _populate_api_server_access_profile(api_server_authorized_ip_ranges, instance)
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
@@ -2108,6 +2167,10 @@ def aks_remove_dev_spaces(cmd, client, name, resource_group_name, prompt=False):
             azext_custom.ads_remove_dev_spaces(name, resource_group_name, prompt)
         except AttributeError as ae:
             raise CLIError(ae)
+
+
+def aks_rotate_certs(cmd, client, resource_group_name, name, no_wait=True):
+    return sdk_no_wait(no_wait, client.rotate_cluster_certificates, resource_group_name, name)
 
 
 def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, enable, workspace_resource_id=None,
@@ -2605,7 +2668,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                 raise CLIError('Taint does not match allowed values. Expect value such as "special=true:NoSchedule".')
 
     if node_vm_size is None:
-        if os_type == "Windows":
+        if os_type.lower() == "windows":
             raise CLIError('Windows nodepool is not supported')
         node_vm_size = "Standard_DS2_v2"
 
@@ -2671,15 +2734,8 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
     instance = client.get(resource_group_name, cluster_name, nodepool_name)
     node_count = instance.count
 
-    if min_count is None or max_count is None:
-        if enable_cluster_autoscaler or update_cluster_autoscaler:
-            raise CLIError('Please specifying both min-count and max-count when --enable-cluster-autoscaler or '
-                           '--update-cluster-autoscaler set.')
-    if min_count is not None and max_count is not None:
-        if int(min_count) > int(max_count):
-            raise CLIError('value of min-count should be less than or equal to value of max-count.')
-        if int(node_count) < int(min_count) or int(node_count) > int(max_count):
-            raise CLIError("current node count '{}' is not in the range of min-count and max-count.".format(node_count))
+    _validate_autoscaler_update_counts(min_count, max_count, node_count, enable_cluster_autoscaler or
+                                       update_cluster_autoscaler)
 
     if enable_cluster_autoscaler:
         if instance.enable_auto_scaling:
@@ -2907,9 +2963,9 @@ def _check_cluster_autoscaler_flag(enable_cluster_autoscaler,
                                    agent_pool_profile):
     if enable_cluster_autoscaler:
         if min_count is None or max_count is None:
-            raise CLIError('Please specifying both min-count and max-count when --enable-cluster-autoscaler enabled')
+            raise CLIError('Please specify both min-count and max-count when --enable-cluster-autoscaler enabled')
         if int(min_count) > int(max_count):
-            raise CLIError('value of min-count should be less than or equal to value of max-count')
+            raise CLIError('Value of min-count should be less than or equal to value of max-count')
         if int(node_count) < int(min_count) or int(node_count) > int(max_count):
             raise CLIError('node-count is not in the range of min-count and max-count')
         agent_pool_profile.min_count = int(min_count)
@@ -2918,6 +2974,21 @@ def _check_cluster_autoscaler_flag(enable_cluster_autoscaler,
     else:
         if min_count is not None or max_count is not None:
             raise CLIError('min-count and max-count are required for --enable-cluster-autoscaler, please use the flag')
+
+
+def _validate_autoscaler_update_counts(min_count, max_count, node_count, is_enable_or_update):
+    """
+    Validates the min, max, and node count when performing an update
+    """
+    if min_count is None or max_count is None:
+        if is_enable_or_update:
+            raise CLIError('Please specify both min-count and max-count when --enable-cluster-autoscaler or '
+                           '--update-cluster-autoscaler is set.')
+    if min_count is not None and max_count is not None:
+        if int(min_count) > int(max_count):
+            raise CLIError('Value of min-count should be less than or equal to value of max-count.')
+        if int(node_count) < int(min_count) or int(node_count) > int(max_count):
+            raise CLIError("Current node count '{}' is not in the range of min-count and max-count.".format(node_count))
 
 
 def _print_or_merge_credentials(path, kubeconfig, overwrite_existing, context_name):
@@ -3055,6 +3126,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
                      vnet_peer=None,
                      tags=None,
                      no_wait=False,
+                     workspace_resource_id=None,
                      customer_admin_group_id=None):
 
     if location is None:
@@ -3125,17 +3197,37 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
                 namespace='Microsoft.Network', type='virtualNetwork',
                 name=vnet_peer
             )
+    if workspace_resource_id is not None:
+        workspace_resource_id = workspace_resource_id.strip()
+        if not workspace_resource_id.startswith('/'):
+            workspace_resource_id = '/' + workspace_resource_id
+        if workspace_resource_id.endswith('/'):
+            workspace_resource_id = workspace_resource_id.rstrip('/')
+        monitor_profile = OpenShiftManagedClusterMonitorProfile(enabled=True, workspace_resource_id=workspace_resource_id)  # pylint: disable=line-too-long
+    else:
+        monitor_profile = None
 
     network_profile = NetworkProfile(vnet_cidr=vnet_prefix, peer_vnet_id=vnet_peer)
 
-    osamc = OpenShiftManagedCluster(
-        location=location, tags=tags,
-        open_shift_version="v3.11",
-        network_profile=network_profile,
-        auth_profile=auth_profile,
-        agent_pool_profiles=agent_pool_profiles,
-        master_pool_profile=agent_master_pool_profile,
-        router_profiles=[default_router_profile])
+    if monitor_profile is not None:
+        osamc = OpenShiftManagedClusterMonitor(
+            location=location, tags=tags,
+            open_shift_version="v3.11",
+            network_profile=network_profile,
+            auth_profile=auth_profile,
+            agent_pool_profiles=agent_pool_profiles,
+            master_pool_profile=agent_master_pool_profile,
+            router_profiles=[default_router_profile],
+            monitor_profile=monitor_profile)
+    else:
+        osamc = OpenShiftManagedCluster(
+            location=location, tags=tags,
+            open_shift_version="v3.11",
+            network_profile=network_profile,
+            auth_profile=auth_profile,
+            agent_pool_profiles=agent_pool_profiles,
+            master_pool_profile=agent_master_pool_profile,
+            router_profiles=[default_router_profile])
 
     try:
         # long_running_operation_timeout=300
@@ -3164,7 +3256,13 @@ def openshift_show(cmd, client, resource_group_name, name):
 def openshift_scale(cmd, client, resource_group_name, name, compute_count, no_wait=False):
     instance = client.get(resource_group_name, name)
     # TODO: change this approach when we support multiple agent pools.
-    instance.agent_pool_profiles[0].count = int(compute_count)  # pylint: disable=no-member
+    idx = 0
+    for i in range(len(instance.agent_pool_profiles)):
+        if instance.agent_pool_profiles[i].name.lower() == "compute":
+            idx = i
+            break
+
+    instance.agent_pool_profiles[idx].count = int(compute_count)  # pylint: disable=no-member
 
     # null out the AAD profile and add manually the masterAP name because otherwise validation complains
     instance.master_pool_profile.name = "master"

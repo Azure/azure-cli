@@ -50,7 +50,7 @@ interactions:
         {\n                \"publicIPAllocationMethod\": \"Static\",\n                \"dnsSettings\":
         {\n                    \"domainNameLabel\": \"[parameters('dnsPrefix')]\"\n
         \               }\n            }\n        },\n        {\n            \"type\":
-        \"Microsoft.Compute/availabilitySets\",\n            \"apiVersion\": \"2019-03-01\",\n
+        \"Microsoft.Compute/availabilitySets\",\n            \"apiVersion\": \"2019-07-01\",\n
         \           \"location\": \"[parameters('location')]\",\n            \"name\":
         \"[variables('adAvailabilitySetName')]\",\n            \"properties\": {\n
         \               \"PlatformUpdateDomainCount\": 20,\n                \"PlatformFaultDomainCount\":
@@ -108,7 +108,7 @@ interactions:
         variables('adLBName'), variables('adRDPNAT'))]\"\n                                }\n
         \                           ]\n                        }\n                    }\n
         \               ]\n            }\n        },\n        {\n            \"type\":
-        \"Microsoft.Compute/virtualMachines\",\n            \"apiVersion\": \"2019-03-01\",\n
+        \"Microsoft.Compute/virtualMachines\",\n            \"apiVersion\": \"2019-07-01\",\n
         \           \"name\": \"[variables('adVMName')]\",\n            \"location\":
         \"[parameters('location')]\",\n            \"dependsOn\": [\n                \"[variables('adNicName')]\",\n
         \               \"[variables('adAvailabilitySetName')]\",\n                \"[variables('adLBName')]\"\n
@@ -2362,7 +2362,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/MicrosoftSQLServer/artifacttypes/vmimage/offers/SQL2017-WS2016/skus/Enterprise/versions?$top=1&$orderby=name%20desc&api-version=2019-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/MicrosoftSQLServer/artifacttypes/vmimage/offers/SQL2017-WS2016/skus/Enterprise/versions?$top=1&$orderby=name%20desc&api-version=2019-07-01
   response:
     body:
       string: "[\r\n  {\r\n    \"location\": \"westus\",\r\n    \"name\": \"14.1.190611\",\r\n
@@ -2414,7 +2414,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/MicrosoftSQLServer/artifacttypes/vmimage/offers/SQL2017-WS2016/skus/Enterprise/versions/14.1.190611?api-version=2019-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/MicrosoftSQLServer/artifacttypes/vmimage/offers/SQL2017-WS2016/skus/Enterprise/versions/14.1.190611?api-version=2019-07-01
   response:
     body:
       string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"replicaType\":
@@ -2537,7 +2537,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/vmSizes?api-version=2019-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/vmSizes?api-version=2019-07-01
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"Standard_B1ls\",\r\n
@@ -3153,7 +3153,7 @@ interactions:
       "Dynamic", "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/adVNET/subnets/adSubnet"},
       "publicIPAddress": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/clisqlvm000003PublicIP"}}}],
       "networkSecurityGroup": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/clisqlvm000003NSG"}}},
-      {"apiVersion": "2019-03-01", "type": "Microsoft.Compute/virtualMachines", "name":
+      {"apiVersion": "2019-07-01", "type": "Microsoft.Compute/virtualMachines", "name":
       "clisqlvm000003", "location": "westus", "tags": {}, "dependsOn": ["Microsoft.Network/networkInterfaces/clisqlvm000003VMNic"],
       "properties": {"hardwareProfile": {"vmSize": "Standard_DS2_v2"}, "networkProfile":
       {"networkInterfaces": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/clisqlvm000003VMNic"}]},
@@ -3705,7 +3705,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/clisqlvm000003?$expand=instanceView&api-version=2019-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/clisqlvm000003?$expand=instanceView&api-version=2019-07-01
   response:
     body:
       string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"8287d9ff-3366-49a4-8f32-aefa8295c156\",\r\n
@@ -3932,13 +3932,13 @@ interactions:
       accept-language:
       - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/adVM/runCommand?api-version=2019-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/adVM/runCommand?api-version=2019-07-01
   response:
     body:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/65875d5b-c9b5-472e-8353-f9972865a433?api-version=2019-03-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/65875d5b-c9b5-472e-8353-f9972865a433?api-version=2019-07-01
       cache-control:
       - no-cache
       content-length:
@@ -3948,7 +3948,7 @@ interactions:
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/65875d5b-c9b5-472e-8353-f9972865a433?monitor=true&api-version=2019-03-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/65875d5b-c9b5-472e-8353-f9972865a433?monitor=true&api-version=2019-07-01
       pragma:
       - no-cache
       server:
@@ -3982,7 +3982,7 @@ interactions:
       - python/3.6.7 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 computemanagementclient/5.0.0
         Azure-SDK-For-Python AZURECLI/2.0.68
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/65875d5b-c9b5-472e-8353-f9972865a433?api-version=2019-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/65875d5b-c9b5-472e-8353-f9972865a433?api-version=2019-07-01
   response:
     body:
       string: "{\r\n  \"startTime\": \"2019-07-05T22:53:00.5738276+00:00\",\r\n  \"status\":
@@ -4033,7 +4033,7 @@ interactions:
       - python/3.6.7 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 computemanagementclient/5.0.0
         Azure-SDK-For-Python AZURECLI/2.0.68
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/65875d5b-c9b5-472e-8353-f9972865a433?api-version=2019-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/65875d5b-c9b5-472e-8353-f9972865a433?api-version=2019-07-01
   response:
     body:
       string: "{\r\n  \"startTime\": \"2019-07-05T22:53:00.5738276+00:00\",\r\n  \"endTime\":
@@ -4087,7 +4087,7 @@ interactions:
       - python/3.6.7 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 computemanagementclient/5.0.0
         Azure-SDK-For-Python AZURECLI/2.0.68
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/65875d5b-c9b5-472e-8353-f9972865a433?monitor=true&api-version=2019-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/65875d5b-c9b5-472e-8353-f9972865a433?monitor=true&api-version=2019-07-01
   response:
     body:
       string: '{"value":[{"code":"ComponentStatus/StdOut/succeeded","level":"Info","displayStatus":"Provisioning

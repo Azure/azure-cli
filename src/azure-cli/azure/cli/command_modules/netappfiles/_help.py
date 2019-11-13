@@ -330,7 +330,7 @@ parameters:
     short-summary: The service level
   - name: --usage-threshold
     short-summary: The maximum storage quota allowed for a file system as integer number of GiB. Min 100 GiB, max 100TiB"
-  - name: --creation-token
+  - name: --file-path
     short-summary: A 1-80 character long alphanumeric string value that identifies a unique file share or mount point in the target subnet
   - name: --vnet
     short-summary: The ARM Id or name of the vnet for the volume
@@ -343,7 +343,7 @@ parameters:
 examples:
   - name: Create an ANF volume
     text: >
-        az netappfiles volume create -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname -l westus2 --service-level premium --usage-threshold 100 --creation-token "unique-file-path" --vnet myvnet --subnet mysubnet --protocol-types NFSv3 NFSv4
+        az netappfiles volume create -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname -l westus2 --service-level premium --usage-threshold 100 --file-path "unique-file-path" --vnet myvnet --subnet mysubnet --protocol-types NFSv3 NFSv4.1
 """
 
 helps['netappfiles volume delete'] = """
@@ -387,14 +387,14 @@ parameters:
     short-summary: Indication that CIFS protocol is allowed
   - name: --nfsv3
     short-summary: Indication that NFSv3 protocol is allowed
-  - name: --nfsv4
-    short-summary: Indication that NFSv4 protocol is allowed
+  - name: --nfsv41
+    short-summary: Indication that NFSv4.1 protocol is allowed
   - name: --allowed-clients
     short-summary: Client ingress specification as comma separated string with IPv4 CIDRs, IPv4 host addresses and host names)
 examples:
   - name: Add an export policy rule for the ANF volume
     text: >
-        az netappfiles volume export-policy add -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname --allowed-clients "1.2.3.0/24" --rule-index 2 --unix-read-only true --unix-read-write false --cifs false --nfsv3 true --nfsv4 false
+        az netappfiles volume export-policy add -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname --allowed-clients "1.2.3.0/24" --rule-index 2 --unix-read-only true --unix-read-write false --cifs false --nfsv3 true --nfsv41 false
 """
 
 helps['netappfiles volume export-policy list'] = """
