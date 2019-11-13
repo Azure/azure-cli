@@ -304,7 +304,7 @@ if 'ARM_CLOUD_METADATA_URL' in os.environ:
             cli_cloud_dict['AzureCloud'].endpoints.active_directory = 'https://login.microsoftonline.com'  # pylint: disable=line-too-long # change once active_directory is fixed in ARM for the public cloud
         KNOWN_CLOUDS = list(cli_cloud_dict.values())
     except Exception as ex:  # pylint: disable=broad-except
-        logger.warn('Failed to load cloud metadata from the url specified by ARM_CLOUD_METADATA_URL')
+        logger.warning('Failed to load cloud metadata from the url specified by ARM_CLOUD_METADATA_URL')
         raise ex
 
 
