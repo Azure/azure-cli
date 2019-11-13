@@ -2967,7 +2967,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
                 "os": "%s",
                 "location" : "%s",
                 "src_path" : "%s",
-                "version_detected": "%s",
+                "runtime_version_detected": "%s",
                 "runtime_version": "%s"
                 }
                 """ % (name, plan, rg_name, get_sku_name(sku), os_name, loc, _src_path_escaped, detected_version,
