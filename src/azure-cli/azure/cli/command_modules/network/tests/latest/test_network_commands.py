@@ -2629,6 +2629,35 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
         self.cmd('network vnet-gateway list-advertised-routes -g {rg} -n {gw1} --peer 10.1.1.1')
         self.cmd('network vnet-gateway list-bgp-peer-status -g {rg} -n {gw1} --peer 10.1.1.1')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vpn_gateway_aad_')
+    def test_network_vpn_gateway_aad(self, resource_group):
+        self.kwargs.update({
+            'ip1': 'ip01',
+            'vnet1': 'vnet1',
+            'gw1': 'gateway1',
+        })
+
+        self.cmd('network public-ip create -n {ip1} -g {rg}')
+        self.cmd('network vnet create -g {rg} -n {vnet1} --subnet-name GatewaySubnet')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw1} '
+                 '--vnet {vnet1} --public-ip-addresses {ip1} '
+                 '--sku Standard '
+                 '--address-prefixes 40.0.1.0/24 '
+                 '--no-wait')
+        self.cmd('network vnet-gateway wait -g {rg} -n {gw1} --created')
+
+        sub_id = self.get_subscription_id()
+        print(sub_id)
+        aad_tenant = ''
+        aad_audience = ''
+        aad_issuer = ''
+
+        # self.cmd('network vnet-gateway aad assign -g {rg} -n {gw1} '
+        #          '--aad-tenant  '
+        #          '--aad-audience  '
+        #          '--aad-issuer  ')
+        # self.cmd('network vnet-gateway aad show -g {rg} -n {gw1}')
+
 
 class NetworkVpnClientPackageScenarioTest(LiveScenarioTest):
 
