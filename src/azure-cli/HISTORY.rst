@@ -3,6 +3,11 @@
 Release History
 ===============
 
+**Azure Red Hat OpenShift**
+
+* Add `--workspace-resource-id` flag to allow creation of Azure Red Hat Openshift cluster with monitoring
+* Add `monitor_profile` to create Azure Red Hat OpenShift cluster with monitoring
+
 **AKS**
 
 * Support cluster certificate rotation operation using "az aks rotate-certs".
@@ -18,6 +23,10 @@ Release History
 **IOT**
 
 * Fix #2531: Add convenience arguments for hub update.
+
+**Key Vault**
+
+* Fix #11121: When using `az keyvault certificate list`, passing `--include-pending` now doesn't require a value of `true` or `false`
 
 **Packaging**
 
@@ -54,7 +63,6 @@ Release History
 * Add a preview parameter `--pack-image-tag` to command `az acr pack build`.
 * Support enabling auditing on creating a registry
 * Support Repository-scoped RBAC
-
 
 **AKS**
 
