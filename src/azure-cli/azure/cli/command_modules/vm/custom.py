@@ -2207,8 +2207,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             custom_data=custom_data, secrets=secrets, license_type=license_type, zones=zones, priority=priority,
             eviction_policy=eviction_policy, application_security_groups=application_security_groups,
             ultra_ssd_enabled=ultra_ssd_enabled, proximity_placement_group=proximity_placement_group,
-            terminate_notification_time=terminate_notification_time, max_billing=max_billing,
-            orchestration_mode=orchestration_mode)
+            terminate_notification_time=terminate_notification_time, max_billing=max_billing)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 

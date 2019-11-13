@@ -1302,7 +1302,7 @@ def get_network_lb(cli_ctx, resource_group_name, lb_name):
 
 
 def process_vmss_create_namespace(cmd, namespace):
-    scale_set_vm_str = 'ScaleSetVM'
+    # scale_set_vm_str = 'ScaleSetVM'
     vm_str = 'VM'
     if namespace.orchestration_mode.lower() == vm_str.lower():
         validate_tags(namespace)
