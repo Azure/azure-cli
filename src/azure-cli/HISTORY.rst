@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**ACR**
+
+* Deprecated paramater `--branch` from acr task create/update
+
 **Profile**
 
 * Polish error when using `az login -u {} -p {}` with Microsoft account
