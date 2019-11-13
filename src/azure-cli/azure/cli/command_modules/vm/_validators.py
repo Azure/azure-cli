@@ -1308,6 +1308,73 @@ def process_vmss_create_namespace(cmd, namespace):
         validate_tags(namespace)
         if not namespace.location:
             get_default_location_from_resource_group(cmd, namespace)
+        banned_params = [
+            namespace.accelerated_networking,
+            namespace.admin_password,
+            # namespace.admin_username,
+            namespace.application_gateway,
+            # namespace.app_gateway_capacity,
+            # namespace.app_gateway_sku,
+            namespace.app_gateway_subnet_address_prefix,
+            namespace.application_security_groups,
+            namespace.assign_identity,
+            namespace.authentication_type,
+            namespace.backend_pool_name,
+            namespace.backend_port,
+            namespace.computer_name_prefix,
+            namespace.custom_data,
+            namespace.data_caching,
+            namespace.data_disk_sizes_gb,
+            # namespace.disable_overprovision,
+            namespace.dns_servers,
+            namespace.ephemeral_os_disk,
+            namespace.eviction_policy,
+            # namespace.generate_ssh_keys,
+            namespace.health_probe,
+            namespace.image,
+            # namespace.instance_count,
+            namespace.load_balancer,
+            namespace.nat_pool_name,
+            namespace.load_balancer_sku,
+            namespace.license_type,
+            namespace.max_billing,
+            namespace.nsg,
+            namespace.os_caching,
+            namespace.os_disk_name,
+            namespace.os_type,
+            namespace.plan_name,
+            namespace.plan_product,
+            namespace.plan_promotion_code,
+            namespace.plan_publisher,
+            namespace.proximity_placement_group,
+            namespace.priority,
+            namespace.public_ip_address,
+            namespace.public_ip_address_allocation,
+            namespace.public_ip_address_dns_name,
+            # namespace.public_ip_per_vm,
+            # namespace.identity_role,
+            namespace.identity_scope,
+            namespace.secrets,
+            namespace.single_placement_group,
+            namespace.ssh_dest_key_path,
+            namespace.ssh_key_value,
+            # namespace.storage_container_name,
+            namespace.storage_sku,
+            namespace.subnet,
+            namespace.subnet_address_prefix,
+            namespace.terminate_notification_time,
+            namespace.ultra_ssd_enabled,
+            # namespace.upgrade_policy_mode,
+            # namespace.use_unmanaged_disk,
+            namespace.vm_domain_name,
+            namespace.vm_sku,
+            # namespace.vnet_address_prefix,
+            namespace.vnet_name
+        ]
+        if any(param is not None for param in banned_params):
+            print(banned_params)
+            raise CLIError('usage error: in VM mode, only name, resource-group, location, '
+                           'tags, zones, platform-fault-domain-count are allowed')
         return
     validate_tags(namespace)
     if namespace.vm_sku is None:
