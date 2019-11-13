@@ -129,7 +129,7 @@ class CloudSuffixes(object):  # pylint: disable=too-few-public-methods
         return val
 
 
-def get_ossrdbms_resource_id(cloud_name):
+def _get_ossrdbms_resource_id(cloud_name):
     ossrdbms_mapper = {
         'AzureCloud': 'https://ossrdbms-aad.database.windows.net',
         'AzureChinaCloud': 'https://ossrdbms-aad.database.chinacloudapi.cn',
@@ -139,7 +139,7 @@ def get_ossrdbms_resource_id(cloud_name):
     return ossrdbms_mapper.get(cloud_name, None)
 
 
-def get_microsoft_graph_resource_id(cloud_name):
+def _get_microsoft_graph_resource_id(cloud_name):
     graph_endpoint_mapper = {
         'AzureCloud': 'https://graph.microsoft.com/',
         'AzureChinaCloud': 'https://microsoftgraph.chinacloudapi.cn/',
@@ -149,14 +149,14 @@ def get_microsoft_graph_resource_id(cloud_name):
     return graph_endpoint_mapper.get(cloud_name, None)
 
 
-def convert_arm_to_cli(arm_cloud_metadata_dict):
+def _convert_arm_to_cli(arm_cloud_metadata_dict):
     cli_cloud_metadata_dict = {}
     for cloud in arm_cloud_metadata_dict:
-        cli_cloud_metadata_dict[cloud['name']] = arm_to_cli_mapper(cloud)
+        cli_cloud_metadata_dict[cloud['name']] = _arm_to_cli_mapper(cloud)
     return cli_cloud_metadata_dict
 
 
-def arm_to_cli_mapper(arm_dict):
+def _arm_to_cli_mapper(arm_dict):
     return Cloud(
         arm_dict['name'],
         endpoints=CloudEndpoints(
@@ -168,10 +168,10 @@ def arm_to_cli_mapper(arm_dict):
             active_directory=arm_dict['authentication']['loginEndpoint'],
             active_directory_resource_id=arm_dict['authentication']['audiences'][0],
             active_directory_graph_resource_id=arm_dict['graphAudience'],
-            microsoft_graph_resource_id=get_microsoft_graph_resource_id(arm_dict['name']),  # pylint: disable=line-too-long # change once microsoft_graph_resource_id is fixed in ARM
+            microsoft_graph_resource_id=_get_microsoft_graph_resource_id(arm_dict['name']),  # pylint: disable=line-too-long # change once microsoft_graph_resource_id is fixed in ARM
             vm_image_alias_doc=arm_dict['vmImageAliasDoc'],  # pylint: disable=line-too-long
             media_resource_id=arm_dict['media'],
-            ossrdbms_resource_id=get_ossrdbms_resource_id(arm_dict['name']),  # pylint: disable=line-too-long # change once ossrdbms_resource_id is available via ARM
+            ossrdbms_resource_id=_get_ossrdbms_resource_id(arm_dict['name']),  # pylint: disable=line-too-long # change once ossrdbms_resource_id is available via ARM
             active_directory_data_lake_resource_id=arm_dict['activeDirectoryDataLake'] if 'activeDirectoryDataLake' in arm_dict else None),  # pylint: disable=line-too-long
         suffixes=CloudSuffixes(
             storage_endpoint=arm_dict['suffixes']['storage'],
@@ -296,17 +296,16 @@ AZURE_GERMAN_CLOUD = Cloud(
 
 KNOWN_CLOUDS = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_GERMAN_CLOUD]
 
-
-try:
-    if 'ARM_CLOUD_METADATA_URL' in os.environ:
+if 'ARM_CLOUD_METADATA_URL' in os.environ:
+    try:
         arm_cloud_dict = json.loads(urlretrieve(os.getenv('ARM_CLOUD_METADATA_URL')))
-        cli_cloud_dict = convert_arm_to_cli(arm_cloud_dict)
+        cli_cloud_dict = _convert_arm_to_cli(arm_cloud_dict)
         if 'AzureCloud' in cli_cloud_dict:
             cli_cloud_dict['AzureCloud'].endpoints.active_directory = 'https://login.microsoftonline.com'  # pylint: disable=line-too-long # change once active_directory is fixed in ARM for the public cloud
         KNOWN_CLOUDS = list(cli_cloud_dict.values())
-except Exception as ex:  # pylint: disable=broad-except
-    print('The ARM_CLOUD_METADATA_URL environment variable points to an invalid cloud metadata URL')
-    raise ex
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.warn('Failed to load cloud metadata from the url specified by ARM_CLOUD_METADATA_URL')
+        raise ex
 
 
 def _set_active_cloud(cli_ctx, cloud_name):
