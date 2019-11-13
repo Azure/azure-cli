@@ -3614,5 +3614,19 @@ class VMImageTermsTest(ScenarioTest):
         ])
 
 
+class VMSSOrchestrationModeTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_orchestration_mode_')
+    def test_vmss_orchestration_mode(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss1'
+        })
+
+        self.cmd('vmss create -g {rg} -n {vmss} --orchestration-mode VM')
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('name', '{vmss}')
+        ])
+
+
 if __name__ == '__main__':
     unittest.main()

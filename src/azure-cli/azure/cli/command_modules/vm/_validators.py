@@ -1302,8 +1302,13 @@ def get_network_lb(cli_ctx, resource_group_name, lb_name):
 
 
 def process_vmss_create_namespace(cmd, namespace):
-    if namespace.orchestration_mode == 'VM':
-        namespace.image = 'centos'  # Will be ignored. Just aim to pass validation.
+    scale_set_vm_str = 'ScaleSetVM'
+    vm_str = 'VM'
+    if namespace.orchestration_mode.lower() == vm_str.lower():
+        validate_tags(namespace)
+        if not namespace.location:
+            get_default_location_from_resource_group(cmd, namespace)
+        return
     validate_tags(namespace)
     if namespace.vm_sku is None:
         from azure.cli.core.cloud import AZURE_US_GOV_CLOUD

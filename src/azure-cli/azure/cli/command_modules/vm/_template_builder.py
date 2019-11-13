@@ -653,25 +653,6 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
                         application_security_groups=None, ultra_ssd_enabled=None, proximity_placement_group=None,
                         terminate_notification_time=None, max_billing=None, orchestration_mode=None):
 
-    if orchestration_mode == 'VM':
-        if platform_fault_domain_count is None:
-            platform_fault_domain_count = 2
-        vmss = {
-            'type': 'Microsoft.Compute/virtualMachineScaleSets',
-            'name': name,
-            'location': location,
-            'tags': tags,
-            'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machine_scale_sets'),
-            'properties': {
-                'singlePlacementGroup': True,
-                'provisioningState': 0,
-                'platformFaultDomainCount': platform_fault_domain_count
-            }
-        }
-        if zones is not None:
-            vmss['zones'] = zones
-        return vmss
-
     # Build IP configuration
     ip_configuration = {
         'name': ip_config_name,
