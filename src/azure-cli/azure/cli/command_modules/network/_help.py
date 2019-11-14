@@ -4424,11 +4424,6 @@ examples:
     text: az network vnet-gateway wait -g MyResourceGroup -n MyVnetGateway --created
 """
 
-helps['network vnet-gateway aad'] = """
-type: group
-short-summary: Manage AAD(Azure Active Directory) authentication of a virtual network gateway
-"""
-
 helps['network vpn-connection'] = """
 type: group
 short-summary: Manage VPN connections.
