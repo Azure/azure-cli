@@ -5,16 +5,19 @@
 
 # pylint: disable=too-many-arguments, too-many-locals, too-many-branches, too-many-statements
 import base64
-import json
 import codecs
+import json
 
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
-
 from knack.util import CLIError
 
-from azure.cli.command_modules.ams._utils import parse_timedelta, parse_duration, JsonBytearrayEncoder
 from azure.cli.command_modules.ams._sdk_utils import get_tokens
+from azure.cli.command_modules.ams._utils import (parse_timedelta,
+                                                  parse_duration,
+                                                  JsonBytearrayEncoder,
+                                                  build_resource_not_found_message,
+                                                  show_resource_not_found_message)
 
 from azure.mgmt.media.models import (ContentKeyPolicyOption, ContentKeyPolicyClearKeyConfiguration,
                                      ContentKeyPolicyOpenRestriction, ContentKeyPolicySymmetricTokenKey,
@@ -57,11 +60,24 @@ def show_content_key_policy(client, resource_group_name, account_name, content_k
             resource_group_name=resource_group_name,
             account_name=account_name,
             content_key_policy_name=content_key_policy_name)
+
+        if not content_key_policy:
+            show_resource_not_found_message(
+                account_name, resource_group_name, 'contenKeyPolicies', content_key_policy_name)
+
         json_object = json.dumps(content_key_policy, cls=JsonBytearrayEncoder, indent=4)
         return json.loads(json_object)
 
-    return client.get(resource_group_name=resource_group_name, account_name=account_name,
-                      content_key_policy_name=content_key_policy_name)
+    content_key_policy = client.get(
+        resource_group_name=resource_group_name,
+        account_name=account_name,
+        content_key_policy_name=content_key_policy_name)
+
+    if not content_key_policy:
+        show_resource_not_found_message(
+            account_name, resource_group_name, 'contenKeyPolicies', content_key_policy_name)
+
+    return content_key_policy
 
 
 def add_content_key_policy_option(client, resource_group_name, account_name, content_key_policy_name,
@@ -75,7 +91,8 @@ def add_content_key_policy_option(client, resource_group_name, account_name, con
     policy = client.get_policy_properties_with_secrets(resource_group_name, account_name, content_key_policy_name)
 
     if not policy:
-        raise CLIError('The content key policy was not found.')
+        raise CLIError(build_resource_not_found_message(
+            account_name, resource_group_name, 'contentKeyPolicies', content_key_policy_name))
 
     options = policy.options
 
@@ -98,7 +115,8 @@ def remove_content_key_policy_option(client, resource_group_name, account_name, 
     policy = client.get_policy_properties_with_secrets(resource_group_name, account_name, content_key_policy_name)
 
     if not policy:
-        raise CLIError('The content key policy was not found.')
+        raise CLIError(build_resource_not_found_message(
+            account_name, resource_group_name, 'contentKeyPolicies', content_key_policy_name))
 
     if all(option.policy_option_id != policy_option_id for option in policy.options):
         raise CLIError('No policy option found with id "' + policy_option_id + '"')
@@ -121,6 +139,10 @@ def update_content_key_policy_option(client, resource_group_name, account_name, 
         resource_group_name=resource_group_name,
         account_name=account_name,
         content_key_policy_name=content_key_policy_name)
+
+    if not policy:
+        raise CLIError(build_resource_not_found_message(
+            account_name, resource_group_name, 'contentKeyPolicies', content_key_policy_name))
 
     policy_option = next((option for option in policy.options if option.policy_option_id == policy_option_id), None)
 
@@ -174,7 +196,7 @@ def update_content_key_policy_option(client, resource_group_name, account_name, 
             policy_option.configuration = ContentKeyPolicyWidevineConfiguration(widevine_template=widevine_template)
     elif isinstance(policy_option.configuration, ContentKeyPolicyFairPlayConfiguration):
         if ask is not None:
-            policy_option.configuration.ask = bytearray.fromhex(ask)
+            policy_option.configuration.ask = bytearray(ask, 'utf-8')
 
         if fair_play_pfx_password is not None:
             policy_option.configuration.fair_play_pfx_password = fair_play_pfx_password
@@ -203,7 +225,7 @@ def update_content_key_policy_setter(client, resource_group_name, account_name, 
 
 def update_content_key_policy(instance, description=None):
     if not instance:
-        raise CLIError('The content key policy was not found.')
+        raise CLIError("The content key policy '{}' was not found.".format(instance))
 
     if description is not None:
         instance.description = description
@@ -247,7 +269,7 @@ def _generate_content_key_policy_option(policy_option_name, clear_key_configurat
 
     if valid_fairplay_configuration:
         configuration = ContentKeyPolicyFairPlayConfiguration(
-            ask=bytearray.fromhex(ask), fair_play_pfx_password=fair_play_pfx_password,
+            ask=bytearray(ask, 'utf-8'), fair_play_pfx_password=fair_play_pfx_password,
             fair_play_pfx=_b64_to_str(_read_binary(fair_play_pfx)).decode('ascii'),
             rental_and_lease_key_type=rental_and_lease_key_type,
             rental_duration=rental_duration)

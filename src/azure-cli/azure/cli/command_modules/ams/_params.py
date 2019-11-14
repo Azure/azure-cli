@@ -152,7 +152,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Applies to Live Streaming only. Indicates whether the endTimestamp property must be present. If true, endTimestamp must be specified or a bad request code is returned. Allowed values: false, true.')
         c.argument('bitrate', help='The first quality bitrate.', deprecate_info=c.deprecate(target='--bitrate', redirect='--first-quality', hide=True))
         c.argument('first_quality', help='The first quality (lowest) bitrate to include in the manifest.')
-        c.argument('tracks', help='The JSON representing the track selections. Use @{file} to load from a file. For further information about the JSON structure please refer to swagger documentation on https://docs.microsoft.com/rest/api/media/assetfilters/assetfilters_createorupdate#filtertrackselection')
+        c.argument('tracks', help='The JSON representing the track selections. Use @{file} to load from a file. For further information about the JSON structure please refer to swagger documentation on https://docs.microsoft.com/en-us/rest/api/media/assetfilters/createorupdate#filtertrackselection')
 
     with self.argument_context('ams asset-filter list') as c:
         c.argument('account_name', id_part=None)
@@ -170,7 +170,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('ams job list') as c:
         c.argument('account_name', id_part=None)
 
-    with self.argument_context('ams job create') as c:
+    with self.argument_context('ams job start') as c:
         c.argument('correlation_data', arg_type=correlation_data_type)
         c.argument('input_asset_name',
                    arg_group='Asset Job Input',
@@ -217,7 +217,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The type of token. Allowed values: {}.'.format(", ".join(get_token_type_completion_list())))
         c.argument('open_id_connect_discovery_document', arg_group='Token Restriction', help='The OpenID connect discovery document.')
         c.argument('widevine_template', arg_group='Widevine Configuration', help='JSON Widevine license template. Use @{file} to load from a file.')
-        c.argument('ask', arg_group='FairPlay Configuration', help='The key that must be used as FairPlay Application Secret Key, which is a 32 character hex string.')
+        c.argument('ask', arg_group='FairPlay Configuration', help='The key that must be used as FairPlay Application Secret Key.')
         c.argument('fair_play_pfx_password', arg_group='FairPlay Configuration', help='The password encrypting FairPlay certificate in PKCS 12 (pfx) format.')
         c.argument('fair_play_pfx', arg_group='FairPlay Configuration', help='The filepath to a FairPlay certificate file in PKCS 12 (pfx) format (including private key).')
         c.argument('rental_and_lease_key_type', arg_group='FairPlay Configuration', help='The rental and lease key type. Available values: {}.'.format(", ".join(get_fairplay_rentalandlease_completion_list())))
@@ -247,7 +247,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help="The ISO 8601 DateTime end time (Y-m-d'T'H:M:S'Z') of the streaming locator.")
         c.argument('streaming_locator_id', help='The identifier of the streaming locator.')
         c.argument('alternative_media_id', help='An alternative media identifier associated with the streaming locator.')
-        c.argument('content_keys', help='JSON string with the content keys to be used by the streaming locator. Use @{file} to load from a file. For further information about the JSON structure please refer to swagger documentation on https://docs.microsoft.com/rest/api/media/streaminglocators/streaminglocators_create#streaminglocatorcontentkey')
+        c.argument('content_keys', help='JSON string with the content keys to be used by the streaming locator. Use @{file} to load from a file. For further information about the JSON structure please refer to swagger documentation on https://docs.microsoft.com/en-us/rest/api/media/streaminglocators/create#streaminglocatorcontentkey')
         c.argument('filters', nargs='+', help='A space-separated list of asset filter names and/or account filter names.')
 
     with self.argument_context('ams streaming-locator list') as c:
@@ -259,16 +259,16 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('default_content_key_policy_name', help='Default Content Key used by current streaming policy.')
         c.argument('no_encryption_protocols', nargs='+', help='Space-separated list of enabled protocols for NoEncryption. Allowed values: {}.'.format(", ".join(get_protocols_completion_list())))
         c.argument('envelope_protocols', nargs='+', arg_group='Envelope Encryption', help='Space-separated list of enabled protocols for Envelope Encryption. Allowed values: {}.'.format(", ".join(get_protocols_completion_list())))
-        c.argument('envelope_clear_tracks', arg_group='Envelope Encryption', help='The JSON representing which tracks should not be encrypted. Use @{file} to load from a file. For further information about the JSON structure please refer to swagger documentation on https://docs.microsoft.com/rest/api/media/streamingpolicies/create#trackselection')
-        c.argument('envelope_key_to_track_mappings', arg_group='Envelope Encryption', help='The JSON representing a list of StreamingPolicyContentKey. Use @{file} to load from a file. For further information about the JSON structure please refer to swagger documentation on https://docs.microsoft.com/rest/api/media/streamingpolicies/create#streamingpolicycontentkey')
+        c.argument('envelope_clear_tracks', arg_group='Envelope Encryption', help='The JSON representing which tracks should not be encrypted. Use @{file} to load from a file. For further information about the JSON structure please refer to swagger documentation on https://docs.microsoft.com/en-us/rest/api/media/streamingpolicies/create#trackselection')
+        c.argument('envelope_key_to_track_mappings', arg_group='Envelope Encryption', help='The JSON representing a list of StreamingPolicyContentKey. Use @{file} to load from a file. For further information about the JSON structure please refer to swagger documentation on https://docs.microsoft.com/en-us/rest/api/media/streamingpolicies/create#streamingpolicycontentkey')
         c.argument('envelope_default_key_label', arg_group='Envelope Encryption', help='Label used to specify Content Key when creating a streaming locator.')
         c.argument('envelope_default_key_policy_name', arg_group='Envelope Encryption', help='Policy used by Default Key.')
         c.argument('envelope_template', arg_group='Envelope Encryption', help='The KeyAcquistionUrlTemplate is used to point to user specified service to delivery content keys.')
         c.argument('cenc_protocols', nargs='+', arg_group='Common Encryption CENC', help='Space-separated list of enabled protocols for Common Encryption CENC. Allowed values: {}.'.format(", ".join(get_protocols_completion_list())))
         c.argument('cenc_default_key_label', arg_group='Common Encryption CENC', help='Label to specify Default Content Key for an encryption scheme.')
         c.argument('cenc_default_key_policy_name', arg_group='Common Encryption CENC', help='Policy used by Default Content Key.')
-        c.argument('cenc_clear_tracks', arg_group='Common Encryption CENC', help='The JSON representing which tracks should not be encrypted. Use @{file} to load from a file. For further information about the JSON structure please refer to swagger documentation on https://docs.microsoft.com/rest/api/media/streamingpolicies/create#trackselection')
-        c.argument('cenc_key_to_track_mappings', arg_group='Common Encryption CENC', help='The JSON representing a list of StreamingPolicyContentKey. Use @{file} to load from a file. For further information about the JSON structure please refer to swagger documentation on https://docs.microsoft.com/rest/api/media/streamingpolicies/create#streamingpolicycontentkey')
+        c.argument('cenc_clear_tracks', arg_group='Common Encryption CENC', help='The JSON representing which tracks should not be encrypted. Use @{file} to load from a file. For further information about the JSON structure please refer to swagger documentation on https://docs.microsoft.com/en-us/rest/api/media/streamingpolicies/create#trackselection')
+        c.argument('cenc_key_to_track_mappings', arg_group='Common Encryption CENC', help='The JSON representing a list of StreamingPolicyContentKey. Use @{file} to load from a file. For further information about the JSON structure please refer to swagger documentation on https://docs.microsoft.com/en-us/rest/api/media/streamingpolicies/create#streamingpolicycontentkey')
         c.argument('cenc_play_ready_attributes', arg_group='Common Encryption CENC', help='Custom attributes for PlayReady.')
         c.argument('cenc_widevine_template', arg_group='Common Encryption CENC', help='The custom license acquisition URL template for a customer service to deliver keys to end users. Not needed when using Azure Media Services for issuing keys.')
         c.argument('cenc_play_ready_template', arg_group='Common Encryption CENC', help='The custom license acquisition URL template for a customer service to deliver keys to end users. Not needed when using Azure Media Services for issuing keys.')
@@ -277,8 +277,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('cbcs_protocols', nargs='+', arg_group='Common Encryption CBCS', help='Space-separated list of enabled protocols for Common Encryption CBCS. Allowed values: {}.'.format(", ".join(get_protocols_completion_list())))
         c.argument('cbcs_default_key_label', arg_group='Common Encryption CBCS', help='Label to specify Default Content Key for an encryption scheme.')
         c.argument('cbcs_default_key_policy_name', arg_group='Common Encryption CBCS', help='Policy used by Default Content Key.')
-        c.argument('cbcs_clear_tracks', arg_group='Common Encryption CBCS', help='The JSON representing which tracks should not be encrypted. Use @{file} to load from a file. For further information about the JSON structure please refer to swagger documentation on https://docs.microsoft.com/rest/api/media/streamingpolicies/create#trackselection')
-        c.argument('cbcs_key_to_track_mappings', arg_group='Common Encryption CBCS', help='The JSON representing a list of StreamingPolicyContentKey. Use @{file} to load from a file. For further information about the JSON structure please refer to swagger documentation on https://docs.microsoft.com/rest/api/media/streamingpolicies/create#streamingpolicycontentkey')
+        c.argument('cbcs_clear_tracks', arg_group='Common Encryption CBCS', help='The JSON representing which tracks should not be encrypted. Use @{file} to load from a file. For further information about the JSON structure please refer to swagger documentation on https://docs.microsoft.com/en-us/rest/api/media/streamingpolicies/create#trackselection')
+        c.argument('cbcs_key_to_track_mappings', arg_group='Common Encryption CBCS', help='The JSON representing a list of StreamingPolicyContentKey. Use @{file} to load from a file. For further information about the JSON structure please refer to swagger documentation on https://docs.microsoft.com/en-us/rest/api/media/streamingpolicies/create#streamingpolicycontentkey')
         c.argument('cbcs_play_ready_attributes', arg_group='Common Encryption CBCS', help='Custom attributes for PlayReady.', deprecate_info=c.deprecate(hide=True))
         c.argument('cbcs_play_ready_template', arg_group='Common Encryption CBCS', help='The custom license acquisition URL template for a customer service to deliver keys to end users. Not needed when using Azure Media Services for issuing keys.', deprecate_info=c.deprecate(hide=True))
         c.argument('cbcs_widevine_template', arg_group='Common Encryption CBCS', help='The custom license acquisition URL template for a customer service to deliver keys to end users. Not needed when using Azure Media Services for issuing keys.', deprecate_info=c.deprecate(hide=True))
@@ -301,9 +301,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('cdn_provider', arg_group='CDN Support', help='The CDN provider name. Allowed values: {}.'.format(", ".join(get_cdn_provider_completion_list())))
         c.argument('cdn_profile', arg_group='CDN Support', help='The CDN profile name.')
         c.argument('client_access_policy', arg_group='Cross Site Access Policies',
-                   help='The XML representing the clientaccesspolicy data used by Microsoft Silverlight and Adobe Flash. Use @{file} to load from a file. For further information about the XML structure please refer to documentation on https://docs.microsoft.com/rest/api/media/operations/crosssiteaccesspolicies')
+                   help='The XML representing the clientaccesspolicy data used by Microsoft Silverlight and Adobe Flash. Use @{file} to load from a file. For further information about the XML structure please refer to documentation on https://docs.microsoft.com/en-us/rest/api/media/operations/crosssiteaccesspolicies')
         c.argument('cross_domain_policy', arg_group='Cross Site Access Policies',
-                   help='The XML representing the crossdomain data used by Silverlight. Use @{file} to load from a file. For further information about the XML structure please refer to documentation on https://docs.microsoft.com/rest/api/media/operations/crosssiteaccesspolicies')
+                   help='The XML representing the crossdomain data used by Silverlight. Use @{file} to load from a file. For further information about the XML structure please refer to documentation on https://docs.microsoft.com/en-us/rest/api/media/operations/crosssiteaccesspolicies')
         c.argument('auto_start', action='store_true', help='The flag indicates if the resource should be automatically started on creation.')
         c.argument('ips', nargs='+', arg_group='Access Control Support', help='Space-separated IP addresses for access control. Allowed IP addresses can be specified as either a single IP address (e.g. "10.0.0.1") or as an IP range using an IP address and a CIDR subnet mask (e.g. "10.0.0.1/22"). Use "" to clear existing list. If no IP addresses are specified any IP address will be allowed.')
         c.argument('disable_cdn', arg_group='CDN Support', action='store_true', help='Use this flag to disable CDN for the streaming endpoint.')
@@ -387,7 +387,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Applies to Live Streaming only. Indicates whether the endTimestamp property must be present. If true, endTimestamp must be specified or a bad request code is returned. Allowed values: false, true.')
         c.argument('bitrate', help='The first quality bitrate.', deprecate_info=c.deprecate(target='--bitrate', redirect='--first-quality', hide=True))
         c.argument('first_quality', help='The first quality (lowest) bitrate to include in the manifest.')
-        c.argument('tracks', help='The JSON representing the track selections. Use @{file} to load from a file. For further information about the JSON structure please refer to swagger documentation on https://docs.microsoft.com/rest/api/media/accountfilters/createorupdate#filtertrackselection')
+        c.argument('tracks', help='The JSON representing the track selections. Use @{file} to load from a file. For further information about the JSON structure please refer to swagger documentation on https://docs.microsoft.com/en-us/rest/api/media/accountfilters/createorupdate#filtertrackselection')
 
     with self.argument_context('ams account-filter list') as c:
         c.argument('account_name', id_part=None)
