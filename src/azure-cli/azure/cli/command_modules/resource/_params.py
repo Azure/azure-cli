@@ -176,6 +176,7 @@ def load_arguments(self, _):
         c.argument('mode', arg_type=get_enum_type(DeploymentMode, default='incremental'), help='Incremental (only add resources to resource group) or Complete (remove extra resources from resource group)')
         c.argument('parameters', action='append', nargs='+', completer=FilesCompleter())
         c.argument('rollback_on_error', nargs='?', action=RollbackAction, help='The name of a deployment to roll back to on error, or use as a flag to roll back to the last successful deployment.')
+        c.argument('aux_tenants', help='a great argument')
 
     with self.argument_context('group deployment create') as c:
         c.argument('deployment_name', options_list=['--name', '-n'], required=False,

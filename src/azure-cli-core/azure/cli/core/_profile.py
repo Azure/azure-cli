@@ -521,7 +521,7 @@ class Profile(object):
                 return parts[0], (None if len(parts) <= 1 else parts[1])
         return None, None
 
-    def get_login_credentials(self, resource=None, subscription_id=None, aux_subscriptions=None):
+    def get_login_credentials(self, resource=None, subscription_id=None, aux_subscriptions=None, aux_tenants=None):
         account = self.get_subscription(subscription_id)
         user_type = account[_USER_ENTITY][_USER_TYPE]
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
@@ -529,7 +529,7 @@ class Profile(object):
 
         identity_type, identity_id = Profile._try_parse_msi_account_name(account)
 
-        external_tenants_info = []
+        external_tenants_info = aux_tenants or []
         ext_subs = [aux_sub for aux_sub in (aux_subscriptions or []) if aux_sub != subscription_id]
         for ext_sub in ext_subs:
             sub = self.get_subscription(ext_sub)
