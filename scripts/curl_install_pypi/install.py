@@ -24,6 +24,7 @@ import tempfile
 import shutil
 import subprocess
 import hashlib
+import distro
 try:
     # Attempt to load python 3 module
     from urllib.request import urlopen
@@ -306,7 +307,7 @@ def _native_dependencies_for_dist(verify_cmd_args, install_cmd_args, dep_list):
             raise CLIInstallError('Please install the native dependencies and try again.')
 
 def verify_native_dependencies():
-    distname, version, _ = platform.linux_distribution()
+    distname, version, _ = distro.linux_distribution()
     if not distname:
         # There's no distribution name so can't determine native dependencies required / or they may not be needed like on OS X
         return
