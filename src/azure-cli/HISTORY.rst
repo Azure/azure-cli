@@ -13,7 +13,7 @@ Release History
 
 **Compute**
 * Upgrade API version of compute, disks, snapshots to 2019-07-01
-* vmss create: Fix minor problems of --orchestration-mode
+* vmss create: Improvement for --orchestration-mode
 
 **Packaging**
 

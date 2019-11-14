@@ -1425,7 +1425,7 @@ class VMCreateExistingOptions(ScenarioTest):
             'vmss': 'vmss1'
         })
 
-        self.cmd('vmss create -g {rg} -n {vmss} --orchestration-mode VM')
+        self.cmd('vmss create -g {rg} -n {vmss} --orchestration-mode VM --platform-fault-domain-count 2')
         self.cmd('vm create -g {rg} -n {vm} --image ubuntults --vmss {vmss}')
         vmss_id = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()['id']
         self.cmd('vm show -g {rg} -n {vm}', checks=[
@@ -3616,16 +3616,19 @@ class VMImageTermsTest(ScenarioTest):
 
 class VMSSOrchestrationModeTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vmss_orchestration_mode_')
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_orchestration_mode_', location='eastus')
     def test_vmss_orchestration_mode(self, resource_group):
         self.kwargs.update({
-            'vmss': 'vmss1'
+            'vmss': 'vmss1',
+            'vmss2': 'vmss2'
         })
 
-        self.cmd('vmss create -g {rg} -n {vmss} --orchestration-mode VM')
+        self.cmd('vmss create -g {rg} -n {vmss} --orchestration-mode VM --zones 3 --platform-fault-domain-count 5')
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('name', '{vmss}')
         ])
+        with self.assertRaises(CLIError):
+            self.cmd('vmss create -g {rg} -n {vmss2} --orchestration-mode VM --admin-username user --admin-password 123456')
 
 
 if __name__ == '__main__':

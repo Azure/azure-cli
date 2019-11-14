@@ -2230,7 +2230,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
 
     elif orchestration_mode.lower() == vm_str.lower():
         if platform_fault_domain_count is None:
-            platform_fault_domain_count = 2
+            raise CLIError("usage error: --platform-fault-domain-count is required in VM mode")
         vmss_resource = {
             'type': 'Microsoft.Compute/virtualMachineScaleSets',
             'name': vmss_name,

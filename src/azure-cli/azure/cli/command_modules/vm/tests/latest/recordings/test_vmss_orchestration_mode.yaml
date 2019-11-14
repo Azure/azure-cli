@@ -11,7 +11,7 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n --orchestration-mode
+      - -g -n --orchestration-mode --zones --platform-fault-domain-count
       User-Agent:
       - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.76
@@ -21,7 +21,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_orchestration_mode_000001?api-version=2019-07-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_orchestration_mode_000001","name":"cli_test_vmss_orchestration_mode_000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-11-13T10:49:31Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_orchestration_mode_000001","name":"cli_test_vmss_orchestration_mode_000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2019-11-14T03:20:23Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -30,7 +30,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 13 Nov 2019 10:49:35 GMT
+      - Thu, 14 Nov 2019 03:20:29 GMT
       expires:
       - '-1'
       pragma:
@@ -48,9 +48,9 @@ interactions:
     body: '{"properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
       "contentVersion": "1.0.0.0", "parameters": {}, "variables": {}, "resources":
       [{"type": "Microsoft.Compute/virtualMachineScaleSets", "name": "vmss1", "location":
-      "westus", "tags": null, "apiVersion": "2019-07-01", "properties": {"singlePlacementGroup":
-      true, "provisioningState": 0, "platformFaultDomainCount": 2}}], "outputs": {"VMSS":
-      {"type": "object", "value": "[reference(resourceId(''Microsoft.Compute/virtualMachineScaleSets'',
+      "eastus", "tags": null, "apiVersion": "2019-07-01", "properties": {"singlePlacementGroup":
+      true, "provisioningState": 0, "platformFaultDomainCount": 5}, "zones": ["3"]}],
+      "outputs": {"VMSS": {"type": "object", "value": "[reference(resourceId(''Microsoft.Compute/virtualMachineScaleSets'',
       ''vmss1''),providers(''Microsoft.Compute'', ''virtualMachineScaleSets'').apiVersions[0])]"}}},
       "parameters": {}, "mode": "Incremental"}}'
     headers:
@@ -63,11 +63,11 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '685'
+      - '701'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
-      - -g -n --orchestration-mode
+      - -g -n --orchestration-mode --zones --platform-fault-domain-count
       User-Agent:
       - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.76
@@ -77,18 +77,18 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_orchestration_mode_000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2019-07-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_orchestration_mode_000001/providers/Microsoft.Resources/deployments/vmss_deploy_V8EdPUva0aN8EfjBtDWTfC55gNm3wyFD","name":"vmss_deploy_V8EdPUva0aN8EfjBtDWTfC55gNm3wyFD","type":"Microsoft.Resources/deployments","properties":{"templateHash":"8154607435353407329","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2019-11-13T10:49:40.5565274Z","duration":"PT2.6109898S","correlationId":"8a8bc22b-92fe-422e-be7b-ffb22ee86634","providers":[{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachineScaleSets","locations":["westus"]}]}],"dependencies":[]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_orchestration_mode_000001/providers/Microsoft.Resources/deployments/vmss_deploy_ue297gE6M1fhmXNLMOpujf7r4nywYtaj","name":"vmss_deploy_ue297gE6M1fhmXNLMOpujf7r4nywYtaj","type":"Microsoft.Resources/deployments","properties":{"templateHash":"6630482649816786803","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2019-11-14T03:20:35.228919Z","duration":"PT2.8524502S","correlationId":"23e0ca31-9830-45b8-adfe-be14580c2b21","providers":[{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachineScaleSets","locations":["eastus"]}]}],"dependencies":[]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_orchestration_mode_000001/providers/Microsoft.Resources/deployments/vmss_deploy_V8EdPUva0aN8EfjBtDWTfC55gNm3wyFD/operationStatuses/08586279647075320692?api-version=2019-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_orchestration_mode_000001/providers/Microsoft.Resources/deployments/vmss_deploy_ue297gE6M1fhmXNLMOpujf7r4nywYtaj/operationStatuses/08586279052531011415?api-version=2019-07-01
       cache-control:
       - no-cache
       content-length:
-      - '727'
+      - '726'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 13 Nov 2019 10:49:42 GMT
+      - Thu, 14 Nov 2019 03:20:37 GMT
       expires:
       - '-1'
       pragma:
@@ -98,7 +98,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 201
       message: Created
@@ -114,270 +114,12 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n --orchestration-mode
+      - -g -n --orchestration-mode --zones --platform-fault-domain-count
       User-Agent:
       - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.76
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_orchestration_mode_000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586279647075320692?api-version=2019-07-01
-  response:
-    body:
-      string: '{"status":"Running"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '20'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 13 Nov 2019 10:50:14 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vmss create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --orchestration-mode
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.76
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_orchestration_mode_000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586279647075320692?api-version=2019-07-01
-  response:
-    body:
-      string: '{"status":"Running"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '20'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 13 Nov 2019 10:50:44 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vmss create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --orchestration-mode
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.76
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_orchestration_mode_000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586279647075320692?api-version=2019-07-01
-  response:
-    body:
-      string: '{"status":"Running"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '20'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 13 Nov 2019 10:51:14 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vmss create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --orchestration-mode
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.76
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_orchestration_mode_000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586279647075320692?api-version=2019-07-01
-  response:
-    body:
-      string: '{"status":"Running"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '20'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 13 Nov 2019 10:51:45 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vmss create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --orchestration-mode
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.76
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_orchestration_mode_000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586279647075320692?api-version=2019-07-01
-  response:
-    body:
-      string: '{"status":"Running"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '20'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 13 Nov 2019 10:52:16 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vmss create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --orchestration-mode
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.76
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_orchestration_mode_000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586279647075320692?api-version=2019-07-01
-  response:
-    body:
-      string: '{"status":"Running"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '20'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 13 Nov 2019 10:52:46 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vmss create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --orchestration-mode
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.76
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_orchestration_mode_000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586279647075320692?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_orchestration_mode_000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586279052531011415?api-version=2019-07-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -389,7 +131,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 13 Nov 2019 10:53:16 GMT
+      - Thu, 14 Nov 2019 03:21:08 GMT
       expires:
       - '-1'
       pragma:
@@ -415,7 +157,7 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n --orchestration-mode
+      - -g -n --orchestration-mode --zones --platform-fault-domain-count
       User-Agent:
       - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.76
@@ -423,16 +165,16 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_orchestration_mode_000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2019-07-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_orchestration_mode_000001/providers/Microsoft.Resources/deployments/vmss_deploy_V8EdPUva0aN8EfjBtDWTfC55gNm3wyFD","name":"vmss_deploy_V8EdPUva0aN8EfjBtDWTfC55gNm3wyFD","type":"Microsoft.Resources/deployments","properties":{"templateHash":"8154607435353407329","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2019-11-13T10:52:52.4816969Z","duration":"PT3M14.5361593S","correlationId":"8a8bc22b-92fe-422e-be7b-ffb22ee86634","providers":[{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachineScaleSets","locations":["westus"]}]}],"dependencies":[],"outputs":{"vmss":{"type":"Object","value":{"singlePlacementGroup":true,"provisioningState":"Succeeded","uniqueId":"aa2067c0-f608-4b2a-9c85-e6c010a702a4","platformFaultDomainCount":2}}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_orchestration_mode_000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_orchestration_mode_000001/providers/Microsoft.Resources/deployments/vmss_deploy_ue297gE6M1fhmXNLMOpujf7r4nywYtaj","name":"vmss_deploy_ue297gE6M1fhmXNLMOpujf7r4nywYtaj","type":"Microsoft.Resources/deployments","properties":{"templateHash":"6630482649816786803","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2019-11-14T03:21:03.2688642Z","duration":"PT30.8923954S","correlationId":"23e0ca31-9830-45b8-adfe-be14580c2b21","providers":[{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachineScaleSets","locations":["eastus"]}]}],"dependencies":[],"outputs":{"vmss":{"type":"Object","value":{"singlePlacementGroup":true,"provisioningState":"Succeeded","uniqueId":"d736740d-00ec-476f-9d3f-3721bb4d9f89","platformFaultDomainCount":5}}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_orchestration_mode_000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1147'
+      - '1145'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 13 Nov 2019 10:53:17 GMT
+      - Thu, 14 Nov 2019 03:21:08 GMT
       expires:
       - '-1'
       pragma:
@@ -470,18 +212,19 @@ interactions:
     body:
       string: "{\r\n  \"name\": \"vmss1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_orchestration_mode_000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachineScaleSets\",\r\n  \"location\":
-        \"westus\",\r\n  \"properties\": {\r\n    \"singlePlacementGroup\": true,\r\n
-        \   \"provisioningState\": \"Succeeded\",\r\n    \"uniqueId\": \"aa2067c0-f608-4b2a-9c85-e6c010a702a4\",\r\n
-        \   \"platformFaultDomainCount\": 2\r\n  }\r\n}"
+        \"eastus\",\r\n  \"properties\": {\r\n    \"singlePlacementGroup\": true,\r\n
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"uniqueId\": \"d736740d-00ec-476f-9d3f-3721bb4d9f89\",\r\n
+        \   \"platformFaultDomainCount\": 5\r\n  },\r\n  \"zones\": [\r\n    \"3\"\r\n
+        \ ]\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '508'
+      - '537'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 13 Nov 2019 10:53:18 GMT
+      - Thu, 14 Nov 2019 03:21:10 GMT
       expires:
       - '-1'
       pragma:
@@ -498,7 +241,52 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetVMScaleSet3Min;398,Microsoft.Compute/GetVMScaleSet30Min;2598
+      - Microsoft.Compute/GetVMScaleSet3Min;398,Microsoft.Compute/GetVMScaleSet30Min;2596
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --orchestration-mode --admin-username --admin-password
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.76
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_orchestration_mode_000001?api-version=2019-07-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_orchestration_mode_000001","name":"cli_test_vmss_orchestration_mode_000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2019-11-14T03:20:23Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '428'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 14 Nov 2019 03:21:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
     status:
       code: 200
       message: OK
