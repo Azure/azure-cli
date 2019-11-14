@@ -15,6 +15,7 @@ Release History
 **AppService**
 
 * Fix issue #11100: AttributeError for az webapp up when create service plan
+* az webapp up: Forcing the creation or deployment to a site for supported languages, no defaults used.
 
 **Compute**
 
