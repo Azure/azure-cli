@@ -26,9 +26,18 @@ def update_action_groups(instance, tags=None, short_name=None, add_receivers=Non
         instance.email_receivers = filter_receivers(instance.email_receivers)
         instance.sms_receivers = filter_receivers(instance.sms_receivers)
         instance.webhook_receivers = filter_receivers(instance.webhook_receivers)
+        instance.arm_role_receivers = filter_receivers(instance.arm_role_receivers)
+        instance.azure_app_push_receivers = filter_receivers(instance.azure_app_push_receivers)
+        instance.itsm_receivers = filter_receivers(instance.itsm_receivers)
+        instance.automation_runbook_receivers = filter_receivers(instance.automation_runbook_receivers)
+        instance.voice_receivers = filter_receivers(instance.voice_receivers)
+        instance.logic_app_receivers = filter_receivers(instance.logic_app_receivers)
+        instance.azure_function_receivers = filter_receivers(instance.azure_function_receivers)
 
     if add_receivers:
-        from azure.mgmt.monitor.models import EmailReceiver, SmsReceiver, WebhookReceiver
+        from azure.mgmt.monitor.models import EmailReceiver, SmsReceiver, WebhookReceiver, \
+            ArmRoleReceiver, AzureAppPushReceiver, ItsmReceiver, AutomationRunbookReceiver, \
+            VoiceReceiver, LogicAppReceiver, AzureFunctionReceiver
         for r in add_receivers:
             if isinstance(r, EmailReceiver):
                 instance.email_receivers.append(r)
@@ -36,5 +45,19 @@ def update_action_groups(instance, tags=None, short_name=None, add_receivers=Non
                 instance.sms_receivers.append(r)
             elif isinstance(r, WebhookReceiver):
                 instance.webhook_receivers.append(r)
+            elif isinstance(r, ArmRoleReceiver):
+                instance.arm_role_receivers.append(r)
+            elif isinstance(r, AzureAppPushReceiver):
+                instance.azure_app_push_receivers.append(r)
+            elif isinstance(r, ItsmReceiver):
+                instance.itsm_receivers.append(r)
+            elif isinstance(r, AutomationRunbookReceiver):
+                instance.automation_runbook_receivers.append(r)
+            elif isinstance(r, VoiceReceiver):
+                instance.voice_receivers.append(r)
+            elif isinstance(r, LogicAppReceiver):
+                instance.logic_app_receivers.append(r)
+            elif isinstance(r, AzureFunctionReceiver):
+                instance.azure_function_receivers.append(r)
 
     return instance

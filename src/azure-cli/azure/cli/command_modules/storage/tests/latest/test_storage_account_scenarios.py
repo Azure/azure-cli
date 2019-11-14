@@ -169,6 +169,27 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         create_cmd = 'az storage account create -n {} -g {}'.format(name, resource_group)
         self.cmd(create_cmd, checks=[JMESPathCheck('sku.name', 'Standard_RAGRS')])
 
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2018-02-01')
+    @ResourceGroupPreparer(location='southcentralus', name_prefix='cli_storage_account_hns')
+    def test_storage_create_with_hns(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        create_cmd = 'az storage account create -n {} -g {} --kind StorageV2 --hns'.format(name, resource_group)
+        self.cmd(create_cmd, checks=[JMESPathCheck('isHnsEnabled', True)])
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2018-02-01')
+    @ResourceGroupPreparer(location='southcentralus', name_prefix='cli_storage_account_hns')
+    def test_storage_create_with_hns_true(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        create_cmd = 'az storage account create -n {} -g {} --kind StorageV2 --hns true'.format(name, resource_group)
+        self.cmd(create_cmd, checks=[JMESPathCheck('isHnsEnabled', True)])
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2018-02-01')
+    @ResourceGroupPreparer(location='southcentralus', name_prefix='cli_storage_account_hns')
+    def test_storage_create_with_hns_false(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        create_cmd = 'az storage account create -n {} -g {} --kind StorageV2 --hns false'.format(name, resource_group)
+        self.cmd(create_cmd, checks=[JMESPathCheck('isHnsEnabled', False)])
+
     def test_show_usage(self):
         self.cmd('storage account show-usage -l westus', checks=JMESPathCheck('name.value', 'StorageAccounts'))
 

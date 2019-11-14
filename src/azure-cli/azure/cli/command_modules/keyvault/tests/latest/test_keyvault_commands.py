@@ -438,6 +438,12 @@ class KeyVaultPendingCertificateScenarioTest(ScenarioTest):
             self.check('cancellationRequested', False),
             self.check('status', 'inProgress')
         ])
+
+        self.cmd('keyvault certificate list --vault-name {kv} --include-pending', checks=self.check('length(@)', 1))
+        self.cmd('keyvault certificate list --vault-name {kv} --include-pending true', checks=self.check('length(@)', 1))
+        self.cmd('keyvault certificate list --vault-name {kv}', checks=self.check('length(@)', 0))
+        self.cmd('keyvault certificate list --vault-name {kv}  --include-pending false', checks=self.check('length(@)', 0))
+
         # we do not have a way of actually getting a certificate that would pass this test so
         # we simply ensure that the payload successfully serializes and is received by the server
         with self.assertRaises(CLIError):
