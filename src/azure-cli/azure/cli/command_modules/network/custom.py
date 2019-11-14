@@ -4554,45 +4554,6 @@ def clear_vpn_conn_ipsec_policies(cmd, resource_group_name, connection_name, no_
 def list_vpn_conn_ipsec_policies(cmd, resource_group_name, connection_name):
     ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateway_connections
     return ncf.get(resource_group_name, connection_name).ipsec_policies
-
-
-def assign_vnet_gateway_aad(cmd, resource_group_name, gateway_name,
-                            aad_tenant, aad_audience, aad_issuer, no_wait=False):
-    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateways
-    gateway = ncf.get(resource_group_name, gateway_name)
-
-    if gateway.vpn_client_configuration is None:
-        raise CLIError('VPN client configuration must be set first through `az network vnet-gateway create/update`.')
-
-    gateway.vpn_client_configuration.aad_tenant = aad_tenant
-    gateway.vpn_client_configuration.aad_audience = aad_audience
-    gateway.vpn_client_configuration.aad_issuer = aad_issuer
-
-    return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, gateway_name, gateway)
-
-
-def show_vnet_gateway_aad(cmd, resource_group_name, gateway_name):
-    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateways
-    gateway = ncf.get(resource_group_name, gateway_name)
-
-    if gateway.vpn_client_configuration is None:
-        raise CLIError('VPN client configuration must be set first through `az network vnet-gateway create/update`.')
-
-    return gateway.vpn_client_configuration
-
-
-def remove_vnet_gateway_aad(cmd, resource_group_name, gateway_name, no_wait=False):
-    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateways
-    gateway = ncf.get(resource_group_name, gateway_name)
-
-    if gateway.vpn_client_configuration is None:
-        raise CLIError('VPN client configuration must be set first through `az network vnet-gateway create/update`.')
-
-    gateway.vpn_client_configuration.aad_tenant = None
-    gateway.vpn_client_configuration.aad_audience = None
-    gateway.vpn_client_configuration.aad_issuer = None
-
-    return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, gateway_name, gateway)
 # endregion
 
 

@@ -4429,36 +4429,6 @@ type: group
 short-summary: Manage AAD(Azure Active Directory) authentication of a virtual network gateway
 """
 
-helps['network vnet-gateway aad assign'] = """
-type: command
-short-summary: Assign/Update AAD(Azure Active Directory) authentication to a virtual network gateway.
-examples:
-  - name: Assign AAD authentication to a virtual network gateway
-    text: |-
-        az network vnet-gateway aad assign \\
-        --resource-group MyResourceGroup \\
-        --gateway-name MyVnetGateway \\
-        --aad-tenant MyAADTenantURI \\
-        --aad-audience MyAADAudienceId \\
-        --aad-issuer MyAADIssuerURI
-"""
-
-helps['network vnet-gateway aad show'] = """
-type: command
-short-summary: Show AAD(Azure Active Directory) authentication of a virtual network gateway
-examples:
-  - name: Show AAD information
-    text: az network vnet-gateway aad show --resource-group MyResourceGroup --gateway-name MyVnetGateway
-"""
-
-helps['network vnet-gateway aad remove'] = """
-type: command
-short-summary: Remove AAD(Azure Active Directory) authentication from a virtual network gateway
-examples:
-  - name: Remove AAD information
-    text: az network vnet-gateway aad remove --resource-group MyResourceGroup --gateway-name MyVnetGateway
-"""
-
 helps['network vpn-connection'] = """
 type: group
 short-summary: Manage VPN connections.
