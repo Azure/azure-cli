@@ -3,8 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.mgmt.reservations.models import Patch
-
+from azure.mgmt.reservations.models import (Patch, PurchaseRequest, SkuName)
+from azure.cli.command_modules.reservations._client_factory import (reservation_order_mgmt_client_factory)
 
 def cli_reservation_update_reservation(client, reservation_order_id, reservation_id,
                                        applied_scope_type, applied_scopes=None,
@@ -35,3 +35,25 @@ def cli_reservation_merge_reservation(client, reservation_order_id,
     return client.merge(reservation_order_id,
                         [create_resource_id(reservation_order_id, reservation_id_1),
                          create_resource_id(reservation_order_id, reservation_id_2)])
+
+
+def cli_calculate(client, sku, location, reserved_resource_type, billing_scope_id, term,
+                 billing_plan, quantity, applied_scope_type, display_name, applied_scopes=None,
+                  renew=False, reserved_resource_properties=None):
+    skuN = SkuName(name=sku)
+    body = PurchaseRequest(sku=skuN, location= location, reserved_resource_type=reserved_resource_type, 
+                            billing_scope_id=billing_scope_id, term=term, quantity=quantity, display_name=display_name,
+                            applied_scope_type=applied_scope_type,applied_scopes=applied_scopes,
+                            renew=renew, reserved_resource_properties=reserved_resource_properties)
+    return client.calculate(body)
+
+
+def cli_purchase(client, reservation_order_id, sku, location, reserved_resource_type, billing_scope_id, term,
+                 billing_plan, quantity, applied_scope_type, display_name, applied_scopes=None,
+                  renew=False, reserved_resource_properties=None):
+    skuN = SkuName(name=sku)
+    body = PurchaseRequest(sku=skuN, location= location, reserved_resource_type=reserved_resource_type, 
+                            billing_scope_id=billing_scope_id, term=term, quantity=quantity, display_name=display_name,
+                            applied_scope_type=applied_scope_type,applied_scopes=applied_scopes,
+                            renew=renew, reserved_resource_properties=reserved_resource_properties)
+    return client.purchase(reservation_order_id, body)

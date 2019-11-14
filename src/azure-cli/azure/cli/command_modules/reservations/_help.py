@@ -162,3 +162,9 @@ parameters:
     type: string
     short-summary: Id of the subscription to look up applied reservations
 """
+
+helps['reservations reservation-order calculate'] = """
+type: command
+short-summary: calculate price
+long-summary: calculate price for reservation
+"""

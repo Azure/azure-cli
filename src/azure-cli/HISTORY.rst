@@ -32,8 +32,8 @@ Release History
 
 **Reservations**
 
-* Upgrading SDK Version to 0.6.0
-* Add billingplan details info after calling Get-Gatalogs
+* Add new command of calculate
+* Add new command of purchase
 
 **AKS**
 

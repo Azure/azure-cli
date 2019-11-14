@@ -11,9 +11,8 @@ from azure.cli.core.commands.parameters import get_enum_type
 from azure.mgmt.reservations.models import (
     ReservedResourceType,
     InstanceFlexibility,
-    AppliedScopeType
+    AppliedScopeType,
 )
-
 
 def load_arguments(self, _):
     with self.argument_context('reservations reservation update') as c:
@@ -31,3 +30,9 @@ def load_arguments(self, _):
 
     with self.argument_context('reservations catalog show') as c:
         c.argument('reserved_resource_type', arg_type=get_enum_type(ReservedResourceType))
+
+    with self.argument_context('reservations reservation-order calculate') as c:
+        c.argument('billing_scope_id', options_list=['--scope'])
+
+    with self.argument_context('reservations reservation-order purchase') as c:
+        c.argument('billing_scope_id', options_list=['--scope'])
