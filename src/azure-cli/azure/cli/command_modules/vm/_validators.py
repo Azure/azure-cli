@@ -1372,7 +1372,6 @@ def process_vmss_create_namespace(cmd, namespace):
             namespace.vnet_name
         ]
         if any(param is not None for param in banned_params):
-            print(banned_params)
             raise CLIError('usage error: in VM mode, only name, resource-group, location, '
                            'tags, zones, platform-fault-domain-count are allowed')
         return
