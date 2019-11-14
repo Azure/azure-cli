@@ -2655,7 +2655,7 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
             self.check('vpnClientConfiguration.vpnClientProtocols', "['OpenVPN']")
         ])
 
-        self.cmd('network vnet-gateway update -g {rg} -n {gw} '
+        self.cmd('network vnet-gateway aad assign -g {rg} --gateway-name {gw} '
                  '--aad-tenant {aad_tenant} '
                  '--aad-audience {aad_audience} '
                  '--aad-issuer {aad_issuer} ')
@@ -2664,16 +2664,17 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
             self.check('vpnClientConfiguration.aadIssuer', self.kwargs['aad_issuer']),
             self.check('vpnClientConfiguration.aadAudience', self.kwargs['aad_audience'])
         ])
-
-        self.cmd('network vnet-gateway update -g {rg} -n {gw} '
-                 '--remove vpnClientConfiguration.aadAudience '
-                 '--remove vpnClientConfiguration.aadIssuer '
-                 '--remove vpnClientConfiguration.aadTenant')
-        self.cmd('network vnet-gateway show -g {rg} -n {gw}', checks=[
-            self.check('vpnClientConfiguration.aadTenant', None),
-            self.check('vpnClientConfiguration.aadIssuer', None),
-            self.check('vpnClientConfiguration.aadAudience', None)
+        self.cmd('network vnet-gateway aad show -g {rg} --gateway-name {gw}', checks=[
+            self.check('aadTenant', self.kwargs['aad_tenant'])
         ])
+
+        self.cmd('network vnet-gateway aad remove -g {rg} --gateway-name {gw}').get_output_in_json()
+        self.cmd('network vnet-gateway aad show -g {rg} --gateway-name {gw}', checks=[
+            self.check('aadTenant', None),
+            self.check('aadIssuer', None),
+            self.check('aadAudience', None)
+        ])
+
 
 class NetworkVpnClientPackageScenarioTest(LiveScenarioTest):
 
