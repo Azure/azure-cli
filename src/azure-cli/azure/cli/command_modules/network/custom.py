@@ -4174,15 +4174,15 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, 
         vnet_gateway.bgp_settings = BgpSettings(asn=asn, bgp_peering_address=bgp_peering_address,
                                                 peer_weight=peer_weight)
 
-    if any((address_prefixes, radius_secret, radius_server, client_protocol, aad_tenant, aad_audience, aad_issuer)):
+    if any((address_prefixes, client_protocol)):
         vnet_gateway.vpn_client_configuration = VpnClientConfiguration()
         vnet_gateway.vpn_client_configuration.vpn_client_address_pool = AddressSpace()
         vnet_gateway.vpn_client_configuration.vpn_client_address_pool.address_prefixes = address_prefixes
-        if cmd.supported_api_version(min_api='2017-06-01'):
-            vnet_gateway.vpn_client_configuration.vpn_client_protocols = client_protocol
+        vnet_gateway.vpn_client_configuration.vpn_client_protocols = client_protocol
+        if any((radius_secret, radius_server)) and cmd.supported_api_version(min_api='2017-06-01'):
             vnet_gateway.vpn_client_configuration.radius_server_address = radius_server
             vnet_gateway.vpn_client_configuration.radius_server_secret = radius_secret
-        if cmd.supported_api_version(min_api='2019-04-01'):
+        if any((aad_tenant, aad_audience, aad_issuer)) and cmd.supported_api_version(min_api='2019-04-01'):
             vnet_gateway.vpn_client_configuration.aad_tenant = aad_tenant
             vnet_gateway.vpn_client_configuration.aad_audience = aad_audience
             vnet_gateway.vpn_client_configuration.aad_issuer = aad_issuer

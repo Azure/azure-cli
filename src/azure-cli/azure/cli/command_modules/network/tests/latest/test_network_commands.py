@@ -2639,23 +2639,30 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
 
         self.cmd('network public-ip create -n {ip1} -g {rg}')
         self.cmd('network vnet create -g {rg} -n {vnet1} --subnet-name GatewaySubnet')
+        # AAD only supported in OpenVPN client protocol
         self.cmd('network vnet-gateway create -g {rg} -n {gw1} '
                  '--vnet {vnet1} --public-ip-addresses {ip1} '
                  '--sku Standard '
-                 '--address-prefixes 40.0.1.0/24 '
+                 '--address-prefixes 40.0.1.0/24 --client-protocol OpenVPN '
                  '--no-wait')
         self.cmd('network vnet-gateway wait -g {rg} -n {gw1} --created')
 
-        sub_id = self.get_subscription_id()
-        print(sub_id)
-        aad_tenant = ''
-        aad_audience = ''
-        aad_issuer = ''
-
+        # sub_id = self.get_subscription_id()
+        # test_account_tenant_id = self.cmd('account show').get_output_in_json()['tenantId']
+        #
+        # aad_tenant = 'https://login.microsoftonline.com/{}'.format(sub_id)
+        # aad_audience = test_account_tenant_id
+        # aad_issuer = 'https://sts.windows.net/{}'.format(sub_id)
+        # self.kwargs.update({
+        #     'aad_tenant': aad_tenant,
+        #     'aad_audience': aad_audience,
+        #     'aad_issuer': aad_issuer
+        # })
+        #
         # self.cmd('network vnet-gateway aad assign -g {rg} -n {gw1} '
-        #          '--aad-tenant  '
-        #          '--aad-audience  '
-        #          '--aad-issuer  ')
+        #          '--aad-tenant {aad_tenant}'
+        #          '--aad-audience {aad_audience}'
+        #          '--aad-issuer {aad_issuer}')
         # self.cmd('network vnet-gateway aad show -g {rg} -n {gw1}')
 
 
