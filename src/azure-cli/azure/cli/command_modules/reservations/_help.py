@@ -191,7 +191,7 @@ parameters:
    short-summary: setup auto renewal
   -name: --reserved-resource-properties
    type: string
-   short-summary: 
+   short-summary:
   -name: --reserved-resource-type
    type: string
    short-summary: type of RIs
@@ -234,7 +234,7 @@ parameters:
    short-summary: setup auto renewal
   -name: --reserved-resource-properties
    type: string
-   short-summary: 
+   short-summary:
   -name: --reserved-resource-type
    type: string
    short-summary: type of RIs
