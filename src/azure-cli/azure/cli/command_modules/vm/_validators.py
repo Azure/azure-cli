@@ -1308,6 +1308,8 @@ def process_vmss_create_namespace(cmd, namespace):
         validate_tags(namespace)
         if not namespace.location:
             get_default_location_from_resource_group(cmd, namespace)
+        # The commentted parameters are also forbidden, but they have default values.
+        # I don't know whether they are provided by user.
         banned_params = [
             namespace.accelerated_networking,
             namespace.admin_password,
