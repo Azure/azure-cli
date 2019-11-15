@@ -190,9 +190,9 @@ parameters:
    type: bool
    short-summary: setup auto renewal
   -name: --reserved-resource-properties
-   type: string
+   type: azure.mgmt.reservations.models.PurchaseRequestPropertiesReservedResourceProperties
    short-summary: 
-  -name: --reserved_resource_type
+  -name: --reserved-resource-type
    type: string
    short-summary: type of RIs
   -name: --sku
@@ -233,9 +233,9 @@ parameters:
    type: bool
    short-summary: setup auto renewal
   -name: --reserved-resource-properties
-   type: string
+   type: azure.mgmt.reservations.models.PurchaseRequestPropertiesReservedResourceProperties
    short-summary: 
-  -name: --reserved_resource_type
+  -name: --reserved-resource-type
    type: string
    short-summary: type of RIs
   -name: --sku
