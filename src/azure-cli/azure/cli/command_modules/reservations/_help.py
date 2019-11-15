@@ -185,7 +185,7 @@ parameters:
     short-summary: custom name
   - name: --quantity
     type: int
-    short-summary: quantity of RIs
+    short-summary: quantity of product for calculating price
   - name: --renew
     short-summary: setup auto renewal
   - name: --reserved-resource-properties
@@ -193,7 +193,7 @@ parameters:
     short-summary: Type of the Instance Flexibility to update the reservation with
   - name: --reserved-resource-type
     type: string
-    short-summary: type of RIs
+    short-summary: Type of the resource for which the skus should be provided.
   - name: --sku
     type: string
     short-summary: sku name
@@ -227,7 +227,7 @@ parameters:
     short-summary: custom name
   - name: --quantity
     type: int
-    short-summary: quantity of RIs
+    short-summary: quantity of product for purchasing
   - name: --renew
     short-summary: setup auto renewal
   - name: --reserved-resource-properties
@@ -235,7 +235,7 @@ parameters:
     short-summary: Type of the Instance Flexibility to update the reservation with
   - name: --reserved-resource-type
     type: string
-    short-summary: type of RIs
+    short-summary: Type of the resource for which the skus should be provided.
   - name: --sku
     type: string
     short-summary: sku name
