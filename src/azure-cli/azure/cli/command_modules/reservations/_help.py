@@ -184,12 +184,11 @@ parameters:
     type: string
     short-summary: custom name
   - name: --quantity
-    type: int(32)
+    type: int
     short-summary: quantity of RIs
   - name: --renew
-    type: bool
     short-summary: setup auto renewal
-  - name: --rrp
+  - name: --reserved-resource-properties
     type: string
     short-summary: Type of the Instance Flexibility to update the reservation with
   - name: --reserved-resource-type
@@ -227,12 +226,11 @@ parameters:
     type: string
     short-summary: custom name
   - name: --quantity
-    type: int(32)
+    type: int
     short-summary: quantity of RIs
   - name: --renew
-    type: bool
     short-summary: setup auto renewal
-  - name: --rrp
+  - name: --reserved-resource-properties
     type: string
     short-summary: Type of the Instance Flexibility to update the reservation with
   - name: --reserved-resource-type

@@ -49,8 +49,8 @@ Release History
 
 **Reservations**
 
-* Upgrading SDK Version to 0.6.0
-* Add billingplan details info after calling Get-Gatalogs
+* Add new command `az reservations reservation-order calculate` to calculate the price for a reservation
+* Add new command `az reservations reservation-order purchase` to purchase a new reservation
 
 **Storage**
 
@@ -64,11 +64,6 @@ Release History
 * Add a preview parameter `--pack-image-tag` to command `az acr pack build`.
 * Support enabling auditing on creating a registry
 * Support Repository-scoped RBAC
-
-**Reservations**
-
-* Add new command of calculate
-* Add new command of purchase
 
 **AKS**
 

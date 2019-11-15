@@ -6,7 +6,7 @@
 
 # pylint: disable=line-too-long
 
-from azure.cli.core.commands.parameters import get_enum_type
+from azure.cli.core.commands.parameters import (get_enum_type,get_three_state_flag)
 
 from azure.mgmt.reservations.models import (
     ReservedResourceType,
@@ -34,8 +34,10 @@ def load_arguments(self, _):
 
     with self.argument_context('reservations reservation-order calculate') as c:
         c.argument('billing_scope_id', options_list=['--scope'])
-        c.argument('reserved_resource_properties', options_list=['--rrp'])
+        c.argument('reserved_resource_properties', options_list=['--reserved-resource-properties'])
+        c.argument('renew', arg_type=get_three_state_flag())
 
     with self.argument_context('reservations reservation-order purchase') as c:
         c.argument('billing_scope_id', options_list=['--scope'])
-        c.argument('reserved_resource_properties', options_list=['--rrp'])
+        c.argument('reserved_resource_properties', options_list=['--reserved-resource-properties'])
+        c.argument('renew', arg_type=get_three_state_flag())
