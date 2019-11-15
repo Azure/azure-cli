@@ -167,4 +167,81 @@ helps['reservations reservation-order calculate'] = """
 type: command
 short-summary: calculate price
 long-summary: calculate price for reservation
+parameters:
+  -name: --applied-scope-type
+   type: string
+   short-summary: choose Single or Shared as appliedscpe
+  -name: --applied-scopes
+   type: string
+   short-summary: choose Single or Shared as appliedscpe
+  -name: --billing-plan
+   type: string
+   short-summary: choose Mothly or Upfront
+  -name: --billing-scope-id
+   type: string
+   short-summary: subscription that will be charged
+  -name: --display-name
+   type: string
+   short-summary: custom name
+  -name: --quantity
+   type: int(32)
+   short-summary: quantity of RIs
+  -name: --renew
+   type: bool
+   short-summary: setup auto renewal
+  -name: --reserved-resource-properties
+   type: string
+   short-summary: 
+  -name: --reserved_resource_type
+   type: string
+   short-summary: type of RIs
+  -name: --sku
+   type: string
+   short-summary: sku name
+  -name: --term
+   type: string
+   short-summary: P1Y or P3Y choose 1 year or 3 years RI
+"""
+
+helps['reservations reservation-order purchase'] = """
+type: command
+short-summary: purchase
+long-summary: purchase a new reservation
+parameters:
+  -name: --reservation-order-id
+   type: string
+   short-summary: Id of reservation order to purchase
+  -name: --applied-scope-type
+   type: string
+   short-summary: choose Single or Shared as appliedscpe
+  -name: --applied-scopes
+   type: string
+   short-summary: choose Single or Shared as appliedscpe
+  -name: --billing-plan
+   type: string
+   short-summary: choose Mothly or Upfront
+  -name: --billing-scope-id
+   type: string
+   short-summary: subscription that will be charged
+  -name: --display-name
+   type: string
+   short-summary: custom name
+  -name: --quantity
+   type: int(32)
+   short-summary: quantity of RIs
+  -name: --renew
+   type: bool
+   short-summary: setup auto renewal
+  -name: --reserved-resource-properties
+   type: string
+   short-summary: 
+  -name: --reserved_resource_type
+   type: string
+   short-summary: type of RIs
+  -name: --sku
+   type: string
+   short-summary: sku name
+  -name: --term
+   type: string
+   short-summary: P1Y or P3Y choose 1 year or 3 years RI
 """
