@@ -34,6 +34,8 @@ def load_arguments(self, _):
 
     with self.argument_context('reservations reservation-order calculate') as c:
         c.argument('billing_scope_id', options_list=['--scope'])
+        c.argument('reserved_resource_properties', options_list=['--rrp'])
 
     with self.argument_context('reservations reservation-order purchase') as c:
         c.argument('billing_scope_id', options_list=['--scope'])
+        c.argument('reserved_resource_properties', options_list=['--rrp'])

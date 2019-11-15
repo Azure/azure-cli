@@ -177,7 +177,7 @@ parameters:
   - name: --billing-plan
     type: string
     short-summary: choose Mothly or Upfront
-  - name: --billing-scope-id
+  - name: --scope
     type: string
     short-summary: subscription that will be charged
   - name: --display-name
@@ -189,7 +189,7 @@ parameters:
   - name: --renew
     type: bool
     short-summary: setup auto renewal
-  - name: --reserved-resource-properties
+  - name: --rrp
     type: string
     short-summary:
   - name: --reserved-resource-type
@@ -220,7 +220,7 @@ parameters:
   - name: --billing-plan
     type: string
     short-summary: choose Mothly or Upfront
-  - name: --billing-scope-id
+  - name: --scope
     type: string
     short-summary: subscription that will be charged
   - name: --display-name
@@ -232,7 +232,7 @@ parameters:
   - name: --renew
     type: bool
     short-summary: setup auto renewal
-  - name: --reserved-resource-properties
+  - name: --rrp
     type: string
     short-summary:
   - name: --reserved-resource-type
