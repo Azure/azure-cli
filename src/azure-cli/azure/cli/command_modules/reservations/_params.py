@@ -6,7 +6,7 @@
 
 # pylint: disable=line-too-long
 
-from azure.cli.core.commands.parameters import (get_enum_type,get_three_state_flag)
+from azure.cli.core.commands.parameters import (get_enum_type, get_three_state_flag)
 
 from azure.mgmt.reservations.models import (
     ReservedResourceType,
