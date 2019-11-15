@@ -46,7 +46,8 @@ def cli_calculate(client, sku, location, reserved_resource_type, billing_scope_i
     skuN = SkuName(name=sku)
     reservedRP = PurchaseRequestPropertiesReservedResourceProperties(instance_flexibility=reserved_resource_properties)
     body = PurchaseRequest(sku=skuN, location=location, reserved_resource_type=reserved_resource_type,
-                           billing_scope_id=billing_scope_id, term=term, quantity=quantity, display_name=display_name,
+                           billing_scope_id=billing_scope_id, term=term, quantity=quantity,
+                           display_name=display_name,
                            applied_scope_type=applied_scope_type,
                            applied_scopes=applied_scopes, billing_plan=billing_plan,
                            renew=renew, reserved_resource_properties=reservedRP)
@@ -60,6 +61,7 @@ def cli_purchase(client, reservation_order_id, sku, location, reserved_resource_
     reservedRP = PurchaseRequestPropertiesReservedResourceProperties(instance_flexibility=reserved_resource_properties)
     body = PurchaseRequest(sku=skuN, location=location, reserved_resource_type=reserved_resource_type,
                            billing_scope_id=billing_scope_id, term=term, quantity=quantity, display_name=display_name,
-                           applied_scope_type=applied_scope_type, applied_scopes=applied_scopes, billing_plan=billing_plan,
+                           applied_scope_type=applied_scope_type, applied_scopes=applied_scopes,
+                           billing_plan=billing_plan,
                            renew=renew, reserved_resource_properties=reservedRP)
     return client.purchase(reservation_order_id, body)
