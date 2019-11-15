@@ -30,6 +30,13 @@ Release History
 
 * Fix #11121: When using `az keyvault certificate list`, passing `--include-pending` now doesn't require a value of `true` or `false`
 
+**NetAppFiles**
+
+* Upgrade azure-mgmt-netapp to 0.7.0 to use API version 2019-08-01. This new API version includes:
+
+    -  Some volume properties associated with replication
+    -  Mount Target resource type, which was previously omitted
+
 **Packaging**
 
 * Rewrite the az wrapper in python
