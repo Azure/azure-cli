@@ -2710,8 +2710,8 @@ def create_image_gallery(cmd, resource_group_name, gallery_name, description=Non
 
 
 def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_name, os_type, publisher, offer, sku,
-                         os_state='Generalized', end_of_life_date=None, privacy_statement_uri=None, release_note_uri=None,
-                         eula=None, description=None, location=None,
+                         os_state='Generalized', end_of_life_date=None, privacy_statement_uri=None,
+                         release_note_uri=None, eula=None, description=None, location=None,
                          minimum_cpu_core=None, maximum_cpu_core=None, minimum_memory=None, maximum_memory=None,
                          disallowed_disk_types=None, plan_name=None, plan_publisher=None, plan_product=None, tags=None):
     # pylint: disable=line-too-long
