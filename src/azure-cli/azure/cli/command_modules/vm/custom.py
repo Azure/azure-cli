@@ -2005,230 +2005,254 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                                                                 build_vmss_storage_account_pool_resource,
                                                                 build_application_gateway_resource,
                                                                 build_msi_role_assignment, build_nsg_resource)
-    from msrestazure.tools import resource_id, is_valid_resource_id
-
-    storage_sku = disk_info['os'].get('storageAccountType')
-
-    subscription_id = get_subscription_id(cmd.cli_ctx)
-    network_id_template = resource_id(
-        subscription=subscription_id, resource_group=resource_group_name,
-        namespace='Microsoft.Network')
-
-    vmss_id = resource_id(
-        subscription=subscription_id, resource_group=resource_group_name,
-        namespace='Microsoft.Compute', type='virtualMachineScaleSets', name=vmss_name)
-
-    scrubbed_name = vmss_name.replace('-', '').lower()[:5]
-    naming_prefix = '{}{}'.format(scrubbed_name,
-                                  hash_string(vmss_id,
-                                              length=(9 - len(scrubbed_name)),
-                                              force_lower=True))
-
-    # determine final defaults and calculated values
-    tags = tags or {}
-    os_disk_name = os_disk_name or ('osdisk_{}'.format(hash_string(vmss_id, length=10)) if use_unmanaged_disk else None)
-    load_balancer = load_balancer or '{}LB'.format(vmss_name)
-    app_gateway = application_gateway or '{}AG'.format(vmss_name)
-    backend_pool_name = backend_pool_name or '{}BEPool'.format(load_balancer or application_gateway)
-
     # Build up the ARM template
     master_template = ArmTemplateBuilder()
 
-    vmss_dependencies = []
+    scale_set_vm_str = 'ScaleSetVM'
+    vm_str = 'VM'
+    if orchestration_mode.lower() == scale_set_vm_str.lower():
+        from msrestazure.tools import resource_id, is_valid_resource_id
 
-    # VNET will always be a dependency
-    if vnet_type == 'new':
-        vnet_name = vnet_name or '{}VNET'.format(vmss_name)
-        subnet = subnet or '{}Subnet'.format(vmss_name)
-        vmss_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(vnet_name))
-        vnet = build_vnet_resource(
-            cmd, vnet_name, location, tags, vnet_address_prefix, subnet, subnet_address_prefix)
-        if app_gateway_type:
-            vnet['properties']['subnets'].append({
-                'name': 'appGwSubnet',
-                'properties': {
-                    'addressPrefix': app_gateway_subnet_address_prefix
-                }
-            })
-        master_template.add_resource(vnet)
+        storage_sku = disk_info['os'].get('storageAccountType')
 
-    subnet_id = subnet if is_valid_resource_id(subnet) else \
-        '{}/virtualNetworks/{}/subnets/{}'.format(network_id_template, vnet_name, subnet)
-    gateway_subnet_id = ('{}/virtualNetworks/{}/subnets/appGwSubnet'.format(network_id_template, vnet_name)
-                         if app_gateway_type == 'new' else None)
+        subscription_id = get_subscription_id(cmd.cli_ctx)
+        network_id_template = resource_id(
+            subscription=subscription_id, resource_group=resource_group_name,
+            namespace='Microsoft.Network')
 
-    # public IP is used by either load balancer/application gateway
-    public_ip_address_id = None
-    if public_ip_address:
-        public_ip_address_id = (public_ip_address if is_valid_resource_id(public_ip_address)
-                                else '{}/publicIPAddresses/{}'.format(network_id_template,
-                                                                      public_ip_address))
+        vmss_id = resource_id(
+            subscription=subscription_id, resource_group=resource_group_name,
+            namespace='Microsoft.Compute', type='virtualMachineScaleSets', name=vmss_name)
 
-    def _get_public_ip_address_allocation(value, sku):
-        IPAllocationMethod = cmd.get_models('IPAllocationMethod', resource_type=ResourceType.MGMT_NETWORK)
-        if not value:
-            value = IPAllocationMethod.static.value if (sku and sku.lower() == 'standard') \
-                else IPAllocationMethod.dynamic.value
-        return value
+        scrubbed_name = vmss_name.replace('-', '').lower()[:5]
+        naming_prefix = '{}{}'.format(scrubbed_name,
+                                      hash_string(vmss_id,
+                                                  length=(9 - len(scrubbed_name)),
+                                                  force_lower=True))
 
-    # Handle load balancer creation
-    if load_balancer_type == 'new':
-        vmss_dependencies.append('Microsoft.Network/loadBalancers/{}'.format(load_balancer))
+        # determine final defaults and calculated values
+        tags = tags or {}
+        os_disk_name = os_disk_name or ('osdisk_{}'.format(hash_string(vmss_id, length=10))
+                                        if use_unmanaged_disk else None)
+        load_balancer = load_balancer or '{}LB'.format(vmss_name)
+        app_gateway = application_gateway or '{}AG'.format(vmss_name)
+        backend_pool_name = backend_pool_name or '{}BEPool'.format(load_balancer or application_gateway)
 
-        lb_dependencies = []
+        vmss_dependencies = []
+
+        # VNET will always be a dependency
         if vnet_type == 'new':
-            lb_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(vnet_name))
-        if public_ip_address_type == 'new':
-            public_ip_address = public_ip_address or '{}PublicIP'.format(load_balancer)
-            lb_dependencies.append(
-                'Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))
-            master_template.add_resource(build_public_ip_resource(
-                cmd, public_ip_address, location, tags,
-                _get_public_ip_address_allocation(public_ip_address_allocation, load_balancer_sku),
-                public_ip_address_dns_name, load_balancer_sku, zones))
-            public_ip_address_id = '{}/publicIPAddresses/{}'.format(network_id_template,
-                                                                    public_ip_address)
+            vnet_name = vnet_name or '{}VNET'.format(vmss_name)
+            subnet = subnet or '{}Subnet'.format(vmss_name)
+            vmss_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(vnet_name))
+            vnet = build_vnet_resource(
+                cmd, vnet_name, location, tags, vnet_address_prefix, subnet, subnet_address_prefix)
+            if app_gateway_type:
+                vnet['properties']['subnets'].append({
+                    'name': 'appGwSubnet',
+                    'properties': {
+                        'addressPrefix': app_gateway_subnet_address_prefix
+                    }
+                })
+            master_template.add_resource(vnet)
 
-        # calculate default names if not provided
-        nat_pool_name = nat_pool_name or '{}NatPool'.format(load_balancer)
-        if not backend_port:
-            backend_port = 3389 if os_type == 'windows' else 22
+        subnet_id = subnet if is_valid_resource_id(subnet) else \
+            '{}/virtualNetworks/{}/subnets/{}'.format(network_id_template, vnet_name, subnet)
+        gateway_subnet_id = ('{}/virtualNetworks/{}/subnets/appGwSubnet'.format(network_id_template, vnet_name)
+                             if app_gateway_type == 'new' else None)
 
-        lb_resource = build_load_balancer_resource(
-            cmd, load_balancer, location, tags, backend_pool_name, nat_pool_name, backend_port,
-            'loadBalancerFrontEnd', public_ip_address_id, subnet_id, private_ip_address='',
-            private_ip_allocation='Dynamic', sku=load_balancer_sku, instance_count=instance_count,
-            disable_overprovision=disable_overprovision)
-        lb_resource['dependsOn'] = lb_dependencies
-        master_template.add_resource(lb_resource)
+        # public IP is used by either load balancer/application gateway
+        public_ip_address_id = None
+        if public_ip_address:
+            public_ip_address_id = (public_ip_address if is_valid_resource_id(public_ip_address)
+                                    else '{}/publicIPAddresses/{}'.format(network_id_template,
+                                                                          public_ip_address))
 
-        # Per https://docs.microsoft.com/azure/load-balancer/load-balancer-standard-overview#nsg
-        if load_balancer_sku and load_balancer_sku.lower() == 'standard' and nsg is None:
-            nsg_name = '{}NSG'.format(vmss_name)
-            master_template.add_resource(build_nsg_resource(
-                None, nsg_name, location, tags, 'rdp' if os_type.lower() == 'windows' else 'ssh'))
-            nsg = "[resourceId('Microsoft.Network/networkSecurityGroups', '{}')]".format(nsg_name)
-            vmss_dependencies.append('Microsoft.Network/networkSecurityGroups/{}'.format(nsg_name))
+        def _get_public_ip_address_allocation(value, sku):
+            IPAllocationMethod = cmd.get_models('IPAllocationMethod', resource_type=ResourceType.MGMT_NETWORK)
+            if not value:
+                value = IPAllocationMethod.static.value if (sku and sku.lower() == 'standard') \
+                    else IPAllocationMethod.dynamic.value
+            return value
 
-    # Or handle application gateway creation
-    if app_gateway_type == 'new':
-        vmss_dependencies.append('Microsoft.Network/applicationGateways/{}'.format(app_gateway))
+        # Handle load balancer creation
+        if load_balancer_type == 'new':
+            vmss_dependencies.append('Microsoft.Network/loadBalancers/{}'.format(load_balancer))
 
-        ag_dependencies = []
-        if vnet_type == 'new':
-            ag_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(vnet_name))
-        if public_ip_address_type == 'new':
-            public_ip_address = public_ip_address or '{}PublicIP'.format(app_gateway)
-            ag_dependencies.append(
-                'Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))
-            master_template.add_resource(build_public_ip_resource(
-                cmd, public_ip_address, location, tags,
-                _get_public_ip_address_allocation(public_ip_address_allocation, None), public_ip_address_dns_name,
-                None, zones))
-            public_ip_address_id = '{}/publicIPAddresses/{}'.format(network_id_template,
-                                                                    public_ip_address)
+            lb_dependencies = []
+            if vnet_type == 'new':
+                lb_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(vnet_name))
+            if public_ip_address_type == 'new':
+                public_ip_address = public_ip_address or '{}PublicIP'.format(load_balancer)
+                lb_dependencies.append(
+                    'Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))
+                master_template.add_resource(build_public_ip_resource(
+                    cmd, public_ip_address, location, tags,
+                    _get_public_ip_address_allocation(public_ip_address_allocation, load_balancer_sku),
+                    public_ip_address_dns_name, load_balancer_sku, zones))
+                public_ip_address_id = '{}/publicIPAddresses/{}'.format(network_id_template,
+                                                                        public_ip_address)
 
-        # calculate default names if not provided
-        backend_port = backend_port or 80
+            # calculate default names if not provided
+            nat_pool_name = nat_pool_name or '{}NatPool'.format(load_balancer)
+            if not backend_port:
+                backend_port = 3389 if os_type == 'windows' else 22
 
-        ag_resource = build_application_gateway_resource(
-            cmd, app_gateway, location, tags, backend_pool_name, backend_port, 'appGwFrontendIP',
-            public_ip_address_id, subnet_id, gateway_subnet_id, private_ip_address='',
-            private_ip_allocation='Dynamic', sku=app_gateway_sku, capacity=app_gateway_capacity)
-        ag_resource['dependsOn'] = ag_dependencies
-        master_template.add_variable(
-            'appGwID',
-            "[resourceId('Microsoft.Network/applicationGateways', '{}')]".format(app_gateway))
-        master_template.add_resource(ag_resource)
+            lb_resource = build_load_balancer_resource(
+                cmd, load_balancer, location, tags, backend_pool_name, nat_pool_name, backend_port,
+                'loadBalancerFrontEnd', public_ip_address_id, subnet_id, private_ip_address='',
+                private_ip_allocation='Dynamic', sku=load_balancer_sku, instance_count=instance_count,
+                disable_overprovision=disable_overprovision)
+            lb_resource['dependsOn'] = lb_dependencies
+            master_template.add_resource(lb_resource)
 
-    # create storage accounts if needed for unmanaged disk storage
-    if storage_profile == StorageProfile.SAPirImage:
-        master_template.add_resource(build_vmss_storage_account_pool_resource(
-            cmd, 'storageLoop', location, tags, storage_sku))
-        master_template.add_variable('storageAccountNames', [
-            '{}{}'.format(naming_prefix, x) for x in range(5)
-        ])
-        master_template.add_variable('vhdContainers', [
-            "[concat('https://', variables('storageAccountNames')[{}], '.blob.{}/{}')]".format(
-                x, cmd.cli_ctx.cloud.suffixes.storage_endpoint, storage_container_name) for x in range(5)
-        ])
-        vmss_dependencies.append('storageLoop')
+            # Per https://docs.microsoft.com/azure/load-balancer/load-balancer-standard-overview#nsg
+            if load_balancer_sku and load_balancer_sku.lower() == 'standard' and nsg is None:
+                nsg_name = '{}NSG'.format(vmss_name)
+                master_template.add_resource(build_nsg_resource(
+                    None, nsg_name, location, tags, 'rdp' if os_type.lower() == 'windows' else 'ssh'))
+                nsg = "[resourceId('Microsoft.Network/networkSecurityGroups', '{}')]".format(nsg_name)
+                vmss_dependencies.append('Microsoft.Network/networkSecurityGroups/{}'.format(nsg_name))
 
-    backend_address_pool_id = None
-    inbound_nat_pool_id = None
-    if load_balancer_type or app_gateway_type:
-        network_balancer = load_balancer if load_balancer_type else app_gateway
-        balancer_type = 'loadBalancers' if load_balancer_type else 'applicationGateways'
+        # Or handle application gateway creation
+        if app_gateway_type == 'new':
+            vmss_dependencies.append('Microsoft.Network/applicationGateways/{}'.format(app_gateway))
 
-        if is_valid_resource_id(network_balancer):
-            # backend address pool needed by load balancer or app gateway
-            backend_address_pool_id = '{}/backendAddressPools/{}'.format(network_balancer, backend_pool_name)
-            if nat_pool_name:
-                inbound_nat_pool_id = '{}/inboundNatPools/{}'.format(network_balancer, nat_pool_name)
-        else:
-            # backend address pool needed by load balancer or app gateway
-            backend_address_pool_id = '{}/{}/{}/backendAddressPools/{}'.format(
-                network_id_template, balancer_type, network_balancer, backend_pool_name)
-            if nat_pool_name:
-                inbound_nat_pool_id = '{}/{}/{}/inboundNatPools/{}'.format(
-                    network_id_template, balancer_type, network_balancer, nat_pool_name)
+            ag_dependencies = []
+            if vnet_type == 'new':
+                ag_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(vnet_name))
+            if public_ip_address_type == 'new':
+                public_ip_address = public_ip_address or '{}PublicIP'.format(app_gateway)
+                ag_dependencies.append(
+                    'Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))
+                master_template.add_resource(build_public_ip_resource(
+                    cmd, public_ip_address, location, tags,
+                    _get_public_ip_address_allocation(public_ip_address_allocation, None), public_ip_address_dns_name,
+                    None, zones))
+                public_ip_address_id = '{}/publicIPAddresses/{}'.format(network_id_template,
+                                                                        public_ip_address)
 
-        if health_probe and not is_valid_resource_id(health_probe):
-            health_probe = '{}/loadBalancers/{}/probes/{}'.format(network_id_template, load_balancer, health_probe)
+            # calculate default names if not provided
+            backend_port = backend_port or 80
 
-    ip_config_name = '{}IPConfig'.format(naming_prefix)
-    nic_name = '{}Nic'.format(naming_prefix)
+            ag_resource = build_application_gateway_resource(
+                cmd, app_gateway, location, tags, backend_pool_name, backend_port, 'appGwFrontendIP',
+                public_ip_address_id, subnet_id, gateway_subnet_id, private_ip_address='',
+                private_ip_allocation='Dynamic', sku=app_gateway_sku, capacity=app_gateway_capacity)
+            ag_resource['dependsOn'] = ag_dependencies
+            master_template.add_variable(
+                'appGwID',
+                "[resourceId('Microsoft.Network/applicationGateways', '{}')]".format(app_gateway))
+            master_template.add_resource(ag_resource)
 
-    if custom_data:
-        custom_data = read_content_if_is_file(custom_data)
+        # create storage accounts if needed for unmanaged disk storage
+        if storage_profile == StorageProfile.SAPirImage:
+            master_template.add_resource(build_vmss_storage_account_pool_resource(
+                cmd, 'storageLoop', location, tags, storage_sku))
+            master_template.add_variable('storageAccountNames', [
+                '{}{}'.format(naming_prefix, x) for x in range(5)
+            ])
+            master_template.add_variable('vhdContainers', [
+                "[concat('https://', variables('storageAccountNames')[{}], '.blob.{}/{}')]".format(
+                    x, cmd.cli_ctx.cloud.suffixes.storage_endpoint, storage_container_name) for x in range(5)
+            ])
+            vmss_dependencies.append('storageLoop')
 
-    if secrets:
-        secrets = _merge_secrets([validate_file_or_dict(secret) for secret in secrets])
+        backend_address_pool_id = None
+        inbound_nat_pool_id = None
+        if load_balancer_type or app_gateway_type:
+            network_balancer = load_balancer if load_balancer_type else app_gateway
+            balancer_type = 'loadBalancers' if load_balancer_type else 'applicationGateways'
 
-    if computer_name_prefix is not None and isinstance(computer_name_prefix, str):
-        naming_prefix = computer_name_prefix
+            if is_valid_resource_id(network_balancer):
+                # backend address pool needed by load balancer or app gateway
+                backend_address_pool_id = '{}/backendAddressPools/{}'.format(network_balancer, backend_pool_name)
+                if nat_pool_name:
+                    inbound_nat_pool_id = '{}/inboundNatPools/{}'.format(network_balancer, nat_pool_name)
+            else:
+                # backend address pool needed by load balancer or app gateway
+                backend_address_pool_id = '{}/{}/{}/backendAddressPools/{}'.format(
+                    network_id_template, balancer_type, network_balancer, backend_pool_name)
+                if nat_pool_name:
+                    inbound_nat_pool_id = '{}/{}/{}/inboundNatPools/{}'.format(
+                        network_id_template, balancer_type, network_balancer, nat_pool_name)
 
-    vmss_resource = build_vmss_resource(
-        cmd=cmd, name=vmss_name, naming_prefix=naming_prefix, location=location, tags=tags,
-        overprovision=not disable_overprovision, upgrade_policy_mode=upgrade_policy_mode, vm_sku=vm_sku,
-        instance_count=instance_count, ip_config_name=ip_config_name, nic_name=nic_name, subnet_id=subnet_id,
-        public_ip_per_vm=public_ip_per_vm, vm_domain_name=vm_domain_name, dns_servers=dns_servers, nsg=nsg,
-        accelerated_networking=accelerated_networking, admin_username=admin_username,
-        authentication_type=authentication_type, storage_profile=storage_profile, os_disk_name=os_disk_name,
-        disk_info=disk_info, os_type=os_type, image=image, admin_password=admin_password,
-        ssh_key_values=ssh_key_value, ssh_key_path=ssh_dest_key_path, os_publisher=os_publisher, os_offer=os_offer,
-        os_sku=os_sku, os_version=os_version, backend_address_pool_id=backend_address_pool_id,
-        inbound_nat_pool_id=inbound_nat_pool_id, health_probe=health_probe,
-        single_placement_group=single_placement_group, platform_fault_domain_count=platform_fault_domain_count,
-        custom_data=custom_data, secrets=secrets, license_type=license_type, zones=zones, priority=priority,
-        eviction_policy=eviction_policy, application_security_groups=application_security_groups,
-        ultra_ssd_enabled=ultra_ssd_enabled, proximity_placement_group=proximity_placement_group,
-        terminate_notification_time=terminate_notification_time, max_billing=max_billing,
-        orchestration_mode=orchestration_mode)
-    vmss_resource['dependsOn'] = vmss_dependencies
+            if health_probe and not is_valid_resource_id(health_probe):
+                health_probe = '{}/loadBalancers/{}/probes/{}'.format(network_id_template, load_balancer, health_probe)
 
-    if plan_name:
-        vmss_resource['plan'] = {
-            'name': plan_name,
-            'publisher': plan_publisher,
-            'product': plan_product,
-            'promotionCode': plan_promotion_code
+        ip_config_name = '{}IPConfig'.format(naming_prefix)
+        nic_name = '{}Nic'.format(naming_prefix)
+
+        if custom_data:
+            custom_data = read_content_if_is_file(custom_data)
+
+        if secrets:
+            secrets = _merge_secrets([validate_file_or_dict(secret) for secret in secrets])
+
+        if computer_name_prefix is not None and isinstance(computer_name_prefix, str):
+            naming_prefix = computer_name_prefix
+
+        vmss_resource = build_vmss_resource(
+            cmd=cmd, name=vmss_name, naming_prefix=naming_prefix, location=location, tags=tags,
+            overprovision=not disable_overprovision, upgrade_policy_mode=upgrade_policy_mode, vm_sku=vm_sku,
+            instance_count=instance_count, ip_config_name=ip_config_name, nic_name=nic_name, subnet_id=subnet_id,
+            public_ip_per_vm=public_ip_per_vm, vm_domain_name=vm_domain_name, dns_servers=dns_servers, nsg=nsg,
+            accelerated_networking=accelerated_networking, admin_username=admin_username,
+            authentication_type=authentication_type, storage_profile=storage_profile, os_disk_name=os_disk_name,
+            disk_info=disk_info, os_type=os_type, image=image, admin_password=admin_password,
+            ssh_key_values=ssh_key_value, ssh_key_path=ssh_dest_key_path, os_publisher=os_publisher, os_offer=os_offer,
+            os_sku=os_sku, os_version=os_version, backend_address_pool_id=backend_address_pool_id,
+            inbound_nat_pool_id=inbound_nat_pool_id, health_probe=health_probe,
+            single_placement_group=single_placement_group, platform_fault_domain_count=platform_fault_domain_count,
+            custom_data=custom_data, secrets=secrets, license_type=license_type, zones=zones, priority=priority,
+            eviction_policy=eviction_policy, application_security_groups=application_security_groups,
+            ultra_ssd_enabled=ultra_ssd_enabled, proximity_placement_group=proximity_placement_group,
+            terminate_notification_time=terminate_notification_time, max_billing=max_billing)
+
+        vmss_resource['dependsOn'] = vmss_dependencies
+
+        if plan_name:
+            vmss_resource['plan'] = {
+                'name': plan_name,
+                'publisher': plan_publisher,
+                'product': plan_product,
+                'promotionCode': plan_promotion_code
+            }
+
+        enable_local_identity = None
+        if assign_identity is not None:
+            vmss_resource['identity'], _, _, enable_local_identity = _build_identities_info(
+                assign_identity)
+            if identity_scope:
+                role_assignment_guid = str(_gen_guid())
+                master_template.add_resource(build_msi_role_assignment(vmss_name, vmss_id, identity_role_id,
+                                                                       role_assignment_guid, identity_scope, False))
+
+    elif orchestration_mode.lower() == vm_str.lower():
+        if platform_fault_domain_count is None:
+            raise CLIError("usage error: --platform-fault-domain-count is required in VM mode")
+        vmss_resource = {
+            'type': 'Microsoft.Compute/virtualMachineScaleSets',
+            'name': vmss_name,
+            'location': location,
+            'tags': tags,
+            'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machine_scale_sets'),
+            'properties': {
+                'singlePlacementGroup': True,
+                'provisioningState': 0,
+                'platformFaultDomainCount': platform_fault_domain_count
+            }
         }
-
-    enable_local_identity = None
-    if assign_identity is not None:
-        vmss_resource['identity'], _, _, enable_local_identity = _build_identities_info(
-            assign_identity)
-        if identity_scope:
-            role_assignment_guid = str(_gen_guid())
-            master_template.add_resource(build_msi_role_assignment(vmss_name, vmss_id, identity_role_id,
-                                                                   role_assignment_guid, identity_scope, False))
+        if zones is not None:
+            vmss_resource['zones'] = zones
+    else:
+        raise CLIError('usage error: --orchestration-mode (ScaleSet | VM)')
 
     master_template.add_resource(vmss_resource)
     master_template.add_output('VMSS', vmss_name, 'Microsoft.Compute', 'virtualMachineScaleSets',
                                output_type='object')
 
-    if admin_password:
+    if orchestration_mode.lower() == scale_set_vm_str.lower() and admin_password:
         master_template.add_secure_parameter('adminPassword', admin_password)
 
     template = master_template.build()
@@ -2250,7 +2274,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
     # creates the VMSS deployment
     deployment_result = DeploymentOutputLongRunningOperation(cmd.cli_ctx)(
         sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties))
-    if assign_identity is not None:
+
+    if orchestration_mode.lower() == scale_set_vm_str.lower() and assign_identity is not None:
         vmss_info = get_vmss(cmd, resource_group_name, vmss_name)
         if enable_local_identity and not identity_scope:
             _show_missing_access_warning(resource_group_name, vmss_name, 'vmss')

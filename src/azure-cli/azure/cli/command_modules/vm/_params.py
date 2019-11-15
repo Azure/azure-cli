@@ -503,7 +503,7 @@ def load_arguments(self, _):
         c.argument('application_security_groups', resource_type=ResourceType.MGMT_COMPUTE, min_api='2018-06-01', nargs='+', options_list=['--asgs'], help='Space-separated list of existing application security groups to associate with the VM.', arg_group='Network', validator=validate_asg_names_or_ids)
         c.argument('computer_name_prefix', help='Computer name prefix for all of the virtual machines in the scale set. Computer name prefixes must be 1 to 15 characters long')
         c.argument('orchestration_mode', help='Choose how virtual machines are managed by the scale set. In VM mode, you manually create and add a virtual machine of any configuration to the scale set. In ScaleSetVM mode, you define a virtual machine model and Azure will generate identical instances based on that model.',
-                   arg_type=get_enum_type(['VM', 'ScaleSetVM']))
+                   arg_type=get_enum_type(['VM', 'ScaleSetVM']), is_preview=True)
 
     with self.argument_context('vmss create', arg_group='Network Balancer') as c:
         LoadBalancerSkuName = self.get_models('LoadBalancerSkuName', resource_type=ResourceType.MGMT_NETWORK)
