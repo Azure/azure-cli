@@ -3,8 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.mgmt.reservations.models import (Patch, PurchaseRequest, SkuName, PurchaseRequestPropertiesReservedResourceProperties)
-from azure.cli.command_modules.reservations._client_factory import (reservation_order_mgmt_client_factory)
+from azure.mgmt.reservations.models import (Patch, 
+                                            PurchaseRequest,
+                                            SkuName,
+                                            PurchaseRequestPropertiesReservedResourceProperties)
+
 
 def cli_reservation_update_reservation(client, reservation_order_id, reservation_id,
                                        applied_scope_type, applied_scopes=None,
@@ -44,7 +47,7 @@ def cli_calculate(client, sku, location, reserved_resource_type, billing_scope_i
     reservedRP = PurchaseRequestPropertiesReservedResourceProperties(instance_flexibility=reserved_resource_properties)
     body = PurchaseRequest(sku=skuN, location=location, reserved_resource_type=reserved_resource_type, 
                            billing_scope_id=billing_scope_id, term=term, quantity=quantity, display_name=display_name,
-                           applied_scope_type=applied_scope_type,applied_scopes=applied_scopes, billing_plan=billing_plan,
+                           applied_scope_type=applied_scope_type, applied_scopes=applied_scopes, billing_plan=billing_plan,
                            renew=renew, reserved_resource_properties=reservedRP)
     return client.calculate(body)
 
