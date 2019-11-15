@@ -191,7 +191,7 @@ parameters:
     short-summary: setup auto renewal
   - name: --rrp
     type: string
-    short-summary:
+    short-summary: Type of the Instance Flexibility to update the reservation with
   - name: --reserved-resource-type
     type: string
     short-summary: type of RIs
@@ -234,7 +234,7 @@ parameters:
     short-summary: setup auto renewal
   - name: --rrp
     type: string
-    short-summary:
+    short-summary: Type of the Instance Flexibility to update the reservation with
   - name: --reserved-resource-type
     type: string
     short-summary: type of RIs
