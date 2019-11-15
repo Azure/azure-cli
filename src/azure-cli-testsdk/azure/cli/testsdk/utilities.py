@@ -54,7 +54,7 @@ def _py3_byte_to_str(byte_or_str):
     logger = logging.getLogger()
     logger.warning(type(byte_or_str))
     try:
-        return str(byte_or_str, 'utf-8') if isinstance(byte_or_str, bytes) else byte_or_str
+        return str(byte_or_str, 'utf-8', errors='ignore') if isinstance(byte_or_str, bytes) else byte_or_str
     except TypeError:  # python 2 doesn't allow decoding through str
         return str(byte_or_str)
 
