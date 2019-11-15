@@ -135,7 +135,7 @@ class AzureReservationsTests(ScenarioTest):
     def test_split_and_merge(self):
         self.kwargs.update({
             'reservation_order_id': '0af601f3-7868-44ee-b833-4d2e64ad3d70',
-            'reservation_id': 'a7595c2e-435c-4b2e-b71d-5c34a5672f23',
+            'reservation_id': '6dee7663-3e63-4115-aa4d-41e9a57f551e',
             'quantity1': 1,
             'quantity2': 2
         })
@@ -193,7 +193,7 @@ class AzureReservationsTests(ScenarioTest):
 
     def test_purchase_reservation_order(self):
         self.kwargs.update({
-            'roid': 'e092ef40-ec56-4492-8835-80615fa79dce',
+            'roid': 'd4ef7ec2-941c-4da7-8ec9-2f148255a0dc',
             'subid': 'd3ae48e5-dbb2-4618-afd4-fb1b8559cb80',
             'sku': 'standard_b1ls',
             'location': 'westus',

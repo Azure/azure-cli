@@ -2,8 +2,9 @@ interactions:
 - request:
     body: '{"sku": {"name": "standard_b1ls"}, "location": "westus", "properties":
       {"reservedResourceType": "VirtualMachines", "billingScopeId": "d3ae48e5-dbb2-4618-afd4-fb1b8559cb80",
-      "term": "P1Y", "quantity": 2, "displayName": "test", "appliedScopeType": "Shared",
-      "renew": false}}'
+      "term": "P1Y", "billingPlan": "Monthly", "quantity": 2, "displayName": "test",
+      "appliedScopeType": "Shared", "renew": false, "reservedResourceProperties":
+      {}}}'
     headers:
       Accept:
       - application/json
@@ -14,7 +15,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '272'
+      - '332'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
@@ -29,17 +30,17 @@ interactions:
     uri: https://management.azure.com/providers/Microsoft.Capacity/calculatePrice?api-version=2019-04-01
   response:
     body:
-      string: '{"properties":{"billingCurrencyTotal":{"currencyCode":"USD","amount":64.00},"netTotal":0.0,"taxTotal":0.0,"grandTotal":0.0,"reservationOrderId":"e092ef40-ec56-4492-8835-80615fa79dce","skuTitle":"Reserved
-        VM Instance, Standard_B1ls, US West, 1 Year","skuDescription":"standard_b1ls","pricingCurrencyTotal":{"currencyCode":"USD","amount":64.00}}}'
+      string: '{"properties":{"billingCurrencyTotal":{"currencyCode":"USD","amount":63.84},"netTotal":0.0,"taxTotal":0.0,"grandTotal":0.0,"paymentSchedule":[{"dueDate":"2019-11-15","pricingCurrencyTotal":{"currencyCode":"USD","amount":5.32},"billingCurrencyTotal":{"currencyCode":"USD","amount":5.32},"status":"Scheduled"},{"dueDate":"2019-12-15","pricingCurrencyTotal":{"currencyCode":"USD","amount":5.32},"status":"Scheduled"},{"dueDate":"2020-01-15","pricingCurrencyTotal":{"currencyCode":"USD","amount":5.32},"status":"Scheduled"},{"dueDate":"2020-02-15","pricingCurrencyTotal":{"currencyCode":"USD","amount":5.32},"status":"Scheduled"},{"dueDate":"2020-03-15","pricingCurrencyTotal":{"currencyCode":"USD","amount":5.32},"status":"Scheduled"},{"dueDate":"2020-04-15","pricingCurrencyTotal":{"currencyCode":"USD","amount":5.32},"status":"Scheduled"},{"dueDate":"2020-05-15","pricingCurrencyTotal":{"currencyCode":"USD","amount":5.32},"status":"Scheduled"},{"dueDate":"2020-06-15","pricingCurrencyTotal":{"currencyCode":"USD","amount":5.32},"status":"Scheduled"},{"dueDate":"2020-07-15","pricingCurrencyTotal":{"currencyCode":"USD","amount":5.32},"status":"Scheduled"},{"dueDate":"2020-08-15","pricingCurrencyTotal":{"currencyCode":"USD","amount":5.32},"status":"Scheduled"},{"dueDate":"2020-09-15","pricingCurrencyTotal":{"currencyCode":"USD","amount":5.32},"status":"Scheduled"},{"dueDate":"2020-10-15","pricingCurrencyTotal":{"currencyCode":"USD","amount":5.32},"status":"Scheduled"}],"reservationOrderId":"d4ef7ec2-941c-4da7-8ec9-2f148255a0dc","skuTitle":"Reserved
+        VM Instance, Standard_B1ls, US West, 1 Year","skuDescription":"standard_b1ls","pricingCurrencyTotal":{"currencyCode":"USD","amount":63.84}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '344'
+      - '1696'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 14 Nov 2019 22:42:18 GMT
+      - Fri, 15 Nov 2019 05:04:31 GMT
       expires:
       - '-1'
       pragma:
@@ -57,8 +58,8 @@ interactions:
       x-ms-ratelimit-remaining-tenant-writes:
       - '1199'
       x-ms-test:
-      - '{"contact":"kgautam","scenarios":"v6-recurrence-test,time-scale:35040,AcceleratedPayment","retention":"2/12/2020
-        10:42:16 PM"}'
+      - '{"contact":"kgautam","scenarios":"v6-recurrence-test,time-scale:35040,AcceleratedPayment","retention":"2/13/2020
+        5:04:30 AM"}'
     status:
       code: 200
       message: OK

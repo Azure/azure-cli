@@ -2,8 +2,9 @@ interactions:
 - request:
     body: '{"sku": {"name": "standard_b1ls"}, "location": "westus", "properties":
       {"reservedResourceType": "VirtualMachines", "billingScopeId": "d3ae48e5-dbb2-4618-afd4-fb1b8559cb80",
-      "term": "P1Y", "quantity": 2, "displayName": "test", "appliedScopeType": "Shared",
-      "renew": false}}'
+      "term": "P1Y", "billingPlan": "Monthly", "quantity": 2, "displayName": "test",
+      "appliedScopeType": "Shared", "renew": false, "reservedResourceProperties":
+      {}}}'
     headers:
       Accept:
       - application/json
@@ -14,7 +15,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '272'
+      - '332'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
@@ -26,11 +27,11 @@ interactions:
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/providers/Microsoft.Capacity/reservationOrders/e092ef40-ec56-4492-8835-80615fa79dce?api-version=2019-04-01
+    uri: https://management.azure.com/providers/Microsoft.Capacity/reservationOrders/d4ef7ec2-941c-4da7-8ec9-2f148255a0dc?api-version=2019-04-01
   response:
     body:
-      string: '{"id":"/providers/microsoft.capacity/reservationOrders/e092ef40-ec56-4492-8835-80615fa79dce","type":"Microsoft.Capacity/reservationOrders","name":"e092ef40-ec56-4492-8835-80615fa79dce","etag":1,"properties":{"displayName":"test","requestDateTime":"2019-11-14T23:06:37.0770243Z","term":"P1Y","provisioningState":"Creating","reservations":[{"sku":{"name":"standard_b1ls"},"id":"/providers/microsoft.capacity/reservationOrders/e092ef40-ec56-4492-8835-80615fa79dce/reservations/a1c827a8-991c-464f-91e4-875aca3bc7e3","type":"Microsoft.Capacity/reservationOrders/reservations","name":"e092ef40-ec56-4492-8835-80615fa79dce/a1c827a8-991c-464f-91e4-875aca3bc7e3","etag":1,"location":"westus","properties":{"appliedScopeType":"Shared","quantity":2,"provisioningState":"Creating","displayName":"test","effectiveDateTime":"2019-11-14T23:06:37.0770243Z","lastUpdatedDateTime":"2019-11-14T23:06:37.0770243Z","reservedResourceType":"VirtualMachines","instanceFlexibility":"On","skuDescription":"Reserved
-        VM Instance, Standard_B1ls, US West, 1 Year","renew":false}}],"originalQuantity":2,"billingPlan":"Upfront"}}'
+      string: '{"id":"/providers/microsoft.capacity/reservationOrders/d4ef7ec2-941c-4da7-8ec9-2f148255a0dc","type":"Microsoft.Capacity/reservationOrders","name":"d4ef7ec2-941c-4da7-8ec9-2f148255a0dc","etag":1,"properties":{"displayName":"test","requestDateTime":"2019-11-15T05:11:14.4056282Z","term":"P1Y","provisioningState":"Creating","reservations":[{"sku":{"name":"standard_b1ls"},"id":"/providers/microsoft.capacity/reservationOrders/d4ef7ec2-941c-4da7-8ec9-2f148255a0dc/reservations/5ccde723-b52b-4c30-9f8c-fc5de28cb396","type":"Microsoft.Capacity/reservationOrders/reservations","name":"d4ef7ec2-941c-4da7-8ec9-2f148255a0dc/5ccde723-b52b-4c30-9f8c-fc5de28cb396","etag":1,"location":"westus","properties":{"appliedScopeType":"Shared","quantity":2,"provisioningState":"Creating","displayName":"test","effectiveDateTime":"2019-11-15T05:11:14.4056282Z","lastUpdatedDateTime":"2019-11-15T05:11:14.4056282Z","reservedResourceType":"VirtualMachines","instanceFlexibility":"On","skuDescription":"Reserved
+        VM Instance, Standard_B1ls, US West, 1 Year","renew":false}}],"originalQuantity":2,"billingPlan":"Monthly"}}'
     headers:
       cache-control:
       - no-cache
@@ -39,11 +40,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 14 Nov 2019 23:06:38 GMT
+      - Fri, 15 Nov 2019 05:11:16 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/providers/Microsoft.Capacity/reservationOrders/e092ef40-ec56-4492-8835-80615fa79dce?api-version=2019-04-01
+      - https://management.azure.com/providers/Microsoft.Capacity/reservationOrders/d4ef7ec2-941c-4da7-8ec9-2f148255a0dc?api-version=2019-04-01
       pragma:
       - no-cache
       server:
@@ -55,8 +56,8 @@ interactions:
       x-ms-ratelimit-remaining-tenant-writes:
       - '1199'
       x-ms-test:
-      - '{"contact":"kgautam","scenarios":"v6-recurrence-test,time-scale:35040,AcceleratedPayment","retention":"2/12/2020
-        11:06:23 PM"}'
+      - '{"contact":"kgautam","scenarios":"v6-recurrence-test,time-scale:35040,AcceleratedPayment","retention":"2/13/2020
+        5:11:01 AM"}'
     status:
       code: 202
       message: Accepted
@@ -78,19 +79,19 @@ interactions:
       - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-reservations/0.6.0 Azure-SDK-For-Python AZURECLI/2.0.76
     method: GET
-    uri: https://management.azure.com/providers/Microsoft.Capacity/reservationOrders/e092ef40-ec56-4492-8835-80615fa79dce?api-version=2019-04-01
+    uri: https://management.azure.com/providers/Microsoft.Capacity/reservationOrders/d4ef7ec2-941c-4da7-8ec9-2f148255a0dc?api-version=2019-04-01
   response:
     body:
-      string: '{"id":"/providers/microsoft.capacity/reservationOrders/e092ef40-ec56-4492-8835-80615fa79dce","type":"Microsoft.Capacity/reservationOrders","name":"e092ef40-ec56-4492-8835-80615fa79dce","etag":3,"properties":{"displayName":"test","requestDateTime":"2019-11-14T23:06:37.0770243Z","term":"P1Y","provisioningState":"Creating","reservations":[{"id":"/providers/microsoft.capacity/reservationOrders/e092ef40-ec56-4492-8835-80615fa79dce/reservations/a1c827a8-991c-464f-91e4-875aca3bc7e3"}],"originalQuantity":2,"billingPlan":"Upfront"}}'
+      string: '{"id":"/providers/microsoft.capacity/reservationOrders/d4ef7ec2-941c-4da7-8ec9-2f148255a0dc","type":"Microsoft.Capacity/reservationOrders","name":"d4ef7ec2-941c-4da7-8ec9-2f148255a0dc","etag":5,"properties":{"displayName":"test","requestDateTime":"2019-11-15T05:11:14.4056282Z","term":"P1Y","provisioningState":"PendingCapacity","reservations":[{"id":"/providers/microsoft.capacity/reservationOrders/d4ef7ec2-941c-4da7-8ec9-2f148255a0dc/reservations/5ccde723-b52b-4c30-9f8c-fc5de28cb396"}],"originalQuantity":2,"billingPlan":"Monthly"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '529'
+      - '536'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 14 Nov 2019 23:08:38 GMT
+      - Fri, 15 Nov 2019 05:13:16 GMT
       expires:
       - '-1'
       pragma:
