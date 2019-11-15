@@ -51,10 +51,6 @@ Release History
 * Upgrading SDK Version to 0.6.0
 * Add billingplan details info after calling Get-Gatalogs
 
-**SQL**
-
-* Update azure-mgmt-sql to version 0.15.0 which contains changed signature for operations get/delete/create_or_update in managed_instance_administrators.
-
 **Storage**
 
 * storage account create: Add --enable-hierarchical-namespace to support filesystem semantics in blob service.
