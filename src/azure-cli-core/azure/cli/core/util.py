@@ -9,8 +9,11 @@ import json
 import getpass
 import base64
 import binascii
+import platform
+import ssl
 import six
 
+from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from knack.log import get_logger
 from knack.util import CLIError, to_snake_case
 
@@ -129,7 +132,6 @@ def _update_latest_from_pypi(versions):
 
 
 def get_az_version_string():
-    import platform
     from azure.cli.core.extension import get_extensions, EXTENSIONS_DIR, DEV_EXTENSION_SOURCES
 
     output = six.StringIO()
@@ -387,7 +389,6 @@ def open_page_in_browser(url):
 
 
 def _get_platform_info():
-    import platform
     uname = platform.uname()
     # python 2, `platform.uname()` returns: tuple(system, node, release, version, machine, processor)
     platform_name = getattr(uname, 'system', None) or uname[0]
@@ -616,3 +617,18 @@ class ConfiguredDefaultSetter(object):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         setattr(self.cli_config, 'use_local_config', self.original_use_local_config)
+
+
+def _ssl_context():
+    if sys.version_info < (3, 4) or (in_cloud_console() and platform.system() == 'Windows'):
+        try:
+            return ssl.SSLContext(ssl.PROTOCOL_TLS)  # added in python 2.7.13 and 3.6
+        except AttributeError:
+            return ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+
+    return ssl.create_default_context()
+
+
+def urlretrieve(url):
+    req = urlopen(url, context=_ssl_context())
+    return req.read()

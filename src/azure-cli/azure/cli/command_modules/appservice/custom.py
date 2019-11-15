@@ -331,20 +331,19 @@ def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_rem
     is_consumption = is_plan_consumption(plan_info)
     if (not build_remote) and is_consumption and app.reserved:
         return upload_zip_to_storage(cmd, resource_group_name, name, src, slot)
+    if build_remote:
+        add_remote_build_app_settings(cmd, resource_group_name, name, slot)
+    else:
+        remove_remote_build_app_settings(cmd, resource_group_name, name, slot)
 
-    return enable_zip_deploy(cmd, resource_group_name, name, src, build_remote,
-                             timeout, slot)
+    return enable_zip_deploy(cmd, resource_group_name, name, src, timeout, slot)
 
 
 def enable_zip_deploy_webapp(cmd, resource_group_name, name, src, timeout=None, slot=None):
-    return enable_zip_deploy(cmd, resource_group_name, name, src,
-                             is_remote_build=False,
-                             timeout=timeout,
-                             slot=slot)
+    return enable_zip_deploy(cmd, resource_group_name, name, src, timeout=timeout, slot=slot)
 
 
-def enable_zip_deploy(cmd, resource_group_name, name, src, is_remote_build=False,
-                      timeout=None, slot=None):
+def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=None):
     logger.warning("Getting scm site credentials for zip deployment")
     user_name, password = _get_site_credential(cmd.cli_ctx, resource_group_name, name, slot)
 
@@ -361,11 +360,6 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, is_remote_build=False
     headers = authorization
     headers['content-type'] = 'application/octet-stream'
     headers['User-Agent'] = UA_AGENT
-
-    if is_remote_build:
-        add_remote_build_app_settings(cmd, resource_group_name, name, slot)
-    else:
-        remove_remote_build_app_settings(cmd, resource_group_name, name, slot)
 
     import requests
     import os
@@ -2926,6 +2920,9 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
         # Get the ASP & RG info, if the ASP & RG parameters are provided we use those else we need to find those
         logger.warning("Webapp %s already exists. The command will deploy contents to the existing app.", name)
         app_details = get_app_details(cmd, name)
+        if app_details is None:
+            raise CLIError("Unable to retrieve details of the existing app {}. Please check that the app is a part of "
+                           "the current subscription".format(name))
         current_rg = app_details.resource_group
         if resource_group_name is not None and (resource_group_name.lower() != current_rg.lower()):
             raise CLIError("The webapp {} exists in ResourceGroup {} and does not match the value entered {}. Please "
@@ -2970,7 +2967,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
                 "os": "%s",
                 "location" : "%s",
                 "src_path" : "%s",
-                "version_detected": "%s",
+                "runtime_version_detected": "%s",
                 "runtime_version": "%s"
                 }
                 """ % (name, plan, rg_name, get_sku_name(sku), os_name, loc, _src_path_escaped, detected_version,
@@ -2990,7 +2987,8 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
         logger.warning("Creating AppServicePlan '%s' ...", plan)
     # we will always call the ASP create or update API so that in case of re-deployment, if the SKU or plan setting are
     # updated we update those
-    create_app_service_plan(cmd, rg_name, plan, _is_linux, False, sku, 1 if _is_linux else None, location)
+    create_app_service_plan(cmd, rg_name, plan, _is_linux, hyper_v=False, per_site_scaling=False, sku=sku,
+                            number_of_workers=1 if _is_linux else None, location=location)
 
     if _create_new_app:
         logger.warning("Creating webapp '%s' ...", name)

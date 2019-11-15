@@ -3,9 +3,31 @@
 Release History
 ===============
 
+**Azure Red Hat OpenShift**
+
+* Add `--workspace-resource-id` flag to allow creation of Azure Red Hat Openshift cluster with monitoring
+* Add `monitor_profile` to create Azure Red Hat OpenShift cluster with monitoring
+
 **AKS**
 
 * Support cluster certificate rotation operation using "az aks rotate-certs".
+
+**AppService**
+
+* Fix issue #11100: AttributeError for az webapp up when create service plan
+* az webapp up: Forcing the creation or deployment to a site for supported languages, no defaults used.
+
+**Compute**
+
+* Upgrade API version of compute, disks, snapshots to 2019-07-01
+
+**IOT**
+
+* Fix #2531: Add convenience arguments for hub update.
+
+**Key Vault**
+
+* Fix #11121: When using `az keyvault certificate list`, passing `--include-pending` now doesn't require a value of `true` or `false`
 
 **Packaging**
 
@@ -20,6 +42,19 @@ Release History
 **RBAC**
 
 * Fix #10996: Polish error for `--force-change-password-next-login` in `az ad user update` when `--password` is not specified
+
+**Redis**
+
+* Fix #2902: Avoid setting memory configs while updating Basic SKU cache
+
+**Reservations**
+
+* Upgrading SDK Version to 0.6.0
+* Add billingplan details info after calling Get-Gatalogs
+
+**Storage**
+
+* storage account create: Add --enable-hierarchical-namespace to support filesystem semantics in blob service.
 
 2.0.76
 ++++++
@@ -89,12 +124,19 @@ Release History
 
 * Add new routing source type: DigitalTwinChangeEvents
 * Fix #2826: Missing features in "az iot hub create"
-* Bug Fixed: Return more descriptive message on raised exception. 
+* Bug Fixed: Return more descriptive message on raised exception.
 
 **Key Vault**
 
 * Fix #9352: Unexpected error when certificate file does not exist
 * Fix #7048: `az keyvault recover/purge` not working
+
+**Monitor**
+
+* Updated azure-mgmt-monitor to 0.7.0
+* az monitor action-group create/update: Added suport for following new receivers: Arm role, Azure app push, ITSM, automation runbook, voice, logic app and Azure function
+* Included parameter usecommonalertschema for supported receivers
+* Included parameter useaadwebhook for webhook receiver
 
 **NetAppFiles**
 
