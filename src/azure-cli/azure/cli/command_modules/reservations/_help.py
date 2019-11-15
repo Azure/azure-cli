@@ -190,7 +190,7 @@ parameters:
    type: bool
    short-summary: setup auto renewal
   -name: --reserved-resource-properties
-   type: azure.mgmt.reservations.models.PurchaseRequestPropertiesReservedResourceProperties
+   type: string
    short-summary: 
   -name: --reserved-resource-type
    type: string
@@ -233,7 +233,7 @@ parameters:
    type: bool
    short-summary: setup auto renewal
   -name: --reserved-resource-properties
-   type: azure.mgmt.reservations.models.PurchaseRequestPropertiesReservedResourceProperties
+   type: string
    short-summary: 
   -name: --reserved-resource-type
    type: string
