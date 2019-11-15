@@ -2623,7 +2623,7 @@ def add_hc(cmd, name, resource_group_name, namespace, hybrid_connection, slot=No
     hy_co_rules = hy_co_client.list_authorization_rules(hy_co_resource_group, namespace, hybrid_connection)
     has_default_sender_key = False
     for r in hy_co_rules:
-        if r.name.lower() == "defaultSender".lower():
+        if r.name.lower() == "defaultsender":
             for z in r.rights:
                 if z == z.send:
                     has_default_sender_key = True
@@ -2701,7 +2701,7 @@ def set_hc_key(cmd, plan, resource_group_name, namespace, hybrid_connection, key
     hy_co_rules = hy_co_client.list_authorization_rules(relay_resource_group, namespace, hybrid_connection)
     has_default_sender_key = False
     for r in hy_co_rules:
-        if r.name.lower() == "defaultSender".lower():
+        if r.name.lower() == "defaultsender":
             for z in r.rights:
                 if z == z.send:
                     has_default_sender_key = True
@@ -2830,7 +2830,7 @@ def add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None
     vnet_resource_group = ''
     i = 0
     for z in vnet_id_strings:
-        if z.lower() == "resourceGroups".lower():
+        if z.lower() == "resourcegroups":
             vnet_resource_group = vnet_id_strings[i + 1]
         i = i + 1
 
@@ -2850,7 +2850,7 @@ def add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None
     delegations = subnetObj.delegations
     delegated = False
     for d in delegations:
-        if d.service_name.lower() == "Microsoft.Web/serverFarms".lower():
+        if d.service_name.lower() == "microsoft.web/serverfarms".lower():
             delegated = True
 
     if not delegated:
