@@ -20,6 +20,7 @@ Release History
 **Compute**
 
 * Upgrade API version of compute, disks, snapshots to 2019-07-01
+* sig image-definition create: add --os-state to allow specifying whether the virtual machines created under this image are 'Generalized' or 'Specialized'
 
 **IOT**
 

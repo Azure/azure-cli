@@ -2710,7 +2710,7 @@ def create_image_gallery(cmd, resource_group_name, gallery_name, description=Non
 
 
 def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_name, os_type, publisher, offer, sku,
-                         os_state=None, end_of_life_date=None, privacy_statement_uri=None, release_note_uri=None,
+                         os_state='Generalized', end_of_life_date=None, privacy_statement_uri=None, release_note_uri=None,
                          eula=None, description=None, location=None,
                          minimum_cpu_core=None, maximum_cpu_core=None, minimum_memory=None, maximum_memory=None,
                          disallowed_disk_types=None, plan_name=None, plan_publisher=None, plan_product=None, tags=None):
@@ -2734,7 +2734,7 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
         purchase_plan = ImagePurchasePlan(name=plan_name, publisher=plan_publisher, product=plan_product)
 
     image = GalleryImage(identifier=GalleryImageIdentifier(publisher=publisher, offer=offer, sku=sku),
-                         os_type=os_type, os_state='Generalized', end_of_life_date=end_of_life_date,
+                         os_type=os_type, os_state=os_state, end_of_life_date=end_of_life_date,
                          recommended=recommendation, disallowed=Disallowed(disk_types=disallowed_disk_types),
                          purchase_plan=purchase_plan, location=location, eula=eula, tags=(tags or {}))
     return client.gallery_images.create_or_update(resource_group_name, gallery_name, gallery_image_name, image)
