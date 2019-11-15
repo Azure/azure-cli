@@ -2652,7 +2652,7 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
             self.check('sku.name', 'VpnGw1'),
             self.check('enableBgp', False),
             self.check('vpnType', 'RouteBased'),
-            self.check('vpnClientConfiguration.vpnClientProtocols', "['OpenVPN']")
+            self.check('vpnClientConfiguration.vpnClientProtocols[0]', "OpenVPN")
         ])
 
         self.cmd('network vnet-gateway aad assign -g {rg} --gateway-name {gw} '
