@@ -1099,6 +1099,19 @@ type: command
 short-summary: Update an application gateway WAF policy custom rule.
 """
 
+helps['network application-gateway waf-policy managed-rules'] = """
+type: group
+short-summary: >
+    Manage managed rules of a waf-policy.
+    Visit: https://docs.microsoft.com/en-us/azure/web-application-firewall/afds/afds-overview
+"""
+
+helps['network application-gateway waf-policy managed-rules rule-set'] = """
+type: group
+short-summary: Manage managed rule set of managed rules of a waf-policy.
+"""
+
+
 helps['network application-gateway waf-policy show'] = """
 type: command
 short-summary: Get the details of an application gateway WAF policy.

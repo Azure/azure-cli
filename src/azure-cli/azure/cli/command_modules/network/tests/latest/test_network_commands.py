@@ -993,6 +993,28 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         self.cmd('network application-gateway waf-policy list -g {rg}',
                  checks=self.is_empty())
 
+    @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_managed_rules_')
+    def test_network_app_gateway_waf_policy_managed_rules(self, resource_group):
+        self.kwargs.update({
+            'waf-policy': 'agp1',
+            'rule': 'rule1',
+            'ip': 'pip1',
+            'ag': 'ag1',
+            'rg': resource_group,
+            'csr_group': 'REQUEST-921-PROTOCOL-ATTACK'
+        })
+        self.cmd('network application-gateway waf-policy create -g {rg} -n {waf-policy}')
+        self.cmd('network application-gateway waf-policy managed-rules rule-set create '
+                 '-g {rg} --policy-name {waf-policy} '
+                 '--type OWASP --version 3.0 '
+                 '--group-name {csr_group} --rules 921100 921110')
+        self.cmd('network application-gateway waf-policy show -g {rg} -n {waf-policy}', checks=[
+            self.check('managedRules.managedRuleSets[0].ruleSetType', 'OWASP'),
+            self.check('managedRules.managedRuleSets[0].ruleSetVersion', '3.0'),
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].ruleGroupName', self.kwargs['csr_group']),
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules[0].ruleId', '921100')
+        ])
+
 
 class NetworkDdosProtectionScenarioTest(LiveScenarioTest):
 

@@ -1041,8 +1041,9 @@ def create_ag_waf_policy(cmd, client, resource_group_name, policy_name, location
                                         'ManagedRulesDefinition',
                                         'ManagedRuleSet')
     #  https://docs.microsoft.com/en-us/azure/application-gateway/waf-overview
-    managed_rule_set = ManagedRuleSet(rule_set_type='OWASP',
-                                      rule_set_version='3.0')
+
+    # mandatory default rule with empty rule sets
+    managed_rule_set = ManagedRuleSet(rule_set_type='OWASP', rule_set_version='3.0')
     managed_rule_definition = ManagedRulesDefinition(managed_rule_sets=[managed_rule_set])
     waf_policy = WebApplicationFirewallPolicy(location=location, tags=tags, managed_rules=managed_rule_definition)
     return client.create_or_update(resource_group_name, policy_name, waf_policy)
@@ -1060,8 +1061,11 @@ def list_ag_waf_policies(cmd, resource_group_name=None):
 
 
 # region ApplicationGatewayWAFPolicyRules
-def create_ag_waf_rule(cmd, client, resource_group_name, policy_name, rule_name, priority=None, rule_type=None,
-                       action=None):
+def create_waf_rule(cmd, client, resource_group_name, policy_name, rule_name, priority=None, rule_type=None,
+                    action=None):
+    """
+    Initialize custom rule for WAF policy
+    """
     WebApplicationFirewallCustomRule = cmd.get_models('WebApplicationFirewallCustomRule')
     waf_policy = client.get(resource_group_name, policy_name)
     new_rule = WebApplicationFirewallCustomRule(
@@ -1131,6 +1135,41 @@ def remove_ag_waf_rule_match_cond(cmd, client, resource_group_name, policy_name,
     rule = find_child_item(waf_policy, rule_name, path='custom_rules', key_path='name')
     rule.match_conditions.pop(index)
     client.create_or_update(resource_group_name, policy_name, waf_policy)
+# endregion
+
+
+# region ApplicationGatewayWAFPolicy ManagedRule ManagedRuleSet
+def create_waf_managed_rule_set(cmd, client, resource_group_name, policy_name,
+                                rule_set_type, rule_set_version, rule_group_name, rules=None):
+    """
+    Initialize/Update managed rules for the WAF policy.
+    Visit: https://docs.microsoft.com/en-us/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
+    """
+    ManagedRuleSet, ManagedRuleGroupOverride, ManagedRuleOverride = \
+        cmd.get_models('ManagedRuleSet', 'ManagedRuleGroupOverride', 'ManagedRuleOverride')
+
+    waf_policy = client.get(resource_group_name, policy_name)
+
+    managed_rule_overrides = [ManagedRuleOverride(rule_id=r) for r in rules] if rules else None
+    rule_group_override = ManagedRuleGroupOverride(rule_group_name=rule_group_name, rules=managed_rule_overrides)
+    new_managed_rule_set = ManagedRuleSet(rule_set_type=rule_set_type,
+                                          rule_set_version=rule_set_version,
+                                          rule_group_overrides=[rule_group_override] if rules else None)
+
+    for rule_set in waf_policy.managed_rules.managed_rule_sets:
+        if rule_set.rule_set_type == rule_set_type:
+            # for rule_override in rule_set.rule_group_overrides:
+            #     if rule_override.rule_group_name == rule_group_name:
+            #         rule_override.rules.extend(managed_rule_overrides)
+            #         break
+            # else:
+            #     rule_set.rule_group_overrides.append(rule_group_override)
+            rule_set.rule_group_overrides = [rule_group_override]
+            break
+    else:
+        waf_policy.managed_rules.managed_rule_sets.append(new_managed_rule_set)
+
+    return client.create_or_update(resource_group_name, policy_name, waf_policy)
 # endregion
 
 

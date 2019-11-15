@@ -371,7 +371,7 @@ def load_arguments(self, _):
         c.argument('application_gateway_name', app_gateway_name_type)
     # endregion
 
-    # region ApplicationGatewayWAFPolicies
+    # region WebApplicationFirewallPolicy
     (WebApplicationFirewallAction, WebApplicationFirewallMatchVariable,
      WebApplicationFirewallOperator, WebApplicationFirewallRuleType,
      WebApplicationFirewallTransform) = self.get_models(
@@ -403,6 +403,19 @@ def load_arguments(self, _):
 
     with self.argument_context('network application-gateway waf-policy rule match-condition list', min_api='2018-12-01') as c:
         c.argument('policy_name', options_list='--policy-name', id_part=None)
+
+    with self.argument_context('network application-gateway waf-policy managed-rules') as c:
+        c.argument('policy_name', options_list='--policy-name', id_part=None,
+                   help='The name of the web application firewall policy.')
+
+    with self.argument_context('network application-gateway waf-policy managed-rules rule-set',
+                               min_api='2019-09-01') as c:
+        c.argument('rule_set_type', options_list='--type', help='Defines the version of the rule set to use.')
+        c.argument('rule_set_version', options_list='--version', help='Defines the version of the rule set to use.')
+        c.argument('rule_group_name',
+                   options_list='--group-name',
+                   help='Defines the rule group overrides to apply to the rule set.')
+        c.argument('rules', nargs='+', help='List of rules that will be disabled.')
     # region
 
     # region ApplicationSecurityGroups
