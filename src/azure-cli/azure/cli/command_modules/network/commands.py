@@ -463,6 +463,11 @@ def load_command_table(self, _):
         g.generic_update_command('update', custom_func_name='update_ag_waf_policy')
         g.wait_command('wait')
 
+    # with self.command_group('network application-gateway waf-policy policy-settings'. network_ag_waf_sdk,
+    #                         client_factory=cf_app_gateway_waf_policy,
+    #                         min_api='2019-09-01') as g:
+    #     pass
+
     with self.command_group('network application-gateway waf-policy rule', network_ag_waf_sdk,
                             client_factory=cf_app_gateway_waf_policy,
                             min_api='2018-12-01') as g:
@@ -481,7 +486,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_ag_waf_rule_match_cond')
         g.custom_command('remove', 'remove_ag_waf_rule_match_cond')
 
-    with self.command_group('network application-gateway waf-policy managed-rules rule-set', network_ag_waf_sdk,
+    with self.command_group('network application-gateway waf-policy managed-rule rule-set', network_ag_waf_sdk,
                             client_factory=cf_app_gateway_waf_policy,
                             min_api='2019-09-01') as g:
         g.custom_command('add', 'add_waf_managed_rule_set')
@@ -492,7 +497,7 @@ def load_command_table(self, _):
         g.custom_command('remove', 'remove_waf_managed_rule_set')
         g.custom_command('list', 'list_waf_managed_rule_set')
 
-    with self.command_group('network application-gateway waf-policy managed-rules exclusion', network_ag_waf_sdk,
+    with self.command_group('network application-gateway waf-policy managed-rule exclusion', network_ag_waf_sdk,
                             client_factory=cf_app_gateway_waf_policy,
                             min_api='2019-09-01') as g:
         g.custom_command('add', 'add_waf_managed_rule_exclusion')

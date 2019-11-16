@@ -406,11 +406,11 @@ def load_arguments(self, _):
     with self.argument_context('network application-gateway waf-policy rule match-condition list', min_api='2018-12-01') as c:
         c.argument('policy_name', options_list='--policy-name', id_part=None)
 
-    with self.argument_context('network application-gateway waf-policy managed-rules') as c:
+    with self.argument_context('network application-gateway waf-policy managed-rule') as c:
         c.argument('policy_name', options_list='--policy-name', id_part=None,
                    help='The name of the web application firewall policy.')
 
-    with self.argument_context('network application-gateway waf-policy managed-rules rule-set',
+    with self.argument_context('network application-gateway waf-policy managed-rule rule-set',
                                min_api='2019-09-01') as c:
         c.argument('rule_set_type', options_list='--type', help='The type of the web application firewall rule set.')
         c.argument('rule_set_version',
@@ -421,7 +421,7 @@ def load_arguments(self, _):
                    help='The name of the web application firewall rule set group.')
         c.argument('rules', nargs='+', help='List of rules that will be disabled.')
 
-    with self.argument_context('network application-gateway waf-policy managed-rules exclusion',
+    with self.argument_context('network application-gateway waf-policy managed-rule exclusion',
                                min_api='2019-09-01') as c:
         c.argument('match_variable',
                    arg_type=get_enum_type(OwaspCrsExclusionEntryMatchVariable),

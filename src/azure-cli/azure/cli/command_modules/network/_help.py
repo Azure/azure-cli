@@ -1099,54 +1099,54 @@ type: command
 short-summary: Update an application gateway WAF policy custom rule.
 """
 
-helps['network application-gateway waf-policy managed-rules'] = """
+helps['network application-gateway waf-policy managed-rule'] = """
 type: group
 short-summary: >
     Manage managed rules of a waf-policy.
     Visit: https://docs.microsoft.com/en-us/azure/web-application-firewall/afds/afds-overview
 """
 
-helps['network application-gateway waf-policy managed-rules rule-set'] = """
+helps['network application-gateway waf-policy managed-rule rule-set'] = """
 type: group
 short-summary: Manage managed rule set of managed rules of a WAF policy.
 """
 
-helps['network application-gateway waf-policy managed-rules rule-set add'] = """
+helps['network application-gateway waf-policy managed-rule rule-set add'] = """
 type: command
 short-summary: Add managed rule set to the WAF policy managed rules.
 """
 
-helps['network application-gateway waf-policy managed-rules rule-set update'] = """
+helps['network application-gateway waf-policy managed-rule rule-set update'] = """
 type: command
 short-summary: Update(Override) existing rule set of a WAF policy managed rules.
 """
 
-helps['network application-gateway waf-policy managed-rules rule-set remove'] = """
+helps['network application-gateway waf-policy managed-rule rule-set remove'] = """
 type: command
 short-summary: Remove all managed rule set or remove a managed rule set by rule set group.
 """
 
-helps['network application-gateway waf-policy managed-rules rule-set list'] = """
+helps['network application-gateway waf-policy managed-rule rule-set list'] = """
 type: command
 short-summary: List all managed rule set.
 """
 
-helps['network application-gateway waf-policy managed-rules exclusion'] = """
+helps['network application-gateway waf-policy managed-rule exclusion'] = """
 type: group
 short-summary: Manage OWASP CRS exclusions that are applied on a WAF policy managed rules.
 """
 
-helps['network application-gateway waf-policy managed-rules exclusion add'] = """
+helps['network application-gateway waf-policy managed-rule exclusion add'] = """
 type: command
 short-summary: Add an OWASP CRS exclusion rule to the WAF policy managed rules.
 """
 
-helps['network application-gateway waf-policy managed-rules exclusion remove'] = """
+helps['network application-gateway waf-policy managed-rule exclusion remove'] = """
 type: command
 short-summary: List all OWASP CRS exclusion rules that are applied on a Waf policy managed rules.
 """
 
-helps['network application-gateway waf-policy managed-rules exclusion list'] = """
+helps['network application-gateway waf-policy managed-rule exclusion list'] = """
 type: command
 short-summary: List all OWASP CRS exclusion rules that are applied on a Waf policy managed rules.
 """
