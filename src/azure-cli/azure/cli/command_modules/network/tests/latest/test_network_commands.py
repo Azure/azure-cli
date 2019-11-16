@@ -1006,7 +1006,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         })
         self.cmd('network application-gateway waf-policy create -g {rg} -n {waf-policy}')
 
-        # case 1: Initialize managed rule set
+        # case 1: Initialize(add) managed rule set
         self.cmd('network application-gateway waf-policy managed-rules rule-set add '
                  '-g {rg} --policy-name {waf-policy} '
                  '--type OWASP --version 3.0 '
@@ -1019,7 +1019,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules[0].ruleId', '921100')
         ])
 
-        # case 2: Append another managed rule set to same rule group
+        # case 2: Append(add) another managed rule set to same rule group
         self.cmd('network application-gateway waf-policy managed-rules rule-set add '
                  '-g {rg} --policy-name {waf-policy} '
                  '--type OWASP --version 3.0 '
@@ -1045,6 +1045,19 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[1].rules[0].ruleId', '913100')
         ])
 
+        # case 4: override(update) existing managed rule set
+        self.cmd('network application-gateway waf-policy managed-rules rule-set update '
+                 '-g {rg} --policy-name {waf-policy} '
+                 '--type OWASP --version 3.0 '
+                 '--group-name {csr_grp1} --rules 921100 921150')
+        self.cmd('network application-gateway waf-policy show -g {rg} -n {waf-policy}', checks=[
+            self.check('managedRules.managedRuleSets[0].ruleSetType', 'OWASP'),
+            self.check('managedRules.managedRuleSets[0].ruleSetVersion', '3.0'),
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules | length(@)', 2),
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].ruleGroupName', self.kwargs['csr_grp1']),
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules[0].ruleId', '921100'),
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules[1].ruleId', '921150')
+        ])
 
 class NetworkDdosProtectionScenarioTest(LiveScenarioTest):
 
