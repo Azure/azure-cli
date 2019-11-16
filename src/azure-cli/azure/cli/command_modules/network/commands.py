@@ -484,7 +484,11 @@ def load_command_table(self, _):
     with self.command_group('network application-gateway waf-policy managed-rules rule-set', network_ag_waf_sdk,
                             client_factory=cf_app_gateway_waf_policy,
                             min_api='2019-09-01') as g:
-        g.custom_command('create', 'create_waf_managed_rule_set')
+        g.custom_command('add', 'add_waf_managed_rule_set')
+        # g.generic_update_command('update',
+        #                          command_type=network_ag_waf_sdk,
+        #                          client_factory=cf_app_gateway_waf_policy,
+        #                          custom_func_name='update_waf_managed_rule_set')
 
     with self.command_group('network application-gateway waf-policy managed-rules exclusion', network_ag_waf_sdk,
                             client_factory=cf_app_gateway_waf_policy,
