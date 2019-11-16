@@ -1173,7 +1173,7 @@ def add_waf_managed_rule_set(cmd, client, resource_group_name, policy_name,
 
 def update_waf_managed_rule_set(cmd, instance, rule_set_type, rule_set_version, rule_group_name, rules=None):
     """
-    Override(Update) existing rule set of a WAF policy managed rules.
+    Update(Override) existing rule set of a WAF policy managed rules.
     """
     ManagedRuleSet, ManagedRuleGroupOverride, ManagedRuleOverride = \
         cmd.get_models('ManagedRuleSet', 'ManagedRuleGroupOverride', 'ManagedRuleOverride')
@@ -1218,10 +1218,14 @@ def remove_waf_managed_rule_set(cmd, client, resource_group_name, policy_name,
             rg = next(filter(lambda x: x.rule_group_name == rule_group_name, rule_set.rule_group_overrides), None)
             if rg is None:
                 raise CLIError('Rule set group [ {} ] not found.'.format(rule_group_name))
-            else:
-                rule_set.rule_group_overrides.remove(rg)
+            rule_set.rule_group_overrides.remove(rg)
 
     return client.create_or_update(resource_group_name, policy_name, waf_policy)
+
+
+def list_waf_managed_rule_set(cmd, client, resource_group_name, policy_name):
+    waf_policy = client.get(resource_group_name, policy_name)
+    return waf_policy.managed_rules
 # endregion
 
 

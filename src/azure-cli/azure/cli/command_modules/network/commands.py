@@ -490,6 +490,7 @@ def load_command_table(self, _):
                                  client_factory=cf_app_gateway_waf_policy,
                                  custom_func_name='update_waf_managed_rule_set')
         g.custom_command('remove', 'remove_waf_managed_rule_set')
+        g.custom_command('list', 'list_waf_managed_rule_set')
 
     with self.command_group('network application-gateway waf-policy managed-rules exclusion', network_ag_waf_sdk,
                             client_factory=cf_app_gateway_waf_policy,
