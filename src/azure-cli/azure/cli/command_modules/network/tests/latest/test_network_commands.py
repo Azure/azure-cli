@@ -1085,7 +1085,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                  '--match-variable "RequestHeaderNames" --selector-match-operator "StartsWith" --selector "Bing"')
         self.cmd('network application-gateway waf-policy managed-rules exclusion list -g {rg} --policy-name {waf}',
                  checks=[
-                    self.check('exclusions | length(@)', 1)
+                     self.check('exclusions | length(@)', 1)
                  ])
 
         # add another exclusion rule
