@@ -1056,6 +1056,16 @@ type: command
 short-summary: Delete an application gateway WAF policy custom rule.
 """
 
+helps['network application-gateway waf-policy policy-setting'] = """
+type: group
+short-summary: Defines contents of a web application firewall global configuration.
+"""
+
+helps['network application-gateway waf-policy policy-setting update'] = """
+type: command
+short-summary: Update properties of a web application firewall global configuration.
+"""
+
 helps['network application-gateway waf-policy rule list'] = """
 type: command
 short-summary: List application gateway WAF policy custom rules.

@@ -463,10 +463,13 @@ def load_command_table(self, _):
         g.generic_update_command('update', custom_func_name='update_ag_waf_policy')
         g.wait_command('wait')
 
-    # with self.command_group('network application-gateway waf-policy policy-settings'. network_ag_waf_sdk,
-    #                         client_factory=cf_app_gateway_waf_policy,
-    #                         min_api='2019-09-01') as g:
-    #     pass
+    with self.command_group('network application-gateway waf-policy policy-setting', network_ag_waf_sdk,
+                            client_factory=cf_app_gateway_waf_policy,
+                            min_api='2019-09-01') as g:
+        g.generic_update_command('update',
+                                 command_type=network_ag_waf_sdk,
+                                 client_factory=cf_app_gateway_waf_policy,
+                                 custom_func_name='update_waf_policy_setting')
 
     with self.command_group('network application-gateway waf-policy rule', network_ag_waf_sdk,
                             client_factory=cf_app_gateway_waf_policy,

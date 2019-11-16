@@ -1060,6 +1060,30 @@ def list_ag_waf_policies(cmd, resource_group_name=None):
 # endregion
 
 
+# region ApplicationGatewayWAFPolicyRules PolicySettings
+def update_waf_policy_setting(cmd, instance,
+                              state=None, mode=None,
+                              max_request_body_size_in_kb=None, file_upload_limit_in_mb=None,
+                              request_body_check=False):
+    if state is not None:
+        instance.policy_settings.state = state
+
+    if mode is not None:
+        instance.policy_settings.mode = mode
+
+    if max_request_body_size_in_kb is not None:
+        instance.policy_settings.max_request_body_size_in_kb = max_request_body_size_in_kb
+
+    if file_upload_limit_in_mb is not None:
+        instance.policy_settings.file_upload_limit_in_mb = file_upload_limit_in_mb
+
+    if request_body_check is not None:
+        instance.policy_settings.request_body_check = request_body_check
+
+    return instance
+# endregion
+
+
 # region ApplicationGatewayWAFPolicyRules
 def create_waf_rule(cmd, client, resource_group_name, policy_name, rule_name, priority=None, rule_type=None,
                     action=None):

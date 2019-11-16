@@ -375,13 +375,34 @@ def load_arguments(self, _):
     (WebApplicationFirewallAction, WebApplicationFirewallMatchVariable,
      WebApplicationFirewallOperator, WebApplicationFirewallRuleType,
      WebApplicationFirewallTransform,
-     OwaspCrsExclusionEntryMatchVariable, OwaspCrsExclusionEntrySelectorMatchOperator) = self.get_models(
+     OwaspCrsExclusionEntryMatchVariable, OwaspCrsExclusionEntrySelectorMatchOperator,
+     WebApplicationFirewallEnabledState, WebApplicationFirewallMode) = self.get_models(
          'WebApplicationFirewallAction', 'WebApplicationFirewallMatchVariable',
          'WebApplicationFirewallOperator', 'WebApplicationFirewallRuleType',
          'WebApplicationFirewallTransform',
-         'OwaspCrsExclusionEntryMatchVariable', 'OwaspCrsExclusionEntrySelectorMatchOperator')
+         'OwaspCrsExclusionEntryMatchVariable', 'OwaspCrsExclusionEntrySelectorMatchOperator',
+         'WebApplicationFirewallEnabledState', 'WebApplicationFirewallMode')
     with self.argument_context('network application-gateway waf-policy', min_api='2018-12-01') as c:
         c.argument('policy_name', name_arg_type, id_part='name', help='The name of the application gateway WAF policy.')
+
+    with self.argument_context('network application-gateway waf-policy policy-setting', min_api='2019-09-01') as c:
+        c.argument('policy_name', options_list='--policy-name', id_part=None,
+                   help='The name of the web application firewall policy.')
+        c.argument('state',
+                   arg_type=get_enum_type(WebApplicationFirewallEnabledState),
+                   help='Describes if the policy is in enabled state or disabled state.')
+        c.argument('mode',
+                   arg_type=get_enum_type(WebApplicationFirewallMode),
+                   help='Describes if it is in detection mode or prevention mode at policy level.')
+        c.argument('request_body_check',
+                   arg_type=get_three_state_flag(),
+                   help='Specified to require WAF to check request Body.')
+        c.argument('max_request_body_size_in_kb',
+                   type=int,
+                   help='Maximum request body size in Kb for WAF.')
+        c.argument('file_upload_limit_in_mb',
+                   type=int,
+                   help='Maximum file upload size in Mb for WAF."')
 
     with self.argument_context('network application-gateway waf-policy rule', min_api='2018-12-01') as c:
         c.argument('policy_name', options_list='--policy-name')

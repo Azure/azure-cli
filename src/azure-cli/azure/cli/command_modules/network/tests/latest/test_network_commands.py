@@ -993,11 +993,38 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         self.cmd('network application-gateway waf-policy list -g {rg}',
                  checks=self.is_empty())
 
+    @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_setting_')
+    def test_network_app_gateway_waf_policy_setting(self, resource_group):
+        self.kwargs.update({
+            'waf': 'agp1',
+            'ag': 'ag1',
+            'rg': resource_group,
+        })
+
+        # check default policy setting values
+        self.cmd('network application-gateway waf-policy create -g {rg} -n {waf}', checks=[
+            self.check('policySettings.fileUploadLimitInMb', 100),
+            self.check('policySettings.maxRequestBodySizeInKb', 128),
+            self.check('policySettings.mode', 'Detection'),
+            self.check('policySettings.requestBodyCheck', True),
+            self.check('policySettings.state', 'Disabled')
+        ])
+
+        # randomly update some properties
+        self.cmd('network application-gateway waf-policy policy-setting update -g {rg} --policy-name {waf} '
+                 '--state Enabled --file-upload-limit-in-mb 64 --mode Prevention',
+                 checks=[
+                     self.check('policySettings.fileUploadLimitInMb', 64),
+                     self.check('policySettings.maxRequestBodySizeInKb', 128),
+                     self.check('policySettings.mode', 'Prevention'),
+                     self.check('policySettings.requestBodyCheck', False),
+                     self.check('policySettings.state', 'Enabled')
+                 ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_managed_rules_')
     def test_network_app_gateway_waf_policy_managed_rules(self, resource_group):
         self.kwargs.update({
             'waf': 'agp1',
-            'rule': 'rule1',
             'ip': 'pip1',
             'ag': 'ag1',
             'rg': resource_group,
