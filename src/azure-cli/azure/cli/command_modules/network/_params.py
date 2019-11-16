@@ -410,11 +410,13 @@ def load_arguments(self, _):
 
     with self.argument_context('network application-gateway waf-policy managed-rules rule-set',
                                min_api='2019-09-01') as c:
-        c.argument('rule_set_type', options_list='--type', help='Defines the version of the rule set to use.')
-        c.argument('rule_set_version', options_list='--version', help='Defines the version of the rule set to use.')
+        c.argument('rule_set_type', options_list='--type', help='The type of the web application firewall rule set.')
+        c.argument('rule_set_version',
+                   options_list='--version',
+                   help='The version of the web application firewall rule set type.')
         c.argument('rule_group_name',
                    options_list='--group-name',
-                   help='Defines the rule group overrides to apply to the rule set.')
+                   help='The name of the web application firewall rule set group.')
         c.argument('rules', nargs='+', help='List of rules that will be disabled.')
     # region
 

@@ -1111,6 +1111,20 @@ type: group
 short-summary: Manage managed rule set of managed rules of a waf-policy.
 """
 
+helps['network application-gateway waf-policy managed-rules rule-set add'] = """
+type: command
+short-summary: Add managed rule set to the WAF policy managed rules.
+"""
+
+helps['network application-gateway waf-policy managed-rules rule-set update'] = """
+type: command
+short-summary: Override(Update) existing rule set of a WAF policy managed rules.
+"""
+
+helps['network application-gateway waf-policy managed-rules rule-set remove'] = """
+type: command
+short-summary: Remove all managed rule set or remove a managed rule set by rule set group.
+"""
 
 helps['network application-gateway waf-policy show'] = """
 type: command

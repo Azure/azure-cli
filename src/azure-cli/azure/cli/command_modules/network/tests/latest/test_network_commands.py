@@ -1059,6 +1059,18 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules[1].ruleId', '921150')
         ])
 
+        # case 5: clear manage rule set by group {csr_grp1}
+        self.cmd('network application-gateway waf-policy managed-rules rule-set remove '
+                 '-g {rg} --policy-name {waf-policy} '
+                 '--type OWASP --version 3.0 '
+                 '--group-name {csr_grp1} ')
+        self.cmd('network application-gateway waf-policy show -g {rg} -n {waf-policy}', checks=[
+            self.check('managedRules.managedRuleSets[0].ruleSetType', 'OWASP'),
+            self.check('managedRules.managedRuleSets[0].ruleSetVersion', '3.0'),
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].ruleGroupName', self.kwargs['csr_grp2']),
+        ])
+
+
 class NetworkDdosProtectionScenarioTest(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_ddos_protection')
