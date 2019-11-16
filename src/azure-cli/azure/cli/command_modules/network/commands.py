@@ -495,7 +495,9 @@ def load_command_table(self, _):
     with self.command_group('network application-gateway waf-policy managed-rules exclusion', network_ag_waf_sdk,
                             client_factory=cf_app_gateway_waf_policy,
                             min_api='2019-09-01') as g:
-        pass
+        g.custom_command('add', 'add_waf_managed_rule_exclusion')
+        g.custom_command('remove', 'remove_waf_managed_rule_exclusion')
+        g.custom_command('list', 'list_waf_managed_rule_exclusion')
     # endregion
 
     # region ApplicationSecurityGroups

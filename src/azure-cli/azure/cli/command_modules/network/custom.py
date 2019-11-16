@@ -1229,6 +1229,34 @@ def list_waf_managed_rule_set(cmd, client, resource_group_name, policy_name):
 # endregion
 
 
+# region ApplicationGatewayWAFPolicy ManagedRule OwaspCrsExclusionEntry
+def add_waf_managed_rule_exclusion(cmd, client, resource_group_name, policy_name,
+                                   match_variable, selector_match_operator, selector):
+    OwaspCrsExclusionEntry = cmd.get_models('OwaspCrsExclusionEntry')
+
+    exclusion_entry = OwaspCrsExclusionEntry(match_variable=match_variable,
+                                             selector_match_operator=selector_match_operator,
+                                             selector=selector)
+
+    waf_policy = client.get(resource_group_name, policy_name)
+
+    waf_policy.managed_rules.exclusions.append(exclusion_entry)
+
+    return client.create_or_update(resource_group_name, policy_name, waf_policy)
+
+
+def remove_waf_managed_rule_exclusion(cmd, client, resource_group_name, policy_name):
+    waf_policy = client.get(resource_group_name, policy_name)
+    waf_policy.managed_rules.exclusions.clear()
+    return client.create_or_update(resource_group_name, policy_name, waf_policy)
+
+
+def list_waf_managed_rule_exclusion(cmd, client, resource_group_name, policy_name):
+    waf_policy = client.get(resource_group_name, policy_name)
+    return waf_policy.managed_rules
+# endregion
+
+
 # region ApplicationSecurityGroups
 def create_asg(cmd, client, resource_group_name, application_security_group_name, location=None, tags=None):
     ApplicationSecurityGroup = cmd.get_models('ApplicationSecurityGroup')

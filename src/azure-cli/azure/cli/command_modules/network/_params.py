@@ -374,10 +374,12 @@ def load_arguments(self, _):
     # region WebApplicationFirewallPolicy
     (WebApplicationFirewallAction, WebApplicationFirewallMatchVariable,
      WebApplicationFirewallOperator, WebApplicationFirewallRuleType,
-     WebApplicationFirewallTransform) = self.get_models(
-         'WebApplicationFirewallAction', 'WebApplicationFirewallMatchVariable',
-         'WebApplicationFirewallOperator', 'WebApplicationFirewallRuleType',
-         'WebApplicationFirewallTransform')
+     WebApplicationFirewallTransform,
+     OwaspCrsExclusionEntryMatchVariable, OwaspCrsExclusionEntrySelectorMatchOperator) = self.get_models(
+        'WebApplicationFirewallAction', 'WebApplicationFirewallMatchVariable',
+        'WebApplicationFirewallOperator', 'WebApplicationFirewallRuleType',
+        'WebApplicationFirewallTransform',
+        'OwaspCrsExclusionEntryMatchVariable', 'OwaspCrsExclusionEntrySelectorMatchOperator')
     with self.argument_context('network application-gateway waf-policy', min_api='2018-12-01') as c:
         c.argument('policy_name', name_arg_type, id_part='name', help='The name of the application gateway WAF policy.')
 
@@ -418,6 +420,19 @@ def load_arguments(self, _):
                    options_list='--group-name',
                    help='The name of the web application firewall rule set group.')
         c.argument('rules', nargs='+', help='List of rules that will be disabled.')
+
+    with self.argument_context('network application-gateway waf-policy managed-rules exclusion',
+                               min_api='2019-09-01') as c:
+        c.argument('match_variable',
+                   arg_type=get_enum_type(OwaspCrsExclusionEntryMatchVariable),
+                   help='The variable to be excluded.')
+        c.argument('selector_match_operator',
+                   arg_type=get_enum_type(OwaspCrsExclusionEntrySelectorMatchOperator),
+                   help='When matchVariable is a collection, operate on the selector to '
+                        'specify which elements in the collection this exclusion applies to.')
+        c.argument('selector',
+                   help='When matchVariable is a collection, operator used to '
+                        'specify which elements in the collection this exclusion applies to.')
     # region
 
     # region ApplicationSecurityGroups

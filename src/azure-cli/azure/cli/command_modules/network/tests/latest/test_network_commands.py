@@ -1069,6 +1069,40 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                      self.check('managedRuleSets[0].ruleGroupOverrides[0].ruleGroupName', self.kwargs['csr_grp2'])
                  ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_managed_rules_exclusion')
+    def test_network_app_gateway_waf_policy_managed_rules_exclusions(self, resource_group):
+        self.kwargs.update({
+            'waf': 'agp1',
+            'ip': 'pip1',
+            'ag': 'ag1',
+            'rg': resource_group
+        })
+
+        self.cmd('network application-gateway waf-policy create -g {rg} -n {waf}')
+
+        # add one exclusion rule
+        self.cmd('network application-gateway waf-policy managed-rules exclusion add -g {rg} --policy-name {waf} '
+                 '--match-variable "RequestHeaderNames" --selector-match-operator "StartsWith" --selector "Bing"')
+        self.cmd('network application-gateway waf-policy managed-rules exclusion list -g {rg} --policy-name {waf}',
+                 checks=[
+                    self.check('exclusions | length(@)', 1)
+                 ])
+
+        # add another exclusion rule
+        self.cmd('network application-gateway waf-policy managed-rules exclusion add -g {rg} --policy-name {waf} '
+                 '--match-variable "RequestHeaderNames" --selector-match-operator "Contains" --selector "Azure"')
+        self.cmd('network application-gateway waf-policy managed-rules exclusion list -g {rg} --policy-name {waf}',
+                 checks=[
+                     self.check('exclusions | length(@)', 2)
+                 ])
+
+        # clear all exclusion rules
+        self.cmd('network application-gateway waf-policy managed-rules exclusion remove  -g {rg} --policy-name {waf} ')
+        self.cmd('network application-gateway waf-policy managed-rules exclusion list -g {rg} --policy-name {waf}',
+                 checks=[
+                     self.check('exclusions | length(@)', 0)
+                 ])
+
 
 class NetworkDdosProtectionScenarioTest(LiveScenarioTest):
 
