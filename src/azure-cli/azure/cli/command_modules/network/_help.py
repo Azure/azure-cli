@@ -1051,6 +1051,11 @@ type: command
 short-summary: Update properties of a web application firewall global configuration.
 """
 
+helps['network application-gateway waf-policy policy-setting list'] = """
+type: command
+short-summary: List properties of a web application firewall global configuration.
+"""
+
 helps['network application-gateway waf-policy custom-rule'] = """
 type: group
 short-summary: Manage application gateway web application firewall (WAF) policy custom rules.

@@ -1081,6 +1081,10 @@ def update_waf_policy_setting(cmd, instance,
         instance.policy_settings.request_body_check = request_body_check
 
     return instance
+
+
+def list_waf_policy_setting(cmd, client, resource_group_name, policy_name):
+    return client.get(resource_group_name, policy_name).policy_settings
 # endregion
 
 
