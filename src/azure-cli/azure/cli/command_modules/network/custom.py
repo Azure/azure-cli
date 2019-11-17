@@ -1227,7 +1227,7 @@ def update_waf_managed_rule_set(cmd, instance, rule_set_type, rule_set_version, 
 def remove_waf_managed_rule_set(cmd, client, resource_group_name, policy_name,
                                 rule_set_type, rule_set_version, rule_group_name=None):
     """
-    Remove all managed rule set or remove a managed rule set by rule set group.
+    Remove a managed rule set by rule set group name if rule_group_name is specified. Otherwise, remove all rule set.
     """
     waf_policy = client.get(resource_group_name, policy_name)
 
@@ -1238,7 +1238,7 @@ def remove_waf_managed_rule_set(cmd, client, resource_group_name, policy_name,
         if rule_group_name is None:
             rule_set.rule_group_overrides = []
         else:
-            rg = next(filter(lambda x: x.rule_group_name == rule_group_name, rule_set.rule_group_overrides), None)
+            rg = next((rg for rg in rule_set.rule_group_overrides if rg.rule_group_name == rule_group_name), None)
             if rg is None:
                 raise CLIError('Rule set group [ {} ] not found.'.format(rule_group_name))
             rule_set.rule_group_overrides.remove(rg)
@@ -1270,7 +1270,7 @@ def add_waf_managed_rule_exclusion(cmd, client, resource_group_name, policy_name
 
 def remove_waf_managed_rule_exclusion(cmd, client, resource_group_name, policy_name):
     waf_policy = client.get(resource_group_name, policy_name)
-    waf_policy.managed_rules.exclusions.clear()
+    waf_policy.managed_rules.exclusions = []
     return client.create_or_update(resource_group_name, policy_name, waf_policy)
 
 

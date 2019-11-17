@@ -1133,7 +1133,8 @@ short-summary: Update(Override) existing rule set of a WAF policy managed rules.
 
 helps['network application-gateway waf-policy managed-rule rule-set remove'] = """
 type: command
-short-summary: Remove all managed rule set or remove a managed rule set by rule set group.
+short-summary: >
+  Remove a managed rule set by rule set group name if rule_group_name is specified. Otherwise, remove all rule set.
 """
 
 helps['network application-gateway waf-policy managed-rule rule-set list'] = """
