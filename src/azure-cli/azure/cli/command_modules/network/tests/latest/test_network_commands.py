@@ -946,15 +946,22 @@ class NetworkAppGatewayWafV2ConfigScenarioTest(ScenarioTest):
 
 class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy')
-    def test_network_app_gateway_waf_policy(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_')
+    def test_network_app_gateway_waf_policy_with_application_gateway(self, resource_group):
         self.kwargs.update({
             'waf': 'agp1',
-            'rule': 'rule1',
-            'ip': 'pip1',
-            'ag': 'ag1',
-            'rg': resource_group
+            'custom-rule1': 'rule1',
+            'custom-rule2': 'rule2',
+            'ip1': 'pip1',
+            'ag1': 'ag1',
+            'ip2': 'pip2',
+            'ag2': 'ag2',
+            'rg': resource_group,
+            'csr_grp1': 'REQUEST-921-PROTOCOL-ATTACK',
+            'csr_grp2': 'REQUEST-913-SCANNER-DETECTION'
         })
+
+        # create a waf policy
         self.cmd('network application-gateway waf-policy create -g {rg} -n {waf}')
         self.cmd('network application-gateway waf-policy update -g {rg} -n {waf} --tags test=best',
                  checks=self.check('tags.test', 'best'))
@@ -962,48 +969,70 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         self.cmd('network application-gateway waf-policy list -g {rg}',
                  checks=self.check('length(@)', 1))
 
-        self.cmd('network application-gateway waf-policy custom-rule create -g {rg} --policy-name {waf} -n {rule} '
+        # add two custom rules of this waf-policy
+        self.cmd('network application-gateway waf-policy custom-rule create -g {rg} '
+                 '--policy-name {waf} -n {custom-rule1} '
                  '--priority 50 --action log --rule-type MatchRule',
                  checks=self.check('priority', 50))
-        self.cmd('network application-gateway waf-policy custom-rule create -g {rg} --policy-name {waf} -n rule2 '
+        self.cmd('network application-gateway waf-policy custom-rule create -g {rg} '
+                 '--policy-name {waf} -n {custom-rule2} '
                  '--priority 100 --action log --rule-type MatchRule')
-        self.cmd('network application-gateway waf-policy custom-rule update -g {rg} --policy-name {waf} -n {rule} '
-                 '--priority 75',
-                 checks=self.check('priority', 75))
-        self.cmd('network application-gateway waf-policy custom-rule show -g {rg} --policy-name {waf} -n {rule}')
-        self.cmd('network application-gateway waf-policy custom-rule list -g {rg} --policy-name {waf}',
-                 checks=self.check('length(@)', 2))
-        self.cmd('network application-gateway waf-policy custom-rule delete -g {rg} --policy-name {waf} -n rule2')
-        self.cmd('network application-gateway waf-policy custom-rule list -g {rg} --policy-name {waf}',
-                 checks=self.check('length(@)', 1))
 
-        self.cmd('network application-gateway waf-policy custom-rule match-condition add -g {rg} '
-                 '--policy-name {waf} -n {rule} '
-                 '--match-variables RequestHeaders.value --operator contains --values foo boo --transform lowercase')
-        self.cmd('network application-gateway waf-policy custom-rule match-condition add -g {rg} '
-                 '--policy-name {waf} -n {rule} '
-                 '--match-variables RequestHeaders.value --operator contains '
-                 '--values remove this --transform lowercase')
-        self.cmd('network application-gateway waf-policy custom-rule match-condition remove -g {rg} '
-                 '--policy-name {waf} -n {rule} '
-                 '--index 1')
-        self.cmd('network application-gateway waf-policy custom-rule match-condition list -g {rg} '
-                 '--policy-name {waf} -n {rule}',
-                 checks=[
-                     self.check('length(@)', 1),
-                     self.check('@[0].matchValues[0]', 'foo')
-                 ])
+        # update some policy settings of this waf-policy
+        self.cmd('network application-gateway waf-policy policy-setting update -g {rg} --policy-name {waf} '
+                 '--state Enabled --file-upload-limit-in-mb 64 --mode Prevention')
 
-        self.cmd('network public-ip create -g {rg} -n {ip} --sku standard')
-        self.cmd('network application-gateway create -g {rg} -n {ag} '
-                 '--subnet subnet1 --vnet-name vnet1 --public-ip-address {ip} --sku WAF_v2 --waf-policy {waf}')
-        self.cmd('network application-gateway show -g {rg} -n {ag}',
+        # add two managed rule set to the managed rules of this waf-policy
+        self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
+                 '--type OWASP --version 3.0 '
+                 '--group-name {csr_grp1} --rules 921100 921110')
+        self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
+                 '--type OWASP --version 3.0 '
+                 '--group-name {csr_grp2} --rules 913100')
+
+        # add one exclusion rule to the managed rules of this waf-policy
+        self.cmd('network application-gateway waf-policy managed-rule exclusion add -g {rg} --policy-name {waf} '
+                 '--match-variable "RequestHeaderNames" --selector-match-operator "StartsWith" --selector "Bing"')
+
+        self.cmd('network application-gateway waf-policy show -g {rg} -n {waf}', checks=[
+            self.check('customRules | length(@)', 2),
+            self.check('customRules[0].priority', 50),
+            self.check('customRules[1].priority', 100),
+            self.check('managedRules.managedRuleSets[0].ruleSetType', 'OWASP'),
+            self.check('managedRules.managedRuleSets[0].ruleSetVersion', '3.0'),
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules | length(@)', 2),
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].ruleGroupName', self.kwargs['csr_grp1']),
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules[0].ruleId', '921100'),
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[1].ruleGroupName', self.kwargs['csr_grp2']),
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[1].rules[0].ruleId', '913100'),
+            self.check('policySettings.fileUploadLimitInMb', 64),
+            self.check('policySettings.maxRequestBodySizeInKb', 128),
+            self.check('policySettings.mode', 'Prevention'),
+            self.check('policySettings.requestBodyCheck', False),
+            self.check('policySettings.state', 'Enabled')
+        ])
+
+        # prepare two IPs
+        self.cmd('network public-ip create -g {rg} -n {ip1} --sku standard')
+        self.cmd('network public-ip create -g {rg} -n {ip2} --sku standard')
+
+        # create two application gateways and assign with the same waf-policy
+        self.cmd('network application-gateway create -g {rg} -n {ag1} '
+                 '--subnet subnet1 --vnet-name vnet1 --public-ip-address {ip1} --sku WAF_v2 --waf-policy {waf}')
+        self.cmd('network application-gateway create -g {rg} -n {ag2} '
+                 '--subnet subnet2 --vnet-name vnet2 --public-ip-address {ip2} --sku WAF_v2 --waf-policy {waf}')
+
+        self.cmd('network application-gateway show -g {rg} -n {ag1}',
                  checks=self.check("firewallPolicy.contains(id, '{waf}')", True))
-        self.cmd('network application-gateway delete -g {rg} -n {ag}')
+        self.cmd('network application-gateway show -g {rg} -n {ag2}',
+                 checks=self.check("firewallPolicy.contains(id, '{waf}')", True))
 
-        self.cmd('network application-gateway waf-policy delete -g {rg} -n {waf}')
-        self.cmd('network application-gateway waf-policy list -g {rg}',
-                 checks=self.is_empty())
+        # test assigned application-gateways
+        self.cmd('network application-gateway waf-policy show -g {rg} -n {waf}', checks=[
+            self.check('applicationGateways | length(@)', 2),
+            self.check("contains(applicationGateways[0].id, '{ag1}')", True),
+            self.check("contains(applicationGateways[1].id, '{ag2}')", True)
+        ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_custom_rule_')
     def test_network_app_gateway_waf_custom_rule(self, resource_group):
@@ -1130,7 +1159,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         self.cmd('network application-gateway waf-policy create -g {rg} -n {waf}')
 
         # case 1: Initialize(add) managed rule set
-        self.cmd('network application-gateway waf-policy managed-rules rule-set add -g {rg} --policy-name {waf} '
+        self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
                  '--type OWASP --version 3.0 '
                  '--group-name {csr_grp1} --rules 921100 921110')
         self.cmd('network application-gateway waf-policy show -g {rg} -n {waf}', checks=[
@@ -1142,10 +1171,10 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         ])
 
         # case 2: Append(add) another managed rule set to same rule group
-        self.cmd('network application-gateway waf-policy managed-rules rule-set add -g {rg} --policy-name {waf} '
+        self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
                  '--type OWASP --version 3.0 '
                  '--group-name {csr_grp1} --rules 921150')
-        self.cmd('network application-gateway waf-policy managed-rules rule-set list -g {rg} --policy-name {waf}',
+        self.cmd('network application-gateway waf-policy managed-rule rule-set list -g {rg} --policy-name {waf}',
                  checks=[
                      self.check('managedRuleSets[0].ruleSetType', 'OWASP'),
                      self.check('managedRuleSets[0].ruleSetVersion', '3.0'),
@@ -1155,10 +1184,10 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                  ])
 
         # # case 3: Add another managed rule set of different rule group
-        self.cmd('network application-gateway waf-policy managed-rules rule-set add -g {rg} --policy-name {waf} '
+        self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
                  '--type OWASP --version 3.0 '
                  '--group-name {csr_grp2} --rules 913100')
-        self.cmd('network application-gateway waf-policy managed-rules rule-set list -g {rg} --policy-name {waf}',
+        self.cmd('network application-gateway waf-policy managed-rule rule-set list -g {rg} --policy-name {waf}',
                  checks=[
                      self.check('managedRuleSets[0].ruleSetType', 'OWASP'),
                      self.check('managedRuleSets[0].ruleSetVersion', '3.0'),
@@ -1168,10 +1197,10 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                  ])
 
         # case 4: override(update) existing managed rule set
-        self.cmd('network application-gateway waf-policy managed-rules rule-set update -g {rg} --policy-name {waf} '
+        self.cmd('network application-gateway waf-policy managed-rule rule-set update -g {rg} --policy-name {waf} '
                  '--type OWASP --version 3.0 '
                  '--group-name {csr_grp1} --rules 921100 921150')
-        self.cmd('network application-gateway waf-policy managed-rules rule-set list -g {rg} --policy-name {waf}',
+        self.cmd('network application-gateway waf-policy managed-rule rule-set list -g {rg} --policy-name {waf}',
                  checks=[
                      self.check('managedRuleSets[0].ruleSetType', 'OWASP'),
                      self.check('managedRuleSets[0].ruleSetVersion', '3.0'),
@@ -1182,10 +1211,10 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                  ])
 
         # # case 5: clear manage rule set by group {csr_grp1}
-        self.cmd('network application-gateway waf-policy managed-rules rule-set remove -g {rg} --policy-name {waf} '
+        self.cmd('network application-gateway waf-policy managed-rule rule-set remove -g {rg} --policy-name {waf} '
                  '--type OWASP --version 3.0 '
                  '--group-name {csr_grp1} ')
-        self.cmd('network application-gateway waf-policy managed-rules rule-set list -g {rg} --policy-name {waf}',
+        self.cmd('network application-gateway waf-policy managed-rule rule-set list -g {rg} --policy-name {waf}',
                  checks=[
                      self.check('managedRuleSets[0].ruleSetType', 'OWASP'),
                      self.check('managedRuleSets[0].ruleSetVersion', '3.0'),
@@ -1204,24 +1233,24 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         self.cmd('network application-gateway waf-policy create -g {rg} -n {waf}')
 
         # add one exclusion rule
-        self.cmd('network application-gateway waf-policy managed-rules exclusion add -g {rg} --policy-name {waf} '
+        self.cmd('network application-gateway waf-policy managed-rule exclusion add -g {rg} --policy-name {waf} '
                  '--match-variable "RequestHeaderNames" --selector-match-operator "StartsWith" --selector "Bing"')
-        self.cmd('network application-gateway waf-policy managed-rules exclusion list -g {rg} --policy-name {waf}',
+        self.cmd('network application-gateway waf-policy managed-rule exclusion list -g {rg} --policy-name {waf}',
                  checks=[
                      self.check('exclusions | length(@)', 1)
                  ])
 
         # add another exclusion rule
-        self.cmd('network application-gateway waf-policy managed-rules exclusion add -g {rg} --policy-name {waf} '
+        self.cmd('network application-gateway waf-policy managed-rule exclusion add -g {rg} --policy-name {waf} '
                  '--match-variable "RequestHeaderNames" --selector-match-operator "Contains" --selector "Azure"')
-        self.cmd('network application-gateway waf-policy managed-rules exclusion list -g {rg} --policy-name {waf}',
+        self.cmd('network application-gateway waf-policy managed-rule exclusion list -g {rg} --policy-name {waf}',
                  checks=[
                      self.check('exclusions | length(@)', 2)
                  ])
 
         # clear all exclusion rules
-        self.cmd('network application-gateway waf-policy managed-rules exclusion remove  -g {rg} --policy-name {waf} ')
-        self.cmd('network application-gateway waf-policy managed-rules exclusion list -g {rg} --policy-name {waf}',
+        self.cmd('network application-gateway waf-policy managed-rule exclusion remove  -g {rg} --policy-name {waf} ')
+        self.cmd('network application-gateway waf-policy managed-rule exclusion list -g {rg} --policy-name {waf}',
                  checks=[
                      self.check('exclusions | length(@)', 0)
                  ])
