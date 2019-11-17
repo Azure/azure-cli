@@ -1085,27 +1085,26 @@ def update_waf_policy_setting(cmd, instance,
 
 
 # region ApplicationGatewayWAFPolicyRules
-def create_waf_rule(cmd, client, resource_group_name, policy_name, rule_name, priority=None, rule_type=None,
-                    action=None):
+def create_waf_custom_rule(cmd, client, resource_group_name, policy_name, rule_name, priority, rule_type, action):
     """
     Initialize custom rule for WAF policy
     """
     WebApplicationFirewallCustomRule = cmd.get_models('WebApplicationFirewallCustomRule')
     waf_policy = client.get(resource_group_name, policy_name)
-    new_rule = WebApplicationFirewallCustomRule(
+    new_custom_rule = WebApplicationFirewallCustomRule(
         name=rule_name,
         action=action,
         match_conditions=[],
         priority=priority,
         rule_type=rule_type
     )
-    upsert_to_collection(waf_policy, 'custom_rules', new_rule, 'name')
+    upsert_to_collection(waf_policy, 'custom_rules', new_custom_rule, 'name')
     parent = client.create_or_update(resource_group_name, policy_name, waf_policy)
     return find_child_item(parent, rule_name, path='custom_rules', key_path='name')
 
 
 # pylint: disable=unused-argument
-def update_ag_waf_rule(instance, parent, cmd, rule_name, priority=None, rule_type=None, action=None):
+def update_waf_custom_rule(instance, parent, cmd, rule_name, priority=None, rule_type=None, action=None):
     with cmd.update_context(instance) as c:
         c.set_param('priority', priority)
         c.set_param('rule_type', rule_type)
@@ -1113,16 +1112,16 @@ def update_ag_waf_rule(instance, parent, cmd, rule_name, priority=None, rule_typ
     return parent
 
 
-def show_ag_waf_rule(cmd, client, resource_group_name, policy_name, rule_name):
+def show_waf_custom_rule(cmd, client, resource_group_name, policy_name, rule_name):
     waf_policy = client.get(resource_group_name, policy_name)
     return find_child_item(waf_policy, rule_name, path='custom_rules', key_path='name')
 
 
-def list_ag_waf_rules(cmd, client, resource_group_name, policy_name):
+def list_waf_custom_rules(cmd, client, resource_group_name, policy_name):
     return client.get(resource_group_name, policy_name).custom_rules
 
 
-def delete_ag_waf_rule(cmd, client, resource_group_name, policy_name, rule_name, no_wait=None):
+def delete_waf_custom_rule(cmd, client, resource_group_name, policy_name, rule_name, no_wait=None):
     waf_policy = client.get(resource_group_name, policy_name)
     rule = find_child_item(waf_policy, rule_name, path='custom_rules', key_path='name')
     waf_policy.custom_rules.remove(rule)
@@ -1131,11 +1130,11 @@ def delete_ag_waf_rule(cmd, client, resource_group_name, policy_name, rule_name,
 
 
 # region ApplicationGatewayWAFPolicyRuleMatchConditions
-def add_ag_waf_rule_match_cond(cmd, client, resource_group_name, policy_name, rule_name, match_variables,
-                               operator, match_values, negation_condition=None, transforms=None):
+def add_waf_custom_rule_match_cond(cmd, client, resource_group_name, policy_name, rule_name,
+                                   match_variables, operator, match_values, negation_condition=None, transforms=None):
     MatchCondition = cmd.get_models('MatchCondition')
     waf_policy = client.get(resource_group_name, policy_name)
-    rule = find_child_item(waf_policy, rule_name, path='custom_rules', key_path='name')
+    custom_rule = find_child_item(waf_policy, rule_name, path='custom_rules', key_path='name')
     new_cond = MatchCondition(
         match_variables=match_variables,
         operator=operator,
@@ -1143,18 +1142,18 @@ def add_ag_waf_rule_match_cond(cmd, client, resource_group_name, policy_name, ru
         negation_conditon=negation_condition,
         transforms=transforms
     )
-    rule.match_conditions.append(new_cond)
-    upsert_to_collection(waf_policy, 'custom_rules', rule, 'name', warn=False)
+    custom_rule.match_conditions.append(new_cond)
+    upsert_to_collection(waf_policy, 'custom_rules', custom_rule, 'name', warn=False)
     client.create_or_update(resource_group_name, policy_name, waf_policy)
     return new_cond
 
 
-def list_ag_waf_rule_match_cond(cmd, client, resource_group_name, policy_name, rule_name):
+def list_waf_custom_rule_match_cond(cmd, client, resource_group_name, policy_name, rule_name):
     waf_policy = client.get(resource_group_name, policy_name)
     return find_child_item(waf_policy, rule_name, path='custom_rules', key_path='name').match_conditions
 
 
-def remove_ag_waf_rule_match_cond(cmd, client, resource_group_name, policy_name, rule_name, index):
+def remove_waf_custom_rule_match_cond(cmd, client, resource_group_name, policy_name, rule_name, index):
     waf_policy = client.get(resource_group_name, policy_name)
     rule = find_child_item(waf_policy, rule_name, path='custom_rules', key_path='name')
     rule.match_conditions.pop(index)

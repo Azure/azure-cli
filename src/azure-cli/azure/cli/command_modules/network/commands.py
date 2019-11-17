@@ -455,7 +455,9 @@ def load_command_table(self, _):
     # endregion
 
     # region ApplicationGatewayWAFPolicy
-    with self.command_group('network application-gateway waf-policy', network_ag_waf_sdk, client_factory=cf_app_gateway_waf_policy, min_api='2018-12-01') as g:
+    with self.command_group('network application-gateway waf-policy', network_ag_waf_sdk,
+                            client_factory=cf_app_gateway_waf_policy,
+                            min_api='2018-12-01') as g:
         g.custom_command('create', 'create_ag_waf_policy')
         g.command('delete', 'delete')
         g.show_command('show', 'get')
@@ -471,23 +473,26 @@ def load_command_table(self, _):
                                  client_factory=cf_app_gateway_waf_policy,
                                  custom_func_name='update_waf_policy_setting')
 
-    with self.command_group('network application-gateway waf-policy rule', network_ag_waf_sdk,
+    with self.command_group('network application-gateway waf-policy custom-rule', network_ag_waf_sdk,
                             client_factory=cf_app_gateway_waf_policy,
                             min_api='2018-12-01') as g:
-        g.custom_command('create', 'create_waf_rule')
-        g.custom_command('delete', 'delete_ag_waf_rule')
-        g.custom_command('list', 'list_ag_waf_rules')
-        g.custom_show_command('show', 'show_ag_waf_rule')
-        g.generic_update_command('update', command_type=network_ag_waf_sdk,
+        g.custom_command('create', 'create_waf_custom_rule')
+        g.custom_command('delete', 'delete_waf_custom_rule')
+        g.custom_command('list', 'list_waf_custom_rules')
+        g.custom_show_command('show', 'show_waf_custom_rule')
+        g.generic_update_command('update',
+                                 command_type=network_ag_waf_sdk,
                                  client_factory=cf_app_gateway_waf_policy,
-                                 custom_func_name='update_ag_waf_rule',
+                                 custom_func_name='update_waf_custom_rule',
                                  child_collection_prop_name='custom_rules',
                                  child_arg_name='rule_name')
 
-    with self.command_group('network application-gateway waf-policy rule match-condition', network_ag_waf_sdk, client_factory=cf_app_gateway_waf_policy, min_api='2018-12-01') as g:
-        g.custom_command('add', 'add_ag_waf_rule_match_cond')
-        g.custom_command('list', 'list_ag_waf_rule_match_cond')
-        g.custom_command('remove', 'remove_ag_waf_rule_match_cond')
+    with self.command_group('network application-gateway waf-policy custom-rule match-condition', network_ag_waf_sdk,
+                            client_factory=cf_app_gateway_waf_policy,
+                            min_api='2018-12-01') as g:
+        g.custom_command('add', 'add_waf_custom_rule_match_cond')
+        g.custom_command('list', 'list_waf_custom_rule_match_cond')
+        g.custom_command('remove', 'remove_waf_custom_rule_match_cond')
 
     with self.command_group('network application-gateway waf-policy managed-rule rule-set', network_ag_waf_sdk,
                             client_factory=cf_app_gateway_waf_policy,

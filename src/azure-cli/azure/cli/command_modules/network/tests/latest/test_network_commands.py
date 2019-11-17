@@ -948,50 +948,146 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy')
     def test_network_app_gateway_waf_policy(self, resource_group):
-
         self.kwargs.update({
-            'wafp': 'agp1',
+            'waf': 'agp1',
             'rule': 'rule1',
             'ip': 'pip1',
             'ag': 'ag1',
             'rg': resource_group
         })
-        self.cmd('network application-gateway waf-policy create -g {rg} -n {wafp}')
-        self.cmd('network application-gateway waf-policy update -g {rg} -n {wafp} --tags test=best',
+        self.cmd('network application-gateway waf-policy create -g {rg} -n {waf}')
+        self.cmd('network application-gateway waf-policy update -g {rg} -n {waf} --tags test=best',
                  checks=self.check('tags.test', 'best'))
-        self.cmd('network application-gateway waf-policy show -g {rg} -n {wafp}')
+        self.cmd('network application-gateway waf-policy show -g {rg} -n {waf}')
         self.cmd('network application-gateway waf-policy list -g {rg}',
                  checks=self.check('length(@)', 1))
 
-        self.cmd('network application-gateway waf-policy rule create -g {rg} --policy-name {wafp} -n {rule} --priority 50 --action log --rule-type matchrule',
+        self.cmd('network application-gateway waf-policy custom-rule create -g {rg} --policy-name {waf} -n {rule} '
+                 '--priority 50 --action log --rule-type MatchRule',
                  checks=self.check('priority', 50))
-        self.cmd('network application-gateway waf-policy rule create -g {rg} --policy-name {wafp} -n rule2 --priority 100 --action log --rule-type matchrule')
-        self.cmd('network application-gateway waf-policy rule update -g {rg} --policy-name {wafp} -n {rule} --priority 75',
+        self.cmd('network application-gateway waf-policy custom-rule create -g {rg} --policy-name {waf} -n rule2 '
+                 '--priority 100 --action log --rule-type MatchRule')
+        self.cmd('network application-gateway waf-policy custom-rule update -g {rg} --policy-name {waf} -n {rule} '
+                 '--priority 75',
                  checks=self.check('priority', 75))
-        self.cmd('network application-gateway waf-policy rule show -g {rg} --policy-name {wafp} -n {rule}')
-        self.cmd('network application-gateway waf-policy rule list -g {rg} --policy-name {wafp}',
+        self.cmd('network application-gateway waf-policy custom-rule show -g {rg} --policy-name {waf} -n {rule}')
+        self.cmd('network application-gateway waf-policy custom-rule list -g {rg} --policy-name {waf}',
                  checks=self.check('length(@)', 2))
-        self.cmd('network application-gateway waf-policy rule delete -g {rg} --policy-name {wafp} -n rule2')
-        self.cmd('network application-gateway waf-policy rule list -g {rg} --policy-name {wafp}',
+        self.cmd('network application-gateway waf-policy custom-rule delete -g {rg} --policy-name {waf} -n rule2')
+        self.cmd('network application-gateway waf-policy custom-rule list -g {rg} --policy-name {waf}',
                  checks=self.check('length(@)', 1))
 
-        self.cmd('network application-gateway waf-policy rule match-condition add -g {rg} --policy-name {wafp} -n {rule} --match-variables RequestHeaders.value --operator contains --values foo boo --transform lowercase')
-        self.cmd('network application-gateway waf-policy rule match-condition add -g {rg} --policy-name {wafp} -n {rule} --match-variables RequestHeaders.value --operator contains --values remove this --transform lowercase')
-        self.cmd('network application-gateway waf-policy rule match-condition remove -g {rg} --policy-name {wafp} -n {rule} --index 1')
-        self.cmd('network application-gateway waf-policy rule match-condition list -g {rg} --policy-name {wafp} -n {rule}', checks=[
-            self.check('length(@)', 1),
-            self.check('@[0].matchValues[0]', 'foo')
-        ])
+        self.cmd('network application-gateway waf-policy custom-rule match-condition add -g {rg} '
+                 '--policy-name {waf} -n {rule} '
+                 '--match-variables RequestHeaders.value --operator contains --values foo boo --transform lowercase')
+        self.cmd('network application-gateway waf-policy custom-rule match-condition add -g {rg} '
+                 '--policy-name {waf} -n {rule} '
+                 '--match-variables RequestHeaders.value --operator contains '
+                 '--values remove this --transform lowercase')
+        self.cmd('network application-gateway waf-policy custom-rule match-condition remove -g {rg} '
+                 '--policy-name {waf} -n {rule} '
+                 '--index 1')
+        self.cmd('network application-gateway waf-policy custom-rule match-condition list -g {rg} '
+                 '--policy-name {waf} -n {rule}',
+                 checks=[
+                     self.check('length(@)', 1),
+                     self.check('@[0].matchValues[0]', 'foo')
+                 ])
 
         self.cmd('network public-ip create -g {rg} -n {ip} --sku standard')
-        self.cmd('network application-gateway create -g {rg} -n {ag} --subnet subnet1 --vnet-name vnet1 --public-ip-address {ip} --sku WAF_v2 --waf-policy {wafp}')
+        self.cmd('network application-gateway create -g {rg} -n {ag} '
+                 '--subnet subnet1 --vnet-name vnet1 --public-ip-address {ip} --sku WAF_v2 --waf-policy {waf}')
         self.cmd('network application-gateway show -g {rg} -n {ag}',
-                 checks=self.check("firewallPolicy.contains(id, '{wafp}')", True))
+                 checks=self.check("firewallPolicy.contains(id, '{waf}')", True))
         self.cmd('network application-gateway delete -g {rg} -n {ag}')
 
-        self.cmd('network application-gateway waf-policy delete -g {rg} -n {wafp}')
+        self.cmd('network application-gateway waf-policy delete -g {rg} -n {waf}')
         self.cmd('network application-gateway waf-policy list -g {rg}',
                  checks=self.is_empty())
+
+    @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_custom_rule_')
+    def test_network_app_gateway_waf_custom_rule(self, resource_group):
+        self.kwargs.update({
+            'waf': 'agp1',
+            'rule': 'rule1',
+            'ip': 'pip1',
+            'ag': 'ag1',
+            'rg': resource_group
+        })
+
+        # create a waf-policy with empty custom rule
+        self.cmd('network application-gateway waf-policy create -g {rg} -n {waf}')
+        self.cmd('network application-gateway waf-policy show -g {rg} -n {waf}', checks=[
+            self.check('customRules | length(@)', 0)
+        ])
+
+        # create a custom rule
+        self.cmd('network application-gateway waf-policy custom-rule create -g {rg} '
+                 '--policy-name {waf} -n {rule} '
+                 '--priority 50 --action LOG --rule-type MatchRule',
+                 checks=[
+                     self.check('priority', 50),
+                     self.check('ruleType', 'MatchRule'),
+                     self.check('action', 'Log'),
+                     self.check('matchConditions | length(@)', 0)
+                 ])
+        self.cmd('network application-gateway waf-policy show -g {rg} -n {waf}', checks=[
+            self.check('customRules | length(@)', 1)
+        ])
+        self.cmd('network application-gateway waf-policy custom-rule show -g {rg} '
+                 '--policy-name {waf} -n {rule}',
+                 checks=[
+                     self.check('priority', 50),
+                     self.check('ruleType', 'MatchRule'),
+                     self.check('action', 'Log'),
+                     self.check('matchConditions | length(@)', 0)
+                 ])
+
+        # add match condition to the previous created custom rule
+        self.cmd('network application-gateway waf-policy custom-rule match-condition add -g {rg} '
+                 '--policy-name {waf} -n {rule} '
+                 '--match-variables RequestHeaders.value --operator contains --values foo boo --transform lowercase')
+        self.cmd('network application-gateway waf-policy custom-rule show -g {rg} '
+                 '--policy-name {waf} -n {rule}',
+                 checks=[
+                     self.check('priority', 50),
+                     self.check('ruleType', 'MatchRule'),
+                     self.check('action', 'Log'),
+                     self.check('matchConditions | length(@)', 1)
+                 ])
+
+        # update one of properties
+        self.cmd('network application-gateway waf-policy custom-rule update -g {rg} '
+                 '--policy-name {waf} -n {rule} '
+                 '--priority 75',
+                 checks=self.check('priority', 75))
+
+        # add another match condition to the same custom rule
+        self.cmd('network application-gateway waf-policy custom-rule match-condition add -g {rg} '
+                 '--policy-name {waf} -n {rule} '
+                 '--match-variables RequestHeaders.value --operator contains '
+                 '--values remove this --transform lowercase')
+        self.cmd('network application-gateway waf-policy custom-rule show -g {rg} '
+                 '--policy-name {waf} -n {rule}',
+                 checks=[
+                     self.check('priority', 75),
+                     self.check('ruleType', 'MatchRule'),
+                     self.check('action', 'Log'),
+                     self.check('matchConditions | length(@)', 2)
+                 ])
+
+        # remove one of match condition of custom rule
+        self.cmd('network application-gateway waf-policy custom-rule match-condition remove -g {rg} '
+                 '--policy-name {waf} -n {rule} '
+                 '--index 0')
+        self.cmd('network application-gateway waf-policy custom-rule show -g {rg} '
+                 '--policy-name {waf} -n {rule}',
+                 checks=[
+                     self.check('priority', 75),
+                     self.check('ruleType', 'MatchRule'),
+                     self.check('action', 'Log'),
+                     self.check('matchConditions | length(@)', 1)
+                 ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_setting_')
     def test_network_app_gateway_waf_policy_setting(self, resource_group):

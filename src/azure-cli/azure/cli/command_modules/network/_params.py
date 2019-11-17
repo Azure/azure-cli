@@ -404,27 +404,39 @@ def load_arguments(self, _):
                    type=int,
                    help='Maximum file upload size in Mb for WAF."')
 
-    with self.argument_context('network application-gateway waf-policy rule', min_api='2018-12-01') as c:
+    with self.argument_context('network application-gateway waf-policy custom-rule', min_api='2018-12-01') as c:
         c.argument('policy_name', options_list='--policy-name')
         c.argument('rule_name', options_list=['--name', '-n'], id_part='child_name_1', help='Name of the WAF policy rule.')
         c.argument('priority', type=int, help='Rule priority. Lower values are evaluated prior to higher values.')
         c.argument('action', arg_type=get_enum_type(WebApplicationFirewallAction), help='Action to take.')
         c.argument('rule_type', arg_type=get_enum_type(WebApplicationFirewallRuleType), help='Type of rule.')
 
-    with self.argument_context('network application-gateway waf-policy rule list', min_api='2018-12-01') as c:
+    with self.argument_context('network application-gateway waf-policy custom-rule list', min_api='2018-12-01') as c:
         c.argument('policy_name', options_list='--policy-name', id_part=None)
 
-    with self.argument_context('network application-gateway waf-policy rule match-condition', min_api='2018-12-01') as c:
+    with self.argument_context('network application-gateway waf-policy custom-rule match-condition',
+                               min_api='2018-12-01') as c:
         c.argument('operator', arg_type=get_enum_type(WebApplicationFirewallOperator), help='Operator for matching.')
-        c.argument('negation_condition', options_list='--negate', arg_type=get_three_state_flag(), help='Match the negative of the condition.')
-        c.argument('match_values', options_list='--values', nargs='+', help='Space-separated list of values to match.')
-        c.argument('transforms', arg_type=get_enum_type(WebApplicationFirewallTransform), nargs='+', help='Space-separated list of transforms to apply when matching.')
+        c.argument('negation_condition',
+                   options_list='--negate',
+                   arg_type=get_three_state_flag(),
+                   help='Match the negative of the condition.')
+        c.argument('match_values',
+                   options_list='--values',
+                   nargs='+',
+                   help='Space-separated list of values to match.')
+        c.argument('transforms',
+                   arg_type=get_enum_type(WebApplicationFirewallTransform),
+                   nargs='+',
+                   help='Space-separated list of transforms to apply when matching.')
         if WebApplicationFirewallMatchVariable:
-            help_string = 'Space-separated list of `VARIABLE[.SELECTOR]` variables to use when matching. Variable values: {}'.format(', '.join(x for x in WebApplicationFirewallMatchVariable))
+            waf_custom_rule_match_variables = [x for x in WebApplicationFirewallMatchVariable]
+            help_string = 'Space-separated list of variables to use when matching. ' \
+                          'Variable values: {}'.format(', '.join(waf_custom_rule_match_variables))
             c.argument('match_variables', nargs='+', help=help_string, validator=validate_match_variables)
         c.argument('index', type=int, help='Index of the match condition to remove.')
 
-    with self.argument_context('network application-gateway waf-policy rule match-condition list', min_api='2018-12-01') as c:
+    with self.argument_context('network application-gateway waf-policy custom-rule match-condition list', min_api='2018-12-01') as c:
         c.argument('policy_name', options_list='--policy-name', id_part=None)
 
     with self.argument_context('network application-gateway waf-policy managed-rule') as c:
