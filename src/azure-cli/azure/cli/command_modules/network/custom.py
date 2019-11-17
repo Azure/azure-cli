@@ -903,7 +903,7 @@ def update_ag_url_path_map(cmd, instance, parent, item_name, default_address_poo
 
 def create_ag_url_path_map_rule(cmd, resource_group_name, application_gateway_name, url_path_map_name,
                                 item_name, paths, address_pool=None, http_settings=None, redirect_config=None,
-                                no_wait=False):
+                                firewall_policy=None, no_wait=False):
     ApplicationGatewayPathRule, SubResource = cmd.get_models('ApplicationGatewayPathRule', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
@@ -918,7 +918,8 @@ def create_ag_url_path_map_rule(cmd, resource_group_name, application_gateway_na
         name=item_name,
         paths=paths,
         backend_address_pool=SubResource(id=address_pool) if address_pool else default_backend_pool,
-        backend_http_settings=SubResource(id=http_settings) if http_settings else default_http_settings)
+        backend_http_settings=SubResource(id=http_settings) if http_settings else default_http_settings,
+        firewall_policy=SubResource(id=firewall_policy) if firewall_policy else None)
     if cmd.supported_api_version(min_api='2017-06-01'):
         default_redirect = SubResource(id=url_map.default_redirect_configuration.id) \
             if url_map.default_redirect_configuration else None
