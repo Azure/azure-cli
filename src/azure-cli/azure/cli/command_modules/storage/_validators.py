@@ -451,7 +451,7 @@ def validate_entity(namespace):
     RowKey and PartitionKey are converted to the correct case and included. """
     values = dict(x.split('=', 1) for x in namespace.entity)
     keys = values.keys()
-    for key in keys:
+    for key in list(keys):
         if key.lower() == 'rowkey':
             val = values[key]
             del values[key]
