@@ -31,6 +31,7 @@ Release History
 
 **Network**
 
+* application-gateway waf-config: deprecated
 * application-gateway waf-policy: Add subgroup managed-rules to manage managed rule sets and exclusion rules
 * application-gateway waf-policy: Add subgroup policy-setting to manage global configuration of a waf-policy
 * [BREAKING CHANGE] application-gateway waf-policy: Rename subgroup rule to custom-rule
