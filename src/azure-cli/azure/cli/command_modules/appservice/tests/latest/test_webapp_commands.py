@@ -1557,7 +1557,7 @@ class WebappZipDeployScenarioTest(ScenarioTest):
         ])
 
 
-class FunctionappRemoteBuildScenarioTest(ScenarioTest):
+class FunctionappRemoteBuildScenarioTest(LiveScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     def test_functionapp_remote_build(self, resource_group, storage_account):
