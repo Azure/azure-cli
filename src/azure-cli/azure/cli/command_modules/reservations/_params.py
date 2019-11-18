@@ -11,8 +11,7 @@ from azure.cli.core.commands.parameters import (get_enum_type, get_three_state_f
 from azure.mgmt.reservations.models import (
     ReservedResourceType,
     InstanceFlexibility,
-    AppliedScopeType,
-    BillingPlan
+    AppliedScopeType
 )
 
 
