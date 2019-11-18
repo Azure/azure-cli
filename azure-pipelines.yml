@@ -359,8 +359,8 @@ jobs:
       targetType: 'filePath'
       filePath: ./scripts/ci/test_automation.sh
 
-- job: RunAutomationReducedPython3
-  displayName: Run Automation, Python 3
+- job: RunAutomationReducedPython3_6
+  displayName: Run Automation Reduced Python 3.6
   dependsOn: BuildPythonWheel
   timeoutInMinutes: 90
 
@@ -387,7 +387,7 @@ jobs:
       REDUCE_SDK: 'True'
 
 - job: RunAutomationReduced20190301
-  displayName: Run Automation Reduced
+  displayName: Run Automation Reduced Python 3.6, Profile 2019-03-01
   dependsOn: BuildPythonWheel
 
   pool:
@@ -413,7 +413,7 @@ jobs:
       REDUCE_SDK: 'True'
       AZURE_CLI_TEST_TARGET_PROFILE: '2019-03-01'
 
-- job: RunAutomationReduced20180301
+- job: RunAutomation20180301
   displayName: Run Automation, Profile 2018-03-01
   dependsOn: BuildPythonWheel
 
