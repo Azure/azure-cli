@@ -32,10 +32,7 @@ Release History
 
 **NetAppFiles**
 
-* Upgrade azure-mgmt-netapp to 0.7.0 to use API version 2019-08-01. This new API version includes:
-
-    -  Some volume properties associated with replication
-    -  Mount Target resource type, which was previously omitted
+* Some additional volume properties associated with upcoming replication operations
 
 **Packaging**
 
