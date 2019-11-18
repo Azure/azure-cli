@@ -176,7 +176,7 @@ parameters:
     short-summary: Subscription that the benefit will be applied. Do not specify if AppliedScopeType is Shared.
   - name: --billing-plan
     type: string
-    short-summary: choose Mothly or Upfront
+    short-summary: choose Monthly or Upfront
   - name: --scope
     type: string
     short-summary: subscription that will be charged
@@ -218,7 +218,7 @@ parameters:
     short-summary: Subscription that the benefit will be applied. Do not specify if AppliedScopeType is Shared.
   - name: --billing-plan
     type: string
-    short-summary: choose Mothly or Upfront
+    short-summary: choose Monthly or Upfront
   - name: --scope
     type: string
     short-summary: subscription that will be charged
