@@ -756,7 +756,8 @@ def load_arguments(self, _):
         c.argument('sku', options_list=['--sku', '-s'], help='image sku')
         c.argument('publisher', options_list=['--publisher', '-p'], help='image publisher')
         c.argument('os_type', arg_type=get_enum_type(['Windows', 'Linux']), help='the type of the OS that is included in the disk if creating a VM from user-image or a specialized VHD')
-        c.ignore('os_state')  # service is not ready
+        c.argument('os_state', arg_type=get_enum_type(self.get_models('OperatingSystemStateTypes')), help="This property allows the user to specify whether the virtual machines created under this image are 'Generalized' or 'Specialized'.")
+        c.argument('hyper_v_generation', arg_type=get_enum_type(self.get_models('HyperVGenerationTypes')), help='The hypervisor generation of the Virtual Machine. Applicable to OS disks only.')
         c.argument('minimum_cpu_core', type=int, arg_group='Recommendation', help='minimum cpu cores')
         c.argument('maximum_cpu_core', type=int, arg_group='Recommendation', help='maximum cpu cores')
         c.argument('minimum_memory', type=int, arg_group='Recommendation', help='minimum memory in MB')
