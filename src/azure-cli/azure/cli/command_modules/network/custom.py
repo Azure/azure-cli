@@ -1209,16 +1209,12 @@ def update_waf_managed_rule_set(cmd, instance, rule_set_type, rule_set_version, 
     """
     Update(Override) existing rule set of a WAF policy managed rules.
     """
-    ManagedRuleSet, ManagedRuleGroupOverride, ManagedRuleOverride = \
-        cmd.get_models('ManagedRuleSet', 'ManagedRuleGroupOverride', 'ManagedRuleOverride')
+    ManagedRuleGroupOverride, ManagedRuleOverride = cmd.get_models('ManagedRuleGroupOverride', 'ManagedRuleOverride')
 
     managed_rule_overrides = [ManagedRuleOverride(rule_id=r) for r in rules] if rules else None
 
     rule_group_override = ManagedRuleGroupOverride(rule_group_name=rule_group_name,
                                                    rules=managed_rule_overrides) if managed_rule_overrides else None
-    new_managed_rule_set = ManagedRuleSet(rule_set_type=rule_set_type,
-                                          rule_set_version=rule_set_version,
-                                          rule_group_overrides=[rule_group_override] if rule_group_override else None)
 
     for rule_set in instance.managed_rules.managed_rule_sets:
         if rule_set.rule_set_type == rule_set_type:
@@ -1230,7 +1226,7 @@ def update_waf_managed_rule_set(cmd, instance, rule_set_type, rule_set_version, 
                 rule_set.rule_group_overrides.append(rule_group_override)
             break
     else:
-        instance.managed_rules.managed_rule_sets.append(new_managed_rule_set)
+        raise CLIError('Managed rule group: [ {} ] not found. Add it first'.format(rule_group_name))
 
     return instance
 
