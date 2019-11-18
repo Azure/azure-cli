@@ -1128,12 +1128,16 @@ short-summary: Manage managed rule set of managed rules of a WAF policy.
 
 helps['network application-gateway waf-policy managed-rule rule-set add'] = """
 type: command
-short-summary: Add managed rule set to the WAF policy managed rules.
+short-summary: >
+  Add managed rule set to the WAF policy managed rules. For rule set and rules, please visit:
+  https://docs.microsoft.com/en-us/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
 """
 
 helps['network application-gateway waf-policy managed-rule rule-set update'] = """
 type: command
-short-summary: Update(Override) existing rule set of a WAF policy managed rules.
+short-summary: >
+  Update(Override) existing rule set of a WAF policy managed rules. For rule set and rules, please visit:
+  https://docs.microsoft.com/en-us/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
 """
 
 helps['network application-gateway waf-policy managed-rule rule-set remove'] = """
