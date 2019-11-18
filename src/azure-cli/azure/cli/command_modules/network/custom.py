@@ -344,7 +344,7 @@ def create_ag_http_listener(cmd, resource_group_name, application_gateway_name, 
         ssl_certificate=SubResource(id=ssl_cert) if ssl_cert else None)
 
     if cmd.supported_api_version(min_api='2019-09-01'):
-        new_listener.firewall_policy=SubResource(id=firewall_policy) if firewall_policy else None
+        new_listener.firewall_policy = SubResource(id=firewall_policy) if firewall_policy else None
 
     upsert_to_collection(ag, 'http_listeners', new_listener, 'name')
     return sdk_no_wait(no_wait, ncf.application_gateways.create_or_update,
@@ -928,7 +928,7 @@ def create_ag_url_path_map_rule(cmd, resource_group_name, application_gateway_na
         new_rule.redirect_configuration = SubResource(id=redirect_config) if redirect_config else default_redirect
 
     if cmd.supported_api_version(min_api='2019-09-01'):
-        new_rule.firewall_policy=SubResource(id=firewall_policy) if firewall_policy else None
+        new_rule.firewall_policy = SubResource(id=firewall_policy) if firewall_policy else None
 
     upsert_to_collection(url_map, 'path_rules', new_rule, 'name')
     return sdk_no_wait(no_wait, ncf.application_gateways.create_or_update,
