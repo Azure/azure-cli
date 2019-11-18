@@ -108,6 +108,7 @@ Release History
 * [BREAKING CHANGE] vm extension set: Fix bug where users could not set an extension on a VM with --ids.
 * New commands `az vm image terms accept/cancel/show` to manage Azure Marketplace image terms.
 * Update VMAccessForLinux to version 1.5
+* vm monitor log show: support query log over linked log analytics workspace.
 
 **CosmosDB**
 
