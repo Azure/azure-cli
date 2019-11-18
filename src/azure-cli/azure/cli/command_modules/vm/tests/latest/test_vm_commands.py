@@ -1204,7 +1204,7 @@ class VMCreateMonitorTest(ScenarioTest):
 
         self.kwargs.update({
             'vm': 'monitorvm',
-            'workspace': self.create_random_name('cliworkspace', 10),
+            'workspace': self.create_random_name('cliworkspace', 20),
             'rg': resource_group
         })
 
