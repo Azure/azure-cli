@@ -2738,7 +2738,8 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
                          os_state='Generalized', end_of_life_date=None, privacy_statement_uri=None,
                          release_note_uri=None, eula=None, description=None, location=None,
                          minimum_cpu_core=None, maximum_cpu_core=None, minimum_memory=None, maximum_memory=None,
-                         disallowed_disk_types=None, plan_name=None, plan_publisher=None, plan_product=None, tags=None):
+                         disallowed_disk_types=None, plan_name=None, plan_publisher=None, plan_product=None, tags=None,
+                         hyper_v_generation='V1'):
     # pylint: disable=line-too-long
     GalleryImage, GalleryImageIdentifier, RecommendedMachineConfiguration, ResourceRange, Disallowed, ImagePurchasePlan = cmd.get_models(
         'GalleryImage', 'GalleryImageIdentifier', 'RecommendedMachineConfiguration', 'ResourceRange', 'Disallowed', 'ImagePurchasePlan')
@@ -2761,7 +2762,8 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
     image = GalleryImage(identifier=GalleryImageIdentifier(publisher=publisher, offer=offer, sku=sku),
                          os_type=os_type, os_state=os_state, end_of_life_date=end_of_life_date,
                          recommended=recommendation, disallowed=Disallowed(disk_types=disallowed_disk_types),
-                         purchase_plan=purchase_plan, location=location, eula=eula, tags=(tags or {}))
+                         purchase_plan=purchase_plan, location=location, eula=eula, tags=(tags or {}),
+                         hyper_vgeneration=hyper_v_generation)
     return client.gallery_images.create_or_update(resource_group_name, gallery_name, gallery_image_name, image)
 
 
