@@ -2629,6 +2629,52 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
         self.cmd('network vnet-gateway list-advertised-routes -g {rg} -n {gw1} --peer 10.1.1.1')
         self.cmd('network vnet-gateway list-bgp-peer-status -g {rg} -n {gw1} --peer 10.1.1.1')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vpn_gateway_aad_')
+    def test_network_vpn_gateway_aad(self, resource_group):
+        self.kwargs.update({
+            'vnet': 'vnet',
+            'gw': 'gw',
+            'ip': 'ip',
+            'aad_tenant': 'https://login.microsoftonline.com/0ab2c4f4-81e6-44cc-a0b2-b3a47a1443f4',
+            'aad_issuer': 'https://sts.windows.net/0ab2c4f4-81e6-44cc-a0b2-b3a47a1443f4/',
+            'aad_audience': 'a21fce82-76af-45e6-8583-a08cb3b956f9'
+        })
+
+        self.cmd('network public-ip create -g {rg} -n {ip} ')
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name GatewaySubnet')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw} '
+                 '--vnet {vnet} --public-ip-address {ip} '
+                 '--gateway-type Vpn --vpn-type RouteBased '
+                 '--sku VpnGw1 '
+                 '--client-protocol OpenVPN '
+                 '--address-prefixes 201.169.0.0/16 ')
+        self.cmd('network vnet-gateway show -g {rg} -n {gw}', checks=[
+            self.check('sku.name', 'VpnGw1'),
+            self.check('enableBgp', False),
+            self.check('vpnType', 'RouteBased'),
+            self.check('vpnClientConfiguration.vpnClientProtocols[0]', "OpenVPN")
+        ])
+
+        self.cmd('network vnet-gateway aad assign -g {rg} --gateway-name {gw} '
+                 '--tenant {aad_tenant} '
+                 '--audience {aad_audience} '
+                 '--issuer {aad_issuer} ')
+        self.cmd('network vnet-gateway show -g {rg} -n {gw}', checks=[
+            self.check('vpnClientConfiguration.aadTenant', self.kwargs['aad_tenant']),
+            self.check('vpnClientConfiguration.aadIssuer', self.kwargs['aad_issuer']),
+            self.check('vpnClientConfiguration.aadAudience', self.kwargs['aad_audience'])
+        ])
+        self.cmd('network vnet-gateway aad show -g {rg} --gateway-name {gw}', checks=[
+            self.check('aadTenant', self.kwargs['aad_tenant'])
+        ])
+
+        self.cmd('network vnet-gateway aad remove -g {rg} --gateway-name {gw}').get_output_in_json()
+        self.cmd('network vnet-gateway aad show -g {rg} --gateway-name {gw}', checks=[
+            self.check('aadTenant', None),
+            self.check('aadIssuer', None),
+            self.check('aadAudience', None)
+        ])
+
 
 class NetworkVpnClientPackageScenarioTest(LiveScenarioTest):
 
