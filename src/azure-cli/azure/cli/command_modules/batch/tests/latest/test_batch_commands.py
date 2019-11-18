@@ -96,15 +96,15 @@ class TestBatchValidators(unittest.TestCase):
 
     def test_batch_resource_file_format(self):
         meta = _validators.resource_file_format("file=source")
-        self.assertEqual(meta, {'file_path': 'file', 'blob_source': 'source'})
+        self.assertEqual(meta, {'file_path': 'file', 'http_url': 'source'})
 
         meta = _validators.resource_file_format("TestData.zip=https://teststorage.blob.core.windows.net/fgrp-47197bb4/"
                                                 "TestData.zip?sv=2015-04-05&sr=b&sig=lk72w%3D&se="
                                                 "2017-07-28T21%3A14%3A12Z&sp=rwd")
         self.assertEqual(meta, {
             'file_path': 'TestData.zip',
-            'blob_source': ("https://teststorage.blob.core.windows.net/fgrp-47197bb4/"
-                            "TestData.zip?sv=2015-04-05&sr=b&sig=lk72w%3D&se=2017-07-28T21%3A14%3A12Z&sp=rwd")})
+            'http_url': ("https://teststorage.blob.core.windows.net/fgrp-47197bb4/"
+                         "TestData.zip?sv=2015-04-05&sr=b&sig=lk72w%3D&se=2017-07-28T21%3A14%3A12Z&sp=rwd")})
 
         with self.assertRaises(ValueError):
             _validators.resource_file_format("file")
