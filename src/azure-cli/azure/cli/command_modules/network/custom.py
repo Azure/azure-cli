@@ -341,8 +341,11 @@ def create_ag_http_listener(cmd, resource_group_name, application_gateway_name, 
         host_name=host_name,
         require_server_name_indication=True if ssl_cert and host_name else None,
         protocol='https' if ssl_cert else 'http',
-        ssl_certificate=SubResource(id=ssl_cert) if ssl_cert else None,
-        firewall_policy=SubResource(id=firewall_policy) if firewall_policy else None)
+        ssl_certificate=SubResource(id=ssl_cert) if ssl_cert else None)
+
+    if cmd.supported_api_version(min_api='2019-09-01'):
+        new_listener.firewall_policy=SubResource(id=firewall_policy) if firewall_policy else None
+
     upsert_to_collection(ag, 'http_listeners', new_listener, 'name')
     return sdk_no_wait(no_wait, ncf.application_gateways.create_or_update,
                        resource_group_name, application_gateway_name, ag)
@@ -918,12 +921,15 @@ def create_ag_url_path_map_rule(cmd, resource_group_name, application_gateway_na
         name=item_name,
         paths=paths,
         backend_address_pool=SubResource(id=address_pool) if address_pool else default_backend_pool,
-        backend_http_settings=SubResource(id=http_settings) if http_settings else default_http_settings,
-        firewall_policy=SubResource(id=firewall_policy) if firewall_policy else None)
+        backend_http_settings=SubResource(id=http_settings) if http_settings else default_http_settings)
     if cmd.supported_api_version(min_api='2017-06-01'):
         default_redirect = SubResource(id=url_map.default_redirect_configuration.id) \
             if url_map.default_redirect_configuration else None
         new_rule.redirect_configuration = SubResource(id=redirect_config) if redirect_config else default_redirect
+
+    if cmd.supported_api_version(min_api='2019-09-01'):
+        new_rule.firewall_policy=SubResource(id=firewall_policy) if firewall_policy else None
+
     upsert_to_collection(url_map, 'path_rules', new_rule, 'name')
     return sdk_no_wait(no_wait, ncf.application_gateways.create_or_update,
                        resource_group_name, application_gateway_name, ag)
