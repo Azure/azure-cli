@@ -678,10 +678,11 @@ class VMManagedDiskScenarioTest(ScenarioTest):
                  ])
 
         self.cmd('image create -g {rg} -n {image_3} --source {snapshot1} --data-disk-sources {disk1} {snapshot2_id} {disk2_id}'
-                 ' --os-type Linux --tags tag1=i1 --storage-sku Standard_LRS --os-disk-caching ReadWrite',
+                 ' --os-type Linux --tags tag1=i1 --storage-sku Standard_LRS --os-disk-caching ReadWrite --data-disk-caching ReadOnly',
                  checks=[
                      self.check('storageProfile.osDisk.storageAccountType', 'Standard_LRS'),
-                     self.check('storageProfile.osDisk.caching', 'ReadWrite')
+                     self.check('storageProfile.osDisk.caching', 'ReadWrite'),
+                     self.check('storageProfile.dataDisks[0].caching', 'ReadOnly')
                  ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_disk_upload_')
