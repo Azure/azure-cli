@@ -24,6 +24,7 @@ Release History
 * sig image-definition create: Add --os-state to allow specifying whether the virtual machines created under this image are 'Generalized' or 'Specialized'
 * sig image-definition create: Add --hyper-v-generation to allow specifying the hypervisor generation
 * image create: Add --data-disk-caching to allow specifying caching setting of data disks
+* vm monitor log show: support query log over linked log analytics workspace.
 
 **IOT**
 
@@ -108,7 +109,6 @@ Release History
 * [BREAKING CHANGE] vm extension set: Fix bug where users could not set an extension on a VM with --ids.
 * New commands `az vm image terms accept/cancel/show` to manage Azure Marketplace image terms.
 * Update VMAccessForLinux to version 1.5
-* vm monitor log show: support query log over linked log analytics workspace.
 
 **CosmosDB**
 
