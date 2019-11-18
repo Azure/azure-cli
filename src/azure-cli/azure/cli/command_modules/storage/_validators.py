@@ -496,7 +496,7 @@ def validate_marker(namespace):
     marker = dict(x.split('=', 1) for x in namespace.marker)
     expected_keys = {'nextrowkey', 'nextpartitionkey'}
 
-    for key in marker:
+    for key in list(marker.keys()):
         new_key = key.lower()
         if new_key in expected_keys:
             expected_keys.remove(key.lower())
