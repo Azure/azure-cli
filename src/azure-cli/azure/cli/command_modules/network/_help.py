@@ -4438,9 +4438,9 @@ examples:
         az network vnet-gateway aad assign \\
         --resource-group MyResourceGroup \\
         --gateway-name MyVnetGateway \\
-        --aad-tenant MyAADTenantURI \\
-        --aad-audience MyAADAudienceId \\
-        --aad-issuer MyAADIssuerURI
+        --tenant MyAADTenantURI \\
+        --audience MyAADAudienceId \\
+        --issuer MyAADIssuerURI
 """
 
 helps['network vnet-gateway aad show'] = """

@@ -2656,9 +2656,9 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
         ])
 
         self.cmd('network vnet-gateway aad assign -g {rg} --gateway-name {gw} '
-                 '--aad-tenant {aad_tenant} '
-                 '--aad-audience {aad_audience} '
-                 '--aad-issuer {aad_issuer} ')
+                 '--tenant {aad_tenant} '
+                 '--audience {aad_audience} '
+                 '--issuer {aad_issuer} ')
         self.cmd('network vnet-gateway show -g {rg} -n {gw}', checks=[
             self.check('vpnClientConfiguration.aadTenant', self.kwargs['aad_tenant']),
             self.check('vpnClientConfiguration.aadIssuer', self.kwargs['aad_issuer']),
