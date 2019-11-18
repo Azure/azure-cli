@@ -21,6 +21,8 @@ Release History
 
 * Upgrade API version of compute, disks, snapshots to 2019-07-01
 * vmss create: Improvement for --orchestration-mode
+* sig image-definition create: add --os-state to allow specifying whether the virtual machines created under this image are 'Generalized' or 'Specialized'
+* sig image-definition create: add --hyper-v-generation to allow specifying the hypervisor generation
 
 **IOT**
 
