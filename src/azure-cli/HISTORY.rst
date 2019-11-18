@@ -35,6 +35,7 @@ Release History
 **Packaging**
 
 * Rewrite the az wrapper in python
+* Support Python 3.8
 
 **Profile**
 
