@@ -2,7 +2,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-from collections import OrderedDict
 
 
 def transform_ip_addresses(result):
@@ -127,6 +126,7 @@ def transform_vm_encryption_show_table_output(result):
 
 
 def transform_log_analytics_query_output(result):
+    from collections import OrderedDict
     tables_output = []
 
     def _transform_query_output(table):

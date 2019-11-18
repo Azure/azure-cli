@@ -2896,11 +2896,12 @@ def execute_query_for_vm(cmd, client, resource_group_name, vm_name, analytics_qu
     from azure.loganalytics.models import QueryBody
     vm = get_vm(cmd, resource_group_name, vm_name)
     workspace = None
-    for resource in vm.resources:
+    extension_resources = vm.resources or []
+    for resource in extension_resources:
         if resource.name == "OMSExtension":
             workspace = resource.settings.get('workspaceId', None)
-    if workspace:
-        return client.query(workspace, QueryBody(query=analytics_query, timespan=timespan))
-    else:
-        raise CLIError("Cannot find the coresponding log analytics workspace. Please check the status of log analytics workpsace")
+    if workspace is None:
+        raise CLIError('Cannot find the coresponding log analytics workspace.'
+                       'Please check the status of log analytics workpsace')
+    return client.query(workspace, QueryBody(query=analytics_query, timespan=timespan))
 # endregion
