@@ -4,7 +4,6 @@ Release History
 ===============
 
 * Add resource group name prefix validator in resource group preparer
-* Ignore errors in UTF-8 decoding process
 
 0.2.4
 +++++
