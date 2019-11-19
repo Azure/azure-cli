@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+
 from msrest.exceptions import ValidationError
 from knack.log import get_logger
 from knack.util import CLIError
@@ -32,6 +33,7 @@ DEFAULT_TIMEOUT_IN_SEC = 60 * 60  # 60 minutes
 DEFAULT_CPU = 2
 ALLOWED_TASK_FILE_TYPES = ('.yaml', '.yml', '.toml', '.json', '.sh', '.bash', '.zsh', '.ps1',
                            '.ps', '.cmd', '.bat', '.ts', '.js', '.php', '.py', '.rb', '.lua')
+
 
 def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     client,

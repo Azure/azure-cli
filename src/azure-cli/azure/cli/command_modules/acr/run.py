@@ -114,3 +114,4 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
         return get_run_with_polling(cmd, client, run_id, registry_name, resource_group_name)
 
     return stream_logs(client, run_id, registry_name, resource_group_name, no_format, True)
+    
