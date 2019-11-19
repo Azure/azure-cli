@@ -2336,6 +2336,39 @@ examples:
     crafted: true
 """
 
+helps['network express-route port identity'] = """
+type: group
+short-summary: Manage the managed service identity of an ExpressRoute Port
+"""
+
+helps['network express-route port identity assign'] = """
+type: command
+short-summary: Assign a managed service identity to an ExpressRoute Port
+examples:
+  - name: Assign an identity to the ExpressRoute Port
+    text: |-
+        az network express-route port identity assign \\
+        --resource-group MyResourceGroupg \\
+        --name MyExpressRoutePort \\
+        --identity MyUserAssignedManagedServiceIdentity
+"""
+
+helps['network express-route port identity remove'] = """
+type: command
+short-summary: Remove the managed service identity of an ExpressRoute Port
+examples:
+  - name: Remove an identity of the ExpressRoute Port
+    text: az network express-route port identity remove -g MyResourceGroup --name MyExpressRoutePort
+"""
+
+helps['network express-route port identity show'] = """
+type: command
+short-summary: Show the managed service identity of an ExpressRoute Port
+examples:
+  - name: Show an identity of the ExpressRoute Port
+    text: az network express-route port identity show -g MyResourceGroup --name MyExpressRoutePort
+"""
+
 helps['network express-route port link'] = """
 type: group
 short-summary: View ExpressRoute links.
@@ -2350,7 +2383,6 @@ helps['network express-route port link show'] = """
 type: command
 short-summary: Get the details of an ExpressRoute link.
 """
-
 
 helps['network express-route port link update'] = """
 type: command
@@ -2406,39 +2438,6 @@ short-summary: Get the details of an ExpressRoute port.
 helps['network express-route port update'] = """
 type: command
 short-summary: Update settings of an ExpressRoute port.
-"""
-
-helps['network express-route port identity'] = """
-type: group
-short-summary: Manage the managed service identity of an ExpressRoute Port
-"""
-
-helps['network express-route port identity assign'] = """
-type: command
-short-summary: Assign a managed service identity to an ExpressRoute Port
-examples:
-  - name: Assign an identity to the ExpressRoute Port
-    text: |-
-        az network express-route port identity assign \\
-        --resource-group MyResourceGroupg \\
-        --name MyExpressRoutePort \\
-        --identity MyUserAssignedManagedServiceIdentity
-"""
-
-helps['network express-route port identity remove'] = """
-type: command
-short-summary: Remove the managed service identity of an ExpressRoute Port
-examples:
-  - name: Remove an identity of the ExpressRoute Port
-    text: az network express-route port identity remove -g MyResourceGroup --name MyExpressRoutePort
-"""
-
-helps['network express-route port identity show'] = """
-type: command
-short-summary: Show the managed service identity of an ExpressRoute Port
-examples:
-  - name: Show an identity of the ExpressRoute Port
-    text: az network express-route port identity show -g MyResourceGroup --name MyExpressRoutePort
 """
 
 helps['network express-route show'] = """
@@ -4212,6 +4211,41 @@ long-summary: >
     To learn more about Azure Virtual Network Gateways, visit https://docs.microsoft.com/azure/vpn-gateway/vpn-gateway-howto-site-to-site-resource-manager-cli
 """
 
+helps['network vnet-gateway aad'] = """
+type: group
+short-summary: Manage AAD(Azure Active Directory) authentication of a virtual network gateway
+"""
+
+helps['network vnet-gateway aad assign'] = """
+type: command
+short-summary: Assign/Update AAD(Azure Active Directory) authentication to a virtual network gateway.
+examples:
+  - name: Assign AAD authentication to a virtual network gateway
+    text: |-
+        az network vnet-gateway aad assign \\
+        --resource-group MyResourceGroup \\
+        --gateway-name MyVnetGateway \\
+        --tenant MyAADTenantURI \\
+        --audience MyAADAudienceId \\
+        --issuer MyAADIssuerURI
+"""
+
+helps['network vnet-gateway aad remove'] = """
+type: command
+short-summary: Remove AAD(Azure Active Directory) authentication from a virtual network gateway
+examples:
+  - name: Remove AAD information
+    text: az network vnet-gateway aad remove --resource-group MyResourceGroup --gateway-name MyVnetGateway
+"""
+
+helps['network vnet-gateway aad show'] = """
+type: command
+short-summary: Show AAD(Azure Active Directory) authentication of a virtual network gateway
+examples:
+  - name: Show AAD information
+    text: az network vnet-gateway aad show --resource-group MyResourceGroup --gateway-name MyVnetGateway
+"""
+
 helps['network vnet-gateway create'] = """
 type: command
 short-summary: Create a virtual network gateway.
@@ -4424,41 +4458,6 @@ examples:
     text: az network vnet-gateway wait -g MyResourceGroup -n MyVnetGateway --created
 """
 
-helps['network vnet-gateway aad'] = """
-type: group
-short-summary: Manage AAD(Azure Active Directory) authentication of a virtual network gateway
-"""
-
-helps['network vnet-gateway aad assign'] = """
-type: command
-short-summary: Assign/Update AAD(Azure Active Directory) authentication to a virtual network gateway.
-examples:
-  - name: Assign AAD authentication to a virtual network gateway
-    text: |-
-        az network vnet-gateway aad assign \\
-        --resource-group MyResourceGroup \\
-        --gateway-name MyVnetGateway \\
-        --tenant MyAADTenantURI \\
-        --audience MyAADAudienceId \\
-        --issuer MyAADIssuerURI
-"""
-
-helps['network vnet-gateway aad show'] = """
-type: command
-short-summary: Show AAD(Azure Active Directory) authentication of a virtual network gateway
-examples:
-  - name: Show AAD information
-    text: az network vnet-gateway aad show --resource-group MyResourceGroup --gateway-name MyVnetGateway
-"""
-
-helps['network vnet-gateway aad remove'] = """
-type: command
-short-summary: Remove AAD(Azure Active Directory) authentication from a virtual network gateway
-examples:
-  - name: Remove AAD information
-    text: az network vnet-gateway aad remove --resource-group MyResourceGroup --gateway-name MyVnetGateway
-"""
-
 helps['network vpn-connection'] = """
 type: group
 short-summary: Manage VPN connections.
@@ -4610,11 +4609,6 @@ type: command
 short-summary: Create a virtual router.
 """
 
-helps['network vrouter update'] = """
-type: command
-short-summary: Update a virtual router.
-"""
-
 helps['network vrouter list'] = """
 type: command
 short-summary: List all virtual routers under a subscription or a resource group.
@@ -4633,6 +4627,11 @@ short-summary: Create a virtual router peering.
 helps['network vrouter peering update'] = """
 type: command
 short-summary: Update a virtual router peering.
+"""
+
+helps['network vrouter update'] = """
+type: command
+short-summary: Update a virtual router.
 """
 
 helps['network watcher'] = """
