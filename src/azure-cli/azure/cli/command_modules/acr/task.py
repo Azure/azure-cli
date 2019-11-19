@@ -2,9 +2,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-import os
-import uuid
-import tempfile
 from msrest.exceptions import ValidationError
 from knack.log import get_logger
 from knack.util import CLIError
@@ -18,11 +15,10 @@ from ._utils import (
     get_yaml_template,
     build_timers_info,
     remove_timer_trigger,
-    get_task_id_from_task_name
+    get_task_id_from_task_name,
+    prepare_source_location
 )
 from ._stream_utils import stream_logs
-from ._archive_utils import upload_source_code, check_remote_source_code
-from ._constants import ACR_TASK_YAML_DEFAULT_NAME
 logger = get_logger(__name__)
 
 
@@ -36,8 +32,6 @@ DEFAULT_TIMEOUT_IN_SEC = 60 * 60  # 60 minutes
 DEFAULT_CPU = 2
 ALLOWED_TASK_FILE_TYPES = ('.yaml', '.yml', '.toml', '.json', '.sh', '.bash', '.zsh', '.ps1',
                            '.ps', '.cmd', '.bat', '.ts', '.js', '.php', '.py', '.rb', '.lua')
-
-NULL_SOURCE_LOCATION = "/dev/null"
 
 def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     client,
@@ -782,9 +776,9 @@ def acr_task_run(cmd,  # pylint: disable=too-many-locals
         update_trigger_token = base64.b64encode(update_trigger_token.encode()).decode()
 
     task_id = get_task_id_from_task_name(cmd.cli_ctx, resource_group_name, registry_name, task_name)
-    
-    context_path = prepare_context_path(
-        context_path, client_registries, registry_name, resource_group_name)
+
+    if context_path:
+        context_path = prepare_source_location(context_path, client_registries, registry_name, resource_group_name)
 
     override_task_step_properties = OverrideTaskStepProperties(
         context_path=context_path,
@@ -990,34 +984,3 @@ def _get_trigger_event_list_patch(cmd,
             if SourceTriggerEvent.pullrequest.value in source_trigger_events:
                 source_trigger_events.remove(SourceTriggerEvent.pullrequest.value)
     return source_trigger_events
-
-def prepare_context_path(source_location, client_registries, registry_name, resource_group_name):
-    if source_location.lower() == NULL_SOURCE_LOCATION:
-        source_location = None
-    elif os.path.exists(source_location):
-        if not os.path.isdir(source_location):
-            raise CLIError(
-                "Source location should be a local directory path or remote URL.")
-
-        tar_file_path = os.path.join(tempfile.gettempdir(
-        ), 'run_archive_{}.tar.gz'.format(uuid.uuid4().hex))
-
-        try:
-            source_location = upload_source_code(
-                client_registries, registry_name, resource_group_name,
-                source_location, tar_file_path, "", "")
-        except Exception as err:
-            raise CLIError(err)
-        finally:
-            try:
-                logger.debug(
-                    "Deleting the archived source code from '%s'...", tar_file_path)
-                os.remove(tar_file_path)
-            except OSError:
-                pass
-    else:
-        source_location = check_remote_source_code(source_location)
-        logger.warning("Sending context to registry: %s...", registry_name)
-
-    return source_location
-
