@@ -6,10 +6,14 @@
 # pylint: disable=line-too-long
 
 import re
+from knack.log import get_logger
 from knack.util import CLIError
 
 from ._utils import is_valid_connection_string, resolve_resource_group
 from ._azconfig.models import QueryFields
+from ._featuremodels import FeatureQueryFields
+
+logger = get_logger(__name__)
 
 
 def validate_datetime(namespace):
@@ -100,3 +104,46 @@ def validate_query_fields(namespace):
                 if field.lower() == query_field.name.lower():
                     fields.append(query_field)
         namespace.fields = fields
+
+
+def validate_feature_query_fields(namespace):
+    if namespace.fields:
+        fields = []
+        for field in namespace.fields:
+            for feature_query_field in FeatureQueryFields:
+                if field.lower() == feature_query_field.name.lower():
+                    fields.append(feature_query_field)
+        namespace.fields = fields
+
+
+def validate_filter_parameters(namespace):
+    """ Extracts multiple space-separated filter paramters in name[=value] format """
+    if isinstance(namespace.filter_parameters, list):
+        filter_parameters_dict = {}
+        for item in namespace.filter_parameters:
+            param_tuple = validate_filter_parameter(item)
+            if param_tuple:
+                param_name, param_value = param_tuple
+                # If param_name already exists, convert the values to a list
+                if param_name in filter_parameters_dict:
+                    old_param_value = filter_parameters_dict[param_name]
+                    if isinstance(old_param_value, list):
+                        old_param_value.append(param_value)
+                    else:
+                        filter_parameters_dict[param_name] = [old_param_value, param_value]
+                else:
+                    filter_parameters_dict.update({param_name: param_value})
+        namespace.filter_parameters = filter_parameters_dict
+
+
+def validate_filter_parameter(string):
+    """ Extracts a single filter parameter in name[=value] format """
+    result = ()
+    if string:
+        comps = string.split('=', 1)
+        # Ignore invalid arguments like  '=value' or '='
+        if comps[0]:
+            result = (comps[0], comps[1]) if len(comps) > 1 else (string, '')
+        else:
+            logger.warning("Ignoring filter parameter '%s' because parameter name is empty.", string)
+    return result

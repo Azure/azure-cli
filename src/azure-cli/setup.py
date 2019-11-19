@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.0.75"
+VERSION = "2.0.76"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -49,6 +49,7 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
     'License :: OSI Approved :: MIT License',
 ]
 
@@ -65,8 +66,8 @@ DEPENDENCIES = [
     'azure-keyvault~=1.1',
     'azure-mgmt-advisor>=2.0.1,<3.0.0',
     'azure-mgmt-apimanagement>=0.1.0',
+    'azure-mgmt-appconfiguration==0.2.0',
     'azure-mgmt-applicationinsights~=0.1.1',
-    'azure-mgmt-appconfiguration>=0.1.0',
     'azure-mgmt-authorization~=0.52.0',
     'azure-mgmt-batch~=7.0',
     'azure-mgmt-batchai~=2.0',
@@ -74,11 +75,11 @@ DEPENDENCIES = [
     'azure-mgmt-botservice~=0.2.0',
     'azure-mgmt-cdn~=3.1',
     'azure-mgmt-cognitiveservices~=5.0.0',
-    'azure-mgmt-compute~=8.0',
+    'azure-mgmt-compute~=10.0',
     'azure-mgmt-consumption~=2.0',
     'azure-mgmt-containerinstance~=1.4',
-    'azure-mgmt-containerregistry~=3.0.0rc6',
-    'azure-mgmt-containerservice~=7.0.0',
+    'azure-mgmt-containerregistry~=3.0.0rc7',
+    'azure-mgmt-containerservice~=8.0.0',
     'azure-mgmt-cosmosdb~=0.8.0',
     'azure-mgmt-datalake-analytics~=0.2.1',
     'azure-mgmt-datalake-store~=0.5.0',
@@ -101,10 +102,10 @@ DEPENDENCIES = [
     'azure-mgmt-maps~=0.1.0',
     'azure-mgmt-marketplaceordering~=0.1',
     'azure-mgmt-media~=1.1,>=1.1.1',
-    'azure-mgmt-monitor~=0.5.2',
+    'azure-mgmt-monitor~=0.7.0',
     'azure-mgmt-msi~=0.2',
-    'azure-mgmt-network~=6.0',
-    'azure-mgmt-netapp~=0.5.0',
+    'azure-mgmt-network~=7.0.0',
+    'azure-mgmt-netapp~=0.6.0',
     'azure-mgmt-policyinsights~=0.3.1',
     'azure-mgmt-privatedns~=0.1.0',
     'azure-mgmt-rdbms~=1.8',
@@ -112,8 +113,8 @@ DEPENDENCIES = [
     'azure-mgmt-recoveryservicesbackup~=0.4.0',
     'azure-mgmt-redis~=6.0',
     'azure-mgmt-relay~=0.1.0',
-    # 'azure-mgmt-reservations~=0.3.1',
-    'azure-mgmt-reservations==0.3.1',  # TODO: Use requirements.txt instead of '==' #9781
+    # 'azure-mgmt-reservations~=0.6.0',
+    'azure-mgmt-reservations==0.6.0',  # TODO: Use requirements.txt instead of '==' #9781
     'azure-mgmt-resource~=4.0',
     'azure-mgmt-search~=2.0',
     'azure-mgmt-security~=0.1.0',
@@ -122,10 +123,11 @@ DEPENDENCIES = [
     'azure-mgmt-signalr~=0.3.0',
     'azure-mgmt-sql~=0.13',
     'azure-mgmt-sqlvirtualmachine~=0.4.0',
-    'azure-mgmt-storage~=4.2.0',
+    'azure-mgmt-storage~=5.0.0',
     'azure-mgmt-trafficmanager~=0.51.0',
     'azure-mgmt-web~=0.42.0',
     'azure-multiapi-storage~=0.2.4',
+    'azure-loganalytics~=0.1.0',
     'azure-storage-blob>=1.3.1,<2.0.0',
     'colorama~=0.4.1',
     'cryptography>=2.3.1,<3.0.0',

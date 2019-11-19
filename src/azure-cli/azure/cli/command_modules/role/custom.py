@@ -629,7 +629,7 @@ def create_user(client, user_principal_name, display_name, password,
 def update_user(client, upn_or_object_id, display_name=None, force_change_password_next_login=None, password=None,
                 account_enabled=None, mail_nickname=None):
     password_profile = None
-    if force_change_password_next_login is not None or password is not None:
+    if password is not None:
         password_profile = PasswordProfile(password=password,
                                            force_change_password_next_login=force_change_password_next_login)
 
@@ -972,6 +972,8 @@ def update_application(instance, display_name=None, homepage=None,  # pylint: di
         app_patch_param.oauth2_allow_implicit_flow = oauth2_allow_implicit_flow
     if identifier_uris is not None:
         app_patch_param.identifier_uris = identifier_uris
+    if display_name is not None:
+        app_patch_param.display_name = display_name
     if reply_urls is not None:
         app_patch_param.reply_urls = reply_urls
     if homepage is not None:

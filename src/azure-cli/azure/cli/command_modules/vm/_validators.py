@@ -256,6 +256,7 @@ def _parse_image_argument(cmd, namespace):
     from azure.cli.command_modules.vm._actions import load_images_from_aliases_doc
     import requests
     try:
+        images = None
         images = load_images_from_aliases_doc(cmd.cli_ctx)
         matched = next((x for x in images if x['urnAlias'].lower() == namespace.image.lower()), None)
         if matched:
@@ -280,8 +281,8 @@ def _parse_image_argument(cmd, namespace):
                   'VHD blob URI, or pick an image from {}.\nSee vm create -h for more information ' \
                   'on specifying an image.'.format(namespace.image, [x['urnAlias'] for x in images])
         else:
-            err = 'Failed to connect to remote source of image aliases. Invalid image "{}". Use a ' \
-                  'valid image URN, custom image name, custom image id, or VHD blob URI.\nSee vm ' \
+            err = 'Failed to connect to remote source of image aliases or find a local copy. Invalid image "{}". ' \
+                  'Use a valid image URN, custom image name, custom image id, or VHD blob URI.\nSee vm ' \
                   'create -h for more information on specifying an image.'.format(namespace.image)
         raise CLIError(err)
 
@@ -560,6 +561,26 @@ def _validate_vm_create_availability_set(cmd, namespace):
             type='availabilitySets',
             name=name)
         logger.debug("adding to specified availability set '%s'", namespace.availability_set)
+
+
+def _validate_vm_create_vmss(cmd, namespace):
+    from msrestazure.tools import parse_resource_id, resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    if namespace.vmss:
+        as_id = parse_resource_id(namespace.vmss)
+        name = as_id['name']
+        rg = as_id.get('resource_group', namespace.resource_group_name)
+
+        if not check_existence(cmd.cli_ctx, name, rg, 'Microsoft.Compute', 'virtualMachineScaleSets'):
+            raise CLIError("virtual machine scale set '{}' does not exist.".format(name))
+
+        namespace.vmss = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=rg,
+            namespace='Microsoft.Compute',
+            type='virtualMachineScaleSets',
+            name=name)
+        logger.debug("adding to specified virtual machine scale set '%s'", namespace.vmss)
 
 
 def _validate_vm_create_dedicated_host(cmd, namespace):
@@ -1108,6 +1129,7 @@ def process_vm_create_namespace(cmd, namespace):
         _validate_vm_create_storage_account(cmd, namespace)
 
     _validate_vm_create_availability_set(cmd, namespace)
+    _validate_vm_create_vmss(cmd, namespace)
     _validate_vm_vmss_create_vnet(cmd, namespace)
     _validate_vm_create_nsg(cmd, namespace)
     _validate_vm_vmss_create_public_ip(cmd, namespace)
@@ -1280,6 +1302,81 @@ def get_network_lb(cli_ctx, resource_group_name, lb_name):
 
 
 def process_vmss_create_namespace(cmd, namespace):
+    # scale_set_vm_str = 'ScaleSetVM'
+    vm_str = 'VM'
+    if namespace.orchestration_mode.lower() == vm_str.lower():
+        validate_tags(namespace)
+        if not namespace.location:
+            get_default_location_from_resource_group(cmd, namespace)
+        # The commentted parameters are also forbidden, but they have default values.
+        # I don't know whether they are provided by user.
+        banned_params = [
+            namespace.accelerated_networking,
+            namespace.admin_password,
+            # namespace.admin_username,
+            namespace.application_gateway,
+            # namespace.app_gateway_capacity,
+            # namespace.app_gateway_sku,
+            namespace.app_gateway_subnet_address_prefix,
+            namespace.application_security_groups,
+            namespace.assign_identity,
+            namespace.authentication_type,
+            namespace.backend_pool_name,
+            namespace.backend_port,
+            namespace.computer_name_prefix,
+            namespace.custom_data,
+            namespace.data_caching,
+            namespace.data_disk_sizes_gb,
+            # namespace.disable_overprovision,
+            namespace.dns_servers,
+            namespace.ephemeral_os_disk,
+            namespace.eviction_policy,
+            # namespace.generate_ssh_keys,
+            namespace.health_probe,
+            namespace.image,
+            # namespace.instance_count,
+            namespace.load_balancer,
+            namespace.nat_pool_name,
+            namespace.load_balancer_sku,
+            namespace.license_type,
+            namespace.max_price,
+            namespace.nsg,
+            namespace.os_caching,
+            namespace.os_disk_name,
+            namespace.os_type,
+            namespace.plan_name,
+            namespace.plan_product,
+            namespace.plan_promotion_code,
+            namespace.plan_publisher,
+            namespace.proximity_placement_group,
+            namespace.priority,
+            namespace.public_ip_address,
+            namespace.public_ip_address_allocation,
+            namespace.public_ip_address_dns_name,
+            # namespace.public_ip_per_vm,
+            # namespace.identity_role,
+            namespace.identity_scope,
+            namespace.secrets,
+            namespace.single_placement_group,
+            namespace.ssh_dest_key_path,
+            namespace.ssh_key_value,
+            # namespace.storage_container_name,
+            namespace.storage_sku,
+            namespace.subnet,
+            namespace.subnet_address_prefix,
+            namespace.terminate_notification_time,
+            namespace.ultra_ssd_enabled,
+            # namespace.upgrade_policy_mode,
+            # namespace.use_unmanaged_disk,
+            namespace.vm_domain_name,
+            namespace.vm_sku,
+            # namespace.vnet_address_prefix,
+            namespace.vnet_name
+        ]
+        if any(param is not None for param in banned_params):
+            raise CLIError('usage error: in VM mode, only name, resource-group, location, '
+                           'tags, zones, platform-fault-domain-count are allowed')
+        return
     validate_tags(namespace)
     if namespace.vm_sku is None:
         from azure.cli.core.cloud import AZURE_US_GOV_CLOUD

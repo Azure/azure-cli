@@ -4,19 +4,20 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set, cf_ni,
-                                                          cf_vm_ext,
-                                                          cf_vm_ext_image, cf_vm_image, cf_usage,
+                                                          cf_vm_ext, cf_vm_ext_image,
+                                                          cf_vm_image, cf_vm_image_term, cf_usage,
                                                           cf_vmss, cf_vmss_vm,
                                                           cf_vm_sizes, cf_disks, cf_snapshots,
                                                           cf_images, cf_run_commands,
                                                           cf_rolling_upgrade_commands, cf_galleries,
                                                           cf_gallery_images, cf_gallery_image_versions,
                                                           cf_proximity_placement_groups,
-                                                          cf_dedicated_hosts, cf_dedicated_host_groups)
+                                                          cf_dedicated_hosts, cf_dedicated_host_groups,
+                                                          cf_log_analytics_data_plane)
 from azure.cli.command_modules.vm._format import (
     transform_ip_addresses, transform_vm, transform_vm_create_output, transform_vm_usage_list, transform_vm_list,
     transform_sku_for_table_output, transform_disk_show_table_output, transform_extension_show_table_output,
-    get_vmss_table_output_transformer, transform_vm_encryption_show_table_output)
+    get_vmss_table_output_transformer, transform_vm_encryption_show_table_output, transform_log_analytics_query_output)
 from azure.cli.command_modules.vm._validators import (
     process_vm_create_namespace, process_vmss_create_namespace, process_image_create_namespace,
     process_disk_or_snapshot_create_namespace, process_disk_encryption_namespace, process_assign_identity_namespace,
@@ -89,6 +90,11 @@ def load_command_table(self, _):
         client_factory=cf_vm_image
     )
 
+    compute_vm_image_term_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.marketplaceordering.operations#MarketplaceAgreementsOperations.{}',
+        client_factory=cf_vm_image_term
+    )
+
     compute_vm_usage_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#UsageOperations.{}',
         client_factory=cf_usage
@@ -159,6 +165,11 @@ def load_command_table(self, _):
     image_builder_image_templates_sdk = CliCommandType(
         operations_tmpl="azure.mgmt.imagebuilder.operations#VirtualMachineImageTemplatesOperations.{}",
         client_factory=cf_img_bldr_image_templates,
+    )
+
+    log_analytics_data_plane_sdk = CliCommandType(
+        operations_tmpl="custom#{}",
+        client_factory=cf_log_analytics_data_plane,
     )
 
     with self.command_group('disk', compute_disk_sdk, operation_group='disks', min_api='2017-03-30') as g:
@@ -282,8 +293,14 @@ def load_command_table(self, _):
         g.command('list-publishers', 'list_publishers')
         g.command('list-skus', 'list_skus')
         g.custom_command('list', 'list_vm_images')
-        g.custom_command('accept-terms', 'accept_market_ordering_terms')
+        g.custom_command('accept-terms', 'accept_market_ordering_terms',
+                         deprecate_info=g.deprecate(redirect='az vm image terms accept', expiration='2.0.82'))
         g.custom_show_command('show', 'show_vm_image')
+
+    with self.command_group('vm image terms', compute_vm_image_term_sdk, validator=None) as g:
+        g.custom_command('accept', 'accept_terms')
+        g.custom_command('cancel', 'cancel_terms')
+        g.custom_show_command('show', 'get_terms')
 
     with self.command_group('vm nic', compute_vm_sdk) as g:
         g.custom_command('add', 'add_vm_nic')
@@ -424,3 +441,6 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_proximity_placement_groups')
         g.generic_update_command('update')
         g.command('delete', 'delete')
+
+    with self.command_group('vm monitor log', log_analytics_data_plane_sdk, client_factory=cf_log_analytics_data_plane) as g:
+        g.custom_command('show', 'execute_query_for_vm', transform=transform_log_analytics_query_output)

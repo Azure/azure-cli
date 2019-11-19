@@ -49,6 +49,9 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
                                    if not in_cloud_console() else ''))
 
             raise CLIError(err)
+        except requests.exceptions.SSLError as err:
+            from .util import SSLERROR_TEMPLATE
+            raise CLIError(SSLERROR_TEMPLATE.format(str(err)))
         except requests.exceptions.ConnectionError as err:
             raise CLIError('Please ensure you have network connection. Error detail: ' + str(err))
 

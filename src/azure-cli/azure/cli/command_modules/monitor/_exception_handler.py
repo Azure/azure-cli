@@ -5,10 +5,25 @@
 
 
 def monitor_exception_handler(ex):
-    from azure.mgmt.monitor.models import ErrorResponseException
+    from azure.mgmt.monitor.v2015_04_01.models import ErrorResponseException as ErrorResponseException_v2015_04_01
+    from azure.mgmt.monitor.v2016_03_01.models import ErrorResponseException as ErrorResponseException_v2016_03_01
+    from azure.mgmt.monitor.v2017_04_01.models import ErrorResponseException as ErrorResponseException_v2017_04_01
+    from azure.mgmt.monitor.v2017_05_01_preview.models import \
+        ErrorResponseException as ErrorResponseException_v2017_05_01
+    from azure.mgmt.monitor.v2018_01_01.models import ErrorResponseException as ErrorResponseException_v2018_01_01
+    from azure.mgmt.monitor.v2018_03_01.models import ErrorResponseException as ErrorResponseException_v2018_03_01
+    from azure.mgmt.monitor.v2019_06_01.models import ErrorResponseException as ErrorResponseException_v2019_06_01
+
     from knack.util import CLIError
 
-    if isinstance(ex, ErrorResponseException):
+    if isinstance(ex, (ErrorResponseException_v2015_04_01,
+                       ErrorResponseException_v2016_03_01,
+                       ErrorResponseException_v2017_04_01,
+                       ErrorResponseException_v2017_05_01,
+                       ErrorResponseException_v2018_01_01,
+                       ErrorResponseException_v2018_03_01,
+                       ErrorResponseException_v2019_06_01
+                       )):
         # work around for issue: https://github.com/Azure/azure-sdk-for-python/issues/1556
         try:
             error_payload = ex.response.json()

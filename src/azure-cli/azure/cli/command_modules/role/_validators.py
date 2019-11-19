@@ -81,6 +81,11 @@ def validate_cert(namespace):
         namespace.cert = x509
 
 
+def validate_change_password(namespace):
+    if namespace.password is None and namespace.force_change_password_next_login is not None:
+        raise CLIError("--force-change-password-next-login is only valid when --password is specified")
+
+
 def process_assignment_namespace(cmd, namespace):  # pylint: disable=unused-argument
     resource_group = namespace.resource_group_name
     if namespace.scope and resource_group and getattr(resource_group, 'is_default', None):
