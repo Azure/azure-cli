@@ -98,7 +98,6 @@ examples:
     text: az storage account keys renew -g MyResourceGroup -n MyStorageAccount --key secondary --key-type kerb
 """
 
-
 helps['storage account list'] = """
 type: command
 short-summary: List storage accounts.
