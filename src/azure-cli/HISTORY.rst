@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**AMS**
+
+* Update show commands to return 3 when resource not found
+
 **Profile**
 
 * Polish error when using `az login -u {} -p {}` with Microsoft account
