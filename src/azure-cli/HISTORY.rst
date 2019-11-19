@@ -49,6 +49,8 @@ Release History
 
 **Reservations**
 
+* Upgrading SDK Version to 0.6.0
+* Add billingplan details info after calling Get-Gatalogs
 * Add new command `az reservations reservation-order calculate` to calculate the price for a reservation
 * Add new command `az reservations reservation-order purchase` to purchase a new reservation
 
