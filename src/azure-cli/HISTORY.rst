@@ -21,9 +21,12 @@ Release History
 
 * Upgrade API version of compute, disks, snapshots to 2019-07-01
 * vmss create: Improvement for --orchestration-mode
-* sig image-definition create: Add --os-state to allow specifying whether the virtual machines created under this image are 'Generalized' or 'Specialized'
-* sig image-definition create: Add --hyper-v-generation to allow specifying the hypervisor generation
+* sig image-definition create: add --os-state to allow specifying whether the virtual machines created under this image are 'Generalized' or 'Specialized'
+* sig image-definition create: add --hyper-v-generation to allow specifying the hypervisor generation
 * image create: Add --data-disk-caching to allow specifying caching setting of data disks
+* Upgrade Python Compute SDK to 10.0.0
+* vm/vmss create: Add 'Spot' to 'Priority' enum property
+* [Breaking change] Rename '--max-billing' parameter to '--max-price', for both VM and VMSS, to be consistent with Swagger and Powershell cmdlets
 * vm monitor log show: support query log over linked log analytics workspace.
 
 **IOT**
