@@ -23,6 +23,9 @@ Release History
 * vmss create: Improvement for --orchestration-mode
 * sig image-definition create: add --os-state to allow specifying whether the virtual machines created under this image are 'Generalized' or 'Specialized'
 * sig image-definition create: add --hyper-v-generation to allow specifying the hypervisor generation
+* Upgrade Python Compute SDK to 10.0.0
+* vm/vmss create: Add 'Spot' to 'Priority' enum property
+* [Breaking change] Rename '--max-billing' parameter to '--max-price', for both VM and VMSS, to be consistent with Swagger and Powershell cmdlets
 
 **IOT**
 
