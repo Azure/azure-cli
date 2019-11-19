@@ -24,6 +24,7 @@ Release History
 * sig image-definition create: Add --os-state to allow specifying whether the virtual machines created under this image are 'Generalized' or 'Specialized'
 * sig image-definition create: Add --hyper-v-generation to allow specifying the hypervisor generation
 * image create: Add --data-disk-caching to allow specifying caching setting of data disks
+* vm monitor log show: support query log over linked log analytics workspace.
 
 **IOT**
 
