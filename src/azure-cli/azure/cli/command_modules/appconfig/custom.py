@@ -9,10 +9,12 @@ from azure.mgmt.appconfiguration.models import (ConfigurationStoreUpdateParamete
 from ._utils import resolve_resource_group, user_confirmation
 
 
-def create_configstore(client, resource_group_name, name, location):
+def create_configstore(client, resource_group_name, name, location, sku):
+    sku = "Free" if sku is None else sku
+
     configstore_params = ConfigurationStore(location=location.lower(),
                                             identity=None,
-                                            sku=Sku(name="Free"))   # hard code the sku as it is not public facing yet
+                                            sku=Sku(name=sku))
     return client.create(resource_group_name, name, configstore_params)
 
 
