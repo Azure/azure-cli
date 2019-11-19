@@ -212,7 +212,7 @@ parameters:
     short-summary: Id of reservation order to purchase
   - name: --applied-scope-type
     type: string
-    short-summary: choose Single or Shared as appliedscpe
+    short-summary: choose Single or Shared as appliedscope
   - name: --applied-scopes
     type: string
     short-summary: Subscription that the benefit will be applied. Do not specify if AppliedScopeType is Shared.
