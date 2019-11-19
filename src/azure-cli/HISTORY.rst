@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**ACR**
+
+* Support Local context in acr task run
+
 **AKS**
 
 * Support cluster certificate rotation operation using "az aks rotate-certs".
