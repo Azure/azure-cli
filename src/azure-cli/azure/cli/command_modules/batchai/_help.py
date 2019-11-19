@@ -127,7 +127,7 @@ examples:
 helps['batchai cluster node list'] = """
 type: command
 short-summary: List remote login information for cluster's nodes.
-long-summary: "List remote login information for cluster nodes. You can ssh to a particular node using the provided public IP address and the port number.\nE.g. ssh <admin user name>@<public ip> -p <node's SSH port number>"
+long-summary: "List remote login information for cluster nodes. You can ssh to a particular node using the provided public IP address and the port number. E.g. ssh <admin user name>@<public ip> -p <node's SSH port number>"
 examples:
   - name: List remote login information for a cluster.
     text: az batchai cluster node list -g MyResourceGroup -w MyWorkspace -c MyCluster -o table
@@ -359,7 +359,7 @@ examples:
 helps['batchai job node list'] = """
 type: command
 short-summary: List remote login information for nodes which executed the job.
-long-summary: "List remote login information for currently existing (not deallocated) nodes on which the job was executed. You can ssh to a particular node using the provided public IP address and the port number.\nE.g. ssh <admin user name>@<public ip> -p <node's SSH port number>"
+long-summary: "List remote login information for currently existing (not deallocated) nodes on which the job was executed. You can ssh to a particular node using the provided public IP address and the port number. E.g. ssh <admin user name>@<public ip> -p <node's SSH port number>"
 examples:
   - name: List remote login information for a job nodes.
     text: az batchai job node list -g MyResourceGroup -w MyWorkspace -e MyExperiment -j MyJob -o table
