@@ -683,7 +683,7 @@ class WebappACRScenarioTest(ScenarioTest):
         self.cmd('acr create --admin-enabled -g {} -n {} --sku Basic'.format(resource_group, acr_registry_name))
         self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan))
         self.cmd('webapp create -g {} -n {} --plan {} --runtime {}'.format(resource_group, webapp, plan, runtime))
-        creds = self.cmd('acr credential show -n {}'.format(acr_registry_name)).get_output_in_json()
+        creds = self.cmd('acr credential show -n {} -g {}'.format(acr_registry_name, resource_group)).get_output_in_json()
         self.cmd('webapp config container set -g {0} -n {1} --docker-custom-image-name {2}.azurecr.io/image-name:latest --docker-registry-server-url https://{2}.azurecr.io'.format(
             resource_group, webapp, acr_registry_name), checks=[
                 JMESPathCheck("[?name=='DOCKER_REGISTRY_SERVER_USERNAME']|[0].value", creds['username'])
