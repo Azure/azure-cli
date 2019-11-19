@@ -1720,7 +1720,7 @@ class WebappWindowsContainerBasicE2ETest(ScenarioTest):
             JMESPathCheck('[0].sku.tier', 'PremiumContainer'),
             JMESPathCheck('[0].sku.name', 'PC2')
         ])
-        self.cmd('appservice plan list', checks=[
+        self.cmd('appservice plan list -g {}'.format(resource_group), checks=[
             JMESPathCheck("length([?name=='{}' && resourceGroup=='{}'])".format(plan, resource_group), 1)
         ])
         self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
