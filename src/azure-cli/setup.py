@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.0.75"
+VERSION = "2.0.76"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -66,8 +66,8 @@ DEPENDENCIES = [
     'azure-keyvault~=1.1',
     'azure-mgmt-advisor>=2.0.1,<3.0.0',
     'azure-mgmt-apimanagement>=0.1.0',
+    'azure-mgmt-appconfiguration==0.2.0',
     'azure-mgmt-applicationinsights~=0.1.1',
-    'azure-mgmt-appconfiguration>=0.1.0',
     'azure-mgmt-authorization~=0.52.0',
     'azure-mgmt-batch~=7.0',
     'azure-mgmt-batchai~=2.0',
@@ -75,7 +75,7 @@ DEPENDENCIES = [
     'azure-mgmt-botservice~=0.2.0',
     'azure-mgmt-cdn~=3.1',
     'azure-mgmt-cognitiveservices~=5.0.0',
-    'azure-mgmt-compute~=8.0',
+    'azure-mgmt-compute~=9.0',
     'azure-mgmt-consumption~=2.0',
     'azure-mgmt-containerinstance~=1.4',
     'azure-mgmt-containerregistry~=3.0.0rc7',
@@ -102,7 +102,7 @@ DEPENDENCIES = [
     'azure-mgmt-maps~=0.1.0',
     'azure-mgmt-marketplaceordering~=0.1',
     'azure-mgmt-media~=1.1,>=1.1.1',
-    'azure-mgmt-monitor~=0.5.2',
+    'azure-mgmt-monitor~=0.7.0',
     'azure-mgmt-msi~=0.2',
     'azure-mgmt-network~=7.0.0',
     'azure-mgmt-netapp~=0.6.0',
@@ -113,8 +113,8 @@ DEPENDENCIES = [
     'azure-mgmt-recoveryservicesbackup~=0.4.0',
     'azure-mgmt-redis~=6.0',
     'azure-mgmt-relay~=0.1.0',
-    # 'azure-mgmt-reservations~=0.3.1',
-    'azure-mgmt-reservations==0.3.1',  # TODO: Use requirements.txt instead of '==' #9781
+    # 'azure-mgmt-reservations~=0.6.0',
+    'azure-mgmt-reservations==0.6.0',  # TODO: Use requirements.txt instead of '==' #9781
     'azure-mgmt-resource~=4.0',
     'azure-mgmt-search~=2.0',
     'azure-mgmt-security~=0.1.0',

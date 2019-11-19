@@ -7,16 +7,42 @@ Release History
 
 * Deprecated paramater `--branch` from acr task create/update
 
+**AKS**
+
+* Support cluster certificate rotation operation using "az aks rotate-certs".
+
+**AppService**
+
+* Fix issue #11100: AttributeError for az webapp up when create service plan
+
+**Compute**
+
+* Upgrade API version of compute, disks, snapshots to 2019-07-01
+
+**Key Vault**
+
+* Fix #11121: When using `az keyvault certificate list`, passing `--include-pending` now doesn't require a value of `true` or `false`
+
+**Packaging**
+
+* Rewrite the az wrapper in python
+
 **Profile**
 
-* Polish error when using `az login -u {} -p {}` with Microsoft account
+* Polish error when running `az login -u {} -p {}` with Microsoft account
+* Polish `SSLError` when running `az login` behind a proxy with self-signed root certificate
+* Fix #10578: `az login` hangs when more than one instances are launched at the same time on Windows or WSL
 
 **RBAC**
 
 * Fix #10996: Polish error for `--force-change-password-next-login` in `az ad user update` when `--password` is not specified
 
-2.0.76
+**Redis**
 
+* Fix #2902: Avoid setting memory configs while updating Basic SKU cache
+
+2.0.76
+++++++
 
 **ACR**
 
@@ -24,14 +50,15 @@ Release History
 * Support enabling auditing on creating a registry
 * Support Repository-scoped RBAC
 
+**Reservations**
+
+* Upgrading SDK Version to 0.6.0
+* Add billingplan details info after calling Get-Gatalogs
+
 **AKS**
 
 * Add `--enable-cluster-autoscaler`, `--min-count` and `--max-count` to the `az aks create` command, which enables cluster autoscaler for the node pool.
 * Add the above flags as well as `--update-cluster-autoscaler` and `--disable-cluster-autoscaler` to the `az aks update` command, allowing updates to cluster autoscaler.
-
-**AKS**
-
-* Support cluster certificate rotation operation using "az aks rotate-certs".
 
 **AppConfig**
 
@@ -82,12 +109,20 @@ Release History
 
 * Add new routing source type: DigitalTwinChangeEvents
 * Fix #2826: Missing features in "az iot hub create"
-* Bug Fixed: Return more descriptive message on raised exception. 
+* Bug Fixed: Return more descriptive message on raised exception.
+* Fix #2531: Add convenience arguments for hub update.
 
 **Key Vault**
 
 * Fix #9352: Unexpected error when certificate file does not exist
 * Fix #7048: `az keyvault recover/purge` not working
+
+**Monitor**
+
+* Updated azure-mgmt-monitor to 0.7.0
+* az monitor action-group create/update: Added suport for following new receivers: Arm role, Azure app push, ITSM, automation runbook, voice, logic app and Azure function
+* Included parameter usecommonalertschema for supported receivers
+* Included parameter useaadwebhook for webhook receiver
 
 **NetAppFiles**
 
