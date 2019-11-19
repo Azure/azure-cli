@@ -188,7 +188,7 @@ parameters:
     short-summary: Quantity of product for calculating price
   - name: --renew
     short-summary: Setting this to true will automatically purchase a new reservation on the expiration date time.
-  - name: --reserved-resource-properties
+  - name: --instance-flexibility
     type: string
     short-summary: Type of the Instance Flexibility to update the reservation with
   - name: --reserved-resource-type
@@ -230,7 +230,7 @@ parameters:
     short-summary: Quantity of product for purchasing
   - name: --renew
     short-summary: Setting this to true will automatically purchase a new reservation on the expiration date time.
-  - name: --reserved-resource-properties
+  - name: --instance-flexibility
     type: string
     short-summary: Type of the Instance Flexibility to update the reservation with
   - name: --reserved-resource-type

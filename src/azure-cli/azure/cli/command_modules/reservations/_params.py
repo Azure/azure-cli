@@ -34,14 +34,14 @@ def load_arguments(self, _):
 
     with self.argument_context('reservations reservation-order calculate') as c:
         c.argument('billing_scope_id', options_list=['--billing-scope'])
-        c.argument('reserved_resource_properties', options_list=['--reserved-resource-properties'])
+        c.argument('instance_flexibility', options_list=['--instance-flexibility'])
         c.argument('renew', arg_type=get_three_state_flag())
         c.argument('reserved_resource_type', arg_type=get_enum_type(ReservedResourceType))
         c.argument('applied_scope_type', options_list=['--applied-scope-type'], arg_type=get_enum_type(AppliedScopeType))
 
     with self.argument_context('reservations reservation-order purchase') as c:
         c.argument('billing_scope_id', options_list=['--billing-scope'])
-        c.argument('reserved_resource_properties', options_list=['--reserved-resource-properties'])
+        c.argument('instance_flexibility', options_list=['--instance-flexibility'])
         c.argument('renew', arg_type=get_three_state_flag())
         c.argument('reserved_resource_type', arg_type=get_enum_type(ReservedResourceType))
         c.argument('applied_scope_type', options_list=['--applied-scope-type'], arg_type=get_enum_type(AppliedScopeType))
