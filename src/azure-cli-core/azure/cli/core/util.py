@@ -9,8 +9,11 @@ import json
 import getpass
 import base64
 import binascii
+import platform
+import ssl
 import six
 
+from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from knack.log import get_logger
 from knack.util import CLIError, to_snake_case
 
@@ -18,6 +21,12 @@ logger = get_logger(__name__)
 
 CLI_PACKAGE_NAME = 'azure-cli'
 COMPONENT_PREFIX = 'azure-cli-'
+
+SSLERROR_TEMPLATE = ('Certificate verification failed. This typically happens when using Azure CLI behind a proxy '
+                     'that intercepts traffic with a self-signed certificate. '
+                     # pylint: disable=line-too-long
+                     'Please add this certificate to the trusted CA bundle: https://github.com/Azure/azure-cli/blob/dev/doc/use_cli_effectively.md#working-behind-a-proxy. '
+                     'Error detail: {}')
 
 
 def handle_exception(ex):  # pylint: disable=too-many-return-statements
@@ -40,7 +49,11 @@ def handle_exception(ex):  # pylint: disable=too-many-return-statements
             logger.error('validation error: %s', ex)
             return 1
         if isinstance(ex, ClientRequestError):
-            logger.error("request failed: %s", ex)
+            msg = str(ex)
+            if 'SSLError' in msg:
+                logger.error("request failed: %s", SSLERROR_TEMPLATE.format(msg))
+            else:
+                logger.error("request failed: %s", ex)
             return 1
         if isinstance(ex, KeyboardInterrupt):
             return 1
@@ -119,7 +132,6 @@ def _update_latest_from_pypi(versions):
 
 
 def get_az_version_string():
-    import platform
     from azure.cli.core.extension import get_extensions, EXTENSIONS_DIR, DEV_EXTENSION_SOURCES
 
     output = six.StringIO()
@@ -357,9 +369,9 @@ def sdk_no_wait(no_wait, func, *args, **kwargs):
 def open_page_in_browser(url):
     import subprocess
     import webbrowser
-    platform_name, release = _get_platform_info()
+    platform_name, _ = _get_platform_info()
 
-    if _is_wsl(platform_name, release):   # windows 10 linux subsystem
+    if is_wsl():   # windows 10 linux subsystem
         try:
             return subprocess.call(['cmd.exe', '/c', "start {}".format(url.replace('&', '^&'))])
         except OSError:  # WSL might be too old  # FileNotFoundError introduced in Python 3
@@ -377,7 +389,6 @@ def open_page_in_browser(url):
 
 
 def _get_platform_info():
-    import platform
     uname = platform.uname()
     # python 2, `platform.uname()` returns: tuple(system, node, release, version, machine, processor)
     platform_name = getattr(uname, 'system', None) or uname[0]
@@ -385,16 +396,21 @@ def _get_platform_info():
     return platform_name.lower(), release.lower()
 
 
-def _is_wsl(platform_name, release):
+def is_wsl():
     platform_name, release = _get_platform_info()
     return platform_name == 'linux' and release.split('-')[-1] == 'microsoft'
+
+
+def is_windows():
+    platform_name, _ = _get_platform_info()
+    return platform_name == 'windows'
 
 
 def can_launch_browser():
     import os
     import webbrowser
-    platform_name, release = _get_platform_info()
-    if _is_wsl(platform_name, release) or platform_name != 'linux':
+    platform_name, _ = _get_platform_info()
+    if is_wsl() or platform_name != 'linux':
         return True
     # per https://unix.stackexchange.com/questions/46305/is-there-a-way-to-retrieve-the-name-of-the-desktop-environment
     # and https://unix.stackexchange.com/questions/193827/what-is-display-0
@@ -601,3 +617,18 @@ class ConfiguredDefaultSetter(object):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         setattr(self.cli_config, 'use_local_config', self.original_use_local_config)
+
+
+def _ssl_context():
+    if sys.version_info < (3, 4) or (in_cloud_console() and platform.system() == 'Windows'):
+        try:
+            return ssl.SSLContext(ssl.PROTOCOL_TLS)  # added in python 2.7.13 and 3.6
+        except AttributeError:
+            return ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+
+    return ssl.create_default_context()
+
+
+def urlretrieve(url):
+    req = urlopen(url, context=_ssl_context())
+    return req.read()

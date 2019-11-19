@@ -40,6 +40,7 @@ setup() {
 
     assert_consent "Add packages necessary to modify your apt-package sources?" ${global_consent}
     set -v
+    export DEBIAN_FRONTEND=noninteractive
     apt-get update
     apt-get install -y apt-transport-https lsb-release gnupg curl
     set +v

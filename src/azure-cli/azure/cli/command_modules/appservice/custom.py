@@ -46,7 +46,7 @@ from azure.mgmt.relay.models import AccessRights
 from azure.cli.command_modules.relay._client_factory import hycos_mgmt_client_factory, namespaces_mgmt_client_factory
 from azure.storage.blob import BlockBlobService, BlobPermissions
 from azure.cli.command_modules.network._client_factory import network_client_factory
-from azure.mgmt.network.models import Subnet, Delegation
+from azure.mgmt.network.models import Delegation
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
@@ -331,20 +331,19 @@ def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_rem
     is_consumption = is_plan_consumption(plan_info)
     if (not build_remote) and is_consumption and app.reserved:
         return upload_zip_to_storage(cmd, resource_group_name, name, src, slot)
+    if build_remote:
+        add_remote_build_app_settings(cmd, resource_group_name, name, slot)
+    else:
+        remove_remote_build_app_settings(cmd, resource_group_name, name, slot)
 
-    return enable_zip_deploy(cmd, resource_group_name, name, src, build_remote,
-                             timeout, slot)
+    return enable_zip_deploy(cmd, resource_group_name, name, src, timeout, slot)
 
 
 def enable_zip_deploy_webapp(cmd, resource_group_name, name, src, timeout=None, slot=None):
-    return enable_zip_deploy(cmd, resource_group_name, name, src,
-                             is_remote_build=False,
-                             timeout=timeout,
-                             slot=slot)
+    return enable_zip_deploy(cmd, resource_group_name, name, src, timeout=timeout, slot=slot)
 
 
-def enable_zip_deploy(cmd, resource_group_name, name, src, is_remote_build=False,
-                      timeout=None, slot=None):
+def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=None):
     logger.warning("Getting scm site credentials for zip deployment")
     user_name, password = _get_site_credential(cmd.cli_ctx, resource_group_name, name, slot)
 
@@ -361,11 +360,6 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, is_remote_build=False
     headers = authorization
     headers['content-type'] = 'application/octet-stream'
     headers['User-Agent'] = UA_AGENT
-
-    if is_remote_build:
-        add_remote_build_app_settings(cmd, resource_group_name, name, slot)
-    else:
-        remove_remote_build_app_settings(cmd, resource_group_name, name, slot)
 
     import requests
     import os
@@ -854,7 +848,7 @@ def _get_linux_multicontainer_encoded_config_from_file(file_name):
 
 # for any modifications to the non-optional parameters, adjust the reflection logic accordingly
 # in the method
-def update_site_configs(cmd, resource_group_name, name, slot=None,
+def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_workers=None,
                         linux_fx_version=None, windows_fx_version=None, reserved_instance_count=None, php_version=None,  # pylint: disable=unused-argument
                         python_version=None, net_framework_version=None,  # pylint: disable=unused-argument
                         java_version=None, java_container=None, java_container_version=None,  # pylint: disable=unused-argument
@@ -867,6 +861,8 @@ def update_site_configs(cmd, resource_group_name, name, slot=None,
                         ftps_state=None,  # pylint: disable=unused-argument
                         generic_configurations=None):
     configs = get_site_configs(cmd, resource_group_name, name, slot)
+    if number_of_workers is not None:
+        number_of_workers = validate_range_of_int_flag('--number-of-workers', number_of_workers, min_val=0, max_val=20)
     if linux_fx_version:
         if linux_fx_version.strip().lower().startswith('docker|'):
             update_app_settings(cmd, resource_group_name, name, ["WEBSITES_ENABLE_APP_SERVICE_STORAGE=false"])
@@ -880,7 +876,7 @@ def update_site_configs(cmd, resource_group_name, name, slot=None,
     frame = inspect.currentframe()
     bool_flags = ['remote_debugging_enabled', 'web_sockets_enabled', 'always_on',
                   'auto_heal_enabled', 'use32_bit_worker_process', 'http20_enabled']
-    int_flags = ['reserved_instance_count']
+    int_flags = ['reserved_instance_count', 'number_of_workers']
     # note: getargvalues is used already in azure.cli.core.commands.
     # and no simple functional replacement for this deprecating method for 3.5
     args, _, _, values = inspect.getargvalues(frame)  # pylint: disable=deprecated-method
@@ -1380,8 +1376,8 @@ def list_app_service_plans(cmd, resource_group_name=None):
     return plans
 
 
-def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, sku='B1', number_of_workers=None,
-                            location=None, tags=None):
+def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, per_site_scaling=False, sku='B1',
+                            number_of_workers=None, location=None, tags=None):
     if is_linux and hyper_v:
         raise CLIError('usage error: --is-linux | --hyper-v')
     client = web_client_factory(cmd.cli_ctx)
@@ -1391,7 +1387,8 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, s
     # the api is odd on parameter naming, have to live with it for now
     sku_def = SkuDescription(tier=get_sku_name(sku), name=sku, capacity=number_of_workers)
     plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
-                              reserved=(is_linux or None), hyper_v=(hyper_v or None), name=name)
+                              reserved=(is_linux or None), hyper_v=(hyper_v or None), name=name,
+                              per_site_scaling=per_site_scaling)
     return client.app_service_plans.create_or_update(resource_group_name, name, plan_def)
 
 
@@ -2292,7 +2289,8 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                                                               value='true'))
                 if runtime not in RUNTIME_TO_IMAGE_FUNCTIONAPP.keys():
                     raise CLIError("An appropriate linux image for runtime:'{}' was not found".format(runtime))
-        site_config.linux_fx_version = _get_linux_fx_functionapp(is_consumption, runtime, runtime_version)
+        if deployment_container_image_name is None:
+            site_config.linux_fx_version = _get_linux_fx_functionapp(is_consumption, runtime, runtime_version)
     else:
         functionapp_def.kind = 'functionapp'
         site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION', value='~2'))
@@ -2619,7 +2617,7 @@ def add_hc(cmd, name, resource_group_name, namespace, hybrid_connection, slot=No
     hy_co_rules = hy_co_client.list_authorization_rules(hy_co_resource_group, namespace, hybrid_connection)
     has_default_sender_key = False
     for r in hy_co_rules:
-        if r.name == "defaultSender":
+        if r.name.lower() == "defaultsender":
             for z in r.rights:
                 if z == z.send:
                     has_default_sender_key = True
@@ -2697,7 +2695,7 @@ def set_hc_key(cmd, plan, resource_group_name, namespace, hybrid_connection, key
     hy_co_rules = hy_co_client.list_authorization_rules(relay_resource_group, namespace, hybrid_connection)
     has_default_sender_key = False
     for r in hy_co_rules:
-        if r.name == "defaultSender":
+        if r.name.lower() == "defaultsender":
             for z in r.rights:
                 if z == z.send:
                     has_default_sender_key = True
@@ -2826,7 +2824,7 @@ def add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None
     vnet_resource_group = ''
     i = 0
     for z in vnet_id_strings:
-        if z == "resourceGroups":
+        if z.lower() == "resourcegroups":
             vnet_resource_group = vnet_id_strings[i + 1]
         i = i + 1
 
@@ -2846,16 +2844,13 @@ def add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None
     delegations = subnetObj.delegations
     delegated = False
     for d in delegations:
-        if d.service_name == "Microsoft.Web/serverFarms":
+        if d.service_name.lower() == "microsoft.web/serverfarms".lower():
             delegated = True
 
     if not delegated:
+        subnetObj.delegations = [Delegation(name="delegation", service_name="Microsoft.Web/serverFarms")]
         vnet_client.subnets.create_or_update(vnet_resource_group, vnet, subnet,
-                                             subnet_parameters=Subnet(name="subnet",
-                                                                      address_prefix=subnetObj.address_prefix,
-                                                                      delegations=[Delegation(name="delegation",
-                                                                                              service_name="Microsoft" +
-                                                                                              ".Web/serverFarms")]))
+                                             subnet_parameters=subnetObj)
 
     id_subnet = vnet_client.subnets.get(vnet_resource_group, vnet, subnet)
     subnet_resource_id = id_subnet.id
@@ -2868,6 +2863,7 @@ def add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None
     else:
         return_vnet = client.web_apps.create_or_update_swift_virtual_network_connection_slot(resource_group_name, name,
                                                                                              swiftVnet, slot)
+
     # reformats the vnet entry, removing unecessary information
     id_strings = return_vnet.id.split('/')
     resourceGroup = id_strings[4]
@@ -2922,6 +2918,9 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
         # Get the ASP & RG info, if the ASP & RG parameters are provided we use those else we need to find those
         logger.warning("Webapp %s already exists. The command will deploy contents to the existing app.", name)
         app_details = get_app_details(cmd, name)
+        if app_details is None:
+            raise CLIError("Unable to retrieve details of the existing app {}. Please check that the app is a part of "
+                           "the current subscription".format(name))
         current_rg = app_details.resource_group
         if resource_group_name is not None and (resource_group_name.lower() != current_rg.lower()):
             raise CLIError("The webapp {} exists in ResourceGroup {} and does not match the value entered {}. Please "
@@ -2966,7 +2965,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
                 "os": "%s",
                 "location" : "%s",
                 "src_path" : "%s",
-                "version_detected": "%s",
+                "runtime_version_detected": "%s",
                 "runtime_version": "%s"
                 }
                 """ % (name, plan, rg_name, get_sku_name(sku), os_name, loc, _src_path_escaped, detected_version,
@@ -2986,7 +2985,8 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
         logger.warning("Creating AppServicePlan '%s' ...", plan)
     # we will always call the ASP create or update API so that in case of re-deployment, if the SKU or plan setting are
     # updated we update those
-    create_app_service_plan(cmd, rg_name, plan, _is_linux, False, sku, 1 if _is_linux else None, location)
+    create_app_service_plan(cmd, rg_name, plan, _is_linux, hyper_v=False, per_site_scaling=False, sku=sku,
+                            number_of_workers=1 if _is_linux else None, location=location)
 
     if _create_new_app:
         logger.warning("Creating webapp '%s' ...", name)

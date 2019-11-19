@@ -168,17 +168,6 @@ def _get_helm_version(ignore_errors):
         _handle_error(obsolete_ver_error, ignore_errors)
 
 
-def _check_health_environment(ignore_errors, yes):
-    from azure.cli.core.util import in_cloud_console
-    if in_cloud_console():
-        logger.warning("Environment checks are not supported in Azure Cloud Shell.")
-        return
-
-    _get_docker_status_and_version(ignore_errors, yes)
-    _get_cli_version()
-    _get_helm_version(ignore_errors)
-
-
 # Checks for the connectivity
 # Check DNS lookup and access to challenge endpoint
 def _get_registry_status(login_server, registry_name, ignore_errors):
@@ -288,7 +277,17 @@ def acr_check_health(cmd,  # pylint: disable useless-return
                      ignore_errors=False,
                      yes=False,
                      registry_name=None):
+    from azure.cli.core.util import in_cloud_console
+    in_cloud_console = in_cloud_console()
+    if in_cloud_console:
+        logger.warning("Environment checks are not supported in Azure Cloud Shell.")
+    else:
+        _get_docker_status_and_version(ignore_errors, yes)
+        _get_cli_version()
 
-    _check_health_environment(ignore_errors, yes)
     _check_health_connectivity(cmd, registry_name, ignore_errors)
+
+    if not in_cloud_console:
+        _get_helm_version(ignore_errors)
+
     print(FAQ_MESSAGE, file=sys.stderr)

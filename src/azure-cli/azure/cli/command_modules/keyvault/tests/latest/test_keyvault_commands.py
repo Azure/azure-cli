@@ -438,6 +438,12 @@ class KeyVaultPendingCertificateScenarioTest(ScenarioTest):
             self.check('cancellationRequested', False),
             self.check('status', 'inProgress')
         ])
+
+        self.cmd('keyvault certificate list --vault-name {kv} --include-pending', checks=self.check('length(@)', 1))
+        self.cmd('keyvault certificate list --vault-name {kv} --include-pending true', checks=self.check('length(@)', 1))
+        self.cmd('keyvault certificate list --vault-name {kv}', checks=self.check('length(@)', 0))
+        self.cmd('keyvault certificate list --vault-name {kv}  --include-pending false', checks=self.check('length(@)', 0))
+
         # we do not have a way of actually getting a certificate that would pass this test so
         # we simply ensure that the payload successfully serializes and is received by the server
         with self.assertRaises(CLIError):
@@ -734,7 +740,7 @@ class KeyVaultSoftDeleteScenarioTest(ScenarioTest):
         self.cmd('keyvault certificate import --vault-name {kv} -n cert1 --file "{pem_plain_file}" -p @"{pem_policy_path}"')
         self.cmd('keyvault certificate import --vault-name {kv} -n cert2 --file "{pem_plain_file}" -p @"{pem_policy_path}"')
 
-        # delete the secrets keys and certficates
+        # delete the secrets keys and certificates
         self.cmd('keyvault secret delete --vault-name {kv} -n secret1')
         self.cmd('keyvault secret delete --vault-name {kv} -n secret2')
         self.cmd('keyvault key delete --vault-name {kv} -n key1')
@@ -755,7 +761,16 @@ class KeyVaultSoftDeleteScenarioTest(ScenarioTest):
         self.cmd('keyvault key purge --vault-name {kv} -n key2')
         self.cmd('keyvault certificate purge --vault-name {kv} -n cert2')
 
-        # delete and purge the vault
+        # recover and purge
+        self.cmd('keyvault delete -n {kv}')
+        self.cmd('keyvault recover -n {kv}', checks=self.check('name', '{kv}'))
+        self.cmd('keyvault delete -n {kv}')
+        self.cmd('keyvault purge -n {kv}')
+
+        # recover and purge with location
+        _create_keyvault(self, self.kwargs, additional_args=' --enable-soft-delete true').get_output_in_json()
+        self.cmd('keyvault delete -n {kv}')
+        self.cmd('keyvault recover -n {kv} -l {loc}', checks=self.check('name', '{kv}'))
         self.cmd('keyvault delete -n {kv}')
         self.cmd('keyvault purge -n {kv} -l {loc}')
 
