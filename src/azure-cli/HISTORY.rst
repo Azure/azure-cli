@@ -7,15 +7,15 @@ Release History
 
 * Support cluster certificate rotation operation using "az aks rotate-certs".
 
-**AppService**
-
-* Fix issue #11100: AttributeError for az webapp up when create service plan
-
 **AppConfig**
 
 * Add support for using ":" for `as az appconfig kv import` separator
 * Fix issue for listing key values with multiple labels including null label. 
 * Apply latest version of management plane sdk. 
+
+**AppService**
+
+* Fix issue #11100: AttributeError for az webapp up when create service plan
 
 **Packaging**
 
