@@ -330,7 +330,8 @@ def create_image(cmd, resource_group_name, name, source, os_type=None, data_disk
                  source_virtual_machine=None, storage_sku=None, hyper_v_generation=None,
                  os_blob_uri=None, data_blob_uris=None,
                  os_snapshot=None, data_snapshots=None,
-                 os_disk=None, os_disk_caching=None, data_disks=None, tags=None, zone_resilient=None):
+                 os_disk=None, os_disk_caching=None, data_disks=None, data_disk_caching=None,
+                 tags=None, zone_resilient=None):
     ImageOSDisk, ImageDataDisk, ImageStorageProfile, Image, SubResource, OperatingSystemStateTypes = cmd.get_models(
         'ImageOSDisk', 'ImageDataDisk', 'ImageStorageProfile', 'Image', 'SubResource', 'OperatingSystemStateTypes')
 
@@ -351,15 +352,15 @@ def create_image(cmd, resource_group_name, name, source, os_type=None, data_disk
         lun = 0
         if data_blob_uris:
             for d in data_blob_uris:
-                all_data_disks.append(ImageDataDisk(lun=lun, blob_uri=d))
+                all_data_disks.append(ImageDataDisk(lun=lun, blob_uri=d, caching=data_disk_caching))
                 lun += 1
         if data_snapshots:
             for d in data_snapshots:
-                all_data_disks.append(ImageDataDisk(lun=lun, snapshot=SubResource(id=d)))
+                all_data_disks.append(ImageDataDisk(lun=lun, snapshot=SubResource(id=d), caching=data_disk_caching))
                 lun += 1
         if data_disks:
             for d in data_disks:
-                all_data_disks.append(ImageDataDisk(lun=lun, managed_disk=SubResource(id=d)))
+                all_data_disks.append(ImageDataDisk(lun=lun, managed_disk=SubResource(id=d), caching=data_disk_caching))
                 lun += 1
 
         image_storage_profile = ImageStorageProfile(os_disk=os_disk, data_disks=all_data_disks)
@@ -531,7 +532,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               identity_role='Contributor', identity_role_id=None, application_security_groups=None, zone=None,
               boot_diagnostics_storage=None, ultra_ssd_enabled=None, ephemeral_os_disk=None,
               proximity_placement_group=None, dedicated_host=None, dedicated_host_group=None, aux_subscriptions=None,
-              priority=None, max_billing=None, eviction_policy=None, enable_agent=None, workspace=None, vmss=None):
+              priority=None, max_price=None, eviction_policy=None, enable_agent=None, workspace=None, vmss=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -658,7 +659,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         license_type=license_type, zone=zone, disk_info=disk_info,
         boot_diagnostics_storage_uri=boot_diagnostics_storage, ultra_ssd_enabled=ultra_ssd_enabled,
         proximity_placement_group=proximity_placement_group, computer_name=computer_name,
-        dedicated_host=dedicated_host, priority=priority, max_billing=max_billing, eviction_policy=eviction_policy,
+        dedicated_host=dedicated_host, priority=priority, max_price=max_price, eviction_policy=eviction_policy,
         enable_agent=enable_agent, vmss=vmss)
 
     vm_resource['dependsOn'] = vm_dependencies
@@ -1995,7 +1996,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 identity_role_id=None, zones=None, priority=None, eviction_policy=None,
                 application_security_groups=None, ultra_ssd_enabled=None, ephemeral_os_disk=None,
                 proximity_placement_group=None, aux_subscriptions=None, terminate_notification_time=None,
-                max_billing=None, computer_name_prefix=None, orchestration_mode='ScaleSetVM'):
+                max_price=None, computer_name_prefix=None, orchestration_mode='ScaleSetVM'):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -2207,7 +2208,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             custom_data=custom_data, secrets=secrets, license_type=license_type, zones=zones, priority=priority,
             eviction_policy=eviction_policy, application_security_groups=application_security_groups,
             ultra_ssd_enabled=ultra_ssd_enabled, proximity_placement_group=proximity_placement_group,
-            terminate_notification_time=terminate_notification_time, max_billing=max_billing)
+            terminate_notification_time=terminate_notification_time, max_price=max_price)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -2735,10 +2736,11 @@ def create_image_gallery(cmd, resource_group_name, gallery_name, description=Non
 
 
 def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_name, os_type, publisher, offer, sku,
-                         os_state=None, end_of_life_date=None, privacy_statement_uri=None, release_note_uri=None,
-                         eula=None, description=None, location=None,
+                         os_state='Generalized', end_of_life_date=None, privacy_statement_uri=None,
+                         release_note_uri=None, eula=None, description=None, location=None,
                          minimum_cpu_core=None, maximum_cpu_core=None, minimum_memory=None, maximum_memory=None,
-                         disallowed_disk_types=None, plan_name=None, plan_publisher=None, plan_product=None, tags=None):
+                         disallowed_disk_types=None, plan_name=None, plan_publisher=None, plan_product=None, tags=None,
+                         hyper_v_generation='V1'):
     # pylint: disable=line-too-long
     GalleryImage, GalleryImageIdentifier, RecommendedMachineConfiguration, ResourceRange, Disallowed, ImagePurchasePlan = cmd.get_models(
         'GalleryImage', 'GalleryImageIdentifier', 'RecommendedMachineConfiguration', 'ResourceRange', 'Disallowed', 'ImagePurchasePlan')
@@ -2759,9 +2761,10 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
         purchase_plan = ImagePurchasePlan(name=plan_name, publisher=plan_publisher, product=plan_product)
 
     image = GalleryImage(identifier=GalleryImageIdentifier(publisher=publisher, offer=offer, sku=sku),
-                         os_type=os_type, os_state='Generalized', end_of_life_date=end_of_life_date,
+                         os_type=os_type, os_state=os_state, end_of_life_date=end_of_life_date,
                          recommended=recommendation, disallowed=Disallowed(disk_types=disallowed_disk_types),
-                         purchase_plan=purchase_plan, location=location, eula=eula, tags=(tags or {}))
+                         purchase_plan=purchase_plan, location=location, eula=eula, tags=(tags or {}),
+                         hyper_vgeneration=hyper_v_generation)
     return client.gallery_images.create_or_update(resource_group_name, gallery_name, gallery_image_name, image)
 
 
@@ -2884,4 +2887,21 @@ def create_dedicated_host(cmd, client, host_group_name, host_name, resource_grou
 def get_dedicated_host_instance_view(client, host_group_name, host_name, resource_group_name):
     return client.get(resource_group_name, host_group_name, host_name, expand="instanceView")
 
+# endregion
+
+
+# region VMMonitor
+def execute_query_for_vm(cmd, client, resource_group_name, vm_name, analytics_query, timespan=None):
+    """Executes a query against the Log Analytics workspace linked with a vm."""
+    from azure.loganalytics.models import QueryBody
+    vm = get_vm(cmd, resource_group_name, vm_name)
+    workspace = None
+    extension_resources = vm.resources or []
+    for resource in extension_resources:
+        if resource.name == "OMSExtension":
+            workspace = resource.settings.get('workspaceId', None)
+    if workspace is None:
+        raise CLIError('Cannot find the corresponding log analytics workspace. '
+                       'Please check the status of log analytics workpsace.')
+    return client.query(workspace, QueryBody(query=analytics_query, timespan=timespan))
 # endregion
