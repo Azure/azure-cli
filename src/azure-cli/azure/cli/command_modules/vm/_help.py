@@ -2388,3 +2388,13 @@ examples:
   - name: Place the CLI in a waiting state until the VMSS instance has been updated.
     text: az vmss wait --updated --instance-id 1 --name MyScaleSet --resource-group MyResourceGroup
 """
+
+helps['vm monitor'] = """
+type: group
+short-summary: Manage monitor aspect for a vm.
+"""
+
+helps['vm monitor log'] = """
+type: group
+short-summary: Manage log analytics workspace for a vm.
+"""

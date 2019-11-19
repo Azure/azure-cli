@@ -127,6 +127,7 @@ DEPENDENCIES = [
     'azure-mgmt-trafficmanager~=0.51.0',
     'azure-mgmt-web~=0.42.0',
     'azure-multiapi-storage~=0.2.4',
+    'azure-loganalytics~=0.1.0',
     'azure-storage-blob>=1.3.1,<2.0.0',
     'colorama~=0.4.1',
     'cryptography>=2.3.1,<3.0.0',
