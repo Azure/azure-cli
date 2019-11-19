@@ -204,13 +204,13 @@ class BotTests(ScenarioTest):
         # Delete bot
         self.cmd('az bot delete -g {rg} -n {botname}')
 
-    @ResourceGroupPreparer(random_name_length=20)
-    def test_botservice_create_should_raise_error_for_invalid_app_id_args(self, resource_group):
+    def test_botservice_create_should_raise_error_for_invalid_app_id_args(self):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),
             'short_app_id': str(uuid.uuid4())[:34],
             'password': str(uuid.uuid4()),
-            'numbers_id': "223232"
+            'numbers_id': "223232",
+            'rg': str(uuid.uuid4())
         })
 
         expected_error = "--appid must be a valid GUID from a Microsoft Azure AD Application Registration. See " \
@@ -244,11 +244,11 @@ class BotTests(ScenarioTest):
         except AssertionError:
             raise AssertionError('should have thrown an error for appid that is not valid GUID.')
 
-    @ResourceGroupPreparer(random_name_length=20)
-    def test_botservice_create_should_raise_error_for_empty_password_strings(self, resource_group):
+    def test_botservice_create_should_raise_error_for_empty_password_strings(self):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),
-            'app_id': str(uuid.uuid4())
+            'app_id': str(uuid.uuid4()),
+            'rg': str(uuid.uuid4())
         })
 
         try:
@@ -646,8 +646,7 @@ class BotTests(ScenarioTest):
         except Exception as error:
             raise error
 
-    @ResourceGroupPreparer(random_name_length=20)
-    def test_botservice_prepare_deploy_should_fail_if_code_dir_doesnt_exist(self, resource_group):
+    def test_botservice_prepare_deploy_should_fail_if_code_dir_doesnt_exist(self):
         dir_path = 'does_not_exist'
         self.kwargs.update({'dir_path': dir_path,
                             'language': 'Javascript'})
@@ -660,8 +659,7 @@ class BotTests(ScenarioTest):
         except Exception as error:
             raise error
 
-    @ResourceGroupPreparer(random_name_length=20)
-    def test_botservice_prepare_deploy_javascript_should_fail_with_proj_file_path(self, resource_group):
+    def test_botservice_prepare_deploy_javascript_should_fail_with_proj_file_path(self):
         self.kwargs.update({'language': 'Javascript',
                             'proj_file': 'node_bot/test.csproj'})
         try:
@@ -672,8 +670,7 @@ class BotTests(ScenarioTest):
         except Exception as error:
             raise error
 
-    @ResourceGroupPreparer(random_name_length=20)
-    def test_botservice_prepare_deploy_javascript(self, resource_group):
+    def test_botservice_prepare_deploy_javascript(self):
         dir_path = 'node_bot'
         self.kwargs.update({'dir_path': dir_path,
                             'language': 'Javascript'})
@@ -685,8 +682,7 @@ class BotTests(ScenarioTest):
         assert os.path.exists(os.path.join(dir_path, 'web.config'))
         shutil.rmtree(dir_path)
 
-    @ResourceGroupPreparer(random_name_length=20)
-    def test_botservice_prepare_deploy_typescript_should_fail_with_proj_file_path(self, resource_group):
+    def test_botservice_prepare_deploy_typescript_should_fail_with_proj_file_path(self):
         self.kwargs.update({'language': 'Typescript',
                             'proj_file': 'node_bot/test.csproj'})
         try:
@@ -695,8 +691,7 @@ class BotTests(ScenarioTest):
         except CLIError as cli_error:
             assert cli_error.__str__() == '--proj-file-path should not be passed in if language is not Csharp'
 
-    @ResourceGroupPreparer(random_name_length=20)
-    def test_botservice_prepare_deploy_typescript(self, resource_group):
+    def test_botservice_prepare_deploy_typescript(self):
         dir_path = 'node_bot'
         self.kwargs.update({'dir_path': dir_path,
                             'language': 'Typescript'})
@@ -708,8 +703,7 @@ class BotTests(ScenarioTest):
         assert os.path.exists(os.path.join(dir_path, 'web.config'))
         shutil.rmtree(dir_path)
 
-    @ResourceGroupPreparer(random_name_length=20)
-    def test_botservice_prepare_deploy_csharp(self, resource_group):
+    def test_botservice_prepare_deploy_csharp(self):
         dir_path = 'csharp_bot'
         proj_file = 'test.csproj'
         self.kwargs.update({'dir_path': dir_path,
@@ -728,8 +722,7 @@ class BotTests(ScenarioTest):
             assert d.readline() == 'SCM_SCRIPT_GENERATOR_ARGS=--aspNetCore "{0}"\n'.format(proj_file)
         shutil.rmtree(dir_path)
 
-    @ResourceGroupPreparer(random_name_length=20)
-    def test_botservice_prepare_deploy_csharp_no_proj_file(self, resource_group):
+    def test_botservice_prepare_deploy_csharp_no_proj_file(self):
         self.kwargs.update({'language': 'Csharp'})
         try:
             self.cmd('az bot prepare-deploy --lang {language}')
@@ -737,8 +730,7 @@ class BotTests(ScenarioTest):
         except CLIError as cli_error:
             assert cli_error.__str__() == '--proj-file-path must be provided if language is Csharp'
 
-    @ResourceGroupPreparer(random_name_length=20)
-    def test_botservice_prepare_deploy_csharp_fail_if_deployment_file_exists(self, resource_group):
+    def test_botservice_prepare_deploy_csharp_fail_if_deployment_file_exists(self):
         dir_path = 'csharp_bot'
         proj_file = 'test.csproj'
         self.kwargs.update({'dir_path': dir_path,
@@ -806,8 +798,7 @@ class BotTests(ScenarioTest):
         assert results['properties']['developerAppInsightsApplicationId']
         assert results['properties']['iconUrl'] == 'https://dev.botframework.com/client/images/channels/icons/directline.png'
 
-    @ResourceGroupPreparer(random_name_length=20)
-    def test_botservice_prepare_deploy_javascript_fail_if_web_config_exists(self, resource_group):
+    def test_botservice_prepare_deploy_javascript_fail_if_web_config_exists(self):
         dir_path = 'node_bot'
         self.kwargs.update({'dir_path': dir_path,
                             'language': 'Javascript'})
