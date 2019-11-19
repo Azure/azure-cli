@@ -9,7 +9,7 @@ import json
 import shutil
 import uuid
 import requests
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, LiveScenarioTest
 from azure.mgmt.botservice.models import ErrorException
 from knack.util import CLIError
 
@@ -70,13 +70,13 @@ class DirectLineClient(object):
                         return bot_response, "No new messages"
         return bot_response, "error contacting bot for response"
 
-    def __set_headers(self):
+    def __set_headers(self, resource_group):
         headers = {'Content-Type': 'application/json'}
         value = ' '.join(['Bearer', self._direct_line_secret])
         headers.update({'Authorization': value})
         self._headers = headers
 
-    def __start_conversation(self):
+    def __start_conversation(self, resource_group):
 
         # Start conversation and get us a conversationId to use
         url = '/'.join([self._base_url, 'conversations'])
@@ -203,66 +203,6 @@ class BotTests(ScenarioTest):
 
         # Delete bot
         self.cmd('az bot delete -g {rg} -n {botname}')
-
-    def test_botservice_create_should_raise_error_for_invalid_app_id_args(self):
-        self.kwargs.update({
-            'botname': self.create_random_name(prefix='cli', length=15),
-            'short_app_id': str(uuid.uuid4())[:34],
-            'password': str(uuid.uuid4()),
-            'numbers_id': "223232",
-            'rg': str(uuid.uuid4())
-        })
-
-        expected_error = "--appid must be a valid GUID from a Microsoft Azure AD Application Registration. See " \
-                         "https://docs.microsoft.com/azure/active-directory/develop/quickstart-register-app " \
-                         "for more information on App Registrations. See 'az bot create --help' for more CLI " \
-                         "information."
-        try:
-            self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {numbers_id} -p {password} --lang '
-                     'Javascript --echo')
-            raise AssertionError()
-        except CLIError as cli_error:
-            assert cli_error.__str__() == expected_error
-        except AssertionError:
-            raise AssertionError('should have thrown an error for appid that is not valid GUID.')
-
-        try:
-            self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {short_app_id} -p {password} --lang '
-                     'Javascript --echo')
-            raise AssertionError()
-        except CLIError as cli_error:
-            assert cli_error.__str__() == expected_error
-        except AssertionError:
-            raise AssertionError('should have thrown an error for appid that is not valid GUID.')
-
-        try:
-            self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid "" -p {password} --lang '
-                     'Javascript --echo')
-            raise AssertionError()
-        except CLIError as cli_error:
-            assert cli_error.__str__() == expected_error
-        except AssertionError:
-            raise AssertionError('should have thrown an error for appid that is not valid GUID.')
-
-    def test_botservice_create_should_raise_error_for_empty_password_strings(self):
-        self.kwargs.update({
-            'botname': self.create_random_name(prefix='cli', length=15),
-            'app_id': str(uuid.uuid4()),
-            'rg': str(uuid.uuid4())
-        })
-
-        try:
-            self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p "" --lang Javascript --echo')
-            raise AssertionError()
-        except CLIError as cli_error:
-            assert cli_error.__str__() == "--password cannot have a length of 0. This value is used to " \
-                                          "authorize calls to your bot. See 'az bot create --help'.`"
-        except AssertionError:
-            raise AssertionError('should have thrown an error for empty string passwords.')
-
-    "--appid must be a valid GUID from a Microsoft Azure AD Application Registration. See "
-    "https://docs.microsoft.com/azure/active-directory/develop/quickstart-register-app for"
-    " more information on App Registrations. See 'az bot create --help' for more CLI information."
 
     @ResourceGroupPreparer(random_name_length=20)
     def test_botservice_create_v4_js_empty_webapp_for_webapp_bot(self, resource_group):
@@ -646,114 +586,6 @@ class BotTests(ScenarioTest):
         except Exception as error:
             raise error
 
-    def test_botservice_prepare_deploy_should_fail_if_code_dir_doesnt_exist(self):
-        dir_path = 'does_not_exist'
-        self.kwargs.update({'dir_path': dir_path,
-                            'language': 'Javascript'})
-        try:
-            self.cmd('az bot prepare-deploy --lang {language} --code-dir {dir_path}')
-            raise Exception("'az bot prepare-publish' should have failed with nonexistent --code-dir value")
-        except CLIError as cli_error:
-            print(cli_error.__str__())
-            assert cli_error.__str__() == 'Provided --code-dir value (does_not_exist) does not exist'
-        except Exception as error:
-            raise error
-
-    def test_botservice_prepare_deploy_javascript_should_fail_with_proj_file_path(self):
-        self.kwargs.update({'language': 'Javascript',
-                            'proj_file': 'node_bot/test.csproj'})
-        try:
-            self.cmd('az bot prepare-deploy --lang {language} --proj-file-path {proj_file}')
-            raise Exception("'az bot prepare-publish --lang Javascript' should have failed with --proj-file-path")
-        except CLIError as cli_error:
-            assert cli_error.__str__() == '--proj-file-path should not be passed in if language is not Csharp'
-        except Exception as error:
-            raise error
-
-    def test_botservice_prepare_deploy_javascript(self):
-        dir_path = 'node_bot'
-        self.kwargs.update({'dir_path': dir_path,
-                            'language': 'Javascript'})
-        if os.path.exists(dir_path):
-            # clean up the folder
-            shutil.rmtree(dir_path)
-        os.mkdir(dir_path)
-        self.cmd('az bot prepare-deploy --lang {language} --code-dir {dir_path}')
-        assert os.path.exists(os.path.join(dir_path, 'web.config'))
-        shutil.rmtree(dir_path)
-
-    def test_botservice_prepare_deploy_typescript_should_fail_with_proj_file_path(self):
-        self.kwargs.update({'language': 'Typescript',
-                            'proj_file': 'node_bot/test.csproj'})
-        try:
-            self.cmd('az bot prepare-deploy --lang {language} --proj-file-path {proj_file}')
-            raise Exception("'az bot prepare-publish --lang Typescript' should have failed with --proj-file-path")
-        except CLIError as cli_error:
-            assert cli_error.__str__() == '--proj-file-path should not be passed in if language is not Csharp'
-
-    def test_botservice_prepare_deploy_typescript(self):
-        dir_path = 'node_bot'
-        self.kwargs.update({'dir_path': dir_path,
-                            'language': 'Typescript'})
-        if os.path.exists(dir_path):
-            # clean up the folder
-            shutil.rmtree(dir_path)
-        os.mkdir(dir_path)
-        self.cmd('az bot prepare-deploy --lang {language} --code-dir {dir_path}')
-        assert os.path.exists(os.path.join(dir_path, 'web.config'))
-        shutil.rmtree(dir_path)
-
-    def test_botservice_prepare_deploy_csharp(self):
-        dir_path = 'csharp_bot'
-        proj_file = 'test.csproj'
-        self.kwargs.update({'dir_path': dir_path,
-                            'language': 'Csharp',
-                            'proj_file': proj_file})
-        if os.path.exists(dir_path):
-            # clean up the folder
-            shutil.rmtree(dir_path)
-        os.mkdir(dir_path)
-        open(os.path.join(dir_path, proj_file), 'w')
-
-        self.cmd('az bot prepare-deploy --lang {language} --code-dir {dir_path} --proj-file-path {proj_file}')
-        assert os.path.exists(os.path.join(dir_path, '.deployment'))
-        with open(os.path.join(dir_path, '.deployment')) as d:
-            assert d.readline() == '[config]\n'
-            assert d.readline() == 'SCM_SCRIPT_GENERATOR_ARGS=--aspNetCore "{0}"\n'.format(proj_file)
-        shutil.rmtree(dir_path)
-
-    def test_botservice_prepare_deploy_csharp_no_proj_file(self):
-        self.kwargs.update({'language': 'Csharp'})
-        try:
-            self.cmd('az bot prepare-deploy --lang {language}')
-            raise Exception("'az bot prepare-publish --lang Csharp' should have failed with no --proj-file-path")
-        except CLIError as cli_error:
-            assert cli_error.__str__() == '--proj-file-path must be provided if language is Csharp'
-
-    def test_botservice_prepare_deploy_csharp_fail_if_deployment_file_exists(self):
-        dir_path = 'csharp_bot'
-        proj_file = 'test.csproj'
-        self.kwargs.update({'dir_path': dir_path,
-                            'language': 'Csharp',
-                            'proj_file': proj_file})
-        if os.path.exists(dir_path):
-            # clean up the folder
-            shutil.rmtree(dir_path)
-        os.mkdir(dir_path)
-        open(os.path.join(dir_path, proj_file), 'w')
-        open(os.path.join(dir_path, '.deployment'), 'w')
-
-        try:
-            self.cmd('az bot prepare-deploy --lang {language} --code-dir {dir_path} --proj-file-path {proj_file}')
-            shutil.rmtree(dir_path)
-        except CLIError as cli_error:
-            shutil.rmtree(dir_path)
-            assert cli_error.__str__() == '.deployment found in csharp_bot\nPlease delete this .deployment before ' \
-                                          'calling "az bot prepare-deploy"'
-        except Exception as error:
-            shutil.rmtree(dir_path)
-            raise error
-
     @ResourceGroupPreparer(random_name_length=20)
     def test_botservice_update_should_update_bot_properties(self, resource_group):
         self.kwargs.update({
@@ -798,27 +630,6 @@ class BotTests(ScenarioTest):
         assert results['properties']['developerAppInsightsApplicationId']
         assert results['properties']['iconUrl'] == 'https://dev.botframework.com/client/images/channels/icons/directline.png'
 
-    def test_botservice_prepare_deploy_javascript_fail_if_web_config_exists(self):
-        dir_path = 'node_bot'
-        self.kwargs.update({'dir_path': dir_path,
-                            'language': 'Javascript'})
-        if os.path.exists(dir_path):
-            # clean up the folder
-            shutil.rmtree(dir_path)
-        os.mkdir(dir_path)
-        open(os.path.join(dir_path, 'web.config'), 'w')
-
-        try:
-            self.cmd('az bot prepare-deploy --lang {language} --code-dir {dir_path}')
-            shutil.rmtree(dir_path)
-        except CLIError as cli_error:
-            shutil.rmtree(dir_path)
-            assert cli_error.__str__() == 'web.config found in node_bot\nPlease delete this web.config before ' \
-                                          'calling "az bot prepare-deploy"'
-        except Exception as error:
-            shutil.rmtree(dir_path)
-            raise error
-
     def __talk_to_bot(self, message_text='Hi', expected_text=None):
         """Enables direct line channel, sends a message to the bot,
         and if expected_text is provided, verify that the bot answer matches it."""
@@ -852,3 +663,200 @@ class BotTests(ScenarioTest):
             if expected_text:
                 self.assertTrue(expected_text in text, "Bot response does not match expectation: " + text +
                                 expected_text)
+
+class BotLocalErrorsTests(LiveScenarioTest):
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_create_should_raise_error_for_invalid_app_id_args(self, resource_group):
+        self.kwargs.update({
+            'botname': self.create_random_name(prefix='cli', length=15),
+            'short_app_id': str(uuid.uuid4())[:34],
+            'password': str(uuid.uuid4()),
+            'numbers_id': "223232",
+            'rg': str(uuid.uuid4())
+        })
+
+        expected_error = "--appid must be a valid GUID from a Microsoft Azure AD Application Registration. See " \
+                         "https://docs.microsoft.com/azure/active-directory/develop/quickstart-register-app " \
+                         "for more information on App Registrations. See 'az bot create --help' for more CLI " \
+                         "information."
+        try:
+            self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {numbers_id} -p {password} --lang '
+                     'Javascript --echo')
+            raise AssertionError()
+        except CLIError as cli_error:
+            assert cli_error.__str__() == expected_error
+        except AssertionError:
+            raise AssertionError('should have thrown an error for appid that is not valid GUID.')
+
+        try:
+            self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {short_app_id} -p {password} --lang '
+                     'Javascript --echo')
+            raise AssertionError()
+        except CLIError as cli_error:
+            assert cli_error.__str__() == expected_error
+        except AssertionError:
+            raise AssertionError('should have thrown an error for appid that is not valid GUID.')
+
+        try:
+            self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid "" -p {password} --lang '
+                     'Javascript --echo')
+            raise AssertionError()
+        except CLIError as cli_error:
+            assert cli_error.__str__() == expected_error
+        except AssertionError:
+            raise AssertionError('should have thrown an error for appid that is not valid GUID.')
+    
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_create_should_raise_error_for_empty_password_strings(self, resource_group):
+        self.kwargs.update({
+            'botname': self.create_random_name(prefix='cli', length=15),
+            'app_id': str(uuid.uuid4()),
+            'rg': str(uuid.uuid4())
+        })
+
+        try:
+            self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p "" --lang Javascript --echo')
+            raise AssertionError()
+        except CLIError as cli_error:
+            assert cli_error.__str__() == "--password cannot have a length of 0. This value is used to " \
+                                          "authorize calls to your bot. See 'az bot create --help'.`"
+        except AssertionError:
+            raise AssertionError('should have thrown an error for empty string passwords.')
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_prepare_deploy_should_fail_if_code_dir_doesnt_exist(self, resource_group):
+        dir_path = 'does_not_exist'
+        self.kwargs.update({'dir_path': dir_path,
+                            'language': 'Javascript'})
+        try:
+            self.cmd('az bot prepare-deploy --lang {language} --code-dir {dir_path}')
+            raise Exception("'az bot prepare-publish' should have failed with nonexistent --code-dir value")
+        except CLIError as cli_error:
+            print(cli_error.__str__())
+            assert cli_error.__str__() == 'Provided --code-dir value (does_not_exist) does not exist'
+        except Exception as error:
+            raise error
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_prepare_deploy_javascript_should_fail_with_proj_file_path(self, resource_group):
+        self.kwargs.update({'language': 'Javascript',
+                            'proj_file': 'node_bot/test.csproj'})
+        try:
+            self.cmd('az bot prepare-deploy --lang {language} --proj-file-path {proj_file}')
+            raise Exception("'az bot prepare-publish --lang Javascript' should have failed with --proj-file-path")
+        except CLIError as cli_error:
+            assert cli_error.__str__() == '--proj-file-path should not be passed in if language is not Csharp'
+        except Exception as error:
+            raise error
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_prepare_deploy_javascript(self, resource_group):
+        dir_path = 'node_bot'
+        self.kwargs.update({'dir_path': dir_path,
+                            'language': 'Javascript'})
+        if os.path.exists(dir_path):
+            # clean up the folder
+            shutil.rmtree(dir_path)
+        os.mkdir(dir_path)
+        self.cmd('az bot prepare-deploy --lang {language} --code-dir {dir_path}')
+        assert os.path.exists(os.path.join(dir_path, 'web.config'))
+        shutil.rmtree(dir_path)
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_prepare_deploy_typescript_should_fail_with_proj_file_path(self, resource_group):
+        self.kwargs.update({'language': 'Typescript',
+                            'proj_file': 'node_bot/test.csproj'})
+        try:
+            self.cmd('az bot prepare-deploy --lang {language} --proj-file-path {proj_file}')
+            raise Exception("'az bot prepare-publish --lang Typescript' should have failed with --proj-file-path")
+        except CLIError as cli_error:
+            assert cli_error.__str__() == '--proj-file-path should not be passed in if language is not Csharp'
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_prepare_deploy_typescript(self, resource_group):
+        dir_path = 'node_bot'
+        self.kwargs.update({'dir_path': dir_path,
+                            'language': 'Typescript'})
+        if os.path.exists(dir_path):
+            # clean up the folder
+            shutil.rmtree(dir_path)
+        os.mkdir(dir_path)
+        self.cmd('az bot prepare-deploy --lang {language} --code-dir {dir_path}')
+        assert os.path.exists(os.path.join(dir_path, 'web.config'))
+        shutil.rmtree(dir_path)
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_prepare_deploy_csharp(self, resource_group):
+        dir_path = 'csharp_bot'
+        proj_file = 'test.csproj'
+        self.kwargs.update({'dir_path': dir_path,
+                            'language': 'Csharp',
+                            'proj_file': proj_file})
+        if os.path.exists(dir_path):
+            # clean up the folder
+            shutil.rmtree(dir_path)
+        os.mkdir(dir_path)
+        open(os.path.join(dir_path, proj_file), 'w')
+
+        self.cmd('az bot prepare-deploy --lang {language} --code-dir {dir_path} --proj-file-path {proj_file}')
+        assert os.path.exists(os.path.join(dir_path, '.deployment'))
+        with open(os.path.join(dir_path, '.deployment')) as d:
+            assert d.readline() == '[config]\n'
+            assert d.readline() == 'SCM_SCRIPT_GENERATOR_ARGS=--aspNetCore "{0}"\n'.format(proj_file)
+        shutil.rmtree(dir_path)
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_prepare_deploy_csharp_no_proj_file(self, resource_group):
+        self.kwargs.update({'language': 'Csharp'})
+        try:
+            self.cmd('az bot prepare-deploy --lang {language}')
+            raise Exception("'az bot prepare-publish --lang Csharp' should have failed with no --proj-file-path")
+        except CLIError as cli_error:
+            assert cli_error.__str__() == '--proj-file-path must be provided if language is Csharp'
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_prepare_deploy_csharp_fail_if_deployment_file_exists(self, resource_group):
+        dir_path = 'csharp_bot'
+        proj_file = 'test.csproj'
+        self.kwargs.update({'dir_path': dir_path,
+                            'language': 'Csharp',
+                            'proj_file': proj_file})
+        if os.path.exists(dir_path):
+            # clean up the folder
+            shutil.rmtree(dir_path)
+        os.mkdir(dir_path)
+        open(os.path.join(dir_path, proj_file), 'w')
+        open(os.path.join(dir_path, '.deployment'), 'w')
+
+        try:
+            self.cmd('az bot prepare-deploy --lang {language} --code-dir {dir_path} --proj-file-path {proj_file}')
+            shutil.rmtree(dir_path)
+        except CLIError as cli_error:
+            shutil.rmtree(dir_path)
+            assert cli_error.__str__() == '.deployment found in csharp_bot\nPlease delete this .deployment before ' \
+                                          'calling "az bot prepare-deploy"'
+        except Exception as error:
+            shutil.rmtree(dir_path)
+            raise error
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_prepare_deploy_javascript_fail_if_web_config_exists(self, resource_group):
+        dir_path = 'node_bot'
+        self.kwargs.update({'dir_path': dir_path,
+                            'language': 'Javascript'})
+        if os.path.exists(dir_path):
+            # clean up the folder
+            shutil.rmtree(dir_path)
+        os.mkdir(dir_path)
+        open(os.path.join(dir_path, 'web.config'), 'w')
+
+        try:
+            self.cmd('az bot prepare-deploy --lang {language} --code-dir {dir_path}')
+            shutil.rmtree(dir_path)
+        except CLIError as cli_error:
+            shutil.rmtree(dir_path)
+            assert cli_error.__str__() == 'web.config found in node_bot\nPlease delete this web.config before ' \
+                                          'calling "az bot prepare-deploy"'
+        except Exception as error:
+            shutil.rmtree(dir_path)
+            raise error
