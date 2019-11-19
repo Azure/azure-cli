@@ -42,7 +42,7 @@ def cli_reservation_merge_reservation(client, reservation_order_id,
 
 def cli_calculate(client, sku, reserved_resource_type, billing_scope_id, term,
                   quantity, applied_scope_type, display_name, applied_scope=None,
-                  renew=False, instance_flexibility=None, location=None, billing_plan = None):
+                  renew=False, instance_flexibility=None, location=None, billing_plan=None):
     sku_name = SkuName(name=sku)
     if applied_scope:
         applied_scopes = [applied_scope]
@@ -58,9 +58,9 @@ def cli_calculate(client, sku, reserved_resource_type, billing_scope_id, term,
     return client.calculate(body)
 
 
-def cli_purchase(client, reservation_order_id,  sku, reserved_resource_type, billing_scope_id, term,
-                  quantity, applied_scope_type, display_name, applied_scope=None,
-                  renew=False, instance_flexibility=None, location=None, billing_plan = None):
+def cli_purchase(client, reservation_order_id, sku, reserved_resource_type, billing_scope_id, term,
+                 quantity, applied_scope_type, display_name, applied_scope=None,
+                 renew=False, instance_flexibility=None, location=None, billing_plan=None):
     sku_name = SkuName(name=sku)
     if applied_scope:
         applied_scopes = [applied_scope]
