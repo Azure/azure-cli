@@ -171,7 +171,7 @@ parameters:
   - name: --applied-scope-type
     type: string
     short-summary: Type of the Applied Scope to update the reservation with
-  - name: --applied-scopes
+  - name: --applied-scope
     type: string
     short-summary: Subscription that the benefit will be applied. Do not specify if --applied-scope-type is Shared.
   - name: --billing-plan
@@ -213,7 +213,7 @@ parameters:
   - name: --applied-scope-type
     type: string
     short-summary: Type of the Applied Scope to update the reservation with
-  - name: --applied-scopes
+  - name: --applied-scope
     type: string
     short-summary: Subscription that the benefit will be applied. Do not specify if --applied-scope-type is Shared.
   - name: --billing-plan
