@@ -7,6 +7,11 @@ Release History
 
 * Deprecated paramater `--branch` from acr task create/update
 
+**Azure Red Hat OpenShift**
+
+* Add `--workspace-resource-id` flag to allow creation of Azure Red Hat Openshift cluster with monitoring
+* Add `monitor_profile` to create Azure Red Hat OpenShift cluster with monitoring
+
 **AKS**
 
 * Support cluster certificate rotation operation using "az aks rotate-certs".
@@ -14,14 +19,36 @@ Release History
 **AppService**
 
 * Fix issue #11100: AttributeError for az webapp up when create service plan
+* az webapp up: Forcing the creation or deployment to a site for supported languages, no defaults used.
 
 **Compute**
 
 * Upgrade API version of compute, disks, snapshots to 2019-07-01
+* vmss create: Improvement for --orchestration-mode
+* sig image-definition create: add --os-state to allow specifying whether the virtual machines created under this image are 'Generalized' or 'Specialized'
+* sig image-definition create: add --hyper-v-generation to allow specifying the hypervisor generation
+* image create: Add --data-disk-caching to allow specifying caching setting of data disks
+* Upgrade Python Compute SDK to 10.0.0
+* vm/vmss create: Add 'Spot' to 'Priority' enum property
+* [Breaking change] Rename '--max-billing' parameter to '--max-price', for both VM and VMSS, to be consistent with Swagger and Powershell cmdlets
+* vm monitor log show: support query log over linked log analytics workspace.
+
+**IOT**
+
+* Fix #2531: Add convenience arguments for hub update.
 
 **Key Vault**
 
 * Fix #11121: When using `az keyvault certificate list`, passing `--include-pending` now doesn't require a value of `true` or `false`
+
+**Network**
+
+* application-gateway waf-config: deprecated
+* application-gateway waf-policy: Add subgroup managed-rules to manage managed rule sets and exclusion rules
+* application-gateway waf-policy: Add subgroup policy-setting to manage global configuration of a waf-policy
+* [BREAKING CHANGE] application-gateway waf-policy: Rename subgroup rule to custom-rule
+* application-gateway http-listener: Add --firewall-policy when create
+* application-gateway url-path-map rule: Add --firewall-policy when create
 
 **Packaging**
 
@@ -41,6 +68,15 @@ Release History
 
 * Fix #2902: Avoid setting memory configs while updating Basic SKU cache
 
+**Reservations**
+
+* Upgrading SDK Version to 0.6.0
+* Add billingplan details info after calling Get-Gatalogs
+
+**Storage**
+
+* storage account create: Add --enable-hierarchical-namespace to support filesystem semantics in blob service.
+
 2.0.76
 ++++++
 
@@ -49,11 +85,6 @@ Release History
 * Add a preview parameter `--pack-image-tag` to command `az acr pack build`.
 * Support enabling auditing on creating a registry
 * Support Repository-scoped RBAC
-
-**Reservations**
-
-* Upgrading SDK Version to 0.6.0
-* Add billingplan details info after calling Get-Gatalogs
 
 **AKS**
 
@@ -72,6 +103,8 @@ Release History
 * Added "--build remote" flag for "az functionapp deployment source config-zip" to support remote build action during function app deployment.
 * Change default node version on function apps to ~10 for Windows
 * Add --runtime-version property to `az functionapp create`
+* az appservice vnet-integration add: Fixed so that subnet delegation is case insensitive and delegating subnets does not overwrite previous data.
+
 
 **ARM**
 
@@ -110,7 +143,6 @@ Release History
 * Add new routing source type: DigitalTwinChangeEvents
 * Fix #2826: Missing features in "az iot hub create"
 * Bug Fixed: Return more descriptive message on raised exception.
-* Fix #2531: Add convenience arguments for hub update.
 
 **Key Vault**
 
