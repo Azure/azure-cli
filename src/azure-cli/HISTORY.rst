@@ -37,6 +37,15 @@ Release History
 
 * Fix #11121: When using `az keyvault certificate list`, passing `--include-pending` now doesn't require a value of `true` or `false`
 
+**Network**
+
+* application-gateway waf-config: deprecated
+* application-gateway waf-policy: Add subgroup managed-rules to manage managed rule sets and exclusion rules
+* application-gateway waf-policy: Add subgroup policy-setting to manage global configuration of a waf-policy
+* [BREAKING CHANGE] application-gateway waf-policy: Rename subgroup rule to custom-rule
+* application-gateway http-listener: Add --firewall-policy when create
+* application-gateway url-path-map rule: Add --firewall-policy when create
+
 **Packaging**
 
 * Rewrite the az wrapper in python
