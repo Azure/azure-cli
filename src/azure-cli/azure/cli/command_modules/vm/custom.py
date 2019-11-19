@@ -330,7 +330,8 @@ def create_image(cmd, resource_group_name, name, source, os_type=None, data_disk
                  source_virtual_machine=None, storage_sku=None, hyper_v_generation=None,
                  os_blob_uri=None, data_blob_uris=None,
                  os_snapshot=None, data_snapshots=None,
-                 os_disk=None, os_disk_caching=None, data_disks=None, tags=None, zone_resilient=None):
+                 os_disk=None, os_disk_caching=None, data_disks=None, data_disk_caching=None,
+                 tags=None, zone_resilient=None):
     ImageOSDisk, ImageDataDisk, ImageStorageProfile, Image, SubResource, OperatingSystemStateTypes = cmd.get_models(
         'ImageOSDisk', 'ImageDataDisk', 'ImageStorageProfile', 'Image', 'SubResource', 'OperatingSystemStateTypes')
 
@@ -351,15 +352,15 @@ def create_image(cmd, resource_group_name, name, source, os_type=None, data_disk
         lun = 0
         if data_blob_uris:
             for d in data_blob_uris:
-                all_data_disks.append(ImageDataDisk(lun=lun, blob_uri=d))
+                all_data_disks.append(ImageDataDisk(lun=lun, blob_uri=d, caching=data_disk_caching))
                 lun += 1
         if data_snapshots:
             for d in data_snapshots:
-                all_data_disks.append(ImageDataDisk(lun=lun, snapshot=SubResource(id=d)))
+                all_data_disks.append(ImageDataDisk(lun=lun, snapshot=SubResource(id=d), caching=data_disk_caching))
                 lun += 1
         if data_disks:
             for d in data_disks:
-                all_data_disks.append(ImageDataDisk(lun=lun, managed_disk=SubResource(id=d)))
+                all_data_disks.append(ImageDataDisk(lun=lun, managed_disk=SubResource(id=d), caching=data_disk_caching))
                 lun += 1
 
         image_storage_profile = ImageStorageProfile(os_disk=os_disk, data_disks=all_data_disks)

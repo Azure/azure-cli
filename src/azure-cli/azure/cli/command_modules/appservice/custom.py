@@ -46,7 +46,7 @@ from azure.mgmt.relay.models import AccessRights
 from azure.cli.command_modules.relay._client_factory import hycos_mgmt_client_factory, namespaces_mgmt_client_factory
 from azure.storage.blob import BlockBlobService, BlobPermissions
 from azure.cli.command_modules.network._client_factory import network_client_factory
-from azure.mgmt.network.models import Subnet, Delegation
+from azure.mgmt.network.models import Delegation
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
@@ -2617,7 +2617,7 @@ def add_hc(cmd, name, resource_group_name, namespace, hybrid_connection, slot=No
     hy_co_rules = hy_co_client.list_authorization_rules(hy_co_resource_group, namespace, hybrid_connection)
     has_default_sender_key = False
     for r in hy_co_rules:
-        if r.name == "defaultSender":
+        if r.name.lower() == "defaultsender":
             for z in r.rights:
                 if z == z.send:
                     has_default_sender_key = True
@@ -2695,7 +2695,7 @@ def set_hc_key(cmd, plan, resource_group_name, namespace, hybrid_connection, key
     hy_co_rules = hy_co_client.list_authorization_rules(relay_resource_group, namespace, hybrid_connection)
     has_default_sender_key = False
     for r in hy_co_rules:
-        if r.name == "defaultSender":
+        if r.name.lower() == "defaultsender":
             for z in r.rights:
                 if z == z.send:
                     has_default_sender_key = True
@@ -2824,7 +2824,7 @@ def add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None
     vnet_resource_group = ''
     i = 0
     for z in vnet_id_strings:
-        if z == "resourceGroups":
+        if z.lower() == "resourcegroups":
             vnet_resource_group = vnet_id_strings[i + 1]
         i = i + 1
 
@@ -2844,16 +2844,13 @@ def add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None
     delegations = subnetObj.delegations
     delegated = False
     for d in delegations:
-        if d.service_name == "Microsoft.Web/serverFarms":
+        if d.service_name.lower() == "microsoft.web/serverfarms".lower():
             delegated = True
 
     if not delegated:
+        subnetObj.delegations = [Delegation(name="delegation", service_name="Microsoft.Web/serverFarms")]
         vnet_client.subnets.create_or_update(vnet_resource_group, vnet, subnet,
-                                             subnet_parameters=Subnet(name="subnet",
-                                                                      address_prefix=subnetObj.address_prefix,
-                                                                      delegations=[Delegation(name="delegation",
-                                                                                              service_name="Microsoft" +
-                                                                                              ".Web/serverFarms")]))
+                                             subnet_parameters=subnetObj)
 
     id_subnet = vnet_client.subnets.get(vnet_resource_group, vnet, subnet)
     subnet_resource_id = id_subnet.id
@@ -2866,6 +2863,7 @@ def add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None
     else:
         return_vnet = client.web_apps.create_or_update_swift_virtual_network_connection_slot(resource_group_name, name,
                                                                                              swiftVnet, slot)
+
     # reformats the vnet entry, removing unecessary information
     id_strings = return_vnet.id.split('/')
     resourceGroup = id_strings[4]

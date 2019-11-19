@@ -23,6 +23,7 @@ Release History
 * vmss create: Improvement for --orchestration-mode
 * sig image-definition create: add --os-state to allow specifying whether the virtual machines created under this image are 'Generalized' or 'Specialized'
 * sig image-definition create: add --hyper-v-generation to allow specifying the hypervisor generation
+* image create: Add --data-disk-caching to allow specifying caching setting of data disks
 * Upgrade Python Compute SDK to 10.0.0
 * vm/vmss create: Add 'Spot' to 'Priority' enum property
 * [Breaking change] Rename '--max-billing' parameter to '--max-price', for both VM and VMSS, to be consistent with Swagger and Powershell cmdlets
@@ -88,6 +89,8 @@ Release History
 * Added "--build remote" flag for "az functionapp deployment source config-zip" to support remote build action during function app deployment.
 * Change default node version on function apps to ~10 for Windows
 * Add --runtime-version property to `az functionapp create`
+* az appservice vnet-integration add: Fixed so that subnet delegation is case insensitive and delegating subnets does not overwrite previous data.
+
 
 **ARM**
 

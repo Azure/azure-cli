@@ -981,6 +981,11 @@ def load_command_table(self, _):
         g.custom_command('add', 'add_vnet_gateway_ipsec_policy', supports_no_wait=True, doc_string_source='IpsecPolicy')
         g.custom_command('list', 'list_vnet_gateway_ipsec_policies')
         g.custom_command('clear', 'clear_vnet_gateway_ipsec_policies', supports_no_wait=True)
+
+    with self.command_group('network vnet-gateway aad', network_vgw_sdk, min_api='2019-04-01') as g:
+        g.custom_command('assign', 'assign_vnet_gateway_aad', supports_no_wait=True)
+        g.custom_command('show', 'show_vnet_gateway_aad')
+        g.custom_command('remove', 'remove_vnet_gateway_aad', supports_no_wait=True)
     # endregion
 
     # region VirtualNetworkGatewayConnections

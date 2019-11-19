@@ -141,6 +141,12 @@ def acr_login(cmd,
         username=username,
         password=password)
 
+    # warn casing difference caused by ACR normalizing to lower on login_server
+    parts = login_server.split('.')
+    if registry_name != parts[0] and registry_name.lower() == parts[0]:
+        logger.warning('Uppercase characters are detected in the registry name. When using its server url in '
+                       'docker commands, to avoid authentication errors, use all lowercase.')
+
     from subprocess import PIPE, Popen
     p = Popen([docker_command, "login",
                "--username", username,

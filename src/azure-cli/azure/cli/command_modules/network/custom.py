@@ -4173,12 +4173,12 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, 
         vnet_gateway.bgp_settings = BgpSettings(asn=asn, bgp_peering_address=bgp_peering_address,
                                                 peer_weight=peer_weight)
 
-    if any((address_prefixes, radius_secret, radius_server, client_protocol)):
+    if any((address_prefixes, client_protocol)):
         vnet_gateway.vpn_client_configuration = VpnClientConfiguration()
         vnet_gateway.vpn_client_configuration.vpn_client_address_pool = AddressSpace()
         vnet_gateway.vpn_client_configuration.vpn_client_address_pool.address_prefixes = address_prefixes
-        if cmd.supported_api_version(min_api='2017-06-01'):
-            vnet_gateway.vpn_client_configuration.vpn_client_protocols = client_protocol
+        vnet_gateway.vpn_client_configuration.vpn_client_protocols = client_protocol
+        if any((radius_secret, radius_server)) and cmd.supported_api_version(min_api='2017-06-01'):
             vnet_gateway.vpn_client_configuration.radius_server_address = radius_server
             vnet_gateway.vpn_client_configuration.radius_server_secret = radius_secret
 
@@ -4544,6 +4544,45 @@ def clear_vpn_conn_ipsec_policies(cmd, resource_group_name, connection_name, no_
 def list_vpn_conn_ipsec_policies(cmd, resource_group_name, connection_name):
     ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateway_connections
     return ncf.get(resource_group_name, connection_name).ipsec_policies
+
+
+def assign_vnet_gateway_aad(cmd, resource_group_name, gateway_name,
+                            aad_tenant, aad_audience, aad_issuer, no_wait=False):
+    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateways
+    gateway = ncf.get(resource_group_name, gateway_name)
+
+    if gateway.vpn_client_configuration is None:
+        raise CLIError('VPN client configuration must be set first through `az network vnet-gateway create/update`.')
+
+    gateway.vpn_client_configuration.aad_tenant = aad_tenant
+    gateway.vpn_client_configuration.aad_audience = aad_audience
+    gateway.vpn_client_configuration.aad_issuer = aad_issuer
+
+    return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, gateway_name, gateway)
+
+
+def show_vnet_gateway_aad(cmd, resource_group_name, gateway_name):
+    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateways
+    gateway = ncf.get(resource_group_name, gateway_name)
+
+    if gateway.vpn_client_configuration is None:
+        raise CLIError('VPN client configuration must be set first through `az network vnet-gateway create/update`.')
+
+    return gateway.vpn_client_configuration
+
+
+def remove_vnet_gateway_aad(cmd, resource_group_name, gateway_name, no_wait=False):
+    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateways
+    gateway = ncf.get(resource_group_name, gateway_name)
+
+    if gateway.vpn_client_configuration is None:
+        raise CLIError('VPN client configuration must be set first through `az network vnet-gateway create/update`.')
+
+    gateway.vpn_client_configuration.aad_tenant = None
+    gateway.vpn_client_configuration.aad_audience = None
+    gateway.vpn_client_configuration.aad_issuer = None
+
+    return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, gateway_name, gateway)
 # endregion
 
 
