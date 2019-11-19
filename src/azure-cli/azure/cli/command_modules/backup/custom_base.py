@@ -160,7 +160,7 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, contain
 def set_policy(client, resource_group_name, vault_name, policy, name=None):
     policy_object = custom_help.get_policy_from_json(client, policy)
     if policy_object.properties.backup_management_type.lower() == "azureiaasvm":
-        return custom.set_policy(client, resource_group_name, vault_name, policy)
+        return custom.set_policy(client, resource_group_name, vault_name, policy, name)
     if policy_object.properties.backup_management_type.lower() == "azurestorage":
         return custom_afs.set_policy(client, resource_group_name, vault_name, policy, name)
     if policy_object.properties.backup_management_type == "AzureWorkload":

@@ -115,7 +115,7 @@ def list_associated_items_for_policy(client, resource_group_name, vault_name, na
     return _get_list_from_paged_response(items)
 
 
-def set_policy(client, resource_group_name, vault_name, policy):
+def set_policy(client, resource_group_name, vault_name, policy, policy_name):
     policy_object = _get_policy_from_json(client, policy)
     retention_range_in_days = policy_object.properties.instant_rp_retention_range_in_days
     schedule_run_frequency = policy_object.properties.schedule_policy.schedule_run_frequency
@@ -148,7 +148,9 @@ def set_policy(client, resource_group_name, vault_name, policy):
                 logger.error(error_message)
         else:
             policy_object.properties.instant_rp_retention_range_in_days = 2
-    return client.create_or_update(vault_name, resource_group_name, policy_object.name, policy_object)
+    if policy_name is None:
+        policy_name = policy_object.name
+    return client.create_or_update(vault_name, resource_group_name, policy_name, policy_object)
 
 
 def delete_policy(client, resource_group_name, vault_name, name):
