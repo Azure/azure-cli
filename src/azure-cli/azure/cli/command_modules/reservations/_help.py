@@ -173,7 +173,7 @@ parameters:
     short-summary: choose Single or Shared as appliedscope
   - name: --applied-scopes
     type: string
-    short-summary: Subscription that the benefit will be applied. Do not specify if AppliedScopeType is Shared.
+    short-summary: Subscription that the benefit will be applied. Do not specify if --applied-scope-type is Shared.
   - name: --billing-plan
     type: string
     short-summary: choose Monthly or Upfront
@@ -199,7 +199,7 @@ parameters:
     short-summary: sku name
   - name: --term
     type: string
-    short-summary: P1Y or P3Y choose 1 year or 3 years RI
+    short-summary: P1Y or P3Y choose 1 year or 3 years Rerservation
 """
 
 helps['reservations reservation-order purchase'] = """
@@ -215,7 +215,7 @@ parameters:
     short-summary: choose Single or Shared as appliedscope
   - name: --applied-scopes
     type: string
-    short-summary: Subscription that the benefit will be applied. Do not specify if AppliedScopeType is Shared.
+    short-summary: Subscription that the benefit will be applied. Do not specify if --applied-scope-type is Shared.
   - name: --billing-plan
     type: string
     short-summary: choose Monthly or Upfront
@@ -241,5 +241,5 @@ parameters:
     short-summary: sku name
   - name: --term
     type: string
-    short-summary: P1Y or P3Y choose 1 year or 3 years RI
+    short-summary: P1Y or P3Y choose 1 year or 3 years Rerservation
 """
