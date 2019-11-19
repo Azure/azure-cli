@@ -205,10 +205,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('iot hub routing-endpoint create') as c:
         c.argument('batch_frequency', options_list=['--batch-frequency', '-b'], type=int,
-                   help='The maximum amount of time that can elapse before data is'
+                   help='Request batch frequency in seconds. The maximum amount of time that can elapse before data is'
                         ' written to a blob, between 60 and 720 seconds.')
         c.argument('chunk_size_window', options_list=['--chunk-size', '-w'], type=int,
-                   help='The maximum size of blobs, between 10 and 500 MB.')
+                   help='Request chunk size in megabytes(MB). The maximum size of blobs, between 10 and 500 MB.')
         c.argument('file_name_format', options_list=['--file-name-format', '--ff'],
                    help='File name format for the blob. The file name format must contain {iothub},'
                         ' {partition}, {YYYY}, {MM}, {DD}, {HH} and {mm} fields. All parameters are'
