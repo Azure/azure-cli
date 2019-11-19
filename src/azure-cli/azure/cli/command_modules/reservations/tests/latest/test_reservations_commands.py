@@ -186,10 +186,11 @@ class AzureReservationsTests(ScenarioTest):
             'appliedScopeType': 'Shared'
         })
         response = self.cmd('reservations reservation-order calculate --sku {sku} --location {location} --reserved-resource-type {reservedResourceType}'
-                            ' --scope {subid} --term {term} --billing-plan {billingPlan} --display-name {displayName}'
+                            ' --billing-scope {subid} --term {term} --billing-plan {billingPlan} --display-name {displayName}'
                             ' --quantity {quantity} --applied-scope-type {appliedScopeType}').get_output_in_json()
         self.assertIsNotNone(response)
-        self.assertIsNotNone
+        self.assertIsNotNone(response['properties']['reservationOrderId'])
+        self.assertEqual('standard_b1ls', response['properties']['skuDescription'])
 
     def test_purchase_reservation_order(self):
         self.kwargs.update({
@@ -207,6 +208,11 @@ class AzureReservationsTests(ScenarioTest):
             'appliedScopeType': 'Shared'
         })
         response = self.cmd('reservations reservation-order purchase --reservation-order-id {roid} --sku {sku} --location {location} --reserved-resource-type {reservedResourceType}'
-                            ' --scope {subid} --term {term} --billing-plan {billingPlan} --display-name {displayName}'
+                            ' --billing-scope {subid} --term {term} --billing-plan {billingPlan} --display-name {displayName}'
                             ' --quantity {quantity} --applied-scope-type {appliedScopeType}').get_output_in_json()
         self.assertIsNotNone(response)
+        self.assertGreater(response['etag'], 0)
+        self.assertIsNotNone(response['term'])
+        self.assertIsNotNone(response['billingPlan'])
+        self.assertIsNotNone(response['displayName'])
+        self.assertEqual(2, response['originalQuantity'])

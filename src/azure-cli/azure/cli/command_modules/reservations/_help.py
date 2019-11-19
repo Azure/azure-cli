@@ -165,29 +165,29 @@ parameters:
 
 helps['reservations reservation-order calculate'] = """
 type: command
-short-summary: calculate price
-long-summary: calculate price for reservation
+short-summary: Calculate price
+long-summary: Calculate price for a ReservationOrder.
 parameters:
   - name: --applied-scope-type
     type: string
-    short-summary: choose Single or Shared as appliedscope
+    short-summary: Type of the Applied Scope to update the reservation with
   - name: --applied-scopes
     type: string
     short-summary: Subscription that the benefit will be applied. Do not specify if --applied-scope-type is Shared.
   - name: --billing-plan
     type: string
-    short-summary: choose Monthly or Upfront
-  - name: --scope
+    short-summary: The billing plan options available for this SKU.
+  - name: --billing-scope
     type: string
-    short-summary: subscription that will be charged
+    short-summary: Subscription that will be charged for purchasing Reservation
   - name: --display-name
     type: string
-    short-summary: custom name
+    short-summary: Friendly name for user to easily identified the reservation.
   - name: --quantity
     type: int
-    short-summary: quantity of product for calculating price
+    short-summary: Quantity of product for calculating price
   - name: --renew
-    short-summary: setup auto renewal
+    short-summary: Setting this to true will automatically purchase a new reservation on the expiration date time.
   - name: --reserved-resource-properties
     type: string
     short-summary: Type of the Instance Flexibility to update the reservation with
@@ -196,40 +196,40 @@ parameters:
     short-summary: Type of the resource for which the skus should be provided.
   - name: --sku
     type: string
-    short-summary: sku name
+    short-summary: Sku name
   - name: --term
     type: string
-    short-summary: P1Y or P3Y choose 1 year or 3 years Rerservation
+    short-summary: Available reservation terms for this resource.
 """
 
 helps['reservations reservation-order purchase'] = """
 type: command
-short-summary: purchase
-long-summary: purchase a new reservation
+short-summary: Purchase ReservationOrder
+long-summary: Purchase ReservationOrder and create resource under the specified URI.
 parameters:
   - name: --reservation-order-id
     type: string
     short-summary: Id of reservation order to purchase
   - name: --applied-scope-type
     type: string
-    short-summary: choose Single or Shared as appliedscope
+    short-summary: Type of the Applied Scope to update the reservation with
   - name: --applied-scopes
     type: string
     short-summary: Subscription that the benefit will be applied. Do not specify if --applied-scope-type is Shared.
   - name: --billing-plan
     type: string
-    short-summary: choose Monthly or Upfront
-  - name: --scope
+    short-summary: The billing plan options available for this SKU.
+  - name: --billing-scope
     type: string
-    short-summary: subscription that will be charged
+    short-summary: Subscription that will be charged for purchasing Reservation
   - name: --display-name
     type: string
-    short-summary: custom name
+    short-summary: Friendly name for user to easily identified the reservation.
   - name: --quantity
     type: int
-    short-summary: quantity of product for purchasing
+    short-summary: Quantity of product for purchasing
   - name: --renew
-    short-summary: setup auto renewal
+    short-summary: Setting this to true will automatically purchase a new reservation on the expiration date time.
   - name: --reserved-resource-properties
     type: string
     short-summary: Type of the Instance Flexibility to update the reservation with
@@ -238,8 +238,8 @@ parameters:
     short-summary: Type of the resource for which the skus should be provided.
   - name: --sku
     type: string
-    short-summary: sku name
+    short-summary: Sku name
   - name: --term
     type: string
-    short-summary: P1Y or P3Y choose 1 year or 3 years Rerservation
+    short-summary: Available reservation terms for this resource.
 """
