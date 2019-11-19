@@ -737,7 +737,7 @@ class FunctionAppCreateUsingACR(ScenarioTest):
         runtime = 'node'
         acr_registry_name = functionapp
         self.cmd('acr create --admin-enabled -g {} -n {} --sku Basic'.format(resource_group, acr_registry_name))
-        acr_creds = self.cmd('acr credential show -n {}'.format(acr_registry_name)).get_output_in_json()
+        acr_creds = self.cmd('acr credential show -n {} -g {}'.format(acr_registry_name, resource_group)).get_output_in_json()
         username = acr_creds['username']
         password = acr_creds['passwords'][0]['value']
         self.cmd('functionapp plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan))
