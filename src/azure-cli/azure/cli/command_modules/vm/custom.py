@@ -2888,3 +2888,20 @@ def get_dedicated_host_instance_view(client, host_group_name, host_name, resourc
     return client.get(resource_group_name, host_group_name, host_name, expand="instanceView")
 
 # endregion
+
+
+# region VMMonitor
+def execute_query_for_vm(cmd, client, resource_group_name, vm_name, analytics_query, timespan=None):
+    """Executes a query against the Log Analytics workspace linked with a vm."""
+    from azure.loganalytics.models import QueryBody
+    vm = get_vm(cmd, resource_group_name, vm_name)
+    workspace = None
+    extension_resources = vm.resources or []
+    for resource in extension_resources:
+        if resource.name == "OMSExtension":
+            workspace = resource.settings.get('workspaceId', None)
+    if workspace is None:
+        raise CLIError('Cannot find the corresponding log analytics workspace. '
+                       'Please check the status of log analytics workpsace.')
+    return client.query(workspace, QueryBody(query=analytics_query, timespan=timespan))
+# endregion

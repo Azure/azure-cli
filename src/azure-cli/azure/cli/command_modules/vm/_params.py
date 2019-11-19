@@ -823,3 +823,9 @@ def load_arguments(self, _):
             c.argument('proximity_placement_group', options_list=['--ppg'], help="The name or ID of the proximity placement group the {} should be associated with.".format(item),
                        validator=_validate_proximity_placement_group)    # only availability set does not have a command level validator, so this should be added.
     # endregion
+
+    # region VM Monitor
+    with self.argument_context('vm monitor log show') as c:
+        c.argument('analytics_query', options_list=['--analytics-query', '-q'], help="Query to execute over Log Analytics data.")
+        c.argument('timespan', help="Timespan over which to query. Defaults to querying all available data.")
+    # endregion

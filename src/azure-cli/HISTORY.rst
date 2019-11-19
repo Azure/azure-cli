@@ -27,6 +27,7 @@ Release History
 * Upgrade Python Compute SDK to 10.0.0
 * vm/vmss create: Add 'Spot' to 'Priority' enum property
 * [Breaking change] Rename '--max-billing' parameter to '--max-price', for both VM and VMSS, to be consistent with Swagger and Powershell cmdlets
+* vm monitor log show: support query log over linked log analytics workspace.
 
 **IOT**
 
