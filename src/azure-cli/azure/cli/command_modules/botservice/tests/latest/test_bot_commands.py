@@ -458,7 +458,7 @@ class BotTests(ScenarioTest):
             # Clean up the folder
             shutil.rmtree(dir_path)
 
-        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v4 --lang Csharp',
+        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Csharp',
                  checks=[
                      self.check('resourceGroup', '{rg}'),
                      self.check('id', '{botname}'),
@@ -512,7 +512,7 @@ class BotTests(ScenarioTest):
             # clean up the folder
             shutil.rmtree(dir_path)
 
-        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v4 --lang Csharp',
+        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Csharp',
                  checks={
                      self.check('resourceGroup', '{rg}'),
                      self.check('id', '{botname}'),
@@ -789,8 +789,10 @@ class BotTests(ScenarioTest):
 
         results = self.cmd('az bot update -g {rg} -n {botname} -e "{endpoint}" --description {description} --sku S1 '
                            '-d {display_name} --ai-key {ai-key} --ai-api-key {ai-api-key} --ai-app-id {ai-app-id} --tags '
-                           '{tag}={tag-value}', checks=[self.check('name', '{botname}'),
-                                                        self.check('resourceGroup', '{rg}')])
+                           '{tag}={tag-value} --icon-url https://dev.botframework.com/client/images/channels/icons/directline.png',
+                           checks=[
+                               self.check('name', '{botname}'),
+                               self.check('resourceGroup', '{rg}')])
         results = results.get_output_in_json()
 
         assert results['sku']['name'] == 'S1'
@@ -802,6 +804,7 @@ class BotTests(ScenarioTest):
         # The "developerAppInsightsApiKey" is a secret and is always null when retrieved.
         assert not results['properties']['developerAppInsightsApiKey']
         assert results['properties']['developerAppInsightsApplicationId']
+        assert results['properties']['iconUrl'] == 'https://dev.botframework.com/client/images/channels/icons/directline.png'
 
     @ResourceGroupPreparer(random_name_length=20)
     def test_botservice_prepare_deploy_javascript_fail_if_web_config_exists(self, resource_group):

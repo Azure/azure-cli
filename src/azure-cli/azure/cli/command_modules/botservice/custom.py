@@ -76,7 +76,7 @@ def __prepare_configuration_file(cmd, resource_group_name, kudu_client, folder_p
 
 def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, password, language=None,  # pylint: disable=too-many-locals, too-many-statements
            description=None, display_name=None, endpoint=None, tags=None, location='Central US',
-           sku_name='F0', version='v4', deploy_echo=None):
+           sku_name='F0', deploy_echo=None):
     # Kind parameter validation
     kind = kind.lower()
     registration_kind = 'registration'
@@ -153,7 +153,7 @@ def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, pa
 
     creation_results = BotTemplateDeployer.create_app(
         cmd, logger, client, resource_group_name, resource_name, description, kind, msa_app_id, password,
-        location, sku_name, language, version, bot_template_type)
+        location, sku_name, language, bot_template_type)
 
     return creation_results
 
@@ -647,7 +647,7 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
 
 def update(client, resource_group_name, resource_name, endpoint=None, description=None,
            display_name=None, tags=None, sku_name=None, app_insights_key=None,
-           app_insights_api_key=None, app_insights_app_id=None):
+           app_insights_api_key=None, app_insights_app_id=None, icon_url=None):
     bot = client.bots.get(
         resource_group_name=resource_group_name,
         resource_name=resource_name
@@ -658,6 +658,7 @@ def update(client, resource_group_name, resource_name, endpoint=None, descriptio
     bot_props.description = description if description else bot_props.description
     bot_props.display_name = display_name if display_name else bot_props.display_name
     bot_props.endpoint = endpoint if endpoint else bot_props.endpoint
+    bot_props.icon_url = icon_url if icon_url else bot_props.icon_url
 
     bot_props.developer_app_insight_key = app_insights_key if app_insights_key else bot_props.developer_app_insight_key
     bot_props.developer_app_insights_application_id = app_insights_app_id if app_insights_app_id \
