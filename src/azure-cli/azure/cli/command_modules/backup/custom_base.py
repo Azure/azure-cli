@@ -156,8 +156,9 @@ def get_default_policy_for_vm(client, resource_group_name, vault_name):
     return custom.get_default_policy_for_vm(client, resource_group_name, vault_name)
 
 
-def list_associated_items_for_policy(client, resource_group_name, vault_name, name):
-    return custom.list_associated_items_for_policy(client, resource_group_name, vault_name, name)
+def list_associated_items_for_policy(client, resource_group_name, vault_name, name, backup_management_type=None):
+    return custom.list_associated_items_for_policy(client, resource_group_name, vault_name, name,
+                                                   backup_management_type)
 
 
 def unregister_container(cmd, client, vault_name, resource_group_name, container_name, backup_management_type=None):

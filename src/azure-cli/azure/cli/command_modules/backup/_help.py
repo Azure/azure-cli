@@ -154,7 +154,7 @@ type: command
 short-summary: List all items protected by a backup policy.
 examples:
   - name: List all items protected by a backup policy
-    text: az backup policy list-associated-items --name MyBackupPolicy --resource-group MyResourceGroup --vault-name MyVault
+    text: az backup policy list-associated-items --name MyBackupPolicy --resource-group MyResourceGroup --vault-name MyVault --backup-management-type AzureIaasVM
     crafted: true
 """
 

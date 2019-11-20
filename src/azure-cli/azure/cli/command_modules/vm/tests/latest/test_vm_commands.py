@@ -1199,16 +1199,17 @@ class VMCreateNoneOptionsTest(ScenarioTest):  # pylint: disable=too-many-instanc
 
 class VMCreateMonitorTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_create_with_monitor', location='centralus')
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_create_with_monitor', location='eastus')
     def test_vm_create_with_monitor(self, resource_group):
 
         self.kwargs.update({
             'vm': 'monitorvm',
-            'workspace': 'vmlogworkspace20191009',
+            'workspace': self.create_random_name('cliworkspace', 20),
             'rg': resource_group
         })
 
         self.cmd('vm create -n {vm} -g {rg} --image UbuntuLTS --workspace {workspace}')
+        self.cmd('vm monitor log show -n {vm} -g {rg} -q "Perf | limit 10"')
 
 
 class VMBootDiagnostics(ScenarioTest):
@@ -3553,7 +3554,7 @@ class VMPriorityEvictionBillingTest(ScenarioTest):
         })
 
         # vm create
-        self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --priority Low --eviction-policy Deallocate --max-billing=50')
+        self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --priority Low --eviction-policy Deallocate --max-price 50')
 
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('priority', 'Low'),
@@ -3562,7 +3563,7 @@ class VMPriorityEvictionBillingTest(ScenarioTest):
         ])
 
         # vmss create
-        self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --lb-sku Standard --priority Low --eviction-policy Deallocate --max-billing=50', checks=[
+        self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --lb-sku Standard --priority Low --eviction-policy Deallocate --max-price 50', checks=[
             self.check('vmss.virtualMachineProfile.priority', 'Low'),
             self.check('vmss.virtualMachineProfile.evictionPolicy', 'Deallocate'),
             self.check('vmss.virtualMachineProfile.billingProfile.maxPrice', 50)

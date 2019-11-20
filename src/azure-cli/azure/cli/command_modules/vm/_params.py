@@ -625,8 +625,8 @@ def load_arguments(self, _):
             c.argument('secrets', multi_ids_type, help='One or many Key Vault secrets as JSON strings or files via `@{path}` containing `[{ "sourceVault": { "id": "value" }, "vaultCertificates": [{ "certificateUrl": "value", "certificateStore": "cert store name (only on windows)"}] }]`', type=file_type, completer=FilesCompleter())
             c.argument('assign_identity', nargs='*', arg_group='Managed Service Identity', help="accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples")
             c.ignore('aux_subscriptions')
-            max_billing_help = 'The maximum price (in US Dollars) you are willing to pay for a low priority VM/VMSS. -1 indicates that the low priority VM/VMSS should not be evicted for price reasons'
-            c.argument('max_billing', help=max_billing_help, min_api='2019-03-01', type=float)
+            max_price_help = 'The maximum price (in US Dollars) you are willing to pay for a low priority VM/VMSS. -1 indicates that the low priority VM/VMSS should not be evicted for price reasons'
+            c.argument('max_price', help=max_price_help, min_api='2019-03-01', type=float, is_preview=True)
 
         with self.argument_context(scope, arg_group='Authentication') as c:
             c.argument('generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing. The keys will be stored in the ~/.ssh directory')
@@ -822,4 +822,10 @@ def load_arguments(self, _):
         with self.argument_context(scope, min_api='2018-04-01') as c:
             c.argument('proximity_placement_group', options_list=['--ppg'], help="The name or ID of the proximity placement group the {} should be associated with.".format(item),
                        validator=_validate_proximity_placement_group)    # only availability set does not have a command level validator, so this should be added.
+    # endregion
+
+    # region VM Monitor
+    with self.argument_context('vm monitor log show') as c:
+        c.argument('analytics_query', options_list=['--analytics-query', '-q'], help="Query to execute over Log Analytics data.")
+        c.argument('timespan', help="Timespan over which to query. Defaults to querying all available data.")
     # endregion
