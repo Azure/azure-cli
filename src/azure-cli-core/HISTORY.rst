@@ -3,6 +3,8 @@
 Release History
 ===============
 
+* Refine the help and error messages for `--ids`
+
 2.0.76
 ++++++
 * no changes
