@@ -911,7 +911,7 @@ examples:
   - name: Create an Openshift cluster using a custom vnet
     text: az openshift create -g MyResourceGroup -n MyManagedCluster --vnet-peer "/subscriptions/0000000-0000-0000-0000-000000000000/resourceGroups/openshift-vnet/providers/Microsoft.Network/virtualNetworks/test"
   - name: Create an Openshift cluster with Log Analytics monitoring enabled
-    text: az openshift create -g MyResourceGroup -n MyManagedCluster --workspace-id "/subscriptions/0000000-0000-0000-0000-000000000000/resourceGroups/<resourcegroup>/providers/Microsoft.OperationalInsights/workspaces/<workspace-resource-id>"
+    text: az openshift create -g MyResourceGroup -n MyManagedCluster --workspace-id "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.OperationalInsights/workspaces/{workspace-id}"
 """
 
 helps['openshift delete'] = """
