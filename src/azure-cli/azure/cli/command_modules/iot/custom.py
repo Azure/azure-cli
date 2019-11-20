@@ -368,7 +368,7 @@ def iot_hub_certificate_verify(client, hub_name, certificate_name, certificate_p
 def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
                    sku=IotHubSku.f1.value,
                    unit=1,
-                   partition_count=2,
+                   partition_count=4,
                    retention_day=1,
                    c2d_ttl=1,
                    c2d_max_delivery_count=10,
@@ -395,7 +395,7 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
     sku = IotHubSkuInfo(name=sku, capacity=unit)
 
     event_hub_dic = {}
-    event_hub_dic['events'] = EventHubProperties(retention_time_in_days=retention_day if retention_day else 1,
+    event_hub_dic['events'] = EventHubProperties(retention_time_in_days=retention_day,
                                                  partition_count=partition_count)
     feedback_Properties = FeedbackProperties(lock_duration_as_iso8601=timedelta(seconds=feedback_lock_duration),
                                              ttl_as_iso8601=timedelta(hours=feedback_ttl),
