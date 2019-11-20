@@ -438,7 +438,7 @@ def parse_actions_from_repositories(allow_or_remove_repository):
     return actions
 
 def prepare_source_location(source_location, client_registries, registry_name, resource_group_name):
-    if source_location.lower() == ACR_NULL_CONTEXT:
+    if source_location is None or source_location.lower() == ACR_NULL_CONTEXT:
         source_location = None
     elif os.path.exists(source_location):
         if not os.path.isdir(source_location):

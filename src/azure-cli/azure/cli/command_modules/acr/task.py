@@ -782,8 +782,7 @@ def acr_task_run(cmd,  # pylint: disable=too-many-locals
 
     task_id = get_task_id_from_task_name(cmd.cli_ctx, resource_group_name, registry_name, task_name)
 
-    if context_path:
-        context_path = prepare_source_location(context_path, client_registries, registry_name, resource_group_name)
+    context_path = prepare_source_location(context_path, client_registries, registry_name, resource_group_name)
 
     override_task_step_properties = OverrideTaskStepProperties(
         context_path=context_path,
