@@ -683,7 +683,8 @@ examples:
         az iot hub routing-endpoint create --resource-group MyResourceGroup --hub-name MyIotHub \\
         --endpoint-name S1 --endpoint-type azurestoragecontainer --endpoint-resource-group "[Resource Group]" \\
         --endpoint-subscription-id {SubscriptionId} --connection-string {ConnectionString} \\
-        --container-name {ContainerName}
+        --container-name {ContainerName} --batch-frequency 100 --chunk-size 100 \\
+        --ff {iothub}-{partition}-{YYYY}-{MM}-{DD}-{HH}-{mm}
 """
 
 helps['iot hub routing-endpoint delete'] = """

@@ -36,6 +36,7 @@ Release History
 **IOT**
 
 * Fix #2531: Add convenience arguments for hub update.
+* Fix #8323: Add missing parameters to create storage custom endpoint.
 
 **Key Vault**
 
