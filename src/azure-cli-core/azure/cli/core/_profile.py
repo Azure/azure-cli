@@ -346,9 +346,7 @@ class Profile(object):
 
         consolidated = self._normalize_properties(user, subscriptions, is_service_principal=True,
                                                   user_assigned_identity_id=base_name)
-
-        # key-off subscription name to allow accounts with same id(but under different identities)
-        self._set_subscriptions(consolidated, secondary_key_name=_SUBSCRIPTION_NAME)
+        self._set_subscriptions(consolidated)
         return deepcopy(consolidated)
 
     def find_subscriptions_in_cloud_console(self):
