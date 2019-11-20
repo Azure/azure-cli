@@ -1218,7 +1218,7 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
         # Expecting no results as we just deleted the only express route in the resource group
         self.cmd('network express-route list --resource-group {rg}', checks=self.is_empty())
 
-        with self.assertRaisesRegexp(CLIError, 'corresponding ID'):
+        with self.assertRaisesRegexp(CLIError, 'ID should be a complete resource ID'):
             self.cmd('network express-route gateway connection show --ids /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myrg/providers/Microsoft.Network/expressRouteGateways/aaa')
 
 

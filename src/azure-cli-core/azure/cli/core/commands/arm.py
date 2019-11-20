@@ -218,8 +218,9 @@ def register_ids_argument(cli_ctx):
             deprecate_info = id_arg.settings.get('deprecate_info', None) if id_arg else None
             id_kwargs = {
                 'metavar': 'ID',
-                'help': "One or more resource IDs (space-delimited). ID should belong to the deepest resource. "
-                        "If provided, no other 'Resource Id' arguments should be specified.",
+                'help': "One or more resource IDs (space-delimited). "
+                        "It should be a complete resource ID containing all information of '{gname}' arguments. "
+                        "If provided, no other '{gname}' arguments should be specified.".format(gname=group_name),
                 'dest': 'ids' if id_arg else '_ids',
                 'deprecate_info': deprecate_info,
                 'is_preview': id_arg.settings.get('is_preview', None) if id_arg else None,
@@ -313,8 +314,12 @@ def register_ids_argument(cli_ctx):
                 id_value = parts.get(id_part, None)
                 if id_value is None:
                     argument_name = arg.type.settings.get('options_list')[0]
-                    raise CLIError('ID should belong to the deepest resource. '
-                                   'Please provide corresponding ID to the argument {}'.format(argument_name))
+                    raise CLIError("ID should be a complete resource ID "
+                                   "containing all information of '{group_name}' arguments. "
+                                   "{id} doesn't contain the information"
+                                   " of the argument {arg_name}".format(group_name=arg.arg_group,
+                                                                   id=val,
+                                                                   arg_name=argument_name))
                 getattr(namespace, arg.name).append(id_value)
 
         # support deprecating --ids
