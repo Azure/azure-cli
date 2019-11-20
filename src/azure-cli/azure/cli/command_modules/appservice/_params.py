@@ -15,7 +15,7 @@ from azure.mgmt.web.models import DatabaseType, ConnectionStringType, BuiltInAut
 from ._completers import get_hostname_completion_list
 from ._constants import RUNTIME_TO_IMAGE_FUNCTIONAPP
 from ._validators import (validate_timeout_value, validate_site_create, validate_asp_create,
-                          validate_add_vnet, validate_front_end_scale_factor)
+                          validate_add_vnet, validate_front_end_scale_factor, validate_ase_create)
 
 
 AUTH_TYPES = {
@@ -568,7 +568,7 @@ def load_arguments(self, _):
         c.argument('name', options_list=['--name', '-n'],
                    help='Name of the app service environment')
     with self.argument_context('appservice ase create') as c:
-        c.argument('name', options_list=['--name', '-n'],
+        c.argument('name', options_list=['--name', '-n'], validator=validate_ase_create,
                    help='Name of the app service environment')
         c.argument('subnet', help='Name or ID of existing subnet. To create vnet and/or subnet \
                    use `az network vnet [subnet] create`')

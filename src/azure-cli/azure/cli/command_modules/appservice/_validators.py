@@ -44,6 +44,16 @@ def validate_site_create(cmd, namespace):
             raise CLIError(validation.error.message)
 
 
+def validate_ase_create(cmd, namespace):
+    # Validate the ASE Name availability
+    client = web_client_factory(cmd.cli_ctx)
+    resource_type = 'Microsoft.Web/hostingEnvironments'
+    if isinstance(namespace.name, str):
+        name_validation = client.check_name_availability(namespace.name, resource_type)
+        if not name_validation.name_available:
+            raise CLIError(name_validation.message)
+
+
 def validate_asp_create(cmd, namespace):
     """Validate the SiteName that is being used to create is available
     This API requires that the RG is already created"""
