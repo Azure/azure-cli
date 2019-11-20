@@ -37,6 +37,10 @@ Release History
 
 * Fix #11121: When using `az keyvault certificate list`, passing `--include-pending` now doesn't require a value of `true` or `false`
 
+**NetAppFiles**
+
+* Upgrade azure-mgmt-netapp to 0.7.0 which includes some additional volume properties associated with upcoming replication operations
+
 **Network**
 
 * application-gateway waf-config: deprecated
