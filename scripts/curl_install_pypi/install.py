@@ -331,17 +331,31 @@ def _native_dependencies_for_dist(verify_cmd_args, install_cmd_args, dep_list):
             raise CLIInstallError('Please install the native dependencies and try again.')
 
 
+def _get_linux_distro():
+    with open('/etc/os-release') as lines:
+        tokens = [line.strip() for line in lines]
+
+    release_info = {}
+    for token in tokens:
+        if '=' in token:
+            k, v = token.split('=', 1)
+            release_info[k.lower()] = v.strip('"')
+
+    return release_info.get('name', None), release_info.get('version_id', None)
+
+
 def verify_native_dependencies():
-    distname, version, _ = platform.linux_distribution()
+    distname, version = _get_linux_distro()
+
     if not distname:
         # There's no distribution name so can't determine native dependencies required / or they may not be needed like on OS X
         return
+
     print_status('Verifying native dependencies.')
     is_python3 = sys.version_info[0] == 3
     distname = distname.lower().strip()
-    verify_cmd_args = None
-    install_cmd_args = None
-    dep_list = None
+
+    verify_cmd_args, install_cmd_args, dep_list = None, None, None
     if any(x in distname for x in ['ubuntu', 'debian']):
         verify_cmd_args = ['dpkg', '-s']
         install_cmd_args = ['apt-get', 'update', '&&', 'apt-get', 'install', '-y']
@@ -361,6 +375,7 @@ def verify_native_dependencies():
         install_cmd_args = ['zypper', 'refresh', '&&', 'zypper', '--non-interactive', 'install']
         python_dep = 'python3-devel' if is_python3 else 'python-devel'
         dep_list = ['gcc', 'libffi-devel', python_dep, 'openssl-devel']
+
     if verify_cmd_args and install_cmd_args and dep_list:
         _native_dependencies_for_dist(verify_cmd_args, install_cmd_args, dep_list)
     else:
