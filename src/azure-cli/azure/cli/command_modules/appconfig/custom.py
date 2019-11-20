@@ -9,7 +9,7 @@ from azure.mgmt.appconfiguration.models import (ConfigurationStoreUpdateParamete
 from ._utils import resolve_resource_group, user_confirmation
 
 
-def create_configstore(client, resource_group_name, name, location, sku):
+def create_configstore(client, resource_group_name, name, location, sku=None):
     sku = "Free" if sku is None else sku
 
     configstore_params = ConfigurationStore(location=location.lower(),

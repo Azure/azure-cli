@@ -11,7 +11,7 @@ Release History
 
 * Add support for using ":" for `as az appconfig kv import` separator
 * Fix issue for listing key values with multiple labels including null label. 
-* Apply latest version of management plane sdk. 
+* Update management plane sdk, azure-mgmt-appconfiguration, to version 0.3.0. 
 
 **AppService**
 
