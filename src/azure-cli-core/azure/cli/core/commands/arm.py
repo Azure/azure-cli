@@ -312,8 +312,7 @@ def register_ids_argument(cli_ctx):
                 id_part = arg.type.settings.get('id_part')
                 id_value = parts.get(id_part, None)
                 if id_value is None:
-                    alias = arg.type.settings.get('options_list', None)
-                    argument_name = alias[0] if alias is not None else arg.name
+                    argument_name = arg.type.settings.get('options_list')[0]
                     raise CLIError('ID should belong to the deepest resource. '
                                    'Please provide corresponding ID to the argument {}'.format(argument_name))
                 getattr(namespace, arg.name).append(id_value)
