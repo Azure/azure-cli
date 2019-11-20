@@ -17,6 +17,10 @@ Release History
 * Fix issue #11100: AttributeError for az webapp up when create service plan
 * az webapp up: Forcing the creation or deployment to a site for supported languages, no defaults used.
 
+**Backup**
+
+* Fix issue in az backup policy list-associated-items. Added optional BackupManagementType parameter.
+
 **Compute**
 
 * Upgrade API version of compute, disks, snapshots to 2019-07-01
