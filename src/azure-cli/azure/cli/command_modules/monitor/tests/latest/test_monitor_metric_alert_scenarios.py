@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk import ScenarioTest, JMESPathCheck, ResourceGroupPreparer, StorageAccountPreparer
-from .preparers import VMPreparer
+from azure.cli.command_modules.backup.tests.latest.preparers import VMPreparer
 
 
 class MonitorTests(ScenarioTest):
