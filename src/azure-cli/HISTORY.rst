@@ -37,6 +37,7 @@ Release History
 
 * Fix #2531: Add convenience arguments for hub update.
 * Fix #8323: Add missing parameters to create storage custom endpoint.
+* Fix regression bug: Reverting the changes which overrides the default storage endpoint.
 
 **Key Vault**
 

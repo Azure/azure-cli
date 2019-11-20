@@ -407,15 +407,11 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
     msg_endpoint_dic['fileNotifications'] = MessagingEndpointProperties(max_delivery_count=fileupload_notification_max_delivery_count,
                                                                         ttl_as_iso8601=timedelta(hours=fileupload_notification_ttl))
     storage_endpoint_dic = {}
-    storage_connection_string = ''
-    storage_container_name = ''
-    if fileupload_storage_connectionstring and fileupload_storage_container_name:
-        storage_connection_string = fileupload_storage_connectionstring
-        storage_container_name = fileupload_storage_container_name
+    storage_endpoint_dic['$default'] = StorageEndpointProperties(
+        sas_ttl_as_iso8601=timedelta(hours=fileupload_sas_ttl),
+        connection_string=fileupload_storage_connectionstring if fileupload_storage_connectionstring else '',
+        container_name=fileupload_storage_container_name if fileupload_storage_container_name else '')
 
-    storage_endpoint_dic['$default'] = StorageEndpointProperties(sas_ttl_as_iso8601=timedelta(hours=fileupload_sas_ttl),
-                                                                 connection_string=storage_connection_string,
-                                                                 container_name=storage_container_name)
     properties = IotHubProperties(event_hub_endpoints=event_hub_dic,
                                   messaging_endpoints=msg_endpoint_dic,
                                   storage_endpoints=storage_endpoint_dic,
