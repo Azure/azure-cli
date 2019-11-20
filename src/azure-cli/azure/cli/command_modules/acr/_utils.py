@@ -446,7 +446,7 @@ def prepare_source_location(source_location, client_registries, registry_name, r
                 "Source location should be a local directory path or remote URL.")
 
         tar_file_path = os.path.join(tempfile.gettempdir(
-        ), 'task_run_archive_{}.tar.gz'.format(uuid.uuid4().hex))
+        ), 'cli_source_archive_{}.tar.gz'.format(uuid.uuid4().hex))
 
         try:
             source_location = upload_source_code(
