@@ -314,12 +314,12 @@ def register_ids_argument(cli_ctx):
                 id_value = parts.get(id_part, None)
                 if id_value is None:
                     argument_name = arg.type.settings.get('options_list')[0]
-                    raise CLIError("ID should be a complete resource ID "
-                                   "containing all information of '{group_name}' arguments. "
-                                   "{id} doesn't contain the information"
-                                   " of the argument {arg_name}".format(group_name=arg.arg_group,
-                                                                   id=val,
-                                                                   arg_name=argument_name))
+                    raise CLIError("Argument {arg_name} cannot be derived from ID {id}. "
+                                   "Please provide a complete resource ID "
+                                   "containing all information of '{group_name}' "
+                                   "arguments. ".format(id=val,
+                                                        arg_name=argument_name,
+                                                        group_name=arg.arg_group))
                 getattr(namespace, arg.name).append(id_value)
 
         # support deprecating --ids
