@@ -642,8 +642,7 @@ class BotTests(ScenarioTest):
             'botname': self.create_random_name(prefix='cli', length=15),
             'short_app_id': str(uuid.uuid4())[:34],
             'password': str(uuid.uuid4()),
-            'numbers_id': "223232",
-            'rg': str(uuid.uuid4())
+            'numbers_id': "223232"
         })
 
         expected_error = "--appid must be a valid GUID from a Microsoft Azure AD Application Registration. See " \
@@ -676,13 +675,12 @@ class BotTests(ScenarioTest):
             assert cli_error.__str__() == expected_error
         except AssertionError:
             raise AssertionError('should have thrown an error for appid that is not valid GUID.')
-    
+
     @ResourceGroupPreparer(random_name_length=20)
     def test_botservice_create_should_raise_error_for_empty_password_strings(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),
-            'app_id': str(uuid.uuid4()),
-            'rg': str(uuid.uuid4())
+            'app_id': str(uuid.uuid4())
         })
 
         try:
@@ -827,7 +825,7 @@ class BotLocalErrorsTests(unittest.TestCase):
         code_dir = 'csharp_bot_deployment'
         language = 'Csharp'
         proj_file_path = 'test.csproj'
-        
+
         if os.path.exists(code_dir):
             # clean up the folder
             shutil.rmtree(code_dir)

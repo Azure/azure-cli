@@ -105,7 +105,7 @@ def load_arguments(self, _):
                    arg_group='Bot Analytics/Application Insights',
                    help='Azure Application Insights Application ID used to read bot analytics data. Provide an Id if '
                         'you want to view analytics about your bot in the Analytics blade.')
-        c.argument('icon_url', help='Icon URL for bot avatar. 30K max, png only')
+        c.argument('icon_url', help='Icon URL for bot avatar. Accepts PNG files with file size limit of 30KB.')
 
     with self.argument_context('bot prepare-publish') as c:
         c.argument('proj_file_path', options_list=['--proj-file-path', c.deprecate(target='--proj-name',
