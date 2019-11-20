@@ -11,7 +11,10 @@ from azure.cli.core.commands.parameters import (get_enum_type, get_three_state_f
 from azure.mgmt.reservations.models import (
     ReservedResourceType,
     InstanceFlexibility,
-    AppliedScopeType
+    AppliedScopeType,
+    ReservationBillingPlan,
+    ReservationTerm,
+    SkuName
 )
 
 
@@ -38,6 +41,8 @@ def load_arguments(self, _):
         c.argument('renew', arg_type=get_three_state_flag())
         c.argument('reserved_resource_type', arg_type=get_enum_type(ReservedResourceType))
         c.argument('applied_scope_type', options_list=['--applied-scope-type'], arg_type=get_enum_type(AppliedScopeType))
+        c.argument('billing_plan', options_list=['--billing-plan'], arg_type=get_enum_type(ReservationBillingPlan))
+        c.argument('term', options_list=['--term'], arg_type=get_enum_type(ReservationTerm))
 
     with self.argument_context('reservations reservation-order purchase') as c:
         c.argument('billing_scope_id', options_list=['--billing-scope'])
@@ -45,3 +50,5 @@ def load_arguments(self, _):
         c.argument('renew', arg_type=get_three_state_flag())
         c.argument('reserved_resource_type', arg_type=get_enum_type(ReservedResourceType))
         c.argument('applied_scope_type', options_list=['--applied-scope-type'], arg_type=get_enum_type(AppliedScopeType))
+        c.argument('billing_plan', options_list=['--billing-plan'], arg_type=get_enum_type(ReservationBillingPlan))
+        c.argument('term', options_list=['--term'], arg_type=get_enum_type(ReservationTerm))

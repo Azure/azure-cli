@@ -165,8 +165,11 @@ parameters:
 
 helps['reservations reservation-order calculate'] = """
 type: command
-short-summary: Calculate price
-long-summary: Calculate price for a ReservationOrder.
+short-summary: Calculate price for a ReservationOrder.
+long-summary: Calculate price for placing a ReservationOrder.
+examples:
+  - name: Calculate price and get quote for specific resource type. 
+    text: az reservations reservation-order calculate --sku standard_b1ls --location westus --reserved-resource-type VirtualMachines --billing-scope {SubId} --term P1Y --billing-plan Upfront --quantity 1 --applied-scope-type Single --applied-scope SubId --display-name test
 parameters:
   - name: --applied-scope-type
     type: string
@@ -179,24 +182,24 @@ parameters:
     short-summary: The billing plan options available for this SKU.
   - name: --billing-scope
     type: string
-    short-summary: Subscription that will be charged for purchasing Reservation
+    short-summary: Subscription that will be charged for purchasing Reservation.
   - name: --display-name
     type: string
     short-summary: Friendly name for user to easily identified the reservation.
   - name: --quantity
     type: int
-    short-summary: Quantity of product for calculating price
+    short-summary: Quantity of product for calculating price.
   - name: --renew
     short-summary: Setting this to true will automatically purchase a new reservation on the expiration date time.
   - name: --instance-flexibility
     type: string
-    short-summary: Type of the Instance Flexibility to update the reservation with
+    short-summary: Type of the Instance Flexibility to update the reservation with.
   - name: --reserved-resource-type
     type: string
     short-summary: Type of the resource for which the skus should be provided.
   - name: --sku
     type: string
-    short-summary: Sku name
+    short-summary: Sku name.
   - name: --term
     type: string
     short-summary: Available reservation terms for this resource.
@@ -206,6 +209,9 @@ helps['reservations reservation-order purchase'] = """
 type: command
 short-summary: Purchase ReservationOrder
 long-summary: Purchase ReservationOrder and create resource under the specified URI.
+examples:
+  - name: Purchase ReservationOrder
+    text: az reservations reservation-order purchase --sku standard_b1ls --location westus --reserved-resource-type VirtualMachines --billing-scope {SubId} --term P1Y --billing-plan Upfront --quantity 1 --applied-scope-type Single --applied-scope {SubId} --display-name test
 parameters:
   - name: --reservation-order-id
     type: string
