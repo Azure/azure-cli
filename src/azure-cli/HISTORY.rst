@@ -53,6 +53,7 @@ Release History
 **Packaging**
 
 * Rewrite the az wrapper in python
+* Use Python 3 for RPM package
 
 **Profile**
 

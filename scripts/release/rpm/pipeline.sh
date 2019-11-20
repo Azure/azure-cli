@@ -32,15 +32,17 @@ docker run \
 # Create a container image that includes the source code and a built RPM using this file for el8.
 docker build \
     --target build-env \
+    --build-arg tag=centos8 \
     --build-arg cli_version=${CLI_VERSION} \
-    -f ./scripts/release/rpm/Dockerfile.centos8 \
+    -f ./scripts/release/rpm/Dockerfile.centos \
     -t microsoft/azure-cli:centos8-builder \
     .
 
 # Continue the previous build, and create a container that has the current azure-cli build but not the source code for el8.
 docker build \
+    --build-arg tag=centos8 \
     --build-arg cli_version=${CLI_VERSION} \
-    -f ./scripts/release/rpm/Dockerfile.centos8 \
+    -f ./scripts/release/rpm/Dockerfile.centos \
     -t microsoft/azure-cli:centos8 \
     .
 
