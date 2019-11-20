@@ -8,7 +8,13 @@ import os
 import json
 import shutil
 import uuid
+import unittest
+try:
+    import unittest.mock as mock
+except ImportError:
+    import mock
 import requests
+from azure.cli.command_modules.botservice.custom import prepare_webapp_deploy
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, LiveScenarioTest
 from azure.mgmt.botservice.models import ErrorException
 from knack.util import CLIError
@@ -630,41 +636,6 @@ class BotTests(ScenarioTest):
         assert results['properties']['developerAppInsightsApplicationId']
         assert results['properties']['iconUrl'] == 'https://dev.botframework.com/client/images/channels/icons/directline.png'
 
-    def __talk_to_bot(self, message_text='Hi', expected_text=None):
-        """Enables direct line channel, sends a message to the bot,
-        and if expected_text is provided, verify that the bot answer matches it."""
-
-        # This setting is for local testing, specifying an app id and password. Set it to true to test directline.
-        # For automation, we set it to false by default to avoid handling keys for now.
-        use_directline = False
-
-        # It is not possible to talk to the bot in playback mode.
-        if self.is_live and use_directline:
-            result = self.cmd('az bot directline create -g {rg} -n {botname}', checks=[
-                self.check('properties.properties.sites[0].siteName', 'Default Site')
-            ])
-
-            json_output = json.loads(result.output)
-
-            directline_key = json_output['properties']['properties']['sites'][0]['key']
-            directline_client = DirectLineClient(directline_key)
-
-            send_result = directline_client.send_message(message_text)
-
-            if send_result.status_code != 200:
-                self.fail("Failed to send message to bot through directline api. Response:" +
-                          json.dumps(send_result.json()))
-
-            response, text = directline_client.get_message()
-
-            if response.status_code != 200:
-                self.fail("Failed to receive message from bot through directline api. Error:" + response.json())
-
-            if expected_text:
-                self.assertTrue(expected_text in text, "Bot response does not match expectation: " + text +
-                                expected_text)
-
-class BotLocalErrorsTests(LiveScenarioTest):
     @ResourceGroupPreparer(random_name_length=20)
     def test_botservice_create_should_raise_error_for_invalid_app_id_args(self, resource_group):
         self.kwargs.update({
@@ -723,13 +694,49 @@ class BotLocalErrorsTests(LiveScenarioTest):
         except AssertionError:
             raise AssertionError('should have thrown an error for empty string passwords.')
 
-    @ResourceGroupPreparer(random_name_length=20)
-    def test_botservice_prepare_deploy_should_fail_if_code_dir_doesnt_exist(self, resource_group):
-        dir_path = 'does_not_exist'
-        self.kwargs.update({'dir_path': dir_path,
-                            'language': 'Javascript'})
+    def __talk_to_bot(self, message_text='Hi', expected_text=None):
+        """Enables direct line channel, sends a message to the bot,
+        and if expected_text is provided, verify that the bot answer matches it."""
+
+        # This setting is for local testing, specifying an app id and password. Set it to true to test directline.
+        # For automation, we set it to false by default to avoid handling keys for now.
+        use_directline = False
+
+        # It is not possible to talk to the bot in playback mode.
+        if self.is_live and use_directline:
+            result = self.cmd('az bot directline create -g {rg} -n {botname}', checks=[
+                self.check('properties.properties.sites[0].siteName', 'Default Site')
+            ])
+
+            json_output = json.loads(result.output)
+
+            directline_key = json_output['properties']['properties']['sites'][0]['key']
+            directline_client = DirectLineClient(directline_key)
+
+            send_result = directline_client.send_message(message_text)
+
+            if send_result.status_code != 200:
+                self.fail("Failed to send message to bot through directline api. Response:" +
+                          json.dumps(send_result.json()))
+
+            response, text = directline_client.get_message()
+
+            if response.status_code != 200:
+                self.fail("Failed to receive message from bot through directline api. Error:" + response.json())
+
+            if expected_text:
+                self.assertTrue(expected_text in text, "Bot response does not match expectation: " + text +
+                                expected_text)
+
+
+class BotLocalErrorsTests(unittest.TestCase):
+    def test_botservice_prepare_deploy_should_fail_if_code_dir_doesnt_exist(self):
+        code_dir = 'does_not_exist'
+        language = 'Javascript'
+        proj_file_path = None
+
         try:
-            self.cmd('az bot prepare-deploy --lang {language} --code-dir {dir_path}')
+            prepare_webapp_deploy(language, code_dir, proj_file_path)
             raise Exception("'az bot prepare-publish' should have failed with nonexistent --code-dir value")
         except CLIError as cli_error:
             print(cli_error.__str__())
@@ -737,126 +744,126 @@ class BotLocalErrorsTests(LiveScenarioTest):
         except Exception as error:
             raise error
 
-    @ResourceGroupPreparer(random_name_length=20)
-    def test_botservice_prepare_deploy_javascript_should_fail_with_proj_file_path(self, resource_group):
-        self.kwargs.update({'language': 'Javascript',
-                            'proj_file': 'node_bot/test.csproj'})
+    def test_botservice_prepare_deploy_javascript_should_fail_with_proj_file_path(self):
+        code_dir = None
+        language = 'Javascript'
+        proj_file_path = 'node_bot/test.csproj'
+
         try:
-            self.cmd('az bot prepare-deploy --lang {language} --proj-file-path {proj_file}')
+            prepare_webapp_deploy(language, code_dir, proj_file_path)
             raise Exception("'az bot prepare-publish --lang Javascript' should have failed with --proj-file-path")
         except CLIError as cli_error:
             assert cli_error.__str__() == '--proj-file-path should not be passed in if language is not Csharp'
         except Exception as error:
             raise error
 
-    @ResourceGroupPreparer(random_name_length=20)
-    def test_botservice_prepare_deploy_javascript(self, resource_group):
-        dir_path = 'node_bot'
-        self.kwargs.update({'dir_path': dir_path,
-                            'language': 'Javascript'})
-        if os.path.exists(dir_path):
-            # clean up the folder
-            shutil.rmtree(dir_path)
-        os.mkdir(dir_path)
-        self.cmd('az bot prepare-deploy --lang {language} --code-dir {dir_path}')
-        assert os.path.exists(os.path.join(dir_path, 'web.config'))
-        shutil.rmtree(dir_path)
+    def test_botservice_prepare_deploy_javascript(self):
+        code_dir = 'node_bot_javascript'
+        language = 'Javascript'
+        proj_file_path = None
 
-    @ResourceGroupPreparer(random_name_length=20)
-    def test_botservice_prepare_deploy_typescript_should_fail_with_proj_file_path(self, resource_group):
-        self.kwargs.update({'language': 'Typescript',
-                            'proj_file': 'node_bot/test.csproj'})
+        if os.path.exists(code_dir):
+            # clean up the folder
+            shutil.rmtree(code_dir)
+        os.mkdir(code_dir)
+        prepare_webapp_deploy(language, code_dir, proj_file_path)
+        assert os.path.exists(os.path.join(code_dir, 'web.config'))
+        shutil.rmtree(code_dir)
+
+    def test_botservice_prepare_deploy_typescript_should_fail_with_proj_file_path(self):
+        code_dir = None
+        language = 'Typescript'
+        proj_file_path = 'node_bot/test.csproj'
+
         try:
-            self.cmd('az bot prepare-deploy --lang {language} --proj-file-path {proj_file}')
+            prepare_webapp_deploy(language, code_dir, proj_file_path)
             raise Exception("'az bot prepare-publish --lang Typescript' should have failed with --proj-file-path")
         except CLIError as cli_error:
             assert cli_error.__str__() == '--proj-file-path should not be passed in if language is not Csharp'
 
-    @ResourceGroupPreparer(random_name_length=20)
-    def test_botservice_prepare_deploy_typescript(self, resource_group):
-        dir_path = 'node_bot'
-        self.kwargs.update({'dir_path': dir_path,
-                            'language': 'Typescript'})
-        if os.path.exists(dir_path):
-            # clean up the folder
-            shutil.rmtree(dir_path)
-        os.mkdir(dir_path)
-        self.cmd('az bot prepare-deploy --lang {language} --code-dir {dir_path}')
-        assert os.path.exists(os.path.join(dir_path, 'web.config'))
-        shutil.rmtree(dir_path)
+    def test_botservice_prepare_deploy_typescript(self):
+        code_dir = 'node_bot_typescript'
+        language = 'Typescript'
+        proj_file_path = None
 
-    @ResourceGroupPreparer(random_name_length=20)
-    def test_botservice_prepare_deploy_csharp(self, resource_group):
-        dir_path = 'csharp_bot'
-        proj_file = 'test.csproj'
-        self.kwargs.update({'dir_path': dir_path,
-                            'language': 'Csharp',
-                            'proj_file': proj_file})
-        if os.path.exists(dir_path):
+        if os.path.exists(code_dir):
             # clean up the folder
-            shutil.rmtree(dir_path)
-        os.mkdir(dir_path)
-        open(os.path.join(dir_path, proj_file), 'w')
+            shutil.rmtree(code_dir)
+        os.mkdir(code_dir)
+        prepare_webapp_deploy(language, code_dir, proj_file_path)
+        assert os.path.exists(os.path.join(code_dir, 'web.config'))
+        shutil.rmtree(code_dir)
 
-        self.cmd('az bot prepare-deploy --lang {language} --code-dir {dir_path} --proj-file-path {proj_file}')
-        assert os.path.exists(os.path.join(dir_path, '.deployment'))
-        with open(os.path.join(dir_path, '.deployment')) as d:
+    def test_botservice_prepare_deploy_csharp(self):
+        code_dir = 'csharp_bot_success'
+        language = 'Csharp'
+        proj_file_path = 'test.csproj'
+
+        if os.path.exists(code_dir):
+            # clean up the folder
+            shutil.rmtree(code_dir)
+        os.mkdir(code_dir)
+        open(os.path.join(code_dir, proj_file_path), 'w')
+
+        prepare_webapp_deploy(language, code_dir, proj_file_path)
+        assert os.path.exists(os.path.join(code_dir, '.deployment'))
+        with open(os.path.join(code_dir, '.deployment')) as d:
             assert d.readline() == '[config]\n'
-            assert d.readline() == 'SCM_SCRIPT_GENERATOR_ARGS=--aspNetCore "{0}"\n'.format(proj_file)
-        shutil.rmtree(dir_path)
+            assert d.readline() == 'SCM_SCRIPT_GENERATOR_ARGS=--aspNetCore "{0}"\n'.format(proj_file_path)
+        shutil.rmtree(code_dir)
 
-    @ResourceGroupPreparer(random_name_length=20)
-    def test_botservice_prepare_deploy_csharp_no_proj_file(self, resource_group):
-        self.kwargs.update({'language': 'Csharp'})
+    def test_botservice_prepare_deploy_csharp_no_proj_file(self):
+        code_dir = None
+        language = 'Csharp'
+        proj_file_path = None
+
         try:
-            self.cmd('az bot prepare-deploy --lang {language}')
+            prepare_webapp_deploy(language, code_dir, proj_file_path)
             raise Exception("'az bot prepare-publish --lang Csharp' should have failed with no --proj-file-path")
         except CLIError as cli_error:
             assert cli_error.__str__() == '--proj-file-path must be provided if language is Csharp'
 
-    @ResourceGroupPreparer(random_name_length=20)
-    def test_botservice_prepare_deploy_csharp_fail_if_deployment_file_exists(self, resource_group):
-        dir_path = 'csharp_bot'
-        proj_file = 'test.csproj'
-        self.kwargs.update({'dir_path': dir_path,
-                            'language': 'Csharp',
-                            'proj_file': proj_file})
-        if os.path.exists(dir_path):
+    def test_botservice_prepare_deploy_csharp_fail_if_deployment_file_exists(self):
+        code_dir = 'csharp_bot_deployment'
+        language = 'Csharp'
+        proj_file_path = 'test.csproj'
+        
+        if os.path.exists(code_dir):
             # clean up the folder
-            shutil.rmtree(dir_path)
-        os.mkdir(dir_path)
-        open(os.path.join(dir_path, proj_file), 'w')
-        open(os.path.join(dir_path, '.deployment'), 'w')
+            shutil.rmtree(code_dir)
+        os.mkdir(code_dir)
+        open(os.path.join(code_dir, proj_file_path), 'w')
+        open(os.path.join(code_dir, '.deployment'), 'w')
 
         try:
-            self.cmd('az bot prepare-deploy --lang {language} --code-dir {dir_path} --proj-file-path {proj_file}')
-            shutil.rmtree(dir_path)
+            prepare_webapp_deploy(language, code_dir, proj_file_path)
+            shutil.rmtree(code_dir)
         except CLIError as cli_error:
-            shutil.rmtree(dir_path)
-            assert cli_error.__str__() == '.deployment found in csharp_bot\nPlease delete this .deployment before ' \
+            shutil.rmtree(code_dir)
+            assert cli_error.__str__() == '.deployment found in csharp_bot_deployment\nPlease delete this .deployment before ' \
                                           'calling "az bot prepare-deploy"'
         except Exception as error:
-            shutil.rmtree(dir_path)
+            shutil.rmtree(code_dir)
             raise error
 
-    @ResourceGroupPreparer(random_name_length=20)
-    def test_botservice_prepare_deploy_javascript_fail_if_web_config_exists(self, resource_group):
-        dir_path = 'node_bot'
-        self.kwargs.update({'dir_path': dir_path,
-                            'language': 'Javascript'})
-        if os.path.exists(dir_path):
+    def test_botservice_prepare_deploy_javascript_fail_if_web_config_exists(self):
+        code_dir = 'node_bot_web_config'
+        language = 'Javascript'
+        proj_file_path = None
+
+        if os.path.exists(code_dir):
             # clean up the folder
-            shutil.rmtree(dir_path)
-        os.mkdir(dir_path)
-        open(os.path.join(dir_path, 'web.config'), 'w')
+            shutil.rmtree(code_dir)
+        os.mkdir(code_dir)
+        open(os.path.join(code_dir, 'web.config'), 'w')
 
         try:
-            self.cmd('az bot prepare-deploy --lang {language} --code-dir {dir_path}')
-            shutil.rmtree(dir_path)
+            prepare_webapp_deploy(language, code_dir, proj_file_path)
+            shutil.rmtree(code_dir)
         except CLIError as cli_error:
-            shutil.rmtree(dir_path)
-            assert cli_error.__str__() == 'web.config found in node_bot\nPlease delete this web.config before ' \
+            shutil.rmtree(code_dir)
+            assert cli_error.__str__() == 'web.config found in node_bot_web_config\nPlease delete this web.config before ' \
                                           'calling "az bot prepare-deploy"'
         except Exception as error:
-            shutil.rmtree(dir_path)
+            shutil.rmtree(code_dir)
             raise error
