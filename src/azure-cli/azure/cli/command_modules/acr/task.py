@@ -20,13 +20,15 @@ from ._utils import (
     prepare_source_location
 )
 from ._stream_utils import stream_logs
+from ._constants import (
+    ACR_NULL_CONTEXT
+)
 
 logger = get_logger(__name__)
 
 
 TASK_NOT_SUPPORTED = 'Task is only supported for managed registries.'
 DEFAULT_TOKEN_TYPE = 'PAT'
-NULL_CONTEXT = '/dev/null'
 IDENTITY_LOCAL_ID = '[system]'
 IDENTITY_GLOBAL_REMOVE = '[all]'
 
@@ -74,7 +76,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
     registry, resource_group_name = get_registry_by_name(
         cmd.cli_ctx, registry_name, resource_group_name)
 
-    if context_path.lower() == NULL_CONTEXT:
+    if context_path.lower() == ACR_NULL_CONTEXT:
         context_path = None
         commit_trigger_enabled = False
         pull_request_trigger_enabled = False

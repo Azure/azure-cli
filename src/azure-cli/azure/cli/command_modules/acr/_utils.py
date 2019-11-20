@@ -20,15 +20,14 @@ from ._constants import (
     get_premium_sku,
     get_valid_os,
     get_valid_architecture,
-    get_valid_variant
+    get_valid_variant,
+    ACR_NULL_CONTEXT
 )
 from ._client_factory import cf_acr_registries
 
 from ._archive_utils import upload_source_code, check_remote_source_code
 
 logger = get_logger(__name__)
-
-NULL_CONTEXT = '/dev/null'
 
 
 def _arm_get_resource_by_name(cli_ctx, resource_name, resource_type):
@@ -439,7 +438,7 @@ def parse_actions_from_repositories(allow_or_remove_repository):
     return actions
 
 def prepare_source_location(source_location, client_registries, registry_name, resource_group_name):
-    if source_location.lower() == NULL_CONTEXT:
+    if source_location.lower() == ACR_NULL_CONTEXT:
         source_location = None
     elif os.path.exists(source_location):
         if not os.path.isdir(source_location):
