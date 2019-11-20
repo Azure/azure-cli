@@ -370,7 +370,7 @@ def verify_native_dependencies():
         # python3-devel not available on yum but python3Xu-devel versions available.
         python_dep = 'python3{}u-devel'.format(sys.version_info[1]) if is_python3 else 'python-devel'
         dep_list = ['gcc', 'libffi-devel', python_dep, 'openssl-devel']
-    elif any(x in distname for x in ['opensuse', 'suse']):
+    elif any(x in distname for x in ['opensuse', 'suse', 'sles']):
         verify_cmd_args = ['rpm', '-q']
         install_cmd_args = ['zypper', 'refresh', '&&', 'zypper', '--non-interactive', 'install']
         python_dep = 'python3-devel' if is_python3 else 'python-devel'
