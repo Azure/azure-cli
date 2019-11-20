@@ -211,11 +211,11 @@ short-summary: Purchase ReservationOrder
 long-summary: Purchase ReservationOrder and create resource under the specified URI.
 examples:
   - name: Purchase ReservationOrder
-    text: az reservations reservation-order purchase --sku standard_b1ls --location westus --reserved-resource-type VirtualMachines --billing-scope {SubId} --term P1Y --billing-plan Upfront --quantity 1 --applied-scope-type Single --applied-scope {SubId} --display-name test
+    text: az reservations reservation-order purchase --reservation-order-id {reservationOrderId} --sku standard_b1ls --location westus --reserved-resource-type VirtualMachines --billing-scope {SubId} --term P1Y --billing-plan Upfront --quantity 1 --applied-scope-type Single --applied-scope {SubId} --display-name test
 parameters:
   - name: --reservation-order-id
     type: string
-    short-summary: Id of reservation order to purchase
+    short-summary: Id of reservation order to purchase, generate by az reservations reservation-order calculate.
   - name: --applied-scope-type
     type: string
     short-summary: Type of the Applied Scope to update the reservation with

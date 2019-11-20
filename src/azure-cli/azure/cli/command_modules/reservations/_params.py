@@ -13,8 +13,7 @@ from azure.mgmt.reservations.models import (
     InstanceFlexibility,
     AppliedScopeType,
     ReservationBillingPlan,
-    ReservationTerm,
-    SkuName
+    ReservationTerm
 )
 
 
