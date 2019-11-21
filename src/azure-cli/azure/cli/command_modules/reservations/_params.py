@@ -5,6 +5,7 @@
 
 
 # pylint: disable=line-too-long
+# pylint: disable=too-many-statements
 
 from azure.cli.core.commands.parameters import (get_enum_type, get_three_state_flag)
 
