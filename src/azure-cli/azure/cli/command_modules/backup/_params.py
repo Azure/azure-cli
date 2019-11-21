@@ -23,7 +23,7 @@ from azure.cli.command_modules.backup._validators import \
 allowed_container_types = ['AzureIaasVM']
 allowed_workload_types = ['VM', 'AzureFileShare', 'SAPHANA', 'MSSQL', 'SAPHanaDatabase', 'SQLDataBase']
 allowed_backup_management_types = ['AzureIaasVM', 'AzureStorage', 'AzureWorkload']
-allowed_protectable_item_type = ['SQLAG', 'SQLInstance', 'SQLDatabase', 'HANAInstance', 'HANADataBase', 'SAPHanaDatabase', 'SAPHanaSystem']
+allowed_protectable_item_type = ['SQLAG', 'SQLInstance', 'SQLDatabase', 'HANAInstance', 'SAPHanaDatabase', 'SAPHanaSystem']
 
 backup_management_type_help = """Specifiy the backup management type. Define how Azure Backup manages the backup of entities within the ARM resource. For eg: AzureWorkloads refers to workloads installed within Azure VMs, AzureStorage refers to entities within Storage account. Required only if friendly name is used as Container name."""
 container_name_help = """Name of the backup container. Accepts 'Name' or 'FriendlyName' from the output of az backup container list command. If 'FriendlyName' is passed then BackupManagementType is required."""

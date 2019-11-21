@@ -354,7 +354,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'fitem': "h22_restored_sarath",
             'id': id_hana,
             'item_id': item_id_hana_2,
-            'pit': 'HANADataBase'
+            'pit': 'SAPHanaDatabase'
         })
 
         self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
@@ -488,7 +488,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'item': item1_hana,
             'id': id_hana,
             'item_id': item_id_hana,
-            'pit': 'HANADataBase',
+            'pit': 'SAPHanaDatabase',
             'protectable_item_name': 'NEWDB',
             'pit_hana': 'SAPHanaDatabase'
         })
@@ -667,7 +667,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'fitem': "h22_restored_sarath",
             'id': id_hana,
             'item_id': item_id_hana,
-            'pit': "HANADataBase",
+            'pit': "SAPHanaDatabase",
             'entityFriendlyName': 'H22/H22_RESTORED_SARATH [HANADemoIDC3]'
         })
 
@@ -766,7 +766,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'fitem': "h22_restored_sarath",
             'id': id_hana,
             'item_id': item_id_hana,
-            'pit': 'HANADataBase',
+            'pit': 'SAPHanaDatabase',
             'entityFriendlyName': 'H22/H22_RESTORED_SARATH [HANADemoIDC3]',
             'tpit': 'HANAInstance',
             'titem': 'H22'
