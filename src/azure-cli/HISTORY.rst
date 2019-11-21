@@ -81,6 +81,9 @@ Release History
 * Upgrading SDK Version to 0.6.0
 * Add billingplan details info after calling Get-Gatalogs
 
+**Rest**
+* `az rest` is now GA
+
 **Storage**
 
 * storage account create: Add --enable-hierarchical-namespace to support filesystem semantics in blob service.

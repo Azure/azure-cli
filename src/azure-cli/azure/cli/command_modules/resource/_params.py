@@ -294,8 +294,8 @@ def load_arguments(self, _):
     with self.argument_context('rest') as c:
         c.argument('method', options_list=['--method', '-m'], arg_type=get_enum_type(['head', 'get', 'put', 'post', 'delete', 'options', 'patch'], default='get'),
                    help='HTTP request method')
-        c.argument('uri', options_list=['--uri', '-u'], help='request uri. For uri without host, CLI will assume "https://management.azure.com/".'
-                   ' Common tokens will also be replaced with real values including "{subscriptionId}"')
+        c.argument('uri', options_list=['--uri', '-u'], help='request uri. For uri without host, CLI will assume "https://management.azure.com/". '
+                   "Common token '{subscriptionId}' will be replaced with the current subscription ID specified by 'az account set'")
         c.argument('headers', nargs='+', help="Space-separated headers in KEY=VALUE format or JSON string. Use @{file} to load from a file")
         c.argument('uri_parameters', nargs='+', help='Space-separated queries in KEY=VALUE format or JSON string. Use @{file} to load from a file')
         c.argument('skip_authorization_header', action='store_true', help='do not auto append "Authorization" header')
