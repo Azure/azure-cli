@@ -210,7 +210,7 @@ class Profile(object):
 
         if not allow_no_subscriptions and not subscriptions:
             raise CLIError("No subscriptions were found for '{}'. If this is expected, use "
-                           "'--allow-no-subscriptions' to have tenant level accesses".format(
+                           "'--allow-no-subscriptions' to have tenant level access".format(
                                username))
 
         if is_service_principal:
@@ -344,7 +344,7 @@ class Profile(object):
                 subscriptions = self._build_tenant_level_accounts([tenant])
             else:
                 raise CLIError('No access was configured for the VM, hence no subscriptions were found. '
-                               "If this is expected, use '--allow-no-subscriptions' to have tenant level accesses.")
+                               "If this is expected, use '--allow-no-subscriptions' to have tenant level access.")
 
         consolidated = self._normalize_properties(user, subscriptions, is_service_principal=True,
                                                   user_assigned_identity_id=base_name)
