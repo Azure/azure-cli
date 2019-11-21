@@ -36,7 +36,7 @@ def load_arguments(self, _):
         arg_type=get_enum_type(ReservationTerm))
     renew_type = CLIArgumentType(
         options_list=['--renew'],
-        help='Setting this to true will automatically purchase a new reservation on the expiration date time.',
+        help='Set this to true will automatically purchase a new reservation on the expiration date time.',
         arg_type=get_three_state_flag())
     billing_plan_type = CLIArgumentType(
         options_list=['--billing-plan'],
@@ -54,7 +54,7 @@ def load_arguments(self, _):
         help='Subscription that the benefit will be applied. Required if --applied-scope-type is Single. Do not specify if --applied-scope-type is Shared.')
     quantity_type = CLIArgumentType(
         options_list=['--quantity'],
-        help=' Quantity of product for calculating price or purchasing.'
+        help='Quantity of product for calculating price or purchasing.'
     )
     reservation_resource_type_param_type = CLIArgumentType(
         options_list=['--reserved-resource-type'],
@@ -93,7 +93,7 @@ def load_arguments(self, _):
         c.argument('location', options_list=['--location'], help='Values from: `az account list-locations`.')
 
     with self.argument_context('reservations reservation-order purchase') as c:
-        c.argument('reservation_order_id', help='Id of reservation order to purchase, generate by az reservations reservation-order calculate.')
+        c.argument('reservation_order_id', help='Id of reservation order to purchase, generate by `az reservations reservation-order calculate`.')
         c.argument('billing_scope_id', billing_scope_id_type)
         c.argument('instance_flexibility', instance_flexibility_type)
         c.argument('renew', renew_type)
