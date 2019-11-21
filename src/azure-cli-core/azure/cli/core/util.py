@@ -191,6 +191,9 @@ def get_az_version_string():
     _print()
     _print('Legal docs and information: aka.ms/AzureCliLegal')
     _print()
+    if sys.version.startswith('2.7'):
+        _print("* DEPRECATION: Python 2.7 will reach the end of its life on January 1st, 2020. \nA future version of Azure CLI will drop support for Python 2.7.")
+    _print()
     version_string = output.getvalue()
 
     # if unable to query PyPI, use sentinel value to flag that
