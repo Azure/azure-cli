@@ -65,6 +65,7 @@ Release History
 * Polish error when running `az login -u {} -p {}` with Microsoft account
 * Polish `SSLError` when running `az login` behind a proxy with self-signed root certificate
 * Fix #10578: `az login` hangs when more than one instances are launched at the same time on Windows or WSL
+* Fix #11059: `az login --allow-no-subscriptions` fails if there are subscriptions in the tenant
 * Fix #11238: After renaming a subscription, logging in with MSI will result in the same subscription appearing twice
 
 **RBAC**
