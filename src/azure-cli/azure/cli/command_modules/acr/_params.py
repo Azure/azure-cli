@@ -168,7 +168,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('with_secure_properties', help="Indicates whether the secure properties of a task should be returned.", action='store_true')
 
         # DockerBuildStep, FileTaskStep parameters
-        c.argument('file', options_list=['--file', '-f'], help="The relative path of the the task/docker file to the source code root folder. Task files must be suffixed with '.yaml' or piped from the standard input using '-'.")
+        c.argument('file', options_list=['--file', '-f'], help="Relative path of the the task/docker file to the source code root folder. Task files must be suffixed with '.yaml' or piped from the standard input using '-'.")
         c.argument('image', arg_type=image_by_tag_or_digest_type)
         c.argument('no_push', help="Indicates whether the image built should be pushed to the registry.", arg_type=get_three_state_flag())
         c.argument('no_cache', help='Indicates whether the image cache is enabled.', arg_type=get_three_state_flag())
@@ -182,32 +182,26 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('set_secret', help="Secret task value in '--set-secret name[=value]' format. Multiples supported by passing --set-secret multiple times.", action='append', validator=validate_set_secret)
 
         # Trigger parameters
-        c.argument('source_trigger_name', help="The name of the source trigger.")
-        c.argument('commit_trigger_enabled', help="Indicates whether the source control commit trigger is enabled.", arg_type=get_three_state_flag())
-        c.argument('pull_request_trigger_enabled', help="Indicates whether the source control pull request trigger is enabled. The trigger is disabled by default.", arg_type=get_three_state_flag())
-        c.argument('schedule', help="Schedule for a timer trigger represented as a cron expression. An optional trigger name can be specified using `--schedule name:schedule` format. Multiples supported by passing --schedule multiple times.", action='append')
-        c.argument('git_access_token', help="The access token used to access the source control provider.")
-        c.argument('branch', help="The source control branch name.")
-        c.argument('base_image_trigger_name', help="The name of the base image trigger.")
-        c.argument('base_image_trigger_enabled', help="Indicates whether the base image trigger is enabled.", arg_type=get_three_state_flag())
-        c.argument('base_image_trigger_type', help="The type of the auto trigger for base image dependency updates.", arg_type=get_enum_type(BaseImageTriggerType))
-        c.argument('update_trigger_endpoint', help="The full URL of the endpoint to receive base image update trigger notifications.", is_preview=True)
-        c.argument('update_trigger_payload_type', help="Indicates whether to include metadata about the base image trigger in the payload alongwith the update trigger token, when a notification is sent.", arg_type=get_enum_type(UpdateTriggerPayloadType), is_preview=True)
+        c.argument('source_trigger_name', arg_group='Trigger', help="The name of the source trigger.")
+        c.argument('commit_trigger_enabled', arg_group='Trigger', help="Indicates whether the source control commit trigger is enabled.", arg_type=get_three_state_flag())
+        c.argument('pull_request_trigger_enabled', arg_group='Trigger', help="Indicates whether the source control pull request trigger is enabled. The trigger is disabled by default.", arg_type=get_three_state_flag())
+        c.argument('schedule', arg_group='Trigger', help="Schedule for a timer trigger represented as a cron expression. An optional trigger name can be specified using `--schedule name:schedule` format. Multiples supported by passing --schedule multiple times.", action='append')
+        c.argument('git_access_token', arg_group='Trigger', help="The access token used to access the source control provider.")
+        c.argument('branch', arg_group='Trigger', help="The source control branch name.")
+        c.argument('base_image_trigger_name', arg_group='Trigger', help="The name of the base image trigger.")
+        c.argument('base_image_trigger_enabled', arg_group='Trigger', help="Indicates whether the base image trigger is enabled.", arg_type=get_three_state_flag())
+        c.argument('base_image_trigger_type', arg_group='Trigger', help="The type of the auto trigger for base image dependency updates.", arg_type=get_enum_type(BaseImageTriggerType))
+        c.argument('update_trigger_endpoint', arg_group='Trigger', help="The full URL of the endpoint to receive base image update trigger notifications.", is_preview=True)
+        c.argument('update_trigger_payload_type', arg_group='Trigger', help="Indicates whether to include metadata about the base image trigger in the payload alongwith the update trigger token, when a notification is sent.", arg_type=get_enum_type(UpdateTriggerPayloadType), is_preview=True)
 
         # Run related parameters
-        c.argument('top', help='Limit the number of latest runs in the results.')
         c.argument('run_id', help='The unique run identifier.')
-        c.argument('run_status', help='The current status of run.', arg_type=get_enum_type(RunStatus))
-        c.argument('no_archive', help='Indicates whether the run should be archived.', arg_type=get_three_state_flag())
 
         # Run agent parameters
         c.argument('cpu', type=int, help='The CPU configuration in terms of number of cores required for the run.')
 
         # MSI parameter
         c.argument('assign_identity', nargs='*', help="Assigns managed identities to the task. Use '[system]' to refer to the system-assigned identity or a resource ID to refer to a user-assigned identity. Please see https://aka.ms/acr/tasks/task-create-managed-identity for more information.")
-
-        # Update trigger token parameters
-        c.argument('update_trigger_token', help="The payload that will be passed back alongwith the base image trigger notification.", is_preview=True)
 
     with self.argument_context('acr task create') as c:
         c.argument('task_name', completer=None)
@@ -218,6 +212,17 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('acr task credential') as c:
         # Custom registry credentials
         c.argument('login_server', help="The login server of the custom registry. For instance, 'myregistry.azurecr.io'.", required=True)
+
+    with self.argument_context('acr task run') as c:
+        # Update trigger token parameters
+        c.argument('update_trigger_token', help="The payload that will be passed back alongwith the base image trigger notification.", is_preview=True)
+
+    with self.argument_context('acr task list-runs') as c:
+        c.argument('run_status', help='The current status of run.', arg_type=get_enum_type(RunStatus))
+        c.argument('top', help='Limit the number of latest runs in the results.')
+
+    with self.argument_context('acr task update-run') as c:
+        c.argument('no_archive', help='Indicates whether the run should be archived.', arg_type=get_three_state_flag())
 
     for scope in ['acr task credential add', 'acr task credential update']:
         with self.argument_context(scope) as c:

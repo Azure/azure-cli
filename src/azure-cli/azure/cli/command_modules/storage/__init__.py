@@ -166,9 +166,7 @@ class StorageCommandGroup(AzCommandGroup):
     def get_handler_suppress_some_400(self):
         def handler(ex):
             from azure.cli.core.profiles import get_sdk
-            from knack.log import get_logger
 
-            logger = get_logger(__name__)
             t_error = get_sdk(self.command_loader.cli_ctx,
                               ResourceType.DATA_STORAGE,
                               'common._error#AzureHttpError')
@@ -181,14 +179,11 @@ Depending on your operation, you may need to be assigned one of the following ro
     "Storage Queue Data Contributor"
     "Storage Queue Data Reader"
 
-If you want to use the old authentication method and allow querying for the right account key, please use the "--auth-mode" parameter and "key" value.
+If you want to use the old authentication method and allow querying for the right account key, please use the "--auth-mode" parameter and "key" value. ErrorCode: AuthenticationFailed
                 """
-                logger.error(message)
-                return
+                ex.args = (message,)
             if isinstance(ex, t_error) and ex.status_code == 409 and ex.error_code == 'NoPendingCopyOperation':
-                logger.error(ex.args[0])
-                return
-            raise ex
+                pass
 
         return handler
 
@@ -244,12 +239,10 @@ def _merge_new_exception_handler(kwargs, handler):
     first = kwargs.get('exception_handler')
 
     def new_handler(ex):
-        try:
-            handler(ex)
-        except Exception:  # pylint: disable=broad-except
-            if not first:
-                raise
-            first(ex)
+        handler(ex)
+        if not first:
+            raise ex
+        first(ex)
     kwargs['exception_handler'] = new_handler
 
 

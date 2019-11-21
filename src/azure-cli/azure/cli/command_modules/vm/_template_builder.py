@@ -248,7 +248,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
         os_publisher=None, os_offer=None, os_sku=None, os_version=None, os_vhd_uri=None,
         attach_os_disk=None, os_disk_size_gb=None, custom_data=None, secrets=None, license_type=None, zone=None,
         disk_info=None, boot_diagnostics_storage_uri=None, ultra_ssd_enabled=None, proximity_placement_group=None,
-        computer_name=None, dedicated_host=None, priority=None, max_billing=None, eviction_policy=None,
+        computer_name=None, dedicated_host=None, priority=None, max_price=None, eviction_policy=None,
         enable_agent=None, vmss=None):
 
     os_caching = disk_info['os'].get('caching')
@@ -420,8 +420,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
     if eviction_policy is not None:
         vm_properties['evictionPolicy'] = eviction_policy
 
-    if max_billing is not None:
-        vm_properties['billingProfile'] = {'maxPrice': max_billing}
+    if max_price is not None:
+        vm_properties['billingProfile'] = {'maxPrice': max_price}
 
     vm = {
         'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machines'),
@@ -651,7 +651,7 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
                         single_placement_group=None, platform_fault_domain_count=None, custom_data=None,
                         secrets=None, license_type=None, zones=None, priority=None, eviction_policy=None,
                         application_security_groups=None, ultra_ssd_enabled=None, proximity_placement_group=None,
-                        terminate_notification_time=None, max_billing=None, orchestration_mode=None):
+                        terminate_notification_time=None, max_price=None):
 
     # Build IP configuration
     ip_configuration = {
@@ -810,9 +810,9 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
                                                      operation_group='virtual_machine_scale_sets'):
         vmss_properties['virtualMachineProfile']['evictionPolicy'] = eviction_policy
 
-    if max_billing is not None and cmd.supported_api_version(
+    if max_price is not None and cmd.supported_api_version(
             min_api='2019-03-01', operation_group='virtual_machine_scale_sets'):
-        vmss_properties['virtualMachineProfile']['billingProfile'] = {'maxPrice': max_billing}
+        vmss_properties['virtualMachineProfile']['billingProfile'] = {'maxPrice': max_price}
 
     if platform_fault_domain_count is not None and cmd.supported_api_version(
             min_api='2017-12-01', operation_group='virtual_machine_scale_sets'):
@@ -851,22 +851,6 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
     }
     if zones:
         vmss['zones'] = zones
-    # vmss without vm profile
-    if orchestration_mode == 'VM':
-        if platform_fault_domain_count is None:
-            platform_fault_domain_count = 2
-        vmss = {
-            'type': 'Microsoft.Compute/virtualMachineScaleSets',
-            'name': name,
-            'location': location,
-            'tags': tags,
-            'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machine_scale_sets'),
-            'properties': {
-                'singlePlacementGroup': True,
-                'provisioningState': 0,
-                'platformFaultDomainCount': platform_fault_domain_count
-            }
-        }
     return vmss
 
 

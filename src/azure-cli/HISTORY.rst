@@ -19,28 +19,60 @@ Release History
 **AppService**
 
 * Fix issue #11100: AttributeError for az webapp up when create service plan
+* az webapp up: Forcing the creation or deployment to a site for supported languages, no defaults used.
+* Add support for App Service Environment: az appservice ase show | list | list-addresses | list-plans | create | update | delete
+
+**Backup**
+
+* Fix issue in az backup policy list-associated-items. Added optional BackupManagementType parameter.
 
 **Compute**
 
 * Upgrade API version of compute, disks, snapshots to 2019-07-01
+* vmss create: Improvement for --orchestration-mode
+* sig image-definition create: add --os-state to allow specifying whether the virtual machines created under this image are 'Generalized' or 'Specialized'
+* sig image-definition create: add --hyper-v-generation to allow specifying the hypervisor generation
+* image create: Add --data-disk-caching to allow specifying caching setting of data disks
+* Upgrade Python Compute SDK to 10.0.0
+* vm/vmss create: Add 'Spot' to 'Priority' enum property
+* [Breaking change] Rename '--max-billing' parameter to '--max-price', for both VM and VMSS, to be consistent with Swagger and Powershell cmdlets
+* vm monitor log show: support query log over linked log analytics workspace.
 
 **IOT**
 
 * Fix #2531: Add convenience arguments for hub update.
+* Fix #8323: Add missing parameters to create storage custom endpoint.
 
 **Key Vault**
 
 * Fix #11121: When using `az keyvault certificate list`, passing `--include-pending` now doesn't require a value of `true` or `false`
 
+**NetAppFiles**
+
+* Upgrade azure-mgmt-netapp to 0.7.0 which includes some additional volume properties associated with upcoming replication operations
+
+**Network**
+
+* application-gateway waf-config: deprecated
+* application-gateway waf-policy: Add subgroup managed-rules to manage managed rule sets and exclusion rules
+* application-gateway waf-policy: Add subgroup policy-setting to manage global configuration of a waf-policy
+* [BREAKING CHANGE] application-gateway waf-policy: Rename subgroup rule to custom-rule
+* application-gateway http-listener: Add --firewall-policy when create
+* application-gateway url-path-map rule: Add --firewall-policy when create
+
 **Packaging**
 
-* Rewrite the az wrapper in python
+* Rewrite the az wrapper in Python
+* Support Python 3.8
+* Use Python 3 for RPM package
 
 **Profile**
 
 * Polish error when running `az login -u {} -p {}` with Microsoft account
 * Polish `SSLError` when running `az login` behind a proxy with self-signed root certificate
 * Fix #10578: `az login` hangs when more than one instances are launched at the same time on Windows or WSL
+* Fix #11059: `az login --allow-no-subscriptions` fails if there are subscriptions in the tenant
+* Fix #11238: After renaming a subscription, logging in with MSI will result in the same subscription appearing twice
 
 **RBAC**
 
@@ -54,10 +86,16 @@ Release History
 
 * Upgrading SDK Version to 0.6.0
 * Add billingplan details info after calling Get-Gatalogs
+* Add new command `az reservations reservation-order calculate` to calculate the price for a reservation
+* Add new command `az reservations reservation-order purchase` to purchase a new reservation
+
+**Rest**
+* `az rest` is now GA
 
 **Storage**
 
 * storage account create: Add --enable-hierarchical-namespace to support filesystem semantics in blob service.
+* Remove unrelated exception from error message
 
 2.0.76
 ++++++
@@ -80,11 +118,13 @@ Release History
 
 **AppService**
 
-* az appservice plan create: Adding support to set 'persitescaling' on appservice plan create.
+* az appservice plan create: Adding support to set 'persitescaling' and app service environment on appservice plan create.
 * Fixing an issue where webapp config ssl bind operation was removing existing tags from the resource
 * Added "--build remote" flag for "az functionapp deployment source config-zip" to support remote build action during function app deployment.
 * Change default node version on function apps to ~10 for Windows
 * Add --runtime-version property to `az functionapp create`
+* az appservice vnet-integration add: Fixed so that subnet delegation is case insensitive and delegating subnets does not overwrite previous data.
+
 
 **ARM**
 
