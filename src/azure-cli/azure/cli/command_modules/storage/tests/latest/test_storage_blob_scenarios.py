@@ -431,7 +431,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
 
         self.storage_cmd('storage blob upload -c {} -n {} -f "{}"', account_info, c, b, local_file)
         from azure.common import AzureException
-        with self.assertRaisesRegex(AzureException, "NoPendingCopyOperation"):
+        with self.assertRaisesRegexp(AzureException, "NoPendingCopyOperation"):
             self.storage_cmd('storage blob copy cancel -c {} -b {} --copy-id {}', account_info, c, b, copy_id)
 
     @ResourceGroupPreparer()
@@ -488,7 +488,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
 
         # test 403
         from azure.common import AzureException
-        with self.assertRaisesRegex(AzureException, "ErrorCode: AuthenticationFailed"):
+        with self.assertRaisesRegexp(AzureException, "ErrorCode: AuthenticationFailed"):
             self.cmd('storage blob show --account-name {} --account-key="YQ==" -c foo -n bar.txt '.format(storage_account))
 
 
