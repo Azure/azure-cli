@@ -92,6 +92,7 @@ Release History
 
 * storage account create: Add --enable-hierarchical-namespace to support filesystem semantics in blob service.
 * Remove unrelated exception from error message
+* Fix issues with incorrect error message "You do not have the required permissions needed to perform this operation." when blocked by network rules or AuthenticationFailed.
 
 2.0.76
 ++++++
