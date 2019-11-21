@@ -1339,7 +1339,7 @@ def process_vmss_create_namespace(cmd, namespace):
             namespace.nat_pool_name,
             namespace.load_balancer_sku,
             namespace.license_type,
-            namespace.max_billing,
+            namespace.max_price,
             namespace.nsg,
             namespace.os_caching,
             namespace.os_disk_name,

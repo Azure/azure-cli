@@ -666,7 +666,8 @@ def iot_hub_get_stats(client, hub_name, resource_group_name=None):
 def iot_hub_routing_endpoint_create(cmd, client, hub_name, endpoint_name, endpoint_type,
                                     endpoint_resource_group, endpoint_subscription_id,
                                     connection_string, container_name=None, encoding=None,
-                                    resource_group_name=None):
+                                    resource_group_name=None, batch_frequency=300, chunk_size_window=300,
+                                    file_name_format='{iothub}/{partition}/{YYYY}/{MM}/{DD}/{HH}/{mm}'):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     hub = iot_hub_get(cmd, client, hub_name, resource_group_name)
     if EndpointType.EventHub.value == endpoint_type.lower():
@@ -706,7 +707,10 @@ def iot_hub_routing_endpoint_create(cmd, client, hub_name, endpoint_name, endpoi
                 subscription_id=endpoint_subscription_id,
                 resource_group=endpoint_resource_group,
                 container_name=container_name,
-                encoding=encoding.lower() if encoding else EncodingFormat.AVRO.value
+                encoding=encoding.lower() if encoding else EncodingFormat.AVRO.value,
+                file_name_format=file_name_format,
+                batch_frequency_in_seconds=batch_frequency,
+                max_chunk_size_in_bytes=(chunk_size_window * 1048576)
             )
         )
     return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
