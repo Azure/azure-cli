@@ -119,8 +119,8 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
     if source_trigger_events:
         if not branch:
             branch = _get_branch_name(context_path)
-            if not branch:
-                branch = 'master'
+            branch = 'master' if not branch else branch
+
         SourceTrigger, SourceProperties, AuthInfo, TriggerStatus = cmd.get_models(
             'SourceTrigger', 'SourceProperties', 'AuthInfo', 'TriggerStatus')
         source_triggers = [
@@ -388,8 +388,8 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
         source_triggers = task.trigger.source_triggers
         base_image_trigger = task.trigger.base_image_trigger
         if (commit_trigger_enabled or pull_request_trigger_enabled) or source_triggers:
-            if not branch:
-                branch = _get_branch_name(context_path)
+            branch = _get_branch_name(context_path) if not branch else branch
+
             SourceTriggerUpdateParameters, SourceUpdateParameters, AuthInfoUpdateParameters = cmd.get_models(
                 'SourceTriggerUpdateParameters', 'SourceUpdateParameters', 'AuthInfoUpdateParameters')
 
