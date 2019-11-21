@@ -12,11 +12,12 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set, c
                                                           cf_rolling_upgrade_commands, cf_galleries,
                                                           cf_gallery_images, cf_gallery_image_versions,
                                                           cf_proximity_placement_groups,
-                                                          cf_dedicated_hosts, cf_dedicated_host_groups)
+                                                          cf_dedicated_hosts, cf_dedicated_host_groups,
+                                                          cf_log_analytics_data_plane)
 from azure.cli.command_modules.vm._format import (
     transform_ip_addresses, transform_vm, transform_vm_create_output, transform_vm_usage_list, transform_vm_list,
     transform_sku_for_table_output, transform_disk_show_table_output, transform_extension_show_table_output,
-    get_vmss_table_output_transformer, transform_vm_encryption_show_table_output)
+    get_vmss_table_output_transformer, transform_vm_encryption_show_table_output, transform_log_analytics_query_output)
 from azure.cli.command_modules.vm._validators import (
     process_vm_create_namespace, process_vmss_create_namespace, process_image_create_namespace,
     process_disk_or_snapshot_create_namespace, process_disk_encryption_namespace, process_assign_identity_namespace,
@@ -164,6 +165,11 @@ def load_command_table(self, _):
     image_builder_image_templates_sdk = CliCommandType(
         operations_tmpl="azure.mgmt.imagebuilder.operations#VirtualMachineImageTemplatesOperations.{}",
         client_factory=cf_img_bldr_image_templates,
+    )
+
+    log_analytics_data_plane_sdk = CliCommandType(
+        operations_tmpl="custom#{}",
+        client_factory=cf_log_analytics_data_plane,
     )
 
     with self.command_group('disk', compute_disk_sdk, operation_group='disks', min_api='2017-03-30') as g:
@@ -435,3 +441,6 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_proximity_placement_groups')
         g.generic_update_command('update')
         g.command('delete', 'delete')
+
+    with self.command_group('vm monitor log', log_analytics_data_plane_sdk, client_factory=cf_log_analytics_data_plane) as g:
+        g.custom_command('show', 'execute_query_for_vm', transform=transform_log_analytics_query_output)

@@ -123,3 +123,31 @@ def transform_vm_encryption_show_table_output(result):
         return OrderedDict([("status", status_dict.get("displayStatus", "N/A")),
                             ("message", status_dict.get("message", "N/A"))])
     return result
+
+
+def transform_log_analytics_query_output(result):
+    from collections import OrderedDict
+    tables_output = []
+
+    def _transform_query_output(table):
+        columns = table.columns
+        name = table.name
+        rows = table.rows
+
+        column_names = []
+        table_output = []
+        for column in columns:
+            column_names.append(column.name)
+        for row in rows:
+            item = OrderedDict()
+            item['TableName'] = name
+            for index, value in enumerate(row):
+                item[column_names[index]] = str(value)
+            table_output.append(item)
+        return table_output
+
+    for table in result.tables:
+        table_output = _transform_query_output(table)
+        tables_output.extend(table_output)
+
+    return tables_output
