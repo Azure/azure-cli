@@ -449,6 +449,59 @@ def iot_hub_list(client, resource_group_name=None):
     return client.iot_hub_resource.list_by_resource_group(resource_group_name)
 
 
+def update_iot_hub_custom(instance,
+                          sku=None,
+                          unit=None,
+                          retention_day=None,
+                          c2d_ttl=None,
+                          c2d_max_delivery_count=None,
+                          feedback_lock_duration=None,
+                          feedback_ttl=None,
+                          feedback_max_delivery_count=None,
+                          enable_fileupload_notifications=None,
+                          fileupload_notification_max_delivery_count=None,
+                          fileupload_notification_ttl=None,
+                          fileupload_storage_connectionstring=None,
+                          fileupload_storage_container_name=None,
+                          fileupload_sas_ttl=None):
+    from datetime import timedelta
+    if sku is not None:
+        instance.sku.name = sku
+    if unit is not None:
+        instance.sku.capacity = unit
+    if retention_day is not None:
+        instance.properties.event_hub_endpoints['events'].retention_time_in_days = retention_day
+    if c2d_ttl is not None:
+        instance.properties.cloud_to_device.default_ttl_as_iso8601 = timedelta(hours=c2d_ttl)
+    if c2d_max_delivery_count is not None:
+        instance.properties.cloud_to_device.max_delivery_count = c2d_max_delivery_count
+    if feedback_lock_duration is not None:
+        duration = timedelta(seconds=feedback_lock_duration)
+        instance.properties.cloud_to_device.feedback.lock_duration_as_iso8601 = duration
+    if feedback_ttl is not None:
+        instance.properties.cloud_to_device.feedback.ttl_as_iso8601 = timedelta(hours=feedback_ttl)
+    if feedback_max_delivery_count is not None:
+        instance.properties.cloud_to_device.feedback.max_delivery_count = feedback_max_delivery_count
+    if enable_fileupload_notifications is not None:
+        instance.properties.enable_file_upload_notifications = enable_fileupload_notifications
+    if fileupload_notification_max_delivery_count is not None:
+        count = fileupload_notification_max_delivery_count
+        instance.properties.messaging_endpoints['fileNotifications'].max_delivery_count = count
+    if fileupload_notification_ttl is not None:
+        ttl = timedelta(hours=fileupload_notification_ttl)
+        instance.properties.messaging_endpoints['fileNotifications'].ttl_as_iso8601 = ttl
+    if fileupload_storage_connectionstring is not None and fileupload_storage_container_name is not None:
+        instance.properties.storage_endpoints['$default'].connection_string = fileupload_storage_connectionstring
+        instance.properties.storage_endpoints['$default'].container_name = fileupload_storage_container_name
+    elif fileupload_storage_connectionstring is not None:
+        raise CLIError('Please mention storage container name.')
+    elif fileupload_storage_container_name is not None:
+        raise CLIError('Please mention storage connection string.')
+    if fileupload_sas_ttl is not None:
+        instance.properties.storage_endpoints['$default'].sas_ttl_as_iso8601 = timedelta(hours=fileupload_sas_ttl)
+    return instance
+
+
 def iot_hub_update(client, hub_name, parameters, resource_group_name=None):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, parameters, {'IF-MATCH': parameters.etag})
@@ -613,7 +666,8 @@ def iot_hub_get_stats(client, hub_name, resource_group_name=None):
 def iot_hub_routing_endpoint_create(cmd, client, hub_name, endpoint_name, endpoint_type,
                                     endpoint_resource_group, endpoint_subscription_id,
                                     connection_string, container_name=None, encoding=None,
-                                    resource_group_name=None):
+                                    resource_group_name=None, batch_frequency=300, chunk_size_window=300,
+                                    file_name_format='{iothub}/{partition}/{YYYY}/{MM}/{DD}/{HH}/{mm}'):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     hub = iot_hub_get(cmd, client, hub_name, resource_group_name)
     if EndpointType.EventHub.value == endpoint_type.lower():
@@ -653,7 +707,10 @@ def iot_hub_routing_endpoint_create(cmd, client, hub_name, endpoint_name, endpoi
                 subscription_id=endpoint_subscription_id,
                 resource_group=endpoint_resource_group,
                 container_name=container_name,
-                encoding=encoding.lower() if encoding else EncodingFormat.AVRO.value
+                encoding=encoding.lower() if encoding else EncodingFormat.AVRO.value,
+                file_name_format=file_name_format,
+                batch_frequency_in_seconds=batch_frequency,
+                max_chunk_size_in_bytes=(chunk_size_window * 1048576)
             )
         )
     return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})

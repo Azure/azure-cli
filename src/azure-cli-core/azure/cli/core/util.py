@@ -9,10 +9,14 @@ import json
 import getpass
 import base64
 import binascii
+import platform
+import ssl
 import six
 
+from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from knack.log import get_logger
 from knack.util import CLIError, to_snake_case
+from azure.common import AzureException
 
 logger = get_logger(__name__)
 
@@ -39,7 +43,7 @@ def handle_exception(ex):  # pylint: disable=too-many-return-statements
             logger.error("To learn more about --query, please visit: "
                          "https://docs.microsoft.com/cli/azure/query-azure-cli?view=azure-cli-latest")
             return 1
-        if isinstance(ex, (CLIError, CloudError)):
+        if isinstance(ex, (CLIError, CloudError, AzureException)):
             logger.error(ex.args[0])
             return ex.args[1] if len(ex.args) >= 2 else 1
         if isinstance(ex, ValidationError):
@@ -129,7 +133,6 @@ def _update_latest_from_pypi(versions):
 
 
 def get_az_version_string():
-    import platform
     from azure.cli.core.extension import get_extensions, EXTENSIONS_DIR, DEV_EXTENSION_SOURCES
 
     output = six.StringIO()
@@ -188,6 +191,9 @@ def get_az_version_string():
     _print('Python ({}) {}'.format(platform.system(), sys.version))
     _print()
     _print('Legal docs and information: aka.ms/AzureCliLegal')
+    _print()
+    if sys.version.startswith('2.7'):
+        _print("* DEPRECATION: Python 2.7 will reach the end of its life on January 1st, 2020. \nA future version of Azure CLI will drop support for Python 2.7.")
     _print()
     version_string = output.getvalue()
 
@@ -387,7 +393,6 @@ def open_page_in_browser(url):
 
 
 def _get_platform_info():
-    import platform
     uname = platform.uname()
     # python 2, `platform.uname()` returns: tuple(system, node, release, version, machine, processor)
     platform_name = getattr(uname, 'system', None) or uname[0]
@@ -616,3 +621,18 @@ class ConfiguredDefaultSetter(object):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         setattr(self.cli_config, 'use_local_config', self.original_use_local_config)
+
+
+def _ssl_context():
+    if sys.version_info < (3, 4) or (in_cloud_console() and platform.system() == 'Windows'):
+        try:
+            return ssl.SSLContext(ssl.PROTOCOL_TLS)  # added in python 2.7.13 and 3.6
+        except AttributeError:
+            return ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+
+    return ssl.create_default_context()
+
+
+def urlretrieve(url):
+    req = urlopen(url, context=_ssl_context())
+    return req.read()

@@ -108,9 +108,10 @@ def list_policies(client, resource_group_name, vault_name):
     return _get_list_from_paged_response(policies)
 
 
-def list_associated_items_for_policy(client, resource_group_name, vault_name, name):
+def list_associated_items_for_policy(client, resource_group_name, vault_name, name, backup_management_type):
     filter_string = _get_filter_string({
-        'policyName': name})
+        'policyName': name,
+        'backupManagementType': backup_management_type})
     items = client.list(vault_name, resource_group_name, filter_string)
     return _get_list_from_paged_response(items)
 

@@ -42,7 +42,10 @@ def get_folded_parameter_help_string(
 
     # add parent name option string (if applicable)
     if other_required_option:
-        help_text = '{} If name specified, also specify {}'.format(help_text, other_required_option)
+        help_text = '{} If name specified, also specify {}.'.format(help_text, other_required_option)
+        help_text = '{} If you want to use an existing {display_name} in other resource group or subscription, ' \
+                    'please provide the ID instead of the name of the {display_name}'.format(help_text,
+                                                                                             display_name=display_name)
     return help_text
 
 
