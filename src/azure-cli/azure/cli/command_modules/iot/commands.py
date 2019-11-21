@@ -96,7 +96,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.custom_command('show-connection-string', 'iot_hub_show_connection_string')
         g.custom_show_command('show', 'iot_hub_get')
         g.generic_update_command('update', getter_name='iot_hub_get', setter_name='iot_hub_update',
-                                 command_type=update_custom_util)
+                                 command_type=update_custom_util, custom_func_name='update_iot_hub_custom')
         g.custom_command('delete', 'iot_hub_delete', transform=HubDeleteResultTransform(self.cli_ctx))
         g.custom_command('list-skus', 'iot_hub_sku_list')
         g.custom_command('show-quota-metrics', 'iot_hub_get_quota_metrics')

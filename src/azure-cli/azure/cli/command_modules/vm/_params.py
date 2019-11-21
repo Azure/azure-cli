@@ -147,6 +147,8 @@ def load_arguments(self, _):
                    'Default is false. Zone resilient images can be created only in regions that provide Zone Redundant Storage')
         c.argument('storage_sku', arg_type=disk_sku, help='The SKU of the storage account with which to create the VM image. Unused if source VM is specified.')
         c.argument('os_disk_caching', arg_type=get_enum_type(CachingTypes), help="Storage caching type for the image's OS disk.")
+        c.argument('data_disk_caching', arg_type=get_enum_type(CachingTypes),
+                   help="Storage caching type for the image's data disk.")
         c.argument('hyper_v_generation', arg_type=hyper_v_gen_sku, min_api="2019-03-01", help='The hypervisor generation of the Virtual Machine created from the image.')
         c.ignore('source_virtual_machine', 'os_blob_uri', 'os_disk', 'os_snapshot', 'data_blob_uris', 'data_disks', 'data_snapshots')
     # endregion
@@ -503,7 +505,7 @@ def load_arguments(self, _):
         c.argument('application_security_groups', resource_type=ResourceType.MGMT_COMPUTE, min_api='2018-06-01', nargs='+', options_list=['--asgs'], help='Space-separated list of existing application security groups to associate with the VM.', arg_group='Network', validator=validate_asg_names_or_ids)
         c.argument('computer_name_prefix', help='Computer name prefix for all of the virtual machines in the scale set. Computer name prefixes must be 1 to 15 characters long')
         c.argument('orchestration_mode', help='Choose how virtual machines are managed by the scale set. In VM mode, you manually create and add a virtual machine of any configuration to the scale set. In ScaleSetVM mode, you define a virtual machine model and Azure will generate identical instances based on that model.',
-                   arg_type=get_enum_type(['VM', 'ScaleSetVM']))
+                   arg_type=get_enum_type(['VM', 'ScaleSetVM']), is_preview=True)
 
     with self.argument_context('vmss create', arg_group='Network Balancer') as c:
         LoadBalancerSkuName = self.get_models('LoadBalancerSkuName', resource_type=ResourceType.MGMT_NETWORK)
@@ -623,8 +625,8 @@ def load_arguments(self, _):
             c.argument('secrets', multi_ids_type, help='One or many Key Vault secrets as JSON strings or files via `@{path}` containing `[{ "sourceVault": { "id": "value" }, "vaultCertificates": [{ "certificateUrl": "value", "certificateStore": "cert store name (only on windows)"}] }]`', type=file_type, completer=FilesCompleter())
             c.argument('assign_identity', nargs='*', arg_group='Managed Service Identity', help="accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples")
             c.ignore('aux_subscriptions')
-            max_billing_help = 'The maximum price (in US Dollars) you are willing to pay for a low priority VM/VMSS. -1 indicates that the low priority VM/VMSS should not be evicted for price reasons'
-            c.argument('max_billing', help=max_billing_help, min_api='2019-03-01', type=float)
+            max_price_help = 'The maximum price (in US Dollars) you are willing to pay for a low priority VM/VMSS. -1 indicates that the low priority VM/VMSS should not be evicted for price reasons'
+            c.argument('max_price', help=max_price_help, min_api='2019-03-01', type=float, is_preview=True)
 
         with self.argument_context(scope, arg_group='Authentication') as c:
             c.argument('generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing. The keys will be stored in the ~/.ssh directory')
@@ -756,7 +758,8 @@ def load_arguments(self, _):
         c.argument('sku', options_list=['--sku', '-s'], help='image sku')
         c.argument('publisher', options_list=['--publisher', '-p'], help='image publisher')
         c.argument('os_type', arg_type=get_enum_type(['Windows', 'Linux']), help='the type of the OS that is included in the disk if creating a VM from user-image or a specialized VHD')
-        c.ignore('os_state')  # service is not ready
+        c.argument('os_state', arg_type=get_enum_type(self.get_models('OperatingSystemStateTypes')), help="This property allows the user to specify whether the virtual machines created under this image are 'Generalized' or 'Specialized'.")
+        c.argument('hyper_v_generation', arg_type=get_enum_type(self.get_models('HyperVGenerationTypes')), help='The hypervisor generation of the Virtual Machine. Applicable to OS disks only.')
         c.argument('minimum_cpu_core', type=int, arg_group='Recommendation', help='minimum cpu cores')
         c.argument('maximum_cpu_core', type=int, arg_group='Recommendation', help='maximum cpu cores')
         c.argument('minimum_memory', type=int, arg_group='Recommendation', help='minimum memory in MB')
@@ -819,4 +822,10 @@ def load_arguments(self, _):
         with self.argument_context(scope, min_api='2018-04-01') as c:
             c.argument('proximity_placement_group', options_list=['--ppg'], help="The name or ID of the proximity placement group the {} should be associated with.".format(item),
                        validator=_validate_proximity_placement_group)    # only availability set does not have a command level validator, so this should be added.
+    # endregion
+
+    # region VM Monitor
+    with self.argument_context('vm monitor log show') as c:
+        c.argument('analytics_query', options_list=['--analytics-query', '-q'], help="Query to execute over Log Analytics data.")
+        c.argument('timespan', help="Timespan over which to query. Defaults to querying all available data.")
     # endregion

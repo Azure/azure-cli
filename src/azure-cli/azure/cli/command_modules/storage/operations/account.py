@@ -19,7 +19,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            enable_files_aadds=None, bypass=None, default_action=None, assign_identity=False,
                            enable_large_file_share=None, enable_files_adds=None, domain_name=None,
                            net_bios_domain_name=None, forest_name=None, domain_guid=None, domain_sid=None,
-                           azure_storage_sid=None):
+                           azure_storage_sid=None, enable_hierarchical_namespace=None):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
@@ -37,6 +37,9 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         params.identity = Identity()
     if https_only is not None:
         params.enable_https_traffic_only = https_only
+    if enable_hierarchical_namespace is not None:
+        params.is_hns_enabled = enable_hierarchical_namespace
+
     AzureFilesIdentityBasedAuthentication = cmd.get_models('AzureFilesIdentityBasedAuthentication')
     if enable_files_aadds is not None:
         params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
