@@ -1875,6 +1875,17 @@ class VMSSCreateAndModify(ScenarioTest):
         self.cmd('vmss delete --resource-group {rg} --name {vmss}')
         self.cmd('vmss list --resource-group {rg}', checks=self.is_empty())
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_scale_in_policy_')
+    def test_vmss_scale_in_policy(self, resource_group):
+        self.kwargs.update({
+            'vmss', 'vmss1'
+        })
+        self.cmd('vmss create -g {rg} -n {vmss} --image centos --scale-in-policy Default NewestVM', checks=[
+            self.check('scaleInPolicy.rules[0]', 'Default'),
+            self.check('scaleInPolicy.rules[1]', 'NewestVM'),
+        ])
+        self.cmd('vmss update -g {rg} -n {vmss} --set ScaleInPolicy.Rules="OldestVM Default"')
+
 
 class VMSSCreateOptions(ScenarioTest):
 

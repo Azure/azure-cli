@@ -506,6 +506,7 @@ def load_arguments(self, _):
         c.argument('computer_name_prefix', help='Computer name prefix for all of the virtual machines in the scale set. Computer name prefixes must be 1 to 15 characters long')
         c.argument('orchestration_mode', help='Choose how virtual machines are managed by the scale set. In VM mode, you manually create and add a virtual machine of any configuration to the scale set. In ScaleSetVM mode, you define a virtual machine model and Azure will generate identical instances based on that model.',
                    arg_type=get_enum_type(['VM', 'ScaleSetVM']), is_preview=True)
+        c.argument('scale_in_policy', nargs='+', arg_type=get_enum_type(self.get_models('VirtualMachineScaleSetScaleInRules')), help='Specify the scale-in policy (space delimited) that decides which virtual machines are chosen for removal when a Virtual Machine Scale Set is scaled-in.')
 
     with self.argument_context('vmss create', arg_group='Network Balancer') as c:
         LoadBalancerSkuName = self.get_models('LoadBalancerSkuName', resource_type=ResourceType.MGMT_NETWORK)
