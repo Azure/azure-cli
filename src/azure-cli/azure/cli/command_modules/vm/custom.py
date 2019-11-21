@@ -2771,7 +2771,7 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
 def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_name, gallery_image_version,
                          location=None, target_regions=None, storage_account_type=None,
                          end_of_life_date=None, exclude_from_latest=None, replica_count=None, tags=None,
-                         os_snapshot=None, data_snapshot=None, managed_image=None):
+                         os_snapshot=None, data_snapshots=None, managed_image=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     ImageVersionPublishingProfile, GalleryArtifactSource, ManagedArtifact, ImageVersion, TargetRegion = cmd.get_models(
         'GalleryImageVersionPublishingProfile', 'GalleryArtifactSource', 'ManagedArtifact', 'GalleryImageVersion',
@@ -2785,9 +2785,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
     if os_snapshot and not is_valid_resource_id(os_snapshot):
         os_snapshot = resource_id(subscription=client.config.subscription_id, resource_group=resource_group_name,
                                   namespace='Microsoft.Compute', type='snapshots', name=os_snapshot)
-    data_snapshots = []
-    if data_snapshot is not None:
-        data_snapshots = data_snapshot.split()
+    if data_snapshots:
         for i, s in enumerate(data_snapshots):
             if not is_valid_resource_id(data_snapshots[i]):
                 data_snapshots[i] = resource_id(
@@ -2799,6 +2797,8 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                                             source=source, replica_count=replica_count,
                                             storage_account_type=storage_account_type)
     if cmd.supported_api_version(min_api='2019-07-01', operation_group='gallery_image_versions'):
+        if managed_image is None and os_snapshot is None:
+            raise CLIError('usage error: Please provide --managed-image or --os-snapshot')
         GalleryImageVersionStorageProfile = cmd.get_models('GalleryImageVersionStorageProfile')
         GalleryArtifactVersionSource = cmd.get_models('GalleryArtifactVersionSource')
         GalleryOSDiskImage = cmd.get_models('GalleryOSDiskImage')
@@ -2812,8 +2812,6 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
             data_disk_images = []
             for i, s in enumerate(data_snapshots):
                 data_disk_images.append(GalleryDataDiskImage(source=GalleryArtifactVersionSource(id=s), lun=i))
-        if managed_image is None and os_snapshot is None:
-            raise CLIError('usage error: Please provide --managed-image or --os-snapshot')
         storage_profile = GalleryImageVersionStorageProfile(source=source, os_disk_image=os_disk_image,
                                                             data_disk_images=data_disk_images)
         image_version = ImageVersion(publishing_profile=profile, location=location, tags=(tags or {}),
