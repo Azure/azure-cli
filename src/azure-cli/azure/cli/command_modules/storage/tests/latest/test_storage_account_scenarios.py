@@ -111,7 +111,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('kind', 'Storage')
         ])
 
-        self.cmd('az storage account show -n {}'.format(name), checks=[
+        self.cmd('az storage account show -n {} -g {}'.format(name, resource_group), checks=[
             JMESPathCheck('name', name),
             JMESPathCheck('location', location),
             JMESPathCheck('sku.name', 'Standard_LRS'),
@@ -234,8 +234,8 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='account_1')
     @StorageAccountPreparer(parameter_name='account_2')
-    def test_list_storage_accounts(self, account_1, account_2):
-        accounts_list = self.cmd('az storage account list').get_output_in_json()
+    def test_list_storage_accounts(self, account_1, account_2, resource_group):
+        accounts_list = self.cmd('az storage account list -g {}'.format(resource_group)).get_output_in_json()
         assert len(accounts_list) >= 2
         assert next(acc for acc in accounts_list if acc['name'] == account_1)
         assert next(acc for acc in accounts_list if acc['name'] == account_2)

@@ -166,36 +166,36 @@ class StorageCommandGroup(AzCommandGroup):
     def get_handler_suppress_some_400(self):
         def handler(ex):
             from azure.cli.core.profiles import get_sdk
-            from knack.log import get_logger
 
-            logger = get_logger(__name__)
             t_error = get_sdk(self.command_loader.cli_ctx,
                               ResourceType.DATA_STORAGE,
                               'common._error#AzureHttpError')
-            if isinstance(ex, t_error) and ex.status_code == 403 and ex.error_code == 'AuthorizationPermissionMismatch':
-                message = """
+            if isinstance(ex, t_error) and ex.status_code == 403:
+                if ex.error_code == 'AuthorizationPermissionMismatch':
+                    message = """
 You do not have the required permissions needed to perform this operation.
 Depending on your operation, you may need to be assigned one of the following roles:
-    "Storage Blob Data Contributor"
-    "Storage Blob Data Reader"
-    "Storage Queue Data Contributor"
-    "Storage Queue Data Reader"
+"Storage Blob Data Contributor"
+"Storage Blob Data Reader"
+"Storage Queue Data Contributor"
+"Storage Queue Data Reader"
 
 If you want to use the old authentication method and allow querying for the right account key, please use the "--auth-mode" parameter and "key" value.
-                """
-                logger.error(message)
-                return
-            if isinstance(ex, t_error) and ex.status_code == 403 and ex.error_code == 'AuthorizationFailure':
+                    """
+                    ex.args = (message,)
+                elif ex.error_code == 'AuthorizationFailure':
                     message = """
-You maybe not allowed by the network rules of storage account. Please check network rule set using 'az storage account show -n accountname --query networkRuleSet'.
+The request may be blocked by network rules of storage account. Please check network rule set using 'az storage account show -n accountname --query networkRuleSet'.
 If you want to change default action to apply when no rule matches, please use 'az storage account update'.
                     """
-                    logger.error(message)
-                    return
+                    ex.args = (message,)
+                elif ex.error_code == 'AuthenticationFailed':
+                    message = """
+Failed to authenticate the request. Make sure account key, connection string or sas token value is valid for your storage account.
+                    """
+                    ex.args = (message,)
             if isinstance(ex, t_error) and ex.status_code == 409 and ex.error_code == 'NoPendingCopyOperation':
-                logger.error(ex.args[0])
-                return
-            raise ex
+                pass
 
         return handler
 
