@@ -2808,7 +2808,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
             source = GalleryArtifactVersionSource(id=managed_image)
         if os_snapshot is not None:
             os_disk_image = GalleryOSDiskImage(source=GalleryArtifactVersionSource(id=os_snapshot))
-        if data_snapshots != []:
+        if data_snapshots:
             data_disk_images = []
             for i, s in enumerate(data_snapshots):
                 data_disk_images.append(GalleryDataDiskImage(source=GalleryArtifactVersionSource(id=s), lun=i))
