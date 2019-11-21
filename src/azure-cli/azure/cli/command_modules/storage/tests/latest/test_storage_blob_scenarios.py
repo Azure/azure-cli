@@ -489,8 +489,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         # test 403
         from azure.common import AzureException
         with self.assertRaisesRegex(AzureException, "ErrorCode: AuthenticationFailed"):
-            self.cmd('storage blob show --account-name {0} -c foo -n bar.txt  --connection-string '
-                     '"DefaultEndpointsProtocol=https;AccountName={0};AccountKey=YQ==;EndpointSuffix=core.windows.net"'.format(storage_account))
+            self.cmd('storage blob show --account-name {} --account-key="YQ==" -c foo -n bar.txt '.format(storage_account))
 
 
 if __name__ == '__main__':
