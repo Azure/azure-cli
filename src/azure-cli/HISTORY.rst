@@ -27,7 +27,7 @@ Release History
 * vmss create: Improvement for --orchestration-mode
 * sig image-definition create: Add --os-state to allow specifying whether the virtual machines created under this image are 'Generalized' or 'Specialized'
 * sig image-definition create: Add --hyper-v-generation to allow specifying the hypervisor generation
-* sig image-version create: Support --os-snapshot and --data-snapshot
+* sig image-version create: Support --os-snapshot and --data-snapshots
 * image create: Add --data-disk-caching to allow specifying caching setting of data disks
 * Upgrade Python Compute SDK to 10.0.0
 * vm/vmss create: Add 'Spot' to 'Priority' enum property
