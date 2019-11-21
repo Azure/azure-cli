@@ -29,7 +29,7 @@ def load_arguments(self, _):
     display_name_type = CLIArgumentType(
         options_list=['--display-name'],
         help='Friendly name for user to easily identified the reservation.')
-    term_type  = CLIArgumentType(
+    term_type = CLIArgumentType(
         options_list=['--term'],
         help='Available reservation terms for this resource.',
         arg_type=get_enum_type(ReservationTerm))
