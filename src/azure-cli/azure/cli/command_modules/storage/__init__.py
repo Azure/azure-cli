@@ -171,17 +171,28 @@ class StorageCommandGroup(AzCommandGroup):
                               ResourceType.DATA_STORAGE,
                               'common._error#AzureHttpError')
             if isinstance(ex, t_error) and ex.status_code == 403:
-                message = """
+                if ex.error_code == 'AuthorizationPermissionMismatch':
+                    message = """
 You do not have the required permissions needed to perform this operation.
 Depending on your operation, you may need to be assigned one of the following roles:
-    "Storage Blob Data Contributor"
-    "Storage Blob Data Reader"
-    "Storage Queue Data Contributor"
-    "Storage Queue Data Reader"
-
-If you want to use the old authentication method and allow querying for the right account key, please use the "--auth-mode" parameter and "key" value. ErrorCode: AuthenticationFailed
-                """
-                ex.args = (message,)
+"Storage Blob Data Contributor"
+"Storage Blob Data Reader"
+"Storage Queue Data Contributor"
+"Storage Queue Data Reader"
+If you want to use the old authentication method and allow querying for the right account key, please use the "--auth-mode" parameter and "key" value.
+                    """
+                    ex.args = (message,)
+                elif ex.error_code == 'AuthorizationFailure':
+                    message = """
+The request may be blocked by network rules of storage account. Please check network rule set using 'az storage account show -n accountname --query networkRuleSet'.
+If you want to change default action to apply when no rule matches, please use 'az storage account update'.
+                    """
+                    ex.args = (message,)
+                elif ex.error_code == 'AuthenticationFailed':
+                    message = """
+Failed to authenticate the request. Make sure account key, connection string or sas token value is valid for your storage account.
+                    """
+                    ex.args = (message,)
             if isinstance(ex, t_error) and ex.status_code == 409 and ex.error_code == 'NoPendingCopyOperation':
                 pass
 
