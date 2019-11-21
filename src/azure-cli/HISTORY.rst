@@ -51,6 +51,10 @@ Release History
 * Upgrading SDK Version to 0.6.0
 * Add billingplan details info after calling Get-Gatalogs
 
+**SQL**
+
+* Update azure-mgmt-sql to version 0.15.0.
+
 **Storage**
 
 * storage account create: Add --enable-hierarchical-namespace to support filesystem semantics in blob service.
