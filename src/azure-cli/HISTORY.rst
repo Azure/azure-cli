@@ -57,7 +57,8 @@ Release History
 
 **Packaging**
 
-* Rewrite the az wrapper in python
+* Rewrite the az wrapper in Python
+* Support Python 3.8
 * Use Python 3 for RPM package
 
 **Profile**
