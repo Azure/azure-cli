@@ -101,6 +101,9 @@ def load_arguments(self, _):
         with self.argument_context('backup policy ' + command) as c:
             c.argument('name', policy_name_type, options_list=['--name', '-n'], help='Name of the backup policy. You can use the backup policy list command to get the name of a policy.')
 
+    with self.argument_context('backup policy list-associated-items') as c:
+        c.argument('backup_management_type', backup_management_type)
+
     with self.argument_context('backup policy set') as c:
         c.argument('policy', type=file_type, help='JSON encoded policy definition. Use the show command with JSON output to obtain a policy object. Modify the values using a file editor and pass the object.', completer=FilesCompleter())
         c.argument('name', options_list=['--name', '-n'], help='Name of the Policy.')
