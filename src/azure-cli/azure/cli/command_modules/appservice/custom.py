@@ -40,7 +40,7 @@ from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan, SiteC
                                    HybridConnection, RampUpRule, UnauthenticatedClientAction,
                                    ManagedServiceIdentity, DeletedAppRestoreRequest,
                                    DefaultErrorResponseException, SnapshotRestoreRequest,
-                                   SnapshotRecoverySource, SwiftVirtualNetwork)
+                                   SnapshotRecoverySource, SwiftVirtualNetwork, HostingEnvironmentProfile)
 from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient
 from azure.mgmt.relay.models import AccessRights
 from azure.cli.command_modules.relay._client_factory import hycos_mgmt_client_factory, namespaces_mgmt_client_factory
@@ -51,7 +51,7 @@ from azure.mgmt.network.models import Delegation
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_page_in_browser, get_json_object, \
-    ConfiguredDefaultSetter
+    ConfiguredDefaultSetter, sdk_no_wait
 from azure.cli.core.commands.client_factory import UA_AGENT
 
 from .tunnel import TunnelServer
@@ -1376,23 +1376,46 @@ def list_app_service_plans(cmd, resource_group_name=None):
     return plans
 
 
-def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, per_site_scaling=False, sku='B1',
-                            number_of_workers=None, location=None, tags=None):
+def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, per_site_scaling=False,
+                            app_service_environment=None, sku='B1', number_of_workers=None, location=None,
+                            tags=None, no_wait=False):
+    sku = _normalize_sku(sku)
+    _validate_asp_sku(app_service_environment, sku)
     if is_linux and hyper_v:
         raise CLIError('usage error: --is-linux | --hyper-v')
+
     client = web_client_factory(cmd.cli_ctx)
-    sku = _normalize_sku(sku)
-    if location is None:
-        location = _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
+    if app_service_environment:
+        if hyper_v:
+            raise CLIError('Windows containers is not yet supported in app service environment')
+        ase_id = _validate_app_service_environment_id(cmd.cli_ctx, app_service_environment, resource_group_name)
+        ase_def = HostingEnvironmentProfile(id=ase_id)
+        ase_list = client.app_service_environments.list()
+        ase_found = False
+        for ase in ase_list:
+            if ase.id.lower() == ase_id.lower():
+                location = ase.location
+                ase_found = True
+                break
+        if not ase_found:
+            raise CLIError("App service environment '{}' not found in subscription.".format(ase_id))
+    else:  # Non-ASE
+        ase_def = None
+        if location is None:
+            location = _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
+
     # the api is odd on parameter naming, have to live with it for now
     sku_def = SkuDescription(tier=get_sku_name(sku), name=sku, capacity=number_of_workers)
     plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
                               reserved=(is_linux or None), hyper_v=(hyper_v or None), name=name,
-                              per_site_scaling=per_site_scaling)
-    return client.app_service_plans.create_or_update(resource_group_name, name, plan_def)
+                              per_site_scaling=per_site_scaling, hosting_environment_profile=ase_def)
+    return sdk_no_wait(no_wait, client.app_service_plans.create_or_update, name=name,
+                       resource_group_name=resource_group_name, app_service_plan=plan_def)
 
 
 def update_app_service_plan(instance, sku=None, number_of_workers=None):
+    if number_of_workers is None and sku is None:
+        logger.warning('No update is done. Specify --sku and/or --number-of-workers.')
     sku_def = instance.sku
     if sku is not None:
         sku = _normalize_sku(sku)
@@ -3201,3 +3224,30 @@ def _configure_default_logging(cmd, rg_name, name):
     return config_diagnostics(cmd, rg_name, name,
                               application_logging=True, web_server_logging='filesystem',
                               docker_container_logging='true')
+
+
+def _validate_app_service_environment_id(cli_ctx, ase, resource_group_name):
+    ase_is_id = is_valid_resource_id(ase)
+    if ase_is_id:
+        return ase
+
+    from msrestazure.tools import resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    return resource_id(
+        subscription=get_subscription_id(cli_ctx),
+        resource_group=resource_group_name,
+        namespace='Microsoft.Web',
+        type='hostingEnvironments',
+        name=ase)
+
+
+def _validate_asp_sku(app_service_environment, sku):
+    # Isolated SKU is supported only for ASE
+    if sku in ['I1', 'I2', 'I3']:
+        if not app_service_environment:
+            raise CLIError("The pricing tier 'Isolated' is not allowed for this app service plan. Use this link to "
+                           "learn more: https://docs.microsoft.com/en-us/azure/app-service/overview-hosting-plans")
+    else:
+        if app_service_environment:
+            raise CLIError("Only pricing tier 'Isolated' is allowed in this app service plan. Use this link to "
+                           "learn more: https://docs.microsoft.com/en-us/azure/app-service/overview-hosting-plans")
