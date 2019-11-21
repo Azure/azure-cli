@@ -94,6 +94,14 @@ Release History
 
 * Fix issue in az backup policy list-associated-items. Added optional BackupManagementType parameter.
 
+**BotService**
+
+* [Breaking change] Remove '--version' flag from preview command 'az bot create'. Only v4 SDK bots are supported.
+* Add support for updating the icon URL for a bot via 'az bot update'.
+* The following command groups are GA and not in preview: 'az bot authsetting'
+* The following command group 'az bot' are GA and not in preview: 'create', 'prepare-deploy', 'show', 'delete', 'update'
+
+
 **Compute**
 
 * Upgrade API version of compute, disks, snapshots to 2019-07-01
