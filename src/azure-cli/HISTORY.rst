@@ -91,6 +91,7 @@ Release History
 **Storage**
 
 * storage account create: Add --enable-hierarchical-namespace to support filesystem semantics in blob service.
+* Remove unrelated exception from error message
 
 2.0.76
 ++++++

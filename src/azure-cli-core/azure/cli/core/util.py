@@ -16,6 +16,7 @@ import six
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from knack.log import get_logger
 from knack.util import CLIError, to_snake_case
+from azure.common import AzureException
 
 logger = get_logger(__name__)
 
@@ -42,7 +43,7 @@ def handle_exception(ex):  # pylint: disable=too-many-return-statements
             logger.error("To learn more about --query, please visit: "
                          "https://docs.microsoft.com/cli/azure/query-azure-cli?view=azure-cli-latest")
             return 1
-        if isinstance(ex, (CLIError, CloudError)):
+        if isinstance(ex, (CLIError, CloudError, AzureException)):
             logger.error(ex.args[0])
             return ex.args[1] if len(ex.args) >= 2 else 1
         if isinstance(ex, ValidationError):
