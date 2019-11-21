@@ -60,10 +60,6 @@ def load_arguments(self, _):
         help='Type of the resource for which the skus should be provided.',
         arg_type=get_enum_type(ReservedResourceType)
     )
-    location_type = CLIArgumentType(
-        options_list=['--location'],
-        help='Values from: `az account list-locations`.'
-    )
 
     with self.argument_context('reservations reservation update') as c:
         c.argument('applied_scope_type', options_list=['--applied-scope-type', '-t'], arg_type=get_enum_type(AppliedScopeType))
@@ -93,7 +89,7 @@ def load_arguments(self, _):
         c.argument('sku', sku_type)
         c.argument('applied_scope', applied_scope_param_type)
         c.argument('quantity', quantity_type)
-        c.argument('location', location_type)
+        c.argument('location', options_list=['--location'], help='Values from: `az account list-locations`.')
 
     with self.argument_context('reservations reservation-order purchase') as c:
         c.argument('reservation_order_id', help='Id of reservation order to purchase, generate by az reservations reservation-order calculate.')
@@ -108,4 +104,4 @@ def load_arguments(self, _):
         c.argument('sku', sku_type)
         c.argument('applied_scope', applied_scope_param_type)
         c.argument('quantity', quantity_type)
-        c.argument('location', location_type)
+        c.argument('location', options_list=['--location'], help='Values from: `az account list-locations`.')
