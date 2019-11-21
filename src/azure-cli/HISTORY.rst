@@ -23,6 +23,7 @@ Release History
 * vmss create: Improvement for --orchestration-mode
 * sig image-definition create: add --os-state to allow specifying whether the virtual machines created under this image are 'Generalized' or 'Specialized'
 * sig image-definition create: add --hyper-v-generation to allow specifying the hypervisor generation
+* sig image-version create: Support --os-snapshot and --data-snapshot
 
 **IOT**
 
