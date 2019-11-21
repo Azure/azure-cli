@@ -488,7 +488,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
 
         # test 403
         from azure.common import AzureException
-        with self.assertRaisesRegexp(AzureException, "ErrorCode: AuthenticationFailed"):
+        with self.assertRaisesRegexp(AzureException, "Failed to authenticate the request."):
             self.cmd('storage blob show --account-name {} --account-key="YQ==" -c foo -n bar.txt '.format(storage_account))
 
 
