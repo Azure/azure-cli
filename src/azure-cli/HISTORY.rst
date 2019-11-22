@@ -3,6 +3,9 @@
 Release History
 ===============
 
+2.0.77
+++++++
+
 **ACR**
 
 * Deprecated paramater `--branch` from acr task create/update
