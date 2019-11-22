@@ -437,6 +437,7 @@ def parse_actions_from_repositories(allow_or_remove_repository):
 
     return actions
 
+
 def prepare_source_location(source_location, client_registries, registry_name, resource_group_name):
     if source_location is None or source_location.lower() == ACR_NULL_CONTEXT:
         source_location = None
@@ -466,7 +467,8 @@ def prepare_source_location(source_location, client_registries, registry_name, r
         logger.warning("Sending context to registry: %s...", registry_name)
 
     return source_location
-    
+
+
 class ResourceNotFound(CLIError):
     """For exceptions that a resource couldn't be found in user's subscription
     """
