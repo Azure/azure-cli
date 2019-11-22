@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**ACR**
+
+* Deprecated paramater `--branch` from acr task create/update
+
 **Azure Red Hat OpenShift**
 
 * Add `--workspace-resource-id` flag to allow creation of Azure Red Hat Openshift cluster with monitoring
