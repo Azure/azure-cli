@@ -83,6 +83,10 @@ Release History
 
 * storage account create: Add --enable-hierarchical-namespace to support filesystem semantics in blob service.
 
+**SQL VM**
+
+* Add new --license-type supporting Disaster Recovery Benefit (DR).
+
 2.0.76
 ++++++
 
