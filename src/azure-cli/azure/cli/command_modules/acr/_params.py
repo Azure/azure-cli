@@ -187,7 +187,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('pull_request_trigger_enabled', arg_group='Trigger', help="Indicates whether the source control pull request trigger is enabled. The trigger is disabled by default.", arg_type=get_three_state_flag())
         c.argument('schedule', arg_group='Trigger', help="Schedule for a timer trigger represented as a cron expression. An optional trigger name can be specified using `--schedule name:schedule` format. Multiples supported by passing --schedule multiple times.", action='append')
         c.argument('git_access_token', arg_group='Trigger', help="The access token used to access the source control provider.")
-        c.argument('branch', arg_group='Trigger', help="The source control branch name.")
+        c.argument('branch', arg_group='Trigger', deprecate_info=c.deprecate(hide=True), help="The source control branch name. Please specify your source branch in the context parameter e.g. https://github.com/Azure-Samples/acr-build-helloworld-node.git#mybranch")
         c.argument('base_image_trigger_name', arg_group='Trigger', help="The name of the base image trigger.")
         c.argument('base_image_trigger_enabled', arg_group='Trigger', help="Indicates whether the base image trigger is enabled.", arg_type=get_three_state_flag())
         c.argument('base_image_trigger_type', arg_group='Trigger', help="The type of the auto trigger for base image dependency updates.", arg_type=get_enum_type(BaseImageTriggerType))
