@@ -2316,7 +2316,6 @@ def mi_ad_admin_set(
     return client.create_or_update(
         resource_group_name=resource_group_name,
         managed_instance_name=managed_instance_name,
-        administrator_name="ActiveDirectory",
         parameters=kwargs
     )
 
@@ -2330,8 +2329,7 @@ def mi_ad_admin_delete(
     '''
     return client.delete(
         resource_group_name=resource_group_name,
-        managed_instance_name=managed_instance_name,
-        administrator_name="ActiveDirectory"
+        managed_instance_name=managed_instance_name
     )
 
 ###############################################

@@ -94,6 +94,10 @@ Release History
 **Rest**
 * `az rest` is now GA
 
+**SQL**
+
+* Update azure-mgmt-sql to version 0.15.0.
+
 **Storage**
 
 * storage account create: Add --enable-hierarchical-namespace to support filesystem semantics in blob service.
