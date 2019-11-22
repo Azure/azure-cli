@@ -82,14 +82,6 @@ jobs:
   - bash: ./scripts/ci/dependency_check.sh
     displayName: 'Verify src/azure-cli/requirements.py3.Linux.txt'
 
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 2'
-    inputs:
-      versionSpec: 2.x
-
-  - bash: ./scripts/ci/dependency_check.sh
-    displayName: 'Verify src/azure-cli/requirements.py2.Linux.txt'
-
 - job: VerifyDarwinRequirements
   displayName: 'Verify src/azure-cli/requirements.*.Darwin.txt'
   condition: succeeded()
@@ -104,14 +96,6 @@ jobs:
 
   - bash: ./scripts/ci/dependency_check.sh
     displayName: 'Verify src/azure-cli/requirements.py3.Darwin.txt'
-
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 2'
-    inputs:
-      versionSpec: 2.x
-
-  - bash: ./scripts/ci/dependency_check.sh
-    displayName: 'Verify src/azure-cli/requirements.py2.Darwin.txt'
 
 - job: VerifyWindowsRequirements
   displayName: 'Verify src/azure-cli/requirements.*.Windows.txt'
@@ -129,16 +113,6 @@ jobs:
     inputs:
       filename: ./scripts/ci/dependency_check.bat
     displayName: 'Verify src/azure-cli/requirements.py3.Windows.txt'
-
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 2'
-    inputs:
-      versionSpec: 2.x
-
-  - task: BatchScript@1
-    inputs:
-      filename: ./scripts/ci/dependency_check.bat
-    displayName: 'Verify src/azure-cli/requirements.py2.Windows.txt'
 
 - job: VerifyVersions
   displayName: Verify Command Module Versions
@@ -366,11 +340,6 @@ jobs:
          --rm -v $PYPI_FILES:/mnt/pypi python:3.8 \
          /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION && az self-test && az --version && sleep 5"  
 
-       echo "== Testing pip install on Python 2.7 =="
-       docker run \
-         --rm -v $PYPI_FILES:/mnt/pypi python:2.7 \
-         /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION && az self-test && az --version && sleep 5"
-
     displayName: 'Test pip Install'
 
 - job: UnitTest
@@ -381,9 +350,6 @@ jobs:
     vmImage: 'ubuntu-16.04'
   strategy:
     matrix:
-      Python27:
-        python.version: '2.7'
-        tox_env: 'py27'
       Python36:
         python.version: '3.6'
         tox_env: 'py36'
@@ -425,31 +391,6 @@ jobs:
       displayName: 'Install pip and wheel'
     - bash: ./scripts/ci/test_profile_integration.sh
       displayName: 'Run Integration Test against Profiles'
-
-- job: RunAutomationFullPython2
-  displayName: Run Automation, Python 2
-  dependsOn: BuildPythonWheel
-  timeoutInMinutes: 90
-
-  pool:
-    vmImage: 'ubuntu-16.04'
-  steps:
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 2.7'
-    inputs:
-      versionSpec: 2.7
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Python Wheels'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-      artifactName: pypi
-  - bash: |
-      pip install --force-reinstall wheel
-  - task: Bash@3
-    displayName: 'Run Test Automation'
-    inputs:
-      targetType: 'filePath'
-      filePath: ./scripts/ci/test_automation.sh
 
 - job: RunAutomationReducedPython3_6
   displayName: Run Automation Reduced Python 3.6
