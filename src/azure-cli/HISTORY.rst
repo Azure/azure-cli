@@ -45,6 +45,10 @@ Release History
 * [Breaking change] Rename '--max-billing' parameter to '--max-price', for both VM and VMSS, to be consistent with Swagger and Powershell cmdlets
 * vm monitor log show: support query log over linked log analytics workspace.
 
+**Install**
+
+* Install script support python 3.8
+
 **IOT**
 
 * Fix #2531: Add convenience arguments for hub update.
