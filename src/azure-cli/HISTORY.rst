@@ -3,6 +3,12 @@
 Release History
 ===============
 
+**Install**
+
+* Install script support python 3.8
+
+2.0.77
+
 **ACR**
 
 * Deprecated paramater `--branch` from acr task create/update
@@ -44,10 +50,6 @@ Release History
 * vm/vmss create: Add 'Spot' to 'Priority' enum property
 * [Breaking change] Rename '--max-billing' parameter to '--max-price', for both VM and VMSS, to be consistent with Swagger and Powershell cmdlets
 * vm monitor log show: support query log over linked log analytics workspace.
-
-**Install**
-
-* Install script support python 3.8
 
 **IOT**
 
