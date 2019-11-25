@@ -202,7 +202,7 @@ examples:
 
 helps['backup protectable-item'] = """
 type: group
-short-summary: An item which can be protected or backed up to an Azure Recovery services vault with an associated policy.
+short-summary: Manage the item which is yet to be protected or backed up to an Azure Recovery services vault with an associated policy.
 """
 
 helps['backup protectable-item initialize'] = """
