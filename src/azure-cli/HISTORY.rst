@@ -3,6 +3,12 @@
 Release History
 ===============
 
+**Install**
+
+* Install script support python 3.8
+
+2.0.77
+
 **ACR**
 
 * Deprecated paramater `--branch` from acr task create/update
