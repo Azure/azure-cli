@@ -786,7 +786,7 @@ examples:
   - name: Trigger a task run.
     text: >
         az acr task run -n MyTask -r MyRegistry
-  - name: Trigger a task run by overriding the context and file passed during Task create.
+  - name: Trigger a task run by overriding the context and file passed during Task create with a remote repository.
     text: >
         az acr task run -n MyTask -r MyRegistry -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile
   - name: Trigger a task run by overriding the context and file passed during Task create with a local context.

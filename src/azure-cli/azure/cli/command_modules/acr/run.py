@@ -20,7 +20,6 @@ from ._client_factory import cf_acr_registries_tasks
 from ._archive_utils import upload_source_code, check_remote_source_code
 
 RUN_NOT_SUPPORTED = 'Run is only available for managed registries.'
-NULL_SOURCE_LOCATION = "/dev/null"
 
 logger = get_logger(__name__)
 
