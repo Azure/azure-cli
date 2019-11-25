@@ -332,8 +332,14 @@ def _native_dependencies_for_dist(verify_cmd_args, install_cmd_args, dep_list):
 
 
 def _get_linux_distro():
-    with open('/etc/os-release') as lines:
-        tokens = [line.strip() for line in lines]
+    if platform.system() != 'Linux':
+        return None, None
+
+    try:
+        with open('/etc/os-release') as lines:
+            tokens = [line.strip() for line in lines]
+    except Exception as e:
+        return None, None
 
     release_info = {}
     for token in tokens:
