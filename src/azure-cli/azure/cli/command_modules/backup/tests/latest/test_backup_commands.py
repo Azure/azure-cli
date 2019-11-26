@@ -8,8 +8,8 @@ from datetime import datetime, timedelta
 import unittest
 
 from azure.cli.testsdk import ScenarioTest, JMESPathCheckExists, ResourceGroupPreparer, \
-    StorageAccountPreparer
-from azure.mgmt.recoveryservices.models import StorageModelType
+    StorageAccountPreparer, record_only
+from azure.mgmt.recoveryservicesbackup.models import StorageType
 
 from .preparers import VaultPreparer, VMPreparer, ItemPreparer, PolicyPreparer, RPPreparer
 
@@ -22,6 +22,7 @@ def _get_vm_version(vm_type):
 
 
 class BackupTests(ScenarioTest, unittest.TestCase):
+    @record_only()
     @ResourceGroupPreparer()
     @VaultPreparer()
     @VMPreparer()
@@ -37,26 +38,27 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup protection enable-for-vm -g {rg} -v {vault} --vm {vm} -p DefaultPolicy').get_output_in_json()
 
         # Get Container
-        self.kwargs['container'] = self.cmd('backup container show -n {vm} -v {vault} -g {rg} --query properties.friendlyName').get_output_in_json()
+        self.kwargs['container'] = self.cmd('backup container show -n {vm} -v {vault} -g {rg} --backup-management-type AzureIaasVM --query properties.friendlyName').get_output_in_json()
 
         # Get Item
-        self.kwargs['item'] = self.cmd('backup item list -g {rg} -v {vault} -c {container} --query [0].properties.friendlyName').get_output_in_json()
+        self.kwargs['item'] = self.cmd('backup item list -g {rg} -v {vault} -c {container} --backup-management-type AzureIaasVM --workload-type VM --query [0].properties.friendlyName').get_output_in_json()
 
         # Trigger Backup
         self.kwargs['retain_date'] = (datetime.utcnow() + timedelta(days=30)).strftime('%d-%m-%Y')
-        self.kwargs['job'] = self.cmd('backup protection backup-now -g {rg} -v {vault} -c {container} -i {item} --retain-until {retain_date} --query name').get_output_in_json()
+        self.kwargs['job'] = self.cmd('backup protection backup-now -g {rg} -v {vault} -c {container} -i {item} --backup-management-type AzureIaasVM --workload-type VM --retain-until {retain_date} --query name').get_output_in_json()
         self.cmd('backup job wait -g {rg} -v {vault} -n {job}')
 
         # Get Recovery Point
-        self.kwargs['recovery_point'] = self.cmd('backup recoverypoint list -g {rg} -v {vault} -c {container} -i {item} --query [0].name').get_output_in_json()
+        self.kwargs['recovery_point'] = self.cmd('backup recoverypoint list -g {rg} -v {vault} -c {container} -i {item} --backup-management-type AzureIaasVM --workload-type VM --query [0].name').get_output_in_json()
 
         # Trigger Restore
         self.kwargs['job'] = self.cmd('backup restore restore-disks -g {rg} -v {vault} -c {container} -i {item} -r {recovery_point} --storage-account {sa} --query name --restore-to-staging-storage-account').get_output_in_json()
         self.cmd('backup job wait -g {rg} -v {vault} -n {job}')
 
         # Disable Protection
-        self.cmd('backup protection disable -g {rg} -v {vault} -c {container} -i {item} --delete-backup-data true --yes')
+        self.cmd('backup protection disable -g {rg} -v {vault} -c {container} -i {item} --backup-management-type AzureIaasVM --workload-type VM --delete-backup-data true --yes')
 
+    @record_only()
     @ResourceGroupPreparer()
     @VaultPreparer(parameter_name='vault1')
     @VaultPreparer(parameter_name='vault2')
@@ -102,23 +104,23 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("length([?name == '{vault4}'])", 1)
         ])
 
-        storage_model_types = [e.value for e in StorageModelType]
+        storage_model_types = [e.value for e in StorageType]
         vault_properties = self.cmd('backup vault backup-properties show -n {vault1} -g {rg}', checks=[
-            JMESPathCheckExists("contains({}, storageModelType)".format(storage_model_types)),
-            self.check('storageTypeState', 'Unlocked'),
+            JMESPathCheckExists("contains({}, properties.storageModelType)".format(storage_model_types)),
+            self.check('properties.storageTypeState', 'Unlocked'),
             self.check('resourceGroup', '{rg}')
         ]).get_output_in_json()
 
-        if vault_properties['storageModelType'] == StorageModelType.geo_redundant.value:
-            new_storage_model = StorageModelType.locally_redundant.value
+        if vault_properties['properties']['storageModelType'] == StorageType.geo_redundant.value:
+            new_storage_model = StorageType.locally_redundant.value
         else:
-            new_storage_model = StorageModelType.geo_redundant.value
+            new_storage_model = StorageType.geo_redundant.value
 
         self.kwargs['model'] = new_storage_model
         self.cmd('backup vault backup-properties set -n {vault1} -g {rg} --backup-storage-redundancy {model}')
 
         self.cmd('backup vault backup-properties show -n {vault1} -g {rg}', checks=[
-            self.check('storageModelType', new_storage_model)
+            self.check('properties.storageModelType', new_storage_model)
         ])
 
         self.cmd('backup vault delete -n {vault4} -g {rg} -y')
@@ -130,7 +132,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("length([?name == '{vault3}'])", 1)
         ])
 
-    @ResourceGroupPreparer()
+    @record_only()
+    @ResourceGroupPreparer(location="southeastasia")
     @VaultPreparer()
     @VMPreparer(parameter_name='vm1')
     @VMPreparer(parameter_name='vm2')
@@ -144,22 +147,11 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'vm2': vm2
         })
 
-        container_json = self.cmd('backup container show -n {vm1} -v {vault} -g {rg}', checks=[
+        container_json = self.cmd('backup container show --backup-management-type AzureIaasVM -n {vm1} -v {vault} -g {rg}', checks=[
             self.check('properties.friendlyName', '{vm1}'),
             self.check('properties.healthStatus', 'Healthy'),
             self.check('properties.registrationStatus', 'Registered'),
             self.check('properties.resourceGroup', '{rg}'),
-            self.check('resourceGroup', '{rg}')
-        ]).get_output_in_json()
-
-        self.kwargs['container_name'] = container_json['name']
-
-        self.cmd('backup container show -n {container_name} -v {vault} -g {rg}', checks=[
-            self.check('properties.friendlyName', '{vm1}'),
-            self.check('properties.healthStatus', 'Healthy'),
-            self.check('properties.registrationStatus', 'Registered'),
-            self.check('properties.resourceGroup', '{rg}'),
-            self.check('name', '{container_name}'),
             self.check('resourceGroup', '{rg}')
         ]).get_output_in_json()
 
@@ -170,15 +162,16 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertIn(vm1.lower(), container_json['properties']['virtualMachineId'].lower())
         self.assertEqual(container_json['properties']['virtualMachineVersion'], _get_vm_version(vm1_json['type']))
 
-        self.cmd('backup container list -v {vault} -g {rg}', checks=[
+        self.cmd('backup container list --backup-management-type AzureIaasVM -v {vault} -g {rg}', checks=[
             self.check("length(@)", 2),
             self.check("length([?properties.friendlyName == '{vm1}'])", 1),
             self.check("length([?properties.friendlyName == '{vm2}'])", 1)])
 
+    @record_only()
     @ResourceGroupPreparer()
     @VaultPreparer()
     @PolicyPreparer(parameter_name='policy1')
-    @PolicyPreparer(parameter_name='policy2')
+    @PolicyPreparer(parameter_name='policy2', instant_rp_days="3")
     @VMPreparer(parameter_name='vm1')
     @VMPreparer(parameter_name='vm2')
     @ItemPreparer(vm_parameter_name='vm1')
@@ -238,7 +231,11 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("length([?name == '{policy2}'])", 1)
         ])
 
-    @ResourceGroupPreparer()
+        self.kwargs['policy4_json'] = self.cmd('backup policy show -g {rg} -v {vault} -n {policy2}').get_output_in_json()
+        self.assertEqual(self.kwargs['policy4_json']['properties']['instantRpRetentionRangeInDays'], 3)
+
+    @record_only()
+    @ResourceGroupPreparer(location="southeastasia")
     @VaultPreparer()
     @VMPreparer(parameter_name='vm1')
     @VMPreparer(parameter_name='vm2')
@@ -254,10 +251,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'policy': policy_name,
             'default': 'DefaultPolicy'
         })
-        self.kwargs['container1'] = self.cmd('backup container show -n {vm1} -v {vault} -g {rg} --query properties.friendlyName').get_output_in_json()
-        self.kwargs['container2'] = self.cmd('backup container show -n {vm2} -v {vault} -g {rg} --query properties.friendlyName').get_output_in_json()
+        self.kwargs['container1'] = self.cmd('backup container show --backup-management-type AzureIaasVM -n {vm1} -v {vault} -g {rg} --query properties.friendlyName').get_output_in_json()
+        self.kwargs['container2'] = self.cmd('backup container show --backup-management-type AzureIaasVM -n {vm2} -v {vault} -g {rg} --query properties.friendlyName').get_output_in_json()
 
-        item1_json = self.cmd('backup item show -g {rg} -v {vault} -c {container1} -n {vm1}', checks=[
+        item1_json = self.cmd('backup item show --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {container1} -n {vm1}', checks=[
             self.check('properties.friendlyName', '{vm1}'),
             self.check('properties.healthStatus', 'Passed'),
             self.check('properties.protectionState', 'IRPending'),
@@ -271,9 +268,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertIn(vm1.lower(), item1_json['properties']['virtualMachineId'].lower())
         self.assertIn(self.kwargs['default'].lower(), item1_json['properties']['policyId'].lower())
 
-        self.kwargs['container1_fullname'] = self.cmd('backup container show -n {vm1} -v {vault} -g {rg} --query name').get_output_in_json()
+        self.kwargs['container1_fullname'] = self.cmd('backup container show --backup-management-type AzureIaasVM -n {vm1} -v {vault} -g {rg} --query name').get_output_in_json()
 
-        self.cmd('backup item show -g {rg} -v {vault} -c {container1_fullname} -n {vm1}', checks=[
+        self.cmd('backup item show --workload-type VM -g {rg} -v {vault} -c {container1_fullname} -n {vm1}', checks=[
             self.check('properties.friendlyName', '{vm1}'),
             self.check('properties.healthStatus', 'Passed'),
             self.check('properties.protectionState', 'IRPending'),
@@ -283,7 +280,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.kwargs['item1_fullname'] = item1_json['name']
 
-        self.cmd('backup item show -g {rg} -v {vault} -c {container1_fullname} -n {item1_fullname}', checks=[
+        self.cmd('backup item show --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {container1_fullname} -n {item1_fullname}', checks=[
             self.check('properties.friendlyName', '{vm1}'),
             self.check('properties.healthStatus', 'Passed'),
             self.check('properties.protectionState', 'IRPending'),
@@ -291,37 +288,38 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('resourceGroup', '{rg}')
         ])
 
-        self.cmd('backup item list -g {rg} -v {vault} -c {container1}', checks=[
+        self.cmd('backup item list --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {container1}', checks=[
             self.check("length(@)", 1),
             self.check("length([?properties.friendlyName == '{vm1}'])", 1)
         ])
 
-        self.cmd('backup item list -g {rg} -v {vault} -c {container1_fullname}', checks=[
+        self.cmd('backup item list --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {container1_fullname}', checks=[
             self.check("length(@)", 1),
             self.check("length([?properties.friendlyName == '{vm1}'])", 1)
         ])
 
-        self.cmd('backup item list -g {rg} -v {vault} -c {container2}', checks=[
+        self.cmd('backup item list --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {container2}', checks=[
             self.check("length(@)", 1),
             self.check("length([?properties.friendlyName == '{vm2}'])", 1)
         ])
 
-        self.cmd('backup item list -g {rg} -v {vault}', checks=[
+        self.cmd('backup item list --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault}', checks=[
             self.check("length(@)", 2),
             self.check("length([?properties.friendlyName == '{vm1}'])", 1),
             self.check("length([?properties.friendlyName == '{vm2}'])", 1)
         ])
 
-        self.cmd('backup item set-policy -g {rg} -v {vault} -c {container1} -n {vm1} -p {policy}', checks=[
+        self.cmd('backup item set-policy --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {container1} -n {vm1} -p {policy}', checks=[
             self.check("properties.entityFriendlyName", '{vm1}'),
             self.check("properties.operation", "ConfigureBackup"),
             self.check("properties.status", "Completed"),
             self.check("resourceGroup", '{rg}')
         ])
 
-        item1_json = self.cmd('backup item show -g {rg} -v {vault} -c {container1} -n {vm1}').get_output_in_json()
+        item1_json = self.cmd('backup item show --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {container1} -n {vm1}').get_output_in_json()
         self.assertIn(policy_name.lower(), item1_json['properties']['policyId'].lower())
 
+    @record_only()
     @ResourceGroupPreparer()
     @VaultPreparer()
     @VMPreparer()
@@ -334,12 +332,13 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'vault': vault_name,
             'vm': vm_name
         })
-        rp_names = self.cmd('backup recoverypoint list -g {rg} -v {vault} -c {vm} -i {vm} --query [].name', checks=[
+
+        rp_names = self.cmd('backup recoverypoint list --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm} -i {vm} --query [].name', checks=[
             self.check("length(@)", 2)
         ]).get_output_in_json()
 
         self.kwargs['rp1'] = rp_names[0]
-        rp1_json = self.cmd('backup recoverypoint show -g {rg} -v {vault} -c {vm} -i {vm} -n {rp1}', checks=[
+        rp1_json = self.cmd('backup recoverypoint show --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm} -i {vm} -n {rp1}', checks=[
             self.check("name", '{rp1}'),
             self.check("resourceGroup", '{rg}')
         ]).get_output_in_json()
@@ -347,13 +346,14 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertIn(vm_name.lower(), rp1_json['id'].lower())
 
         self.kwargs['rp2'] = rp_names[1]
-        rp2_json = self.cmd('backup recoverypoint show -g {rg} -v {vault} -c {vm} -i {vm} -n {rp2}', checks=[
+        rp2_json = self.cmd('backup recoverypoint show --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm} -i {vm} -n {rp2}', checks=[
             self.check("name", '{rp2}'),
             self.check("resourceGroup", '{rg}')
         ]).get_output_in_json()
         self.assertIn(vault_name.lower(), rp2_json['id'].lower())
         self.assertIn(vm_name.lower(), rp2_json['id'].lower())
 
+    @record_only()
     @ResourceGroupPreparer()
     @VaultPreparer()
     @VMPreparer()
@@ -382,51 +382,55 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertIsNotNone(vault_id_check)
         self.assertTrue(vault_id.lower() == vault_id_check.lower())
 
-        self.cmd('backup protection disable -g {rg} -v {vault} -c {vm} -i {vm} --yes', checks=[
+        self.cmd('backup protection disable --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm} -i {vm} --yes', checks=[
             self.check("properties.entityFriendlyName", '{vm}'),
             self.check("properties.operation", "DisableBackup"),
             self.check("properties.status", "Completed"),
             self.check("resourceGroup", '{rg}')
         ])
 
-        self.cmd('backup item show -g {rg} -v {vault} -c {vm} -n {vm}', checks=[
+        self.cmd('backup item show --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm} -n {vm}', checks=[
             self.check("properties.friendlyName", '{vm}'),
             self.check("properties.protectionState", "ProtectionStopped"),
             self.check("resourceGroup", '{rg}')
         ])
 
-        self.cmd('backup protection disable -g {rg} -v {vault} -c {vm} -i {vm} --delete-backup-data true --yes', checks=[
+        self.cmd('backup protection disable --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm} -i {vm} --delete-backup-data true --yes', checks=[
             self.check("properties.entityFriendlyName", '{vm}'),
             self.check("properties.operation", "DeleteBackupData"),
             self.check("properties.status", "Completed"),
             self.check("resourceGroup", '{rg}')
         ])
 
-        self.cmd('backup container list -v {vault} -g {rg}',
+        self.cmd('backup container list --backup-management-type AzureIaasVM -v {vault} -g {rg}',
                  checks=self.check("length(@)", 0))
 
         protection_check = self.cmd('backup protection check-vm --vm-id {vm_id}').output
         self.assertTrue(protection_check == '')
 
+    @record_only()
     @ResourceGroupPreparer()
+    @ResourceGroupPreparer(parameter_name="target_resource_group")
     @VaultPreparer()
     @VMPreparer()
     @ItemPreparer()
     @RPPreparer()
     @StorageAccountPreparer()
-    def test_backup_restore(self, resource_group, vault_name, vm_name, storage_account):
+    def test_backup_restore(self, resource_group, target_resource_group, vault_name, vm_name, storage_account):
 
         self.kwargs.update({
             'vault': vault_name,
-            'vm': vm_name
+            'vm': vm_name,
+            'target_rg': target_resource_group,
+            'rg': resource_group
         })
-        self.kwargs['rp'] = self.cmd('backup recoverypoint list -g {rg} -v {vault} -c {vm} -i {vm} --query [0].name').get_output_in_json()
+        self.kwargs['rp'] = self.cmd('backup recoverypoint list --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm} -i {vm} --query [0].name').get_output_in_json()
 
         # Original Storage Account Restore Fails
         self.cmd('backup restore restore-disks -g {rg} -v {vault} -c {vm} -i {vm} -r {rp} --storage-account {sa} --restore-to-staging-storage-account false', expect_failure=True)
 
         # Trigger Restore
-        trigger_restore_job_json = self.cmd('backup restore restore-disks -g {rg} -v {vault} -c {vm} -i {vm} -r {rp} --storage-account {sa} --restore-to-staging-storage-account', checks=[
+        trigger_restore_job_json = self.cmd('backup restore restore-disks -g {rg} -v {vault} -c {vm} -i {vm} -r {rp} -t {target_rg} --storage-account {sa} --restore-to-staging-storage-account', checks=[
             self.check("properties.entityFriendlyName", '{vm}'),
             self.check("properties.operation", "Restore"),
             self.check("properties.status", "InProgress"),
@@ -451,6 +455,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('storage blob exists --account-name {sa} -c {container} -n {blob}',
                  checks=self.check("exists", True))
 
+    @record_only()
     @ResourceGroupPreparer()
     @VaultPreparer()
     @VMPreparer()
@@ -463,7 +468,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'vault': vault_name,
             'vm': vm_name
         })
-        self.kwargs['rp'] = self.cmd('backup recoverypoint list -g {rg} -v {vault} -c {vm} -i {vm} --query [0].name').get_output_in_json()
+        self.kwargs['rp'] = self.cmd('backup recoverypoint list --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm} -i {vm} --query [0].name').get_output_in_json()
         self.kwargs['job'] = self.cmd('backup restore restore-disks -g {rg} -v {vault} -c {vm} -i {vm} -r {rp} --storage-account {sa} --query name --restore-to-staging-storage-account').get_output_in_json()
 
         self.cmd('backup job show -g {rg} -v {vault} -n {job}', checks=[

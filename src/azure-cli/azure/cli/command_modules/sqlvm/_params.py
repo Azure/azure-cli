@@ -111,7 +111,7 @@ def load_arguments(self, _):
         c.argument('availability_group_name',
                    options_list=['--ag-name', '-a'],
                    help='Name of the availability group. Please refer to '
-                   'https://docs.microsoft.com/en-us/sql/database-engine/availability-groups/windows/use-the-availability-group-wizard-sql-server-management-studio?view=sql-server-2017 '
+                   'https://docs.microsoft.com/sql/database-engine/availability-groups/windows/use-the-availability-group-wizard-sql-server-management-studio?view=sql-server-2017 '
                    'to create and availability group')
 
     with self.argument_context('sql vm group ag-listener', arg_group='Load Balancer Configuration') as c:

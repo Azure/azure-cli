@@ -31,3 +31,8 @@ def load_command_table(self, _):
     with self.command_group('cognitiveservices') as g:
         g.custom_command('list', 'list_resources',
                          deprecate_info=g.deprecate(redirect='az cognitiveservices account list', hide=True))
+
+    with self.command_group('cognitiveservices account network-rule', mgmt_type, client_factory=cf_accounts) as g:
+        g.custom_command('add', 'add_network_rule')
+        g.custom_command('list', 'list_network_rules')
+        g.custom_command('remove', 'remove_network_rule')

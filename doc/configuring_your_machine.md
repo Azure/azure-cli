@@ -17,9 +17,22 @@ The Azure Python CLI projects sources are located on GitHub (https://github.com/
 
 ## Configuring your IDE
 #### Visual Studio (Windows only)
-1. Install Python Tools for Visual Studio. As of 2/18/2016, the current version (PTVS 2.2) can be found at http://microsoft.github.io/PTVS/.
-2. Open the `azure-cli.pyproj` project
-You should now be able to launch your project by pressing F5/start debugging
+1. Both VS 2015 and 2017 support Python development, but VS 2015 is more relible, particular on the intellisense and "Test Explorer". VS 2019's Python support is being actively improved, and we will recommend it here once the evalution result is promising.  
+2. Steps to setup VS 2015:
+
+   - You can install VS 2015 from https://visualstudio.microsoft.com/vs/older-downloads/
+   - Click menu "View->Other Windows->Python Environment" and create a new one by pointing to a local installed Python like 3.7.0.
+   - Click menu "File->New Project", and in the dialog select "Python->From Existing Python Code". This will create a project from your local clone.
+   - Go through the wizard
+   - Once the project gets populated in the solution explorer, for better IDE performance, exlude folders not interested such as "bin", "build_scripts", "doc", etc. For ther same performance reason, under \<root\>\src\azure-cli\azure\cli\command_modules exlude all unrelated command modules.
+   - In solution explorer, right click "Python Environments", and invoke "Add Virtual Environment".
+   - Save the new project and solution.
+   - Back to the command prompt, activate the virtual environment by running "env\scripts\activate".
+   - Run "pip install azdev"
+   - Run "azdev setup -c"
+   - Run "pip install ptvsd==2.2.0". This is to enable unit test executing & debugging through "Test Explorer"
+   - Back to the VS IDE, you are all set
+
 
 #### Visual Studio Code (Any platform)
 Experimental steps – still haven’t been able to get virtual environments to work well with VSCode

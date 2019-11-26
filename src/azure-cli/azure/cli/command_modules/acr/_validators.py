@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+from knack.util import CLIError
 
 
 def validate_headers(namespace):
@@ -78,3 +79,9 @@ def validate_task_argument(string, is_secret):
             return {'type': 'Argument', 'name': comps[0], 'value': local_value, 'isSecret': is_secret}
         return {'type': 'Argument', 'name': comps[0], 'value': '', 'isSecret': is_secret}
     return None
+
+
+def validate_retention_days(namespace):
+    days = namespace.days
+    if days and (days < 0 or days > 365):
+        raise CLIError("Invalid value for days: should be from 0 to 365")

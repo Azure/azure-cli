@@ -16,6 +16,7 @@ from azure.mgmt.sql.models import (
     ExportRequest,
     ManagedDatabase,
     ManagedInstance,
+    ManagedInstanceAdministrator,
     Server,
     ServerAzureADAdministrator,
     Sku,
@@ -52,6 +53,7 @@ from knack.arguments import CLIArgumentType, ignore_type
 from .custom import (
     ClientAuthenticationType,
     ClientType,
+    ComputeModelType,
     DatabaseCapabilitiesAdditionalDetails,
     ElasticPoolCapabilitiesAdditionalDetails,
     FailoverPolicyType
@@ -99,13 +101,15 @@ class SizeWithUnitConverter():  # pylint: disable=too-few-public-methods
 
 
 #####
-#           Reusable param type definitions
+#        Reusable param type definitions
 #####
 
 
 sku_arg_group = 'Performance Level'
 
 sku_component_arg_group = 'Performance Level (components)'
+
+serverless_arg_group = 'Serverless offering'
 
 server_configure_help = 'You can configure the default using `az configure --defaults sql-server=<name>`'
 
@@ -149,6 +153,23 @@ elastic_pool_id_param_type = CLIArgumentType(
     arg_group=sku_arg_group,
     options_list=['--elastic-pool'])
 
+compute_model_param_type = CLIArgumentType(
+    arg_group=serverless_arg_group,
+    options_list=['--compute-model'],
+    help='The compute model of the database.',
+    arg_type=get_enum_type(ComputeModelType))
+
+auto_pause_delay_param_type = CLIArgumentType(
+    arg_group=serverless_arg_group,
+    options_list=['--auto-pause-delay'],
+    help='Time in minutes after which database is automatically paused. '
+    'A value of -1 means that automatic pause is disabled.')
+
+min_capacity_param_type = CLIArgumentType(
+    arg_group=serverless_arg_group,
+    options_list=['--min-capacity'],
+    help='Minimal capacity that database will always have allocated, if not paused')
+
 max_size_bytes_param_type = CLIArgumentType(
     options_list=['--max-size'],
     type=SizeWithUnitConverter('B', result_type=int),
@@ -183,7 +204,27 @@ storage_param_type = CLIArgumentType(
     help='The storage size. If no unit is specified, defaults to gigabytes (GB).',
     validator=validate_managed_instance_storage_size)
 
-db_service_objective_examples = 'Basic, S0, P1, GP_Gen4_1, BC_Gen5_2.'
+grace_period_param_type = CLIArgumentType(
+    help='Interval in hours before automatic failover is initiated '
+    'if an outage occurs on the primary server. '
+    'This indicates that Azure SQL Database will not initiate '
+    'automatic failover before the grace period expires. '
+    'Please note that failover operation with --allow-data-loss option '
+    'might cause data loss due to the nature of asynchronous synchronization.')
+
+allow_data_loss_param_type = CLIArgumentType(
+    help='Complete the failover even if doing so may result in data loss. '
+    'This will allow the failover to proceed even if a primary database is unavailable.')
+
+aad_admin_login_param_type = CLIArgumentType(
+    options_list=['--display-name', '-u'],
+    help='Display name of the Azure AD administrator user or group.')
+
+aad_admin_sid_param_type = CLIArgumentType(
+    options_list=['--object-id', '-i'],
+    help='The unique ID of the Azure AD administrator.')
+
+db_service_objective_examples = 'Basic, S0, P1, GP_Gen4_1, BC_Gen5_2, GP_Gen5_S_8.'
 dw_service_objective_examples = 'DW100, DW1000c'
 
 
@@ -244,6 +285,9 @@ def _configure_db_create_params(
             'source_database_deletion_date',
             'tags',
             'zone_redundant',
+            'auto_pause_delay',
+            'min_capacity',
+            'compute_model'
         ])
 
     # Create args that will be used to build up the Database's Sku object
@@ -265,6 +309,15 @@ def _configure_db_create_params(
     arg_ctx.argument('elastic_pool_id',
                      arg_type=elastic_pool_id_param_type,
                      help='The name or resource id of the elastic pool to create the database in.')
+
+    arg_ctx.argument('compute_model',
+                     arg_type=compute_model_param_type)
+
+    arg_ctx.argument('auto_pause_delay',
+                     arg_type=auto_pause_delay_param_type)
+
+    arg_ctx.argument('min_capacity',
+                     arg_type=min_capacity_param_type)
 
     # Only applicable to default create mode. Also only applicable to db.
     if create_mode != CreateMode.default or engine != Engine.db:
@@ -301,6 +354,11 @@ def _configure_db_create_params(
 
         # Provisioning with capacity is not applicable to DataWarehouse
         arg_ctx.ignore('capacity')
+
+        # Serverless offerings are not applicable to DataWarehouse
+        arg_ctx.ignore('auto_pause_delay')
+        arg_ctx.ignore('min_capacity')
+        arg_ctx.ignore('compute_model')
 
 
 # pylint: disable=too-many-statements
@@ -465,6 +523,15 @@ def load_arguments(self, _):
                    help='The name or resource id of the elastic pool to move the database into.')
 
         c.argument('max_size_bytes', help='The new maximum size of the database expressed in bytes.')
+
+        c.argument('compute_model',
+                   arg_type=compute_model_param_type)
+
+        c.argument('auto_pause_delay',
+                   arg_type=auto_pause_delay_param_type)
+
+        c.argument('min_capacity',
+                   arg_type=min_capacity_param_type)
 
     with self.argument_context('sql db export') as c:
         # Create args that will be used to build up the ExportRequest object
@@ -861,19 +928,13 @@ def load_arguments(self, _):
         c.argument('failover_policy', help="The failover policy of the Failover Group",
                    arg_type=get_enum_type(FailoverPolicyType))
         c.argument('grace_period',
-                   help='Interval in hours before automatic failover is initiated '
-                        'if an outage occurs on the primary server. '
-                        'This indicates that Azure SQL Database will not initiate '
-                        'automatic failover before the grace period expires. '
-                        'Please note that failover operation with AllowDataLoss option '
-                        'might cause data loss due to the nature of asynchronous synchronization.')
+                   arg_type=grace_period_param_type)
         c.argument('add_db', nargs='+',
                    help='List of databases to add to Failover Group')
         c.argument('remove_db', nargs='+',
                    help='List of databases to remove from Failover Group')
-        c.argument('allow-data-loss',
-                   help='Complete the failover even if doing so may result in data loss. '
-                        'This will allow the failover to proceed even if a primary database is unavailable.')
+        c.argument('allow_data_loss',
+                   arg_type=allow_data_loss_param_type)
 
     ###############################################
     #                sql server                   #
@@ -931,12 +992,10 @@ def load_arguments(self, _):
                    options_list=['--server-name', '--server', '-s'])
 
         c.argument('login',
-                   options_list=['--display-name', '-u'],
-                   help='Display name of the Azure AD administrator user or group.')
+                   arg_type=aad_admin_login_param_type)
 
         c.argument('sid',
-                   options_list=['--object-id', '-i'],
-                   help='The unique ID of the Azure AD administrator ')
+                   arg_type=aad_admin_sid_param_type)
 
         c.ignore('tenant_id')
 
@@ -1194,6 +1253,35 @@ def load_arguments(self, _):
                    required=True,)
 
     #####
+    #           sql managed instance ad-admin
+    ######
+    with self.argument_context('sql mi ad-admin') as c:
+        c.argument('managed_instance_name',
+                   arg_type=managed_instance_param_type)
+
+        c.argument('login',
+                   arg_type=aad_admin_login_param_type)
+
+        c.argument('sid',
+                   arg_type=aad_admin_sid_param_type)
+
+    with self.argument_context('sql mi ad-admin create') as c:
+        # Create args that will be used to build up the ManagedInstanceAdministrator object
+        create_args_for_complex_type(
+            c, 'properties', ManagedInstanceAdministrator, [
+                'login',
+                'sid',
+            ])
+
+    with self.argument_context('sql mi ad-admin update') as c:
+        # Create args that will be used to build up the ManagedInstanceAdministrator object
+        create_args_for_complex_type(
+            c, 'properties', ManagedInstanceAdministrator, [
+                'login',
+                'sid',
+            ])
+
+    #####
     #           sql server tde-key
     #####
     with self.argument_context('sql mi tde-key') as c:
@@ -1281,3 +1369,33 @@ def load_arguments(self, _):
                    id_part='name')
 
         c.argument('resource_group_name', arg_type=resource_group_name_type)
+
+    ###############################################
+    #             sql instance failover-group     #
+    ###############################################
+
+    with self.argument_context('sql instance-failover-group') as c:
+        c.argument('failover_group_name',
+                   options_list=['--name', '-n'],
+                   help="The name of the Instance Failover Group")
+
+        c.argument('managed_instance',
+                   arg_type=managed_instance_param_type,
+                   options_list=['--source-mi', '--mi'])
+
+        c.argument('partner_managed_instance',
+                   help="The name of the partner managed instance of a Instance Failover Group",
+                   options_list=['--partner-mi'])
+
+        c.argument('partner_resource_group',
+                   help="The name of the resource group of the partner managed instance")
+
+        c.argument('failover_policy',
+                   help="The failover policy of the Instance Failover Group",
+                   arg_type=get_enum_type(FailoverPolicyType))
+
+        c.argument('grace_period',
+                   arg_type=grace_period_param_type)
+
+        c.argument('allow_data_loss',
+                   arg_type=allow_data_loss_param_type)

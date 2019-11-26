@@ -4,12 +4,18 @@
 # --------------------------------------------------------------------------------------------
 
 
-from azure.mgmt.signalr.models import (ResourceSku, SignalRCreateOrUpdateProperties, SignalRCreateParameters)
+from azure.mgmt.signalr.models import (ResourceSku, SignalRCreateOrUpdateProperties, SignalRCreateParameters,
+                                       SignalRFeature, SignalRCorsSettings, SignalRUpdateParameters)
 
 
-def signalr_create(client, signalr_name, resource_group_name, sku, unit_count=1, location=None, tags=None):
+def signalr_create(client, signalr_name, resource_group_name,
+                   sku, unit_count=1, location=None, tags=None, service_mode='Default', allowed_origins=None):
     sku = ResourceSku(name=sku, capacity=unit_count)
-    properties = SignalRCreateOrUpdateProperties(host_name_prefix=signalr_name)
+    service_mode_feature = SignalRFeature(value=service_mode)
+    cors_setting = SignalRCorsSettings(allowed_origins=allowed_origins)
+
+    properties = SignalRCreateOrUpdateProperties(host_name_prefix=signalr_name,
+                                                 features=[service_mode_feature], cors=cors_setting)
 
     parameter = SignalRCreateParameters(tags=tags,
                                         sku=sku,
@@ -31,3 +37,35 @@ def signalr_list(client, resource_group_name=None):
 
 def signalr_show(client, signalr_name, resource_group_name):
     return client.get(resource_group_name, signalr_name)
+
+
+def signalr_restart(client, signalr_name, resource_group_name):
+    return client.restart(resource_group_name, signalr_name)
+
+
+def signalr_update_get():
+    return SignalRUpdateParameters()
+
+
+def signalr_update_set(client, signalr_name, resource_group_name, parameters):
+    return client.update(resource_group_name, signalr_name, parameters)
+
+
+def signalr_update_custom(instance, sku=None, unit_count=1, tags=None, service_mode=None, allowed_origins=None):
+    if sku is not None:
+        instance.sku = ResourceSku(name=sku, capacity=unit_count)
+
+    if tags is not None:
+        instance.tags = tags
+
+    properties = SignalRCreateOrUpdateProperties()
+
+    if service_mode is not None:
+        properties.features = [SignalRFeature(value=service_mode)]
+
+    if allowed_origins is not None:
+        properties.cors = SignalRCorsSettings(allowed_origins=allowed_origins)
+
+    instance.properties = properties
+
+    return instance

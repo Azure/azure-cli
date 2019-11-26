@@ -1,41 +1,44 @@
 interactions:
 - request:
-    body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
-      "date": "2019-04-16T18:44:38Z"}}'
+    body: '{"location": "global", "sku": {"name": "S0"}}'
     headers:
       Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - group create
+      - maps account create
       Connection:
       - keep-alive
       Content-Length:
-      - '110'
+      - '45'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
-      - --location --name --tag
+      - -n -g --sku --accept-tos
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.62
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-maps/0.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000005?api-version=2018-05-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-04-16T18:44:38Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"error":{"code":"MissingSubscriptionRegistration","message":"The subscription
+        is not registered to use namespace ''Microsoft.Maps''. See https://aka.ms/rps-not-found
+        for how to register subscriptions.","details":[{"code":"MissingSubscriptionRegistration","target":"Microsoft.Maps","message":"The
+        subscription is not registered to use namespace ''Microsoft.Maps''. See https://aka.ms/rps-not-found
+        for how to register subscriptions."}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '384'
+      - '433'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 18:44:40 GMT
+      - Wed, 28 Aug 2019 17:52:31 GMT
       expires:
       - '-1'
       pragma:
@@ -44,61 +47,368 @@ interactions:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1193'
+      x-ms-failure-cause:
+      - gateway
     status:
-      code: 201
-      message: Created
+      code: 409
+      message: Conflict
 - request:
-    body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
-      "date": "2019-04-16T18:44:40Z"}}'
+    body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
-      CommandName:
-      - group create
       Connection:
       - keep-alive
       Content-Length:
-      - '110'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - --location --name --tag
+      - '0'
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.62
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000002?api-version=2018-05-01
+      - python-requests/2.22.0
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maps/register?api-version=2016-02-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002","name":"clitest.rg000002","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-04-16T18:44:40Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maps","namespace":"Microsoft.Maps","authorizations":[{"applicationId":"608f6f31-fed0-4f7b-809f-90f6c9b3de78","roleDefinitionId":"3431F0E6-63BC-482D-A96E-0AB819610A5F"},{"applicationId":"ba1ea022-5807-41d5-bbeb-292c7e1cf5f6"}],"resourceTypes":[{"resourceType":"accounts","locations":["Global"],"apiVersions":["2018-05-01","2017-01-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"accounts/eventGridFilters","locations":[],"apiVersions":["2018-05-01"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-05-01","2017-01-01-preview"]}],"registrationState":"Registering"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '384'
+      - '721'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 18:44:41 GMT
+      - Wed, 28 Aug 2019 17:52:33 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1194'
+      - '1199'
     status:
-      code: 201
-      message: Created
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maps?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maps","namespace":"Microsoft.Maps","authorizations":[{"applicationId":"608f6f31-fed0-4f7b-809f-90f6c9b3de78","roleDefinitionId":"3431F0E6-63BC-482D-A96E-0AB819610A5F"},{"applicationId":"ba1ea022-5807-41d5-bbeb-292c7e1cf5f6"}],"resourceTypes":[{"resourceType":"accounts","locations":["Global"],"apiVersions":["2018-05-01","2017-01-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"accounts/eventGridFilters","locations":[],"apiVersions":["2018-05-01"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-05-01","2017-01-01-preview"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '721'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Aug 2019 17:52:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maps?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maps","namespace":"Microsoft.Maps","authorizations":[{"applicationId":"608f6f31-fed0-4f7b-809f-90f6c9b3de78","roleDefinitionId":"3431F0E6-63BC-482D-A96E-0AB819610A5F"},{"applicationId":"ba1ea022-5807-41d5-bbeb-292c7e1cf5f6"}],"resourceTypes":[{"resourceType":"accounts","locations":["Global"],"apiVersions":["2018-05-01","2017-01-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"accounts/eventGridFilters","locations":[],"apiVersions":["2018-05-01"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-05-01","2017-01-01-preview"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '721'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Aug 2019 17:52:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maps?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maps","namespace":"Microsoft.Maps","authorizations":[{"applicationId":"608f6f31-fed0-4f7b-809f-90f6c9b3de78","roleDefinitionId":"3431F0E6-63BC-482D-A96E-0AB819610A5F"},{"applicationId":"ba1ea022-5807-41d5-bbeb-292c7e1cf5f6"}],"resourceTypes":[{"resourceType":"accounts","locations":["Global"],"apiVersions":["2018-05-01","2017-01-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"accounts/eventGridFilters","locations":[],"apiVersions":["2018-05-01"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-05-01","2017-01-01-preview"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '721'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Aug 2019 17:53:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maps?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maps","namespace":"Microsoft.Maps","authorizations":[{"applicationId":"608f6f31-fed0-4f7b-809f-90f6c9b3de78","roleDefinitionId":"3431F0E6-63BC-482D-A96E-0AB819610A5F"},{"applicationId":"ba1ea022-5807-41d5-bbeb-292c7e1cf5f6"}],"resourceTypes":[{"resourceType":"accounts","locations":["Global"],"apiVersions":["2018-05-01","2017-01-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"accounts/eventGridFilters","locations":[],"apiVersions":["2018-05-01"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-05-01","2017-01-01-preview"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '721'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Aug 2019 17:53:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maps?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maps","namespace":"Microsoft.Maps","authorizations":[{"applicationId":"608f6f31-fed0-4f7b-809f-90f6c9b3de78","roleDefinitionId":"3431F0E6-63BC-482D-A96E-0AB819610A5F"},{"applicationId":"ba1ea022-5807-41d5-bbeb-292c7e1cf5f6"}],"resourceTypes":[{"resourceType":"accounts","locations":["Global"],"apiVersions":["2018-05-01","2017-01-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"accounts/eventGridFilters","locations":[],"apiVersions":["2018-05-01"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-05-01","2017-01-01-preview"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '721'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Aug 2019 17:53:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maps?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maps","namespace":"Microsoft.Maps","authorizations":[{"applicationId":"608f6f31-fed0-4f7b-809f-90f6c9b3de78","roleDefinitionId":"3431F0E6-63BC-482D-A96E-0AB819610A5F"},{"applicationId":"ba1ea022-5807-41d5-bbeb-292c7e1cf5f6"}],"resourceTypes":[{"resourceType":"accounts","locations":["Global"],"apiVersions":["2018-05-01","2017-01-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"accounts/eventGridFilters","locations":[],"apiVersions":["2018-05-01"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-05-01","2017-01-01-preview"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '721'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Aug 2019 17:53:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maps?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maps","namespace":"Microsoft.Maps","authorizations":[{"applicationId":"608f6f31-fed0-4f7b-809f-90f6c9b3de78","roleDefinitionId":"3431F0E6-63BC-482D-A96E-0AB819610A5F"},{"applicationId":"ba1ea022-5807-41d5-bbeb-292c7e1cf5f6"}],"resourceTypes":[{"resourceType":"accounts","locations":["Global"],"apiVersions":["2018-05-01","2017-01-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"accounts/eventGridFilters","locations":[],"apiVersions":["2018-05-01"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-05-01","2017-01-01-preview"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '721'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Aug 2019 17:53:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maps?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maps","namespace":"Microsoft.Maps","authorizations":[{"applicationId":"608f6f31-fed0-4f7b-809f-90f6c9b3de78","roleDefinitionId":"3431F0E6-63BC-482D-A96E-0AB819610A5F"},{"applicationId":"ba1ea022-5807-41d5-bbeb-292c7e1cf5f6"}],"resourceTypes":[{"resourceType":"accounts","locations":["Global"],"apiVersions":["2018-05-01","2017-01-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"accounts/eventGridFilters","locations":[],"apiVersions":["2018-05-01"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-05-01","2017-01-01-preview"]}],"registrationState":"Registered"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '720'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Aug 2019 17:53:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: '{"location": "global", "sku": {"name": "S0"}}'
     headers:
@@ -117,8 +427,8 @@ interactions:
       ParameterSetName:
       - -n -g --sku --accept-tos
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-maps/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.62
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-maps/0.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
       accept-language:
       - en-US
     method: PUT
@@ -128,7 +438,7 @@ interactions:
       string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000005\",\r\n
         \ \"name\": \"cli-000005\",\r\n  \"type\": \"Microsoft.Maps/accounts\",\r\n
         \ \"location\": \"global\",\r\n  \"sku\": {\r\n    \"name\": \"s0\",\r\n    \"tier\":
-        \"Standard\"\r\n  },\r\n  \"properties\": {\r\n    \"x-ms-client-id\": \"f83abc78-8a27-4694-99e0-d72350795b0a\"\r\n
+        \"Standard\"\r\n  },\r\n  \"properties\": {\r\n    \"x-ms-client-id\": \"2a0c4635-c659-4d17-a061-79591dfbad08\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
@@ -138,7 +448,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 18:44:44 GMT
+      - Wed, 28 Aug 2019 17:53:57 GMT
       expires:
       - '-1'
       pragma:
@@ -150,7 +460,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1194'
+      - '1198'
     status:
       code: 201
       message: Created
@@ -172,8 +482,8 @@ interactions:
       ParameterSetName:
       - -n -g --sku --accept-tos
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-maps/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.62
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-maps/0.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
       accept-language:
       - en-US
     method: PUT
@@ -183,7 +493,7 @@ interactions:
       string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000005\",\r\n
         \ \"name\": \"cli-000005\",\r\n  \"type\": \"Microsoft.Maps/accounts\",\r\n
         \ \"location\": \"global\",\r\n  \"sku\": {\r\n    \"name\": \"s0\",\r\n    \"tier\":
-        \"Standard\"\r\n  },\r\n  \"properties\": {\r\n    \"x-ms-client-id\": \"f83abc78-8a27-4694-99e0-d72350795b0a\"\r\n
+        \"Standard\"\r\n  },\r\n  \"properties\": {\r\n    \"x-ms-client-id\": \"2a0c4635-c659-4d17-a061-79591dfbad08\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
@@ -193,7 +503,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 18:44:46 GMT
+      - Wed, 28 Aug 2019 17:53:58 GMT
       expires:
       - '-1'
       pragma:
@@ -209,7 +519,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1198'
     status:
       code: 200
       message: OK
@@ -231,8 +541,8 @@ interactions:
       ParameterSetName:
       - -n -g --sku --accept-tos
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-maps/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.62
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-maps/0.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
       accept-language:
       - en-US
     method: PUT
@@ -242,7 +552,7 @@ interactions:
       string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Maps/accounts/clis1-000008\",\r\n
         \ \"name\": \"clis1-000008\",\r\n  \"type\": \"Microsoft.Maps/accounts\",\r\n
         \ \"location\": \"global\",\r\n  \"sku\": {\r\n    \"name\": \"s1\",\r\n    \"tier\":
-        \"Standard\"\r\n  },\r\n  \"properties\": {\r\n    \"x-ms-client-id\": \"7fc7f9d0-52d0-4ca3-8bf1-41bfd7eb90a4\"\r\n
+        \"Standard\"\r\n  },\r\n  \"properties\": {\r\n    \"x-ms-client-id\": \"814f30f4-2902-49b5-a3ef-6b627ee6f7e2\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
@@ -252,7 +562,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 18:44:48 GMT
+      - Wed, 28 Aug 2019 17:54:00 GMT
       expires:
       - '-1'
       pragma:
@@ -264,7 +574,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1193'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -284,8 +594,8 @@ interactions:
       ParameterSetName:
       - -n -g --sku --tags
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-maps/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.62
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-maps/0.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
       accept-language:
       - en-US
     method: GET
@@ -295,7 +605,7 @@ interactions:
       string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000005\",\r\n
         \ \"name\": \"cli-000005\",\r\n  \"type\": \"Microsoft.Maps/accounts\",\r\n
         \ \"location\": \"global\",\r\n  \"sku\": {\r\n    \"name\": \"s0\",\r\n    \"tier\":
-        \"Standard\"\r\n  },\r\n  \"properties\": {\r\n    \"x-ms-client-id\": \"f83abc78-8a27-4694-99e0-d72350795b0a\"\r\n
+        \"Standard\"\r\n  },\r\n  \"properties\": {\r\n    \"x-ms-client-id\": \"2a0c4635-c659-4d17-a061-79591dfbad08\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
@@ -305,7 +615,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 18:44:49 GMT
+      - Wed, 28 Aug 2019 17:54:01 GMT
       expires:
       - '-1'
       pragma:
@@ -324,8 +634,8 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: 'b''b\''{"location": "global", "tags": {"key-000003": "val-000004"}, "sku":
-      {"name": "S1"}}\'''''
+    body: '{"location": "global", "tags": {"key-000003": "val-000004"}, "sku": {"name":
+      "S1"}}'
     headers:
       Accept:
       - application/json
@@ -342,8 +652,8 @@ interactions:
       ParameterSetName:
       - -n -g --sku --tags
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-maps/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.62
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-maps/0.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
       accept-language:
       - en-US
     method: PUT
@@ -354,7 +664,7 @@ interactions:
         \ \"name\": \"cli-000005\",\r\n  \"type\": \"Microsoft.Maps/accounts\",\r\n
         \ \"location\": \"global\",\r\n  \"tags\": {\r\n    \"key-000003\": \"val-000004\"\r\n
         \ },\r\n  \"sku\": {\r\n    \"name\": \"s1\",\r\n    \"tier\": \"Standard\"\r\n
-        \ },\r\n  \"properties\": {\r\n    \"x-ms-client-id\": \"f83abc78-8a27-4694-99e0-d72350795b0a\"\r\n
+        \ },\r\n  \"properties\": {\r\n    \"x-ms-client-id\": \"2a0c4635-c659-4d17-a061-79591dfbad08\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
@@ -364,7 +674,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 18:44:52 GMT
+      - Wed, 28 Aug 2019 17:54:03 GMT
       expires:
       - '-1'
       pragma:
@@ -380,7 +690,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1192'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -400,8 +710,8 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-maps/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.62
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-maps/0.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
       accept-language:
       - en-US
     method: GET
@@ -412,7 +722,7 @@ interactions:
         \ \"name\": \"cli-000005\",\r\n  \"type\": \"Microsoft.Maps/accounts\",\r\n
         \ \"location\": \"global\",\r\n  \"tags\": {\r\n    \"key-000003\": \"val-000004\"\r\n
         \ },\r\n  \"sku\": {\r\n    \"name\": \"s1\",\r\n    \"tier\": \"Standard\"\r\n
-        \ },\r\n  \"properties\": {\r\n    \"x-ms-client-id\": \"f83abc78-8a27-4694-99e0-d72350795b0a\"\r\n
+        \ },\r\n  \"properties\": {\r\n    \"x-ms-client-id\": \"2a0c4635-c659-4d17-a061-79591dfbad08\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
@@ -422,7 +732,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 18:44:52 GMT
+      - Wed, 28 Aug 2019 17:54:04 GMT
       expires:
       - '-1'
       pragma:
@@ -456,8 +766,8 @@ interactions:
       ParameterSetName:
       - --ids
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-maps/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.62
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-maps/0.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
       accept-language:
       - en-US
     method: GET
@@ -468,7 +778,7 @@ interactions:
         \ \"name\": \"cli-000005\",\r\n  \"type\": \"Microsoft.Maps/accounts\",\r\n
         \ \"location\": \"global\",\r\n  \"tags\": {\r\n    \"key-000003\": \"val-000004\"\r\n
         \ },\r\n  \"sku\": {\r\n    \"name\": \"s1\",\r\n    \"tier\": \"Standard\"\r\n
-        \ },\r\n  \"properties\": {\r\n    \"x-ms-client-id\": \"f83abc78-8a27-4694-99e0-d72350795b0a\"\r\n
+        \ },\r\n  \"properties\": {\r\n    \"x-ms-client-id\": \"2a0c4635-c659-4d17-a061-79591dfbad08\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
@@ -478,7 +788,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 18:44:52 GMT
+      - Wed, 28 Aug 2019 17:54:05 GMT
       expires:
       - '-1'
       pragma:
@@ -512,8 +822,8 @@ interactions:
       ParameterSetName:
       - -g
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-maps/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.62
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-maps/0.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
       accept-language:
       - en-US
     method: GET
@@ -525,7 +835,7 @@ interactions:
         \     \"location\": \"global\",\r\n      \"tags\": {\r\n        \"key-000003\":
         \"val-000004\"\r\n      },\r\n      \"sku\": {\r\n        \"name\": \"s1\",\r\n
         \       \"tier\": \"Standard\"\r\n      },\r\n      \"properties\": {\r\n
-        \       \"x-ms-client-id\": \"f83abc78-8a27-4694-99e0-d72350795b0a\"\r\n      }\r\n
+        \       \"x-ms-client-id\": \"2a0c4635-c659-4d17-a061-79591dfbad08\"\r\n      }\r\n
         \   }\r\n  ]\r\n}"
     headers:
       cache-control:
@@ -535,7 +845,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 18:44:53 GMT
+      - Wed, 28 Aug 2019 17:54:05 GMT
       expires:
       - '-1'
       pragma:
@@ -571,8 +881,8 @@ interactions:
       ParameterSetName:
       - -n -g --sku --accept-tos
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-maps/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.62
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-maps/0.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
       accept-language:
       - en-US
     method: PUT
@@ -582,7 +892,7 @@ interactions:
       string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Maps/accounts/cli-000006\",\r\n
         \ \"name\": \"cli-000006\",\r\n  \"type\": \"Microsoft.Maps/accounts\",\r\n
         \ \"location\": \"global\",\r\n  \"sku\": {\r\n    \"name\": \"s0\",\r\n    \"tier\":
-        \"Standard\"\r\n  },\r\n  \"properties\": {\r\n    \"x-ms-client-id\": \"09a97a92-27ca-46e9-b320-b2461a1c77cd\"\r\n
+        \"Standard\"\r\n  },\r\n  \"properties\": {\r\n    \"x-ms-client-id\": \"a937c7c3-2aa5-498e-9f49-725d4282dd98\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
@@ -592,7 +902,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 18:44:56 GMT
+      - Wed, 28 Aug 2019 17:54:08 GMT
       expires:
       - '-1'
       pragma:
@@ -604,7 +914,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1191'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -626,8 +936,8 @@ interactions:
       ParameterSetName:
       - -n -g --sku --accept-tos
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-maps/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.62
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-maps/0.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
       accept-language:
       - en-US
     method: PUT
@@ -637,7 +947,7 @@ interactions:
       string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000007\",\r\n
         \ \"name\": \"cli-000007\",\r\n  \"type\": \"Microsoft.Maps/accounts\",\r\n
         \ \"location\": \"global\",\r\n  \"sku\": {\r\n    \"name\": \"s0\",\r\n    \"tier\":
-        \"Standard\"\r\n  },\r\n  \"properties\": {\r\n    \"x-ms-client-id\": \"32e7bec3-eaa6-4271-8f98-65cbd71097c2\"\r\n
+        \"Standard\"\r\n  },\r\n  \"properties\": {\r\n    \"x-ms-client-id\": \"b54e441d-f219-421a-8f18-57b3c535be2f\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
@@ -647,7 +957,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 18:44:58 GMT
+      - Wed, 28 Aug 2019 17:54:10 GMT
       expires:
       - '-1'
       pragma:
@@ -659,7 +969,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '1197'
     status:
       code: 201
       message: Created
@@ -679,8 +989,8 @@ interactions:
       ParameterSetName:
       - -g
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-maps/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.62
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-maps/0.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
       accept-language:
       - en-US
     method: GET
@@ -692,12 +1002,12 @@ interactions:
         \     \"location\": \"global\",\r\n      \"tags\": {\r\n        \"key-000003\":
         \"val-000004\"\r\n      },\r\n      \"sku\": {\r\n        \"name\": \"s1\",\r\n
         \       \"tier\": \"Standard\"\r\n      },\r\n      \"properties\": {\r\n
-        \       \"x-ms-client-id\": \"f83abc78-8a27-4694-99e0-d72350795b0a\"\r\n      }\r\n
+        \       \"x-ms-client-id\": \"2a0c4635-c659-4d17-a061-79591dfbad08\"\r\n      }\r\n
         \   },\r\n    {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000007\",\r\n
         \     \"name\": \"cli-000007\",\r\n      \"type\": \"Microsoft.Maps/accounts\",\r\n
         \     \"location\": \"global\",\r\n      \"sku\": {\r\n        \"name\": \"s0\",\r\n
         \       \"tier\": \"Standard\"\r\n      },\r\n      \"properties\": {\r\n
-        \       \"x-ms-client-id\": \"32e7bec3-eaa6-4271-8f98-65cbd71097c2\"\r\n      }\r\n
+        \       \"x-ms-client-id\": \"b54e441d-f219-421a-8f18-57b3c535be2f\"\r\n      }\r\n
         \   }\r\n  ]\r\n}"
     headers:
       cache-control:
@@ -707,7 +1017,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 18:44:59 GMT
+      - Wed, 28 Aug 2019 17:54:11 GMT
       expires:
       - '-1'
       pragma:
@@ -741,8 +1051,8 @@ interactions:
       ParameterSetName:
       - -g
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-maps/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.62
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-maps/0.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
       accept-language:
       - en-US
     method: GET
@@ -753,12 +1063,12 @@ interactions:
         \     \"name\": \"clis1-000008\",\r\n      \"type\": \"Microsoft.Maps/accounts\",\r\n
         \     \"location\": \"global\",\r\n      \"sku\": {\r\n        \"name\": \"s1\",\r\n
         \       \"tier\": \"Standard\"\r\n      },\r\n      \"properties\": {\r\n
-        \       \"x-ms-client-id\": \"7fc7f9d0-52d0-4ca3-8bf1-41bfd7eb90a4\"\r\n      }\r\n
+        \       \"x-ms-client-id\": \"814f30f4-2902-49b5-a3ef-6b627ee6f7e2\"\r\n      }\r\n
         \   },\r\n    {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Maps/accounts/cli-000006\",\r\n
         \     \"name\": \"cli-000006\",\r\n      \"type\": \"Microsoft.Maps/accounts\",\r\n
         \     \"location\": \"global\",\r\n      \"sku\": {\r\n        \"name\": \"s0\",\r\n
         \       \"tier\": \"Standard\"\r\n      },\r\n      \"properties\": {\r\n
-        \       \"x-ms-client-id\": \"09a97a92-27ca-46e9-b320-b2461a1c77cd\"\r\n      }\r\n
+        \       \"x-ms-client-id\": \"a937c7c3-2aa5-498e-9f49-725d4282dd98\"\r\n      }\r\n
         \   }\r\n  ]\r\n}"
     headers:
       cache-control:
@@ -768,7 +1078,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 18:44:58 GMT
+      - Wed, 28 Aug 2019 17:54:12 GMT
       expires:
       - '-1'
       pragma:
@@ -804,8 +1114,8 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-maps/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.62
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-maps/0.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
       accept-language:
       - en-US
     method: POST
@@ -813,9 +1123,9 @@ interactions:
   response:
     body:
       string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000005\",\r\n
-        \ \"primaryKey\": \"YvaCGvNCVWhDDTCIJODrdcgagg3hX5ExQbpThFEHTRY\",\r\n  \"secondaryKey\":
-        \"ZAKACAudhquAJkx5ww8iV3p_Q2iElHIEIdmrFjgOC_M\",\r\n  \"primaryKeyLastUpdated\":
-        \"2019-04-16T18:44:42.2784455Z\",\r\n  \"secondaryKeyLastUpdated\": \"2019-04-16T18:44:42.2784455Z\"\r\n}"
+        \ \"primaryKey\": \"F6fXXklqwj_pTM1yo6YB_D_d3IP9HRGc1FgnlM92nhc\",\r\n  \"secondaryKey\":
+        \"ZfyEqEmxEmNfX9jN4vpPsbX2srC_Bv52u6IFZvNaV2k\",\r\n  \"primaryKeyLastUpdated\":
+        \"2019-08-28T17:53:55.4245004Z\",\r\n  \"secondaryKeyLastUpdated\": \"2019-08-28T17:53:55.4245004Z\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -824,7 +1134,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 18:44:59 GMT
+      - Wed, 28 Aug 2019 17:54:13 GMT
       expires:
       - '-1'
       pragma:
@@ -840,7 +1150,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -862,8 +1172,8 @@ interactions:
       ParameterSetName:
       - -n -g --key
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-maps/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.62
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-maps/0.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
       accept-language:
       - en-US
     method: POST
@@ -871,9 +1181,9 @@ interactions:
   response:
     body:
       string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000005\",\r\n
-        \ \"primaryKey\": \"18J_dWWg04_PknmJRyriYrI0YFJul2nTZMJhTm9fhBU\",\r\n  \"secondaryKey\":
-        \"ZAKACAudhquAJkx5ww8iV3p_Q2iElHIEIdmrFjgOC_M\",\r\n  \"primaryKeyLastUpdated\":
-        \"2019-04-16T18:44:59.7927064Z\",\r\n  \"secondaryKeyLastUpdated\": \"2019-04-16T18:44:42.2784455Z\"\r\n}"
+        \ \"primaryKey\": \"sRdZw8tWHQZDMCGzsJseL6Jm5wey6fnA3bwwOVYKYIU\",\r\n  \"secondaryKey\":
+        \"ZfyEqEmxEmNfX9jN4vpPsbX2srC_Bv52u6IFZvNaV2k\",\r\n  \"primaryKeyLastUpdated\":
+        \"2019-08-28T17:54:14.4462449Z\",\r\n  \"secondaryKeyLastUpdated\": \"2019-08-28T17:53:55.4245004Z\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -882,7 +1192,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 18:45:01 GMT
+      - Wed, 28 Aug 2019 17:54:14 GMT
       expires:
       - '-1'
       pragma:
@@ -898,7 +1208,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -920,8 +1230,8 @@ interactions:
       ParameterSetName:
       - -n -g --key
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-maps/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.62
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-maps/0.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
       accept-language:
       - en-US
     method: POST
@@ -929,9 +1239,9 @@ interactions:
   response:
     body:
       string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000005\",\r\n
-        \ \"primaryKey\": \"18J_dWWg04_PknmJRyriYrI0YFJul2nTZMJhTm9fhBU\",\r\n  \"secondaryKey\":
-        \"DEg3DUOu9FmZSJ24fLogFXE4VgHkPk4nu51nmdQRKR4\",\r\n  \"primaryKeyLastUpdated\":
-        \"2019-04-16T18:44:59.7927064Z\",\r\n  \"secondaryKeyLastUpdated\": \"2019-04-16T18:45:01.3565837Z\"\r\n}"
+        \ \"primaryKey\": \"sRdZw8tWHQZDMCGzsJseL6Jm5wey6fnA3bwwOVYKYIU\",\r\n  \"secondaryKey\":
+        \"s-lxkEKPImoNk_Ui42paUtlejCKvBkLJmeMQi-I0A14\",\r\n  \"primaryKeyLastUpdated\":
+        \"2019-08-28T17:54:14.4462449Z\",\r\n  \"secondaryKeyLastUpdated\": \"2019-08-28T17:54:15.5247919Z\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -940,7 +1250,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 18:45:02 GMT
+      - Wed, 28 Aug 2019 17:54:15 GMT
       expires:
       - '-1'
       pragma:
@@ -978,8 +1288,8 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-maps/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.62
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-maps/0.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
       accept-language:
       - en-US
     method: DELETE
@@ -993,7 +1303,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 16 Apr 2019 18:45:03 GMT
+      - Wed, 28 Aug 2019 17:54:16 GMT
       expires:
       - '-1'
       pragma:
@@ -1025,8 +1335,8 @@ interactions:
       ParameterSetName:
       - -g
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-maps/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.62
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-maps/0.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
       accept-language:
       - en-US
     method: GET
@@ -1037,7 +1347,7 @@ interactions:
         \     \"name\": \"cli-000007\",\r\n      \"type\": \"Microsoft.Maps/accounts\",\r\n
         \     \"location\": \"global\",\r\n      \"sku\": {\r\n        \"name\": \"s0\",\r\n
         \       \"tier\": \"Standard\"\r\n      },\r\n      \"properties\": {\r\n
-        \       \"x-ms-client-id\": \"32e7bec3-eaa6-4271-8f98-65cbd71097c2\"\r\n      }\r\n
+        \       \"x-ms-client-id\": \"b54e441d-f219-421a-8f18-57b3c535be2f\"\r\n      }\r\n
         \   }\r\n  ]\r\n}"
     headers:
       cache-control:
@@ -1047,7 +1357,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 18:45:03 GMT
+      - Wed, 28 Aug 2019 17:54:17 GMT
       expires:
       - '-1'
       pragma:
@@ -1083,8 +1393,8 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-maps/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.62
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-maps/0.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
       accept-language:
       - en-US
     method: DELETE
@@ -1098,56 +1408,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 16 Apr 2019 18:45:05 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-deletes:
-      - '14996'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - maps account delete
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -n -g
-      User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-maps/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.62
-      accept-language:
-      - en-US
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000007?api-version=2018-05-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Tue, 16 Apr 2019 18:45:07 GMT
+      - Wed, 28 Aug 2019 17:54:19 GMT
       expires:
       - '-1'
       pragma:
@@ -1181,8 +1442,57 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-maps/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.62
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-maps/0.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000007?api-version=2018-05-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Wed, 28 Aug 2019 17:54:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - maps account delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-maps/0.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
       accept-language:
       - en-US
     method: DELETE
@@ -1196,7 +1506,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 16 Apr 2019 18:45:08 GMT
+      - Wed, 28 Aug 2019 17:54:21 GMT
       expires:
       - '-1'
       pragma:
@@ -1208,7 +1518,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14997'
+      - '14999'
     status:
       code: 200
       message: OK
@@ -1228,8 +1538,8 @@ interactions:
       ParameterSetName:
       - -g
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-maps/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.62
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-maps/0.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
       accept-language:
       - en-US
     method: GET
@@ -1245,7 +1555,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 18:45:10 GMT
+      - Wed, 28 Aug 2019 17:54:21 GMT
       expires:
       - '-1'
       pragma:
@@ -1279,8 +1589,8 @@ interactions:
       ParameterSetName:
       - -g
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-maps/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.62
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-maps/0.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.72
       accept-language:
       - en-US
     method: GET
@@ -1296,7 +1606,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 18:45:10 GMT
+      - Wed, 28 Aug 2019 17:54:22 GMT
       expires:
       - '-1'
       pragma:
@@ -1314,98 +1624,4 @@ interactions:
     status:
       code: 200
       message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - group delete
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - --name --yes --no-wait
-      User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.62
-      accept-language:
-      - en-US
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000002?api-version=2018-05-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Tue, 16 Apr 2019 18:45:11 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkc1MzNJR0pGR1VBSlJCRkdIV1VCWFZSU05YQ01NQ0k0U0pHNHxFRERENjM0RDY5NDU5MUM0LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-deletes:
-      - '14996'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - group delete
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - --name --yes --no-wait
-      User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.62
-      accept-language:
-      - en-US
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Tue, 16 Apr 2019 18:45:12 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkczVlBUSFJOWDJMTkFSNldVVUlFRUJRUFFCRzdEWFJDMlRGVnxEOUNCNjlCNjFDQUQ1NUI3LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-deletes:
-      - '14997'
-    status:
-      code: 202
-      message: Accepted
 version: 1

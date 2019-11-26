@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# Generated from MetricAlertCondition.g4 by ANTLR 4.7.1
 from .MetricAlertConditionListener import MetricAlertConditionListener
 
 

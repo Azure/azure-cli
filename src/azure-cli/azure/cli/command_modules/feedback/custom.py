@@ -22,7 +22,7 @@ from knack.prompting import prompt, NoTTYException
 from knack.util import CLIError
 
 from azure.cli.core.extension._resolve import resolve_project_url_from_index, NoExtensionCandidatesError
-from azure.cli.core.util import get_az_version_string, open_page_in_browser
+from azure.cli.core.util import get_az_version_string, open_page_in_browser, can_launch_browser, in_cloud_console
 from azure.cli.core.azlogging import _UNKNOWN_COMMAND, _CMD_LOG_LINE_PREFIX
 
 _ONE_MIN_IN_SECS = 60
@@ -60,8 +60,8 @@ _ISSUES_TEMPLATE_PREFIX = """
 
 BEGIN TEMPLATE
 ===============
-**A browser has been opened to {} to create an issue.**
-**You can also run `az feedback --verbose` to emit the full output to stderr.**
+**If possible, a browser will be opened to {} to create an issue.**
+**You can also run `az feedback --verbose` to emit the full issue draft to stderr.**
 **Azure CLI repo: {}**
 **Azure CLI Extensions repo: {}**
 """
@@ -750,7 +750,12 @@ def _prompt_issue(recent_command_list):
     print(prefix)
 
     logger.info(original_issue)
-    open_page_in_browser(url)
+    # if we are not in cloud shell and can launch a browser, launch it with the issue draft
+    if can_launch_browser() and not in_cloud_console():
+        open_page_in_browser(url)
+    else:
+        print("There isn't an available browser to create an issue draft. You can copy and paste the url"
+              " below in a browser to submit.\n\n{}\n\n".format(url))
 
     return True
 

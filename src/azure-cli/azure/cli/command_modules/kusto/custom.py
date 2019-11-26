@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 from enum import Enum
 from knack.log import get_logger
-from azure.mgmt.resource import ResourceManagementClient
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.util import sdk_no_wait
 
@@ -172,7 +171,7 @@ def update_kusto_database(instance, soft_delete_period, hot_cache_period=None):
 
 
 def _get_resource_group_location(cli_ctx, resource_group_name):
-
-    client = get_mgmt_service_client(cli_ctx, ResourceManagementClient)
+    from azure.cli.core.profiles import ResourceType
+    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     # pylint: disable=no-member
     return client.resource_groups.get(resource_group_name).location

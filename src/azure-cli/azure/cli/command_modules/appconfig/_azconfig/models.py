@@ -43,6 +43,15 @@ class KeyValue(object):
         self.last_modified = None
         self.locked = None
 
+    def __str__(self):
+        return "\nKey: " + self.key + \
+               "\nValue: " + self.value + \
+               "\nLabel: " + (self.label if self.label else '') + \
+               "\netag: " + self.etag + \
+               "\nLast Modified: " + self.last_modified + \
+               "\nContent Type: " + self.content_type + \
+               "\nTags: " + (str(self.tags) if self.tags else '')
+
 
 class QueryFields(Enum):
     KEY = 0x001
@@ -72,7 +81,7 @@ class QueryKeyValueOptions(object):
         An ID that can be used to correlate the request with a more general operation.
     '''
 
-    empty_label = u'\0'
+    empty_label = '\\0'
 
     def __init__(self,
                  label=empty_label,
@@ -109,7 +118,7 @@ class QueryKeyValueCollectionOptions(object):
 
     any_key = '*'
     any_label = '*'
-    empty_label = u'\0'
+    empty_label = '\\0'
 
     def __init__(self,
                  key_filter=any_key,
@@ -137,6 +146,8 @@ class ModifyKeyValueOptions(object):
     :ivar string correlation_request_id:
         An ID that can be used to correlate the request with a more general operation.
     '''
+
+    empty_label = '\\0'
 
     def __init__(self, client_request_id=None, correlation_request_id=None):
         self.client_request_id = str(

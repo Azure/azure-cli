@@ -162,6 +162,8 @@ class DnsScenarioTest(ScenarioTest):
 
         self.cmd('network dns record-set a delete -n myrsa -g {rg} --zone-name {zone} -y')
 
+        self.cmd('network dns record-set cname delete -n myrscname -g {rg} --zone-name {zone} -y')
+
         self.cmd('network dns zone delete -g {rg} -n {zone} -y',
                  checks=self.is_empty())
 

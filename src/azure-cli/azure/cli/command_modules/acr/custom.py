@@ -6,23 +6,18 @@
 from knack.util import CLIError
 from knack.log import get_logger
 
-from azure.cli.core.commands import LongRunningOperation
-
-from ._constants import get_classic_sku, get_managed_sku, get_premium_sku
+from ._constants import get_managed_sku, get_premium_sku
 from ._utils import (
-    arm_deploy_template_new_storage,
-    arm_deploy_template_existing_storage,
-    random_storage_account_name,
     get_registry_by_name,
     validate_managed_registry,
     validate_sku_update,
-    get_resource_group_name_by_registry_name,
-    get_resource_id_by_storage_account_name
+    get_resource_group_name_by_registry_name
 )
 from ._docker_utils import get_login_credentials
 from .network_rule import NETWORK_RULE_NOT_SUPPORTED
 
 logger = get_logger(__name__)
+DEF_DIAG_SETTINGS_NAME_TEMPLATE = '{}-diagnostic-settings'
 
 
 def acr_check_name(client, registry_name):
@@ -41,67 +36,35 @@ def acr_create(cmd,
                resource_group_name,
                sku,
                location=None,
-               storage_account_name=None,
                admin_enabled=False,
                default_action=None,
-               deployment_name=None):
+               tags=None,
+               workspace=None):
     if default_action and sku not in get_premium_sku(cmd):
         raise CLIError(NETWORK_RULE_NOT_SUPPORTED)
 
-    if sku in get_managed_sku(cmd) and storage_account_name:
-        raise CLIError("Please specify '--sku {0}' without providing an existing storage account "
-                       "to create a managed registry, or specify '--sku Classic --storage-account-name {1}' "
-                       "to create a Classic registry using storage account `{1}`."
-                       .format(sku, storage_account_name))
+    if sku not in get_managed_sku(cmd):
+        raise CLIError("Classic SKU is no longer supported. Please select a managed SKU.")
 
-    if sku in get_classic_sku(cmd):
-        result = client.check_name_availability(registry_name)
-        if not result.name_available:
-            raise CLIError(result.message)
-
-        logger.warning(
-            "Due to the planned deprecation of the Classic registry SKU, we recommend using "
-            "Basic, Standard, or Premium for all new registries. See https://aka.ms/acr/skus for details.")
-        if storage_account_name is None:
-            storage_account_name = random_storage_account_name(cmd.cli_ctx, registry_name)
-            logger.warning(
-                "A new storage account '%s' will be created in resource group '%s'.",
-                storage_account_name,
-                resource_group_name)
-            LongRunningOperation(cmd.cli_ctx)(
-                arm_deploy_template_new_storage(
-                    cmd.cli_ctx,
-                    resource_group_name,
-                    registry_name,
-                    location,
-                    sku,
-                    storage_account_name,
-                    admin_enabled,
-                    deployment_name)
-            )
-        else:
-            LongRunningOperation(cmd.cli_ctx)(
-                arm_deploy_template_existing_storage(
-                    cmd.cli_ctx,
-                    resource_group_name,
-                    registry_name,
-                    location,
-                    sku,
-                    storage_account_name,
-                    admin_enabled,
-                    deployment_name)
-            )
-        return client.get(resource_group_name, registry_name)
-
-    if storage_account_name:
-        logger.warning(
-            "The registry '%s' in '%s' SKU is a managed registry. The specified storage account will be ignored.",
-            registry_name, sku)
     Registry, Sku, NetworkRuleSet = cmd.get_models('Registry', 'Sku', 'NetworkRuleSet')
-    registry = Registry(location=location, sku=Sku(name=sku), admin_user_enabled=admin_enabled)
+    registry = Registry(location=location, sku=Sku(name=sku), admin_user_enabled=admin_enabled, tags=tags)
     if default_action:
         registry.network_rule_set = NetworkRuleSet(default_action=default_action)
-    return client.create(resource_group_name, registry_name, registry)
+    lro_poller = client.create(resource_group_name, registry_name, registry)
+    if workspace:
+        from azure.cli.core.commands import LongRunningOperation
+        from msrestazure.tools import is_valid_resource_id, resource_id
+        from azure.cli.core.commands.client_factory import get_subscription_id
+        acr = LongRunningOperation(cmd.cli_ctx)(lro_poller)
+        if not is_valid_resource_id(workspace):
+            workspace = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
+                                    resource_group=resource_group_name,
+                                    namespace='microsoft.OperationalInsights',
+                                    type='workspaces',
+                                    name=workspace)
+        _create_diagnostic_settings(cmd.cli_ctx, acr, workspace)
+        return acr
+    return lro_poller
 
 
 def acr_delete(cmd, client, registry_name, resource_group_name=None):
@@ -117,18 +80,12 @@ def acr_show(cmd, client, registry_name, resource_group_name=None):
 def acr_update_custom(cmd,
                       instance,
                       sku=None,
-                      storage_account_name=None,
                       admin_enabled=None,
                       default_action=None,
                       tags=None):
     if sku is not None:
         Sku = cmd.get_models('Sku')
         instance.sku = Sku(name=sku)
-
-    if storage_account_name is not None:
-        StorageAccountProperties = cmd.get_models('StorageAccountProperties')
-        instance.storage_account = StorageAccountProperties(
-            id=get_resource_id_by_storage_account_name(cmd.cli_ctx, storage_account_name))
 
     if admin_enabled is not None:
         instance.admin_user_enabled = admin_enabled
@@ -183,6 +140,12 @@ def acr_login(cmd,
         tenant_suffix=tenant_suffix,
         username=username,
         password=password)
+
+    # warn casing difference caused by ACR normalizing to lower on login_server
+    parts = login_server.split('.')
+    if registry_name != parts[0] and registry_name.lower() == parts[0]:
+        logger.warning('Uppercase characters are detected in the registry name. When using its server url in '
+                       'docker commands, to avoid authentication errors, use all lowercase.')
 
     from subprocess import PIPE, Popen
     p = Popen([docker_command, "login",
@@ -304,3 +267,22 @@ def _check_wincred(login_server):
         return True
 
     return False
+
+
+def _create_diagnostic_settings(cli_ctx, acr, workspace):
+    from azure.mgmt.monitor import MonitorManagementClient
+    from azure.mgmt.monitor.models import (DiagnosticSettingsResource, RetentionPolicy,
+                                           LogSettings, MetricSettings)
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+
+    client = get_mgmt_service_client(cli_ctx, MonitorManagementClient)
+    def_retention_policy = RetentionPolicy(enabled=True, days=0)
+    logs = [
+        LogSettings(enabled=True, category="ContainerRegistryRepositoryEvents", retention_policy=def_retention_policy),
+        LogSettings(enabled=True, category="ContainerRegistryLoginEvents", retention_policy=def_retention_policy)
+    ]
+    metrics = [MetricSettings(enabled=True, category="AllMetrics", retention_policy=def_retention_policy)]
+    parameters = DiagnosticSettingsResource(workspace_id=workspace, metrics=metrics, logs=logs)
+
+    client.diagnostic_settings.create_or_update(resource_uri=acr.id, parameters=parameters,
+                                                name=DEF_DIAG_SETTINGS_NAME_TEMPLATE.format(acr.name))

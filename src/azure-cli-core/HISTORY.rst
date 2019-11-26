@@ -2,6 +2,44 @@
 
 Release History
 ===============
+
+2.0.77
+++++++
+* Add deprecate message for Python 2.7
+* Refine the help and error messages for `--ids`
+
+2.0.76
+++++++
+* no changes
+
+2.0.75
+++++++
+* Add syntax check for --set parameter in generic update command.
+* Fix #10760: `az login` fails if subscription name is None
+* Minor change in DeploymentOutputLongRunningOperation
+
+2.0.74
+++++++
+* Introduce Debian Buster package
+
+2.0.73
+++++++
+* Minor changes
+
+2.0.72
+++++++
+* no changes
+
+2.0.71
+++++++
+* Added ossrdbmsResourceId to cloud.py.
+* properly handle type errors caused by invalid JMESPath queries in core.util.handle_exception
+* `--query`: properly handle type errors caused by invalid JMESPath queries.
+
+2.0.70
+++++++
+* no changes
+
 2.0.69
 ++++++
 * Fixed issue where `--subscription` would appear despite being suppressed on certain commands.

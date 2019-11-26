@@ -26,7 +26,7 @@ class CognitiveServicesTests(ScenarioTest):
         })
 
         # test to create cognitive services account
-        self.cmd('az cognitiveservices account create -n {sname} -g {rg} --kind {kind} --sku {sku} -l {location} --yes',
+        self.cmd('az cognitiveservices account create -n {sname} -g {rg} --kind {kind} --sku {sku} -l {location}',
                  checks=[self.check('name', '{sname}'),
                          self.check('location', '{location}'),
                          self.check('sku.name', '{sku}'),
@@ -76,7 +76,7 @@ class CognitiveServicesTests(ScenarioTest):
             'location': 'westeurope'
         })
 
-        self.cmd('az cognitiveservices account create -n {name} -g {rg} --kind {kind} --sku {sku} -l {location} --yes',
+        self.cmd('az cognitiveservices account create -n {name} -g {rg} --kind {kind} --sku {sku} -l {location}',
                  checks=[self.check('name', '{name}'),
                          self.check('location', '{location}'),
                          self.check('sku.name', '{sku}'),
@@ -119,7 +119,7 @@ class CognitiveServicesTests(ScenarioTest):
             'location': 'westeurope'
         })
 
-        self.cmd('az cognitiveservices account create -n {name} -g {rg} --kind {kind} --sku {sku} -l {location} --yes',
+        self.cmd('az cognitiveservices account create -n {name} -g {rg} --kind {kind} --sku {sku} -l {location}',
                  checks=[self.check('name', '{name}'),
                          self.check('location', '{location}'),
                          self.check('sku.name', '{sku}'),

@@ -5,20 +5,8 @@
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
-VERSION_2017_10_GA = "2017-10-01"
+VERSION_2019_05_01_PREVIEW = "2019-05-01-preview"
 VERSION_2019_06_01_PREVIEW = "2019-06-01-preview"
-
-
-def get_arm_service_client(cli_ctx):
-    """Returns the client for managing ARM resources. """
-    from azure.mgmt.resource import ResourceManagementClient
-    return get_mgmt_service_client(cli_ctx, ResourceManagementClient)
-
-
-def get_storage_service_client(cli_ctx):
-    """Returns the client for managing storage accounts. """
-    from azure.cli.core.profiles import ResourceType
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_STORAGE)
 
 
 def get_acr_service_client(cli_ctx, api_version=None):
@@ -28,7 +16,7 @@ def get_acr_service_client(cli_ctx, api_version=None):
 
 
 def cf_acr_registries(cli_ctx, *_):
-    return get_acr_service_client(cli_ctx, VERSION_2017_10_GA).registries
+    return get_acr_service_client(cli_ctx).registries
 
 
 def cf_acr_registries_tasks(cli_ctx, *_):
@@ -36,11 +24,11 @@ def cf_acr_registries_tasks(cli_ctx, *_):
 
 
 def cf_acr_replications(cli_ctx, *_):
-    return get_acr_service_client(cli_ctx, VERSION_2017_10_GA).replications
+    return get_acr_service_client(cli_ctx).replications
 
 
 def cf_acr_webhooks(cli_ctx, *_):
-    return get_acr_service_client(cli_ctx, VERSION_2017_10_GA).webhooks
+    return get_acr_service_client(cli_ctx).webhooks
 
 
 def cf_acr_tasks(cli_ctx, *_):
@@ -49,3 +37,15 @@ def cf_acr_tasks(cli_ctx, *_):
 
 def cf_acr_runs(cli_ctx, *_):
     return get_acr_service_client(cli_ctx, VERSION_2019_06_01_PREVIEW).runs
+
+
+def cf_acr_scope_maps(cli_ctx, *_):
+    return get_acr_service_client(cli_ctx, VERSION_2019_05_01_PREVIEW).scope_maps
+
+
+def cf_acr_tokens(cli_ctx, *_):
+    return get_acr_service_client(cli_ctx, VERSION_2019_05_01_PREVIEW).tokens
+
+
+def cf_acr_token_credentials(cli_ctx, *_):
+    return get_acr_service_client(cli_ctx, VERSION_2019_05_01_PREVIEW).registries

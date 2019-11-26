@@ -5,12 +5,17 @@
 
 import os
 import zipfile
+from knack.util import CLIError
+from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.mgmt.resource.resources.models import ResourceGroup
+from azure.mgmt.web.models import SkuDescription
+
 from ._constants import (NETCORE_VERSION_DEFAULT, NETCORE_VERSIONS, NODE_VERSION_DEFAULT,
                          NODE_VERSIONS, NETCORE_RUNTIME_NAME, NODE_RUNTIME_NAME, DOTNET_RUNTIME_NAME,
                          DOTNET_VERSION_DEFAULT, DOTNET_VERSIONS, STATIC_RUNTIME_NAME,
-                         PYTHON_RUNTIME_NAME, PYTHON_VERSION_DEFAULT, LINUX_SKU_DEFAULT)
+                         PYTHON_RUNTIME_NAME, PYTHON_VERSION_DEFAULT, LINUX_SKU_DEFAULT, OS_DEFAULT)
+
+logger = get_logger(__name__)
 
 
 def _resource_client_factory(cli_ctx, **_):
@@ -32,14 +37,13 @@ def zip_contents_from_dir(dirPath, lang):
     with zipfile.ZipFile("{}".format(zip_file_path), "w", zipfile.ZIP_DEFLATED) as zf:
         for dirname, subdirs, files in os.walk(dirPath):
             # skip node_modules folder for Node apps,
-            # since zip_deployment will perfom the build operation
-            if lang.lower() == NODE_RUNTIME_NAME and 'node_modules' in subdirs:
-                subdirs.remove('node_modules')
+            # since zip_deployment will perform the build operation
+            if lang.lower() == NODE_RUNTIME_NAME:
+                subdirs[:] = [d for d in subdirs if 'node_modules' not in d]
             elif lang.lower() == NETCORE_RUNTIME_NAME:
-                if 'bin' in subdirs:
-                    subdirs.remove('bin')
-                elif 'obj' in subdirs:
-                    subdirs.remove('obj')
+                subdirs[:] = [d for d in subdirs if d not in ['obj', 'bin']]
+            elif lang.lower() == PYTHON_RUNTIME_NAME:
+                subdirs[:] = [d for d in subdirs if 'env' not in d]  # Ignores dir that contain env
             for filename in files:
                 absname = os.path.abspath(os.path.join(dirname, filename))
                 arcname = absname[len(abs_src) + 1:]
@@ -75,8 +79,10 @@ def get_runtime_version_details(file_path, lang_name):
 
 
 def create_resource_group(cmd, rg_name, location):
+    from azure.cli.core.profiles import ResourceType, get_sdk
     rcf = _resource_client_factory(cmd.cli_ctx)
-    rg_params = ResourceGroup(location=location)
+    resource_group = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'ResourceGroup', mod='models')
+    rg_params = resource_group(location=location)
     return rcf.resource_groups.create_or_update(rg_name, rg_params)
 
 
@@ -98,14 +104,6 @@ def _check_resource_group_supports_os(cmd, rg_name, is_linux):
     return True
 
 
-def should_create_new_app(cmd, rg_name, app_name):
-    client = web_client_factory(cmd.cli_ctx)
-    for item in list(client.web_apps.list_by_resource_group(rg_name)):
-        if item.name.lower() == app_name.lower():
-            return False
-    return True
-
-
 def get_num_apps_in_asp(cmd, rg_name, asp_name):
     client = web_client_factory(cmd.cli_ctx)
     return len(list(client.app_service_plans.list_web_apps(rg_name, asp_name)))
@@ -113,7 +111,6 @@ def get_num_apps_in_asp(cmd, rg_name, asp_name):
 
 # pylint:disable=unexpected-keyword-arg
 def get_lang_from_content(src_path):
-    import glob
     # NODE: package.json should exist in the application root dir
     # NETCORE & DOTNET: *.csproj should exist in the application dir
     # NETCORE: <TargetFramework>netcoreapp2.0</TargetFramework>
@@ -121,8 +118,17 @@ def get_lang_from_content(src_path):
     runtime_details_dict = dict.fromkeys(['language', 'file_loc', 'default_sku'])
     package_json_file = os.path.join(src_path, 'package.json')
     package_python_file = os.path.join(src_path, 'requirements.txt')
-    package_netlang_glob = glob.glob("**/*.csproj", recursive=True)
-    static_html_file = glob.glob("**/*.html", recursive=True)
+    package_netcore_file = ""
+    runtime_details_dict['language'] = ''
+    runtime_details_dict['file_loc'] = ''
+    runtime_details_dict['default_sku'] = 'F1'
+    import fnmatch
+    for _dirpath, _dirnames, files in os.walk(src_path):
+        for file in files:
+            if fnmatch.fnmatch(file, "*.csproj"):
+                package_netcore_file = os.path.join(src_path, file)
+                break
+
     if os.path.isfile(package_python_file):
         runtime_details_dict['language'] = PYTHON_RUNTIME_NAME
         runtime_details_dict['file_loc'] = package_python_file
@@ -131,16 +137,14 @@ def get_lang_from_content(src_path):
         runtime_details_dict['language'] = NODE_RUNTIME_NAME
         runtime_details_dict['file_loc'] = package_json_file if os.path.isfile(package_json_file) else ''
         runtime_details_dict['default_sku'] = LINUX_SKU_DEFAULT
-    elif package_netlang_glob:
-        package_netcore_file = os.path.join(src_path, package_netlang_glob[0])
+    elif package_netcore_file:
         runtime_lang = detect_dotnet_lang(package_netcore_file)
         runtime_details_dict['language'] = runtime_lang
         runtime_details_dict['file_loc'] = package_netcore_file
         runtime_details_dict['default_sku'] = 'F1'
-    elif static_html_file:
-        runtime_details_dict['language'] = STATIC_RUNTIME_NAME
-        runtime_details_dict['file_loc'] = static_html_file[0]
-        runtime_details_dict['default_sku'] = 'F1'
+    else:  # TODO: Update the doc when the detection logic gets updated
+        raise CLIError("Could not auto-detect the runtime stack of your app, "
+                       "see 'https://go.microsoft.com/fwlink/?linkid=2109470' for more information")
     return runtime_details_dict
 
 
@@ -203,8 +207,11 @@ def parse_node_version(file_path):
                 # remove the string ~ or  > that sometimes exists in version value
                 c = non_decimal.sub('', value_detected)
                 # reduce the version to '6.0' from '6.0.0'
-                num_array = c.split('.')
-                num = num_array[0] + "." + num_array[1]
+                if '.' in c:  # handle version set as 4 instead of 4.0
+                    num_array = c.split('.')
+                    num = num_array[0] + "." + num_array[1]
+                else:
+                    num = c + ".0"
                 version_detected.append(num)
     return version_detected or ['0.0']
 
@@ -259,8 +266,10 @@ def set_location(cmd, sku, location):
         available_locs = []
         for loc in locs:
             available_locs.append(loc.name)
-        return available_locs[0]
-    return location
+        loc = available_locs[0]
+    else:
+        loc = location
+    return loc.replace(" ", "").lower()
 
 
 # check if the RG value to use already exists and follows the OS requirements or new RG to be created
@@ -268,4 +277,104 @@ def should_create_new_rg(cmd, rg_name, is_linux):
     if (_check_resource_group_exists(cmd, rg_name) and
             _check_resource_group_supports_os(cmd, rg_name, is_linux)):
         return False
+    return True
+
+
+def does_app_already_exist(cmd, name):
+    """ This is used by az webapp up to verify if a site needs to be created or should just be deployed"""
+    client = web_client_factory(cmd.cli_ctx)
+    site_availability = client.check_name_availability(name, 'Microsoft.Web/sites')
+    # check availability returns true to name_available  == site does not exist
+    return site_availability.name_available
+
+
+def get_app_details(cmd, name):
+    client = web_client_factory(cmd.cli_ctx)
+    data = (list(filter(lambda x: name.lower() in x.name.lower(), client.web_apps.list())))
+    _num_items = len(data)
+    if _num_items > 0:
+        return data[0]
+    return None
+
+
+def get_rg_to_use(cmd, user, loc, os_name, rg_name=None):
+    default_rg = "{}_rg_{}_{}".format(user, os_name, loc.replace(" ", "").lower())
+    # check if RG exists & can be used
+    if rg_name is not None and _check_resource_group_exists(cmd, rg_name):
+        if _check_resource_group_supports_os(cmd, rg_name, os_name.lower() == 'linux'):
+            return rg_name
+        raise CLIError("The ResourceGroup '{}' cannot be used with the os '{}'. Use a different RG".format(rg_name,
+                                                                                                           os_name))
+    rg_name = default_rg
+    return rg_name
+
+
+def get_profile_username():
+    from azure.cli.core._profile import Profile
+    user = Profile().get_current_account_user()
+    user = user.split('@', 1)[0]
+    if len(user.split('#', 1)) > 1:  # on cloudShell user is in format live.com#user@domain.com
+        user = user.split('#', 1)[1]
+    return user
+
+
+def get_sku_to_use(src_dir, sku=None):
+    if sku is None:
+        lang_details = get_lang_from_content(src_dir)
+        return lang_details.get("default_sku")
+    logger.info("Found sku argument, skipping use default sku")
+    return sku
+
+
+def set_language(src_dir):
+    lang_details = get_lang_from_content(src_dir)
+    return lang_details.get('language')
+
+
+def detect_os_form_src(src_dir):
+    lang_details = get_lang_from_content(src_dir)
+    language = lang_details.get('language')
+    return "Linux" if language is not None and language.lower() == NODE_RUNTIME_NAME \
+        or language.lower() == PYTHON_RUNTIME_NAME else OS_DEFAULT
+
+
+def get_plan_to_use(cmd, user, os_name, loc, sku, create_rg, resource_group_name, plan=None):
+    _default_asp = "{}_asp_{}_{}_0".format(user, os_name, loc)
+    if plan is None:  # --plan not provided by user
+        # get the plan name to use
+        return _determine_if_default_plan_to_use(cmd, _default_asp, resource_group_name, loc, sku, create_rg)
+    return plan
+
+
+# if plan name not provided we need to get a plan name based on the OS, location & SKU
+def _determine_if_default_plan_to_use(cmd, plan_name, resource_group_name, loc, sku, create_rg):
+    client = web_client_factory(cmd.cli_ctx)
+    if create_rg:  # if new RG needs to be created use the default name
+        return plan_name
+    # get all ASPs in the RG & filter to the ones that contain the plan_name
+    _asp_generic = plan_name[:-len(plan_name.split("_")[4])]
+    _asp_list = (list(filter(lambda x: _asp_generic in x.name,
+                             client.app_service_plans.list_by_resource_group(resource_group_name))))
+    _num_asp = len(_asp_list)
+    if _num_asp:
+        # check if we have at least one app that can be used with the combination of loc, sku & os
+        selected_asp = next((a for a in _asp_list if isinstance(a.sku, SkuDescription) and
+                             a.sku.name.lower() == sku.lower() and
+                             (a.location.replace(" ", "").lower() == loc.lower())), None)
+        if selected_asp is not None:
+            return selected_asp.name
+        # from the sorted data pick the last one & check if a new ASP needs to be created
+        # based on SKU or not
+        data_sorted = sorted(_asp_list, key=lambda x: x.name)
+        _plan_info = data_sorted[_num_asp - 1]
+        _asp_num = int(_plan_info.name.split('_')[4]) + 1  # default asp created by CLI can be of type plan_num
+        return '{}_{}'.format(_asp_generic, _asp_num)
+    return plan_name
+
+
+def should_create_new_app(cmd, rg_name, app_name):  # this is currently referenced by an extension command
+    client = web_client_factory(cmd.cli_ctx)
+    for item in list(client.web_apps.list_by_resource_group(rg_name)):
+        if item.name.lower() == app_name.lower():
+            return False
     return True

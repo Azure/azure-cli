@@ -5,7 +5,7 @@
 
 
 def _build_frontend_ip_config(cmd, name, public_ip_id=None, subnet_id=None, private_ip_address=None,
-                              private_ip_allocation=None, zone=None):
+                              private_ip_allocation=None, zone=None, private_ip_address_version=None):
     frontend_ip_config = {
         'name': name
     }
@@ -28,16 +28,21 @@ def _build_frontend_ip_config(cmd, name, public_ip_id=None, subnet_id=None, priv
     if zone and cmd.supported_api_version(min_api='2017-06-01'):
         frontend_ip_config['zones'] = zone
 
+    if private_ip_address_version and cmd.supported_api_version(min_api='2019-04-01'):
+        frontend_ip_config['properties']['privateIPAddressVersion'] = private_ip_address_version
+
     return frontend_ip_config
 
 
-# pylint: disable=too-many-locals
+# pylint: disable=too-many-locals, too-many-statements
 def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_tier, capacity, servers, frontend_port,
-                                       private_ip_address, private_ip_allocation, cert_data, cert_password,
+                                       private_ip_address, private_ip_allocation,
+                                       cert_data, cert_password, key_vault_secret_id,
                                        cookie_based_affinity, http_settings_protocol, http_settings_port,
                                        http_listener_protocol, routing_rule_type, public_ip_id, subnet_id,
                                        connection_draining_timeout, enable_http2, min_capacity, zones,
-                                       custom_error_pages, firewall_policy, max_capacity):
+                                       custom_error_pages, firewall_policy, max_capacity,
+                                       user_assigned_identity):
 
     # set the default names
     frontend_ip_name = 'appGatewayFrontendIP'
@@ -86,6 +91,15 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
         }
         if cert_password:
             ssl_cert['properties']['password'] = "[parameters('certPassword')]"
+
+    if key_vault_secret_id:
+        http_listener['properties'].update({'SslCertificate': {'id': ssl_cert_id}})
+        ssl_cert = {
+            'name': ssl_cert_name,
+            'properties': {
+                'keyVaultSecretId': key_vault_secret_id,
+            }
+        }
 
     backend_http_settings = {
         'name': http_settings_name,
@@ -169,13 +183,25 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
     }
     if cmd.supported_api_version(min_api='2018-08-01'):
         ag.update({'zones': zones})
+    if user_assigned_identity and cmd.supported_api_version(min_api='2018-12-01'):
+        ag.update(
+            {
+                "identity": {
+                    "type": "UserAssigned",
+                    "userAssignedIdentities": {
+                        user_assigned_identity: {}
+                    }
+                }
+            }
+        )
     return ag
 
 
 def build_load_balancer_resource(cmd, name, location, tags, backend_pool_name, frontend_ip_name, public_ip_id,
-                                 subnet_id, private_ip_address, private_ip_allocation, sku, frontend_ip_zone):
+                                 subnet_id, private_ip_address, private_ip_allocation,
+                                 sku, frontend_ip_zone, private_ip_address_version):
     frontend_ip_config = _build_frontend_ip_config(cmd, frontend_ip_name, public_ip_id, subnet_id, private_ip_address,
-                                                   private_ip_allocation, frontend_ip_zone)
+                                                   private_ip_allocation, frontend_ip_zone, private_ip_address_version)
 
     lb_properties = {
         'backendAddressPools': [

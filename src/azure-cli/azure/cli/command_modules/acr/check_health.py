@@ -3,47 +3,43 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from __future__ import print_function
+
 import re
+import sys
 from knack.util import CLIError
+from knack.log import get_logger
 from .custom import get_docker_command
 from ._docker_utils import _get_aad_token
 from .helm import get_helm_command
 from ._utils import get_registry_by_name
 from ._errors import ErrorClass
 
+logger = get_logger(__name__)
 
 DOCKER_PULL_SUCCEEDED = "Downloaded newer image for {}"
 DOCKER_IMAGE_UP_TO_DATE = "Image is up to date for {}"
 IMAGE = "mcr.microsoft.com/mcr/hello-world:latest"
-FAQ_MESSAGE = "\nPlease refer to https://aka.ms/acr/faq for more information."
+FAQ_MESSAGE = "\nPlease refer to https://aka.ms/acr/health-check for more information."
+ERROR_MSG_DEEP_LINK = "\nPlease refer to https://aka.ms/acr/errors#{} for more information."
 MIN_HELM_VERSION = "2.11.0"
 HELM_VERSION_REGEX = re.compile(r'SemVer:"v([.\d]+)"', re.I)
+ACR_CHECK_HEALTH_MSG = "Try running 'az acr check-health -n {} --yes' to diagnose this issue."
 
 
 # Utilities functions
 def print_pass(message):
     from colorama import Fore, Style, init
     init()
-    print(str(message) + " : " + Fore.GREEN + "OK" + Style.RESET_ALL)
-
-
-def print_warning(message):
-    from colorama import Fore, Style, init
-    init()
-    print(Fore.YELLOW + str(message) + Style.RESET_ALL)
-
-
-def print_error(message):
-    from colorama import Fore, Style, init
-    init()
-    print(Fore.RED + str(message) + Style.RESET_ALL)
+    print(str(message) + " : " + Fore.GREEN + "OK" + Style.RESET_ALL, file=sys.stderr)
 
 
 def _handle_error(error, ignore_errors):
     if ignore_errors:
-        print_error(error.get_error_message())
+        logger.error(error.get_error_message())
     else:
-        raise CLIError(error.get_error_message(FAQ_MESSAGE))
+        error_msg = ERROR_MSG_DEEP_LINK.format(error.error_title.lower())
+        raise CLIError(error.get_error_message(error_msg))
 
 
 def _subprocess_communicate(command_parts, shell=False):
@@ -87,7 +83,7 @@ def _get_docker_status_and_version(ignore_errors, yes):
         docker_daemon_available = False
 
     if docker_daemon_available:
-        print("Docker daemon status: available")
+        print("Docker daemon status: available", file=sys.stderr)
 
     # Docker version check
     output, warning, stderr = _subprocess_communicate([docker_command, "--version"])
@@ -95,8 +91,8 @@ def _get_docker_status_and_version(ignore_errors, yes):
         _handle_error(DOCKER_VERSION_ERROR.append_error_message(stderr), ignore_errors)
     else:
         if warning:
-            print_warning(warning)
-        print("Docker version: {}".format(output))
+            logger.warning(warning)
+        print("Docker version: {}".format(output), file=sys.stderr)
 
     # Docker pull check - only if docker daemon is available
     if docker_daemon_available:
@@ -104,7 +100,7 @@ def _get_docker_status_and_version(ignore_errors, yes):
             from knack.prompting import prompt_y_n
             confirmation = prompt_y_n("This will pull the image {}. Proceed?".format(IMAGE))
             if not confirmation:
-                print_warning("Skipping pull check.")
+                logger.warning("Skipping pull check.")
                 return
 
         output, warning, stderr = _subprocess_communicate([docker_command, "pull", IMAGE])
@@ -113,7 +109,7 @@ def _get_docker_status_and_version(ignore_errors, yes):
             _handle_error(DOCKER_PULL_ERROR.append_error_message(stderr), ignore_errors)
         else:
             if warning:
-                print_warning(warning)
+                logger.warning(warning)
             if output.find(DOCKER_PULL_SUCCEEDED.format(IMAGE)) != -1 or \
                output.find(DOCKER_IMAGE_UP_TO_DATE.format(IMAGE)) != -1:
                 print_pass("Docker pull of '{}'".format(IMAGE))
@@ -123,16 +119,16 @@ def _get_docker_status_and_version(ignore_errors, yes):
 
 # Get current CLI version
 def _get_cli_version():
-    acr_component_name = "azure-cli-acr"
-    acr_cli_version = "not found"
     from pkg_resources import working_set
-    for component in list(working_set):
-        if component.key == acr_component_name:
-            acr_cli_version = component.version
 
-    print('ACR CLI version: {}'.format(acr_cli_version))
+    # working_set.by_key is a dictionary with component names as key
+    cli_component_name = "azure-cli"
+    cli_version = "not found"
 
-    return 0
+    if cli_component_name in working_set.by_key:
+        cli_version = working_set.by_key[cli_component_name].version
+
+    print('Azure CLI version: {}'.format(cli_version), file=sys.stderr)
 
 
 # Get helm versions
@@ -155,14 +151,14 @@ def _get_helm_version(ignore_errors):
         return
 
     if warning:
-        print_warning(warning)
+        logger.warning(warning)
 
     # Retrieve the helm version if regex pattern is found
     match_obj = HELM_VERSION_REGEX.search(output)
     if match_obj:
         output = match_obj.group(1)
 
-    print("Helm version: {}".format(output))
+    print("Helm version: {}".format(output), file=sys.stderr)
 
     # Display an error message if the current helm version < min required version
     if match_obj and LooseVersion(output) < LooseVersion(MIN_HELM_VERSION):
@@ -172,23 +168,12 @@ def _get_helm_version(ignore_errors):
         _handle_error(obsolete_ver_error, ignore_errors)
 
 
-def _check_health_environment(ignore_errors, yes):
-    from azure.cli.core.util import in_cloud_console
-    if in_cloud_console():
-        print_warning("Environment checks are not supported in Azure Cloud Shell.")
-        return
-
-    _get_docker_status_and_version(ignore_errors, yes)
-    _get_cli_version()
-    _get_helm_version(ignore_errors)
-
-
 # Checks for the connectivity
 # Check DNS lookup and access to challenge endpoint
-def _get_registry_status(login_server, ignore_errors):
+def _get_registry_status(login_server, registry_name, ignore_errors):
     import socket
 
-    registry_ip = ""
+    registry_ip = None
 
     try:
         registry_ip = socket.gethostbyname(login_server)
@@ -203,12 +188,23 @@ def _get_registry_status(login_server, ignore_errors):
     print_pass("DNS lookup to {} at IP {}".format(login_server, registry_ip))
 
     import requests
+    from requests.exceptions import SSLError, RequestException
     from azure.cli.core.util import should_disable_connection_verify
-    challenge = requests.get('https://' + login_server + '/v2/', verify=(not should_disable_connection_verify()))
+
+    try:
+        challenge = requests.get('https://' + login_server + '/v2/', verify=(not should_disable_connection_verify()))
+    except SSLError:
+        from ._errors import CONNECTIVITY_SSL_ERROR
+        _handle_error(CONNECTIVITY_SSL_ERROR.format_error_message(login_server), ignore_errors)
+        return False
+    except RequestException:
+        from ._errors import CONNECTIVITY_CHALLENGE_ERROR
+        _handle_error(CONNECTIVITY_CHALLENGE_ERROR.format_error_message(login_server), ignore_errors)
+        return False
 
     if challenge.status_code == 403:
         from ._errors import CONNECTIVITY_FORBIDDEN_ERROR
-        _handle_error(CONNECTIVITY_FORBIDDEN_ERROR.format_error_message(login_server), ignore_errors)
+        _handle_error(CONNECTIVITY_FORBIDDEN_ERROR.format_error_message(login_server, registry_name), ignore_errors)
         return False
     return True
 
@@ -254,7 +250,7 @@ def _get_endpoint_and_token_status(cmd, login_server, ignore_errors):
 
 def _check_health_connectivity(cmd, registry_name, ignore_errors):
     if registry_name is None:
-        print_warning("Registry name must be provided to check connectivity.")
+        logger.warning("Registry name must be provided to check connectivity.")
         return
 
     try:
@@ -271,7 +267,7 @@ def _check_health_connectivity(cmd, registry_name, ignore_errors):
 
         login_server = registry_name + suffix
 
-    status_validated = _get_registry_status(login_server, ignore_errors)
+    status_validated = _get_registry_status(login_server, registry_name, ignore_errors)
     if status_validated:
         _get_endpoint_and_token_status(cmd, login_server, ignore_errors)
 
@@ -281,7 +277,17 @@ def acr_check_health(cmd,  # pylint: disable useless-return
                      ignore_errors=False,
                      yes=False,
                      registry_name=None):
+    from azure.cli.core.util import in_cloud_console
+    in_cloud_console = in_cloud_console()
+    if in_cloud_console:
+        logger.warning("Environment checks are not supported in Azure Cloud Shell.")
+    else:
+        _get_docker_status_and_version(ignore_errors, yes)
+        _get_cli_version()
 
-    _check_health_environment(ignore_errors, yes)
     _check_health_connectivity(cmd, registry_name, ignore_errors)
-    print(FAQ_MESSAGE)
+
+    if not in_cloud_console:
+        _get_helm_version(ignore_errors)
+
+    print(FAQ_MESSAGE, file=sys.stderr)

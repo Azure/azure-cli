@@ -13,7 +13,7 @@ from cryptography.hazmat.primitives import serialization
 
 from knack.util import CLIError
 
-from azure.cli.command_modules.ams._utils import parse_timedelta, JsonBytearrayEncoder
+from azure.cli.command_modules.ams._utils import parse_timedelta, parse_duration, JsonBytearrayEncoder
 from azure.cli.command_modules.ams._sdk_utils import get_tokens
 
 from azure.mgmt.media.models import (ContentKeyPolicyOption, ContentKeyPolicyClearKeyConfiguration,
@@ -174,7 +174,7 @@ def update_content_key_policy_option(client, resource_group_name, account_name, 
             policy_option.configuration = ContentKeyPolicyWidevineConfiguration(widevine_template=widevine_template)
     elif isinstance(policy_option.configuration, ContentKeyPolicyFairPlayConfiguration):
         if ask is not None:
-            policy_option.configuration.ask = bytearray(ask, 'utf-8')
+            policy_option.configuration.ask = bytearray.fromhex(ask)
 
         if fair_play_pfx_password is not None:
             policy_option.configuration.fair_play_pfx_password = fair_play_pfx_password
@@ -247,7 +247,7 @@ def _generate_content_key_policy_option(policy_option_name, clear_key_configurat
 
     if valid_fairplay_configuration:
         configuration = ContentKeyPolicyFairPlayConfiguration(
-            ask=bytearray(ask, 'utf-8'), fair_play_pfx_password=fair_play_pfx_password,
+            ask=bytearray.fromhex(ask), fair_play_pfx_password=fair_play_pfx_password,
             fair_play_pfx=_b64_to_str(_read_binary(fair_play_pfx)).decode('ascii'),
             rental_and_lease_key_type=rental_and_lease_key_type,
             rental_duration=rental_duration)
@@ -301,6 +301,10 @@ def _generate_content_key_policy_option(policy_option_name, clear_key_configurat
 # Returns string if not null, or an empty string otherwise.
 def _coalesce_lst(value):
     return value or []
+
+
+def _coalesce_duration(value):
+    return parse_duration(value) if value else None
 
 
 def _coalesce_timedelta(value):
@@ -382,8 +386,9 @@ def _play_ready_configuration_factory(content):
     def __get_play_right(prl):
         if prl is None:
             return None
+
         return ContentKeyPolicyPlayReadyPlayRight(
-            first_play_expiration=_coalesce_timedelta(prl.get('firstPlayExpiration')),
+            first_play_expiration=_coalesce_duration(prl.get('firstPlayExpiration')),
             scms_restriction=prl.get('scmsRestriction'),
             agc_and_color_stripe_restriction=prl.get('agcAndColorStripeRestriction'),
             explicit_analog_television_output_restriction=__get_eator(
@@ -407,13 +412,14 @@ def _play_ready_configuration_factory(content):
             expiration_date = None
         else:
             expiration_date = dateutil.parser.parse(lic.get('expirationDate'))
+
         return ContentKeyPolicyPlayReadyLicense(
             allow_test_devices=lic.get('allowTestDevices'),
             begin_date=lic.get('beginDate'),
             expiration_date=expiration_date,
-            relative_begin_date=_coalesce_timedelta(lic.get('relativeBeginDate')),
-            relative_expiration_date=_coalesce_timedelta(lic.get('relativeExpirationDate')),
-            grace_period=_coalesce_timedelta(lic.get('gracePeriod')),
+            relative_begin_date=_coalesce_duration(lic.get('relativeBeginDate')),
+            relative_expiration_date=_coalesce_duration(lic.get('relativeExpirationDate')),
+            grace_period=_coalesce_duration(lic.get('gracePeriod')),
             play_right=__get_play_right(lic.get('playRight')),
             license_type=lic.get('licenseType'),
             content_key_location=__get_content_key_location(

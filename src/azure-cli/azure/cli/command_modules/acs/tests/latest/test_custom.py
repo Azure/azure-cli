@@ -95,7 +95,7 @@ class AcsCustomCommandTest(unittest.TestCase):
             create_role_assignment.assert_called_with(cli_ctx, role, sp, scope=None)
             self.assertFalse(ok, 'Expected _add_role_assignment to fail')
 
-    @mock.patch('azure.cli.command_modules.acs.custom._get_subscription_id')
+    @mock.patch('azure.cli.core.commands.client_factory.get_subscription_id')
     def test_browse_k8s(self, get_subscription_id):
         acs_info = ContainerService(location="location", orchestrator_profile={}, master_profile={}, linux_profile={})
         acs_info.orchestrator_profile = ContainerServiceOrchestratorProfile(
@@ -110,7 +110,7 @@ class AcsCustomCommandTest(unittest.TestCase):
                 get_acs_info.assert_called_once()
                 k8s_browse.assert_called_with('name', acs_info, False, 'ssh/key/file')
 
-    @mock.patch('azure.cli.command_modules.acs.custom._get_subscription_id')
+    @mock.patch('azure.cli.core.commands.client_factory.get_subscription_id')
     def test_browse_dcos(self, get_subscription_id):
         acs_info = ContainerService(location="location", orchestrator_profile={}, master_profile={}, linux_profile={})
         acs_info.orchestrator_profile = ContainerServiceOrchestratorProfile(
@@ -563,7 +563,7 @@ class AcsCustomCommandTest(unittest.TestCase):
 
         # assert we handled such error
         self.assertTrue(
-            'https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal' in str(context.exception))
+            'https://docs.microsoft.com/azure/azure-resource-manager/resource-group-create-service-principal-portal' in str(context.exception))
 
     @mock.patch('azure.cli.command_modules.acs.custom._get_rg_location', return_value='eastus')
     @mock.patch('azure.cli.command_modules.acs.custom.cf_resource_groups', autospec=True)

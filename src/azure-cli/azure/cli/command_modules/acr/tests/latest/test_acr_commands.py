@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, record_only
+from azure.cli.command_modules.acr.custom import DEF_DIAG_SETTINGS_NAME_TEMPLATE
 
 
 class AcrCommandsTests(ScenarioTest):
@@ -21,7 +22,7 @@ class AcrCommandsTests(ScenarioTest):
                                     self.check('location', location),
                                     self.check('adminUserEnabled', False)]).get_output_in_json()
 
-        if registry['sku']['name'] == 'Standard':
+        if registry['sku']['name'] == 'Premium':
             self.cmd('acr show-usage -n {} -g {}'.format(registry_name, resource_group))
 
         # enable admin user
@@ -31,6 +32,22 @@ class AcrCommandsTests(ScenarioTest):
                          self.check('tags', {'cat': '', 'foo': 'bar'}),
                          self.check('adminUserEnabled', True),
                          self.check('provisioningState', 'Succeeded')])
+
+        # test retention
+        self.cmd('acr config retention update -r {} --status enabled --days 30 --type UntaggedManifests'.format(registry_name),
+                 checks=[self.check('status', "enabled"),
+                         self.check('days', 30)])
+
+        self.cmd('acr config retention show -r {}'.format(registry_name),
+                 checks=[self.check('status', "enabled"),
+                         self.check('days', 30)])
+
+        # test content-trust
+        self.cmd('acr config content-trust update -n {} --status enabled'.format(registry_name),
+                 checks=[self.check('status', "enabled")])
+
+        self.cmd('acr config content-trust show -n {}'.format(registry_name),
+                 checks=[self.check('status', "enabled")])
 
         # test credential module
         credential = self.cmd(
@@ -83,15 +100,15 @@ class AcrCommandsTests(ScenarioTest):
         self.kwargs.update({
             'registry_name': registry_name,
             'rg_loc': resource_group_location,
-            'sku': 'Standard'
+            'sku': 'Premium'
         })
 
         self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku}',
                  checks=[self.check('name', '{registry_name}'),
                          self.check('location', '{rg_loc}'),
                          self.check('adminUserEnabled', False),
-                         self.check('sku.name', 'Standard'),
-                         self.check('sku.tier', 'Standard'),
+                         self.check('sku.name', 'Premium'),
+                         self.check('sku.tier', 'Premium'),
                          self.check('provisioningState', 'Succeeded')])
 
         self._core_registry_scenario(registry_name, resource_group, resource_group_location)
@@ -302,3 +319,24 @@ class AcrCommandsTests(ScenarioTest):
 
         # Case 9: Import image from an Azure Container Registry with personal access token
         self.cmd('acr import -n {registry_name} --source {resource_imageV2} -p {token}')
+
+    @ResourceGroupPreparer()
+    def test_acr_create_with_audits(self, resource_group):
+        registry_name = self.create_random_name('clireg', 20)
+        workspace_name = self.create_random_name('wprkspace', 20)
+        self.kwargs.update({
+            'registry_name': registry_name,
+            'sku': 'basic',
+            'workspace': workspace_name,
+            'diagnostic-settings': DEF_DIAG_SETTINGS_NAME_TEMPLATE.format(registry_name)
+        })
+
+        self.cmd('monitor log-analytics workspace create -g {rg} -n {workspace}')
+
+        result = self.cmd('acr create -n {registry_name} -g {rg} --sku {sku} --workspace {workspace}')
+        self.kwargs['registry_id'] = result.get_output_in_json()['id']
+        self.cmd('monitor diagnostic-settings show -g {rg} --resource {registry_id} -n {diagnostic-settings}', checks=[
+            self.check('logs[0].category', 'ContainerRegistryRepositoryEvents'),
+            self.check('logs[1].category', 'ContainerRegistryLoginEvents'),
+            self.check('metrics[0].category', 'AllMetrics'),
+        ])

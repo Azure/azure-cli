@@ -28,7 +28,7 @@ class HDInsightClusterTests(ScenarioTest):
         self._create_hdinsight_cluster(
             self._wasb_arguments(storage_account_info))
 
-        resize_cluster_format = 'az hdinsight resize -n {cluster} -g {rg} --target-instance-count 2'
+        resize_cluster_format = 'az hdinsight resize -n {cluster} -g {rg} --workernode-count 2'
         self.cmd(resize_cluster_format)
 
         self.cmd('az hdinsight show -n {cluster} -g {rg}', checks=[
@@ -111,18 +111,18 @@ class HDInsightClusterTests(ScenarioTest):
         })
 
         # create an application and wait for completion
-        self.cmd('az hdinsight application create -g {rg} -n {cluster} --application-name {app} '
+        self.cmd('az hdinsight application create -g {rg} -n {app} --cluster-name {cluster} '
                  '--script-uri {script_uri} --script-action-name {script_action} --script-parameters {script_params}')
-        self.cmd('az hdinsight application wait --created -n {cluster} -g {rg} --application-name {app}')
+        self.cmd('az hdinsight application wait --created -n {app} -g {rg} --cluster-name {cluster}')
 
         # list all applications
-        self.cmd('az hdinsight application list -g {rg} -n {cluster}', checks=[
+        self.cmd('az hdinsight application list -g {rg} --cluster-name {cluster}', checks=[
             self.check('type(@)', 'array'),
             self.check('length(@)', 1)
         ])
 
         # get the specific application
-        self.cmd('az hdinsight application show -g {rg} -n {cluster} --application-name {app}', checks=[
+        self.cmd('az hdinsight application show -g {rg} -n {app} --cluster-name {cluster}', checks=[
             self.check('name', '{app}'),
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('properties.applicationState', 'Running')
@@ -202,12 +202,12 @@ class HDInsightClusterTests(ScenarioTest):
         )
 
         # execute script actions, and persist on success.
-        self.cmd('az hdinsight script-action execute -g {rg} -n {cluster} '
-                 '--script-action-name {script_action} --script-uri {script_uri} --roles {head_node},{worker_node} --persist-on-success')
+        self.cmd('az hdinsight script-action execute -g {rg} -n {script_action} '
+                 '--cluster-name {cluster} --script-uri {script_uri} --roles {head_node} {worker_node} --persist-on-success')
 
         # list script actions and validate script is persisted.
         roles = [self.kwargs['head_node'], self.kwargs['worker_node']]
-        self.cmd('az hdinsight script-action list -g {rg} -n {cluster} --persisted', checks=[
+        self.cmd('az hdinsight script-action list -g {rg} --cluster-name {cluster}', checks=[
             self.check('type(@)', 'array'),
             self.check('length(@)', 1),
             self.check('[0].name', '{script_action}'),
@@ -216,16 +216,16 @@ class HDInsightClusterTests(ScenarioTest):
         ])
 
         # delete script action.
-        self.cmd('az hdinsight script-action delete -g {rg} -n {cluster} --script-action-name {script_action}')
+        self.cmd('az hdinsight script-action delete -g {rg} -n {script_action} --cluster-name {cluster}')
 
         # list script actions and validate script is deleted.
-        self.cmd('az hdinsight script-action list -g {rg} -n {cluster} --persisted', checks=[
+        self.cmd('az hdinsight script-action list -g {rg} --cluster-name {cluster}', checks=[
             self.check('type(@)', 'array'),
             self.check('length(@)', 0)
         ])
 
         # list script action history and validate script appears there.
-        script_actions = self.cmd('az hdinsight script-action list -g {rg} -n {cluster}', checks=[
+        script_actions = self.cmd('az hdinsight script-action list-execution-history -g {rg} --cluster-name {cluster}', checks=[
             self.check('type(@)', 'array'),
             self.check('length(@)', 1),
             self.check('[0].name', '{script_action}'),
@@ -236,18 +236,18 @@ class HDInsightClusterTests(ScenarioTest):
 
         # get the script action by ID and validate it's the same action.
         self.kwargs['script_execution_id'] = str(script_actions[0]['scriptExecutionId'])
-        script_actions = self.cmd('az hdinsight script-action show -g {rg} -n {cluster} '
-                                  '--script-execution-id {script_execution_id}',
+        script_actions = self.cmd('az hdinsight script-action show-execution-details -g {rg} --cluster-name {cluster} '
+                                  '--execution-id {script_execution_id}',
                                   checks=[
                                       self.check('name', '{script_action}')
                                   ])
 
         # execute script actions, but don't persist on success.
-        self.cmd('az hdinsight script-action execute -g {rg} -n {cluster} '
-                 '--script-action-name {script_action_1} --script-uri {script_uri} --roles {head_node},{worker_node}')
+        self.cmd('az hdinsight script-action execute -g {rg} --cluster-name {cluster} '
+                 '--name {script_action_1} --script-uri {script_uri} --roles {head_node} {worker_node}')
 
         # list script action history and validate the new script also appears.
-        script_actions = self.cmd('az hdinsight script-action list -g {rg} -n {cluster}', checks=[
+        script_actions = self.cmd('az hdinsight script-action list-execution-history -g {rg} --cluster-name {cluster}', checks=[
             self.check('type(@)', 'array'),
             self.check('length(@)', 2),
             self.check('[0].name', '{script_action_1}'),
@@ -257,11 +257,11 @@ class HDInsightClusterTests(ScenarioTest):
 
         # promote non-persisted script.
         self.kwargs['script_execution_id'] = str(script_actions[0]['scriptExecutionId'])
-        script_actions = self.cmd('az hdinsight script-action promote -g {rg} -n {cluster} '
-                                  '--script-execution-id {script_execution_id}')
+        script_actions = self.cmd('az hdinsight script-action promote -g {rg} --cluster-name {cluster} '
+                                  '--execution-id {script_execution_id}')
 
         # list script action list and validate the promoted script is the only one there.
-        self.cmd('az hdinsight script-action list -g {rg} -n {cluster} --persisted', checks=[
+        self.cmd('az hdinsight script-action list -g {rg} --cluster-name {cluster}', checks=[
             self.check('type(@)', 'array'),
             self.check('length(@)', 1),
             self.check('[0].name', '{script_action_1}'),
@@ -271,7 +271,7 @@ class HDInsightClusterTests(ScenarioTest):
         ])
 
         # list script action history and validate both scripts are there.
-        script_actions = self.cmd('az hdinsight script-action list -g {rg} -n {cluster}', checks=[
+        script_actions = self.cmd('az hdinsight script-action list-execution-history -g {rg} --cluster-name {cluster}', checks=[
             self.check('type(@)', 'array'),
             self.check('length(@)', 2),
             self.check('[0].name', '{script_action_1}'),
@@ -319,7 +319,7 @@ class HDInsightClusterTests(ScenarioTest):
         storage_account_key = storage_account_key.strip()
 
         key_args = ' --storage-account-key "{}"'.format(storage_account_key) if specify_key else ""
-        container_args = ' --storage-default-container {}'.format('default') if specify_container else ""
+        container_args = ' --storage-container {}'.format('default') if specify_container else ""
 
         return '--storage-account {}{}{}'\
             .format(storage_account_name, key_args, container_args)

@@ -18,9 +18,6 @@ from azure.cli.command_modules.botservice.constants import CSHARP, JAVASCRIPT
 
 
 class BotTemplateDeployer:
-    # Function App
-    function_template_name = 'functionapp.template.json'
-    v3_webapp_template_name = 'webapp.template.json'
 
     v4_webapp_template_name = 'webappv4.template.json'
 
@@ -56,11 +53,10 @@ class BotTemplateDeployer:
 
     @staticmethod
     def create_app(cmd, logger, client, resource_group_name, resource_name, description, kind, appid, password,  # pylint:disable=too-many-statements
-                   storageAccountName, location, sku_name, appInsightsLocation, language, version, bot_template_type):
+                   location, sku_name, language, version, bot_template_type):
         kind = 'sdk' if kind == 'webapp' else kind
         (zip_url, template_name) = BotTemplateDeployer.__retrieve_bot_template_link(version,
                                                                                     language,
-                                                                                    kind,
                                                                                     bot_template_type)
 
         logger.debug('Detected SDK version %s, kind %s and programming language %s. Using the following template: %s.',
@@ -72,7 +68,7 @@ class BotTemplateDeployer:
         # The valid name would be "testname.azurewebsites.net"
         while site_name[-1] == '-':
             site_name = site_name[:-1]
-        logger.debug('Web or Function app name to be used is %s.', site_name)
+        logger.debug('Web app name to be used is %s.', site_name)
 
         # ARM Template parameters
         paramsdict = {
@@ -92,24 +88,6 @@ class BotTemplateDeployer:
         }
         if description:
             paramsdict['description'] = description
-
-        if version == 'v3':
-            # Storage prep
-            paramsdict['createNewStorage'] = False
-            paramsdict['storageAccountResourceId'] = ''
-            if not storageAccountName:
-                storageAccountName = re.sub(r'[^a-z0-9]', '', resource_name[:24].lower())
-                paramsdict['createNewStorage'] = True
-
-                logger.debug('Storage name not provided. If storage is to be created, name to be used is %s.',
-                             storageAccountName)
-            paramsdict['storageAccountName'] = storageAccountName
-
-            # Application insights prep
-            appInsightsLocation = appInsightsLocation.lower().replace(' ', '')
-            paramsdict['useAppInsights'] = True
-            paramsdict['appInsightsLocation'] = appInsightsLocation
-            logger.debug('Application insights location resolved to %s.', appInsightsLocation)
 
         params = {k: {'value': v} for k, v in paramsdict.items()}
 
@@ -162,37 +140,21 @@ class BotTemplateDeployer:
         return parameters
 
     @staticmethod
-    def __retrieve_bot_template_link(version, language, kind, bot_template_type):
+    def __retrieve_bot_template_link(version, language, bot_template_type):
         if version == 'v4' and not bot_template_type:
             return '', BotTemplateDeployer.v4_webapp_template_name
 
         response = requests.get('https://dev.botframework.com/api/misc/bottemplateroot')
         if response.status_code != 200:
             raise CLIError('Unable to get bot code template from CDN. Please file an issue on {0}'.format(
-                'https://github.com/Microsoft/botbuilder-tools/issues'
+                'https://github.com/microsoft/botframework-sdk'
             ))
         cdn_link = response.text.strip('"')
-        if version == 'v3':
-            if kind == 'function':
-                template_name = BotTemplateDeployer.function_template_name
-                if language == CSHARP:
-                    cdn_link = cdn_link + 'csharp-abs-functions_emptybot.zip'
-                elif language == JAVASCRIPT:
-                    cdn_link = cdn_link + 'node.js-abs-functions_emptybot_funcpack.zip'
-            else:
-                template_name = BotTemplateDeployer.v3_webapp_template_name
-                if language == CSHARP:
-                    cdn_link = cdn_link + 'csharp-abs-webapp_simpleechobot_precompiled.zip'
-                elif language == JAVASCRIPT:
-                    cdn_link = cdn_link + 'node.js-abs-webapp_hello-chatconnector.zip'
-        else:
-            if kind == 'function':
-                raise CLIError('Function bot creation is not supported for v4 bot sdk.')
 
-            template_name = BotTemplateDeployer.v4_webapp_template_name
-            if language == CSHARP and bot_template_type == 'echo':
-                cdn_link = cdn_link + 'csharp-abs-webapp-v4_echobot_precompiled.zip'
-            elif language == JAVASCRIPT and bot_template_type == 'echo':
-                cdn_link = cdn_link + 'node.js-abs-webapp-v4_echobot.zip'
+        template_name = BotTemplateDeployer.v4_webapp_template_name
+        if language == CSHARP and bot_template_type == 'echo':
+            cdn_link = cdn_link + 'csharp-abs-webapp-v4_echobot_precompiled.zip'
+        elif language == JAVASCRIPT and bot_template_type == 'echo':
+            cdn_link = cdn_link + 'node.js-abs-webapp-v4_echobot.zip'
 
         return cdn_link, template_name

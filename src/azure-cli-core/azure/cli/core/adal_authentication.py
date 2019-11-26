@@ -37,13 +37,21 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
 
             err = (getattr(err, 'error_response', None) or {}).get('error_description') or ''
             if 'AADSTS70008' in err:  # all errors starting with 70008 should be creds expiration related
-                raise CLIError("Credentials have expired due to inactivity.{}".format(
-                    " Please run 'az login'" if not in_cloud_console() else ''))
+                raise CLIError("Credentials have expired due to inactivity. {}".format(
+                    "Please run 'az login'" if not in_cloud_console() else ''))
             if 'AADSTS50079' in err:
                 raise CLIError("Configuration of your account was changed. {}".format(
-                    " Please run 'az login'" if not in_cloud_console() else ''))
+                    "Please run 'az login'" if not in_cloud_console() else ''))
+            if 'AADSTS50173' in err:
+                raise CLIError("The credential data used by CLI has been expired because you might have changed or "
+                               "reset the password. {}".format(
+                                   "Please clear browser's cookies and run 'az login'"
+                                   if not in_cloud_console() else ''))
 
             raise CLIError(err)
+        except requests.exceptions.SSLError as err:
+            from .util import SSLERROR_TEMPLATE
+            raise CLIError(SSLERROR_TEMPLATE.format(str(err)))
         except requests.exceptions.ConnectionError as err:
             raise CLIError('Please ensure you have network connection. Error detail: ' + str(err))
 

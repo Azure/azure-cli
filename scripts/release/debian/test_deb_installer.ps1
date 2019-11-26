@@ -1,4 +1,4 @@
-$baseImages = @("ubuntu:xenial", "ubuntu:bionic", "debian:stretch","debian:jessie")
+$baseImages = @("ubuntu:xenial", "ubuntu:bionic", "debian:stretch","debian:jessie", "debian:buster")
 
 foreach ($image in $baseImages) {
     docker build --build-arg base=${image} -t deb-installer:current -f Dockerfile.install_test .

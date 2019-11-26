@@ -25,15 +25,24 @@ class RoleScenarioTest(ScenarioTest):
 
 
 class RbacSPSecretScenarioTest(RoleScenarioTest):
-    @ResourceGroupPreparer(name_prefix='cli_create_rbac_sp_minimal')
-    def test_create_for_rbac_with_secret_no_assignment(self, resource_group):
-
-        self.kwargs['sp'] = 'http://{}'.format(resource_group)
-        self.kwargs['display_name'] = resource_group
+    def test_create_for_rbac_with_right_display_name(self):
+        sp_name = self.create_random_name('cli-test-sp', 15)
+        self.kwargs['sp'] = 'http://{}'.format(sp_name)
+        self.kwargs['display_name'] = sp_name
         try:
             self.cmd('ad sp create-for-rbac -n {display_name} --skip-assignment', checks=self.check('name', '{sp}'))
         finally:
             self.cmd('ad app delete --id {sp}')
+
+        # verify we can extrat out disply name from name which starts with protocol
+        sp_name2 = self.create_random_name('cli-test-sp', 15)
+        self.kwargs['sp2'] = 'http://{}'.format(sp_name2)
+        self.kwargs['display_name2'] = sp_name2
+
+        try:
+            self.cmd('ad sp create-for-rbac -n {sp2} --skip-assignment', checks=self.check('displayName', '{display_name2}'))
+        finally:
+            self.cmd('ad app delete --id {sp2}')
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_create_rbac_sp_with_password')

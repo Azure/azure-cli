@@ -50,6 +50,13 @@ def cf_vm_image(cli_ctx, _):
     return _compute_client_factory(cli_ctx).virtual_machine_images
 
 
+def cf_vm_image_term(cli_ctx, _):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.mgmt.marketplaceordering import MarketplaceOrderingAgreements
+    market_place_client = get_mgmt_service_client(cli_ctx, MarketplaceOrderingAgreements)
+    return market_place_client.marketplace_agreements
+
+
 def cf_usage(cli_ctx, _):
     return _compute_client_factory(cli_ctx).usage
 
@@ -100,3 +107,31 @@ def cf_gallery_image_versions(cli_ctx, _):
 
 def cf_proximity_placement_groups(cli_ctx, _):
     return _compute_client_factory(cli_ctx).proximity_placement_groups
+
+
+def cf_dedicated_hosts(cli_ctx, _):
+    return _compute_client_factory(cli_ctx).dedicated_hosts
+
+
+def cf_dedicated_host_groups(cli_ctx, _):
+    return _compute_client_factory(cli_ctx).dedicated_host_groups
+
+
+def _log_analytics_client_factory(cli_ctx, subscription_id, *_):
+    from azure.mgmt.loganalytics import LogAnalyticsManagementClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    return get_mgmt_service_client(cli_ctx, LogAnalyticsManagementClient, subscription_id=subscription_id)
+
+
+def cf_log_analytics(cli_ctx, subscription_id, *_):
+    return _log_analytics_client_factory(cli_ctx, subscription_id).workspaces
+
+
+def cf_log_analytics_data_plane(cli_ctx, _):
+    """Initialize Log Analytics data client for use with CLI."""
+    from azure.loganalytics import LogAnalyticsDataClient
+    from azure.cli.core._profile import Profile
+    profile = Profile(cli_ctx=cli_ctx)
+    cred, _, _ = profile.get_login_credentials(
+        resource="https://api.loganalytics.io")
+    return LogAnalyticsDataClient(cred)

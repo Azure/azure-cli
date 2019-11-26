@@ -71,8 +71,7 @@ class AzconfigClient(object):
         if modify_options is None:
             modify_options = models.ModifyKeyValueOptions()
 
-        key, label = utils.encode_key_and_label(
-            keyvalue.key, keyvalue.label)
+        key, label = utils.unescape_encode_key_and_label(keyvalue.key, keyvalue.label)
         body_content = {
             "content_type": keyvalue.content_type,
             "value": keyvalue.value,
@@ -104,7 +103,7 @@ class AzconfigClient(object):
         if modify_options is None:
             modify_options = models.ModifyKeyValueOptions()
 
-        key, label = utils.encode_key_and_label(keyvalue.key, keyvalue.label)
+        key, label = utils.unescape_encode_key_and_label(keyvalue.key, keyvalue.label)
         body_content = {
             "content_type": keyvalue.content_type,
             "value": keyvalue.value,
@@ -139,8 +138,7 @@ class AzconfigClient(object):
         if keyvalue.etag is None:
             raise ValueError("Etag of the keyvalue cannot be null")
 
-        key, label = utils.encode_key_and_label(
-            keyvalue.key, keyvalue.label)
+        key, label = utils.unescape_encode_key_and_label(keyvalue.key, keyvalue.label)
         body_content = {
             "content_type": keyvalue.content_type,
             "value": keyvalue.value,
@@ -171,7 +169,7 @@ class AzconfigClient(object):
         if modify_options is None:
             modify_options = models.ModifyKeyValueOptions()
 
-        key, label = utils.encode_key_and_label(key, label)
+        key, label = utils.unescape_encode_key_and_label(key, label)
         query_url = '/kv/{}?label={}'.format(key,
                                              '' if label is None else label)
 
@@ -220,7 +218,7 @@ class AzconfigClient(object):
         if keyvalue.etag is None:
             raise ValueError("Etag of the keyvalue cannot be null")
 
-        key, label = utils.encode_key_and_label(keyvalue.key, keyvalue.label)
+        key, label = utils.unescape_encode_key_and_label(keyvalue.key, keyvalue.label)
         query_url = '/kv/{}?label={}'.format(key,
                                              '' if label is None else label)
         endpoint = utils.get_endpoint_from_connection_string(
@@ -312,7 +310,7 @@ class AzconfigClient(object):
         if modify_options is None:
             modify_options = models.ModifyKeyValueOptions()
 
-        key, label = utils.encode_key_and_label(keyvalue.key, keyvalue.label)
+        key, label = utils.unescape_encode_key_and_label(keyvalue.key, keyvalue.label)
 
         query_url = '/locks/{}'.format(key)
         query_url += '?label={}'.format('' if label is None else label)
@@ -354,7 +352,7 @@ class AzconfigClient(object):
         if modify_options is None:
             modify_options = models.ModifyKeyValueOptions()
 
-        key, label = utils.encode_key_and_label(keyvalue.key, keyvalue.label)
+        key, label = utils.unescape_encode_key_and_label(keyvalue.key, keyvalue.label)
 
         query_url = '/locks/{}'.format(key)
         query_url += '?label={}'.format('' if label is None else label)
@@ -390,8 +388,7 @@ class AzconfigClient(object):
                     modify_options,
                     if_match_etag=None,
                     if_none_match_etag=None):
-        query_url = '/kv/{}?label={}'.format(key,
-                                             '' if label is None else label)
+        query_url = '/kv/{}?label={}'.format(key, '' if label is None else label)
         endpoint = utils.get_endpoint_from_connection_string(
             self.connection_string)
         url = 'https://{}{}'.format(endpoint, query_url)
@@ -415,8 +412,7 @@ class AzconfigClient(object):
                                        response.headers, response.content)
 
     def __list_revision(self, query_option, continuation_link):
-        key, label = utils.encode_key_and_label(
-            query_option.key_filter, query_option.label_filter)
+        key, label = utils.unescape_encode_key_and_label(query_option.key_filter, query_option.label_filter)
         query_datetime = query_option.query_datetime
         query_fields = self.__construct_query_fields_to_string(
             query_option.fields)
@@ -452,7 +448,7 @@ class AzconfigClient(object):
                                        response.headers, response.content)
 
     def __query_key(self, key, query_kv_option):
-        key, label = utils.encode_key_and_label(key, query_kv_option.label)
+        key, label = utils.unescape_encode_key_and_label(key, query_kv_option.label)
         fields = self.__construct_query_fields_to_string(
             query_kv_option.fields)
 
@@ -483,8 +479,8 @@ class AzconfigClient(object):
                                        response.headers, response.content)
 
     def __query_keys(self, query_kv_collection_option, continuation_link):
-        key, label = utils.encode_key_and_label(
-            query_kv_collection_option.key_filter, query_kv_collection_option.label_filter)
+        key, label = utils.unescape_encode_key_and_label(query_kv_collection_option.key_filter, query_kv_collection_option.label_filter)
+
         query_datetime = query_kv_collection_option.query_datetime
         query_fields = self.__construct_query_fields_to_string(
             query_kv_collection_option.fields)

@@ -51,16 +51,23 @@ def vaults_cf(cli_ctx, *_):
 
 
 def backup_storage_configs_cf(cli_ctx, *_):
-    return _common_client_factory(cli_ctx).backup_storage_configs
+    return _backup_client_factory(cli_ctx).backup_resource_storage_configs
 
 
-# Protection Client Factories
 def protection_policies_cf(cli_ctx, *_):
     return _backup_client_factory(cli_ctx).protection_policies
 
 
 def protection_containers_cf(cli_ctx, *_):
     return _backup_client_factory(cli_ctx).protection_containers
+
+
+def protectable_containers_cf(cli_ctx, *_):
+    return _backup_client_factory(cli_ctx).protectable_containers
+
+
+def protection_container_operation_results_cf(cli_ctx, *_):
+    return _backup_client_factory(cli_ctx).protection_container_operation_results
 
 
 def protection_container_refresh_operation_results_cf(cli_ctx, *_):

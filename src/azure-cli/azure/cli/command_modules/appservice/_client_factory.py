@@ -14,7 +14,7 @@ def ex_handler_factory(creating_plan=False, no_throw=False):
             if creating_plan:
                 if 'Requested features are not supported in region' in detail:
                     detail = ("Plan with linux worker is not supported in current region. For " +
-                              "supported regions, please refer to https://docs.microsoft.com/en-us/"
+                              "supported regions, please refer to https://docs.microsoft.com/"
                               "azure/app-service-web/app-service-linux-intro")
                 elif 'Not enough available reserved instance servers to satisfy' in detail:
                     detail = ("Plan with Linux worker can only be created in a group " +

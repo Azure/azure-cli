@@ -74,6 +74,29 @@ def validate_domain_service(cmd, namespace):
 
 # Validate workspace.
 def validate_workspace(cmd, namespace):
+    from uuid import UUID
+
+    try:
+        # check if the given workspace is a valid UUID
+        UUID(namespace.workspace, version=4)
+        namespace.workspace_type = 'workspace_id'
+
+        # A workspace name can also be in type of GUID
+        # if we can find the workspace by name,
+        # we will use the input value as workspace name
+        try:
+            namespace.workspace = HDInsightValidator(
+                resource_type='Microsoft.OperationalInsights/workspaces',
+                resource_name=namespace.workspace).validate(cmd, namespace)
+            namespace.workspace_type = 'resource_id'
+        except CLIError:
+            # This indicates the input is not a valid UUID.
+            # So we just ignore the error and treat it as workspace id
+            pass
+        return
+    except ValueError:
+        pass
+
     namespace.workspace = HDInsightValidator(
         resource_type='Microsoft.OperationalInsights/workspaces',
         resource_name=namespace.workspace).validate(cmd, namespace)

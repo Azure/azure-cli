@@ -55,7 +55,7 @@ class AmsJobTests(ScenarioTest):
             'outputLabel': 'outputLabel'
         })
 
-        self.cmd('az ams job start -t {transformName} -a {amsname} -g {rg} -n {jobName} --input-asset-name {inputAssetName} --output-assets {outputAssetName}={outputLabel} --priority {priority} --label {label} --correlation-data {correlationData}', checks=[
+        self.cmd('az ams job create -t {transformName} -a {amsname} -g {rg} -n {jobName} --input-asset-name {inputAssetName} --output-assets {outputAssetName}={outputLabel} --priority {priority} --label {label} --correlation-data {correlationData}', checks=[
             self.check('name', '{jobName}'),
             self.check('resourceGroup', '{rg}'),
             self.check('input.label', '{label}'),

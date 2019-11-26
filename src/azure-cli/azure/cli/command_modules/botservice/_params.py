@@ -55,18 +55,15 @@ def load_arguments(self, _):
 
     with self.argument_context('bot create') as c:
         c.argument('sku_name', options_list=['--sku'], arg_type=get_enum_type(SUPPORTED_SKUS), help='The Sku of the bot.', arg_group='Registration Bot Specific')
-        c.argument('kind', options_list=['--kind', '-k'], arg_type=get_enum_type(['registration', 'function', 'webapp']), help='The kind of the bot.')
+        c.argument('kind', options_list=['--kind', '-k'], arg_type=get_enum_type(['registration', 'webapp']), help='The kind of the bot.')
         c.argument('display_name', help='The display name of the bot. If not specified, defaults to the name of the bot.', arg_group='Registration Bot Specific')
         c.argument('description', options_list=['--description', '-d'], help='The description of the bot.', arg_group='Registration Bot Specific')
         c.argument('endpoint', options_list=['-e', '--endpoint'], help='The messaging endpoint of the bot.', arg_group='Registration Bot Specific')
         c.argument('msa_app_id', options_list=['--appid'], help='The Microsoft account ID (MSA ID) to be used with the bot.')
         c.argument('password', options_list=['-p', '--password'], help='The Microsoft account (MSA) password for the bot. Used to authorize messages being sent to the bot.')
-        c.argument('storageAccountName', options_list=['-s', '--storage'], help='WARNING: Not used in V4 bot creation. Storage account name to be used with the bot. If not provided, a new account will be created.', arg_group='Web/Function Bot Specific')
         c.argument('tags', arg_type=tags_type)
-        c.argument('language', options_list=['--lang'], arg_type=get_enum_type(SUPPORTED_LANGUAGES), help='The language to be used to create the bot.', arg_group='Web/Function Bot Specific')
-        c.argument('appInsightsLocation', help='WARNING: Not used in V4 bot creation. The location for the app insights to be used with the bot.  Default: South Central US.', options_list=['--insights-location'], arg_group='Web/Function Bot Specific',
-                   arg_type=get_enum_type(SUPPORTED_APP_INSIGHTS_REGIONS))
-        c.argument('version', options_list=['-v', '--version'], help='The Microsoft Bot Builder SDK version to be used to create the bot', arg_type=get_enum_type(['v3', 'v4']), arg_group='Web/Function Bot Specific')
+        c.argument('language', options_list=['--lang'], arg_type=get_enum_type(SUPPORTED_LANGUAGES), help='The language to be used to create the bot.', arg_group='Web Bot Specific')
+        c.argument('version', options_list=['-v', '--version'], help='The Microsoft Bot Builder SDK version to be used to create the bot', arg_type=get_enum_type(['v4']), arg_group='Web Bot Specific')
         c.argument('deploy_echo', options_list=['--echo'], arg_type=get_three_state_flag(), help='Deploy an Echo Bot template to the newly created v4 Web App Bot.', arg_group='V4 Bot Templates')
 
     with self.argument_context('bot publish') as c:

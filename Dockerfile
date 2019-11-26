@@ -3,9 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-ARG PYTHON_VERSION="3.6.4"
+ARG PYTHON_VERSION="3.6.9"
 
-FROM python:${PYTHON_VERSION}-alpine3.7
+FROM python:${PYTHON_VERSION}-alpine3.10
 
 ARG CLI_VERSION
 
@@ -19,8 +19,8 @@ LABEL maintainer="Microsoft" \
       org.label-schema.version=$CLI_VERSION \
       org.label-schema.license="MIT" \
       org.label-schema.description="The Azure CLI is used for all Resource Manager deployments in Azure." \
-      org.label-schema.url="https://docs.microsoft.com/en-us/cli/azure/overview" \
-      org.label-schema.usage="https://docs.microsoft.com/en-us/cli/azure/install-az-cli2#docker" \
+      org.label-schema.url="https://docs.microsoft.com/cli/azure/overview" \
+      org.label-schema.usage="https://docs.microsoft.com/cli/azure/install-az-cli2#docker" \
       org.label-schema.build-date=$BUILD_DATE \
       org.label-schema.vcs-url="https://github.com/Azure/azure-cli.git" \
       org.label-schema.docker.cmd="docker run -v \${HOME}/.azure:/root/.azure -it microsoft/azure-cli:$CLI_VERSION"

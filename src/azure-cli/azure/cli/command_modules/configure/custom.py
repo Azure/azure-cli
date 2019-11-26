@@ -51,11 +51,12 @@ def _print_cur_configuration(file_config):
 def _config_env_public_azure(cli_ctx, _):
     from adal.adal_error import AdalError
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.resource import ResourceManagementClient
     from azure.cli.core._profile import Profile
+    from azure.cli.core.profiles import ResourceType
     # Determine if user logged in
+
     try:
-        list(get_mgmt_service_client(cli_ctx, ResourceManagementClient).resources.list())
+        list(get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).resources.list())
     except CLIError:
         # Not logged in
         login_successful = False

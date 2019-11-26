@@ -371,7 +371,7 @@ _General Kwargs_
 
 The following kwargs may be inherited from the command loader:
 - `min_api` - Minimum API version for which the command will appear.
-- `max_api` - Maximimum API version for which the command will appear.
+- `max_api` - Maximum API version for which the command will appear.
 - `resource_type` - An `azure.cli.core.profiles.ResourceType` enum value that is used for multi-API packages.
 - `operation_group` - Only used by the `azure-cli-vm` module to specify which resource API to target.
 - `command_group` - A `CliCommandType` object that contains a bundle of kwargs that will be used by the `command` method if not otherwise provided.
@@ -404,7 +404,7 @@ _General Kwargs_
 
 The following kwargs may be inherited from the command loader:
 - `min_api` - Minimum API version for which the argument will appear. Otherwise the argument will be ignored.
-- `max_api` - Maximimum API version for which the argument will appear. Otherwise the argument will be ignored.
+- `max_api` - Maximum API version for which the argument will appear. Otherwise the argument will be ignored.
 - `resource_type` - An `azure.cli.core.profiles.ResourceType` enum value that is used for multi-API packages.
 - `operation_group` - Only used by the `azure-cli-vm` module to specify which resource API to target.
 

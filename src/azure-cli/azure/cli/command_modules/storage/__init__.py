@@ -52,6 +52,7 @@ class StorageArgumentContext(AzArgumentContext):
 
     def register_content_settings_argument(self, settings_class, update, arg_group=None, guess_from_file=None):
         from azure.cli.command_modules.storage._validators import get_content_setting_validator
+        from azure.cli.core.commands.parameters import get_three_state_flag
 
         self.ignore('content_settings')
         self.extra('content_type', default=None, help='The content MIME type.', arg_group=arg_group,
@@ -63,6 +64,13 @@ class StorageArgumentContext(AzArgumentContext):
                         'used to attach additional metadata.')
         self.extra('content_cache_control', default=None, help='The cache control string.', arg_group=arg_group)
         self.extra('content_md5', default=None, help='The content\'s MD5 hash.', arg_group=arg_group)
+        if update:
+            self.extra('clear_content_settings', help='If this flag is set, then if any one or more of the '
+                       'following properties (--content-cache-control, --content-disposition, --content-encoding, '
+                       '--content-language, --content-md5, --content-type) is set, then all of these properties are '
+                       'set together. If a value is not provided for a given property when at least one of the '
+                       'properties listed below is set, then that property will be cleared.',
+                       arg_type=get_three_state_flag())
 
     def register_path_argument(self, default_file_param=None, options_list=None):
         from ._validators import get_file_path_validator
@@ -158,29 +166,37 @@ class StorageCommandGroup(AzCommandGroup):
     def get_handler_suppress_some_400(self):
         def handler(ex):
             from azure.cli.core.profiles import get_sdk
-            from knack.log import get_logger
 
-            logger = get_logger(__name__)
             t_error = get_sdk(self.command_loader.cli_ctx,
                               ResourceType.DATA_STORAGE,
                               'common._error#AzureHttpError')
             if isinstance(ex, t_error) and ex.status_code == 403:
-                message = """
+                # TODO: Revisit the logic here once the service team updates their response
+                if ex.error_code == 'AuthorizationPermissionMismatch':
+                    message = """
 You do not have the required permissions needed to perform this operation.
 Depending on your operation, you may need to be assigned one of the following roles:
-    "Storage Blob Data Contributor (Preview)"
-    "Storage Blob Data Reader (Preview)"
-    "Storage Queue Data Contributor (Preview)"
-    "Storage Queue Data Reader (Preview)"
+    "Storage Blob Data Contributor"
+    "Storage Blob Data Reader"
+    "Storage Queue Data Contributor"
+    "Storage Queue Data Reader"
 
 If you want to use the old authentication method and allow querying for the right account key, please use the "--auth-mode" parameter and "key" value.
-                """
-                logger.error(message)
-                return
+                    """
+                    ex.args = (message,)
+                elif ex.error_code == 'AuthorizationFailure':
+                    message = """
+The request may be blocked by network rules of storage account. Please check network rule set using 'az storage account show -n accountname --query networkRuleSet'.
+If you want to change the default action to apply when no rule matches, please use 'az storage account update'.
+                    """
+                    ex.args = (message,)
+                elif ex.error_code == 'AuthenticationFailed':
+                    message = """
+Authentication failure. This may be caused by either invalid account key, connection string or sas token value provided for your storage account.
+                    """
+                    ex.args = (message,)
             if isinstance(ex, t_error) and ex.status_code == 409 and ex.error_code == 'NoPendingCopyOperation':
-                logger.error(ex.args[0])
-                return
-            raise ex
+                pass
 
         return handler
 
@@ -236,12 +252,10 @@ def _merge_new_exception_handler(kwargs, handler):
     first = kwargs.get('exception_handler')
 
     def new_handler(ex):
-        try:
-            handler(ex)
-        except Exception:  # pylint: disable=broad-except
-            if not first:
-                raise
-            first(ex)
+        handler(ex)
+        if not first:
+            raise ex
+        first(ex)
     kwargs['exception_handler'] = new_handler
 
 

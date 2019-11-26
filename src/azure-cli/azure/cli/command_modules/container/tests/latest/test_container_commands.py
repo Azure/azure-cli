@@ -218,7 +218,7 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
 
     # Test create container with azure container registry image.
     # An ACR instance is required to re-record this test with 'nginx:latest' image available in the url.
-    # see https://docs.microsoft.com/en-us/azure/container-registry/container-registry-get-started-docker-cli
+    # see https://docs.microsoft.com/azure/container-registry/container-registry-get-started-docker-cli
     # After recording, regenerate the password for the acr instance.
     @ResourceGroupPreparer()
     def test_container_create_with_acr(self, resource_group, resource_group_location):

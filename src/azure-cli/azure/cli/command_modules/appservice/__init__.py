@@ -16,7 +16,7 @@ class AppserviceCommandsLoader(AzCommandsLoader):
         appservice_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.custom#{}')
         super(AppserviceCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                        custom_command_type=appservice_custom,
-                                                       resource_type=ResourceType.MGMT_CONTAINERREGISTRY)
+                                                       resource_type=ResourceType.MGMT_APPSERVICE)
 
     def load_command_table(self, args):
         from azure.cli.command_modules.appservice.commands import load_command_table

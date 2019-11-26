@@ -32,7 +32,7 @@ from ._vm_diagnostics_templates import get_default_diag_config
 
 from ._actions import (load_images_from_aliases_doc, load_extension_images_thru_services,
                        load_images_thru_services, _get_latest_image_version)
-from ._client_factory import _compute_client_factory, cf_public_ip_addresses
+from ._client_factory import _compute_client_factory, cf_public_ip_addresses, cf_vm_image_term
 
 logger = get_logger(__name__)
 
@@ -47,7 +47,7 @@ _LINUX_DIAG_EXT = 'LinuxDiagnostic'
 _WINDOWS_DIAG_EXT = 'IaaSDiagnostics'
 extension_mappings = {
     _LINUX_ACCESS_EXT: {
-        'version': '1.4',
+        'version': '1.5',
         'publisher': 'Microsoft.OSTCExtensions'
     },
     _WINDOWS_ACCESS_EXT: {
@@ -245,7 +245,7 @@ class ExtensionUpdateLongRunningOperation(LongRunningOperation):  # pylint: disa
 # region Disks (Managed)
 def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # pylint: disable=too-many-locals
                         size_gb=None, sku='Premium_LRS', os_type=None,
-                        source=None, for_upload=None,  # pylint: disable=unused-argument
+                        source=None, for_upload=None, upload_size_bytes=None,  # pylint: disable=unused-argument
                         # below are generated internally from 'source'
                         source_blob_uri=None, source_disk=None, source_snapshot=None,
                         source_storage_account_id=None, no_wait=False, tags=None, zone=None,
@@ -262,13 +262,26 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
     else:
         option = DiskCreateOption.empty
 
+    if source_storage_account_id is None and source_blob_uri is not None:
+        from azure.cli.core.commands.client_factory import get_subscription_id
+        from msrestazure.tools import resource_id
+        subscription_id = get_subscription_id(cmd.cli_ctx)
+        storage_account_name = source_blob_uri.split('.')[0].split('/')[-1]
+        source_storage_account_id = resource_id(
+            subscription=subscription_id, resource_group=resource_group_name,
+            namespace='Microsoft.Storage', type='storageAccounts', name=storage_account_name)
+
+    if upload_size_bytes is not None and for_upload is not True:
+        raise CLIError('usage error: --upload-size-bytes should be used together with --for-upload')
+
     creation_data = CreationData(create_option=option, source_uri=source_blob_uri,
                                  image_reference=None,
                                  source_resource_id=source_disk or source_snapshot,
-                                 storage_account_id=source_storage_account_id)
+                                 storage_account_id=source_storage_account_id,
+                                 upload_size_bytes=upload_size_bytes)
 
-    if size_gb is None and (option == DiskCreateOption.empty or for_upload):
-        raise CLIError('usage error: --size-gb required to create an empty disk')
+    if size_gb is None and upload_size_bytes is None and (option == DiskCreateOption.empty or for_upload):
+        raise CLIError('usage error: --size-gb or --upload-size-bytes required to create an empty disk')
     disk = Disk(location=location, creation_data=creation_data, tags=(tags or {}),
                 sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb, os_type=os_type)
 
@@ -317,7 +330,8 @@ def create_image(cmd, resource_group_name, name, source, os_type=None, data_disk
                  source_virtual_machine=None, storage_sku=None, hyper_v_generation=None,
                  os_blob_uri=None, data_blob_uris=None,
                  os_snapshot=None, data_snapshots=None,
-                 os_disk=None, os_disk_caching=None, data_disks=None, tags=None, zone_resilient=None):
+                 os_disk=None, os_disk_caching=None, data_disks=None, data_disk_caching=None,
+                 tags=None, zone_resilient=None):
     ImageOSDisk, ImageDataDisk, ImageStorageProfile, Image, SubResource, OperatingSystemStateTypes = cmd.get_models(
         'ImageOSDisk', 'ImageDataDisk', 'ImageStorageProfile', 'Image', 'SubResource', 'OperatingSystemStateTypes')
 
@@ -338,15 +352,15 @@ def create_image(cmd, resource_group_name, name, source, os_type=None, data_disk
         lun = 0
         if data_blob_uris:
             for d in data_blob_uris:
-                all_data_disks.append(ImageDataDisk(lun=lun, blob_uri=d))
+                all_data_disks.append(ImageDataDisk(lun=lun, blob_uri=d, caching=data_disk_caching))
                 lun += 1
         if data_snapshots:
             for d in data_snapshots:
-                all_data_disks.append(ImageDataDisk(lun=lun, snapshot=SubResource(id=d)))
+                all_data_disks.append(ImageDataDisk(lun=lun, snapshot=SubResource(id=d), caching=data_disk_caching))
                 lun += 1
         if data_disks:
             for d in data_disks:
-                all_data_disks.append(ImageDataDisk(lun=lun, managed_disk=SubResource(id=d)))
+                all_data_disks.append(ImageDataDisk(lun=lun, managed_disk=SubResource(id=d), caching=data_disk_caching))
                 lun += 1
 
         image_storage_profile = ImageStorageProfile(os_disk=os_disk, data_disks=all_data_disks)
@@ -379,7 +393,7 @@ def list_images(cmd, resource_group_name=None):
 
 # region Snapshots
 def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size_gb=None, sku='Standard_LRS',
-                    source=None, for_upload=None,  # pylint: disable=unused-argument
+                    source=None, for_upload=None, incremental=None,  # pylint: disable=unused-argument
                     # below are generated internally from 'source'
                     source_blob_uri=None, source_disk=None, source_snapshot=None, source_storage_account_id=None,
                     hyper_v_generation=None, tags=None, no_wait=False):
@@ -403,7 +417,7 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
     if size_gb is None and option == DiskCreateOption.empty:
         raise CLIError('Please supply size for the snapshots')
     snapshot = Snapshot(location=location, creation_data=creation_data, tags=(tags or {}),
-                        sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb)
+                        sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb, incremental=incremental)
     if hyper_v_generation:
         snapshot.hyper_vgeneration = hyper_v_generation
 
@@ -517,7 +531,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               plan_promotion_code=None, license_type=None, assign_identity=None, identity_scope=None,
               identity_role='Contributor', identity_role_id=None, application_security_groups=None, zone=None,
               boot_diagnostics_storage=None, ultra_ssd_enabled=None, ephemeral_os_disk=None,
-              proximity_placement_group=None, aux_subscriptions=None):
+              proximity_placement_group=None, dedicated_host=None, dedicated_host_group=None, aux_subscriptions=None,
+              priority=None, max_price=None, eviction_policy=None, enable_agent=None, workspace=None, vmss=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -525,7 +540,9 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                                                                 build_storage_account_resource, build_nic_resource,
                                                                 build_vnet_resource, build_nsg_resource,
                                                                 build_public_ip_resource, StorageProfile,
-                                                                build_msi_role_assignment)
+                                                                build_msi_role_assignment,
+                                                                build_vm_mmaExtension_resource,
+                                                                build_vm_daExtensionName_resource)
     from msrestazure.tools import resource_id, is_valid_resource_id
 
     storage_sku = disk_info['os'].get('storageAccountType')
@@ -610,6 +627,10 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         if any(invalid_parameters):
             raise CLIError('When specifying an existing NIC, do not specify NSG, '
                            'public IP, ASGs, VNet or subnet.')
+        if accelerated_networking is not None:
+            logger.warning('When specifying an existing NIC, do not specify accelerated networking. '
+                           'Ignore --accelerated-networking now. '
+                           'This will trigger an error instead of a warning in future releases.')
 
     os_vhd_uri = None
     if storage_profile in [StorageProfile.SACustomImage, StorageProfile.SAPirImage]:
@@ -637,7 +658,9 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         attach_os_disk=attach_os_disk, os_disk_size_gb=os_disk_size_gb, custom_data=custom_data, secrets=secrets,
         license_type=license_type, zone=zone, disk_info=disk_info,
         boot_diagnostics_storage_uri=boot_diagnostics_storage, ultra_ssd_enabled=ultra_ssd_enabled,
-        proximity_placement_group=proximity_placement_group, computer_name=computer_name)
+        proximity_placement_group=proximity_placement_group, computer_name=computer_name,
+        dedicated_host=dedicated_host, priority=priority, max_price=max_price, eviction_policy=eviction_policy,
+        enable_agent=enable_agent, vmss=vmss)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -657,6 +680,14 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
             role_assignment_guid = str(_gen_guid())
             master_template.add_resource(build_msi_role_assignment(vm_name, vm_id, identity_role_id,
                                                                    role_assignment_guid, identity_scope))
+
+    if workspace is not None:
+        workspace_id = _prepare_workspace(cmd, resource_group_name, workspace)
+        master_template.add_secure_parameter('workspaceId', workspace_id)
+        vm_mmaExtension_resource = build_vm_mmaExtension_resource(cmd, vm_name, location)
+        vm_daExtensionName_resource = build_vm_daExtensionName_resource(cmd, vm_name, location)
+        master_template.add_resource(vm_mmaExtension_resource)
+        master_template.add_resource(vm_daExtensionName_resource)
 
     master_template.add_resource(vm_resource)
 
@@ -682,8 +713,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     if no_wait:
         return sdk_no_wait(no_wait, client.create_or_update,
                            resource_group_name, deployment_name, properties)
-    LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(no_wait, client.create_or_update,
-                                                  resource_group_name, deployment_name, properties))
+    LongRunningOperation(cmd.cli_ctx)(client.create_or_update(resource_group_name, deployment_name, properties))
+
     vm = get_vm_details(cmd, resource_group_name, vm_name)
     if assign_identity is not None:
         if enable_local_identity and not identity_scope:
@@ -933,7 +964,7 @@ def show_vm(cmd, resource_group_name, vm_name, show_details=False):
 
 
 def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None,
-              write_accelerator=None, license_type=None, no_wait=False, **kwargs):
+              write_accelerator=None, license_type=None, no_wait=False, ultra_ssd_enabled=None, **kwargs):
     from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
     vm = kwargs['parameters']
@@ -957,9 +988,46 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
     if license_type is not None:
         vm.license_type = license_type
 
+    if ultra_ssd_enabled is not None:
+        if vm.additional_capabilities is None:
+            AdditionalCapabilities = cmd.get_models('AdditionalCapabilities')
+            vm.additional_capabilities = AdditionalCapabilities(ultra_ssd_enabled=ultra_ssd_enabled)
+        else:
+            vm.additional_capabilities.ultra_ssd_enabled = ultra_ssd_enabled
+
     return sdk_no_wait(no_wait, _compute_client_factory(cmd.cli_ctx).virtual_machines.create_or_update,
                        resource_group_name, vm_name, **kwargs)
 
+
+def _prepare_workspace(cmd, resource_group_name, workspace):
+    from msrestazure.tools import is_valid_resource_id
+    from ._client_factory import cf_log_analytics
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from msrestazure.azure_exceptions import CloudError
+
+    workspace_id = None
+    if not is_valid_resource_id(workspace):
+        workspace_name = workspace
+        subscription_id = get_subscription_id(cmd.cli_ctx)
+        log_client = cf_log_analytics(cmd.cli_ctx, subscription_id)
+        workspace_result = None
+        try:
+            workspace_result = log_client.get(resource_group_name, workspace_name)
+        except CloudError:
+            from azure.mgmt.loganalytics.models import Workspace, Sku, SkuNameEnum
+            sku = Sku(name=SkuNameEnum.per_gb2018.value)
+            retention_time = 30  # default value
+            location = _get_resource_group_location(cmd.cli_ctx, resource_group_name)
+            workspace_instance = Workspace(location=location,
+                                           sku=sku,
+                                           retention_in_days=retention_time)
+            workspace_result = LongRunningOperation(cmd.cli_ctx)(log_client.create_or_update(resource_group_name,
+                                                                                             workspace_name,
+                                                                                             workspace_instance))
+        workspace_id = workspace_result.id
+    else:
+        workspace_id = workspace
+    return workspace_id
 # endregion
 
 
@@ -1388,6 +1456,75 @@ def accept_market_ordering_terms(cmd, urn=None, publisher=None, offer=None, plan
     term.accepted = True
     return market_place_client.marketplace_agreements.create(publisher, offer, plan, term)
 # endregion
+
+
+def _terms_prepare(cmd, urn, publisher, offer, plan):
+    if urn:
+        if any([publisher, offer, plan]):
+            raise CLIError('usage error: If using --urn, do not use any of --plan, --offer, --publisher.')
+        terms = urn.split(':')
+        if len(terms) != 4:
+            raise CLIError('usage error: urn should be in the format of publisher:offer:sku:version.')
+        publisher, offer = terms[0], terms[1]
+        image = show_vm_image(cmd, urn)
+        if not image.plan:
+            raise CLIError("Image '%s' has no terms to accept." % urn)
+        plan = image.plan.name
+    else:
+        if not all([publisher, offer, plan]):
+            raise CLIError(
+                'usage error: If not using --urn, all of --plan, --offer and --publisher should be provided.')
+    return publisher, offer, plan
+
+
+def _accept_cancel_terms(cmd, urn, publisher, offer, plan, accept):
+    publisher, offer, plan = _terms_prepare(cmd, urn, publisher, offer, plan)
+    op = cf_vm_image_term(cmd.cli_ctx, '')
+    terms = op.get(publisher, offer, plan)
+    terms.accepted = accept
+    return op.create(publisher, offer, plan, terms)
+
+
+def accept_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
+    """
+    Accept Azure Marketplace image terms so that the image can be used to create VMs.
+    :param cmd:cmd
+    :param urn:URN, in the format of 'publisher:offer:sku:version'. If specified, other argument values can be omitted
+    :param publisher:Image publisher
+    :param offer:Image offer
+    :param plan:Image billing plan
+    :return:
+    """
+    return _accept_cancel_terms(cmd, urn, publisher, offer, plan, True)
+
+
+def cancel_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
+    """
+    Cancel Azure Marketplace image terms.
+    :param cmd:cmd
+    :param urn:URN, in the format of 'publisher:offer:sku:version'. If specified, other argument values can be omitted
+    :param publisher:Image publisher
+    :param offer:Image offer
+    :param plan:Image billing plan
+    :return:
+    """
+    return _accept_cancel_terms(cmd, urn, publisher, offer, plan, False)
+
+
+def get_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
+    """
+    Get the details of Azure Marketplace image terms.
+    :param cmd:cmd
+    :param urn:URN, in the format of 'publisher:offer:sku:version'. If specified, other argument values can be omitted
+    :param publisher:Image publisher
+    :param offer:Image offer
+    :param plan:Image billing plan
+    :return:
+    """
+    publisher, offer, plan = _terms_prepare(cmd, urn, publisher, offer, plan)
+    op = cf_vm_image_term(cmd.cli_ctx, '')
+    terms = op.get(publisher, offer, plan)
+    return terms
 
 
 # region VirtualMachines NetworkInterfaces (NICs)
@@ -1831,7 +1968,7 @@ def assign_vmss_identity(cmd, resource_group_name, vmss_name, assign_identity=No
 
 
 # pylint: disable=too-many-locals, too-many-statements
-def create_vmss(cmd, vmss_name, resource_group_name, image,
+def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 disable_overprovision=False, instance_count=2,
                 location=None, tags=None, upgrade_policy_mode='manual', validate=False,
                 admin_username=None, admin_password=None, authentication_type=None,
@@ -1858,7 +1995,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
                 assign_identity=None, identity_scope=None, identity_role='Contributor',
                 identity_role_id=None, zones=None, priority=None, eviction_policy=None,
                 application_security_groups=None, ultra_ssd_enabled=None, ephemeral_os_disk=None,
-                proximity_placement_group=None, aux_subscriptions=None):
+                proximity_placement_group=None, aux_subscriptions=None, terminate_notification_time=None,
+                max_price=None, computer_name_prefix=None, orchestration_mode='ScaleSetVM'):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -1868,225 +2006,254 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
                                                                 build_vmss_storage_account_pool_resource,
                                                                 build_application_gateway_resource,
                                                                 build_msi_role_assignment, build_nsg_resource)
-    from msrestazure.tools import resource_id, is_valid_resource_id
-
-    storage_sku = disk_info['os'].get('storageAccountType')
-
-    subscription_id = get_subscription_id(cmd.cli_ctx)
-    network_id_template = resource_id(
-        subscription=subscription_id, resource_group=resource_group_name,
-        namespace='Microsoft.Network')
-
-    vmss_id = resource_id(
-        subscription=subscription_id, resource_group=resource_group_name,
-        namespace='Microsoft.Compute', type='virtualMachineScaleSets', name=vmss_name)
-
-    scrubbed_name = vmss_name.replace('-', '').lower()[:5]
-    naming_prefix = '{}{}'.format(scrubbed_name,
-                                  hash_string(vmss_id,
-                                              length=(9 - len(scrubbed_name)),
-                                              force_lower=True))
-
-    # determine final defaults and calculated values
-    tags = tags or {}
-    os_disk_name = os_disk_name or ('osdisk_{}'.format(hash_string(vmss_id, length=10)) if use_unmanaged_disk else None)
-    load_balancer = load_balancer or '{}LB'.format(vmss_name)
-    app_gateway = application_gateway or '{}AG'.format(vmss_name)
-    backend_pool_name = backend_pool_name or '{}BEPool'.format(load_balancer or application_gateway)
-
     # Build up the ARM template
     master_template = ArmTemplateBuilder()
 
-    vmss_dependencies = []
+    scale_set_vm_str = 'ScaleSetVM'
+    vm_str = 'VM'
+    if orchestration_mode.lower() == scale_set_vm_str.lower():
+        from msrestazure.tools import resource_id, is_valid_resource_id
 
-    # VNET will always be a dependency
-    if vnet_type == 'new':
-        vnet_name = vnet_name or '{}VNET'.format(vmss_name)
-        subnet = subnet or '{}Subnet'.format(vmss_name)
-        vmss_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(vnet_name))
-        vnet = build_vnet_resource(
-            cmd, vnet_name, location, tags, vnet_address_prefix, subnet, subnet_address_prefix)
-        if app_gateway_type:
-            vnet['properties']['subnets'].append({
-                'name': 'appGwSubnet',
-                'properties': {
-                    'addressPrefix': app_gateway_subnet_address_prefix
-                }
-            })
-        master_template.add_resource(vnet)
+        storage_sku = disk_info['os'].get('storageAccountType')
 
-    subnet_id = subnet if is_valid_resource_id(subnet) else \
-        '{}/virtualNetworks/{}/subnets/{}'.format(network_id_template, vnet_name, subnet)
-    gateway_subnet_id = ('{}/virtualNetworks/{}/subnets/appGwSubnet'.format(network_id_template, vnet_name)
-                         if app_gateway_type == 'new' else None)
+        subscription_id = get_subscription_id(cmd.cli_ctx)
+        network_id_template = resource_id(
+            subscription=subscription_id, resource_group=resource_group_name,
+            namespace='Microsoft.Network')
 
-    # public IP is used by either load balancer/application gateway
-    public_ip_address_id = None
-    if public_ip_address:
-        public_ip_address_id = (public_ip_address if is_valid_resource_id(public_ip_address)
-                                else '{}/publicIPAddresses/{}'.format(network_id_template,
-                                                                      public_ip_address))
+        vmss_id = resource_id(
+            subscription=subscription_id, resource_group=resource_group_name,
+            namespace='Microsoft.Compute', type='virtualMachineScaleSets', name=vmss_name)
 
-    def _get_public_ip_address_allocation(value, sku):
-        IPAllocationMethod = cmd.get_models('IPAllocationMethod', resource_type=ResourceType.MGMT_NETWORK)
-        if not value:
-            value = IPAllocationMethod.static.value if (sku and sku.lower() == 'standard') \
-                else IPAllocationMethod.dynamic.value
-        return value
+        scrubbed_name = vmss_name.replace('-', '').lower()[:5]
+        naming_prefix = '{}{}'.format(scrubbed_name,
+                                      hash_string(vmss_id,
+                                                  length=(9 - len(scrubbed_name)),
+                                                  force_lower=True))
 
-    # Handle load balancer creation
-    if load_balancer_type == 'new':
-        vmss_dependencies.append('Microsoft.Network/loadBalancers/{}'.format(load_balancer))
+        # determine final defaults and calculated values
+        tags = tags or {}
+        os_disk_name = os_disk_name or ('osdisk_{}'.format(hash_string(vmss_id, length=10))
+                                        if use_unmanaged_disk else None)
+        load_balancer = load_balancer or '{}LB'.format(vmss_name)
+        app_gateway = application_gateway or '{}AG'.format(vmss_name)
+        backend_pool_name = backend_pool_name or '{}BEPool'.format(load_balancer or application_gateway)
 
-        lb_dependencies = []
+        vmss_dependencies = []
+
+        # VNET will always be a dependency
         if vnet_type == 'new':
-            lb_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(vnet_name))
-        if public_ip_address_type == 'new':
-            public_ip_address = public_ip_address or '{}PublicIP'.format(load_balancer)
-            lb_dependencies.append(
-                'Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))
-            master_template.add_resource(build_public_ip_resource(
-                cmd, public_ip_address, location, tags,
-                _get_public_ip_address_allocation(public_ip_address_allocation, load_balancer_sku),
-                public_ip_address_dns_name, load_balancer_sku, zones))
-            public_ip_address_id = '{}/publicIPAddresses/{}'.format(network_id_template,
-                                                                    public_ip_address)
+            vnet_name = vnet_name or '{}VNET'.format(vmss_name)
+            subnet = subnet or '{}Subnet'.format(vmss_name)
+            vmss_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(vnet_name))
+            vnet = build_vnet_resource(
+                cmd, vnet_name, location, tags, vnet_address_prefix, subnet, subnet_address_prefix)
+            if app_gateway_type:
+                vnet['properties']['subnets'].append({
+                    'name': 'appGwSubnet',
+                    'properties': {
+                        'addressPrefix': app_gateway_subnet_address_prefix
+                    }
+                })
+            master_template.add_resource(vnet)
 
-        # calculate default names if not provided
-        nat_pool_name = nat_pool_name or '{}NatPool'.format(load_balancer)
-        if not backend_port:
-            backend_port = 3389 if os_type == 'windows' else 22
+        subnet_id = subnet if is_valid_resource_id(subnet) else \
+            '{}/virtualNetworks/{}/subnets/{}'.format(network_id_template, vnet_name, subnet)
+        gateway_subnet_id = ('{}/virtualNetworks/{}/subnets/appGwSubnet'.format(network_id_template, vnet_name)
+                             if app_gateway_type == 'new' else None)
 
-        lb_resource = build_load_balancer_resource(
-            cmd, load_balancer, location, tags, backend_pool_name, nat_pool_name, backend_port,
-            'loadBalancerFrontEnd', public_ip_address_id, subnet_id, private_ip_address='',
-            private_ip_allocation='Dynamic', sku=load_balancer_sku, instance_count=instance_count,
-            disable_overprovision=disable_overprovision)
-        lb_resource['dependsOn'] = lb_dependencies
-        master_template.add_resource(lb_resource)
+        # public IP is used by either load balancer/application gateway
+        public_ip_address_id = None
+        if public_ip_address:
+            public_ip_address_id = (public_ip_address if is_valid_resource_id(public_ip_address)
+                                    else '{}/publicIPAddresses/{}'.format(network_id_template,
+                                                                          public_ip_address))
 
-        # Per https://docs.microsoft.com/en-us/azure/load-balancer/load-balancer-standard-overview#nsg
-        if load_balancer_sku and load_balancer_sku.lower() == 'standard' and nsg is None:
-            nsg_name = '{}NSG'.format(vmss_name)
-            master_template.add_resource(build_nsg_resource(
-                None, nsg_name, location, tags, 'rdp' if os_type.lower() == 'windows' else 'ssh'))
-            nsg = "[resourceId('Microsoft.Network/networkSecurityGroups', '{}')]".format(nsg_name)
-            vmss_dependencies.append('Microsoft.Network/networkSecurityGroups/{}'.format(nsg_name))
+        def _get_public_ip_address_allocation(value, sku):
+            IPAllocationMethod = cmd.get_models('IPAllocationMethod', resource_type=ResourceType.MGMT_NETWORK)
+            if not value:
+                value = IPAllocationMethod.static.value if (sku and sku.lower() == 'standard') \
+                    else IPAllocationMethod.dynamic.value
+            return value
 
-    # Or handle application gateway creation
-    if app_gateway_type == 'new':
-        vmss_dependencies.append('Microsoft.Network/applicationGateways/{}'.format(app_gateway))
+        # Handle load balancer creation
+        if load_balancer_type == 'new':
+            vmss_dependencies.append('Microsoft.Network/loadBalancers/{}'.format(load_balancer))
 
-        ag_dependencies = []
-        if vnet_type == 'new':
-            ag_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(vnet_name))
-        if public_ip_address_type == 'new':
-            public_ip_address = public_ip_address or '{}PublicIP'.format(app_gateway)
-            ag_dependencies.append(
-                'Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))
-            master_template.add_resource(build_public_ip_resource(
-                cmd, public_ip_address, location, tags,
-                _get_public_ip_address_allocation(public_ip_address_allocation, None), public_ip_address_dns_name,
-                None, zones))
-            public_ip_address_id = '{}/publicIPAddresses/{}'.format(network_id_template,
-                                                                    public_ip_address)
+            lb_dependencies = []
+            if vnet_type == 'new':
+                lb_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(vnet_name))
+            if public_ip_address_type == 'new':
+                public_ip_address = public_ip_address or '{}PublicIP'.format(load_balancer)
+                lb_dependencies.append(
+                    'Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))
+                master_template.add_resource(build_public_ip_resource(
+                    cmd, public_ip_address, location, tags,
+                    _get_public_ip_address_allocation(public_ip_address_allocation, load_balancer_sku),
+                    public_ip_address_dns_name, load_balancer_sku, zones))
+                public_ip_address_id = '{}/publicIPAddresses/{}'.format(network_id_template,
+                                                                        public_ip_address)
 
-        # calculate default names if not provided
-        backend_port = backend_port or 80
+            # calculate default names if not provided
+            nat_pool_name = nat_pool_name or '{}NatPool'.format(load_balancer)
+            if not backend_port:
+                backend_port = 3389 if os_type == 'windows' else 22
 
-        ag_resource = build_application_gateway_resource(
-            cmd, app_gateway, location, tags, backend_pool_name, backend_port, 'appGwFrontendIP',
-            public_ip_address_id, subnet_id, gateway_subnet_id, private_ip_address='',
-            private_ip_allocation='Dynamic', sku=app_gateway_sku, capacity=app_gateway_capacity)
-        ag_resource['dependsOn'] = ag_dependencies
-        master_template.add_variable(
-            'appGwID',
-            "[resourceId('Microsoft.Network/applicationGateways', '{}')]".format(app_gateway))
-        master_template.add_resource(ag_resource)
+            lb_resource = build_load_balancer_resource(
+                cmd, load_balancer, location, tags, backend_pool_name, nat_pool_name, backend_port,
+                'loadBalancerFrontEnd', public_ip_address_id, subnet_id, private_ip_address='',
+                private_ip_allocation='Dynamic', sku=load_balancer_sku, instance_count=instance_count,
+                disable_overprovision=disable_overprovision)
+            lb_resource['dependsOn'] = lb_dependencies
+            master_template.add_resource(lb_resource)
 
-    # create storage accounts if needed for unmanaged disk storage
-    if storage_profile == StorageProfile.SAPirImage:
-        master_template.add_resource(build_vmss_storage_account_pool_resource(
-            cmd, 'storageLoop', location, tags, storage_sku))
-        master_template.add_variable('storageAccountNames', [
-            '{}{}'.format(naming_prefix, x) for x in range(5)
-        ])
-        master_template.add_variable('vhdContainers', [
-            "[concat('https://', variables('storageAccountNames')[{}], '.blob.{}/{}')]".format(
-                x, cmd.cli_ctx.cloud.suffixes.storage_endpoint, storage_container_name) for x in range(5)
-        ])
-        vmss_dependencies.append('storageLoop')
+            # Per https://docs.microsoft.com/azure/load-balancer/load-balancer-standard-overview#nsg
+            if load_balancer_sku and load_balancer_sku.lower() == 'standard' and nsg is None:
+                nsg_name = '{}NSG'.format(vmss_name)
+                master_template.add_resource(build_nsg_resource(
+                    None, nsg_name, location, tags, 'rdp' if os_type.lower() == 'windows' else 'ssh'))
+                nsg = "[resourceId('Microsoft.Network/networkSecurityGroups', '{}')]".format(nsg_name)
+                vmss_dependencies.append('Microsoft.Network/networkSecurityGroups/{}'.format(nsg_name))
 
-    backend_address_pool_id = None
-    inbound_nat_pool_id = None
-    if load_balancer_type or app_gateway_type:
-        network_balancer = load_balancer if load_balancer_type else app_gateway
-        balancer_type = 'loadBalancers' if load_balancer_type else 'applicationGateways'
+        # Or handle application gateway creation
+        if app_gateway_type == 'new':
+            vmss_dependencies.append('Microsoft.Network/applicationGateways/{}'.format(app_gateway))
 
-        if is_valid_resource_id(network_balancer):
-            # backend address pool needed by load balancer or app gateway
-            backend_address_pool_id = '{}/backendAddressPools/{}'.format(network_balancer, backend_pool_name)
-            if nat_pool_name:
-                inbound_nat_pool_id = '{}/inboundNatPools/{}'.format(network_balancer, nat_pool_name)
-        else:
-            # backend address pool needed by load balancer or app gateway
-            backend_address_pool_id = '{}/{}/{}/backendAddressPools/{}'.format(
-                network_id_template, balancer_type, network_balancer, backend_pool_name)
-            if nat_pool_name:
-                inbound_nat_pool_id = '{}/{}/{}/inboundNatPools/{}'.format(
-                    network_id_template, balancer_type, network_balancer, nat_pool_name)
+            ag_dependencies = []
+            if vnet_type == 'new':
+                ag_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(vnet_name))
+            if public_ip_address_type == 'new':
+                public_ip_address = public_ip_address or '{}PublicIP'.format(app_gateway)
+                ag_dependencies.append(
+                    'Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))
+                master_template.add_resource(build_public_ip_resource(
+                    cmd, public_ip_address, location, tags,
+                    _get_public_ip_address_allocation(public_ip_address_allocation, None), public_ip_address_dns_name,
+                    None, zones))
+                public_ip_address_id = '{}/publicIPAddresses/{}'.format(network_id_template,
+                                                                        public_ip_address)
 
-        if health_probe and not is_valid_resource_id(health_probe):
-            health_probe = '{}/loadBalancers/{}/probes/{}'.format(network_id_template, load_balancer, health_probe)
+            # calculate default names if not provided
+            backend_port = backend_port or 80
 
-    ip_config_name = '{}IPConfig'.format(naming_prefix)
-    nic_name = '{}Nic'.format(naming_prefix)
+            ag_resource = build_application_gateway_resource(
+                cmd, app_gateway, location, tags, backend_pool_name, backend_port, 'appGwFrontendIP',
+                public_ip_address_id, subnet_id, gateway_subnet_id, private_ip_address='',
+                private_ip_allocation='Dynamic', sku=app_gateway_sku, capacity=app_gateway_capacity)
+            ag_resource['dependsOn'] = ag_dependencies
+            master_template.add_variable(
+                'appGwID',
+                "[resourceId('Microsoft.Network/applicationGateways', '{}')]".format(app_gateway))
+            master_template.add_resource(ag_resource)
 
-    if custom_data:
-        custom_data = read_content_if_is_file(custom_data)
+        # create storage accounts if needed for unmanaged disk storage
+        if storage_profile == StorageProfile.SAPirImage:
+            master_template.add_resource(build_vmss_storage_account_pool_resource(
+                cmd, 'storageLoop', location, tags, storage_sku))
+            master_template.add_variable('storageAccountNames', [
+                '{}{}'.format(naming_prefix, x) for x in range(5)
+            ])
+            master_template.add_variable('vhdContainers', [
+                "[concat('https://', variables('storageAccountNames')[{}], '.blob.{}/{}')]".format(
+                    x, cmd.cli_ctx.cloud.suffixes.storage_endpoint, storage_container_name) for x in range(5)
+            ])
+            vmss_dependencies.append('storageLoop')
 
-    if secrets:
-        secrets = _merge_secrets([validate_file_or_dict(secret) for secret in secrets])
+        backend_address_pool_id = None
+        inbound_nat_pool_id = None
+        if load_balancer_type or app_gateway_type:
+            network_balancer = load_balancer if load_balancer_type else app_gateway
+            balancer_type = 'loadBalancers' if load_balancer_type else 'applicationGateways'
 
-    vmss_resource = build_vmss_resource(
-        cmd=cmd, name=vmss_name, naming_prefix=naming_prefix, location=location, tags=tags,
-        overprovision=not disable_overprovision, upgrade_policy_mode=upgrade_policy_mode, vm_sku=vm_sku,
-        instance_count=instance_count, ip_config_name=ip_config_name, nic_name=nic_name, subnet_id=subnet_id,
-        public_ip_per_vm=public_ip_per_vm, vm_domain_name=vm_domain_name, dns_servers=dns_servers, nsg=nsg,
-        accelerated_networking=accelerated_networking, admin_username=admin_username,
-        authentication_type=authentication_type, storage_profile=storage_profile, os_disk_name=os_disk_name,
-        disk_info=disk_info, os_type=os_type, image=image, admin_password=admin_password,
-        ssh_key_values=ssh_key_value, ssh_key_path=ssh_dest_key_path, os_publisher=os_publisher, os_offer=os_offer,
-        os_sku=os_sku, os_version=os_version, backend_address_pool_id=backend_address_pool_id,
-        inbound_nat_pool_id=inbound_nat_pool_id, health_probe=health_probe,
-        single_placement_group=single_placement_group, platform_fault_domain_count=platform_fault_domain_count,
-        custom_data=custom_data, secrets=secrets, license_type=license_type, zones=zones, priority=priority,
-        eviction_policy=eviction_policy, application_security_groups=application_security_groups,
-        ultra_ssd_enabled=ultra_ssd_enabled, proximity_placement_group=proximity_placement_group)
-    vmss_resource['dependsOn'] = vmss_dependencies
+            if is_valid_resource_id(network_balancer):
+                # backend address pool needed by load balancer or app gateway
+                backend_address_pool_id = '{}/backendAddressPools/{}'.format(network_balancer, backend_pool_name)
+                if nat_pool_name:
+                    inbound_nat_pool_id = '{}/inboundNatPools/{}'.format(network_balancer, nat_pool_name)
+            else:
+                # backend address pool needed by load balancer or app gateway
+                backend_address_pool_id = '{}/{}/{}/backendAddressPools/{}'.format(
+                    network_id_template, balancer_type, network_balancer, backend_pool_name)
+                if nat_pool_name:
+                    inbound_nat_pool_id = '{}/{}/{}/inboundNatPools/{}'.format(
+                        network_id_template, balancer_type, network_balancer, nat_pool_name)
 
-    if plan_name:
-        vmss_resource['plan'] = {
-            'name': plan_name,
-            'publisher': plan_publisher,
-            'product': plan_product,
-            'promotionCode': plan_promotion_code
+            if health_probe and not is_valid_resource_id(health_probe):
+                health_probe = '{}/loadBalancers/{}/probes/{}'.format(network_id_template, load_balancer, health_probe)
+
+        ip_config_name = '{}IPConfig'.format(naming_prefix)
+        nic_name = '{}Nic'.format(naming_prefix)
+
+        if custom_data:
+            custom_data = read_content_if_is_file(custom_data)
+
+        if secrets:
+            secrets = _merge_secrets([validate_file_or_dict(secret) for secret in secrets])
+
+        if computer_name_prefix is not None and isinstance(computer_name_prefix, str):
+            naming_prefix = computer_name_prefix
+
+        vmss_resource = build_vmss_resource(
+            cmd=cmd, name=vmss_name, naming_prefix=naming_prefix, location=location, tags=tags,
+            overprovision=not disable_overprovision, upgrade_policy_mode=upgrade_policy_mode, vm_sku=vm_sku,
+            instance_count=instance_count, ip_config_name=ip_config_name, nic_name=nic_name, subnet_id=subnet_id,
+            public_ip_per_vm=public_ip_per_vm, vm_domain_name=vm_domain_name, dns_servers=dns_servers, nsg=nsg,
+            accelerated_networking=accelerated_networking, admin_username=admin_username,
+            authentication_type=authentication_type, storage_profile=storage_profile, os_disk_name=os_disk_name,
+            disk_info=disk_info, os_type=os_type, image=image, admin_password=admin_password,
+            ssh_key_values=ssh_key_value, ssh_key_path=ssh_dest_key_path, os_publisher=os_publisher, os_offer=os_offer,
+            os_sku=os_sku, os_version=os_version, backend_address_pool_id=backend_address_pool_id,
+            inbound_nat_pool_id=inbound_nat_pool_id, health_probe=health_probe,
+            single_placement_group=single_placement_group, platform_fault_domain_count=platform_fault_domain_count,
+            custom_data=custom_data, secrets=secrets, license_type=license_type, zones=zones, priority=priority,
+            eviction_policy=eviction_policy, application_security_groups=application_security_groups,
+            ultra_ssd_enabled=ultra_ssd_enabled, proximity_placement_group=proximity_placement_group,
+            terminate_notification_time=terminate_notification_time, max_price=max_price)
+
+        vmss_resource['dependsOn'] = vmss_dependencies
+
+        if plan_name:
+            vmss_resource['plan'] = {
+                'name': plan_name,
+                'publisher': plan_publisher,
+                'product': plan_product,
+                'promotionCode': plan_promotion_code
+            }
+
+        enable_local_identity = None
+        if assign_identity is not None:
+            vmss_resource['identity'], _, _, enable_local_identity = _build_identities_info(
+                assign_identity)
+            if identity_scope:
+                role_assignment_guid = str(_gen_guid())
+                master_template.add_resource(build_msi_role_assignment(vmss_name, vmss_id, identity_role_id,
+                                                                       role_assignment_guid, identity_scope, False))
+
+    elif orchestration_mode.lower() == vm_str.lower():
+        if platform_fault_domain_count is None:
+            raise CLIError("usage error: --platform-fault-domain-count is required in VM mode")
+        vmss_resource = {
+            'type': 'Microsoft.Compute/virtualMachineScaleSets',
+            'name': vmss_name,
+            'location': location,
+            'tags': tags,
+            'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machine_scale_sets'),
+            'properties': {
+                'singlePlacementGroup': True,
+                'provisioningState': 0,
+                'platformFaultDomainCount': platform_fault_domain_count
+            }
         }
-
-    enable_local_identity = None
-    if assign_identity is not None:
-        vmss_resource['identity'], _, _, enable_local_identity = _build_identities_info(
-            assign_identity)
-        if identity_scope:
-            role_assignment_guid = str(_gen_guid())
-            master_template.add_resource(build_msi_role_assignment(vmss_name, vmss_id, identity_role_id,
-                                                                   role_assignment_guid, identity_scope, False))
+        if zones is not None:
+            vmss_resource['zones'] = zones
+    else:
+        raise CLIError('usage error: --orchestration-mode (ScaleSet | VM)')
 
     master_template.add_resource(vmss_resource)
     master_template.add_output('VMSS', vmss_name, 'Microsoft.Compute', 'virtualMachineScaleSets',
                                output_type='object')
 
-    if admin_password:
+    if orchestration_mode.lower() == scale_set_vm_str.lower() and admin_password:
         master_template.add_secure_parameter('adminPassword', admin_password)
 
     template = master_template.build()
@@ -2108,7 +2275,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
     # creates the VMSS deployment
     deployment_result = DeploymentOutputLongRunningOperation(cmd.cli_ctx)(
         sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties))
-    if assign_identity is not None:
+
+    if orchestration_mode.lower() == scale_set_vm_str.lower() and assign_identity is not None:
         vmss_info = get_vmss(cmd, resource_group_name, vmss_name)
         if enable_local_identity and not identity_scope:
             _show_missing_access_warning(resource_group_name, vmss_name, 'vmss')
@@ -2289,6 +2457,7 @@ def update_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_
 
 def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False, instance_id=None,
                 protect_from_scale_in=None, protect_from_scale_set_actions=None,
+                enable_terminate_notification=None, terminate_notification_time=None, ultra_ssd_enabled=None,
                 **kwargs):
     vmss = kwargs['parameters']
     client = _compute_client_factory(cmd.cli_ctx)
@@ -2315,6 +2484,27 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
     # else handle vmss update
     if license_type is not None:
         vmss.virtual_machine_profile.license_type = license_type
+
+    if enable_terminate_notification is not None or terminate_notification_time is not None:
+        TerminateNotificationProfile = cmd.get_models('TerminateNotificationProfile')
+        vmss.virtual_machine_profile.scheduled_events_profile.terminate_notification_profile =\
+            TerminateNotificationProfile(not_before_timeout=terminate_notification_time,
+                                         enable=enable_terminate_notification)
+
+    if ultra_ssd_enabled is not None:
+        if cmd.supported_api_version(min_api='2019-03-01', operation_group='virtual_machine_scale_sets'):
+            if vmss.additional_capabilities is None:
+                AdditionalCapabilities = cmd.get_models('AdditionalCapabilities')
+                vmss.additional_capabilities = AdditionalCapabilities(ultra_ssd_enabled=ultra_ssd_enabled)
+            else:
+                vmss.additional_capabilities.ultra_ssd_enabled = ultra_ssd_enabled
+        else:
+            if vmss.virtual_machine_profile.additional_capabilities is None:
+                AdditionalCapabilities = cmd.get_models('AdditionalCapabilities')
+                vmss.virtual_machine_profile.additional_capabilities = AdditionalCapabilities(
+                    ultra_ssd_enabled=ultra_ssd_enabled)
+            else:
+                vmss.virtual_machine_profile.additional_capabilities.ultra_ssd_enabled = ultra_ssd_enabled
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.create_or_update,
                        resource_group_name, name, **kwargs)
@@ -2546,10 +2736,11 @@ def create_image_gallery(cmd, resource_group_name, gallery_name, description=Non
 
 
 def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_name, os_type, publisher, offer, sku,
-                         os_state=None, end_of_life_date=None, privacy_statement_uri=None, release_note_uri=None,
-                         eula=None, description=None, location=None,
+                         os_state='Generalized', end_of_life_date=None, privacy_statement_uri=None,
+                         release_note_uri=None, eula=None, description=None, location=None,
                          minimum_cpu_core=None, maximum_cpu_core=None, minimum_memory=None, maximum_memory=None,
-                         disallowed_disk_types=None, plan_name=None, plan_publisher=None, plan_product=None, tags=None):
+                         disallowed_disk_types=None, plan_name=None, plan_publisher=None, plan_product=None, tags=None,
+                         hyper_v_generation='V1'):
     # pylint: disable=line-too-long
     GalleryImage, GalleryImageIdentifier, RecommendedMachineConfiguration, ResourceRange, Disallowed, ImagePurchasePlan = cmd.get_models(
         'GalleryImage', 'GalleryImageIdentifier', 'RecommendedMachineConfiguration', 'ResourceRange', 'Disallowed', 'ImagePurchasePlan')
@@ -2570,15 +2761,17 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
         purchase_plan = ImagePurchasePlan(name=plan_name, publisher=plan_publisher, product=plan_product)
 
     image = GalleryImage(identifier=GalleryImageIdentifier(publisher=publisher, offer=offer, sku=sku),
-                         os_type=os_type, os_state='Generalized', end_of_life_date=end_of_life_date,
+                         os_type=os_type, os_state=os_state, end_of_life_date=end_of_life_date,
                          recommended=recommendation, disallowed=Disallowed(disk_types=disallowed_disk_types),
-                         purchase_plan=purchase_plan, location=location, eula=eula, tags=(tags or {}))
+                         purchase_plan=purchase_plan, location=location, eula=eula, tags=(tags or {}),
+                         hyper_vgeneration=hyper_v_generation)
     return client.gallery_images.create_or_update(resource_group_name, gallery_name, gallery_image_name, image)
 
 
-def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_name, managed_image,
-                         gallery_image_version, location=None, target_regions=None, storage_account_type=None,
-                         end_of_life_date=None, exclude_from_latest=None, replica_count=None, tags=None):
+def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_name, gallery_image_version,
+                         location=None, target_regions=None, storage_account_type=None,
+                         end_of_life_date=None, exclude_from_latest=None, replica_count=None, tags=None,
+                         os_snapshot=None, data_snapshots=None, managed_image=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     ImageVersionPublishingProfile, GalleryArtifactSource, ManagedArtifact, ImageVersion, TargetRegion = cmd.get_models(
         'GalleryImageVersionPublishingProfile', 'GalleryArtifactSource', 'ManagedArtifact', 'GalleryImageVersion',
@@ -2586,15 +2779,47 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
     client = _compute_client_factory(cmd.cli_ctx)
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     end_of_life_date = fix_gallery_image_date_info(end_of_life_date)
-    if not is_valid_resource_id(managed_image):
+    if managed_image and not is_valid_resource_id(managed_image):
         managed_image = resource_id(subscription=client.config.subscription_id, resource_group=resource_group_name,
                                     namespace='Microsoft.Compute', type='images', name=managed_image)
+    if os_snapshot and not is_valid_resource_id(os_snapshot):
+        os_snapshot = resource_id(subscription=client.config.subscription_id, resource_group=resource_group_name,
+                                  namespace='Microsoft.Compute', type='snapshots', name=os_snapshot)
+    if data_snapshots:
+        for i, s in enumerate(data_snapshots):
+            if not is_valid_resource_id(data_snapshots[i]):
+                data_snapshots[i] = resource_id(
+                    subscription=client.config.subscription_id, resource_group=resource_group_name,
+                    namespace='Microsoft.Compute', type='snapshots', name=s)
     source = GalleryArtifactSource(managed_image=ManagedArtifact(id=managed_image))
     profile = ImageVersionPublishingProfile(exclude_from_latest=exclude_from_latest, end_of_life_date=end_of_life_date,
                                             target_regions=target_regions or [TargetRegion(name=location)],
                                             source=source, replica_count=replica_count,
                                             storage_account_type=storage_account_type)
-    image_version = ImageVersion(publishing_profile=profile, location=location, tags=(tags or {}))
+    if cmd.supported_api_version(min_api='2019-07-01', operation_group='gallery_image_versions'):
+        if managed_image is None and os_snapshot is None:
+            raise CLIError('usage error: Please provide --managed-image or --os-snapshot')
+        GalleryImageVersionStorageProfile = cmd.get_models('GalleryImageVersionStorageProfile')
+        GalleryArtifactVersionSource = cmd.get_models('GalleryArtifactVersionSource')
+        GalleryOSDiskImage = cmd.get_models('GalleryOSDiskImage')
+        GalleryDataDiskImage = cmd.get_models('GalleryDataDiskImage')
+        source = os_disk_image = data_disk_images = None
+        if managed_image is not None:
+            source = GalleryArtifactVersionSource(id=managed_image)
+        if os_snapshot is not None:
+            os_disk_image = GalleryOSDiskImage(source=GalleryArtifactVersionSource(id=os_snapshot))
+        if data_snapshots:
+            data_disk_images = []
+            for i, s in enumerate(data_snapshots):
+                data_disk_images.append(GalleryDataDiskImage(source=GalleryArtifactVersionSource(id=s), lun=i))
+        storage_profile = GalleryImageVersionStorageProfile(source=source, os_disk_image=os_disk_image,
+                                                            data_disk_images=data_disk_images)
+        image_version = ImageVersion(publishing_profile=profile, location=location, tags=(tags or {}),
+                                     storage_profile=storage_profile)
+    else:
+        if managed_image is None:
+            raise CLIError('usage error: Please provide --managed-image')
+        image_version = ImageVersion(publishing_profile=profile, location=location, tags=(tags or {}))
 
     return client.gallery_image_versions.create_or_update(resource_group_name=resource_group_name,
                                                           gallery_name=gallery_name,
@@ -2615,10 +2840,13 @@ def update_image_version(instance, target_regions=None, replica_count=None):
         instance.publishing_profile.target_regions = target_regions
     if replica_count:
         instance.publishing_profile.replica_count = replica_count
+    if instance.storage_profile.source is not None:
+        instance.storage_profile.os_disk_image = instance.storage_profile.data_disk_images = None
     return instance
 # endregion
 
 
+# region proximity placement groups
 def create_proximity_placement_group(cmd, client, proximity_placement_group_name, resource_group_name,
                                      ppg_type=None, location=None, tags=None):
     from knack.arguments import CaseInsensitiveList
@@ -2643,4 +2871,60 @@ def list_proximity_placement_groups(client, resource_group_name=None):
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name=resource_group_name)
     return client.list_by_subscription()
+# endregion
+
+
+# region dedicated host
+def create_dedicated_host_group(cmd, client, host_group_name, resource_group_name, platform_fault_domain_count=None,
+                                location=None, zones=None, tags=None):
+    DedicatedHostGroup = cmd.get_models('DedicatedHostGroup')
+    location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
+
+    host_group_params = DedicatedHostGroup(location=location, platform_fault_domain_count=platform_fault_domain_count,
+                                           zones=zones, tags=tags)
+
+    return client.create_or_update(resource_group_name, host_group_name, parameters=host_group_params)
+
+
+def list_dedicated_host_groups(cmd, client, resource_group_name=None):
+    if resource_group_name:
+        return client.list_by_resource_group(resource_group_name)
+    return client.list_by_subscription()
+
+
+def create_dedicated_host(cmd, client, host_group_name, host_name, resource_group_name, sku, platform_fault_domain=None,
+                          auto_replace_on_failure=None, license_type=None, location=None, tags=None):
+    DedicatedHostType = cmd.get_models('DedicatedHost')
+    SkuType = cmd.get_models('Sku')
+
+    location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
+    sku = SkuType(name=sku)
+
+    host_params = DedicatedHostType(location=location, platform_fault_domain=platform_fault_domain,
+                                    auto_replace_on_failure=auto_replace_on_failure, license_type=license_type,
+                                    sku=sku, tags=tags)
+
+    return client.create_or_update(resource_group_name, host_group_name, host_name, parameters=host_params)
+
+
+def get_dedicated_host_instance_view(client, host_group_name, host_name, resource_group_name):
+    return client.get(resource_group_name, host_group_name, host_name, expand="instanceView")
+
+# endregion
+
+
+# region VMMonitor
+def execute_query_for_vm(cmd, client, resource_group_name, vm_name, analytics_query, timespan=None):
+    """Executes a query against the Log Analytics workspace linked with a vm."""
+    from azure.loganalytics.models import QueryBody
+    vm = get_vm(cmd, resource_group_name, vm_name)
+    workspace = None
+    extension_resources = vm.resources or []
+    for resource in extension_resources:
+        if resource.name == "OMSExtension":
+            workspace = resource.settings.get('workspaceId', None)
+    if workspace is None:
+        raise CLIError('Cannot find the corresponding log analytics workspace. '
+                       'Please check the status of log analytics workpsace.')
+    return client.query(workspace, QueryBody(query=analytics_query, timespan=timespan))
 # endregion

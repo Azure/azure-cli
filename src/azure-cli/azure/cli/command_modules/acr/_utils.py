@@ -10,8 +10,6 @@ from azure.cli.core.commands.parameters import get_resources_in_subscription
 
 from ._constants import (
     REGISTRY_RESOURCE_TYPE,
-    ACR_RESOURCE_PROVIDER,
-    STORAGE_RESOURCE_TYPE,
     TASK_RESOURCE_ID_TEMPLATE,
     ACR_TASK_YAML_DEFAULT_NAME,
     get_classic_sku,
@@ -21,13 +19,7 @@ from ._constants import (
     get_valid_architecture,
     get_valid_variant
 )
-from ._client_factory import (
-    get_arm_service_client,
-    get_storage_service_client,
-    get_acr_service_client
-)
-
-VERSION_2017_10_GA = "2017-10-01"
+from ._client_factory import cf_acr_registries
 
 logger = get_logger(__name__)
 
@@ -89,12 +81,12 @@ def get_resource_group_name_by_registry_name(cli_ctx, registry_name,
     return resource_group_name
 
 
-def get_resource_id_by_storage_account_name(cli_ctx, storage_account_name):
-    """Returns the resource id for the storage account.
-    :param str storage_account_name: The name of storage account
+def get_resource_id_by_registry_name(cli_ctx, registry_name):
+    """Returns the resource id for the container registry.
+    :param str storage_account_name: The name of container registry
     """
     arm_resource = _arm_get_resource_by_name(
-        cli_ctx, storage_account_name, STORAGE_RESOURCE_TYPE)
+        cli_ctx, registry_name, REGISTRY_RESOURCE_TYPE)
     return arm_resource.id
 
 
@@ -105,7 +97,7 @@ def get_registry_by_name(cli_ctx, registry_name, resource_group_name=None):
     """
     resource_group_name = get_resource_group_name_by_registry_name(
         cli_ctx, registry_name, resource_group_name)
-    client = get_acr_service_client(cli_ctx, VERSION_2017_10_GA).registries
+    client = cf_acr_registries(cli_ctx)
 
     return client.get(resource_group_name, registry_name), resource_group_name
 
@@ -114,7 +106,7 @@ def get_registry_from_name_or_login_server(cli_ctx, login_server, registry_name=
     """Returns a Registry object for the specified name.
     :param str name: either the registry name or the login server of the registry.
     """
-    client = get_acr_service_client(cli_ctx, VERSION_2017_10_GA).registries
+    client = cf_acr_registries(cli_ctx)
     registry_list = client.list()
 
     if registry_name:
@@ -130,153 +122,6 @@ def get_registry_from_name_or_login_server(cli_ctx, login_server, registry_name=
         logger.warning(
             "More than one registries were found by %s.", login_server)
     return None
-
-
-def arm_deploy_template_new_storage(cli_ctx,
-                                    resource_group_name,
-                                    registry_name,
-                                    location,
-                                    sku,
-                                    storage_account_name,
-                                    admin_user_enabled,
-                                    deployment_name=None):
-    """Deploys ARM template to create a container registry with a new storage account.
-    :param str resource_group_name: The name of resource group
-    :param str registry_name: The name of container registry
-    :param str location: The name of location
-    :param str sku: The SKU of the container registry
-    :param str storage_account_name: The name of storage account
-    :param bool admin_user_enabled: Enable admin user
-    :param str deployment_name: The name of the deployment
-    """
-    from azure.mgmt.resource.resources.models import DeploymentProperties
-    from azure.cli.core.util import get_file_json
-    import os
-
-    parameters = _parameters(
-        registry_name=registry_name,
-        location=location,
-        sku=sku,
-        admin_user_enabled=admin_user_enabled,
-        storage_account_name=storage_account_name)
-
-    file_path = os.path.join(os.path.dirname(
-        __file__), 'template_new_storage.json')
-    template = get_file_json(file_path)
-    properties = DeploymentProperties(
-        template=template, parameters=parameters, mode='incremental')
-
-    return _arm_deploy_template(
-        get_arm_service_client(cli_ctx).deployments, resource_group_name, deployment_name, properties)
-
-
-def arm_deploy_template_existing_storage(cli_ctx,
-                                         resource_group_name,
-                                         registry_name,
-                                         location,
-                                         sku,
-                                         storage_account_name,
-                                         admin_user_enabled,
-                                         deployment_name=None):
-    """Deploys ARM template to create a container registry with an existing storage account.
-    :param str resource_group_name: The name of resource group
-    :param str registry_name: The name of container registry
-    :param str location: The name of location
-    :param str sku: The SKU of the container registry
-    :param str storage_account_name: The name of storage account
-    :param bool admin_user_enabled: Enable admin user
-    :param str deployment_name: The name of the deployment
-    """
-    from azure.mgmt.resource.resources.models import DeploymentProperties
-    from azure.cli.core.util import get_file_json
-    import os
-
-    storage_account_id = get_resource_id_by_storage_account_name(
-        cli_ctx, storage_account_name)
-
-    parameters = _parameters(
-        registry_name=registry_name,
-        location=location,
-        sku=sku,
-        admin_user_enabled=admin_user_enabled,
-        storage_account_id=storage_account_id)
-
-    file_path = os.path.join(os.path.dirname(
-        __file__), 'template_existing_storage.json')
-    template = get_file_json(file_path)
-    properties = DeploymentProperties(
-        template=template, parameters=parameters, mode='incremental')
-
-    return _arm_deploy_template(
-        get_arm_service_client(cli_ctx).deployments, resource_group_name, deployment_name, properties)
-
-
-def _arm_deploy_template(deployments_client,
-                         resource_group_name,
-                         deployment_name,
-                         properties):
-    """Deploys ARM template to create a container registry.
-    :param obj deployments_client: ARM deployments service client
-    :param str resource_group_name: The name of resource group
-    :param str deployment_name: The name of the deployment
-    :param DeploymentProperties properties: The properties of a deployment
-    """
-    if deployment_name is None:
-        import random
-        deployment_name = '{0}_{1}'.format(
-            ACR_RESOURCE_PROVIDER, random.randint(100, 800))
-
-    return deployments_client.create_or_update(resource_group_name, deployment_name, properties)
-
-
-def _parameters(registry_name,
-                location,
-                sku,
-                admin_user_enabled,
-                storage_account_name=None,
-                storage_account_id=None,
-                registry_api_version=None):
-    """Returns a dict of deployment parameters.
-    :param str registry_name: The name of container registry
-    :param str location: The name of location
-    :param str sku: The SKU of the container registry
-    :param bool admin_user_enabled: Enable admin user
-    :param str storage_account_name: The name of storage account
-    :param str storage_account_id: The resource ID of storage account
-    :param str registry_api_version: The API version of the container registry
-    """
-    parameters = {
-        'registryName': {'value': registry_name},
-        'registryLocation': {'value': location},
-        'registrySku': {'value': sku},
-        'adminUserEnabled': {'value': admin_user_enabled}
-    }
-    if registry_api_version:
-        parameters['registryApiVersion'] = {'value': registry_api_version}
-    if storage_account_name:
-        parameters['storageAccountName'] = {'value': storage_account_name}
-    if storage_account_id:
-        parameters['storageAccountId'] = {'value': storage_account_id}
-
-    return parameters
-
-
-def random_storage_account_name(cli_ctx, registry_name):
-    from datetime import datetime
-
-    client = get_storage_service_client(cli_ctx).storage_accounts
-    prefix = registry_name[:18].lower()
-
-    for x in range(10):
-        time_stamp_suffix = datetime.utcnow().strftime('%H%M%S')
-        storage_account_name = ''.join([prefix, time_stamp_suffix])[:24]
-        logger.debug("Checking storage account %s with name '%s'.",
-                     x, storage_account_name)
-        if client.check_name_availability(storage_account_name).name_available:  # pylint: disable=no-member
-            return storage_account_name
-
-    raise CLIError(
-        "Could not find an available storage account name. Please try again later.")
 
 
 def validate_managed_registry(cmd, registry_name, resource_group_name=None, message=None):
@@ -400,13 +245,13 @@ def get_validate_platform(cmd, platform):
 
 def get_yaml_template(cmd_value, timeout, file):
     """Generates yaml template
-    :param str cmd_value: The command to execute in each step
+    :param str cmd_value: The command to execute in each step. Task version defaults to v1.1.0
     :param str timeout: The timeout for each step
     :param str file: The task definition
     """
-    yaml_template = ""
+    yaml_template = "version: v1.1.0\n"
     if cmd_value:
-        yaml_template = "steps: \n  - cmd: {0}\n".format(cmd_value)
+        yaml_template += "steps: \n  - cmd: {0}\n".format(cmd_value)
         if timeout:
             yaml_template += "    timeout: {0}\n".format(timeout)
     else:
@@ -539,6 +384,16 @@ def remove_timer_trigger(task_name,
     return timer_triggers
 
 
+def add_days_to_now(days):
+    if days <= 0:
+        raise CLIError('Days must be positive.')
+    from datetime import datetime, timedelta
+    try:
+        return datetime.utcnow() + timedelta(days=days)
+    except OverflowError:
+        return datetime.max
+
+
 def is_vault_secret(cmd, credential):
     keyvault_dns = None
     try:
@@ -557,6 +412,24 @@ def get_task_id_from_task_name(cli_ctx, resource_group, registry_name, task_name
         reg=registry_name,
         name=task_name
     )
+
+
+def parse_actions_from_repositories(allow_or_remove_repository):
+    from .scope_map import ScopeMapActions
+    valid_actions = {action.value for action in ScopeMapActions}
+    REPOSITORIES = 'repositories'
+    actions = []
+    for rule in allow_or_remove_repository:
+        repository = rule[0]
+        if len(rule) < 2:
+            raise CLIError('At least one action must be specified with the repository {}.'.format(repository))
+        for action in rule[1:]:
+            action = action.lower()
+            if action not in valid_actions:
+                raise CLIError('Invalid action "{}" provided. \nValid actions are {}.'.format(action, valid_actions))
+            actions.append('{}/{}/{}'.format(REPOSITORIES, repository, action))
+
+    return actions
 
 
 class ResourceNotFound(CLIError):

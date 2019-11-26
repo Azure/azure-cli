@@ -3,7 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import json
 from collections import OrderedDict
+from knack.log import get_logger
+
+logger = get_logger(__name__)
 
 
 def configstore_output_format(result):
@@ -18,6 +22,14 @@ def keyvalue_entry_format(result):
     return _output_format(result, _keyvalue_entry_format_group)
 
 
+def featureflag_entry_format(result):
+    return _output_format(result, _featureflag_entry_format_group)
+
+
+def featurefilter_entry_format(result):
+    return _output_format(result, _featurefilter_entry_format_group)
+
+
 def _output_format(result, format_group):
     if 'value' in result and isinstance(result['value'], list):
         result = result['value']
@@ -26,13 +38,22 @@ def _output_format(result, format_group):
 
 
 def _configstore_format_group(item):
+    sku_value = _get_value(item, 'sku')
+
+    try:
+        sku = json.loads(sku_value.replace("\'", "\"")).get('name')
+    except ValueError:
+        logger.debug("No valid sku %s found", sku_value)
+        sku = ""
+
     return OrderedDict([
         ('CREATIONDATE', _format_datetime(_get_value(item, 'creationDate'))),
         ('ENDPOINT', _get_value(item, 'endpoint')),
         ('LOCATION', _get_value(item, 'location')),
         ('NAME', _get_value(item, 'name')),
-        ('PROVISIONINGSTATE', _get_value(_get_value(item, 'provisioningState'))),
-        ('RESOURCEGROUP', _get_value(item, 'resourceGroup'))
+        ('PROVISIONINGSTATE', _get_value(item, 'provisioningState')),
+        ('RESOURCEGROUP', _get_value(item, 'resourceGroup')),
+        ('SKU', sku)
     ])
 
 
@@ -42,7 +63,7 @@ def _configstore_credential_format_group(item):
         ('ID', _get_value(item, 'id')),
         ('LAST MODIFIED', _format_datetime(_get_value(item, 'lastModified'))),
         ('NAME', _get_value(item, 'name')),
-        ('READ ONLY', _get_value(_get_value(item, 'readOnly'))),
+        ('READ ONLY', _get_value(item, 'readOnly')),
         ('VALUE', _get_value(item, 'value'))
     ])
 
@@ -56,6 +77,25 @@ def _keyvalue_entry_format_group(item):
         ('TAGS', _get_value(item, 'tags')),
         ('LABEL', _get_value(item, 'label')),
         ('LOCKED', _get_value(item, 'locked'))
+    ])
+
+
+def _featureflag_entry_format_group(item):
+    return OrderedDict([
+        ('KEY', _get_value(item, 'key')),
+        ('LABEL', _get_value(item, 'label')),
+        ('STATE', _get_value(item, 'state')),
+        ('LOCKED', _get_value(item, 'locked')),
+        ('DESCRIPTION', _get_value(item, 'description')),
+        ('LAST MODIFIED', _format_datetime(_get_value(item, 'lastModified'))),
+        ('CONDITIONS', _get_value(item, 'conditions'))
+    ])
+
+
+def _featurefilter_entry_format_group(item):
+    return OrderedDict([
+        ('NAME', _get_value(item, 'name')),
+        ('PARAMETERS', _get_value(item, 'parameters'))
     ])
 
 

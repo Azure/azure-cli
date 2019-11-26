@@ -10,6 +10,7 @@ import dateutil
 import dateutil.parser
 from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import ScenarioTest, AADGraphUserReplacer, MOCKED_USER_NAME
+from knack.util import CLIError
 
 
 class ServicePrincipalExpressCreateScenarioTest(ScenarioTest):
@@ -41,7 +42,7 @@ class ServicePrincipalExpressCreateScenarioTest(ScenarioTest):
         self.cmd('ad sp credential reset -n {app_id_uri}',
                  checks=self.check('name', '{app_id_uri}'))
         # cleanup
-        self.cmd('ad sp delete --id {app_id_uri}')  # this whould auto-delete the app as well
+        self.cmd('ad sp delete --id {app_id_uri}')  # this would auto-delete the app as well
         self.cmd('ad sp list --spn {app_id_uri}',
                  checks=self.is_empty())
         self.cmd('ad app list --identifier-uri {app_id_uri}',
@@ -132,43 +133,73 @@ class ApplicationSetScenarioTest(ScenarioTest):
                 }
             ])
         })
-
+        app_id = None
         # create app through general option
         self.cmd('ad app create --display-name {name} --homepage {app} --identifier-uris {app}',
                  checks=self.check('identifierUris[0]', '{app}'))
 
         # set app password
         result = self.cmd('ad app credential reset --id {app} --append --password "test" --years 2').get_output_in_json()
-        self.assertTrue(result['appId'])
+        app_id = result['appId']
+        self.assertTrue(app_id)
+        self.kwargs['app_id'] = app_id
 
-        # show/list app
-        self.cmd('ad app show --id {app}',
-                 checks=self.check('identifierUris[0]', '{app}'))
-        self.cmd('ad app list --display-name {name}', checks=[
-            self.check('[0].identifierUris[0]', '{app}'),
-            self.check('length([*])', 1)
-        ])
+        try:
+            # show by identifierUri
+            self.cmd('ad app show --id {app}', checks=self.check('identifierUris[0]', '{app}'))
+            # show by appId
+            self.cmd('ad app show --id {app_id}', checks=self.check('appId', '{app_id}'))
 
-        # update app
-        self.kwargs['reply_uri'] = "http://azureclitest-replyuri"
-        self.cmd('ad app update --id {app} --reply-urls {reply_uri}')
-        self.cmd('ad app show --id {app}',
-                 checks=self.check('replyUrls[0]', '{reply_uri}'))
+            self.cmd('ad app list --display-name {name}', checks=[
+                self.check('[0].identifierUris[0]', '{app}'),
+                self.check('length([*])', 1)
+            ])
 
-        # invoke generic update
-        self.cmd('ad app update --id {app} --set oauth2AllowUrlPathMatching=true')
-        self.cmd('ad app show --id {app}',
-                 checks=self.check('oauth2AllowUrlPathMatching', True))
+            # update app
+            self.kwargs['reply_uri'] = "http://azureclitest-replyuri"
+            self.kwargs['reply_uri2'] = "http://azureclitest-replyuri2"
+            self.cmd('ad app update --id {app} --reply-urls {reply_uri}')
+            self.cmd('ad app show --id {app}',
+                     checks=self.check('replyUrls[0]', '{reply_uri}'))
 
-        # update app_roles
-        self.cmd("ad app update --id {app} --app-roles '{app_roles}'")
-        self.cmd('ad app show --id {app}',
-                 checks=self.check('length(appRoles)', 1))
+            # add and remove replyUrl
+            self.cmd('ad app update --id {app} --add replyUrls {reply_uri2}')
+            self.cmd('ad app show --id {app}', checks=self.check('length(replyUrls)', 2))
+            self.cmd('ad app update --id {app} --remove replyUrls 1')
+            self.cmd('ad app show --id {app}', checks=[
+                self.check('length(replyUrls)', 1),
+                self.check('replyUrls[0]', '{reply_uri2}')
+            ])
 
-        # delete app
-        self.cmd('ad app delete --id {app}')
-        self.cmd('ad app list --identifier-uri {app}',
-                 checks=self.is_empty())
+            # update displayName
+            name2 = self.create_random_name(prefix='cli-graph', length=14)
+            self.kwargs['name2'] = name2
+            self.cmd('ad app update --id {app} --display-name {name2}')
+            self.cmd('ad app show --id {app}', checks=self.check('displayName', '{name2}'))
+
+            # update homepage
+            self.kwargs['homepage2'] = 'http://' + name2
+            self.cmd('ad app update --id {app} --homepage {homepage2}')
+            self.cmd('ad app show --id {app}', checks=self.check('homepage', '{homepage2}'))
+
+            # invoke generic update
+            self.cmd('ad app update --id {app} --set oauth2AllowUrlPathMatching=true')
+            self.cmd('ad app show --id {app}',
+                     checks=self.check('oauth2AllowUrlPathMatching', True))
+
+            # update app_roles
+            self.cmd("ad app update --id {app} --app-roles '{app_roles}'")
+            self.cmd('ad app show --id {app}',
+                     checks=self.check('length(appRoles)', 1))
+
+            # delete app
+            self.cmd('ad app delete --id {app}')
+            app_id = None
+            self.cmd('ad app list --identifier-uri {app}',
+                     checks=self.is_empty())
+        finally:
+            if app_id:
+                self.cmd("ad app delete --id " + app_id)
 
 
 class CreateForRbacScenarioTest(ScenarioTest):
@@ -241,6 +272,10 @@ class GraphGroupScenarioTest(ScenarioTest):
             self.cmd('ad user update --display-name {user1}_new --account-enabled false --id {user1}@{domain} --mail-nickname {new_mail_nick_name}')
             user1_update_result = self.cmd('ad user show --upn-or-object-id {user1}@{domain}', checks=[self.check("displayName", '{user1}_new'),
                                                                                                        self.check("accountEnabled", False)]).get_output_in_json()
+            self.cmd('ad user update --id {user1}@{domain} --password {pass}')
+            self.cmd('ad user update --id {user1}@{domain} --password {pass} --force-change-password-next-login true')
+            with self.assertRaises(CLIError):
+                self.cmd('ad user update --id {user1}@{domain} --force-change-password-next-login false')
             self.kwargs['user1_id'] = user1_update_result['objectId']
 
             # create user2

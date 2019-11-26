@@ -4,7 +4,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.help_files import helps
+from knack.help_files import helps  # pylint: disable=unused-import
 # pylint: disable=line-too-long, too-many-lines
 
 helps['iotcentral'] = """
@@ -21,9 +21,9 @@ helps['iotcentral app create'] = """
 type: command
 short-summary: Create an IoT Central application.
 long-summary: |
-    For an introduction to IoT Central, see https://docs.microsoft.com/en-us/azure/iot-central/.
+    For an introduction to IoT Central, see https://docs.microsoft.com/azure/iot-central/.
     The F1 Sku is no longer supported. Please use the S1 Sku (default) for app creation.
-    For more pricing information, please visit https://azure.microsoft.com/en-us/pricing/details/iot-central/.
+    For more pricing information, please visit https://azure.microsoft.com/pricing/details/iot-central/.
 examples:
   - name: Create an IoT Central application in the standard pricing tier S1, in the region of the resource group.
     text: >

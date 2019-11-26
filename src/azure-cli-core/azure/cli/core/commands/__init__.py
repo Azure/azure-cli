@@ -44,6 +44,7 @@ except AttributeError:  # in Python 2.7
     t_JSONDecodeError = ValueError
 
 logger = get_logger(__name__)
+DEFAULT_CACHE_TTL = '10'
 
 
 def _explode_list_args(args):
@@ -91,7 +92,7 @@ def _expand_file_prefixed_files(args):
             try:
                 return _load_file(poss_file)
             except IOError:
-                logger.debug("Failed to load @'%s', assume not a file", arg)
+                logger.debug("Failed to load '%s', assume not a file", arg)
                 return arg
 
         # if @ not at the start it can't be a file
@@ -357,7 +358,6 @@ def _is_stale(cli_ctx, cache_obj):
         cls_str = str(ex.__class__)
         if 'NoOptionError' in cls_str or 'NoSectionError' in cls_str:
             # ensure a default value exists even if not previously set
-            from azure.cli.command_modules.configure._consts import DEFAULT_CACHE_TTL
             cli_ctx.config.set_value('core', 'cache_ttl', DEFAULT_CACHE_TTL)
             cache_ttl = DEFAULT_CACHE_TTL
         else:
@@ -920,14 +920,20 @@ class DeploymentOutputLongRunningOperation(LongRunningOperation):
             result = super(DeploymentOutputLongRunningOperation, self).__call__(result)
             outputs = None
             try:
-                outputs = result.properties.outputs
+                if isinstance(result, str) and result:
+                    try:
+                        obj = json.loads(result)
+                        return obj
+                    except json.decoder.JSONDecodeError:
+                        logger.info("Fail to transform result \"%s\" to dictionary", result)
+                else:
+                    outputs = result.properties.outputs
             except AttributeError:  # super.__call__ might return a ClientRawResponse
                 pass
             return {key: val['value'] for key, val in outputs.items()} if outputs else {}
         if isinstance(result, ClientRawResponse):
             # --no-wait returns a ClientRawResponse
             return {}
-
         # --validate returns a 'normal' response
         return result
 

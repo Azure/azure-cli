@@ -18,8 +18,8 @@ logger = get_logger(__name__)
 
 def create_account(client, resource_group_name, account_name, sku_name='S0', tags=None, force=None):
     terms = 'By creating an Azure Maps account, you agree that you have read and agree to the ' \
-            '\nLicense (https://azure.microsoft.com/en-us/support/legal/) and ' \
-            '\nPrivacy Statement (https://privacy.microsoft.com/en-us/privacystatement).'
+            '\nLicense (https://azure.microsoft.com/support/legal/) and ' \
+            '\nPrivacy Statement (https://privacy.microsoft.com/privacystatement).'
     hint = 'Please select.'
     client_denied_terms = 'You must agree to the License and Privacy Statement to create an account.'
 

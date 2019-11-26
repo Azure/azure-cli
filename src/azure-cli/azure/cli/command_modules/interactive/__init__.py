@@ -12,7 +12,7 @@ helps['interactive'] = """
             type: command
             short-summary: Start interactive mode. Installs the Interactive extension if not installed already.
             long-summary: >
-                For more information on interactive mode, see: https://azure.microsoft.com/en-us/blog/welcome-to-azure-cli-shell/
+                For more information on interactive mode, see: https://azure.microsoft.com/blog/welcome-to-azure-cli-shell/
             """
 
 
@@ -35,11 +35,11 @@ class InteractiveCommandsLoader(AzCommandsLoader):
 
     def load_arguments(self, _):
 
-        from azure.cli.command_modules.interactive.color_styles import get_options as style_options
-
         with self.argument_context('interactive') as c:
+            style_options = ['quiet', 'purple', 'default', 'none', 'contrast', 'pastel',
+                             'halloween', 'grey', 'br', 'bg', 'primary', 'neon']
             c.argument('style', options_list=['--style', '-s'], help='The colors of the shell.',
-                       choices=style_options())
+                       choices=style_options)
             c.argument('update', help='Update the Interactive extension to the latest available.',
                        action='store_true')
             c.ignore('_subscription')  # hide global subscription param

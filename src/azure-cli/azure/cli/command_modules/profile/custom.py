@@ -14,6 +14,15 @@ from azure.cli.core.util import in_cloud_console
 
 logger = get_logger(__name__)
 
+cloud_resource_type_mappings = {
+    "oss-rdbms": "ossrdbms_resource_id",
+    "arm": "active_directory_resource_id",
+    "aad-graph": "active_directory_graph_resource_id",
+    "ms-graph": "microsoft_graph_resource_id",
+    "batch": "batch_resource_id",
+    "media": "media_resource_id",
+    "data-lake": "active_directory_data_lake_resource_id"
+}
 
 _CLOUD_CONSOLE_LOGOUT_WARNING = ("Logout successful. Re-login to your initial Cloud Shell identity with"
                                  " 'az login --identity'. Login with a new identity with 'az login'.")
@@ -50,13 +59,18 @@ def show_subscription(cmd, subscription=None, show_auth_for_sdk=None):
     print(json.dumps(profile.get_sp_auth_info(subscription), indent=2))
 
 
-def get_access_token(cmd, subscription=None, resource=None):
+def get_access_token(cmd, subscription=None, resource=None, resource_type=None):
     '''
     get AAD token to access to a specified resource
     :param resource: Azure resource endpoints. Default to Azure Resource Manager
+    :param resource-type: Name of Azure resource endpoints. Can be used instead of resource.
     Use 'az cloud show' command for other Azure resources
     '''
-    resource = (resource or cmd.cli_ctx.cloud.endpoints.active_directory_resource_id)
+    if resource is None and resource_type is not None:
+        endpoints_attr_name = cloud_resource_type_mappings[resource_type]
+        resource = getattr(cmd.cli_ctx.cloud.endpoints, endpoints_attr_name)
+    else:
+        resource = (resource or cmd.cli_ctx.cloud.endpoints.active_directory_resource_id)
     profile = Profile(cli_ctx=cmd.cli_ctx)
     creds, subscription, tenant = profile.get_raw_token(subscription=subscription, resource=resource)
     return {
@@ -140,7 +154,16 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
                 raise CLIError("The user name might be invalid. " + suggestion)
             if 'Server returned error in RSTR - ErrorCode' in msg:
                 raise CLIError("Logging in through command line is not supported. " + suggestion)
+            if 'wstrust' in msg:
+                raise CLIError("Authentication failed due to error of '" + msg + "' "
+                               "This typically happens when attempting a Microsoft account, which requires "
+                               "interactive login. Please invoke 'az login' to cross check. "
+                               # pylint: disable=line-too-long
+                               "More details are available at https://github.com/AzureAD/microsoft-authentication-library-for-python/wiki/Username-Password-Authentication")
         raise CLIError(err)
+    except requests.exceptions.SSLError as err:
+        from azure.cli.core.util import SSLERROR_TEMPLATE
+        raise CLIError(SSLERROR_TEMPLATE.format(str(err)))
     except requests.exceptions.ConnectionError as err:
         raise CLIError('Please ensure you have network connection. Error detail: ' + str(err))
     all_subscriptions = list(subscriptions)

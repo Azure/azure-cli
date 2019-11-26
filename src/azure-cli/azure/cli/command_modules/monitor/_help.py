@@ -4,7 +4,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.help_files import helps
+from knack.help_files import helps  # pylint: disable=unused-import
 # pylint: disable=line-too-long, too-many-lines
 
 helps['monitor'] = """
@@ -25,10 +25,39 @@ parameters:
     short-summary: Add receivers to the action group during the creation
     long-summary: |
         Usage:   --action TYPE NAME [ARG ...]
-        Email:   --action email bob bob@contoso.com
-        SMS:     --action sms charli 1 5551234567
-        Webhook: --action webhook alert_hook https://www.contoso.com/alert
-        Multiple actions can be specified by using more than one `--action` argument.
+        Email:
+            Format:     --action email NAME EMAIL_ADDRESS [usecommonalertschema]
+            Example:    --action email bob bob@contoso.com
+        SMS:
+            Format:     --action sms NAME COUNTRY_CODE PHONE_NUMBER
+            Example:    --action sms charli 1 5551234567
+        Webhook:
+            Format:     --action webhook NAME URI [useaadauth OBJECT_ID IDENTIFIER URI] [usecommonalertschema]
+            Example:    --action webhook alert_hook https://www.contoso.com/alert useaadauth testobj http://identifier usecommonalertschema
+        Arm Role:
+            Format:     --action armrole NAME ROLE_ID [usecommonalertschema]
+            Example:    --action armole owner_role 8e3af657-a8ff-443c-a75c-2fe8c4bcb635
+        Azure App Push:
+            Format:     --action azureapppush NAME EMAIL_ADDRESS
+            Example:    --action azureapppush test_apppush bob@contoso.com
+        ITSM:
+            Format:     --action itsm NAME WORKSPACE_ID CONNECTION_ID TICKET_CONFIGURATION REGION
+            Example:    --action itsm test_itsm test_workspace test_conn ticket_blob useast
+        Automation runbook:
+            Format:     --action automationrunbook NAME AUTOMATION_ACCOUNT_ID RUNBOOK_NAME WEBHOOK_RESOURCE_ID SERVICE_URI [isglobalrunbook] [usecommonalertschema]
+            Example:    --action automationrunbook test_runbook test_acc test_book test_webhook test_rsrc http://example.com isglobalrunbook usecommonalertschema
+        Voice:
+            Format:     --action voice NAME COUNTRY_CODE PHONE_NUMBER
+            Example:    --action voice charli 1 4441234567
+        Logic App:
+            Format:     --action logicapp NAME RESOURCE_ID CALLBACK_URL [usecommonalertschema]
+            Example:    --action logicapp test_logicapp test_rsrc http://callback
+        Azure Function:
+            Format:     --action azurefunction NAME FUNCTION_APP_RESOURCE_ID FUNCTION_NAME HTTP_TRIGGER_URL [usecommonalertschema]
+            Example:    --action azurefunction test_function test_rsrc test_func http://trigger usecommonalertschema
+        Multiple actions can be specified by using more than one `--add-action` argument.
+        'useaadauth', 'isglobalrunbook' and 'usecommonalertschema' are optional arguements that only need to be passed to set the respective parameter to True.
+        If the 'useaadauth' argument is passed, then the OBJECT_ID and IDENTIFIER_URI values are required as well.
   - name: --short-name
     short-summary: The short name of the action group
 examples:
@@ -67,12 +96,45 @@ parameters:
     short-summary: Add receivers to the action group
     long-summary: |
         Usage:   --add-action TYPE NAME [ARG ...]
-        Email:   --add-action email bob bob@contoso.com
-        SMS:     --add-action sms charli 1 5551234567
-        Webhook: --add-action https://www.contoso.com/alert
+        Email:
+            Format:     --add-action email NAME EMAIL_ADDRESS [usecommonalertschema]
+            Example:    --add-action email bob bob@contoso.com
+        SMS:
+            Format:     --add-action sms NAME COUNTRY_CODE PHONE_NUMBER
+            Example:    --add-action sms charli 1 5551234567
+        Webhook:
+            Format:     --add-action webhook NAME URI [useaadauth OBJECT_ID IDENTIFIER URI] [usecommonalertschema]
+            Example:    --add-action https://www.contoso.com/alert useaadauth testobj http://identifier usecommonalertschema
+        Arm Role:
+            Format:     --add-action armrole NAME ROLE_ID [usecommonalertschema]
+            Example:    --add-action armole owner_role 8e3af657-a8ff-443c-a75c-2fe8c4bcb635
+        Azure App Push:
+            Format:     --add-action azureapppush NAME EMAIL_ADDRESS
+            Example:    --add-action azureapppush test_apppush bob@contoso.com
+        ITSM:
+            Format:     --add-action itsm NAME WORKSPACE_ID CONNECTION_ID TICKET_CONFIGURATION REGION
+            Example:    --add-action itsm test_itsm test_workspace test_conn ticket_blob useast
+        Automation runbook:
+            Format:     --add-action automationrunbook NAME AUTOMATION_ACCOUNT_ID RUNBOOK_NAME WEBHOOK_RESOURCE_ID SERVICE_URI [isglobalrunbook] [usecommonalertschema]
+            Example:    --add-action automationrunbook test_runbook test_acc test_book test_webhook test_rsrc http://example.com isglobalrunbook usecommonalertschema
+        Voice:
+            Format:     --add-action voice NAME COUNTRY_CODE PHONE_NUMBER
+            Example:    --add-action voice charli 1 4441234567
+        Logic App:
+            Format:     --add-action logicapp NAME RESOURCE_ID CALLBACK_URL [usecommonalertschema]
+            Example:    --add-action logicapp test_logicapp test_rsrc http://callback
+        Azure Function:
+            Format:     --add-action azurefunction NAME FUNCTION_APP_RESOURCE_ID FUNCTION_NAME HTTP_TRIGGER_URL [usecommonalertschema]
+            Example:    --add-action azurefunction test_function test_rsrc test_func http://trigger usecommonalertschema
         Multiple actions can be specified by using more than one `--add-action` argument.
+        'useaadauth', 'isglobalrunbook' and 'usecommonalertschema' are optional arguements that only need to be passed to set the respective parameter to True.
+        If the 'useaadauth' argument is passed, then the OBJECT_ID and IDENTIFIER_URI values are required as well.
   - name: --remove-action -r
     short-summary: Remove receivers from the action group. Accept space-separated list of receiver names.
+examples:
+  - name: Update an action group (autogenerated)
+    text: az monitor action-group update --name MyActionGroup --resource-group MyResourceGroup --set retentionPolicy.days=365 --subscription MySubscription
+    crafted: true
 """
 
 helps['monitor activity-log'] = """
@@ -244,6 +306,9 @@ examples:
   - name: Disable an alert
     text: >
         az monitor activity-log alert update -n {AlertName} -g {ResourceGroup} --enable false
+  - name: Update the details of this activity log alert (autogenerated)
+    text: az monitor activity-log alert update --enabled true --name MyActivityLogAlerts --resource-group MyResourceGroup --subscription MySubscription
+    crafted: true
 """
 
 helps['monitor activity-log list'] = """
@@ -332,6 +397,10 @@ examples:
 helps['monitor alert delete'] = """
 type: command
 short-summary: Delete an alert rule.
+examples:
+  - name: Delete an alert rule. (autogenerated)
+    text: az monitor alert delete --name MyAlertRule --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['monitor alert list'] = """
@@ -346,11 +415,19 @@ examples:
 helps['monitor alert list-incidents'] = """
 type: command
 short-summary: List all incidents for an alert rule.
+examples:
+  - name: List all incidents for an alert rule. (autogenerated)
+    text: az monitor alert list-incidents --resource-group MyResourceGroup --rule-name MyRule
+    crafted: true
 """
 
 helps['monitor alert show'] = """
 type: command
 short-summary: Show an alert rule.
+examples:
+  - name: Show an alert rule. (autogenerated)
+    text: az monitor alert show --name MyAlertRule --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['monitor alert show-incident'] = """
@@ -399,20 +476,27 @@ parameters:
   - name: --period
     short-summary: >
         Time span over which to apply --aggregation, in nDnHnMnS shorthand or full ISO8601 format.
+examples:
+  - name: Update a classic metric-based alert rule. (autogenerated)
+    text: az monitor alert update --email-service-owners true --name MyAlertRule --resource-group MyResourceGroup
+    crafted: true
+  - name: Update a classic metric-based alert rule. (autogenerated)
+    text: az monitor alert update --name MyAlertRule --remove-action email bob@contoso.com --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['monitor autoscale'] = """
 type: group
 short-summary: Manage autoscale settings.
 long-summary: >
-    For more information on autoscaling, visit: https://docs.microsoft.com/en-us/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings
+    For more information on autoscaling, visit: https://docs.microsoft.com/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings
 """
 
 helps['monitor autoscale create'] = """
 type: command
 short-summary: Create new autoscale settings.
 long-summary: >
-    For more information on autoscaling, visit: https://docs.microsoft.com/en-us/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings
+    For more information on autoscaling, visit: https://docs.microsoft.com/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings
 parameters:
   - name: --action -a
     short-summary: Add an action to fire when a scaling event occurs.
@@ -445,14 +529,14 @@ helps['monitor autoscale profile'] = """
 type: group
 short-summary: Manage autoscaling profiles.
 long-summary: >
-    For more information on autoscaling, visit: https://docs.microsoft.com/en-us/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings
+    For more information on autoscaling, visit: https://docs.microsoft.com/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings
 """
 
 helps['monitor autoscale profile create'] = """
 type: command
 short-summary: Create a fixed or recurring autoscale profile.
 long-summary: >
-    For more information on autoscaling, visit: https://docs.microsoft.com/en-us/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings
+    For more information on autoscaling, visit: https://docs.microsoft.com/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings
 parameters:
   - name: --timezone
     short-summary: Timezone name.
@@ -507,11 +591,19 @@ examples:
 helps['monitor autoscale profile delete'] = """
 type: command
 short-summary: Delete an autoscale profile.
+examples:
+  - name: Delete an autoscale profile. (autogenerated)
+    text: az monitor autoscale profile delete --autoscale-name MyAutoscale --name MyAutoscaleProfile --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['monitor autoscale profile list'] = """
 type: command
 short-summary: List autoscale profiles.
+examples:
+  - name: List autoscale profiles. (autogenerated)
+    text: az monitor autoscale profile list --autoscale-name MyAutoscale --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['monitor autoscale profile list-timezones'] = """
@@ -528,7 +620,7 @@ helps['monitor autoscale rule'] = """
 type: group
 short-summary: Manage autoscale scaling rules.
 long-summary: >
-    For more information on autoscaling, visit: https://docs.microsoft.com/en-us/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings
+    For more information on autoscaling, visit: https://docs.microsoft.com/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings
 """
 
 helps['monitor autoscale rule copy'] = """
@@ -540,7 +632,7 @@ helps['monitor autoscale rule create'] = """
 type: command
 short-summary: Add a new autoscale rule.
 long-summary: >
-    For more information on autoscaling, visit: https://docs.microsoft.com/en-us/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings
+    For more information on autoscaling, visit: https://docs.microsoft.com/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings
 parameters:
   - name: --condition
     short-summary: The condition which triggers the scaling action.
@@ -584,6 +676,10 @@ short-summary: Remove autoscale rules from a profile.
 helps['monitor autoscale rule list'] = """
 type: command
 short-summary: List autoscale rules for a profile.
+examples:
+  - name: List autoscale rules for a profile. (autogenerated)
+    text: az monitor autoscale rule list --autoscale-name MyAutoscale --profile-name MyProfile --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['monitor autoscale show'] = """
@@ -599,7 +695,7 @@ helps['monitor autoscale update'] = """
 type: command
 short-summary: Update autoscale settings.
 long-summary: >
-    For more information on autoscaling, visit: https://docs.microsoft.com/en-us/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings
+    For more information on autoscaling, visit: https://docs.microsoft.com/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings
 parameters:
   - name: --add-action -a
     short-summary: Add an action to fire when a scaling event occurs.
@@ -623,6 +719,9 @@ examples:
     text: |
         az monitor autoscale update -g {myrg} -n {autoscale-name} \\
           --remove-action email bob@contoso.com
+  - name: Update autoscale settings. (autogenerated)
+    text: az monitor autoscale update --count 3 --email-administrator true --enabled true --max-count 5 --min-count 2 --name MyAutoscaleSettings --resource-group MyResourceGroup --tags key[=value]
+    crafted: true
 """
 
 helps['monitor autoscale-settings'] = """
@@ -653,7 +752,7 @@ helps['monitor diagnostic-settings create'] = """
 type: command
 short-summary: Create diagnostic settings for the specified resource.
 long-summary: >
-    For more information, visit: https://docs.microsoft.com/en-us/rest/api/monitor/diagnosticsettings/createorupdate#metricsettings
+    For more information, visit: https://docs.microsoft.com/rest/api/monitor/diagnosticsettings/createorupdate#metricsettings
 parameters:
   - name: --name -n
     short-summary: The name of the diagnostic settings.
@@ -708,6 +807,91 @@ examples:
 helps['monitor diagnostic-settings update'] = """
 type: command
 short-summary: Update diagnostic settings.
+examples:
+  - name: Update diagnostic settings. (autogenerated)
+    text: az monitor diagnostic-settings update --name MyDiagnosticSetting --resource myScaleSet --set retentionPolicy.days=365
+    crafted: true
+"""
+
+helps['monitor log-analytics'] = """
+type: group
+short-summary: Manage Azure log analytics
+"""
+
+helps['monitor log-analytics workspace'] = """
+type: group
+short-summary: Manage Azure log analytics workspace
+"""
+
+helps['monitor log-analytics workspace create'] = """
+type: command
+short-summary: Create a workspace instance
+examples:
+  - name: Create a workspace instance
+    text: az monitor log-analytics workspace create -g MyResourceGroup -n MyWorkspace
+"""
+
+helps['monitor log-analytics workspace delete'] = """
+type: command
+short-summary: Delete a workspace instance.
+"""
+
+helps['monitor log-analytics workspace get-schema'] = """
+type: command
+short-summary: Get the schema for a given workspace.
+long-summary: >
+    Schema represents the internal structure of the workspace, which can be used during the query.
+    For more information, visit: https://docs.microsoft.com/en-us/rest/api/loganalytics/workspaces%202015-03-20/getschema
+"""
+
+helps['monitor log-analytics workspace get-shared-keys'] = """
+type: command
+short-summary: Get the shared keys for a workspace.
+"""
+
+helps['monitor log-analytics workspace list'] = """
+type: command
+short-summary: Get a list of workspaces under a resource group or a subscription.
+"""
+
+helps['monitor log-analytics workspace list-management-groups'] = """
+type: command
+short-summary: Get a list of management groups connected to a workspace.
+"""
+
+helps['monitor log-analytics workspace list-usages'] = """
+type: command
+short-summary: Get a list of usage metrics for a workspace.
+"""
+
+helps['monitor log-analytics workspace pack'] = """
+type: group
+short-summary: Manage intelligent packs for log analytics workspace.
+"""
+
+helps['monitor log-analytics workspace pack disable'] = """
+type: command
+short-summary: Disable an intelligence pack for a given workspace.
+"""
+
+helps['monitor log-analytics workspace pack enable'] = """
+type: command
+short-summary: Enable an intelligence pack for a given workspace.
+"""
+
+helps['monitor log-analytics workspace pack list'] = """
+type: command
+short-summary: List all the intelligence packs possible and whether they are enabled or disabled for a given workspace.
+"""
+
+helps['monitor log-analytics workspace show'] = """
+type: command
+short-summary: Show a workspace instance.
+"""
+
+helps['monitor log-analytics workspace update'] = """
+type: command
+short-summary: Update a workspace instance
 """
 
 helps['monitor log-profiles'] = """
@@ -774,15 +958,15 @@ parameters:
   - name: --condition
     short-summary: The condition which triggers the rule.
     long-summary: |
-        Usage:  --conditon {avg,min,max,total,count} [NAMESPACE.]METRIC {=,!=,>,>=,<,<=} THRESHOLD
+        Usage:  --condition {avg,min,max,total,count} [NAMESPACE.]METRIC {=,!=,>,>=,<,<=} THRESHOLD
                            [where DIMENSION {includes,excludes} VALUE [or VALUE ...]
                            [and   DIMENSION {includes,excludes} VALUE [or VALUE ...] ...]]
 
         Dimensions can be queried by adding the 'where' keyword and multiple dimensions can be queried by combining them with the 'and' keyword.
 
-        Values for METRIC, DIMENSION and appropriate THRESHOLD values can be obtained from `az monitor metrics list-definition` command.
+        Values for METRIC, DIMENSION and appropriate THRESHOLD values can be obtained from `az monitor metrics list-definitions` command.
 
-        Multiple conditons can be specified by using more than one `--condition` argument.
+        Multiple conditions can be specified by using more than one `--condition` argument.
 examples:
   - name: Create a high CPU usage alert on a VM with no actions.
     text: >
@@ -834,15 +1018,15 @@ parameters:
   - name: --add-condition
     short-summary: Add a condition which triggers the rule.
     long-summary: |
-        Usage:  --add-conditon {avg,min,max,total,count} [NAMESPACE.]METRIC {=,!=,>,>=,<,<=} THRESHOLD
+        Usage:  --add-condition {avg,min,max,total,count} [NAMESPACE.]METRIC {=,!=,>,>=,<,<=} THRESHOLD
                                [where DIMENSION {includes,excludes} VALUE [or VALUE ...]
                                [and   DIMENSION {includes,excludes} VALUE [or VALUE ...] ...]]
 
         Dimensions can be queried by adding the 'where' keyword and multiple dimensions can be queried by combining them with the 'and' keyword.
 
-        Values for METRIC, DIMENSION and appropriate THRESHOLD values can be obtained from `az monitor metrics list-definition` command.
+        Values for METRIC, DIMENSION and appropriate THRESHOLD values can be obtained from `az monitor metrics list-definitions` command.
 
-        Multiple conditons can be specified by using more than one `--condition` argument.
+        Multiple conditions can be specified by using more than one `--condition` argument.
   - name: --remove-conditions
     short-summary: Space-separated list of condition names to remove.
   - name: --add-action
@@ -872,7 +1056,7 @@ parameters:
         The interval over which to aggregate metrics, in ##h##m format.
   - name: --filter
     short-summary: A string used to reduce the set of metric data returned. eg. "BlobType eq '*'"
-    long-summary: 'For a full list of filters, see the filter string reference at https://docs.microsoft.com/en-us/rest/api/monitor/metrics/list'
+    long-summary: 'For a full list of filters, see the filter string reference at https://docs.microsoft.com/rest/api/monitor/metrics/list'
   - name: --metadata
     short-summary: Returns the metadata values instead of metric data
   - name: --dimension

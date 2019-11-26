@@ -74,6 +74,11 @@ def list_express_route_circuits(cmd, resource_group_name=None):
     return _generic_list(cmd.cli_ctx, 'express_route_circuits', resource_group_name)
 
 
+def create_express_route_auth(cmd, resource_group_name, circuit_name, authorization_name):
+    client = network_client_factory(cmd.cli_ctx).express_route_circuit_authorizations
+    return client.create_or_update(resource_group_name, circuit_name, authorization_name)
+
+
 def list_lbs(cmd, resource_group_name=None):
     return _generic_list(cmd.cli_ctx, 'load_balancers', resource_group_name)
 
@@ -121,7 +126,7 @@ def list_network_watchers(cmd, resource_group_name=None):
 # pylint: disable=too-many-locals
 def create_application_gateway(cmd, application_gateway_name, resource_group_name, location=None,
                                tags=None, no_wait=False, capacity=2,
-                               cert_data=None, cert_password=None,
+                               cert_data=None, cert_password=None, key_vault_secret_id=None,
                                frontend_port=None, http_settings_cookie_based_affinity='disabled',
                                http_settings_port=80, http_settings_protocol='Http',
                                routing_rule_type='Basic', servers=None,
@@ -132,7 +137,8 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
                                virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
                                public_ip_address_type=None, subnet_type=None, validate=False,
                                connection_draining_timeout=0, enable_http2=None, min_capacity=None, zones=None,
-                               custom_error_pages=None, firewall_policy=None, max_capacity=None):
+                               custom_error_pages=None, firewall_policy=None, max_capacity=None,
+                               user_assigned_identity=None):
     from azure.cli.core.util import random_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.network._template_builder import (
@@ -180,11 +186,11 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
 
     app_gateway_resource = build_application_gateway_resource(
         cmd, application_gateway_name, location, tags, sku, sku_tier, capacity, servers, frontend_port,
-        private_ip_address, private_ip_allocation, cert_data, cert_password,
+        private_ip_address, private_ip_allocation, cert_data, cert_password, key_vault_secret_id,
         http_settings_cookie_based_affinity, http_settings_protocol, http_settings_port,
         http_listener_protocol, routing_rule_type, public_ip_id, subnet_id,
         connection_draining_timeout, enable_http2, min_capacity, zones, custom_error_pages,
-        firewall_policy, max_capacity)
+        firewall_policy, max_capacity, user_assigned_identity)
     app_gateway_resource['dependsOn'] = ag_dependencies
     master_template.add_variable(
         'appGwID',
@@ -322,7 +328,7 @@ def update_ag_frontend_port(instance, parent, item_name, port=None):
 
 def create_ag_http_listener(cmd, resource_group_name, application_gateway_name, item_name,
                             frontend_port, frontend_ip=None, host_name=None, ssl_cert=None,
-                            no_wait=False):
+                            firewall_policy=None, no_wait=False):
     ApplicationGatewayHttpListener, SubResource = cmd.get_models('ApplicationGatewayHttpListener', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
@@ -336,13 +342,17 @@ def create_ag_http_listener(cmd, resource_group_name, application_gateway_name, 
         require_server_name_indication=True if ssl_cert and host_name else None,
         protocol='https' if ssl_cert else 'http',
         ssl_certificate=SubResource(id=ssl_cert) if ssl_cert else None)
+
+    if cmd.supported_api_version(min_api='2019-09-01'):
+        new_listener.firewall_policy = SubResource(id=firewall_policy) if firewall_policy else None
+
     upsert_to_collection(ag, 'http_listeners', new_listener, 'name')
     return sdk_no_wait(no_wait, ncf.application_gateways.create_or_update,
                        resource_group_name, application_gateway_name, ag)
 
 
 def update_ag_http_listener(cmd, instance, parent, item_name, frontend_ip=None, frontend_port=None,
-                            host_name=None, ssl_cert=None):
+                            host_name=None, ssl_cert=None, firewall_policy=None):
     SubResource = cmd.get_models('SubResource')
     if frontend_ip is not None:
         instance.frontend_ip_configuration = SubResource(id=frontend_ip)
@@ -357,8 +367,52 @@ def update_ag_http_listener(cmd, instance, parent, item_name, frontend_ip=None, 
             instance.protocol = 'Http'
     if host_name is not None:
         instance.host_name = host_name or None
+
+    if cmd.supported_api_version(min_api='2019-09-01'):
+        if firewall_policy is not None:
+            instance.firewall_policy = SubResource(id=firewall_policy)
+
     instance.require_server_name_indication = instance.host_name and instance.protocol.lower() == 'https'
     return parent
+
+
+def assign_ag_identity(cmd, resource_group_name, application_gateway_name,
+                       user_assigned_identity, no_wait=False):
+    ncf = network_client_factory(cmd.cli_ctx).application_gateways
+    ag = ncf.get(resource_group_name, application_gateway_name)
+    ManagedServiceIdentity, ManagedServiceIdentityUserAssignedIdentitiesValue = \
+        cmd.get_models('ManagedServiceIdentity', 'ManagedServiceIdentityUserAssignedIdentitiesValue')
+    user_assigned_indentity_instance = ManagedServiceIdentityUserAssignedIdentitiesValue()
+
+    user_assigned_identities_instance = dict()
+
+    user_assigned_identities_instance[user_assigned_identity] = user_assigned_indentity_instance
+
+    identity_instance = ManagedServiceIdentity(
+        type="UserAssigned",
+        user_assigned_identities=user_assigned_identities_instance
+    )
+    ag.identity = identity_instance
+
+    return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag)
+
+
+def remove_ag_identity(cmd, resource_group_name, application_gateway_name, no_wait=False):
+    ncf = network_client_factory(cmd.cli_ctx).application_gateways
+    ag = ncf.get(resource_group_name, application_gateway_name)
+    if ag.identity is None:
+        logger.warning("This command will be ignored. The identity doesn't exist.")
+    ag.identity = None
+
+    return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag)
+
+
+def show_ag_identity(cmd, resource_group_name, application_gateway_name):
+    ncf = network_client_factory(cmd.cli_ctx).application_gateways
+    ag = ncf.get(resource_group_name, application_gateway_name)
+    if ag.identity is None:
+        raise CLIError("Please first use 'az network application-gateway identity assign` to init the identity.")
+    return ag.identity
 
 
 def create_ag_backend_http_settings_collection(cmd, resource_group_name, application_gateway_name, item_name, port,
@@ -366,7 +420,7 @@ def create_ag_backend_http_settings_collection(cmd, resource_group_name, applica
                                                no_wait=False, connection_draining_timeout=0,
                                                host_name=None, host_name_from_backend_pool=None,
                                                affinity_cookie_name=None, enable_probe=None, path=None,
-                                               auth_certs=None):
+                                               auth_certs=None, root_certs=None):
     ApplicationGatewayBackendHttpSettings, ApplicationGatewayConnectionDraining, SubResource = cmd.get_models(
         'ApplicationGatewayBackendHttpSettings', 'ApplicationGatewayConnectionDraining', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
@@ -390,6 +444,8 @@ def create_ag_backend_http_settings_collection(cmd, resource_group_name, applica
         new_settings.affinity_cookie_name = affinity_cookie_name
         new_settings.probe_enabled = enable_probe
         new_settings.path = path
+    if cmd.supported_api_version(min_api='2019-04-01'):
+        new_settings.trusted_root_certificates = [SubResource(id=x) for x in root_certs or []]
     upsert_to_collection(ag, 'backend_http_settings_collection', new_settings, 'name')
     return sdk_no_wait(no_wait, ncf.application_gateways.create_or_update,
                        resource_group_name, application_gateway_name, ag)
@@ -400,12 +456,16 @@ def update_ag_backend_http_settings_collection(cmd, instance, parent, item_name,
                                                connection_draining_timeout=None,
                                                host_name=None, host_name_from_backend_pool=None,
                                                affinity_cookie_name=None, enable_probe=None, path=None,
-                                               auth_certs=None):
+                                               auth_certs=None, root_certs=None):
     SubResource = cmd.get_models('SubResource')
     if auth_certs == "":
         instance.authentication_certificates = None
     elif auth_certs is not None:
         instance.authentication_certificates = [SubResource(id=x) for x in auth_certs]
+    if root_certs == "":
+        instance.trusted_root_certificates = None
+    elif root_certs is not None:
+        instance.trusted_root_certificates = [SubResource(id=x) for x in root_certs]
     if port is not None:
         instance.port = port
     if probe is not None:
@@ -704,23 +764,26 @@ def update_ag_request_routing_rule(cmd, instance, parent, item_name, address_poo
     return parent
 
 
-def create_ag_ssl_certificate(cmd, resource_group_name, application_gateway_name, item_name, cert_data,
-                              cert_password, no_wait=False):
+def create_ag_ssl_certificate(cmd, resource_group_name, application_gateway_name, item_name, cert_data=None,
+                              cert_password=None, key_vault_secret_id=None, no_wait=False):
     ApplicationGatewaySslCertificate = cmd.get_models('ApplicationGatewaySslCertificate')
     ncf = network_client_factory(cmd.cli_ctx)
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     new_cert = ApplicationGatewaySslCertificate(
-        name=item_name, data=cert_data, password=cert_password)
+        name=item_name, data=cert_data, password=cert_password, key_vault_secret_id=key_vault_secret_id)
     upsert_to_collection(ag, 'ssl_certificates', new_cert, 'name')
     return sdk_no_wait(no_wait, ncf.application_gateways.create_or_update,
                        resource_group_name, application_gateway_name, ag)
 
 
-def update_ag_ssl_certificate(instance, parent, item_name, cert_data=None, cert_password=None):
+def update_ag_ssl_certificate(instance, parent, item_name,
+                              cert_data=None, cert_password=None, key_vault_secret_id=None):
     if cert_data is not None:
         instance.data = cert_data
     if cert_password is not None:
         instance.password = cert_password
+    if key_vault_secret_id is not None:
+        instance.key_vault_secret_id = key_vault_secret_id
     return parent
 
 
@@ -843,7 +906,7 @@ def update_ag_url_path_map(cmd, instance, parent, item_name, default_address_poo
 
 def create_ag_url_path_map_rule(cmd, resource_group_name, application_gateway_name, url_path_map_name,
                                 item_name, paths, address_pool=None, http_settings=None, redirect_config=None,
-                                no_wait=False):
+                                firewall_policy=None, no_wait=False):
     ApplicationGatewayPathRule, SubResource = cmd.get_models('ApplicationGatewayPathRule', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
@@ -863,6 +926,10 @@ def create_ag_url_path_map_rule(cmd, resource_group_name, application_gateway_na
         default_redirect = SubResource(id=url_map.default_redirect_configuration.id) \
             if url_map.default_redirect_configuration else None
         new_rule.redirect_configuration = SubResource(id=redirect_config) if redirect_config else default_redirect
+
+    if cmd.supported_api_version(min_api='2019-09-01'):
+        new_rule.firewall_policy = SubResource(id=firewall_policy) if firewall_policy else None
+
     upsert_to_collection(url_map, 'path_rules', new_rule, 'name')
     return sdk_no_wait(no_wait, ncf.application_gateways.create_or_update,
                        resource_group_name, application_gateway_name, ag)
@@ -982,8 +1049,16 @@ def list_ag_waf_rule_sets(client, _type=None, version=None, group=None):
 
 # region ApplicationGatewayWAFPolicy
 def create_ag_waf_policy(cmd, client, resource_group_name, policy_name, location=None, tags=None):
-    WebApplicationFirewallPolicy = cmd.get_models('WebApplicationFirewallPolicy')
-    waf_policy = WebApplicationFirewallPolicy(location=location, tags=tags)
+    WebApplicationFirewallPolicy, ManagedRulesDefinition, \
+        ManagedRuleSet = cmd.get_models('WebApplicationFirewallPolicy',
+                                        'ManagedRulesDefinition',
+                                        'ManagedRuleSet')
+    #  https://docs.microsoft.com/en-us/azure/application-gateway/waf-overview
+
+    # mandatory default rule with empty rule sets
+    managed_rule_set = ManagedRuleSet(rule_set_type='OWASP', rule_set_version='3.0')
+    managed_rule_definition = ManagedRulesDefinition(managed_rule_sets=[managed_rule_set])
+    waf_policy = WebApplicationFirewallPolicy(location=location, tags=tags, managed_rules=managed_rule_definition)
     return client.create_or_update(resource_group_name, policy_name, waf_policy)
 
 
@@ -998,25 +1073,55 @@ def list_ag_waf_policies(cmd, resource_group_name=None):
 # endregion
 
 
+# region ApplicationGatewayWAFPolicyRules PolicySettings
+def update_waf_policy_setting(cmd, instance,
+                              state=None, mode=None,
+                              max_request_body_size_in_kb=None, file_upload_limit_in_mb=None,
+                              request_body_check=False):
+    if state is not None:
+        instance.policy_settings.state = state
+
+    if mode is not None:
+        instance.policy_settings.mode = mode
+
+    if max_request_body_size_in_kb is not None:
+        instance.policy_settings.max_request_body_size_in_kb = max_request_body_size_in_kb
+
+    if file_upload_limit_in_mb is not None:
+        instance.policy_settings.file_upload_limit_in_mb = file_upload_limit_in_mb
+
+    if request_body_check is not None:
+        instance.policy_settings.request_body_check = request_body_check
+
+    return instance
+
+
+def list_waf_policy_setting(cmd, client, resource_group_name, policy_name):
+    return client.get(resource_group_name, policy_name).policy_settings
+# endregion
+
+
 # region ApplicationGatewayWAFPolicyRules
-def create_ag_waf_rule(cmd, client, resource_group_name, policy_name, rule_name, priority=None, rule_type=None,
-                       action=None):
+def create_waf_custom_rule(cmd, client, resource_group_name, policy_name, rule_name, priority, rule_type, action):
+    """
+    Initialize custom rule for WAF policy
+    """
     WebApplicationFirewallCustomRule = cmd.get_models('WebApplicationFirewallCustomRule')
     waf_policy = client.get(resource_group_name, policy_name)
-    new_rule = WebApplicationFirewallCustomRule(
+    new_custom_rule = WebApplicationFirewallCustomRule(
         name=rule_name,
         action=action,
         match_conditions=[],
         priority=priority,
         rule_type=rule_type
     )
-    upsert_to_collection(waf_policy, 'custom_rules', new_rule, 'name')
+    upsert_to_collection(waf_policy, 'custom_rules', new_custom_rule, 'name')
     parent = client.create_or_update(resource_group_name, policy_name, waf_policy)
     return find_child_item(parent, rule_name, path='custom_rules', key_path='name')
 
 
 # pylint: disable=unused-argument
-def update_ag_waf_rule(instance, parent, cmd, rule_name, priority=None, rule_type=None, action=None):
+def update_waf_custom_rule(instance, parent, cmd, rule_name, priority=None, rule_type=None, action=None):
     with cmd.update_context(instance) as c:
         c.set_param('priority', priority)
         c.set_param('rule_type', rule_type)
@@ -1024,16 +1129,16 @@ def update_ag_waf_rule(instance, parent, cmd, rule_name, priority=None, rule_typ
     return parent
 
 
-def show_ag_waf_rule(cmd, client, resource_group_name, policy_name, rule_name):
+def show_waf_custom_rule(cmd, client, resource_group_name, policy_name, rule_name):
     waf_policy = client.get(resource_group_name, policy_name)
     return find_child_item(waf_policy, rule_name, path='custom_rules', key_path='name')
 
 
-def list_ag_waf_rules(cmd, client, resource_group_name, policy_name):
+def list_waf_custom_rules(cmd, client, resource_group_name, policy_name):
     return client.get(resource_group_name, policy_name).custom_rules
 
 
-def delete_ag_waf_rule(cmd, client, resource_group_name, policy_name, rule_name, no_wait=None):
+def delete_waf_custom_rule(cmd, client, resource_group_name, policy_name, rule_name, no_wait=None):
     waf_policy = client.get(resource_group_name, policy_name)
     rule = find_child_item(waf_policy, rule_name, path='custom_rules', key_path='name')
     waf_policy.custom_rules.remove(rule)
@@ -1042,11 +1147,11 @@ def delete_ag_waf_rule(cmd, client, resource_group_name, policy_name, rule_name,
 
 
 # region ApplicationGatewayWAFPolicyRuleMatchConditions
-def add_ag_waf_rule_match_cond(cmd, client, resource_group_name, policy_name, rule_name, match_variables,
-                               operator, match_values, negation_condition=None, transforms=None):
+def add_waf_custom_rule_match_cond(cmd, client, resource_group_name, policy_name, rule_name,
+                                   match_variables, operator, match_values, negation_condition=None, transforms=None):
     MatchCondition = cmd.get_models('MatchCondition')
     waf_policy = client.get(resource_group_name, policy_name)
-    rule = find_child_item(waf_policy, rule_name, path='custom_rules', key_path='name')
+    custom_rule = find_child_item(waf_policy, rule_name, path='custom_rules', key_path='name')
     new_cond = MatchCondition(
         match_variables=match_variables,
         operator=operator,
@@ -1054,22 +1159,137 @@ def add_ag_waf_rule_match_cond(cmd, client, resource_group_name, policy_name, ru
         negation_conditon=negation_condition,
         transforms=transforms
     )
-    rule.match_conditions.append(new_cond)
-    upsert_to_collection(waf_policy, 'custom_rules', rule, 'name', warn=False)
+    custom_rule.match_conditions.append(new_cond)
+    upsert_to_collection(waf_policy, 'custom_rules', custom_rule, 'name', warn=False)
     client.create_or_update(resource_group_name, policy_name, waf_policy)
     return new_cond
 
 
-def list_ag_waf_rule_match_cond(cmd, client, resource_group_name, policy_name, rule_name):
+def list_waf_custom_rule_match_cond(cmd, client, resource_group_name, policy_name, rule_name):
     waf_policy = client.get(resource_group_name, policy_name)
     return find_child_item(waf_policy, rule_name, path='custom_rules', key_path='name').match_conditions
 
 
-def remove_ag_waf_rule_match_cond(cmd, client, resource_group_name, policy_name, rule_name, index):
+def remove_waf_custom_rule_match_cond(cmd, client, resource_group_name, policy_name, rule_name, index):
     waf_policy = client.get(resource_group_name, policy_name)
     rule = find_child_item(waf_policy, rule_name, path='custom_rules', key_path='name')
     rule.match_conditions.pop(index)
     client.create_or_update(resource_group_name, policy_name, waf_policy)
+# endregion
+
+
+# region ApplicationGatewayWAFPolicy ManagedRule ManagedRuleSet
+def add_waf_managed_rule_set(cmd, client, resource_group_name, policy_name,
+                             rule_set_type, rule_set_version, rule_group_name, rules):
+    """
+    Add managed rule set to the WAF policy managed rules.
+    Visit: https://docs.microsoft.com/en-us/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
+    """
+    ManagedRuleSet, ManagedRuleGroupOverride, ManagedRuleOverride = \
+        cmd.get_models('ManagedRuleSet', 'ManagedRuleGroupOverride', 'ManagedRuleOverride')
+
+    waf_policy = client.get(resource_group_name, policy_name)
+
+    managed_rule_overrides = [ManagedRuleOverride(rule_id=r) for r in rules]
+    rule_group_override = ManagedRuleGroupOverride(rule_group_name=rule_group_name, rules=managed_rule_overrides)
+    new_managed_rule_set = ManagedRuleSet(rule_set_type=rule_set_type,
+                                          rule_set_version=rule_set_version,
+                                          rule_group_overrides=[rule_group_override])
+
+    for rule_set in waf_policy.managed_rules.managed_rule_sets:
+        if rule_set.rule_set_type == rule_set_type:
+            for rule_override in rule_set.rule_group_overrides:
+                if rule_override.rule_group_name == rule_group_name:
+                    rule_override.rules.extend(managed_rule_overrides)
+                    break
+            else:
+                rule_set.rule_group_overrides.append(rule_group_override)
+            break
+    else:
+        waf_policy.managed_rules.managed_rule_sets.append(new_managed_rule_set)
+
+    return client.create_or_update(resource_group_name, policy_name, waf_policy)
+
+
+def update_waf_managed_rule_set(cmd, instance, rule_set_type, rule_set_version, rule_group_name, rules=None):
+    """
+    Update(Override) existing rule set of a WAF policy managed rules.
+    """
+    ManagedRuleGroupOverride, ManagedRuleOverride = cmd.get_models('ManagedRuleGroupOverride', 'ManagedRuleOverride')
+
+    managed_rule_overrides = [ManagedRuleOverride(rule_id=r) for r in rules] if rules else None
+
+    rule_group_override = ManagedRuleGroupOverride(rule_group_name=rule_group_name,
+                                                   rules=managed_rule_overrides) if managed_rule_overrides else None
+
+    for rule_set in instance.managed_rules.managed_rule_sets:
+        if rule_set.rule_set_type == rule_set_type:
+            for rule_group in rule_set.rule_group_overrides:
+                if rule_group.rule_group_name == rule_group_name:
+                    rule_group.rules = managed_rule_overrides
+                    break
+            else:
+                rule_set.rule_group_overrides.append(rule_group_override)
+            break
+    else:
+        raise CLIError('Managed rule group: [ {} ] not found. Add it first'.format(rule_group_name))
+
+    return instance
+
+
+def remove_waf_managed_rule_set(cmd, client, resource_group_name, policy_name,
+                                rule_set_type, rule_set_version, rule_group_name=None):
+    """
+    Remove a managed rule set by rule set group name if rule_group_name is specified. Otherwise, remove all rule set.
+    """
+    waf_policy = client.get(resource_group_name, policy_name)
+
+    for rule_set in waf_policy.managed_rules.managed_rule_sets:
+        if rule_set.rule_set_type != rule_set_type:
+            continue
+
+        if rule_group_name is None:
+            rule_set.rule_group_overrides = []
+        else:
+            rg = next((rg for rg in rule_set.rule_group_overrides if rg.rule_group_name == rule_group_name), None)
+            if rg is None:
+                raise CLIError('Rule set group [ {} ] not found.'.format(rule_group_name))
+            rule_set.rule_group_overrides.remove(rg)
+
+    return client.create_or_update(resource_group_name, policy_name, waf_policy)
+
+
+def list_waf_managed_rule_set(cmd, client, resource_group_name, policy_name):
+    waf_policy = client.get(resource_group_name, policy_name)
+    return waf_policy.managed_rules
+# endregion
+
+
+# region ApplicationGatewayWAFPolicy ManagedRule OwaspCrsExclusionEntry
+def add_waf_managed_rule_exclusion(cmd, client, resource_group_name, policy_name,
+                                   match_variable, selector_match_operator, selector):
+    OwaspCrsExclusionEntry = cmd.get_models('OwaspCrsExclusionEntry')
+
+    exclusion_entry = OwaspCrsExclusionEntry(match_variable=match_variable,
+                                             selector_match_operator=selector_match_operator,
+                                             selector=selector)
+
+    waf_policy = client.get(resource_group_name, policy_name)
+
+    waf_policy.managed_rules.exclusions.append(exclusion_entry)
+
+    return client.create_or_update(resource_group_name, policy_name, waf_policy)
+
+
+def remove_waf_managed_rule_exclusion(cmd, client, resource_group_name, policy_name):
+    waf_policy = client.get(resource_group_name, policy_name)
+    waf_policy.managed_rules.exclusions = []
+    return client.create_or_update(resource_group_name, policy_name, waf_policy)
+
+
+def list_waf_managed_rule_exclusion(cmd, client, resource_group_name, policy_name):
+    waf_policy = client.get(resource_group_name, policy_name)
+    return waf_policy.managed_rules
 # endregion
 
 
@@ -1949,7 +2169,8 @@ def update_express_route_peering(cmd, instance, peer_asn=None, primary_peer_addr
 # region ExpressRoute Connection
 # pylint: disable=unused-argument
 def create_express_route_connection(cmd, resource_group_name, express_route_gateway_name, connection_name,
-                                    peering, circuit_name=None, authorization_key=None, routing_weight=None):
+                                    peering, circuit_name=None, authorization_key=None, routing_weight=None,
+                                    enable_internet_security=None):
     ExpressRouteConnection, SubResource = cmd.get_models('ExpressRouteConnection', 'SubResource')
     client = network_client_factory(cmd.cli_ctx).express_route_connections
     connection = ExpressRouteConnection(
@@ -1958,12 +2179,16 @@ def create_express_route_connection(cmd, resource_group_name, express_route_gate
         authorization_key=authorization_key,
         routing_weight=routing_weight
     )
+
+    if enable_internet_security and cmd.supported_api_version(min_api='2019-09-01'):
+        connection.enable_internet_security = enable_internet_security
+
     return client.create_or_update(resource_group_name, express_route_gateway_name, connection_name, connection)
 
 
 # pylint: disable=unused-argument
 def update_express_route_connection(instance, cmd, circuit_name=None, peering=None, authorization_key=None,
-                                    routing_weight=None):
+                                    routing_weight=None, enable_internet_security=None):
     SubResource = cmd.get_models('SubResource')
     if peering is not None:
         instance.express_route_connection_id = SubResource(id=peering)
@@ -1971,6 +2196,9 @@ def update_express_route_connection(instance, cmd, circuit_name=None, peering=No
         instance.authorization_key = authorization_key
     if routing_weight is not None:
         instance.routing_weight = routing_weight
+    if enable_internet_security is not None and cmd.supported_api_version(min_api='2019-09-01'):
+        instance.enable_internet_security = enable_internet_security
+
     return instance
 # endregion
 
@@ -2048,15 +2276,245 @@ def list_express_route_ports(cmd, resource_group_name=None):
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
     return client.list()
+
+
+def assign_express_route_port_identity(cmd, resource_group_name, express_route_port_name,
+                                       user_assigned_identity, no_wait=False):
+    client = network_client_factory(cmd.cli_ctx).express_route_ports
+    ports = client.get(resource_group_name, express_route_port_name)
+
+    ManagedServiceIdentity, ManagedServiceIdentityUserAssignedIdentitiesValue = \
+        cmd.get_models('ManagedServiceIdentity', 'ManagedServiceIdentityUserAssignedIdentitiesValue')
+
+    user_assigned_identity_instance = ManagedServiceIdentityUserAssignedIdentitiesValue()
+    user_assigned_identities_instance = dict()
+    user_assigned_identities_instance[user_assigned_identity] = user_assigned_identity_instance
+
+    identity_instance = ManagedServiceIdentity(type="UserAssigned",
+                                               user_assigned_identities=user_assigned_identities_instance)
+    ports.identity = identity_instance
+
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, express_route_port_name, ports)
+
+
+def remove_express_route_port_identity(cmd, resource_group_name, express_route_port_name, no_wait=False):
+    client = network_client_factory(cmd.cli_ctx).express_route_ports
+    ports = client.get(resource_group_name, express_route_port_name)
+
+    if ports.identity is None:
+        logger.warning("The identity of the ExpressRoute Port doesn't exist.")
+        return ports
+
+    ports.identity = None
+
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, express_route_port_name, ports)
+
+
+def show_express_route_port_identity(cmd, resource_group_name, express_route_port_name):
+    client = network_client_factory(cmd.cli_ctx).express_route_ports
+    ports = client.get(resource_group_name, express_route_port_name)
+    return ports.identity
+
+
+def update_express_route_port_link(cmd, instance, express_route_port_name, link_name,
+                                   macsec_cak_secret_identifier=None, macsec_ckn_secret_identifier=None,
+                                   macsec_cipher=None, admin_state=None):
+    """
+    :param cmd:
+    :param instance: an instance of ExpressRoutePort
+    :param express_route_port_name:
+    :param link_name:
+    :param macsec_cak_secret_identifier:
+    :param macsec_ckn_secret_identifier:
+    :param macsec_cipher:
+    :param admin_state:
+    :return:
+    """
+    if len(instance.links) != 2:
+        raise CLIError("The number of ExpressRoute Links should be 2. "
+                       "Code may not perform as expected. Please contact us to update CLI.")
+
+    try:
+        link_index = [index for index, link in enumerate(instance.links) if link.name == link_name][0]
+    except Exception:
+        raise CLIError('ExpressRoute Link "{}" not found'.format(link_name))
+
+    if any([macsec_cak_secret_identifier, macsec_ckn_secret_identifier, macsec_cipher]):
+        instance.links[link_index].mac_sec_config.cak_secret_identifier = macsec_cak_secret_identifier
+        instance.links[link_index].mac_sec_config.ckn_secret_identifier = macsec_ckn_secret_identifier
+
+        # TODO https://github.com/Azure/azure-rest-api-specs/issues/7569
+        # need to remove this conversion when the issue is fixed.
+        if macsec_cipher is not None:
+            macsec_ciphers_tmp = {'gcm-aes-128': 'GcmAes128', 'gcm-aes-256': 'GcmAes256'}
+            macsec_cipher = macsec_ciphers_tmp[macsec_cipher]
+        instance.links[link_index].mac_sec_config.cipher = macsec_cipher
+
+    if admin_state is not None:
+        instance.links[link_index].admin_state = admin_state
+
+    return instance
 # endregion
 
 
 # region PrivateEndpoint
+def create_private_endpoint(cmd, resource_group_name, private_endpoint_name, subnet,
+                            private_connection_resource_id, connection_name, group_ids=None,
+                            virtual_network_name=None, tags=None, location=None,
+                            request_message=None, manual_request=None):
+    client = network_client_factory(cmd.cli_ctx).private_endpoints
+    PrivateEndpoint, Subnet, PrivateLinkServiceConnection = cmd.get_models('PrivateEndpoint',
+                                                                           'Subnet',
+                                                                           'PrivateLinkServiceConnection')
+    pls_connection = PrivateLinkServiceConnection(private_link_service_id=private_connection_resource_id,
+                                                  group_ids=group_ids,
+                                                  request_message=request_message,
+                                                  name=connection_name)
+    private_endpoint = PrivateEndpoint(
+        location=location,
+        tags=tags,
+        subnet=Subnet(id=subnet)
+    )
+
+    if manual_request:
+        private_endpoint.manual_private_link_service_connections = [pls_connection]
+    else:
+        private_endpoint.private_link_service_connections = [pls_connection]
+
+    return client.create_or_update(resource_group_name, private_endpoint_name, private_endpoint)
+
+
+def update_private_endpoint(instance, cmd, tags=None, request_message=None):
+    with cmd.update_context(instance) as c:
+        c.set_param('tags', tags)
+
+    if request_message is not None:
+        if instance.private_link_service_connections:
+            instance.private_link_service_connections[0].request_message = request_message
+        else:
+            instance.manual_private_link_service_connections[0].request_message = request_message
+
+    return instance
+
+
 def list_private_endpoints(cmd, resource_group_name=None):
     client = network_client_factory(cmd.cli_ctx).private_endpoints
     if resource_group_name:
         return client.list(resource_group_name)
     return client.list_by_subscription()
+# endregion
+
+
+# region PrivateLinkService
+def create_private_link_service(cmd, resource_group_name, service_name, subnet, frontend_ip_configurations,
+                                private_ip_address=None, private_ip_allocation_method=None,
+                                private_ip_address_version=None,
+                                virtual_network_name=None, public_ip_address=None,
+                                location=None, tags=None, load_balancer_name=None,
+                                visibility=None, auto_approval=None, fqdns=None):
+    client = network_client_factory(cmd.cli_ctx).private_link_services
+    FrontendIPConfiguration, PrivateLinkService, PrivateLinkServiceIpConfiguration, PublicIPAddress, Subnet = \
+        cmd.get_models('FrontendIPConfiguration', 'PrivateLinkService', 'PrivateLinkServiceIpConfiguration',
+                       'PublicIPAddress', 'Subnet')
+    pls_ip_config = PrivateLinkServiceIpConfiguration(
+        name='{}_ipconfig_0'.format(service_name),
+        private_ip_address=private_ip_address,
+        private_ip_allocation_method=private_ip_allocation_method,
+        private_ip_address_version=private_ip_address_version,
+        subnet=subnet and Subnet(id=subnet),
+        public_ip_address=public_ip_address and PublicIPAddress(id=public_ip_address)
+    )
+    link_service = PrivateLinkService(
+        location=location,
+        load_balancer_frontend_ip_configurations=frontend_ip_configurations and [
+            FrontendIPConfiguration(id=ip_config) for ip_config in frontend_ip_configurations
+        ],
+        ip_configurations=[pls_ip_config],
+        visbility=visibility,
+        auto_approval=auto_approval,
+        fqdns=fqdns,
+        tags=tags
+    )
+    return client.create_or_update(resource_group_name, service_name, link_service)
+
+
+def update_private_link_service(instance, cmd, tags=None, frontend_ip_configurations=None, load_balancer_name=None,
+                                visibility=None, auto_approval=None, fqdns=None):
+    FrontendIPConfiguration = cmd.get_models('FrontendIPConfiguration')
+    with cmd.update_context(instance) as c:
+        c.set_param('tags', tags)
+        c.set_param('load_balancer_frontend_ip_configurations', frontend_ip_configurations and [
+            FrontendIPConfiguration(id=ip_config) for ip_config in frontend_ip_configurations
+        ])
+        c.set_param('visibility', visibility)
+        c.set_param('auto_approval', auto_approval)
+        c.set_param('fqdns', fqdns)
+    return instance
+
+
+def list_private_link_services(cmd, resource_group_name=None):
+    client = network_client_factory(cmd.cli_ctx).private_link_services
+    if resource_group_name:
+        return client.list(resource_group_name)
+    return client.list_by_subscription()
+
+
+def update_private_endpoint_connection(cmd, resource_group_name, service_name, pe_connection_name,
+                                       connection_status, description=None, action_required=None):
+    client = network_client_factory(cmd.cli_ctx).private_link_services
+    PrivateEndpointConnection, PrivateLinkServiceConnectionState = cmd.get_models('PrivateEndpointConnection',
+                                                                                  'PrivateLinkServiceConnectionState')
+    connection_state = PrivateLinkServiceConnectionState(
+        status=connection_status,
+        description=description,
+        action_required=action_required
+    )
+    pe_connection = PrivateEndpointConnection(
+        private_link_service_connection_state=connection_state
+    )
+    return client.update_private_endpoint_connection(resource_group_name, service_name, pe_connection_name, pe_connection)  # pylint: disable=line-too-long
+
+
+def add_private_link_services_ipconfig(cmd, resource_group_name, service_name,
+                                       private_ip_address=None, private_ip_allocation_method=None,
+                                       private_ip_address_version=None,
+                                       subnet=None, virtual_network_name=None, public_ip_address=None):
+    client = network_client_factory(cmd.cli_ctx).private_link_services
+    PrivateLinkServiceIpConfiguration, PublicIPAddress, Subnet = cmd.get_models('PrivateLinkServiceIpConfiguration',
+                                                                                'PublicIPAddress',
+                                                                                'Subnet')
+    link_service = client.get(resource_group_name, service_name)
+    if link_service is None:
+        raise CLIError("Private link service should be existed. Please create it first.")
+    ip_name_index = len(link_service.ip_configurations)
+    ip_config = PrivateLinkServiceIpConfiguration(
+        name='{0}_ipconfig_{1}'.format(service_name, ip_name_index),
+        private_ip_address=private_ip_address,
+        private_ip_allocation_method=private_ip_allocation_method,
+        private_ip_address_version=private_ip_address_version,
+        subnet=subnet and Subnet(id=subnet),
+        public_ip_address=public_ip_address and PublicIPAddress(id=public_ip_address)
+    )
+    link_service.ip_configurations.append(ip_config)
+    return client.create_or_update(resource_group_name, service_name, link_service)
+
+
+def remove_private_link_services_ipconfig(cmd, resource_group_name, service_name, ip_config_name):
+    client = network_client_factory(cmd.cli_ctx).private_link_services
+    link_service = client.get(resource_group_name, service_name)
+    if link_service is None:
+        raise CLIError("Private link service should be existed. Please create it first.")
+    ip_config = None
+    for item in link_service.ip_configurations:
+        if item.name == ip_config_name:
+            ip_config = item
+            break
+    if ip_config is None:  # pylint: disable=no-else-return
+        logger.warning("%s ip configuration doesn't exist", ip_config_name)
+        return link_service
+    else:
+        link_service.ip_configurations.remove(ip_config)
+        return client.create_or_update(resource_group_name, service_name, link_service)
 # endregion
 
 
@@ -2068,7 +2526,8 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
                          public_ip_dns_name=None, subnet=None, subnet_address_prefix='10.0.0.0/24',
                          virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
                          public_ip_address_type=None, subnet_type=None, validate=False,
-                         no_wait=False, sku=None, frontend_ip_zone=None, public_ip_zone=None):
+                         no_wait=False, sku=None, frontend_ip_zone=None, public_ip_zone=None,
+                         private_ip_address_version=None):
     from azure.cli.core.util import random_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.network._template_builder import (
@@ -2119,7 +2578,7 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
     load_balancer_resource = build_load_balancer_resource(
         cmd, load_balancer_name, location, tags, backend_pool_name, frontend_ip_name,
         public_ip_id, subnet_id, private_ip_address, private_ip_allocation, sku,
-        frontend_ip_zone)
+        frontend_ip_zone, private_ip_address_version)
     load_balancer_resource['dependsOn'] = lb_dependencies
     master_template.add_resource(load_balancer_resource)
     master_template.add_output('loadBalancer', load_balancer_name, output_type='object')
@@ -2231,7 +2690,7 @@ def set_lb_inbound_nat_pool(
 def create_lb_frontend_ip_configuration(
         cmd, resource_group_name, load_balancer_name, item_name, public_ip_address=None,
         public_ip_prefix=None, subnet=None, virtual_network_name=None, private_ip_address=None,
-        private_ip_address_allocation=None, zone=None):
+        private_ip_address_version=None, private_ip_address_allocation=None, zone=None):
     FrontendIPConfiguration, SubResource, Subnet = cmd.get_models(
         'FrontendIPConfiguration', 'SubResource', 'Subnet')
     ncf = network_client_factory(cmd.cli_ctx)
@@ -2243,6 +2702,7 @@ def create_lb_frontend_ip_configuration(
     new_config = FrontendIPConfiguration(
         name=item_name,
         private_ip_address=private_ip_address,
+        private_ip_address_version=private_ip_address_version,
         private_ip_allocation_method=private_ip_address_allocation,
         public_ip_address=SubResource(id=public_ip_address) if public_ip_address else None,
         public_ip_prefix=SubResource(id=public_ip_prefix) if public_ip_prefix else None,
@@ -2258,15 +2718,19 @@ def create_lb_frontend_ip_configuration(
 
 def set_lb_frontend_ip_configuration(
         cmd, instance, parent, item_name, private_ip_address=None,
-        private_ip_address_allocation=None, public_ip_address=None, subnet=None,
-        virtual_network_name=None, public_ip_prefix=None):
+        private_ip_address_allocation=None, public_ip_address=None,
+        subnet=None, virtual_network_name=None, public_ip_prefix=None):
     PublicIPAddress, Subnet, SubResource = cmd.get_models('PublicIPAddress', 'Subnet', 'SubResource')
-    if private_ip_address == '':
+    if not private_ip_address:
         instance.private_ip_allocation_method = 'dynamic'
         instance.private_ip_address = None
     elif private_ip_address is not None:
         instance.private_ip_allocation_method = 'static'
         instance.private_ip_address = private_ip_address
+
+    # Doesn't support update operation for now
+    # if cmd.supported_api_version(min_api='2019-04-01'):
+    #    instance.private_ip_address_version = private_ip_address_version
 
     if subnet == '':
         instance.subnet = None
@@ -3017,14 +3481,24 @@ def check_nw_ip_flow(cmd, client, vm, watcher_rg, watcher_name, direction, proto
                      resource_group_name=None, nic=None, location=None):
     VerificationIPFlowParameters = cmd.get_models('VerificationIPFlowParameters')
 
-    local_ip_address, local_port = local.split(':')
-    remote_ip_address, remote_port = remote.split(':')
+    try:
+        local_ip_address, local_port = local.split(':')
+        remote_ip_address, remote_port = remote.split(':')
+    except:
+        raise CLIError("usage error: the format of the '--local' and '--remote' should be like x.x.x.x:port")
+
     if not is_valid_resource_id(vm):
+        if not resource_group_name:
+            raise CLIError("usage error: --vm NAME --resource-group NAME | --vm ID")
+
         vm = resource_id(
             subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
             namespace='Microsoft.Compute', type='virtualMachines', name=vm)
 
     if nic and not is_valid_resource_id(nic):
+        if not resource_group_name:
+            raise CLIError("usage error: --nic NAME --resource-group NAME | --nic ID")
+
         nic = resource_id(
             subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
             namespace='Microsoft.Network', type='networkInterfaces', name=nic)
@@ -3129,7 +3603,8 @@ def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_acc
                     'enabled': traffic_analytics_enabled,
                     'workspace_id': workspace.properties['customerId'],
                     'workspace_region': workspace.location,
-                    'workspace_resource_id': traffic_analytics_workspace
+                    'workspace_resource_id': traffic_analytics_workspace,
+                    'traffic_analytics_interval': traffic_analytics_interval
                 }
             }
         else:
@@ -3143,6 +3618,7 @@ def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_acc
                     c.set_param('workspace_id', workspace.properties['customerId'])
                     c.set_param('workspace_region', workspace.location)
                     c.set_param('workspace_resource_id', traffic_analytics_workspace)
+                    c.set_param('traffic_analytics_interval', traffic_analytics_interval)
 
     return client.set_flow_log_configuration(watcher_rg, watcher_name, config)
 
@@ -3255,7 +3731,7 @@ def update_public_ip(cmd, instance, dns_name=None, allocation_method=None, versi
 
 
 def create_public_ip_prefix(cmd, client, resource_group_name, public_ip_prefix_name, prefix_length,
-                            location=None, tags=None, zone=None):
+                            version=None, location=None, tags=None, zone=None):
     PublicIPPrefix, PublicIPPrefixSku = cmd.get_models('PublicIPPrefix', 'PublicIPPrefixSku')
     prefix = PublicIPPrefix(
         location=location,
@@ -3264,6 +3740,10 @@ def create_public_ip_prefix(cmd, client, resource_group_name, public_ip_prefix_n
         tags=tags,
         zones=zone
     )
+
+    if cmd.supported_api_version(min_api='2019-08-01'):
+        prefix.public_ip_address_version = version if version is not None else 'ipv4'
+
     return client.create_or_update(resource_group_name, public_ip_prefix_name, prefix)
 
 
@@ -3642,7 +4122,8 @@ def create_subnet(cmd, resource_group_name, virtual_network_name, subnet_name,
 
 def update_subnet(cmd, instance, resource_group_name, address_prefix=None, network_security_group=None,
                   route_table=None, service_endpoints=None, delegations=None, nat_gateway=None,
-                  service_endpoint_policy=None):
+                  service_endpoint_policy=None, disable_private_endpoint_network_policies=None,
+                  disable_private_link_service_network_policies=None):
     NetworkSecurityGroup, ServiceEndpoint, SubResource = cmd.get_models(
         'NetworkSecurityGroup', 'ServiceEndpointPropertiesFormat', 'SubResource')
 
@@ -3681,6 +4162,16 @@ def update_subnet(cmd, instance, resource_group_name, address_prefix=None, netwo
 
     if delegations:
         instance.delegations = delegations
+
+    if disable_private_endpoint_network_policies:
+        instance.private_endpoint_network_policies = "Disabled"
+    elif disable_private_endpoint_network_policies is not None:
+        instance.private_endpoint_network_policies = "Enabled"
+
+    if disable_private_link_service_network_policies:
+        instance.private_link_service_network_policies = "Disabled"
+    elif disable_private_link_service_network_policies is not None:
+        instance.private_link_service_network_policies = "Enabled"
 
     return instance
 
@@ -3814,7 +4305,7 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, 
                         no_wait=False, gateway_type=None, sku=None, vpn_type=None,
                         asn=None, bgp_peering_address=None, peer_weight=None,
                         address_prefixes=None, radius_server=None, radius_secret=None, client_protocol=None,
-                        gateway_default_site=None):
+                        gateway_default_site=None, custom_routes=None):
     (VirtualNetworkGateway, BgpSettings, SubResource, VirtualNetworkGatewayIPConfiguration, VirtualNetworkGatewaySku,
      VpnClientConfiguration, AddressSpace) = cmd.get_models(
          'VirtualNetworkGateway', 'BgpSettings', 'SubResource', 'VirtualNetworkGatewayIPConfiguration',
@@ -3841,14 +4332,18 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, 
         vnet_gateway.bgp_settings = BgpSettings(asn=asn, bgp_peering_address=bgp_peering_address,
                                                 peer_weight=peer_weight)
 
-    if any((address_prefixes, radius_secret, radius_server, client_protocol)):
+    if any((address_prefixes, client_protocol)):
         vnet_gateway.vpn_client_configuration = VpnClientConfiguration()
         vnet_gateway.vpn_client_configuration.vpn_client_address_pool = AddressSpace()
         vnet_gateway.vpn_client_configuration.vpn_client_address_pool.address_prefixes = address_prefixes
-        if cmd.supported_api_version(min_api='2017-06-01'):
-            vnet_gateway.vpn_client_configuration.vpn_client_protocols = client_protocol
+        vnet_gateway.vpn_client_configuration.vpn_client_protocols = client_protocol
+        if any((radius_secret, radius_server)) and cmd.supported_api_version(min_api='2017-06-01'):
             vnet_gateway.vpn_client_configuration.radius_server_address = radius_server
             vnet_gateway.vpn_client_configuration.radius_server_secret = radius_secret
+
+    if custom_routes and cmd.supported_api_version(min_api='2019-02-01'):
+        vnet_gateway.custom_routes = AddressSpace()
+        vnet_gateway.custom_routes.address_prefixes = custom_routes
 
     return sdk_no_wait(no_wait, client.create_or_update,
                        resource_group_name, virtual_network_gateway_name, vnet_gateway)
@@ -3858,7 +4353,7 @@ def update_vnet_gateway(cmd, instance, sku=None, vpn_type=None, tags=None,
                         public_ip_address=None, gateway_type=None, enable_bgp=None,
                         asn=None, bgp_peering_address=None, peer_weight=None, virtual_network=None,
                         address_prefixes=None, radius_server=None, radius_secret=None, client_protocol=None,
-                        gateway_default_site=None):
+                        gateway_default_site=None, custom_routes=None):
     AddressSpace, SubResource, VirtualNetworkGatewayIPConfiguration, VpnClientConfiguration = cmd.get_models(
         'AddressSpace', 'SubResource', 'VirtualNetworkGatewayIPConfiguration', 'VpnClientConfiguration')
 
@@ -3914,6 +4409,11 @@ def update_vnet_gateway(cmd, instance, sku=None, vpn_type=None, tags=None,
 
     if enable_bgp is not None:
         instance.enable_bgp = enable_bgp.lower() == 'true'
+
+    if custom_routes and cmd.supported_api_version(min_api='2019-02-01'):
+        if not instance.custom_routes:
+            instance.custom_routes = AddressSpace()
+        instance.custom_routes.address_prefixes = custom_routes
 
     _validate_bgp_peering(cmd, instance, asn, bgp_peering_address, peer_weight)
 
@@ -4203,4 +4703,85 @@ def clear_vpn_conn_ipsec_policies(cmd, resource_group_name, connection_name, no_
 def list_vpn_conn_ipsec_policies(cmd, resource_group_name, connection_name):
     ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateway_connections
     return ncf.get(resource_group_name, connection_name).ipsec_policies
+
+
+def assign_vnet_gateway_aad(cmd, resource_group_name, gateway_name,
+                            aad_tenant, aad_audience, aad_issuer, no_wait=False):
+    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateways
+    gateway = ncf.get(resource_group_name, gateway_name)
+
+    if gateway.vpn_client_configuration is None:
+        raise CLIError('VPN client configuration must be set first through `az network vnet-gateway create/update`.')
+
+    gateway.vpn_client_configuration.aad_tenant = aad_tenant
+    gateway.vpn_client_configuration.aad_audience = aad_audience
+    gateway.vpn_client_configuration.aad_issuer = aad_issuer
+
+    return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, gateway_name, gateway)
+
+
+def show_vnet_gateway_aad(cmd, resource_group_name, gateway_name):
+    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateways
+    gateway = ncf.get(resource_group_name, gateway_name)
+
+    if gateway.vpn_client_configuration is None:
+        raise CLIError('VPN client configuration must be set first through `az network vnet-gateway create/update`.')
+
+    return gateway.vpn_client_configuration
+
+
+def remove_vnet_gateway_aad(cmd, resource_group_name, gateway_name, no_wait=False):
+    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateways
+    gateway = ncf.get(resource_group_name, gateway_name)
+
+    if gateway.vpn_client_configuration is None:
+        raise CLIError('VPN client configuration must be set first through `az network vnet-gateway create/update`.')
+
+    gateway.vpn_client_configuration.aad_tenant = None
+    gateway.vpn_client_configuration.aad_audience = None
+    gateway.vpn_client_configuration.aad_issuer = None
+
+    return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, gateway_name, gateway)
+# endregion
+
+
+# region VirtualRouter
+def create_virtual_router(cmd, resource_group_name, virtual_router_name, hosted_gateway, location=None, tags=None):
+    VirtualRouter, SubResource = cmd.get_models('VirtualRouter', 'SubResource')
+    client = network_client_factory(cmd.cli_ctx).virtual_routers
+    virtual_router = VirtualRouter(virtual_router_asn=None,
+                                   virtual_router_ips=[],
+                                   hosted_subnet=None,
+                                   hosted_gateway=SubResource(id=hosted_gateway),
+                                   location=location,
+                                   tags=tags)
+    return client.create_or_update(resource_group_name, virtual_router_name, virtual_router)
+
+
+def update_virtual_router(cmd, instance, tags=None):
+    with cmd.update_context(instance) as c:
+        c.set_param('tags', tags)
+    return instance
+
+
+def list_virtual_router(cmd, resource_group_name=None):
+    client = network_client_factory(cmd.cli_ctx).virtual_routers
+    if resource_group_name is not None:
+        return client.list_by_resource_group(resource_group_name)
+    return client.list()
+
+
+def create_virtual_router_peering(cmd, resource_group_name, virtual_router_name, peering_name, peer_asn, peer_ip):
+    VirtualRouterPeering = cmd.get_models('VirtualRouterPeering')
+    client = network_client_factory(cmd.cli_ctx).virtual_router_peerings
+    virtual_router_peering = VirtualRouterPeering(peer_asn=peer_asn,
+                                                  peer_ip=peer_ip)
+    return client.create_or_update(resource_group_name, virtual_router_name, peering_name, virtual_router_peering)
+
+
+def update_virtual_router_peering(cmd, instance, peer_asn=None, peer_ip=None):
+    with cmd.update_context(instance) as c:
+        c.set_param('peer_asn', peer_asn)
+        c.set_param('peer_ip', peer_ip)
+    return instance
 # endregion

@@ -16,9 +16,9 @@ from azure.cli.core.commands.parameters import (
     get_enum_type
 )
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
+from .policy import RetentionType
 
 from ._constants import (
-    STORAGE_RESOURCE_TYPE,
     REGISTRY_RESOURCE_TYPE,
     WEBHOOK_RESOURCE_TYPE,
     REPLICATION_RESOURCE_TYPE,
@@ -29,8 +29,10 @@ from ._validators import (
     validate_arg,
     validate_secret_arg,
     validate_set,
-    validate_set_secret
+    validate_set_secret,
+    validate_retention_days
 )
+from .scope_map import ScopeMapActions
 
 image_by_tag_or_digest_type = CLIArgumentType(
     options_list=['--image', '-t'],
@@ -39,12 +41,12 @@ image_by_tag_or_digest_type = CLIArgumentType(
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-statements
-    SkuName, PasswordName, DefaultAction, PolicyStatus, WebhookAction, WebhookStatus, TaskStatus, BaseImageTriggerType, RunStatus, SourceRegistryLoginMode, UpdateTriggerPayloadType = self.get_models('SkuName', 'PasswordName', 'DefaultAction', 'PolicyStatus', 'WebhookAction', 'WebhookStatus', 'TaskStatus', 'BaseImageTriggerType', 'RunStatus', 'SourceRegistryLoginMode', 'UpdateTriggerPayloadType')
+    SkuName, PasswordName, DefaultAction, PolicyStatus, WebhookAction, WebhookStatus, TaskStatus, BaseImageTriggerType, RunStatus, SourceRegistryLoginMode, UpdateTriggerPayloadType, TokenStatus = self.get_models(
+        'SkuName', 'PasswordName', 'DefaultAction', 'PolicyStatus', 'WebhookAction', 'WebhookStatus', 'TaskStatus', 'BaseImageTriggerType', 'RunStatus', 'SourceRegistryLoginMode', 'UpdateTriggerPayloadType', 'TokenStatus')
     with self.argument_context('acr') as c:
         c.argument('tags', arg_type=tags_type)
         c.argument('registry_name', options_list=['--name', '-n'], help='The name of the container registry. You can configure the default registry name using `az configure --defaults acr=<registry name>`', completer=get_resource_name_completion_list(REGISTRY_RESOURCE_TYPE), configured_default='acr')
         c.argument('tenant_suffix', options_list=['--suffix'], help="The tenant suffix in registry login server. You may specify '--suffix tenant' if your registry login server is in the format 'registry-tenant.azurecr.io'. Applicable if you\'re accessing the registry from a different subscription or you have permission to access images but not the permission to manage the registry resource.")
-        c.argument('storage_account_name', help='Provide the name of an existing storage account if you\'re recreating a container registry over a previous registry created storage account. Only applicable to Classic SKU.', completer=get_resource_name_completion_list(STORAGE_RESOURCE_TYPE))
         c.argument('sku', help='The SKU of the container registry', arg_type=get_enum_type(SkuName))
         c.argument('admin_enabled', help='Indicates whether the admin user is enabled', arg_type=get_three_state_flag())
         c.argument('password_name', help='The name of password to regenerate', arg_type=get_enum_type(PasswordName))
@@ -79,7 +81,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('force', help='Overwrite the existing tag of the image to be imported.', action='store_true')
 
     with self.argument_context('acr config content-trust') as c:
-        c.argument('status', help="Indicates whether content-trust is enabled or disabled.", arg_type=get_enum_type(PolicyStatus))
+        c.argument('registry_name', options_list=['--registry', '-r', c.deprecate(target='-n', redirect='-r', hide=True), c.deprecate(target='--name', redirect='--registry', hide=True)])
+        c.argument('status', help="Indicates whether content-trust is enabled.", arg_type=get_enum_type(PolicyStatus))
+
+    with self.argument_context('acr config retention') as c:
+        c.argument('status', help="Indicates whether retention policy is enabled.", arg_type=get_enum_type(PolicyStatus))
+        c.argument('registry_name', options_list=['--registry', '-r'])
+        c.argument('days', type=int, help='The number of days to retain an untagged manifest after which it gets purged (Range: 0 to 365). Value "0" will delete untagged manifests immediately.', validator=validate_retention_days, default=7)
+        c.argument('policy_type', options_list=['--type'], help='The type of retention policy.', arg_type=get_enum_type(RetentionType))
 
     with self.argument_context('acr login') as c:
         c.argument('resource_group_name', deprecate_info=c.deprecate(hide=True))
@@ -103,6 +112,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('registry_name', completer=None)
         c.argument('deployment_name', validator=None)
         c.argument('location', validator=get_default_location_from_resource_group)
+        c.argument('workspace', is_preview=True,
+                   help='Name or ID of the Log Analytics workspace to send registry diagnostic logs to. All events will be enabled. You can use "az monitor log-analytics workspace create" to create one. Extra billing may apply.')
 
     with self.argument_context('acr check-name') as c:
         c.argument('registry_name', completer=None)
@@ -138,6 +149,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('registry_name', options_list=['--registry', '-r'])
         c.argument('image_name', options_list=['--image', '-t'], help="The name and tag of the image using the format: '-t repo/image:tag'.")
         c.argument('builder', options_list=['--builder', '-b'], help="The name and tag of a Buildpack builder image.")
+        c.argument('pack_image_tag', options_list=['--pack-image-tag'], help="The tag of the 'pack' runner image ('mcr.microsoft.com/oryx/pack').", is_preview=True)
         c.argument('pull', options_list=['--pull'], help="Pull the latest builder and run images before use.", action='store_true')
         c.positional('source_location', help="The local source code directory path (e.g., './src') or the URL to a git repository (e.g., 'https://github.com/Azure-Samples/acr-build-helloworld-node.git') or a remote tarball (e.g., 'http://server/context.tar.gz').", completer=FilesCompleter())
 
@@ -156,7 +168,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('with_secure_properties', help="Indicates whether the secure properties of a task should be returned.", action='store_true')
 
         # DockerBuildStep, FileTaskStep parameters
-        c.argument('file', options_list=['--file', '-f'], help="The relative path of the the task/docker file to the source code root folder. Task files must be suffixed with '.yaml' or piped from the standard input using '-'.")
+        c.argument('file', options_list=['--file', '-f'], help="Relative path of the the task/docker file to the source code root folder. Task files must be suffixed with '.yaml' or piped from the standard input using '-'.")
         c.argument('image', arg_type=image_by_tag_or_digest_type)
         c.argument('no_push', help="Indicates whether the image built should be pushed to the registry.", arg_type=get_three_state_flag())
         c.argument('no_cache', help='Indicates whether the image cache is enabled.', arg_type=get_three_state_flag())
@@ -170,32 +182,26 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('set_secret', help="Secret task value in '--set-secret name[=value]' format. Multiples supported by passing --set-secret multiple times.", action='append', validator=validate_set_secret)
 
         # Trigger parameters
-        c.argument('source_trigger_name', help="The name of the source trigger.")
-        c.argument('commit_trigger_enabled', help="Indicates whether the source control commit trigger is enabled.", arg_type=get_three_state_flag())
-        c.argument('pull_request_trigger_enabled', help="Indicates whether the source control pull request trigger is enabled.", arg_type=get_three_state_flag())
-        c.argument('schedule', help="Schedule for a timer trigger represented as a cron expression. An optional trigger name can be specified using `--schedule name:schedule` format. Multiples supported by passing --schedule multiple times.", action='append')
-        c.argument('git_access_token', help="The access token used to access the source control provider.")
-        c.argument('branch', help="The source control branch name.")
-        c.argument('base_image_trigger_name', help="The name of the base image trigger.")
-        c.argument('base_image_trigger_enabled', help="Indicates whether the base image trigger is enabled.", arg_type=get_three_state_flag())
-        c.argument('base_image_trigger_type', help="The type of the auto trigger for base image dependency updates.", arg_type=get_enum_type(BaseImageTriggerType))
-        c.argument('update_trigger_endpoint', help="The full URL of the endpoint to receive base image update trigger notifications.", is_preview=True)
-        c.argument('update_trigger_payload_type', help="Indicates whether to include metadata about the base image trigger in the payload alongwith the update trigger token, when a notification is sent.", arg_type=get_enum_type(UpdateTriggerPayloadType), is_preview=True)
+        c.argument('source_trigger_name', arg_group='Trigger', help="The name of the source trigger.")
+        c.argument('commit_trigger_enabled', arg_group='Trigger', help="Indicates whether the source control commit trigger is enabled.", arg_type=get_three_state_flag())
+        c.argument('pull_request_trigger_enabled', arg_group='Trigger', help="Indicates whether the source control pull request trigger is enabled. The trigger is disabled by default.", arg_type=get_three_state_flag())
+        c.argument('schedule', arg_group='Trigger', help="Schedule for a timer trigger represented as a cron expression. An optional trigger name can be specified using `--schedule name:schedule` format. Multiples supported by passing --schedule multiple times.", action='append')
+        c.argument('git_access_token', arg_group='Trigger', help="The access token used to access the source control provider.")
+        c.argument('branch', arg_group='Trigger', deprecate_info=c.deprecate(hide=True), help="The source control branch name. Please specify your source branch in the context parameter e.g. https://github.com/Azure-Samples/acr-build-helloworld-node.git#mybranch")
+        c.argument('base_image_trigger_name', arg_group='Trigger', help="The name of the base image trigger.")
+        c.argument('base_image_trigger_enabled', arg_group='Trigger', help="Indicates whether the base image trigger is enabled.", arg_type=get_three_state_flag())
+        c.argument('base_image_trigger_type', arg_group='Trigger', help="The type of the auto trigger for base image dependency updates.", arg_type=get_enum_type(BaseImageTriggerType))
+        c.argument('update_trigger_endpoint', arg_group='Trigger', help="The full URL of the endpoint to receive base image update trigger notifications.", is_preview=True)
+        c.argument('update_trigger_payload_type', arg_group='Trigger', help="Indicates whether to include metadata about the base image trigger in the payload alongwith the update trigger token, when a notification is sent.", arg_type=get_enum_type(UpdateTriggerPayloadType), is_preview=True)
 
         # Run related parameters
-        c.argument('top', help='Limit the number of latest runs in the results.')
         c.argument('run_id', help='The unique run identifier.')
-        c.argument('run_status', help='The current status of run.', arg_type=get_enum_type(RunStatus))
-        c.argument('no_archive', help='Indicates whether the run should be archived.', arg_type=get_three_state_flag())
 
         # Run agent parameters
         c.argument('cpu', type=int, help='The CPU configuration in terms of number of cores required for the run.')
 
         # MSI parameter
-        c.argument('assign_identity', nargs='*', help="Assigns managed identities to the task. Use '[system]' to refer to the system-assigned identity or a resource ID to refer to a user-assigned identity.")
-
-        # Update trigger token parameters
-        c.argument('update_trigger_token', help="The payload that will be passed back alongwith the base image trigger notification.", is_preview=True)
+        c.argument('assign_identity', nargs='*', help="Assigns managed identities to the task. Use '[system]' to refer to the system-assigned identity or a resource ID to refer to a user-assigned identity. Please see https://aka.ms/acr/tasks/task-create-managed-identity for more information.")
 
     with self.argument_context('acr task create') as c:
         c.argument('task_name', completer=None)
@@ -207,11 +213,22 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         # Custom registry credentials
         c.argument('login_server', help="The login server of the custom registry. For instance, 'myregistry.azurecr.io'.", required=True)
 
+    with self.argument_context('acr task run') as c:
+        # Update trigger token parameters
+        c.argument('update_trigger_token', help="The payload that will be passed back alongwith the base image trigger notification.", is_preview=True)
+
+    with self.argument_context('acr task list-runs') as c:
+        c.argument('run_status', help='The current status of run.', arg_type=get_enum_type(RunStatus))
+        c.argument('top', help='Limit the number of latest runs in the results.')
+
+    with self.argument_context('acr task update-run') as c:
+        c.argument('no_archive', help='Indicates whether the run should be archived.', arg_type=get_three_state_flag())
+
     for scope in ['acr task credential add', 'acr task credential update']:
         with self.argument_context(scope) as c:
             c.argument('username', options_list=['--username', '-u'], help="The username to login to the custom registry. This can be plain text or a key vault secret URI.")
             c.argument('password', options_list=['--password', '-p'], help="The password to login to the custom registry. This can be plain text or a key vault secret URI.")
-            c.argument('use_identity', help="The task managed identity used for the credential. Use '[system]' to refer to the system-assigned identity or a client id to refer to a user-assigned identity.")
+            c.argument('use_identity', help="The task managed identity used for the credential. Use '[system]' to refer to the system-assigned identity or a client id to refer to a user-assigned identity. Please see https://aka.ms/acr/tasks/cross-registry-authentication for more information.")
 
     with self.argument_context('acr task timer') as c:
         # Timer trigger parameters
@@ -241,4 +258,46 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('ip_address', help='IPv4 address or CIDR range.')
 
     with self.argument_context('acr check-health') as c:
-        c.argument('ignore_errors', options_list=['--ignore-errors'], help='Ignore errors, displaying them only at the final', action='store_true', required=False)
+        c.argument('ignore_errors', options_list=['--ignore-errors'], help='Provide all health checks, even if errors are found', action='store_true', required=False)
+
+    with self.argument_context('acr scope-map') as c:
+        c.argument('registry_name', options_list=['--registry', '-r'])
+        c.argument('description', options_list=['--description'], help='Description for the scope map. Maximum 256 characters are allowed.', required=False)
+        c.argument('scope_map_name', options_list=['--name', '-n'], help='The name of the scope map.', required=True)
+
+    valid_actions = "Valid actions are {}".format({action.value for action in ScopeMapActions})
+    with self.argument_context('acr scope-map update') as c:
+        c.argument('add_repository', options_list=['--add'], nargs='+', action='append', required=False,
+                   help='repository permissions to be added. Use the format "--add REPO [ACTION1 ACTION2 ...]" per flag. ' + valid_actions)
+        c.argument('remove_repository', options_list=['--remove'], nargs='+', action='append', required=False,
+                   help='respsitory permissions to be removed. Use the format "--remove REPO [ACTION1 ACTION2 ...]" per flag. ' + valid_actions)
+
+    with self.argument_context('acr scope-map create') as c:
+        c.argument('repository_actions_list', options_list=['--repository'], nargs='+', action='append', required=True,
+                   help='repository permissions. Use the format "--repository REPO [ACTION1 ACTION2 ...]" per flag. ' + valid_actions)
+
+    with self.argument_context('acr token') as c:
+        c.argument('registry_name', options_list=['--registry', '-r'])
+        c.argument('token_name', options_list=['--name', '-n'], help='The name of the token.', required=True)
+        c.argument('scope_map_name', options_list=['--scope-map'], help='The name of the scope map associated with the token', required=False)
+        c.argument('status', options_list=['--status'], arg_type=get_enum_type(TokenStatus),
+                   help='The status of the token', required=False, default="enabled")
+
+    with self.argument_context('acr token create') as c:
+        c.argument('scope_map_name', options_list=['--scope-map'],
+                   help='The name of the scope map with pre-configured repository permissions. Use "--repository" if you would like CLI to configure one for you')
+        c.argument('repository_actions_list', options_list=['--repository'], nargs='+', action='append',
+                   help='repository permissions. Use the format "--repository REPO [ACTION1 ACTION2 ...]" per flag. ' + valid_actions)
+        c.argument('no_passwords', arg_type=get_three_state_flag(), help='Do not generate passwords, instead use "az acr token credential generate"')
+
+    with self.argument_context('acr token update') as c:
+        c.argument('scope_map_name', options_list=['--scope-map'], help='The name of the scope map associated with the token. If not specified, running this command will disassociate the current scope map related to the token.', required=False)
+
+    with self.argument_context('acr token credential generate') as c:
+        c.argument('password1', options_list=['--password1'], help='Flag indicating if password1 should be generated.', action='store_true', required=False)
+        c.argument('password2', options_list=['--password2'], help='Flag indicating if password2 should be generated.', action='store_true', required=False)
+        c.argument('days', options_list=['--days'], help='Number of days for which the credentials will be valid. If not specified, the expiration will default to the max value "9999-12-31T23:59:59.999999+00:00"', type=int, required=False)
+
+    with self.argument_context('acr token credential delete') as c:
+        c.argument('password1', options_list=['--password1'], help='Flag indicating if first password should be deleted', action='store_true', required=False)
+        c.argument('password2', options_list=['--password2'], help='Flag indicating if second password should be deleted.', action='store_true', required=False)

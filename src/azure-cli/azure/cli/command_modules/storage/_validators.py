@@ -5,11 +5,13 @@
 
 # pylint: disable=protected-access
 
-from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_key_value_pairs
 from azure.cli.core.profiles import ResourceType, get_sdk
 
-from azure.cli.command_modules.storage._client_factory import get_storage_data_service_client, blob_data_service_factory
+from azure.cli.command_modules.storage._client_factory import (get_storage_data_service_client,
+                                                               blob_data_service_factory,
+                                                               file_data_service_factory,
+                                                               storage_client_factory)
 from azure.cli.command_modules.storage.util import glob_files_locally, guess_content_type
 from azure.cli.command_modules.storage.sdkutil import get_table_data_type
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url
@@ -30,6 +32,8 @@ def _query_account_key(cli_ctx, account_name):
     t_storage_account_keys = get_sdk(
         cli_ctx, ResourceType.MGMT_STORAGE, 'models.storage_account_keys#StorageAccountKeys')
 
+    scf.config.enable_http_logger = False
+    logger.debug('Disable HTTP logging to avoid having storage keys in debug logs')
     if t_storage_account_keys:
         return scf.storage_accounts.list_keys(rg, account_name).key1
     # of type: models.storage_account_list_keys_result#StorageAccountListKeysResult
@@ -38,7 +42,7 @@ def _query_account_key(cli_ctx, account_name):
 
 def _query_account_rg(cli_ctx, account_name):
     """Query the storage account's resource group, which the mgmt sdk requires."""
-    scf = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_STORAGE)
+    scf = storage_client_factory(cli_ctx)
     acc = next((x for x in scf.storage_accounts.list() if x.name == account_name), None)
     if acc:
         from msrestazure.tools import parse_resource_id
@@ -349,9 +353,10 @@ def get_content_setting_validator(settings_class, update, guess_from_file=None):
         if update and _class_name(settings_class) == _class_name(t_file_content_settings):
             get_file_path_validator()(namespace)
         ns = vars(namespace)
+        clear_content_settings = ns.pop('clear_content_settings', False)
 
         # retrieve the existing object properties for an update
-        if update:
+        if update and not clear_content_settings:
             account = ns.get('account_name')
             key = ns.get('account_key')
             cs = ns.get('connection_string')
@@ -386,10 +391,11 @@ def get_content_setting_validator(settings_class, update, guess_from_file=None):
 
         # if update, fill in any None values with existing
         if update:
-            for attr in ['content_type', 'content_disposition', 'content_encoding', 'content_language', 'content_md5',
-                         'cache_control']:
-                if getattr(new_props, attr) is None:
-                    setattr(new_props, attr, getattr(props, attr))
+            if not clear_content_settings:
+                for attr in ['content_type', 'content_disposition', 'content_encoding', 'content_language',
+                             'content_md5', 'cache_control']:
+                    if getattr(new_props, attr) is None:
+                        setattr(new_props, attr, getattr(props, attr))
         else:
             if guess_from_file:
                 new_props = guess_content_type(ns[guess_from_file], new_props, settings_class)
@@ -445,7 +451,7 @@ def validate_entity(namespace):
     RowKey and PartitionKey are converted to the correct case and included. """
     values = dict(x.split('=', 1) for x in namespace.entity)
     keys = values.keys()
-    for key in keys:
+    for key in list(keys):
         if key.lower() == 'rowkey':
             val = values[key]
             del values[key]
@@ -490,7 +496,7 @@ def validate_marker(namespace):
     marker = dict(x.split('=', 1) for x in namespace.marker)
     expected_keys = {'nextrowkey', 'nextpartitionkey'}
 
-    for key in marker:
+    for key in list(marker.keys()):
         new_key = key.lower()
         if new_key in expected_keys:
             expected_keys.remove(key.lower())
@@ -538,8 +544,12 @@ def validate_included_datasets(cmd, namespace):
         namespace.include = t_blob_include('s' in include, 'm' in include, False, 'c' in include, 'd' in include)
 
 
-def validate_key(namespace):
-    namespace.key_name = storage_account_key_options[namespace.key_name]
+def validate_key_name(namespace):
+    key_options = {'primary': '1', 'secondary': '2'}
+    if hasattr(namespace, 'key_type') and namespace.key_type:
+        namespace.key_name = namespace.key_type + key_options[namespace.key_name]
+    else:
+        namespace.key_name = storage_account_key_options[namespace.key_name]
 
 
 def validate_metadata(namespace):
@@ -1043,6 +1053,50 @@ def validate_azcopy_upload_destination_url(cmd, namespace):
     namespace.destination = url
     del namespace.destination_container
     del namespace.destination_path
+
+
+def validate_azcopy_remove_arguments(cmd, namespace):
+    usage_string = \
+        'Invalid usage: {}. Supply only one of the following argument sets to specify source:' \
+        '\n\t   --container-name  --name' \
+        '\n\tOR --share-name --path'
+
+    ns = vars(namespace)
+
+    # source as blob
+    container = ns.pop('container_name', None)
+    blob = ns.pop('blob_name', None)
+
+    # source as file
+    share = ns.pop('share_name', None)
+    path = ns.pop('path', None)
+
+    # ensure either a file or blob source is specified
+    valid_blob = container and blob and not share and not path
+    valid_file = share and path and not container and not blob
+
+    if not valid_blob and not valid_file:
+        raise ValueError(usage_string.format('Neither a valid blob or file source is specified'))
+    if valid_blob and valid_file:
+        raise ValueError(usage_string.format('Ambiguous parameters, both blob and file sources are '
+                                             'specified'))
+    if valid_blob:
+        client = blob_data_service_factory(cmd.cli_ctx, {
+            'account_name': namespace.account_name})
+        url = client.make_blob_url(container, blob)
+        namespace.service = 'blob'
+        namespace.target = url
+
+    if valid_file:
+        import os
+        client = file_data_service_factory(cmd.cli_ctx, {
+            'account_name': namespace.account_name,
+            'account_key': namespace.account_key})
+        dir_name, file_name = os.path.split(path) if path else (None, '')
+        dir_name = None if dir_name in ('', '.') else dir_name
+        url = client.make_file_url(share, dir_name, file_name)
+        namespace.service = 'file'
+        namespace.target = url
 
 
 def as_user_validator(namespace):

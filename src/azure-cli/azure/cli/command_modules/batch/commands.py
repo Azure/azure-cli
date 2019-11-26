@@ -26,7 +26,7 @@ def _operation(name):
 def load_command_table(self, _):
 
     data_path = 'azure.batch.operations._{}_operations#{}.'
-    mgmt_path = 'azure.mgmt.batch.operations.{}_operations#{}.'
+    mgmt_path = 'azure.mgmt.batch.operations._{}_operations#{}.'
 
     def get_data_type(name):
         return CliCommandType(

@@ -29,9 +29,9 @@ def cf_log_analytics(cli_ctx, *_):
 
 
 def cf_resource(cli_ctx):
-    from azure.mgmt.resource import ResourceManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, ResourceManagementClient)
+    from azure.cli.core.profiles import ResourceType
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
 
 
 def get_auth_management_client(cli_ctx, scope=None, **_):

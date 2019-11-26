@@ -59,7 +59,7 @@ Size Standard_A3, existing storage account, existing storage container name, exi
  **custom Linux image**
 
  - create VM, add a customization such as "sudo apt-get install emacs23"
- - generalize, capture and deallocate VM's vhd (https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-capture-image/)
+ - generalize, capture and deallocate VM's vhd (https://azure.microsoft.com/documentation/articles/virtual-machines-linux-capture-image/)
  - create VM with OS Disk URI pointing to VM's vhd.  Create in a different resource group than
    the storage account the VHD is in.
  - SSH into instance
@@ -76,7 +76,7 @@ Commands to verify (Linux):
  **custom Windows image**
 
  - create VM, add a customization such as installing an application
- - generalize, capture and deallocate VM's vhd (https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-classic-capture-image/ + https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-capture-image/)
+ - generalize, capture and deallocate VM's vhd (https://azure.microsoft.com/documentation/articles/virtual-machines-windows-classic-capture-image/ + https://azure.microsoft.com/documentation/articles/virtual-machines-linux-capture-image/)
  - create VM with OS Disk URI pointing to VM's vhd.  Create in a different resource group than
    the storage account the VHD is in.
  - RDP into instance

@@ -49,7 +49,7 @@ OR
 **custom Linux image**
 
  - create VM1, add a customization such as "sudo apt-get install emacs23"
- - generalize, capture and deallocate VM1's vhd (https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-capture-image/)
+ - generalize, capture and deallocate VM1's vhd (https://azure.microsoft.com/documentation/articles/virtual-machines-linux-capture-image/)
  - create VMSS with OS Disk URI pointing to VM1's vhd. Create in a different resource group than
    the storage account the VHD is in.
  - SSH into instance 1
@@ -67,7 +67,7 @@ Commands to verify (Linux):
  **custom Windows image**
 
  - create VM1, add a customization such as installing an application (e.g WinMerge)
- - generalize, capture and deallocate VM1's vhd (https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-classic-capture-image/ + https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-capture-image/)
+ - generalize, capture and deallocate VM1's vhd (https://azure.microsoft.com/documentation/articles/virtual-machines-windows-classic-capture-image/ + https://azure.microsoft.com/documentation/articles/virtual-machines-linux-capture-image/)
  - create VMSS with OS Disk URI pointing to VM1's vhd. Create in a different resource group than
    the storage account the VHD is in.
  - RDP into instance 1

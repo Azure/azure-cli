@@ -62,7 +62,7 @@ def _create_verification_cert(cert_file, key_file, verification_file, nonce, val
         # create a cert signed by the root
         verification_cert = crypto.X509()
         verification_cert.get_subject().CN = nonce
-        verification_cert.gmtime_adj_notBefore(0)
+        verification_cert.gmtime_adj_notBefore(-1 * 24 * 60 * 60)
         verification_cert.gmtime_adj_notAfter(valid_days * 24 * 60 * 60)
         verification_cert.set_version(2)
         verification_cert.set_serial_number(serial_number)

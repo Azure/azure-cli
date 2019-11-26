@@ -11,9 +11,8 @@ helps['bot'] = """
 """
 helps['bot create'] = """
     type: command
-    short-summary: Create a new bot.
-    long-summary: Create a new bot. Support for creating v3 SDK bots will be deprecated on August 1st, 2019. For more
-                  information please visit this blog post, blog.botframework.com/2019/06/07/v3-bot-broadcast-message/
+    short-summary: Create a new v4 SDK bot.
+    long-summary: Create a new v4 SDK bot.
 """
 helps['bot show'] = """
     type: command

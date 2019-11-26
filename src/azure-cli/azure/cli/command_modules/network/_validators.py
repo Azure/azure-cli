@@ -52,6 +52,18 @@ def get_asg_validator(loader, dest):
     return _validate_asg_name_or_id
 
 
+def get_subscription_list_validator(dest, model_class):
+
+    def _validate_subscription_list(cmd, namespace):
+        val = getattr(namespace, dest, None)
+        if not val:
+            return
+        model = cmd.get_models(model_class)
+        setattr(namespace, dest, model(subscriptions=val))
+
+    return _validate_subscription_list
+
+
 def get_vnet_validator(dest):
     from msrestazure.tools import is_valid_resource_id, resource_id
 
@@ -204,11 +216,13 @@ def validate_cert(namespace):
 
 def validate_ssl_cert(namespace):
     params = [namespace.cert_data, namespace.cert_password]
-    if all([not x for x in params]):
+    if all([not x for x in params]) and not namespace.key_vault_secret_id:
         # no cert supplied -- use HTTP
         if not namespace.frontend_port:
             namespace.frontend_port = 80
     else:
+        if namespace.key_vault_secret_id:
+            return
         # cert supplied -- use HTTPS
         if not all(params):
             raise CLIError(
@@ -251,6 +265,19 @@ def validate_dns_record_type(namespace):
             return
 
 
+def validate_application_gateway_identity(cmd, namespace):
+    from msrestazure.tools import is_valid_resource_id, resource_id
+
+    if namespace.user_assigned_identity and not is_valid_resource_id(namespace.user_assigned_identity):
+        namespace.user_assigned_identity = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=namespace.resource_group_name,
+            namespace='Microsoft.ManagedIdentity',
+            type='userAssignedIdentities',
+            name=namespace.user_assigned_identity
+        )
+
+
 def validate_express_route_peering(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, resource_id
     circuit = namespace.circuit_name
@@ -283,6 +310,18 @@ def validate_express_route_port(cmd, namespace):
             namespace='Microsoft.Network',
             type='expressRoutePorts',
             name=namespace.express_route_port
+        )
+
+
+def validate_virtul_network_gateway(cmd, namespace):
+    from msrestazure.tools import is_valid_resource_id, resource_id
+    if namespace.hosted_gateway and not is_valid_resource_id(namespace.hosted_gateway):
+        namespace.hosted_gateway = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=namespace.resource_group_name,
+            namespace='Microsoft.Network',
+            type='virtualNetworkGateways',
+            name=namespace.hosted_gateway
         )
 
 
@@ -686,6 +725,11 @@ def process_ag_listener_create_namespace(cmd, namespace):  # pylint: disable=unu
         namespace.ssl_cert = _generate_ag_subproperty_id(
             cmd.cli_ctx, namespace, 'sslCertificates', namespace.ssl_cert)
 
+    if namespace.firewall_policy and not is_valid_resource_id(namespace.firewall_policy):
+        namespace.firewall_policy = _generate_ag_subproperty_id(
+            cmd.cli_ctx, namespace, 'firewallPolicy', namespace.firewall_policy
+        )
+
 
 def process_ag_http_settings_create_namespace(cmd, namespace):  # pylint: disable=unused-argument
     from msrestazure.tools import is_valid_resource_id
@@ -697,6 +741,11 @@ def process_ag_http_settings_create_namespace(cmd, namespace):  # pylint: disabl
             return val if is_valid_resource_id(val) else _generate_ag_subproperty_id(
                 cmd.cli_ctx, namespace, 'authenticationCertificates', val)
         namespace.auth_certs = [_validate_name_or_id(x) for x in namespace.auth_certs]
+    if namespace.root_certs:
+        def _validate_name_or_id(val):
+            return val if is_valid_resource_id(val) else _generate_ag_subproperty_id(
+                cmd.cli_ctx, namespace, 'trustedRootCertificates', val)
+        namespace.root_certs = [_validate_name_or_id(x) for x in namespace.root_certs]
 
 
 def process_ag_rule_create_namespace(cmd, namespace):  # pylint: disable=unused-argument
@@ -743,6 +792,11 @@ def process_ag_url_path_map_create_namespace(cmd, namespace):  # pylint: disable
         namespace.default_redirect_config = _generate_ag_subproperty_id(
             cmd.cli_ctx, namespace, 'redirectConfigurations', namespace.default_redirect_config)
 
+    if namespace.firewall_policy and not is_valid_resource_id(namespace.firewall_policy):
+        namespace.firewall_policy = _generate_ag_subproperty_id(
+            cmd.cli_ctx, namespace, 'firewallPolicy', namespace.firewall_policy
+        )
+
     if hasattr(namespace, 'rule_name'):
         process_ag_url_path_map_rule_create_namespace(cmd, namespace)
 
@@ -778,6 +832,7 @@ def process_ag_create_namespace(cmd, namespace):
     validate_tags(namespace)
     validate_custom_error_pages(namespace)
     validate_waf_policy(cmd, namespace)
+    validate_application_gateway_identity(cmd, namespace)
 
 
 def process_auth_create_namespace(cmd, namespace):

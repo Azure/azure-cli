@@ -629,7 +629,7 @@ def create_user(client, user_principal_name, display_name, password,
 def update_user(client, upn_or_object_id, display_name=None, force_change_password_next_login=None, password=None,
                 account_enabled=None, mail_nickname=None):
     password_profile = None
-    if force_change_password_next_login is not None or password is not None:
+    if password is not None:
         password_profile = PasswordProfile(password=password,
                                            force_change_password_next_login=force_change_password_next_login)
 
@@ -779,7 +779,7 @@ def create_application(cmd, display_name, homepage=None, identifier_uris=None,  
         result = graph_client.applications.create(app_create_param)
     except GraphErrorException as ex:
         if 'insufficient privileges' in str(ex).lower():
-            link = 'https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
+            link = 'https://docs.microsoft.com/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
             raise CLIError("Directory permission is needed for the current user to register the application. "
                            "For how to configure, please refer '{}'. Original error: {}".format(link, ex))
         raise
@@ -966,10 +966,18 @@ def update_application(instance, display_name=None, homepage=None,  # pylint: di
     if app_roles:
         app_patch_param.app_roles = _build_app_roles(app_roles)
 
-    app_patch_param.available_to_other_tenants = available_to_other_tenants
-    app_patch_param.oauth2_allow_implicit_flow = oauth2_allow_implicit_flow
-    app_patch_param.identifier_uris = identifier_uris
-    app_patch_param.reply_urls = reply_urls
+    if available_to_other_tenants is not None:
+        app_patch_param.available_to_other_tenants = available_to_other_tenants
+    if oauth2_allow_implicit_flow is not None:
+        app_patch_param.oauth2_allow_implicit_flow = oauth2_allow_implicit_flow
+    if identifier_uris is not None:
+        app_patch_param.identifier_uris = identifier_uris
+    if display_name is not None:
+        app_patch_param.display_name = display_name
+    if reply_urls is not None:
+        app_patch_param.reply_urls = reply_urls
+    if homepage is not None:
+        app_patch_param.homepage = homepage
 
     return app_patch_param
 
@@ -1104,7 +1112,12 @@ def delete_service_principal(cmd, identifier):
     from azure.cli.core._profile import Profile
     client = _graph_client_factory(cmd.cli_ctx)
     sp_object_id = _resolve_service_principal(client.service_principals, identifier)
-    app_object_id = _get_app_object_id_from_sp_object_id(client, sp_object_id)
+
+    app_object_id = None
+    try:
+        app_object_id = _get_app_object_id_from_sp_object_id(client, sp_object_id)
+    except CLIError as ex:
+        logger.info("%s. Skip application deletion.", ex)
 
     profile = Profile()
     if not profile.is_tenant_level_account():
@@ -1114,6 +1127,7 @@ def delete_service_principal(cmd, identifier):
             delete_role_assignments(cmd, [a['id'] for a in assignments])
 
     if app_object_id:  # delete the application, and AAD service will automatically clean up the SP
+        logger.info("Deleting associated application %s", app_object_id)
         client.applications.delete(app_object_id)
     else:
         client.service_principals.delete(sp_object_id)
@@ -1260,12 +1274,15 @@ def create_service_principal_for_rbac(
     sp_oid = None
     _RETRY_TIMES = 36
     app_display_name, existing_sps = None, None
-    if name and '://' not in name:
-        prefix = "http://"
-        app_display_name = name
-        logger.warning('Changing "%s" to a valid URI of "%s%s", which is the required format'
-                       ' used for service principal names', name, prefix, name)
-        name = prefix + name  # normalize be a valid graph service principal name
+    if name:
+        if '://' not in name:
+            prefix = "http://"
+            app_display_name = name
+            logger.warning('Changing "%s" to a valid URI of "%s%s", which is the required format'
+                           ' used for service principal names', name, prefix, name)
+            name = prefix + name  # normalize be a valid graph service principal name
+        else:
+            app_display_name = name.split('://', 1)[-1]
 
     if name:
         query_exp = 'servicePrincipalNames/any(x:x eq \'{}\')'.format(name)
@@ -1325,6 +1342,7 @@ def create_service_principal_for_rbac(
     # retry while server replication is done
     if not skip_assignment:
         for scope in scopes:
+            logger.warning('Creating a role assignment under the scope of "%s"', scope)
             for l in range(0, _RETRY_TIMES):
                 try:
                     _create_role_assignment(cmd.cli_ctx, role, sp_oid, None, scope, resolve_assignee=False)
@@ -1332,17 +1350,17 @@ def create_service_principal_for_rbac(
                 except Exception as ex:
                     if l < _RETRY_TIMES and ' does not exist in the directory ' in str(ex):
                         time.sleep(5)
-                        logger.warning('Retrying role assignment creation: %s/%s', l + 1,
+                        logger.warning('  Retrying role assignment creation: %s/%s', l + 1,
                                        _RETRY_TIMES)
                         continue
                     elif _error_caused_by_role_assignment_exists(ex):
-                        logger.warning('Role assignment already exits.\n')
+                        logger.warning('  Role assignment already exits.\n')
                         break
                     else:
                         # dump out history for diagnoses
-                        logger.warning('Role assignment creation failed.\n')
+                        logger.warning('  Role assignment creation failed.\n')
                         if getattr(ex, 'response', None) is not None:
-                            logger.warning('role assignment response headers: %s\n',
+                            logger.warning('  role assignment response headers: %s\n',
                                            ex.response.headers)  # pylint: disable=no-member
                     raise
 
@@ -1651,8 +1669,7 @@ def _is_guid(guid):
         uuid.UUID(guid)
         return True
     except ValueError:
-        pass
-    return False
+        return False
 
 
 def _get_object_stubs(graph_client, assignees):

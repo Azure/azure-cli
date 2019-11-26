@@ -89,8 +89,8 @@ def login_auth_for_azcopy(cmd):
     return AzCopyCredentials(token_info=token_info)
 
 
-def blob_client_auth_for_azcopy(cmd, blob_client):
-    azcopy_creds = storage_client_auth_for_azcopy(cmd, blob_client, 'blob')
+def client_auth_for_azcopy(cmd, client, service='blob'):
+    azcopy_creds = storage_client_auth_for_azcopy(cmd, client, service)
     if azcopy_creds is not None:
         return azcopy_creds
 
@@ -164,7 +164,7 @@ def _get_default_install_location():
             return None
         install_location = os.path.join(home_dir, r'.azcopy\azcopy.exe')
     elif system in ('Linux', 'Darwin'):
-        install_location = '/usr/local/bin/azcopy'
+        install_location = os.path.expanduser(os.path.join('~', 'bin/azcopy'))
     else:
         install_location = None
     return install_location

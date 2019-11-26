@@ -6,5 +6,5 @@
 
 def load_command_table(self, _):
     with self.command_group('') as g:
-        g.custom_command('find', 'process_query', is_preview=True)
+        g.custom_command('find', 'process_query', is_preview=False)
     return self.command_table

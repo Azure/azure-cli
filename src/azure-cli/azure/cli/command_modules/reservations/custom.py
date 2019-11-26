@@ -3,7 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.mgmt.reservations.models import Patch
+from azure.mgmt.reservations.models import (Patch,
+                                            PurchaseRequest,
+                                            SkuName,
+                                            PurchaseRequestPropertiesReservedResourceProperties)
 
 
 def cli_reservation_update_reservation(client, reservation_order_id, reservation_id,
@@ -35,3 +38,38 @@ def cli_reservation_merge_reservation(client, reservation_order_id,
     return client.merge(reservation_order_id,
                         [create_resource_id(reservation_order_id, reservation_id_1),
                          create_resource_id(reservation_order_id, reservation_id_2)])
+
+
+def cli_calculate(client, sku, reserved_resource_type, billing_scope_id, term,
+                  quantity, applied_scope_type, display_name, applied_scope=None,
+                  renew=False, instance_flexibility=None, location=None, billing_plan=None):
+    sku_name = SkuName(name=sku)
+    if applied_scope:
+        applied_scopes = [applied_scope]
+    else:
+        applied_scopes = None
+    properties = PurchaseRequestPropertiesReservedResourceProperties(instance_flexibility=instance_flexibility)
+    body = PurchaseRequest(sku=sku_name, location=location, reserved_resource_type=reserved_resource_type,
+                           billing_scope_id=billing_scope_id, term=term, quantity=quantity,
+                           display_name=display_name,
+                           applied_scope_type=applied_scope_type,
+                           applied_scopes=applied_scopes, billing_plan=billing_plan,
+                           renew=renew, reserved_resource_properties=properties)
+    return client.calculate(body)
+
+
+def cli_purchase(client, reservation_order_id, sku, reserved_resource_type, billing_scope_id, term,
+                 quantity, applied_scope_type, display_name, applied_scope=None,
+                 renew=False, instance_flexibility=None, location=None, billing_plan=None):
+    sku_name = SkuName(name=sku)
+    if applied_scope:
+        applied_scopes = [applied_scope]
+    else:
+        applied_scopes = None
+    properties = PurchaseRequestPropertiesReservedResourceProperties(instance_flexibility=instance_flexibility)
+    body = PurchaseRequest(sku=sku_name, location=location, reserved_resource_type=reserved_resource_type,
+                           billing_scope_id=billing_scope_id, term=term, quantity=quantity, display_name=display_name,
+                           applied_scope_type=applied_scope_type, applied_scopes=applied_scopes,
+                           billing_plan=billing_plan,
+                           renew=renew, reserved_resource_properties=properties)
+    return client.purchase(reservation_order_id, body)
