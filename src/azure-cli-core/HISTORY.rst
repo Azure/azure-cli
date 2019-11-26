@@ -3,6 +3,11 @@
 Release History
 ===============
 
+2.0.77
+++++++
+* Add deprecate message for Python 2.7
+* Refine the help and error messages for `--ids`
+
 2.0.76
 ++++++
 * no changes
