@@ -831,3 +831,11 @@ def load_arguments(self, _):
         c.argument('analytics_query', options_list=['--analytics-query', '-q'], help="Query to execute over Log Analytics data.")
         c.argument('timespan', help="Timespan over which to query. Defaults to querying all available data.")
     # endregion
+
+    # region disk encryption set
+    with self.argument_context('disk-encryption-set create') as c:
+        c.argument('disk_encryption_set_name', name_arg_type, help='Name of disk encryption set.')
+        c.argument('key_url', help='URL pointing to a key or secret in KeyVault.')
+        c.argument('source_vault', help='Resource ID of the KeyVault containing the key or secret.')
+        c.argument('location', validator=get_default_location_from_resource_group)
+    # endregion

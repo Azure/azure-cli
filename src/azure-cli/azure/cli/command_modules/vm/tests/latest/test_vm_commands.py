@@ -3655,5 +3655,22 @@ class VMSSOrchestrationModeTest(ScenarioTest):
             self.cmd('vmss create -g {rg} -n {vmss2} --orchestration-mode VM --admin-username user --admin-password 123456')
 
 
+class DiskEncryptionSetTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_disk_encryption_set_', location='westcentralus')
+    def test_disk_encryption_set(self, resource_group):
+        self.kwargs.update({
+            'vault': 'vault2897',
+            'key': 'key1',
+            'des': 'des1'
+        })
+        self.cmd('keyvault create -g {rg} -n {vault}')
+        kid = self.cmd('keyvault key create -n {key} --vault {vault}').get_output_in_json()['key']['kid']
+        self.kwargs.update({
+            'kid': kid
+        })
+        self.cmd('disk-encryption-set create -g {rg} -n {des} --key-url {kid} --source-vault {vault}')
+
+
 if __name__ == '__main__':
     unittest.main()

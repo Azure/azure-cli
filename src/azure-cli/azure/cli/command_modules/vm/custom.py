@@ -2928,3 +2928,23 @@ def execute_query_for_vm(cmd, client, resource_group_name, vm_name, analytics_qu
                        'Please check the status of log analytics workpsace.')
     return client.query(workspace, QueryBody(query=analytics_query, timespan=timespan))
 # endregion
+
+
+# disk encryption set
+def create_disk_encryption_set(cmd, client, resource_group_name, disk_encryption_set_name,
+                               key_url, source_vault, location=None, tags=None):
+    from msrestazure.tools import resource_id, is_valid_resource_id
+    DiskEncryptionSet, EncryptionSetIdentity, KeyVaultAndKeyReference, SourceVault = cmd.get_models(
+        'DiskEncryptionSet', 'EncryptionSetIdentity', 'KeyVaultAndKeyReference', 'SourceVault')
+    encryption_set_identity = EncryptionSetIdentity(type='SystemAssigned')
+    if not is_valid_resource_id(source_vault):
+        source_vault = resource_id(subscription=client.config.subscription_id, resource_group=resource_group_name,
+                                   namespace='Microsoft.KeyVault', type='vaults', name=source_vault)
+    source_vault = SourceVault(id=source_vault)
+    keyVault_and_key_reference = KeyVaultAndKeyReference(source_vault=source_vault, key_url=key_url)
+    disk_encryption_set = DiskEncryptionSet(location=location, tags=tags, identity=encryption_set_identity,
+                                            active_key=keyVault_and_key_reference)
+    client.create_or_update(resource_group_name, disk_encryption_set_name, disk_encryption_set)
+
+
+# endregion
