@@ -7,6 +7,10 @@ Release History
 
 * Install script support python 3.8
 
+**Packaging**
+
+* Add back edge builds for pip install  
+
 2.0.77
 ++++++
 
