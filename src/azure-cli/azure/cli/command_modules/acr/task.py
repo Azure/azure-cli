@@ -8,7 +8,6 @@ from msrest.exceptions import ValidationError
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
-
 from ._utils import (
     get_registry_by_name,
     validate_managed_registry,
@@ -32,7 +31,6 @@ TASK_NOT_SUPPORTED = 'Task is only supported for managed registries.'
 DEFAULT_TOKEN_TYPE = 'PAT'
 IDENTITY_LOCAL_ID = '[system]'
 IDENTITY_GLOBAL_REMOVE = '[all]'
-
 DEFAULT_TIMEOUT_IN_SEC = 60 * 60  # 60 minutes
 DEFAULT_CPU = 2
 ALLOWED_TASK_FILE_TYPES = ('.yaml', '.yml', '.toml', '.json', '.sh', '.bash', '.zsh', '.ps1',
@@ -788,7 +786,6 @@ def acr_task_run(cmd,  # pylint: disable=too-many-locals
         update_trigger_token = base64.b64encode(update_trigger_token.encode()).decode()
 
     task_id = get_task_id_from_task_name(cmd.cli_ctx, resource_group_name, registry_name, task_name)
-
     context_path = prepare_source_location(context_path, client_registries, registry_name, resource_group_name)
 
     override_task_step_properties = OverrideTaskStepProperties(
@@ -809,7 +806,6 @@ def acr_task_run(cmd,  # pylint: disable=too-many-locals
             )
         )
     )
-
     run_id = queued_run.run_id
     logger.warning("Queued a run with ID: %s", run_id)
 

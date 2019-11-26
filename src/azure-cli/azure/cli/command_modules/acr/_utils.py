@@ -269,7 +269,6 @@ def get_yaml_template(cmd_value, timeout, file):
             for s in sys.stdin.readlines():
                 yaml_template += s
         else:
-            import os
             if os.path.exists(file):
                 f = open(file, 'r')
                 for line in f:
