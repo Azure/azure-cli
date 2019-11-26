@@ -40,18 +40,18 @@ from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan, SiteC
                                    HybridConnection, RampUpRule, UnauthenticatedClientAction,
                                    ManagedServiceIdentity, DeletedAppRestoreRequest,
                                    DefaultErrorResponseException, SnapshotRestoreRequest,
-                                   SnapshotRecoverySource, SwiftVirtualNetwork)
+                                   SnapshotRecoverySource, SwiftVirtualNetwork, HostingEnvironmentProfile)
 from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient
 from azure.mgmt.relay.models import AccessRights
 from azure.cli.command_modules.relay._client_factory import hycos_mgmt_client_factory, namespaces_mgmt_client_factory
 from azure.storage.blob import BlockBlobService, BlobPermissions
 from azure.cli.command_modules.network._client_factory import network_client_factory
-from azure.mgmt.network.models import Subnet, Delegation
+from azure.mgmt.network.models import Delegation
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_page_in_browser, get_json_object, \
-    ConfiguredDefaultSetter
+    ConfiguredDefaultSetter, sdk_no_wait
 from azure.cli.core.commands.client_factory import UA_AGENT
 
 from .tunnel import TunnelServer
@@ -331,20 +331,19 @@ def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_rem
     is_consumption = is_plan_consumption(plan_info)
     if (not build_remote) and is_consumption and app.reserved:
         return upload_zip_to_storage(cmd, resource_group_name, name, src, slot)
+    if build_remote:
+        add_remote_build_app_settings(cmd, resource_group_name, name, slot)
+    else:
+        remove_remote_build_app_settings(cmd, resource_group_name, name, slot)
 
-    return enable_zip_deploy(cmd, resource_group_name, name, src, build_remote,
-                             timeout, slot)
+    return enable_zip_deploy(cmd, resource_group_name, name, src, timeout, slot)
 
 
 def enable_zip_deploy_webapp(cmd, resource_group_name, name, src, timeout=None, slot=None):
-    return enable_zip_deploy(cmd, resource_group_name, name, src,
-                             is_remote_build=False,
-                             timeout=timeout,
-                             slot=slot)
+    return enable_zip_deploy(cmd, resource_group_name, name, src, timeout=timeout, slot=slot)
 
 
-def enable_zip_deploy(cmd, resource_group_name, name, src, is_remote_build=False,
-                      timeout=None, slot=None):
+def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=None):
     logger.warning("Getting scm site credentials for zip deployment")
     user_name, password = _get_site_credential(cmd.cli_ctx, resource_group_name, name, slot)
 
@@ -361,11 +360,6 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, is_remote_build=False
     headers = authorization
     headers['content-type'] = 'application/octet-stream'
     headers['User-Agent'] = UA_AGENT
-
-    if is_remote_build:
-        add_remote_build_app_settings(cmd, resource_group_name, name, slot)
-    else:
-        remove_remote_build_app_settings(cmd, resource_group_name, name, slot)
 
     import requests
     import os
@@ -1382,23 +1376,46 @@ def list_app_service_plans(cmd, resource_group_name=None):
     return plans
 
 
-def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, per_site_scaling=False, sku='B1',
-                            number_of_workers=None, location=None, tags=None):
+def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, per_site_scaling=False,
+                            app_service_environment=None, sku='B1', number_of_workers=None, location=None,
+                            tags=None, no_wait=False):
+    sku = _normalize_sku(sku)
+    _validate_asp_sku(app_service_environment, sku)
     if is_linux and hyper_v:
         raise CLIError('usage error: --is-linux | --hyper-v')
+
     client = web_client_factory(cmd.cli_ctx)
-    sku = _normalize_sku(sku)
-    if location is None:
-        location = _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
+    if app_service_environment:
+        if hyper_v:
+            raise CLIError('Windows containers is not yet supported in app service environment')
+        ase_id = _validate_app_service_environment_id(cmd.cli_ctx, app_service_environment, resource_group_name)
+        ase_def = HostingEnvironmentProfile(id=ase_id)
+        ase_list = client.app_service_environments.list()
+        ase_found = False
+        for ase in ase_list:
+            if ase.id.lower() == ase_id.lower():
+                location = ase.location
+                ase_found = True
+                break
+        if not ase_found:
+            raise CLIError("App service environment '{}' not found in subscription.".format(ase_id))
+    else:  # Non-ASE
+        ase_def = None
+        if location is None:
+            location = _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
+
     # the api is odd on parameter naming, have to live with it for now
     sku_def = SkuDescription(tier=get_sku_name(sku), name=sku, capacity=number_of_workers)
     plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
                               reserved=(is_linux or None), hyper_v=(hyper_v or None), name=name,
-                              per_site_scaling=per_site_scaling)
-    return client.app_service_plans.create_or_update(resource_group_name, name, plan_def)
+                              per_site_scaling=per_site_scaling, hosting_environment_profile=ase_def)
+    return sdk_no_wait(no_wait, client.app_service_plans.create_or_update, name=name,
+                       resource_group_name=resource_group_name, app_service_plan=plan_def)
 
 
 def update_app_service_plan(instance, sku=None, number_of_workers=None):
+    if number_of_workers is None and sku is None:
+        logger.warning('No update is done. Specify --sku and/or --number-of-workers.')
     sku_def = instance.sku
     if sku is not None:
         sku = _normalize_sku(sku)
@@ -2623,7 +2640,7 @@ def add_hc(cmd, name, resource_group_name, namespace, hybrid_connection, slot=No
     hy_co_rules = hy_co_client.list_authorization_rules(hy_co_resource_group, namespace, hybrid_connection)
     has_default_sender_key = False
     for r in hy_co_rules:
-        if r.name == "defaultSender":
+        if r.name.lower() == "defaultsender":
             for z in r.rights:
                 if z == z.send:
                     has_default_sender_key = True
@@ -2701,7 +2718,7 @@ def set_hc_key(cmd, plan, resource_group_name, namespace, hybrid_connection, key
     hy_co_rules = hy_co_client.list_authorization_rules(relay_resource_group, namespace, hybrid_connection)
     has_default_sender_key = False
     for r in hy_co_rules:
-        if r.name == "defaultSender":
+        if r.name.lower() == "defaultsender":
             for z in r.rights:
                 if z == z.send:
                     has_default_sender_key = True
@@ -2830,7 +2847,7 @@ def add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None
     vnet_resource_group = ''
     i = 0
     for z in vnet_id_strings:
-        if z == "resourceGroups":
+        if z.lower() == "resourcegroups":
             vnet_resource_group = vnet_id_strings[i + 1]
         i = i + 1
 
@@ -2850,16 +2867,13 @@ def add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None
     delegations = subnetObj.delegations
     delegated = False
     for d in delegations:
-        if d.service_name == "Microsoft.Web/serverFarms":
+        if d.service_name.lower() == "microsoft.web/serverfarms".lower():
             delegated = True
 
     if not delegated:
+        subnetObj.delegations = [Delegation(name="delegation", service_name="Microsoft.Web/serverFarms")]
         vnet_client.subnets.create_or_update(vnet_resource_group, vnet, subnet,
-                                             subnet_parameters=Subnet(name="subnet",
-                                                                      address_prefix=subnetObj.address_prefix,
-                                                                      delegations=[Delegation(name="delegation",
-                                                                                              service_name="Microsoft" +
-                                                                                              ".Web/serverFarms")]))
+                                             subnet_parameters=subnetObj)
 
     id_subnet = vnet_client.subnets.get(vnet_resource_group, vnet, subnet)
     subnet_resource_id = id_subnet.id
@@ -2872,6 +2886,7 @@ def add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None
     else:
         return_vnet = client.web_apps.create_or_update_swift_virtual_network_connection_slot(resource_group_name, name,
                                                                                              swiftVnet, slot)
+
     # reformats the vnet entry, removing unecessary information
     id_strings = return_vnet.id.split('/')
     resourceGroup = id_strings[4]
@@ -2926,6 +2941,9 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
         # Get the ASP & RG info, if the ASP & RG parameters are provided we use those else we need to find those
         logger.warning("Webapp %s already exists. The command will deploy contents to the existing app.", name)
         app_details = get_app_details(cmd, name)
+        if app_details is None:
+            raise CLIError("Unable to retrieve details of the existing app {}. Please check that the app is a part of "
+                           "the current subscription".format(name))
         current_rg = app_details.resource_group
         if resource_group_name is not None and (resource_group_name.lower() != current_rg.lower()):
             raise CLIError("The webapp {} exists in ResourceGroup {} and does not match the value entered {}. Please "
@@ -2970,7 +2988,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
                 "os": "%s",
                 "location" : "%s",
                 "src_path" : "%s",
-                "version_detected": "%s",
+                "runtime_version_detected": "%s",
                 "runtime_version": "%s"
                 }
                 """ % (name, plan, rg_name, get_sku_name(sku), os_name, loc, _src_path_escaped, detected_version,
@@ -2990,7 +3008,8 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
         logger.warning("Creating AppServicePlan '%s' ...", plan)
     # we will always call the ASP create or update API so that in case of re-deployment, if the SKU or plan setting are
     # updated we update those
-    create_app_service_plan(cmd, rg_name, plan, _is_linux, False, sku, 1 if _is_linux else None, location)
+    create_app_service_plan(cmd, rg_name, plan, _is_linux, hyper_v=False, per_site_scaling=False, sku=sku,
+                            number_of_workers=1 if _is_linux else None, location=location)
 
     if _create_new_app:
         logger.warning("Creating webapp '%s' ...", name)
@@ -3205,3 +3224,30 @@ def _configure_default_logging(cmd, rg_name, name):
     return config_diagnostics(cmd, rg_name, name,
                               application_logging=True, web_server_logging='filesystem',
                               docker_container_logging='true')
+
+
+def _validate_app_service_environment_id(cli_ctx, ase, resource_group_name):
+    ase_is_id = is_valid_resource_id(ase)
+    if ase_is_id:
+        return ase
+
+    from msrestazure.tools import resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    return resource_id(
+        subscription=get_subscription_id(cli_ctx),
+        resource_group=resource_group_name,
+        namespace='Microsoft.Web',
+        type='hostingEnvironments',
+        name=ase)
+
+
+def _validate_asp_sku(app_service_environment, sku):
+    # Isolated SKU is supported only for ASE
+    if sku in ['I1', 'I2', 'I3']:
+        if not app_service_environment:
+            raise CLIError("The pricing tier 'Isolated' is not allowed for this app service plan. Use this link to "
+                           "learn more: https://docs.microsoft.com/en-us/azure/app-service/overview-hosting-plans")
+    else:
+        if app_service_environment:
+            raise CLIError("Only pricing tier 'Isolated' is allowed in this app service plan. Use this link to "
+                           "learn more: https://docs.microsoft.com/en-us/azure/app-service/overview-hosting-plans")

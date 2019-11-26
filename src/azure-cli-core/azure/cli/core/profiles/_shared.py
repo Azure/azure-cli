@@ -47,6 +47,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_RESOURCE_POLICY = ('azure.mgmt.resource.policy', 'PolicyClient')
     MGMT_RESOURCE_RESOURCES = ('azure.mgmt.resource.resources', 'ResourceManagementClient')
     MGMT_RESOURCE_SUBSCRIPTIONS = ('azure.mgmt.resource.subscriptions', 'SubscriptionClient')
+    MGMT_MONITOR = ('azure.mgmt.monitor', 'MonitorManagementClient')
     DATA_KEYVAULT = ('azure.keyvault', 'KeyVaultClient')
     MGMT_EVENTHUB = ('azure.mgmt.eventhub', 'EventHubManagementClient')
     # the "None" below will stay till a command module fills in the type so "get_mgmt_service_client"
@@ -76,7 +77,6 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_IOTCENTRAL = ('azure.mgmt.iotcentral', None)
     MGMT_DEVTESTLABS = ('azure.mgmt.devtestlabs', None)
     MGMT_MAPS = ('azure.mgmt.maps', None)
-    MGMT_MONITOR = ('azure.mgmt.monitor', None)
     MGMT_POLICYINSIGHTS = ('azure.mgmt.policyinsights', None)
     MGMT_RDBMS = ('azure.mgmt.rdbms', None)
     MGMT_REDIS = ('azure.mgmt.redis', None)
@@ -125,10 +125,10 @@ AZURE_API_PROFILES = {
     'latest': {
         ResourceType.MGMT_STORAGE: '2019-04-01',
         ResourceType.MGMT_NETWORK: '2019-09-01',
-        ResourceType.MGMT_COMPUTE: SDKProfile('2019-03-01', {
+        ResourceType.MGMT_COMPUTE: SDKProfile('2019-07-01', {
             'resource_skus': '2019-04-01',
-            'disks': '2019-03-01',
-            'snapshots': '2019-03-01',
+            'disks': '2019-07-01',
+            'snapshots': '2019-07-01',
             'galleries': '2019-07-01'
         }),
         ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
@@ -148,7 +148,33 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_KEYVAULT: '7.0',
         ResourceType.DATA_STORAGE: '2018-11-09',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
-        ResourceType.MGMT_EVENTHUB: '2017-04-01'
+        ResourceType.MGMT_EVENTHUB: '2017-04-01',
+        ResourceType.MGMT_MONITOR: SDKProfile('2019-06-01', {
+            'activity_log_alerts': '2017-04-01',
+            'activity_logs': '2015-04-01',
+            'alert_rule_incidents': '2016-03-01',
+            'alert_rules': '2016-03-01',
+            'autoscale_settings': '2015-04-01',
+            'baseline': '2018-09-01',
+            'baselines': '2019-03-01',
+            'diagnostic_settings': '2017-05-01-preview',
+            'diagnostic_settings_category': '2017-05-01-preview',
+            'event_categories': '2015-04-01',
+            'guest_diagnostics_settings': '2018-06-01-preview',
+            'guest_diagnostics_settings_association': '2018-06-01-preview',
+            'log_profiles': '2016-03-01',
+            'metric_alerts': '2018-03-01',
+            'metric_alerts_status': '2018-03-01',
+            'metric_baseline': '2018-09-01',
+            'metric_definitions': '2018-01-01',
+            'metric_namespaces': '2017-12-01-preview',
+            'metrics': '2018-01-01',
+            'operations': '2015-04-01',
+            'scheduled_query_rules': '2018-04-16',
+            'service_diagnostic_settings': '2016-09-01',
+            'tenant_activity_logs': '2015-04-01',
+            'vm_insights': '2018-11-27-preview'
+        })
     },
     '2019-03-01-hybrid': {
         ResourceType.MGMT_STORAGE: '2017-10-01',

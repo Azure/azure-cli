@@ -162,3 +162,21 @@ parameters:
     type: string
     short-summary: Id of the subscription to look up applied reservations
 """
+
+helps['reservations reservation-order calculate'] = """
+type: command
+short-summary: Calculate price for a reservation order.
+long-summary: Calculate price for placing a reservation order.
+examples:
+  - name: Calculate price and get quote for specific resource type.
+    text: az reservations reservation-order calculate --sku standard_b1ls --location westus --reserved-resource-type VirtualMachines --billing-scope {SubId} --term P1Y --billing-plan Upfront --quantity 1 --applied-scope-type Single --applied-scope SubId --display-name test
+"""
+
+helps['reservations reservation-order purchase'] = """
+type: command
+short-summary: Purchase reservation order
+long-summary: Purchase reservation order and create resource under the specified URI.
+examples:
+  - name: Purchase reservation order
+    text: az reservations reservation-order purchase --reservation-order-id {reservationOrderId} --sku standard_b1ls --location westus --reserved-resource-type VirtualMachines --billing-scope {SubId} --term P1Y --billing-plan Upfront --quantity 1 --applied-scope-type Single --applied-scope {SubId} --display-name test
+"""

@@ -1,0 +1,112 @@
+interactions:
+- request:
+    body: '{"sku": {"name": "standard_b1ls"}, "location": "westus", "properties":
+      {"reservedResourceType": "VirtualMachines", "billingScopeId": "d3ae48e5-dbb2-4618-afd4-fb1b8559cb80",
+      "term": "P1Y", "billingPlan": "Monthly", "quantity": 2, "displayName": "test",
+      "appliedScopeType": "Shared", "renew": false, "reservedResourceProperties":
+      {}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - reservations reservation-order purchase
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '332'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --reservation-order-id --sku --location --reserved-resource-type --scope --term
+        --billing-plan --display-name --quantity --applied-scope-type
+      User-Agent:
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-reservations/0.6.0 Azure-SDK-For-Python AZURECLI/2.0.76
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/providers/Microsoft.Capacity/reservationOrders/d4ef7ec2-941c-4da7-8ec9-2f148255a0dc?api-version=2019-04-01
+  response:
+    body:
+      string: '{"id":"/providers/microsoft.capacity/reservationOrders/d4ef7ec2-941c-4da7-8ec9-2f148255a0dc","type":"Microsoft.Capacity/reservationOrders","name":"d4ef7ec2-941c-4da7-8ec9-2f148255a0dc","etag":1,"properties":{"displayName":"test","requestDateTime":"2019-11-15T05:11:14.4056282Z","term":"P1Y","provisioningState":"Creating","reservations":[{"sku":{"name":"standard_b1ls"},"id":"/providers/microsoft.capacity/reservationOrders/d4ef7ec2-941c-4da7-8ec9-2f148255a0dc/reservations/5ccde723-b52b-4c30-9f8c-fc5de28cb396","type":"Microsoft.Capacity/reservationOrders/reservations","name":"d4ef7ec2-941c-4da7-8ec9-2f148255a0dc/5ccde723-b52b-4c30-9f8c-fc5de28cb396","etag":1,"location":"westus","properties":{"appliedScopeType":"Shared","quantity":2,"provisioningState":"Creating","displayName":"test","effectiveDateTime":"2019-11-15T05:11:14.4056282Z","lastUpdatedDateTime":"2019-11-15T05:11:14.4056282Z","reservedResourceType":"VirtualMachines","instanceFlexibility":"On","skuDescription":"Reserved
+        VM Instance, Standard_B1ls, US West, 1 Year","renew":false}}],"originalQuantity":2,"billingPlan":"Monthly"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1097'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 15 Nov 2019 05:11:16 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/providers/Microsoft.Capacity/reservationOrders/d4ef7ec2-941c-4da7-8ec9-2f148255a0dc?api-version=2019-04-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-tenant-writes:
+      - '1199'
+      x-ms-test:
+      - '{"contact":"kgautam","scenarios":"v6-recurrence-test,time-scale:35040,AcceleratedPayment","retention":"2/13/2020
+        5:11:01 AM"}'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - reservations reservation-order purchase
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --reservation-order-id --sku --location --reserved-resource-type --scope --term
+        --billing-plan --display-name --quantity --applied-scope-type
+      User-Agent:
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-reservations/0.6.0 Azure-SDK-For-Python AZURECLI/2.0.76
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Capacity/reservationOrders/d4ef7ec2-941c-4da7-8ec9-2f148255a0dc?api-version=2019-04-01
+  response:
+    body:
+      string: '{"id":"/providers/microsoft.capacity/reservationOrders/d4ef7ec2-941c-4da7-8ec9-2f148255a0dc","type":"Microsoft.Capacity/reservationOrders","name":"d4ef7ec2-941c-4da7-8ec9-2f148255a0dc","etag":5,"properties":{"displayName":"test","requestDateTime":"2019-11-15T05:11:14.4056282Z","term":"P1Y","provisioningState":"PendingCapacity","reservations":[{"id":"/providers/microsoft.capacity/reservationOrders/d4ef7ec2-941c-4da7-8ec9-2f148255a0dc/reservations/5ccde723-b52b-4c30-9f8c-fc5de28cb396"}],"originalQuantity":2,"billingPlan":"Monthly"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '536'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 15 Nov 2019 05:13:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

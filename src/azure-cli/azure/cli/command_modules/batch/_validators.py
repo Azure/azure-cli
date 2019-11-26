@@ -86,14 +86,14 @@ def task_id_ranges_format(value):
 
 
 def resource_file_format(value):
-    """Space-separated resource references in filename=blobsource format."""
+    """Space-separated resource references in filename=httpurl format."""
     try:
-        file_name, blob_source = value.split('=', 1)
+        file_name, http_url = value.split('=', 1)
     except ValueError:
         message = ("Incorrectly formatted resource reference. "
-                   "Argument values should be in the format filename=blobsource")
+                   "Argument values should be in the format filename=httpurl")
         raise ValueError(message)
-    return {'file_path': file_name, 'blob_source': blob_source}
+    return {'file_path': file_name, 'http_url': http_url}
 
 
 # COMMAND NAMESPACE VALIDATORS

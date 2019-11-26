@@ -81,7 +81,7 @@ class QueryKeyValueOptions(object):
         An ID that can be used to correlate the request with a more general operation.
     '''
 
-    empty_label = u'\0'
+    empty_label = '\\0'
 
     def __init__(self,
                  label=empty_label,
@@ -118,7 +118,7 @@ class QueryKeyValueCollectionOptions(object):
 
     any_key = '*'
     any_label = '*'
-    empty_label = u'\0'
+    empty_label = '\\0'
 
     def __init__(self,
                  key_filter=any_key,
@@ -146,6 +146,8 @@ class ModifyKeyValueOptions(object):
     :ivar string correlation_request_id:
         An ID that can be used to correlate the request with a more general operation.
     '''
+
+    empty_label = '\\0'
 
     def __init__(self, client_request_id=None, correlation_request_id=None):
         self.client_request_id = str(

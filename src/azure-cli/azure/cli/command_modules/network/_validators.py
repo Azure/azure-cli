@@ -725,6 +725,11 @@ def process_ag_listener_create_namespace(cmd, namespace):  # pylint: disable=unu
         namespace.ssl_cert = _generate_ag_subproperty_id(
             cmd.cli_ctx, namespace, 'sslCertificates', namespace.ssl_cert)
 
+    if namespace.firewall_policy and not is_valid_resource_id(namespace.firewall_policy):
+        namespace.firewall_policy = _generate_ag_subproperty_id(
+            cmd.cli_ctx, namespace, 'firewallPolicy', namespace.firewall_policy
+        )
+
 
 def process_ag_http_settings_create_namespace(cmd, namespace):  # pylint: disable=unused-argument
     from msrestazure.tools import is_valid_resource_id
@@ -786,6 +791,11 @@ def process_ag_url_path_map_create_namespace(cmd, namespace):  # pylint: disable
             namespace.default_redirect_config):
         namespace.default_redirect_config = _generate_ag_subproperty_id(
             cmd.cli_ctx, namespace, 'redirectConfigurations', namespace.default_redirect_config)
+
+    if namespace.firewall_policy and not is_valid_resource_id(namespace.firewall_policy):
+        namespace.firewall_policy = _generate_ag_subproperty_id(
+            cmd.cli_ctx, namespace, 'firewallPolicy', namespace.firewall_policy
+        )
 
     if hasattr(namespace, 'rule_name'):
         process_ag_url_path_map_rule_create_namespace(cmd, namespace)

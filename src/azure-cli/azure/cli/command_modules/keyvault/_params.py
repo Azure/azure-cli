@@ -129,6 +129,10 @@ def load_arguments(self, _):
                 c.argument(item + '_name', help='Name of the {}. Required if --id is not specified.'.format(item), required=False)
                 c.argument('vault_base_url', help='Name of the key vault. Required if --id is not specified.', required=False)
                 c.argument(item + '_version', required=False)
+
+        for cmd in ['list', 'list-deleted']:
+            with self.argument_context('keyvault {} {}'.format(item, cmd)) as c:
+                c.argument('include_pending', arg_type=get_three_state_flag())
     # endregion
 
     # region keys

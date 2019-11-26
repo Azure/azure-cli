@@ -20,10 +20,10 @@ def bot_exception_handler(ex):
         return None
     if isinstance(ex, ClientRequestError):
         message = 'Error occurred in sending request. Please file an issue on {0}'.format(
-            'https://github.com/Microsoft/botbuilder-tools/issues'
+            'https://github.com/microsoft/botframework-sdk'
         )
         raise CLIError(message)
     message = 'Unknown error during execution. Please file an issue on {0}'.format(
-        'https://github.com/Microsoft/botbuilder-tools/issues'
+        'https://github.com/microsoft/botframework-sdk'
     )
     raise CLIError(message)

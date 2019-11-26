@@ -683,7 +683,8 @@ examples:
         az iot hub routing-endpoint create --resource-group MyResourceGroup --hub-name MyIotHub \\
         --endpoint-name S1 --endpoint-type azurestoragecontainer --endpoint-resource-group "[Resource Group]" \\
         --endpoint-subscription-id {SubscriptionId} --connection-string {ConnectionString} \\
-        --container-name {ContainerName}
+        --container-name {ContainerName} --batch-frequency 100 --chunk-size 100 \\
+        --ff {iothub}-{partition}-{YYYY}-{MM}-{DD}-{HH}-{mm}
 """
 
 helps['iot hub routing-endpoint delete'] = """
@@ -781,6 +782,10 @@ helps['iot hub update'] = """
 type: command
 short-summary: Update metadata for an IoT hub.
 examples:
+  - name: Add a storage container settings
+    text: >
+        az iot hub update --name MyIotHub --fileupload-storage-connectionstring "connection-string" \\
+        --fileupload-storage-container-name "container_name"
   - name: Add a firewall filter rule to accept traffic from the IP mask 127.0.0.0/31.
     text: >
         az iot hub update --name MyIotHub --add properties.ipFilterRules filter_name=test-rule action=Accept ip_mask=127.0.0.0/31

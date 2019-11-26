@@ -212,7 +212,9 @@ def _validate_tag(string):
 
 
 def process_action_group_detail_for_creation(namespace):
-    from azure.mgmt.monitor.models import ActionGroupResource, EmailReceiver, SmsReceiver, WebhookReceiver
+    from azure.mgmt.monitor.models import ActionGroupResource, EmailReceiver, SmsReceiver, WebhookReceiver, \
+        ArmRoleReceiver, AzureAppPushReceiver, ItsmReceiver, AutomationRunbookReceiver, \
+        VoiceReceiver, LogicAppReceiver, AzureFunctionReceiver
 
     _validate_tags(namespace)
 
@@ -225,6 +227,13 @@ def process_action_group_detail_for_creation(namespace):
         'email_receivers': [r for r in receivers if isinstance(r, EmailReceiver)],
         'sms_receivers': [r for r in receivers if isinstance(r, SmsReceiver)],
         'webhook_receivers': [r for r in receivers if isinstance(r, WebhookReceiver)],
+        'arm_role_receivers': [r for r in receivers if isinstance(r, ArmRoleReceiver)],
+        'itsm_receivers': [r for r in receivers if isinstance(r, ItsmReceiver)],
+        'azure_app_push_receivers': [r for r in receivers if isinstance(r, AzureAppPushReceiver)],
+        'automation_runbook_receivers': [r for r in receivers if isinstance(r, AutomationRunbookReceiver)],
+        'voice_receivers': [r for r in receivers if isinstance(r, VoiceReceiver)],
+        'logic_app_receivers': [r for r in receivers if isinstance(r, LogicAppReceiver)],
+        'azure_function_receivers': [r for r in receivers if isinstance(r, AzureFunctionReceiver)],
         'tags': ns.get('tags') or None
     }
 
