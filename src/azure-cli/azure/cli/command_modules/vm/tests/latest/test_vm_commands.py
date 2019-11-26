@@ -1878,13 +1878,19 @@ class VMSSCreateAndModify(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_scale_in_policy_')
     def test_vmss_scale_in_policy(self, resource_group):
         self.kwargs.update({
-            'vmss', 'vmss1'
+            'vmss': 'vmss1'
         })
-        self.cmd('vmss create -g {rg} -n {vmss} --image centos --scale-in-policy Default NewestVM', checks=[
-            self.check('scaleInPolicy.rules[0]', 'Default'),
-            self.check('scaleInPolicy.rules[1]', 'NewestVM'),
+        self.cmd('vmss create -g {rg} -n {vmss} --image centos --scale-in-policy NewestVM', checks=[
+            self.check('vmss.scaleInPolicy.rules[0]', 'NewestVM')
         ])
-        self.cmd('vmss update -g {rg} -n {vmss} --set ScaleInPolicy.Rules="OldestVM Default"')
+        self.cmd('vmss update -g {rg} -n {vmss} --set scaleInPolicy.rules[0]=OldestVM', checks=[
+            self.check('scaleInPolicy.rules[0]', 'OldestVM')
+        ])
+        self.cmd('vmss update -g {rg} -n {vmss} --set automaticRepairsPolicy.enabled=false automaticRepairsPolicy.gracePeriod=PT5M automaticRepairsPolicy.maxInstanceRepairsPercent=100', checks=[
+            self.check('automaticRepairsPolicy.enabled', False),
+            self.check('automaticRepairsPolicy.gracePeriod', 'PT5M'),
+            self.check('automaticRepairsPolicy.maxInstanceRepairsPercent', 100)
+        ])
 
 
 class VMSSCreateOptions(ScenarioTest):
