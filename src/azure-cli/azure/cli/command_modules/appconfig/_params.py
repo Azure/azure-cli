@@ -82,8 +82,8 @@ def load_arguments(self, _):
     with self.argument_context('appconfig kv import', arg_group='File') as c:
         c.argument('path', help='Local configuration file path. Required for file arguments.')
         c.argument('format_', options_list=['--format'], choices=['json', 'yaml', 'properties'], help='Imported file format. Required for file arguments.')
-        c.argument('depth', validator=validate_import_depth, help="Depth for flattening the json or yaml file to key-value pairs. Flatten to the deepest level by default.")
-        c.argument('separator', arg_type=get_enum_type(['.', ',', ';', '-', '_', '__', '/']), help="Delimiter for flattening the json or yaml file to key-value pairs. Required for importing hierarchical structure. Not applicable for property files.")
+        c.argument('depth', validator=validate_import_depth, help="Depth for flattening the json or yaml file to key-value pairs. Flatten to the deepest level by default. Not appicable for property files or feature flags.")
+        c.argument('separator', arg_type=get_enum_type(['.', ',', ';', '-', '_', '__', '/']), help="Delimiter for flattening the json or yaml file to key-value pairs. Required for importing hierarchical structure. Not applicable for property files or feature flags.")
         c.argument('skip_features', help="Import only key values and exclude all feature flags. By default, all features with the specified label will be imported.", arg_type=get_three_state_flag())
 
     with self.argument_context('appconfig kv import', arg_group='AppConfig') as c:
@@ -106,8 +106,8 @@ def load_arguments(self, _):
     with self.argument_context('appconfig kv export', arg_group='File') as c:
         c.argument('path', help='Local configuration file path. Required for file arguments.')
         c.argument('format_', options_list=['--format'], choices=['json', 'yaml', 'properties'], help='File format exporting to. Required for file arguments.')
-        c.argument('depth', validator=validate_import_depth, help="Depth for flattening the json or yaml file to key-value pairs. Flatten to the deepest level by default.")
-        c.argument('separator', validator=validate_separator, help="Delimiter for flattening the json or yaml file to key-value pairs. Required for importing hierarchical structure. Not applicable for property files. Supported values: '.', ',', ';', '-', '_', '__', '/', ':', '' ")
+        c.argument('depth', validator=validate_import_depth, help="Depth for flattening the json or yaml file to key-value pairs. Flatten to the deepest level by default. Not appicable for property files or feature flags.")
+        c.argument('separator', validator=validate_separator, help="Delimiter for flattening the json or yaml file to key-value pairs. Required for importing hierarchical structure. Not applicable for property files or feature flags. Supported values: '.', ',', ';', '-', '_', '__', '/', ':', '' ")
         c.argument('skip_features', help="Export only key values and exclude all feature flags. By default, all features with the specified label will be exported.", arg_type=get_three_state_flag())
 
     with self.argument_context('appconfig kv export', arg_group='AppConfig') as c:
@@ -160,7 +160,7 @@ def load_arguments(self, _):
         c.argument('fields', arg_type=feature_fields_arg_type)
 
     with self.argument_context('appconfig feature set') as c:
-        c.argument('feature', help='Name of the feature flag to be set.')
+        c.argument('feature', help="Name of the feature flag to be set. Only alphanumeric characters, '.', '-' and '_' are allowed.")
         c.argument('label', help="If no label specified, set the feature flag with null label by default")
         c.argument('description', help='Description of the feature flag to be set.')
 
