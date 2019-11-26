@@ -3,7 +3,7 @@ name: "\U0001F6A7Service Team Support Request"
 about: For select service teams to request CLI-team support for work such as new features,
   commands, etc.
 title: ''
-labels: ''
+labels: Service Team Support Request
 assignees: ''
 
 ---
