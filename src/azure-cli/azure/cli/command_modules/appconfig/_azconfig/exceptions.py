@@ -47,23 +47,27 @@ class HTTPException(Exception):
         self.response_headers = response_headers
         self.response_content = response_content
 
-        message = self._parse_error_message(
-            message, response_headers, response_content)
+        error_message = self._parse_error_message(response_headers, response_content)
+        message = message if error_message is None else error_message
         _LOGGER.debug(message)
         Exception.__init__(self, 'Status code: %d Reason: %s' %
                            (self.status, message))
 
     @staticmethod
-    def _parse_error_message(message, response_headers, response_content):
-        if response_content:
-            if not six.PY2:
-                # python 3 compatible: convert data from byte to unicode string
-                response_content = response_content.decode('utf-8')
+    def _parse_error_message(response_headers, response_content):
+        try:
+            if response_content:
+                if not six.PY2:
+                    # python 3 compatible: convert data from byte to unicode string
+                    response_content = response_content.decode('utf-8')
 
-            content = json.loads(response_content)
-        if constants.HttpHeaders.ContentType in response_headers and constants.HttpHeaderValues.MediaTypeKeyValueApplication in response_headers[constants.HttpHeaders.ContentType]:
-            if constants.HttpResponseContent.Detail in content:
-                return content[constants.HttpResponseContent.Detail]
-            if constants.HttpResponseContent.Title in content:
-                return content[constants.HttpResponseContent.Title]
-        return message
+                content = json.loads(response_content)
+            if constants.HttpHeaders.ContentType in response_headers and constants.HttpHeaderValues.MediaTypeKeyValueApplication in response_headers[constants.HttpHeaders.ContentType]:
+                if constants.HttpResponseContent.Detail in content:
+                    return content[constants.HttpResponseContent.Detail]
+                if constants.HttpResponseContent.Title in content:
+                    return content[constants.HttpResponseContent.Title]
+        except ValueError as exception:
+            _LOGGER.debug(exception)
+            return None
+        return None

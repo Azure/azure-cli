@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from __future__ import print_function
 
-__version__ = "2.0.76"
+__version__ = "2.0.77"
 
 import os
 import sys
@@ -90,7 +90,9 @@ class AzCli(CLI):
         if updates_available == -1:
             logger.warning('Unable to check if your CLI is up-to-date. Check your internet connection.')
         elif updates_available:
-            logger.warning('You have %i updates available. Consider updating your CLI installation.', updates_available)
+            logger.warning('You have %i updates available. Consider updating your CLI installation. '
+                           'Instructions can be found at https://docs.microsoft.com/en-us/cli/azure/install-azure-cli',
+                           updates_available)
         else:
             print('Your CLI is up-to-date.')
 
