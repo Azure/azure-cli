@@ -1886,11 +1886,6 @@ class VMSSCreateAndModify(ScenarioTest):
         self.cmd('vmss update -g {rg} -n {vmss} --set scaleInPolicy.rules[0]=OldestVM', checks=[
             self.check('scaleInPolicy.rules[0]', 'OldestVM')
         ])
-        self.cmd('vmss update -g {rg} -n {vmss} --set automaticRepairsPolicy.enabled=false automaticRepairsPolicy.gracePeriod=PT5M automaticRepairsPolicy.maxInstanceRepairsPercent=100', checks=[
-            self.check('automaticRepairsPolicy.enabled', False),
-            self.check('automaticRepairsPolicy.gracePeriod', 'PT5M'),
-            self.check('automaticRepairsPolicy.maxInstanceRepairsPercent', 100)
-        ])
 
 
 class VMSSCreateOptions(ScenarioTest):
