@@ -218,8 +218,9 @@ def register_ids_argument(cli_ctx):
             deprecate_info = id_arg.settings.get('deprecate_info', None) if id_arg else None
             id_kwargs = {
                 'metavar': 'ID',
-                'help': "One or more resource IDs (space-delimited). If provided, "
-                        "no other 'Resource Id' arguments should be specified.",
+                'help': "One or more resource IDs (space-delimited). "
+                        "It should be a complete resource ID containing all information of '{gname}' arguments. "
+                        "If provided, no other '{gname}' arguments should be specified.".format(gname=group_name),
                 'dest': 'ids' if id_arg else '_ids',
                 'deprecate_info': deprecate_info,
                 'is_preview': id_arg.settings.get('is_preview', None) if id_arg else None,
@@ -309,7 +310,17 @@ def register_ids_argument(cli_ctx):
             # place the ID parts into the correct property lists
             parts = parse_resource_id(val)
             for arg in combined_args:
-                getattr(namespace, arg.name).append(parts[arg.type.settings['id_part']])
+                id_part = arg.type.settings.get('id_part')
+                id_value = parts.get(id_part, None)
+                if id_value is None:
+                    argument_name = arg.type.settings.get('options_list')[0]
+                    raise CLIError("Argument {arg_name} cannot be derived from ID {id}. "
+                                   "Please provide a complete resource ID "
+                                   "containing all information of '{group_name}' "
+                                   "arguments. ".format(id=val,
+                                                        arg_name=argument_name,
+                                                        group_name=arg.arg_group))
+                getattr(namespace, arg.name).append(id_value)
 
         # support deprecating --ids
         deprecate_info = cmd.arguments['ids'].type.settings.get('deprecate_info')

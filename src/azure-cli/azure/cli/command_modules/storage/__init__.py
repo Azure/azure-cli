@@ -166,14 +166,14 @@ class StorageCommandGroup(AzCommandGroup):
     def get_handler_suppress_some_400(self):
         def handler(ex):
             from azure.cli.core.profiles import get_sdk
-            from knack.log import get_logger
 
-            logger = get_logger(__name__)
             t_error = get_sdk(self.command_loader.cli_ctx,
                               ResourceType.DATA_STORAGE,
                               'common._error#AzureHttpError')
             if isinstance(ex, t_error) and ex.status_code == 403:
-                message = """
+                # TODO: Revisit the logic here once the service team updates their response
+                if ex.error_code == 'AuthorizationPermissionMismatch':
+                    message = """
 You do not have the required permissions needed to perform this operation.
 Depending on your operation, you may need to be assigned one of the following roles:
     "Storage Blob Data Contributor"
@@ -182,13 +182,21 @@ Depending on your operation, you may need to be assigned one of the following ro
     "Storage Queue Data Reader"
 
 If you want to use the old authentication method and allow querying for the right account key, please use the "--auth-mode" parameter and "key" value.
-                """
-                logger.error(message)
-                return
+                    """
+                    ex.args = (message,)
+                elif ex.error_code == 'AuthorizationFailure':
+                    message = """
+The request may be blocked by network rules of storage account. Please check network rule set using 'az storage account show -n accountname --query networkRuleSet'.
+If you want to change the default action to apply when no rule matches, please use 'az storage account update'.
+                    """
+                    ex.args = (message,)
+                elif ex.error_code == 'AuthenticationFailed':
+                    message = """
+Authentication failure. This may be caused by either invalid account key, connection string or sas token value provided for your storage account.
+                    """
+                    ex.args = (message,)
             if isinstance(ex, t_error) and ex.status_code == 409 and ex.error_code == 'NoPendingCopyOperation':
-                logger.error(ex.args[0])
-                return
-            raise ex
+                pass
 
         return handler
 
@@ -244,12 +252,10 @@ def _merge_new_exception_handler(kwargs, handler):
     first = kwargs.get('exception_handler')
 
     def new_handler(ex):
-        try:
-            handler(ex)
-        except Exception:  # pylint: disable=broad-except
-            if not first:
-                raise
-            first(ex)
+        handler(ex)
+        if not first:
+            raise ex
+        first(ex)
     kwargs['exception_handler'] = new_handler
 
 
