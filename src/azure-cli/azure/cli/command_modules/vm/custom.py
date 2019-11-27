@@ -1996,7 +1996,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 identity_role_id=None, zones=None, priority=None, eviction_policy=None,
                 application_security_groups=None, ultra_ssd_enabled=None, ephemeral_os_disk=None,
                 proximity_placement_group=None, aux_subscriptions=None, terminate_notification_time=None,
-                max_price=None, computer_name_prefix=None, orchestration_mode='ScaleSetVM'):
+                max_price=None, computer_name_prefix=None, orchestration_mode='ScaleSetVM', scale_in_policy=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -2208,7 +2208,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             custom_data=custom_data, secrets=secrets, license_type=license_type, zones=zones, priority=priority,
             eviction_policy=eviction_policy, application_security_groups=application_security_groups,
             ultra_ssd_enabled=ultra_ssd_enabled, proximity_placement_group=proximity_placement_group,
-            terminate_notification_time=terminate_notification_time, max_price=max_price)
+            terminate_notification_time=terminate_notification_time, max_price=max_price,
+            scale_in_policy=scale_in_policy)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -2458,7 +2459,7 @@ def update_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_
 def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False, instance_id=None,
                 protect_from_scale_in=None, protect_from_scale_set_actions=None,
                 enable_terminate_notification=None, terminate_notification_time=None, ultra_ssd_enabled=None,
-                **kwargs):
+                scale_in_policy=None, **kwargs):
     vmss = kwargs['parameters']
     client = _compute_client_factory(cmd.cli_ctx)
 
@@ -2505,6 +2506,10 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                     ultra_ssd_enabled=ultra_ssd_enabled)
             else:
                 vmss.virtual_machine_profile.additional_capabilities.ultra_ssd_enabled = ultra_ssd_enabled
+
+    if scale_in_policy is not None:
+        ScaleInPolicy = cmd.get_models('ScaleInPolicy')
+        vmss.scale_in_policy = ScaleInPolicy(rules=scale_in_policy)
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.create_or_update,
                        resource_group_name, name, **kwargs)

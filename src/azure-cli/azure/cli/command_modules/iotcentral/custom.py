@@ -19,7 +19,6 @@ def iotcentral_app_create(
         location=None, template=None, display_name=None
 ):
     cli_ctx = cmd.cli_ctx
-    _check_name_availability(client, app_name)
     location = _ensure_location(cli_ctx, resource_group_name, location)
     display_name = _ensure_display_name(app_name, display_name)
     appSku = AppSkuInfo(name=sku)
@@ -54,16 +53,6 @@ def iotcentral_app_list(client, resource_group_name=None):
 def iotcentral_app_update(client, app_name, parameters, resource_group_name):
     etag = parameters.additional_properties['etag']
     return client.apps.update(resource_group_name, app_name, parameters, {'IF-MATCH': etag})
-
-
-def _check_name_availability(client, app_name):
-    """Search the current subscription for an app with the given name.
-    :param object client: IoTCentralClient
-    :param str app_name: App name to search for
-    """
-    name_availability = client.apps.check_name_availability(app_name)
-    if not name_availability.name_available:
-        raise CLIError(name_availability.message)
 
 
 def _ensure_location(cli_ctx, resource_group_name, location):
