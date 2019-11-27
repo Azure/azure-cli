@@ -1883,7 +1883,7 @@ class VMSSCreateAndModify(ScenarioTest):
         self.cmd('vmss create -g {rg} -n {vmss} --image centos --scale-in-policy NewestVM', checks=[
             self.check('vmss.scaleInPolicy.rules[0]', 'NewestVM')
         ])
-        self.cmd('vmss update -g {rg} -n {vmss} --set scaleInPolicy.rules[0]=OldestVM', checks=[
+        self.cmd('vmss update -g {rg} -n {vmss} --scale-in-policy OldestVM', checks=[
             self.check('scaleInPolicy.rules[0]', 'OldestVM')
         ])
 

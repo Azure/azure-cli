@@ -86,6 +86,11 @@ def load_arguments(self, _):
         arg_type=get_three_state_flag(), min_api='2018-06-01',
         help='Enables or disables the capability to have 1 or more managed data disks with UltraSSD_LRS storage account')
 
+    scale_in_policy_type = CLIArgumentType(
+        nargs='+', arg_type=get_enum_type(self.get_models('VirtualMachineScaleSetScaleInRules')),
+        help='Specify the scale-in policy (space delimited) that decides which virtual machines are chosen for removal when a Virtual Machine Scale Set is scaled-in.'
+    )
+
     # region MixedScopes
     for scope in ['vm', 'disk', 'snapshot', 'image', 'sig']:
         with self.argument_context(scope) as c:
@@ -506,7 +511,7 @@ def load_arguments(self, _):
         c.argument('computer_name_prefix', help='Computer name prefix for all of the virtual machines in the scale set. Computer name prefixes must be 1 to 15 characters long')
         c.argument('orchestration_mode', help='Choose how virtual machines are managed by the scale set. In VM mode, you manually create and add a virtual machine of any configuration to the scale set. In ScaleSetVM mode, you define a virtual machine model and Azure will generate identical instances based on that model.',
                    arg_type=get_enum_type(['VM', 'ScaleSetVM']), is_preview=True)
-        c.argument('scale_in_policy', nargs='+', arg_type=get_enum_type(self.get_models('VirtualMachineScaleSetScaleInRules')), help='Specify the scale-in policy (space delimited) that decides which virtual machines are chosen for removal when a Virtual Machine Scale Set is scaled-in.')
+        c.argument('scale_in_policy', scale_in_policy_type)
 
     with self.argument_context('vmss create', arg_group='Network Balancer') as c:
         LoadBalancerSkuName = self.get_models('LoadBalancerSkuName', resource_type=ResourceType.MGMT_NETWORK)
@@ -535,6 +540,7 @@ def load_arguments(self, _):
         c.argument('enable_terminate_notification', min_api='2019-03-01', arg_type=get_three_state_flag(),
                    help='Enable terminate notification')
         c.argument('ultra_ssd_enabled', ultra_ssd_enabled_type)
+        c.argument('scale_in_policy', scale_in_policy_type)
 
     for scope in ['vmss create', 'vmss update']:
         with self.argument_context(scope) as c:
