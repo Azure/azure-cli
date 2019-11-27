@@ -282,7 +282,7 @@ def _deploy_arm_template_core(cli_ctx, resource_group_name,
 
     properties = DeploymentProperties(template=template, template_link=template_link,
                                       parameters=parameters, mode=mode, on_error_deployment=on_error_deployment)
- 
+
     smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, aux_tenants=aux_tenants)
     if validate_only:
         return sdk_no_wait(no_wait, smc.deployments.validate, resource_group_name, deployment_name, properties)
