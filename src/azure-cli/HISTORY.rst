@@ -3,6 +3,26 @@
 Release History
 ===============
 
+**Compute**
+
+* vmss create/update: Add --scale-in-policy, which decides which virtual machines are chosen for removal when a VMSS is scaled-in
+
+**Install**
+
+* Install script support python 3.8
+
+**Packaging**
+
+* Add back edge builds for pip install
+
+**Storage**
+
+* GA Release Large File Shares property for storage account create and update command
+* GA Release User Delegation SAS token Support
+
+2.0.77
+++++++
+
 **ACR**
 
 * Deprecated paramater `--branch` from acr task create/update

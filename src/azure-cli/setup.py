@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.0.76"
+VERSION = "2.0.77"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -56,7 +56,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'azure-batch~=8.0',
     'azure-cli-command_modules-nspkg~=2.0',
-    'azure-cli-core=={}'.format(VERSION),
+    'azure-cli-core=={}.*'.format(VERSION),
     'azure-cli-nspkg~=3.0,>=3.0.3',
     'azure-cli-telemetry>=1.0.2,<2.0',
     'azure-cosmos~=3.0,>=3.0.2',
