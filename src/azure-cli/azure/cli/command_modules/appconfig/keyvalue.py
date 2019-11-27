@@ -53,13 +53,32 @@ def import_config(cmd,
                   # from-appservice parameters
                   appservice_account=None,
                   skip_features=False):
+    src_features = []
+    dest_kvs = []
     # fetch key values from source
     if source == 'file':
         src_kvs = __read_kv_from_file(
             file_path=path, format_=format_, separator=separator, prefix_to_add=prefix, depth=depth)
+
+        if not skip_features:
+            src_features = __read_features_from_file(file_path=path, format_=format_)
+            src_kvs.extend(src_features)
+
     elif source == 'appconfig':
-        src_kvs = __read_kv_from_config_store(
-            cmd, name=src_name, connection_string=src_connection_string, key=src_key, label=src_label, prefix_to_add=prefix)
+        src_kvs = __read_kv_from_config_store(cmd, name=src_name, connection_string=src_connection_string,
+                                              key=src_key, label=src_label, prefix_to_add=prefix)
+        # We need to separate KV from feature flags
+        __discard_features_from_retrieved_kv(src_kvs)
+
+        if not skip_features:
+            # Get all Feature flags with matching label
+            all_features_pattern = FEATURE_FLAG_PREFIX + '*'
+            all_features = __read_kv_from_config_store(cmd, name=src_name, connection_string=src_connection_string, 
+                                                    key=all_features_pattern, label=src_label)
+            for feature in all_features:
+                if feature.content_type == FEATURE_FLAG_CONTENT_TYPE:
+                    src_kvs.append(feature)
+
     elif source == 'appservice':
         src_kvs = __read_kv_from_app_service(
             cmd, appservice_account=appservice_account, prefix_to_add=prefix)
@@ -69,14 +88,21 @@ def import_config(cmd,
         # fetch key values from user's configstore
         dest_kvs = __read_kv_from_config_store(
             cmd, name=name, connection_string=connection_string, key=None, label=label)
+        if skip_features:
+            __discard_features_from_retrieved_kv(dest_kvs)
+
         # generate preview and wait for user confirmation
         src_json = __serialize_kv_list_to_comparable_json_object(
             keyvalues=src_kvs, level=source)
         dest_json = __serialize_kv_list_to_comparable_json_object(
             keyvalues=dest_kvs, level=source)
         need_change = __print_preview(old_json=dest_json, new_json=src_json)
-        if need_change is False:
+
+        if not need_change:
             return
+
+        confirmation_message = "Do you want to continue? \n"
+        user_confirmation(confirmation_message)
 
     # import into configstore
     __write_kv_to_config_store(
@@ -548,9 +574,7 @@ def __read_kv_from_file(file_path, format_, separator=None, prefix_to_add="", de
                     del config_data['feature-management']
             elif format_ == 'properties':
                 config_data = javaproperties.load(config_file)
-                for k,v in config_data.items():
-                    if k.startswith('feature-management.featureSet.features'):
-                        del k
+                config_data = {k : v for k, v in config_data.items()if not k.startswith('feature-management.featureSet.features')}
                         
     except ValueError:
         raise CLIError(
@@ -576,11 +600,34 @@ def __read_kv_from_file(file_path, format_, separator=None, prefix_to_add="", de
     return key_values
 
 
+def __read_features_from_file(file_path, format_):
+    config_data = {}
+    features_dict = {}
+    try:
+        with io.open(file_path, 'r', encoding=__check_file_encoding(file_path)) as config_file:
+            if format_ == 'json':
+                config_data = json.load(config_file)
+                if 'FeatureManagement' in config_data:
+                    features_dict = config_data['FeatureManagement']
+            elif format_ == 'yaml':
+                logger.warning("Importing feature flags from a yaml file is not supported yet. Ignoring all feature flags.")
+            elif format_ == 'properties':
+                logger.warning("Importing feature flags from a properties file is not supported yet. Ignoring all feature flags.")
+               
+    except ValueError:
+        raise CLIError(
+            'The input is not a well formatted %s file.' % (format_))
+    except OSError:
+        raise CLIError('File is not available.')
+    
+    # features_dict contains all features that need to be converted to KeyValue format now
+    return __convert_features_to_key_value_list(features_dict, format_)
+
 
 def __write_kv_and_features_to_file(file_path, key_values=None, features=None, format_=None, separator=None, skip_features=False):
     try:
         exported_keyvalues = __export_keyvalues(key_values, format_, separator, None)
-        if not skip_features:
+        if not skip_features and format_ == 'json':
             exported_features = __export_features(features, format_)
             exported_keyvalues.update(exported_features)
 
@@ -1029,6 +1076,8 @@ def __export_features(retrieved_features, format_):
         exported_dict["FeatureManagement"] = {}
     
     elif format_ == 'yaml' or format_ == 'properties':
+        # Currently, this condition will never be met 
+        # We only support json feature flags for now
         featureSetValues = {}
         featureSetValues["features"] = {}
         exported_dict["feature-management"] = {"featureSet" : featureSetValues}
@@ -1055,7 +1104,6 @@ def __export_features(retrieved_features, format_):
                     feature_filter["Parameters"] = filter_.parameters
                     feature_state["EnabledFor"].append(feature_filter)
 
-
             feature_entry = {}
             feature_entry[feature.key] = feature_state
 
@@ -1073,6 +1121,47 @@ def __export_features(retrieved_features, format_):
 
     except Exception as exception:
         raise CLIError("Failed to export feature flags. " + str(exception))
+
+
+def __convert_features_to_key_value_list(features_dict, format_):
+    key_values = []
+    default_conditions = {'client_filters': []}
+
+    default_value = {
+        "id": "",
+        "description": "",
+        "enabled": False,
+        "conditions": default_conditions
+    }
+    try:
+        if format_ == 'json':
+            for k,v in features_dict.items():
+                key = FEATURE_FLAG_PREFIX + str(k)
+                default_value["id"] = str(k)
+
+                if isinstance(v, dict):
+                    # This is a conditional feature
+                    default_value["enabled"] = True
+                    default_value["conditions"] = {'client_filters': v.get('EnabledFor', [])} 
+                    
+                    # Convert Name and Parameters to lowercase for backend compatibility
+                    for idx, val in enumerate(default_value["conditions"]["client_filters"]):
+                        # each val is a dict with two keys - Name, Parameters
+                        if isinstance (val, dict):
+                            val = {filter_key.lower(): filter_val for filter_key, filter_val in val.items()}
+                            default_value["conditions"]["client_filters"][idx] = val
+                else:
+                    default_value["enabled"] = v
+                    default_value["conditions"] = default_conditions
+
+                set_kv = KeyValue(key=key,
+                                  value=json.dumps(default_value),
+                                  content_type=FEATURE_FLAG_CONTENT_TYPE)
+                key_values.append(set_kv)
+
+    except Exception as exception:
+        raise CLIError("File contains feature flags in invalid format. " + str(exception))
+    return key_values
 
 
 def __check_file_encoding(file_path):
