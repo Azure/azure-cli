@@ -9,7 +9,11 @@ Release History
 
 **Packaging**
 
-* Add back edge builds for pip install  
+* Add back edge builds for pip install
+
+**Storage**
+
+* GA Release Large File Shares property for storage account create and update command
 
 2.0.77
 ++++++
