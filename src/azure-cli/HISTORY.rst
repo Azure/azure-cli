@@ -98,9 +98,9 @@ Release History
 
 * [Breaking change] Remove '--version' flag from preview command 'az bot create'. Only v4 SDK bots are supported.
 * Add support for updating the icon URL for a bot via 'az bot update'.
+* Add support for updating a Direct Line channel via 'az bot directline update'.
 * The following command groups are GA and not in preview: 'az bot authsetting'
 * The following command group 'az bot' are GA and not in preview: 'create', 'prepare-deploy', 'show', 'delete', 'update'
-
 
 **Compute**
 

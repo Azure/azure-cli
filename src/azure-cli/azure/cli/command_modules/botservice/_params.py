@@ -163,6 +163,16 @@ def load_arguments(self, _):
         c.argument('site_name', options_list=['-s', '--site-name'], help='Name of the Directline channel site.')
         c.argument('is_v1_disabled', options_list=['--disablev1'], help='If true, v1 protocol will be disabled on the channel', arg_type=get_three_state_flag())
         c.argument('is_v3_disabled', options_list=['--disablev3'], help='If true, v3 protocol will be disabled on the channel.', arg_type=get_three_state_flag())
+        c.argument('is_secure_site_enabled', help='If true, enables enhanced authentication features. Must be true for --trusted-origins parameters to work.', arg_type=get_three_state_flag())
+        c.argument('trusted_origins', nargs='+', help='Space separated Trusted Origins URLs (must use HTTPS) e.g. --trusted-origins https://mybotsite1.azurewebsites.net https://mybotsite2.azurewebsites.net')
+
+    with self.argument_context('bot directline update') as c:
+        c.argument('is_disabled', options_list=['--add-disabled'], arg_type=get_three_state_flag(), help='Add the channel in a disabled state.')
+        c.argument('site_name', options_list=['-s', '--site-name'], help='Name of the Directline channel site.')
+        c.argument('is_v1_disabled', options_list=['--disablev1'], help='If true, v1 protocol will be disabled on the channel', arg_type=get_three_state_flag())
+        c.argument('is_v3_disabled', options_list=['--disablev3'], help='If true, v3 protocol will be disabled on the channel.', arg_type=get_three_state_flag())
+        c.argument('is_secure_site_enabled', help='If true, enables enhanced authentication features. Must be true for --trusted-origins parameters to work.', arg_type=get_three_state_flag())
+        c.argument('trusted_origins', nargs='+', help='Space separated Trusted Origins URLs (must use HTTPS) e.g. --trusted-origins https://mybotsite1.azurewebsites.net https://mybotsite2.azurewebsites.net')
 
     with self.argument_context('bot telegram create') as c:
         c.argument('is_disabled', options_list=['--add-disabled'], arg_type=get_three_state_flag(), help='Add the channel in a disabled state.')

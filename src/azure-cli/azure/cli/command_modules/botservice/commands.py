@@ -70,6 +70,8 @@ def load_command_table(self, _):
     for channel in ['facebook', 'email', 'msteams', 'skype', 'kik', 'directline', 'telegram', 'sms', 'slack']:
         with self.command_group('bot {}'.format(channel), channelOperationsCreate_commandType, is_preview=True) as g:
             g.command('create', '{}_create'.format(channel))
+            if channel == 'directline':
+                g.command('update', '{}_update'.format(channel))
 
         with self.command_group('bot {}'.format(channel), channelOperations_commandType, is_preview=True) as g:
             g.command('show', '{}_get'.format(channel))
