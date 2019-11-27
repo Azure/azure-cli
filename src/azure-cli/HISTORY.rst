@@ -11,6 +11,10 @@ Release History
 
 * Install script support python 3.8
 
+**IOT**
+
+* [BREAKING CHANGE] Removed --failover-region parameter from manual-failover. Now it will failover to assigned geo-paired secondary region.
+
 **Packaging**
 
 * Add back edge builds for pip install
@@ -70,7 +74,6 @@ Release History
 * Fix #2531: Add convenience arguments for hub update.
 * Fix #8323: Add missing parameters to create storage custom endpoint.
 * Fix regression bug: Reverting the changes which overrides the default storage endpoint.
-* [BREAKING CHANGE] Removed --failover-region parameter from manual-failover. Now it will failover to assigned geo-paired secondary region.
 
 **Key Vault**
 

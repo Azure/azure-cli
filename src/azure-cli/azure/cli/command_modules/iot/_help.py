@@ -485,7 +485,7 @@ helps['iot hub manual-failover'] = """
 type: command
 short-summary: Initiate a manual failover for the IoT Hub to the geo-paired disaster recovery region.
 examples:
-  - name: Initiating failover “myhub” from primary to secondary region.
+  - name: Initiate failover “myhub” from primary to secondary region.
     text: >
         az iot hub manual-failover -n myhub
 """
