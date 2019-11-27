@@ -651,7 +651,7 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
                         single_placement_group=None, platform_fault_domain_count=None, custom_data=None,
                         secrets=None, license_type=None, zones=None, priority=None, eviction_policy=None,
                         application_security_groups=None, ultra_ssd_enabled=None, proximity_placement_group=None,
-                        terminate_notification_time=None, max_price=None):
+                        terminate_notification_time=None, max_price=None, scale_in_policy=None):
 
     # Build IP configuration
     ip_configuration = {
@@ -835,6 +835,9 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
             }
         }
         vmss_properties['virtualMachineProfile']['scheduledEventsProfile'] = scheduled_events_profile
+
+    if scale_in_policy:
+        vmss_properties['scaleInPolicy'] = {'rules': scale_in_policy}
 
     vmss = {
         'type': 'Microsoft.Compute/virtualMachineScaleSets',
