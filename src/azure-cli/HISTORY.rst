@@ -6,6 +6,7 @@ Release History
 **Compute**
 
 * vmss create/update: Add --scale-in-policy, which decides which virtual machines are chosen for removal when a VMSS is scaled-in
+* Add disk-encryption-set command group
 
 **Install**
 
