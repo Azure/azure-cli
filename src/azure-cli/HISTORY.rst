@@ -9,7 +9,11 @@ Release History
 
 **Packaging**
 
-* Add back edge builds for pip install  
+* Add back edge builds for pip install
+
+**Storage**
+
+* GA Release User Delegation SAS token Support
 
 2.0.77
 ++++++
