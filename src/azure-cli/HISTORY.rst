@@ -14,6 +14,7 @@ Release History
 **Storage**
 
 * GA Release Large File Shares property for storage account create and update command
+* GA Release User Delegation SAS token Support
 
 2.0.77
 ++++++
