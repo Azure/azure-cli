@@ -724,7 +724,7 @@ def update_ag_probe(cmd, instance, parent, item_name, protocol=None, host=None, 
 
 def create_ag_request_routing_rule(cmd, resource_group_name, application_gateway_name, item_name,
                                    address_pool=None, http_settings=None, http_listener=None, redirect_config=None,
-                                   url_path_map=None, rule_type='Basic', no_wait=False):
+                                   url_path_map=None, rule_type='Basic', no_wait=False, rewrite_rule_set=None):
     ApplicationGatewayRequestRoutingRule, SubResource = cmd.get_models(
         'ApplicationGatewayRequestRoutingRule', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
@@ -744,6 +744,8 @@ def create_ag_request_routing_rule(cmd, resource_group_name, application_gateway
         url_path_map=SubResource(id=url_path_map) if url_path_map else None)
     if cmd.supported_api_version(min_api='2017-06-01'):
         new_rule.redirect_configuration = SubResource(id=redirect_config) if redirect_config else None
+    if cmd.supported_api_version(min_api='2019-04-01'):
+        new_rule.rewrite_rule_set = SubResource(id=rewrite_rule_set) if rewrite_rule_set else None
     upsert_to_collection(ag, 'request_routing_rules', new_rule, 'name')
     return sdk_no_wait(no_wait, ncf.application_gateways.create_or_update,
                        resource_group_name, application_gateway_name, ag)
@@ -751,7 +753,7 @@ def create_ag_request_routing_rule(cmd, resource_group_name, application_gateway
 
 def update_ag_request_routing_rule(cmd, instance, parent, item_name, address_pool=None,
                                    http_settings=None, http_listener=None, redirect_config=None, url_path_map=None,
-                                   rule_type=None):
+                                   rule_type=None, rewrite_rule_set=None):
     SubResource = cmd.get_models('SubResource')
     if address_pool is not None:
         instance.backend_address_pool = SubResource(id=address_pool)
@@ -765,6 +767,8 @@ def update_ag_request_routing_rule(cmd, instance, parent, item_name, address_poo
         instance.url_path_map = SubResource(id=url_path_map)
     if rule_type is not None:
         instance.rule_type = rule_type
+    if rewrite_rule_set is not None:
+        instance.rewrite_rule_set = SubResource(id=rewrite_rule_set)
     return parent
 
 
@@ -848,9 +852,9 @@ def update_ag_trusted_root_certificate(instance, parent, item_name, cert_data=No
 
 
 def create_ag_url_path_map(cmd, resource_group_name, application_gateway_name, item_name, paths,
-                           address_pool=None, http_settings=None, redirect_config=None,
+                           address_pool=None, http_settings=None, redirect_config=None, rewrite_rule_set=None,
                            default_address_pool=None, default_http_settings=None, default_redirect_config=None,
-                           no_wait=False, rule_name='default'):
+                           no_wait=False, rule_name='default', default_rewrite_rule_set=None, firewall_policy=None):
     ApplicationGatewayUrlPathMap, ApplicationGatewayPathRule, SubResource = cmd.get_models(
         'ApplicationGatewayUrlPathMap', 'ApplicationGatewayPathRule', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
@@ -872,6 +876,14 @@ def create_ag_url_path_map(cmd, resource_group_name, application_gateway_name, i
         new_map.default_redirect_configuration = \
             SubResource(id=default_redirect_config) if default_redirect_config else None
 
+    if cmd.supported_api_version(min_api='2019-04-01'):
+        new_rule.rewrite_rule_set = SubResource(id=rewrite_rule_set) if rewrite_rule_set else None
+        new_map.default_rewrite_rule_set = \
+            SubResource(id=default_rewrite_rule_set) if default_rewrite_rule_set else None
+
+    if cmd.supported_api_version(min_api='2019-09-01'):
+        new_rule.firewall_policy = SubResource(id=firewall_policy) if firewall_policy else None
+
     # pull defaults from the rule specific properties if the default-* option isn't specified
     if new_rule.backend_address_pool and not new_map.default_backend_address_pool:
         new_map.default_backend_address_pool = new_rule.backend_address_pool
@@ -889,7 +901,8 @@ def create_ag_url_path_map(cmd, resource_group_name, application_gateway_name, i
 
 
 def update_ag_url_path_map(cmd, instance, parent, item_name, default_address_pool=None,
-                           default_http_settings=None, default_redirect_config=None, raw=False):
+                           default_http_settings=None, default_redirect_config=None, raw=False,
+                           default_rewrite_rule_set=None):
     SubResource = cmd.get_models('SubResource')
     if default_address_pool == '':
         instance.default_backend_address_pool = None
@@ -905,12 +918,17 @@ def update_ag_url_path_map(cmd, instance, parent, item_name, default_address_poo
         instance.default_redirect_configuration = None
     elif default_redirect_config:
         instance.default_redirect_configuration = SubResource(id=default_redirect_config)
+
+    if default_rewrite_rule_set == '':
+        instance.default_rewrite_rule_set = None
+    elif default_rewrite_rule_set:
+        instance.default_rewrite_rule_set = SubResource(id=default_rewrite_rule_set)
     return parent
 
 
 def create_ag_url_path_map_rule(cmd, resource_group_name, application_gateway_name, url_path_map_name,
                                 item_name, paths, address_pool=None, http_settings=None, redirect_config=None,
-                                firewall_policy=None, no_wait=False):
+                                firewall_policy=None, no_wait=False, rewrite_rule_set=None):
     ApplicationGatewayPathRule, SubResource = cmd.get_models('ApplicationGatewayPathRule', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
@@ -930,6 +948,9 @@ def create_ag_url_path_map_rule(cmd, resource_group_name, application_gateway_na
         default_redirect = SubResource(id=url_map.default_redirect_configuration.id) \
             if url_map.default_redirect_configuration else None
         new_rule.redirect_configuration = SubResource(id=redirect_config) if redirect_config else default_redirect
+
+    if cmd.supported_api_version(min_api='2019-04-01'):
+        new_rule.rewrite_rule_set = SubResource(id=rewrite_rule_set) if rewrite_rule_set else None
 
     if cmd.supported_api_version(min_api='2019-09-01'):
         new_rule.firewall_policy = SubResource(id=firewall_policy) if firewall_policy else None
