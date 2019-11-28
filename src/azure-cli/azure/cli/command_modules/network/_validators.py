@@ -774,6 +774,7 @@ def process_ag_rule_create_namespace(cmd, namespace):  # pylint: disable=unused-
         namespace.rewrite_rule_set = _generate_ag_subproperty_id(
             cmd.cli_ctx, namespace, 'rewriteRuleSets', namespace.rewrite_rule_set)
 
+
 def process_ag_ssl_policy_set_namespace(namespace):
     if namespace.disabled_ssl_protocols and getattr(namespace, 'clear', None):
         raise ValueError('incorrect usage: --disabled-ssl-protocols PROTOCOL [...] | --clear')
@@ -795,7 +796,8 @@ def process_ag_url_path_map_create_namespace(cmd, namespace):  # pylint: disable
         namespace.default_redirect_config = _generate_ag_subproperty_id(
             cmd.cli_ctx, namespace, 'redirectConfigurations', namespace.default_redirect_config)
 
-    if hasattr(namespace, 'firewall_policy') and namespace.firewall_policy and not is_valid_resource_id(namespace.firewall_policy):
+    if hasattr(namespace, 'firewall_policy') and \
+            namespace.firewall_policy and not is_valid_resource_id(namespace.firewall_policy):
         namespace.firewall_policy = _generate_ag_subproperty_id(
             cmd.cli_ctx, namespace, 'firewallPolicy', namespace.firewall_policy
         )

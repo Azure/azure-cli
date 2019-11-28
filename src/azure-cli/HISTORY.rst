@@ -50,6 +50,11 @@ Release History
 * GA Release Large File Shares property for storage account create and update command
 * GA Release User Delegation SAS token Support
 
+**Network**
+
+* az network application-gateway url-path-map create/update: bug fix for `--waf-policy`
+* az network application-gateway: support `--redirect-rule-set`
+
 2.0.77
 ++++++
 
