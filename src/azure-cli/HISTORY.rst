@@ -101,6 +101,7 @@ Release History
 * Add support for updating a Direct Line channel via 'az bot directline update'.
 * The following command groups are GA and not in preview: 'az bot authsetting'
 * The following command group 'az bot' are GA and not in preview: 'create', 'prepare-deploy', 'show', 'delete', 'update'
+* Add name availability check for 'az bot create'
 
 **Compute**
 

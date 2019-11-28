@@ -13,6 +13,7 @@ from azure.cli.command_modules.botservice.bot_publish_prep import BotPublishPrep
 from azure.cli.command_modules.botservice.bot_template_deployer import BotTemplateDeployer
 from azure.cli.command_modules.botservice.constants import CSHARP, JAVASCRIPT, TYPESCRIPT
 from azure.cli.command_modules.botservice.kudu_client import KuduClient
+from azure.cli.command_modules.botservice.name_availability import NameAvailability
 from azure.cli.command_modules.botservice.web_app_operations import WebAppOperations
 from azure.mgmt.botservice.models import (
     Bot,
@@ -74,7 +75,7 @@ def __prepare_configuration_file(cmd, resource_group_name, kudu_client, folder_p
             f.write(json.dumps(existing))
 
 
-def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, password, language=None,  # pylint: disable=too-many-locals, too-many-statements
+def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, password=None, language=None,  # pylint: disable=too-many-locals, too-many-statements, inconsistent-return-statements
            description=None, display_name=None, endpoint=None, tags=None, location='Central US',
            sku_name='F0', deploy_echo=None):
     # Kind parameter validation
@@ -82,6 +83,18 @@ def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, pa
     registration_kind = 'registration'
     bot_kind = 'bot'
     webapp_kind = 'webapp'
+
+    # Mapping: registration is deprecated, we now use 'bot' kind for registration bots
+    if kind == registration_kind:
+        kind = bot_kind
+
+    # Check the resource name availability for the bot.
+    name_response = NameAvailability.check_name_availability(client, resource_name, kind)
+    if not name_response.valid:
+        # If the name is unavailable, gracefully exit and log the reason for the user.
+        logger.error('Unable to create a bot with a name of "%s".', resource_name)
+        logger.error('Reason: %s', name_response.message)
+        return
 
     if resource_name.find(".") > -1:
         logger.warning('"." found in --name parameter ("%s"). "." is an invalid character for Azure Bot resource names '
@@ -98,16 +111,9 @@ def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, pa
         raise CLIError("--appid must be a valid GUID from a Microsoft Azure AD Application Registration. See "
                        "https://docs.microsoft.com/azure/active-directory/develop/quickstart-register-app for "
                        "more information on App Registrations. See 'az bot create --help' for more CLI information.")
-    if not password:
-        raise CLIError("--password cannot have a length of 0. This value is used to authorize calls to your bot. See "
-                       "'az bot create --help'.`")
 
     # If display name was not provided, just use the resource name
     display_name = display_name or resource_name
-
-    # Mapping: registration is deprecated, we now use 'bot' kind for registration bots
-    if kind == registration_kind:
-        kind = bot_kind
 
     logger.info('Creating Azure Bot Service.')
 
@@ -140,6 +146,10 @@ def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, pa
             resource_name=resource_name,
             parameters=parameters
         )
+
+    if not password:
+        raise CLIError("--password cannot have a length of 0 for Web App Bots. This value is used to authorize calls "
+                       "to your bot. See 'az bot create --help'.")
 
     # Web app bots require deploying custom ARM templates, we do that in a separate method
     logger.info('Detected kind %s, validating parameters for the specified kind.', kind)

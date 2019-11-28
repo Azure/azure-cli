@@ -60,9 +60,9 @@ def load_arguments(self, _):
         c.argument('description', options_list=['--description', '-d'], help='The description of the bot.', arg_group='Registration Bot Specific')
         c.argument('endpoint', options_list=['-e', '--endpoint'], help='The messaging endpoint of the bot.', arg_group='Registration Bot Specific')
         c.argument('msa_app_id', options_list=['--appid'], help='The Microsoft account ID (MSA ID) to be used with the bot.')
-        c.argument('password', options_list=['-p', '--password'], help='The Microsoft account (MSA) password for the bot. Used to authorize messages being sent to the bot.')
+        c.argument('password', options_list=['-p', '--password'], help='The Microsoft account (MSA) password for the bot. Used to authorize messages being sent to the bot. Required for Web App Bots.', arg_group='Web App Bot Specific')
         c.argument('tags', arg_type=tags_type)
-        c.argument('language', options_list=['--lang'], arg_type=get_enum_type(SUPPORTED_LANGUAGES), help='The language to be used to create the bot.', arg_group='Web Bot Specific')
+        c.argument('language', options_list=['--lang'], arg_type=get_enum_type(SUPPORTED_LANGUAGES), help='The language to be used to create the bot.', arg_group='Web App Bot Specific')
         c.argument('deploy_echo', options_list=['--echo'], arg_type=get_three_state_flag(), help='Deploy an Echo Bot template to the newly created v4 Web App Bot.', arg_group='V4 Bot Templates')
 
     with self.argument_context('bot publish') as c:
