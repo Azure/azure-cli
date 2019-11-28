@@ -174,7 +174,9 @@ def load_arguments(self, _):
         with self.argument_context(scope + ' config appsettings') as c:
             c.argument('settings', nargs='+', help="space-separated app settings in a format of <name>=<value>")
             c.argument('setting_names', nargs='+', help="space-separated app setting names")
-
+        with self.argument_context(scope + ' config ssl import') as c:
+            c.argument('key_vault', help='The name or resource ID of the Key Vault')
+            c.argument('key_vault_certificate_name', help='The name of the certificate in Key Vault')
         with self.argument_context(scope + ' config hostname') as c:
             c.argument('hostname', completer=get_hostname_completion_list, help="hostname assigned to the site, such as custom domains", id_part='child_name_1')
         with self.argument_context(scope + ' deployment user') as c:
