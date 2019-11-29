@@ -3669,7 +3669,7 @@ class VMSSOrchestrationModeTest(ScenarioTest):
 
 class DiskEncryptionSetTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_disk_encryption_set_', location='westcentralus')
+    @ResourceGroupPreparer(name_prefix='cli_test_disk_encryption_set_', location='centraluseuap')
     def test_disk_encryption_set(self, resource_group):
         self.kwargs.update({
             'vault': 'vault2897',
@@ -3681,7 +3681,11 @@ class DiskEncryptionSetTest(ScenarioTest):
         self.kwargs.update({
             'kid': kid
         })
-        self.cmd('disk-encryption-set create -g {rg} -n {des} --key-url {kid} --source-vault {vault}')
+        des_sp_id = self.cmd('disk-encryption-set create -g {rg} -n {des} --key-url {kid} --source-vault {vault}').get_output_in_json()['identity']['principalId']
+        self.kwargs.update({
+            'des_sp_id': des_sp_id
+        })
+        self.cmd('keyvault set-policy -n {vault} --object-id {des_sp_id} --key-permissions wrapKey unwrapKey get')
 
 
 if __name__ == '__main__':

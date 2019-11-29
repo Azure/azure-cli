@@ -2949,7 +2949,6 @@ def create_disk_encryption_set(cmd, client, resource_group_name, disk_encryption
     keyVault_and_key_reference = KeyVaultAndKeyReference(source_vault=source_vault, key_url=key_url)
     disk_encryption_set = DiskEncryptionSet(location=location, tags=tags, identity=encryption_set_identity,
                                             active_key=keyVault_and_key_reference)
-    client.create_or_update(resource_group_name, disk_encryption_set_name, disk_encryption_set)
-
+    return client.create_or_update(resource_group_name, disk_encryption_set_name, disk_encryption_set)
 
 # endregion

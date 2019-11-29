@@ -100,6 +100,16 @@ examples:
     crafted: true
 """
 
+helps['disk-encryption-set'] = """
+type: group
+short-summary: Disk Encryption Set resource.
+"""
+
+helps['disk-encryption-set create'] = """
+type: command
+short-summary: Create a Disk Encryption Set.
+"""
+
 helps['image'] = """
 type: group
 short-summary: Manage custom virtual machine images.

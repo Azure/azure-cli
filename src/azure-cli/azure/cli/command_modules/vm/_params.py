@@ -54,6 +54,7 @@ def load_arguments(self, _):
 
     extension_instance_name_type = CLIArgumentType(help="Name of extension instance, which can be customized. Default: name of the extension.")
     image_template_name_type = CLIArgumentType(overrides=name_arg_type, id_part='name')
+    disk_encryption_set_name = CLIArgumentType(overrides=name_arg_type, help='Name of disk encryption set.', id_part='name')
 
     # StorageAccountTypes renamed to DiskStorageAccountTypes in 2018_06_01 of azure-mgmt-compute
     DiskStorageAccountTypes = DiskStorageAccountTypes or StorageAccountTypes
@@ -840,9 +841,10 @@ def load_arguments(self, _):
     # endregion
 
     # region disk encryption set
-    with self.argument_context('disk-encryption-set create') as c:
-        c.argument('disk_encryption_set_name', name_arg_type, help='Name of disk encryption set.')
+    with self.argument_context('disk-encryption-set') as c:
+        c.argument('disk_encryption_set_name', disk_encryption_set_name)
         c.argument('key_url', help='URL pointing to a key or secret in KeyVault.')
         c.argument('source_vault', help='Resource ID of the KeyVault containing the key or secret.')
         c.argument('location', validator=get_default_location_from_resource_group)
+        c.argument('tags', tags_type)
     # endregion
