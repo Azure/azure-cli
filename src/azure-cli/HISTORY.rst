@@ -12,6 +12,10 @@ Release History
 
 * Install script support python 3.8
 
+**IOT**
+
+* [BREAKING CHANGE] Removed --failover-region parameter from manual-failover. Now it will failover to assigned geo-paired secondary region.
+
 **Packaging**
 
 * Add back edge builds for pip install
