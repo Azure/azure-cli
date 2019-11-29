@@ -249,8 +249,13 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                         # below are generated internally from 'source'
                         source_blob_uri=None, source_disk=None, source_snapshot=None,
                         source_storage_account_id=None, no_wait=False, tags=None, zone=None,
-                        disk_iops_read_write=None, disk_mbps_read_write=None, hyper_v_generation=None):
-    Disk, CreationData, DiskCreateOption = cmd.get_models('Disk', 'CreationData', 'DiskCreateOption')
+                        disk_iops_read_write=None, disk_mbps_read_write=None, hyper_v_generation=None,
+                        encryption_type=None, disk_encryption_set=None):
+    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    Disk, CreationData, DiskCreateOption, Encryption = cmd.get_models(
+        'Disk', 'CreationData', 'DiskCreateOption', 'Encryption')
 
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     if source_blob_uri:
@@ -263,8 +268,6 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         option = DiskCreateOption.empty
 
     if source_storage_account_id is None and source_blob_uri is not None:
-        from azure.cli.core.commands.client_factory import get_subscription_id
-        from msrestazure.tools import resource_id
         subscription_id = get_subscription_id(cmd.cli_ctx)
         storage_account_name = source_blob_uri.split('.')[0].split('/')[-1]
         source_storage_account_id = resource_id(
@@ -282,8 +285,15 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
 
     if size_gb is None and upload_size_bytes is None and (option == DiskCreateOption.empty or for_upload):
         raise CLIError('usage error: --size-gb or --upload-size-bytes required to create an empty disk')
+
+    if disk_encryption_set is not None and not is_valid_resource_id(disk_encryption_set):
+        disk_encryption_set = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
+            namespace='Microsoft.Compute', type='diskEncryptionSets', name=disk_encryption_set)
+    encryption = Encryption(type=encryption_type, disk_encryption_set_id=disk_encryption_set)
+
     disk = Disk(location=location, creation_data=creation_data, tags=(tags or {}),
-                sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb, os_type=os_type)
+                sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb, os_type=os_type, encryption=encryption)
 
     if hyper_v_generation:
         disk.hyper_vgeneration = hyper_v_generation

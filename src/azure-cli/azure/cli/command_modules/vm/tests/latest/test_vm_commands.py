@@ -3674,11 +3674,13 @@ class DiskEncryptionSetTest(ScenarioTest):
         self.kwargs.update({
             'vault': 'vault2897',
             'key': 'key1',
-            'des': 'des1'
+            'des': 'des1',
+            'disk': 'disk1'
         })
-        self.cmd('keyvault create -g {rg} -n {vault}')
+        vault_id = self.cmd('keyvault create -g {rg} -n {vault}').get_output_in_json()['id']
         kid = self.cmd('keyvault key create -n {key} --vault {vault}').get_output_in_json()['key']['kid']
         self.kwargs.update({
+            'vault_id': vault_id,
             'kid': kid
         })
         des_sp_id = self.cmd('disk-encryption-set create -g {rg} -n {des} --key-url {kid} --source-vault {vault}').get_output_in_json()['identity']['principalId']
@@ -3686,6 +3688,8 @@ class DiskEncryptionSetTest(ScenarioTest):
             'des_sp_id': des_sp_id
         })
         self.cmd('keyvault set-policy -n {vault} --object-id {des_sp_id} --key-permissions wrapKey unwrapKey get')
+        self.cmd('role assignment create --assignee {des_sp_id} --role Reader --scope {vault_id}')
+        self.cmd('disk create -g {rg} -n {disk} --encryption-type EncryptionAtRestWithCustomerKey --disk-encryption-set {des} --size-gb 10')
 
 
 if __name__ == '__main__':
