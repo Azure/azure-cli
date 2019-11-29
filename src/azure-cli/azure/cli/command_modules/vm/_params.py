@@ -9,6 +9,7 @@ from argcomplete.completers import FilesCompleter
 from knack.arguments import CLIArgumentType
 
 from azure.cli.core.profiles import ResourceType
+from azure.cli.core.commands.parameters import get_datetime_type
 from azure.cli.core.util import get_default_admin_username
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict)
@@ -25,6 +26,9 @@ from azure.cli.command_modules.vm._validators import (
 
 from azure.cli.command_modules.vm._vm_utils import MSI_LOCAL_ID
 from azure.cli.command_modules.vm._image_builder import ScriptType
+
+from azure.cli.command_modules.monitor.validators import validate_metric_dimension
+from azure.cli.command_modules.monitor.actions import get_period_type
 
 
 # pylint: disable=too-many-statements, too-many-branches, too-many-locals
@@ -844,6 +848,29 @@ def load_arguments(self, _):
     with self.argument_context('vm monitor log show') as c:
         c.argument('analytics_query', options_list=['--analytics-query', '-q'], help="Query to execute over Log Analytics data.")
         c.argument('timespan', help="Timespan over which to query. Defaults to querying all available data.")
+
+    with self.argument_context('vm monitor metrics') as c:
+        c.argument('metricnamespace', options_list=['--namespace'],
+                   help='Namespace to query metric definitions for.')
+
+    with self.argument_context('vm monitor metrics tail') as c:
+        from azure.mgmt.monitor.models import AggregationType
+        c.argument('resource', arg_type=existing_vm_name, help='Name or ID of Virtual Machine', id_part=None)
+        c.argument('metadata', action='store_true')
+        c.argument('dimension', nargs='*', validator=validate_metric_dimension)
+        c.argument('aggregation', arg_type=get_enum_type(t for t in AggregationType if t.name != 'none'), nargs='*')
+        c.argument('metrics', nargs='+')
+        c.argument('orderby',
+                   help='Aggregation to use for sorting results and the direction of the sort. Only one order can be specificed. Examples: sum asc')
+        c.argument('top', help='Max number of records to retrieve. Valid only if --filter used.')
+        c.argument('filters', options_list='--filter')
+        c.argument('metric_namespace', options_list='--namespace')
+
+    with self.argument_context('vm monitor metrics tail', arg_group='Time') as c:
+        c.argument('start_time', arg_type=get_datetime_type(help='Start time of the query.'))
+        c.argument('end_time', arg_type=get_datetime_type(help='End time of the query. Defaults to the current time.'))
+        c.argument('offset', type=get_period_type(as_timedelta=True))
+        c.argument('interval', arg_group='Time', type=get_period_type())
     # endregion
 
     # region disk encryption set
