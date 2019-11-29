@@ -18,7 +18,7 @@ from azure.mgmt.resource.subscriptions.models import \
     (SubscriptionState, Subscription, SubscriptionPolicies, SpendingLimit)
 
 from azure.cli.core._profile import (Profile, CredsCache, SubscriptionFinder,
-                                     ServicePrincipalAuth, _AUTH_CTX_FACTORY)
+                                     ServicePrincipalAuth, _AUTH_CTX_FACTORY, _TENANT_LEVEL_SUBSCRIPTION_ID)
 from azure.cli.core.mock import DummyCli
 
 from knack.util import CLIError
@@ -28,15 +28,22 @@ class TestProfile(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.tenant_id = 'microsoft.com'
+        cls.tenant_id_rest = 'microsoft.com'
+        cls.tenant_id_cli = 'microsoft.com'
+        cls.tenant_id = 'token-tenant'
+        cls.subscription_tenant_id = 'home-tenant'
+        cls.managed_by_tenants = []
         cls.user1 = 'foo@foo.com'
-        cls.id1 = 'subscriptions/1'
+        cls.id1 = 'subscriptions/00000000-0000-0000-0000-000000000001'
+        cls.subscription_id1 = '00000000-0000-0000-0000-000000000001'
         cls.display_name1 = 'foo account'
         cls.state1 = SubscriptionState.enabled
-        cls.subscription1 = SubscriptionStub(cls.id1,
+
+        # Subscription returned by REST API
+        cls.subscription1 = SubscriptionStub(cls.subscription_id1,
                                              cls.display_name1,
                                              cls.state1,
-                                             cls.tenant_id)
+                                             cls.tenant_id_rest)
         cls.raw_token1 = 'some...secrets'
         cls.token_entry1 = {
             "_clientId": "04b07795-8ddb-461a-bbee-02f9e1bf7b46",
@@ -53,13 +60,14 @@ class TestProfile(unittest.TestCase):
         }
 
         cls.user2 = 'bar@bar.com'
-        cls.id2 = 'subscriptions/2'
+        cls.id2 = 'subscriptions/00000000-0000-0000-0000-000000000002'
+        cls.subscription_id2 = '00000000-0000-0000-0000-000000000002'
         cls.display_name2 = 'bar account'
         cls.state2 = SubscriptionState.past_due
-        cls.subscription2 = SubscriptionStub(cls.id2,
+        cls.subscription2 = SubscriptionStub(cls.subscription_id2,
                                              cls.display_name2,
                                              cls.state2,
-                                             cls.tenant_id)
+                                             cls.tenant_id_rest)
         cls.test_msi_tenant = '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a'
         cls.test_msi_access_token = ('eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IlZXVkljMVdEMVRrc2JiMzAxc2FzTTVrT3E1'
                                      'USIsImtpZCI6IlZXVkljMVdEMVRrc2JiMzAxc2FzTTVrT3E1USJ9.eyJhdWQiOiJodHRwczovL21hbmF'
@@ -88,12 +96,19 @@ class TestProfile(unittest.TestCase):
         cli = DummyCli()
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
+
+        subscription_sdk = SubscriptionStub(self.subscription_id1,
+                                            self.display_name1,
+                                            self.state1,
+                                            self.tenant_id,
+                                            self.subscription_tenant_id)
         consolidated = profile._normalize_properties(self.user1,
-                                                     [self.subscription1],
+                                                     [subscription_sdk],
                                                      False)
         expected = {
             'environmentName': 'AzureCloud',
-            'id': '1',
+            'id': self.subscription_id1,
+            'managedByTenants': [],
             'name': self.display_name1,
             'state': self.state1.value,
             'user': {
@@ -101,7 +116,8 @@ class TestProfile(unittest.TestCase):
                 'type': 'user'
             },
             'isDefault': False,
-            'tenantId': self.tenant_id
+            'tenantId': self.tenant_id,
+            'subscriptionTenantId': self.subscription_tenant_id
         }
         self.assertEqual(expected, consolidated[0])
         # verify serialization works
@@ -143,8 +159,13 @@ class TestProfile(unittest.TestCase):
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
 
         # add the first and verify
+        sub1 = SubscriptionStub(self.subscription_id1,
+                                self.display_name1,
+                                SubscriptionState.enabled,
+                                self.tenant_id,
+                                subscription_tenant_id=self.subscription_tenant_id)
         consolidated = profile._normalize_properties(self.user1,
-                                                     [self.subscription1],
+                                                     [sub1],
                                                      False)
         profile._set_subscriptions(consolidated)
 
@@ -152,7 +173,8 @@ class TestProfile(unittest.TestCase):
         subscription1 = storage_mock['subscriptions'][0]
         self.assertEqual(subscription1, {
             'environmentName': 'AzureCloud',
-            'id': '1',
+            'id': self.subscription_id1,
+            'managedByTenants': [],
             'name': self.display_name1,
             'state': self.state1.value,
             'user': {
@@ -160,12 +182,18 @@ class TestProfile(unittest.TestCase):
                 'type': 'user'
             },
             'isDefault': True,
-            'tenantId': self.tenant_id
+            'tenantId': self.tenant_id,
+            'subscriptionTenantId': self.subscription_tenant_id
         })
 
         # add the second and verify
+        sub2 = SubscriptionStub(self.subscription_id2,
+                                self.display_name2,
+                                self.state2,
+                                self.tenant_id,
+                                subscription_tenant_id=self.subscription_tenant_id)
         consolidated = profile._normalize_properties(self.user2,
-                                                     [self.subscription2],
+                                                     [sub2],
                                                      False)
         profile._set_subscriptions(consolidated)
 
@@ -173,7 +201,8 @@ class TestProfile(unittest.TestCase):
         subscription2 = storage_mock['subscriptions'][1]
         self.assertEqual(subscription2, {
             'environmentName': 'AzureCloud',
-            'id': '2',
+            'id': self.subscription_id2,
+            'managedByTenants': [],
             'name': self.display_name2,
             'state': self.state2.value,
             'user': {
@@ -181,7 +210,8 @@ class TestProfile(unittest.TestCase):
                 'type': 'user'
             },
             'isDefault': True,
-            'tenantId': self.tenant_id
+            'tenantId': self.tenant_id,
+            'subscriptionTenantId': self.subscription_tenant_id
         })
 
         # verify the old one stays, but no longer active
@@ -200,7 +230,7 @@ class TestProfile(unittest.TestCase):
                                                      False)
         profile._set_subscriptions(consolidated)
 
-        new_subscription1 = SubscriptionStub(self.id1,
+        new_subscription1 = SubscriptionStub(self.subscription_id1,
                                              self.display_name1,
                                              self.state1,
                                              self.tenant_id)
@@ -495,7 +525,7 @@ class TestProfile(unittest.TestCase):
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
         test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
         test_tenant_id = '12345678-38d6-4fb2-bad9-b7b93a3e1234'
-        test_subscription = SubscriptionStub('/subscriptions/{}'.format(test_subscription_id),
+        test_subscription = SubscriptionStub(test_subscription_id,
                                              'MSI-DEV-INC', self.state1, '12345678-38d6-4fb2-bad9-b7b93a3e1234')
         consolidated = profile._normalize_properties(self.user1,
                                                      [test_subscription],
@@ -536,9 +566,9 @@ class TestProfile(unittest.TestCase):
         test_subscription_id2 = '12345678-1bf0-4dda-aec3-cb9272f09591'
         test_tenant_id = '12345678-38d6-4fb2-bad9-b7b93a3e1234'
         test_tenant_id2 = '12345678-38d6-4fb2-bad9-b7b93a3e4321'
-        test_subscription = SubscriptionStub('/subscriptions/{}'.format(test_subscription_id),
+        test_subscription = SubscriptionStub(test_subscription_id,
                                              'MSI-DEV-INC', self.state1, test_tenant_id)
-        test_subscription2 = SubscriptionStub('/subscriptions/{}'.format(test_subscription_id2),
+        test_subscription2 = SubscriptionStub(test_subscription_id2,
                                               'MSI-DEV-INC2', self.state1, test_tenant_id2)
         consolidated = profile._normalize_properties(self.user1,
                                                      [test_subscription, test_subscription2],
@@ -571,12 +601,14 @@ class TestProfile(unittest.TestCase):
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None}, use_global_creds_cache=False,
                           async_persist=False)
         test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
+        test_display_name = 'foo subscription name'
         test_tenant_id = '12345678-38d6-4fb2-bad9-b7b93a3e1234'
+        test_subscription_tenant_id = '87654321-0000-0000-0000-000000000000'
         test_user = 'systemAssignedIdentity'
-        msi_subscription = SubscriptionStub('/subscriptions/' + test_subscription_id, 'MSI', self.state1, test_tenant_id)
-        consolidated = profile._normalize_properties(test_user,
-                                                     [msi_subscription],
-                                                     True)
+        test_assigned_identity_info = 'MSI'
+        msi_subscription = SubscriptionStub(test_subscription_id, test_display_name, self.state1, test_tenant_id)
+        consolidated = profile._normalize_properties(test_user, [msi_subscription], True,
+                                                     user_assigned_identity_id=test_assigned_identity_info)
         profile._set_subscriptions(consolidated)
 
         mock_msi_auth.side_effect = MSRestAzureAuthStub
@@ -602,12 +634,17 @@ class TestProfile(unittest.TestCase):
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None}, use_global_creds_cache=False,
                           async_persist=False)
         test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
+        test_display_name = 'foo subscription name'
         test_tenant_id = '12345678-38d6-4fb2-bad9-b7b93a3e1234'
+        test_subscription_tenant_id = '87654321-0000-0000-0000-000000000000'
         test_user = 'userAssignedIdentity'
         test_client_id = '12345678-38d6-4fb2-bad9-b7b93a3e8888'
-        msi_subscription = SubscriptionStub('/subscriptions/' + test_subscription_id, 'MSIClient-{}'.format(test_client_id), self.state1, test_tenant_id)
-        consolidated = profile._normalize_properties(test_user, [msi_subscription], True)
-        profile._set_subscriptions(consolidated, secondary_key_name='name')
+        test_assigned_identity_info = 'MSIClient-{}'.format(test_client_id)
+        msi_subscription = SubscriptionStub(test_subscription_id, test_display_name,
+                                            self.state1, test_tenant_id, test_subscription_tenant_id)
+        consolidated = profile._normalize_properties(test_user, [msi_subscription], True,
+                                                     user_assigned_identity_id=test_assigned_identity_info)
+        profile._set_subscriptions(consolidated)
 
         mock_msi_auth.side_effect = MSRestAzureAuthStub
 
@@ -633,12 +670,17 @@ class TestProfile(unittest.TestCase):
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None}, use_global_creds_cache=False,
                           async_persist=False)
         test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
+        test_display_name = 'foo subscription name'
+        test_tenant_id = '12345678-38d6-4fb2-bad9-b7b93a3e1234'
+        test_subscription_tenant_id = '87654321-0000-0000-0000-000000000000'
+        test_user = 'userAssignedIdentity'
         test_object_id = '12345678-38d6-4fb2-bad9-b7b93a3e9999'
-        msi_subscription = SubscriptionStub('/subscriptions/12345678-1bf0-4dda-aec3-cb9272f09590',
-                                            'MSIObject-{}'.format(test_object_id),
-                                            self.state1, '12345678-38d6-4fb2-bad9-b7b93a3e1234')
-        consolidated = profile._normalize_properties('userAssignedIdentity', [msi_subscription], True)
-        profile._set_subscriptions(consolidated, secondary_key_name='name')
+        test_assigned_identity_info = 'MSIObject-{}'.format(test_object_id)
+        msi_subscription = SubscriptionStub('12345678-1bf0-4dda-aec3-cb9272f09590',
+                                            test_display_name, self.state1, test_tenant_id, test_subscription_tenant_id)
+        consolidated = profile._normalize_properties(test_user, [msi_subscription], True,
+                                                     user_assigned_identity_id=test_assigned_identity_info)
+        profile._set_subscriptions(consolidated)
 
         mock_msi_auth.side_effect = MSRestAzureAuthStub
 
@@ -666,11 +708,11 @@ class TestProfile(unittest.TestCase):
         test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
         test_res_id = ('/subscriptions/{}/resourceGroups/r1/providers/Microsoft.ManagedIdentity/'
                        'userAssignedIdentities/id1').format(test_subscription_id)
-        msi_subscription = SubscriptionStub('/subscriptions/{}'.format(test_subscription_id),
+        msi_subscription = SubscriptionStub(test_subscription_id,
                                             'MSIResource-{}'.format(test_res_id),
                                             self.state1, '12345678-38d6-4fb2-bad9-b7b93a3e1234')
         consolidated = profile._normalize_properties('userAssignedIdentity', [msi_subscription], True)
-        profile._set_subscriptions(consolidated, secondary_key_name='name')
+        profile._set_subscriptions(consolidated)
 
         mock_msi_auth.side_effect = MSRestAzureAuthStub
 
@@ -702,19 +744,41 @@ class TestProfile(unittest.TestCase):
                                                      [self.subscription1],
                                                      False)
         profile._set_subscriptions(consolidated)
+        # test resource
         # action
         creds, sub, tenant = profile.get_raw_token(resource='https://foo')
-
         # verify
         self.assertEqual(creds[0], self.token_entry1['tokenType'])
         self.assertEqual(creds[1], self.raw_token1)
         # the last in the tuple is the whole token entry which has several fields
         self.assertEqual(creds[2]['expiresOn'], self.token_entry1['expiresOn'])
-        mock_get_token.assert_called_once_with(mock.ANY, self.user1, self.tenant_id,
+        self.assertEqual(sub, self.subscription_id1)
+        self.assertEqual(tenant, self.tenant_id)
+        mock_get_token.assert_called_with(mock.ANY, self.user1, self.tenant_id,
                                                'https://foo')
         self.assertEqual(mock_get_token.call_count, 1)
-        self.assertEqual(sub, '1')
+
+        # test subscription
+        creds, sub, tenant = profile.get_raw_token(subscription=self.subscription_id1)
+        self.assertEqual(creds[0], self.token_entry1['tokenType'])
+        self.assertEqual(creds[1], self.raw_token1)
+        self.assertEqual(creds[2]['expiresOn'], self.token_entry1['expiresOn'])
+        self.assertEqual(sub, self.subscription_id1)
         self.assertEqual(tenant, self.tenant_id)
+        mock_get_token.assert_called_with(mock.ANY, self.user1, self.tenant_id, self.token_entry1['resource'])
+        self.assertEqual(mock_get_token.call_count, 2)
+
+        # test tenant
+        tenant2 = 'foo-tenant'
+        creds, sub, tenant = profile.get_raw_token(tenant=tenant2)
+        self.assertEqual(creds[0], self.token_entry1['tokenType'])
+        self.assertEqual(creds[1], self.raw_token1)
+        self.assertEqual(creds[2]['expiresOn'], self.token_entry1['expiresOn'])
+        self.assertEqual(sub, _TENANT_LEVEL_SUBSCRIPTION_ID)
+        self.assertEqual(tenant, tenant2)
+        mock_get_token.assert_called_with(mock.ANY, self.user1, tenant2, self.token_entry1['resource'])
+        self.assertEqual(mock_get_token.call_count, 3)
+
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_service_principal', autospec=True)
@@ -741,7 +805,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(creds[2]['expiresOn'], self.token_entry1['expiresOn'])
         mock_get_token.assert_called_once_with(mock.ANY, 'sp1', 'https://foo', self.tenant_id)
         self.assertEqual(mock_get_token.call_count, 1)
-        self.assertEqual(sub, '1')
+        self.assertEqual(sub, self.subscription_id1)
         self.assertEqual(tenant, self.tenant_id)
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
@@ -755,7 +819,7 @@ class TestProfile(unittest.TestCase):
         test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
         test_tenant_id = '12345678-38d6-4fb2-bad9-b7b93a3e1234'
         test_user = 'systemAssignedIdentity'
-        msi_subscription = SubscriptionStub('/subscriptions/' + test_subscription_id,
+        msi_subscription = SubscriptionStub(test_subscription_id,
                                             'MSI', self.state1, test_tenant_id)
         consolidated = profile._normalize_properties(test_user,
                                                      [msi_subscription],
@@ -1351,7 +1415,7 @@ class TestProfile(unittest.TestCase):
         cli = DummyCli()
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
-        sp_subscription1 = SubscriptionStub('sp-sub/3', 'foo-subname', self.state1, 'foo_tenant.onmicrosoft.com')
+        sp_subscription1 = SubscriptionStub('3', 'foo-subname', self.state1, 'foo_tenant.onmicrosoft.com')
         consolidated = profile._normalize_properties(self.user1, deepcopy([self.subscription1]), False)
         consolidated += profile._normalize_properties('http://foo', [sp_subscription1], True)
         profile._set_subscriptions(consolidated)
@@ -1681,17 +1745,22 @@ class FileHandleStub(object):  # pylint: disable=too-few-public-methods
 
 
 class SubscriptionStub(Subscription):  # pylint: disable=too-few-public-methods
+    """
+    Subscription Stub of Subscription from SDK before tenantId transformation.
+    """
 
-    def __init__(self, id, display_name, state, tenant_id):  # pylint: disable=redefined-builtin
+    def __init__(self, subscription_id, display_name, state, tenant_id, subscription_tenant_id=None, managed_by_tenants=[]):  # pylint: disable=redefined-builtin
         policies = SubscriptionPolicies()
         policies.spending_limit = SpendingLimit.current_period_off
         policies.quota_id = 'some quota'
         super(SubscriptionStub, self).__init__(subscription_policies=policies, authorization_source='some_authorization_source')
-        self.id = id
+        self.id = '/subscriptions/' + subscription_id
+        self.subscription_id = subscription_id
         self.display_name = display_name
         self.state = state
         self.tenant_id = tenant_id
-
+        self.subscription_tenant_id = subscription_tenant_id
+        self.managed_by_tenants = managed_by_tenants
 
 class TenantStub(object):  # pylint: disable=too-few-public-methods
 

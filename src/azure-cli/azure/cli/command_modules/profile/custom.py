@@ -49,17 +49,17 @@ def list_subscriptions(cmd, all=False, refresh=False):  # pylint: disable=redefi
 
 
 # pylint: disable=inconsistent-return-statements
-def show_subscription(cmd, subscription=None, show_auth_for_sdk=None):
+def show_subscription(cmd, subscription=None, tenant=None, show_auth_for_sdk=None):
     import json
     profile = Profile(cli_ctx=cmd.cli_ctx)
     if not show_auth_for_sdk:
-        return profile.get_subscription(subscription)
+        return profile.get_subscription(subscription, tenant)
 
     # sdk-auth file should be in json format all the time, hence the print
     print(json.dumps(profile.get_sp_auth_info(subscription), indent=2))
 
 
-def get_access_token(cmd, subscription=None, resource=None, resource_type=None):
+def get_access_token(cmd, subscription=None, tenant=None, resource=None, resource_type=None):
     '''
     get AAD token to access to a specified resource
     :param resource: Azure resource endpoints. Default to Azure Resource Manager
@@ -72,7 +72,7 @@ def get_access_token(cmd, subscription=None, resource=None, resource_type=None):
     else:
         resource = (resource or cmd.cli_ctx.cloud.endpoints.active_directory_resource_id)
     profile = Profile(cli_ctx=cmd.cli_ctx)
-    creds, subscription, tenant = profile.get_raw_token(subscription=subscription, resource=resource)
+    creds, subscription, tenant = profile.get_raw_token(subscription=subscription, tenant=tenant, resource=resource)
     return {
         'tokenType': creds[0],
         'accessToken': creds[1],
@@ -82,12 +82,12 @@ def get_access_token(cmd, subscription=None, resource=None, resource_type=None):
     }
 
 
-def set_active_subscription(cmd, subscription):
+def set_active_subscription(cmd, subscription, tenant=None):
     """Set the current subscription"""
     profile = Profile(cli_ctx=cmd.cli_ctx)
     if not id:
         raise CLIError('Please provide subscription id or unique name.')
-    profile.set_active_subscription(subscription)
+    profile.set_active_subscription(subscription, tenant)
 
 
 def account_clear(cmd):

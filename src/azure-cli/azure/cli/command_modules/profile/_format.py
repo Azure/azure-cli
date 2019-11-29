@@ -12,6 +12,8 @@ def transform_account_list(result):
         res = OrderedDict([('Name', r['name']),
                            ('CloudName', r['cloudName']),
                            ('SubscriptionId', r['id']),
+                           ('SubscriptionTenantId', r['subscriptionTenantId']),
+                           ('TenantId', r['tenantId']),
                            ('State', r.get('state')),
                            ('IsDefault', r['isDefault'])])
         transformed.append(res)

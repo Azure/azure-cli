@@ -63,6 +63,7 @@ class ProfileCommandsLoader(AzCommandsLoader):
 
         with self.argument_context('account') as c:
             c.argument('subscription', options_list=['--subscription', '-s'], arg_group='', help='Name or ID of subscription.', completer=get_subscription_id_list)
+            c.argument('tenant', options_list=['--tenant', '-t'], arg_group='', help='Tenant ID of token which is used to access the subscription. Only specify it when the subscription can be accessed via multiple tenants.') # TODO: get_tenant_id_list
             c.ignore('_subscription')
 
         with self.argument_context('account list') as c:

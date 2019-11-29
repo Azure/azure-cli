@@ -30,18 +30,18 @@ class ProfileCommandTest(unittest.TestCase):
         logger_mock.warning.assert_called_once_with(mock.ANY)
 
     @mock.patch('azure.cli.core._profile.Profile.get_raw_token', autospec=True)
-    def test_get_row_token(self, get_raw_token_mcok):
+    def test_get_row_token(self, get_raw_token_mock):
         cmd = mock.MagicMock()
         cmd.cli_ctx = DummyCli()
-
+        default_resource = 'https://management.core.windows.net/'
         # arrange
-        get_raw_token_mcok.return_value = (['bearer', 'token123', {'expiresOn': '2100-01-01'}], 'sub123', 'tenant123')
+        get_raw_token_mock.return_value = (['bearer', 'token123', {'expiresOn': '2100-01-01'}], 'sub123', 'tenant123')
 
         # action
         result = get_access_token(cmd)
 
         # assert
-        get_raw_token_mcok.assert_called_with(mock.ANY, 'https://management.core.windows.net/', None)
+        get_raw_token_mock.assert_called_with(mock.ANY, default_resource, None, None)
         expected_result = {
             'tokenType': 'bearer',
             'accessToken': 'token123',
@@ -53,7 +53,11 @@ class ProfileCommandTest(unittest.TestCase):
 
         # assert it takes customized resource, subscription
         get_access_token(cmd, subscription='foosub', resource='foores')
-        get_raw_token_mcok.assert_called_with(mock.ANY, 'foores', 'foosub')
+        get_raw_token_mock.assert_called_with(mock.ANY, 'foores', 'foosub', None)
+
+        # assert it takes tenant
+        get_access_token(cmd, tenant='footenant')
+        get_raw_token_mock.assert_called_with(mock.ANY, default_resource, None, 'footenant')
 
     @mock.patch('azure.cli.command_modules.profile.custom.Profile', autospec=True)
     def test_get_login(self, profile_mock):

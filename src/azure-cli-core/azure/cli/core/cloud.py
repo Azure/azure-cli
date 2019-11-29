@@ -400,12 +400,12 @@ def get_cloud_subscription(cloud_name):
     config = get_config_parser()
     config.read(CLOUD_CONFIG_FILE)
     try:
-        return config.get(cloud_name, 'subscription')
+        return config.get(cloud_name, 'subscription'), config(cloud_name, 'tenant')
     except (configparser.NoOptionError, configparser.NoSectionError):
         return None
 
 
-def set_cloud_subscription(cli_ctx, cloud_name, subscription):
+def set_cloud_subscription(cli_ctx, cloud_name, subscription, tenant):
     if not _get_cloud(cli_ctx, cloud_name):
         raise CloudNotRegisteredException(cloud_name)
     config = get_config_parser()
@@ -421,6 +421,17 @@ def set_cloud_subscription(cli_ctx, cloud_name, subscription):
             config.remove_option(cloud_name, 'subscription')
         except configparser.NoSectionError:
             pass
+    if tenant:
+        try:
+            config.add_section(cloud_name)
+        except configparser.DuplicateSectionError:
+            pass
+        config.set(cloud_name, 'tenant', tenant)
+    else:
+        try:
+            config.remove_option(cloud_name, 'tenant')
+        except configparser.NoSectionError:
+            pass
     if not os.path.isdir(GLOBAL_CONFIG_DIR):
         os.makedirs(GLOBAL_CONFIG_DIR)
     with open(CLOUD_CONFIG_FILE, 'w') as configfile:
@@ -428,17 +439,17 @@ def set_cloud_subscription(cli_ctx, cloud_name, subscription):
 
 
 def _set_active_subscription(cli_ctx, cloud_name):
-    from azure.cli.core._profile import (Profile, _ENVIRONMENT_NAME, _SUBSCRIPTION_ID,
+    from azure.cli.core._profile import (Profile, _ENVIRONMENT_NAME, _SUBSCRIPTION_ID, _TENANT_ID,
                                          _STATE, _SUBSCRIPTION_NAME)
     profile = Profile(cli_ctx=cli_ctx)
-    subscription_to_use = get_cloud_subscription(cloud_name) or \
-                          next((s[_SUBSCRIPTION_ID] for s in profile.load_cached_subscriptions()  # noqa
+    subscription_to_use, tenant_to_use = get_cloud_subscription(cloud_name) or \
+                          next(((s[_SUBSCRIPTION_ID], s[_TENANT_ID]) for s in profile.load_cached_subscriptions()  # noqa
                                 if s[_STATE] == 'Enabled'),
                                None)
-    if subscription_to_use:
+    if subscription_to_use and tenant_to_use:
         try:
-            profile.set_active_subscription(subscription_to_use)
-            sub = profile.get_subscription(subscription_to_use)
+            profile.set_active_subscription(subscription_to_use, tenant_to_use)
+            sub = profile.get_subscription(subscription_to_use, tenant_to_use)
             logger.warning("Active subscription switched to '%s (%s)'.",
                            sub[_SUBSCRIPTION_NAME], sub[_SUBSCRIPTION_ID])
         except CLIError as e:

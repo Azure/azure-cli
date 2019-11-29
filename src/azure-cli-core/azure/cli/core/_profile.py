@@ -18,7 +18,7 @@ from six.moves import BaseHTTPServer
 
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._session import ACCOUNT
-from azure.cli.core.util import get_file_json, in_cloud_console, open_page_in_browser, can_launch_browser,\
+from azure.cli.core.util import get_file_json, in_cloud_console, open_page_in_browser, can_launch_browser, \
     is_windows, is_wsl
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
 
@@ -34,7 +34,12 @@ logger = get_logger(__name__)
 _IS_DEFAULT_SUBSCRIPTION = 'isDefault'
 _SUBSCRIPTION_ID = 'id'
 _SUBSCRIPTION_NAME = 'name'
+# Tenant of the token, which is used to list the subscription
 _TENANT_ID = 'tenantId'
+# Home tenant of the subscription, which maps to tenantId in 'Subscriptions - List REST API'　
+# https://docs.microsoft.com/en-us/rest/api/resources/subscriptions/list
+_SUBSCRIPTION_TENANT_ID = 'subscriptionTenantId'
+_MANAGED_BY_TENANTS = 'managedByTenants'
 _USER_ENTITY = 'user'
 _USER_NAME = 'name'
 _CLOUD_SHELL_ID = 'cloudShellID'
@@ -66,6 +71,10 @@ _CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 _COMMON_TENANT = 'common'
 
 _TENANT_LEVEL_ACCOUNT_NAME = 'N/A(tenant level account)'
+# used as subscription for get-access-token --tenant
+_TENANT_LEVEL_SUBSCRIPTION_ID = 'N/A(tenant level token)'
+# used as subscriptionTenantId with --allow-no-subscription
+_TENANT_LEVEL_SUBSCRIPTION_TENANT_ID = 'N/A(no subscription)'
 
 _SYSTEM_ASSIGNED_IDENTITY = 'systemAssignedIdentity'
 _USER_ASSIGNED_IDENTITY = 'userAssignedIdentity'
@@ -121,7 +130,6 @@ def _delete_file(file_path):
 
 
 def get_credential_types(cli_ctx):
-
     class CredentialType(Enum):  # pylint: disable=too-few-public-methods
         cloud = get_active_cloud(cli_ctx)
         management = cli_ctx.cloud.endpoints.management
@@ -136,7 +144,6 @@ def _get_cloud_console_token_endpoint():
 
 # pylint: disable=too-many-lines,too-many-instance-attributes
 class Profile(object):
-
     _global_creds_cache = None
 
     def __init__(self, storage=None, auth_ctx_factory=None, use_global_creds_cache=True,
@@ -211,7 +218,7 @@ class Profile(object):
         if not allow_no_subscriptions and not subscriptions:
             raise CLIError("No subscriptions were found for '{}'. If this is expected, use "
                            "'--allow-no-subscriptions' to have tenant level access".format(
-                               username))
+                username))
 
         if is_service_principal:
             self._creds_cache.save_service_principal_cred(sp_auth.get_entry_to_persist(username,
@@ -249,7 +256,7 @@ class Profile(object):
                 display_name = re.sub(r'[^\x00-\x7f]', lambda x: '?', display_name)
 
             consolidated.append({
-                _SUBSCRIPTION_ID: s.id.rpartition('/')[2],
+                _SUBSCRIPTION_ID: s.subscription_id,
                 _SUBSCRIPTION_NAME: display_name,
                 _STATE: s.state.value,
                 _USER_ENTITY: {
@@ -258,6 +265,8 @@ class Profile(object):
                 },
                 _IS_DEFAULT_SUBSCRIPTION: False,
                 _TENANT_ID: s.tenant_id,
+                _SUBSCRIPTION_TENANT_ID: s.subscription_tenant_id,
+                _MANAGED_BY_TENANTS: [{_TENANT_ID: t.tenant_id} for t in s.managed_by_tenants],
                 _ENVIRONMENT_NAME: self.cli_ctx.cloud.name
             })
 
@@ -272,9 +281,11 @@ class Profile(object):
         for t in tenants:
             s = self._new_account()
             s.id = '/subscriptions/' + t
-            s.subscription = t
+            s.subscription_id = t
             s.tenant_id = t
+            s.subscription_tenant_id = _TENANT_LEVEL_SUBSCRIPTION_TENANT_ID
             s.display_name = _TENANT_LEVEL_ACCOUNT_NAME
+            s.managed_by_tenants = []
             result.append(s)
         return result
 
@@ -378,36 +389,34 @@ class Profile(object):
         token_entry = auth.token
         return (token_entry['token_type'], token_entry['access_token'], token_entry)
 
-    def _set_subscriptions(self, new_subscriptions, merge=True, secondary_key_name=None):
+    def _set_subscriptions(self, new_subscriptions, merge=True):
 
-        def _get_key_name(account, secondary_key_name):
-            return (account[_SUBSCRIPTION_ID] if secondary_key_name is None
-                    else '{}-{}'.format(account[_SUBSCRIPTION_ID], account[secondary_key_name]))
+        def _get_key_name(account):
+            subid_tenantid = '{}-{}'.format(account[_SUBSCRIPTION_ID], account[_TENANT_ID])
+            return subid_tenantid
 
-        def _match_account(account, subscription_id, secondary_key_name, secondary_key_val):
-            return (account[_SUBSCRIPTION_ID] == subscription_id and
-                    (secondary_key_val is None or account[secondary_key_name] == secondary_key_val))
+        def _match_account(account, subscription_id, tenant_id):
+            return account[_SUBSCRIPTION_ID] == subscription_id and account[_TENANT_ID] == tenant_id
 
         existing_ones = self.load_cached_subscriptions(all_clouds=True)
         active_one = next((x for x in existing_ones if x.get(_IS_DEFAULT_SUBSCRIPTION)), None)
         active_subscription_id = active_one[_SUBSCRIPTION_ID] if active_one else None
-        active_secondary_key_val = active_one[secondary_key_name] if (active_one and secondary_key_name) else None
+        active_tenant_id = active_one[_TENANT_ID] if active_one else None
         active_cloud = self.cli_ctx.cloud
         default_sub_id = None
 
         # merge with existing ones
         if merge:
-            dic = collections.OrderedDict((_get_key_name(x, secondary_key_name), x) for x in existing_ones)
+            dic = collections.OrderedDict((_get_key_name(x), x) for x in existing_ones)
         else:
             dic = collections.OrderedDict()
 
-        dic.update((_get_key_name(x, secondary_key_name), x) for x in new_subscriptions)
+        dic.update((_get_key_name(x), x) for x in new_subscriptions)
         subscriptions = list(dic.values())
         if subscriptions:
             if active_one:
                 new_active_one = next(
-                    (x for x in new_subscriptions if _match_account(x, active_subscription_id, secondary_key_name,
-                                                                    active_secondary_key_val)), None)
+                    (x for x in new_subscriptions if _match_account(x, active_subscription_id, active_tenant_id)), None)
 
                 for s in subscriptions:
                     s[_IS_DEFAULT_SUBSCRIPTION] = False
@@ -419,8 +428,9 @@ class Profile(object):
 
             new_active_one[_IS_DEFAULT_SUBSCRIPTION] = True
             default_sub_id = new_active_one[_SUBSCRIPTION_ID]
+            default_tenant_id = new_active_one[_TENANT_ID]
 
-            set_cloud_subscription(self.cli_ctx, active_cloud.name, default_sub_id)
+            set_cloud_subscription(self.cli_ctx, active_cloud.name, default_sub_id, default_tenant_id)
         self._storage[_SUBSCRIPTIONS] = subscriptions
 
     @staticmethod
@@ -432,24 +442,23 @@ class Profile(object):
     def is_tenant_level_account(self):
         return self.get_subscription()[_SUBSCRIPTION_NAME] == _TENANT_LEVEL_ACCOUNT_NAME
 
-    def set_active_subscription(self, subscription):  # take id or name
+    def set_active_subscription(self, subscription, tenant=None):  # take id or name
         subscriptions = self.load_cached_subscriptions(all_clouds=True)
         active_cloud = self.cli_ctx.cloud
         subscription = subscription.lower()
-        result = [x for x in subscriptions
-                  if subscription in [x[_SUBSCRIPTION_ID].lower(),
-                                      x[_SUBSCRIPTION_NAME].lower()] and
-                  x[_ENVIRONMENT_NAME] == active_cloud.name]
 
-        if len(result) != 1:
-            raise CLIError("The subscription of '{}' {} in cloud '{}'.".format(
-                subscription, "doesn't exist" if not result else 'has more than one match', active_cloud.name))
+        result = self.get_subscription(subscription, tenant)
+        if result[_ENVIRONMENT_NAME] != active_cloud.name:
+            raise CLIError("The subscription of '{}' doesn't exist in cloud '{}'.".format(
+                subscription, active_cloud.name))
 
         for s in subscriptions:
-            s[_IS_DEFAULT_SUBSCRIPTION] = False
-        result[0][_IS_DEFAULT_SUBSCRIPTION] = True
+            if s[_SUBSCRIPTION_ID] == result[_SUBSCRIPTION_ID] and s[_TENANT_ID] == result[_TENANT_ID]:
+                s[_IS_DEFAULT_SUBSCRIPTION] = True
+            else:
+                s[_IS_DEFAULT_SUBSCRIPTION] = False
 
-        set_cloud_subscription(self.cli_ctx, active_cloud.name, result[0][_SUBSCRIPTION_ID])
+        set_cloud_subscription(self.cli_ctx, active_cloud.name, result[_SUBSCRIPTION_ID], result[_TENANT_ID])
         self._storage[_SUBSCRIPTIONS] = subscriptions
 
     def logout(self, user_or_sp):
@@ -481,24 +490,61 @@ class Profile(object):
 
         return active_account[_USER_ENTITY][_USER_NAME]
 
-    def get_subscription(self, subscription=None):  # take id or name
+    def get_subscription(self, subscription=None, tenant_id=None):
+        """
+        Show the select/default subscription or specified subscription.
+
+        :param subscription: id or name
+        :param tenant_id: only used when the subscription can be accessed by multiple tenants
+        :return: a subscription object
+        """
         subscriptions = self.load_cached_subscriptions()
         if not subscriptions:
             raise CLIError(_AZ_LOGIN_MESSAGE)
 
-        result = [x for x in subscriptions if (
-            not subscription and x.get(_IS_DEFAULT_SUBSCRIPTION) or
-            subscription and subscription.lower() in [x[_SUBSCRIPTION_ID].lower(), x[
-                _SUBSCRIPTION_NAME].lower()])]
-        if not result and subscription:
+        # show the currently selected subscription
+        if subscription is None:
+            subs = [x for x in subscriptions if x.get(_IS_DEFAULT_SUBSCRIPTION)]
+            if not subs:
+                raise CLIError("No subscription found. Run 'az account set' to select a subscription.")
+            return subs[0]
+
+        # show the specified subscription
+        subs = [x for x in subscriptions
+                if subscription.lower() in [x[_SUBSCRIPTION_ID].lower(), x[_SUBSCRIPTION_NAME].lower()]]
+        if not subs:
             raise CLIError("Subscription '{}' not found. "
                            "Check the spelling and casing and try again.".format(subscription))
-        if not result and not subscription:
-            raise CLIError("No subscription found. Run 'az account set' to select a subscription.")
-        if len(result) > 1:
-            raise CLIError("Multiple subscriptions with the name '{}' found. "
-                           "Specify the subscription ID.".format(subscription))
-        return result[0]
+        if len(subs) == 1:
+            if tenant_id and subs[0][_TENANT_ID] != tenant_id:
+                logger.warning("The subscription '{}' cannot be accessed via tenant {}. Use tenant {} instead."
+                               .format(subscription, tenant_id, subs[0][_TENANT_ID]))
+            return subs[0]
+        if len(subs) > 1:
+            # check if tenant_id can be used to uniquely identify the subscription
+            tenant_set = set()
+            for s in subs:
+                tenant_set.add(s[_TENANT_ID])
+            if len(tenant_set) > 1:
+                if not tenant_id:
+                    # prompt to enter tenant ID if not provided
+                    logger.warning("The subscription '{}' can be accessed via multiple tenants {}. "
+                                   "Specify --tenant or enter the tenant ID of the token to use."
+                                   .format(subscription, ', '.join(tenant_set)))
+                    from knack.prompting import prompt, NoTTYException
+                    try:
+                        tenant_id = prompt('Tenant: ')
+                    except NoTTYException:
+                        raise CLIError('Please specify both subscription and tenant in non-interactive mode.')
+                    if tenant_id not in tenant_set:
+                        raise CLIError('Invalid tenant.')
+                subs = [x for x in subs if tenant_id.lower() == x[_TENANT_ID].lower()]
+
+            if len(subs) > 1:
+                # (subscription_name, tenant_id) can't identify the account
+                raise CLIError("Multiple subscriptions with the name '{}' found in tenant {}. "
+                               "Specify the subscription ID.".format(subscription, subs[0][_TENANT_ID]))
+        return subs[0]
 
     def get_subscription_id(self, subscription=None):  # take id or name
         return self.get_subscription(subscription)[_SUBSCRIPTION_ID]
@@ -587,8 +633,9 @@ class Profile(object):
         sp_secret = self._creds_cache.retrieve_secret_of_service_principal(username_or_sp_id)
         return username_or_sp_id, sp_secret, None, str(account[_TENANT_ID])
 
-    def get_raw_token(self, resource=None, subscription=None):
-        account = self.get_subscription(subscription)
+    def get_raw_token(self, resource=None, subscription=None, tenant=None):
+        account = self.get_subscription(subscription, tenant)
+        token_tenant = tenant if tenant else account[_TENANT_ID]
         user_type = account[_USER_ENTITY][_USER_TYPE]
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
         resource = resource or self.cli_ctx.cloud.endpoints.active_directory_resource_id
@@ -604,14 +651,14 @@ class Profile(object):
 
         elif user_type == _USER:
             creds = self._creds_cache.retrieve_token_for_user(username_or_sp_id,
-                                                              account[_TENANT_ID], resource)
+                                                              token_tenant, resource)
         else:
             creds = self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id,
                                                                            resource,
-                                                                           account[_TENANT_ID])
+                                                                           token_tenant)
         return (creds,
-                str(account[_SUBSCRIPTION_ID]),
-                str(account[_TENANT_ID]))
+                str(_TENANT_LEVEL_SUBSCRIPTION_ID if tenant else account[_SUBSCRIPTION_ID]),
+                str(token_tenant))
 
     def refresh_accounts(self, subscription_finder=None):
         subscriptions = self.load_cached_subscriptions()
@@ -865,6 +912,10 @@ class SubscriptionFinder(object):
         subscriptions = client.subscriptions.list()
         all_subscriptions = []
         for s in subscriptions:
+            # deep copy the Subscription to make sure test cases' stub is not modified
+            # import copy
+            # s = copy.deepcopy(s)
+            setattr(s, 'subscription_tenant_id', s.tenant_id)
             setattr(s, 'tenant_id', tenant)
             all_subscriptions.append(s)
         self.tenants.append(tenant)
@@ -966,7 +1017,8 @@ class CredsCache(object):
         if matched:
             # pylint: disable=line-too-long
             if (sp_entry.get(_ACCESS_TOKEN, None) != matched[0].get(_ACCESS_TOKEN, None) or
-                    sp_entry.get(_SERVICE_PRINCIPAL_CERT_FILE, None) != matched[0].get(_SERVICE_PRINCIPAL_CERT_FILE, None)):
+                    sp_entry.get(_SERVICE_PRINCIPAL_CERT_FILE, None) != matched[0].get(_SERVICE_PRINCIPAL_CERT_FILE,
+                                                                                       None)):
                 self._service_principal_creds.remove(matched[0])
                 self._service_principal_creds.append(sp_entry)
                 state_changed = True
