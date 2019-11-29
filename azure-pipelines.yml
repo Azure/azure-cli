@@ -7,34 +7,72 @@ trigger:
     include:
     - '*'
 
+jobs:
 - job: CredScan
   displayName: "Credential Scan"
 
   pool:
     vmImage: "windows-2019"
   steps:
-    - task: CredScan@2
-      inputs:
-        toolMajorVersion: 'V2'
+  - bash: |
+      #!/usr/bin/env bash
 
-    - task: PostAnalysis@1
-      inputs:
-        AllTools: false
-        APIScan: false
-        BinSkim: false
-        CodesignValidation: false
-        CredScan: true
-        FortifySCA: false
-        FxCop: false
-        ModernCop: false
-        PoliCheck: false
-        RoslynAnalyzers: false
-        SDLNativeRules: false
-        Semmle: false
-        TSLint: false
-        ToolLogsNotFoundAction: 'Standard'
+      set -ex
 
-jobs:
+      git fetch --quiet origin dev:dev
+
+      git checkout -b temp_merged
+
+      FILES_NEED_CREDSCAN=$(git diff --name-only HEAD dev | grep -v "CredScanSuppressions.json" | sort | uniq)
+      
+      read -a FILES <<< ${FILES_NEED_CREDSCAN}
+
+      echo ${FILES}
+
+      # set variable between tasks
+      echo "##vso[task.setvariable variable=FILES_NEED_CREDSCAN]$FILES_NEED_CREDSCAN"
+    displayName: 'Get files to CredScan'
+
+  - bash: |
+      #!/usr/bin/env bash
+      
+      set -ex
+
+      files=(${FILES_NEED_CREDSCAN})
+
+      for file in ${files};
+      do
+        echo "${file}"
+      done
+
+      arr="1 2 3"
+      arr=($arr)
+      for item in $(arr[@]);
+      do
+        echo $item
+      done
+
+  - task: CredScan@2
+    inputs:
+      toolMajorVersion: 'V2'
+
+  - task: PostAnalysis@1
+    inputs:
+      AllTools: false
+      APIScan: false
+      BinSkim: false
+      CodesignValidation: false
+      CredScan: true
+      FortifySCA: false
+      FxCop: false
+      ModernCop: false
+      PoliCheck: false
+      RoslynAnalyzers: false
+      SDLNativeRules: false
+      Semmle: false
+      TSLint: false
+      ToolLogsNotFoundAction: 'Standard'
+
 - job: ExtractMetadata
   displayName: Extract Metadata
 
