@@ -109,6 +109,31 @@ def configure_common_settings(cli_ctx, client):
     client.config.generate_client_request_id = 'x-ms-client-request-id' not in cli_ctx.data['headers']
 
 
+from azure.common.credentials import get_azure_cli_credentials
+from azure.core.credentials import AccessToken
+import time
+
+
+class AdalAuthenticationWrapper(object):
+
+    _DEFAULT_PREFIX = "/.default"
+
+    def get_token(self, *scopes, **kwargs):  # pylint:disable=unused-argument
+        if len(scopes) != 1:
+            raise ValueError("Cannot deal with multiple scope: {}".format(scopes))
+        scope = scopes[0]
+        if scope.endswith(self._DEFAULT_PREFIX):
+            resource = scope[:-len(self._DEFAULT_PREFIX)]
+        else:
+            resource = scope
+
+        credentials, subscription_id, tenant_id = get_azure_cli_credentials(resource=resource,
+                                                                            with_tenant=True)
+        scheme, token, fulltoken = credentials._token_retriever()
+
+        return AccessToken(token, int(fulltoken['expiresIn'] + time.time()))
+
+
 def _get_mgmt_service_client(cli_ctx,
                              client_type,
                              subscription_bound=True,
@@ -137,11 +162,11 @@ def _get_mgmt_service_client(cli_ctx,
         client_kwargs.update(kwargs)
 
     if subscription_bound:
-        client = client_type(cred, subscription_id, **client_kwargs)
+        client = client_type(AdalAuthenticationWrapper(), subscription_id, **client_kwargs)
     else:
-        client = client_type(cred, **client_kwargs)
+        client = client_type(AdalAuthenticationWrapper(), **client_kwargs)
 
-    configure_common_settings(cli_ctx, client)
+    # configure_common_settings(cli_ctx, client)
 
     return client, subscription_id
 
