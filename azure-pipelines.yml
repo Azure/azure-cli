@@ -374,16 +374,14 @@ jobs:
       inputs:
         versionSpec: 3.6
     - bash: pip install --upgrade pip tox
-    - task: Bash@3
-      displayName: 'UnitTest for azure-cli-core'
+      displayName: 'Install pip and tox'
+    - bash: ./scripts/ci/unittest.sh
+      displayName: 'Run Unit Test'
       env:
         TOXENV: py36
-      inputs:
-        targetType: 'filePath'
-        filePath: ./scripts/ci/unittest.sh
 
 - job: UnitTestInPython38
-  displayName: Unit Test for Core and Telemetry in Python 3.8
+  displayName: Unit Test for Core, Telemetry in Python 3.8
   timeoutInMinutes: 10
   condition: succeeded()
 
@@ -395,16 +393,14 @@ jobs:
       inputs:
         versionSpec: 3.8
     - bash: pip install --upgrade pip tox
-    - task: Bash@3
-      displayName: 'UnitTest for azure-cli-core'
+      displayName: 'Install pip and tox'
+    - bash: ./scripts/ci/unittest.sh
+      displayName: 'Run Unit Test'
       env:
         TOXENV: py38
-      inputs:
-        targetType: 'filePath'
-        filePath: ./scripts/ci/unittest.sh
 
 - job: UnitTestInPython27
-  displayName: Unit Test for Core and Telemetry in Python 2.7
+  displayName: Unit Test for Core, Telemetry in Python 2.7
   timeoutInMinutes: 10
   condition: succeeded()
 
@@ -416,13 +412,65 @@ jobs:
       inputs:
         versionSpec: 2.7
     - bash: pip install --upgrade pip tox
-    - task: Bash@3
-      displayName: 'UnitTest for azure-cli-core'
+      displayName: 'Install pip and tox'
+    - bash: ./scripts/ci/unittest.sh
+      displayName: 'Run Unit Test'
       env:
         TOXENV: py27
+
+- job: IntegrationTestAgainstProfilesInPython36
+  displayName: Integration Test against Profiles in Python 3.6
+  dependsOn: BuildPythonWheel
+  timeoutInMinutes: 10
+  condition: succeeded()
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+    - task: UsePythonVersion@0
+      displayName: 'Use Python 3.6'
       inputs:
-        targetType: 'filePath'
-        filePath: ./scripts/ci/unittest.sh
+        versionSpec: 3.6
+    - bash: pip install --upgrade pip wheel
+      displayName: 'Install pip and wheel'
+    - bash: ./scripts/ci/test_profile_integration.sh
+      displayName: 'Run Integration Test against Profiles'
+
+- job: IntegrationTestAgainstProfilesInPython38
+  displayName: Integration Test against Profiles in Python 3.8
+  dependsOn: BuildPythonWheel
+  timeoutInMinutes: 10
+  condition: succeeded()
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+    - task: UsePythonVersion@0
+      displayName: 'Use Python 3.8'
+      inputs:
+        versionSpec: 3.8
+    - bash: pip install --upgrade pip wheel
+      displayName: 'Install pip and wheel'
+    - bash: ./scripts/ci/test_profile_integration.sh
+      displayName: 'Run Integration Test against Profiles'
+
+- job: IntegrationTestAgainstProfilesInPython27
+  displayName: Integration Test against Profiles in Python 2.7
+  dependsOn: BuildPythonWheel
+  timeoutInMinutes: 10
+  condition: succeeded()
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+    - task: UsePythonVersion@0
+      displayName: 'Use Python 2.7'
+      inputs:
+        versionSpec: 2.7
+    - bash: pip install --upgrade pip wheel
+      displayName: 'Install pip and wheel'
+    - bash: ./scripts/ci/test_profile_integration.sh
+      displayName: 'Run Integration Test against Profiles'
 
 - job: RunAutomationFullPython2
   displayName: Run Automation, Python 2
