@@ -10,6 +10,7 @@ trigger:
 jobs:
 - job: RejectPullRequestToMasterBranch
   displayName: "Reject Pull Request To Master Branch"
+  condition: and(succeeded(), eq(variables['System.PullRequest.TargetBranch'], 'master'))
 
   pool:
     vmImage: 'ubuntu-16.04'
@@ -17,7 +18,7 @@ jobs:
     - bash: |
         set -ex
 
-        echo "$(Build.SourceBranchName)"
+        echo "$(Build.SourceBranch)"
 
 - job: CredScan
   displayName: "Credential Scan"
