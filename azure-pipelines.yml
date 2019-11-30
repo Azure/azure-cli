@@ -10,6 +10,17 @@ trigger:
       - master
 
 jobs:
+- job: RejectPullRequestToMasterBranch
+  displayName: "Reject Pull Request To Master Branch"
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+    - bash: |
+        set -ex
+
+        echo "$(Build.SourceBranchName)"
+
 - job: CredScan
   displayName: "Credential Scan"
 
