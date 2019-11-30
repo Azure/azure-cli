@@ -362,9 +362,8 @@ jobs:
     displayName: 'Test pip Install'
 
 - job: UnitTestInPython36
-  displayName: Unit Test for Core and Telemetry in Python 3.6
+  displayName: Unit Test for Core, Telemetry in Python 3.6
   timeoutInMinutes: 10
-  condition: succeeded()
 
   pool:
     vmImage: 'ubuntu-16.04'
@@ -383,7 +382,6 @@ jobs:
 - job: UnitTestInPython38
   displayName: Unit Test for Core, Telemetry in Python 3.8
   timeoutInMinutes: 10
-  condition: succeeded()
 
   pool:
     vmImage: 'ubuntu-16.04'
@@ -402,7 +400,6 @@ jobs:
 - job: UnitTestInPython27
   displayName: Unit Test for Core, Telemetry in Python 2.7
   timeoutInMinutes: 10
-  condition: succeeded()
 
   pool:
     vmImage: 'ubuntu-16.04'
@@ -421,8 +418,8 @@ jobs:
 - job: IntegrationTestAgainstProfilesInPython36
   displayName: Integration Test against Profiles in Python 3.6
   dependsOn: BuildPythonWheel
-  timeoutInMinutes: 10
   condition: succeeded()
+  timeoutInMinutes: 10
 
   pool:
     vmImage: 'ubuntu-16.04'
@@ -439,8 +436,8 @@ jobs:
 - job: IntegrationTestAgainstProfilesInPython38
   displayName: Integration Test against Profiles in Python 3.8
   dependsOn: BuildPythonWheel
-  timeoutInMinutes: 10
   condition: succeeded()
+  timeoutInMinutes: 10
 
   pool:
     vmImage: 'ubuntu-16.04'
@@ -457,8 +454,8 @@ jobs:
 - job: IntegrationTestAgainstProfilesInPython27
   displayName: Integration Test against Profiles in Python 2.7
   dependsOn: BuildPythonWheel
-  timeoutInMinutes: 10
   condition: succeeded()
+  timeoutInMinutes: 10
 
   pool:
     vmImage: 'ubuntu-16.04'
@@ -630,6 +627,24 @@ jobs:
     env:
       REDUCE_SDK: 'True'
       AZURE_CLI_TEST_TARGET_PROFILE: '2019-03-01'
+
+- job: TestExtensionsLoading
+  displayName: Test Extensions Loading
+  dependsOn: BuildPythonWheel
+  condition: succeeded()
+  timeoutInMinutes: 10
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+    - task: UsePythonVersion@0
+      displayName: 'Use Python 3.6'
+      inputs:
+        versionSpec: 3.6
+    - bash: pip install --upgrade pip wheel
+      displayName: 'Install pip and wheel'
+    - bash: ./scripts/ci/test_extensions.sh
+      displayName: 'Load extensions'
 
 - job: RunAutomation20180301Python3_8
   displayName: Run Automation Python 3.8, Profile 2018-03-01
