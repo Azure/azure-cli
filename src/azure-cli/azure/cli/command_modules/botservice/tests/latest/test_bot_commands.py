@@ -846,6 +846,24 @@ class BotLocalErrorsTests(unittest.TestCase):
             assert d.readline() == 'SCM_SCRIPT_GENERATOR_ARGS=--aspNetCore "{0}"\n'.format(proj_file_path)
         shutil.rmtree(code_dir)
 
+    def test_botservice_prepare_deploy_csharp_preserve_filename_casing(self):
+        code_dir = 'csharp_bot_success_casing'
+        language = 'Csharp'
+        proj_file_path = 'Azure_azure-cli_11390.csproj'
+
+        if os.path.exists(code_dir):
+            # clean up the folder
+            shutil.rmtree(code_dir)
+        os.mkdir(code_dir)
+        open(os.path.join(code_dir, proj_file_path), 'w')
+
+        prepare_webapp_deploy(language, code_dir, proj_file_path)
+        assert os.path.exists(os.path.join(code_dir, '.deployment'))
+        with open(os.path.join(code_dir, '.deployment')) as d:
+            assert d.readline() == '[config]\n'
+            assert d.readline() == 'SCM_SCRIPT_GENERATOR_ARGS=--aspNetCore "{0}"\n'.format(proj_file_path)
+        shutil.rmtree(code_dir)
+
     def test_botservice_prepare_deploy_csharp_no_proj_file(self):
         code_dir = None
         language = 'Csharp'

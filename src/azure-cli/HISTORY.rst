@@ -25,6 +25,7 @@ Release History
 * The following command groups are GA and not in preview: 'az bot authsetting'.
 * The following commands in 'az bot' are GA and not in preview: 'create', 'prepare-deploy', 'show', 'delete', 'update'.
 * Add name availability check for 'az bot create'.
+* Fix 'az bot prepare-deploy' changing '--proj-file-path' value to lower case (e.g. "Test.csproj" to "test.csproj").
 
 **Compute**
 

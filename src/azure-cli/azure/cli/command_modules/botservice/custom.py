@@ -539,8 +539,7 @@ def prepare_webapp_deploy(language, code_dir=None, proj_file_path=None):
 
         with open(os.path.join(code_dir, '.deployment'), 'w') as f:
             f.write('[config]\n')
-            proj_file = proj_file_path.lower()
-            proj_file = proj_file if proj_file.endswith('.csproj') else proj_file + '.csproj'
+            proj_file = proj_file_path if proj_file_path.lower().endswith('.csproj') else proj_file_path + '.csproj'
             f.write('SCM_SCRIPT_GENERATOR_ARGS=--aspNetCore "{0}"\n'.format(proj_file))
         logger.info('.deployment file successfully created.')
     return True
