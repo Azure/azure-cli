@@ -373,7 +373,7 @@ jobs:
     displayName: 'Test pip Install'
 
 - job: UnitTest
-  displayName: Unit Test for Core, Telemetry
+  displayName: Unit Test for Core and Telemetry
   timeoutInMinutes: 10
 
   pool:
@@ -389,7 +389,7 @@ jobs:
 
   steps:
     - task: UsePythonVersion@0
-      displayName: 'Use Python 3.6'
+      displayName: 'Use Python $(python.version)'
       inputs:
         versionSpec: '$(python.version)'
     - bash: pip install --upgrade pip tox
