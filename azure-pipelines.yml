@@ -372,8 +372,8 @@ jobs:
 
     displayName: 'Test pip Install'
 
-- job: UnitTestInPython36
-  displayName: Unit Test for Core, Telemetry in Python 3.6
+- job: UnitTest
+  displayName: Unit Test for Core, Telemetry
   timeoutInMinutes: 10
 
   pool:
@@ -396,44 +396,6 @@ jobs:
       displayName: 'Install pip and tox'
     - bash: ./scripts/ci/unittest.sh
       displayName: 'Run Unit Test'
-#      env:
-#        TOXENV: py36
-
-#- job: UnitTestInPython38
-#  displayName: Unit Test for Core, Telemetry in Python 3.8
-#  timeoutInMinutes: 10
-#
-#  pool:
-#    vmImage: 'ubuntu-16.04'
-#  steps:
-#    - task: UsePythonVersion@0
-#      displayName: 'Use Python 3.8'
-#      inputs:
-#        versionSpec: 3.8
-#    - bash: pip install --upgrade pip tox
-#      displayName: 'Install pip and tox'
-#    - bash: ./scripts/ci/unittest.sh
-#      displayName: 'Run Unit Test'
-#      env:
-#        TOXENV: py38
-#
-#- job: UnitTestInPython27
-#  displayName: Unit Test for Core, Telemetry in Python 2.7
-#  timeoutInMinutes: 10
-#
-#  pool:
-#    vmImage: 'ubuntu-16.04'
-#  steps:
-#    - task: UsePythonVersion@0
-#      displayName: 'Use Python 2.7'
-#      inputs:
-#        versionSpec: 2.7
-#    - bash: pip install --upgrade pip tox
-#      displayName: 'Install pip and tox'
-#    - bash: ./scripts/ci/unittest.sh
-#      displayName: 'Run Unit Test'
-#      env:
-#        TOXENV: py27
 
 - job: IntegrationTestAgainstProfilesInPython36
   displayName: Integration Test against Profiles in Python 3.6
