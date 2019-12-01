@@ -386,7 +386,6 @@ jobs:
         python.version: '3.6'
       Python38:
         python.version: '3.8'
-
   steps:
     - task: UsePythonVersion@0
       displayName: 'Use Python $(python.version)'
@@ -397,55 +396,27 @@ jobs:
     - bash: ./scripts/ci/unittest.sh
       displayName: 'Run Unit Test'
 
-- job: IntegrationTestAgainstProfilesInPython36
-  displayName: Integration Test against Profiles in Python 3.6
+- job: IntegrationTestAgainstProfiles
+  displayName: Integration Test against Profiles
   dependsOn: BuildPythonWheel
   condition: succeeded()
-  timeoutInMinutes: 10
+  timeoutInMinutes: 20
 
   pool:
     vmImage: 'ubuntu-16.04'
+  strategy:
+    matrix:
+      Python27:
+        python.version: '2.7'
+      Python36:
+        python.version: '3.6'
+      Python38:
+        python.version: '3.8'
   steps:
     - task: UsePythonVersion@0
-      displayName: 'Use Python 3.6'
+      displayName: 'Use Python $(python.version)'
       inputs:
-        versionSpec: 3.6
-    - bash: pip install --upgrade pip wheel
-      displayName: 'Install pip and wheel'
-    - bash: ./scripts/ci/test_profile_integration.sh
-      displayName: 'Run Integration Test against Profiles'
-
-- job: IntegrationTestAgainstProfilesInPython38
-  displayName: Integration Test against Profiles in Python 3.8
-  dependsOn: BuildPythonWheel
-  condition: succeeded()
-  timeoutInMinutes: 10
-
-  pool:
-    vmImage: 'ubuntu-16.04'
-  steps:
-    - task: UsePythonVersion@0
-      displayName: 'Use Python 3.8'
-      inputs:
-        versionSpec: 3.8
-    - bash: pip install --upgrade pip wheel
-      displayName: 'Install pip and wheel'
-    - bash: ./scripts/ci/test_profile_integration.sh
-      displayName: 'Run Integration Test against Profiles'
-
-- job: IntegrationTestAgainstProfilesInPython27
-  displayName: Integration Test against Profiles in Python 2.7
-  dependsOn: BuildPythonWheel
-  condition: succeeded()
-  timeoutInMinutes: 10
-
-  pool:
-    vmImage: 'ubuntu-16.04'
-  steps:
-    - task: UsePythonVersion@0
-      displayName: 'Use Python 2.7'
-      inputs:
-        versionSpec: 2.7
+        versionSpec: '$(python.version)'
     - bash: pip install --upgrade pip wheel
       displayName: 'Install pip and wheel'
     - bash: ./scripts/ci/test_profile_integration.sh
@@ -618,11 +589,19 @@ jobs:
 
   pool:
     vmImage: 'ubuntu-16.04'
+  strategy:
+    matrix:
+      Python27:
+        python.version: '2.7'
+      Python36:
+        python.version: '3.6'
+      Python38:
+        python.version: '3.8'
   steps:
     - task: UsePythonVersion@0
-      displayName: 'Use Python 3.6'
+      displayName: 'Use Python $(python.version)'
       inputs:
-        versionSpec: 3.6
+        versionSpec: '$(python.version)'
     - bash: pip install --upgrade pip wheel
       displayName: 'Install pip and wheel'
     - bash: ./scripts/ci/test_extensions.sh
