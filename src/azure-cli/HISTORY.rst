@@ -17,6 +17,15 @@ Release History
 
 * Update azure-mgmt-resource package to use 6.0.0
 
+**BotService**
+
+* [Breaking change] Remove '--version' flag from preview command 'az bot create'. Only v4 SDK bots are supported.
+* Add support for updating the icon URL for a bot via 'az bot update'.
+* Add support for updating a Direct Line channel via 'az bot directline update'.
+* The following command groups are GA and not in preview: 'az bot authsetting'.
+* The following commands in 'az bot' are GA and not in preview: 'create', 'prepare-deploy', 'show', 'delete', 'update'.
+* Add name availability check for 'az bot create'.
+
 **Compute**
 
 * vmss create/update: Add --scale-in-policy, which decides which virtual machines are chosen for removal when a VMSS is scaled-in.
@@ -93,15 +102,6 @@ Release History
 **Backup**
 
 * Fix issue in az backup policy list-associated-items. Added optional BackupManagementType parameter.
-
-**BotService**
-
-* [Breaking change] Remove '--version' flag from preview command 'az bot create'. Only v4 SDK bots are supported.
-* Add support for updating the icon URL for a bot via 'az bot update'.
-* Add support for updating a Direct Line channel via 'az bot directline update'.
-* The following command groups are GA and not in preview: 'az bot authsetting'
-* The following command group 'az bot' are GA and not in preview: 'create', 'prepare-deploy', 'show', 'delete', 'update'
-* Add name availability check for 'az bot create'
 
 **Compute**
 
