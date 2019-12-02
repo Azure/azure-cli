@@ -3,11 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import time
 import requests
 import adal
 
 from msrest.authentication import Authentication
-
+from azure.core.credentials import AccessToken
 from azure.cli.core.util import in_cloud_console
 
 from knack.util import CLIError
@@ -19,11 +20,10 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
         self._token_retriever = token_retriever
         self._external_tenant_token_retriever = external_tenant_token_retriever
 
-    def signed_session(self, session=None):  # pylint: disable=arguments-differ
-        session = session or super(AdalAuthentication, self).signed_session()
+    def _get_token(self):
         external_tenant_tokens = None
         try:
-            scheme, token, _ = self._token_retriever()
+            scheme, token, full_token = self._token_retriever()
             if self._external_tenant_token_retriever:
                 external_tenant_tokens = self._external_tenant_token_retriever()
         except CLIError as err:
@@ -45,8 +45,8 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
             if 'AADSTS50173' in err:
                 raise CLIError("The credential data used by CLI has been expired because you might have changed or "
                                "reset the password. {}".format(
-                                   "Please clear browser's cookies and run 'az login'"
-                                   if not in_cloud_console() else ''))
+                    "Please clear browser's cookies and run 'az login'"
+                    if not in_cloud_console() else ''))
 
             raise CLIError(err)
         except requests.exceptions.SSLError as err:
@@ -54,6 +54,20 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
             raise CLIError(SSLERROR_TEMPLATE.format(str(err)))
         except requests.exceptions.ConnectionError as err:
             raise CLIError('Please ensure you have network connection. Error detail: ' + str(err))
+
+        return scheme, token, full_token, external_tenant_tokens
+
+    # This method is exposed for Azure Core.
+    def get_token(self, *scopes):  # pylint:disable=unused-argument
+        _, token, full_token, _ = self._get_token()
+
+        return AccessToken(token, int(full_token['expiresIn'] + time.time()))
+
+    # This method is exposed for msrest.
+    def signed_session(self, session=None):  # pylint: disable=arguments-differ
+        session = session or super(AdalAuthentication, self).signed_session()
+
+        scheme, token, _, external_tenant_tokens = self._get_token()
 
         header = "{} {}".format(scheme, token)
         session.headers['Authorization'] = header
