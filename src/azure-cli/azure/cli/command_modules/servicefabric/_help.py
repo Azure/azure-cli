@@ -163,7 +163,7 @@ short-summary: Add a new node type to a cluster.
 examples:
   - name: Add a new node type to a cluster.
     text: >
-        az sf cluster node-type add -g group-name -n cluster1 --node-type 'n2' --capacity 5 --vm-user-name 'adminName' --vm-password User@1234567890
+        az sf cluster node-type add -g group-name -n cluster1 --node-type 'n2' --capacity 5 --vm-user-name 'adminName' --vm-password testPassword0
 
 """
 
