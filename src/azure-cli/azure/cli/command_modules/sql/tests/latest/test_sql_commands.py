@@ -466,8 +466,8 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('sku.capacity', vcore_capacity_updated),
                      JMESPathCheck('sku.family', vcore_family_updated)])
 
-    @ResourceGroupPreparer(name_prefix='clitest', location='eastus2')
-    @SqlServerPreparer(name_prefix='clitest', location='eastus2')
+    @ResourceGroupPreparer(name_prefix='clitest-sql', location='eastus2')
+    @SqlServerPreparer(name_prefix='clitest-sql', location='eastus2')
     @AllowLargeResponse()
     def test_sql_db_read_replica_mgmt(self, resource_group, resource_group_location, server):
         database_name = "cliautomationdb01"

@@ -21,7 +21,7 @@ Release History
 
 **SQL**
 
-* Added "--read-scale" and "--read-replicas", parameters to support read scale management with SQL Database CRUD operations."
+* Added "--read-scale" and "--read-replicas" parameters to sql db create and update commands, to support read scale management.
 
 **Storage**
 

@@ -234,6 +234,7 @@ read_scale_param_type = CLIArgumentType(
 
 read_replicas_param_type = CLIArgumentType(
     options_list=['--read-replicas'],
+    type=int,
     help='The number of readonly replicas to provision for the database. '
     'Only settable for Hyperscale edition.')
 
