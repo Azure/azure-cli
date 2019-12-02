@@ -45,8 +45,8 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
             if 'AADSTS50173' in err:
                 raise CLIError("The credential data used by CLI has been expired because you might have changed or "
                                "reset the password. {}".format(
-                    "Please clear browser's cookies and run 'az login'"
-                    if not in_cloud_console() else ''))
+                                   "Please clear browser's cookies and run 'az login'"
+                                   if not in_cloud_console() else ''))
 
             raise CLIError(err)
         except requests.exceptions.SSLError as err:
