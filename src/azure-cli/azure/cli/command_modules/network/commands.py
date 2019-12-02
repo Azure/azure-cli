@@ -27,7 +27,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_express_route_circuit_connections, cf_express_route_gateways, cf_express_route_connections,
     cf_express_route_ports, cf_express_route_port_locations, cf_express_route_links, cf_app_gateway_waf_policy,
     cf_service_tags, cf_private_link_services, cf_private_endpoint_types, cf_peer_express_route_circuit_connections,
-    cf_virtual_router, cf_virtual_router_peering)
+    cf_virtual_router, cf_virtual_router_peering, cf_service_aliases)
 from azure.cli.command_modules.network._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry)
 from azure.cli.command_modules.network._format import (
@@ -323,6 +323,12 @@ def load_command_table(self, _):
     network_vrouter_peering_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#VirtualRouterPeeringsOperations.{}',
         client_factory=cf_virtual_router_peering,
+        min_api='2019-08-01'
+    )
+
+    network_service_aliases_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations#AvailableServiceAliasesOperations.{}',
+        client_factory=cf_service_aliases,
         min_api='2019-08-01'
     )
 
@@ -1057,4 +1063,7 @@ def load_command_table(self, _):
         g.command('delete', 'delete')
         g.show_command('show', 'get')
         g.command('list', 'list')
+
+    with self.command_group('network service-aliases', network_service_aliases_sdk) as g:
+        g.custom_command('list', 'list_service_aliases')
     # endregion
