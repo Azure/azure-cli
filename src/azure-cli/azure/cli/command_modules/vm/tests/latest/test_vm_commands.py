@@ -18,7 +18,7 @@ from azure_devtools.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.core.profiles import ResourceType
 from azure.cli.testsdk import (
     ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, api_version_constraint,
-    StorageAccountPreparer)
+    StorageAccountPreparer, JMESPathCheck)
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 # pylint: disable=line-too-long
@@ -3669,27 +3669,34 @@ class VMSSOrchestrationModeTest(ScenarioTest):
 
 class DiskEncryptionSetTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_disk_encryption_set_', location='centraluseuap')
+    @ResourceGroupPreparer(name_prefix='cli_test_disk_encryption_set_', location='westcentralus')
     def test_disk_encryption_set(self, resource_group):
         self.kwargs.update({
-            'vault': 'vault2897',
-            'key': 'key1',
-            'des': 'des1',
-            'disk': 'disk1'
+            'vault': self.create_random_name(prefix='vault-', length=20),
+            'key': self.create_random_name(prefix='key-', length=20),
+            'des': self.create_random_name(prefix='des-', length=20),
+            'disk': self.create_random_name(prefix='disk-', length=20),
         })
-        vault_id = self.cmd('keyvault create -g {rg} -n {vault}').get_output_in_json()['id']
-        kid = self.cmd('keyvault key create -n {key} --vault {vault}').get_output_in_json()['key']['kid']
+        vault_id = self.cmd('keyvault create -g {rg} -n {vault} --enable-purge-protection true --enable-soft-delete true').get_output_in_json()['id']
+        kid = self.cmd('keyvault key create -n {key} --vault {vault} --protection software').get_output_in_json()['key']['kid']
         self.kwargs.update({
             'vault_id': vault_id,
             'kid': kid
         })
-        des_sp_id = self.cmd('disk-encryption-set create -g {rg} -n {des} --key-url {kid} --source-vault {vault}').get_output_in_json()['identity']['principalId']
+        self.cmd('disk-encryption-set create -g {rg} -n {des} --key-url {kid} --source-vault {vault}')
+        des_show_output = self.cmd('disk-encryption-set show -g {rg} -n {des}').get_output_in_json()
+        des_sp_id = des_show_output['identity']['principalId']
+        des_id = des_show_output['id']
         self.kwargs.update({
-            'des_sp_id': des_sp_id
+            'des_sp_id': des_sp_id,
+            'des_id': des_id
         })
         self.cmd('keyvault set-policy -n {vault} --object-id {des_sp_id} --key-permissions wrapKey unwrapKey get')
         self.cmd('role assignment create --assignee {des_sp_id} --role Reader --scope {vault_id}')
-        self.cmd('disk create -g {rg} -n {disk} --encryption-type EncryptionAtRestWithCustomerKey --disk-encryption-set {des} --size-gb 10')
+        self.cmd('disk create -g {rg} -n {disk} --encryption-type EncryptionAtRestWithCustomerKey --disk-encryption-set {des} --size-gb 10', checks=[
+            self.check('encryption.diskEncryptionSetId', '{des_id}'),
+            self.check('encryption.type', 'EncryptionAtRestWithCustomerKey'),
+        ])
 
 
 if __name__ == '__main__':
