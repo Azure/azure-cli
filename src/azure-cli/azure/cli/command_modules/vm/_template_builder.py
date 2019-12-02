@@ -212,8 +212,8 @@ def build_vnet_resource(_, name, location, tags, vnet_prefix=None, subnet=None,
     return vnet
 
 
-def build_msi_role_assignment(vm_vmss_name, vm_vmss_resource_id, vm_vmss_api_version,
-                              role_definition_id, role_assignment_guid, identity_scope, is_vm=True):
+def build_msi_role_assignment(vm_vmss_name, vm_vmss_resource_id, role_definition_id,
+                              role_assignment_guid, identity_scope, is_vm=True):
     from msrestazure.tools import parse_resource_id
     result = parse_resource_id(identity_scope)
     if result.get('type'):  # is a resource id?
@@ -224,6 +224,7 @@ def build_msi_role_assignment(vm_vmss_name, vm_vmss_resource_id, vm_vmss_api_ver
         assignment_type = 'Microsoft.Authorization/roleAssignments'
 
     # pylint: disable=line-too-long
+    msi_rp_api_version = '2019-07-01'
     return {
         'name': name,
         'type': assignment_type,
@@ -234,7 +235,7 @@ def build_msi_role_assignment(vm_vmss_name, vm_vmss_resource_id, vm_vmss_api_ver
         'properties': {
             'roleDefinitionId': role_definition_id,
             'principalId': "[reference('{}', '{}', 'Full').identity.principalId]".format(
-                vm_vmss_resource_id, vm_vmss_api_version),
+                vm_vmss_resource_id, msi_rp_api_version),
             'scope': identity_scope
         }
     }
@@ -247,8 +248,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
         os_publisher=None, os_offer=None, os_sku=None, os_version=None, os_vhd_uri=None,
         attach_os_disk=None, os_disk_size_gb=None, custom_data=None, secrets=None, license_type=None, zone=None,
         disk_info=None, boot_diagnostics_storage_uri=None, ultra_ssd_enabled=None, proximity_placement_group=None,
-        computer_name=None, dedicated_host=None, priority=None, max_billing=None, eviction_policy=None,
-        enable_agent=None):
+        computer_name=None, dedicated_host=None, priority=None, max_price=None, eviction_policy=None,
+        enable_agent=None, vmss=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -386,6 +387,10 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
     if availability_set_id:
         vm_properties['availabilitySet'] = {'id': availability_set_id}
 
+    # vmss is ID
+    if vmss is not None:
+        vm_properties['virtualMachineScaleSet'] = {'id': vmss}
+
     if not attach_os_disk:
         vm_properties['osProfile'] = _build_os_profile()
 
@@ -415,8 +420,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
     if eviction_policy is not None:
         vm_properties['evictionPolicy'] = eviction_policy
 
-    if max_billing is not None:
-        vm_properties['billingProfile'] = {'maxPrice': max_billing}
+    if max_price is not None:
+        vm_properties['billingProfile'] = {'maxPrice': max_price}
 
     vm = {
         'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machines'),
@@ -646,7 +651,7 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
                         single_placement_group=None, platform_fault_domain_count=None, custom_data=None,
                         secrets=None, license_type=None, zones=None, priority=None, eviction_policy=None,
                         application_security_groups=None, ultra_ssd_enabled=None, proximity_placement_group=None,
-                        terminate_notification_time=None, max_billing=None):
+                        terminate_notification_time=None, max_price=None, scale_in_policy=None):
 
     # Build IP configuration
     ip_configuration = {
@@ -805,9 +810,9 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
                                                      operation_group='virtual_machine_scale_sets'):
         vmss_properties['virtualMachineProfile']['evictionPolicy'] = eviction_policy
 
-    if max_billing is not None and cmd.supported_api_version(
+    if max_price is not None and cmd.supported_api_version(
             min_api='2019-03-01', operation_group='virtual_machine_scale_sets'):
-        vmss_properties['virtualMachineProfile']['billingProfile'] = {'maxPrice': max_billing}
+        vmss_properties['virtualMachineProfile']['billingProfile'] = {'maxPrice': max_price}
 
     if platform_fault_domain_count is not None and cmd.supported_api_version(
             min_api='2017-12-01', operation_group='virtual_machine_scale_sets'):
@@ -830,6 +835,9 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
             }
         }
         vmss_properties['virtualMachineProfile']['scheduledEventsProfile'] = scheduled_events_profile
+
+    if scale_in_policy:
+        vmss_properties['scaleInPolicy'] = {'rules': scale_in_policy}
 
     vmss = {
         'type': 'Microsoft.Compute/virtualMachineScaleSets',

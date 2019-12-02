@@ -147,7 +147,7 @@ class BotTemplateDeployer:
         response = requests.get('https://dev.botframework.com/api/misc/bottemplateroot')
         if response.status_code != 200:
             raise CLIError('Unable to get bot code template from CDN. Please file an issue on {0}'.format(
-                'https://github.com/Microsoft/botbuilder-tools/issues'
+                'https://github.com/microsoft/botframework-sdk'
             ))
         cdn_link = response.text.strip('"')
 

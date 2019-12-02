@@ -1085,8 +1085,10 @@ def deploy_arm_template_at_scope(cmd,
 
 
 def validate_arm_template(cmd, resource_group_name, template_file=None, template_uri=None,
-                          parameters=None, mode=None, rollback_on_error=None):
-
+                          parameters=None, mode=None, rollback_on_error=None, handle_extended_json_format=None):
+    if handle_extended_json_format:
+        return _deploy_arm_template_unmodified(cmd.cli_ctx, resource_group_name, template_file, template_uri,
+                                               'deployment_dry_run', parameters, mode, rollback_on_error, validate_only=True)
     return _deploy_arm_template_core(cmd.cli_ctx, resource_group_name, template_file, template_uri,
                                      'deployment_dry_run', parameters, mode, rollback_on_error, validate_only=True)
 
@@ -2216,7 +2218,7 @@ def rest_call(cmd, method, uri, headers=None, uri_parameters=None,
         try:
             return r.json()
         except ValueError:
-            logger.warning('Not a json response, outputing to stdout. For binary data '
+            logger.warning('Not a json response, outputting to stdout. For binary data '
                            'suggest use "--output-file" to write to a file')
             print(r.text)
 

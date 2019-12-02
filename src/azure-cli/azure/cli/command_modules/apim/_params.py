@@ -29,7 +29,7 @@ def load_arguments(self, _):
 
     with self.argument_context('apim create') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
-        c.argument('publisher_name', help='The name of your organization for use in the developer portal and e-mail notifications.')
+        c.argument('publisher_name', help='The name of your organization for use in the developer portal and e-mail notifications.', required=True)
         c.argument('publisher_email', help='The e-mail address to receive all system notifications.')
         c.argument('enable_client_certificate', arg_type=get_three_state_flag(), help='Enforces a client certificate to be presented on each request to the gateway and also enables the ability to authenticate the certificate in the policy on the gateway.')
         c.argument('virtual_network_type', get_enum_type(VNET_TYPES), options_list=['--virtual-network', '-v'], help='The virtual network type.')

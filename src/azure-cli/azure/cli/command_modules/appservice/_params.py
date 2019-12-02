@@ -13,8 +13,9 @@ from azure.cli.core.commands.parameters import (resource_group_name_type, get_lo
 from azure.mgmt.web.models import DatabaseType, ConnectionStringType, BuiltInAuthenticationProvider, AzureStorageType
 
 from ._completers import get_hostname_completion_list
-
-from ._validators import validate_timeout_value, validate_site_create, validate_asp_create, validate_add_vnet
+from ._constants import RUNTIME_TO_IMAGE_FUNCTIONAPP
+from ._validators import (validate_timeout_value, validate_site_create, validate_asp_create,
+                          validate_add_vnet, validate_front_end_scale_factor, validate_ase_create)
 
 
 AUTH_TYPES = {
@@ -31,6 +32,7 @@ OS_TYPES = ['Windows', 'Linux']
 LINUX_RUNTIMES = ['dotnet', 'node', 'python']
 WINDOWS_RUNTIMES = ['dotnet', 'node', 'java', 'powershell']
 ACCESS_RESTRICTION_ACTION_TYPES = ['Allow', 'Deny']
+ASE_LOADBALANCER_MODES = ['Internal', 'External']
 
 # pylint: disable=too-many-statements
 
@@ -40,11 +42,17 @@ def load_arguments(self, _):
     # pylint: disable=line-too-long
     # PARAMETER REGISTRATION
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
-    sku_arg_type = CLIArgumentType(help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1V2(Premium V2 Small), PC2 (Premium Container Small), PC3 (Premium Container Medium), PC4 (Premium Container Large)',
+    sku_arg_type = CLIArgumentType(help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1V2(Premium V2 Small), PC2 (Premium Container Small), PC3 (Premium Container Medium), PC4 (Premium Container Large), I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large)',
                                    arg_type=get_enum_type(['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1V2', 'P2V2', 'P3V2', 'PC2', 'PC3', 'PC4', 'I1', 'I2', 'I3']))
     webapp_name_arg_type = CLIArgumentType(configured_default='web', options_list=['--name', '-n'], metavar='NAME',
                                            completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name',
                                            help="name of the web app. You can configure the default using 'az configure --defaults web=<name>'")
+    isolated_sku_arg_type = CLIArgumentType(help='The Isolated pricing tiers, e.g., I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large)',
+                                            arg_type=get_enum_type(['I1', 'I2', 'I3']))
+
+    functionapp_runtime_to_version_texts = []
+    for runtime, val in RUNTIME_TO_IMAGE_FUNCTIONAPP.items():
+        functionapp_runtime_to_version_texts.append(runtime + ' -> [' + ', '.join(val.keys()) + ']')
 
     # use this hidden arg to give a command the right instance, that functionapp commands
     # work on function app and webapp ones work on web app
@@ -76,9 +84,15 @@ def load_arguments(self, _):
     with self.argument_context('appservice plan create') as c:
         c.argument('name', options_list=['--name', '-n'], help="Name of the new app service plan", completer=None,
                    validator=validate_asp_create)
+        c.argument('app_service_environment', options_list=['--app-service-environment', '-e'],
+                   help="Name or ID of the app service environment")
         c.argument('sku', arg_type=sku_arg_type)
         c.argument('is_linux', action='store_true', required=False, help='host web app on Linux worker')
         c.argument('hyper_v', action='store_true', required=False, help='Host web app on Windows container', is_preview=True)
+        c.argument('per_site_scaling', action='store_true', required=False, help='Enable per-app scaling at the '
+                                                                                 'App Service plan level to allow for '
+                                                                                 'scaling an app independently from '
+                                                                                 'the App Service plan that hosts it.')
         c.argument('tags', arg_type=tags_type)
 
     with self.argument_context('appservice plan update') as c:
@@ -201,6 +215,7 @@ def load_arguments(self, _):
             c.argument('allowed_origins', options_list=['--allowed-origins', '-a'], nargs='*', help='space separated origins that should be allowed to make cross-origin calls (for example: http://example.com:12345). To allow all, use "*" and remove all other origins from the list')
 
         with self.argument_context(scope + ' config set') as c:
+            c.argument('number_of_workers', help='The number of workers to be allocated.', type=int)
             c.argument('remote_debugging_enabled', help='enable or disable remote debugging', arg_type=get_three_state_flag(return_label=True))
             c.argument('web_sockets_enabled', help='enable or disable web sockets', arg_type=get_three_state_flag(return_label=True))
             c.argument('always_on', help='ensure web app gets loaded all the time, rather unloaded after been idle. Recommended when you have continuous web jobs running', arg_type=get_three_state_flag(return_label=True))
@@ -440,8 +455,10 @@ def load_arguments(self, _):
         c.argument('storage_account', options_list=['--storage-account', '-s'],
                    help='Provide a string value of a Storage Account in the provided Resource Group. Or Resource ID of a Storage Account in a different Resource Group')
         c.argument('consumption_plan_location', options_list=['--consumption-plan-location', '-c'],
-                   help="Geographic location where Function App will be hosted. Use 'functionapp list-consumption-locations' to view available locations.")
+                   help="Geographic location where Function App will be hosted. Use 'az functionapp list-consumption-locations' to view available locations.")
         c.argument('runtime', help='The functions runtime stack.', arg_type=get_enum_type(set(LINUX_RUNTIMES).union(set(WINDOWS_RUNTIMES))))
+        c.argument('runtime_version', help='The version of the functions runtime stack. '
+                                           'Allowed values for each --runtime are: ' + ', '.join(functionapp_runtime_to_version_texts))
         c.argument('os_type', arg_type=get_enum_type(OS_TYPES), help="Set the OS type for the app to be created.")
         c.argument('app_insights_key', help="Instrumentation key of App Insights to be added.")
         c.argument('app_insights', help="Name of the existing App Insights project to be added to the Function app. Must be in the same resource group.")
@@ -511,7 +528,7 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(['swap', 'preview', 'reset']))
 
 
-# Access Resction Commands
+# Access Restriction Commands
     for scope in ['webapp', 'functionapp']:
         with self.argument_context(scope + ' config access-restriction show') as c:
             c.argument('name', arg_type=webapp_name_arg_type)
@@ -545,3 +562,46 @@ def load_arguments(self, _):
             c.argument('use_same_restrictions_for_scm_site',
                        help="Use same access restrictions for scm site",
                        arg_type=get_three_state_flag())
+
+# App Service Environment Commands
+    with self.argument_context('appservice ase show') as c:
+        c.argument('name', options_list=['--name', '-n'],
+                   help='Name of the app service environment')
+    with self.argument_context('appservice ase create') as c:
+        c.argument('name', options_list=['--name', '-n'], validator=validate_ase_create,
+                   help='Name of the app service environment')
+        c.argument('subnet', help='Name or ID of existing subnet. To create vnet and/or subnet \
+                   use `az network vnet [subnet] create`')
+        c.argument('vnet_name', help='Name of the vNet. Mandatory if only subnet name is specified.')
+        c.argument('virtual_ip_type', arg_type=get_enum_type(ASE_LOADBALANCER_MODES),
+                   help="Specify if app service environment should be accessible from internet")
+        c.argument('ignore_subnet_size_validation', arg_type=get_three_state_flag(),
+                   help='Do not check if subnet is sized according to recommendations.')
+        c.argument('ignore_route_table', arg_type=get_three_state_flag(),
+                   help='Configure route table manually.')
+        c.argument('ignore_network_security_group', arg_type=get_three_state_flag(),
+                   help='Configure network security group manually.')
+        c.argument('force_route_table', arg_type=get_three_state_flag(),
+                   help='Override route table for subnet')
+        c.argument('force_network_security_group', arg_type=get_three_state_flag(),
+                   help='Override network security group for subnet')
+        c.argument('front_end_scale_factor', type=int, validator=validate_front_end_scale_factor,
+                   help='Scale of front ends to app service plan instance ratio.', default=15)
+        c.argument('front_end_sku', arg_type=isolated_sku_arg_type, default='I1',
+                   help='Size of front end servers.')
+    with self.argument_context('appservice ase delete') as c:
+        c.argument('name', options_list=['--name', '-n'],
+                   help='Name of the app service environment')
+    with self.argument_context('appservice ase update') as c:
+        c.argument('name', options_list=['--name', '-n'],
+                   help='Name of the app service environment')
+        c.argument('front_end_scale_factor', type=int, validator=validate_front_end_scale_factor,
+                   help='Scale of front ends to app service plan instance ratio between 5 and 15.')
+        c.argument('front_end_sku', arg_type=isolated_sku_arg_type,
+                   help='Size of front end servers.')
+    with self.argument_context('appservice ase list-addresses') as c:
+        c.argument('name', options_list=['--name', '-n'],
+                   help='Name of the app service environment')
+    with self.argument_context('appservice ase list-plans') as c:
+        c.argument('name', options_list=['--name', '-n'],
+                   help='Name of the app service environment')

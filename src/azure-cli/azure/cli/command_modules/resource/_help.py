@@ -288,6 +288,14 @@ examples:
         az deployment create --scope-type Tenant --location WestUS --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
 """
 
+helps['deployment delete'] = """
+type: command
+short-summary: Delete a deployment at subscription scope.
+examples:
+  - name: Delete a deployment at subscription scope.
+    text: az deployment delete -n deployment01
+"""
+
 helps['deployment export'] = """
 type: command
 short-summary: Export the template used for a deployment.
@@ -302,6 +310,14 @@ examples:
     text: az deployment export --scope-type Tenant --name MyDeployment
 """
 
+helps['deployment list'] = """
+type: command
+short-summary: List deployments at subscription scope.
+examples:
+  - name: List deployments at subscription scope.
+    text: az deployment list
+"""
+
 helps['deployment operation'] = """
 type: group
 short-summary: Manage deployment operations.
@@ -310,6 +326,14 @@ short-summary: Manage deployment operations.
 helps['deployment operation list'] = """
 type: command
 short-summary: List deployment operations.
+"""
+
+helps['deployment show'] = """
+type: command
+short-summary: Show a deployment at subscription scope.
+examples:
+  - name: Show a deployment at subscription scope.
+    text: az deployment show -n deployment01
 """
 
 helps['deployment validate'] = """
@@ -1309,6 +1333,12 @@ examples:
   - name: Update a Azure Active Directory Graph User's display name
     text: >
         az rest --method patch --uri "https://graph.microsoft.com/v1.0/users/johndoe@azuresdkteam.onmicrosoft.com" --body "{\\"displayName\\": \\"jondoe2\\"}"
+  - name: Get a virtual machine
+    text: >
+        az rest --method get --uri /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachines/{vmName}?api-version=2019-03-01
+  - name: Create a public IP address from body.json file
+    text: >
+        az rest --method put --uri https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/publicIPAddresses/{publicIpAddressName}?api-version=2019-09-01 --body @body.json
 """
 
 helps['tag'] = """

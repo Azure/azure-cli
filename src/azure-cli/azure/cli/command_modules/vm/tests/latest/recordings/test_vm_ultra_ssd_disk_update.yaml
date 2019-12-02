@@ -13,15 +13,15 @@ interactions:
       ParameterSetName:
       - -g -n --size-gb --sku --disk-iops-read-write --disk-mbps-read-write --zone
       User-Agent:
-      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-ultrassd000001?api-version=2019-07-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001","name":"cli-test-ultrassd000001","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2019-10-13T02:30:18Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001","name":"cli-test-ultrassd000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{"product":"azurecli","cause":"automation","date":"2019-11-04T09:34:53Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -30,7 +30,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 13 Oct 2019 02:30:20 GMT
+      - Mon, 04 Nov 2019 09:34:58 GMT
       expires:
       - '-1'
       pragma:
@@ -45,7 +45,7 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus2", "tags": {}, "sku": {"name": "UltraSSD_LRS"}, "zones":
+    body: '{"location": "eastus2", "tags": {}, "sku": {"name": "UltraSSD_LRS"}, "zones":
       ["2"], "properties": {"hyperVGeneration": "V1", "creationData": {"createOption":
       "Empty"}, "diskSizeGB": 4, "diskIOPSReadWrite": 500, "diskMBpsReadWrite": 8}}'
     headers:
@@ -64,15 +64,15 @@ interactions:
       ParameterSetName:
       - -g -n --size-gb --sku --disk-iops-read-write --disk-mbps-read-write --zone
       User-Agent:
-      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-compute/8.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-compute/9.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Compute/disks/d1?api-version=2019-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Compute/disks/d1?api-version=2019-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"d1\",\r\n  \"location\": \"westus2\",\r\n  \"tags\":
+      string: "{\r\n  \"name\": \"d1\",\r\n  \"location\": \"eastus2\",\r\n  \"tags\":
         {},\r\n  \"zones\": [\r\n    \"2\"\r\n  ],\r\n  \"sku\": {\r\n    \"name\":
         \"UltraSSD_LRS\"\r\n  },\r\n  \"properties\": {\r\n    \"hyperVGeneration\":
         \"V1\",\r\n    \"creationData\": {\r\n      \"createOption\": \"Empty\"\r\n
@@ -82,7 +82,7 @@ interactions:
         true\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus2/DiskOperations/c4ccd896-4581-4452-8a01-8227b7e2a215?api-version=2019-03-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/DiskOperations/718fdff7-b836-4181-979f-800515e3d7c8?api-version=2019-07-01
       cache-control:
       - no-cache
       content-length:
@@ -90,11 +90,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 13 Oct 2019 02:30:20 GMT
+      - Mon, 04 Nov 2019 09:35:02 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus2/DiskOperations/c4ccd896-4581-4452-8a01-8227b7e2a215?monitor=true&api-version=2019-03-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/DiskOperations/718fdff7-b836-4181-979f-800515e3d7c8?monitor=true&api-version=2019-07-01
       pragma:
       - no-cache
       server:
@@ -107,7 +107,7 @@ interactions:
       x-ms-ratelimit-remaining-resource:
       - Microsoft.Compute/CreateUpdateDisks3Min;999,Microsoft.Compute/CreateUpdateDisks30Min;7999
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1195'
     status:
       code: 202
       message: Accepted
@@ -125,14 +125,14 @@ interactions:
       ParameterSetName:
       - -g -n --size-gb --sku --disk-iops-read-write --disk-mbps-read-write --zone
       User-Agent:
-      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-compute/8.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-compute/9.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus2/DiskOperations/c4ccd896-4581-4452-8a01-8227b7e2a215?api-version=2019-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/DiskOperations/718fdff7-b836-4181-979f-800515e3d7c8?api-version=2019-07-01
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2019-10-13T02:30:21.6105107+00:00\",\r\n  \"status\":
-        \"InProgress\",\r\n  \"name\": \"c4ccd896-4581-4452-8a01-8227b7e2a215\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2019-11-04T09:35:02.5176173+00:00\",\r\n  \"status\":
+        \"InProgress\",\r\n  \"name\": \"718fdff7-b836-4181-979f-800515e3d7c8\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -141,7 +141,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 13 Oct 2019 02:30:23 GMT
+      - Mon, 04 Nov 2019 09:35:04 GMT
       expires:
       - '-1'
       pragma:
@@ -176,14 +176,14 @@ interactions:
       ParameterSetName:
       - -g -n --size-gb --sku --disk-iops-read-write --disk-mbps-read-write --zone
       User-Agent:
-      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-compute/8.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-compute/9.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus2/DiskOperations/c4ccd896-4581-4452-8a01-8227b7e2a215?api-version=2019-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/DiskOperations/718fdff7-b836-4181-979f-800515e3d7c8?api-version=2019-07-01
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2019-10-13T02:30:21.6105107+00:00\",\r\n  \"status\":
-        \"InProgress\",\r\n  \"name\": \"c4ccd896-4581-4452-8a01-8227b7e2a215\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2019-11-04T09:35:02.5176173+00:00\",\r\n  \"status\":
+        \"InProgress\",\r\n  \"name\": \"718fdff7-b836-4181-979f-800515e3d7c8\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -192,7 +192,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 13 Oct 2019 02:30:33 GMT
+      - Mon, 04 Nov 2019 09:35:15 GMT
       expires:
       - '-1'
       pragma:
@@ -227,25 +227,25 @@ interactions:
       ParameterSetName:
       - -g -n --size-gb --sku --disk-iops-read-write --disk-mbps-read-write --zone
       User-Agent:
-      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-compute/8.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-compute/9.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus2/DiskOperations/c4ccd896-4581-4452-8a01-8227b7e2a215?api-version=2019-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/DiskOperations/718fdff7-b836-4181-979f-800515e3d7c8?api-version=2019-07-01
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2019-10-13T02:30:21.6105107+00:00\",\r\n  \"endTime\":
-        \"2019-10-13T02:30:48.9868847+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
-        \ \"properties\": {\r\n    \"output\": {\"name\":\"d1\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Compute/disks/d1\",\"type\":\"Microsoft.Compute/disks\",\"location\":\"westus2\",\"tags\":{},\"zones\":[\"2\"],\"sku\":{\"name\":\"UltraSSD_LRS\",\"tier\":\"Ultra\"},\"properties\":{\"hyperVGeneration\":\"V1\",\"creationData\":{\"createOption\":\"Empty\"},\"diskSizeGB\":4,\"diskIOPSReadWrite\":500,\"diskMBpsReadWrite\":8,\"readOnly\":false,\"diskIOPSReadOnly\":650,\"diskMBpsReadOnly\":82,\"maxShares\":1,\"timeCreated\":\"2019-10-13T02:30:21.6105107+00:00\",\"provisioningState\":\"Succeeded\",\"diskState\":\"Unattached\",\"diskSizeBytes\":4294967296,\"uniqueId\":\"3eb84933-b098-4501-bdd7-664ced6e27aa\"}}\r\n
-        \ },\r\n  \"name\": \"c4ccd896-4581-4452-8a01-8227b7e2a215\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2019-11-04T09:35:02.5176173+00:00\",\r\n  \"endTime\":
+        \"2019-11-04T09:35:29.9876014+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+        \ \"properties\": {\r\n    \"output\": {\"name\":\"d1\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Compute/disks/d1\",\"type\":\"Microsoft.Compute/disks\",\"location\":\"eastus2\",\"tags\":{},\"zones\":[\"2\"],\"sku\":{\"name\":\"UltraSSD_LRS\",\"tier\":\"Ultra\"},\"properties\":{\"hyperVGeneration\":\"V1\",\"creationData\":{\"createOption\":\"Empty\"},\"diskSizeGB\":4,\"diskIOPSReadWrite\":500,\"diskMBpsReadWrite\":8,\"readOnly\":false,\"diskIOPSReadOnly\":650,\"diskMBpsReadOnly\":82,\"encryption\":{\"type\":\"EncryptionAtRestWithPlatformKey\"},\"maxShares\":1,\"timeCreated\":\"2019-11-04T09:35:02.5176173+00:00\",\"provisioningState\":\"Succeeded\",\"diskState\":\"Unattached\",\"diskSizeBytes\":4294967296,\"uniqueId\":\"99d7f817-03c9-4683-be63-7fb4777b8d6a\"}}\r\n
+        \ },\r\n  \"name\": \"718fdff7-b836-4181-979f-800515e3d7c8\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '948'
+      - '1004'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 13 Oct 2019 02:31:03 GMT
+      - Mon, 04 Nov 2019 09:35:45 GMT
       expires:
       - '-1'
       pragma:
@@ -280,32 +280,34 @@ interactions:
       ParameterSetName:
       - -g -n --size-gb --sku --disk-iops-read-write --disk-mbps-read-write --zone
       User-Agent:
-      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-compute/8.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-compute/9.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Compute/disks/d1?api-version=2019-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Compute/disks/d1?api-version=2019-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"d1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Compute/disks/d1\",\r\n
-        \ \"type\": \"Microsoft.Compute/disks\",\r\n  \"location\": \"westus2\",\r\n
+        \ \"type\": \"Microsoft.Compute/disks\",\r\n  \"location\": \"eastus2\",\r\n
         \ \"tags\": {},\r\n  \"zones\": [\r\n    \"2\"\r\n  ],\r\n  \"sku\": {\r\n
         \   \"name\": \"UltraSSD_LRS\",\r\n    \"tier\": \"Ultra\"\r\n  },\r\n  \"properties\":
         {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"creationData\": {\r\n      \"createOption\":
         \"Empty\"\r\n    },\r\n    \"diskSizeGB\": 4,\r\n    \"diskIOPSReadWrite\":
         500,\r\n    \"diskMBpsReadWrite\": 8,\r\n    \"readOnly\": false,\r\n    \"diskIOPSReadOnly\":
-        650,\r\n    \"diskMBpsReadOnly\": 82,\r\n    \"maxShares\": 1,\r\n    \"timeCreated\":
-        \"2019-10-13T02:30:21.6105107+00:00\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"diskState\": \"Unattached\",\r\n    \"diskSizeBytes\": 4294967296,\r\n
-        \   \"uniqueId\": \"3eb84933-b098-4501-bdd7-664ced6e27aa\"\r\n  }\r\n}"
+        650,\r\n    \"diskMBpsReadOnly\": 82,\r\n    \"encryption\": {\r\n      \"type\":
+        \"EncryptionAtRestWithPlatformKey\"\r\n    },\r\n    \"maxShares\": 1,\r\n
+        \   \"timeCreated\": \"2019-11-04T09:35:02.5176173+00:00\",\r\n    \"provisioningState\":
+        \"Succeeded\",\r\n    \"diskState\": \"Unattached\",\r\n    \"diskSizeBytes\":
+        4294967296,\r\n    \"uniqueId\": \"99d7f817-03c9-4683-be63-7fb4777b8d6a\"\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '910'
+      - '988'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 13 Oct 2019 02:31:03 GMT
+      - Mon, 04 Nov 2019 09:35:46 GMT
       expires:
       - '-1'
       pragma:
@@ -322,7 +324,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;4998,Microsoft.Compute/LowCostGet30Min;39998
+      - Microsoft.Compute/LowCostGet3Min;4998,Microsoft.Compute/LowCostGet30Min;39997
     status:
       code: 200
       message: OK
@@ -340,34 +342,36 @@ interactions:
       ParameterSetName:
       - -g -n --disk-iops-read-write --disk-mbps-read-write
       User-Agent:
-      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-compute/8.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-compute/9.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Compute/disks/d1?api-version=2019-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Compute/disks/d1?api-version=2019-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"d1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Compute/disks/d1\",\r\n
-        \ \"type\": \"Microsoft.Compute/disks\",\r\n  \"location\": \"westus2\",\r\n
+        \ \"type\": \"Microsoft.Compute/disks\",\r\n  \"location\": \"eastus2\",\r\n
         \ \"tags\": {},\r\n  \"zones\": [\r\n    \"2\"\r\n  ],\r\n  \"sku\": {\r\n
         \   \"name\": \"UltraSSD_LRS\",\r\n    \"tier\": \"Ultra\"\r\n  },\r\n  \"properties\":
         {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"creationData\": {\r\n      \"createOption\":
         \"Empty\"\r\n    },\r\n    \"diskSizeGB\": 4,\r\n    \"diskIOPSReadWrite\":
         500,\r\n    \"diskMBpsReadWrite\": 8,\r\n    \"readOnly\": false,\r\n    \"diskIOPSReadOnly\":
-        650,\r\n    \"diskMBpsReadOnly\": 82,\r\n    \"maxShares\": 1,\r\n    \"timeCreated\":
-        \"2019-10-13T02:30:21.6105107+00:00\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"diskState\": \"Unattached\",\r\n    \"diskSizeBytes\": 4294967296,\r\n
-        \   \"uniqueId\": \"3eb84933-b098-4501-bdd7-664ced6e27aa\"\r\n  }\r\n}"
+        650,\r\n    \"diskMBpsReadOnly\": 82,\r\n    \"encryption\": {\r\n      \"type\":
+        \"EncryptionAtRestWithPlatformKey\"\r\n    },\r\n    \"maxShares\": 1,\r\n
+        \   \"timeCreated\": \"2019-11-04T09:35:02.5176173+00:00\",\r\n    \"provisioningState\":
+        \"Succeeded\",\r\n    \"diskState\": \"Unattached\",\r\n    \"diskSizeBytes\":
+        4294967296,\r\n    \"uniqueId\": \"99d7f817-03c9-4683-be63-7fb4777b8d6a\"\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '910'
+      - '988'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 13 Oct 2019 02:31:03 GMT
+      - Mon, 04 Nov 2019 09:35:48 GMT
       expires:
       - '-1'
       pragma:
@@ -384,14 +388,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;4997,Microsoft.Compute/LowCostGet30Min;39997
+      - Microsoft.Compute/LowCostGet3Min;4997,Microsoft.Compute/LowCostGet30Min;39996
     status:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus2", "tags": {}, "sku": {"name": "UltraSSD_LRS"}, "zones":
+    body: '{"location": "eastus2", "tags": {}, "sku": {"name": "UltraSSD_LRS"}, "zones":
       ["2"], "properties": {"hyperVGeneration": "V1", "creationData": {"createOption":
-      "Empty"}, "diskSizeGB": 4, "diskIOPSReadWrite": 510, "diskMBpsReadWrite": 10}}'
+      "Empty"}, "diskSizeGB": 4, "diskIOPSReadWrite": 510, "diskMBpsReadWrite": 10,
+      "encryption": {"type": "EncryptionAtRestWithPlatformKey"}}}'
     headers:
       Accept:
       - application/json
@@ -402,43 +407,45 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '237'
+      - '296'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -g -n --disk-iops-read-write --disk-mbps-read-write
       User-Agent:
-      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-compute/8.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-compute/9.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Compute/disks/d1?api-version=2019-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Compute/disks/d1?api-version=2019-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"d1\",\r\n  \"location\": \"westus2\",\r\n  \"tags\":
-        {},\r\n  \"zones\": [\r\n    \"2\"\r\n  ],\r\n  \"physicalZone\": \"uswest2-AZ02\",\r\n
+      string: "{\r\n  \"name\": \"d1\",\r\n  \"location\": \"eastus2\",\r\n  \"tags\":
+        {},\r\n  \"zones\": [\r\n    \"2\"\r\n  ],\r\n  \"physicalZone\": \"useast2-AZ01\",\r\n
         \ \"sku\": {\r\n    \"name\": \"UltraSSD_LRS\"\r\n  },\r\n  \"properties\":
         {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"creationData\": {\r\n      \"createOption\":
         \"Empty\"\r\n    },\r\n    \"diskSizeGB\": 4,\r\n    \"diskIOPSReadWrite\":
         510,\r\n    \"diskMBpsReadWrite\": 10,\r\n    \"readOnly\": false,\r\n    \"diskIOPSReadOnly\":
-        650,\r\n    \"diskMBpsReadOnly\": 82,\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"isArmResource\": true,\r\n    \"faultDomain\": 0\r\n  }\r\n}"
+        650,\r\n    \"diskMBpsReadOnly\": 82,\r\n    \"encryption\": {\r\n      \"type\":
+        \"EncryptionAtRestWithPlatformKey\"\r\n    },\r\n    \"provisioningState\":
+        \"Updating\",\r\n    \"isArmResource\": true,\r\n    \"faultDomain\": 0\r\n
+        \ }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus2/DiskOperations/c8408c2b-4a62-4f71-af0b-23d06ed2e860?api-version=2019-03-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/DiskOperations/b31bae96-feb9-4272-8517-1b69b943d126?api-version=2019-07-01
       cache-control:
       - no-cache
       content-length:
-      - '543'
+      - '621'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 13 Oct 2019 02:31:04 GMT
+      - Mon, 04 Nov 2019 09:35:50 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus2/DiskOperations/c8408c2b-4a62-4f71-af0b-23d06ed2e860?monitor=true&api-version=2019-03-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/DiskOperations/b31bae96-feb9-4272-8517-1b69b943d126?monitor=true&api-version=2019-07-01
       pragma:
       - no-cache
       server:
@@ -451,7 +458,7 @@ interactions:
       x-ms-ratelimit-remaining-resource:
       - Microsoft.Compute/CreateUpdateDisks3Min;998,Microsoft.Compute/CreateUpdateDisks30Min;7998
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1195'
     status:
       code: 202
       message: Accepted
@@ -469,36 +476,37 @@ interactions:
       ParameterSetName:
       - -g -n --disk-iops-read-write --disk-mbps-read-write
       User-Agent:
-      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-compute/8.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-compute/9.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus2/DiskOperations/c8408c2b-4a62-4f71-af0b-23d06ed2e860?api-version=2019-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/DiskOperations/b31bae96-feb9-4272-8517-1b69b943d126?api-version=2019-07-01
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2019-10-13T02:31:04.7091636+00:00\",\r\n  \"endTime\":
-        \"2019-10-13T02:31:04.8810539+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+      string: "{\r\n  \"startTime\": \"2019-11-04T09:35:50.7385332+00:00\",\r\n  \"endTime\":
+        \"2019-11-04T09:35:50.9260415+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
         \ \"properties\": {\r\n    \"output\": {\r\n  \"name\": \"d1\",\r\n  \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Compute/disks/d1\",\r\n
-        \ \"type\": \"Microsoft.Compute/disks\",\r\n  \"location\": \"westus2\",\r\n
+        \ \"type\": \"Microsoft.Compute/disks\",\r\n  \"location\": \"eastus2\",\r\n
         \ \"tags\": {},\r\n  \"zones\": [\r\n    \"2\"\r\n  ],\r\n  \"sku\": {\r\n
         \   \"name\": \"UltraSSD_LRS\",\r\n    \"tier\": \"Ultra\"\r\n  },\r\n  \"properties\":
         {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"creationData\": {\r\n      \"createOption\":
         \"Empty\"\r\n    },\r\n    \"diskSizeGB\": 4,\r\n    \"diskIOPSReadWrite\":
         510,\r\n    \"diskMBpsReadWrite\": 10,\r\n    \"readOnly\": false,\r\n    \"diskIOPSReadOnly\":
-        650,\r\n    \"diskMBpsReadOnly\": 82,\r\n    \"maxShares\": 1,\r\n    \"timeCreated\":
-        \"2019-10-13T02:30:21.6105107+00:00\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"diskState\": \"Unattached\",\r\n    \"diskSizeBytes\": 4294967296,\r\n
-        \   \"uniqueId\": \"3eb84933-b098-4501-bdd7-664ced6e27aa\"\r\n  }\r\n}\r\n
-        \ },\r\n  \"name\": \"c8408c2b-4a62-4f71-af0b-23d06ed2e860\"\r\n}"
+        650,\r\n    \"diskMBpsReadOnly\": 82,\r\n    \"encryption\": {\r\n      \"type\":
+        \"EncryptionAtRestWithPlatformKey\"\r\n    },\r\n    \"maxShares\": 1,\r\n
+        \   \"timeCreated\": \"2019-11-04T09:35:02.5176173+00:00\",\r\n    \"provisioningState\":
+        \"Succeeded\",\r\n    \"diskState\": \"Unattached\",\r\n    \"diskSizeBytes\":
+        4294967296,\r\n    \"uniqueId\": \"99d7f817-03c9-4683-be63-7fb4777b8d6a\"\r\n
+        \ }\r\n}\r\n  },\r\n  \"name\": \"b31bae96-feb9-4272-8517-1b69b943d126\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1136'
+      - '1214'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 13 Oct 2019 02:31:06 GMT
+      - Mon, 04 Nov 2019 09:35:53 GMT
       expires:
       - '-1'
       pragma:
@@ -533,32 +541,34 @@ interactions:
       ParameterSetName:
       - -g -n --disk-iops-read-write --disk-mbps-read-write
       User-Agent:
-      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-compute/8.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-compute/9.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Compute/disks/d1?api-version=2019-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Compute/disks/d1?api-version=2019-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"d1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Compute/disks/d1\",\r\n
-        \ \"type\": \"Microsoft.Compute/disks\",\r\n  \"location\": \"westus2\",\r\n
+        \ \"type\": \"Microsoft.Compute/disks\",\r\n  \"location\": \"eastus2\",\r\n
         \ \"tags\": {},\r\n  \"zones\": [\r\n    \"2\"\r\n  ],\r\n  \"sku\": {\r\n
         \   \"name\": \"UltraSSD_LRS\",\r\n    \"tier\": \"Ultra\"\r\n  },\r\n  \"properties\":
         {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"creationData\": {\r\n      \"createOption\":
         \"Empty\"\r\n    },\r\n    \"diskSizeGB\": 4,\r\n    \"diskIOPSReadWrite\":
         510,\r\n    \"diskMBpsReadWrite\": 10,\r\n    \"readOnly\": false,\r\n    \"diskIOPSReadOnly\":
-        650,\r\n    \"diskMBpsReadOnly\": 82,\r\n    \"maxShares\": 1,\r\n    \"timeCreated\":
-        \"2019-10-13T02:30:21.6105107+00:00\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"diskState\": \"Unattached\",\r\n    \"diskSizeBytes\": 4294967296,\r\n
-        \   \"uniqueId\": \"3eb84933-b098-4501-bdd7-664ced6e27aa\"\r\n  }\r\n}"
+        650,\r\n    \"diskMBpsReadOnly\": 82,\r\n    \"encryption\": {\r\n      \"type\":
+        \"EncryptionAtRestWithPlatformKey\"\r\n    },\r\n    \"maxShares\": 1,\r\n
+        \   \"timeCreated\": \"2019-11-04T09:35:02.5176173+00:00\",\r\n    \"provisioningState\":
+        \"Succeeded\",\r\n    \"diskState\": \"Unattached\",\r\n    \"diskSizeBytes\":
+        4294967296,\r\n    \"uniqueId\": \"99d7f817-03c9-4683-be63-7fb4777b8d6a\"\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '911'
+      - '989'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 13 Oct 2019 02:31:06 GMT
+      - Mon, 04 Nov 2019 09:35:53 GMT
       expires:
       - '-1'
       pragma:
@@ -575,7 +585,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;4996,Microsoft.Compute/LowCostGet30Min;39996
+      - Microsoft.Compute/LowCostGet3Min;4996,Microsoft.Compute/LowCostGet30Min;39995
     status:
       code: 200
       message: OK

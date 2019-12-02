@@ -6,11 +6,7 @@
   %define dist .el%{?rhel}
 %endif
 
-%if 0%{?rhel} && 0%{?rhel} < 8
-    %define python_cmd python
-%else
-    %define python_cmd python3
-%endif
+%define python_cmd python3
 
 %define name           azure-cli
 %define release        1%{?dist}
@@ -25,7 +21,7 @@ Version:        %{version}
 Release:        %{release}
 Url:            https://docs.microsoft.com/cli/azure/install-azure-cli
 BuildArch:      x86_64
-Requires:       %{python_cmd}, %{python_cmd}-virtualenv
+Requires:       %{python_cmd}
 
 BuildRequires:  gcc, libffi-devel, openssl-devel, perl
 BuildRequires:  %{python_cmd}-devel
@@ -39,7 +35,7 @@ A great cloud needs great tools; we're excited to introduce Azure CLI,
 %prep
 %install
 # Create a fully instantiated virtual environment, ready to use the CLI.
-%{python_cmd} -m virtualenv --python %{python_cmd} %{buildroot}%{cli_lib_dir}
+%{python_cmd} -m venv %{buildroot}%{cli_lib_dir}
 source %{buildroot}%{cli_lib_dir}/bin/activate
 
 source %{repo_path}/scripts/install_full.sh

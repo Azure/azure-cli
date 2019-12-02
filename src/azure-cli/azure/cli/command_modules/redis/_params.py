@@ -31,7 +31,7 @@ def load_arguments(self, _):
         c.argument('prefix', help='Prefix to use for exported files')
         c.argument('cache_name', arg_type=cache_name)
         c.argument('shard_count', type=int, help='The number of shards to be created on a Premium Cluster Cache.')
-        c.argument('subnet_id', help='The full resource ID of a subnet in a virtual network to deploy the redis cache in. Example format /subscriptions/{subid}/resourceGroups/{resourceGroupName}/Microsoft.{Network|ClassicNetwork}/VirtualNetworks/vnet1/subnets/subnet1')
+        c.argument('subnet_id', help='The full resource ID of a subnet in a virtual network to deploy the redis cache in. Example format /subscriptions/{subid}/resourceGroups/{resourceGroupName}/providers/Microsoft.{Network|ClassicNetwork}/virtualNetworks/vnet1/subnets/subnet1')
         c.argument('static_ip', help='Specify a static ip if required for the VNET. If you do not specify a static IP then an IP address is chosen automatically')
         c.argument('tenant_settings', arg_type=tags_type, help='Space-separated tenant settings in key[=value] format')
         c.argument('tags', arg_type=tags_type)

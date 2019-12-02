@@ -2,11 +2,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+from azure.cli.testsdk import ScenarioTest
 
-from azure.cli.testsdk import ScenarioTest, record_only
 
-
-@record_only()
 class AzureReservationsTests(ScenarioTest):
 
     def _validate_reservation_order(self, reservation_order):
@@ -40,7 +38,7 @@ class AzureReservationsTests(ScenarioTest):
             'subscription': '00000000-0000-0000-0000-000000000000'
         })
         result = self.cmd('reservations reservation-order-id list --subscription-id {subscription}') \
-                     .get_output_in_json()
+            .get_output_in_json()
         for order_id in result['reservationOrderIds']['value']:
             self.assertIn('/providers/Microsoft.Capacity/reservationorders/', order_id)
 
@@ -56,7 +54,7 @@ class AzureReservationsTests(ScenarioTest):
 
     def test_get_reservation_order(self):
         self.kwargs.update({
-            'reservation_order_id': "98e884a1-2e01-4c9a-987e-e4e8be8f2775"
+            'reservation_order_id': '0a47417c-cd30-4f67-add6-d631583e09f3'
         })
         command = 'reservations reservation-order show --reservation-order-id {reservation_order_id}'
         reservation_order = self.cmd(command).get_output_in_json()
@@ -66,10 +64,10 @@ class AzureReservationsTests(ScenarioTest):
 
     def test_list_reservation(self):
         self.kwargs.update({
-            'reservation_order_id': "98e884a1-2e01-4c9a-987e-e4e8be8f2775"
+            'reservation_order_id': '0a47417c-cd30-4f67-add6-d631583e09f3'
         })
         reservation_list = self.cmd('reservations reservation list --reservation-order-id {reservation_order_id}') \
-                               .get_output_in_json()
+            .get_output_in_json()
         self.assertIsNotNone(reservation_list)
         for reservation in reservation_list:
             self.assertIn(self.kwargs['reservation_order_id'], reservation['name'])
@@ -78,8 +76,8 @@ class AzureReservationsTests(ScenarioTest):
 
     def test_get_reservation(self):
         self.kwargs.update({
-            'reservation_order_id': "98e884a1-2e01-4c9a-987e-e4e8be8f2775",
-            'reservation_id': 'de06a4f6-06a7-41c7-9bfb-822863669d05'
+            'reservation_order_id': '0a47417c-cd30-4f67-add6-d631583e09f3',
+            'reservation_id': 'ae1fbdad-6333-4964-9f4c-83f7e2b7f44f'
         })
         reservation = self.cmd('reservations reservation show  --reservation-order-id {reservation_order_id} '
                                '--reservation-id {reservation_id}').get_output_in_json()
@@ -90,8 +88,8 @@ class AzureReservationsTests(ScenarioTest):
 
     def test_list_reservation_history(self):
         self.kwargs.update({
-            'reservation_order_id': "98e884a1-2e01-4c9a-987e-e4e8be8f2775",
-            'reservation_id': 'de06a4f6-06a7-41c7-9bfb-822863669d05'
+            'reservation_order_id': '0a47417c-cd30-4f67-add6-d631583e09f3',
+            'reservation_id': 'ae1fbdad-6333-4964-9f4c-83f7e2b7f44f'
         })
         history = self.cmd('reservations reservation list-history --reservation-order-id {reservation_order_id}'
                            ' --reservation-id {reservation_id}').get_output_in_json()
@@ -104,35 +102,11 @@ class AzureReservationsTests(ScenarioTest):
     def test_get_catalog(self):
         self.kwargs.update({
             'subscription': '00000000-0000-0000-0000-000000000000',
-            'type': 'SuseLinux'
-        })
-        catalog = self.cmd('reservations catalog show --subscription-id {subscription} --reserved-resource-type {type}').get_output_in_json()
-        self.assertGreater(len(catalog), 0)
-        for entry in catalog:
-            self.assertGreater(len(entry['terms']), 0)
-            self.assertGreater(len(entry['skuProperties']), 0)
-            self.assertIsNotNone(entry['resourceType'])
-            self.assertIsNotNone(entry['name'])
-
-        self.kwargs.update({
-            'subscription': '00000000-0000-0000-0000-000000000000',
-            'type': 'SqlDatabases',
-            'location': 'westus'
-        })
-        catalog = self.cmd('reservations catalog show --subscription-id {subscription} --reserved-resource-type {type} --location {location}').get_output_in_json()
-        self.assertGreater(len(catalog), 0)
-        for entry in catalog:
-            self.assertGreater(len(entry['terms']), 0)
-            self.assertGreater(len(entry['skuProperties']), 0)
-            self.assertIsNotNone(entry['resourceType'])
-            self.assertIsNotNone(entry['name'])
-
-        self.kwargs.update({
-            'subscription': '00000000-0000-0000-0000-000000000000',
             'type': 'VirtualMachines',
             'location': 'westus'
         })
-        catalog = self.cmd('reservations catalog show --subscription-id {subscription} --reserved-resource-type {type} --location {location}').get_output_in_json()
+        catalog = self.cmd(
+            'reservations catalog show --subscription-id {subscription} --reserved-resource-type {type} --location {location}').get_output_in_json()
         self.assertGreater(len(catalog), 0)
         for entry in catalog:
             self.assertGreater(len(entry['terms']), 0)
@@ -142,10 +116,10 @@ class AzureReservationsTests(ScenarioTest):
 
     def test_update_reservation(self):
         self.kwargs.update({
-            'reservation_order_id': "98e884a1-2e01-4c9a-987e-e4e8be8f2775",
-            'reservation_id': 'e208f907-6d08-4b07-b857-91071cac521b',
-            'scope': '/subscriptions/302110e3-cd4e-4244-9874-07c91853c809',
-            'instance_flexibility': "Off"
+            'reservation_order_id': 'fe1341ea-4820-4ac9-9352-4136a6d8a252',
+            'reservation_id': '8e5963e2-000b-45bd-a1b4-305c9e5f89c9',
+            'scope': '/subscriptions/d3ae48e5-dbb2-4618-afd4-fb1b8559cb80',
+            'instance_flexibility': 'Off'
         })
 
         single_reservation = self.cmd('reservations reservation update --reservation-order-id {reservation_order_id}'
@@ -160,10 +134,10 @@ class AzureReservationsTests(ScenarioTest):
 
     def test_split_and_merge(self):
         self.kwargs.update({
-            'reservation_order_id': "98e884a1-2e01-4c9a-987e-e4e8be8f2775",
-            'reservation_id': '4ed87136-43a4-4b7f-9a54-52b31740eea3',
+            'reservation_order_id': '0af601f3-7868-44ee-b833-4d2e64ad3d70',
+            'reservation_id': '6dee7663-3e63-4115-aa4d-41e9a57f551e',
             'quantity1': 1,
-            'quantity2': 1
+            'quantity2': 2
         })
 
         original_reservation = self.cmd('reservations reservation show  --reservation-order-id {reservation_order_id}'
@@ -196,3 +170,49 @@ class AzureReservationsTests(ScenarioTest):
             self._validate_reservation(item)
             if 'Succeeded' in item['properties']['provisioningState']:
                 self.assertEqual(quantity_sum, item['properties']['quantity'])
+
+    def test_calculate_reservation_order(self):
+        self.kwargs.update({
+            'subid': 'd3ae48e5-dbb2-4618-afd4-fb1b8559cb80',
+            'sku': 'standard_b1ls',
+            'location': 'westus',
+            'reservedResourceType': 'VirtualMachines',
+            'term': 'P1Y',
+            'quantity': '2',
+            'displayName': 'test',
+            'appliedScopes': 'Shared',
+            'instanceFlexibility': 'Off',
+            'billingPlan': 'Monthly',
+            'appliedScopeType': 'Shared'
+        })
+        response = self.cmd('reservations reservation-order calculate --sku {sku} --location {location} --reserved-resource-type {reservedResourceType}'
+                            ' --billing-scope {subid} --term {term} --billing-plan {billingPlan} --display-name {displayName}'
+                            ' --quantity {quantity} --applied-scope-type {appliedScopeType}').get_output_in_json()
+        self.assertIsNotNone(response)
+        self.assertIsNotNone(response['properties']['reservationOrderId'])
+        self.assertEqual('standard_b1ls', response['properties']['skuDescription'])
+
+    def test_purchase_reservation_order(self):
+        self.kwargs.update({
+            'roid': 'd4ef7ec2-941c-4da7-8ec9-2f148255a0dc',
+            'subid': 'd3ae48e5-dbb2-4618-afd4-fb1b8559cb80',
+            'sku': 'standard_b1ls',
+            'location': 'westus',
+            'reservedResourceType': 'VirtualMachines',
+            'term': 'P1Y',
+            'quantity': '2',
+            'displayName': 'test',
+            'appliedScopes': 'Shared',
+            'instanceFlexibility': 'Off',
+            'billingPlan': 'Monthly',
+            'appliedScopeType': 'Shared'
+        })
+        response = self.cmd('reservations reservation-order purchase --reservation-order-id {roid} --sku {sku} --location {location} --reserved-resource-type {reservedResourceType}'
+                            ' --billing-scope {subid} --term {term} --billing-plan {billingPlan} --display-name {displayName}'
+                            ' --quantity {quantity} --applied-scope-type {appliedScopeType}').get_output_in_json()
+        self.assertIsNotNone(response)
+        self.assertGreater(response['etag'], 0)
+        self.assertIsNotNone(response['term'])
+        self.assertIsNotNone(response['billingPlan'])
+        self.assertIsNotNone(response['displayName'])
+        self.assertEqual(2, response['originalQuantity'])

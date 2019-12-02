@@ -14,15 +14,15 @@ interactions:
       - -g -n --image --os-type --ip-address --dns-name-label --ports --cpu --memory
         --command-line -e --restart-policy --secrets --secrets-mount-path
       User-Agent:
-      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.74
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-07-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-10-14T05:37:30Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-10-21T11:42:45Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -31,7 +31,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Oct 2019 05:37:34 GMT
+      - Mon, 21 Oct 2019 11:42:49 GMT
       expires:
       - '-1'
       pragma:
@@ -73,803 +73,8 @@ interactions:
       - -g -n --image --os-type --ip-address --dns-name-label --ports --cpu --memory
         --command-line -e --restart-policy --secrets --secrets-mount-path
       User-Agent:
-      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-containerinstance/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.74
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002?api-version=2018-10-01
-  response:
-    body:
-      string: '{"error":{"code":"MissingSubscriptionRegistration","message":"The subscription
-        is not registered to use namespace ''Microsoft.ContainerInstance''. See https://aka.ms/rps-not-found
-        for how to register subscriptions.","details":[{"code":"MissingSubscriptionRegistration","target":"Microsoft.ContainerInstance","message":"The
-        subscription is not registered to use namespace ''Microsoft.ContainerInstance''.
-        See https://aka.ms/rps-not-found for how to register subscriptions."}]}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '472'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 14 Oct 2019 05:37:34 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-failure-cause:
-      - gateway
-    status:
-      code: 409
-      message: Conflict
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      User-Agent:
-      - python-requests/2.22.0
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerInstance/register?api-version=2016-02-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerInstance","namespace":"Microsoft.ContainerInstance","authorizations":[{"applicationId":"6bb8e274-af5d-4df2-98a3-4fd78b4cafd9","roleDefinitionId":"3c60422b-a83a-428d-9830-22609c77aa6c"}],"resourceTypes":[{"resourceType":"containerGroups","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"],"capabilities":"SystemAssignedResourceIdentity"},{"resourceType":"serviceAssociationLinks","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"],"capabilities":"SupportsExtension"},{"resourceType":"locations","locations":[],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/capabilities","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/usages","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/operations","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/cachedImages","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01"]},{"resourceType":"locations/deleteVirtualNetworkOrSubnets","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-12-01","2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]}],"registrationState":"Registering"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '4047'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 14 Oct 2019 05:37:35 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      User-Agent:
-      - python-requests/2.22.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerInstance?api-version=2016-02-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerInstance","namespace":"Microsoft.ContainerInstance","authorizations":[{"applicationId":"6bb8e274-af5d-4df2-98a3-4fd78b4cafd9","roleDefinitionId":"3c60422b-a83a-428d-9830-22609c77aa6c"}],"resourceTypes":[{"resourceType":"containerGroups","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"],"capabilities":"SystemAssignedResourceIdentity"},{"resourceType":"serviceAssociationLinks","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"],"capabilities":"SupportsExtension"},{"resourceType":"locations","locations":[],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/capabilities","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/usages","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/operations","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/cachedImages","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01"]},{"resourceType":"locations/deleteVirtualNetworkOrSubnets","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-12-01","2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]}],"registrationState":"Registering"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '4047'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 14 Oct 2019 05:37:45 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      User-Agent:
-      - python-requests/2.22.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerInstance?api-version=2016-02-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerInstance","namespace":"Microsoft.ContainerInstance","authorizations":[{"applicationId":"6bb8e274-af5d-4df2-98a3-4fd78b4cafd9","roleDefinitionId":"3c60422b-a83a-428d-9830-22609c77aa6c"}],"resourceTypes":[{"resourceType":"containerGroups","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"],"capabilities":"SystemAssignedResourceIdentity"},{"resourceType":"serviceAssociationLinks","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"],"capabilities":"SupportsExtension"},{"resourceType":"locations","locations":[],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/capabilities","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/usages","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/operations","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/cachedImages","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01"]},{"resourceType":"locations/deleteVirtualNetworkOrSubnets","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-12-01","2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]}],"registrationState":"Registering"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '4047'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 14 Oct 2019 05:37:55 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      User-Agent:
-      - python-requests/2.22.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerInstance?api-version=2016-02-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerInstance","namespace":"Microsoft.ContainerInstance","authorizations":[{"applicationId":"6bb8e274-af5d-4df2-98a3-4fd78b4cafd9","roleDefinitionId":"3c60422b-a83a-428d-9830-22609c77aa6c"}],"resourceTypes":[{"resourceType":"containerGroups","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"],"capabilities":"SystemAssignedResourceIdentity"},{"resourceType":"serviceAssociationLinks","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"],"capabilities":"SupportsExtension"},{"resourceType":"locations","locations":[],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/capabilities","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/usages","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/operations","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/cachedImages","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01"]},{"resourceType":"locations/deleteVirtualNetworkOrSubnets","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-12-01","2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]}],"registrationState":"Registering"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '4047'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 14 Oct 2019 05:38:06 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      User-Agent:
-      - python-requests/2.22.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerInstance?api-version=2016-02-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerInstance","namespace":"Microsoft.ContainerInstance","authorizations":[{"applicationId":"6bb8e274-af5d-4df2-98a3-4fd78b4cafd9","roleDefinitionId":"3c60422b-a83a-428d-9830-22609c77aa6c"}],"resourceTypes":[{"resourceType":"containerGroups","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"],"capabilities":"SystemAssignedResourceIdentity"},{"resourceType":"serviceAssociationLinks","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"],"capabilities":"SupportsExtension"},{"resourceType":"locations","locations":[],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/capabilities","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/usages","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/operations","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/cachedImages","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01"]},{"resourceType":"locations/deleteVirtualNetworkOrSubnets","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-12-01","2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]}],"registrationState":"Registering"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '4047'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 14 Oct 2019 05:38:16 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      User-Agent:
-      - python-requests/2.22.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerInstance?api-version=2016-02-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerInstance","namespace":"Microsoft.ContainerInstance","authorizations":[{"applicationId":"6bb8e274-af5d-4df2-98a3-4fd78b4cafd9","roleDefinitionId":"3c60422b-a83a-428d-9830-22609c77aa6c"}],"resourceTypes":[{"resourceType":"containerGroups","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"],"capabilities":"SystemAssignedResourceIdentity"},{"resourceType":"serviceAssociationLinks","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"],"capabilities":"SupportsExtension"},{"resourceType":"locations","locations":[],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/capabilities","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/usages","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/operations","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/cachedImages","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01"]},{"resourceType":"locations/deleteVirtualNetworkOrSubnets","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-12-01","2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]}],"registrationState":"Registering"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '4047'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 14 Oct 2019 05:38:26 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      User-Agent:
-      - python-requests/2.22.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerInstance?api-version=2016-02-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerInstance","namespace":"Microsoft.ContainerInstance","authorizations":[{"applicationId":"6bb8e274-af5d-4df2-98a3-4fd78b4cafd9","roleDefinitionId":"3c60422b-a83a-428d-9830-22609c77aa6c"}],"resourceTypes":[{"resourceType":"containerGroups","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"],"capabilities":"SystemAssignedResourceIdentity"},{"resourceType":"serviceAssociationLinks","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"],"capabilities":"SupportsExtension"},{"resourceType":"locations","locations":[],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/capabilities","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/usages","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/operations","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/cachedImages","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01"]},{"resourceType":"locations/deleteVirtualNetworkOrSubnets","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-12-01","2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]}],"registrationState":"Registering"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '4047'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 14 Oct 2019 05:38:35 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      User-Agent:
-      - python-requests/2.22.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerInstance?api-version=2016-02-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerInstance","namespace":"Microsoft.ContainerInstance","authorizations":[{"applicationId":"6bb8e274-af5d-4df2-98a3-4fd78b4cafd9","roleDefinitionId":"3c60422b-a83a-428d-9830-22609c77aa6c"}],"resourceTypes":[{"resourceType":"containerGroups","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"],"capabilities":"SystemAssignedResourceIdentity"},{"resourceType":"serviceAssociationLinks","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"],"capabilities":"SupportsExtension"},{"resourceType":"locations","locations":[],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/capabilities","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/usages","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/operations","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/cachedImages","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01"]},{"resourceType":"locations/deleteVirtualNetworkOrSubnets","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-12-01","2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]}],"registrationState":"Registering"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '4047'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 14 Oct 2019 05:38:45 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      User-Agent:
-      - python-requests/2.22.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerInstance?api-version=2016-02-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerInstance","namespace":"Microsoft.ContainerInstance","authorizations":[{"applicationId":"6bb8e274-af5d-4df2-98a3-4fd78b4cafd9","roleDefinitionId":"3c60422b-a83a-428d-9830-22609c77aa6c"}],"resourceTypes":[{"resourceType":"containerGroups","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"],"capabilities":"SystemAssignedResourceIdentity"},{"resourceType":"serviceAssociationLinks","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"],"capabilities":"SupportsExtension"},{"resourceType":"locations","locations":[],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/capabilities","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/usages","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/operations","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/cachedImages","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01"]},{"resourceType":"locations/deleteVirtualNetworkOrSubnets","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-12-01","2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]}],"registrationState":"Registering"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '4047'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 14 Oct 2019 05:38:55 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      User-Agent:
-      - python-requests/2.22.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerInstance?api-version=2016-02-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerInstance","namespace":"Microsoft.ContainerInstance","authorizations":[{"applicationId":"6bb8e274-af5d-4df2-98a3-4fd78b4cafd9","roleDefinitionId":"3c60422b-a83a-428d-9830-22609c77aa6c"}],"resourceTypes":[{"resourceType":"containerGroups","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"],"capabilities":"SystemAssignedResourceIdentity"},{"resourceType":"serviceAssociationLinks","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"],"capabilities":"SupportsExtension"},{"resourceType":"locations","locations":[],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/capabilities","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/usages","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/operations","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/cachedImages","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01"]},{"resourceType":"locations/deleteVirtualNetworkOrSubnets","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-12-01","2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]}],"registrationState":"Registering"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '4047'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 14 Oct 2019 05:39:06 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      User-Agent:
-      - python-requests/2.22.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerInstance?api-version=2016-02-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerInstance","namespace":"Microsoft.ContainerInstance","authorizations":[{"applicationId":"6bb8e274-af5d-4df2-98a3-4fd78b4cafd9","roleDefinitionId":"3c60422b-a83a-428d-9830-22609c77aa6c"}],"resourceTypes":[{"resourceType":"containerGroups","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"],"capabilities":"SystemAssignedResourceIdentity"},{"resourceType":"serviceAssociationLinks","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"],"capabilities":"SupportsExtension"},{"resourceType":"locations","locations":[],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/capabilities","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/usages","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/operations","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]},{"resourceType":"locations/cachedImages","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-10-01"]},{"resourceType":"locations/deleteVirtualNetworkOrSubnets","locations":["West
-        US","East US","West Europe","West US 2","North Europe","Southeast Asia","East
-        US 2","Central US","Australia East","UK South","South Central US","Central
-        India","Brazil South","South India","North Central US","East Asia","Canada
-        Central","Japan East"],"apiVersions":["2018-12-01","2018-10-01","2018-09-01","2018-07-01","2018-06-01","2018-04-01","2018-02-01-preview","2017-12-01-preview","2017-10-01-preview","2017-08-01-preview"]}],"registrationState":"Registered"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '4046'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 14 Oct 2019 05:39:16 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"location": "westus", "tags": {}, "properties": {"containers": [{"name":
-      "clicontainer000002", "properties": {"image": "alpine:latest", "command": ["/bin/sh",
-      "-c", "while true; do echo hello; sleep 20; done"], "ports": [{"protocol": "TCP",
-      "port": 8000}, {"protocol": "TCP", "port": 8001}], "environmentVariables": [{"name":
-      "KEY1", "value": "VALUE1"}, {"name": "KEY2", "value": "FOO=BAR="}], "resources":
-      {"requests": {"memoryInGB": 1.0, "cpu": 1.0}}, "volumeMounts": [{"name": "secrets",
-      "mountPath": "/s"}]}}], "restartPolicy": "Never", "ipAddress": {"ports": [{"protocol":
-      "TCP", "port": 8000}, {"protocol": "TCP", "port": 8001}], "type": "Public",
-      "dnsNameLabel": "clicontainer000002"}, "osType": "Linux", "volumes": [{"name":
-      "secrets", "secret": {"secret1": "c3VwZXJhd2Vzb21lc2VjcmV0", "secret2": "bm90aGluZyB0byBzZWU="}}]}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - container create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '829'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -g -n --image --os-type --ip-address --dns-name-label --ports --cpu --memory
-        --command-line -e --restart-policy --secrets --secrets-mount-path
-      User-Agent:
-      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-containerinstance/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.74
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-containerinstance/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.75
       accept-language:
       - en-US
     method: PUT
@@ -877,18 +82,18 @@ interactions:
   response:
     body:
       string: '{"properties":{"provisioningState":"Pending","containers":[{"name":"clicontainer000002","properties":{"image":"alpine:latest","command":["/bin/sh","-c","while
-        true; do echo hello; sleep 20; done"],"ports":[{"protocol":"TCP","port":8000},{"protocol":"TCP","port":8001}],"environmentVariables":[{"name":"KEY1","value":"VALUE1"},{"name":"KEY2","value":"FOO=BAR="}],"resources":{"requests":{"memoryInGB":1.0,"cpu":1.0}},"volumeMounts":[{"name":"secrets","mountPath":"/s"}]}}],"restartPolicy":"Never","ipAddress":{"ports":[{"protocol":"TCP","port":8000},{"protocol":"TCP","port":8001}],"ip":"13.86.253.169","type":"Public","dnsNameLabel":"clicontainer000002","fqdn":"clicontainer000002.westus.azurecontainer.io"},"osType":"Linux","volumes":[{"name":"secrets","secret":{}}],"instanceView":{"events":[],"state":"Pending"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002","name":"clicontainer000002","type":"Microsoft.ContainerInstance/containerGroups","location":"westus","tags":{}}'
+        true; do echo hello; sleep 20; done"],"ports":[{"protocol":"TCP","port":8000},{"protocol":"TCP","port":8001}],"environmentVariables":[{"name":"KEY1","value":"VALUE1"},{"name":"KEY2","value":"FOO=BAR="}],"resources":{"requests":{"memoryInGB":1.0,"cpu":1.0}},"volumeMounts":[{"name":"secrets","mountPath":"/s"}]}}],"restartPolicy":"Never","ipAddress":{"ports":[{"protocol":"TCP","port":8000},{"protocol":"TCP","port":8001}],"ip":"13.83.249.21","type":"Public","dnsNameLabel":"clicontainer000002","fqdn":"clicontainer000002.westus.azurecontainer.io"},"osType":"Linux","volumes":[{"name":"secrets","secret":{}}],"instanceView":{"events":[],"state":"Pending"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002","name":"clicontainer000002","type":"Microsoft.ContainerInstance/containerGroups","location":"westus","tags":{}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerInstance/locations/westus/operations/8f280c44-1d2b-4a46-adf4-973c5f65d5a5?api-version=2018-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerInstance/locations/westus/operations/f38e70c7-3122-46d2-b924-d9820012223d?api-version=2018-06-01
       cache-control:
       - no-cache
       content-length:
-      - '1140'
+      - '1139'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Oct 2019 05:39:21 GMT
+      - Mon, 21 Oct 2019 11:42:57 GMT
       expires:
       - '-1'
       pragma:
@@ -898,11 +103,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests-pt1h:
-      - '299'
+      - '294'
       x-ms-ratelimit-remaining-subscription-resource-requests-pt5m:
       - '99'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1166'
     status:
       code: 201
       message: Created
@@ -921,16 +126,16 @@ interactions:
       - -g -n --image --os-type --ip-address --dns-name-label --ports --cpu --memory
         --command-line -e --restart-policy --secrets --secrets-mount-path
       User-Agent:
-      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-containerinstance/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.74
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-containerinstance/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.75
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerInstance/locations/westus/operations/8f280c44-1d2b-4a46-adf4-973c5f65d5a5?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerInstance/locations/westus/operations/f38e70c7-3122-46d2-b924-d9820012223d?api-version=2018-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002","status":"Succeeded","startTime":"2019-10-14T05:39:21.1424678Z","properties":{"events":[{"count":1,"firstTimestamp":"2019-10-14T05:39:30Z","lastTimestamp":"2019-10-14T05:39:30Z","name":"Pulling","message":"pulling
-        image \"alpine:latest\"","type":"Normal"},{"count":1,"firstTimestamp":"2019-10-14T05:39:32Z","lastTimestamp":"2019-10-14T05:39:32Z","name":"Pulled","message":"Successfully
-        pulled image \"alpine:latest\"","type":"Normal"},{"count":1,"firstTimestamp":"2019-10-14T05:39:33Z","lastTimestamp":"2019-10-14T05:39:33Z","name":"Created","message":"Created
-        container","type":"Normal"},{"count":1,"firstTimestamp":"2019-10-14T05:39:33Z","lastTimestamp":"2019-10-14T05:39:33Z","name":"Started","message":"Started
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002","status":"Succeeded","startTime":"2019-10-21T11:42:57.2369151Z","properties":{"events":[{"count":1,"firstTimestamp":"2019-10-21T11:43:03Z","lastTimestamp":"2019-10-21T11:43:03Z","name":"Pulling","message":"pulling
+        image \"alpine:latest\"","type":"Normal"},{"count":1,"firstTimestamp":"2019-10-21T11:43:05Z","lastTimestamp":"2019-10-21T11:43:05Z","name":"Pulled","message":"Successfully
+        pulled image \"alpine:latest\"","type":"Normal"},{"count":1,"firstTimestamp":"2019-10-21T11:43:05Z","lastTimestamp":"2019-10-21T11:43:05Z","name":"Created","message":"Created
+        container","type":"Normal"},{"count":1,"firstTimestamp":"2019-10-21T11:43:06Z","lastTimestamp":"2019-10-21T11:43:06Z","name":"Started","message":"Started
         container","type":"Normal"}]}}'
     headers:
       cache-control:
@@ -940,7 +145,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Oct 2019 05:39:50 GMT
+      - Mon, 21 Oct 2019 11:43:29 GMT
       expires:
       - '-1'
       pragma:
@@ -971,27 +176,27 @@ interactions:
       - -g -n --image --os-type --ip-address --dns-name-label --ports --cpu --memory
         --command-line -e --restart-policy --secrets --secrets-mount-path
       User-Agent:
-      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-containerinstance/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.74
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-containerinstance/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.75
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002?api-version=2018-10-01
   response:
     body:
       string: '{"properties":{"provisioningState":"Succeeded","containers":[{"name":"clicontainer000002","properties":{"image":"alpine:latest","command":["/bin/sh","-c","while
-        true; do echo hello; sleep 20; done"],"ports":[{"protocol":"TCP","port":8000},{"protocol":"TCP","port":8001}],"environmentVariables":[{"name":"KEY1","value":"VALUE1"},{"name":"KEY2","value":"FOO=BAR="}],"instanceView":{"restartCount":0,"currentState":{"state":"Running","startTime":"2019-10-14T05:39:33Z","detailStatus":""},"events":[{"count":1,"firstTimestamp":"2019-10-14T05:39:30Z","lastTimestamp":"2019-10-14T05:39:30Z","name":"Pulling","message":"pulling
-        image \"alpine:latest\"","type":"Normal"},{"count":1,"firstTimestamp":"2019-10-14T05:39:32Z","lastTimestamp":"2019-10-14T05:39:32Z","name":"Pulled","message":"Successfully
-        pulled image \"alpine:latest\"","type":"Normal"},{"count":1,"firstTimestamp":"2019-10-14T05:39:33Z","lastTimestamp":"2019-10-14T05:39:33Z","name":"Created","message":"Created
-        container","type":"Normal"},{"count":1,"firstTimestamp":"2019-10-14T05:39:33Z","lastTimestamp":"2019-10-14T05:39:33Z","name":"Started","message":"Started
-        container","type":"Normal"}]},"resources":{"requests":{"memoryInGB":1.0,"cpu":1.0}},"volumeMounts":[{"name":"secrets","mountPath":"/s"}]}}],"restartPolicy":"Never","ipAddress":{"ports":[{"protocol":"TCP","port":8000},{"protocol":"TCP","port":8001}],"ip":"13.86.253.169","type":"Public","dnsNameLabel":"clicontainer000002","fqdn":"clicontainer000002.westus.azurecontainer.io"},"osType":"Linux","volumes":[{"name":"secrets","secret":{}}],"instanceView":{"events":[],"state":"Running"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002","name":"clicontainer000002","type":"Microsoft.ContainerInstance/containerGroups","location":"westus","tags":{}}'
+        true; do echo hello; sleep 20; done"],"ports":[{"protocol":"TCP","port":8000},{"protocol":"TCP","port":8001}],"environmentVariables":[{"name":"KEY1","value":"VALUE1"},{"name":"KEY2","value":"FOO=BAR="}],"instanceView":{"restartCount":0,"currentState":{"state":"Running","startTime":"2019-10-21T11:43:06Z","detailStatus":""},"events":[{"count":1,"firstTimestamp":"2019-10-21T11:43:03Z","lastTimestamp":"2019-10-21T11:43:03Z","name":"Pulling","message":"pulling
+        image \"alpine:latest\"","type":"Normal"},{"count":1,"firstTimestamp":"2019-10-21T11:43:05Z","lastTimestamp":"2019-10-21T11:43:05Z","name":"Pulled","message":"Successfully
+        pulled image \"alpine:latest\"","type":"Normal"},{"count":1,"firstTimestamp":"2019-10-21T11:43:05Z","lastTimestamp":"2019-10-21T11:43:05Z","name":"Created","message":"Created
+        container","type":"Normal"},{"count":1,"firstTimestamp":"2019-10-21T11:43:06Z","lastTimestamp":"2019-10-21T11:43:06Z","name":"Started","message":"Started
+        container","type":"Normal"}]},"resources":{"requests":{"memoryInGB":1.0,"cpu":1.0}},"volumeMounts":[{"name":"secrets","mountPath":"/s"}]}}],"restartPolicy":"Never","ipAddress":{"ports":[{"protocol":"TCP","port":8000},{"protocol":"TCP","port":8001}],"ip":"13.83.249.21","type":"Public","dnsNameLabel":"clicontainer000002","fqdn":"clicontainer000002.westus.azurecontainer.io"},"osType":"Linux","volumes":[{"name":"secrets","secret":{}}],"instanceView":{"events":[],"state":"Running"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002","name":"clicontainer000002","type":"Microsoft.ContainerInstance/containerGroups","location":"westus","tags":{}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1930'
+      - '1929'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Oct 2019 05:39:51 GMT
+      - Mon, 21 Oct 2019 11:43:31 GMT
       expires:
       - '-1'
       pragma:
@@ -1021,8 +226,8 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-containerinstance/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.74
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-containerinstance/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.75
       accept-language:
       - en-US
     method: GET
@@ -1030,20 +235,20 @@ interactions:
   response:
     body:
       string: '{"properties":{"provisioningState":"Succeeded","containers":[{"name":"clicontainer000002","properties":{"image":"alpine:latest","command":["/bin/sh","-c","while
-        true; do echo hello; sleep 20; done"],"ports":[{"protocol":"TCP","port":8000},{"protocol":"TCP","port":8001}],"environmentVariables":[{"name":"KEY1","value":"VALUE1"},{"name":"KEY2","value":"FOO=BAR="}],"instanceView":{"restartCount":0,"currentState":{"state":"Running","startTime":"2019-10-14T05:39:33Z","detailStatus":""},"events":[{"count":1,"firstTimestamp":"2019-10-14T05:39:30Z","lastTimestamp":"2019-10-14T05:39:30Z","name":"Pulling","message":"pulling
-        image \"alpine:latest\"","type":"Normal"},{"count":1,"firstTimestamp":"2019-10-14T05:39:32Z","lastTimestamp":"2019-10-14T05:39:32Z","name":"Pulled","message":"Successfully
-        pulled image \"alpine:latest\"","type":"Normal"},{"count":1,"firstTimestamp":"2019-10-14T05:39:33Z","lastTimestamp":"2019-10-14T05:39:33Z","name":"Created","message":"Created
-        container","type":"Normal"},{"count":1,"firstTimestamp":"2019-10-14T05:39:33Z","lastTimestamp":"2019-10-14T05:39:33Z","name":"Started","message":"Started
-        container","type":"Normal"}]},"resources":{"requests":{"memoryInGB":1.0,"cpu":1.0}},"volumeMounts":[{"name":"secrets","mountPath":"/s"}]}}],"restartPolicy":"Never","ipAddress":{"ports":[{"protocol":"TCP","port":8000},{"protocol":"TCP","port":8001}],"ip":"13.86.253.169","type":"Public","dnsNameLabel":"clicontainer000002","fqdn":"clicontainer000002.westus.azurecontainer.io"},"osType":"Linux","volumes":[{"name":"secrets","secret":{}}],"instanceView":{"events":[],"state":"Running"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002","name":"clicontainer000002","type":"Microsoft.ContainerInstance/containerGroups","location":"westus","tags":{}}'
+        true; do echo hello; sleep 20; done"],"ports":[{"protocol":"TCP","port":8000},{"protocol":"TCP","port":8001}],"environmentVariables":[{"name":"KEY1","value":"VALUE1"},{"name":"KEY2","value":"FOO=BAR="}],"instanceView":{"restartCount":0,"currentState":{"state":"Running","startTime":"2019-10-21T11:43:06Z","detailStatus":""},"events":[{"count":1,"firstTimestamp":"2019-10-21T11:43:03Z","lastTimestamp":"2019-10-21T11:43:03Z","name":"Pulling","message":"pulling
+        image \"alpine:latest\"","type":"Normal"},{"count":1,"firstTimestamp":"2019-10-21T11:43:05Z","lastTimestamp":"2019-10-21T11:43:05Z","name":"Pulled","message":"Successfully
+        pulled image \"alpine:latest\"","type":"Normal"},{"count":1,"firstTimestamp":"2019-10-21T11:43:05Z","lastTimestamp":"2019-10-21T11:43:05Z","name":"Created","message":"Created
+        container","type":"Normal"},{"count":1,"firstTimestamp":"2019-10-21T11:43:06Z","lastTimestamp":"2019-10-21T11:43:06Z","name":"Started","message":"Started
+        container","type":"Normal"}]},"resources":{"requests":{"memoryInGB":1.0,"cpu":1.0}},"volumeMounts":[{"name":"secrets","mountPath":"/s"}]}}],"restartPolicy":"Never","ipAddress":{"ports":[{"protocol":"TCP","port":8000},{"protocol":"TCP","port":8001}],"ip":"13.83.249.21","type":"Public","dnsNameLabel":"clicontainer000002","fqdn":"clicontainer000002.westus.azurecontainer.io"},"osType":"Linux","volumes":[{"name":"secrets","secret":{}}],"instanceView":{"events":[],"state":"Running"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002","name":"clicontainer000002","type":"Microsoft.ContainerInstance/containerGroups","location":"westus","tags":{}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1930'
+      - '1929'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Oct 2019 05:39:53 GMT
+      - Mon, 21 Oct 2019 11:43:34 GMT
       expires:
       - '-1'
       pragma:
@@ -1073,8 +278,8 @@ interactions:
       ParameterSetName:
       - -g
       User-Agent:
-      - python/3.6.5 (Windows-10-10.0.17134-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-containerinstance/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.74
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-containerinstance/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.75
       accept-language:
       - en-US
     method: GET
@@ -1082,16 +287,16 @@ interactions:
   response:
     body:
       string: '{"value":[{"properties":{"provisioningState":"Succeeded","containers":[{"name":"clicontainer000002","properties":{"image":"alpine:latest","command":["/bin/sh","-c","while
-        true; do echo hello; sleep 20; done"],"ports":[{"protocol":"TCP","port":8000},{"protocol":"TCP","port":8001}],"environmentVariables":[{"name":"KEY1","value":"VALUE1"},{"name":"KEY2","value":"FOO=BAR="}],"resources":{"requests":{"memoryInGB":1.0,"cpu":1.0}},"volumeMounts":[{"name":"secrets","mountPath":"/s"}]}}],"restartPolicy":"Never","ipAddress":{"ports":[{"protocol":"TCP","port":8000},{"protocol":"TCP","port":8001}],"ip":"13.86.253.169","type":"Public","dnsNameLabel":"clicontainer000002","fqdn":"clicontainer000002.westus.azurecontainer.io"},"osType":"Linux","volumes":[{"name":"secrets","secret":{}}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002","name":"clicontainer000002","type":"Microsoft.ContainerInstance/containerGroups","location":"westus","tags":{}}]}'
+        true; do echo hello; sleep 20; done"],"ports":[{"protocol":"TCP","port":8000},{"protocol":"TCP","port":8001}],"environmentVariables":[{"name":"KEY1","value":"VALUE1"},{"name":"KEY2","value":"FOO=BAR="}],"resources":{"requests":{"memoryInGB":1.0,"cpu":1.0}},"volumeMounts":[{"name":"secrets","mountPath":"/s"}]}}],"restartPolicy":"Never","ipAddress":{"ports":[{"protocol":"TCP","port":8000},{"protocol":"TCP","port":8001}],"ip":"13.83.249.21","type":"Public","dnsNameLabel":"clicontainer000002","fqdn":"clicontainer000002.westus.azurecontainer.io"},"osType":"Linux","volumes":[{"name":"secrets","secret":{}}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002","name":"clicontainer000002","type":"Microsoft.ContainerInstance/containerGroups","location":"westus","tags":{}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1107'
+      - '1106'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Oct 2019 05:39:54 GMT
+      - Mon, 21 Oct 2019 11:43:36 GMT
       expires:
       - '-1'
       pragma:

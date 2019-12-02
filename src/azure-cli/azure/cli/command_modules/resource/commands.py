@@ -317,4 +317,4 @@ def load_command_table(self, _):
         g.custom_command('remove', 'cli_managementgroups_subscription_remove')
 
     with self.command_group('') as g:
-        g.custom_command('rest', 'rest_call', is_preview=True)
+        g.custom_command('rest', 'rest_call')

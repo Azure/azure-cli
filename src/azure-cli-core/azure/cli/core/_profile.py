@@ -18,7 +18,8 @@ from six.moves import BaseHTTPServer
 
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._session import ACCOUNT
-from azure.cli.core.util import get_file_json, in_cloud_console, open_page_in_browser, can_launch_browser
+from azure.cli.core.util import get_file_json, in_cloud_console, open_page_in_browser, can_launch_browser,\
+    is_windows, is_wsl
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
 
 from knack.log import get_logger
@@ -209,7 +210,7 @@ class Profile(object):
 
         if not allow_no_subscriptions and not subscriptions:
             raise CLIError("No subscriptions were found for '{}'. If this is expected, use "
-                           "'--allow-no-subscriptions' to have tenant level accesses".format(
+                           "'--allow-no-subscriptions' to have tenant level access".format(
                                username))
 
         if is_service_principal:
@@ -222,7 +223,8 @@ class Profile(object):
             t_list = [s.tenant_id for s in subscriptions]
             bare_tenants = [t for t in subscription_finder.tenants if t not in t_list]
             profile = Profile(cli_ctx=self.cli_ctx)
-            subscriptions = profile._build_tenant_level_accounts(bare_tenants)  # pylint: disable=protected-access
+            tenant_accounts = profile._build_tenant_level_accounts(bare_tenants)  # pylint: disable=protected-access
+            subscriptions.extend(tenant_accounts)
             if not subscriptions:
                 return []
 
@@ -341,13 +343,12 @@ class Profile(object):
             if allow_no_subscriptions:
                 subscriptions = self._build_tenant_level_accounts([tenant])
             else:
-                raise CLIError('No access was configured for the VM, hence no subscriptions were found')
+                raise CLIError('No access was configured for the VM, hence no subscriptions were found. '
+                               "If this is expected, use '--allow-no-subscriptions' to have tenant level access.")
 
         consolidated = self._normalize_properties(user, subscriptions, is_service_principal=True,
                                                   user_assigned_identity_id=base_name)
-
-        # key-off subscription name to allow accounts with same id(but under different identities)
-        self._set_subscriptions(consolidated, secondary_key_name=_SUBSCRIPTION_NAME)
+        self._set_subscriptions(consolidated)
         return deepcopy(consolidated)
 
     def find_subscriptions_in_cloud_console(self):
@@ -1089,6 +1090,16 @@ def _get_authorization_code_worker(authority_url, resource, results):
     import random
 
     reply_url = None
+
+    # On Windows, HTTPServer by default doesn't throw error if the port is in-use
+    # https://github.com/Azure/azure-cli/issues/10578
+    if is_windows():
+        logger.debug('Windows is detected. Set HTTPServer.allow_reuse_address to False')
+        ClientRedirectServer.allow_reuse_address = False
+    elif is_wsl():
+        logger.debug('WSL is detected. Set HTTPServer.allow_reuse_address to False')
+        ClientRedirectServer.allow_reuse_address = False
+
     for port in range(8400, 9000):
         try:
             web_server = ClientRedirectServer(('localhost', port), ClientRedirectHandler)
@@ -1116,10 +1127,6 @@ def _get_authorization_code_worker(authority_url, resource, results):
         web_server.server_close()
         results['no_browser'] = True
         return
-
-    # emit a warning for transitioning to the new experience
-    logger.warning('Note, we have launched a browser for you to login. For old experience'
-                   ' with device code, use "az login --use-device-code"')
 
     # wait for callback from browser.
     while True:

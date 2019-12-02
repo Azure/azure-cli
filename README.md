@@ -106,13 +106,13 @@ We maintain a Docker image preconfigured with the Azure CLI.
 See our [Docker tags](https://hub.docker.com/r/microsoft/azure-cli/tags/) for available versions.
 
 ```bash
-$ docker run -v ${HOME}:/root -it --rm mcr.microsoft.com/azure-cli:<version>
+$ docker run -u $(id -u):$(id -g) -v ${HOME}:/home/az -e HOME=/home/az --rm -it mcr.microsoft.com/azure-cli:<version>
 ```
 
 For automated builds triggered by pushes to this repo, see [azuresdk/azure-cli-python](https://hub.docker.com/r/azuresdk/azure-cli-python/tags).
 For example:
 ```bash
-docker run -v ${HOME}:/root -it --rm azuresdk/azure-cli-python:dev
+$ docker run -u $(id -u):$(id -g) -v ${HOME}:/home/az -e HOME=/home/az --rm -it azuresdk/azure-cli-python:dev
 ```
 
 ### Edge Builds
@@ -132,6 +132,22 @@ You can easily install the latest Homebrew edge build with the following command
 brew install $(curl -Ls -o /dev/null -w %{url_effective} https://aka.ms/InstallAzureCliHomebrewEdge)
 ```
 
+Here's an example of installing edge builds with pip3 in a virtual environment. The `--upgrade-strategy=eager` option will install the edge builds of dependencies as well. 
+
+```bash
+$ python3 -m venv env
+$ . env/bin/activate
+$ pip3 install --pre azure-cli --extra-index-url https://azurecliprod.blob.core.windows.net/edge --upgrade-strategy=eager
+```
+
+To upgrade your current edge build pass the `--upgrade` option. The `--no-cache-dir` option is also recommended since
+the feed is frequently updated.
+
+```bash
+$ pip3 install --upgrade --pre azure-cli --extra-index-url https://azurecliprod.blob.core.windows.net/edge --no-cache-dir --upgrade-strategy=eager
+```
+
+The edge build is generated for each PR merged to the `dev` branch as a part of the Azure DevOps Pipelines. 
 
 ## Developer Setup
 

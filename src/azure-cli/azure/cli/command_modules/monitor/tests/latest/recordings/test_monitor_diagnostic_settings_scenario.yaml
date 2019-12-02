@@ -1,208 +1,5 @@
 interactions:
 - request:
-    body: '{"location": "southcentralus", "tags": {"product": "azurecli", "cause":
-      "automation", "date": "2019-06-14T16:54:46Z"}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - group create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '118'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - --location --name --tag
-      User-Agent:
-      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.66
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-05-10
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"southcentralus","tags":{"product":"azurecli","cause":"automation","date":"2019-06-14T16:54:46Z"},"properties":{"provisioningState":"Succeeded"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '392'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 14 Jun 2019 16:54:47 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
-    status:
-      code: 201
-      message: Created
-- request:
-    body: '{"sku": {"name": "Standard_LRS"}, "kind": "Storage", "location": "southcentralus"}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - storage account create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '82'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -n -g -l --sku
-      User-Agent:
-      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 azure-mgmt-storage/3.3.0
-        Azure-SDK-For-Python AZURECLI/2.0.66
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2019-04-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      content-type:
-      - text/plain; charset=utf-8
-      date:
-      - Fri, 14 Jun 2019 16:54:48 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/southcentralus/asyncoperations/69d1260a-033e-4869-9f0c-ab9334f83b76?monitor=true&api-version=2019-04-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - storage account create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l --sku
-      User-Agent:
-      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 azure-mgmt-storage/3.3.0
-        Azure-SDK-For-Python AZURECLI/2.0.66
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/southcentralus/asyncoperations/69d1260a-033e-4869-9f0c-ab9334f83b76?monitor=true&api-version=2019-04-01
-  response:
-    body:
-      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"southcentralus","tags":{},"properties":{"minimumTlsVersion":"TLS1_2","allowBlobPublicAccess":false,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2019-06-14T16:54:49.1385698Z"},"blob":{"enabled":true,"lastEnabledTime":"2019-06-14T16:54:49.1385698Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2019-06-14T16:54:49.0448085Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"southcentralus","statusOfPrimary":"available"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1243'
-      content-type:
-      - application/json
-      date:
-      - Fri, 14 Jun 2019 16:55:06 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - storage account keys list
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - -n -g --query -o
-      User-Agent:
-      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 azure-mgmt-storage/3.3.0
-        Azure-SDK-For-Python AZURECLI/2.0.66
-      accept-language:
-      - en-US
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2019-04-01
-  response:
-    body:
-      string: '{"keys":[{"keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '288'
-      content-type:
-      - application/json
-      date:
-      - Fri, 14 Jun 2019 16:55:07 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 200
-      message: OK
-- request:
     body: null
     headers:
       Accept:
@@ -216,24 +13,24 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-07-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"southcentralus","tags":{"product":"azurecli","cause":"automation","date":"2019-06-14T16:54:46Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"southcentralus","tags":{"product":"azurecli","cause":"automation","date":"2019-10-21T11:27:43Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '392'
+      - '436'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 14 Jun 2019 16:55:08 GMT
+      - Mon, 21 Oct 2019 11:28:17 GMT
       expires:
       - '-1'
       pragma:
@@ -265,22 +62,22 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/6.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/nsg000003?api-version=2019-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/nsg000003?api-version=2019-09-01
   response:
     body:
       string: "{\r\n  \"name\": \"nsg000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/nsg000003\",\r\n
-        \ \"etag\": \"W/\\\"a06df646-8853-4872-9f02-34df39b17d14\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"1debe635-777a-4dce-b2c7-759744bdf228\\\"\",\r\n  \"type\":
         \"Microsoft.Network/networkSecurityGroups\",\r\n  \"location\": \"southcentralus\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
-        \"93b7200e-d4c2-42b0-b270-711c780fa5f5\",\r\n    \"securityRules\": [],\r\n
+        \"27762885-e1eb-4378-80be-1f639adfbc60\",\r\n    \"securityRules\": [],\r\n
         \   \"defaultSecurityRules\": [\r\n      {\r\n        \"name\": \"AllowVnetInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/nsg000003/defaultSecurityRules/AllowVnetInBound\",\r\n
-        \       \"etag\": \"W/\\\"a06df646-8853-4872-9f02-34df39b17d14\\\"\",\r\n
+        \       \"etag\": \"W/\\\"1debe635-777a-4dce-b2c7-759744bdf228\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"description\": \"Allow inbound traffic from all VMs in VNET\",\r\n
@@ -292,7 +89,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowAzureLoadBalancerInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/nsg000003/defaultSecurityRules/AllowAzureLoadBalancerInBound\",\r\n
-        \       \"etag\": \"W/\\\"a06df646-8853-4872-9f02-34df39b17d14\\\"\",\r\n
+        \       \"etag\": \"W/\\\"1debe635-777a-4dce-b2c7-759744bdf228\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"description\": \"Allow inbound traffic from azure load balancer\",\r\n
@@ -304,7 +101,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/nsg000003/defaultSecurityRules/DenyAllInBound\",\r\n
-        \       \"etag\": \"W/\\\"a06df646-8853-4872-9f02-34df39b17d14\\\"\",\r\n
+        \       \"etag\": \"W/\\\"1debe635-777a-4dce-b2c7-759744bdf228\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"description\": \"Deny all inbound traffic\",\r\n          \"protocol\":
@@ -315,7 +112,7 @@ interactions:
         \         \"destinationPortRanges\": [],\r\n          \"sourceAddressPrefixes\":
         [],\r\n          \"destinationAddressPrefixes\": []\r\n        }\r\n      },\r\n
         \     {\r\n        \"name\": \"AllowVnetOutBound\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/nsg000003/defaultSecurityRules/AllowVnetOutBound\",\r\n
-        \       \"etag\": \"W/\\\"a06df646-8853-4872-9f02-34df39b17d14\\\"\",\r\n
+        \       \"etag\": \"W/\\\"1debe635-777a-4dce-b2c7-759744bdf228\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"description\": \"Allow outbound traffic from all VMs to all VMs
@@ -327,7 +124,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowInternetOutBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/nsg000003/defaultSecurityRules/AllowInternetOutBound\",\r\n
-        \       \"etag\": \"W/\\\"a06df646-8853-4872-9f02-34df39b17d14\\\"\",\r\n
+        \       \"etag\": \"W/\\\"1debe635-777a-4dce-b2c7-759744bdf228\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"description\": \"Allow outbound traffic from all VMs to Internet\",\r\n
@@ -339,7 +136,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllOutBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/nsg000003/defaultSecurityRules/DenyAllOutBound\",\r\n
-        \       \"etag\": \"W/\\\"a06df646-8853-4872-9f02-34df39b17d14\\\"\",\r\n
+        \       \"etag\": \"W/\\\"1debe635-777a-4dce-b2c7-759744bdf228\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"description\": \"Deny all outbound traffic\",\r\n          \"protocol\":
@@ -352,7 +149,7 @@ interactions:
         \   ]\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/southcentralus/operations/dbae8fb7-2bc7-41e3-a7f9-37bebebc6704?api-version=2019-08-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/southcentralus/operations/8688e5d6-76cd-4f88-8036-b96fcd53ce51?api-version=2019-09-01
       cache-control:
       - no-cache
       content-length:
@@ -360,7 +157,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 14 Jun 2019 16:55:09 GMT
+      - Mon, 21 Oct 2019 11:28:21 GMT
       expires:
       - '-1'
       pragma:
@@ -372,8 +169,10 @@ interactions:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - e6247541-41ce-4a93-9bcb-70e1428cadf2
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1167'
     status:
       code: 201
       message: Created
@@ -391,10 +190,10 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/6.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/southcentralus/operations/dbae8fb7-2bc7-41e3-a7f9-37bebebc6704?api-version=2019-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/southcentralus/operations/8688e5d6-76cd-4f88-8036-b96fcd53ce51?api-version=2019-09-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -406,7 +205,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 14 Jun 2019 16:55:13 GMT
+      - Mon, 21 Oct 2019 11:28:26 GMT
       expires:
       - '-1'
       pragma:
@@ -422,6 +221,8 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - 18ef6a8b-bfbc-4272-b29b-9bb2f6a2c219
     status:
       code: 200
       message: OK
@@ -439,20 +240,20 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 networkmanagementclient/3.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/6.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/nsg000003?api-version=2019-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/nsg000003?api-version=2019-09-01
   response:
     body:
       string: "{\r\n  \"name\": \"nsg000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/nsg000003\",\r\n
-        \ \"etag\": \"W/\\\"d000bf0a-b9d6-4712-82ec-125e686ad8ee\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"9a39d175-f940-42a9-a7ba-cd9a63e1abc9\\\"\",\r\n  \"type\":
         \"Microsoft.Network/networkSecurityGroups\",\r\n  \"location\": \"southcentralus\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
-        \"93b7200e-d4c2-42b0-b270-711c780fa5f5\",\r\n    \"securityRules\": [],\r\n
+        \"27762885-e1eb-4378-80be-1f639adfbc60\",\r\n    \"securityRules\": [],\r\n
         \   \"defaultSecurityRules\": [\r\n      {\r\n        \"name\": \"AllowVnetInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/nsg000003/defaultSecurityRules/AllowVnetInBound\",\r\n
-        \       \"etag\": \"W/\\\"d000bf0a-b9d6-4712-82ec-125e686ad8ee\\\"\",\r\n
+        \       \"etag\": \"W/\\\"9a39d175-f940-42a9-a7ba-cd9a63e1abc9\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow inbound traffic from all VMs in VNET\",\r\n
@@ -464,7 +265,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowAzureLoadBalancerInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/nsg000003/defaultSecurityRules/AllowAzureLoadBalancerInBound\",\r\n
-        \       \"etag\": \"W/\\\"d000bf0a-b9d6-4712-82ec-125e686ad8ee\\\"\",\r\n
+        \       \"etag\": \"W/\\\"9a39d175-f940-42a9-a7ba-cd9a63e1abc9\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow inbound traffic from azure load balancer\",\r\n
@@ -476,7 +277,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/nsg000003/defaultSecurityRules/DenyAllInBound\",\r\n
-        \       \"etag\": \"W/\\\"d000bf0a-b9d6-4712-82ec-125e686ad8ee\\\"\",\r\n
+        \       \"etag\": \"W/\\\"9a39d175-f940-42a9-a7ba-cd9a63e1abc9\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Deny all inbound traffic\",\r\n          \"protocol\":
@@ -487,7 +288,7 @@ interactions:
         \         \"destinationPortRanges\": [],\r\n          \"sourceAddressPrefixes\":
         [],\r\n          \"destinationAddressPrefixes\": []\r\n        }\r\n      },\r\n
         \     {\r\n        \"name\": \"AllowVnetOutBound\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/nsg000003/defaultSecurityRules/AllowVnetOutBound\",\r\n
-        \       \"etag\": \"W/\\\"d000bf0a-b9d6-4712-82ec-125e686ad8ee\\\"\",\r\n
+        \       \"etag\": \"W/\\\"9a39d175-f940-42a9-a7ba-cd9a63e1abc9\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow outbound traffic from all VMs to all VMs
@@ -499,7 +300,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowInternetOutBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/nsg000003/defaultSecurityRules/AllowInternetOutBound\",\r\n
-        \       \"etag\": \"W/\\\"d000bf0a-b9d6-4712-82ec-125e686ad8ee\\\"\",\r\n
+        \       \"etag\": \"W/\\\"9a39d175-f940-42a9-a7ba-cd9a63e1abc9\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow outbound traffic from all VMs to Internet\",\r\n
@@ -511,7 +312,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllOutBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/nsg000003/defaultSecurityRules/DenyAllOutBound\",\r\n
-        \       \"etag\": \"W/\\\"d000bf0a-b9d6-4712-82ec-125e686ad8ee\\\"\",\r\n
+        \       \"etag\": \"W/\\\"9a39d175-f940-42a9-a7ba-cd9a63e1abc9\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Deny all outbound traffic\",\r\n          \"protocol\":
@@ -530,9 +331,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 14 Jun 2019 16:55:14 GMT
+      - Mon, 21 Oct 2019 11:28:26 GMT
       etag:
-      - W/"d000bf0a-b9d6-4712-82ec-125e686ad8ee"
+      - W/"9a39d175-f940-42a9-a7ba-cd9a63e1abc9"
       expires:
       - '-1'
       pragma:
@@ -548,6 +349,8 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-arm-service-request-id:
+      - ec5d5f73-a89f-43c8-a36a-537effd080c9
     status:
       code: 200
       message: OK
@@ -572,8 +375,8 @@ interactions:
       ParameterSetName:
       - -n --resource --resource-type --resource-group --storage-account --log -o
       User-Agent:
-      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 azure-mgmt-monitor/0.5.2
-        Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-monitor/0.5.2 Azure-SDK-For-Python AZURECLI/2.0.75
       accept-language:
       - en-US
     method: PUT
@@ -589,7 +392,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 14 Jun 2019 16:55:18 GMT
+      - Mon, 21 Oct 2019 11:28:33 GMT
       expires:
       - '-1'
       pragma:
@@ -625,8 +428,8 @@ interactions:
       ParameterSetName:
       - --resource --resource-type --resource-group -o
       User-Agent:
-      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 azure-mgmt-monitor/0.5.2
-        Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-monitor/0.5.2 Azure-SDK-For-Python AZURECLI/2.0.75
       accept-language:
       - en-US
     method: GET
@@ -642,7 +445,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 14 Jun 2019 16:55:20 GMT
+      - Mon, 21 Oct 2019 11:28:35 GMT
       expires:
       - '-1'
       pragma:
@@ -676,64 +479,8 @@ interactions:
       ParameterSetName:
       - -n --resource --resource-type --resource-group -o
       User-Agent:
-      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 azure-mgmt-monitor/0.5.2
-        Azure-SDK-For-Python AZURECLI/2.0.66
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/nsg000003/providers/microsoft.insights/diagnosticSettings/test01?api-version=2017-05-01-preview
-  response:
-    body:
-      string: '{"error":{"code":"MultipleErrorsOccurred","message":"Multiple error
-        occurred: . Please see details.","details":[{"code":"ServerTimeout","message":"The
-        request timed out. Diagnostic information: timestamp ''20190614T165630Z'',
-        subscription id ''00977cdb-163f-435f-9c32-39ec8ae61f4d'', tracking id ''8a6ab098-23be-4d58-abae-7906b903176d'',
-        request correlation id ''8a6ab098-23be-4d58-abae-7906b903176d''."},{"code":"ServerTimeout","message":"The
-        request timed out. Diagnostic information: timestamp ''20190614T165630Z'',
-        subscription id ''00977cdb-163f-435f-9c32-39ec8ae61f4d'', tracking id ''8a6ab098-23be-4d58-abae-7906b903176d'',
-        request correlation id ''8a6ab098-23be-4d58-abae-7906b903176d''."}]}}'
-    headers:
-      cache-control:
-      - no-cache
-      connection:
-      - close
-      content-length:
-      - '684'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 14 Jun 2019 16:56:30 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-failure-cause:
-      - gateway
-    status:
-      code: 500
-      message: Internal Server Error
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - monitor diagnostic-settings show
-      Connection:
-      - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -n --resource --resource-type --resource-group -o
-      User-Agent:
-      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 azure-mgmt-monitor/0.5.2
-        Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-monitor/0.5.2 Azure-SDK-For-Python AZURECLI/2.0.75
       accept-language:
       - en-US
     method: GET
@@ -749,7 +496,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 14 Jun 2019 16:56:31 GMT
+      - Mon, 21 Oct 2019 11:28:38 GMT
       expires:
       - '-1'
       pragma:
@@ -785,8 +532,8 @@ interactions:
       ParameterSetName:
       - -n --resource --resource-type --resource-group -o
       User-Agent:
-      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 azure-mgmt-monitor/0.5.2
-        Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-monitor/0.5.2 Azure-SDK-For-Python AZURECLI/2.0.75
       accept-language:
       - en-US
     method: DELETE
@@ -800,7 +547,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 14 Jun 2019 16:56:35 GMT
+      - Mon, 21 Oct 2019 11:28:45 GMT
       expires:
       - '-1'
       pragma:
@@ -812,7 +559,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14998'
+      - '14991'
     status:
       code: 200
       message: OK
@@ -832,8 +579,8 @@ interactions:
       ParameterSetName:
       - --resource --resource-type --resource-group -o
       User-Agent:
-      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 azure-mgmt-monitor/0.5.2
-        Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-monitor/0.5.2 Azure-SDK-For-Python AZURECLI/2.0.75
       accept-language:
       - en-US
     method: GET
@@ -849,7 +596,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 14 Jun 2019 16:56:36 GMT
+      - Mon, 21 Oct 2019 11:28:48 GMT
       expires:
       - '-1'
       pragma:
@@ -867,51 +614,4 @@ interactions:
     status:
       code: 200
       message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - group delete
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - --name --yes --no-wait
-      User-Agent:
-      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.66
-      accept-language:
-      - en-US
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-05-10
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Fri, 14 Jun 2019 16:56:38 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkcyV0taVkRTUUFWM0dCR003SUFaREZLR0VBWTZSRkFQNldKWHxCNENFNUU4RkJGNTgwODRFLVNPVVRIQ0VOVFJBTFVTIiwiam9iTG9jYXRpb24iOiJzb3V0aGNlbnRyYWx1cyJ9?api-version=2019-05-10
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
-    status:
-      code: 202
-      message: Accepted
 version: 1
