@@ -7292,10 +7292,6 @@ interactions:
       - network vnet-gateway ipsec-policy clear
       Connection:
       - keep-alive
-      Content-Length:
-      - '1724'
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - -g --gateway-name
       User-Agent:
@@ -7316,7 +7312,7 @@ interactions:
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vnet_gateway_ipsec000001/providers/Microsoft.Network/virtualNetworkGateways/gw1/ipConfigurations/vnetGatewayConfig0\",\r\n
         \       \"etag\": \"W/\\\"6c211efb-8552-4eb3-8264-a966342d095e\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/virtualNetworkGateways/ipConfigurations\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateIPAllocationMethod\": \"Dynamic\",\r\n          \"publicIPAddress\":
         {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vnet_gateway_ipsec000001/providers/Microsoft.Network/publicIPAddresses/pip1\"\r\n
         \         },\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vnet_gateway_ipsec000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/GatewaySubnet\"\r\n
@@ -7327,7 +7323,9 @@ interactions:
         {\r\n      \"vpnClientAddressPool\": {\r\n        \"addressPrefixes\": [\r\n
         \         \"40.1.0.0/24\"\r\n        ]\r\n      },\r\n      \"vpnClientProtocols\":
         [\r\n        \"IkeV2\",\r\n        \"SSTP\"\r\n      ],\r\n      \"vpnClientRootCertificates\":
-        [],\r\n      \"vpnClientRevokedCertificates\": [],\r\n      \"radiusServerAddress\":
+        [],\r\n      \"vpnClientRevokedCertificates\": [],\r\n      \"vpnClientConnectionHealth\":
+        {\r\n        \"vpnClientConnectionsCount\": 0,\r\n        \"totalIngressBytesTransferred\":
+        0,\r\n        \"totalEgressBytesTransferred\": 0\r\n      },\r\n      \"radiusServerAddress\":
         \"30.1.1.15\",\r\n      \"radiusServerSecret\": \"111_aaa\",\r\n      \"vpnClientIpsecPolicies\":
         [\r\n        {\r\n          \"saLifeTimeSeconds\": 7200,\r\n          \"saDataSizeKilobytes\":
         2048,\r\n          \"ipsecEncryption\": \"GCMAES256\",\r\n          \"ipsecIntegrity\":
@@ -7338,8 +7336,6 @@ interactions:
         \     \"peerWeight\": 0\r\n    },\r\n    \"vpnGatewayGeneration\": \"Generation1\"\r\n
         \ }\r\n}"
     headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/e33d5338-4d40-4b03-a98e-64e5d07125cf?api-version=2019-04-01
       cache-control:
       - no-cache
       content-length:

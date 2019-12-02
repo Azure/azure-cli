@@ -12,6 +12,10 @@ interactions:
       - network public-ip create
       Connection:
       - keep-alive
+      Content-Length:
+      - '191'
+      Content-Type:
+      - application/json; charset=utf-8
       ParameterSetName:
       - -g -l -n --sku --tags
       User-Agent:
@@ -37,7 +41,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '30'
+      - '725'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -51,10 +55,6 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
@@ -62,8 +62,8 @@ interactions:
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
-      code: 200
-      message: OK
+      code: 201
+      message: Created
 - request:
     body: null
     headers:
@@ -1084,12 +1084,12 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/ef22054e-3e84-4eb6-84d4-32861e6a989d?api-version=2019-09-01
   response:
     body:
-      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '30'
+      - '29'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -1182,11 +1182,11 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network public-ip create
+      - network public-ip show
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -l -n --sku --tags
+      - -g -n
       User-Agent:
       - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-network/6.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
