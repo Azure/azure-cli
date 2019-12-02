@@ -569,12 +569,12 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
 def _get_restore_request_instance(item_type, log_point_in_time):
     if item_type.lower() == "saphana":
         if log_point_in_time is not None:
-            return AzureWorkloadSAPHanaRestoreRequest()
-        return AzureWorkloadSAPHanaPointInTimeRestoreRequest()
+            return AzureWorkloadSAPHanaPointInTimeRestoreRequest() 
+        return AzureWorkloadSAPHanaRestoreRequest()
     if item_type.lower() == "sql":
         if log_point_in_time is not None:
-            return AzureWorkloadSQLRestoreRequest()
-        return AzureWorkloadSQLPointInTimeRestoreRequest()
+            return AzureWorkloadSQLPointInTimeRestoreRequest()  
+        return AzureWorkloadSQLRestoreRequest()
     return None
 
 
