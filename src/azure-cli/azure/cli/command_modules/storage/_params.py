@@ -67,7 +67,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         validator=validate_storage_data_plane_list)
 
     large_file_share_type = CLIArgumentType(
-        action='store_true', min_api='2019-04-01', is_preview=True,
+        action='store_true', min_api='2019-04-01',
         help='Enable the capability to support large file shares with more than 5 TiB capacity for storage account.'
              'Once the property is enabled, the feature cannot be disabled. Currently only supported for LRS and '
              'ZRS replication types, hence account conversions to geo-redundant accounts would not be possible. '
@@ -154,6 +154,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('domain_guid', domain_guid_type)
         c.argument('domain_sid', domain_sid_type)
         c.argument('azure_storage_sid', azure_storage_sid_type)
+        c.argument('enable_hierarchical_namespace', arg_type=get_three_state_flag(),
+                   options_list=['--enable-hierarchical-namespace', '--hns'],
+                   help=" Allow the blob service to exhibit filesystem semantics. This property can be enabled only "
+                   "when storage account kind is StorageV2.",
+                   min_api='2018-02-01', is_preview=True)
 
     with self.argument_context('storage account update', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.register_common_storage_account_options()
@@ -296,7 +301,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                         'using this shared access signature.')
         c.argument('full_uri', action='store_true',
                    help='Indicates that this command return the full blob URI and the shared access signature token.')
-        c.argument('as_user', min_api='2018-11-09', is_preview=True, action='store_true',
+        c.argument('as_user', min_api='2018-11-09', action='store_true',
                    validator=as_user_validator,
                    help="Indicates that this command return the SAS signed with the user delegation key. "
                         "The expiry parameter and '--auth-mode login' are required if this argument is specified. ")
@@ -418,14 +423,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('blob_name', arg_type=blob_name_type)
 
     with self.argument_context('storage copy') as c:
-        c.argument('destination', options_list=['--destination', '-d'], help="The path/url of copy destination. \
-            It can be local path, an url to azure storage server. For more imformation, please refer to [link here]. \
-            If you provide destination parameter here, you do not need to provide arguments in copy \
-            destination arguments group and copy destination arguments will be deprecated  in future.")
-        c.argument('source', options_list=['--source', '-s'], help="The path/url of copy source. \
-            It can be local path, an url to azure storage server or AWS S3 buckets. For more imformation, please refer to [link here]. \
-            If you provide source parameter here, you do not need to provide arguments in copy source arguments group and copy source \
-            arguments will be deprecated in future.")
+        c.argument('destination', options_list=['--destination', '-d'], help="The path/url of copy destination. "
+                   "It can be a local path, an url to azure storage server. If you provide destination parameter "
+                   "here, you do not need to provide arguments in copy destination arguments group and copy "
+                   "destination arguments will be deprecated in future.")
+        c.argument('source', options_list=['--source', '-s'], help="The path/url of copy source. It can be a local"
+                   " path, an url to azure storage server or AWS S3 buckets. If you provide source parameter here,"
+                   " you do not need to provide arguments in copy source arguments group and copy source arguments"
+                   " will be deprecated in future.")
         for item in ['destination', 'source']:
             c.argument('{}_account_name'.format(item), arg_group='Copy {}'.format(item),
                        help='Storage account name of copy {}'.format(item))
@@ -593,7 +598,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                             'using this shared access signature.')
         c.argument('content_type', help='Response header value for Content-Type when resource is accessed'
                                         'using this shared access signature.')
-        c.argument('as_user', min_api='2018-11-09', is_preview=True, action='store_true',
+        c.argument('as_user', min_api='2018-11-09', action='store_true',
                    validator=as_user_validator,
                    help="Indicates that this command return the SAS signed with the user delegation key. "
                         "The expiry parameter and '--auth-mode login' are required if this argument is specified. ")

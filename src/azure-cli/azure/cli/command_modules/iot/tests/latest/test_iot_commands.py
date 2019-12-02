@@ -60,15 +60,25 @@ class IoTHubTest(ScenarioTest):
             self.check_pattern('connectionString[0]', conn_str_pattern)
         ])
 
+        # Storage Connection String Pattern
+        storage_cs_pattern = 'DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName='
         # Test 'az iot hub update'
-        property_to_update = 'properties.messagingEndpoints.fileNotifications.maxDeliveryCount'
-        updated_value = '20'
-        self.cmd('iot hub update -n {0} --set {1}="{2}"'.format(hub, property_to_update, updated_value),
-                 checks=[self.check('resourcegroup', rg),
-                         self.check('location', location),
-                         self.check('name', hub),
-                         self.check('sku.name', 'S1'),
-                         self.check(property_to_update, updated_value)])
+        updated_hub = self.cmd('iot hub update -n {0} --fnd 80 --rd 4 --ct 34 --cdd 46 --ft 43 --fld 10 --fd 76'
+                               ' --fn true --fnt 32 --fst 3 --fcs {1} --fc {2}'
+                               .format(hub, storageConnectionString, containerName)).get_output_in_json()
+
+        assert updated_hub['properties']['eventHubEndpoints']['events']['partitionCount'] == 4
+        assert updated_hub['properties']['eventHubEndpoints']['events']['retentionTimeInDays'] == 4
+        assert updated_hub['properties']['cloudToDevice']['feedback']['maxDeliveryCount'] == 76
+        assert updated_hub['properties']['cloudToDevice']['feedback']['lockDurationAsIso8601'] == '0:00:10'
+        assert updated_hub['properties']['cloudToDevice']['feedback']['ttlAsIso8601'] == '1 day, 19:00:00'
+        assert updated_hub['properties']['cloudToDevice']['maxDeliveryCount'] == 46
+        assert updated_hub['properties']['cloudToDevice']['defaultTtlAsIso8601'] == '1 day, 10:00:00'
+        assert updated_hub['properties']['messagingEndpoints']['fileNotifications']['ttlAsIso8601'] == '1 day, 8:00:00'
+        assert updated_hub['properties']['messagingEndpoints']['fileNotifications']['maxDeliveryCount'] == 80
+        assert storage_cs_pattern in updated_hub['properties']['storageEndpoints']['$default']['connectionString']
+        assert updated_hub['properties']['storageEndpoints']['$default']['containerName'] == containerName
+        assert updated_hub['properties']['storageEndpoints']['$default']['sasTtlAsIso8601'] == '3:00:00'
 
         # Test 'az iot hub show'
         self.cmd('iot hub show -n {0}'.format(hub), checks=[
@@ -76,7 +86,15 @@ class IoTHubTest(ScenarioTest):
             self.check('location', location),
             self.check('name', hub),
             self.check('sku.name', 'S1'),
-            self.check(property_to_update, updated_value)
+            self.check('properties.eventHubEndpoints.events.partitionCount', '4'),
+            self.check('properties.eventHubEndpoints.events.retentionTimeInDays', '4'),
+            self.check('properties.cloudToDevice.feedback.maxDeliveryCount', '76'),
+            self.check('properties.cloudToDevice.feedback.lockDurationAsIso8601', '0:00:10'),
+            self.check('properties.cloudToDevice.feedback.ttlAsIso8601', '1 day, 19:00:00'),
+            self.check('properties.cloudToDevice.maxDeliveryCount', '46'),
+            self.check('properties.cloudToDevice.defaultTtlAsIso8601', '1 day, 10:00:00'),
+            self.check('properties.messagingEndpoints.fileNotifications.ttlAsIso8601', '1 day, 8:00:00'),
+            self.check('properties.messagingEndpoints.fileNotifications.maxDeliveryCount', '80')
         ])
 
         # Test 'az iot hub list'
@@ -197,6 +215,9 @@ class IoTHubTest(ScenarioTest):
         storage_endpoint_name = 'Storage1'
         storage_endpoint_type = 'azurestoragecontainer'
         storage_encoding_format = 'avro'
+        storage_chunk_size = 150
+        storage_batch_frequency = 100
+        storage_file_name_format = '{iothub}/{partition}/{YYYY}/{MM}/{DD}/{HH}/{mm}'
         # Test 'az iot hub routing-endpoint create'
         self.cmd('iot hub routing-endpoint create --hub-name {0} -g {1} -n {2} -t {3} -r {4} -s {5} -c "{6}"'
                  .format(hub, rg, endpoint_name, endpoint_type, rg, subscription_id, ehConnectionString),
@@ -227,16 +248,21 @@ class IoTHubTest(ScenarioTest):
                          self.check('name', endpoint_name)])
 
         # Test 'az iot hub routing-endpoint create' with storage endpoint
-        self.cmd('iot hub routing-endpoint create --hub-name {0} -g {1} -n {2} -t {3} -r {4} -s {5} -c "{6}" '
-                 '--container-name {7} --encoding {8}'
-                 .format(hub, rg, storage_endpoint_name, storage_endpoint_type, rg, subscription_id,
-                         storageConnectionString, containerName, storage_encoding_format),
-                 checks=[self.check('length(storageContainers[*])', 1),
-                         self.check('storageContainers[0].containerName', containerName),
-                         self.check('storageContainers[0].name', storage_endpoint_name),
-                         self.check('length(serviceBusQueues[*])', 0),
-                         self.check('length(serviceBusTopics[*])', 0),
-                         self.check('length(eventHubs[*])', 1)])
+        endpoint = self.cmd('iot hub routing-endpoint create --hub-name {0} -g {1} -n {2} -t {3} -r {4} -s {5} '
+                            '-c "{6}" --container-name {7} --encoding {8} -b {9} -w {10}'
+                            .format(hub, rg, storage_endpoint_name, storage_endpoint_type, rg, subscription_id,
+                                    storageConnectionString, containerName, storage_encoding_format,
+                                    storage_batch_frequency, storage_chunk_size)).get_output_in_json()
+
+        assert len(endpoint['storageContainers']) == 1
+        assert endpoint["storageContainers"][0]["containerName"] == containerName
+        assert endpoint["storageContainers"][0]["name"] == storage_endpoint_name
+        assert endpoint["storageContainers"][0]["batchFrequencyInSeconds"] == storage_batch_frequency
+        assert endpoint["storageContainers"][0]["maxChunkSizeInBytes"] == 1048576 * storage_chunk_size
+        assert endpoint["storageContainers"][0]["fileNameFormat"] == storage_file_name_format
+        assert len(endpoint['serviceBusQueues']) == 0
+        assert len(endpoint['serviceBusTopics']) == 0
+        assert len(endpoint['eventHubs']) == 1
 
         # Test 'az iot hub route create'
         route_name = 'route1'
@@ -353,7 +379,7 @@ class IoTHubTest(ScenarioTest):
                  checks=[self.check('length(properties.routing.enrichments)', 0)])
 
         # Test 'az iot hub manual-failover'
-        self.cmd('iot hub manual-failover -n {0} -g {1} --failover-region "{2}"'.format(hub, rg, 'westcentralus'),
+        self.cmd('iot hub manual-failover -n {0} -g {1}'.format(hub, rg),
                  checks=[self.check('location', location)])
         # Test 'az iot hub delete'
         self.cmd('iot hub delete -n {0}'.format(hub), checks=self.is_empty())

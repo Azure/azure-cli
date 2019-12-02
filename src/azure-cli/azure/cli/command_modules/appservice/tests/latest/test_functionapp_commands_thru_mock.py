@@ -24,7 +24,8 @@ class TestFunctionappMocked(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom.parse_resource_id')
     @mock.patch('azure.cli.command_modules.appservice.custom.enable_zip_deploy')
-    def test_functionapp_zip_deploy_flow(self,
+    @mock.patch('azure.cli.command_modules.appservice.custom.add_remote_build_app_settings')
+    def test_functionapp_zip_deploy_flow(self, add_remote_build_app_settings_mock,
                                          enable_zip_deploy_mock,
                                          parse_resource_id_mock,
                                          web_client_factory_mock):
@@ -69,13 +70,15 @@ class TestFunctionappMocked(unittest.TestCase):
         web_client_mock.web_apps.get.assert_called_with('rg', 'name')
         upload_zip_to_storage_mock.assert_called_with(cmd_mock, 'rg', 'name', 'src', None)
 
+    @mock.patch('azure.cli.command_modules.appservice.custom.add_remote_build_app_settings')
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom.parse_resource_id')
     @mock.patch('azure.cli.command_modules.appservice.custom.enable_zip_deploy')
     def test_functionapp_remote_build_supports_linux(self,
                                                      enable_zip_deploy_mock,
                                                      parse_resource_id_mock,
-                                                     web_client_factory_mock):
+                                                     web_client_factory_mock,
+                                                     add_remote_build_app_settings_mock):
         # prepare
         cmd_mock = mock.MagicMock()
         cli_ctx_mock = mock.MagicMock()
@@ -94,7 +97,7 @@ class TestFunctionappMocked(unittest.TestCase):
 
         # assert
         web_client_mock.web_apps.get.assert_called_with('rg', 'name')
-        enable_zip_deploy_mock.assert_called_with(cmd_mock, 'rg', 'name', 'src', True, None, None)
+        enable_zip_deploy_mock.assert_called_with(cmd_mock, 'rg', 'name', 'src', None, None)
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom.parse_resource_id')
@@ -136,7 +139,7 @@ class TestFunctionappMocked(unittest.TestCase):
         # action
         # When the function app is created before 8/1/2019, it cannot use remote build
         with self.assertRaises(CLIError):
-            enable_zip_deploy(cmd_mock, 'rg', 'name', 'src', is_remote_build=True, slot=None)
+            enable_zip_deploy(cmd_mock, 'rg', 'name', 'src', slot=None)
 
         # assert
         get_site_credential_mock.assert_called_with(cmd_mock.cli_ctx, 'rg', 'name', None)

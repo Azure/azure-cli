@@ -321,6 +321,7 @@ def load_arguments(self, _):
         c.argument('name', validator=validate_linux_host_name)
         c.argument('compute_vm_size', options_list=['--compute-vm-size', '-s'])
         c.argument('customer_admin_group_id', options_list=['--customer-admin-group-id'])
+        c.argument('workspace_resource_id')
 
 
 def _get_default_install_location(exe_name):

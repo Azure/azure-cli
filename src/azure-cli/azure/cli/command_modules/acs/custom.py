@@ -81,6 +81,8 @@ from azure.mgmt.containerservice.v2019_04_30.models import OpenShiftManagedClust
 from azure.mgmt.containerservice.v2019_04_30.models import OpenShiftRouterProfile
 from azure.mgmt.containerservice.v2019_04_30.models import OpenShiftManagedClusterAuthProfile
 from azure.mgmt.containerservice.v2019_04_30.models import NetworkProfile
+from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedCluster as OpenShiftManagedClusterMonitor  # pylint: disable=line-too-long
+from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedClusterMonitorProfile
 
 from ._client_factory import cf_container_services
 from ._client_factory import cf_resource_groups
@@ -2167,6 +2169,10 @@ def aks_remove_dev_spaces(cmd, client, name, resource_group_name, prompt=False):
             raise CLIError(ae)
 
 
+def aks_rotate_certs(cmd, client, resource_group_name, name, no_wait=True):
+    return sdk_no_wait(no_wait, client.rotate_cluster_certificates, resource_group_name, name)
+
+
 def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, enable, workspace_resource_id=None,
                    subnet_name=None, no_wait=False):
     # parse the comma-separated addons argument
@@ -3120,6 +3126,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
                      vnet_peer=None,
                      tags=None,
                      no_wait=False,
+                     workspace_resource_id=None,
                      customer_admin_group_id=None):
 
     if location is None:
@@ -3190,17 +3197,37 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
                 namespace='Microsoft.Network', type='virtualNetwork',
                 name=vnet_peer
             )
+    if workspace_resource_id is not None:
+        workspace_resource_id = workspace_resource_id.strip()
+        if not workspace_resource_id.startswith('/'):
+            workspace_resource_id = '/' + workspace_resource_id
+        if workspace_resource_id.endswith('/'):
+            workspace_resource_id = workspace_resource_id.rstrip('/')
+        monitor_profile = OpenShiftManagedClusterMonitorProfile(enabled=True, workspace_resource_id=workspace_resource_id)  # pylint: disable=line-too-long
+    else:
+        monitor_profile = None
 
     network_profile = NetworkProfile(vnet_cidr=vnet_prefix, peer_vnet_id=vnet_peer)
 
-    osamc = OpenShiftManagedCluster(
-        location=location, tags=tags,
-        open_shift_version="v3.11",
-        network_profile=network_profile,
-        auth_profile=auth_profile,
-        agent_pool_profiles=agent_pool_profiles,
-        master_pool_profile=agent_master_pool_profile,
-        router_profiles=[default_router_profile])
+    if monitor_profile is not None:
+        osamc = OpenShiftManagedClusterMonitor(
+            location=location, tags=tags,
+            open_shift_version="v3.11",
+            network_profile=network_profile,
+            auth_profile=auth_profile,
+            agent_pool_profiles=agent_pool_profiles,
+            master_pool_profile=agent_master_pool_profile,
+            router_profiles=[default_router_profile],
+            monitor_profile=monitor_profile)
+    else:
+        osamc = OpenShiftManagedCluster(
+            location=location, tags=tags,
+            open_shift_version="v3.11",
+            network_profile=network_profile,
+            auth_profile=auth_profile,
+            agent_pool_profiles=agent_pool_profiles,
+            master_pool_profile=agent_master_pool_profile,
+            router_profiles=[default_router_profile])
 
     try:
         # long_running_operation_timeout=300
@@ -3229,7 +3256,13 @@ def openshift_show(cmd, client, resource_group_name, name):
 def openshift_scale(cmd, client, resource_group_name, name, compute_count, no_wait=False):
     instance = client.get(resource_group_name, name)
     # TODO: change this approach when we support multiple agent pools.
-    instance.agent_pool_profiles[0].count = int(compute_count)  # pylint: disable=no-member
+    idx = 0
+    for i in range(len(instance.agent_pool_profiles)):
+        if instance.agent_pool_profiles[i].name.lower() == "compute":
+            idx = i
+            break
+
+    instance.agent_pool_profiles[idx].count = int(compute_count)  # pylint: disable=no-member
 
     # null out the AAD profile and add manually the masterAP name because otherwise validation complains
     instance.master_pool_profile.name = "master"
