@@ -27,8 +27,8 @@ class JMESPathCheck(object):  # pylint: disable=too-few-public-methods
         if self._case_sensitive:
             equals = actual_result == self._expected_result or str(actual_result) == str(self._expected_result)
         else:
-            equals = isinstance(actual_result, str) and isinstance(self._expected_result, str)\
-                and actual_result.lower() == self._expected_result.lower()
+            equals = actual_result == self._expected_result \
+                or str(actual_result).lower() == str(self._expected_result).lower()
         if not equals:
             if actual_result:
                 raise JMESPathCheckAssertionError(self._query, self._expected_result, actual_result,
