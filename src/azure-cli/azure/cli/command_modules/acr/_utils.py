@@ -2,6 +2,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import os
+import uuid
+import tempfile
 
 from knack.util import CLIError
 from knack.log import get_logger
@@ -17,9 +20,12 @@ from ._constants import (
     get_premium_sku,
     get_valid_os,
     get_valid_architecture,
-    get_valid_variant
+    get_valid_variant,
+    ACR_NULL_CONTEXT
 )
 from ._client_factory import cf_acr_registries
+
+from ._archive_utils import upload_source_code, check_remote_source_code
 
 logger = get_logger(__name__)
 
@@ -263,7 +269,6 @@ def get_yaml_template(cmd_value, timeout, file):
             for s in sys.stdin.readlines():
                 yaml_template += s
         else:
-            import os
             if os.path.exists(file):
                 f = open(file, 'r')
                 for line in f:
@@ -430,6 +435,37 @@ def parse_actions_from_repositories(allow_or_remove_repository):
             actions.append('{}/{}/{}'.format(REPOSITORIES, repository, action))
 
     return actions
+
+
+def prepare_source_location(source_location, client_registries, registry_name, resource_group_name):
+    if not source_location or source_location.lower() == ACR_NULL_CONTEXT:
+        source_location = None
+    elif os.path.exists(source_location):
+        if not os.path.isdir(source_location):
+            raise CLIError(
+                "Source location should be a local directory path or remote URL.")
+
+        tar_file_path = os.path.join(tempfile.gettempdir(
+        ), 'cli_source_archive_{}.tar.gz'.format(uuid.uuid4().hex))
+
+        try:
+            source_location = upload_source_code(
+                client_registries, registry_name, resource_group_name,
+                source_location, tar_file_path, "", "")
+        except Exception as err:
+            raise CLIError(err)
+        finally:
+            try:
+                logger.debug(
+                    "Deleting the archived source code from '%s'...", tar_file_path)
+                os.remove(tar_file_path)
+            except OSError:
+                pass
+    else:
+        source_location = check_remote_source_code(source_location)
+        logger.warning("Sending context to registry: %s...", registry_name)
+
+    return source_location
 
 
 class ResourceNotFound(CLIError):
