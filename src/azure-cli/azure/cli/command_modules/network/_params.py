@@ -536,7 +536,11 @@ def load_arguments(self, _):
 
     for item in ['a', 'aaaa', 'caa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
         with self.argument_context('network dns record-set {} add-record'.format(item)) as c:
-            c.argument('record_set_name', options_list=['--record-set-name', '-n'], help='The name of the record set relative to the zone. Creates a new record set if one does not exist.')
+            c.argument('ttl', help='Record set TTL (time-to-live)')
+            c.argument('record_set_name',
+                       options_list=['--record-set-name', '-n'],
+                       help='The name of the record set relative to the zone. '
+                            'Creates a new record set if one does not exist.')
 
         with self.argument_context('network dns record-set {} remove-record'.format(item)) as c:
             c.argument('record_set_name', options_list=['--record-set-name', '-n'], help='The name of the record set relative to the zone.')
@@ -544,15 +548,16 @@ def load_arguments(self, _):
 
     with self.argument_context('network dns record-set cname set-record') as c:
         c.argument('record_set_name', options_list=['--record-set-name', '-n'], help='The name of the record set relative to the zone. Creates a new record set if one does not exist.')
+        c.argument('ttl', help='Record set TTL (time-to-live)')
 
     with self.argument_context('network dns record-set soa') as c:
         c.argument('relative_record_set_name', ignore_type, default='@')
 
     with self.argument_context('network dns record-set a') as c:
-        c.argument('ipv4_address', options_list=['--ipv4-address', '-a'], help='IPV4 address in string notation.')
+        c.argument('ipv4_address', options_list=['--ipv4-address', '-a'], help='IPv4 address in string notation.')
 
     with self.argument_context('network dns record-set aaaa') as c:
-        c.argument('ipv6_address', options_list=['--ipv6-address', '-a'], help='IPV6 address in string notation.')
+        c.argument('ipv6_address', options_list=['--ipv6-address', '-a'], help='IPv6 address in string notation.')
 
     with self.argument_context('network dns record-set caa') as c:
         c.argument('value', help='Value of the CAA record.')
