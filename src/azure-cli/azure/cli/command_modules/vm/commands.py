@@ -193,7 +193,7 @@ def load_command_table(self, _):
         g.command('delete', 'delete')
         # g.command('update', 'update')
         g.show_command('show', 'get')
-        g.command('list', 'list')
+        g.custom_command('list', 'list_disk_encryption_sets')
 
     with self.command_group('image', compute_image_sdk, min_api='2016-04-30-preview') as g:
         g.custom_command('create', 'create_image', validator=process_image_create_namespace)

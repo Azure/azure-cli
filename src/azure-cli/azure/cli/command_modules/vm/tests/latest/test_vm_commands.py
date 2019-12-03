@@ -3676,6 +3676,7 @@ class DiskEncryptionSetTest(ScenarioTest):
             'key': self.create_random_name(prefix='key-', length=20),
             'des': self.create_random_name(prefix='des-', length=20),
             'disk': self.create_random_name(prefix='disk-', length=20),
+            'vm': self.create_random_name(prefix='vm-', length=20)
         })
         vault_id = self.cmd('keyvault create -g {rg} -n {vault} --enable-purge-protection true --enable-soft-delete true').get_output_in_json()['id']
         kid = self.cmd('keyvault key create -n {key} --vault {vault} --protection software').get_output_in_json()['key']['kid']
@@ -3694,9 +3695,12 @@ class DiskEncryptionSetTest(ScenarioTest):
         self.cmd('keyvault set-policy -n {vault} --object-id {des_sp_id} --key-permissions wrapKey unwrapKey get')
         self.cmd('role assignment create --assignee {des_sp_id} --role Reader --scope {vault_id}')
         self.cmd('disk create -g {rg} -n {disk} --encryption-type EncryptionAtRestWithCustomerKey --disk-encryption-set {des} --size-gb 10', checks=[
-            self.check('encryption.diskEncryptionSetId', '{des_id}'),
+            self.check('encryption.diskEncryptionSetId', '{des_id}', False),
             self.check('encryption.type', 'EncryptionAtRestWithCustomerKey'),
         ])
+        self.cmd('vm create -g {rg} -n {vm} --attach-os-disk {disk}')
+        self.cmd('disk delete -g {rg} -n {disk}')
+        self.cmd('disk-encryption-set delete -g {rg} -n {des}')
 
 
 if __name__ == '__main__':
