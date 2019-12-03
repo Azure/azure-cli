@@ -503,7 +503,8 @@ def load_arguments(self, _):
                    nargs='+',
                    help='Space-separated names or IDs of virtual networks that register hostnames in this DNS zone. '
                         'Number of private DNS zones with virtual network auto-registration enabled is 1. '
-                        'If you need to increase this limit, contact Azure Support.',
+                        'If you need to increase this limit, please contact Azure Support: '
+                        'https://docs.microsoft.com/en-us/azure/azure-subscription-service-limits',
                    validator=get_vnet_validator('registration_vnets'))
         c.argument('resolution_vnets',
                    arg_group='Private Zone',
