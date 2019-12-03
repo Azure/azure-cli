@@ -3278,8 +3278,8 @@ class NetworkServiceAliasesScenarioTest(ScenarioTest):
         self.kwargs.update({
             'rg': resource_group
         })
-        self.cmd('network service-aliases list -l centralus')
-        self.cmd('network service-aliases list -l centralus -g {rg}')
+        self.cmd('network list-service-aliases -l centralus')
+        self.cmd('network list-service-aliases -l centralus -g {rg}')
 
 
 if __name__ == '__main__':

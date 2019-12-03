@@ -5138,12 +5138,7 @@ examples:
             --storage-path https://{storageAccountName}.blob.core.windows.net/{containerName}
 """
 
-helps['network service-aliases'] = """
-type: group
-short-summary: Manage service aliases for Azure Network.
-"""
-
-helps['network service-aliases list'] = """
+helps['network list-service-aliases'] = """
 type: command
 short-summary: List available service aliases in the region which can be used for Service Endpoint Policies.
 """

@@ -343,6 +343,7 @@ def load_command_table(self, _):
 
     with self.command_group('network', network_service_tags_sdk) as g:
         g.command('list-service-tags', 'list')
+        g.custom_command('list-service-aliases', 'list_service_aliases', command_type=network_service_aliases_sdk)
     # endregion
 
     # region ApplicationGateways
@@ -1063,7 +1064,4 @@ def load_command_table(self, _):
         g.command('delete', 'delete')
         g.show_command('show', 'get')
         g.command('list', 'list')
-
-    with self.command_group('network service-aliases', network_service_aliases_sdk) as g:
-        g.custom_command('list', 'list_service_aliases')
     # endregion
