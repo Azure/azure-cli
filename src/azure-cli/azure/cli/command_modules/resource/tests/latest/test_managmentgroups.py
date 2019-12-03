@@ -227,10 +227,10 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
             "/providers/Microsoft.Management/managementGroups")
 
     def test_create_managementgroup_with_parentid(self):
-        name = "clitestgroupchild"
-        displayName = "clitestgroupchild"
-        parentId = "/providers/Microsoft.Management/managementGroups/clitestgroup"
-        parentName = "clitestgroup"
+        name = "testcligroupchild"
+        displayName = "testcligroupchild"
+        parentId = "/providers/Microsoft.Management/managementGroups/testcligroup"
+        parentName = "testcligroup"
         self.cmd('account management-group create --name ' + parentName)
         managementgroup_create = self.cmd(
             'account management-group create --name ' +
@@ -264,10 +264,10 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
             "/providers/Microsoft.Management/managementGroups")
 
     def test_create_managementgroup_with_displayname_and_parentid(self):
-        name = "clitestgroupchild"
-        displayName = "clitestgroupchildDisplayName"
-        parentId = "/providers/Microsoft.Management/managementGroups/clitestgroup"
-        parentName = "clitestgroup"
+        name = "testcligroupchild"
+        displayName = "testcligroupchildDisplayName"
+        parentId = "/providers/Microsoft.Management/managementGroups/testcligroup"
+        parentName = "testcligroup"
         self.cmd('account management-group create --name ' + parentName)
         managementgroup_create = self.cmd(
             'account management-group create --name ' +
@@ -336,10 +336,10 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
             "/providers/Microsoft.Management/managementGroups")
 
     def test_update_managementgroup_with_parentid(self):
-        name = "clitestgroupchild"
-        displayName = "clitestgroupchild"
-        parentId = "/providers/Microsoft.Management/managementGroups/clitestgroup"
-        parentName = "clitestgroup"
+        name = "testcligroupchild"
+        displayName = "testcligroupchild"
+        parentId = "/providers/Microsoft.Management/managementGroups/testcligroup"
+        parentName = "testcligroup"
         self.cmd('account management-group create --name ' + parentName)
         self.cmd('account management-group create --name ' + name)
         managementgroup_update = self.cmd(
@@ -372,10 +372,10 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
             "/providers/Microsoft.Management/managementGroups")
 
     def test_update_managementgroup_with_displayname_and_parentid(self):
-        name = "clitestgroupchild"
-        displayName = "clitestgroupchild"
-        parentId = "/providers/Microsoft.Management/managementGroups/clitestgroup"
-        parentName = "clitestgroup"
+        name = "testcligroupchild"
+        displayName = "testcligroupchild"
+        parentId = "/providers/Microsoft.Management/managementGroups/testcligroup"
+        parentName = "testcligroup"
         self.cmd('account management-group create --name ' + parentName)
         self.cmd('account management-group create --name ' + name)
         managementgroup_update = self.cmd(
