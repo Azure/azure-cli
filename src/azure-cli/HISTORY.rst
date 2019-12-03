@@ -19,6 +19,10 @@ Release History
 
 * Add back edge builds for pip install
 
+**RBAC**
+
+* Fix #11458: az ad sp credential reset doesn't reset service principal credential, resets app credential
+
 **Storage**
 
 * GA Release Large File Shares property for storage account create and update command
