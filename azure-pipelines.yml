@@ -839,16 +839,11 @@ jobs:
         TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
         artifactName: pypi
 
-
-    - task: Bash@3
+    - bash: scripts/release/debian/pipeline.sh
       displayName: 'Build Ubuntu Eoan Package'
-      inputs:
-        targetType: 'filePath'
-        filePath: scripts/release/debian/pipeline.sh
       env:
         DISTRO: eoan
         DISTRO_BASE_IMAGE: ubuntu:eoan
-
 
     - task: PublishPipelineArtifact@0
       displayName: 'Publish Artifact: debian'
