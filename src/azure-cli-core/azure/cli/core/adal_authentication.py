@@ -58,7 +58,7 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
         return scheme, token, full_token, external_tenant_tokens
 
     # This method is exposed for Azure Core.
-    def get_token(self, *scopes):  # pylint:disable=unused-argument
+    def get_token(self, *scopes, **kwargs):  # pylint:disable=unused-argument
         _, token, full_token, _ = self._get_token()
 
         return AccessToken(token, int(full_token['expiresIn'] + time.time()))
