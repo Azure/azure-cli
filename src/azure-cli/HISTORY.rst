@@ -7,6 +7,10 @@ Release History
 
 * Support Local context in acr task run
 
+**AppConfig**
+
+* Add support for importing/exporting feature flags
+
 **Compute**
 
 * vmss create/update: Add --scale-in-policy, which decides which virtual machines are chosen for removal when a VMSS is scaled-in
