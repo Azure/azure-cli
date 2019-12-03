@@ -10,9 +10,10 @@ from .exceptions import JMESPathCheckAssertionError
 
 
 class JMESPathCheck(object):  # pylint: disable=too-few-public-methods
-    def __init__(self, query, expected_result):
+    def __init__(self, query, expected_result, case_sensitive=True):
         self._query = query
         self._expected_result = expected_result
+        self._case_sensitive = case_sensitive
 
     def __call__(self, execution_result):
         json_value = execution_result.get_output_in_json()
@@ -23,7 +24,12 @@ class JMESPathCheck(object):  # pylint: disable=too-few-public-methods
         except jmespath.exceptions.JMESPathTypeError:
             raise JMESPathCheckAssertionError(self._query, self._expected_result, actual_result,
                                               execution_result.output)
-        if actual_result != self._expected_result and str(actual_result) != str(self._expected_result):
+        if self._case_sensitive:
+            equals = actual_result == self._expected_result or str(actual_result) == str(self._expected_result)
+        else:
+            equals = actual_result == self._expected_result \
+                or str(actual_result).lower() == str(self._expected_result).lower()
+        if not equals:
             if actual_result:
                 raise JMESPathCheckAssertionError(self._query, self._expected_result, actual_result,
                                                   execution_result.output)
