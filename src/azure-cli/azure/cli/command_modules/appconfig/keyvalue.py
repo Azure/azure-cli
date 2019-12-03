@@ -62,6 +62,7 @@ def import_config(cmd,
 
         if not skip_features:
             src_features = __read_features_from_file(file_path=path, format_=format_)
+            # src_features is a list of KeyValue objects
             src_kvs.extend(src_features)
 
     elif source == 'appconfig':
@@ -78,6 +79,7 @@ def import_config(cmd,
             for feature in all_features:
                 if feature.content_type == FEATURE_FLAG_CONTENT_TYPE:
                     src_kvs.append(feature)
+                    src_features.append(feature)
 
     elif source == 'appservice':
         src_kvs = __read_kv_from_app_service(
@@ -180,7 +182,7 @@ def export_config(cmd,
         dest_kv_json = __serialize_kv_list_to_comparable_json_object(keyvalues=dest_kvs, level=destination)
         need_kv_change = __print_preview(old_json=dest_kv_json, new_json=src_kv_json)
 
-        if not skip_features:
+        if not skip_features and destination == 'file':
             # Currently, we only overwrite features to file. So dest features will always be empty. 
             # When dest is appconfig, src_kv contains both features and kv so we dont need to compare separately
             dest_features_json = {}
@@ -627,7 +629,7 @@ def __read_features_from_file(file_path, format_):
 def __write_kv_and_features_to_file(file_path, key_values=None, features=None, format_=None, separator=None, skip_features=False):
     try:
         exported_keyvalues = __export_keyvalues(key_values, format_, separator, None)
-        if not skip_features and format_ == 'json':
+        if features and not skip_features:
             exported_features = __export_features(features, format_)
             exported_keyvalues.update(exported_features)
 

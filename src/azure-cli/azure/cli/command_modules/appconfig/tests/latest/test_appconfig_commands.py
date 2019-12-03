@@ -225,10 +225,6 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         exported_file_path = os.path.join(TEST_DIR, 'export.json')
 
         self.kwargs.update({
-            'key': "Color",
-            'value': "Red",
-            'label': 'v1.0.0',
-            'content_type': 'text',
             'import_source': 'file',
             'imported_format': 'json',
             'separator': '/',
@@ -240,6 +236,28 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --separator {separator} -y')
         self.cmd(
             'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --separator {separator} -y')
+
+        with open(imported_file_path) as json_file:
+            imported_kvs = json.load(json_file)
+        with open(exported_file_path) as json_file:
+            exported_kvs = json.load(json_file)
+
+        assert imported_kvs == exported_kvs
+
+        # Feature flags test
+        imported_file_path = os.path.join(TEST_DIR, 'import_features.json')
+        exported_file_path = os.path.join(TEST_DIR, 'export_features.json')
+
+        self.kwargs.update({
+            'label': 'FeatureLabel',
+            'imported_file_path': imported_file_path,
+            'exported_file_path': exported_file_path
+        })
+
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} -y')
 
         with open(imported_file_path) as json_file:
             imported_kvs = json.load(json_file)
