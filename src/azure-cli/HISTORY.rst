@@ -28,6 +28,10 @@ Release History
 * GA Release Large File Shares property for storage account create and update command
 * GA Release User Delegation SAS token Support
 
+**RBAC**
+
+* Fix #11458: az ad sp credential reset doesn't reset service principal credential, resets app credential
+
 2.0.77
 ++++++
 
