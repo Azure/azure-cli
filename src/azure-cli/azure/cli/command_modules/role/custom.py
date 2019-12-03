@@ -1687,7 +1687,7 @@ def reset_application_credential(cmd, name, password=None, create_cert=False, ce
         raise CLIError(
             'more than one entry matches the name, please provide unique names like '
             'app id guid, or app id uri')
-    app = (show_application(client.applications, name) if aad_sps else
+    app = (show_application(client.applications, aad_sps[0].app_id) if aad_sps else
            show_application(client.applications, name))  # possible there is no SP created for the app
 
     if not app:
