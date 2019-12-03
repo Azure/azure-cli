@@ -17,10 +17,10 @@ from azure.graphrbac.models import (Application, ServicePrincipal, GraphErrorExc
 from azure.cli.command_modules.role.custom import (create_role_definition,
                                                    update_role_definition,
                                                    create_service_principal_for_rbac,
-                                                   reset_service_principal_credential,
+                                                   reset_application_credential,
                                                    update_application, _try_x509_pem,
-                                                   delete_service_principal_credential,
-                                                   list_service_principal_credentials,
+                                                   delete_application_credential,
+                                                   list_application_credentials,
                                                    update_application,
                                                    _get_object_stubs,
                                                    list_service_principal_owners,
@@ -209,7 +209,7 @@ class TestRoleMocked(unittest.TestCase):
         faked_graph_client.applications.list_password_credentials.side_effect = [ValueError('should not invoke')]
 
         # action
-        reset_service_principal_credential(cmd, name, test_pwd, append=False)
+        reset_application_credential(cmd, name, test_pwd, append=False)
 
         # assert
         self.assertTrue(patch_invoked[0])
@@ -265,7 +265,7 @@ class TestRoleMocked(unittest.TestCase):
         faked_graph_client.applications.list_key_credentials.return_value = [key_cred]
 
         # action
-        reset_service_principal_credential(cmd, name, cert=test_cert, append=True)
+        reset_application_credential(cmd, name, cert=test_cert, append=True)
 
         # assert
         self.assertTrue(patch_invoked[0])

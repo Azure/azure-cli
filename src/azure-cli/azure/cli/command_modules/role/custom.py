@@ -1148,17 +1148,20 @@ def list_service_principal_owners(cmd, identifier):
     return client.service_principals.list_owners(sp_object_id)
 
 
+def list_application_credentials(cmd, identifier, cert=False):
+    graph_client = _graph_client_factory(cmd.cli_ctx)
+    app_object_id = _resolve_application(graph_client.applications, identifier)
+    return _get_application_credentials(graph_client, app_object_id, cert)
+
+
 def list_service_principal_credentials(cmd, identifier, cert=False):
     graph_client = _graph_client_factory(cmd.cli_ctx)
-    if " sp " in cmd.name:
-        sp_object_id = _resolve_service_principal(graph_client.service_principals, identifier)
-        app_object_id = _get_app_object_id_from_sp_object_id(graph_client, sp_object_id)
-    else:
-        app_object_id = _resolve_application(graph_client.applications, identifier)
-    return _get_service_principal_credentials(graph_client, app_object_id, cert)
+    sp_object_id = _resolve_service_principal(graph_client.service_principals, identifier)
+
+    return _get_service_principal_credentials(graph_client, sp_object_id, cert)
 
 
-def _get_service_principal_credentials(graph_client, app_object_id, cert=False):
+def _get_application_credentials(graph_client, app_object_id, cert=False):
     if cert:
         app_creds = list(graph_client.applications.list_key_credentials(app_object_id))
     else:
@@ -1167,14 +1170,20 @@ def _get_service_principal_credentials(graph_client, app_object_id, cert=False):
     return app_creds
 
 
-def delete_service_principal_credential(cmd, identifier, key_id, cert=False):
-    graph_client = _graph_client_factory(cmd.cli_ctx)
-    if " sp " in cmd.name:
-        sp_object_id = _resolve_service_principal(graph_client.service_principals, identifier)
-        app_object_id = _get_app_object_id_from_sp_object_id(graph_client, sp_object_id)
+def _get_service_principal_credentials(graph_client, sp_object_id, cert=False):
+    if cert:
+        sp_creds = list(graph_client.service_principals.list_key_credentials(sp_object_id))
     else:
-        app_object_id = _resolve_application(graph_client.applications, identifier)
-    result = _get_service_principal_credentials(graph_client, app_object_id, cert)
+        sp_creds = list(graph_client.service_principals.list_password_credentials(sp_object_id))
+
+    return sp_creds
+
+
+def delete_application_credential(cmd, identifier, key_id, cert=False):
+    graph_client = _graph_client_factory(cmd.cli_ctx)
+    
+    app_object_id = _resolve_application(graph_client.applications, identifier)
+    result = _get_application_credentials(graph_client, app_object_id, cert)
 
     to_delete = next((x for x in result if x.key_id == key_id), None)
     if to_delete:
@@ -1182,6 +1191,23 @@ def delete_service_principal_credential(cmd, identifier, key_id, cert=False):
         if cert:
             return graph_client.applications.update_key_credentials(app_object_id, result)
         return graph_client.applications.update_password_credentials(app_object_id, result)
+
+    raise CLIError("'{}' doesn't exist in the service principal of '{}' or associated application".format(
+        key_id, identifier))
+
+
+def delete_service_principal_credential(cmd, identifier, key_id, cert=False):
+    graph_client = _graph_client_factory(cmd.cli_ctx)
+    
+    sp_object_id = _resolve_service_principal(graph_client.service_principals, identifier)
+    result = _get_service_principal_credentials(graph_client, sp_object_id, cert)
+
+    to_delete = next((x for x in result if x.key_id == key_id), None)
+    if to_delete:
+        result.remove(to_delete)
+        if cert:
+            return graph_client.service_principals.update_key_credentials(sp_object_id, result)
+        return graph_client.service_principals.update_password_credentials(sp_object_id, result)
 
     raise CLIError("'{}' doesn't exist in the service principal of '{}' or associated application".format(
         key_id, identifier))
@@ -1549,6 +1575,97 @@ def reset_service_principal_credential(cmd, name, password=None, create_cert=Fal
                                        end_date=None, keyvault=None, append=False, credential_description=None):
     client = _graph_client_factory(cmd.cli_ctx)
 
+    #pylint: disable=no-member
+    app_start_date = datetime.datetime.now(TZ_UTC)
+    if years is not None and end_date is not None:
+        raise CLIError('usage error: --years | --end-date')
+    if end_date is None:
+        years = years or 1
+        app_end_date = app_start_date + relativedelta(years=years)
+    else:
+        app_end_date = dateutil.parser.parse(end_date)
+        if app_end_date.tzinfo is None:
+            app_end_date = app_end_date.replace(tzinfo=TZ_UTC)
+        years = (app_end_date - app_start_date).days / 365
+
+    # look for existing service principal
+    query_exp = "servicePrincipalNames/any(x:x eq \'{0}') or displayName eq '{0}'".format(name)
+    aad_sps = list(client.service_principals.list(filter=query_exp))
+
+    if len(aad_sps) > 1:
+        raise CLIError(
+            'more than one entry matches the name, please provide unique names like '
+            'app id guid, or app id uri')
+
+    if not aad_sps:
+        raise CLIError("can't find a service principal matching '{}'".format(name))
+
+    sp = aad_sps[0]
+
+    public_cert_string = None
+    cert_file = None
+
+    password, public_cert_string, cert_file, cert_start_date, cert_end_date = \
+        _process_service_principal_creds(cmd.cli_ctx, years, app_start_date, app_end_date, cert, create_cert,
+                                         password, keyvault)
+
+    app_start_date, app_end_date, cert_start_date, cert_end_date = \
+        _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_date)
+
+    sp_creds = None
+    cert_creds = None
+
+    custom_key_identifier = None
+    if credential_description and password:
+        custom_key_identifier = _encode_custom_key_description(credential_description)
+
+    if password:
+        sp_creds = []
+        if append:
+            sp_creds = list(client.service_principals.list_password_credentials(sp.object_id))
+        sp_creds.append(PasswordCredential(
+            start_date=app_start_date,
+            end_date=app_end_date,
+            key_id=str(_gen_guid()),
+            value=password,
+            custom_key_identifier=custom_key_identifier
+        ))
+
+    if public_cert_string:
+        cert_creds = []
+        if append:
+            cert_creds = list(client.service_principals.list_key_credentials(sp.object_id))
+        cert_creds.append(KeyCredential(
+            start_date=app_start_date,
+            end_date=app_end_date,
+            value=public_cert_string,
+            key_id=str(_gen_guid()),
+            usage='Verify',
+            type='AsymmetricX509Cert',
+            custom_key_identifier=custom_key_identifier
+        ))
+
+    if cert_creds:
+        client.service_principals.update_key_credentials(sp.object_id, cert_creds)
+    if sp_creds:
+        client.service_principals.update_password_credentials(sp.object_id, sp_creds)
+
+    result = {
+        'appId': sp.app_id,
+        'password': password,
+        'name': name,
+        'tenant': client.config.tenant_id
+    }
+
+    if cert_file:
+        result['fileWithCertAndPrivateKey'] = cert_file
+    return result
+
+
+def reset_application_credential(cmd, name, password=None, create_cert=False, cert=None, years=None,
+                                 end_date=None, keyvault=None, append=False, credential_description=None):
+    client = _graph_client_factory(cmd.cli_ctx)
+
     # pylint: disable=no-member
     app_start_date = datetime.datetime.now(TZ_UTC)
     if years is not None and end_date is not None:
@@ -1570,8 +1687,8 @@ def reset_service_principal_credential(cmd, name, password=None, create_cert=Fal
         raise CLIError(
             'more than one entry matches the name, please provide unique names like '
             'app id guid, or app id uri')
-    app = (show_application(client.applications, aad_sps[0].app_id) if aad_sps else
-           show_application(client.applications, name))  # possible there is no SP created for the app
+    app = (show_application(client.applications, name) if aad_sps else
+            show_application(client.applications, name))  # possible there is no SP created for the app
 
     if not app:
         raise CLIError("can't find an application matching '{}'".format(name))
