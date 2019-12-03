@@ -1181,7 +1181,7 @@ def _get_service_principal_credentials(graph_client, sp_object_id, cert=False):
 
 def delete_application_credential(cmd, identifier, key_id, cert=False):
     graph_client = _graph_client_factory(cmd.cli_ctx)
-    
+
     app_object_id = _resolve_application(graph_client.applications, identifier)
     result = _get_application_credentials(graph_client, app_object_id, cert)
 
@@ -1198,7 +1198,7 @@ def delete_application_credential(cmd, identifier, key_id, cert=False):
 
 def delete_service_principal_credential(cmd, identifier, key_id, cert=False):
     graph_client = _graph_client_factory(cmd.cli_ctx)
-    
+
     sp_object_id = _resolve_service_principal(graph_client.service_principals, identifier)
     result = _get_service_principal_credentials(graph_client, sp_object_id, cert)
 
@@ -1575,7 +1575,7 @@ def reset_service_principal_credential(cmd, name, password=None, create_cert=Fal
                                        end_date=None, keyvault=None, append=False, credential_description=None):
     client = _graph_client_factory(cmd.cli_ctx)
 
-    #pylint: disable=no-member
+    # pylint: disable=no-member
     app_start_date = datetime.datetime.now(TZ_UTC)
     if years is not None and end_date is not None:
         raise CLIError('usage error: --years | --end-date')
@@ -1688,7 +1688,7 @@ def reset_application_credential(cmd, name, password=None, create_cert=False, ce
             'more than one entry matches the name, please provide unique names like '
             'app id guid, or app id uri')
     app = (show_application(client.applications, name) if aad_sps else
-            show_application(client.applications, name))  # possible there is no SP created for the app
+           show_application(client.applications, name))  # possible there is no SP created for the app
 
     if not app:
         raise CLIError("can't find an application matching '{}'".format(name))
