@@ -752,8 +752,11 @@ helps['monitor diagnostic-settings categories list'] = """
 type: command
 short-summary:  Lists the diagnostic settings categories for the specified resource.
 examples:
-  - name: List diagnostic settings categories using resource ID
+  - name: List diagnostic settings categories by using resource ID
     text: az monitor diagnostic-settings categories list --resource /subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/myRG/providers/microsoft.logic/workflows/myworkflow
+  - name: List diagnostic settings categories by using resource name
+    text: az monitor diagnostic-settings categories list -g myRG --resource-type microsoft.logic/workflows --resource myworkflow
+
 """
 
 helps['monitor diagnostic-settings create'] = """
