@@ -22,6 +22,7 @@ from ._azconfig.models import (KeyValue,
                                ModifyKeyValueOptions,
                                QueryKeyValueCollectionOptions)
 from .feature import list_feature
+from._featuremodels import map_keyvalue_to_featureflag
 
 logger = get_logger(__name__)
 FEATURE_FLAG_PREFIX = ".appconfig.featureflag/"
@@ -281,6 +282,19 @@ def __serialize_kv_list_to_comparable_json_object(keyvalues, level):
     return res
 
 
+def __serialize_features_from_kv_list_to_comparable_json_object(keyvalues):
+    res = {}
+    for kv in keyvalues:
+        feature = map_keyvalue_to_featureflag(kv)
+        # state
+        feature_json = {'state': feature.state}
+        # conditions
+        feature_json['conditions'] = feature.conditions
+        # key
+        res[feature.key] = feature_json
+    return res
+
+
 def __serialize_feature_list_to_comparable_json_object(features):
     res = {}
     for feature in features:
@@ -324,7 +338,7 @@ def __print_features_preview(old_json, new_json):
     # to simplify output, add one shared key in src and dest configuration
     new_json['@base'] = ''
     old_json['@base'] = ''
-    differ = JsonDiffer(syntax='explicit')
+    differ = JsonDiffer(syntax='symmetric')
     res = differ.diff(old_json, new_json)
     keys = str(res.keys())
     if res == {} or (('update' not in keys) and ('insert' not in keys)):
@@ -354,8 +368,8 @@ def __print_features_preview(old_json, new_json):
                 for attribute in attributes:
                     old_record[attribute] = old_json[key][attribute]
                     new_record[attribute] = new_json[key][attribute]
-                error_print('- ' + json.dumps(old_record))
-                error_print('+ ' + json.dumps(new_record))
+                error_print('- ' + str(old_record))
+                error_print('+ ' + str(new_record))
     error_print("")  # printing an empty line for formatting purpose
     return True
 
