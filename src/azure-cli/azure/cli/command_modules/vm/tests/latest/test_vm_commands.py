@@ -3670,13 +3670,17 @@ class VMSSOrchestrationModeTest(ScenarioTest):
 class DiskEncryptionSetTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_disk_encryption_set_', location='westcentralus')
+    @AllowLargeResponse(size_kb=99999)
     def test_disk_encryption_set(self, resource_group):
         self.kwargs.update({
             'vault': self.create_random_name(prefix='vault-', length=20),
             'key': self.create_random_name(prefix='key-', length=20),
-            'des': self.create_random_name(prefix='des-', length=20),
+            'des1': self.create_random_name(prefix='des1-', length=20),
+            'des2': self.create_random_name(prefix='des2-', length=20),
+            'des3': self.create_random_name(prefix='des3-', length=20),
             'disk': self.create_random_name(prefix='disk-', length=20),
-            'vm': self.create_random_name(prefix='vm-', length=20)
+            'vm1': self.create_random_name(prefix='vm1-', length=20),
+            'vm2': self.create_random_name(prefix='vm2-', length=20),
         })
         vault_id = self.cmd('keyvault create -g {rg} -n {vault} --enable-purge-protection true --enable-soft-delete true').get_output_in_json()['id']
         kid = self.cmd('keyvault key create -n {key} --vault {vault} --protection software').get_output_in_json()['key']['kid']
@@ -3684,23 +3688,56 @@ class DiskEncryptionSetTest(ScenarioTest):
             'vault_id': vault_id,
             'kid': kid
         })
-        self.cmd('disk-encryption-set create -g {rg} -n {des} --key-url {kid} --source-vault {vault}')
-        des_show_output = self.cmd('disk-encryption-set show -g {rg} -n {des}').get_output_in_json()
-        des_sp_id = des_show_output['identity']['principalId']
-        des_id = des_show_output['id']
+
+        self.cmd('disk-encryption-set create -g {rg} -n {des1} --key-url {kid} --source-vault {vault}')
+        des1_show_output = self.cmd('disk-encryption-set show -g {rg} -n {des1}').get_output_in_json()
+        des1_sp_id = des1_show_output['identity']['principalId']
+        des1_id = des1_show_output['id']
         self.kwargs.update({
-            'des_sp_id': des_sp_id,
-            'des_id': des_id
+            'des1_sp_id': des1_sp_id,
+            'des1_id': des1_id
         })
-        self.cmd('keyvault set-policy -n {vault} --object-id {des_sp_id} --key-permissions wrapKey unwrapKey get')
-        self.cmd('role assignment create --assignee {des_sp_id} --role Reader --scope {vault_id}')
-        self.cmd('disk create -g {rg} -n {disk} --encryption-type EncryptionAtRestWithCustomerKey --disk-encryption-set {des} --size-gb 10', checks=[
-            self.check('encryption.diskEncryptionSetId', '{des_id}', False),
-            self.check('encryption.type', 'EncryptionAtRestWithCustomerKey'),
+
+        self.cmd('disk-encryption-set create -g {rg} -n {des2} --key-url {kid} --source-vault {vault}')
+        des2_show_output = self.cmd('disk-encryption-set show -g {rg} -n {des2}').get_output_in_json()
+        des2_sp_id = des2_show_output['identity']['principalId']
+        des2_id = des2_show_output['id']
+        self.kwargs.update({
+            'des2_sp_id': des2_sp_id,
+            'des2_id': des2_id
+        })
+
+        self.cmd('disk-encryption-set create -g {rg} -n {des3} --key-url {kid} --source-vault {vault}')
+        des3_show_output = self.cmd('disk-encryption-set show -g {rg} -n {des3}').get_output_in_json()
+        des3_sp_id = des3_show_output['identity']['principalId']
+        des3_id = des3_show_output['id']
+        self.kwargs.update({
+            'des3_sp_id': des3_sp_id,
+            'des3_id': des3_id
+        })
+
+        self.cmd('keyvault set-policy -n {vault} --object-id {des1_sp_id} --key-permissions wrapKey unwrapKey get')
+        self.cmd('keyvault set-policy -n {vault} --object-id {des2_sp_id} --key-permissions wrapKey unwrapKey get')
+        self.cmd('keyvault set-policy -n {vault} --object-id {des3_sp_id} --key-permissions wrapKey unwrapKey get')
+
+        time.sleep(10)
+
+        self.cmd('role assignment create --assignee {des1_sp_id} --role Reader --scope {vault_id}')
+        self.cmd('role assignment create --assignee {des2_sp_id} --role Reader --scope {vault_id}')
+        self.cmd('role assignment create --assignee {des3_sp_id} --role Reader --scope {vault_id}')
+
+        self.cmd('disk create -g {rg} -n {disk} --encryption-type EncryptionAtRestWithCustomerKey --disk-encryption-set {des1} --size-gb 10', checks=[
+            self.check('encryption.diskEncryptionSetId', '{des1_id}', False),
+            self.check('encryption.type', 'EncryptionAtRestWithCustomerKey')
         ])
-        self.cmd('vm create -g {rg} -n {vm} --attach-os-disk {disk}')
-        self.cmd('disk delete -g {rg} -n {disk}')
-        self.cmd('disk-encryption-set delete -g {rg} -n {des}')
+        self.cmd('vm create -g {rg} -n {vm1} --attach-os-disk {disk} --os-type linux')
+
+        self.cmd('vm create -g {rg} -n {vm2} --image centos --os-disk-encryption-set {des1} --data-disk-sizes-gb 10 10 --data-disk-encryption-set {des2} {des3}')
+        self.cmd('vm show -g {rg} -n {vm2}', checks=[
+            self.check('storageProfile.osDisk.managedDisk.diskEncryptionSet.id', '{des1_id}', False),
+            self.check('storageProfile.dataDisks[0].managedDisk.diskEncryptionSet.id', '{des2_id}', False),
+            self.check('storageProfile.dataDisks[1].managedDisk.diskEncryptionSet.id', '{des3_id}', False)
+        ])
 
 
 if __name__ == '__main__':

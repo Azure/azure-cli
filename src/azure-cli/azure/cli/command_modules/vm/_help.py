@@ -110,6 +110,11 @@ type: command
 short-summary: Create a Disk Encryption Set.
 """
 
+helps['disk-encryption-set list'] = """
+type: command
+short-summary: List Disk Encryption Sets.
+"""
+
 helps['image'] = """
 type: group
 short-summary: Manage custom virtual machine images.

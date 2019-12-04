@@ -249,7 +249,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
         attach_os_disk=None, os_disk_size_gb=None, custom_data=None, secrets=None, license_type=None, zone=None,
         disk_info=None, boot_diagnostics_storage_uri=None, ultra_ssd_enabled=None, proximity_placement_group=None,
         computer_name=None, dedicated_host=None, priority=None, max_price=None, eviction_policy=None,
-        enable_agent=None, vmss=None):
+        enable_agent=None, vmss=None, os_disk_encryption_set=None, data_disk_encryption_sets=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -337,7 +337,12 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
                     'createOption': 'fromImage',
                     'name': os_disk_name,
                     'caching': os_caching,
-                    'managedDisk': {'storageAccountType': disk_info['os'].get('storageAccountType')}
+                    'managedDisk': {
+                        'storageAccountType': disk_info['os'].get('storageAccountType'),
+                        'diskEncryptionSet': {
+                            'id': os_disk_encryption_set,
+                        }
+                    }
                 },
                 'imageReference': {
                     'publisher': os_publisher,
@@ -351,7 +356,12 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
                     'createOption': 'fromImage',
                     'name': os_disk_name,
                     'caching': os_caching,
-                    'managedDisk': {'storageAccountType': disk_info['os'].get('storageAccountType')}
+                    'managedDisk': {
+                        'storageAccountType': disk_info['os'].get('storageAccountType'),
+                        'diskEncryptionSet': {
+                            'id': os_disk_encryption_set,
+                        }
+                    }
                 },
                 "imageReference": {
                     'id': image_reference
@@ -373,6 +383,10 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
         if disk_info['os'].get('writeAcceleratorEnabled') is not None:
             profile['osDisk']['writeAcceleratorEnabled'] = disk_info['os']['writeAcceleratorEnabled']
         data_disks = [v for k, v in disk_info.items() if k != 'os']
+        if len(data_disk_encryption_sets) < len(data_disks):
+            data_disk_encryption_sets.extend([None] * (len(data_disks) - len(data_disk_encryption_sets)))
+        for i, data_disk in enumerate(data_disks):
+            data_disk['managedDisk']['diskEncryptionSet'] = {'id': data_disk_encryption_sets[i]}
         if data_disks:
             profile['dataDisks'] = data_disks
 
