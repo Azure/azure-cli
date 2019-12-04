@@ -75,9 +75,9 @@ def load_arguments(self, _):
         c.argument('id_', options_list=['--id'], help='Id of the key to be regenerated. Can be found using az appconfig credential list command.')
 
     with self.argument_context('appconfig kv import') as c:
-        c.argument('label', help="Imported KVs will be assigned with this label. If no label specified, will assign null label.")
+        c.argument('label', help="Imported KVs and feature flags will be assigned with this label. If no label specified, will assign null label.")
         c.argument('prefix', help="This prefix will be appended to the front of imported keys. Not applicable for feature flags.")
-        c.argument('source', options_list=['--source', '-s'], choices=['file', 'appconfig', 'appservice'], validator=validate_import, help="The source of importing.")
+        c.argument('source', options_list=['--source', '-s'], choices=['file', 'appconfig', 'appservice'], validator=validate_import, help="The source of importing. Note that importing feature flags from appservice is not supported.")
         c.argument('yes', help="Do not prompt for preview.")
         c.argument('skip_features', help="Import only key values and exclude all feature flags. By default, all feature flags will be imported from file or appconfig. Not applicable for appservice.", arg_type=get_three_state_flag())
 
@@ -98,10 +98,10 @@ def load_arguments(self, _):
         c.argument('appservice_account', validator=validate_appservice_name_or_id, help='ARM ID for AppService OR the name of the AppService, assuming it is in the same subscription and resource group as the App Configuration. Required for AppService arguments')
 
     with self.argument_context('appconfig kv export') as c:
-        c.argument('label', help="Only keys with this label will be exported. If no label specified, export keys with null label by default.")
+        c.argument('label', help="Only keys and feature flags with this label will be exported. If no label specified, export keys and feature flags with null label by default.")
         c.argument('prefix', help="Prefix to be trimmed from keys. Not applicable for feature flags.")
-        c.argument('key', help='If no key specified, return all keys by default. Support star sign as filters, for instance abc* means keys with abc as prefix. Similarly, *abc and *abc* are also supported. Not applicable for feature flags.')
-        c.argument('destination', options_list=['--destination', '-d'], choices=['file', 'appconfig', 'appservice'], validator=validate_export, help="The destination of exporting.")
+        c.argument('key', help='If no key specified, return all keys by default. Support star sign as filters, for instance abc* means keys with abc as prefix. Similarly, *abc and *abc* are also supported. Key filtering not applicable for feature flags. By default, all feature flags with specified label will be exported.')
+        c.argument('destination', options_list=['--destination', '-d'], choices=['file', 'appconfig', 'appservice'], validator=validate_export, help="The destination of exporting. Note that exporting feature flags to appservice is not supported.")
         c.argument('yes', help="Do not prompt for preview.")
         c.argument('skip_features', help="Export only key values and exclude all feature flags. By default, all features with the specified label will be exported to file or appconfig. Not applicable for appservice.", arg_type=get_three_state_flag())
 
