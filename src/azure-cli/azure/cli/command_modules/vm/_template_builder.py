@@ -383,10 +383,9 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
         if disk_info['os'].get('writeAcceleratorEnabled') is not None:
             profile['osDisk']['writeAcceleratorEnabled'] = disk_info['os']['writeAcceleratorEnabled']
         data_disks = [v for k, v in disk_info.items() if k != 'os']
-        if len(data_disk_encryption_sets) < len(data_disks):
-            data_disk_encryption_sets.extend([None] * (len(data_disks) - len(data_disk_encryption_sets)))
         for i, data_disk in enumerate(data_disks):
-            data_disk['managedDisk']['diskEncryptionSet'] = {'id': data_disk_encryption_sets[i]}
+            if i < len(data_disk_encryption_sets):
+                data_disk['managedDisk']['diskEncryptionSet'] = {'id': data_disk_encryption_sets[i]}
         if data_disks:
             profile['dataDisks'] = data_disks
 
