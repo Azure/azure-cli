@@ -1883,11 +1883,11 @@ parameters:
 examples:
   - name: Update a Windows user account.
     text: az vm user update -u username -p password -n MyVm -g MyResourceGroup
-  - name: Update a Linux user account.
-    text: az vm user update -u username --ssh-key-value "$({ ~/.ssh/id_rsa.pub)" -n MyVm -g MyResourceGroup
-  - name: Update a user on all VMs in a resource group.
+  - name: Update a Linux user account. ("$(< filename)" syntax is not supported on Command Prompt or PowerShell.)
+    text: az vm user update -u username --ssh-key-value "$(< ~/.ssh/id_rsa.pub)" -n MyVm -g MyResourceGroup
+  - name: Update a user on all VMs in a resource group. ("$(< filename)" syntax is not supported on Command Prompt or PowerShell.)
     text: >
-        az vm user update -u username --ssh-key-value "$({ ~/.ssh/id_rsa.pub)" --ids $(az vm list -g MyResourceGroup --query "[].id" -o tsv)
+        az vm user update -u username --ssh-key-value "$(< ~/.ssh/id_rsa.pub)" --ids $(az vm list -g MyResourceGroup --query "[].id" -o tsv)
 
 """
 
