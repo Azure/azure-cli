@@ -272,7 +272,7 @@ parameters:
   - name: --name -n
     short-summary: Name of the activity log alerts
   - name: --scope -s
-    short-summary: List of scopes to add. Each scope could be a resource ID, resource group ID or a subscription ID.
+    short-summary: List of scopes to add. Each scope could be a resource ID, a resource group ID or a subscription ID.
   - name: --reset
     short-summary: Remove all the existing scopes before add new scopes.
 examples:
