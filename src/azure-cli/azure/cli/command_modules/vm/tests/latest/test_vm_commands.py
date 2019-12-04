@@ -3720,9 +3720,13 @@ class DiskEncryptionSetTest(ScenarioTest):
         self.cmd('keyvault set-policy -n {vault} --object-id {des2_sp_id} --key-permissions wrapKey unwrapKey get')
         self.cmd('keyvault set-policy -n {vault} --object-id {des3_sp_id} --key-permissions wrapKey unwrapKey get')
 
+        time.sleep(15)
+
         self.cmd('role assignment create --assignee {des1_sp_id} --role Reader --scope {vault_id}')
         self.cmd('role assignment create --assignee {des2_sp_id} --role Reader --scope {vault_id}')
         self.cmd('role assignment create --assignee {des3_sp_id} --role Reader --scope {vault_id}')
+
+        time.sleep(15)
 
         self.cmd('disk create -g {rg} -n {disk} --encryption-type EncryptionAtRestWithCustomerKey --disk-encryption-set {des1} --size-gb 10', checks=[
             self.check('encryption.diskEncryptionSetId', '{des1_id}', False),
