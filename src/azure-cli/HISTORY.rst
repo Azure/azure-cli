@@ -23,6 +23,7 @@ Release History
 **Packaging**
 
 * Add back edge builds for pip install
+* Add Ubuntu eoan package
 
 **Storage**
 
