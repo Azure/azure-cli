@@ -631,6 +631,7 @@ def __export_features(retrieved_features, format_):
 
 
 def __convert_features_to_key_value_list(features_dict, format_):
+    # pylint: disable=too-many-nested-blocks
     key_values = []
     default_conditions = {'client_filters': []}
 
@@ -651,11 +652,23 @@ def __convert_features_to_key_value_list(features_dict, format_):
                     default_value["enabled"] = True
                     default_value["conditions"] = {'client_filters': v.get('EnabledFor', [])}
 
-                    # Convert Name and Parameters to lowercase for backend compatibility
-                    for idx, val in enumerate(default_value["conditions"]["client_filters"]):
-                        # each val is a dict with two keys - Name, Parameters
-                        val = {filter_key.lower(): filter_val for filter_key, filter_val in val.items()}
-                        default_value["conditions"]["client_filters"][idx] = val
+                    if not default_value["conditions"]["client_filters"]:
+                        # We support alternate format for specifying always OFF features
+                        # "FeatureU": {"EnabledFor": []}
+                        default_value["enabled"] = False
+                        default_value["conditions"] = default_conditions
+
+                    else:
+                        # Convert Name and Parameters to lowercase for backend compatibility
+                        for idx, val in enumerate(default_value["conditions"]["client_filters"]):
+                            # each val is a dict with two keys - Name, Parameters
+                            val = {filter_key.lower(): filter_val for filter_key, filter_val in val.items()}
+                            if val["name"] and val["name"].lower() == "alwayson":
+                                # We support alternate format for specifying always ON features
+                                # "FeatureT": {"EnabledFor": [{ "Name": "AlwaysOn"}]}
+                                default_value["conditions"] = default_conditions
+                                break
+                            default_value["conditions"]["client_filters"][idx] = val
                 else:
                     default_value["enabled"] = v
                     default_value["conditions"] = default_conditions
