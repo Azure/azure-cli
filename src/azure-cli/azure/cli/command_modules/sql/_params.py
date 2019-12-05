@@ -25,7 +25,6 @@ from azure.mgmt.sql.models import (
     CatalogCollationType,
     CreateMode,
     DatabaseLicenseType,
-    DatabaseReadScale,
     ElasticPoolLicenseType,
     SampleName,
     SecurityAlertPolicyState,
@@ -230,7 +229,7 @@ read_scale_param_type = CLIArgumentType(
     help='If enabled, connections that have application intent set to readonly '
     'in their connection string may be routed to a readonly secondary replica. '
     'This property is only settable for Premium and Business Critical databases.',
-    arg_type=get_three_state_flag('Enabled','Disabled', False, True))
+    arg_type=get_three_state_flag('Enabled', 'Disabled', False, True))
 
 read_replicas_param_type = CLIArgumentType(
     options_list=['--read-replicas'],
