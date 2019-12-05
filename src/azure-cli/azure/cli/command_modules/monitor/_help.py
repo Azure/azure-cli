@@ -750,12 +750,12 @@ short-summary: Retrieve service diagnostic settings categories.
 
 helps['monitor diagnostic-settings categories list'] = """
 type: command
-short-summary:  Lists the diagnostic settings categories for the specified resource.
+short-summary:  List the diagnostic settings categories for the specified resource.
 examples:
   - name: List diagnostic settings categories by using resource ID
-    text: az monitor diagnostic-settings categories list --resource /subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/myRG/providers/microsoft.logic/workflows/myworkflow
+    text: az monitor diagnostic-settings categories list --resource /subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/myRG/providers/microsoft.logic/workflows/myWorkflow
   - name: List diagnostic settings categories by using resource name
-    text: az monitor diagnostic-settings categories list -g myRG --resource-type microsoft.logic/workflows --resource myworkflow
+    text: az monitor diagnostic-settings categories list -g myRG --resource-type microsoft.logic/workflows --resource myWorkflow
 
 """
 
