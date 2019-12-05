@@ -56,6 +56,7 @@ Release History
 * Fix issue #11100: AttributeError for az webapp up when create service plan
 * az webapp up: Forcing the creation or deployment to a site for supported languages, no defaults used.
 * Add support for App Service Environment: az appservice ase show | list | list-addresses | list-plans | create | update | delete
+* Fix issue #11217: webapp: az webapp config ssl upload should support slot parameter
 
 **Backup**
 
