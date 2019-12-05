@@ -238,6 +238,18 @@ def show_protectable_item(items, name, server_name, protectable_item_type):
 
     return cust_help.get_none_one_or_many(filtered_items)
 
+def show_protectable_instance(items, server_name, protectable_item_type):
+    if protectable_item_type_map.get(protectable_item_type) is not None:
+        protectable_item_type = protectable_item_type_map[protectable_item_type]
+    
+    # Server Name filter
+    filtered_items = [item for item in items if item.properties.server_name.lower() == server_name.lower()]
+
+    # Protectable Item Type filter
+    filtered_items = [item for item in filtered_items if
+                      item.properties.protectable_item_type.lower() == protectable_item_type.lower()]
+
+    return cust_help.get_none_one_or_many(filtered_items)
 
 def list_protectable_items(client, resource_group_name, vault_name, workload_type, container_uri=None):
     workload_type = workload_type_map[workload_type]
@@ -472,7 +484,7 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
 
 
 def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_mode, container_name, item_name,
-                         rp_name, target_item, log_point_in_time):
+                         rp_name, target_item, target_item_name, log_point_in_time):
     if log_point_in_time is not None:
         datetime_type(log_point_in_time)
 
@@ -544,7 +556,7 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
     if restore_mode == 'AlternateWorkloadRestore':
         friendly_name = target_item.properties.friendly_name
         item_friendly_name = item.properties.friendly_name
-        db_name = friendly_name + '/' + item_friendly_name + '_restored_' + datetime.now().strftime('%m_%d_%Y_%H%M')
+        db_name = friendly_name + '/' + target_item_name
 
     container_id = None
     if restore_mode == 'AlternateWorkloadRestore':
@@ -553,7 +565,7 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
     if not ('sql' in item_type.lower() and restore_mode == 'AlternateWorkloadRestore'):
         alternate_directory_paths = None
 
-    return json.dumps({
+    return {
         'restore_mode': restore_mode_map[restore_mode],
         'container_uri': item.properties.container_name,
         'item_uri': item_name,
@@ -563,7 +575,7 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
         'source_resource_id': item.properties.source_resource_id,
         'database_name': db_name,
         'container_id': container_id,
-        'alternate_directory_paths': alternate_directory_paths})
+        'alternate_directory_paths': alternate_directory_paths}
 
 
 def _get_restore_request_instance(item_type, log_point_in_time):
