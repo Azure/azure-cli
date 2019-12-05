@@ -111,7 +111,7 @@ def load_arguments(self, _):
             else:
                 c.ignore('access_level', 'for_upload', 'hyper_v_generation')
             c.argument('encryption_type', arg_type=get_enum_type(self.get_models('EncryptionType')), help='Encryption type.')
-            c.argument('disk_encryption_set', help='Name of Id of disk encryption set that is used to encrypt the disk.')
+            c.argument('disk_encryption_set', help='Name or ID of disk encryption set that is used to encrypt the disk.')
 
     for scope in ['disk create', 'snapshot create']:
         with self.argument_context(scope) as c:
@@ -848,7 +848,7 @@ def load_arguments(self, _):
     with self.argument_context('disk-encryption-set') as c:
         c.argument('disk_encryption_set_name', disk_encryption_set_name)
         c.argument('key_url', help='URL pointing to a key or secret in KeyVault.')
-        c.argument('source_vault', help='Resource ID of the KeyVault containing the key or secret.')
+        c.argument('source_vault', help='Name or ID of the KeyVault containing the key or secret.')
         c.argument('location', validator=get_default_location_from_resource_group)
         c.argument('tags', tags_type)
     # endregion

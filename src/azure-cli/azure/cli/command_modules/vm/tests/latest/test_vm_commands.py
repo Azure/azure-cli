@@ -3734,7 +3734,7 @@ class DiskEncryptionSetTest(ScenarioTest):
         ])
         self.cmd('vm create -g {rg} -n {vm1} --attach-os-disk {disk} --os-type linux')
 
-        self.cmd('vm create -g {rg} -n {vm2} --image centos --os-disk-encryption-set {des1} --data-disk-sizes-gb 10 10 --data-disk-encryption-set {des2} {des3}')
+        self.cmd('vm create -g {rg} -n {vm2} --image centos --os-disk-encryption-set {des1} --data-disk-sizes-gb 10 10 --data-disk-encryption-sets {des2} {des3}')
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
             self.check('storageProfile.osDisk.managedDisk.diskEncryptionSet.id', '{des1_id}', False),
             self.check('storageProfile.dataDisks[0].managedDisk.diskEncryptionSet.id', '{des2_id}', False),
