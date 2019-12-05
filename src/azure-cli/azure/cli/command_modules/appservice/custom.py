@@ -1962,9 +1962,9 @@ def _get_log(url, user_name, password, log_file=None):
     r.release_conn()
 
 
-def upload_ssl_cert(cmd, resource_group_name, name, certificate_password, certificate_file):
+def upload_ssl_cert(cmd, resource_group_name, name, certificate_password, certificate_file, slot=None):
     client = web_client_factory(cmd.cli_ctx)
-    webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
+    webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     cert_file = open(certificate_file, 'rb')
     cert_contents = cert_file.read()
     hosting_environment_profile_param = (webapp.hosting_environment_profile.name
