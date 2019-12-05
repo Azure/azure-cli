@@ -270,6 +270,11 @@ def load_arguments(self, _):
         c.argument('interval', help='The time interval in seconds between consecutive probes.')
         c.argument('threshold', help='The number of failed probes after which the back end server is marked down.')
         c.argument('timeout', help='The probe timeout in seconds.')
+        c.argument('port', type=int, min_api='2019-04-01',
+                   help='Custom port which will be used for probing the backend servers. '
+                        'The valid value ranges from 1 to 65535. '
+                        'In case not set, port from http settings will be used. '
+                        'This property is valid for Standard_v2 and WAF_v2 only.')
 
     with self.argument_context('network application-gateway rule') as c:
         c.argument('address_pool', help='The name or ID of the backend address pool.', completer=get_ag_subresource_completion_list('backend_address_pools'))

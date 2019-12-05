@@ -15,6 +15,10 @@ Release History
 
 * [BREAKING CHANGE] Removed --failover-region parameter from manual-failover. Now it will failover to assigned geo-paired secondary region.
 
+**Network**
+
+* application-gateway probe: Support --port option to specify a port for probing backend servers when create and update
+
 **Packaging**
 
 * Add back edge builds for pip install
