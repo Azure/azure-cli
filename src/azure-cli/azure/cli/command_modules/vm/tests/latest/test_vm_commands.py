@@ -3722,9 +3722,10 @@ class DiskEncryptionSetTest(ScenarioTest):
 
         time.sleep(15)
 
-        self.cmd('role assignment create --assignee {des1_sp_id} --role Reader --scope {vault_id}')
-        self.cmd('role assignment create --assignee {des2_sp_id} --role Reader --scope {vault_id}')
-        self.cmd('role assignment create --assignee {des3_sp_id} --role Reader --scope {vault_id}')
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            self.cmd('role assignment create --assignee {des1_sp_id} --role Reader --scope {vault_id}')
+            self.cmd('role assignment create --assignee {des2_sp_id} --role Reader --scope {vault_id}')
+            self.cmd('role assignment create --assignee {des3_sp_id} --role Reader --scope {vault_id}')
 
         time.sleep(15)
 
