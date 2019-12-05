@@ -786,13 +786,29 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
     def test_network_ag_probe(self, resource_group):
 
         self.kwargs.update({
+            'rg': resource_group,
+            'gateway_ip': 'gateway_ip',
             'ag': 'ag1',
             'res': 'application-gateway probe',
             'name': 'myprobe'
         })
-        self._create_ag()
 
-        self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name} --no-wait --path /test --protocol http --interval 25 --timeout 100 --threshold 10 --min-servers 2 --host www.test.com --match-status-codes 200 204 --host-name-from-http-settings false')
+        self.cmd('network public-ip create -g {rg} -n {gateway_ip} --sku Standard')
+        self.cmd('network application-gateway create -g {rg} -n {ag} '
+                 '--sku WAF_v2 '
+                 '--public-ip-address {gateway_ip} ')
+
+        self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name} --no-wait '
+                 '--path /test '
+                 '--protocol http '
+                 '--interval 25 '
+                 '--timeout 100 '
+                 '--threshold 10 '
+                 '--min-servers 2 '
+                 '--host www.test.com '
+                 '--match-status-codes 200 204 '
+                 '--host-name-from-http-settings false '
+                 '--port 2048 ')
         self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}', checks=[
             self.check('path', '/test'),
             self.check('protocol', 'Http'),
@@ -802,9 +818,20 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
             self.check('minServers', 2),
             self.check('host', 'www.test.com'),
             self.check('length(match.statusCodes)', 2),
-            self.check('pickHostNameFromBackendHttpSettings', False)
+            self.check('pickHostNameFromBackendHttpSettings', False),
+            self.check('port', 2048)
         ])
-        self.cmd('network {res} update -g {rg} --gateway-name {ag} -n {name} --no-wait --path /test2 --protocol https --interval 26 --timeout 101 --threshold 11 --min-servers 3 --host "" --match-status-codes 201 --host-name-from-http-settings')
+        self.cmd('network {res} update -g {rg} --gateway-name {ag} -n {name} --no-wait '
+                 '--path /test2 '
+                 '--protocol https '
+                 '--interval 26 '
+                 '--timeout 101 '
+                 '--threshold 11 '
+                 '--min-servers 3 '
+                 '--host "" '
+                 '--match-status-codes 201 '
+                 '--host-name-from-http-settings '
+                 '--port 4096 ')
         self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}', checks=[
             self.check('path', '/test2'),
             self.check('protocol', 'Https'),
@@ -814,7 +841,8 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
             self.check('minServers', 3),
             self.check('host', ''),
             self.check('length(match.statusCodes)', 1),
-            self.check('pickHostNameFromBackendHttpSettings', True)
+            self.check('pickHostNameFromBackendHttpSettings', True),
+            self.check('port', 4096)
         ])
         self.cmd('network {res} list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 1))
         self.cmd('network {res} delete -g {rg} --gateway-name {ag} --no-wait -n {name}')
