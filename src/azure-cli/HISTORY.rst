@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**ACR**
+
+* Support Local context in acr task run
+
 **Compute**
 
 * vmss create/update: Add --scale-in-policy, which decides which virtual machines are chosen for removal when a VMSS is scaled-in
@@ -18,6 +22,7 @@ Release History
 **Packaging**
 
 * Add back edge builds for pip install
+* Add Ubuntu eoan package
 
 **SQL**
 
