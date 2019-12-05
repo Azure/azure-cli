@@ -37,7 +37,7 @@ def update_channel(client, channel, channel_name, resource_group_name, resource_
     return client.update(
         resource_group_name=resource_group_name,
         resource_name=resource_name,
-        channel_name='DirectLineChannel',
+        channel_name=channel_name,
         properties=channel
     )
 
@@ -115,7 +115,7 @@ def kik_create(client, resource_group_name, resource_name, user_name, api_key, i
 
 def directline_create(client, resource_group_name, resource_name, is_disabled=None,
                       is_v1_disabled=None, is_v3_disabled=None, site_name='Default Site',
-                      is_secure_site_enabled=False, trusted_origins=None):
+                      enable_enhanced_auth=False, trusted_origins=None):
     if not trusted_origins:
         trusted_origins = []
     channel = DirectLineChannel(
@@ -125,7 +125,7 @@ def directline_create(client, resource_group_name, resource_name, is_disabled=No
                 is_enabled=not is_disabled,
                 is_v1_enabled=not is_v1_disabled,
                 is_v3_enabled=not is_v3_disabled,
-                is_secure_site_enabled=is_secure_site_enabled,
+                is_secure_site_enabled=enable_enhanced_auth,
                 trusted_origins=trusted_origins
             )]
         )
@@ -137,7 +137,7 @@ def directline_create(client, resource_group_name, resource_name, is_disabled=No
 
 def directline_update(client, resource_group_name, resource_name, is_disabled=None,
                       is_v1_disabled=None, is_v3_disabled=None, site_name='Default Site',
-                      is_secure_site_enabled=False, trusted_origins=None):
+                      enable_enhanced_auth=False, trusted_origins=None):
     if not trusted_origins:
         trusted_origins = []
     channel = DirectLineChannel(
@@ -147,7 +147,7 @@ def directline_update(client, resource_group_name, resource_name, is_disabled=No
                 is_enabled=not is_disabled,
                 is_v1_enabled=not is_v1_disabled,
                 is_v3_enabled=not is_v3_disabled,
-                is_secure_site_enabled=is_secure_site_enabled,
+                is_secure_site_enabled=enable_enhanced_auth,
                 trusted_origins=trusted_origins
             )]
         )

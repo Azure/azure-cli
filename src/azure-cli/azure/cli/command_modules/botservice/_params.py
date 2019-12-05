@@ -60,7 +60,7 @@ def load_arguments(self, _):
         c.argument('description', options_list=['--description', '-d'], help='The description of the bot.', arg_group='Registration Bot Specific')
         c.argument('endpoint', options_list=['-e', '--endpoint'], help='The messaging endpoint of the bot.', arg_group='Registration Bot Specific')
         c.argument('msa_app_id', options_list=['--appid'], help='The Microsoft account ID (MSA ID) to be used with the bot.')
-        c.argument('password', options_list=['-p', '--password'], help='The Microsoft account (MSA) password for the bot. Used to authorize messages being sent to the bot. Required for Web App Bots.', arg_group='Web App Bot Specific')
+        c.argument('password', options_list=['-p', '--password'], help='The Microsoft account (MSA) password for the bot. Used to authorize messages being sent from the bot. Required when "--kind" is "webapp".', arg_group='Web App Bot Specific')
         c.argument('tags', arg_type=tags_type)
         c.argument('language', options_list=['--lang'], arg_type=get_enum_type(SUPPORTED_LANGUAGES), help='The language to be used to create the bot.', arg_group='Web App Bot Specific')
         c.argument('deploy_echo', options_list=['--echo'], arg_type=get_three_state_flag(), help='Deploy an Echo Bot template to the newly created v4 Web App Bot.', arg_group='V4 Bot Templates')
@@ -163,7 +163,7 @@ def load_arguments(self, _):
         c.argument('site_name', options_list=['-s', '--site-name'], help='Name of the Directline channel site.')
         c.argument('is_v1_disabled', options_list=['--disablev1'], help='If true, v1 protocol will be disabled on the channel', arg_type=get_three_state_flag())
         c.argument('is_v3_disabled', options_list=['--disablev3'], help='If true, v3 protocol will be disabled on the channel.', arg_type=get_three_state_flag())
-        c.argument('is_secure_site_enabled', help='If true, enables enhanced authentication features. Must be true for --trusted-origins parameters to work.', arg_type=get_three_state_flag())
+        c.argument('enable_enhanced_auth', help='If true, enables enhanced authentication features. Must be true for --trusted-origins parameters to work.', arg_type=get_three_state_flag())
         c.argument('trusted_origins', nargs='+', help='Space separated Trusted Origins URLs (must use HTTPS) e.g. --trusted-origins https://mybotsite1.azurewebsites.net https://mybotsite2.azurewebsites.net')
 
     with self.argument_context('bot directline update') as c:
@@ -171,7 +171,7 @@ def load_arguments(self, _):
         c.argument('site_name', options_list=['-s', '--site-name'], help='Name of the Directline channel site.')
         c.argument('is_v1_disabled', options_list=['--disablev1'], help='If true, v1 protocol will be disabled on the channel', arg_type=get_three_state_flag())
         c.argument('is_v3_disabled', options_list=['--disablev3'], help='If true, v3 protocol will be disabled on the channel.', arg_type=get_three_state_flag())
-        c.argument('is_secure_site_enabled', help='If true, enables enhanced authentication features. Must be true for --trusted-origins parameters to work.', arg_type=get_three_state_flag())
+        c.argument('enable_enhanced_auth', help='If true, enables enhanced authentication features. Must be true for --trusted-origins parameters to work.', arg_type=get_three_state_flag())
         c.argument('trusted_origins', nargs='+', help='Space separated Trusted Origins URLs (must use HTTPS) e.g. --trusted-origins https://mybotsite1.azurewebsites.net https://mybotsite2.azurewebsites.net')
 
     with self.argument_context('bot telegram create') as c:

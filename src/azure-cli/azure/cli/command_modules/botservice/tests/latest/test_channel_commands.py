@@ -115,7 +115,7 @@ class ChannelTests(ScenarioTest):
         origin_url = 'https://mybotsite1.azurewebsites.net'
         self.kwargs.update({'origin_url': origin_url})
 
-        self.cmd('az bot directline update -g {rg} -n {botname} --is-secure-site-enabled --trusted-origins {origin_url} --debug', checks=[
+        self.cmd('az bot directline update -g {rg} -n {botname} --enable-enhanced-auth --trusted-origins {origin_url} --debug', checks=[
             self.check('properties.properties.sites[0].trustedOrigins[0]', 'https://mybotsite1.azurewebsites.net'),
             self.check('properties.properties.sites[0].isSecureSiteEnabled', True)
         ])

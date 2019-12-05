@@ -707,9 +707,10 @@ class BotTests(ScenarioTest):
             raise AssertionError('should have thrown an error for empty string passwords.')
 
     @ResourceGroupPreparer(random_name_length=20)
-    def test_botservice_should_gracefully_exit_if_name_is_unavailable(self, resource_group):
+    def test_botservice_should_throw_if_name_is_unavailable(self, resource_group):
+        bot_name = self.create_random_name(prefix='cli', length=10)
         self.kwargs.update({
-            'botname': self.create_random_name(prefix='cli', length=10),
+            'botname': bot_name,
             'description': 'description1',
             'endpoint': 'https://www.google.com/api/messages',
             'app_id': str(uuid.uuid4()),
@@ -725,8 +726,14 @@ class BotTests(ScenarioTest):
                 self.check('location', 'global'),
             ])
 
-        self.cmd(
-            'az bot create -k registration -g {rg} -n {botname} -d {description} -e {endpoint} --appid {app_id}')
+        try:
+            self.cmd(
+                'az bot create -k registration -g {rg} -n {botname} -d {description} -e {endpoint} --appid {app_id}')
+            raise AssertionError()
+        except CLIError as cli_error:
+            assert cli_error.__str__().startswith('Unable to create a bot with a name of "{0}".'.format(bot_name))
+        except AssertionError:
+            raise AssertionError('should have thrown an error for unavailable name.')
 
     def __talk_to_bot(self, message_text='Hi', expected_text=None):
         """Enables direct line channel, sends a message to the bot,

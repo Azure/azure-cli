@@ -92,9 +92,8 @@ def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, pa
     name_response = NameAvailability.check_name_availability(client, resource_name, kind)
     if not name_response.valid:
         # If the name is unavailable, gracefully exit and log the reason for the user.
-        logger.error('Unable to create a bot with a name of "%s".', resource_name)
-        logger.error('Reason: %s', name_response.message)
-        return
+        raise CLIError('Unable to create a bot with a name of "{0}".\nReason: {1}'
+                       .format(resource_name, name_response.message))
 
     if resource_name.find(".") > -1:
         logger.warning('"." found in --name parameter ("%s"). "." is an invalid character for Azure Bot resource names '
