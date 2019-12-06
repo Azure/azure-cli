@@ -335,8 +335,8 @@ class ProviderOperationTest(ScenarioTest):
 
 class DeploymentTestAtSubscriptionScope(ScenarioTest):
     def tearDown(self):
-        #self.cmd('policy assignment delete -n location-lock')
-        #self.cmd('policy definition delete -n policy2')
+        self.cmd('policy assignment delete -n location-lock')
+        self.cmd('policy definition delete -n policy2')
         self.cmd('group delete -n cli_test_subscription_level_deployment --yes')
 
     def test_subscription_level_deployment(self):

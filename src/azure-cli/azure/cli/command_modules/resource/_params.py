@@ -25,7 +25,7 @@ def load_arguments(self, _):
         get_resource_types_completion_list, get_providers_completion_list)
     from azure.cli.command_modules.resource._validators import (
         validate_lock_parameters, validate_resource_lock, validate_group_lock, validate_subscription_lock, validate_metadata, RollbackAction,
-        validate_msi, DeploymentScopeType)
+        validate_msi)
 
     # BASIC PARAMETER CONFIGURATION
 
@@ -193,7 +193,7 @@ def load_arguments(self, _):
         c.argument('deployment_location', arg_type=get_location_type(self.cli_ctx), required=True)
         c.argument('template_file', options_list=['--template-file', '-f'], completer=FilesCompleter(), type=file_type, help="a template file path in the file system")
         c.argument('template_uri', options_list=['--template-uri', '-u'], help='a uri to a remote template file')
-        c.argument('parameters', options_list=['--parameters', '-p'], action='append', nargs='+', completer=FilesCompleter())
+        c.argument('parameters', options_list=['--parameters', '-p'], action='append', nargs='+', completer=FilesCompleter(), help='the deployment parameters')
 
     with self.argument_context('deployment create') as c:
         c.argument('deployment_name', options_list=['--name', '-n'], required=False,

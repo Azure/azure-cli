@@ -6,7 +6,6 @@
 import os
 import re
 import argparse
-from enum import Enum
 
 from knack.util import CLIError
 try:
@@ -15,12 +14,6 @@ except ImportError:
     from urlparse import urlparse, urlsplit  # pylint: disable=import-error
 
 MSI_LOCAL_ID = '[system]'
-
-
-def process_group_deployment_create_namespace(namespace):
-    if bool(namespace.template_uri) == bool(namespace.template_file):
-        raise CLIError('incorrect usage: --template-file FILE | --template-uri URI')
-    _validate_deployment_name(namespace)
 
 
 def process_deployment_create_namespace(namespace):
@@ -184,11 +177,3 @@ def validate_msi(namespace):
 class RollbackAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
         setattr(namespace, 'rollback_on_error', '' if not values else values)
-
-
-class DeploymentScopeType(str, Enum):
-
-    resource_group = "ResourceGroup"
-    subscription = "Subscription"
-    managementGroup = "ManagementGroup"
-    tenant = "Tenant"

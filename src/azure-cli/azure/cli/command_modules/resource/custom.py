@@ -401,6 +401,7 @@ class JsonCTemplatePolicy(SansIOHTTPPolicy):
 
             http_request.data = partial_request[:-2] + ", template:" + template.template_as_bytes + r"}}"
 
+
 def deploy_arm_template_at_subscription_scope(cmd,
                                               template_file=None, template_uri=None, parameters=None,
                                               deployment_name=None, deployment_location=None,
@@ -1108,7 +1109,7 @@ def validate_arm_template(cmd, resource_group_name, template_file=None, template
                           parameters=None, mode=None, rollback_on_error=None, handle_extended_json_format=None):
     if handle_extended_json_format:
         return _deploy_arm_template_core_unmodified(cmd.cli_ctx, resource_group_name, template_file, template_uri,
-                                               'deployment_dry_run', parameters, mode, rollback_on_error, validate_only=True)
+                                                    'deployment_dry_run', parameters, mode, rollback_on_error, validate_only=True)
     return _deploy_arm_template_core(cmd.cli_ctx, resource_group_name, template_file, template_uri,
                                      'deployment_dry_run', parameters, mode, rollback_on_error, validate_only=True)
 
