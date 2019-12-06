@@ -40,6 +40,7 @@ from azure.cli.command_modules.network._completers import (
     ag_url_map_rule_completion_list, tm_endpoint_completion_list, service_endpoint_completer,
     get_sdk_completer)
 from azure.cli.core.util import get_json_object
+from ._settings import application_gateway_url_path_map_rewrite_rule_set
 
 
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements
@@ -282,7 +283,7 @@ def load_arguments(self, _):
         c.argument('http_settings', help='The name or ID of the backend HTTP settings.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
         c.argument('rule_type', help='The rule type (Basic, PathBasedRouting).')
         c.argument('url_path_map', help='The name or ID of the URL path map.', completer=get_ag_subresource_completion_list('url_path_maps'))
-        c.argument('rewrite_rule_set', min_api='2019-04-01', help='The name or ID of the rewrite rule set.')
+        c.argument('rewrite_rule_set', min_api=application_gateway_url_path_map_rewrite_rule_set, help='The name or ID of the rewrite rule set.')
 
     with self.argument_context('network application-gateway ssl-cert') as c:
         c.argument('cert_data', options_list='--cert-file', type=file_type, completer=FilesCompleter(), help='The path to the PFX certificate file.', validator=validate_ssl_cert)
@@ -299,17 +300,17 @@ def load_arguments(self, _):
         c.argument('address_pool', help='The name or ID of the backend address pool to use with the created rule.', completer=get_ag_subresource_completion_list('backend_address_pools'), arg_group='First Rule')
         c.argument('http_settings', help='The name or ID of the HTTP settings to use with the created rule.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'), arg_group='First Rule')
         c.argument('firewall_policy', min_api='2019-09-01', help='Name or ID of a Firewall Policy resource.', arg_group='First Rule')
-        c.argument('rewrite_rule_set', min_api='2019-04-01', help='The name or ID of the rewrite rule set. If not specified, the default for the map will be used.', arg_group='First Rule')
+        c.argument('rewrite_rule_set', min_api=application_gateway_url_path_map_rewrite_rule_set, help='The name or ID of the rewrite rule set. If not specified, the default for the map will be used.', arg_group='First Rule')
 
     with self.argument_context('network application-gateway url-path-map create') as c:
         c.argument('default_address_pool', help='The name or ID of the default backend address pool, if different from --address-pool.', completer=get_ag_subresource_completion_list('backend_address_pools'))
         c.argument('default_http_settings', help='The name or ID of the default HTTP settings, if different from --http-settings.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
-        c.argument('default_rewrite_rule_set', min_api='2019-04-01', help='The name or ID of the default rewrite rule set, if different from --http-settings.')
+        c.argument('default_rewrite_rule_set', min_api=application_gateway_url_path_map_rewrite_rule_set, help='The name or ID of the default rewrite rule set, if different from --http-settings.')
 
     with self.argument_context('network application-gateway url-path-map update') as c:
         c.argument('default_address_pool', help='The name or ID of the default backend address pool.', completer=get_ag_subresource_completion_list('backend_address_pools'))
         c.argument('default_http_settings', help='The name or ID of the default HTTP settings.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
-        c.argument('default_rewrite_rule_set', min_api='2019-04-01', help='The name or ID of the default rewrite rule set.')
+        c.argument('default_rewrite_rule_set', min_api=application_gateway_url_path_map_rewrite_rule_set, help='The name or ID of the default rewrite rule set.')
 
     with self.argument_context('network application-gateway url-path-map rule') as c:
         c.argument('item_name', options_list=['--name', '-n'], help='The name of the url-path-map rule.', completer=ag_url_map_rule_completion_list, id_part='child_name_2')
