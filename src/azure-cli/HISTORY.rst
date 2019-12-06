@@ -117,6 +117,7 @@ Release History
 
 **Redis**
 
+* Fixing `az redis update` operation to work for caches with RDB/AOF enabled
 * Fix #2902: Avoid setting memory configs while updating Basic SKU cache
 
 **Reservations**
