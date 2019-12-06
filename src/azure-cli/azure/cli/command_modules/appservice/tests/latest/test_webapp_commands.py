@@ -1016,11 +1016,23 @@ class WebappSSLCertTest(ScenarioTest):
         self.cmd('webapp show -g {} -n {}'.format(resource_group, webapp_name), self.check('tags.web', 'web1'))
         self.cmd('webapp config ssl delete -g {} --certificate-thumbprint {}'.format(resource_group, cert_thumbprint))
         self.cmd('webapp show -g {} -n {}'.format(resource_group, webapp_name), self.check('tags.web', 'web1'))
-        # upload to slot
+        # test with slot
         self.cmd('webapp deployment slot create -g {} -n {} --slot {}'.format(resource_group, webapp_name, slot_name))
         self.cmd('webapp config ssl upload -g {} -n {} --certificate-file "{}" --certificate-password {} -s {}'.format(resource_group, webapp_name, pfx_file, cert_password, slot_name), checks=[
             JMESPathCheck('thumbprint', cert_thumbprint)
         ])
+        self.cmd('webapp show -g {} -n {} -s {}'.format(resource_group, webapp_name, slot_name))
+        self.cmd('webapp config ssl bind -g {} -n {} --certificate-thumbprint {} --ssl-type {} -s {}'.format(resource_group, webapp_name, cert_thumbprint, 'SNI', slot_name), checks=[
+            JMESPathCheck("hostNameSslStates|[?name=='{}-{}.azurewebsites.net']|[0].sslState".format(webapp_name, slot_name), 'SniEnabled'),
+            JMESPathCheck("hostNameSslStates|[?name=='{}-{}.azurewebsites.net']|[0].thumbprint".format(webapp_name, slot_name), cert_thumbprint)
+        ])
+        self.cmd('webapp show -g {} -n {} -s {}'.format(resource_group, webapp_name, slot_name))
+        self.cmd('webapp config ssl unbind -g {} -n {} --certificate-thumbprint {} -s {}'.format(resource_group, webapp_name, cert_thumbprint, slot_name), checks=[
+            JMESPathCheck("hostNameSslStates|[?name=='{}-{}.azurewebsites.net']|[0].sslState".format(webapp_name, slot_name), 'Disabled'),
+        ])
+        self.cmd('webapp show -g {} -n {} -s {}'.format(resource_group, webapp_name, slot_name))
+        self.cmd('webapp config ssl delete -g {} --certificate-thumbprint {}'.format(resource_group, cert_thumbprint))
+        self.cmd('webapp show -g {} -n {} -s {}'.format(resource_group, webapp_name, slot_name))
         self.cmd('webapp delete -g {} -n {}'.format(resource_group, webapp_name))
 
 
