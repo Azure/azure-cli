@@ -19,6 +19,10 @@ Release History
 
 * [BREAKING CHANGE] Removed --failover-region parameter from manual-failover. Now it will failover to assigned geo-paired secondary region.
 
+**Key Vault**
+
+* Fix #10846: Calling az keyvault secret show-deleted --id <value> still says secret_name "can not" be none
+
 **Packaging**
 
 * Add back edge builds for pip install
