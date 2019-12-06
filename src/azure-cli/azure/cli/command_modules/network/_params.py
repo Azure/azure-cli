@@ -305,7 +305,7 @@ def load_arguments(self, _):
     with self.argument_context('network application-gateway url-path-map create') as c:
         c.argument('default_address_pool', help='The name or ID of the default backend address pool, if different from --address-pool.', completer=get_ag_subresource_completion_list('backend_address_pools'))
         c.argument('default_http_settings', help='The name or ID of the default HTTP settings, if different from --http-settings.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
-        c.argument('default_rewrite_rule_set', min_api=application_gateway_url_path_map_rewrite_rule_set, help='The name or ID of the default rewrite rule set, if different from --http-settings.')
+        c.argument('default_rewrite_rule_set', min_api=application_gateway_url_path_map_rewrite_rule_set, help='The name or ID of the default rewrite rule set, if different from --rewrite-rule-set.')
 
     with self.argument_context('network application-gateway url-path-map update') as c:
         c.argument('default_address_pool', help='The name or ID of the default backend address pool.', completer=get_ag_subresource_completion_list('backend_address_pools'))

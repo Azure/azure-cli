@@ -53,7 +53,7 @@ Release History
 **Network**
 
 * az network application-gateway url-path-map create/update: bug fix for `--waf-policy`
-* az network application-gateway: support `--redirect-rule-set`
+* az network application-gateway: support `--rewrite-rule-set`
 
 2.0.77
 ++++++
