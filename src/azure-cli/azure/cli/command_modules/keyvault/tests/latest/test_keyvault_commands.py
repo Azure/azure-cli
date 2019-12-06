@@ -328,7 +328,7 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
         self._test_download_secret()
 
         # show deleted
-        self.cmd('keyvault update -n {kv} --enable-soft-delete', 
+        self.cmd('keyvault update -n {kv} --enable-soft-delete',
                  checks=self.check('properties.enableSoftDelete', True))
         if self.is_live:
             time.sleep(20)
@@ -341,10 +341,10 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
 
         self.kwargs['secret_id'] = data['id']
         self.kwargs['secret_recovery_id'] = data['recoveryId']
-        self.cmd('keyvault secret show-deleted --id {secret_recovery_id}', 
-                  checks=self.check('id', '{secret_id}'))
-        self.cmd('keyvault secret show-deleted --vault-name {kv} -n {sec}', 
-                  checks=self.check('id', '{secret_id}'))
+        self.cmd('keyvault secret show-deleted --id {secret_recovery_id}',
+                 checks=self.check('id', '{secret_id}'))
+        self.cmd('keyvault secret show-deleted --vault-name {kv} -n {sec}',
+                 checks=self.check('id', '{secret_id}'))
 
 
 class KeyVaultCertificateContactsScenarioTest(ScenarioTest):
