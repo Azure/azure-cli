@@ -3,6 +3,11 @@
 Release History
 ===============
 
+
+**ACR**
+
+* Support Local context in acr task run
+
 **AppService**
 
 * Fix issue #10965: Error: Name cannot be empty. Allow remove by ip_address and subnet
@@ -22,6 +27,7 @@ Release History
 **Packaging**
 
 * Add back edge builds for pip install
+* Add Ubuntu eoan package
 
 **Storage**
 
