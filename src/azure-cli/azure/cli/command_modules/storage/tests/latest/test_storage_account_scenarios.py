@@ -643,4 +643,3 @@ class BlobServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
 
         result = self.cmd('storage account blob-service-properties show -n {sa} -g {rg}').get_output_in_json()
         self.assertEqual(result['changeFeed']['enabled'], True)
-

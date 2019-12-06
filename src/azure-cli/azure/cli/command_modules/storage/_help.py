@@ -17,6 +17,40 @@ type: group
 short-summary: Manage storage accounts.
 """
 
+helps['storage account blob-service-properties'] = """
+type: group
+short-summary: Manage blob service properties for storage account.
+"""
+
+helps['storage account blob-service-properties show'] = """
+type: command
+short-summary: Show the properties of a storage account's Blob service.
+long-summary: >
+    Show the properties of a storage account's Blob service, including
+    properties for Storage Analytics and CORS (Cross-Origin Resource
+    Sharing) rules.
+examples:
+  - name: Show the properties of the storage account 'MyStorageAccount' in resource group 'MyResourceGroup'.
+    text: az storage account blob-service-properties show -n MyStorageAccount -g MyResourceGroup
+"""
+
+helps['storage account blob-service-properties update'] = """
+type: command
+short-summary: Update the properties of a storage account's Blob service.
+long-summary: >
+    Update the properties of a storage account's Blob service, including
+    properties for Storage Analytics and CORS (Cross-Origin Resource
+    Sharing) rules.
+parameters:
+  - name: --enable-change-feed
+    short-summary: 'Indicate whether change feed event logging is enabled. If it is true, you enable the storage account to begin capturing changes. The default value is true. You can see more details in https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-change-feed?tabs=azure-portal#register-by-using-azure-cli'
+examples:
+  - name: Enable the change feed for the storage account 'MyStorageAccount' in resource group 'MyResourceGroup'.
+    text: az storage account blob-service-properties update --enable-change-feed true -n MyStorageAccount -g MyResourceGroup
+  - name: Disable the change feed for the storage account 'MyStorageAccount' in resource group 'MyResourceGroup'.
+    text: az storage account blob-service-properties update --enable-change-feed false -n MyStorageAccount -g MyResourceGroup
+"""
+
 helps['storage account create'] = """
 type: command
 short-summary: Create a storage account.

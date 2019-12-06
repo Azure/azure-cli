@@ -243,10 +243,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage account blob-service-properties show') as c:
         c.argument('account_name', acct_name_type, id_part=None)
 
-    with self.argument_context('storage account blob-service-properties update') as c:
+    with self.argument_context('storage account blob-service-properties update',
+                               resource_type=ResourceType.MGMT_STORAGE) as c:
         c.argument('account_name', acct_name_type, id_part=None)
-        c.argument('enable_change_feed', arg_type=get_three_state_flag(),
-                   help='Indicates whether change feed event logging is enabled.')
+        c.argument('enable_change_feed', arg_type=get_three_state_flag(), min_api='2019-04-01')
 
     with self.argument_context('storage account generate-sas') as c:
         t_account_permissions = self.get_sdk('common.models#AccountPermissions')

@@ -125,7 +125,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('storage account blob-service-properties', blob_service_mgmt_sdk,
                             custom_command_type=storage_account_custom_type,
-                            resource_type=ResourceType.MGMT_STORAGE, min_api='2019-04-01') as g:
+                            resource_type=ResourceType.MGMT_STORAGE, min_api='2018-07-01') as g:
         g.show_command('show', 'get_service_properties')
         g.generic_update_command('update',
                                  getter_name='get_service_properties',
