@@ -335,3 +335,10 @@ def update_management_policies(client, resource_group_name, account_name, parame
     if parameters:
         parameters = parameters.policy
     return client.create_or_update(resource_group_name, account_name, policy=parameters)
+
+
+# TODO: support updating other properties besides 'enable_change_feed'
+def update_blob_service_properties(cmd, instance, enable_change_feed=None):
+    if enable_change_feed is not None:
+        instance.change_feed = cmd.get_models('ChangeFeed')(enabled=enable_change_feed)
+    return instance
