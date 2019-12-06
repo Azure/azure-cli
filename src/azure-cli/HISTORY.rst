@@ -9,7 +9,9 @@ Release History
 
 **Compute**
 
-* vmss create/update: Add --scale-in-policy, which decides which virtual machines are chosen for removal when a VMSS is scaled-in
+* vmss create/update: Add --scale-in-policy, which decides which virtual machines are chosen for removal when a VMSS is scaled-in.
+* vm/vmss update: Add --priority.
+* vm/vmss update: Add --max-price.
 
 **Install**
 
