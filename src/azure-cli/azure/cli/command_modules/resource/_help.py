@@ -239,18 +239,18 @@ helps['deployment validate'] = """
 type: command
 short-summary: Validate whether a template is valid at subscription scope.
 parameters:
-  - name: --parameters
+  - name: --parameters -p
     short-summary: Supply deployment parameter values.
     long-summary: >
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
-  - name: --template-file
+  - name: --template-file -f
     short-summary: The path to the template file.
-  - name: --template-uri
+  - name: --template-uri -u
     short-summary: The URI to the template file.
-  - name: --location
+  - name: --location -l
     short-summary: The location to store the deployment metadata.
-  - name: --name
+  - name: --name -n
     short-summary: The deployment name.
 examples:
   - name: Validate whether a template is valid at subscription scope.
@@ -261,18 +261,18 @@ helps['deployment create'] = """
 type: command
 short-summary: Start a deployment at subscription scope.
 parameters:
-  - name: --parameters
+  - name: --parameters -p
     short-summary: Supply deployment parameter values.
     long-summary: >
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
-  - name: --template-file
+  - name: --template-file -f
     short-summary: The path to the template file.
-  - name: --template-uri
+  - name: --template-uri -u
     short-summary: The URI to the template file.
-  - name: --location
+  - name: --location -l
     short-summary: The location to store the deployment metadata.
-  - name: --name
+  - name: --name -n
     short-summary: The deployment name.
 examples:
   - name: Create a deployment at subscription scope from a remote template file, using parameters from a local JSON file.
@@ -352,18 +352,18 @@ helps['deployment sub validate'] = """
 type: command
 short-summary: Validate whether a template is valid at subscription scope.
 parameters:
-  - name: --parameters
+  - name: --parameters -p
     short-summary: Supply deployment parameter values.
     long-summary: >
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
-  - name: --template-file
+  - name: --template-file -f
     short-summary: The path to the template file.
-  - name: --template-uri
+  - name: --template-uri -u
     short-summary: The URI to the template file.
-  - name: --location
+  - name: --location -l
     short-summary: The location to store the deployment metadata.
-  - name: --name
+  - name: --name -n
     short-summary: The deployment name.
 examples:
   - name: Validate whether a template is valid at subscription scope.
@@ -374,18 +374,18 @@ helps['deployment sub create'] = """
 type: command
 short-summary: Start a deployment at subscription scope.
 parameters:
-  - name: --parameters
+  - name: --parameters -p
     short-summary: Supply deployment parameter values.
     long-summary: >
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
-  - name: --template-file
+  - name: --template-file -f
     short-summary: The path to the template file.
-  - name: --template-uri
+  - name: --template-uri -u
     short-summary: The URI to the template file.
-  - name: --location
+  - name: --location -l
     short-summary: The location to store the deployment metadata.
-  - name: --name
+  - name: --name -n
     short-summary: The deployment name.
 examples:
   - name: Create a deployment at subscription scope from a remote template file, using parameters from a local JSON file.
@@ -465,18 +465,18 @@ helps['deployment group validate'] = """
 type: command
 short-summary: Validate whether a template is valid at resource group.
 parameters:
-  - name: --parameters
+  - name: --parameters -p
     short-summary: Supply deployment parameter values.
     long-summary: >
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
-  - name: --template-file
+  - name: --template-file -f
     short-summary: The path to the template file.
-  - name: --template-uri
+  - name: --template-uri -u
     short-summary: The URI to the template file.
-  - name: --resource-group
+  - name: --resource-group -g
     short-summary: The resource group to create deployment at.
-  - name: --name
+  - name: --name -n
     short-summary: The deployment name.
   - name: --mode
     short-summary: The deployment mode.
@@ -489,18 +489,18 @@ helps['deployment group create'] = """
 type: command
 short-summary: Start a deployment at resource group.
 parameters:
-  - name: --parameters
+  - name: --parameters -p
     short-summary: Supply deployment parameter values.
     long-summary: >
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
-  - name: --template-file
+  - name: --template-file -f
     short-summary: The path to the template file.
-  - name: --template-uri
+  - name: --template-uri -u
     short-summary: The URI to the template file.
-  - name: --resource-group
+  - name: --resource-group -g
     short-summary: The resource group to create deployment at.
-  - name: --name
+  - name: --name -n
     short-summary: The deployment name.
   - name: --mode
     short-summary: The deployment mode.
@@ -582,20 +582,20 @@ helps['deployment mg validate'] = """
 type: command
 short-summary: Validate whether a template is valid at management group.
 parameters:
-  - name: --parameters
+  - name: --parameters -p
     short-summary: Supply deployment parameter values.
     long-summary: >
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
-  - name: --template-file
+  - name: --template-file -f
     short-summary: The path to the template file.
-  - name: --template-uri
+  - name: --template-uri -u
     short-summary: The URI to the template file.
-  - name: --management-group-id
+  - name: --management-group-id -m
     short-summary: The management group id to create deployment at.
-  - name: --name
+  - name: --name -n
     short-summary: The deployment name.
-  - name: --location
+  - name: --location -l
     short-summary: The location to store the deployment metadata.
 examples:
   - name: Validate whether a template is valid at management group.
@@ -606,20 +606,20 @@ helps['deployment mg create'] = """
 type: command
 short-summary: Start a deployment at management group.
 parameters:
-  - name: --parameters
+  - name: --parameters -p
     short-summary: Supply deployment parameter values.
     long-summary: >
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
-  - name: --template-file
+  - name: --template-file -f
     short-summary: The path to the template file.
-  - name: --template-uri
+  - name: --template-uri -u
     short-summary: The URI to the template file.
-  - name: --management-group-id
+  - name: --management-group-id -m
     short-summary: The management group id to create deployment at.
-  - name: --name
+  - name: --name -n
     short-summary: The deployment name.
-  - name: --location
+  - name: --location -l
     short-summary: The location to store the deployment metadata.
 examples:
   - name: Create a deployment at management group from a remote template file, using parameters from a local JSON file.
@@ -699,18 +699,18 @@ helps['deployment tenant validate'] = """
 type: command
 short-summary: Validate whether a template is valid at tenant scope.
 parameters:
-  - name: --parameters
+  - name: --parameters -p
     short-summary: Supply deployment parameter values.
     long-summary: >
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
-  - name: --template-file
+  - name: --template-file -f
     short-summary: The path to the template file.
-  - name: --template-uri
+  - name: --template-uri -u
     short-summary: The URI to the template file.
-  - name: --name
+  - name: --name -n
     short-summary: The deployment name.
-  - name: --location
+  - name: --location -l
     short-summary: The location to store the deployment metadata.
 examples:
   - name: Validate whether a template is valid at tenant scope.
@@ -721,18 +721,18 @@ helps['deployment tenant create'] = """
 type: command
 short-summary: Start a deployment at tenant scope.
 parameters:
-  - name: --parameters
+  - name: --parameters -p
     short-summary: Supply deployment parameter values.
     long-summary: >
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
-  - name: --template-file
+  - name: --template-file -f
     short-summary: The path to the template file.
-  - name: --template-uri
+  - name: --template-uri -u
     short-summary: The URI to the template file.
-  - name: --name
+  - name: --name -n
     short-summary: The deployment name.
-  - name: --location
+  - name: --location -l
     short-summary: The location to store the deployment metadata.
 examples:
   - name: Create a deployment at tenant scope from a remote template file, using parameters from a local JSON file.
@@ -833,7 +833,7 @@ helps['group deployment create'] = """
 type: command
 short-summary: Start a deployment.
 parameters:
-  - name: --parameters
+  - name: --parameters -p
     short-summary: Supply deployment parameter values.
     long-summary: >
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
@@ -873,7 +873,7 @@ helps['group deployment validate'] = """
 type: command
 short-summary: Validate whether a template is syntactically correct.
 parameters:
-  - name: --parameters
+  - name: --parameters -p
     short-summary: Supply deployment parameter values.
     long-summary: >
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
