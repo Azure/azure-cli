@@ -24,31 +24,9 @@ def process_group_deployment_create_namespace(namespace):
 
 
 def process_deployment_create_namespace(namespace):
-    process_deployment_common_namespace(namespace)
-    _validate_deployment_location(namespace)
-
     if bool(namespace.template_uri) == bool(namespace.template_file):
         raise CLIError('incorrect usage: --template-file FILE | --template-uri URI')
     _validate_deployment_name(namespace)
-
-
-def process_deployment_validate_namespace(namespace):
-    process_deployment_common_namespace(namespace)
-    _validate_deployment_location(namespace)
-
-
-def process_deployment_common_namespace(namespace):
-    if namespace.scope_type == 'ResourceGroup' and namespace.resource_group_name is None:
-        raise CLIError('--resource-group is required for deployment at resource group scope.')
-
-    if namespace.scope_type != 'ResourceGroup' and namespace.resource_group_name:
-        raise CLIError('--resource-group is not allowed for the given scope type.')
-
-    if namespace.scope_type == 'ManagementGroup' and namespace.management_group_id is None:
-        raise CLIError('--management-group-id is required for deployment at management group scope.')
-
-    if namespace.scope_type != 'ManagementGroup' and namespace.management_group_id:
-        raise CLIError('--management-group-id is not allowed for the given scope type.')
 
 
 def _validate_deployment_name(namespace):
@@ -64,14 +42,6 @@ def _validate_deployment_name(namespace):
             namespace.deployment_name = os.path.splitext(template_filename)[0]
         else:
             namespace.deployment_name = 'deployment1'
-
-
-def _validate_deployment_location(namespace):
-    if namespace.scope_type == 'ResourceGroup' and namespace.deployment_location:
-        raise CLIError('--location is not allowed for deployment at resource group scope.')
-
-    if namespace.scope_type != 'ResourceGroup' and namespace.deployment_location is None:
-        raise CLIError('--location is required for deployment at subscription, management group and tenant scope.')
 
 
 def internal_validate_lock_parameters(namespace, resource_group, resource_provider_namespace,

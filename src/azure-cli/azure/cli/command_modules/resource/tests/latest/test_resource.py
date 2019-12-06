@@ -335,8 +335,8 @@ class ProviderOperationTest(ScenarioTest):
 
 class DeploymentTestAtSubscriptionScope(ScenarioTest):
     def tearDown(self):
-        self.cmd('policy assignment delete -n location-lock')
-        self.cmd('policy definition delete -n policy2')
+        #self.cmd('policy assignment delete -n location-lock')
+        #self.cmd('policy definition delete -n policy2')
         self.cmd('group delete -n cli_test_subscription_level_deployment --yes')
 
     def test_subscription_level_deployment(self):
@@ -349,34 +349,67 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
             'dn': self.create_random_name('azure-cli-subscription_level_deployment', 60)
         })
 
-        self.cmd('group create --name cli_test_subscription_level_deployment --location WestUS', checks=[
+        self.cmd('deployment sub validate --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('deployment validate --scope-type Subscription --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
+        self.cmd('deployment sub validate --location WestUS --template-file {tf} --parameters "{params_uri}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('deployment validate --scope-type Subscription --location WestUS --template-file {tf} --parameters {params_uri}', checks=[
-            self.check('properties.provisioningState', 'Succeeded')
-        ])
-
-        self.cmd('deployment create --scope-type Subscription -n {dn} --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
+        self.cmd('deployment sub create -n {dn} --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
         ])
 
-        self.cmd('deployment list --scope-type Subscription', checks=[
+        self.cmd('deployment sub list', checks=[
             self.check('[0].name', '{dn}'),
         ])
 
-        self.cmd('deployment show --scope-type Subscription -n {dn}', checks=[
+        self.cmd('deployment sub show -n {dn}', checks=[
             self.check('name', '{dn}')
         ])
 
-        self.cmd('deployment export --scope-type Subscription -n {dn}', checks=[
+        self.cmd('deployment sub export -n {dn}', checks=[
         ])
 
-        self.cmd('deployment operation list --scope-type Subscription -n {dn}', checks=[
+        self.cmd('deployment operation sub list -n {dn}', checks=[
+            self.check('length([])', 5)
+        ])
+
+    def test_subscription_level_deployment_old_command(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'subscription_level_template.json').replace('\\', '\\\\'),
+            'params': os.path.join(curr_dir, 'subscription_level_parameters.json').replace('\\', '\\\\'),
+            # params-uri below is the raw file url of the subscription_level_parameters.json above
+            'params_uri': 'https://raw.githubusercontent.com/Azure/azure-cli/dev/src/azure-cli/azure/cli/command_modules/resource/tests/latest/subscription_level_parameters.json',
+            'dn': self.create_random_name('azure-cli-subscription_level_deployment', 60)
+        })
+
+        self.cmd('deployment validate --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment validate --location WestUS --template-file {tf} --parameters "{params_uri}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment create -n {dn} --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+        ])
+
+        self.cmd('deployment list', checks=[
+            self.check('[0].name', '{dn}'),
+        ])
+
+        self.cmd('deployment show -n {dn}', checks=[
+            self.check('name', '{dn}')
+        ])
+
+        self.cmd('deployment export -n {dn}', checks=[
+        ])
+
+        self.cmd('deployment operation list -n {dn}', checks=[
             self.check('length([])', 5)
         ])
 
@@ -397,26 +430,26 @@ class DeploymentTestAtResourceGroup(ScenarioTest):
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('deployment validate --scope-type ResourceGroup --resource-group cli_test_resource_group_deployment --template-file {tf} --parameters @"{params}"', checks=[
+        self.cmd('deployment group validate --resource-group cli_test_resource_group_deployment --template-file {tf} --parameters @"{params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('deployment create --scope-type ResourceGroup --resource-group cli_test_resource_group_deployment -n {dn} --template-file {tf} --parameters @"{params}"', checks=[
+        self.cmd('deployment group create --resource-group cli_test_resource_group_deployment -n {dn} --template-file {tf} --parameters @"{params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
         ])
 
-        self.cmd('deployment list --scope-type ResourceGroup --resource-group cli_test_resource_group_deployment', checks=[
+        self.cmd('deployment group list --resource-group cli_test_resource_group_deployment', checks=[
             self.check('[0].name', '{dn}'),
         ])
 
-        self.cmd('deployment show --scope-type ResourceGroup --resource-group cli_test_resource_group_deployment -n {dn}', checks=[
+        self.cmd('deployment group show --resource-group cli_test_resource_group_deployment -n {dn}', checks=[
             self.check('name', '{dn}')
         ])
 
-        self.cmd('deployment export --scope-type ResourceGroup --resource-group cli_test_resource_group_deployment -n {dn}', checks=[
+        self.cmd('deployment group export --resource-group cli_test_resource_group_deployment -n {dn}', checks=[
         ])
 
-        self.cmd('deployment operation list --scope-type ResourceGroup --resource-group cli_test_resource_group_deployment -n {dn}', checks=[
+        self.cmd('deployment operation group list --resource-group cli_test_resource_group_deployment -n {dn}', checks=[
             self.check('length([])', 2)
         ])
 
@@ -436,26 +469,26 @@ class DeploymentTestAtManagementGroup(ScenarioTest):
 
         self.cmd('account management-group create --name cli_test_management_group_deployment', checks=[])
 
-        self.cmd('deployment validate --scope-type ManagementGroup --management-group-id cli_test_management_group_deployment --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
+        self.cmd('deployment mg validate --management-group-id cli_test_management_group_deployment --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('deployment create --scope-type ManagementGroup --management-group-id cli_test_management_group_deployment --location WestUS -n {dn} --template-file {tf} --parameters @"{params}"', checks=[
+        self.cmd('deployment mg create --management-group-id cli_test_management_group_deployment --location WestUS -n {dn} --template-file {tf} --parameters @"{params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
         ])
 
-        self.cmd('deployment list --scope-type ManagementGroup --management-group-id cli_test_management_group_deployment', checks=[
+        self.cmd('deployment mg list --management-group-id cli_test_management_group_deployment', checks=[
             self.check('[0].name', '{dn}'),
         ])
 
-        self.cmd('deployment show --scope-type ManagementGroup --management-group-id cli_test_management_group_deployment -n {dn}', checks=[
+        self.cmd('deployment mg show --management-group-id cli_test_management_group_deployment -n {dn}', checks=[
             self.check('name', '{dn}')
         ])
 
-        self.cmd('deployment export --scope-type ManagementGroup --management-group-id cli_test_management_group_deployment -n {dn}', checks=[
+        self.cmd('deployment mg export --management-group-id cli_test_management_group_deployment -n {dn}', checks=[
         ])
 
-        self.cmd('deployment operation list --scope-type ManagementGroup --management-group-id cli_test_management_group_deployment -n {dn}', checks=[
+        self.cmd('deployment operation mg list --management-group-id cli_test_management_group_deployment -n {dn}', checks=[
             self.check('length([])', 4)
         ])
 
@@ -474,26 +507,26 @@ class DeploymentTestAtTenantScope(ScenarioTest):
 
         self.cmd('account management-group create --name cli_tenant_level_deployment_mg', checks=[])
 
-        self.cmd('deployment validate --scope-type Tenant --location WestUS --template-file {tf}', checks=[
+        self.cmd('deployment tenant validate --location WestUS --template-file {tf}', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('deployment create --scope-type Tenant --location WestUS -n {dn} --template-file {tf}', checks=[
+        self.cmd('deployment tenant create --location WestUS -n {dn} --template-file {tf}', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
         ])
 
-        self.cmd('deployment list --scope-type Tenant', checks=[
+        self.cmd('deployment tenant list', checks=[
             self.check('[0].name', '{dn}'),
         ])
 
-        self.cmd('deployment show --scope-type Tenant -n {dn}', checks=[
+        self.cmd('deployment tenant show -n {dn}', checks=[
             self.check('name', '{dn}')
         ])
 
-        self.cmd('deployment export --scope-type Tenant -n {dn}', checks=[
+        self.cmd('deployment tenant export -n {dn}', checks=[
         ])
 
-        self.cmd('deployment operation list --scope-type Tenant -n {dn}', checks=[
+        self.cmd('deployment operation tenant list -n {dn}', checks=[
             self.check('length([])', 4)
         ])
 

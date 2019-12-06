@@ -189,11 +189,8 @@ def load_arguments(self, _):
         c.argument('operation_ids', nargs='+', help='A list of operation ids to show')
 
     with self.argument_context('deployment') as c:
-        c.argument('scope_type', arg_type=get_enum_type(DeploymentScopeType), options_list=['--scope-type', '-s'], required=True, help="The deployment scope type.")
-        c.argument('resource_group_name', arg_type=resource_group_name_type, completer=get_resource_group_completion_list)
-        c.argument('management_group_id', options_list=['--management-group-id', '-m'], help='The management group id.')
         c.argument('deployment_name', options_list=['--name', '-n'], required=True, help='The deployment name.')
-        c.argument('deployment_location', arg_type=get_location_type(self.cli_ctx))
+        c.argument('deployment_location', arg_type=get_location_type(self.cli_ctx), required=True)
         c.argument('template_file', options_list=['--template-file', '-f'], completer=FilesCompleter(), type=file_type, help="a template file path in the file system")
         c.argument('template_uri', options_list=['--template-uri', '-u'], help='a uri to a remote template file')
         c.argument('parameters', options_list=['--parameters', '-p'], action='append', nargs='+', completer=FilesCompleter())
@@ -204,10 +201,69 @@ def load_arguments(self, _):
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
 
     with self.argument_context('deployment validate') as c:
+        c.argument('deployment_name', options_list=['--name', '-n'], required=False,
+                   help='The deployment name. Default to template file base name')
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
 
-    with self.argument_context('deployment operation show') as c:
+    with self.argument_context('deployment operation') as c:
         c.argument('operation_ids', nargs='+', help='A list of operation ids to show')
+
+    with self.argument_context('deployment sub') as c:
+        c.argument('deployment_location', arg_type=get_location_type(self.cli_ctx), required=True)
+
+    with self.argument_context('deployment sub create') as c:
+        c.argument('deployment_name', options_list=['--name', '-n'], required=False,
+                   help='The deployment name. Default to template file base name')
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
+
+    with self.argument_context('deployment sub validate') as c:
+        c.argument('deployment_name', options_list=['--name', '-n'], required=False,
+                   help='The deployment name. Default to template file base name')
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
+
+    with self.argument_context('deployment group') as c:
+        c.argument('resource_group_name', arg_type=resource_group_name_type, completer=get_resource_group_completion_list, required=True)
+        c.argument('mode', arg_type=get_enum_type(DeploymentMode, default='incremental'), help='Incremental (only add resources to resource group) or Complete (remove extra resources from resource group)')
+
+    with self.argument_context('deployment group create') as c:
+        c.argument('deployment_name', options_list=['--name', '-n'], required=False,
+                   help='The deployment name. Default to template file base name')
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
+
+    with self.argument_context('deployment group validate') as c:
+        c.argument('deployment_name', options_list=['--name', '-n'], required=False,
+                   help='The deployment name. Default to template file base name')
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
+
+    with self.argument_context('deployment mg') as c:
+        c.argument('management_group_id', options_list=['--management-group-id', '-m'], required=True, help='The management group id.')
+        c.argument('deployment_location', arg_type=get_location_type(self.cli_ctx), required=True)
+
+    with self.argument_context('deployment mg create') as c:
+        c.argument('deployment_name', options_list=['--name', '-n'], required=False,
+                   help='The deployment name. Default to template file base name')
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
+
+    with self.argument_context('deployment mg validate') as c:
+        c.argument('deployment_name', options_list=['--name', '-n'], required=False,
+                   help='The deployment name. Default to template file base name')
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
+
+    with self.argument_context('deployment operation mg') as c:
+        c.argument('management_group_id', options_list=['--management-group-id', '-m'], required=True, help='The management group id.')
+
+    with self.argument_context('deployment tenant') as c:
+        c.argument('deployment_location', arg_type=get_location_type(self.cli_ctx), required=True)
+
+    with self.argument_context('deployment tenant create') as c:
+        c.argument('deployment_name', options_list=['--name', '-n'], required=False,
+                   help='The deployment name. Default to template file base name')
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
+
+    with self.argument_context('deployment tenant validate') as c:
+        c.argument('deployment_name', options_list=['--name', '-n'], required=False,
+                   help='The deployment name. Default to template file base name')
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
 
     with self.argument_context('group export') as c:
         c.argument('include_comments', action='store_true')

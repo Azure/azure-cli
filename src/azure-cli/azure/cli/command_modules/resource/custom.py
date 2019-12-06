@@ -401,88 +401,180 @@ class JsonCTemplatePolicy(SansIOHTTPPolicy):
 
             http_request.data = partial_request[:-2] + ", template:" + template.template_as_bytes + r"}}"
 
+def deploy_arm_template_at_subscription_scope(cmd,
+                                              template_file=None, template_uri=None, parameters=None,
+                                              deployment_name=None, deployment_location=None,
+                                              no_wait=False, handle_extended_json_format=False):
+    return _deploy_arm_template_at_subscription_scope(cli_ctx=cmd.cli_ctx,
+                                                      template_file=template_file, template_uri=template_uri, parameters=parameters,
+                                                      deployment_name=deployment_name, deployment_location=deployment_location,
+                                                      validate_only=False,
+                                                      no_wait=no_wait, handle_extended_json_format=handle_extended_json_format)
 
-def _deploy_arm_template_unmodified(cli_ctx,
-                                    scope_type=None, resource_group_name=None, management_group_id=None,
-                                    template_file=None, template_uri=None,
-                                    deployment_name=None, deployment_location=None,
-                                    parameters=None, mode=None, validate_only=False,
-                                    no_wait=False):
+
+def validate_arm_template_at_subscription_scope(cmd,
+                                                template_file=None, template_uri=None, parameters=None,
+                                                deployment_name=None, deployment_location=None,
+                                                no_wait=False, handle_extended_json_format=False):
+    return _deploy_arm_template_at_subscription_scope(cli_ctx=cmd.cli_ctx,
+                                                      template_file=template_file, template_uri=template_uri, parameters=parameters,
+                                                      deployment_name=deployment_name, deployment_location=deployment_location,
+                                                      validate_only=True,
+                                                      no_wait=no_wait, handle_extended_json_format=handle_extended_json_format)
+
+
+def _deploy_arm_template_at_subscription_scope(cli_ctx,
+                                               template_file=None, template_uri=None, parameters=None,
+                                               deployment_name=None, deployment_location=None,
+                                               validate_only=False,
+                                               no_wait=False, handle_extended_json_format=False):
+    deployment_properties = _prepare_deployment_properties(cli_ctx=cli_ctx, template_file=template_file,
+                                                           template_uri=template_uri,
+                                                           parameters=parameters, mode='Incremental')
+
+    mgmt_client = _get_deployment_management_client(cli_ctx, handle_extended_json_format=handle_extended_json_format)
+
+    if validate_only:
+        return sdk_no_wait(no_wait, mgmt_client.deployments.validate_at_subscription_scope,
+                           deployment_name, deployment_properties, deployment_location)
+    return sdk_no_wait(no_wait, mgmt_client.deployments.create_or_update_at_subscription_scope,
+                       deployment_name, deployment_properties, deployment_location)
+
+
+def deploy_arm_template_at_resource_group(cmd,
+                                          resource_group_name=None,
+                                          template_file=None, template_uri=None, parameters=None,
+                                          deployment_name=None, mode=None,
+                                          no_wait=False, handle_extended_json_format=False):
+    return _deploy_arm_template_at_resource_group(cli_ctx=cmd.cli_ctx,
+                                                  resource_group_name=resource_group_name,
+                                                  template_file=template_file, template_uri=template_uri, parameters=parameters,
+                                                  deployment_name=deployment_name,
+                                                  mode=mode, validate_only=False,
+                                                  no_wait=no_wait, handle_extended_json_format=handle_extended_json_format)
+
+
+def validate_arm_template_at_resource_group(cmd,
+                                            resource_group_name=None,
+                                            template_file=None, template_uri=None, parameters=None,
+                                            deployment_name=None, mode=None,
+                                            no_wait=False, handle_extended_json_format=False):
+    return _deploy_arm_template_at_resource_group(cli_ctx=cmd.cli_ctx,
+                                                  resource_group_name=resource_group_name,
+                                                  template_file=template_file, template_uri=template_uri, parameters=parameters,
+                                                  deployment_name=deployment_name,
+                                                  mode=mode, validate_only=True,
+                                                  no_wait=no_wait, handle_extended_json_format=handle_extended_json_format)
+
+
+def _deploy_arm_template_at_resource_group(cli_ctx,
+                                           resource_group_name=None,
+                                           template_file=None, template_uri=None, parameters=None,
+                                           deployment_name=None,
+                                           mode=None, validate_only=False,
+                                           no_wait=False, handle_extended_json_format=False):
+    deployment_properties = _prepare_deployment_properties(cli_ctx=cli_ctx, template_file=template_file,
+                                                           template_uri=template_uri,
+                                                           parameters=parameters, mode=mode)
+
+    mgmt_client = _get_deployment_management_client(cli_ctx, handle_extended_json_format=handle_extended_json_format)
+
+    if validate_only:
+        return sdk_no_wait(no_wait, mgmt_client.deployments.validate, resource_group_name,
+                           deployment_name, deployment_properties)
+    return sdk_no_wait(no_wait, mgmt_client.deployments.create_or_update, resource_group_name,
+                       deployment_name, deployment_properties)
+
+
+def deploy_arm_template_at_management_group(cmd,
+                                            management_group_id=None,
+                                            template_file=None, template_uri=None, parameters=None,
+                                            deployment_name=None, deployment_location=None,
+                                            no_wait=False, handle_extended_json_format=False):
+    return _deploy_arm_template_at_management_group(cli_ctx=cmd.cli_ctx,
+                                                    management_group_id=management_group_id,
+                                                    template_file=template_file, template_uri=template_uri, parameters=parameters,
+                                                    deployment_name=deployment_name, deployment_location=deployment_location,
+                                                    validate_only=False,
+                                                    no_wait=no_wait, handle_extended_json_format=handle_extended_json_format)
+
+
+def validate_arm_template_at_management_group(cmd,
+                                              management_group_id=None,
+                                              template_file=None, template_uri=None, parameters=None,
+                                              deployment_name=None, deployment_location=None,
+                                              no_wait=False, handle_extended_json_format=False):
+    return _deploy_arm_template_at_management_group(cli_ctx=cmd.cli_ctx,
+                                                    management_group_id=management_group_id,
+                                                    template_file=template_file, template_uri=template_uri, parameters=parameters,
+                                                    deployment_name=deployment_name, deployment_location=deployment_location,
+                                                    validate_only=True,
+                                                    no_wait=no_wait, handle_extended_json_format=handle_extended_json_format)
+
+
+def _deploy_arm_template_at_management_group(cli_ctx,
+                                             management_group_id=None,
+                                             template_file=None, template_uri=None, parameters=None,
+                                             deployment_name=None, deployment_location=None,
+                                             validate_only=False,
+                                             no_wait=False, handle_extended_json_format=False):
+    deployment_properties = _prepare_deployment_properties(cli_ctx=cli_ctx, template_file=template_file,
+                                                           template_uri=template_uri,
+                                                           parameters=parameters, mode='Incremental')
+
+    mgmt_client = _get_deployment_management_client(cli_ctx, handle_extended_json_format=handle_extended_json_format)
+
+    if validate_only:
+        return sdk_no_wait(no_wait, mgmt_client.deployments.validate_at_management_group_scope,
+                           management_group_id, deployment_name, deployment_properties, deployment_location)
+    return sdk_no_wait(no_wait, mgmt_client.deployments.create_or_update_at_management_group_scope,
+                       management_group_id, deployment_name, deployment_properties, deployment_location)
+
+
+def deploy_arm_template_at_tenant_scope(cmd,
+                                        template_file=None, template_uri=None, parameters=None,
+                                        deployment_name=None, deployment_location=None,
+                                        no_wait=False, handle_extended_json_format=False):
+    return _deploy_arm_template_at_tenant_scope(cli_ctx=cmd.cli_ctx,
+                                                template_file=template_file, template_uri=template_uri, parameters=parameters,
+                                                deployment_name=deployment_name, deployment_location=deployment_location,
+                                                validate_only=False,
+                                                no_wait=no_wait, handle_extended_json_format=handle_extended_json_format)
+
+
+def validate_arm_template_at_tenant_scope(cmd,
+                                          template_file=None, template_uri=None, parameters=None,
+                                          deployment_name=None, deployment_location=None,
+                                          no_wait=False, handle_extended_json_format=False):
+    return _deploy_arm_template_at_tenant_scope(cli_ctx=cmd.cli_ctx,
+                                                template_file=template_file, template_uri=template_uri, parameters=parameters,
+                                                deployment_name=deployment_name, deployment_location=deployment_location,
+                                                validate_only=True,
+                                                no_wait=no_wait, handle_extended_json_format=handle_extended_json_format)
+
+
+def _deploy_arm_template_at_tenant_scope(cli_ctx,
+                                         template_file=None, template_uri=None, parameters=None,
+                                         deployment_name=None, deployment_location=None,
+                                         validate_only=False,
+                                         no_wait=False, handle_extended_json_format=False):
+    deployment_properties = _prepare_deployment_properties(cli_ctx=cli_ctx, template_file=template_file,
+                                                           template_uri=template_uri,
+                                                           parameters=parameters, mode='Incremental')
+
+    mgmt_client = _get_deployment_management_client(cli_ctx, handle_extended_json_format=handle_extended_json_format)
+
+    if validate_only:
+        return sdk_no_wait(no_wait, mgmt_client.deployments.validate_at_tenant_scope,
+                           deployment_name, deployment_properties, deployment_location)
+    return sdk_no_wait(no_wait, mgmt_client.deployments.create_or_update_at_tenant_scope,
+                       deployment_name, deployment_properties, deployment_location)
+
+
+def _prepare_deployment_properties(cli_ctx, template_file=None, template_uri=None, parameters=None, mode=None):
     DeploymentProperties, TemplateLink = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
                                                  'DeploymentProperties', 'TemplateLink', mod='models')
-    template = None
-    template_link = None
-    template_obj = None
-    if template_uri:
-        template_link = TemplateLink(uri=template_uri)
-        template_content = _urlretrieve(template_uri).decode('utf-8')
-        template_obj = _remove_comments_from_json(template_content)
-    else:
-        template_content = read_file_content(template_file)
-        template_obj = _remove_comments_from_json(template_content)
 
-    template_param_defs = template_obj.get('parameters', {})
-    template_obj['resources'] = template_obj.get('resources', [])
-    parameters = _process_parameters(template_param_defs, parameters) or {}
-    parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters)
-
-    template = json.loads(json.dumps(template))
-    parameters = json.loads(json.dumps(parameters))
-
-    properties = DeploymentProperties(template=template, template_link=template_link,
-                                      parameters=parameters, mode=mode)
-
-    smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
-
-    deployments_operation_group = smc.deployments  # This solves the multi-api for you
-
-    # pylint: disable=protected-access
-    deployments_operation_group._serialize = JSONSerializer(
-        deployments_operation_group._serialize.dependencies
-    )
-
-    # Plug this as default HTTP pipeline
-    from msrest.pipeline import Pipeline
-    from msrest.pipeline.requests import (
-        RequestsCredentialsPolicy,
-        RequestsPatchSession,
-        PipelineRequestsHTTPSender
-    )
-    from msrest.universal_http.requests import RequestsHTTPSender
-
-    smc.config.pipeline = Pipeline(
-        policies=[
-            JsonCTemplatePolicy(),
-            smc.config.user_agent_policy,
-            RequestsPatchSession(),
-            smc.config.http_logger_policy,
-            RequestsCredentialsPolicy(smc.config.credentials)
-        ],
-        sender=PipelineRequestsHTTPSender(RequestsHTTPSender(smc.config))
-    )
-
-    smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
-
-    if scope_type == 'Subscription':
-        return _deploy_at_subscription_scope(smc, deployment_name, deployment_location, properties, validate_only, no_wait)
-
-    if scope_type == 'ResourceGroup':
-        return _deploy_at_resource_group(smc, resource_group_name, deployment_name, properties, validate_only, no_wait)
-
-    if scope_type == 'ManagementGroup':
-        return _deploy_at_management_group(smc, management_group_id, deployment_name, deployment_location, properties, validate_only, no_wait)
-
-    return _deploy_at_tenant_scope(smc, deployment_name, deployment_location, properties, validate_only, no_wait)
-
-
-def _deploy_arm_template(cli_ctx,
-                         scope_type=None, resource_group_name=None, management_group_id=None,
-                         template_file=None, template_uri=None,
-                         deployment_name=None, deployment_location=None,
-                         parameters=None, mode=None, validate_only=False,
-                         no_wait=False):
-    DeploymentProperties, TemplateLink = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
-                                                 'DeploymentProperties', 'TemplateLink', mod='models')
     template = None
     template_link = None
     template_obj = None
@@ -504,50 +596,41 @@ def _deploy_arm_template(cli_ctx,
     properties = DeploymentProperties(template=template, template_link=template_link,
                                       parameters=parameters, mode=mode)
 
+    return properties
+
+
+def _get_deployment_management_client(cli_ctx, handle_extended_json_format=False):
     smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
 
-    if scope_type == 'Subscription':
-        return _deploy_at_subscription_scope(smc, deployment_name, deployment_location, properties, validate_only, no_wait)
+    if handle_extended_json_format:
+        deployments_operation_group = smc.deployments  # This solves the multi-api for you
 
-    if scope_type == 'ResourceGroup':
-        return _deploy_at_resource_group(smc, resource_group_name, deployment_name, properties, validate_only, no_wait)
+        # pylint: disable=protected-access
+        deployments_operation_group._serialize = JSONSerializer(
+            deployments_operation_group._serialize.dependencies
+        )
 
-    if scope_type == 'ManagementGroup':
-        return _deploy_at_management_group(smc, management_group_id, deployment_name, deployment_location, properties, validate_only, no_wait)
+        # Plug this as default HTTP pipeline
+        from msrest.pipeline import Pipeline
+        from msrest.pipeline.requests import (
+            RequestsCredentialsPolicy,
+            RequestsPatchSession,
+            PipelineRequestsHTTPSender
+        )
+        from msrest.universal_http.requests import RequestsHTTPSender
 
-    return _deploy_at_tenant_scope(smc, deployment_name, deployment_location, properties, validate_only, no_wait)
+        smc.config.pipeline = Pipeline(
+            policies=[
+                JsonCTemplatePolicy(),
+                smc.config.user_agent_policy,
+                RequestsPatchSession(),
+                smc.config.http_logger_policy,
+                RequestsCredentialsPolicy(smc.config.credentials)
+            ],
+            sender=PipelineRequestsHTTPSender(RequestsHTTPSender(smc.config))
+        )
 
-
-def _deploy_at_subscription_scope(mgmt_client, deployment_name=None, deployment_location=None, deployment_properties=None, validate_only=False, no_wait=False):
-    if validate_only:
-        return sdk_no_wait(no_wait, mgmt_client.deployments.validate_at_subscription_scope,
-                           deployment_name, deployment_properties, deployment_location)
-    return sdk_no_wait(no_wait, mgmt_client.deployments.create_or_update_at_subscription_scope,
-                       deployment_name, deployment_properties, deployment_location)
-
-
-def _deploy_at_resource_group(mgmt_client, resource_group_name=None, deployment_name=None, deployment_properties=None, validate_only=False, no_wait=False):
-    if validate_only:
-        return sdk_no_wait(no_wait, mgmt_client.deployments.validate, resource_group_name,
-                           deployment_name, deployment_properties)
-    return sdk_no_wait(no_wait, mgmt_client.deployments.create_or_update, resource_group_name,
-                       deployment_name, deployment_properties)
-
-
-def _deploy_at_management_group(mgmt_client, management_group_id=None, deployment_name=None, deployment_location=None, deployment_properties=None, validate_only=False, no_wait=False):
-    if validate_only:
-        return sdk_no_wait(no_wait, mgmt_client.deployments.validate_at_management_group_scope,
-                           management_group_id, deployment_name, deployment_properties, deployment_location)
-    return sdk_no_wait(no_wait, mgmt_client.deployments.create_or_update_at_management_group_scope,
-                       management_group_id, deployment_name, deployment_properties, deployment_location)
-
-
-def _deploy_at_tenant_scope(mgmt_client, deployment_name=None, deployment_location=None, deployment_properties=None, validate_only=False, no_wait=False):
-    if validate_only:
-        return sdk_no_wait(no_wait, mgmt_client.deployments.validate_at_tenant_scope,
-                           deployment_name, deployment_properties, deployment_location)
-    return sdk_no_wait(no_wait, mgmt_client.deployments.create_or_update_at_tenant_scope,
-                       deployment_name, deployment_properties, deployment_location)
+    return smc
 
 
 def _list_resources_odata_filter_builder(resource_group_name=None, resource_provider_namespace=None,
@@ -950,19 +1033,6 @@ def list_applications(cmd, resource_group_name=None):
     return list(applications)
 
 
-def list_deployments(cmd, scope_type, resource_group_name=None, management_group_id=None):
-    if scope_type == 'Subscription':
-        return list_deployments_at_subscription_scope(cmd)
-
-    if scope_type == 'ResourceGroup':
-        return list_deployments_at_resource_group(cmd, resource_group_name)
-
-    if scope_type == 'ManagementGroup':
-        return list_deployments_at_management_group(cmd, management_group_id)
-
-    return list_deployments_at_tenant_scope(cmd)
-
-
 def list_deployments_at_subscription_scope(cmd):
     rcf = _resource_client_factory(cmd.cli_ctx)
     return rcf.deployments.list_at_subscription_scope()
@@ -983,19 +1053,6 @@ def list_deployments_at_tenant_scope(cmd):
     return rcf.deployments.list_at_tenant_scope()
 
 
-def get_deployment(cmd, scope_type, deployment_name, resource_group_name=None, management_group_id=None):
-    if scope_type == 'Subscription':
-        return get_deployment_at_subscription_scope(cmd, deployment_name)
-
-    if scope_type == 'ResourceGroup':
-        return get_deployment_at_resource_group(cmd, resource_group_name, deployment_name)
-
-    if scope_type == 'ManagementGroup':
-        return get_deployment_at_management_group(cmd, management_group_id, deployment_name)
-
-    return get_deployment_at_tenant_scope(cmd, deployment_name)
-
-
 def get_deployment_at_subscription_scope(cmd, deployment_name):
     rcf = _resource_client_factory(cmd.cli_ctx)
     return rcf.deployments.get_at_subscription_scope(deployment_name)
@@ -1014,23 +1071,6 @@ def get_deployment_at_management_group(cmd, management_group_id, deployment_name
 def get_deployment_at_tenant_scope(cmd, deployment_name):
     rcf = _resource_client_factory(cmd.cli_ctx)
     return rcf.deployments.get_at_tenant_scope(deployment_name)
-
-
-def wait_deployment(cmd, scope_type, deployment_name, resource_group_name=None, management_group_id=None):
-    return get_deployment(cmd, scope_type, deployment_name, resource_group_name, management_group_id)
-
-
-def delete_deployment(cmd, scope_type, deployment_name, resource_group_name=None, management_group_id=None):
-    if scope_type == 'Subscription':
-        return delete_deployment_at_subscription_scope(cmd, deployment_name)
-
-    if scope_type == 'ResourceGroup':
-        return delete_deployment_at_resource_group(cmd, resource_group_name, deployment_name)
-
-    if scope_type == 'ManagementGroup':
-        return delete_deployment_at_management_group(cmd, management_group_id, deployment_name)
-
-    return delete_deployment_at_tenant_scope(cmd, deployment_name)
 
 
 def delete_deployment_at_subscription_scope(cmd, deployment_name):
@@ -1064,77 +1104,41 @@ def deploy_arm_template(cmd, resource_group_name,
                                      deployment_name, parameters, mode, rollback_on_error, no_wait=no_wait)
 
 
-def deploy_arm_template_at_scope(cmd,
-                                 scope_type=None, resource_group_name=None, management_group_id=None,
-                                 template_file=None, template_uri=None,
-                                 deployment_name=None, deployment_location=None,
-                                 parameters=None, no_wait=False, handle_extended_json_format=None):
-
-    if handle_extended_json_format:
-        _deploy_arm_template_unmodified(cmd.cli_ctx,
-                                        scope_type, resource_group_name, management_group_id,
-                                        template_file, template_uri,
-                                        deployment_name, deployment_location,
-                                        parameters, 'Incremental', no_wait=no_wait)
-
-    return _deploy_arm_template(cmd.cli_ctx,
-                                scope_type, resource_group_name, management_group_id,
-                                template_file, template_uri,
-                                deployment_name, deployment_location,
-                                parameters, 'Incremental', no_wait=no_wait)
-
-
 def validate_arm_template(cmd, resource_group_name, template_file=None, template_uri=None,
                           parameters=None, mode=None, rollback_on_error=None, handle_extended_json_format=None):
     if handle_extended_json_format:
-        return _deploy_arm_template_unmodified(cmd.cli_ctx, resource_group_name, template_file, template_uri,
+        return _deploy_arm_template_core_unmodified(cmd.cli_ctx, resource_group_name, template_file, template_uri,
                                                'deployment_dry_run', parameters, mode, rollback_on_error, validate_only=True)
     return _deploy_arm_template_core(cmd.cli_ctx, resource_group_name, template_file, template_uri,
                                      'deployment_dry_run', parameters, mode, rollback_on_error, validate_only=True)
 
 
-def validate_arm_template_at_scope(cmd, scope_type=None, resource_group_name=None, management_group_id=None,
-                                   template_file=None, template_uri=None,
-                                   deployment_location=None, parameters=None):
-    return _deploy_arm_template(cmd.cli_ctx,
-                                scope_type, resource_group_name, management_group_id,
-                                template_file, template_uri,
-                                'deployment_dry_run', deployment_location,
-                                parameters, 'Incremental',
-                                validate_only=True)
-
-
-def export_deployment_template(cmd, scope_type, deployment_name, resource_group_name=None, management_group_id=None):
-    if scope_type == 'Subscription':
-        result = export_template_at_subscription_scope(cmd, deployment_name)
-    elif scope_type == 'ResourceGroup':
-        result = export_template_at_resource_group(cmd, resource_group_name, deployment_name)
-    elif scope_type == 'ManagementGroup':
-        result = export_template_at_management_group(cmd, management_group_id, deployment_name)
-    else:
-        result = export_template_at_tenant_scope(cmd, deployment_name)
+def export_template_at_subscription_scope(cmd, deployment_name):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    result = rcf.deployments.export_template_at_subscription_scope(deployment_name)
 
     print(json.dumps(result.template, indent=2))  # pylint: disable=no-member
 
 
-def export_template_at_subscription_scope(cmd, deployment_name):
-    rcf = _resource_client_factory(cmd.cli_ctx)
-    return rcf.deployments.export_template_at_subscription_scope(deployment_name)
-
-
 def export_template_at_resource_group(cmd, resource_group_name, deployment_name):
     rcf = _resource_client_factory(cmd.cli_ctx)
-    return rcf.deployments.export_template(resource_group_name, deployment_name)
+    result = rcf.deployments.export_template(resource_group_name, deployment_name)
+
+    print(json.dumps(result.template, indent=2))  # pylint: disable=no-member
 
 
 def export_template_at_management_group(cmd, management_group_id, deployment_name):
     rcf = _resource_client_factory(cmd.cli_ctx)
-    return rcf.deployments.export_template_at_management_group_scope(management_group_id, deployment_name)
+    result = rcf.deployments.export_template_at_management_group_scope(management_group_id, deployment_name)
+
+    print(json.dumps(result.template, indent=2))  # pylint: disable=no-member
 
 
 def export_template_at_tenant_scope(cmd, deployment_name):
     rcf = _resource_client_factory(cmd.cli_ctx)
-    return rcf.deployments.export_template_at_tenant_scope(deployment_name)
+    result = rcf.deployments.export_template_at_tenant_scope(deployment_name)
+
+    print(json.dumps(result.template, indent=2))  # pylint: disable=no-member
 
 
 def export_deployment_as_template(cmd, resource_group_name, deployment_name):
@@ -1330,36 +1334,36 @@ def get_deployment_operations(client, resource_group_name, deployment_name, oper
     return result
 
 
-def get_deployment_operations_at_scope(cmd, scope_type, deployment_name, operation_ids, resource_group_name=None, management_group_id=None):
-    """get a deployment's operation."""
-
-    if scope_type == 'Subscription':
-        get_function = lambda op_id: get_deployment_operation_at_subscription_scope(cmd, deployment_name, op_id)  # noqa: E731
-    elif scope_type == 'ResourceGroup':
-        get_function = lambda op_id: get_deployment_operation_at_resource_group(cmd, resource_group_name, deployment_name, op_id)  # noqa: E731
-    elif scope_type == 'ManagementGroup':
-        get_function = lambda op_id: get_deployment_operation_at_management_group(cmd, management_group_id, deployment_name, op_id)  # noqa: E731
-    else:
-        get_function = lambda op_id: get_deployment_operation_at_tenant_scope(cmd, deployment_name, op_id)  # noqa: E731
-
+def get_deployment_operations_at_subscription_scope(client, deployment_name, operation_ids):
     result = []
     for op_id in operation_ids:
-        dep = get_function(op_id)
+        deployment = client.get_at_subscription_scope(deployment_name, op_id)
+        result.append(deployment)
+    return result
+
+
+def get_deployment_operations_at_resource_group(client, resource_group_name, deployment_name, operation_ids):
+    result = []
+    for op_id in operation_ids:
+        dep = client.get(resource_group_name, deployment_name, op_id)
         result.append(dep)
     return result
 
 
-def list_deployment_operations_at_scope(cmd, scope_type, deployment_name, resource_group_name=None, management_group_id=None):
-    if scope_type == 'Subscription':
-        return list_deployment_operations_at_subscription_scope(cmd, deployment_name)
+def get_deployment_operations_at_management_group(client, management_group_id, deployment_name, operation_ids):
+    result = []
+    for op_id in operation_ids:
+        dep = client.get_at_management_group_scope(management_group_id, deployment_name, op_id)
+        result.append(dep)
+    return result
 
-    if scope_type == 'ResourceGroup':
-        return list_deployment_operations_at_resource_group(cmd, resource_group_name, deployment_name)
 
-    if scope_type == 'ManagementGroup':
-        return list_deployment_operations_at_management_group(cmd, management_group_id, deployment_name)
-
-    return list_deployment_operations_at_tenant_scope(cmd, deployment_name)
+def get_deployment_operations_at_tenant_scope(client, deployment_name, operation_ids):
+    result = []
+    for op_id in operation_ids:
+        dep = client.get_at_tenant_scope(deployment_name, op_id)
+        result.append(dep)
+    return result
 
 
 def list_deployment_operations_at_subscription_scope(cmd, deployment_name):
