@@ -8,6 +8,33 @@ trigger:
     - '*'
 
 jobs:
+- job: CredScan
+  displayName: "Credential Scan"
+
+  pool:
+    vmImage: "windows-2019"
+  steps:
+  - task: CredScan@2
+    inputs:
+      toolMajorVersion: 'V2'
+
+  - task: PostAnalysis@1
+    inputs:
+      AllTools: false
+      APIScan: false
+      BinSkim: false
+      CodesignValidation: false
+      CredScan: true
+      FortifySCA: false
+      FxCop: false
+      ModernCop: false
+      PoliCheck: false
+      RoslynAnalyzers: false
+      SDLNativeRules: false
+      Semmle: false
+      TSLint: false
+      ToolLogsNotFoundAction: 'Standard'
+
 - job: ExtractMetadata
   displayName: Extract Metadata
 
@@ -798,6 +825,32 @@ jobs:
         TargetPath: $(Build.ArtifactStagingDirectory)
         ArtifactName: ubuntu-disco
 
+- job: BuildUbuntuEoan
+  displayName: Build Ubuntu Eoan Package
+
+  dependsOn: BuildPythonWheel
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+    - task: DownloadPipelineArtifact@1
+      displayName: 'Download Build Artifacts'
+      inputs:
+        TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
+        artifactName: pypi
+
+    - bash: scripts/release/debian/pipeline.sh
+      displayName: 'Build Ubuntu Eoan Package'
+      env:
+        DISTRO: eoan
+        DISTRO_BASE_IMAGE: ubuntu:eoan
+
+    - task: PublishPipelineArtifact@0
+      displayName: 'Publish Artifact: debian'
+      inputs:
+        TargetPath: $(Build.ArtifactStagingDirectory)
+        ArtifactName: ubuntu-eoan
+
 - job: BuildDebianJessie
   displayName: Build Debian Jessie Package
 
@@ -898,6 +951,7 @@ jobs:
    - BuildDebianStretch
    - BuildUbuntuCosmic
    - BuildUbuntuDisco
+   - BuildUbuntuEoan
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
   pool:
     vmImage: 'ubuntu-16.04'
@@ -962,6 +1016,13 @@ jobs:
       artifactName: ubuntu-trusty
 
 
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Ubuntu:Eoan Builds'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
+      artifactName: ubuntu-eoan    
+
+
   - bash: |
        set -exv
 
@@ -982,8 +1043,8 @@ jobs:
        done
 
        # Distros that do require libssl1.1
-       DISTROS=(bionic cosmic disco buster)
-       BASE_IMAGES=(ubuntu:bionic ubuntu:cosmic ubuntu:disco debian:buster)
+       DISTROS=(bionic cosmic disco eoan buster)
+       BASE_IMAGES=(ubuntu:bionic ubuntu:cosmic ubuntu:disco ubuntu:eoan debian:buster)
 
        for i in ${!DISTROS[@]}; do
            echo "== Test debian package on ${DISTROS[$i]} =="
