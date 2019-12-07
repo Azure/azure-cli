@@ -84,7 +84,7 @@ class CLIPrintMixin(CLIHelp):
         # That way it can fall back to the default one if there was a server
         # error more elegantly.
         if in_cloud_console():
-            examples = AzCliHelp.get_generated_examples(help_file.command)
+            examples = AzCliHelp.example_provider(help_file.command)
             if examples:
                 use_default_examples = False
                 for e in examples:
@@ -208,8 +208,9 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
 
     # This method is meant to be overridden by one in the Find module.
     @staticmethod
-    def get_generated_examples():
-        return []
+    def example_provider(placeholder):
+        placeholder = []
+        return placeholder
 
 
 class CliHelpFile(KnackHelpFile):

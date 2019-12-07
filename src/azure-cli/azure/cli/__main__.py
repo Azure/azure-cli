@@ -10,7 +10,9 @@ import timeit
 from knack.completion import ARGCOMPLETE_ENV_NAME
 from knack.log import get_logger
 
-from azure.cli.utils import get_default_cli
+from azure.cli.core import get_default_cli
+from azure.cli.core._help import AzCliHelp
+from azure.cli.command_modules.find.custom import get_generated_examples
 
 import azure.cli.core.telemetry as telemetry
 
@@ -31,6 +33,9 @@ def cli_main(cli, args):
 
 
 az_cli = get_default_cli()
+
+# Inject the Aladdin example service into the core CLI for help usage
+AzCliHelp.example_provider = get_generated_examples
 
 telemetry.set_application(az_cli, ARGCOMPLETE_ENV_NAME)
 
