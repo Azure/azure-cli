@@ -574,8 +574,12 @@ def send_raw_request(cli_ctx, method, uri, headers=None, uri_parameters=None,  #
     if not skip_authorization_header and uri.lower().startswith('https://'):
         if not resource:
             endpoints = cli_ctx.cloud.endpoints
+            from azure.cli.core.cloud import CloudEndpointNotSetException
             for p in [x for x in dir(endpoints) if not x.startswith('_')]:
-                value = getattr(endpoints, p)
+                try:
+                    value = getattr(endpoints, p)
+                except CloudEndpointNotSetException:
+                    continue
                 if isinstance(value, six.string_types) and uri.lower().startswith(value.lower()):
                     resource = value
                     break
