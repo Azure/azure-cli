@@ -44,6 +44,10 @@ def cli_redis_update(cmd, instance, sku=None, vm_size=None):
         if 'maxmemory-delta' in instance.redis_configuration:
             instance.redis_configuration.pop('maxmemory-delta')
 
+    # Trim zonal-configuration
+    if 'zonal-configuration' in instance.redis_configuration:
+        instance.redis_configuration.pop('zonal-configuration')
+
     # pylint: disable=too-many-function-args
     update_params = RedisUpdateParameters(
         redis_configuration=instance.redis_configuration,
