@@ -287,7 +287,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         with open(exported_file_path) as json_file:
             exported_kvs = json.load(json_file)
         assert only_kvs == exported_kvs
-        
+
         # Prefix addition test
         self.kwargs.update({
             'label': 'PrefixTest',
@@ -302,7 +302,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         with open(exported_file_path) as json_file:
             exported_kvs = json.load(json_file)
         assert prefix_added_kvs == exported_kvs
-        
+
         # Prefix trimming test
         self.cmd(
             'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} --prefix {prefix} -y')
@@ -322,7 +322,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         with open(exported_file_path) as json_file:
             exported_kvs = json.load(json_file)
         assert key_filtered_features == exported_kvs
-        
+
         # Separator test
         self.kwargs.update({
             'label': 'SeparatorTest',
