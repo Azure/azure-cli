@@ -11,6 +11,7 @@ except ImportError:
 
 import time
 from json import loads
+from enum import Enum
 from base64 import b64encode
 import requests
 from requests import RequestException
@@ -36,10 +37,77 @@ logger = get_logger(__name__)
 
 EMPTY_GUID = '00000000-0000-0000-0000-000000000000'
 ALLOWED_HTTP_METHOD = ['get', 'patch', 'put', 'delete']
-ACCESS_TOKEN_PERMISSION = ['pull', 'push', 'delete', 'push,pull', 'delete,pull']
-
 AAD_TOKEN_BASE_ERROR_MESSAGE = "Unable to get AAD authorization tokens with message"
 ADMIN_USER_BASE_ERROR_MESSAGE = "Unable to get admin user credentials with message"
+ALLOWS_BASIC_AUTH = "allows_basic_auth"
+
+
+class RepoAccessTokenPermission(Enum):
+    METADATA_READ = 'metadata_read'
+    METADATA_WRITE = 'metadata_write'
+    DELETE = 'delete'
+    META_WRITE_META_READ = '{},{}'.format(METADATA_WRITE, METADATA_READ)
+    DELETE_META_READ = '{},{}'.format(DELETE, METADATA_READ)
+
+
+class HelmAccessTokenPermission(Enum):
+    PULL = 'pull'
+    PUSH = 'push'
+    DELETE = 'delete'
+    PUSH_PULL = 'push,pull'
+    DELETE_PULL = 'delete,pull'
+
+
+def _handle_challenge_phase(login_server,
+                            repository,
+                            artifact_repository,
+                            permission,
+                            is_aad_token=True,
+                            is_diagnostics_context=False):
+
+    if repository and artifact_repository:
+        raise ValueError("Only one of repository and artifact_repository can be provided.")
+
+    repo_permissions = {permission.value for permission in RepoAccessTokenPermission}
+    if repository and permission not in repo_permissions:
+        raise ValueError(
+            "Permission is required for a repository. Allowed access token permission: {}"
+            .format(repo_permissions))
+
+    helm_permissions = {permission.value for permission in HelmAccessTokenPermission}
+    if artifact_repository and permission not in helm_permissions:
+        raise ValueError(
+            "Permission is required for an artifact_repository. Allowed access token permission: {}"
+            .format(helm_permissions))
+
+    login_server = login_server.rstrip('/')
+
+    challenge = requests.get('https://' + login_server + '/v2/', verify=(not should_disable_connection_verify()))
+    if challenge.status_code != 401 or 'WWW-Authenticate' not in challenge.headers:
+        from ._errors import CONNECTIVITY_CHALLENGE_ERROR
+        if is_diagnostics_context:
+            return CONNECTIVITY_CHALLENGE_ERROR.format_error_message(login_server)
+        raise CLIError(CONNECTIVITY_CHALLENGE_ERROR.format_error_message(login_server).get_error_message())
+
+    authenticate = challenge.headers['WWW-Authenticate']
+
+    tokens = authenticate.split(' ', 2)
+
+    if not is_aad_token and tokens[0].lower() == 'basic':
+        return {ALLOWS_BASIC_AUTH: True}
+
+    token_params = {y[0]: y[1].strip('"') for y in (x.strip().split('=', 2) for x in tokens[1].split(','))} \
+        if len(tokens) >= 2 and tokens[0].lower() == 'bearer' else None
+
+    if not token_params or 'realm' not in token_params or 'service' not in token_params:
+        from ._errors import CONNECTIVITY_AAD_LOGIN_ERROR, CONNECTIVITY_WWW_AUTHENTICATE_ERROR
+        error = CONNECTIVITY_AAD_LOGIN_ERROR if is_aad_token else CONNECTIVITY_WWW_AUTHENTICATE_ERROR
+
+        if is_diagnostics_context:
+            return error.format_error_message(login_server)
+        raise CLIError(error.format_error_message(login_server).get_error_message())
+
+    return token_params
 
 
 def _get_aad_token_after_challenge(cli_ctx,
@@ -125,39 +193,15 @@ def _get_aad_token(cli_ctx,
     :param str artifact_repository: Artifact repository for which the access token is requested
     :param str permission: The requested permission on the repository, '*' or 'pull'
     """
-    if repository and artifact_repository:
-        raise ValueError("Only one of repository and artifact_repository can be provided.")
+    token_params = _handle_challenge_phase(
+        login_server, repository, artifact_repository, permission, True, is_diagnostics_context
+    )
 
-    if (repository or artifact_repository) and permission not in ACCESS_TOKEN_PERMISSION:
-        raise ValueError(
-            "Permission is required for a repository or artifact_repository. Allowed access token permission: {}"
-            .format(ACCESS_TOKEN_PERMISSION))
-
-    login_server = login_server.rstrip('/')
-
-    challenge = requests.get('https://' + login_server + '/v2/', verify=(not should_disable_connection_verify()))
-    if challenge.status_code not in [401] or 'WWW-Authenticate' not in challenge.headers:
-        from ._errors import CONNECTIVITY_CHALLENGE_ERROR
+    from ._errors import ErrorClass
+    if isinstance(token_params, ErrorClass):
         if is_diagnostics_context:
-            return CONNECTIVITY_CHALLENGE_ERROR.format_error_message(login_server)
-        raise CLIError(CONNECTIVITY_CHALLENGE_ERROR.format_error_message(login_server).get_error_message())
-
-    authenticate = challenge.headers['WWW-Authenticate']
-
-    tokens = authenticate.split(' ', 2)
-    if len(tokens) < 2 or tokens[0].lower() != 'bearer':
-        from ._errors import CONNECTIVITY_AAD_LOGIN_ERROR
-        if is_diagnostics_context:
-            return CONNECTIVITY_AAD_LOGIN_ERROR.format_error_message(login_server)
-        raise CLIError(CONNECTIVITY_AAD_LOGIN_ERROR.format_error_message(login_server).get_error_message())
-
-    token_params = {y[0]: y[1].strip('"') for y in
-                    (x.strip().split('=', 2) for x in tokens[1].split(','))}
-    if 'realm' not in token_params or 'service' not in token_params:
-        from ._errors import CONNECTIVITY_AAD_LOGIN_ERROR
-        if is_diagnostics_context:
-            return CONNECTIVITY_AAD_LOGIN_ERROR.format_error_message(login_server)
-        raise CLIError(CONNECTIVITY_AAD_LOGIN_ERROR.format_error_message(login_server).get_error_message())
+            return token_params
+        raise CLIError(token_params.get_error_message())
 
     return _get_aad_token_after_challenge(cli_ctx,
                                           token_params,
@@ -169,6 +213,73 @@ def _get_aad_token(cli_ctx,
                                           is_diagnostics_context)
 
 
+def _get_token_with_username_and_password(login_server,
+                                          username,
+                                          password,
+                                          repository=None,
+                                          artifact_repository=None,
+                                          permission=None,
+                                          is_login_context=False,
+                                          is_diagnostics_context=False):
+    """Decides and obtains credentials for a registry using username and password.
+       To be used for scoped access credentials.
+    :param str login_server: The registry login server URL to log in to
+    :param bool only_refresh_token: Whether to ask for only refresh token, or for both refresh and access tokens
+    :param str repository: Repository for which the access token is requested
+    :param str artifact_repository: Artifact repository for which the access token is requested
+    :param str permission: The requested permission on the repository, '*' or 'pull'
+    """
+
+    if is_login_context:
+        return username, password
+
+    token_params = _handle_challenge_phase(
+        login_server, repository, artifact_repository, permission, False, is_diagnostics_context
+    )
+
+    from ._errors import ErrorClass
+    if isinstance(token_params, ErrorClass):
+        if is_diagnostics_context:
+            return token_params
+        raise CLIError(token_params.get_error_message())
+
+    if ALLOWS_BASIC_AUTH in token_params:
+        return username, password
+
+    if repository:
+        scope = 'repository:{}:{}'.format(repository, permission)
+    elif artifact_repository:
+        scope = 'artifact-repository:{}:{}'.format(artifact_repository, permission)
+    else:
+        # catalog only has * as permission, even for a read operation
+        scope = 'registry:catalog:*'
+
+    authurl = urlparse(token_params['realm'])
+    authhost = urlunparse((authurl[0], authurl[1], '/oauth2/token', '', '', ''))
+    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+    content = {
+        'service': token_params['service'],
+        'grant_type': 'password',
+        'username': username,
+        'password': password,
+        'scope': scope
+    }
+
+    response = requests.post(authhost, urlencode(content), headers=headers,
+                             verify=(not should_disable_connection_verify()))
+
+    if response.status_code != 200:
+        from ._errors import CONNECTIVITY_ACCESS_TOKEN_ERROR
+        if is_diagnostics_context:
+            return CONNECTIVITY_ACCESS_TOKEN_ERROR.format_error_message(login_server, response.status_code)
+        raise CLIError(CONNECTIVITY_ACCESS_TOKEN_ERROR.format_error_message(login_server, response.status_code)
+                       .get_error_message())
+
+    access_token = loads(response.content.decode("utf-8"))["access_token"]
+
+    return EMPTY_GUID, access_token
+
+
 def _get_credentials(cmd,  # pylint: disable=too-many-statements
                      registry_name,
                      tenant_suffix,
@@ -177,7 +288,8 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
                      only_refresh_token,
                      repository=None,
                      artifact_repository=None,
-                     permission=None):
+                     permission=None,
+                     is_login_context=False):
     """Try to get AAD authorization tokens or admin user credentials.
     :param str registry_name: The name of container registry
     :param str tenant_suffix: The registry login server tenant suffix
@@ -241,6 +353,9 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
             except NoTTYException:
                 raise CLIError('Please specify both username and password in non-interactive mode.')
 
+        username, password = _get_token_with_username_and_password(
+            login_server, username, password, repository, artifact_repository, permission, is_login_context
+        )
         return login_server, username, password
 
     # 2. if we don't yet have credentials, attempt to get a refresh token
@@ -270,6 +385,9 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
     try:
         username = prompt('Username: ')
         password = prompt_pass(msg='Password: ')
+        username, password = _get_token_with_username_and_password(
+            login_server, username, password, repository, artifact_repository, permission, is_login_context
+        )
         return login_server, username, password
     except NoTTYException:
         raise CLIError(
@@ -294,7 +412,8 @@ def get_login_credentials(cmd,
                             tenant_suffix,
                             username,
                             password,
-                            only_refresh_token=True)
+                            only_refresh_token=True,
+                            is_login_context=True)
 
 
 def get_access_credentials(cmd,

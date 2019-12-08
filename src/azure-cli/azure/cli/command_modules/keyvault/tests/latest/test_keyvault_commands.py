@@ -438,6 +438,12 @@ class KeyVaultPendingCertificateScenarioTest(ScenarioTest):
             self.check('cancellationRequested', False),
             self.check('status', 'inProgress')
         ])
+
+        self.cmd('keyvault certificate list --vault-name {kv} --include-pending', checks=self.check('length(@)', 1))
+        self.cmd('keyvault certificate list --vault-name {kv} --include-pending true', checks=self.check('length(@)', 1))
+        self.cmd('keyvault certificate list --vault-name {kv}', checks=self.check('length(@)', 0))
+        self.cmd('keyvault certificate list --vault-name {kv}  --include-pending false', checks=self.check('length(@)', 0))
+
         # we do not have a way of actually getting a certificate that would pass this test so
         # we simply ensure that the payload successfully serializes and is received by the server
         with self.assertRaises(CLIError):
@@ -651,6 +657,17 @@ class KeyVaultCertificateImportScenario(ScenarioTest):
 
         _create_keyvault(self, self.kwargs)
 
+        # Create certificate with encrypted key
+        # openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 3650 -out cert.pem
+        # openssl pkcs8 -in key.pem -topk8 -v1 PBE-SHA1-3DES -out key.pem
+        # type key.pem cert.pem > import_pem_encrypted_pwd_1234.pem
+        # del key.pem cert.pem
+
+        # Create certificate with plain key
+        # openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 3650 -out cert.pem
+        # type key.pem cert.pem > import_pem_plain.pem
+        # del key.pem cert.pem
+
         # test certificate import
         self.kwargs.update({
             'pem_encrypted_file': os.path.join(TEST_DIR, 'import_pem_encrypted_pwd_1234.pem'),
@@ -661,6 +678,10 @@ class KeyVaultCertificateImportScenario(ScenarioTest):
 
         self.cmd('keyvault certificate import --vault-name {kv} -n pem-cert1 --file "{pem_plain_file}" -p @"{pem_policy_path}"')
         self.cmd('keyvault certificate import --vault-name {kv} -n pem-cert2 --file "{pem_encrypted_file}" --password {pem_encrypted_password} -p @"{pem_policy_path}"')
+
+        # Test certificate file not exist
+        with self.assertRaises(CLIError):
+            self.cmd('keyvault certificate import --vault-name {kv} -n pem-cert2 --file "notexist.json" -p @"{pem_policy_path}"')
 
         # self.kwargs.update({
         #     'pfx_plain_file': os.path.join(TEST_DIR, 'import_pfx.pfx'),
@@ -719,7 +740,7 @@ class KeyVaultSoftDeleteScenarioTest(ScenarioTest):
         self.cmd('keyvault certificate import --vault-name {kv} -n cert1 --file "{pem_plain_file}" -p @"{pem_policy_path}"')
         self.cmd('keyvault certificate import --vault-name {kv} -n cert2 --file "{pem_plain_file}" -p @"{pem_policy_path}"')
 
-        # delete the secrets keys and certficates
+        # delete the secrets keys and certificates
         self.cmd('keyvault secret delete --vault-name {kv} -n secret1')
         self.cmd('keyvault secret delete --vault-name {kv} -n secret2')
         self.cmd('keyvault key delete --vault-name {kv} -n key1')
@@ -740,7 +761,16 @@ class KeyVaultSoftDeleteScenarioTest(ScenarioTest):
         self.cmd('keyvault key purge --vault-name {kv} -n key2')
         self.cmd('keyvault certificate purge --vault-name {kv} -n cert2')
 
-        # delete and purge the vault
+        # recover and purge
+        self.cmd('keyvault delete -n {kv}')
+        self.cmd('keyvault recover -n {kv}', checks=self.check('name', '{kv}'))
+        self.cmd('keyvault delete -n {kv}')
+        self.cmd('keyvault purge -n {kv}')
+
+        # recover and purge with location
+        _create_keyvault(self, self.kwargs, additional_args=' --enable-soft-delete true').get_output_in_json()
+        self.cmd('keyvault delete -n {kv}')
+        self.cmd('keyvault recover -n {kv} -l {loc}', checks=self.check('name', '{kv}'))
         self.cmd('keyvault delete -n {kv}')
         self.cmd('keyvault purge -n {kv} -l {loc}')
 

@@ -59,7 +59,7 @@ def load_arguments(self, _):
         c.argument('unix_read_write', help="Indication of read and write access", arg_type=get_three_state_flag())
         c.argument('cifs', help="Indication that CIFS protocol is allowed", arg_type=get_three_state_flag())
         c.argument('nfsv3', help="Indication that NFSv3 protocol is allowed", arg_type=get_three_state_flag())
-        c.argument('nfsv4', help="Indication that NFSv4 protocol is allowed", arg_type=get_three_state_flag())
+        c.argument('nfsv41', help="Indication that NFSv4.1 protocol is allowed", arg_type=get_three_state_flag())
 
     with self.argument_context('netappfiles snapshot') as c:
         c.argument('account_name', account_name_type)

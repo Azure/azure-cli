@@ -81,6 +81,15 @@ def get_resource_group_name_by_registry_name(cli_ctx, registry_name,
     return resource_group_name
 
 
+def get_resource_id_by_registry_name(cli_ctx, registry_name):
+    """Returns the resource id for the container registry.
+    :param str storage_account_name: The name of container registry
+    """
+    arm_resource = _arm_get_resource_by_name(
+        cli_ctx, registry_name, REGISTRY_RESOURCE_TYPE)
+    return arm_resource.id
+
+
 def get_registry_by_name(cli_ctx, registry_name, resource_group_name=None):
     """Returns a tuple of Registry object and resource group name.
     :param str registry_name: The name of container registry
@@ -236,13 +245,13 @@ def get_validate_platform(cmd, platform):
 
 def get_yaml_template(cmd_value, timeout, file):
     """Generates yaml template
-    :param str cmd_value: The command to execute in each step
+    :param str cmd_value: The command to execute in each step. Task version defaults to v1.1.0
     :param str timeout: The timeout for each step
     :param str file: The task definition
     """
-    yaml_template = ""
+    yaml_template = "version: v1.1.0\n"
     if cmd_value:
-        yaml_template = "steps: \n  - cmd: {0}\n".format(cmd_value)
+        yaml_template += "steps: \n  - cmd: {0}\n".format(cmd_value)
         if timeout:
             yaml_template += "    timeout: {0}\n".format(timeout)
     else:
@@ -375,6 +384,16 @@ def remove_timer_trigger(task_name,
     return timer_triggers
 
 
+def add_days_to_now(days):
+    if days <= 0:
+        raise CLIError('Days must be positive.')
+    from datetime import datetime, timedelta
+    try:
+        return datetime.utcnow() + timedelta(days=days)
+    except OverflowError:
+        return datetime.max
+
+
 def is_vault_secret(cmd, credential):
     keyvault_dns = None
     try:
@@ -393,6 +412,24 @@ def get_task_id_from_task_name(cli_ctx, resource_group, registry_name, task_name
         reg=registry_name,
         name=task_name
     )
+
+
+def parse_actions_from_repositories(allow_or_remove_repository):
+    from .scope_map import ScopeMapActions
+    valid_actions = {action.value for action in ScopeMapActions}
+    REPOSITORIES = 'repositories'
+    actions = []
+    for rule in allow_or_remove_repository:
+        repository = rule[0]
+        if len(rule) < 2:
+            raise CLIError('At least one action must be specified with the repository {}.'.format(repository))
+        for action in rule[1:]:
+            action = action.lower()
+            if action not in valid_actions:
+                raise CLIError('Invalid action "{}" provided. \nValid actions are {}.'.format(action, valid_actions))
+            actions.append('{}/{}/{}'.format(REPOSITORIES, repository, action))
+
+    return actions
 
 
 class ResourceNotFound(CLIError):

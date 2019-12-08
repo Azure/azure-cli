@@ -10,10 +10,10 @@ import json
 import sys
 import time
 
+from itertools import chain
 import chardet
 import javaproperties
 import yaml
-from itertools import chain
 from jsondiff import JsonDiffer
 from knack.log import get_logger
 from knack.util import CLIError
@@ -105,13 +105,7 @@ def export_config(cmd,
     if not yes:
         # fetch key values from destination
         if destination == 'file':
-            try:
-                dest_kvs = __read_kv_from_file(
-                    file_path=path, format_=format_, separator=separator, prefix_to_add="", depth=None)
-            except CLIError as exception:
-                logger.debug(
-                    'Can not read content from the target file for preview: %s', str(exception))
-                dest_kvs = []  # if target file does not exist / is problematic, then treat as empty file
+            dest_kvs = []  # treat as empty file and overwrite exported key values
         elif destination == 'appconfig':
             dest_kvs = __read_kv_from_config_store(
                 cmd, name=dest_name, connection_string=dest_connection_string, key=None, label=dest_label)
@@ -154,9 +148,13 @@ def set_key(cmd,
 
     retry_times = 3
     retry_interval = 1
+
+    label = label if label and label != ModifyKeyValueOptions.empty_label else None
     for i in range(0, retry_times):
-        retrieved_kv = azconfig_client.get_keyvalue(
-            key, QueryKeyValueOptions(label))
+        try:
+            retrieved_kv = azconfig_client.get_keyvalue(key, QueryKeyValueOptions(label))
+        except HTTPException as exception:
+            raise CLIError(str(exception))
 
         if retrieved_kv is None:
             set_kv = KeyValue(key, value, label, tags, content_type)
@@ -167,6 +165,7 @@ def set_key(cmd,
                               content_type=retrieved_kv.content_type if content_type is None else content_type,
                               tags=retrieved_kv.tags if tags is None else tags)
             set_kv.etag = retrieved_kv.etag
+
         verification_kv = {
             "key": set_kv.key,
             "label": set_kv.label,
@@ -249,21 +248,14 @@ def lock_key(cmd, key, label=None, name=None, connection_string=None, yes=False)
     retry_times = 3
     retry_interval = 1
     for i in range(0, retry_times):
-        retrieved_kv = azconfig_client.get_keyvalue(
-            key, QueryKeyValueOptions(label))
+        try:
+            retrieved_kv = azconfig_client.get_keyvalue(key, QueryKeyValueOptions(label))
+        except HTTPException as exception:
+            raise CLIError(exception)
         if retrieved_kv is None:
             raise CLIError("The key you are trying to lock does not exist.")
 
-        confirmation_entry = {
-            "key": retrieved_kv.key,
-            "label": retrieved_kv.label,
-            "content_type": retrieved_kv.content_type,
-            "value": retrieved_kv.value,
-            "tags": retrieved_kv.tags
-        }
-
-        entry = json.dumps(confirmation_entry, indent=2, sort_keys=True)
-        confirmation_message = "Are you sure you want to lock the key: \n" + entry + "\n"
+        confirmation_message = "Are you sure you want to lock the key '{}'".format(key)
         user_confirmation(confirmation_message, yes)
 
         try:
@@ -289,20 +281,14 @@ def unlock_key(cmd, key, label=None, name=None, connection_string=None, yes=Fals
     retry_times = 3
     retry_interval = 1
     for i in range(0, retry_times):
-        retrieved_kv = azconfig_client.get_keyvalue(
-            key, QueryKeyValueOptions(label))
+        try:
+            retrieved_kv = azconfig_client.get_keyvalue(key, QueryKeyValueOptions(label))
+        except HTTPException as exception:
+            raise CLIError(exception)
         if retrieved_kv is None:
             raise CLIError("The key you are trying to unlock does not exist.")
 
-        confirmation_entry = {
-            "key": retrieved_kv.key,
-            "label": retrieved_kv.label,
-            "content_type": retrieved_kv.content_type,
-            "value": retrieved_kv.value,
-            "tags": retrieved_kv.tags
-        }
-        entry = json.dumps(confirmation_entry, indent=2, sort_keys=True)
-        confirmation_message = "Are you sure you want to unlock the key: \n" + entry + "\n"
+        confirmation_message = "Are you sure you want to unlock the key '{}'".format(key)
         user_confirmation(confirmation_message, yes)
 
         try:
@@ -874,26 +860,6 @@ def __export_keyvalues(fetched_items, format_, separator, prefix=None):
         return __compact_key_values(exported_dict if not exported_list else exported_list)
     except Exception as exception:
         raise CLIError("Fail to export key-values." + str(exception))
-
-
-def __set_keyvalues(connection_string, loaded_keyvalues, label):
-    azconfig_client = AzconfigClient(connection_string)
-
-    not_imported_entries = []
-    imported_entries = []
-    for key in loaded_keyvalues:
-        try:
-            keyvalue = KeyValue(key=key,
-                                label=label,
-                                value=None if loaded_keyvalues[key] is None else str(loaded_keyvalues[key]))
-            imported_entries.append(azconfig_client.set_keyvalue(
-                keyvalue, ModifyKeyValueOptions()))
-        except HTTPException as exception:
-            logger.debug(
-                "Fail to set keyvalues. Reason: %s", str(exception))
-            not_imported_entries.append({key: loaded_keyvalues[key]})
-
-    return imported_entries, not_imported_entries
 
 
 def __check_file_encoding(file_path):

@@ -119,8 +119,7 @@ def get_lang_from_content(src_path):
     package_json_file = os.path.join(src_path, 'package.json')
     package_python_file = os.path.join(src_path, 'requirements.txt')
     package_netcore_file = ""
-    static_html_file = ""
-    runtime_details_dict['language'] = NETCORE_RUNTIME_NAME  # default to windows
+    runtime_details_dict['language'] = ''
     runtime_details_dict['file_loc'] = ''
     runtime_details_dict['default_sku'] = 'F1'
     import fnmatch
@@ -128,9 +127,6 @@ def get_lang_from_content(src_path):
         for file in files:
             if fnmatch.fnmatch(file, "*.csproj"):
                 package_netcore_file = os.path.join(src_path, file)
-                break
-            if fnmatch.fnmatch(file, "*.html"):
-                static_html_file = os.path.join(src_path, file)
                 break
 
     if os.path.isfile(package_python_file):
@@ -146,10 +142,9 @@ def get_lang_from_content(src_path):
         runtime_details_dict['language'] = runtime_lang
         runtime_details_dict['file_loc'] = package_netcore_file
         runtime_details_dict['default_sku'] = 'F1'
-    elif static_html_file:
-        runtime_details_dict['language'] = STATIC_RUNTIME_NAME
-        runtime_details_dict['file_loc'] = static_html_file
-        runtime_details_dict['default_sku'] = 'F1'
+    else:  # TODO: Update the doc when the detection logic gets updated
+        raise CLIError("Could not auto-detect the runtime stack of your app, "
+                       "see 'https://go.microsoft.com/fwlink/?linkid=2109470' for more information")
     return runtime_details_dict
 
 

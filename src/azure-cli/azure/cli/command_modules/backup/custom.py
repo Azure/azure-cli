@@ -36,6 +36,7 @@ os_windows = 'Windows'
 os_linux = 'Linux'
 password_offset = 33
 password_length = 15
+# pylint: disable=too-many-function-args
 
 
 def create_vault(client, vault_name, resource_group_name, location):
@@ -64,9 +65,12 @@ def _force_delete_vault(cmd, vault_name, resource_group_name):
             logger.warning("Deleting backup item '%s' in container '%s'",
                            item_name, container_name)
             disable_protection(cmd, item_client, resource_group_name, vault_name,
-                               container_name, item_name, delete_backup_data=True)
+                               item, True)
     # now delete the vault
-    vault_client.delete(resource_group_name, vault_name)
+    try:
+        vault_client.delete(resource_group_name, vault_name)
+    except Exception:
+        raise CLIError("Vault cannot be deleted as there are existing resources within the vault")
 
 
 def delete_vault(cmd, client, vault_name, resource_group_name, force=False):
@@ -104,15 +108,30 @@ def list_policies(client, resource_group_name, vault_name):
     return _get_list_from_paged_response(policies)
 
 
-def list_associated_items_for_policy(client, resource_group_name, vault_name, name):
+def list_associated_items_for_policy(client, resource_group_name, vault_name, name, backup_management_type):
     filter_string = _get_filter_string({
-        'policyName': name})
+        'policyName': name,
+        'backupManagementType': backup_management_type})
     items = client.list(vault_name, resource_group_name, filter_string)
     return _get_list_from_paged_response(items)
 
 
 def set_policy(client, resource_group_name, vault_name, policy):
     policy_object = _get_policy_from_json(client, policy)
+    retention_range_in_days = policy_object.properties.instant_rp_retention_range_in_days
+    schedule_run_frequency = policy_object.properties.schedule_policy.schedule_run_frequency
+
+    # Validating range of days input
+    if schedule_run_frequency == 'Weekly' and retention_range_in_days != 5:
+        raise CLIError(
+            """
+            Retention policy range must be equal to 5.
+            """)
+    if schedule_run_frequency == 'Daily' and (retention_range_in_days > 5 or retention_range_in_days < 1):
+        raise CLIError(
+            """
+            Retention policy range must be between 1 to 5.
+            """)
 
     error_message = "For SnapshotRetentionRangeInDays, the minimum value is 1 and"\
                     "maximum is 5. For weekly backup policies, the only allowed value is 5 "\
@@ -237,17 +256,7 @@ def list_items(cmd, client, resource_group_name, vault_name, container_name=None
     return paged_items
 
 
-def update_policy_for_item(cmd, client, resource_group_name, vault_name, container_name, item_name, policy_name,
-                           container_type="AzureIaasVM", item_type="VM"):
-    # Client factories
-    backup_protected_items_client = backup_protected_items_cf(cmd.cli_ctx)
-
-    # Get objects from JSON files
-    item = show_item(cmd, backup_protected_items_client, resource_group_name, vault_name, container_name, item_name,
-                     container_type, item_type)
-    policy = show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name, policy_name)
-    _validate_policy(policy)
-
+def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, policy):
     if item.properties.backup_management_type != policy.properties.backup_management_type:
         raise CLIError(
             """
@@ -275,12 +284,7 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, contain
     return _track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
-def backup_now(cmd, client, resource_group_name, vault_name, container_name, item_name, retain_until,
-               container_type="AzureIaasVM", item_type="VM"):
-    item = show_item(cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name, container_name,
-                     item_name, container_type, item_type)
-    _validate_item(item)
-
+def backup_now(cmd, client, resource_group_name, vault_name, item, retain_until):
     # Get container and item URIs
     container_uri = _get_protection_container_uri_from_id(item.id)
     item_uri = _get_protected_item_uri_from_id(item.id)
@@ -306,12 +310,7 @@ def show_recovery_point(cmd, client, resource_group_name, vault_name, container_
     return client.get(vault_name, resource_group_name, fabric_name, container_uri, item_uri, name)
 
 
-def list_recovery_points(cmd, client, resource_group_name, vault_name, container_name, item_name,
-                         container_type="AzureIaasVM", item_type="VM", start_date=None, end_date=None):
-    item = show_item(cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name, container_name,
-                     item_name, container_type, item_type)
-    _validate_item(item)
-
+def list_recovery_points(client, resource_group_name, vault_name, item, start_date=None, end_date=None):
     # Get container and item URIs
     container_uri = _get_protection_container_uri_from_id(item.id)
     item_uri = _get_protected_item_uri_from_id(item.id)
@@ -458,12 +457,7 @@ def restore_files_unmount_rp(cmd, client, resource_group_name, vault_name, conta
         _track_backup_operation(cmd.cli_ctx, resource_group_name, result, vault_name)
 
 
-def disable_protection(cmd, client, resource_group_name, vault_name, container_name, item_name,  # pylint: disable=unused-argument
-                       container_type="AzureIaasVM", item_type="VM", delete_backup_data=False, **kwargs):
-    item = show_item(cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name, container_name,
-                     item_name, container_type, item_type)
-    _validate_item(item)
-
+def disable_protection(cmd, client, resource_group_name, vault_name, item, delete_backup_data=False):
     # Get container and item URIs
     container_uri = _get_protection_container_uri_from_id(item.id)
     item_uri = _get_protected_item_uri_from_id(item.id)

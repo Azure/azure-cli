@@ -405,6 +405,9 @@ class CosmosDBTests(ScenarioTest):
         partition_key = "/thePartitionKey"
         default_ttl = 1000
         new_default_ttl = 2000
+        unique_key_policy = '"{\\"uniqueKeys\\": [{\\"paths\\": [\\"/path/to/key1\\"]}, {\\"paths\\": [\\"/path/to/key2\\"]}]}"'
+        conflict_resolution_policy = '"{\\"mode\\": \\"lastWriterWins\\", \\"conflictResolutionPath\\": \\"/path\\"}"'
+        indexing = '"{\\"indexingMode\\": \\"consistent\\", \\"automatic\\": true, \\"includedPaths\\": [{\\"path\\": \\"/*\\"}], \\"excludedPaths\\": [{\\"path\\": \\"/headquarters/employees/?\\"}]}"'
 
         self.kwargs.update({
             'acc': self.create_random_name(prefix='cli', length=15),
@@ -412,16 +415,22 @@ class CosmosDBTests(ScenarioTest):
             'ctn_name': ctn_name,
             'part': partition_key,
             'ttl': default_ttl,
-            'nttl': new_default_ttl
+            'nttl': new_default_ttl,
+            'unique_key': unique_key_policy,
+            "conflict_resolution": conflict_resolution_policy,
+            "indexing": indexing
         })
 
         self.cmd('az cosmosdb create -n {acc} -g {rg}')
         self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
 
-        container_create = self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {ctn_name} -p {part} --ttl {ttl}').get_output_in_json()
+        container_create = self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {ctn_name} -p {part} --ttl {ttl} --unique-key-policy {unique_key} --conflict-resolution-policy {conflict_resolution} --idx {indexing}').get_output_in_json()
         assert container_create["sqlContainerId"] == ctn_name
         assert container_create["partitionKey"]["paths"][0] == partition_key
         assert container_create["defaultTtl"] == default_ttl
+        assert len(container_create["uniqueKeyPolicy"]["uniqueKeys"]) == 2
+        assert container_create["conflictResolutionPolicy"]["mode"] == "lastWriterWins"
+        assert container_create["indexingPolicy"]["excludedPaths"][0]["path"] == "/headquarters/employees/?"
 
         container_update = self.cmd('az cosmosdb sql container update -g {rg} -a {acc} -d {db_name} -n {ctn_name} --ttl {nttl}').get_output_in_json()
         assert container_update["defaultTtl"] == new_default_ttl
@@ -581,23 +590,32 @@ class CosmosDBTests(ScenarioTest):
     def test_cosmosdb_gremlin_graph(self, resource_group):
         db_name = self.create_random_name(prefix='cli', length=15)
         gp_name = self.create_random_name(prefix='cli', length=15)
+        partition_key = "/thePartitionKey"
         default_ttl = 1000
         new_default_ttl = 2000
+        conflict_resolution_policy = '"{\\"mode\\": \\"lastWriterWins\\", \\"conflictResolutionPath\\": \\"/path\\"}"'
+        indexing = '"{\\"indexingMode\\": \\"consistent\\", \\"automatic\\": true, \\"includedPaths\\": [{\\"path\\": \\"/*\\"}], \\"excludedPaths\\": [{\\"path\\": \\"/headquarters/employees/?\\"}]}"'
 
         self.kwargs.update({
             'acc': self.create_random_name(prefix='cli', length=15),
             'db_name': db_name,
             'gp_name': gp_name,
+            'part': partition_key,
             'ttl': default_ttl,
             'nttl': new_default_ttl,
+            "conflict_resolution": conflict_resolution_policy,
+            "indexing": indexing
         })
 
         self.cmd('az cosmosdb create -n {acc} -g {rg} --capabilities EnableGremlin')
         self.cmd('az cosmosdb gremlin database create -g {rg} -a {acc} -n {db_name}')
 
-        graph_create = self.cmd('az cosmosdb gremlin graph create -g {rg} -a {acc} -d {db_name} -n {gp_name} --ttl {ttl}').get_output_in_json()
+        graph_create = self.cmd('az cosmosdb gremlin graph create -g {rg} -a {acc} -d {db_name} -n {gp_name} -p {part} --ttl {ttl} --conflict-resolution-policy {conflict_resolution} --idx {indexing}').get_output_in_json()
         assert graph_create["gremlinGraphId"] == gp_name
+        assert graph_create["partitionKey"]["paths"][0] == partition_key
         assert graph_create["defaultTtl"] == default_ttl
+        assert graph_create["conflictResolutionPolicy"]["mode"] == "lastWriterWins"
+        assert graph_create["indexingPolicy"]["excludedPaths"][0]["path"] == "/headquarters/employees/?"
 
         graph_update = self.cmd('az cosmosdb gremlin graph update -g {rg} -a {acc} -d {db_name} -n {gp_name} --ttl {nttl}').get_output_in_json()
         assert graph_update["defaultTtl"] == new_default_ttl

@@ -451,7 +451,7 @@ def validate_entity(namespace):
     RowKey and PartitionKey are converted to the correct case and included. """
     values = dict(x.split('=', 1) for x in namespace.entity)
     keys = values.keys()
-    for key in keys:
+    for key in list(keys):
         if key.lower() == 'rowkey':
             val = values[key]
             del values[key]
@@ -496,7 +496,7 @@ def validate_marker(namespace):
     marker = dict(x.split('=', 1) for x in namespace.marker)
     expected_keys = {'nextrowkey', 'nextpartitionkey'}
 
-    for key in marker:
+    for key in list(marker.keys()):
         new_key = key.lower()
         if new_key in expected_keys:
             expected_keys.remove(key.lower())
@@ -544,8 +544,12 @@ def validate_included_datasets(cmd, namespace):
         namespace.include = t_blob_include('s' in include, 'm' in include, False, 'c' in include, 'd' in include)
 
 
-def validate_key(namespace):
-    namespace.key_name = storage_account_key_options[namespace.key_name]
+def validate_key_name(namespace):
+    key_options = {'primary': '1', 'secondary': '2'}
+    if hasattr(namespace, 'key_type') and namespace.key_type:
+        namespace.key_name = namespace.key_type + key_options[namespace.key_name]
+    else:
+        namespace.key_name = storage_account_key_options[namespace.key_name]
 
 
 def validate_metadata(namespace):

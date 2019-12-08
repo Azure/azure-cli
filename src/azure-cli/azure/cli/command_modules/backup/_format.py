@@ -7,7 +7,8 @@ from collections import OrderedDict
 
 
 def transform_container(result):
-    return OrderedDict([('Name', result['properties']['friendlyName']),
+    return OrderedDict([('Name', result['name']),
+                        ('Friendly Name', result['properties']['friendlyName']),
                         ('Resource Group', result['resourceGroup']),
                         ('Type', result['properties']['backupManagementType']),
                         ('Registration Status', result['properties']['registrationStatus'])])
@@ -15,15 +16,18 @@ def transform_container(result):
 
 def transform_item(result):
     columns = []
-    columns.append(('Name', result['properties']['friendlyName']))
+    columns.append(('Name', result['name']))
+    columns.append(('Friendly Name', result['properties']['friendlyName']))
+    columns.append(('Container name', result['properties']['containerName']))
     columns.append(('Resource Group', result['resourceGroup']))
     columns.append(('Type', result['properties']['workloadType']))
     columns.append(('Last Backup Status', result['properties']['lastBackupStatus']))
     columns.append(('Last Recovery Point', result['properties']['lastRecoveryPoint']))
     columns.append(('Protection Status', result['properties']['protectionStatus']))
-    columns.append(('Health Status', result['properties']['healthStatus']))
+    if 'healthStatus' in result['properties']:
+        columns.append(('Health Status', result['properties']['healthStatus']))
 
-    if result['properties']['healthDetails'] is not None:
+    if 'healthDetails' in result['properties'] and result['properties']['healthDetails'] is not None:
         recommendations = []
         for health_detail in result['properties']['healthDetails']:
             recommendations.append(', '.join(health_detail['recommendations']))

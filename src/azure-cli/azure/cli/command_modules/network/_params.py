@@ -33,7 +33,7 @@ from azure.cli.command_modules.network._validators import (
     validate_express_route_port, bandwidth_validator_factory,
     get_header_configuration_validator, validate_nat_gateway, validate_match_variables,
     validate_waf_policy, get_subscription_list_validator, validate_frontend_ip_configs,
-    validate_application_gateway_identity)
+    validate_application_gateway_identity, validate_virtul_network_gateway)
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 from azure.cli.command_modules.network._completers import (
     subnet_completion_list, get_lb_subresource_completion_list, get_ag_subresource_completion_list,
@@ -52,7 +52,8 @@ def load_arguments(self, _):
      FlowLogFormatType, HTTPMethod, IPAllocationMethod,
      IPVersion, LoadBalancerSkuName, LoadDistribution, ProbeProtocol, ProcessorArchitecture, Protocol, PublicIPAddressSkuName,
      RouteNextHopType, SecurityRuleAccess, SecurityRuleProtocol, SecurityRuleDirection, TransportProtocol,
-     VirtualNetworkGatewaySkuName, VirtualNetworkGatewayType, VpnClientProtocol, VpnType, ZoneType) = self.get_models(
+     VirtualNetworkGatewaySkuName, VirtualNetworkGatewayType, VpnClientProtocol, VpnType, ZoneType,
+     ExpressRouteLinkMacSecCipher, ExpressRouteLinkAdminState) = self.get_models(
          'Access', 'ApplicationGatewayFirewallMode', 'ApplicationGatewayProtocol', 'ApplicationGatewayRedirectType',
          'ApplicationGatewayRequestRoutingRuleType', 'ApplicationGatewaySkuName', 'ApplicationGatewaySslProtocol', 'AuthenticationMethod',
          'Direction',
@@ -60,7 +61,8 @@ def load_arguments(self, _):
          'FlowLogFormatType', 'HTTPMethod', 'IPAllocationMethod',
          'IPVersion', 'LoadBalancerSkuName', 'LoadDistribution', 'ProbeProtocol', 'ProcessorArchitecture', 'Protocol', 'PublicIPAddressSkuName',
          'RouteNextHopType', 'SecurityRuleAccess', 'SecurityRuleProtocol', 'SecurityRuleDirection', 'TransportProtocol',
-         'VirtualNetworkGatewaySkuName', 'VirtualNetworkGatewayType', 'VpnClientProtocol', 'VpnType', 'ZoneType')
+         'VirtualNetworkGatewaySkuName', 'VirtualNetworkGatewayType', 'VpnClientProtocol', 'VpnType', 'ZoneType',
+         'ExpressRouteLinkMacSecCipher', 'ExpressRouteLinkAdminState')
 
     if self.supported_api_version(min_api='2018-02-01'):
         ExpressRoutePeeringType = self.get_models('ExpressRoutePeeringType')
@@ -85,6 +87,8 @@ def load_arguments(self, _):
     http_protocol_type = CLIArgumentType(get_enum_type(ApplicationGatewayProtocol))
     ag_servers_type = CLIArgumentType(nargs='+', help='Space-separated list of IP addresses or DNS names corresponding to backend servers.', validator=get_servers_validator())
     app_gateway_name_type = CLIArgumentType(help='Name of the application gateway.', options_list='--gateway-name', completer=get_resource_name_completion_list('Microsoft.Network/applicationGateways'), id_part='name')
+    express_route_link_macsec_cipher_type = CLIArgumentType(get_enum_type(ExpressRouteLinkMacSecCipher))
+    express_route_link_admin_state_type = CLIArgumentType(get_enum_type(ExpressRouteLinkAdminState))
 
     # region NetworkRoot
     with self.argument_context('network') as c:
@@ -214,6 +218,7 @@ def load_arguments(self, _):
         c.argument('ssl_cert', help='The name or ID of the SSL certificate to use.', completer=get_ag_subresource_completion_list('ssl_certificates'))
         c.ignore('protocol')
         c.argument('host_name', help='Host name to use for multisite gateways.')
+        c.argument('firewall_policy', min_api='2019-09-01', help='Name or ID of a Firewall Policy resource.')
 
     with self.argument_context('network application-gateway http-listener create') as c:
         c.argument('frontend_ip', help='The name or ID of the frontend IP configuration. {}'.format(default_existing))
@@ -287,6 +292,7 @@ def load_arguments(self, _):
         c.argument('paths', nargs='+', help='Space-separated list of paths to associate with the rule. Valid paths start and end with "/" (ex: "/bar/")', arg_group='First Rule')
         c.argument('address_pool', help='The name or ID of the backend address pool to use with the created rule.', completer=get_ag_subresource_completion_list('backend_address_pools'), arg_group='First Rule')
         c.argument('http_settings', help='The name or ID of the HTTP settings to use with the created rule.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'), arg_group='First Rule')
+        c.argument('firewall_policy', min_api='2019-09-01', help='Name or ID of a Firewall Policy resource.')
 
     with self.argument_context('network application-gateway url-path-map create') as c:
         c.argument('default_address_pool', help='The name or ID of the default backend address pool, if different from --address-pool.', completer=get_ag_subresource_completion_list('backend_address_pools'))
@@ -367,38 +373,101 @@ def load_arguments(self, _):
         c.argument('application_gateway_name', app_gateway_name_type)
     # endregion
 
-    # region ApplicationGatewayWAFPolicies
+    # region WebApplicationFirewallPolicy
     (WebApplicationFirewallAction, WebApplicationFirewallMatchVariable,
      WebApplicationFirewallOperator, WebApplicationFirewallRuleType,
-     WebApplicationFirewallTransform) = self.get_models(
+     WebApplicationFirewallTransform,
+     OwaspCrsExclusionEntryMatchVariable, OwaspCrsExclusionEntrySelectorMatchOperator,
+     WebApplicationFirewallEnabledState, WebApplicationFirewallMode) = self.get_models(
          'WebApplicationFirewallAction', 'WebApplicationFirewallMatchVariable',
          'WebApplicationFirewallOperator', 'WebApplicationFirewallRuleType',
-         'WebApplicationFirewallTransform')
+         'WebApplicationFirewallTransform',
+         'OwaspCrsExclusionEntryMatchVariable', 'OwaspCrsExclusionEntrySelectorMatchOperator',
+         'WebApplicationFirewallEnabledState', 'WebApplicationFirewallMode')
     with self.argument_context('network application-gateway waf-policy', min_api='2018-12-01') as c:
         c.argument('policy_name', name_arg_type, id_part='name', help='The name of the application gateway WAF policy.')
 
-    with self.argument_context('network application-gateway waf-policy rule', min_api='2018-12-01') as c:
+    with self.argument_context('network application-gateway waf-policy policy-setting', min_api='2019-09-01') as c:
+        c.argument('policy_name', options_list='--policy-name', id_part=None,
+                   help='The name of the web application firewall policy.')
+        c.argument('state',
+                   arg_type=get_enum_type(WebApplicationFirewallEnabledState),
+                   help='Describes if the policy is in enabled state or disabled state.')
+        c.argument('mode',
+                   arg_type=get_enum_type(WebApplicationFirewallMode),
+                   help='Describes if it is in detection mode or prevention mode at policy level.')
+        c.argument('request_body_check',
+                   arg_type=get_three_state_flag(),
+                   help='Specified to require WAF to check request Body.')
+        c.argument('max_request_body_size_in_kb',
+                   type=int,
+                   help='Maximum request body size in Kb for WAF.')
+        c.argument('file_upload_limit_in_mb',
+                   type=int,
+                   help='Maximum file upload size in Mb for WAF."')
+
+    with self.argument_context('network application-gateway waf-policy custom-rule', min_api='2018-12-01') as c:
         c.argument('policy_name', options_list='--policy-name')
         c.argument('rule_name', options_list=['--name', '-n'], id_part='child_name_1', help='Name of the WAF policy rule.')
         c.argument('priority', type=int, help='Rule priority. Lower values are evaluated prior to higher values.')
         c.argument('action', arg_type=get_enum_type(WebApplicationFirewallAction), help='Action to take.')
         c.argument('rule_type', arg_type=get_enum_type(WebApplicationFirewallRuleType), help='Type of rule.')
 
-    with self.argument_context('network application-gateway waf-policy rule list', min_api='2018-12-01') as c:
+    with self.argument_context('network application-gateway waf-policy custom-rule list', min_api='2018-12-01') as c:
         c.argument('policy_name', options_list='--policy-name', id_part=None)
 
-    with self.argument_context('network application-gateway waf-policy rule match-condition', min_api='2018-12-01') as c:
+    with self.argument_context('network application-gateway waf-policy custom-rule match-condition',
+                               min_api='2018-12-01') as c:
         c.argument('operator', arg_type=get_enum_type(WebApplicationFirewallOperator), help='Operator for matching.')
-        c.argument('negation_condition', options_list='--negate', arg_type=get_three_state_flag(), help='Match the negative of the condition.')
-        c.argument('match_values', options_list='--values', nargs='+', help='Space-separated list of values to match.')
-        c.argument('transforms', arg_type=get_enum_type(WebApplicationFirewallTransform), nargs='+', help='Space-separated list of transforms to apply when matching.')
+        c.argument('negation_condition',
+                   options_list='--negate',
+                   arg_type=get_three_state_flag(),
+                   help='Match the negative of the condition.')
+        c.argument('match_values',
+                   options_list='--values',
+                   nargs='+',
+                   help='Space-separated list of values to match.')
+        c.argument('transforms',
+                   arg_type=get_enum_type(WebApplicationFirewallTransform),
+                   nargs='+',
+                   help='Space-separated list of transforms to apply when matching.')
         if WebApplicationFirewallMatchVariable:
-            help_string = 'Space-separated list of `VARIABLE[.SELECTOR]` variables to use when matching. Variable values: {}'.format(', '.join(x for x in WebApplicationFirewallMatchVariable))
+            waf_custom_rule_match_variables = [x for x in WebApplicationFirewallMatchVariable]
+            help_string = 'Space-separated list of variables to use when matching. ' \
+                          'Variable values: {}'.format(', '.join(waf_custom_rule_match_variables))
             c.argument('match_variables', nargs='+', help=help_string, validator=validate_match_variables)
         c.argument('index', type=int, help='Index of the match condition to remove.')
 
-    with self.argument_context('network application-gateway waf-policy rule match-condition list', min_api='2018-12-01') as c:
+    with self.argument_context('network application-gateway waf-policy custom-rule match-condition list', min_api='2018-12-01') as c:
         c.argument('policy_name', options_list='--policy-name', id_part=None)
+
+    with self.argument_context('network application-gateway waf-policy managed-rule') as c:
+        c.argument('policy_name', options_list='--policy-name', id_part=None,
+                   help='The name of the web application firewall policy.')
+
+    with self.argument_context('network application-gateway waf-policy managed-rule rule-set',
+                               min_api='2019-09-01') as c:
+        c.argument('rule_set_type', options_list='--type', help='The type of the web application firewall rule set.')
+        c.argument('rule_set_version',
+                   options_list='--version',
+                   help='The version of the web application firewall rule set type.')
+        c.argument('rule_group_name',
+                   options_list='--group-name',
+                   help='The name of the web application firewall rule set group.')
+        c.argument('rules', nargs='+', help='List of rules that will be disabled.')
+
+    with self.argument_context('network application-gateway waf-policy managed-rule exclusion',
+                               min_api='2019-09-01') as c:
+        c.argument('match_variable',
+                   arg_type=get_enum_type(OwaspCrsExclusionEntryMatchVariable),
+                   help='The variable to be excluded.')
+        c.argument('selector_match_operator',
+                   arg_type=get_enum_type(OwaspCrsExclusionEntrySelectorMatchOperator),
+                   help='When matchVariable is a collection, operate on the selector to '
+                        'specify which elements in the collection this exclusion applies to.')
+        c.argument('selector',
+                   help='When matchVariable is a collection, operator used to '
+                        'specify which elements in the collection this exclusion applies to.')
     # region
 
     # region ApplicationSecurityGroups
@@ -594,6 +663,7 @@ def load_arguments(self, _):
         c.argument('connection_name', options_list=['--name', '-n'], help='ExpressRoute connection name.', id_part='child_name_1')
         c.argument('routing_weight', help='Routing weight associated with the connection.', type=int)
         c.argument('authorization_key', help='Authorization key to establish the connection.')
+        c.argument('enable_internet_security', options_list='--internet-security', arg_type=get_three_state_flag(), help='Enable internet security. A virtual hub can have the ability to propagate a learned default route to this ExpressRoute connection. This ref https://review.docs.microsoft.com/en-us/azure/virtual-wan/effective-routes-virtual-hub?branch=pr-en-us-91866#aboutdefaultroute might be helpful.', min_api='2019-09-01')
 
     with self.argument_context('network express-route gateway connection', arg_group='Peering', min_api='2018-08-01') as c:
         c.argument('peering', help='Name or ID of an ExpressRoute peering.', validator=validate_express_route_peering)
@@ -611,13 +681,30 @@ def load_arguments(self, _):
 
     with self.argument_context('network express-route port link', min_api='2018-08-01') as c:
         c.argument('express_route_port_name', er_port_name_type)
-        c.argument('link_name', options_list=['--name', '-n'], id_part='child_name_1')
+        c.argument('link_name', options_list=['--name', '-n'], id_part='child_name_1',
+                   help='The link name of the ExpressRoute Port')
 
     with self.argument_context('network express-route port link list', min_api='2018-08-01') as c:
         c.argument('express_route_port_name', er_port_name_type, id_part=None)
 
+    with self.argument_context('network express-route port link update', min_api='2019-08-01') as c:
+        c.argument('admin_state',
+                   arg_type=express_route_link_admin_state_type,
+                   help='Enable/Disable administrative state of an ExpressRoute Link')
+
+    with self.argument_context('network express-route port link update', arg_group='MACsec', min_api='2019-08-01') as c:
+        c.argument('macsec_cak_secret_identifier',
+                   help='The connectivity association key (CAK) ID that stored in the KeyVault.')
+        c.argument('macsec_ckn_secret_identifier',
+                   help='The connectivity key name (CKN) that stored in the KeyVault.')
+        c.argument('macsec_cipher', arg_type=express_route_link_macsec_cipher_type, help='Cipher Method')
+
     with self.argument_context('network express-route port location', min_api='2018-08-01') as c:
         c.argument('location_name', options_list=['--location', '-l'])
+
+    with self.argument_context('network express-route port identity assign', arg_group='Identity', min_api='2019-08-01') as c:
+        c.argument('user_assigned_identity', options_list='--identity',
+                   help="Name or ID of the ManagedIdentity Resource", validator=validate_application_gateway_identity)
     # endregion
 
     # region PrivateEndpoint
@@ -1033,6 +1120,9 @@ def load_arguments(self, _):
         c.argument('public_ip_prefix_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/publicIPPrefixes'), id_part='name', help='The name of the public IP prefix.')
         c.argument('prefix_length', options_list='--length', help='Length of the prefix (i.e. XX.XX.XX.XX/<Length>)')
         c.argument('zone', zone_type)
+
+    with self.argument_context('network public-ip prefix create') as c:
+        c.argument('version', min_api='2019-08-01', help='IP address type.', arg_type=get_enum_type(IPVersion, 'ipv4'))
     # endregion
 
     # region RouteFilters
@@ -1192,6 +1282,7 @@ def load_arguments(self, _):
     for scope in ['network vnet subnet list', 'network vnet peering list']:
         with self.argument_context(scope) as c:
             c.argument('ids', deprecate_info=c.deprecate(hide=True, expiration='2.1.0'))
+            c.argument('virtual_network_name', id_part=None)
 
     # endregion
 
@@ -1228,6 +1319,11 @@ def load_arguments(self, _):
         c.argument('enable_bgp', help='Enable BGP (Border Gateway Protocol)', arg_group='BGP Peering', arg_type=get_enum_type(['true', 'false']))
         c.argument('virtual_network', virtual_network_name_type, options_list='--vnet', help="Name or ID of a virtual network that contains a subnet named 'GatewaySubnet'.")
         c.extra('address_prefixes', options_list='--address-prefixes', help='List of address prefixes for the VPN gateway.  Prerequisite for uploading certificates.', nargs='+')
+
+    with self.argument_context('network vnet-gateway aad assign', min_api='2019-04-01') as c:
+        c.argument('aad_tenant', options_list='--tenant', help='The AADTenant URI of the VirtualNetworkGateway.')
+        c.argument('aad_audience', options_list='--audience', help='The AADAudience ID of the VirtualNetworkGateway.')
+        c.argument('aad_issuer', options_list='--issuer', help='The AADIssuer URI of the VirtualNetworkGateway.')
 
     with self.argument_context('network vnet-gateway root-cert create') as c:
         c.argument('public_cert_data', help='Base64 contents of the root certificate file or file path.', type=file_type, completer=FilesCompleter(), validator=load_cert_file('public_cert_data'))
@@ -1267,6 +1363,16 @@ def load_arguments(self, _):
         c.argument('connection_shared_key_name', options_list=['--name', '-n'], id_part='name')
         c.argument('virtual_network_gateway_connection_name', options_list='--connection-name', metavar='NAME', id_part='name')
         c.argument('key_length', type=int)
+
+    with self.argument_context('network vrouter') as c:
+        c.argument('virtual_router_name', options_list=['--name', '-n'], help='The name of the Virtual Router.')
+        c.argument('hosted_gateway', help='Name or ID of the virtual network gateway with ExpressRouter on which VirtualRouter is hosted.', validator=validate_virtul_network_gateway)
+
+    with self.argument_context('network vrouter peering') as c:
+        c.argument('virtual_router_name', options_list=['--vrouter-name'], help='The name of the Virtual Router.')
+        c.argument('peering_name', options_list=['--name', '-n'], help='The name of the Virtual Router Peering')
+        c.argument('peer_asn', type=int, help='Peer ASN. Its range is from 1 to 4294967295.')
+        c.argument('peer_ip', help='Peer IP address.')
 
     param_map = {
         'dh_group': 'DhGroup',

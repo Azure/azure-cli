@@ -430,7 +430,8 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         copy_id = 'abcdabcd-abcd-abcd-abcd-abcdabcdabcd'
 
         self.storage_cmd('storage blob upload -c {} -n {} -f "{}"', account_info, c, b, local_file)
-        with self.assertRaisesRegexp(TypeError, "'CommandResultItem' object is not iterable"):
+        from azure.common import AzureException
+        with self.assertRaisesRegexp(AzureException, "NoPendingCopyOperation"):
             self.storage_cmd('storage blob copy cancel -c {} -b {} --copy-id {}', account_info, c, b, copy_id)
 
     @ResourceGroupPreparer()
@@ -475,6 +476,20 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         self.assertIn('sks=', container_sas)
         self.assertIn('skv=', container_sas)
         self.assertIn('skv=', container_sas)
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_storage_blob_suppress_400(self, resource_group, storage_account):
+        # test for azure.cli.command_modules.storage.StorageCommandGroup.get_handler_suppress_some_400
+        # test 404
+        with self.assertRaises(SystemExit) as ex:
+            self.cmd('storage blob show --account-name {} -c foo -n bar.txt --auth-mode key'.format(storage_account))
+        self.assertEqual(ex.exception.code, 3)
+
+        # test 403
+        from azure.common import AzureException
+        with self.assertRaisesRegexp(AzureException, "Authentication failure"):
+            self.cmd('storage blob show --account-name {} --account-key="YQ==" -c foo -n bar.txt '.format(storage_account))
 
 
 if __name__ == '__main__':
