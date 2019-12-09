@@ -7,6 +7,10 @@ Release History
 
 * Support Local context in acr task run
 
+**AppService**
+
+* Fix issue #11217: webapp: az webapp config ssl upload should support slot parameter
+
 **Compute**
 
 * vmss create/update: Add --scale-in-policy, which decides which virtual machines are chosen for removal when a VMSS is scaled-in
@@ -14,6 +18,10 @@ Release History
 **Cdn**
 
 * Add support for rulesEngine feature
+
+**Core**
+
+* Remove support for Python 3.4
 
 **Install**
 
@@ -23,9 +31,19 @@ Release History
 
 * [BREAKING CHANGE] Removed --failover-region parameter from manual-failover. Now it will failover to assigned geo-paired secondary region.
 
+**Key Vault**
+
+* Fix #10846: Calling az keyvault secret show-deleted --id <value> still says secret_name "can not" be none
+* Fix #11084: Confusing encoding information
+
+**Network**
+
+* az network list-service-aliases: support list service aliases which can be used for Service Endpoint Policies
+
 **Packaging**
 
 * Add back edge builds for pip install
+* Add Ubuntu eoan package
 
 **Storage**
 
