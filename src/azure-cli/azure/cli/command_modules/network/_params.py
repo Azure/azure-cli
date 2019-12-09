@@ -1295,6 +1295,7 @@ def load_arguments(self, _):
 
     with self.argument_context('network vnet subnet update') as c:
         c.argument('network_security_group', validator=get_nsg_validator(), help='Name or ID of a network security group (NSG). Use empty string "" to detach it.')
+        c.argument('route_table', help='Name or ID of a route table to associate with the subnet. Use empty string "" to detach it. You can also append "--remove routeTable" in "az network vnet subnet update" to detach it.')
 
     for scope in ['network vnet subnet list', 'network vnet peering list']:
         with self.argument_context(scope) as c:

@@ -364,75 +364,70 @@ class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
     def test_network_app_gateway_with_identity(self, resource_group):
 
         self.kwargs.update({
-            'emsi': 'id1',
-            'emsi2': 'id2',
-            'ip': 'pubip1',
-            'kv': self.create_random_name('cli-test-kevault-', 24),
-            'loc': 'westus',
-            'sec': 'secret1',
-            'sec_value': "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tDQpNSUlFdmdJQkFEQU5CZ2txaGtpRzl3MEJBUUVGQUFTQ0JLZ3dnZ1NrQWdFQUFvSUJBUUNybWp0MlJCSFRBbllkDQprOWE3ZHgvTU1EK3hjSGkvdk9zcEwzN1lJREdGbEMrZnU3d2RiRzZpUGVWRm5xMkRKOHhSUm1TUkdabUc0SWJYDQpFYzIxcy85WWJPTmVaSXhhOWlSc0ZKdERNRU5EY2VQZ0lNQ2pqcGczb01vcHNaSUhHdk1pVzI4TG54RzZvVXJ6DQovVzUwazNTMGUzT0NvcTZuNlBmdElsbGhuRlFKUmV6d01pRHpUeHIvOHBJaGFOaitnNG5pd0QraEErSDhqU2tmDQpmT3BVWXQ0UndoWUo1ZDBlMit1R0tSUkJUNFZ4YnlGVGw3MzFPd3VacUxYa1hncjlXTUNONkN2VHJlSC9JQWpIDQpaRHN2cU9veTZ2SGE3bk5tRUNZT2VQbnlhTkVpSjJ3Mjh3NGl3Q3N0Z2RRNEVaWk5KUGh5R3IzZDdrWUNXcnZODQpYR3RPZUhYekFnTUJBQUVDZ2dFQUZtRmhJVVdJeFpVV21UanZmVGViY0ExWU5wTjM5c1IwTHhwQXJYNEFETVNNDQozdHBQUGM4bk1Wc1NqSWZyWi9yeXpNN1BlRC9NZVg0akFwTVIyZGJiUUo4WVJhRlF6NG1MLzludGZmcDNhMVBEDQo1K0ZJVStIWnZHSStFT2lySmo0VTQ3QTZjQVkrVVFia09FOTBtUmo2S1pKeTR1REdGL2xzWWEyNTFvbmE4L0p4DQo1QjFpNTNmNzdFSHhBbXJ5Tkxac0h3VzA2ZkNBMTdCTmd1TEZ2VjVCM0Zoa081QzhSb05XdkhSZ01NZzFFQURZDQpZODVjempnNnk2UlhSVjdvT3QyT3ZyNmJRNnEzMURVSU5zZ3lrczZ1djY5Y3lKbjh0TWt6Z1RRYm9seTRKTUJwDQp6V2tEYjlzZHMwVHRrN3NBQ1pKWU5GWk95UTlXaDh3NkpSY2VoeTBHQVFLQmdRREI1OE5qTTMxbFdxbGFXNEVjDQpFZFRMNnkwRXVmVmEzVlFhd0tJTVIreFZWWHFsUGxiYXdQNEY2bzNETTNIZThEbzVZVVRuUjFMM2tua1U3TGZTDQpwTFhhTlk1c2V3V0crMmxFd0NmQXpMVGpyOE9acUlFSXd3N0c0QjczdTVnQ2dJU0dsSWE5djBxQVp0bUVqL3pnDQpQUEZwaXhyOE5UNVo4eFZSdERkNlE5c21nUUtCZ1FEaWpoaFArOVdGaEhHblRLQWpBZDUxY1ZjcnFIOHpFdmYzDQppRWRLYlRsdi8zc3l4emQ2UmNJR2NLOExmbGx1bHhMVWhOY3ovU0FpeElxU2V0UW9IcU5LYzZwTGh6T3BmM3dyDQpVd29ldWcxNkhKUWh5WTVzVkswNG5MamVMZHdYN1ZEQlVjQkFPcHd0WHNUZy81UjlEMFYrMlNWN0hSZXZKVUNhDQpvNWxtNWpVcWN3S0JnUUNla1FHRjZRQmRWdU53d2ExMkg5ck5teGJvYTQySjdiNnVWZUx1ZWc1NHhmc1NrRVVFDQpoSmYyakpXN0VDSEpkdGVXUHNYUy84K0lKeDZmRHVsUDkyUEMrdExxUVR3RzR5ZDFrbEd2NTNieFRyVjh2WUF2DQpneHRkWkwvT1JIa05hcjExTkpadktyUXBCbkpRWmxNYnFKcWVmYVBtcFQvRTNQVU5LSHZKbngzaWdRS0JnUUNsDQpQVzZPSitmOGtqVXpDTGhqMENFcEY1bTB4aGpBYjcxY1ZaRnB2M0I5TjZIcnoxR3ZaT0czUU1qcllTUnBmTmJIDQpHbnk3OW90UjBIZ2hqbVRmUGpsclBDR2hKT09SWk9KejF3VXlsQkR3VjVmVGJPYnNMSGFMTEFQS1NUaVdXd2pqDQpkM1Q1WThZMWNVRzN1YkhiNVIrUy9WNVJCVThZOTlxKzcwUWJ3UnhWOFFLQmdHSW1yY1pXSkpJa2lkYVMrR2dYDQpYRmlVOTA4QTJpRlQ3Kzkva3B3Q08rRVVYZjljWS80WFZoNkVLa2RQaXhUN2gwT2duamVnMWQwbjcrWkl5bUlQDQpkUGVLeGNvcGlzdm9zOXd2eSs0ZmV0YmZQeG5vbXlIUlpzMnhZQUs0VzZTMmVPZ2F3aUN0aDc1bmlxNmxZeTVvDQpJTjNmWitjNHJqYUt6UUo0Vm5hOWlNUE4NCi0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0NCi0tLS0tQkVHSU4gQ0VSVElGSUNBVEUtLS0tLQ0KTUlJRThUQ0NBOW1nQXdJQkFnSVRWZ0JmMFR5b2dRbGg1eUk5c0FBQUFGL1JQREFOQmdrcWhraUc5dzBCQVFzRg0KQURBVk1STXdFUVlEVlFRREV3cE5VMGxVSUVOQklGb3lNQjRYRFRFNE1EWXhPVEF4TVRZeE4xb1hEVEU1TURZeA0KT1RBeE1UWXhOMW93R1RFWE1CVUdBMVVFQXhNT2EyVjVkbUYxYkhRdGRHVnpkSE13Z2dFaU1BMEdDU3FHU0liMw0KRFFFQkFRVUFBNElCRHdBd2dnRUtBb0lCQVFDcm1qdDJSQkhUQW5ZZGs5YTdkeC9NTUQreGNIaS92T3NwTDM3WQ0KSURHRmxDK2Z1N3dkYkc2aVBlVkZucTJESjh4UlJtU1JHWm1HNEliWEVjMjFzLzlZYk9OZVpJeGE5aVJzRkp0RA0KTUVORGNlUGdJTUNqanBnM29Nb3BzWklIR3ZNaVcyOExueEc2b1Vyei9XNTBrM1MwZTNPQ29xNm42UGZ0SWxsaA0KbkZRSlJlendNaUR6VHhyLzhwSWhhTmorZzRuaXdEK2hBK0g4alNrZmZPcFVZdDRSd2hZSjVkMGUyK3VHS1JSQg0KVDRWeGJ5RlRsNzMxT3d1WnFMWGtYZ3I5V01DTjZDdlRyZUgvSUFqSFpEc3ZxT295NnZIYTduTm1FQ1lPZVBueQ0KYU5FaUoydzI4dzRpd0NzdGdkUTRFWlpOSlBoeUdyM2Q3a1lDV3J2TlhHdE9lSFh6QWdNQkFBR2pnZ0kwTUlJQw0KTURBbkJna3JCZ0VFQVlJM0ZRb0VHakFZTUFvR0NDc0dBUVVGQndNQk1Bb0dDQ3NHQVFVRkJ3TUNNRDRHQ1NzRw0KQVFRQmdqY1ZCd1F4TUM4R0p5c0dBUVFCZ2pjVkNJZmFobldEN3RrQmdzbUZHNEcxbm1HRjlPdGdnVjJGM3Vscg0KZ2RTRlp3SUJaQUlCRkRDQmhRWUlLd1lCQlFVSEFRRUVlVEIzTURFR0NDc0dBUVVGQnpBQ2hpVm9kSFJ3T2k4dg0KWTI5eWNIQnJhUzloYVdFdlRWTkpWQ1V5TUVOQkpUSXdXakl1WTNKME1FSUdDQ3NHQVFVRkJ6QUNoalpvZEhSdw0KT2k4dmQzZDNMbTFwWTNKdmMyOW1kQzVqYjIwdmNHdHBMMjF6WTI5eWNDOU5VMGxVSlRJd1EwRWxNakJhTWk1ag0KY25Rd0hRWURWUjBPQkJZRUZHaktXQzNiSmNtcTRvK0pTQlJVSFI1SjdGWUJNQXNHQTFVZER3UUVBd0lGb0RBWg0KQmdOVkhSRUVFakFRZ2c1clpYbDJZWFZzZEMxMFpYTjBjekNCdFFZRFZSMGZCSUd0TUlHcU1JR25vSUdrb0lHaA0KaGlWb2RIUndPaTh2WTI5eWNIQnJhUzlqY213dlRWTkpWQ1V5TUVOQkpUSXdXakl1WTNKc2hqeG9kSFJ3T2k4dg0KYlhOamNtd3ViV2xqY205emIyWjBMbU52YlM5d2Eya3ZiWE5qYjNKd0wyTnliQzlOVTBsVUpUSXdRMEVsTWpCYQ0KTWk1amNteUdPbWgwZEhBNkx5OWpjbXd1YldsamNtOXpiMlowTG1OdmJTOXdhMmt2YlhOamIzSndMMk55YkM5Tg0KVTBsVUpUSXdRMEVsTWpCYU1pNWpjbXd3SHdZRFZSMGpCQmd3Rm9BVVljdTdobUZCWXpMVlcyYkdqcmVjVFFCdg0KQlBrd0hRWURWUjBsQkJZd0ZBWUlLd1lCQlFVSEF3RUdDQ3NHQVFVRkJ3TUNNQTBHQ1NxR1NJYjNEUUVCQ3dVQQ0KQTRJQkFRQmdLb0hZdlZPdHZDYXpwc1RWZVoxVENFbTdBVnA5cUtRUVd5YXNUbTdwT3FVQkplM2twMkhuSFNVWA0KemU4YzMvK2FZcmdaS25uOS9VWGFxdHk3QXFadWxNcjloWFJQVWhCeFpqV0J1Q1NTV1dvS2MxckdUcDlmY3lKdw0KZ0M5VTcxQnAwQzYyTnlQRnhqZkcvOFNwYlR5a09lejNJdHY5R1JPelIxUVhpU01tdE1LSzlvMVl3SUZDVmRXRw0KR0U3VnhsbitvUlFYckVqUHdIcFBEam5CWGJIelh3SXZUVVNsL0VrZExqRW5teDI2ZHMxL0RMaHdMWVJCSERpTA0KUzFNWXcrdHZacmNXNnMvOVdLOGNkc0VWUXFCMVBPMXlpVHlRdFRxUXNjblhxMzd6S0ZJUTArL2w3R1pBMEhJOA0KYlB4K3ExSUNJWXpVcUYzN3Y0UTZWZVdUbHZMaQ0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ0K",
-            'sec2': 'secret2'
+            'rg': resource_group,
+            'gw': 'gateway',
+            'one_off_identity': 'id1',
+            'access_identity': 'id2',
+            'ip': 'ip1',
+            'kv': self.create_random_name('cli-test-keyvault-', 24),
+            'cert': 'MyCertificate'
         })
 
         # create a managed identity
-        emsi_result = self.cmd('identity create -g {rg} -n {emsi}').get_output_in_json()
-        emsi2_result = self.cmd('identity create -g {rg} -n {emsi2}').get_output_in_json()
-
-        emsi_id = emsi_result['principalId']
-        emsi2_id = emsi2_result['principalId']
-
+        self.cmd('identity create -g {rg} -n {one_off_identity}').get_output_in_json()
+        access_identity_result = self.cmd('identity create -g {rg} -n {access_identity}').get_output_in_json()
         self.kwargs.update({
-            'emsi_id': emsi_id,
-            'emsi2_id': emsi2_id
+            'access_identity_principal': access_identity_result['principalId']
+        })
+
+        self.cmd('keyvault create -g {rg} -n {kv} --sku premium')
+        self.cmd('keyvault set-policy -g {rg} -n {kv} '
+                 '--object-id {access_identity_principal} --secret-permissions get list set')
+        self.cmd('keyvault update -n {kv} --enable-soft-delete -g {rg}')
+
+        # create a certificate
+        keyvault_cert_policy = self.cmd('az keyvault certificate get-default-policy').get_output_in_json()
+        self.kwargs.update({
+            'keyvault_cert_policy': keyvault_cert_policy
+        })
+        self.cmd('keyvault certificate create '
+                 '--vault-name {kv} '
+                 '--name {cert} '
+                 '--policy "{keyvault_cert_policy}"')
+        cert_result = self.cmd('keyvault certificate show --vault-name {kv} --name {cert}').get_output_in_json()
+        self.kwargs.update({
+            'secret_id': cert_result['sid']
         })
 
         self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
 
-        self.cmd('keyvault create -g {rg} -n {kv} -l {loc} --sku premium')
-
-        self.cmd('keyvault set-policy -n {kv} -g {rg} --object-id {emsi_id} --secret-permissions get list set')
-        self.cmd('keyvault set-policy -n {kv} -g {rg} --object-id {emsi2_id} --secret-permissions get list set')
-
-        self.cmd('keyvault update -n {kv} --enable-soft-delete -g {rg}')
-
-        # create a secret
-        secret = self.cmd('keyvault secret set --vault-name {kv} -n {sec} --value {sec_value}',
-                          checks=self.check('value', self.kwargs['sec_value'])).get_output_in_json()
-        first_sid = secret['id']
-        first_version = first_sid.rsplit('/', 1)[1]
-        self.kwargs.update({
-            'sid1': first_sid,
-            'ver1': first_version
-        })
-
-        secret = self.cmd('keyvault secret set --vault-name {kv} -n {sec2} --value {sec_value}',
-                          checks=self.check('value', self.kwargs['sec_value'])).get_output_in_json()
-        first_sid = secret['id']
-        first_version = first_sid.rsplit('/', 1)[1]
-        self.kwargs.update({
-            'sid2': first_sid,
-            'ver2': first_version
-        })
-
-        self.cmd('network application-gateway create -g {rg} -n ag1 --identity {emsi} --sku Standard_v2 --public-ip-address {ip}')
-        self.cmd('network application-gateway show -g {rg} -n ag1', checks=[
+        # create application-gateway with one_off_identity
+        self.cmd('network application-gateway create '
+                 '-g {rg} -n {gw} '
+                 '--sku Standard_v2 --public-ip-address {ip} '
+                 '--identity {one_off_identity} ')
+        self.cmd('network application-gateway show -g {rg} -n {gw}', checks=[
             self.check('identity.type', 'UserAssigned')
         ])
 
-        self.cmd('network application-gateway identity remove -g {rg} --gateway-name ag1', checks=[
+        # remove one_off_identity
+        self.cmd('network application-gateway identity remove -g {rg} --gateway-name {gw}', checks=[
             self.check('identity', None)
         ])
-        self.cmd('network application-gateway identity assign -g {rg} --gateway-name ag1 --identity {emsi2}', checks=[
-            self.check('identity.type', 'UserAssigned')
-        ])
-        self.cmd('network application-gateway identity show -g {rg} --gateway-name ag1', checks=[
+        # assign access_identity
+        self.cmd('network application-gateway identity assign '
+                 '-g {rg} --gateway-name {gw} --identity {access_identity}',
+                 checks=[
+                     self.check('identity.type', 'UserAssigned')
+                 ])
+        self.cmd('network application-gateway identity show -g {rg} --gateway-name {gw}', checks=[
             self.check('type', 'UserAssigned')
         ])
 
-        # There is a validation by the backend server to check the effectiveness of the certificate.
-        # Since we cannot create a real certificate, so here we just check that the communication between the CLI and the backend server works.
-        with self.assertRaisesRegexp(CLIError, '^Deployment failed'):
-            self.cmd('network application-gateway ssl-cert create --gateway-name ag1 --name ssl-cert1 -g {rg} --key-vault-secret-id {sid2}')
+        self.cmd('network application-gateway ssl-cert create '
+                 ' -g {rg} --gateway-name {gw} '
+                 '--name MySSLCert '
+                 '--key-vault-secret-id {secret_id}')
 
 
 class NetworkAppGatewayZoneScenario(ScenarioTest):
@@ -3274,6 +3269,17 @@ class NetworkProfileScenarioTest(ScenarioTest):
         with self.assertRaisesRegexp(SystemExit, '3'):
             self.cmd('network profile show -g {rg} -n dummy')
         self.cmd('network profile delete -g {rg} -n dummy -y')
+
+
+class NetworkServiceAliasesScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='test_network_service_aliases')
+    def test_network_service_aliases(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group
+        })
+        self.cmd('network list-service-aliases -l centralus')
+        self.cmd('network list-service-aliases -l centralus -g {rg}')
 
 
 if __name__ == '__main__':
