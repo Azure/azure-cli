@@ -23,7 +23,8 @@ from azure.mgmt.cdn.models import (Endpoint, SkuName, EndpointUpdateParameters, 
                                    DeliveryRuleRequestHeaderAction, HeaderActionParameters,
                                    DeliveryRuleResponseHeaderAction, DeliveryRuleCacheKeyQueryStringAction,
                                    CacheKeyQueryStringActionParameters, UrlRedirectAction,
-                                   UrlRedirectActionParameters, UrlRewriteAction, UrlRewriteActionParameters)
+                                   DeliveryRuleCondition, DeliveryRuleAction, UrlRedirectActionParameters,
+                                   UrlRewriteAction, UrlRewriteActionParameters)
 
 from azure.cli.core.util import sdk_no_wait
 

@@ -176,19 +176,19 @@ class CdnEndpointScenarioTest(CdnScenarioMixin, ScenarioTest):
         update_checks = [JMESPathCheck('name', endpoint_name),
                          JMESPathCheck('length(deliveryPolicy.rules[0].actions)', 2)]
         self.endpoint_add_action_cmd(resource_group,
-                                        endpoint_name,
-                                        profile_name,
-                                        checks=update_checks,
-                                        options='--rule-name r1 --action-name "UrlRewrite"\
-                                                 --source-pattern "/abc" --destination "/def"')
+                                     endpoint_name,
+                                     profile_name,
+                                     checks=update_checks,
+                                     options='--rule-name r1 --action-name "UrlRewrite"\
+                                              --source-pattern "/abc" --destination "/def"')
 
         update_checks = [JMESPathCheck('name', endpoint_name),
                          JMESPathCheck('length(deliveryPolicy.rules[0].conditions)', 1)]
         self.endpoint_remove_condition_cmd(resource_group,
-                                        endpoint_name,
-                                        profile_name,
-                                        checks=update_checks,
-                                        options='--rule-name r1 --index 0')
+                                           endpoint_name,
+                                           profile_name,
+                                           checks=update_checks,
+                                           options='--rule-name r1 --index 0')
 
         update_checks = [JMESPathCheck('name', endpoint_name),
                          JMESPathCheck('length(deliveryPolicy.rules[0].actions)', 1)]
@@ -201,9 +201,9 @@ class CdnEndpointScenarioTest(CdnScenarioMixin, ScenarioTest):
         update_checks = [JMESPathCheck('name', endpoint_name),
                          JMESPathCheck('length(deliveryPolicy.rules)', 0)]
         self.endpoint_remove_rule_cmd(resource_group,
-                                        endpoint_name,
-                                        profile_name,
-                                        checks=update_checks,
-                                        options='--rule-name r1')
+                                      endpoint_name,
+                                      profile_name,
+                                      checks=update_checks,
+                                      options='--rule-name r1')
 
         self.endpoint_delete_cmd(resource_group, endpoint_name, profile_name)
