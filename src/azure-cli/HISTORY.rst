@@ -7,6 +7,10 @@ Release History
 
 * Support Local context in acr task run
 
+**AppService**
+
+* Fix issue #11217: webapp: az webapp config ssl upload should support slot parameter
+
 **Compute**
 
 * vmss create/update: Add --scale-in-policy, which decides which virtual machines are chosen for removal when a VMSS is scaled-in
