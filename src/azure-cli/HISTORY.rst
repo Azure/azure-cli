@@ -7,6 +7,10 @@ Release History
 
 * Support Local context in acr task run
 
+**AppService**
+
+* Fix issue #11217: webapp: az webapp config ssl upload should support slot parameter
+
 **Compute**
 
 * vmss create/update: Add --scale-in-policy, which decides which virtual machines are chosen for removal when a VMSS is scaled-in
@@ -56,7 +60,6 @@ Release History
 * Fix issue #11100: AttributeError for az webapp up when create service plan
 * az webapp up: Forcing the creation or deployment to a site for supported languages, no defaults used.
 * Add support for App Service Environment: az appservice ase show | list | list-addresses | list-plans | create | update | delete
-* Fix issue #11217: webapp: az webapp config ssl upload should support slot parameter
 
 **Backup**
 
