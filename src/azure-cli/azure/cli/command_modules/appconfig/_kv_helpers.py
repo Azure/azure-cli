@@ -16,7 +16,7 @@ from jsondiff import JsonDiffer
 from knack.log import get_logger
 from knack.util import CLIError
 
-from ._utils import resolve_connection_string, user_confirmation, error_print
+from ._utils import resolve_connection_string, user_confirmation
 from ._azconfig.azconfig_client import AzconfigClient
 from ._azconfig.models import (KeyValue,
                                ModifyKeyValueOptions,
@@ -329,9 +329,9 @@ def __serialize_kv_list_to_comparable_json_list(keyvalues):
 
 
 def __print_features_preview(old_json, new_json):
-    error_print('\n---------------- Preview Feature Flags (Beta) ----------------')
+    logger.warning('\n---------------- Feature Flags Preview (Beta) -------------')
     if not new_json:
-        error_print('\nSource configuration is empty. No changes will be made.')
+        logger.warning('\nSource configuration is empty. No changes will be made.')
         return False
 
     # perform diff operation
@@ -342,7 +342,7 @@ def __print_features_preview(old_json, new_json):
     res = differ.diff(old_json, new_json)
     keys = str(res.keys())
     if res == {} or (('update' not in keys) and ('insert' not in keys)):
-        error_print('\nTarget configuration already contains all feature flags in source. No changes will be made.')
+        logger.warning('\nTarget configuration already contains all feature flags in source. No changes will be made.')
         return False
 
     # format result printing
@@ -350,16 +350,16 @@ def __print_features_preview(old_json, new_json):
         if action.label == 'delete':
             continue  # we do not delete KVs while importing/exporting
         elif action.label == 'insert':
-            error_print('\nAdding:')
+            logger.warning('\nAdding:')
             for key, adding in changes.items():
                 record = {'feature': key}
                 for attribute, value in adding.items():
                     if attribute in ('description', 'conditions'):
                         continue
                     record[str(attribute)] = str(value)
-                error_print(json.dumps(record))
+                logger.warning(json.dumps(record))
         elif action.label == 'update':
-            error_print('\nUpdating:')
+            logger.warning('\nUpdating:')
             for key, updates in changes.items():
                 updates = list(updates.values())[0]
                 attributes = list(updates.keys())
@@ -368,16 +368,16 @@ def __print_features_preview(old_json, new_json):
                 for attribute in attributes:
                     old_record[attribute] = old_json[key][attribute]
                     new_record[attribute] = new_json[key][attribute]
-                error_print('- ' + str(old_record))
-                error_print('+ ' + str(new_record))
-    error_print("")  # printing an empty line for formatting purpose
+                logger.warning('- %s', str(old_record))
+                logger.warning('+ %s', str(new_record))
+    logger.warning("")  # printing an empty line for formatting purpose
     return True
 
 
 def __print_preview(old_json, new_json):
-    error_print('\n---------------- Preview (Beta) ----------------')
+    logger.warning('\n---------------- Key Values Preview (Beta) ----------------')
     if not new_json:
-        error_print('\nSource configuration is empty. No changes will be made.')
+        logger.warning('\nSource configuration is empty. No changes will be made.')
         return False
 
     # perform diff operation
@@ -388,7 +388,7 @@ def __print_preview(old_json, new_json):
     res = differ.diff(old_json, new_json)
     keys = str(res.keys())
     if res == {} or (('update' not in keys) and ('insert' not in keys)):
-        error_print('\nTarget configuration already contains all key-values in source. No changes will be made.')
+        logger.warning('\nTarget configuration already contains all key-values in source. No changes will be made.')
         return False
 
     # format result printing
@@ -396,14 +396,14 @@ def __print_preview(old_json, new_json):
         if action.label == 'delete':
             continue  # we do not delete KVs while importing/exporting
         elif action.label == 'insert':
-            error_print('\nAdding:')
+            logger.warning('\nAdding:')
             for key, adding in changes.items():
                 record = {'key': key}
                 for attribute, value in adding.items():
                     record[str(attribute)] = str(value)
-                error_print(json.dumps(record))
+                logger.warning(json.dumps(record))
         elif action.label == 'update':
-            error_print('\nUpdating:')
+            logger.warning('\nUpdating:')
             for key, updates in changes.items():
                 updates = list(updates.values())[0]
                 attributes = list(updates.keys())
@@ -412,32 +412,32 @@ def __print_preview(old_json, new_json):
                 for attribute in attributes:
                     old_record[attribute] = old_json[key][attribute]
                     new_record[attribute] = new_json[key][attribute]
-                error_print('- ' + json.dumps(old_record))
-                error_print('+ ' + json.dumps(new_record))
-    error_print("")  # printing an empty line for formatting purpose
+                logger.warning('- %s', json.dumps(old_record))
+                logger.warning('+ %s', json.dumps(new_record))
+    logger.warning("")  # printing an empty line for formatting purpose
     return True
 
 
 def __print_restore_preview(kvs_to_restore, kvs_to_modify, kvs_to_delete):
-    error_print('\n---------------- Preview (Beta) ----------------')
+    logger.warning('\n---------------- Preview (Beta) ----------------')
     if len(kvs_to_restore) + len(kvs_to_modify) + len(kvs_to_delete) == 0:
-        error_print('\nNo records matching found to be restored. No changes will be made.')
+        logger.warning('\nNo records matching found to be restored. No changes will be made.')
         return False
 
     # format result printing
     if kvs_to_restore:
-        error_print('\nAdding:')
-        error_print(json.dumps(__serialize_kv_list_to_comparable_json_list(kvs_to_restore), indent=2))
+        logger.warning('\nAdding:')
+        logger.warning(json.dumps(__serialize_kv_list_to_comparable_json_list(kvs_to_restore), indent=2))
 
     if kvs_to_modify:
-        error_print('\nUpdating:')
-        error_print(json.dumps(__serialize_kv_list_to_comparable_json_list(kvs_to_modify), indent=2))
+        logger.warning('\nUpdating:')
+        logger.warning(json.dumps(__serialize_kv_list_to_comparable_json_list(kvs_to_modify), indent=2))
 
     if kvs_to_delete:
-        error_print('\nDeleting:')
-        error_print(json.dumps(__serialize_kv_list_to_comparable_json_list(kvs_to_delete), indent=2))
+        logger.warning('\nDeleting:')
+        logger.warning(json.dumps(__serialize_kv_list_to_comparable_json_list(kvs_to_delete), indent=2))
 
-    error_print("")  # printing an empty line for formatting purpose
+    logger.warning("")  # printing an empty line for formatting purpose
     confirmation_message = "Do you want to continue? \n"
     user_confirmation(confirmation_message)
     return True

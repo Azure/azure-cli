@@ -6,8 +6,6 @@ from __future__ import print_function
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
-import sys
-
 from knack.prompting import NoTTYException, prompt_y_n
 from knack.util import CLIError
 
@@ -101,8 +99,3 @@ def is_valid_connection_string(connection_string):
             return False
         return True
     return False
-
-
-def error_print(error_message):
-    # used for printing to stderr, even for messages that are not necessarily error messages
-    print(error_message, file=sys.stderr)
