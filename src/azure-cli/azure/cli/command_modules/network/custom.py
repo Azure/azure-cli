@@ -1706,56 +1706,65 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
           .format(cum_records, total_records, zone_name), file=sys.stderr)
 
 
-def add_dns_aaaa_record(cmd, resource_group_name, zone_name, record_set_name, ipv6_address):
+def add_dns_aaaa_record(cmd, resource_group_name, zone_name, record_set_name, ipv6_address,
+                        ttl=None):
     AaaaRecord = cmd.get_models('AaaaRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = AaaaRecord(ipv6_address=ipv6_address)
     record_type = 'aaaa'
-    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name)
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
+                            ttl=ttl)
 
 
-def add_dns_a_record(cmd, resource_group_name, zone_name, record_set_name, ipv4_address):
+def add_dns_a_record(cmd, resource_group_name, zone_name, record_set_name, ipv4_address,
+                     ttl=None):
     ARecord = cmd.get_models('ARecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = ARecord(ipv4_address=ipv4_address)
     record_type = 'a'
-    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
-                            'arecords')
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name, 'arecords',
+                            ttl=ttl)
 
 
-def add_dns_caa_record(cmd, resource_group_name, zone_name, record_set_name, value, flags, tag):
+def add_dns_caa_record(cmd, resource_group_name, zone_name, record_set_name, value, flags, tag,
+                       ttl=None):
     CaaRecord = cmd.get_models('CaaRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = CaaRecord(flags=flags, tag=tag, value=value)
     record_type = 'caa'
-    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name)
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
+                            ttl=ttl)
 
 
-def add_dns_cname_record(cmd, resource_group_name, zone_name, record_set_name, cname):
+def add_dns_cname_record(cmd, resource_group_name, zone_name, record_set_name, cname, ttl=None):
     CnameRecord = cmd.get_models('CnameRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = CnameRecord(cname=cname)
     record_type = 'cname'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
-                            is_list=False)
+                            is_list=False, ttl=ttl)
 
 
-def add_dns_mx_record(cmd, resource_group_name, zone_name, record_set_name, preference, exchange):
+def add_dns_mx_record(cmd, resource_group_name, zone_name, record_set_name, preference, exchange,
+                      ttl=None):
     MxRecord = cmd.get_models('MxRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = MxRecord(preference=int(preference), exchange=exchange)
     record_type = 'mx'
-    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name)
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
+                            ttl=ttl)
 
 
-def add_dns_ns_record(cmd, resource_group_name, zone_name, record_set_name, dname, subscription_id=None):
+def add_dns_ns_record(cmd, resource_group_name, zone_name, record_set_name, dname,
+                      subscription_id=None, ttl=None):
     NsRecord = cmd.get_models('NsRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = NsRecord(nsdname=dname)
     record_type = 'ns'
-    return _add_save_record(cmd, record, record_type, record_set_name,
-                            resource_group_name, zone_name, subscription_id=subscription_id)
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
+                            subscription_id=subscription_id, ttl=ttl)
 
 
-def add_dns_ptr_record(cmd, resource_group_name, zone_name, record_set_name, dname):
+def add_dns_ptr_record(cmd, resource_group_name, zone_name, record_set_name, dname, ttl=None):
     PtrRecord = cmd.get_models('PtrRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = PtrRecord(ptrdname=dname)
     record_type = 'ptr'
-    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name)
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
+                            ttl=ttl)
 
 
 def update_dns_soa_record(cmd, resource_group_name, zone_name, host=None, email=None,
@@ -1900,14 +1909,16 @@ def _add_record(record_set, record, record_type, is_list=False):
 
 
 def _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
-                     is_list=True, subscription_id=None):
+                     is_list=True, subscription_id=None, ttl=None):
     ncf = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS,
                                   subscription_id=subscription_id).record_sets
     try:
         record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
     except CloudError:
         RecordSet = cmd.get_models('RecordSet', resource_type=ResourceType.MGMT_NETWORK_DNS)
-        record_set = RecordSet(ttl=3600)
+        record_set = RecordSet()
+
+    record_set.ttl = ttl if ttl is not None else 3600
 
     _add_record(record_set, record, record_type, is_list)
 
@@ -4784,4 +4795,13 @@ def update_virtual_router_peering(cmd, instance, peer_asn=None, peer_ip=None):
         c.set_param('peer_asn', peer_asn)
         c.set_param('peer_ip', peer_ip)
     return instance
+# endregion
+
+
+# region service aliases
+def list_service_aliases(cmd, location, resource_group_name=None):
+    client = network_client_factory(cmd.cli_ctx).available_service_aliases
+    if resource_group_name is not None:
+        return client.list_by_resource_group(resource_group_name=resource_group_name, location=location)
+    return client.list(location=location)
 # endregion
