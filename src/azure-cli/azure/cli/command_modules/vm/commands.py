@@ -188,7 +188,7 @@ def load_command_table(self, _):
         g.generic_update_command('update', custom_func_name='update_managed_disk', setter_arg_name='disk', supports_no_wait=True)
         g.wait_command('wait')
 
-    with self.command_group('disk-encryption-set', compute_disk_encryption_set_sdk, client_factory=cf_disk_encryption_set) as g:
+    with self.command_group('disk-encryption-set', compute_disk_encryption_set_sdk, client_factory=cf_disk_encryption_set, min_api='2019-07-01') as g:
         g.custom_command('create', 'create_disk_encryption_set')
         g.command('delete', 'delete')
         # g.command('update', 'update')
