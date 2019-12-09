@@ -3006,4 +3006,13 @@ def list_disk_encryption_sets(cmd, client, resource_group_name=None):
         return client.list_by_resource_group(resource_group_name)
     return client.list()
 
+
+def update_disk_encryption_set(instance, key_url=None, source_vault=None):
+    if key_url:
+        instance.active_key.key_url = key_url
+    if source_vault:
+        instance.active_key.source_vault = source_vault
+    return instance
+
+
 # endregion

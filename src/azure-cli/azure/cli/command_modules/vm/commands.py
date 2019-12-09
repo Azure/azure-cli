@@ -191,7 +191,7 @@ def load_command_table(self, _):
     with self.command_group('disk-encryption-set', compute_disk_encryption_set_sdk, client_factory=cf_disk_encryption_set, min_api='2019-07-01') as g:
         g.custom_command('create', 'create_disk_encryption_set', supports_no_wait=True)
         g.command('delete', 'delete')
-        # g.command('update', 'update')
+        g.generic_update_command('update', custom_func_name='update_disk_encryption_set')
         g.show_command('show', 'get')
         g.custom_command('list', 'list_disk_encryption_sets')
 
