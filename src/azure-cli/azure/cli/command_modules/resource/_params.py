@@ -172,11 +172,18 @@ def load_arguments(self, _):
     with self.argument_context('group deployment') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type, completer=get_resource_group_completion_list)
         c.argument('deployment_name', options_list=['--name', '-n'], required=True, help='The deployment name.')
-        c.argument('template_file', completer=FilesCompleter(), type=file_type, help="a template file path in the file system")
+        c.argument('template_file', completer=FilesCompleter(), type=file_type,
+                   help="a template file path in the file system")
         c.argument('template_uri', help='a uri to a remote template file')
-        c.argument('mode', arg_type=get_enum_type(DeploymentMode, default='incremental'), help='Incremental (only add resources to resource group) or Complete (remove extra resources from resource group)')
+        c.argument('mode', arg_type=get_enum_type(DeploymentMode, default='incremental'),
+                   help='Incremental (only add resources to resource group) or Complete '
+                        '(remove extra resources from resource group)')
         c.argument('parameters', action='append', nargs='+', completer=FilesCompleter())
-        c.argument('rollback_on_error', nargs='?', action=RollbackAction, help='The name of a deployment to roll back to on error, or use as a flag to roll back to the last successful deployment.')
+        c.argument('rollback_on_error', nargs='?', action=RollbackAction,
+                   help='The name of a deployment to roll back to on error, or use as a flag to roll back to the last '
+                        'successful deployment.')
+        c.argument('aux_subscriptions', nargs='*', opstions_list=['--aux-subs'],
+                   help='[TODO] Auxilary subscriptions which are used for cross tenants')
 
     with self.argument_context('group deployment create') as c:
         c.argument('deployment_name', options_list=['--name', '-n'], required=False,
