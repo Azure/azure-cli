@@ -9,7 +9,6 @@ import json
 # pylint: disable=import-error
 # pylint: disable=broad-except
 
-from datetime import datetime
 from uuid import uuid4
 from azure.cli.command_modules.backup._validators import datetime_type
 
@@ -238,10 +237,10 @@ def show_protectable_item(items, name, server_name, protectable_item_type):
 
     return cust_help.get_none_one_or_many(filtered_items)
 
+
 def show_protectable_instance(items, server_name, protectable_item_type):
     if protectable_item_type_map.get(protectable_item_type) is not None:
         protectable_item_type = protectable_item_type_map[protectable_item_type]
-    
     # Server Name filter
     filtered_items = [item for item in items if item.properties.server_name.lower() == server_name.lower()]
 
@@ -250,6 +249,7 @@ def show_protectable_instance(items, server_name, protectable_item_type):
                       item.properties.protectable_item_type.lower() == protectable_item_type.lower()]
 
     return cust_help.get_none_one_or_many(filtered_items)
+
 
 def list_protectable_items(client, resource_group_name, vault_name, workload_type, container_uri=None):
     workload_type = workload_type_map[workload_type]
@@ -555,7 +555,6 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
     db_name = None
     if restore_mode == 'AlternateWorkloadRestore':
         friendly_name = target_item.properties.friendly_name
-        item_friendly_name = item.properties.friendly_name
         db_name = friendly_name + '/' + target_item_name
 
     container_id = None
@@ -565,7 +564,7 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
     if not ('sql' in item_type.lower() and restore_mode == 'AlternateWorkloadRestore'):
         alternate_directory_paths = None
 
-    return {
+    return json.dumps({
         'restore_mode': restore_mode_map[restore_mode],
         'container_uri': item.properties.container_name,
         'item_uri': item_name,
@@ -575,17 +574,17 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
         'source_resource_id': item.properties.source_resource_id,
         'database_name': db_name,
         'container_id': container_id,
-        'alternate_directory_paths': alternate_directory_paths}
+        'alternate_directory_paths': alternate_directory_paths})
 
 
 def _get_restore_request_instance(item_type, log_point_in_time):
     if item_type.lower() == "saphana":
         if log_point_in_time is not None:
-            return AzureWorkloadSAPHanaPointInTimeRestoreRequest() 
+            return AzureWorkloadSAPHanaPointInTimeRestoreRequest()
         return AzureWorkloadSAPHanaRestoreRequest()
     if item_type.lower() == "sql":
         if log_point_in_time is not None:
-            return AzureWorkloadSQLPointInTimeRestoreRequest()  
+            return AzureWorkloadSQLPointInTimeRestoreRequest()
         return AzureWorkloadSQLRestoreRequest()
     return None
 
