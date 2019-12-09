@@ -68,6 +68,11 @@ def validate_keyvault(cmd, namespace):
                                           'vaults', 'Microsoft.KeyVault')
 
 
+def validate_vm_name(cmd, namespace):
+    namespace.resource = _get_resource_id(cmd.cli_ctx, namespace.resource, namespace.resource_group_name,
+                                          'virtualMachines', 'Microsoft.Compute')
+
+
 def _validate_proximity_placement_group(cmd, namespace):
     from msrestazure.tools import parse_resource_id
 

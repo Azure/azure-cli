@@ -2474,7 +2474,6 @@ parameters:
         Space-separated list of metric names to retrieve.
     populator-commands:
       - az monitor metrics list-definitions
-    
 examples:
   - name: List a VM's CPU usage for the past hour
     text: >

@@ -22,7 +22,7 @@ from azure.cli.command_modules.vm._completers import (
 from azure.cli.command_modules.vm._validators import (
     validate_nsg_name, validate_vm_nics, validate_vm_nic, validate_vm_disk, validate_vmss_disk,
     validate_asg_names_or_ids, validate_keyvault, _validate_proximity_placement_group,
-    process_gallery_image_version_namespace)
+    process_gallery_image_version_namespace, validate_vm_name)
 
 from azure.cli.command_modules.vm._vm_utils import MSI_LOCAL_ID
 from azure.cli.command_modules.vm._image_builder import ScriptType
@@ -855,7 +855,8 @@ def load_arguments(self, _):
 
     with self.argument_context('vm monitor metrics tail') as c:
         from azure.mgmt.monitor.models import AggregationType
-        c.argument('resource', arg_type=existing_vm_name, help='Name or ID of Virtual Machine', id_part=None)
+        c.extra('resource_group_name')
+        c.argument('resource', arg_type=existing_vm_name, help='Name or ID of Virtual Machine', validator=validate_vm_name, id_part=None)
         c.argument('metadata', action='store_true')
         c.argument('dimension', nargs='*', validator=validate_metric_dimension)
         c.argument('aggregation', arg_type=get_enum_type(t for t in AggregationType if t.name != 'none'), nargs='*')
