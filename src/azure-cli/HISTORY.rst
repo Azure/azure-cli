@@ -22,6 +22,10 @@ Release History
 
 * [BREAKING CHANGE] Removed --failover-region parameter from manual-failover. Now it will failover to assigned geo-paired secondary region.
 
+**Network**
+
+* az network list-service-aliases: support list service aliases which can be used for Service Endpoint Policies
+
 **Packaging**
 
 * Add back edge builds for pip install
