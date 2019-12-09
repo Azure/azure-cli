@@ -167,8 +167,12 @@ class AzCliCommandParser(CLICommandParser):
         if action.choices is not None and value not in action.choices:
             if not self.command_source:
                 # parser has no `command_source`, value is part of command itself
-                error_msg = "{prog}: '{value}' is not in the '{prog}' command group. See '{prog} --help'.".format(
-                    prog=self.prog, value=value)
+                extensions_link = 'https://docs.microsoft.com/en-us/cli/azure/azure-cli-extensions-overview'
+                error_msg = ("{prog}: '{value}' is not in the '{prog}' command group. See '{prog} --help'. "
+                             "If the command is from an extension, "
+                             "please make sure the corresponding extension is installed. "
+                             "To learn more about extensions, please visit "
+                             "{extensions_link}").format(prog=self.prog, value=value, extensions_link=extensions_link)
             else:
                 # `command_source` indicates command values have been parsed, value is an argument
                 parameter = action.option_strings[0] if action.option_strings else action.dest

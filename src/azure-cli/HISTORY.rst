@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**ACR**
+
+* Support Local context in acr task run
+
 **Compute**
 
 * vmss create/update: Add --scale-in-policy, which decides which virtual machines are chosen for removal when a VMSS is scaled-in
@@ -17,11 +21,14 @@ Release History
 
 **Network**
 
-* application-gateway probe: Support --port option to specify a port for probing backend servers when create and update
+* az application-gateway probe: Support --port option to specify a port for probing backend servers when create and update
+* az network list-service-aliases: Support list service aliases which can be used for Service Endpoint Policies
+
 
 **Packaging**
 
 * Add back edge builds for pip install
+* Add Ubuntu eoan package
 
 **Storage**
 
