@@ -200,7 +200,7 @@ def show_protectable_item(cmd, client, resource_group_name, vault_name, name, se
     return custom_wl.show_protectable_item(items, name, server_name, protectable_item_type)
 
 
-def show_protectable_instance(cmd, client, resource_group_name, vault_name, name, server_name, protectable_item_type,
+def show_protectable_instance(cmd, client, resource_group_name, vault_name, server_name, protectable_item_type,
                               workload_type, container_name=None):
     items = list_protectable_items(cmd, client, resource_group_name, vault_name, workload_type, container_name)
     return custom_wl.show_protectable_instance(items, server_name, protectable_item_type)
@@ -349,7 +349,7 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
     if target_item_name is not None:
         protectable_items_client = backup_protectable_items_cf(cmd.cli_ctx)
         target_item = show_protectable_instance(cmd, protectable_items_client, resource_group_name, vault_name,
-                                                target_item_name, target_server_name, target_server_type,
+                                                target_server_name, target_server_type,
                                                 workload_type, container_name)
     return custom_wl.show_recovery_config(cmd, client, resource_group_name, vault_name, restore_mode, container_name,
                                           item_name, rp_name, target_item, target_item_name, log_point_in_time)

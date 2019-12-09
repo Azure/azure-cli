@@ -59,6 +59,12 @@ def transform_policy(result):
 
 
 def transform_recovery_point(result):
+    if result['properties']['objectType'][:13] == "AzureWorkload":
+        return OrderedDict([('Name', result['name']),
+                            ('Time', result['properties']['recoveryPointTimeInUtc']),
+                            ('BackupManagementType', 'AzureWorkload'),
+                            ('Item Name', result['id'].split('/')[14]),
+                            ('RecoveryPointType', result['properties']['objectType'])])
     return OrderedDict([('Name', result['name']),
                         ('Time', result['properties']['recoveryPointTime']),
                         ('Consistency', result['properties']['recoveryPointType'])])
