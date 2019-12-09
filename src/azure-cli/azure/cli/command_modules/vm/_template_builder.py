@@ -669,7 +669,8 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
                         single_placement_group=None, platform_fault_domain_count=None, custom_data=None,
                         secrets=None, license_type=None, zones=None, priority=None, eviction_policy=None,
                         application_security_groups=None, ultra_ssd_enabled=None, proximity_placement_group=None,
-                        terminate_notification_time=None, max_price=None, scale_in_policy=None):
+                        terminate_notification_time=None, max_price=None, scale_in_policy=None,
+                        os_disk_encryption_set=None, data_disk_encryption_sets=None):
 
     # Build IP configuration
     ip_configuration = {
@@ -733,6 +734,10 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
             'caching': os_caching,
             'managedDisk': {'storageAccountType': disk_info['os'].get('storageAccountType')}
         }
+        if os_disk_encryption_set is not None:
+            storage_properties['osDisk']['managedDisk']['diskEncryptionSet'] = {
+                'id': os_disk_encryption_set
+            }
         if disk_info['os'].get('diffDiskSettings'):
             storage_properties['osDisk']['diffDiskSettings'] = disk_info['os']['diffDiskSettings']
 
@@ -748,6 +753,12 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
             'id': image
         }
     data_disks = [v for k, v in disk_info.items() if k != 'os']
+    if data_disk_encryption_sets:
+        if len(data_disk_encryption_sets) != len(data_disks):
+            raise CLIError(
+                'usage error: Number of --data-disk-encryption-sets mismatches with number of data disks.')
+        for i, data_disk in enumerate(data_disks):
+            data_disk['managedDisk']['diskEncryptionSet'] = {'id': data_disk_encryption_sets[i]}
     if data_disks:
         storage_properties['dataDisks'] = data_disks
 

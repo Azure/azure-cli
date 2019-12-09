@@ -2028,7 +2028,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 identity_role_id=None, zones=None, priority=None, eviction_policy=None,
                 application_security_groups=None, ultra_ssd_enabled=None, ephemeral_os_disk=None,
                 proximity_placement_group=None, aux_subscriptions=None, terminate_notification_time=None,
-                max_price=None, computer_name_prefix=None, orchestration_mode='ScaleSetVM', scale_in_policy=None):
+                max_price=None, computer_name_prefix=None, orchestration_mode='ScaleSetVM', scale_in_policy=None,
+                os_disk_encryption_set=None, data_disk_encryption_sets=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -2049,6 +2050,20 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
         storage_sku = disk_info['os'].get('storageAccountType')
 
         subscription_id = get_subscription_id(cmd.cli_ctx)
+
+        if os_disk_encryption_set is not None and not is_valid_resource_id(os_disk_encryption_set):
+            os_disk_encryption_set = resource_id(
+                subscription=subscription_id, resource_group=resource_group_name,
+                namespace='Microsoft.Compute', type='diskEncryptionSets', name=os_disk_encryption_set)
+
+        if data_disk_encryption_sets is None:
+            data_disk_encryption_sets = []
+        for i, des in enumerate(data_disk_encryption_sets):
+            if des is not None and not is_valid_resource_id(des):
+                data_disk_encryption_sets[i] = resource_id(
+                    subscription=subscription_id, resource_group=resource_group_name,
+                    namespace='Microsoft.Compute', type='diskEncryptionSets', name=des)
+
         network_id_template = resource_id(
             subscription=subscription_id, resource_group=resource_group_name,
             namespace='Microsoft.Network')
@@ -2241,7 +2256,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             eviction_policy=eviction_policy, application_security_groups=application_security_groups,
             ultra_ssd_enabled=ultra_ssd_enabled, proximity_placement_group=proximity_placement_group,
             terminate_notification_time=terminate_notification_time, max_price=max_price,
-            scale_in_policy=scale_in_policy)
+            scale_in_policy=scale_in_policy, os_disk_encryption_set=os_disk_encryption_set,
+            data_disk_encryption_sets=data_disk_encryption_sets)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -2969,7 +2985,7 @@ def execute_query_for_vm(cmd, client, resource_group_name, vm_name, analytics_qu
 
 # disk encryption set
 def create_disk_encryption_set(cmd, client, resource_group_name, disk_encryption_set_name,
-                               key_url, source_vault, location=None, tags=None):
+                               key_url, source_vault, location=None, tags=None, no_wait=False):
     from msrestazure.tools import resource_id, is_valid_resource_id
     DiskEncryptionSet, EncryptionSetIdentity, KeyVaultAndKeyReference, SourceVault = cmd.get_models(
         'DiskEncryptionSet', 'EncryptionSetIdentity', 'KeyVaultAndKeyReference', 'SourceVault')
@@ -2981,7 +2997,8 @@ def create_disk_encryption_set(cmd, client, resource_group_name, disk_encryption
     keyVault_and_key_reference = KeyVaultAndKeyReference(source_vault=source_vault, key_url=key_url)
     disk_encryption_set = DiskEncryptionSet(location=location, tags=tags, identity=encryption_set_identity,
                                             active_key=keyVault_and_key_reference)
-    return client.create_or_update(resource_group_name, disk_encryption_set_name, disk_encryption_set)
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, disk_encryption_set_name,
+                       disk_encryption_set)
 
 
 def list_disk_encryption_sets(cmd, client, resource_group_name=None):
