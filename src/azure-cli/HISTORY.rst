@@ -26,6 +26,7 @@ Release History
 **Key Vault**
 
 * Fix #10846: Calling az keyvault secret show-deleted --id <value> still says secret_name "can not" be none
+* Fix #11084: Confusing encoding information
 
 **Network**
 
