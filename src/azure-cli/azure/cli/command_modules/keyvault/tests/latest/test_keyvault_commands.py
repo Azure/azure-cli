@@ -31,7 +31,6 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
 def _create_keyvault(test, kwargs, additional_args=None):
-
     # need premium KeyVault to store keys in HSM
     kwargs['add'] = additional_args or ''
     return test.cmd('keyvault create -g {rg} -n {kv} -l {loc} --sku premium {add}')
@@ -257,13 +256,11 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_secret')
     def test_keyvault_secret(self, resource_group):
-
         self.kwargs.update({
             'kv': self.create_random_name('cli-test-kevault-', 24),
             'loc': 'westus',
             'sec': 'secret1'
         })
-
         _create_keyvault(self, self.kwargs)
 
         # create a secret
@@ -329,6 +326,25 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
                  checks=self.is_empty())
 
         self._test_download_secret()
+
+        # show deleted
+        self.cmd('keyvault update -n {kv} --enable-soft-delete',
+                 checks=self.check('properties.enableSoftDelete', True))
+        if self.is_live:
+            time.sleep(20)
+
+        self.cmd('keyvault secret set --vault-name {kv} -n {sec} --value ABC123',
+                 checks=self.check('value', 'ABC123'))
+        data = self.cmd('keyvault secret delete --vault-name {kv} -n {sec}').get_output_in_json()
+        if self.is_live:
+            time.sleep(20)
+
+        self.kwargs['secret_id'] = data['id']
+        self.kwargs['secret_recovery_id'] = data['recoveryId']
+        self.cmd('keyvault secret show-deleted --id {secret_recovery_id}',
+                 checks=self.check('id', '{secret_id}'))
+        self.cmd('keyvault secret show-deleted --vault-name {kv} -n {sec}',
+                 checks=self.check('id', '{secret_id}'))
 
 
 class KeyVaultCertificateContactsScenarioTest(ScenarioTest):
