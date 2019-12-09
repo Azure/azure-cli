@@ -69,6 +69,10 @@ Release History
 
 * Update ADLS sdk version (0.0.48).
 
+**Cdn**
+
+* Add support for rulesEngine feature
+
 **Install**
 
 * Install script support python 3.8
