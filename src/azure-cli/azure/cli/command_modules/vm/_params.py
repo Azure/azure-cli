@@ -746,6 +746,11 @@ def load_arguments(self, _):
             c.argument('max_price', min_api='2019-03-01', type=float, is_preview=True,
                        help='The maximum price (in US Dollars) you are willing to pay for a low priority VM/VMSS. -1 indicates that the low priority VM/VMSS should not be evicted for price reasons')
 
+    with self.argument_context('vmss create') as c:
+        c.argument('priority', resource_type=ResourceType.MGMT_COMPUTE, min_api='2017-12-01',
+                   arg_type=get_enum_type(self.get_models('VirtualMachinePriorityTypes'), default=None),
+                   help="Priority. Use 'Spot' to run short-lived workloads in a cost-effective way. 'Low' enum will be deprecated in the future. Please use 'Spot' to deploy Azure spot VM and/or VMSS")
+
     with self.argument_context('sig') as c:
         c.argument('gallery_name', options_list=['--gallery-name', '-r'], help='gallery name')
         c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], help='gallery image definition')
