@@ -11,6 +11,10 @@ Release History
 
 * vmss create/update: Add --scale-in-policy, which decides which virtual machines are chosen for removal when a VMSS is scaled-in
 
+**Core**
+
+* Remove support for Python 3.4
+
 **Install**
 
 * Install script support python 3.8
