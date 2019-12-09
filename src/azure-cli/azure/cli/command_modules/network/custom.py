@@ -4796,3 +4796,12 @@ def update_virtual_router_peering(cmd, instance, peer_asn=None, peer_ip=None):
         c.set_param('peer_ip', peer_ip)
     return instance
 # endregion
+
+
+# region service aliases
+def list_service_aliases(cmd, location, resource_group_name=None):
+    client = network_client_factory(cmd.cli_ctx).available_service_aliases
+    if resource_group_name is not None:
+        return client.list_by_resource_group(resource_group_name=resource_group_name, location=location)
+    return client.list(location=location)
+# endregion
