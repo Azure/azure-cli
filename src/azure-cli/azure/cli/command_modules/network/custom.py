@@ -24,7 +24,6 @@ from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zo
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
 from azure.cli.core.profiles import ResourceType, supported_api_version
 
-from ._settings import application_gateway_url_path_map_rewrite_rule_set
 
 logger = get_logger(__name__)
 
@@ -746,7 +745,9 @@ def create_ag_request_routing_rule(cmd, resource_group_name, application_gateway
         url_path_map=SubResource(id=url_path_map) if url_path_map else None)
     if cmd.supported_api_version(min_api='2017-06-01'):
         new_rule.redirect_configuration = SubResource(id=redirect_config) if redirect_config else None
-    if cmd.supported_api_version(min_api=application_gateway_url_path_map_rewrite_rule_set):
+
+    rewrite_rule_set_min_api_version = cmd.get_param_min_api_version(rewrite_rule_set, locals())
+    if cmd.supported_api_version(min_api=rewrite_rule_set_min_api_version):
         new_rule.rewrite_rule_set = SubResource(id=rewrite_rule_set) if rewrite_rule_set else None
     upsert_to_collection(ag, 'request_routing_rules', new_rule, 'name')
     return sdk_no_wait(no_wait, ncf.application_gateways.create_or_update,
@@ -878,7 +879,8 @@ def create_ag_url_path_map(cmd, resource_group_name, application_gateway_name, i
         new_map.default_redirect_configuration = \
             SubResource(id=default_redirect_config) if default_redirect_config else None
 
-    if cmd.supported_api_version(min_api=application_gateway_url_path_map_rewrite_rule_set):
+    rewrite_rule_set_min_api_version = cmd.get_param_min_api_version(rewrite_rule_set, locals())
+    if cmd.supported_api_version(min_api=rewrite_rule_set_min_api_version):
         new_rule.rewrite_rule_set = SubResource(id=rewrite_rule_set) if rewrite_rule_set else None
         new_map.default_rewrite_rule_set = \
             SubResource(id=default_rewrite_rule_set) if default_rewrite_rule_set else None
