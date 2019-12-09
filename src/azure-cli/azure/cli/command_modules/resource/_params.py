@@ -182,7 +182,7 @@ def load_arguments(self, _):
         c.argument('rollback_on_error', nargs='?', action=RollbackAction,
                    help='The name of a deployment to roll back to on error, or use as a flag to roll back to the last '
                         'successful deployment.')
-        c.argument('aux_subscriptions', nargs='*', opstions_list=['--aux-subs'],
+        c.argument('aux_subscriptions', nargs='*', options_list=['--aux-subs'],
                    help='[TODO] Auxilary subscriptions which are used for cross tenants')
 
     with self.argument_context('group deployment create') as c:
