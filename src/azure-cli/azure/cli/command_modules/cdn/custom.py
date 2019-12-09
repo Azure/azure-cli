@@ -258,7 +258,6 @@ def create_action(action_name=None, cache_behavior=None, cache_duration=None, he
                 preserve_unmatched_path=preserve_unmatched_path
             ))
 
-    print("action name not found, no action was created")
     return DeliveryRuleAction()
 
 
@@ -311,7 +310,7 @@ def add_condition(instance, rule_name=None, match_variable=None, operator=None, 
 
     policy = instance.delivery_policy
     if policy is None:
-        return print("rule cannot be found")
+        return
 
     condition = create_condition(match_variable, operator, match_values, selector, negate_condition, transform)
     for i in range(0, len(policy.rules)):
@@ -335,7 +334,7 @@ def add_action(instance, rule_name=None, action_name=None, cache_behavior=None, 
 
     policy = instance.delivery_policy
     if policy is None:
-        return print("rule cannot be found")
+        return
 
     action = create_action(action_name, cache_behavior, cache_duration, header_action, header_name,
                            header_value, query_string_behavior, query_parameters, redirect_type,
