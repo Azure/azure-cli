@@ -878,7 +878,7 @@ def create_ag_url_path_map(cmd, resource_group_name, application_gateway_name, i
         new_map.default_redirect_configuration = \
             SubResource(id=default_redirect_config) if default_redirect_config else None
 
-    if cmd.supported_api_version(min_api='2019-04-01'):
+    if cmd.supported_api_version(min_api=application_gateway_url_path_map_rewrite_rule_set):
         new_rule.rewrite_rule_set = SubResource(id=rewrite_rule_set) if rewrite_rule_set else None
         new_map.default_rewrite_rule_set = \
             SubResource(id=default_rewrite_rule_set) if default_rewrite_rule_set else None
