@@ -8,6 +8,17 @@ trigger:
     - '*'
 
 jobs:
+- job: RejectPullRequestToMasterBranch
+  displayName: "Reject Pull Request To Master Branch"
+  condition: and(succeeded(), eq(variables['System.PullRequest.TargetBranch'], 'master'))
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+    - bash: |
+        echo "Reject pull request directly to master branch"
+        exit 1
+
 - job: CredScan
   displayName: "Credential Scan"
 
@@ -361,6 +372,54 @@ jobs:
 
     displayName: 'Test pip Install'
 
+- job: UnitTest
+  displayName: Unit Test for Core and Telemetry
+  timeoutInMinutes: 10
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  strategy:
+    matrix:
+      Python27:
+        python.version: '2.7'
+      Python36:
+        python.version: '3.6'
+      Python38:
+        python.version: '3.8'
+  steps:
+    - task: UsePythonVersion@0
+      displayName: 'Use Python $(python.version)'
+      inputs:
+        versionSpec: '$(python.version)'
+    - bash: pip install --upgrade pip tox
+      displayName: 'Install pip and tox'
+    - bash: ./scripts/ci/unittest.sh
+      displayName: 'Run Unit Test'
+
+- job: IntegrationTestAgainstProfiles
+  displayName: Integration Test against Profiles
+  dependsOn: BuildPythonWheel
+  condition: succeeded()
+  timeoutInMinutes: 20
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  strategy:
+    matrix:
+      Python36:
+        python.version: '3.6'
+      Python38:
+        python.version: '3.8'
+  steps:
+    - task: UsePythonVersion@0
+      displayName: 'Use Python $(python.version)'
+      inputs:
+        versionSpec: '$(python.version)'
+    - bash: pip install --upgrade pip wheel
+      displayName: 'Install pip and wheel'
+    - bash: ./scripts/ci/test_profile_integration.sh
+      displayName: 'Run Integration Test against Profiles'
+
 - job: RunAutomationFullPython2
   displayName: Run Automation, Python 2
   dependsOn: BuildPythonWheel
@@ -519,6 +578,28 @@ jobs:
     env:
       REDUCE_SDK: 'True'
       AZURE_CLI_TEST_TARGET_PROFILE: '2019-03-01'
+
+- job: TestExtensionsLoading
+  displayName: Test Extensions Loading
+  dependsOn: BuildPythonWheel
+  condition: succeeded()
+  timeoutInMinutes: 10
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  strategy:
+    matrix:
+      Python36:
+        python.version: '3.6'
+  steps:
+    - task: UsePythonVersion@0
+      displayName: 'Use Python $(python.version)'
+      inputs:
+        versionSpec: '$(python.version)'
+    - bash: pip install --upgrade pip wheel
+      displayName: 'Install pip and wheel'
+    - bash: ./scripts/ci/test_extensions.sh
+      displayName: 'Load extensions'
 
 - job: RunAutomation20180301Python3_8
   displayName: Run Automation Python 3.8, Profile 2018-03-01
@@ -1145,3 +1226,17 @@ jobs:
   - bash: |
       . scripts/ci/install_azdev.sh
       azdev linter --ci-exclusions
+
+- job: VerifySphinxDocumentGenerator
+  displayName: "Verify Sphinx Document Generator"
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+    - task: UsePythonVersion@0
+      displayName: 'Use Python 3.6'
+      inputs:
+        versionSpec: 3.6
+    - bash: pip install --upgrade pip wheel
+      displayName: "Install pip and wheel"
+    - bash: ./scripts/ci/test_ref_doc.sh
+      displayName: "Verify Sphinx Document Generator"
