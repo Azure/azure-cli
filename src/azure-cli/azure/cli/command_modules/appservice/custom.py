@@ -369,7 +369,7 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
         zip_content = fs.read()
         logger.warning("Starting zip deployment. This operation can take a while to complete ...")
         res = requests.post(zip_url, data=zip_content, headers=headers, verify=not should_disable_connection_verify())
-        logger.warning("Deployment endpoint responses with status code %d", res.status_code)
+        logger.warning("Deployment endpoint responded with status code %d", res.status_code)
 
     # check if there's an ongoing process
     if res.status_code == 409:

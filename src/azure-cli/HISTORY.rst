@@ -23,6 +23,10 @@ Release History
 
 * Fix #10846: Calling az keyvault secret show-deleted --id <value> still says secret_name "can not" be none
 
+**Network**
+
+* az network list-service-aliases: support list service aliases which can be used for Service Endpoint Policies
+
 **Packaging**
 
 * Add back edge builds for pip install
