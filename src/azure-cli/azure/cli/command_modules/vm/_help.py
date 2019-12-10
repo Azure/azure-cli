@@ -108,6 +108,9 @@ short-summary: Disk Encryption Set resource.
 helps['disk-encryption-set create'] = """
 type: command
 short-summary: Create a disk encryption set.
+examples:
+  - name: Create a disk encryption set
+    text: az disk-encryption-set create -g MyResourceGroup -n MyDiskEncryptionSet --key-url MyKey --source-vault MyVault
 """
 
 helps['disk-encryption-set delete'] = """
