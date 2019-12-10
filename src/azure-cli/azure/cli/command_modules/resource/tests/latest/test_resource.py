@@ -1387,9 +1387,9 @@ class CrossTenantDeploymentScenarioTest(LiveScenarioTest):
                  checks=self.check('name', self.kwargs['rg']))
         self.cmd('sig create -g {rg} --gallery-name {gallery} --subscription {aux_sub}', checks=self.check('name', self.kwargs['gallery']))
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1 --subscription {aux_sub}',
-            checks=self.check('name', self.kwargs['image']))
+                 checks=self.check('name', self.kwargs['image']))
         self.cmd('sig image-definition show -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --subscription {aux_sub}',
-                       checks=self.check('name', self.kwargs['image']))
+                 checks=self.check('name', self.kwargs['image']))
 
         self.cmd('vm create -g {rg} -n {vm} --image ubuntults --admin-username clitest1 --generate-ssh-key --subscription {aux_sub}')
         self.cmd(
@@ -1417,8 +1417,8 @@ class CrossTenantDeploymentScenarioTest(LiveScenarioTest):
             self.check('properties.provisioningState', 'Succeeded')
         ])
         self.cmd('group deployment create -g {vm_rg} -n {dn} --template-file "{tf}" --parameters SIG_ImageVersion_id={sig_id} NIC_id={nic_id} --aux-subs "{aux_sub}"', checks=[
-                    self.check('properties.provisioningState', 'Succeeded'),
-                    self.check('resourceGroup', '{vm_rg}')
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('resourceGroup', '{vm_rg}')
         ])
         self.cmd('group deployment list -g {vm_rg}', checks=[
             self.check('[0].name', '{dn}'),
