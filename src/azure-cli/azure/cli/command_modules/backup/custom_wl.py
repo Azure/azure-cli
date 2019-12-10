@@ -5,13 +5,11 @@
 
 import azure.cli.command_modules.backup.custom_help as cust_help
 import azure.cli.command_modules.backup.custom_common as common
-import json
 # pylint: disable=import-error
 # pylint: disable=broad-except
 
 from uuid import uuid4
 from azure.cli.command_modules.backup._validators import datetime_type
-from knack.log import get_logger
 
 from azure.mgmt.recoveryservicesbackup.models import AzureVMAppContainerProtectionContainer, \
     AzureWorkloadBackupRequest, ProtectedItemResource, AzureRecoveryServiceVaultProtectionIntent, TargetRestoreInfo, \
@@ -23,6 +21,8 @@ from azure.mgmt.recoveryservicesbackup.models import AzureVMAppContainerProtecti
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.command_modules.backup._client_factory import backup_workload_items_cf, \
     protectable_containers_cf, backup_protection_containers_cf, backup_protected_items_cf
+
+from knack.log import get_logger
 
 fabric_name = "Azure"
 logger = get_logger(__name__)
@@ -569,7 +569,7 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
     if not ('sql' in item_type.lower() and restore_mode == 'AlternateWorkloadRestore'):
         alternate_directory_paths = None
 
-    return json.dumps({
+    return {
         'restore_mode': restore_mode_map[restore_mode],
         'container_uri': item.properties.container_name,
         'item_uri': item_name,
@@ -579,7 +579,7 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
         'source_resource_id': item.properties.source_resource_id,
         'database_name': db_name,
         'container_id': container_id,
-        'alternate_directory_paths': alternate_directory_paths})
+        'alternate_directory_paths': alternate_directory_paths}
 
 
 def _get_restore_request_instance(item_type, log_point_in_time):
