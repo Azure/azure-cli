@@ -3591,6 +3591,20 @@ class VMPriorityEvictionBillingTest(ScenarioTest):
             self.check('vmss.virtualMachineProfile.billingProfile.maxPrice', 50)
         ])
 
+        # vm update
+        self.cmd('vm deallocate -g {rg} -n {vm}')
+        self.cmd('vm update -g {rg} -n {vm} --priority Spot --max-price 100', checks=[
+            self.check('priority', 'Spot'),
+            self.check('billingProfile.maxPrice', 100)
+        ])
+
+        # vmss update
+        self.cmd('vmss deallocate -g {rg} -n {vmss}')
+        self.cmd('vmss update -g {rg} -n {vmss} --priority Spot --max-price 100', checks=[
+            self.check('virtualMachineProfile.priority', 'Spot'),
+            self.check('virtualMachineProfile.billingProfile.maxPrice', 100)
+        ])
+
 
 class VMCreateSpecialName(ScenarioTest):
 
