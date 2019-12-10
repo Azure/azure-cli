@@ -1439,14 +1439,15 @@ def create_policy_definition(cmd, name, rules=None, params=None, display_name=No
 
 
 def create_policy_setdefinition(cmd, name, definitions, params=None, display_name=None, description=None,
-                                subscription=None, management_group=None):
+                                subscription=None, management_group=None, definition_groups=None):
     definitions = _load_file_string_or_uri(definitions, 'definitions')
     params = _load_file_string_or_uri(params, 'params', False)
+    definition_groups = _load_file_string_or_uri(definition_groups, 'definition_groups', False)
 
     policy_client = _resource_policy_client_factory(cmd.cli_ctx)
     PolicySetDefinition = cmd.get_models('PolicySetDefinition')
     parameters = PolicySetDefinition(policy_definitions=definitions, parameters=params, description=description,
-                                     display_name=display_name)
+                                     display_name=display_name, policy_definition_groups=definition_groups)
     if cmd.supported_api_version(min_api='2018-03-01'):
         enforce_mutually_exclusive(subscription, management_group)
         if management_group:
@@ -1554,10 +1555,11 @@ def update_policy_definition(cmd, policy_definition_name, rules=None, params=Non
 
 def update_policy_setdefinition(cmd, policy_set_definition_name, definitions=None, params=None,
                                 display_name=None, description=None,
-                                subscription=None, management_group=None):
+                                subscription=None, management_group=None, definition_groups=None):
 
     definitions = _load_file_string_or_uri(definitions, 'definitions', False)
     params = _load_file_string_or_uri(params, 'params', False)
+    definition_groups = _load_file_string_or_uri(definition_groups, 'definition_groups', False)
 
     policy_client = _resource_policy_client_factory(cmd.cli_ctx)
     definition = _get_custom_or_builtin_policy(cmd, policy_client, policy_set_definition_name, subscription, management_group, True)
@@ -1567,7 +1569,8 @@ def update_policy_setdefinition(cmd, policy_set_definition_name, definitions=Non
         policy_definitions=definitions if definitions is not None else definition.policy_definitions,
         description=description if description is not None else definition.description,
         display_name=display_name if display_name is not None else definition.display_name,
-        parameters=params if params is not None else definition.parameters)
+        parameters=params if params is not None else definition.parameters,
+        policy_definition_groups=definition_groups if definition_groups is not None else definition.policy_definition_groups)
     if cmd.supported_api_version(min_api='2018-03-01'):
         enforce_mutually_exclusive(subscription, management_group)
         if management_group:

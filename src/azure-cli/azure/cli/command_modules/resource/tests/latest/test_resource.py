@@ -772,7 +772,7 @@ class PolicyScenarioTest(ScenarioTest):
             'dpn': self.create_random_name('azure-cli-test-data-policy', 30),
             'dpdn': self.create_random_name('test_data_policy', 20),
             'dp_desc': 'desc_for_test_data_policy_123',
-            'dp_mode': 'Microsoft.KeyVault.Data',
+            'dp_mode': 'Microsoft.DataCatalog.Data',
             'psn': self.create_random_name('azure-cli-test-policyset', 30),
             'psdn': self.create_random_name('test_policyset', 20),
             'ps_desc': 'desc_for_test_policyset_123',
@@ -1002,7 +1002,7 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd('policy assignment delete -n {pan} -g {rg}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_policy_management_group')
-    @AllowLargeResponse()
+    @AllowLargeResponse(4096)
     def test_resource_policy_management_group(self, resource_group):
         management_group_name = self.create_random_name('cli-test-mgmt-group', 30)
         self.cmd('account management-group create -n ' + management_group_name)
@@ -1021,17 +1021,17 @@ class PolicyScenarioTest(ScenarioTest):
         if not self.in_recording:
             with mock.patch('azure.cli.command_modules.resource.custom._get_subscription_id_from_subscription',
                             return_value=MOCKED_SUBSCRIPTION_ID):
-                self.resource_policy_operations(resource_group, None, 'e78961ba-36fe-4739-9212-e3031b4c8db7')
+                self.resource_policy_operations(resource_group, None, 'f67cc918-f64f-4c3f-aa24-a855465f9d41')
         else:
-            self.resource_policy_operations(resource_group, None, 'e78961ba-36fe-4739-9212-e3031b4c8db7')
+            self.resource_policy_operations(resource_group, None, 'f67cc918-f64f-4c3f-aa24-a855465f9d41')
 
     @ResourceGroupPreparer(name_prefix='cli_test_policyset')
-    @AllowLargeResponse()
+    @AllowLargeResponse(4096)
     def test_resource_policyset_default(self, resource_group):
         self.resource_policyset_operations(resource_group)
 
     @ResourceGroupPreparer(name_prefix='cli_test_policyset_management_group')
-    @AllowLargeResponse()
+    @AllowLargeResponse(4096)
     def test_resource_policyset_management_group(self, resource_group):
         management_group_name = self.create_random_name('cli-test-mgmt-group', 30)
         self.cmd('account management-group create -n ' + management_group_name)
@@ -1042,16 +1042,80 @@ class PolicyScenarioTest(ScenarioTest):
 
     @record_only()
     @ResourceGroupPreparer(name_prefix='cli_test_policyset_subscription_id')
-    @AllowLargeResponse()
+    @AllowLargeResponse(4096)
     def test_resource_policyset_subscription_id(self, resource_group):
         # under playback, we mock it so the subscription id will be '00000000...' and it will match
         # the same sanitized value in the recording
         if not self.in_recording:
             with mock.patch('azure.cli.command_modules.resource.custom._get_subscription_id_from_subscription',
                             return_value=MOCKED_SUBSCRIPTION_ID):
-                self.resource_policyset_operations(resource_group, None, 'e78961ba-36fe-4739-9212-e3031b4c8db7')
+                self.resource_policyset_operations(resource_group, None, 'f67cc918-f64f-4c3f-aa24-a855465f9d41')
         else:
-            self.resource_policyset_operations(resource_group, None, 'e78961ba-36fe-4739-9212-e3031b4c8db7')
+            self.resource_policyset_operations(resource_group, None, 'f67cc918-f64f-4c3f-aa24-a855465f9d41')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_policyset_grouping')
+    @AllowLargeResponse()
+    def test_resource_policyset_grouping(self, resource_group):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+
+        self.kwargs.update({
+            'pn': self.create_random_name('azure-cli-test-policy', 30),
+            'pdn': self.create_random_name('test_policy', 20),
+            'psn': self.create_random_name('azure-cli-test-policyset', 30),
+            'psdn': self.create_random_name('test_policyset', 20),
+            'rf': os.path.join(curr_dir, 'sample_policy_rule.json').replace('\\', '\\\\'),
+            'psf': os.path.join(curr_dir, 'sample_policy_set_grouping.json').replace('\\', '\\\\'),
+            'pgf': os.path.join(curr_dir, 'sample_policy_groups_def.json').replace('\\', '\\\\'),
+            'pgf2': os.path.join(curr_dir, 'sample_policy_groups_def2.json').replace('\\', '\\\\'),
+            'pdf': os.path.join(curr_dir, 'sample_policy_param_def.json').replace('\\', '\\\\')
+        })
+
+        # create a policy
+        policy = self.cmd('policy definition create -n {pn} --rules {rf} --params {pdf} --display-name {pdn}').get_output_in_json()
+
+        # create a policy set
+        policyset = get_file_json(self.kwargs['psf'])
+        policyset[0]['policyDefinitionId'] = policy['id']
+        policyset[1]['policyDefinitionId'] = policy['id']
+        with open(os.path.join(curr_dir, 'sample_policy_set_grouping.json'), 'w') as outfile:
+            json.dump(policyset, outfile)
+
+        self.cmd('policy set-definition create -n {psn} --definitions @"{psf}" --display-name {psdn} --definition-groups @"{pgf}"', checks=[
+            self.check('name', '{psn}'),
+            self.check('displayName', '{psdn}'),
+            self.check('length(policyDefinitionGroups)', 2),
+            self.check("length(policyDefinitionGroups[?name=='group1'])", 1),
+            self.check("length(policyDefinitionGroups[?name=='group2'])", 1),
+            self.check('length(policyDefinitions[0].groupNames)', 2),
+            self.check('length(policyDefinitions[1].groupNames)', 1)
+        ])
+
+        # update the groups
+        groups = get_file_json(self.kwargs['pgf'])
+        groups[0]['displayName'] = "Updated display name"
+        with open(os.path.join(curr_dir, 'sample_policy_groups_def2.json'), 'w') as outfile:
+            json.dump(groups, outfile)
+
+        self.cmd('policy set-definition update -n {psn} --definition-groups @"{pgf2}"', checks=[
+            self.check('length(policyDefinitionGroups)', 2),
+            self.check("length(policyDefinitionGroups[?name=='group1'])", 1),
+            self.check("length(policyDefinitionGroups[?name=='group2'])", 1),
+            self.check("length(policyDefinitionGroups[?displayName=='Updated display name\'])", 1)
+        ])
+
+        # show it
+        self.cmd('policy set-definition show -n {psn}',
+                 checks=self.check('length(policyDefinitionGroups)', 2))
+
+        # delete the policy set
+        self.cmd('policy set-definition delete -n {psn}')
+        time.sleep(10)  # ensure the policy is gone when run live.
+
+        self.cmd('policy set-definition list',
+                 checks=self.check("length([?name=='{psn}'])", 0))
+
+        # delete the policy
+        self.cmd('policy definition delete -n {pn}')
 
     @AllowLargeResponse(8192)
     def test_show_built_in_policy(self):
@@ -1079,7 +1143,7 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
             'adn': self.create_random_name('testappdefname', 20),
             'addn': self.create_random_name('test_appdef', 20),
             'ad_desc': 'test_appdef_123',
-            'uri': 'https://testclinew.blob.core.windows.net/files/vivekMAD.zip',
+            'uri': 'https://raw.githubusercontent.com/Azure/azure-managedapp-samples/master/Managed%20Application%20Sample%20Packages/201-managed-storage-account/managedstorage.zip',
             'auth': '5e91139a-c94b-462e-a6ff-1ee95e8aac07:8e3af657-a8ff-443c-a75c-2fe8c4bcb635',
             'lock': 'None'
         })
