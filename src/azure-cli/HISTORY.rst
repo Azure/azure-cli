@@ -23,7 +23,7 @@ Release History
 
 * GA Release Large File Shares property for storage account create and update command
 * GA Release User Delegation SAS token Support
-* Add new commands to manage blob service properties for storage account.
+* Add new commands `az storage account blob-service-properties show` and `az storage account blob-service-properties update --enable-change-feed` to manage blob service properties for storage account.
 
 2.0.77
 ++++++
