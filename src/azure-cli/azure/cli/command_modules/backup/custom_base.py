@@ -335,7 +335,11 @@ def resume_protection(cmd, client, resource_group_name, vault_name, container_na
     policy = show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name, policy_name)
     custom_help.validate_policy(policy)
 
-    return custom_afs.resume_protection(cmd, client, resource_group_name, vault_name, item, policy)
+    if item.properties.backup_management_type.lower() == "azurestorage":
+        return custom_afs.resume_protection(cmd, client, resource_group_name, vault_name, item, policy)
+    if item.properties.backup_management_type.lower() == "azureworkload":
+        return custom_wl.resume_protection(cmd, client, resource_group_name, vault_name, item, policy)
+    return None
 
 
 def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_config):

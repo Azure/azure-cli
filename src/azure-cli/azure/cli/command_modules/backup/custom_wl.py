@@ -189,6 +189,10 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
     return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
+def resume_protection(cmd, client, resource_group_name, vault_name, item, policy):
+    return update_policy_for_item(cmd, client, resource_group_name, vault_name, item, policy)
+
+
 def initialize_protectable_items(client, resource_group_name, vault_name, container_name, workload_type):
     workload_type = workload_type_map[workload_type]
 

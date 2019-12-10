@@ -169,7 +169,7 @@ def load_arguments(self, _):
         c.argument('policy_name', policy_name_type)
 
     # TODO: Need to use item.id once https://github.com/Azure/msrestazure-for-python/issues/80 is fixed.
-    for command in ['backup-now', 'disable', 'auto-disable-for-azurewl']:
+    for command in ['backup-now', 'disable', 'auto-disable-for-azurewl', 'resume']:
         with self.argument_context('backup protection ' + command) as c:
             c.argument('container_name', container_name_type)
             c.argument('item_name', item_name_type)

@@ -302,6 +302,14 @@ examples:
     text: az backup protection auto-disable-for-azurewl --resource-group MyResourceGroup --vault-name MyVault --item-name MyItemName
 """
 
+helps['backup protection resume'] = """
+type: command
+short-summary: Resume backup for the associated backup item. Use this to change the policy associated with the backup item.
+examples:
+  - name: Resume backup for the associated backup item. Use this to change the policy associated with the backup item.
+    text: az backup protection resume --vault-name MyVault --resource-group MyResourceGroup --container-name MyContainer --name MyItem --policy-name MyPolicy
+"""
+
 helps['backup recoveryconfig'] = """
 type: group
 short-summary: Manage recovery configuration of an Azure workload backed up item.

@@ -69,6 +69,7 @@ def load_command_table(self, _):
         g.custom_command('enable-for-azurewl', 'enable_protection_for_azure_wl')
         g.custom_command('auto-enable-for-azurewl', 'auto_enable_for_azure_wl', client_factory=protection_intent_cf)
         g.custom_command('auto-disable-for-azurewl', 'disable_auto_for_azure_wl', client_factory=protection_intent_cf)
+        g.custom_command('resume', 'resume_protection')
 
     with self.command_group('backup item', backup_custom_base, client_factory=protected_items_cf) as g:
         g.show_command('show', 'show_item', client_factory=backup_protected_items_cf, table_transformer=transform_item)

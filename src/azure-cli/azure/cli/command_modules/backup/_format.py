@@ -64,7 +64,7 @@ def transform_recovery_point(result):
                             ('Time', result['properties']['recoveryPointTimeInUtc']),
                             ('BackupManagementType', 'AzureWorkload'),
                             ('Item Name', result['id'].split('/')[14]),
-                            ('RecoveryPointType', result['properties']['objectType'])])
+                            ('RecoveryPointType', result['properties']['type'])])
     return OrderedDict([('Name', result['name']),
                         ('Time', result['properties']['recoveryPointTime']),
                         ('Consistency', result['properties']['recoveryPointType'])])
