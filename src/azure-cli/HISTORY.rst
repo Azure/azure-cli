@@ -3,6 +3,7 @@
 Release History
 ===============
 
+
 **ACR**
 
 * Support Local context in acr task run
@@ -10,6 +11,7 @@ Release History
 **AppService**
 
 * Fix issue #11217: webapp: az webapp config ssl upload should support slot parameter
+* Fix issue #10965: Error: Name cannot be empty. Allow remove by ip_address and subnet
 
 **Compute**
 
@@ -141,6 +143,8 @@ Release History
 
 **Redis**
 
+* Add preview param `--replicas-per-master` to `az redis create` command
+* Update azure-mgmt-redis from 6.0.0 to 7.0.0rc1
 * Fix #2902: Avoid setting memory configs while updating Basic SKU cache
 
 **Reservations**

@@ -556,8 +556,13 @@ def load_arguments(self, _):
             c.argument('name', arg_type=webapp_name_arg_type)
             c.argument('rule_name', options_list=['--rule-name', '-r'],
                        help='Name of the access restriction to remove')
+            c.argument('ip_address', help="IP address or CIDR range")
+            c.argument('vnet_name', help="vNet name")
+            c.argument('subnet', help="Subnet name (requires vNet name) or subnet resource id")
             c.argument('scm_site', help='True if access restriction should be removed from scm site',
                        arg_type=get_three_state_flag())
+            c.argument('action', arg_type=get_enum_type(ACCESS_RESTRICTION_ACTION_TYPES),
+                       help="Allow or deny access")
         with self.argument_context(scope + ' config access-restriction set') as c:
             c.argument('name', arg_type=webapp_name_arg_type)
             c.argument('use_same_restrictions_for_scm_site',
