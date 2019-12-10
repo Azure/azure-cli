@@ -634,14 +634,14 @@ def _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=False):
     if vnet and '/' in vnet:
         raise CLIError("incorrect usage: --subnet ID | --subnet NAME --vnet-name NAME")
 
-    if not vnet and not subnet and not nics:
+    if not subnet and not nics:
         logger.debug('no subnet specified. Attempting to find an existing Vnet and subnet...')
 
         # if nothing specified, try to find an existing vnet and subnet in the target resource group
         client = get_network_client(cmd.cli_ctx).virtual_networks
 
         # find VNET in target resource group that matches the VM's location with a matching subnet
-        for vnet_match in (v for v in client.list(rg) if v.location == location and v.subnets):
+        for vnet_match in (v for v in client.list(rg) if (not vnet or v.name == vnet) and v.location == location and v.subnets):
 
             # 1 - find a suitable existing vnet/subnet
             result = None
@@ -663,6 +663,8 @@ def _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=False):
             namespace.vnet_type = 'existing'
             logger.debug("existing vnet '%s' and subnet '%s' found", namespace.vnet_name, namespace.subnet)
             return
+        if vnet:
+            raise CLIError("incorrect usage: --subnet ID | --subnet NAME --vnet-name NAME")
 
     if subnet:
         subnet_is_id = is_valid_resource_id(subnet)
