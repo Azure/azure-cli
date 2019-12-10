@@ -13,6 +13,10 @@ Release History
 * Fix issue #11217: webapp: az webapp config ssl upload should support slot parameter
 * Fix issue #10965: Error: Name cannot be empty. Allow remove by ip_address and subnet
 
+**ARM**
+
+* Update azure-mgmt-resource package to use 6.0.0
+
 **Compute**
 
 * vmss create/update: Add --scale-in-policy, which decides which virtual machines are chosen for removal when a VMSS is scaled-in.
@@ -46,6 +50,11 @@ Release History
 
 * Add back edge builds for pip install
 * Add Ubuntu eoan package
+
+**Policy**
+
+* Support for Policy API version 2019-09-01.
+* az policy set-definition: Support grouping within policy set definitions with `--definition-groups` parameter
 
 **Storage**
 
