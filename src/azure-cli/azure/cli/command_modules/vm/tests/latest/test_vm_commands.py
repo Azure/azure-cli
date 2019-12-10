@@ -1211,6 +1211,24 @@ class VMCreateMonitorTest(ScenarioTest):
         self.cmd('vm create -n {vm} -g {rg} --image UbuntuLTS --workspace {workspace}')
         self.cmd('vm monitor log show -n {vm} -g {rg} -q "Perf | limit 10"')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_metric_tail', location='eastus')
+    def test_vm_metric_tail(self, resource_group):
+
+        self.kwargs.update({
+            'vm': 'monitorvm',
+            'rg': resource_group
+        })
+
+        self.cmd('vm create -n {vm} -g {rg} --image UbuntuLTS')
+        self.cmd('vm start -n {vm} -g {rg}')
+
+        time.sleep(60)
+
+        self.cmd('vm monitor metrics tail -n {vm} -g {rg} --metrics "Percentage CPU"')
+        self.cmd('vm monitor metrics list-definitions -n {vm} -g {rg}', checks=[
+            self.check("length(@[*].id) != '0'", True)
+        ])
+
 
 class VMBootDiagnostics(ScenarioTest):
 
