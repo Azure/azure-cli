@@ -1,108 +1,26 @@
 {
     "$schema": "https: //schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
-    "parameters": {},
+    "parameters": {
+        "virtualMachines_veerCrossTenantVM_2_name": {
+            "defaultValue": "veerCrossTenantVM-2",
+            "type": "String"
+        },
+        "SIG_ImageVersion_id": {
+            "type": "String"
+        },
+        "NIC_id": {
+            "type": "String"
+        }
+    },
     "variables": {},
     "resources": [
         {
-            "name": "zuhvmVNET",
-            "type": "Microsoft.Network/virtualNetworks",
-            "location": "eastus",
-            "apiVersion": "2015-06-15",
-            "dependsOn": [],
-            "tags": {},
-            "properties": {
-                "addressSpace": {
-                    "addressPrefixes": [
-                        "10.0.0.0/16"
-                    ]
-                },
-                "subnets": [
-                    {
-                        "name": "zuhvmSubnet",
-                        "properties": {
-                            "addressPrefix": "10.0.0.0/24"
-                        }
-                    }
-                ]
-            }
-        },
-        {
-            "type": "Microsoft.Network/networkSecurityGroups",
-            "name": "zuhvmNSG",
-            "apiVersion": "2015-06-15",
-            "location": "eastus",
-            "tags": {},
-            "dependsOn": [],
-            "properties": {
-                "securityRules": [
-                    {
-                        "name": "default-allow-ssh",
-                        "properties": {
-                            "protocol": "Tcp",
-                            "sourcePortRange": "*",
-                            "destinationPortRange": "22",
-                            "sourceAddressPrefix": "*",
-                            "destinationAddressPrefix": "*",
-                            "access": "Allow",
-                            "priority": 1000,
-                            "direction": "Inbound"
-                        }
-                    }
-                ]
-            }
-        },
-        {
-            "apiVersion": "2018-01-01",
-            "type": "Microsoft.Network/publicIPAddresses",
-            "name": "zuhvmPublicIP",
-            "location": "eastus",
-            "tags": {},
-            "dependsOn": [],
-            "properties": {
-                "publicIPAllocationMethod": None
-            }
-        },
-        {
-            "apiVersion": "2015-06-15",
-            "type": "Microsoft.Network/networkInterfaces",
-            "name": "zuhvmVMNic",
-            "location": "eastus",
-            "tags": {},
-            "dependsOn": [
-                "Microsoft.Network/virtualNetworks/zuhvmVNET",
-                "Microsoft.Network/networkSecurityGroups/zuhvmNSG",
-                "Microsoft.Network/publicIpAddresses/zuhvmPublicIP"
-            ],
-            "properties": {
-                "ipConfigurations": [
-                    {
-                        "name": "ipconfigzuhvm",
-                        "properties": {
-                            "privateIPAllocationMethod": "Dynamic",
-                            "subnet": {
-                                "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/zuhtest/providers/Microsoft.Network/virtualNetworks/zuhvmVNET/subnets/zuhvmSubnet"
-                            },
-                            "publicIPAddress": {
-                                "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/zuhtest/providers/Microsoft.Network/publicIPAddresses/zuhvmPublicIP"
-                            }
-                        }
-                    }
-                ],
-                "networkSecurityGroup": {
-                    "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/zuhtest/providers/Microsoft.Network/networkSecurityGroups/zuhvmNSG"
-                }
-            }
-        },
-        {
             "apiVersion": "2019-07-01",
             "type": "Microsoft.Compute/virtualMachines",
-            "name": "zuhvm",
+            "name": "[parameters('virtualMachines_veerCrossTenantVM_2_name')]",
             "location": "eastus",
             "tags": {},
-            "dependsOn": [
-                "Microsoft.Network/networkInterfaces/zuhvmVMNic"
-            ],
             "properties": {
                 "hardwareProfile": {
                     "vmSize": "Standard_DS1_v2"
@@ -110,7 +28,7 @@
                 "networkProfile": {
                     "networkInterfaces": [
                         {
-                            "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/zuhtest/providers/Microsoft.Network/networkInterfaces/zuhvmVMNic"
+                            "id": "[parameters('NIC_id')]"
                         }
                     ]
                 },
@@ -124,11 +42,11 @@
                         }
                     },
                     "imageReference": {
-                        "id": "/subscriptions/685ba005-af8d-4b04-8f16-a7bf38b2eb5a/resourceGroups/zuh/providers/Microsoft.Compute/galleries/gallery1/images/image1/versions/1.1.2"
+                        "id": "[parameters('SIG_ImageVersion_id')]"
                     }
                 },
                 "osProfile": {
-                    "computerName": "zuhvm",
+                    "computerName":  "[parameters('virtualMachines_veerCrossTenantVM_2_name')]",
                     "adminUsername": "clitest1",
                     "linuxConfiguration": {
                         "disablePasswordAuthentication": True,
