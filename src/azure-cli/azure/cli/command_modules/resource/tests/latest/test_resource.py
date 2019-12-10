@@ -1351,7 +1351,7 @@ class CrossRGDeploymentScenarioTest(ScenarioTest):
         ])
 
 
-class CrossTenantDeploymentScenarioTest(ScenarioTest):
+class CrossTenantDeploymentScenarioTest(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_cross_tenant_deploy', location='eastus')
     def test_group_deployment_crosstenant(self, resource_group):
