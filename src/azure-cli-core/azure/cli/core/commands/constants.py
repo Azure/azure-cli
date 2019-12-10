@@ -31,5 +31,5 @@ DEFAULT_QUERY_TIME_RANGE = 3600000
 
 BLACKLISTED_MODS = ['context', 'shell', 'documentdb', 'component']
 
-SURVEY_PROMPT = Fore.YELLOW + Style.BRIGHT + 'Please let us know how we are doing: ' + Fore.BLUE 
+SURVEY_PROMPT = Fore.YELLOW + Style.BRIGHT + 'Please let us know how we are doing: ' + Fore.BLUE \
     + 'https://aka.ms/clihats' + Style.RESET_ALL
