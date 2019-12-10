@@ -61,6 +61,7 @@ Release History
 * GA Release Large File Shares property for storage account create and update command
 * GA Release User Delegation SAS token Support
 * Add new commands `az storage account blob-service-properties show` and `az storage account blob-service-properties update --enable-change-feed` to manage blob service properties for storage account.
+* Fix issue #11043: Support to remove container/share contents in `az storage remove` command
 
 2.0.77
 ++++++

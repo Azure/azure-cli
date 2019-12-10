@@ -198,7 +198,8 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.storage_cmd('storage remove --share-name {}',
                          account_info, s2)
         self.storage_cmd('storage file list -s {}', account_info, s2) \
-            .assert_with_checks(JMESPathCheck('length(@)', 1))
+            .assert_with_checks(JMESPathCheck('length(@)', 1)) \
+            .assert_with_checks(JMESPathCheck('[0].type', 'dir'))
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='first_account')
