@@ -665,7 +665,7 @@ def delete_ag_rewrite_rule_condition(cmd, resource_group_name, application_gatew
 
 def create_ag_probe(cmd, resource_group_name, application_gateway_name, item_name, protocol, host,
                     path, interval=30, timeout=120, threshold=8, no_wait=False, host_name_from_http_settings=None,
-                    min_servers=None, match_body=None, match_status_codes=None):
+                    min_servers=None, match_body=None, match_status_codes=None, port=None):
     ApplicationGatewayProbe, ProbeMatchCriteria = cmd.get_models(
         'ApplicationGatewayProbe', 'ApplicationGatewayProbeHealthResponseMatch')
     ncf = network_client_factory(cmd.cli_ctx)
@@ -682,6 +682,8 @@ def create_ag_probe(cmd, resource_group_name, application_gateway_name, item_nam
         new_probe.pick_host_name_from_backend_http_settings = host_name_from_http_settings
         new_probe.min_servers = min_servers
         new_probe.match = ProbeMatchCriteria(body=match_body, status_codes=match_status_codes)
+    if cmd.supported_api_version(min_api='2019-04-01'):
+        new_probe.port = port
 
     upsert_to_collection(ag, 'probes', new_probe, 'name')
     return sdk_no_wait(no_wait, ncf.application_gateways.create_or_update,
@@ -690,7 +692,7 @@ def create_ag_probe(cmd, resource_group_name, application_gateway_name, item_nam
 
 def update_ag_probe(cmd, instance, parent, item_name, protocol=None, host=None, path=None,
                     interval=None, timeout=None, threshold=None, host_name_from_http_settings=None,
-                    min_servers=None, match_body=None, match_status_codes=None):
+                    min_servers=None, match_body=None, match_status_codes=None, port=None):
     if protocol is not None:
         instance.protocol = protocol
     if host is not None:
@@ -715,6 +717,8 @@ def update_ag_probe(cmd, instance, parent, item_name, protocol=None, host=None, 
             instance.match.body = match_body
         if match_status_codes is not None:
             instance.match.status_codes = match_status_codes
+    if port is not None:
+        instance.port = port
     return parent
 
 
@@ -4795,4 +4799,13 @@ def update_virtual_router_peering(cmd, instance, peer_asn=None, peer_ip=None):
         c.set_param('peer_asn', peer_asn)
         c.set_param('peer_ip', peer_ip)
     return instance
+# endregion
+
+
+# region service aliases
+def list_service_aliases(cmd, location, resource_group_name=None):
+    client = network_client_factory(cmd.cli_ctx).available_service_aliases
+    if resource_group_name is not None:
+        return client.list_by_resource_group(resource_group_name=resource_group_name, location=location)
+    return client.list(location=location)
 # endregion
