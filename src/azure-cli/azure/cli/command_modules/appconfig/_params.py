@@ -90,7 +90,7 @@ def load_arguments(self, _):
 
     with self.argument_context('appconfig kv import', arg_group='AppConfig') as c:
         c.argument('src_name', help='The name of the source App Configuration.')
-        c.argument('src_connection_string', validator=validate_connection_string, help="Combination of access key and endpoint of the source store. ")
+        c.argument('src_connection_string', validator=validate_connection_string, help="Combination of access key and endpoint of the source store.")
         c.argument('src_key', help='If no key specified, import all keys by default. Support star sign as filters, for instance abc* means keys with abc as prefix. Similarly, *abc and *abc* are also supported. Not applicable for feature flags.')
         c.argument('src_label', help="Only keys with this label in source AppConfig will be imported. If no label specified, import keys with null label by default.")
 
@@ -114,7 +114,7 @@ def load_arguments(self, _):
 
     with self.argument_context('appconfig kv export', arg_group='AppConfig') as c:
         c.argument('dest_name', help='The name of the destination App Configuration.')
-        c.argument('dest_connection_string', validator=validate_connection_string, help="Combination of access key and endpoint of the destination store. ")
+        c.argument('dest_connection_string', validator=validate_connection_string, help="Combination of access key and endpoint of the destination store.")
         c.argument('dest_label', help="Exported KVs will be labeled with this destination label.")
 
     with self.argument_context('appconfig kv export', arg_group='AppService') as c:
