@@ -2444,7 +2444,7 @@ parameters:
   - name: --aggregation
     short-summary: The list of aggregation types (space-separated) to retrieve.
     populator-commands:
-      - az monitor metrics list-definitions
+      - az vm monitor metrics list-definitions
   - name: --interval
     short-summary: >
         The interval over which to aggregate metrics, in ##h##m format.
@@ -2456,11 +2456,11 @@ parameters:
   - name: --dimension
     short-summary: The list of dimensions (space-separated) the metrics are queried into.
     populator-commands:
-      - az monitor metrics list-definitions
+      - az vm monitor metrics list-definitions
   - name: --namespace
     short-summary: Namespace to query metric definitions for.
     populator-commands:
-      - az monitor metrics list-definitions
+      - az vm monitor metrics list-definitions
   - name: --offset
     short-summary: >
         Time offset of the query range, in ##d##h format.
@@ -2473,9 +2473,14 @@ parameters:
     short-summary: >
         Space-separated list of metric names to retrieve.
     populator-commands:
-      - az monitor metrics list-definitions
+      - az vm monitor metrics list-definitions
 examples:
   - name: List a VM's CPU usage for the past hour
     text: >
         az vm monitor metrics tail --name myVM --metric "Percentage CPU"
+"""
+
+helps['vm monitor metrics list-definitions'] = """
+type: command
+short-summary: List the metric definitions for a vm.
 """
