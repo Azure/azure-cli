@@ -259,7 +259,6 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
         for encoding in secret_encoding_values:
             _test_set_and_download(encoding)
 
-
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_secret_soft_delete')
     def test_keyvault_secret_soft_delete(self, resource_group):
         self.kwargs.update({
@@ -285,7 +284,6 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
         self.cmd('keyvault secret list-deleted --vault-name {kv} --maxresults 10', checks=self.check('length(@)', 1))
         self.cmd('keyvault secret show-deleted --id {secret_recovery_id}', checks=self.check('id', '{secret_id}'))
         self.cmd('keyvault secret show-deleted --vault-name {kv} -n {sec}', checks=self.check('id', '{secret_id}'))
-
 
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_secret')
     def test_keyvault_secret(self, resource_group):
