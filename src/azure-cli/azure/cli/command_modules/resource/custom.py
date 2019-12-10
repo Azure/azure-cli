@@ -929,13 +929,16 @@ def deploy_arm_template(cmd, resource_group_name,
                         parameters=None, mode=None, rollback_on_error=None, no_wait=False,
                         handle_extended_json_format=False, aux_subscriptions=None):
     if handle_extended_json_format:
-        return _deploy_arm_template_unmodified(cmd.cli_ctx, resource_group_name, template_file, template_uri,
-                                               deployment_name, parameters, mode, rollback_on_error, no_wait=no_wait,
+        return _deploy_arm_template_unmodified(cmd.cli_ctx, resource_group_name=resource_group_name,
+                                               template_file=template_file, template_uri=template_uri,
+                                               deployment_name=deployment_name, parameters=parameters, mode=mode,
+                                               rollback_on_error=rollback_on_error, no_wait=no_wait,
                                                aux_subscriptions=aux_subscriptions)
 
-    return _deploy_arm_template_core(cmd.cli_ctx, resource_group_name, template_file, template_uri,
-                                     deployment_name, parameters, mode, rollback_on_error, no_wait=no_wait,
-                                     aux_subscriptions=aux_subscriptions)
+    return _deploy_arm_template_core(cmd.cli_ctx, resource_group_name=resource_group_name, template_file=template_file,
+                                     template_uri=template_uri, deployment_name=deployment_name,
+                                     parameters=parameters, mode=mode, rollback_on_error=rollback_on_error,
+                                     no_wait=no_wait, aux_subscriptions=aux_subscriptions)
 
 
 def deploy_arm_template_at_subscription_scope(cmd, template_file=None, template_uri=None,
