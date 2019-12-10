@@ -856,7 +856,7 @@ def __export_keyvalues(fetched_items, format_, separator, prefix=None):
 
         if exported_dict and exported_list:
             logger.error("Can not export to a valid file! Some keys have been dropped. %s", json.dumps(
-                exported_dict, indent=2, ensure_ascii=False))
+                exported_dict, indent=2))
 
         return __compact_key_values(exported_dict if not exported_list else exported_list)
     except Exception as exception:
