@@ -2012,15 +2012,17 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
         raise CLIError("'{}' app doesn't exist in resource group {}".format(name, resource_group_name))
     server_farm_id = webapp.server_farm_id
     location = webapp.location
-    kv_id = _validate_key_vault_id(cmd.cli_ctx, key_vault, resource_group_name)
+    kv_id = _format_key_vault_id(cmd.cli_ctx, key_vault, resource_group_name)
     kv_id_parts = parse_resource_id(kv_id)
     kv_name = kv_id_parts['name']
     kv_resource_group_name = kv_id_parts['resource_group']
     cert_name = '{}-{}-{}'.format(resource_group_name, kv_name, key_vault_certificate_name)
-
+    lnk = 'https://azure.github.io/AppService/2016/05/24/Deploying-Azure-Web-App-Certificate-through-Key-Vault.html'
+    lnk_msg = 'Find more details here: {}'.format(lnk)
     if not _check_service_principal_permissions(cmd, kv_resource_group_name, kv_name):
         logger.warning('Unable to verify Key Vault permissions.')
         logger.warning('You may need to grant Microsoft.Azure.WebSites service principal the Secret:Get permission')
+        logger.warning(lnk_msg)
 
     kv_cert_def = Certificate(location=location, key_vault_id=kv_id, password='',
                               key_vault_secret_name=key_vault_certificate_name, server_farm_id=server_farm_id)
@@ -2035,7 +2037,7 @@ def _check_service_principal_permissions(cmd, resource_group_name, key_vault_nam
     from azure.graphrbac.models import GraphErrorException
     kv_client = keyvault_client_vaults_factory(cmd.cli_ctx, None)
     vault = kv_client.get(resource_group_name=resource_group_name, vault_name=key_vault_name)
-    # Check for Microsoft.Azure.WebSites app registration (app-id: abfa0a7c-a6b6-4736-8310-5855508787cd)
+    # Check for Microsoft.Azure.WebSites app registration
     AZURE_PUBLIC_WEBSITES_APP_ID = 'abfa0a7c-a6b6-4736-8310-5855508787cd'
     AZURE_GOV_WEBSITES_APP_ID = '6a02c803-dafd-4136-b4c3-5a6f318b4714'
     graph_sp_client = _graph_client_factory(cmd.cli_ctx).service_principals
@@ -3299,7 +3301,7 @@ def _validate_asp_sku(app_service_environment, sku):
                            "learn more: https://docs.microsoft.com/en-us/azure/app-service/overview-hosting-plans")
 
 
-def _validate_key_vault_id(cli_ctx, key_vault, resource_group_name):
+def _format_key_vault_id(cli_ctx, key_vault, resource_group_name):
     key_vault_is_id = is_valid_resource_id(key_vault)
     if key_vault_is_id:
         return key_vault
