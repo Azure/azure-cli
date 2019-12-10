@@ -9,7 +9,8 @@ from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_co
                                                                cloud_storage_account_service_factory,
                                                                multi_service_properties_factory,
                                                                cf_mgmt_policy,
-                                                               cf_blob_data_gen_update, cf_sa_for_keys)
+                                                               cf_blob_data_gen_update, cf_sa_for_keys,
+                                                               cf_mgmt_blob_services)
 from azure.cli.command_modules.storage.sdkutil import cosmosdb_table_exists
 from azure.cli.command_modules.storage._format import transform_immutability_policy
 from azure.cli.core.commands import CliCommandType
@@ -21,6 +22,12 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     storage_account_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.storage.operations#StorageAccountsOperations.{}',
         client_factory=cf_sa,
+        resource_type=ResourceType.MGMT_STORAGE
+    )
+
+    blob_service_mgmt_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.storage.operations#BlobServicesOperations.{}',
+        client_factory=cf_mgmt_blob_services,
         resource_type=ResourceType.MGMT_STORAGE
     )
 
@@ -115,6 +122,15 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.custom_command('add', 'add_network_rule')
         g.custom_command('list', 'list_network_rules')
         g.custom_command('remove', 'remove_network_rule')
+
+    with self.command_group('storage account blob-service-properties', blob_service_mgmt_sdk,
+                            custom_command_type=storage_account_custom_type,
+                            resource_type=ResourceType.MGMT_STORAGE, min_api='2018-07-01', is_preview=True) as g:
+        g.show_command('show', 'get_service_properties')
+        g.generic_update_command('update',
+                                 getter_name='get_service_properties',
+                                 setter_name='set_service_properties',
+                                 custom_func_name='update_blob_service_properties')
 
     with self.command_group('storage logging', get_custom_sdk('logging', multi_service_properties_factory)) as g:
         from ._transformers import transform_logging_list_output
