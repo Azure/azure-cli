@@ -182,13 +182,13 @@ def load_arguments(self, _):
         c.argument('rollback_on_error', nargs='?', action=RollbackAction,
                    help='The name of a deployment to roll back to on error, or use as a flag to roll back to the last '
                         'successful deployment.')
-        c.argument('aux_subscriptions', nargs='*', options_list=['--aux-subs'],
-                   help='[TODO] Auxilary subscriptions which are used for cross tenants')
 
     with self.argument_context('group deployment create') as c:
         c.argument('deployment_name', options_list=['--name', '-n'], required=False,
                    help='The deployment name. Default to template file base name')
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
+        c.argument('aux_subscriptions', nargs='*', options_list=['--aux-subs'],
+                   help='Auxiliary subscriptions which wil be used during deployment in cross tenants.')
 
     with self.argument_context('group deployment validate') as c:
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
