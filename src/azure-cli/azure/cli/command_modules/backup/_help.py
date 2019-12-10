@@ -307,7 +307,7 @@ type: command
 short-summary: Resume backup for the associated backup item. Use this to change the policy associated with the backup item.
 examples:
   - name: Resume backup for the associated backup item. Use this to change the policy associated with the backup item.
-    text: az backup protection resume --vault-name MyVault --resource-group MyResourceGroup --container-name MyContainer --name MyItem --policy-name MyPolicy
+    text: az backup protection resume --vault-name MyVault --resource-group MyResourceGroup --container-name MyContainer --item-name MyItem --policy-name MyPolicy
 """
 
 helps['backup recoveryconfig'] = """
