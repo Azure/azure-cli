@@ -438,6 +438,47 @@ class DeploymentTest(ScenarioTest):
             self.check('[0].resourceGroup', '{rg}')
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment')
+    def test_group_deployment(self, resource_group):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'test-template.json').replace('\\', '\\\\'),
+            'params': os.path.join(curr_dir, 'test-params.json').replace('\\', '\\\\'),
+            # params-uri below is the raw file url of the test_params.json above
+            'params_uri': 'https://raw.githubusercontent.com/Azure/azure-cli/dev/src/azure-cli/azure/cli/command_modules/resource/tests/latest/test-params.json',
+            'of': os.path.join(curr_dir, 'test-object.json').replace('\\', '\\\\'),
+            'dn': 'azure-cli-deployment'
+        })
+        self.kwargs['subnet_id'] = self.cmd('network vnet create -g {rg} -n vnet1 --subnet-name subnet1').get_output_in_json()['newVNet']['subnets'][0]['id']
+
+        self.cmd('group deployment validate -g {rg} --template-file {tf} --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('group deployment validate -g {rg} --template-file {tf} --parameters "{params_uri}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('group deployment create -g {rg} -n {dn} --template-file {tf} --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('resourceGroup', '{rg}')
+        ])
+        self.cmd('network lb show -g {rg} -n test-lb',
+                 checks=self.check('tags', {'key': 'super=value'}))
+
+        self.cmd('group deployment list -g {rg}', checks=[
+            self.check('[0].name', '{dn}'),
+            self.check('[0].resourceGroup', '{rg}')
+        ])
+        self.cmd('group deployment show -g {rg} -n {dn}', checks=[
+            self.check('name', '{dn}'),
+            self.check('resourceGroup', '{rg}')
+        ])
+        self.cmd('group deployment operation list -g {rg} -n {dn}', checks=[
+            self.check('length([])', 2),
+            self.check('[0].resourceGroup', '{rg}')
+        ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_on_error_deployment_lastsuccessful')
     def test_group_on_error_deployment_lastsuccessful(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
@@ -1309,6 +1350,35 @@ class CrossRGDeploymentScenarioTest(ScenarioTest):
             self.check('[0].resourceGroup', '{rg1}')
         ])
 
+
+class CrossTenantDeploymentScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cross_tenant_deploy', location='eastus')
+    def test_group_deployment_crosstenant(self, resource_group):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'tf': os.path.join(curr_dir, 'crosstenant_vm_deploy.json').replace('\\', '\\\\'),
+            'dn': self.create_random_name('cli-crosstenantdeployment', 40),
+        })
+
+        self.cmd('group deployment validate -g {rg} --template-file "{tf}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+        self.cmd('group deployment create -g {rg} -n {dn} --template-file "{tf}" '
+                 '--aux-subs 685ba005-af8d-4b04-8f16-a7bf38b2eb5a', checks=[
+                    self.check('properties.provisioningState', 'Succeeded'),
+                    self.check('resourceGroup', '{rg}')
+        ])
+        self.cmd('group deployment list -g {rg}', checks=[
+            self.check('[0].name', '{dn}'),
+            self.check('[0].resourceGroup', '{rg}')
+        ])
+        self.cmd('group deployment show -g {rg} -n {dn}', checks=[
+            self.check('name', '{dn}'),
+            self.check('resourceGroup', '{rg}')
+        ])
 
 class InvokeActionTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_invoke_action')

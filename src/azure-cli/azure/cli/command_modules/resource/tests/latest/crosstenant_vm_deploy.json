@@ -1,0 +1,149 @@
+{
+    "$schema": "https: //schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {},
+    "variables": {},
+    "resources": [
+        {
+            "name": "zuhvmVNET",
+            "type": "Microsoft.Network/virtualNetworks",
+            "location": "eastus",
+            "apiVersion": "2015-06-15",
+            "dependsOn": [],
+            "tags": {},
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.0.0.0/16"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "zuhvmSubnet",
+                        "properties": {
+                            "addressPrefix": "10.0.0.0/24"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "zuhvmNSG",
+            "apiVersion": "2015-06-15",
+            "location": "eastus",
+            "tags": {},
+            "dependsOn": [],
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "default-allow-ssh",
+                        "properties": {
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "22",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 1000,
+                            "direction": "Inbound"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "2018-01-01",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "name": "zuhvmPublicIP",
+            "location": "eastus",
+            "tags": {},
+            "dependsOn": [],
+            "properties": {
+                "publicIPAllocationMethod": None
+            }
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "zuhvmVMNic",
+            "location": "eastus",
+            "tags": {},
+            "dependsOn": [
+                "Microsoft.Network/virtualNetworks/zuhvmVNET",
+                "Microsoft.Network/networkSecurityGroups/zuhvmNSG",
+                "Microsoft.Network/publicIpAddresses/zuhvmPublicIP"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfigzuhvm",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/zuhtest/providers/Microsoft.Network/virtualNetworks/zuhvmVNET/subnets/zuhvmSubnet"
+                            },
+                            "publicIPAddress": {
+                                "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/zuhtest/providers/Microsoft.Network/publicIPAddresses/zuhvmPublicIP"
+                            }
+                        }
+                    }
+                ],
+                "networkSecurityGroup": {
+                    "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/zuhtest/providers/Microsoft.Network/networkSecurityGroups/zuhvmNSG"
+                }
+            }
+        },
+        {
+            "apiVersion": "2019-07-01",
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "zuhvm",
+            "location": "eastus",
+            "tags": {},
+            "dependsOn": [
+                "Microsoft.Network/networkInterfaces/zuhvmVMNic"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "Standard_DS1_v2"
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/zuhtest/providers/Microsoft.Network/networkInterfaces/zuhvmVMNic"
+                        }
+                    ]
+                },
+                "storageProfile": {
+                    "osDisk": {
+                        "createOption": "fromImage",
+                        "name": None,
+                        "caching": "ReadWrite",
+                        "managedDisk": {
+                            "storageAccountType": None
+                        }
+                    },
+                    "imageReference": {
+                        "id": "/subscriptions/685ba005-af8d-4b04-8f16-a7bf38b2eb5a/resourceGroups/zuh/providers/Microsoft.Compute/galleries/gallery1/images/image1/versions/1.1.2"
+                    }
+                },
+                "osProfile": {
+                    "computerName": "zuhvm",
+                    "adminUsername": "clitest1",
+                    "linuxConfiguration": {
+                        "disablePasswordAuthentication": True,
+                        "ssh": {
+                            "publicKeys": [
+                                {
+                                    "keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC86Jgk+Wp0JneEvsoZMG3PIL/zMJIbuY+r3xakXOZ8thq9gOQVgxSLdwUELhPy1iekWGsoGrvQIMEb22upTPG/9VaulCAVXfZnIetNUlId5DNAxOiyvOMEIqhPuxIOce0KKeGnCMkfPGzXrT3hqg8mSU8xW4cDNKJGikpPLMTX+O8V0QptnO5n7E4vH3zPOWuH9Xf0D2uTc6Z8JUFIljy1LfmvJkAitEsPWBott4k4JtxueODbNB+RaQT/p4FUGcxKMObAgQw0jJWKoZTylQOi0xtOOBKAS19+bXwo8AMOoUOB+8CHDX+3okZI3thHN7C1oL7qm6pfHdgvNrt1sPFl",
+                                    "path": "/home/clitest1/.ssh/authorized_keys"
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}
