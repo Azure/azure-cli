@@ -3683,6 +3683,7 @@ class DiskEncryptionSetTest(ScenarioTest):
             'vm2': self.create_random_name(prefix='vm2-', length=20),
             'vmss': self.create_random_name(prefix='vmss-', length=20),
         })
+
         vault_id = self.cmd('keyvault create -g {rg} -n {vault} --enable-purge-protection true --enable-soft-delete true').get_output_in_json()['id']
         kid = self.cmd('keyvault key create -n {key} --vault {vault} --protection software').get_output_in_json()['key']['kid']
         self.kwargs.update({
@@ -3748,6 +3749,37 @@ class DiskEncryptionSetTest(ScenarioTest):
             self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.diskEncryptionSet.id', '{des1_id}', False),
             self.check('virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.diskEncryptionSet.id', '{des2_id}', False),
             self.check('virtualMachineProfile.storageProfile.dataDisks[1].managedDisk.diskEncryptionSet.id', '{des3_id}', False)
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_disk_encryption_set_update_', location='westcentralus')
+    @AllowLargeResponse(size_kb=99999)
+    @unittest.skip('Key rotation in disk encryption set is not supported in this version of service')
+    def test_disk_encryption_set_update(self, resource_group):
+
+        self.kwargs.update({
+            'vault1': self.create_random_name(prefix='vault1-', length=20),
+            'key1': self.create_random_name(prefix='key1-', length=20),
+            'vault2': self.create_random_name(prefix='vault2-', length=20),
+            'key2': self.create_random_name(prefix='key2-', length=20),
+            'des': self.create_random_name(prefix='des-', length=20)
+        })
+
+        vault1_id = self.cmd('keyvault create -g {rg} -n {vault1} --enable-purge-protection true --enable-soft-delete true').get_output_in_json()['id']
+        kid1 = self.cmd('keyvault key create -n {key1} --vault {vault1} --protection software').get_output_in_json()['key']['kid']
+        vault2_id = self.cmd('keyvault create -g {rg} -n {vault2} --enable-purge-protection true --enable-soft-delete true').get_output_in_json()['id']
+        kid2 = self.cmd('keyvault key create -n {key2} --vault {vault2} --protection software').get_output_in_json()['key']['kid']
+
+        self.kwargs.update({
+            'vault1_id': vault1_id,
+            'kid1': kid1,
+            'vault2_id': vault2_id,
+            'kid2': kid2
+        })
+
+        self.cmd('disk-encryption-set create -g {rg} -n {des} --key-url {kid1} --source-vault {vault1}')
+        self.cmd('disk-encryption-set update -g {rg} -n {des} --key-url {kid2} --source-vault {vault2}', checks=[
+            self.check('key', '{kid2}'),
+            self.check('vault', '{vault2}'),
         ])
 
 

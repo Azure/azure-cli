@@ -107,12 +107,27 @@ short-summary: Disk Encryption Set resource.
 
 helps['disk-encryption-set create'] = """
 type: command
-short-summary: Create a Disk Encryption Set.
+short-summary: Create a disk encryption set.
+"""
+
+helps['disk-encryption-set delete'] = """
+type: command
+short-summary: Delete a disk encryption set.
 """
 
 helps['disk-encryption-set list'] = """
 type: command
-short-summary: List Disk Encryption Sets.
+short-summary: List disk encryption sets.
+"""
+
+helps['disk-encryption-set show'] = """
+type: command
+short-summary: Get information of a disk encryption sets.
+"""
+
+helps['disk-encryption-set update'] = """
+type: command
+short-summary: Update a disk encryption set.
 """
 
 helps['image'] = """

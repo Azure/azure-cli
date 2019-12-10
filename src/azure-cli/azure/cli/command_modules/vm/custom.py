@@ -3007,12 +3007,15 @@ def list_disk_encryption_sets(cmd, client, resource_group_name=None):
     return client.list()
 
 
-def update_disk_encryption_set(instance, key_url=None, source_vault=None):
+def update_disk_encryption_set(instance, client, resource_group_name, key_url=None, source_vault=None):
+    from msrestazure.tools import resource_id, is_valid_resource_id
+    if not is_valid_resource_id(source_vault):
+        source_vault = resource_id(subscription=client.config.subscription_id, resource_group=resource_group_name,
+                                   namespace='Microsoft.KeyVault', type='vaults', name=source_vault)
     if key_url:
         instance.active_key.key_url = key_url
     if source_vault:
-        instance.active_key.source_vault = source_vault
+        instance.active_key.source_vault.id = source_vault
     return instance
-
 
 # endregion
