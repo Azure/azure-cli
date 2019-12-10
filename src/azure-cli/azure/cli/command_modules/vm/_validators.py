@@ -74,7 +74,7 @@ def validate_vm_name_for_monitor_metrics(cmd, namespace):
                                               'virtualMachines', 'Microsoft.Compute')
     elif hasattr(namespace, 'resource_uri'):
         namespace.resource_uri = _get_resource_id(cmd.cli_ctx, namespace.resource_uri, namespace.resource_group_name,
-                                              'virtualMachines', 'Microsoft.Compute')
+                                                  'virtualMachines', 'Microsoft.Compute')
     del namespace.resource_group_name
 
 
