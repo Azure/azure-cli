@@ -25,6 +25,7 @@ Release History
 
 **Key Vault**
 
+* Fix #8921: Command `az keyvault key/secret/certificate list/list-deleted/list-versions` with parameter `--maxresults` do not work as intended
 * Fix #10846: Calling az keyvault secret show-deleted --id <value> still says secret_name "can not" be none
 * Fix #11084: Confusing encoding information
 
