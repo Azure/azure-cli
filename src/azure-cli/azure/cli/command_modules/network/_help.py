@@ -5137,3 +5137,8 @@ examples:
             --resource-type vpnConnection --storage-account MyStorageAccount \\
             --storage-path https://{storageAccountName}.blob.core.windows.net/{containerName}
 """
+
+helps['network list-service-aliases'] = """
+type: command
+short-summary: List available service aliases in the region which can be used for Service Endpoint Policies.
+"""

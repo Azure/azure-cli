@@ -3271,5 +3271,16 @@ class NetworkProfileScenarioTest(ScenarioTest):
         self.cmd('network profile delete -g {rg} -n dummy -y')
 
 
+class NetworkServiceAliasesScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='test_network_service_aliases')
+    def test_network_service_aliases(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group
+        })
+        self.cmd('network list-service-aliases -l centralus')
+        self.cmd('network list-service-aliases -l centralus -g {rg}')
+
+
 if __name__ == '__main__':
     unittest.main()

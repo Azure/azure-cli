@@ -168,6 +168,7 @@ def load_arguments(self, _):
         with self.argument_context(scope + ' config ssl upload') as c:
             c.argument('certificate_password', help='The ssl cert password')
             c.argument('certificate_file', type=file_type, help='The filepath for the .pfx file')
+            c.argument('slot', options_list=['--slot', '-s'], help='The name of the slot. Default to the productions slot if not specified')
         with self.argument_context(scope + ' config ssl') as c:
             c.argument('certificate_thumbprint', help='The ssl cert thumbprint')
         with self.argument_context(scope + ' config appsettings') as c:
