@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: '{"sku": {"name": "Free"}, "location": "eastus"}'
+    body: '{"location": "eastus", "sku": {"name": "Free"}}'
     headers:
       Accept:
       - application/json
@@ -25,18 +25,18 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/MgmtTest000002?api-version=2019-10-01
   response:
     body:
-      string: '{"type":"Microsoft.AppConfiguration/configurationStores","properties":{"provisioningState":"Creating","creationDate":"2019-12-10T01:41:47.552621+00:00","endpoint":"https://MgmtTest000002.azconfig.io"},"sku":null,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/MgmtTest000002","name":"MgmtTest000002","location":"eastus","tags":{}}'
+      string: '{"type":"Microsoft.AppConfiguration/configurationStores","properties":{"provisioningState":"Creating","creationDate":"2019-12-10T21:37:51.1255463+00:00","endpoint":"https://MgmtTest000002.azconfig.io"},"sku":null,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/MgmtTest000002","name":"MgmtTest000002","location":"eastus","tags":{}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/8d211a7a-6d6a-9d95-ce4e-4b740f49128a?api-version=2019-10-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/0efc02b5-d609-304b-a834-fe99d52332bc?api-version=2019-10-01
       cache-control:
       - no-cache
       content-length:
-      - '518'
+      - '519'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 10 Dec 2019 01:41:47 GMT
+      - Tue, 10 Dec 2019 21:37:51 GMT
       expires:
       - '-1'
       pragma:
@@ -69,13 +69,160 @@ interactions:
       - python/3.5.2 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-appconfiguration/0.3.0 Azure-SDK-For-Python AZURECLI/2.0.77
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/8d211a7a-6d6a-9d95-ce4e-4b740f49128a?api-version=2019-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/0efc02b5-d609-304b-a834-fe99d52332bc?api-version=2019-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/8d211a7a-6d6a-9d95-ce4e-4b740f49128a","name":"8d211a7a-6d6a-9d95-ce4e-4b740f49128a","status":"Succeeded","error":null}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/0efc02b5-d609-304b-a834-fe99d52332bc","name":"0efc02b5-d609-304b-a834-fe99d52332bc","status":"Creating","error":null}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/8d211a7a-6d6a-9d95-ce4e-4b740f49128a?api-version=2019-10-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/0efc02b5-d609-304b-a834-fe99d52332bc?api-version=2019-10-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '247'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 10 Dec 2019 21:38:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - openresty/1.15.8.1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appconfig create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l
+      User-Agent:
+      - python/3.5.2 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-appconfiguration/0.3.0 Azure-SDK-For-Python AZURECLI/2.0.77
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/0efc02b5-d609-304b-a834-fe99d52332bc?api-version=2019-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/0efc02b5-d609-304b-a834-fe99d52332bc","name":"0efc02b5-d609-304b-a834-fe99d52332bc","status":"Creating","error":null}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/0efc02b5-d609-304b-a834-fe99d52332bc?api-version=2019-10-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '247'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 10 Dec 2019 21:38:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - openresty/1.15.8.1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appconfig create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l
+      User-Agent:
+      - python/3.5.2 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-appconfiguration/0.3.0 Azure-SDK-For-Python AZURECLI/2.0.77
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/0efc02b5-d609-304b-a834-fe99d52332bc?api-version=2019-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/0efc02b5-d609-304b-a834-fe99d52332bc","name":"0efc02b5-d609-304b-a834-fe99d52332bc","status":"Creating","error":null}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/0efc02b5-d609-304b-a834-fe99d52332bc?api-version=2019-10-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '247'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 10 Dec 2019 21:38:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - openresty/1.15.8.1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appconfig create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l
+      User-Agent:
+      - python/3.5.2 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-appconfiguration/0.3.0 Azure-SDK-For-Python AZURECLI/2.0.77
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/0efc02b5-d609-304b-a834-fe99d52332bc?api-version=2019-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/0efc02b5-d609-304b-a834-fe99d52332bc","name":"0efc02b5-d609-304b-a834-fe99d52332bc","status":"Succeeded","error":null}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/0efc02b5-d609-304b-a834-fe99d52332bc?api-version=2019-10-01
       cache-control:
       - no-cache
       content-length:
@@ -83,7 +230,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 10 Dec 2019 01:41:57 GMT
+      - Tue, 10 Dec 2019 21:38:31 GMT
       expires:
       - '-1'
       pragma:
@@ -121,7 +268,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/MgmtTest000002?api-version=2019-10-01
   response:
     body:
-      string: '{"type":"Microsoft.AppConfiguration/configurationStores","properties":{"provisioningState":"Succeeded","creationDate":"2019-12-10T01:41:49+00:00","endpoint":"https://mgmttest7lxactkqm5hh6zxe.azconfig.io"},"sku":{"name":"free"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/mgmttest7lxactkqm5hh6zxe","name":"MgmtTest000002","location":"eastus","tags":{}}'
+      string: '{"type":"Microsoft.AppConfiguration/configurationStores","properties":{"provisioningState":"Succeeded","creationDate":"2019-12-10T21:38:27+00:00","endpoint":"https://mgmttest4ompno554xrpsqyz.azconfig.io"},"sku":{"name":"free"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/mgmttest4ompno554xrpsqyz","name":"MgmtTest000002","location":"eastus","tags":{}}'
     headers:
       cache-control:
       - no-cache
@@ -130,9 +277,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 10 Dec 2019 01:41:58 GMT
+      - Tue, 10 Dec 2019 21:38:32 GMT
       etag:
-      - W/"000057d9-0000-0100-0000-5deef7dd0000"
+      - W/"4500ce91-0000-0100-0000-5df010530000"
       expires:
       - '-1'
       pragma:
@@ -172,7 +319,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores?api-version=2019-10-01
   response:
     body:
-      string: '{"value":[{"type":"Microsoft.AppConfiguration/configurationStores","properties":{"provisioningState":"Succeeded","creationDate":"2019-12-10T01:41:49+00:00","endpoint":"https://mgmttest7lxactkqm5hh6zxe.azconfig.io"},"sku":{"name":"free"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/mgmttest7lxactkqm5hh6zxe","name":"MgmtTest000002","location":"eastus","tags":{}}],"nextLink":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores?api-version=2019-10-01&$skipToken=mgmttest7lxactkqm5hh6zxe"}'
+      string: '{"value":[{"type":"Microsoft.AppConfiguration/configurationStores","properties":{"provisioningState":"Succeeded","creationDate":"2019-12-10T21:38:27+00:00","endpoint":"https://mgmttest4ompno554xrpsqyz.azconfig.io"},"sku":{"name":"free"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/mgmttest4ompno554xrpsqyz","name":"MgmtTest000002","location":"eastus","tags":{}}],"nextLink":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores?api-version=2019-10-01&$skipToken=mgmttest4ompno554xrpsqyz"}'
     headers:
       cache-control:
       - no-cache
@@ -181,11 +328,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 10 Dec 2019 01:41:59 GMT
+      - Tue, 10 Dec 2019 21:38:33 GMT
       expires:
       - '-1'
       link:
-      - </subscriptions/77d5ab06-7edd-4eec-bce9-52c11b75bb37/resourceGroups/clitest.rg5rfdopgkw7ajd62ihphmlxxbgwfdj4renhcr3spiqask2faa3oc5vz7gbm2bcnuqw/providers/Microsoft.AppConfiguration/configurationStores?api-version=2019-10-01&$skipToken=mgmttest7lxactkqm5hh6zxe>;
+      - </subscriptions/77d5ab06-7edd-4eec-bce9-52c11b75bb37/resourceGroups/clitest.rghaby3sqft4i7sjirdn75hu3uob6ive4n45rucgvgbo3oo4cdwqlr5t4os6gdp75vt/providers/Microsoft.AppConfiguration/configurationStores?api-version=2019-10-01&$skipToken=mgmttest4ompno554xrpsqyz>;
         rel="next"
       pragma:
       - no-cache
@@ -221,7 +368,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores?api-version=2019-10-01&$skipToken=mgmttest7lxactkqm5hh6zxe
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores?api-version=2019-10-01&$skipToken=mgmttest4ompno554xrpsqyz
   response:
     body:
       string: '{"value":[],"nextLink":null}'
@@ -233,7 +380,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 10 Dec 2019 01:41:59 GMT
+      - Tue, 10 Dec 2019 21:38:33 GMT
       expires:
       - '-1'
       pragma:
@@ -273,7 +420,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/MgmtTest000002?api-version=2019-10-01
   response:
     body:
-      string: '{"type":"Microsoft.AppConfiguration/configurationStores","properties":{"provisioningState":"Succeeded","creationDate":"2019-12-10T01:41:49+00:00","endpoint":"https://mgmttest7lxactkqm5hh6zxe.azconfig.io"},"sku":{"name":"free"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/mgmttest7lxactkqm5hh6zxe","name":"MgmtTest000002","location":"eastus","tags":{}}'
+      string: '{"type":"Microsoft.AppConfiguration/configurationStores","properties":{"provisioningState":"Succeeded","creationDate":"2019-12-10T21:38:27+00:00","endpoint":"https://mgmttest4ompno554xrpsqyz.azconfig.io"},"sku":{"name":"free"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/mgmttest4ompno554xrpsqyz","name":"MgmtTest000002","location":"eastus","tags":{}}'
     headers:
       cache-control:
       - no-cache
@@ -282,9 +429,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 10 Dec 2019 01:42:00 GMT
+      - Tue, 10 Dec 2019 21:38:34 GMT
       etag:
-      - W/"000057d9-0000-0100-0000-5deef7dd0000"
+      - W/"4500ce91-0000-0100-0000-5df010530000"
       expires:
       - '-1'
       pragma:
@@ -328,7 +475,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/MgmtTest000002?api-version=2019-10-01
   response:
     body:
-      string: '{"type":"Microsoft.AppConfiguration/configurationStores","properties":{"provisioningState":"Succeeded","creationDate":"2019-12-10T01:41:49+00:00","endpoint":"https://mgmttest7lxactkqm5hh6zxe.azconfig.io"},"sku":{"name":"free"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/mgmttest7lxactkqm5hh6zxe","name":"MgmtTest000002","location":"eastus","tags":{"Env":"Prod"}}'
+      string: '{"type":"Microsoft.AppConfiguration/configurationStores","properties":{"provisioningState":"Succeeded","creationDate":"2019-12-10T21:38:27+00:00","endpoint":"https://mgmttest4ompno554xrpsqyz.azconfig.io"},"sku":{"name":"free"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/mgmttest4ompno554xrpsqyz","name":"MgmtTest000002","location":"eastus","tags":{"Env":"Prod"}}'
     headers:
       cache-control:
       - no-cache
@@ -337,9 +484,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 10 Dec 2019 01:42:02 GMT
+      - Tue, 10 Dec 2019 21:38:35 GMT
       etag:
-      - W/"00005fd9-0000-0100-0000-5deef7e90000"
+      - W/"4500d191-0000-0100-0000-5df0105b0000"
       expires:
       - '-1'
       pragma:
@@ -390,7 +537,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 10 Dec 2019 01:42:03 GMT
+      - Tue, 10 Dec 2019 21:38:35 GMT
       expires:
       - '-1'
       pragma:

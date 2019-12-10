@@ -170,8 +170,8 @@ class AzconfigClient(object):
             modify_options = models.ModifyKeyValueOptions()
 
         key, label = utils.unescape_encode_key_and_label(key, label)
-        query_url = '/kv/{}?label={}'.format(key,
-                                             '' if label is None else label)
+        query_url = '/kv/{}?label={}'.format(key, '' if label is None else label)
+        query_url = self.__append_api_version(query_url)
 
         endpoint = utils.get_endpoint_from_connection_string(
             self.connection_string)
@@ -219,8 +219,9 @@ class AzconfigClient(object):
             raise ValueError("Etag of the keyvalue cannot be null")
 
         key, label = utils.unescape_encode_key_and_label(keyvalue.key, keyvalue.label)
-        query_url = '/kv/{}?label={}'.format(key,
-                                             '' if label is None else label)
+        query_url = '/kv/{}?label={}'.format(key, '' if label is None else label)
+        query_url = self.__append_api_version(query_url)
+
         endpoint = utils.get_endpoint_from_connection_string(
             self.connection_string)
         url = 'https://{}{}'.format(endpoint, query_url)
@@ -314,6 +315,8 @@ class AzconfigClient(object):
 
         query_url = '/locks/{}'.format(key)
         query_url += '?label={}'.format('' if label is None else label)
+        query_url = self.__append_api_version(query_url)
+
         endpoint = utils.get_endpoint_from_connection_string(
             self.connection_string)
         url = 'https://{}{}'.format(endpoint, query_url)
@@ -356,6 +359,7 @@ class AzconfigClient(object):
 
         query_url = '/locks/{}'.format(key)
         query_url += '?label={}'.format('' if label is None else label)
+        query_url = self.__append_api_version(query_url)
 
         endpoint = utils.get_endpoint_from_connection_string(
             self.connection_string)
