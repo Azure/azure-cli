@@ -10,11 +10,18 @@ Release History
 
 **AppService**
 
+* Fix issue #11217: webapp: az webapp config ssl upload should support slot parameter
 * Fix issue #10965: Error: Name cannot be empty. Allow remove by ip_address and subnet
 
 **Compute**
 
-* vmss create/update: Add --scale-in-policy, which decides which virtual machines are chosen for removal when a VMSS is scaled-in
+* vmss create/update: Add --scale-in-policy, which decides which virtual machines are chosen for removal when a VMSS is scaled-in.
+* vm/vmss update: Add --priority.
+* vm/vmss update: Add --max-price.
+
+**Core**
+
+* Remove support for Python 3.4
 
 **Install**
 
@@ -23,6 +30,17 @@ Release History
 **IOT**
 
 * [BREAKING CHANGE] Removed --failover-region parameter from manual-failover. Now it will failover to assigned geo-paired secondary region.
+
+**Key Vault**
+
+* Fix #10846: Calling az keyvault secret show-deleted --id <value> still says secret_name "can not" be none
+* Fix #11084: Confusing encoding information
+
+**Network**
+
+* az application-gateway probe: Support --port option to specify a port for probing backend servers when create and update
+* az network list-service-aliases: Support list service aliases which can be used for Service Endpoint Policies
+
 
 **Packaging**
 

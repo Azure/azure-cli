@@ -272,9 +272,15 @@ parameters:
   - name: --name -n
     short-summary: Name of the activity log alerts
   - name: --scope -s
-    short-summary: The scopes to add
+    short-summary: List of scopes to add. Each scope could be a resource ID, a resource group ID or a subscription ID.
   - name: --reset
     short-summary: Remove all the existing scopes before add new scopes.
+examples:
+  - name: Add three levels of scopes into activity-log alert.
+    text: >
+        az monitor activity-log alert scope add -n {AlertName} -g {ResourceGroup} -s /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx \\
+        /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myRG \\
+        /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myRG/Microsoft.KeyVault/vaults/mykey
 """
 
 helps['monitor activity-log alert scope remove'] = """
