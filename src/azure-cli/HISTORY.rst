@@ -22,6 +22,7 @@ Release History
 **Core**
 
 * Remove support for Python 3.4
+* Plug in HaTS survey in multiple commands
 
 **Install**
 
