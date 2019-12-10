@@ -127,7 +127,7 @@ def __write_kv_and_features_to_file(file_path, key_values=None, features=None, f
 
         with open(file_path, 'w') as fp:
             if format_ == 'json':
-                json.dump(exported_keyvalues, fp, indent=2)
+                json.dump(exported_keyvalues, fp, indent=2, ensure_ascii=False)
             elif format_ == 'yaml':
                 yaml.dump(exported_keyvalues, fp, sort_keys=False)
             elif format_ == 'properties':
@@ -357,7 +357,7 @@ def __print_features_preview(old_json, new_json):
                     if attribute in ('description', 'conditions'):
                         continue
                     record[str(attribute)] = str(value)
-                logger.warning(json.dumps(record))
+                logger.warning(json.dumps(record, ensure_ascii=False))
         elif action.label == 'update':
             logger.warning('\nUpdating:')
             for key, updates in changes.items():
@@ -401,7 +401,7 @@ def __print_preview(old_json, new_json):
                 record = {'key': key}
                 for attribute, value in adding.items():
                     record[str(attribute)] = str(value)
-                logger.warning(json.dumps(record))
+                logger.warning(json.dumps(record, ensure_ascii=False))
         elif action.label == 'update':
             logger.warning('\nUpdating:')
             for key, updates in changes.items():
@@ -412,8 +412,8 @@ def __print_preview(old_json, new_json):
                 for attribute in attributes:
                     old_record[attribute] = old_json[key][attribute]
                     new_record[attribute] = new_json[key][attribute]
-                logger.warning('- %s', json.dumps(old_record))
-                logger.warning('+ %s', json.dumps(new_record))
+                logger.warning('- %s', json.dumps(old_record, ensure_ascii=False))
+                logger.warning('+ %s', json.dumps(new_record, ensure_ascii=False))
     logger.warning("")  # printing an empty line for formatting purpose
     return True
 
@@ -427,15 +427,15 @@ def __print_restore_preview(kvs_to_restore, kvs_to_modify, kvs_to_delete):
     # format result printing
     if kvs_to_restore:
         logger.warning('\nAdding:')
-        logger.warning(json.dumps(__serialize_kv_list_to_comparable_json_list(kvs_to_restore), indent=2))
+        logger.warning(json.dumps(__serialize_kv_list_to_comparable_json_list(kvs_to_restore), indent=2, ensure_ascii=False))
 
     if kvs_to_modify:
         logger.warning('\nUpdating:')
-        logger.warning(json.dumps(__serialize_kv_list_to_comparable_json_list(kvs_to_modify), indent=2))
+        logger.warning(json.dumps(__serialize_kv_list_to_comparable_json_list(kvs_to_modify), indent=2, ensure_ascii=False))
 
     if kvs_to_delete:
         logger.warning('\nDeleting:')
-        logger.warning(json.dumps(__serialize_kv_list_to_comparable_json_list(kvs_to_delete), indent=2))
+        logger.warning(json.dumps(__serialize_kv_list_to_comparable_json_list(kvs_to_delete), indent=2, ensure_ascii=False))
 
     logger.warning("")  # printing an empty line for formatting purpose
     confirmation_message = "Do you want to continue? \n"
@@ -546,7 +546,7 @@ def __export_keyvalues(fetched_items, format_, separator, prefix=None):
 
         if exported_dict and exported_list:
             logger.error("Can not export to a valid file! Some keys have been dropped. %s", json.dumps(
-                exported_dict, indent=2))
+                exported_dict, indent=2, ensure_ascii=False))
 
         return __compact_key_values(exported_dict if not exported_list else exported_list)
     except Exception as exception:
@@ -674,7 +674,7 @@ def __convert_features_to_key_value_list(features_dict, format_):
                     default_value["conditions"] = default_conditions
 
                 set_kv = KeyValue(key=key,
-                                  value=json.dumps(default_value),
+                                  value=json.dumps(default_value, ensure_ascii=False),
                                   content_type=FEATURE_FLAG_CONTENT_TYPE)
                 key_values.append(set_kv)
 

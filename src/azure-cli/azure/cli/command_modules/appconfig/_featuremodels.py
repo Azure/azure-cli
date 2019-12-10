@@ -66,7 +66,7 @@ class FeatureFlagValue(object):
             "conditions": custom_serialize_conditions(self.conditions)
         }
 
-        return json.dumps(featureflagvalue, indent=2)
+        return json.dumps(featureflagvalue, indent=2, ensure_ascii=False)
 
 
 class FeatureFlag(object):
@@ -118,7 +118,7 @@ class FeatureFlag(object):
             "Conditions": custom_serialize_conditions(self.conditions)
         }
 
-        return json.dumps(featureflag, indent=2)
+        return json.dumps(featureflag, indent=2, ensure_ascii=False)
 
 
 class FeatureFilter(object):
@@ -142,7 +142,7 @@ class FeatureFilter(object):
             "name": self.name,
             "parameters": self.parameters
         }
-        return json.dumps(featurefilter, indent=2)
+        return json.dumps(featurefilter, indent=2, ensure_ascii=False)
 
 # Feature Flag Helper Functions #
 
@@ -254,7 +254,7 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
                 client_filters_list.append(FeatureFilter(name, params))
             else:
                 logger.warning("Ignoring this filter without the 'name' attribute:\n%s",
-                               json.dumps(client_filter, indent=2))
+                               json.dumps(client_filter, indent=2, ensure_ascii=False))
         conditions['client_filters'] = client_filters_list
 
         feature_flag_value = FeatureFlagValue(id_=feature_name,
