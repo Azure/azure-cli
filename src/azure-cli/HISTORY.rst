@@ -15,6 +15,10 @@ Release History
 
 * Remove support for Python 3.4
 
+**HDInsight**
+
+* Support for creating a Kafka cluster with Kafka Rest Proxy
+
 **Install**
 
 * Install script support python 3.8

@@ -96,10 +96,10 @@ def load_arguments(self, _):
                    help='The size of the data disk in GB, e.g. 1023.')
         c.argument('zookeepernode_size', arg_type=node_size_type)
         c.argument('edgenode_size', arg_type=node_size_type)
-        c.argument('kafka_managementnode_size', arg_type=node_size_type)
+        c.argument('kafka_management_node_size', arg_type=node_size_type)
         c.argument('workernode_count', options_list=['--workernode-count', '-c'], arg_group='Node',
                    help='The number of worker nodes in the cluster.')
-        c.argument('kafka_managementnode_count', arg_group='Node',
+        c.argument('kafka_management_node_count', arg_group='Node',
                    help='The number of kafka management node in the cluster')
 
         # Storage
