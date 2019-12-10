@@ -2477,7 +2477,7 @@ parameters:
 examples:
   - name: List a VM's CPU usage for the past hour
     text: >
-        az vm monitor metrics tail --name myVM --metric "Percentage CPU"
+        az vm monitor metrics tail --name myVM -g myRG --metric "Percentage CPU"
 """
 
 helps['vm monitor metrics list-definitions'] = """

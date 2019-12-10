@@ -198,7 +198,33 @@ AZURE_API_PROFILES = {
         }),
         ResourceType.DATA_KEYVAULT: '2016-10-01',
         ResourceType.DATA_STORAGE: '2017-11-09',
-        ResourceType.DATA_COSMOS_TABLE: '2017-04-17'
+        ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
+        ResourceType.MGMT_MONITOR: SDKProfile('2019-06-01', {
+            'activity_log_alerts': '2017-04-01',
+            'activity_logs': '2015-04-01',
+            'alert_rule_incidents': '2016-03-01',
+            'alert_rules': '2016-03-01',
+            'autoscale_settings': '2015-04-01',
+            'baseline': '2018-09-01',
+            'baselines': '2019-03-01',
+            'diagnostic_settings': '2017-05-01-preview',
+            'diagnostic_settings_category': '2017-05-01-preview',
+            'event_categories': '2015-04-01',
+            'guest_diagnostics_settings': '2018-06-01-preview',
+            'guest_diagnostics_settings_association': '2018-06-01-preview',
+            'log_profiles': '2016-03-01',
+            'metric_alerts': '2018-03-01',
+            'metric_alerts_status': '2018-03-01',
+            'metric_baseline': '2018-09-01',
+            'metric_definitions': '2018-01-01',
+            'metric_namespaces': '2017-12-01-preview',
+            'metrics': '2018-01-01',
+            'operations': '2015-04-01',
+            'scheduled_query_rules': '2018-04-16',
+            'service_diagnostic_settings': '2016-09-01',
+            'tenant_activity_logs': '2015-04-01',
+            'vm_insights': '2018-11-27-preview'
+        })
     },
     '2018-03-01-hybrid': {
         ResourceType.MGMT_STORAGE: '2016-01-01',
@@ -216,7 +242,33 @@ AZURE_API_PROFILES = {
         }),
         ResourceType.DATA_KEYVAULT: '2016-10-01',
         ResourceType.DATA_STORAGE: '2017-04-17',
-        ResourceType.DATA_COSMOS_TABLE: '2017-04-17'
+        ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
+        ResourceType.MGMT_MONITOR: SDKProfile('2019-06-01', {
+            'activity_log_alerts': '2017-04-01',
+            'activity_logs': '2015-04-01',
+            'alert_rule_incidents': '2016-03-01',
+            'alert_rules': '2016-03-01',
+            'autoscale_settings': '2015-04-01',
+            'baseline': '2018-09-01',
+            'baselines': '2019-03-01',
+            'diagnostic_settings': '2017-05-01-preview',
+            'diagnostic_settings_category': '2017-05-01-preview',
+            'event_categories': '2015-04-01',
+            'guest_diagnostics_settings': '2018-06-01-preview',
+            'guest_diagnostics_settings_association': '2018-06-01-preview',
+            'log_profiles': '2016-03-01',
+            'metric_alerts': '2018-03-01',
+            'metric_alerts_status': '2018-03-01',
+            'metric_baseline': '2018-09-01',
+            'metric_definitions': '2018-01-01',
+            'metric_namespaces': '2017-12-01-preview',
+            'metrics': '2018-01-01',
+            'operations': '2015-04-01',
+            'scheduled_query_rules': '2018-04-16',
+            'service_diagnostic_settings': '2016-09-01',
+            'tenant_activity_logs': '2015-04-01',
+            'vm_insights': '2018-11-27-preview'
+        })
     },
     '2017-03-09-profile': {
         ResourceType.MGMT_STORAGE: '2016-01-01',
@@ -233,7 +285,33 @@ AZURE_API_PROFILES = {
             'classic_administrators': '2015-06-01'
         }),
         ResourceType.DATA_KEYVAULT: '2016-10-01',
-        ResourceType.DATA_STORAGE: '2015-04-05'
+        ResourceType.DATA_STORAGE: '2015-04-05',
+        ResourceType.MGMT_MONITOR: SDKProfile('2019-06-01', {
+            'activity_log_alerts': '2017-04-01',
+            'activity_logs': '2015-04-01',
+            'alert_rule_incidents': '2016-03-01',
+            'alert_rules': '2016-03-01',
+            'autoscale_settings': '2015-04-01',
+            'baseline': '2018-09-01',
+            'baselines': '2019-03-01',
+            'diagnostic_settings': '2017-05-01-preview',
+            'diagnostic_settings_category': '2017-05-01-preview',
+            'event_categories': '2015-04-01',
+            'guest_diagnostics_settings': '2018-06-01-preview',
+            'guest_diagnostics_settings_association': '2018-06-01-preview',
+            'log_profiles': '2016-03-01',
+            'metric_alerts': '2018-03-01',
+            'metric_alerts_status': '2018-03-01',
+            'metric_baseline': '2018-09-01',
+            'metric_definitions': '2018-01-01',
+            'metric_namespaces': '2017-12-01-preview',
+            'metrics': '2018-01-01',
+            'operations': '2015-04-01',
+            'scheduled_query_rules': '2018-04-16',
+            'service_diagnostic_settings': '2016-09-01',
+            'tenant_activity_logs': '2015-04-01',
+            'vm_insights': '2018-11-27-preview'
+        })
     }
 }
 
