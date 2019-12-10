@@ -140,6 +140,8 @@ Release History
 
 **Redis**
 
+* Add preview param `--replicas-per-master` to `az redis create` command
+* Update azure-mgmt-redis from 6.0.0 to 7.0.0rc1
 * Fix #2902: Avoid setting memory configs while updating Basic SKU cache
 
 **Reservations**
