@@ -75,6 +75,11 @@ def load_arguments(self, _):
                         'user requests for a compressed version. Content won\'t be compressed '
                         'on CDN when requested content is smaller than 1 byte or larger than 1 '
                         'MB.')
+        c.argument('preserve_unmatched_path', arg_type=get_three_state_flag(), options_list='--preserve-unmatched-path',
+                   help='If True, the remaining path after the source pattern '
+                        'will be appended to the new destination path.')
+        c.argument('negate_condition', arg_type=get_three_state_flag(), options_list='--negate-condition',
+                   help='Describes if this is negate condition or not.')
 
         caching_behavior = [item.value for item in list(QueryStringCachingBehavior)]
         c.argument('query_string_caching_behavior', options_list='--query-string-caching',

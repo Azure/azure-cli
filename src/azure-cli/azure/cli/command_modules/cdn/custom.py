@@ -97,7 +97,6 @@ def create_condition(match_variable=None, operator=None, match_values=None,
     transforms = []
     if transform is not None:
         transforms = [transform]
-
     if match_variable == 'RemoteAddress':
         return DeliveryRuleRemoteAddressCondition(
             parameters=RemoteAddressMatchConditionParameters(
@@ -309,9 +308,6 @@ def add_condition(instance, rule_name=None, match_variable=None, operator=None, 
                   negate_condition=None, transform=None):
 
     policy = instance.delivery_policy
-    if policy is None:
-        return
-
     condition = create_condition(match_variable, operator, match_values, selector, negate_condition, transform)
     for i in range(0, len(policy.rules)):
         if policy.rules[i].name == rule_name:
@@ -333,9 +329,6 @@ def add_action(instance, rule_name=None, action_name=None, cache_behavior=None, 
                destination=None, preserve_unmatched_path=None):
 
     policy = instance.delivery_policy
-    if policy is None:
-        return
-
     action = create_action(action_name, cache_behavior, cache_duration, header_action, header_name,
                            header_value, query_string_behavior, query_parameters, redirect_type,
                            redirect_protocol, custom_hostname, custom_path, custom_querystring,
