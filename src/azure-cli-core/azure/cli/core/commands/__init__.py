@@ -313,7 +313,8 @@ class AzCliCommand(CLICommand):
         resource_type = resource_type or self.command_kwargs.get('resource_type', None)
         return self.loader.get_api_version(resource_type=resource_type, operation_group=operation_group)
 
-    def supported_api_version(self, resource_type=None, min_api=None, max_api=None, operation_group=None, parameter_name=None):
+    def supported_api_version(self, resource_type=None, min_api=None, max_api=None,
+                              operation_group=None, parameter_name=None):
         if min_api and parameter_name:
             parameter_name = None
         if parameter_name is not None and parameter_name in self.arguments:
