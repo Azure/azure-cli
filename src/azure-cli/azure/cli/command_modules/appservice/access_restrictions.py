@@ -14,6 +14,8 @@ from azure.cli.command_modules.network._client_factory import network_client_fac
 
 logger = get_logger(__name__)
 
+NETWORK_API_VERSION = '2019-02-01'
+
 
 def show_webapp_access_restrictions(cmd, resource_group_name, name, slot=None):
     import json
@@ -29,11 +31,14 @@ def show_webapp_access_restrictions(cmd, resource_group_name, name, slot=None):
 
 
 def add_webapp_access_restriction(
-        cmd, resource_group_name, name, rule_name, priority,
+        cmd, resource_group_name, name, priority, rule_name=None,
         action='Allow', ip_address=None, subnet=None,
         vnet_name=None, description=None, scm_site=False,
         ignore_missing_vnet_service_endpoint=False, slot=None):
     configs = get_site_configs(cmd, resource_group_name, name, slot)
+
+    if (ip_address and subnet) or (not ip_address and not subnet):
+        raise CLIError('Usage error: --subnet | --ip_address')
 
     # get rules list
     access_rules = configs.scm_ip_security_restrictions if scm_site else configs.ip_security_restrictions
@@ -46,57 +51,52 @@ def add_webapp_access_restriction(
         if not ignore_missing_vnet_service_endpoint:
             _ensure_subnet_service_endpoint(cmd.cli_ctx, subnet_id)
 
-        for rule in list(access_rules):
-            if rule.vnet_subnet_resource_id:
-                if rule.action.lower() == action.lower() and rule.vnet_subnet_resource_id.lower() == subnet_id.lower():
-                    rule_instance = rule
-                    break
+        rule_instance = IpSecurityRestriction(
+            name=rule_name, vnet_subnet_resource_id=subnet_id,
+            priority=priority, action=action, tag='Default', description=description)
+        access_rules.append(rule_instance)
 
-        if rule_instance:
-            rule_instance.name = rule_name
-            rule_instance.priority = priority
-            rule_instance.description = description if description else rule_instance.description
-        else:
-            rule_instance = IpSecurityRestriction(
-                name=rule_name, vnet_subnet_resource_id=subnet_id,
-                priority=priority, action=action, tag='Default', description=description)
-            access_rules.append(rule_instance)
-
-    if ip_address:
-        for rule in list(access_rules):
-            if rule.ip_address:
-                if rule.action.lower() == action.lower() and rule.ip_address.lower() == ip_address.lower():
-                    rule_instance = rule
-                    break
-
-        if rule_instance:
-            rule_instance.name = rule_name
-            rule_instance.priority = priority
-            rule_instance.description = description or rule_instance.description
-        else:
-            rule_instance = IpSecurityRestriction(
-                name=rule_name, ip_address=ip_address,
-                priority=priority, action=action, tag='Default', description=description)
-            access_rules.append(rule_instance)
+    elif ip_address:
+        rule_instance = IpSecurityRestriction(
+            name=rule_name, ip_address=ip_address,
+            priority=priority, action=action, tag='Default', description=description)
+        access_rules.append(rule_instance)
 
     result = _generic_site_operation(
         cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
     return result.scm_ip_security_restrictions if scm_site else result.ip_security_restrictions
 
 
-def remove_webapp_access_restriction(cmd, resource_group_name, name, rule_name, scm_site=False, slot=None):
+def remove_webapp_access_restriction(cmd, resource_group_name, name, rule_name=None, action='Allow',
+                                     ip_address=None, subnet=None, vnet_name=None, scm_site=False, slot=None):
     configs = get_site_configs(cmd, resource_group_name, name, slot)
     rule_instance = None
     # get rules list
     access_rules = configs.scm_ip_security_restrictions if scm_site else configs.ip_security_restrictions
 
     for rule in list(access_rules):
-        if rule.name.lower() == rule_name.lower():
-            rule_instance = rule
-            break
+        if rule_name:
+            if rule.name and rule.name.lower() == rule_name.lower() and rule.action == action:
+                rule_instance = rule
+                break
+        elif ip_address:
+            if rule.ip_address == ip_address and rule.action == action:
+                if rule_name and rule.name and rule.name.lower() != rule_name.lower():
+                    continue
+                rule_instance = rule
+                break
+        elif subnet:
+            subnet_id = _validate_subnet(cmd.cli_ctx, subnet, vnet_name, resource_group_name)
+            if rule.vnet_subnet_resource_id == subnet_id and rule.action == action:
+                if rule_name and rule.name and rule.name.lower() != rule_name.lower():
+                    continue
+                rule_instance = rule
+                break
 
-    if rule_instance is not None:
-        access_rules.remove(rule_instance)
+    if rule_instance is None:
+        raise CLIError('No rule found with the specified criteria')
+
+    access_rules.remove(rule_instance)
 
     result = _generic_site_operation(
         cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
@@ -143,7 +143,7 @@ def _ensure_subnet_service_endpoint(cli_ctx, subnet_id):
     subnet_vnet_name = subnet_id_parts['name']
     subnet_name = subnet_id_parts['resource_name']
 
-    vnet_client = network_client_factory(cli_ctx)
+    vnet_client = network_client_factory(cli_ctx, api_version=NETWORK_API_VERSION)
     subnet_obj = vnet_client.subnets.get(subnet_resource_group, subnet_vnet_name, subnet_name)
     subnet_obj.service_endpoints = subnet_obj.service_endpoints or []
     service_endpoint_exists = False

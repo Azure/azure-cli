@@ -1875,6 +1875,18 @@ class VMSSCreateAndModify(ScenarioTest):
         self.cmd('vmss delete --resource-group {rg} --name {vmss}')
         self.cmd('vmss list --resource-group {rg}', checks=self.is_empty())
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_scale_in_policy_')
+    def test_vmss_scale_in_policy(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss1'
+        })
+        self.cmd('vmss create -g {rg} -n {vmss} --image centos --scale-in-policy NewestVM', checks=[
+            self.check('vmss.scaleInPolicy.rules[0]', 'NewestVM')
+        ])
+        self.cmd('vmss update -g {rg} -n {vmss} --scale-in-policy OldestVM', checks=[
+            self.check('scaleInPolicy.rules[0]', 'OldestVM')
+        ])
+
 
 class VMSSCreateOptions(ScenarioTest):
 
@@ -3316,8 +3328,18 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux --os-state specialized --hyper-v-generation V2 -p publisher1 -f offer1 -s sku1',
                  checks=[self.check('name', '{image}'), self.check('osState', 'Specialized'),
                          self.check('hyperVgeneration', 'V2')])
-
-
+        self.cmd('disk create -g {rg} -n d1 --size-gb 10')
+        self.cmd('disk create -g {rg} -n d2 --size-gb 10')
+        self.cmd('disk create -g {rg} -n d3 --size-gb 10')
+        s1_id = self.cmd('snapshot create -g {rg} -n s1 --source d1').get_output_in_json()['id']
+        s2_id = self.cmd('snapshot create -g {rg} -n s2 --source d2').get_output_in_json()['id']
+        s3_id = self.cmd('snapshot create -g {rg} -n s3 --source d3').get_output_in_json()['id']
+        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version 1.0.0 --os-snapshot s1 --data-snapshots s2 s3',
+                 checks=[
+                     self.check('storageProfile.osDiskImage.source.id', s1_id),
+                     self.check('storageProfile.dataDiskImages[0].source.id', s2_id),
+                     self.check('storageProfile.dataDiskImages[1].source.id', s3_id),
+                 ])
 # endregion
 
 
@@ -3567,6 +3589,20 @@ class VMPriorityEvictionBillingTest(ScenarioTest):
             self.check('vmss.virtualMachineProfile.priority', 'Low'),
             self.check('vmss.virtualMachineProfile.evictionPolicy', 'Deallocate'),
             self.check('vmss.virtualMachineProfile.billingProfile.maxPrice', 50)
+        ])
+
+        # vm update
+        self.cmd('vm deallocate -g {rg} -n {vm}')
+        self.cmd('vm update -g {rg} -n {vm} --priority Spot --max-price 100', checks=[
+            self.check('priority', 'Spot'),
+            self.check('billingProfile.maxPrice', 100)
+        ])
+
+        # vmss update
+        self.cmd('vmss deallocate -g {rg} -n {vmss}')
+        self.cmd('vmss update -g {rg} -n {vmss} --priority Spot --max-price 100', checks=[
+            self.check('virtualMachineProfile.priority', 'Spot'),
+            self.check('virtualMachineProfile.billingProfile.maxPrice', 100)
         ])
 
 

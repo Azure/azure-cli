@@ -28,8 +28,7 @@ class IoTHubTest(ScenarioTest):
         self.cmd('iot hub create -n {0} -g {1} --sku S1 --partition-count 4 --retention-day 3'
                  ' --c2d-ttl 23 --c2d-max-delivery-count 89 --feedback-ttl 29 --feedback-lock-duration 35'
                  ' --feedback-max-delivery-count 40 --fileupload-notification-max-delivery-count 79'
-                 ' --fileupload-notification-ttl 20 --fcs {2} --fc {3}'
-                 .format(hub, rg, storageConnectionString, containerName),
+                 ' --fileupload-notification-ttl 20'.format(hub, rg),
                  checks=[self.check('resourcegroup', rg),
                          self.check('location', location),
                          self.check('name', hub),
@@ -380,7 +379,7 @@ class IoTHubTest(ScenarioTest):
                  checks=[self.check('length(properties.routing.enrichments)', 0)])
 
         # Test 'az iot hub manual-failover'
-        self.cmd('iot hub manual-failover -n {0} -g {1} --failover-region "{2}"'.format(hub, rg, 'westcentralus'),
+        self.cmd('iot hub manual-failover -n {0} -g {1}'.format(hub, rg),
                  checks=[self.check('location', location)])
         # Test 'az iot hub delete'
         self.cmd('iot hub delete -n {0}'.format(hub), checks=self.is_empty())

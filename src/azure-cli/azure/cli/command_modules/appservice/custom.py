@@ -369,7 +369,7 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
         zip_content = fs.read()
         logger.warning("Starting zip deployment. This operation can take a while to complete ...")
         res = requests.post(zip_url, data=zip_content, headers=headers, verify=not should_disable_connection_verify())
-        logger.warning("Deployment endpoint responses with status code %d", res.status_code)
+        logger.warning("Deployment endpoint responded with status code %d", res.status_code)
 
     # check if there's an ongoing process
     if res.status_code == 409:
@@ -1962,9 +1962,9 @@ def _get_log(url, user_name, password, log_file=None):
     r.release_conn()
 
 
-def upload_ssl_cert(cmd, resource_group_name, name, certificate_password, certificate_file):
+def upload_ssl_cert(cmd, resource_group_name, name, certificate_password, certificate_file, slot=None):
     client = web_client_factory(cmd.cli_ctx)
-    webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
+    webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     cert_file = open(certificate_file, 'rb')
     cert_contents = cert_file.read()
     hosting_environment_profile_param = (webapp.hosting_environment_profile.name

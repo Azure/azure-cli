@@ -3,9 +3,74 @@
 Release History
 ===============
 
+
+**ACR**
+
+* Support Local context in acr task run
+
+**AppService**
+
+* Fix issue #11217: webapp: az webapp config ssl upload should support slot parameter
+* Fix issue #10965: Error: Name cannot be empty. Allow remove by ip_address and subnet
+
+**ARM**
+
+* Update azure-mgmt-resource package to use 6.0.0
+
+**Compute**
+
+* vmss create/update: Add --scale-in-policy, which decides which virtual machines are chosen for removal when a VMSS is scaled-in.
+* vm/vmss update: Add --priority.
+* vm/vmss update: Add --max-price.
+
+**Core**
+
+* Remove support for Python 3.4
+
 **DLS**
 
 * Update ADLS sdk version (0.0.48).
+
+**Install**
+
+* Install script support python 3.8
+
+**IOT**
+
+* [BREAKING CHANGE] Removed --failover-region parameter from manual-failover. Now it will failover to assigned geo-paired secondary region.
+
+**Key Vault**
+
+* Fix #10846: Calling az keyvault secret show-deleted --id <value> still says secret_name "can not" be none
+* Fix #11084: Confusing encoding information
+
+**Network**
+
+* az application-gateway probe: Support --port option to specify a port for probing backend servers when create and update
+* az network list-service-aliases: Support list service aliases which can be used for Service Endpoint Policies
+
+
+**Packaging**
+
+* Add back edge builds for pip install
+* Add Ubuntu eoan package
+
+**Policy**
+
+* Support for Policy API version 2019-09-01.
+* az policy set-definition: Support grouping within policy set definitions with `--definition-groups` parameter
+
+**Storage**
+
+* GA Release Large File Shares property for storage account create and update command
+* GA Release User Delegation SAS token Support
+
+2.0.77
+++++++
+
+**ACR**
+
+* Deprecated paramater `--branch` from acr task create/update
 
 **Azure Red Hat OpenShift**
 
@@ -15,6 +80,12 @@ Release History
 **AKS**
 
 * Support cluster certificate rotation operation using "az aks rotate-certs".
+
+**AppConfig**
+
+* Add support for using ":" for `as az appconfig kv import` separator
+* Fix issue for listing key values with multiple labels including null label. 
+* Update management plane sdk, azure-mgmt-appconfiguration, to version 0.3.0. 
 
 **AppService**
 
@@ -30,8 +101,9 @@ Release History
 
 * Upgrade API version of compute, disks, snapshots to 2019-07-01
 * vmss create: Improvement for --orchestration-mode
-* sig image-definition create: add --os-state to allow specifying whether the virtual machines created under this image are 'Generalized' or 'Specialized'
-* sig image-definition create: add --hyper-v-generation to allow specifying the hypervisor generation
+* sig image-definition create: Add --os-state to allow specifying whether the virtual machines created under this image are 'Generalized' or 'Specialized'
+* sig image-definition create: Add --hyper-v-generation to allow specifying the hypervisor generation
+* sig image-version create: Support --os-snapshot and --data-snapshots
 * image create: Add --data-disk-caching to allow specifying caching setting of data disks
 * Upgrade Python Compute SDK to 10.0.0
 * vm/vmss create: Add 'Spot' to 'Priority' enum property
@@ -42,6 +114,7 @@ Release History
 
 * Fix #2531: Add convenience arguments for hub update.
 * Fix #8323: Add missing parameters to create storage custom endpoint.
+* Fix regression bug: Reverting the changes which overrides the default storage endpoint.
 
 **Key Vault**
 
@@ -80,6 +153,8 @@ Release History
 
 **Redis**
 
+* Add preview param `--replicas-per-master` to `az redis create` command
+* Update azure-mgmt-redis from 6.0.0 to 7.0.0rc1
 * Fix #2902: Avoid setting memory configs while updating Basic SKU cache
 
 **Reservations**
@@ -92,10 +167,15 @@ Release History
 **Rest**
 * `az rest` is now GA
 
+**SQL**
+
+* Update azure-mgmt-sql to version 0.15.0.
+
 **Storage**
 
 * storage account create: Add --enable-hierarchical-namespace to support filesystem semantics in blob service.
 * Remove unrelated exception from error message
+* Fix issues with incorrect error message "You do not have the required permissions needed to perform this operation." when blocked by network rules or AuthenticationFailed.
 
 2.0.76
 ++++++

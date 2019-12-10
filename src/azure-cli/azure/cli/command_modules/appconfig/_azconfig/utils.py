@@ -135,13 +135,21 @@ def __parse_connection_string(connection_string):
     return endpoint, id_, secret
 
 
-def __encode_keyword(string):
-    if six.PY2:
-        # python 2 compatible
-        return None if string is None else urllib.quote(string, safe='')  # pylint: disable=E1101
+def __unescape_encode_keyword(string):
+    if string is not None:
+        import ast
 
-    return None if string is None else urllib.parse.quote(string, safe='')
+        # ast library requires quotes around string
+        string = '"{0}"'.format(string)
+        string = ast.literal_eval(string)
+
+        if six.PY2:
+            # python 2 compatible
+            return urllib.quote(string, safe='')  # pylint: disable=E1101
+
+        return urllib.parse.quote(string, safe='')
+    return string
 
 
-def encode_key_and_label(key=None, label=None):
-    return __encode_keyword(key), __encode_keyword(label)
+def unescape_encode_key_and_label(key=None, label=None):
+    return __unescape_encode_keyword(key), __unescape_encode_keyword(label)
