@@ -36,7 +36,9 @@ Release History
 
 **Network**
 
-* az network list-service-aliases: support list service aliases which can be used for Service Endpoint Policies
+* az application-gateway probe: Support --port option to specify a port for probing backend servers when create and update
+* az network list-service-aliases: Support list service aliases which can be used for Service Endpoint Policies
+
 
 **Packaging**
 
