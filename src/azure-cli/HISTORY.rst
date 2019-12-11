@@ -148,6 +148,10 @@ Release History
 * application-gateway http-listener: Add --firewall-policy when create
 * application-gateway url-path-map rule: Add --firewall-policy when create
 
+**Backup**
+
+* Added Backup support for SQL and SAP Hana workload.
+
 **Packaging**
 
 * Rewrite the az wrapper in Python
