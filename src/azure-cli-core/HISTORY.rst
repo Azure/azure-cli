@@ -3,6 +3,8 @@
 Release History
 ===============
 
+* Plug in HaTS survey
+
 2.0.77
 ++++++
 * Add deprecate message for Python 2.7

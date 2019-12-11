@@ -782,6 +782,7 @@ class SubscriptionFinder(object):
         return result
 
     def find_through_authorization_code_flow(self, tenant, resource, authority_url):
+        from azure.cli.core.commands.constants import SURVEY_PROMPT
         # launch browser and get the code
         results = _get_authorization_code(resource, authority_url)
 
@@ -793,6 +794,7 @@ class SubscriptionFinder(object):
         token_entry = context.acquire_token_with_authorization_code(results['code'], results['reply_url'],
                                                                     resource, _CLIENT_ID, None)
         self.user_id = token_entry[_TOKEN_ENTRY_USER_ID]
+        print(SURVEY_PROMPT + "\n")
         logger.warning("You have logged in. Now let us find all the subscriptions to which you have access...")
         if tenant is None:
             result = self._find_using_common_tenant(token_entry[_ACCESS_TOKEN], resource)
