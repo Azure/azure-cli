@@ -42,6 +42,10 @@ Release History
 * Remove support for Python 3.4
 * Plug in HaTS survey in multiple commands
 
+**Cosmos DB**
+
+* Update azure-mgmt-cosmosdb package to use 0.11.0
+
 **DLS**
 
 * Update ADLS sdk version (0.0.48).
