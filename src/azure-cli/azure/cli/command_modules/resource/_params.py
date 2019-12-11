@@ -188,7 +188,7 @@ def load_arguments(self, _):
                    help='The deployment name. Default to template file base name')
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
         c.argument('aux_subscriptions', nargs='*', options_list=['--aux-subs'],
-                   help='Auxiliary subscriptions which wil be used during deployment in cross tenants.')
+                   help='Auxiliary subscriptions which will be used during deployment across tenants.')
 
     with self.argument_context('group deployment validate') as c:
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
