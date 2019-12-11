@@ -42,10 +42,11 @@ Release History
 
 **Network**
 
-* az application-gateway probe: Support --port option to specify a port for probing backend servers when create and update
-* az network list-service-aliases: Support list service aliases which can be used for Service Endpoint Policies
+* az network application-gateway probe: Support --port option to specify a port for probing backend servers when create and update
 * az network application-gateway url-path-map create/update: bug fix for `--waf-policy`
 * az network application-gateway: support `--rewrite-rule-set`
+* az network list-service-aliases: Support list service aliases which can be used for Service Endpoint Policies
+* az network dns zone import: Support .@ in record name
 
 **Packaging**
 
