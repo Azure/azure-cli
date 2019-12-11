@@ -17,6 +17,17 @@ Release History
 
 * Update azure-mgmt-resource package to use 6.0.0
 
+**BotService**
+
+* [Breaking change] Remove '--version' flag from preview command 'az bot create'. Only v4 SDK bots are supported.
+* Add name availability check for 'az bot create'.
+* Add support for updating the icon URL for a bot via 'az bot update'.
+* Add support for updating a Direct Line channel via 'az bot directline update'.
+* Add '--enable-enhanced-auth' flag support to 'az bot directline create'.
+* The following command groups are GA and not in preview: 'az bot authsetting'.
+* The following commands in 'az bot' are GA and not in preview: 'create', 'prepare-deploy', 'show', 'delete', 'update'.
+* Fix 'az bot prepare-deploy' changing '--proj-file-path' value to lower case (e.g. "Test.csproj" to "test.csproj").
+
 **Compute**
 
 * vmss create/update: Add --scale-in-policy, which decides which virtual machines are chosen for removal when a VMSS is scaled-in.
