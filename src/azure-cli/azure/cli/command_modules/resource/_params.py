@@ -173,8 +173,8 @@ def load_arguments(self, _):
         c.argument('resource_group_name', arg_type=resource_group_name_type, completer=get_resource_group_completion_list)
         c.argument('deployment_name', options_list=['--name', '-n'], required=True, help='The deployment name.')
         c.argument('template_file', completer=FilesCompleter(), type=file_type,
-                   help="a template file path in the file system")
-        c.argument('template_uri', help='a uri to a remote template file')
+                   help="The template file path in the file system")
+        c.argument('template_uri', help='The URI to a remote template file')
         c.argument('mode', arg_type=get_enum_type(DeploymentMode, default='incremental'),
                    help='Incremental (only add resources to resource group) or Complete '
                         '(remove extra resources from resource group)')
@@ -199,8 +199,8 @@ def load_arguments(self, _):
     with self.argument_context('deployment') as c:
         c.argument('deployment_name', options_list=['--name', '-n'], required=True, help='The deployment name.')
         c.argument('deployment_location', arg_type=get_location_type(self.cli_ctx), required=True)
-        c.argument('template_file', completer=FilesCompleter(), type=file_type, help="a template file path in the file system")
-        c.argument('template_uri', help='a uri to a remote template file')
+        c.argument('template_file', completer=FilesCompleter(), type=file_type, help="The template file path in the file system")
+        c.argument('template_uri', help='The URI to a remote template file')
         c.argument('parameters', action='append', nargs='+', completer=FilesCompleter())
 
     with self.argument_context('deployment create') as c:
