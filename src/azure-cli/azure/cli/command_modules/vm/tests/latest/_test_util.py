@@ -18,8 +18,8 @@ class TimeSpanProcessor(RecordingProcessor):
     def _replace_timespan(self, val):
         import re
         # subscription presents in all api call
-        retval = re.sub('timespan=.*?&',
-                        r'timespan={}&'.format(self._replacement),
+        retval = re.sub('timespan=((.*?)(&|$))',
+                        r'timespan={}\3'.format(self._replacement),
                         val,
                         flags=re.IGNORECASE)
         return retval
