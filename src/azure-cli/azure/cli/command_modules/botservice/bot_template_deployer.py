@@ -53,14 +53,13 @@ class BotTemplateDeployer:
 
     @staticmethod
     def create_app(cmd, logger, client, resource_group_name, resource_name, description, kind, appid, password,  # pylint:disable=too-many-statements
-                   location, sku_name, language, version, bot_template_type):
+                   location, sku_name, language, bot_template_type):
         kind = 'sdk' if kind == 'webapp' else kind
-        (zip_url, template_name) = BotTemplateDeployer.__retrieve_bot_template_link(version,
-                                                                                    language,
+        (zip_url, template_name) = BotTemplateDeployer.__retrieve_bot_template_link(language,
                                                                                     bot_template_type)
 
-        logger.debug('Detected SDK version %s, kind %s and programming language %s. Using the following template: %s.',
-                     version, kind, language, zip_url)
+        logger.debug('Detected kind %s and programming language %s. Using the following template: %s.',
+                     kind, language, zip_url)
 
         site_name = re.sub(r'[^a-z0-9\-]', '', resource_name[:40].lower())
 
@@ -140,8 +139,8 @@ class BotTemplateDeployer:
         return parameters
 
     @staticmethod
-    def __retrieve_bot_template_link(version, language, bot_template_type):
-        if version == 'v4' and not bot_template_type:
+    def __retrieve_bot_template_link(language, bot_template_type):
+        if not bot_template_type:
             return '', BotTemplateDeployer.v4_webapp_template_name
 
         response = requests.get('https://dev.botframework.com/api/misc/bottemplateroot')
