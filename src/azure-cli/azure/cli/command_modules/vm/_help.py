@@ -2482,5 +2482,5 @@ examples:
 
 helps['vm monitor metrics list-definitions'] = """
 type: command
-short-summary: List the metric definitions for a vm.
+short-summary: List the metric definitions for a VM.
 """
