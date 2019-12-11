@@ -271,13 +271,13 @@ examples:
         az cdn endpoint rule remove -g group -n endpoint --profile-name profile --rule-name Global\\
 """
 
-helps['cdn endpoint rule list'] = """
+helps['cdn endpoint rule show'] = """
 type: command
-short-summary: List delivery rules asscociate with the endpoint.
+short-summary: show delivery rules asscociate with the endpoint.
 examples:
-  - name: List delivery rules asscociate with the endpoint.
+  - name: show delivery rules asscociate with the endpoint.
     text: >
-        az cdn endpoint rule list -g group --profile-name profile-name
+        az cdn endpoint rule show -g group --profile-name profile-name
 """
 
 helps['cdn endpoint rule condition'] = """
@@ -334,13 +334,13 @@ examples:
             --index 0
 """
 
-helps['cdn endpoint rule condition list'] = """
+helps['cdn endpoint rule condition show'] = """
 type: command
-short-summary: List delivery rules asscociate with the endpoint.
+short-summary: show delivery rules asscociate with the endpoint.
 examples:
-  - name: List delivery rules asscociate with the endpoint.
+  - name: show delivery rules asscociate with the endpoint.
     text: >
-        az cdn endpoint rule condition list -g group --profile-name profile-name
+        az cdn endpoint rule condition show -g group --profile-name profile-name
 """
 
 helps['cdn endpoint rule action'] = """
@@ -437,13 +437,13 @@ examples:
             --index 0
 """
 
-helps['cdn endpoint rule action list'] = """
+helps['cdn endpoint rule action show'] = """
 type: command
-short-summary: List delivery rules asscociate with the endpoint.
+short-summary: show delivery rules asscociate with the endpoint.
 examples:
-  - name: List delivery rules asscociate with the endpoint.
+  - name: show delivery rules asscociate with the endpoint.
     text: >
-        az cdn endpoint rule action list -g group --profile-name profile-name
+        az cdn endpoint rule action show -g group --profile-name profile-name
 """
 
 helps['cdn origin'] = """
