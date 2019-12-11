@@ -100,16 +100,16 @@ class CdnScenarioMixin(object):
 
     def endpoint_add_condition_cmd(self, group, name, profile_name, checks=None, options=None):
         command = 'cdn endpoint rule condition add -g {} -n {} --profile-name {}'.format(group,
-                                                                                    name,
-                                                                                    profile_name)
+                                                                                         name,
+                                                                                         profile_name)
         if options:
             command = command + ' ' + options
         return self.cmd(command, checks)
 
     def endpoint_add_action_cmd(self, group, name, profile_name, checks=None, options=None):
         command = 'cdn endpoint rule action add -g {} -n {} --profile-name {}'.format(group,
-                                                                                 name,
-                                                                                 profile_name)
+                                                                                      name,
+                                                                                      profile_name)
         if options:
             command = command + ' ' + options
         return self.cmd(command, checks)
@@ -124,16 +124,16 @@ class CdnScenarioMixin(object):
 
     def endpoint_remove_condition_cmd(self, group, name, profile_name, checks=None, options=None):
         command = 'cdn endpoint rule condition remove -g {} -n {} --profile-name {}'.format(group,
-                                                                                       name,
-                                                                                       profile_name)
+                                                                                            name,
+                                                                                            profile_name)
         if options:
             command = command + ' ' + options
         return self.cmd(command, checks)
 
     def endpoint_remove_action_cmd(self, group, name, profile_name, checks=None, options=None):
         command = 'cdn endpoint rule action remove -g {} -n {} --profile-name {}'.format(group,
-                                                                                    name,
-                                                                                    profile_name)
+                                                                                         name,
+                                                                                         profile_name)
         if options:
             command = command + ' ' + options
         return self.cmd(command, checks)

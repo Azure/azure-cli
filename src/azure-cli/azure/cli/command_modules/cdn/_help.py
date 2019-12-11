@@ -159,7 +159,7 @@ examples:
             --enable-compression
 """
 
-helps['cdn endpoint add-rule'] = """
+helps['cdn endpoint rule add'] = """
 type: command
 short-summary: Add a delivery rule to a CDN endpoint.
 parameters:
@@ -253,7 +253,7 @@ examples:
             --action-name "UrlRedirect" --redirect-protocol Https --redirect-type Moved
 """
 
-helps['cdn endpoint add-condition'] = """
+helps['cdn endpoint rule condition add'] = """
 type: command
 short-summary: Add a condition to a delivery rule.
 parameters:
@@ -285,7 +285,7 @@ examples:
             --match-variable RemoteAddress --operator GeoMatch --match-values "TH"
 """
 
-helps['cdn endpoint add-action'] = """
+helps['cdn endpoint rule action add'] = """
 type: command
 short-summary: Add an action to a delivery rule.
 parameters:
@@ -357,7 +357,7 @@ examples:
             --action-name "CacheExpiration" --cache-behavior BypassCache
 """
 
-helps['cdn endpoint remove-action'] = """
+helps['cdn endpoint rule action remove'] = """
 type: command
 short-summary: Remove an action from a delivery rule.
 parameters:
@@ -374,7 +374,7 @@ examples:
             --index 0
 """
 
-helps['cdn endpoint remove-condition'] = """
+helps['cdn endpoint rule condition remove'] = """
 type: command
 short-summary: Remove a condition from a delivery rule.
 parameters:
@@ -391,7 +391,7 @@ examples:
             --index 0
 """
 
-helps['cdn endpoint remove-rule'] = """
+helps['cdn endpoint rule remove'] = """
 type: command
 short-summary: Remove a delivery rule from an endpoint.
 parameters:
