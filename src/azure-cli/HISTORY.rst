@@ -42,6 +42,10 @@ Release History
 * Remove support for Python 3.4
 * Plug in HaTS survey in multiple commands
 
+**DLS**
+
+* Update ADLS sdk version (0.0.48).
+
 **Install**
 
 * Install script support python 3.8
