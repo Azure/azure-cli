@@ -670,10 +670,10 @@ short-summary: Manage container stored access policies.
 helps['storage copy'] = """
 type: command
 short-summary: Copy files or directories to or from Azure storage.
-long-summary: > 
+long-summary: >
     Copy command depends on Azcopy, which will be upgraded to v10.3 soon to support 32-bit Operating System and
     utilize new features.
-    
+
     [COMING BREAKING CHANGE] With Azcopy v10.3, `*` character is no longer supported as a wildcard in URL, but new
     parameters --include-pattern and --exclude-pattern will be added with `*` wildcard support.
 examples:
@@ -1146,8 +1146,8 @@ helps['storage remove'] = """
 type: command
 short-summary: Delete blobs or files from Azure Storage.
 long-summary: >
-    To delete blobs, both the source must either be public or be authenticated by using a shared access signature. 
-    Remove command depends on Azcopy, which will be upgraded to v10.3 soon to support 32-bit Operating System and 
+    To delete blobs, both the source must either be public or be authenticated by using a shared access signature.
+    Remove command depends on Azcopy, which will be upgraded to v10.3 soon to support 32-bit Operating System and
     utilize new features.
 examples:
   - name: Remove a single blob.
