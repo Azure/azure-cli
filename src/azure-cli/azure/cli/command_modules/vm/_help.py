@@ -2439,7 +2439,7 @@ short-summary: Manage metrics for a vm.
 
 helps['vm monitor metrics tail'] = """
 type: command
-short-summary: List the metric values for a vm.
+short-summary: List the metric values for a VM.
 parameters:
   - name: --aggregation
     short-summary: The list of aggregation types (space-separated) to retrieve.
