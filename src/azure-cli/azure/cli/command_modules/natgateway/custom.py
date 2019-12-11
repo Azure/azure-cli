@@ -6,7 +6,6 @@
 from azure.cli.core.util import sdk_no_wait
 
 from knack.log import get_logger
-from knack.util import CLIError
 
 logger = get_logger(__name__)
 
