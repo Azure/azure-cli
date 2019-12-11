@@ -33,6 +33,9 @@ Release History
 * vmss create/update: Add --scale-in-policy, which decides which virtual machines are chosen for removal when a VMSS is scaled-in.
 * vm/vmss update: Add --priority.
 * vm/vmss update: Add --max-price.
+* Add disk-encryption-set command group (create, show, update, delete, list).
+* disk create: Add --encryption-type and --disk-encryption-set.
+* vm/vmss create: Add --os-disk-encryption-set and --data-disk-encryption-sets.
 
 **Core**
 

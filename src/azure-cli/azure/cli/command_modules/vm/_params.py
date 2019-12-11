@@ -54,6 +54,7 @@ def load_arguments(self, _):
 
     extension_instance_name_type = CLIArgumentType(help="Name of extension instance, which can be customized. Default: name of the extension.")
     image_template_name_type = CLIArgumentType(overrides=name_arg_type, id_part='name')
+    disk_encryption_set_name = CLIArgumentType(overrides=name_arg_type, help='Name of disk encryption set.', id_part='name')
 
     # StorageAccountTypes renamed to DiskStorageAccountTypes in 2018_06_01 of azure-mgmt-compute
     DiskStorageAccountTypes = DiskStorageAccountTypes or StorageAccountTypes
@@ -109,6 +110,8 @@ def load_arguments(self, _):
                 c.argument('hyper_v_generation', arg_type=hyper_v_gen_sku, help='The hypervisor generation of the Virtual Machine. Applicable to OS disks only.')
             else:
                 c.ignore('access_level', 'for_upload', 'hyper_v_generation')
+            c.argument('encryption_type', arg_type=get_enum_type(self.get_models('EncryptionType')), help='Encryption type.')
+            c.argument('disk_encryption_set', help='Name or ID of disk encryption set that is used to encrypt the disk.')
 
     for scope in ['disk create', 'snapshot create']:
         with self.argument_context(scope) as c:
@@ -660,6 +663,9 @@ def load_arguments(self, _):
             c.argument('ultra_ssd_enabled', ultra_ssd_enabled_type)
             c.argument('ephemeral_os_disk', arg_type=get_three_state_flag(), min_api='2018-06-01',
                        help='Allows you to create an OS disk directly on the host node, providing local disk performance and faster VM/VMSS reimage time.', is_preview=True)
+            c.argument('os_disk_encryption_set', help='Name or ID of disk encryption set for OS disk.')
+            c.argument('data_disk_encryption_sets', nargs='+',
+                       help='Names or IDs (space delimited) of disk encryption sets for data disks.')
 
         with self.argument_context(scope, arg_group='Network') as c:
             c.argument('vnet_name', help='Name of the virtual network when creating a new one or referencing an existing one.')
@@ -838,4 +844,13 @@ def load_arguments(self, _):
     with self.argument_context('vm monitor log show') as c:
         c.argument('analytics_query', options_list=['--analytics-query', '-q'], help="Query to execute over Log Analytics data.")
         c.argument('timespan', help="Timespan over which to query. Defaults to querying all available data.")
+    # endregion
+
+    # region disk encryption set
+    with self.argument_context('disk-encryption-set') as c:
+        c.argument('disk_encryption_set_name', disk_encryption_set_name)
+        c.argument('key_url', help='URL pointing to a key or secret in KeyVault.')
+        c.argument('source_vault', help='Name or ID of the KeyVault containing the key or secret.')
+        c.argument('location', validator=get_default_location_from_resource_group)
+        c.argument('tags', tags_type)
     # endregion
