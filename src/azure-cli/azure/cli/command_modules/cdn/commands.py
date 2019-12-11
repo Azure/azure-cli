@@ -93,7 +93,7 @@ def load_command_table(self, _):
                                  supports_no_wait=True)
 
     with self.command_group('cdn endpoint rule', cdn_endpoints_sdk) as g:
-        g.show_command('list', 'get')
+        g.show_command('show', 'get')
         g.generic_update_command('add', setter_name='update', setter_arg_name='endpoint_update_properties',
                                  custom_func_name='add_rule',
                                  doc_string_source='azure.mgmt.cdn.models#EndpointUpdateParameters',
@@ -104,7 +104,7 @@ def load_command_table(self, _):
                                  supports_no_wait=True)
 
     with self.command_group('cdn endpoint rule condition', cdn_endpoints_sdk) as g:
-        g.show_command('list', 'get')
+        g.show_command('show', 'get')
         g.generic_update_command('add', setter_name='update', setter_arg_name='endpoint_update_properties',
                                  custom_func_name='add_condition',
                                  doc_string_source='azure.mgmt.cdn.models#EndpointUpdateParameters',
@@ -115,7 +115,7 @@ def load_command_table(self, _):
                                  supports_no_wait=True)
 
     with self.command_group('cdn endpoint rule action', cdn_endpoints_sdk) as g:
-        g.show_command('list', 'get')
+        g.show_command('show', 'get')
         g.generic_update_command('add', setter_name='update', setter_arg_name='endpoint_update_properties',
                                  custom_func_name='add_action',
                                  doc_string_source='azure.mgmt.cdn.models#EndpointUpdateParameters',
