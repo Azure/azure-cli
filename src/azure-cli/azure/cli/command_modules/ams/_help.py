@@ -5,9 +5,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long, too-many-lines
-
 from knack.help_files import helps
-
 
 helps['ams'] = """
     type: group
