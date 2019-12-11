@@ -770,6 +770,10 @@ def process_ag_rule_create_namespace(cmd, namespace):  # pylint: disable=unused-
         namespace.redirect_config = _generate_ag_subproperty_id(
             cmd.cli_ctx, namespace, 'redirectConfigurations', namespace.redirect_config)
 
+    if namespace.rewrite_rule_set and not is_valid_resource_id(namespace.rewrite_rule_set):
+        namespace.rewrite_rule_set = _generate_ag_subproperty_id(
+            cmd.cli_ctx, namespace, 'rewriteRuleSets', namespace.rewrite_rule_set)
+
 
 def process_ag_ssl_policy_set_namespace(namespace):
     if namespace.disabled_ssl_protocols and getattr(namespace, 'clear', None):
@@ -792,10 +796,15 @@ def process_ag_url_path_map_create_namespace(cmd, namespace):  # pylint: disable
         namespace.default_redirect_config = _generate_ag_subproperty_id(
             cmd.cli_ctx, namespace, 'redirectConfigurations', namespace.default_redirect_config)
 
-    if namespace.firewall_policy and not is_valid_resource_id(namespace.firewall_policy):
+    if hasattr(namespace, 'firewall_policy') and \
+            namespace.firewall_policy and not is_valid_resource_id(namespace.firewall_policy):
         namespace.firewall_policy = _generate_ag_subproperty_id(
             cmd.cli_ctx, namespace, 'firewallPolicy', namespace.firewall_policy
         )
+
+    if namespace.default_rewrite_rule_set and not is_valid_resource_id(namespace.default_rewrite_rule_set):
+        namespace.default_rewrite_rule_set = _generate_ag_subproperty_id(
+            cmd.cli_ctx, namespace, 'rewriteRuleSets', namespace.default_rewrite_rule_set)
 
     if hasattr(namespace, 'rule_name'):
         process_ag_url_path_map_rule_create_namespace(cmd, namespace)
@@ -815,6 +824,10 @@ def process_ag_url_path_map_rule_create_namespace(cmd, namespace):  # pylint: di
             namespace.redirect_config):
         namespace.redirect_config = _generate_ag_subproperty_id(
             cmd.cli_ctx, namespace, 'redirectConfigurations', namespace.redirect_config)
+
+    if namespace.rewrite_rule_set and not is_valid_resource_id(namespace.rewrite_rule_set):
+        namespace.rewrite_rule_set = _generate_ag_subproperty_id(
+            cmd.cli_ctx, namespace, 'rewriteRuleSets', namespace.rewrite_rule_set)
 
 
 def process_ag_create_namespace(cmd, namespace):
