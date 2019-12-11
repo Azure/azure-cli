@@ -1197,15 +1197,17 @@ class VMCreateNoneOptionsTest(ScenarioTest):  # pylint: disable=too-many-instanc
         self.cmd('network public-ip show -n {vm}PublicIP -g {rg}', expect_failure=True)
 
 
-class VMCreateMonitorTest(ScenarioTest):
+class VMMonitorTest(ScenarioTest):
     def __init__(self, method_name, config_file=None, recording_dir=None, recording_name=None, recording_processors=None,
                  replay_processors=None, recording_patches=None, replay_patches=None):
-        from .recording_processors import TimeSpanRecordingProcessor
-        TIMESPANTEMPLATE=0000000000
-        super(VMCreateMonitorTest, self).__init__(
+        from ._test_util import TimeSpanProcessor
+        TIMESPANTEMPLATE='0000-00-00'
+        super(VMMonitorTest, self).__init__(
             method_name,
-            recording_processors=TimeSpanRecordingProcessor(TIMESPANTEMPLATE)
+            recording_processors=TimeSpanProcessor(TIMESPANTEMPLATE),
+            replay_processors=TimeSpanProcessor(TIMESPANTEMPLATE)
         )
+
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_with_monitor', location='eastus')
     def test_vm_create_with_monitor(self, resource_group):
 
