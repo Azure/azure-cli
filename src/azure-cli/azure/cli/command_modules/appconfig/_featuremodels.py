@@ -7,12 +7,14 @@ from enum import Enum
 import json
 from knack.log import get_logger
 from azure.cli.core.util import shell_safe_json_parse
+from ._azconfig.models import KeyValue
 
 # pylint: disable=too-few-public-methods
 # pylint: disable=too-many-instance-attributes
 
 logger = get_logger(__name__)
 FEATURE_FLAG_PREFIX = ".appconfig.featureflag/"
+FEATURE_FLAG_CONTENT_TYPE = "application/vnd.microsoft.appconfig.ff+json;charset=utf-8"
 
 # Feature Flag Models #
 
@@ -167,6 +169,44 @@ def custom_serialize_conditions(conditions_dict):
             featurefilters.append(str(featurefilter))
         featurefilterdict[key] = featurefilters
     return featurefilterdict
+
+
+def map_featureflag_to_keyvalue(featureflag):
+    '''
+        Helper Function to convert FeatureFlag object to KeyValue object
+
+        Args:
+            featureflag - FeatureFlag object to be converted
+
+        Return:
+            KeyValue object
+    '''
+    try:
+        enabled = False
+        if featureflag.state in ("on", "conditional"):
+            enabled = True
+
+        feature_flag_value = FeatureFlagValue(id_=featureflag.key,
+                                              description=featureflag.description,
+                                              enabled=enabled,
+                                              conditions=featureflag.conditions)
+
+        set_kv = KeyValue(key=FEATURE_FLAG_PREFIX + featureflag.key,
+                          label=featureflag.label,
+                          value=json.dumps(feature_flag_value,
+                                           default=lambda o: o.__dict__,
+                                           ensure_ascii=False),
+                          content_type=FEATURE_FLAG_CONTENT_TYPE,
+                          tags={})
+
+        set_kv.locked = featureflag.locked
+        set_kv.last_modified = featureflag.last_modified
+
+    except:
+        logger.debug("Exception while converting feature flag to key value:\n%s\n", featureflag)
+        raise
+
+    return set_kv
 
 
 def map_keyvalue_to_featureflag(keyvalue, show_conditions=True):

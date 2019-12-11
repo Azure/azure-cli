@@ -22,7 +22,9 @@ from ._azconfig.models import (KeyValue,
                                ModifyKeyValueOptions,
                                QueryKeyValueCollectionOptions)
 from .feature import list_feature
-from._featuremodels import map_keyvalue_to_featureflag, FeatureFlagValue
+from._featuremodels import (map_keyvalue_to_featureflag,
+                            map_featureflag_to_keyvalue,
+                            FeatureFlagValue)
 
 logger = get_logger(__name__)
 FEATURE_FLAG_PREFIX = ".appconfig.featureflag/"
@@ -115,7 +117,7 @@ def __read_features_from_file(file_path, format_):
         raise CLIError('File is not available.')
 
     # features_dict contains all features that need to be converted to KeyValue format now
-    return __convert_features_to_key_value_list(features_dict, format_)
+    return __convert_feature_dict_to_keyvalue_list(features_dict, format_)
 
 
 def __write_kv_and_features_to_file(file_path, key_values=None, features=None, format_=None, separator=None, skip_features=False):
@@ -175,14 +177,17 @@ def __read_features_from_config_store(cmd, name=None, connection_string=None, ke
         raise CLIError(str(exception))
 
 
-def __write_kv_to_config_store(cmd, key_values, name=None, connection_string=None, label=None):
-    if not key_values:
+def __write_kv_and_features_to_config_store(cmd, key_values, features=None, name=None, connection_string=None, label=None):
+    if not key_values and not features:
         return
     try:
         # write all keyvalues to target store
         connection_string = resolve_connection_string(
             cmd, name, connection_string)
         azconfig_client = AzconfigClient(connection_string)
+        if features:
+            key_values.extend(__convert_featureflag_list_to_keyvalue_list(features))
+
         for kv in key_values:
             kv.label = label
             azconfig_client.set_keyvalue(kv, ModifyKeyValueOptions())
@@ -598,7 +603,7 @@ def __export_features(retrieved_features, format_):
         raise CLIError("Failed to export feature flags. " + str(exception))
 
 
-def __convert_features_to_key_value_list(features_dict, format_):
+def __convert_feature_dict_to_keyvalue_list(features_dict, format_):
     # pylint: disable=too-many-nested-blocks
     key_values = []
     default_conditions = {'client_filters': []}
@@ -627,14 +632,24 @@ def __convert_features_to_key_value_list(features_dict, format_):
                     else:
                         # Convert Name and Parameters to lowercase for backend compatibility
                         for idx, val in enumerate(default_value.conditions["client_filters"]):
-                            # each val is a dict with two keys - Name, Parameters
+                            # each val should be a dict with at most 2 keys (Name, Parameters) or at least 1 key (Name)
                             val = {filter_key.lower(): filter_val for filter_key, filter_val in val.items()}
-                            if val["name"] and val["name"].lower() == "alwayson":
+                            if not val.get("name", None):
+                                logger.warning("Ignoring a filter for feature '%s' because it doesn't have a 'Name' attribute.", str(k))
+                                continue
+
+                            if val["name"].lower() == "alwayson":
                                 # We support alternate format for specifying always ON features
                                 # "FeatureT": {"EnabledFor": [{ "Name": "AlwaysOn"}]}
                                 default_value.conditions = default_conditions
                                 break
-                            default_value.conditions["client_filters"][idx] = val
+
+                            filter_param = val.get("parameters", {})
+                            new_val = {'name': val["name"]}
+                            if filter_param:
+                                new_val["parameters"] = filter_param
+                            default_value.conditions["client_filters"][idx] = new_val
+
                 else:
                     default_value.enabled = v
                     default_value.conditions = default_conditions
@@ -647,6 +662,14 @@ def __convert_features_to_key_value_list(features_dict, format_):
     except Exception as exception:
         raise CLIError("File contains feature flags in invalid format. " + str(exception))
     return key_values
+
+
+def __convert_featureflag_list_to_keyvalue_list(featureflags):
+    kv_list = []
+    for feature in featureflags:
+        kv = map_featureflag_to_keyvalue(feature)
+        kv_list.append(kv)
+    return kv_list
 
 
 def __check_file_encoding(file_path):

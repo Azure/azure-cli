@@ -22,7 +22,7 @@ from ._azconfig.models import (KeyValue,
                                QueryKeyValueOptions)
 from ._kv_helpers import (__compare_kvs_for_restore, __read_kv_from_file, __read_features_from_file,
                           __write_kv_and_features_to_file, __read_kv_from_config_store, __read_features_from_config_store,
-                          __write_kv_to_config_store, __discard_features_from_retrieved_kv, __read_kv_from_app_service,
+                          __write_kv_and_features_to_config_store, __discard_features_from_retrieved_kv, __read_kv_from_app_service,
                           __write_kv_to_app_service, __serialize_kv_list_to_comparable_json_object, __serialize_features_from_kv_list_to_comparable_json_object,
                           __serialize_feature_list_to_comparable_json_object, __print_features_preview, __print_preview, __print_restore_preview)
 
@@ -55,7 +55,7 @@ def import_config(cmd,
     dest_features = []
     dest_kvs = []
     source = source.lower()
-    format_ = format_.lower()
+    format_ = format_.lower() if format_ else None
 
     # fetch key values from source
     if source == 'file':
@@ -118,7 +118,7 @@ def import_config(cmd,
     src_kvs.extend(src_features)
 
     # import into configstore
-    __write_kv_to_config_store(
+    __write_kv_and_features_to_config_store(
         cmd, key_values=src_kvs, name=name, connection_string=connection_string, label=label)
 
 
@@ -145,46 +145,7 @@ def export_config(cmd,
     dest_features = []
     dest_kvs = []
     destination = destination.lower()
-    format_ = format_.lower()
-
-    if skip_features and not yes:
-        if destination == 'appconfig':
-            # dest_kvs contains features and KV that match the label. We discard only features.
-            dest_kvs = __read_kv_from_config_store(
-                cmd, name=dest_name, connection_string=dest_connection_string, key=None, label=dest_label)
-
-            __discard_features_from_retrieved_kv(dest_kvs)
-
-        elif destination == 'appservice':
-            dest_kvs = __read_kv_from_app_service(cmd, appservice_account=appservice_account)
-    elif not skip_features:
-        if destination == 'file':
-            # Get all Feature flags with matching label
-            src_features = __read_features_from_config_store(
-                cmd, name=name, connection_string=connection_string, key='*', label=label)
-        elif destination == 'appconfig':
-            # Append all features to src_features list
-            all_features = __read_kv_from_config_store(
-                cmd, name=name, connection_string=connection_string, key=FEATURE_FLAG_PREFIX + '*', label=label)
-            for feature in all_features:
-                if feature.content_type == FEATURE_FLAG_CONTENT_TYPE:
-                    src_features.append(feature)
-
-            if not yes:
-                # dest_kvs contains features and KV that match the label
-                dest_kvs = __read_kv_from_config_store(
-                    cmd, name=dest_name, connection_string=dest_connection_string, key=None, label=dest_label)
-                __discard_features_from_retrieved_kv(dest_kvs)
-
-                # Append all features to dest_features list
-                all_dest_features = __read_kv_from_config_store(
-                    cmd, name=dest_name, connection_string=dest_connection_string, key=FEATURE_FLAG_PREFIX + '*', label=dest_label)
-                for feature in all_dest_features:
-                    if feature.content_type == FEATURE_FLAG_CONTENT_TYPE:
-                        dest_features.append(feature)
-
-        elif destination == 'appservice' and not yes:
-            dest_kvs = __read_kv_from_app_service(cmd, appservice_account=appservice_account)
+    format_ = format_.lower() if format_ else None
 
     # fetch key values from user's configstore
     src_kvs = __read_kv_from_config_store(
@@ -193,26 +154,39 @@ def export_config(cmd,
     # We need to separate KV from feature flags
     __discard_features_from_retrieved_kv(src_kvs)
 
+    if not skip_features:
+        # Get all Feature flags with matching label
+        if destination in ('file', 'appconfig'):
+            # src_features is a list of FeatureFlag objects
+            src_features = __read_features_from_config_store(
+                cmd, name=name, connection_string=connection_string, key='*', label=label)
+
     # if customer needs preview & confirmation
     if not yes:
+        if destination == 'appconfig':
+            # dest_kvs contains features and KV that match the label
+            dest_kvs = __read_kv_from_config_store(
+                cmd, name=dest_name, connection_string=dest_connection_string, key=None, label=dest_label)
+            __discard_features_from_retrieved_kv(dest_kvs)
+
+            if not skip_features:
+                # Append all features to dest_features list
+                dest_features = __read_features_from_config_store(
+                    cmd, name=dest_name, connection_string=dest_connection_string, key='*', label=dest_label)
+
+        elif destination == 'appservice':
+            dest_kvs = __read_kv_from_app_service(cmd, appservice_account=appservice_account)
+
         # generate preview and wait for user confirmation
         need_kv_change = __print_preview(
             old_json=__serialize_kv_list_to_comparable_json_object(keyvalues=dest_kvs, level=destination),
             new_json=__serialize_kv_list_to_comparable_json_object(keyvalues=src_kvs, level=destination))
 
         need_feature_change = False
-        if src_features and not skip_features:
-            if destination == 'file':
-                # Currently, we only overwrite features to file. So dest features will always be empty.
-                # When dest is appconfig, src_kv contains both features and kv so we dont need to compare separately
-                need_feature_change = __print_features_preview(
-                    old_json={},
-                    new_json=__serialize_feature_list_to_comparable_json_object(features=src_features))
-
-            elif destination == 'appconfig':
-                need_feature_change = __print_features_preview(
-                    old_json=__serialize_features_from_kv_list_to_comparable_json_object(keyvalues=dest_features),
-                    new_json=__serialize_features_from_kv_list_to_comparable_json_object(keyvalues=src_features))
+        if src_features:
+            need_feature_change = __print_features_preview(
+                old_json=__serialize_feature_list_to_comparable_json_object(features=dest_features),
+                new_json=__serialize_feature_list_to_comparable_json_object(features=src_features))
 
         if not need_kv_change and not need_feature_change:
             return
@@ -224,9 +198,9 @@ def export_config(cmd,
         __write_kv_and_features_to_file(file_path=path, key_values=src_kvs, features=src_features,
                                         format_=format_, separator=separator, skip_features=skip_features)
     elif destination == 'appconfig':
-        src_kvs.extend(src_features)
-        __write_kv_to_config_store(cmd, key_values=src_kvs, name=dest_name,
-                                   connection_string=dest_connection_string, label=dest_label)
+        # src_kvs.extend(src_features)
+        __write_kv_and_features_to_config_store(cmd, key_values=src_kvs, features=src_features, name=dest_name,
+                                                connection_string=dest_connection_string, label=dest_label)
     elif destination == 'appservice':
         __write_kv_to_app_service(cmd, key_values=src_kvs, appservice_account=appservice_account)
 
