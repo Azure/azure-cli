@@ -53,10 +53,12 @@ class FeatureFlagValue(object):
                  description=None,
                  enabled=None,
                  conditions=None):
+        default_conditions = {'client_filters': []}
+
         self.id = id_
         self.description = description
-        self.enabled = enabled
-        self.conditions = conditions
+        self.enabled = enabled if enabled else False
+        self.conditions = conditions if conditions else default_conditions
 
     def __repr__(self):
         featureflagvalue = {
@@ -223,8 +225,6 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
             Valid FeatureFlagValue object
     '''
 
-    default_conditions = {'client_filters': []}
-
     try:
         # Make sure value string is a valid json
         feature_flag_dict = shell_safe_json_parse(keyvalue.value)
@@ -240,22 +240,23 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
             logger.debug("'%s' feature flag is missing required values or it contains ", feature_name +
                          "unsupported values. Setting missing value to defaults and ignoring unsupported values\n")
 
-        conditions = feature_flag_dict.get('conditions', default_conditions)
-        client_filters = conditions.get('client_filters', [])
+        conditions = feature_flag_dict.get('conditions', None)
+        if conditions:
+            client_filters = conditions.get('client_filters', [])
 
-        # Convert all filters to FeatureFilter objects
-        client_filters_list = []
-        for client_filter in client_filters:
-            # If there is a filter, it should always have a name
-            # In case it doesn't, ignore this filter
-            name = client_filter.get('name')
-            if name:
-                params = client_filter.get('parameters', {})
-                client_filters_list.append(FeatureFilter(name, params))
-            else:
-                logger.warning("Ignoring this filter without the 'name' attribute:\n%s",
-                               json.dumps(client_filter, indent=2, ensure_ascii=False))
-        conditions['client_filters'] = client_filters_list
+            # Convert all filters to FeatureFilter objects
+            client_filters_list = []
+            for client_filter in client_filters:
+                # If there is a filter, it should always have a name
+                # In case it doesn't, ignore this filter
+                name = client_filter.get('name')
+                if name:
+                    params = client_filter.get('parameters', {})
+                    client_filters_list.append(FeatureFilter(name, params))
+                else:
+                    logger.warning("Ignoring this filter without the 'name' attribute:\n%s",
+                                   json.dumps(client_filter, indent=2, ensure_ascii=False))
+            conditions['client_filters'] = client_filters_list
 
         feature_flag_value = FeatureFlagValue(id_=feature_name,
                                               description=feature_flag_dict.get(

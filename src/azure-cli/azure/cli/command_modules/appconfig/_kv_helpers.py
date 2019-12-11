@@ -22,7 +22,7 @@ from ._azconfig.models import (KeyValue,
                                ModifyKeyValueOptions,
                                QueryKeyValueCollectionOptions)
 from .feature import list_feature
-from._featuremodels import map_keyvalue_to_featureflag
+from._featuremodels import map_keyvalue_to_featureflag, FeatureFlagValue
 
 logger = get_logger(__name__)
 FEATURE_FLAG_PREFIX = ".appconfig.featureflag/"
@@ -553,41 +553,17 @@ def __export_keyvalues(fetched_items, format_, separator, prefix=None):
         raise CLIError("Fail to export key-values." + str(exception))
 
 
-def __flatten_dict_to_properties(value_to_flatten, separator='.', prefix=''):
-    flattened_properties_dict = {}
-    if isinstance(value_to_flatten, dict):
-        for keys, values in value_to_flatten.items():
-            current_prefix = prefix + separator + str(keys) if prefix else str(keys)
-            if isinstance(values, (dict, list)):
-                flattened_properties_dict.update(__flatten_dict_to_properties(values, separator, current_prefix))
-            else:
-                flattened_properties_dict.update({current_prefix: str(values)})
-
-    elif isinstance(value_to_flatten, list):
-        for idx, val in enumerate(value_to_flatten):
-            current_prefix = prefix + '[' + str(idx) + ']' if prefix else str(idx)
-            if isinstance(val, (dict, list)):
-                flattened_properties_dict.update(__flatten_dict_to_properties(val, separator, current_prefix))
-            else:
-                flattened_properties_dict.update({current_prefix: str(val)})
-    else:
-        flattened_properties_dict.update({prefix: str(value_to_flatten)})
-
-    return flattened_properties_dict
-
-
 def __export_features(retrieved_features, format_):
     exported_dict = {}
     client_filters = []
+
+    if format_ in ('yaml', 'properties'):
+        # We only support json feature flags for now
+        logger.warning("Exporting feature flags to a yaml or properties file is not supported yet. Ignoring all feature flags.")
+        return exported_dict
+
     if format_ == 'json':
         exported_dict["FeatureManagement"] = {}
-
-    elif format_ in ('yaml', 'properties'):
-        # Currently, this condition will never be met
-        # We only support json feature flags for now
-        featureSetValues = {}
-        featureSetValues["features"] = {}
-        exported_dict["feature-management"] = {"featureSet": featureSetValues}
 
     try:
         # retrieved_features is a list of FeatureFlag objects
@@ -601,28 +577,20 @@ def __export_features(retrieved_features, format_):
                 feature_state = False
 
             elif feature.state == "conditional":
-                feature_state = {}
-                feature_state["EnabledFor"] = []
+                feature_state = {"EnabledFor": []}
                 client_filters = feature.conditions["client_filters"]
                 # client_filters is a list of dictionaries, where all dictionaries have 2 keys - Name and Parameters
                 for filter_ in client_filters:
                     feature_filter = {}
                     feature_filter["Name"] = filter_.name
-                    feature_filter["Parameters"] = filter_.parameters
+                    if filter_.parameters:
+                        feature_filter["Parameters"] = filter_.parameters
                     feature_state["EnabledFor"].append(feature_filter)
 
-            feature_entry = {}
-            feature_entry[feature.key] = feature_state
+            feature_entry = {feature.key: feature_state}
 
             if format_ == 'json':
                 exported_dict["FeatureManagement"].update(feature_entry)
-
-            elif format_ in ('yaml', 'properties'):
-                featureSetValues["features"].update(feature_entry)
-                exported_dict["feature-management"].update({"featureSet": featureSetValues})
-
-        if format_ == 'properties':
-            exported_dict = __flatten_dict_to_properties(exported_dict)
 
         return __compact_key_values(exported_dict)
 
@@ -634,47 +602,45 @@ def __convert_features_to_key_value_list(features_dict, format_):
     # pylint: disable=too-many-nested-blocks
     key_values = []
     default_conditions = {'client_filters': []}
+    default_value = FeatureFlagValue(id_="")
 
-    default_value = {
-        "id": "",
-        "description": "",
-        "enabled": False,
-        "conditions": default_conditions
-    }
     try:
         if format_ == 'json':
             for k, v in features_dict.items():
                 key = FEATURE_FLAG_PREFIX + str(k)
-                default_value["id"] = str(k)
+                default_value.id_ = str(k)
 
                 if isinstance(v, dict):
                     # This is a conditional feature
-                    default_value["enabled"] = True
-                    default_value["conditions"] = {'client_filters': v.get('EnabledFor', [])}
+                    default_value.enabled = True
+                    try:
+                        default_value.conditions = {'client_filters': v["EnabledFor"]}
+                    except KeyError:
+                        raise CLIError("Feature '{0}' must contain 'EnabledFor' definition or have a true/false value. \n".format(str(k)))
 
-                    if not default_value["conditions"]["client_filters"]:
+                    if not default_value.conditions["client_filters"]:
                         # We support alternate format for specifying always OFF features
                         # "FeatureU": {"EnabledFor": []}
-                        default_value["enabled"] = False
-                        default_value["conditions"] = default_conditions
+                        default_value.enabled = False
+                        default_value.conditions = default_conditions
 
                     else:
                         # Convert Name and Parameters to lowercase for backend compatibility
-                        for idx, val in enumerate(default_value["conditions"]["client_filters"]):
+                        for idx, val in enumerate(default_value.conditions["client_filters"]):
                             # each val is a dict with two keys - Name, Parameters
                             val = {filter_key.lower(): filter_val for filter_key, filter_val in val.items()}
                             if val["name"] and val["name"].lower() == "alwayson":
                                 # We support alternate format for specifying always ON features
                                 # "FeatureT": {"EnabledFor": [{ "Name": "AlwaysOn"}]}
-                                default_value["conditions"] = default_conditions
+                                default_value.conditions = default_conditions
                                 break
-                            default_value["conditions"]["client_filters"][idx] = val
+                            default_value.conditions["client_filters"][idx] = val
                 else:
-                    default_value["enabled"] = v
-                    default_value["conditions"] = default_conditions
+                    default_value.enabled = v
+                    default_value.conditions = default_conditions
 
                 set_kv = KeyValue(key=key,
-                                  value=json.dumps(default_value, ensure_ascii=False),
+                                  value=json.dumps(default_value, default=lambda o: o.__dict__, ensure_ascii=False),
                                   content_type=FEATURE_FLAG_CONTENT_TYPE)
                 key_values.append(set_kv)
 

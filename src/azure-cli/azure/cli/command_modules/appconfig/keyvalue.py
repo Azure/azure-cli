@@ -55,6 +55,7 @@ def import_config(cmd,
     dest_features = []
     dest_kvs = []
     source = source.lower()
+    format_ = format_.lower()
 
     # fetch key values from source
     if source == 'file':
@@ -144,6 +145,7 @@ def export_config(cmd,
     dest_features = []
     dest_kvs = []
     destination = destination.lower()
+    format_ = format_.lower()
 
     if skip_features and not yes:
         if destination == 'appconfig':
@@ -154,8 +156,7 @@ def export_config(cmd,
             __discard_features_from_retrieved_kv(dest_kvs)
 
         elif destination == 'appservice':
-            dest_kvs = __read_kv_from_app_service(
-                cmd, appservice_account=appservice_account, prefix_to_add="")
+            dest_kvs = __read_kv_from_app_service(cmd, appservice_account=appservice_account)
     elif not skip_features:
         if destination == 'file':
             # Get all Feature flags with matching label
@@ -183,8 +184,7 @@ def export_config(cmd,
                         dest_features.append(feature)
 
         elif destination == 'appservice' and not yes:
-            dest_kvs = __read_kv_from_app_service(
-                cmd, appservice_account=appservice_account, prefix_to_add="")
+            dest_kvs = __read_kv_from_app_service(cmd, appservice_account=appservice_account)
 
     # fetch key values from user's configstore
     src_kvs = __read_kv_from_config_store(
