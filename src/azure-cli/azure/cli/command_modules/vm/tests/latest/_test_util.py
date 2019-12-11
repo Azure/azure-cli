@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure_devtools.scenario_tests import RecordingProcessor
-from azure_devtools.scenario_tests.utilities import is_text_payload
+
 
 class TimeSpanProcessor(RecordingProcessor):
     def __init__(self, replacement):

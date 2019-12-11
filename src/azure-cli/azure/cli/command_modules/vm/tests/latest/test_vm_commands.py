@@ -1201,7 +1201,7 @@ class VMMonitorTest(ScenarioTest):
     def __init__(self, method_name, config_file=None, recording_dir=None, recording_name=None, recording_processors=None,
                  replay_processors=None, recording_patches=None, replay_patches=None):
         from ._test_util import TimeSpanProcessor
-        TIMESPANTEMPLATE='0000-00-00'
+        TIMESPANTEMPLATE = '0000-00-00'
         super(VMMonitorTest, self).__init__(
             method_name,
             recording_processors=TimeSpanProcessor(TIMESPANTEMPLATE),
