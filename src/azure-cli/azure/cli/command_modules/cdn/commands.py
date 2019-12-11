@@ -91,27 +91,36 @@ def load_command_table(self, _):
                                  custom_func_name='update_endpoint',
                                  doc_string_source='azure.mgmt.cdn.models#EndpointUpdateParameters',
                                  supports_no_wait=True)
-        g.generic_update_command('add-rule', setter_name='update', setter_arg_name='endpoint_update_properties',
+
+    with self.command_group('cdn endpoint rule', cdn_endpoints_sdk) as g:
+        g.show_command('list', 'get')
+        g.generic_update_command('add', setter_name='update', setter_arg_name='endpoint_update_properties',
                                  custom_func_name='add_rule',
                                  doc_string_source='azure.mgmt.cdn.models#EndpointUpdateParameters',
                                  supports_no_wait=True)
-        g.generic_update_command('remove-rule', setter_name='update', setter_arg_name='endpoint_update_properties',
+        g.generic_update_command('remove', setter_name='update', setter_arg_name='endpoint_update_properties',
                                  custom_func_name='remove_rule',
                                  doc_string_source='azure.mgmt.cdn.models#EndpointUpdateParameters',
                                  supports_no_wait=True)
-        g.generic_update_command('add-condition', setter_name='update', setter_arg_name='endpoint_update_properties',
+
+    with self.command_group('cdn endpoint rule condition', cdn_endpoints_sdk) as g:
+        g.show_command('list', 'get')
+        g.generic_update_command('add', setter_name='update', setter_arg_name='endpoint_update_properties',
                                  custom_func_name='add_condition',
                                  doc_string_source='azure.mgmt.cdn.models#EndpointUpdateParameters',
                                  supports_no_wait=True)
-        g.generic_update_command('remove-condition', setter_name='update', setter_arg_name='endpoint_update_properties',
+        g.generic_update_command('remove', setter_name='update', setter_arg_name='endpoint_update_properties',
                                  custom_func_name='remove_condition',
                                  doc_string_source='azure.mgmt.cdn.models#EndpointUpdateParameters',
                                  supports_no_wait=True)
-        g.generic_update_command('add-action', setter_name='update', setter_arg_name='endpoint_update_properties',
+
+    with self.command_group('cdn endpoint rule action', cdn_endpoints_sdk) as g:
+        g.show_command('list', 'get')
+        g.generic_update_command('add', setter_name='update', setter_arg_name='endpoint_update_properties',
                                  custom_func_name='add_action',
                                  doc_string_source='azure.mgmt.cdn.models#EndpointUpdateParameters',
                                  supports_no_wait=True)
-        g.generic_update_command('remove-action', setter_name='update', setter_arg_name='endpoint_update_properties',
+        g.generic_update_command('remove', setter_name='update', setter_arg_name='endpoint_update_properties',
                                  custom_func_name='remove_action',
                                  doc_string_source='azure.mgmt.cdn.models#EndpointUpdateParameters',
                                  supports_no_wait=True)

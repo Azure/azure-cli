@@ -90,7 +90,7 @@ class CdnScenarioMixin(object):
         return self.cmd(command, checks)
 
     def endpoint_add_rule_cmd(self, group, name, profile_name, checks=None):
-        msg = 'az cdn endpoint add-rule -g {} -n {} --profile-name {} --order 1 --rule-name r1\
+        msg = 'az cdn endpoint rule add -g {} -n {} --profile-name {} --order 1 --rule-name r1\
                --match-variable RemoteAddress --operator GeoMatch --match-values "TH"\
                --action-name CacheExpiration --cache-behavior BypassCache'
         command = msg.format(group,
@@ -99,7 +99,7 @@ class CdnScenarioMixin(object):
         return self.cmd(command, checks)
 
     def endpoint_add_condition_cmd(self, group, name, profile_name, checks=None, options=None):
-        command = 'cdn endpoint add-condition -g {} -n {} --profile-name {}'.format(group,
+        command = 'cdn endpoint rule condition add -g {} -n {} --profile-name {}'.format(group,
                                                                                     name,
                                                                                     profile_name)
         if options:
@@ -107,7 +107,7 @@ class CdnScenarioMixin(object):
         return self.cmd(command, checks)
 
     def endpoint_add_action_cmd(self, group, name, profile_name, checks=None, options=None):
-        command = 'cdn endpoint add-action -g {} -n {} --profile-name {}'.format(group,
+        command = 'cdn endpoint rule action add -g {} -n {} --profile-name {}'.format(group,
                                                                                  name,
                                                                                  profile_name)
         if options:
@@ -115,7 +115,7 @@ class CdnScenarioMixin(object):
         return self.cmd(command, checks)
 
     def endpoint_remove_rule_cmd(self, group, name, profile_name, checks=None, options=None):
-        command = 'cdn endpoint remove-rule -g {} -n {} --profile-name {}'.format(group,
+        command = 'cdn endpoint rule remove -g {} -n {} --profile-name {}'.format(group,
                                                                                   name,
                                                                                   profile_name)
         if options:
@@ -123,7 +123,7 @@ class CdnScenarioMixin(object):
         return self.cmd(command, checks)
 
     def endpoint_remove_condition_cmd(self, group, name, profile_name, checks=None, options=None):
-        command = 'cdn endpoint remove-condition -g {} -n {} --profile-name {}'.format(group,
+        command = 'cdn endpoint rule condition remove -g {} -n {} --profile-name {}'.format(group,
                                                                                        name,
                                                                                        profile_name)
         if options:
@@ -131,7 +131,7 @@ class CdnScenarioMixin(object):
         return self.cmd(command, checks)
 
     def endpoint_remove_action_cmd(self, group, name, profile_name, checks=None, options=None):
-        command = 'cdn endpoint remove-action -g {} -n {} --profile-name {}'.format(group,
+        command = 'cdn endpoint rule action remove -g {} -n {} --profile-name {}'.format(group,
                                                                                     name,
                                                                                     profile_name)
         if options:
