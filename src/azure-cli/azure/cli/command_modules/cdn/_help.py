@@ -272,7 +272,7 @@ examples:
 """
 
 helps['cdn endpoint rule list'] = """
-type: group
+type: command
 short-summary: List delivery rules asscociate with the endpoint.
 examples:
   - name: List delivery rules asscociate with the endpoint.
@@ -335,7 +335,7 @@ examples:
 """
 
 helps['cdn endpoint rule condition list'] = """
-type: group
+type: command
 short-summary: List delivery rules asscociate with the endpoint.
 examples:
   - name: List delivery rules asscociate with the endpoint.
@@ -438,7 +438,7 @@ examples:
 """
 
 helps['cdn endpoint rule action list'] = """
-type: group
+type: command
 short-summary: List delivery rules asscociate with the endpoint.
 examples:
   - name: List delivery rules asscociate with the endpoint.
