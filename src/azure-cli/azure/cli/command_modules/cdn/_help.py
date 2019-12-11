@@ -244,11 +244,11 @@ parameters:
 examples:
   - name: Create a global rule to disable caching.
     text: >
-        az cdn endpoint add-rule -g group -n endpoint --profile-name profile --order 0\\
+        az cdn endpoint rule add -g group -n endpoint --profile-name profile --order 0\\
             --rule-name global --action-name CacheExpiration --cache-behavior BypassCache
   - name: Create a rule for http to https redirect
     text: >
-        az cdn endpoint add-rule -g group -n endpoint --profile-name profile --order 1\\
+        az cdn endpoint rule add -g group -n endpoint --profile-name profile --order 1\\
             --rule-name "redirect" --match-variable RequestScheme --operator Equal --match-values HTTPS\\
             --action-name "UrlRedirect" --redirect-protocol Https --redirect-type Moved
 """
@@ -281,7 +281,7 @@ parameters:
 examples:
   - name: Add a remote address condition.
     text: >
-        az cdn endpoint add-condition -g group -n endpoint --profile-name profile --rule-name name\\
+        az cdn endpoint rule condition add -g group -n endpoint --profile-name profile --rule-name name\\
             --match-variable RemoteAddress --operator GeoMatch --match-values "TH"
 """
 
@@ -349,11 +349,11 @@ parameters:
 examples:
   - name: Add a redirect action.
     text: >
-        az cdn endpoint add-action -g group -n endpoint --profile-name profile --rule-name name\\
+        az cdn endpoint rule action add -g group -n endpoint --profile-name profile --rule-name name\\
             --action-name "UrlRedirect" --redirect-protocol HTTPS --redirect-type Moved
   - name: Add a cache expiration action
     text: >
-        az cdn endpoint add-action -g group -n endpoint --profile-name profile --rule-name name\\
+        az cdn endpoint rule action add -g group -n endpoint --profile-name profile --rule-name name\\
             --action-name "CacheExpiration" --cache-behavior BypassCache
 """
 
@@ -370,7 +370,7 @@ parameters:
 examples:
   - name: Remove the first action.
     text: >
-        az cdn endpoint remove-action -g group -n endpoint --profile-name profile --rule-name name\\
+        az cdn endpoint rule action remove -g group -n endpoint --profile-name profile --rule-name name\\
             --index 0
 """
 
@@ -387,7 +387,7 @@ parameters:
 examples:
   - name: Remove the first condition.
     text: >
-        az cdn endpoint remove-condition -g group -n endpoint --profile-name profile --rule-name name\\
+        az cdn endpoint rule condition remove -g group -n endpoint --profile-name profile --rule-name name\\
             --index 0
 """
 
@@ -401,7 +401,7 @@ parameters:
 examples:
   - name: Remove the global rule.
     text: >
-        az cdn endpoint remove-rule -g group -n endpoint --profile-name profile --rule-name Global\\
+        az cdn endpoint rule remove -g group -n endpoint --profile-name profile --rule-name Global\\
 """
 
 helps['cdn origin'] = """
