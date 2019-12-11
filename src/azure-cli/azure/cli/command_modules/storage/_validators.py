@@ -1058,8 +1058,8 @@ def validate_azcopy_upload_destination_url(cmd, namespace):
 def validate_azcopy_remove_arguments(cmd, namespace):
     usage_string = \
         'Invalid usage: {}. Supply only one of the following argument sets to specify source:' \
-        '\n\t   --container-name  --name' \
-        '\n\tOR --share-name --path'
+        '\n\t   --container-name  (--name)' \
+        '\n\tOR --share-name (--path)'
 
     ns = vars(namespace)
 
