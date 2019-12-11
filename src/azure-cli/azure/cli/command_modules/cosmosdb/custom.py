@@ -35,7 +35,8 @@ from azure.mgmt.cosmosdb.models import (
     GremlinDatabaseCreateUpdateParameters,
     GremlinGraphResource,
     GremlinGraphCreateUpdateParameters,
-    ThroughputSettingsResource
+    ThroughputSettingsResource,
+    ThroughputSettingsUpdateParameters
 )
 
 logger = get_logger(__name__)
@@ -293,11 +294,11 @@ def cli_cosmosdb_sql_container_update(client,
     sql_container = client.get_sql_container(resource_group_name, account_name, database_name, container_name)
 
     sql_container_resource = SqlContainerResource(id=container_name)
-    sql_container_resource.partition_key = sql_container.partition_key
-    sql_container_resource.indexing_policy = sql_container.indexing_policy
-    sql_container_resource.default_ttl = sql_container.default_ttl
-    sql_container_resource.unique_key_policy = sql_container.unique_key_policy
-    sql_container_resource.conflict_resolution_policy = sql_container.conflict_resolution_policy
+    sql_container_resource.partition_key = sql_container.resource.partition_key
+    sql_container_resource.indexing_policy = sql_container.resource.indexing_policy
+    sql_container_resource.default_ttl = sql_container.resource.default_ttl
+    sql_container_resource.unique_key_policy = sql_container.resource.unique_key_policy
+    sql_container_resource.conflict_resolution_policy = sql_container.resource.conflict_resolution_policy
 
     if _populate_sql_container_definition(sql_container_resource,
                                           None,
@@ -410,11 +411,11 @@ def cli_cosmosdb_gremlin_graph_update(client,
     gremlin_graph = client.get_gremlin_graph(resource_group_name, account_name, database_name, graph_name)
 
     gremlin_graph_resource = GremlinGraphResource(id=graph_name)
-    gremlin_graph_resource.partition_key = gremlin_graph.partition_key
-    gremlin_graph_resource.indexing_policy = gremlin_graph.indexing_policy
-    gremlin_graph_resource.default_ttl = gremlin_graph.default_ttl
-    gremlin_graph_resource.unique_key_policy = gremlin_graph.unique_key_policy
-    gremlin_graph_resource.conflict_resolution_policy = gremlin_graph.conflict_resolution_policy
+    gremlin_graph_resource.partition_key = gremlin_graph.resource.partition_key
+    gremlin_graph_resource.indexing_policy = gremlin_graph.resource.indexing_policy
+    gremlin_graph_resource.default_ttl = gremlin_graph.resource.default_ttl
+    gremlin_graph_resource.unique_key_policy = gremlin_graph.resource.unique_key_policy
+    gremlin_graph_resource.conflict_resolution_policy = gremlin_graph.resource.conflict_resolution_policy
 
     if _populate_gremlin_graph_definition(gremlin_graph_resource,
                                           None,
@@ -508,10 +509,9 @@ def cli_cosmosdb_mongodb_collection_update(client,
                                                         account_name,
                                                         database_name,
                                                         collection_name)
-
     mongodb_collection_resource = MongoDBCollectionResource(id=collection_name)
-    mongodb_collection_resource.shard_key = mongodb_collection.shard_key
-    mongodb_collection_resource.indexes = mongodb_collection.indexes
+    mongodb_collection_resource.shard_key = mongodb_collection.resource.shard_key
+    mongodb_collection_resource.indexes = mongodb_collection.resource.indexes
 
     if _populate_mongodb_collection_definition(mongodb_collection_resource, None, indexes):
         logger.debug('replacing MongoDB collection')
@@ -600,8 +600,8 @@ def cli_cosmosdb_cassandra_table_update(client,
     cassandra_table = client.get_cassandra_table(resource_group_name, account_name, keyspace_name, table_name)
 
     cassandra_table_resource = CassandraTableResource(id=table_name)
-    cassandra_table_resource.default_ttl = cassandra_table.default_ttl
-    cassandra_table_resource.schema = cassandra_table.schema
+    cassandra_table_resource.default_ttl = cassandra_table.resource.default_ttl
+    cassandra_table_resource.schema = cassandra_table.resource.schema
 
     if _populate_cassandra_table_definition(cassandra_table_resource, default_ttl, schema):
         logger.debug('replacing Cassandra table')
@@ -637,7 +637,8 @@ def cli_cosmosdb_table_create(client,
 def cli_cosmosdb_sql_database_throughput_update(client, resource_group_name, account_name, database_name, throughput):
     """Update an Azure Cosmos DB SQL database throughput"""
     throughput_resource = ThroughputSettingsResource(throughput=throughput)
-    return client.update_sql_database_throughput(resource_group_name, account_name, database_name, throughput_resource)
+    throughput_update_resource = ThroughputSettingsUpdateParameters(resource=throughput_resource)
+    return client.update_sql_database_throughput(resource_group_name, account_name, database_name, throughput_update_resource)
 
 
 def cli_cosmosdb_sql_container_throughput_update(client,
@@ -648,11 +649,12 @@ def cli_cosmosdb_sql_container_throughput_update(client,
                                                  throughput):
     """Update an Azure Cosmos DB SQL container throughput"""
     throughput_resource = ThroughputSettingsResource(throughput=throughput)
+    throughput_update_resource = ThroughputSettingsUpdateParameters(resource=throughput_resource)
     return client.update_sql_container_throughput(resource_group_name,
                                                   account_name,
                                                   database_name,
                                                   container_name,
-                                                  throughput_resource)
+                                                  throughput_update_resource)
 
 
 def cli_cosmosdb_mongodb_database_throughput_update(client,
@@ -662,10 +664,11 @@ def cli_cosmosdb_mongodb_database_throughput_update(client,
                                                     throughput):
     """Update an Azure Cosmos DB MongoDB database throughput"""
     throughput_resource = ThroughputSettingsResource(throughput=throughput)
+    throughput_update_resource = ThroughputSettingsUpdateParameters(resource=throughput_resource)
     return client.update_mongo_db_database_throughput(resource_group_name,
                                                       account_name,
                                                       database_name,
-                                                      throughput_resource)
+                                                      throughput_update_resource)
 
 
 def cli_cosmosdb_mongodb_collection_throughput_update(client,
@@ -676,11 +679,12 @@ def cli_cosmosdb_mongodb_collection_throughput_update(client,
                                                       throughput):
     """Update an Azure Cosmos DB MongoDB collection throughput"""
     throughput_resource = ThroughputSettingsResource(throughput=throughput)
+    throughput_update_resource = ThroughputSettingsUpdateParameters(resource=throughput_resource)
     return client.update_mongo_db_collection_throughput(resource_group_name,
                                                         account_name,
                                                         database_name,
                                                         collection_name,
-                                                        throughput_resource)
+                                                        throughput_update_resource)
 
 
 def cli_cosmosdb_cassandra_keyspace_throughput_update(client,
@@ -690,10 +694,11 @@ def cli_cosmosdb_cassandra_keyspace_throughput_update(client,
                                                       throughput):
     """Update an Azure Cosmos DB Cassandra keyspace throughput"""
     throughput_resource = ThroughputSettingsResource(throughput=throughput)
+    throughput_update_resource = ThroughputSettingsUpdateParameters(resource=throughput_resource)
     return client.update_cassandra_keyspace_throughput(resource_group_name,
                                                        account_name,
                                                        keyspace_name,
-                                                       throughput_resource)
+                                                       throughput_update_resource)
 
 
 def cli_cosmosdb_cassandra_table_throughput_update(client,
@@ -704,11 +709,12 @@ def cli_cosmosdb_cassandra_table_throughput_update(client,
                                                    throughput):
     """Update an Azure Cosmos DB Cassandra table throughput"""
     throughput_resource = ThroughputSettingsResource(throughput=throughput)
+    throughput_update_resource = ThroughputSettingsUpdateParameters(resource=throughput_resource)
     return client.update_cassandra_table_throughput(resource_group_name,
                                                     account_name,
                                                     keyspace_name,
                                                     table_name,
-                                                    throughput_resource)
+                                                    throughput_update_resource)
 
 
 def cli_cosmosdb_gremlin_database_throughput_update(client,
@@ -718,10 +724,11 @@ def cli_cosmosdb_gremlin_database_throughput_update(client,
                                                     throughput):
     """Update an Azure Cosmos DB Gremlin database throughput"""
     throughput_resource = ThroughputSettingsResource(throughput=throughput)
+    throughput_update_resource = ThroughputSettingsUpdateParameters(resource=throughput_resource)
     return client.update_gremlin_database_throughput(resource_group_name,
                                                      account_name,
                                                      database_name,
-                                                     throughput_resource)
+                                                     throughput_update_resource)
 
 
 def cli_cosmosdb_gremlin_graph_throughput_update(client,
@@ -732,11 +739,12 @@ def cli_cosmosdb_gremlin_graph_throughput_update(client,
                                                  throughput):
     """Update an Azure Cosmos DB Gremlin graph throughput"""
     throughput_resource = ThroughputSettingsResource(throughput=throughput)
+    throughput_update_resource = ThroughputSettingsUpdateParameters(resource=throughput_resource)
     return client.update_gremlin_graph_throughput(resource_group_name,
                                                   account_name,
                                                   database_name,
                                                   graph_name,
-                                                  throughput_resource)
+                                                  throughput_update_resource)
 
 
 def cli_cosmosdb_table_throughput_update(client,
@@ -746,7 +754,8 @@ def cli_cosmosdb_table_throughput_update(client,
                                          throughput):
     """Update an Azure Cosmos DB table throughput"""
     throughput_resource = ThroughputSettingsResource(throughput=throughput)
-    return client.update_table_throughput(resource_group_name, account_name, table_name, throughput_resource)
+    throughput_update_resource = ThroughputSettingsUpdateParameters(resource=throughput_resource)
+    return client.update_table_throughput(resource_group_name, account_name, table_name, throughput_update_resource)
 
 
 def cli_cosmosdb_network_rule_list(client, resource_group_name, account_name):
