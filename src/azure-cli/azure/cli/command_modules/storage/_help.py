@@ -1147,6 +1147,8 @@ examples:
   - name: Remove an entire virtual directory.
     text: az storage remove -c MyContainer -n path/to/directory --recursive
   - name: Remove only the top blobs inside a virtual directory but not its sub-directories.
+    text: az storage remove -c MyContainer --recursive
+  - name: Remove all the blobs in a Storage Container.
     text: az storage remove -c MyContainer -n path/to/directory
   - name: Remove a subset of blobs in a virtual directory (For example, only jpg and pdf files, or if the blob name is "exactName").
     text: az storage remove -c MyContainer -n path/to/directory --recursive --include "*.jpg;*.pdf;exactName"
@@ -1156,6 +1158,8 @@ examples:
     text: az storage remove -s MyShare -p MyFile
   - name: Remove an entire directory.
     text: az storage remove -s MyShare -p path/to/directory --recursive
+  - name: Remove all the files in a Storage File Share.
+    text: az storage remove -s MyShare --recursive
 """
 
 helps['storage share'] = """
