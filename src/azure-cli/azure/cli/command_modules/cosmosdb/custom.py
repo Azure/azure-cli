@@ -64,6 +64,7 @@ DEFAULT_INDEXING_POLICY = """{
 }"""
 
 
+# pylint: disable=too-many-locals
 def cli_cosmosdb_create(cmd, client,
                         resource_group_name,
                         account_name,
@@ -169,7 +170,7 @@ def cli_cosmosdb_update(client,
         virtual_network_rules=virtual_network_rules,
         enable_multiple_write_locations=enable_multiple_write_locations,
         disable_key_based_metadata_write_access=disable_key_based_metadata_write_access)
-    
+
     async_docdb_update = client.update(resource_group_name, account_name, params)
     docdb_account = async_docdb_update.result()
     docdb_account = client.get(resource_group_name, account_name)  # Workaround
@@ -206,7 +207,7 @@ def cli_cosmosdb_sql_database_create(client,
         options['Throughput'] = throughput
 
     sql_database_resource = SqlDatabaseCreateUpdateParameters(
-        resource=SqlDatabaseResource(id=database_name), 
+        resource=SqlDatabaseResource(id=database_name),
         options=options)
 
     return client.create_update_sql_database(resource_group_name,
@@ -270,7 +271,7 @@ def cli_cosmosdb_sql_container_create(client,
     options = {}
     if throughput:
         options['Throughput'] = throughput
-    
+
     sql_container_create_update_resource = SqlContainerCreateUpdateParameters(
         resource=sql_container_resource,
         options=options)
@@ -307,7 +308,7 @@ def cli_cosmosdb_sql_container_update(client,
                                           None,
                                           None):
         logger.debug('replacing SQL container')
-    
+
     sql_container_create_update_resource = SqlContainerCreateUpdateParameters(
         resource=sql_container_resource,
         options={})
@@ -806,7 +807,7 @@ def cli_cosmosdb_network_rule_add(cmd,
                                ignore_missing_vnet_service_endpoint=ignore_missing_vnet_service_endpoint))
 
     params = DatabaseAccountUpdateParameters(virtual_network_rules=virtual_network_rules)
-    
+
     async_docdb_update = client.update(resource_group_name, account_name, params)
     docdb_account = async_docdb_update.result()
     docdb_account = client.get(resource_group_name, account_name)  # Workaround
@@ -836,7 +837,7 @@ def cli_cosmosdb_network_rule_remove(cmd,
         raise CLIError("This rule does not exist for the Cosmos DB account")
 
     params = DatabaseAccountUpdateParameters(virtual_network_rules=virtual_network_rules)
-    
+
     async_docdb_update = client.update(resource_group_name, account_name, params)
     docdb_account = async_docdb_update.result()
     docdb_account = client.get(resource_group_name, account_name)  # Workaround

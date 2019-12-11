@@ -81,17 +81,22 @@ def cf_cosmosdb(cli_ctx, **_):
 def cf_db_accounts(cli_ctx, _):
     return cf_cosmosdb(cli_ctx).database_accounts
 
+
 def cf_sql_resources(cli_ctx, _):
     return cf_cosmosdb(cli_ctx).sql_resources
+
 
 def cf_mongo_db_resources(cli_ctx, _):
     return cf_cosmosdb(cli_ctx).mongo_db_resources
 
+
 def cf_cassandra_resources(cli_ctx, _):
     return cf_cosmosdb(cli_ctx).cassandra_resources
 
+
 def cf_gremlin_resources(cli_ctx, _):
     return cf_cosmosdb(cli_ctx).gremlin_resources
+
 
 def cf_table_resources(cli_ctx, _):
     return cf_cosmosdb(cli_ctx).table_resources
