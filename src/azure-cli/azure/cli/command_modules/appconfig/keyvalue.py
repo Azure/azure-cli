@@ -198,7 +198,6 @@ def export_config(cmd,
         __write_kv_and_features_to_file(file_path=path, key_values=src_kvs, features=src_features,
                                         format_=format_, separator=separator, skip_features=skip_features)
     elif destination == 'appconfig':
-        # src_kvs.extend(src_features)
         __write_kv_and_features_to_config_store(cmd, key_values=src_kvs, features=src_features, name=dest_name,
                                                 connection_string=dest_connection_string, label=dest_label)
     elif destination == 'appservice':

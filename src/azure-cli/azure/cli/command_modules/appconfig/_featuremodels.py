@@ -202,9 +202,13 @@ def map_featureflag_to_keyvalue(featureflag):
         set_kv.locked = featureflag.locked
         set_kv.last_modified = featureflag.last_modified
 
-    except:
-        logger.debug("Exception while converting feature flag to key value:\n%s\n", featureflag)
-        raise
+    except ValueError as exception:
+        error_msg = "Exception while converting feature flag to key value: {0}\n{1}".format(featureflag.key, exception)
+        raise ValueError(error_msg)
+
+    except Exception as exception:
+        error_msg = "Exception while converting feature flag to key value: {0}\n{1}".format(featureflag.key, exception)
+        raise Exception(error_msg)
 
     return set_kv
 

@@ -66,11 +66,10 @@ def __read_kv_from_file(file_path, format_, separator=None, prefix_to_add="", de
             elif format_ == 'yaml':
                 for yaml_data in list(yaml.safe_load_all(config_file)):
                     config_data.update(yaml_data)
-                if 'feature-management' in config_data:
-                    del config_data['feature-management']
+                logger.warning("Importing feature flags from a yaml file is not supported yet. If yaml file contains feature flags, they will be imported as regular key-values.")
             elif format_ == 'properties':
                 config_data = javaproperties.load(config_file)
-                config_data = {k: v for k, v in config_data.items()if not k.startswith('feature-management.featureSet.features')}
+                logger.warning("Importing feature flags from a properties file is not supported yet. If properties file contains feature flags, they will be imported as regular key-values.")
 
     except ValueError:
         raise CLIError(
@@ -667,8 +666,15 @@ def __convert_feature_dict_to_keyvalue_list(features_dict, format_):
 def __convert_featureflag_list_to_keyvalue_list(featureflags):
     kv_list = []
     for feature in featureflags:
-        kv = map_featureflag_to_keyvalue(feature)
+        try:
+            kv = map_featureflag_to_keyvalue(feature)
+        except ValueError as exception:
+            # If we failed to convert FatureFlag to KeyValue, log warning and continue parsing other features
+            logger.warning(exception)
+            continue
+
         kv_list.append(kv)
+
     return kv_list
 
 
