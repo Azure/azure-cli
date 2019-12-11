@@ -237,29 +237,8 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
                  checks=[self.check('key.kty', 'EC'), self.check('key.crv', 'P-521')])
 
 
-class KeyVaultSecretScenarioTest(ScenarioTest):
-
-    def _test_download_secret(self):
-        secret_path = os.path.join(TEST_DIR, 'test_secret.txt')
-        self.kwargs['src_path'] = secret_path
-        with open(secret_path, 'r') as f:
-            expected = f.read().replace('\r\n', '\n')
-
-        def _test_set_and_download(encoding):
-            self.kwargs['enc'] = encoding
-            self.cmd('keyvault secret set --vault-name {kv} -n download-{enc} --file "{src_path}" --encoding {enc}')
-            dest_path = os.path.join(TEST_DIR, 'recover-{}'.format(encoding))
-            self.kwargs['dest_path'] = dest_path
-            self.cmd('keyvault secret download --vault-name {kv} -n download-{enc} --file "{dest_path}"')
-            with open(dest_path, 'r') as f:
-                actual = f.read().replace('\r\n', '\n')
-            self.assertEqual(actual, expected)
-            os.remove(dest_path)
-
-        for encoding in secret_encoding_values:
-            _test_set_and_download(encoding)
-
-    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_secret_soft_delete')
+class KeyVaultSecretSoftDeleteScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_secret')
     def test_keyvault_secret_soft_delete(self, resource_group):
         self.kwargs.update({
             'kv': self.create_random_name('cli-test-keyvault-', 24),
@@ -284,6 +263,29 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
         self.cmd('keyvault secret list-deleted --vault-name {kv} --maxresults 10', checks=self.check('length(@)', 1))
         self.cmd('keyvault secret show-deleted --id {secret_recovery_id}', checks=self.check('id', '{secret_id}'))
         self.cmd('keyvault secret show-deleted --vault-name {kv} -n {sec}', checks=self.check('id', '{secret_id}'))
+
+
+class KeyVaultSecretScenarioTest(ScenarioTest):
+
+    def _test_download_secret(self):
+        secret_path = os.path.join(TEST_DIR, 'test_secret.txt')
+        self.kwargs['src_path'] = secret_path
+        with open(secret_path, 'r') as f:
+            expected = f.read().replace('\r\n', '\n')
+
+        def _test_set_and_download(encoding):
+            self.kwargs['enc'] = encoding
+            self.cmd('keyvault secret set --vault-name {kv} -n download-{enc} --file "{src_path}" --encoding {enc}')
+            dest_path = os.path.join(TEST_DIR, 'recover-{}'.format(encoding))
+            self.kwargs['dest_path'] = dest_path
+            self.cmd('keyvault secret download --vault-name {kv} -n download-{enc} --file "{dest_path}"')
+            with open(dest_path, 'r') as f:
+                actual = f.read().replace('\r\n', '\n')
+            self.assertEqual(actual, expected)
+            os.remove(dest_path)
+
+        for encoding in secret_encoding_values:
+            _test_set_and_download(encoding)
 
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_secret')
     def test_keyvault_secret(self, resource_group):
