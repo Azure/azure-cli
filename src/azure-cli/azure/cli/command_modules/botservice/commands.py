@@ -45,9 +45,9 @@ def load_command_table(self, _):
 
     with self.command_group('bot', botOperations_commandType) as g:
         g.custom_command('create', 'create')
-        g.custom_command('publish', 'publish_app')
-        g.custom_command('download', 'download_app')
-        g.custom_command('prepare-publish', 'prepare_publish')
+        g.custom_command('publish', 'publish_app', is_preview=True)
+        g.custom_command('download', 'download_app', is_preview=True)
+        g.custom_command('prepare-publish', 'prepare_publish', is_preview=True)
         g.custom_command('prepare-deploy', 'prepare_webapp_deploy')
 
     with self.command_group('bot', botServices_commandType) as g:
@@ -68,15 +68,17 @@ def load_command_table(self, _):
         g.custom_command('update', 'update')
 
     for channel in ['facebook', 'email', 'msteams', 'skype', 'kik', 'directline', 'telegram', 'sms', 'slack']:
-        with self.command_group('bot {}'.format(channel), channelOperationsCreate_commandType) as g:
+        with self.command_group('bot {}'.format(channel), channelOperationsCreate_commandType, is_preview=True) as g:
             g.command('create', '{}_create'.format(channel))
+            if channel == 'directline':
+                g.command('update', '{}_update'.format(channel))
 
-        with self.command_group('bot {}'.format(channel), channelOperations_commandType) as g:
+        with self.command_group('bot {}'.format(channel), channelOperations_commandType, is_preview=True) as g:
             g.command('show', '{}_get'.format(channel))
             g.command('delete', '{}_delete'.format(channel))
 
     with self.command_group('bot webchat', channelOperations_commandType) as g:
         g.command('show', 'webchat_get')
 
-    with self.command_group('bot', is_preview=True):
+    with self.command_group('bot'):
         pass
