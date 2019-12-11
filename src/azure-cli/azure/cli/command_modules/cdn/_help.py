@@ -159,6 +159,11 @@ examples:
             --enable-compression
 """
 
+helps['cdn endpoint rule'] = """
+type: group
+short-summary: Manage delivery rules for an endpoint.
+"""
+
 helps['cdn endpoint rule add'] = """
 type: command
 short-summary: Add a delivery rule to a CDN endpoint.
@@ -253,6 +258,33 @@ examples:
             --action-name "UrlRedirect" --redirect-protocol Https --redirect-type Moved
 """
 
+helps['cdn endpoint rule remove'] = """
+type: command
+short-summary: Remove a delivery rule from an endpoint.
+parameters:
+  - name: --rule-name
+    type: string
+    short-summary: Name of the rule.
+examples:
+  - name: Remove the global rule.
+    text: >
+        az cdn endpoint rule remove -g group -n endpoint --profile-name profile --rule-name Global\\
+"""
+
+helps['cdn endpoint rule list'] = """
+type: group
+short-summary: List delivery rules asscociate with the endpoint.
+examples:
+  - name: List delivery rules asscociate with the endpoint.
+    text: >
+        az cdn endpoint rule list -g group --profile-name profile-name
+"""
+
+helps['cdn endpoint rule condition'] = """
+type: group
+short-summary: Manage delivery rule conditions for an endpoint.
+"""
+
 helps['cdn endpoint rule condition add'] = """
 type: command
 short-summary: Add a condition to a delivery rule.
@@ -283,6 +315,37 @@ examples:
     text: >
         az cdn endpoint rule condition add -g group -n endpoint --profile-name profile --rule-name name\\
             --match-variable RemoteAddress --operator GeoMatch --match-values "TH"
+"""
+
+helps['cdn endpoint rule condition remove'] = """
+type: command
+short-summary: Remove a condition from a delivery rule.
+parameters:
+  - name: --rule-name
+    type: string
+    short-summary: Name of the rule.
+  - name: --index
+    type: string
+    short-summary: index of the condition.
+examples:
+  - name: Remove the first condition.
+    text: >
+        az cdn endpoint rule condition remove -g group -n endpoint --profile-name profile --rule-name name\\
+            --index 0
+"""
+
+helps['cdn endpoint rule condition list'] = """
+type: group
+short-summary: List delivery rules asscociate with the endpoint.
+examples:
+  - name: List delivery rules asscociate with the endpoint.
+    text: >
+        az cdn endpoint rule condition list -g group --profile-name profile-name
+"""
+
+helps['cdn endpoint rule action'] = """
+type: group
+short-summary: Manage delivery rule actions for an endpoint.
 """
 
 helps['cdn endpoint rule action add'] = """
@@ -374,34 +437,13 @@ examples:
             --index 0
 """
 
-helps['cdn endpoint rule condition remove'] = """
-type: command
-short-summary: Remove a condition from a delivery rule.
-parameters:
-  - name: --rule-name
-    type: string
-    short-summary: Name of the rule.
-  - name: --index
-    type: string
-    short-summary: index of the condition.
+helps['cdn endpoint rule action list'] = """
+type: group
+short-summary: List delivery rules asscociate with the endpoint.
 examples:
-  - name: Remove the first condition.
+  - name: List delivery rules asscociate with the endpoint.
     text: >
-        az cdn endpoint rule condition remove -g group -n endpoint --profile-name profile --rule-name name\\
-            --index 0
-"""
-
-helps['cdn endpoint rule remove'] = """
-type: command
-short-summary: Remove a delivery rule from an endpoint.
-parameters:
-  - name: --rule-name
-    type: string
-    short-summary: Name of the rule.
-examples:
-  - name: Remove the global rule.
-    text: >
-        az cdn endpoint rule remove -g group -n endpoint --profile-name profile --rule-name Global\\
+        az cdn endpoint rule action list -g group --profile-name profile-name
 """
 
 helps['cdn origin'] = """
