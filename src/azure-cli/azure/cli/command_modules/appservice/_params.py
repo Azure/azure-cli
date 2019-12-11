@@ -168,6 +168,7 @@ def load_arguments(self, _):
         with self.argument_context(scope + ' config ssl upload') as c:
             c.argument('certificate_password', help='The ssl cert password')
             c.argument('certificate_file', type=file_type, help='The filepath for the .pfx file')
+            c.argument('slot', options_list=['--slot', '-s'], help='The name of the slot. Default to the productions slot if not specified')
         with self.argument_context(scope + ' config ssl') as c:
             c.argument('certificate_thumbprint', help='The ssl cert thumbprint')
         with self.argument_context(scope + ' config appsettings') as c:
@@ -555,8 +556,13 @@ def load_arguments(self, _):
             c.argument('name', arg_type=webapp_name_arg_type)
             c.argument('rule_name', options_list=['--rule-name', '-r'],
                        help='Name of the access restriction to remove')
+            c.argument('ip_address', help="IP address or CIDR range")
+            c.argument('vnet_name', help="vNet name")
+            c.argument('subnet', help="Subnet name (requires vNet name) or subnet resource id")
             c.argument('scm_site', help='True if access restriction should be removed from scm site',
                        arg_type=get_three_state_flag())
+            c.argument('action', arg_type=get_enum_type(ACCESS_RESTRICTION_ACTION_TYPES),
+                       help="Allow or deny access")
         with self.argument_context(scope + ' config access-restriction set') as c:
             c.argument('name', arg_type=webapp_name_arg_type)
             c.argument('use_same_restrictions_for_scm_site',

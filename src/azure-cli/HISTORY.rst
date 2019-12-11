@@ -3,13 +3,25 @@
 Release History
 ===============
 
+
 **ACR**
 
 * Support Local context in acr task run
 
+**AppService**
+
+* Fix issue #11217: webapp: az webapp config ssl upload should support slot parameter
+* Fix issue #10965: Error: Name cannot be empty. Allow remove by ip_address and subnet
+
+**ARM**
+
+* Update azure-mgmt-resource package to use 6.0.0
+
 **Compute**
 
-* vmss create/update: Add --scale-in-policy, which decides which virtual machines are chosen for removal when a VMSS is scaled-in
+* vmss create/update: Add --scale-in-policy, which decides which virtual machines are chosen for removal when a VMSS is scaled-in.
+* vm/vmss update: Add --priority.
+* vm/vmss update: Add --max-price.
 
 **Core**
 
@@ -30,26 +42,32 @@ Release History
 
 **Network**
 
-* az network list-service-aliases: support list service aliases which can be used for Service Endpoint Policies
-* dns zone import: Support .@ in record name
-
+* az network application-gateway probe: Support --port option to specify a port for probing backend servers when create and update
+* az network list-service-aliases: Support list service aliases which can be used for Service Endpoint Policies
+* az network dns zone import: Support .@ in record name
 
 **Packaging**
 
 * Add back edge builds for pip install
 * Add Ubuntu eoan package
 
+**Policy**
+
+* Support for Policy API version 2019-09-01.
+* az policy set-definition: Support grouping within policy set definitions with `--definition-groups` parameter
+
 **Storage**
 
 * GA Release Large File Shares property for storage account create and update command
 * GA Release User Delegation SAS token Support
+* Add new commands `az storage account blob-service-properties show` and `az storage account blob-service-properties update --enable-change-feed` to manage blob service properties for storage account.
 
 2.0.77
 ++++++
 
 **ACR**
 
-* Deprecated paramater `--branch` from acr task create/update
+* Deprecated parameter `--branch` from acr task create/update
 
 **Azure Red Hat OpenShift**
 
@@ -132,6 +150,8 @@ Release History
 
 **Redis**
 
+* Add preview param `--replicas-per-master` to `az redis create` command
+* Update azure-mgmt-redis from 6.0.0 to 7.0.0rc1
 * Fix #2902: Avoid setting memory configs while updating Basic SKU cache
 
 **Reservations**
