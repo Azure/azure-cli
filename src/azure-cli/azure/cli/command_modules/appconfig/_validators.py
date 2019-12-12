@@ -147,3 +147,17 @@ def validate_filter_parameter(string):
         else:
             logger.warning("Ignoring filter parameter '%s' because parameter name is empty.", string)
     return result
+
+
+def validate_secret_identifier(namespace):
+    """ Validate the format of keyvault reference secret identifier """
+    from azure.keyvault.key_vault_id import KeyVaultIdentifier
+
+    identifier = getattr(namespace, 'secret_identifier', None)
+    if identifier:
+        try:
+            KeyVaultIdentifier(uri=identifier, collection="secrets")
+        except Exception as e:
+            raise CLIError("--secret-identifier is invalid.\n{0}".format(str(e)))
+    else:
+        raise CLIError("usage error: --secret-identifier is required.")
