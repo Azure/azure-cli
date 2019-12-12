@@ -22,6 +22,7 @@ Release History
 
 * Update azure-mgmt-resource package to use 6.0.0
 * Cross Tenant Support for `az group deployment create` command by adding new parameter `--aux-subs`
+* Add new parameter `--metadata` to support adding metadata information for policy set definitions.
 
 **BotService**
 

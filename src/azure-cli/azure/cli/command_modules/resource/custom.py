@@ -1447,7 +1447,8 @@ def create_policy_definition(cmd, name, rules=None, params=None, display_name=No
 
 
 def create_policy_setdefinition(cmd, name, definitions, params=None, display_name=None, description=None,
-                                subscription=None, management_group=None, definition_groups=None):
+                                subscription=None, management_group=None, definition_groups=None, metadata=None):
+
     definitions = _load_file_string_or_uri(definitions, 'definitions')
     params = _load_file_string_or_uri(params, 'params', False)
     definition_groups = _load_file_string_or_uri(definition_groups, 'definition_groups', False)
@@ -1456,6 +1457,9 @@ def create_policy_setdefinition(cmd, name, definitions, params=None, display_nam
     PolicySetDefinition = cmd.get_models('PolicySetDefinition')
     parameters = PolicySetDefinition(policy_definitions=definitions, parameters=params, description=description,
                                      display_name=display_name, policy_definition_groups=definition_groups)
+
+    if cmd.supported_api_version(min_api='2017-06-01-preview'):
+        parameters.metadata = metadata
     if cmd.supported_api_version(min_api='2018-03-01'):
         enforce_mutually_exclusive(subscription, management_group)
         if management_group:
@@ -1563,7 +1567,7 @@ def update_policy_definition(cmd, policy_definition_name, rules=None, params=Non
 
 def update_policy_setdefinition(cmd, policy_set_definition_name, definitions=None, params=None,
                                 display_name=None, description=None,
-                                subscription=None, management_group=None, definition_groups=None):
+                                subscription=None, management_group=None, definition_groups=None, metadata=None):
 
     definitions = _load_file_string_or_uri(definitions, 'definitions', False)
     params = _load_file_string_or_uri(params, 'params', False)
@@ -1578,7 +1582,9 @@ def update_policy_setdefinition(cmd, policy_set_definition_name, definitions=Non
         description=description if description is not None else definition.description,
         display_name=display_name if display_name is not None else definition.display_name,
         parameters=params if params is not None else definition.parameters,
-        policy_definition_groups=definition_groups if definition_groups is not None else definition.policy_definition_groups)
+        policy_definition_groups=definition_groups if definition_groups is not None else definition.policy_definition_groups,
+        metadata=metadata if metadata is not None else definition.metadata)
+
     if cmd.supported_api_version(min_api='2018-03-01'):
         enforce_mutually_exclusive(subscription, management_group)
         if management_group:
