@@ -10,14 +10,14 @@ from azure.cli.command_modules.ams._test_utils import _get_test_data_file
 
 class AmsAccountFilterTests(ScenarioTest):
     @ResourceGroupPreparer()
-    @StorageAccountPreparer(parameter_name='storage_account_for_create')
-    def test_ams_account_filter_create_and_show(self, storage_account_for_create):
+    @StorageAccountPreparer(parameter_name='storage_account_for_create_and_show')
+    def test_ams_account_filter_create_and_show(self, storage_account_for_create_and_show):
         amsname = self.create_random_name(prefix='ams', length=12)
         filter_name = self.create_random_name(prefix='filter', length=12)
 
         self.kwargs.update({
             'amsname': amsname,
-            'storageAccount': storage_account_for_create,
+            'storageAccount': storage_account_for_create_and_show,
             'location': 'northcentralus',
             'filterName': filter_name,
             'firstQuality': 420,
@@ -68,6 +68,13 @@ class AmsAccountFilterTests(ScenarioTest):
             self.check('tracks[1].trackSelections[1].property', 'FourCC'),
             self.check('tracks[1].trackSelections[1].value', 'MP4A')
         ])
+
+        nonexits_filter_name = self.create_random_name(prefix='filter', length=12)
+        self.kwargs.update({
+            'nonexits_filter_name': nonexits_filter_name
+        })
+        with self.assertRaisesRegexp(SystemExit, '3'):
+            self.cmd('az ams account-filter show -a {amsname} -g {rg} -n {nonexits_filter_name}')
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_list_and_delete')

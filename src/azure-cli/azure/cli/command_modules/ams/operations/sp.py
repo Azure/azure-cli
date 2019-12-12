@@ -6,8 +6,8 @@
 import importlib
 import datetime
 import time
-
 import re
+
 from dateutil.relativedelta import relativedelta
 
 from knack.util import CLIError, todict
@@ -251,7 +251,7 @@ def create_application(client, display_name, homepage, years, password, identifi
         return client.create(app_create_param)
     except GraphErrorException as ex:
         if 'insufficient privileges' in str(ex).lower():
-            link = ('https://docs.microsoft.com/azure/azure-resource-manager/' +
+            link = ('https://docs.microsoft.com/en-us/azure/azure-resource-manager/' +
                     'resource-group-create-service-principal-portal')
             raise CLIError("Directory permission is needed for the current user to register the application. "
                            "For how to configure, please refer '{}'. Original error: {}".format(link, ex))
