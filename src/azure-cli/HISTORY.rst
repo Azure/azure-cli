@@ -8,9 +8,18 @@ Release History
 
 * Support Local context in acr task run
 
+**ACS**
+
+* [BREAKING CHANGE]az openshift create: rename `--workspace-resource-id` to `--workspace-id`.
+
 **AMS**
 
 * Update show commands to return 3 when resource not found
+
+**AppConfig**
+
+* Fix bug when appending api-version to request url. The existing solution doesn't work with pagination.
+* Support showing languages besides English as our backend service support unicode for globalization.
 
 **AppService**
 
