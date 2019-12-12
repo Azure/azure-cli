@@ -99,6 +99,11 @@ Release History
 * [COMING BREAKING CHANGE] `az storage copy`: `*` character is no longer supported as a wildcard in URL, but new parameters --include-pattern and --exclude-pattern will be added with `*` wildcard support.
 * Fix issue #11043: Support to remove whole container/share in `az storage remove` command
 
+**ServiceFabric**
+
+* Fixes in node-type add logic including #10963: Adding new node type with durability level Gold will always throw CLI error
+* Update ServiceFabricNodeVmExt version to 1.1 in creation template
+
 2.0.77
 ++++++
 
