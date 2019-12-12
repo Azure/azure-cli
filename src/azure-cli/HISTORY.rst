@@ -17,7 +17,8 @@ Release History
 **ARM**
 
 * Update azure-mgmt-resource package to use 6.0.0
-* Add new parameter '--metadata' to support adding metadata information for policy set definitions.
+* Cross Tenant Support for `az group deployment create` command by adding new parameter `--aux-subs`
+* Add new parameter `--metadata` to support adding metadata information for policy set definitions.
 
 **BotService**
 
@@ -90,6 +91,7 @@ Release History
 * GA Release Large File Shares property for storage account create and update command
 * GA Release User Delegation SAS token Support
 * Add new commands `az storage account blob-service-properties show` and `az storage account blob-service-properties update --enable-change-feed` to manage blob service properties for storage account.
+* Fix issue #11043: Support to remove whole container/share in `az storage remove` command
 
 2.0.77
 ++++++
