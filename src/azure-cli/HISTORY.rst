@@ -103,7 +103,7 @@ Release History
 * Support for Policy API version 2019-09-01.
 * az policy set-definition: Support grouping within policy set definitions with `--definition-groups` parameter
 
-** Redis **
+**Redis**
 
 * Add preview param `--replicas-per-master` to `az redis create` command
 * Update azure-mgmt-redis from 6.0.0 to 7.0.0rc1
