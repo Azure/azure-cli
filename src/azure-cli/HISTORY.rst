@@ -7,6 +7,10 @@ Release History
 
 * Support Local context in acr task run
 
+**ACS**
+
+* [BREAKING CHANGE]az openshift create: rename `--workspace-resource-id` to `--workspace-id`.
+
 **Compute**
 
 * vmss create/update: Add --scale-in-policy, which decides which virtual machines are chosen for removal when a VMSS is scaled-in
@@ -38,7 +42,7 @@ Release History
 
 **Azure Red Hat OpenShift**
 
-* Add `--workspace-id` flag to allow creation of Azure Red Hat Openshift cluster with monitoring
+* Add `--workspace-resource-id` flag to allow creation of Azure Red Hat Openshift cluster with monitoring
 * Add `monitor_profile` to create Azure Red Hat OpenShift cluster with monitoring
 
 **AKS**
