@@ -90,6 +90,7 @@ Release History
 * GA Release Large File Shares property for storage account create and update command
 * GA Release User Delegation SAS token Support
 * Add new commands `az storage account blob-service-properties show` and `az storage account blob-service-properties update --enable-change-feed` to manage blob service properties for storage account.
+* [COMING BREAKING CHANGE] `az storage copy`: `*` character is no longer supported as a wildcard in URL, but new parameters --include-pattern and --exclude-pattern will be added with `*` wildcard support.
 * Fix issue #11043: Support to remove whole container/share in `az storage remove` command
 
 2.0.77
