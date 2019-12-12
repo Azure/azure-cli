@@ -758,7 +758,7 @@ def add_cluster_node_type(cmd,
                           vm_tier=DEFAULT_TIER,
                           durability_level=DEFAULT_DURABILITY_LEVEL):
     if durability_level.lower() == 'gold':
-        if vm_sku.lower() != 'standard_d15_v2' and vm_sku.lower() != 'standard_G5':
+        if vm_sku.lower() != 'standard_d15_v2' and vm_sku.lower() != 'standard_g5':
             raise CLIError(
                 'Only Standard_D15_v2 and Standard_G5 supports Gold durability, please specify --vm-sku to right value')
     cluster = client.get(resource_group_name, cluster_name)
@@ -776,8 +776,7 @@ def _add_node_type_to_sfrp(cmd, client, resource_group_name, cluster_name, clust
                                                   client_connection_endpoint_port=DEFAULT_CLIENT_CONNECTION_ENDPOINT,
                                                   http_gateway_endpoint_port=DEFAULT_HTTP_GATEWAY_ENDPOINT,
                                                   is_primary=False,
-                                                  vm_instance_count=int(
-                                                      capacity),
+                                                  vm_instance_count=int(capacity),
                                                   durability_level=durability_level,
                                                   application_ports=EndpointRangeDescription(
                                                       start_port=DEFAULT_APPLICATION_START_PORT, end_port=DEFAULT_APPLICATION_END_PORT),
