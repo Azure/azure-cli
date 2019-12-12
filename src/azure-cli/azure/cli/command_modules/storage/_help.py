@@ -17,6 +17,38 @@ type: group
 short-summary: Manage storage accounts.
 """
 
+helps['storage account blob-service-properties'] = """
+type: group
+short-summary: Manage the properties of a storage account's blob service.
+"""
+
+helps['storage account blob-service-properties show'] = """
+type: command
+short-summary: Show the properties of a storage account's blob service.
+long-summary: >
+    Show the properties of a storage account's blob service, including
+    properties for Storage Analytics and CORS (Cross-Origin Resource
+    Sharing) rules.
+examples:
+  - name: Show the properties of the storage account 'MyStorageAccount' in resource group 'MyResourceGroup'.
+    text: az storage account blob-service-properties show -n MyStorageAccount -g MyResourceGroup
+"""
+
+helps['storage account blob-service-properties update'] = """
+type: command
+short-summary: Update the properties of a storage account's blob service.
+long-summary: >
+    Update the properties of a storage account's blob service, including
+    properties for Storage Analytics and CORS (Cross-Origin Resource
+    Sharing) rules. But currently we only support enabling or disabling change feed for a storage account's blob service.
+parameters:
+  - name: --enable-change-feed
+    short-summary: 'Indicate whether change feed event logging is enabled. If it is true, you enable the storage account to begin capturing changes. The default value is true. You can see more details in https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-change-feed?tabs=azure-portal#register-by-using-azure-cli'
+examples:
+  - name: Enable the change feed for the storage account 'MyStorageAccount' in resource group 'MyResourceGroup'.
+    text: az storage account blob-service-properties update --enable-change-feed true -n MyStorageAccount -g MyResourceGroup
+"""
+
 helps['storage account create'] = """
 type: command
 short-summary: Create a storage account.
@@ -466,7 +498,7 @@ examples:
 helps['storage blob sync'] = """
 type: command
 short-summary: Sync blobs recursively to a storage blob container.
-long-summary: Sync command depends on Azcopy, which only works for 64-bit Operating System now. We will support 32-bit Operating System soon.
+long-summary: Sync command depends on Azcopy, which will be upgraded to v10.3 soon to support 32-bit Operating System and utilize new features.
 examples:
   - name: Sync a single blob to a container.
     text: az storage blob sync -c MyContainer --account-name MyStorageAccount -s "path/to/file" -d NewBlob
@@ -638,7 +670,12 @@ short-summary: Manage container stored access policies.
 helps['storage copy'] = """
 type: command
 short-summary: Copy files or directories to or from Azure storage.
-long-summary: Copy command depends on Azcopy, which only works for 64-bit Operating System now. We will support 32-bit Operating System soon.
+long-summary: >
+    Copy command depends on Azcopy, which will be upgraded to v10.3 soon to support 32-bit Operating System and
+    utilize new features.
+
+    [COMING BREAKING CHANGE] With Azcopy v10.3, `*` character is no longer supported as a wildcard in URL, but new
+    parameters --include-pattern and --exclude-pattern will be added with `*` wildcard support.
 examples:
   - name: Upload a single file to Azure Blob using url.
     text: az storage copy -s /path/to/file.txt -d https://[account].blob.core.windows.net/[container]/[path/to/blob]
@@ -1108,13 +1145,18 @@ short-summary: Manage shared access policies for a storage queue.
 helps['storage remove'] = """
 type: command
 short-summary: Delete blobs or files from Azure Storage.
-long-summary: To delete blobs, both the source must either be public or be authenticated by using a shared access signature. Remove command depends on Azcopy, which only works for 64-bit Operating System now. We will support 32-bit Operating System soon.
+long-summary: >
+    To delete blobs, both the source must either be public or be authenticated by using a shared access signature.
+    Remove command depends on Azcopy, which will be upgraded to v10.3 soon to support 32-bit Operating System and
+    utilize new features.
 examples:
   - name: Remove a single blob.
     text: az storage remove -c MyContainer -n MyBlob
   - name: Remove an entire virtual directory.
     text: az storage remove -c MyContainer -n path/to/directory --recursive
   - name: Remove only the top blobs inside a virtual directory but not its sub-directories.
+    text: az storage remove -c MyContainer --recursive
+  - name: Remove all the blobs in a Storage Container.
     text: az storage remove -c MyContainer -n path/to/directory
   - name: Remove a subset of blobs in a virtual directory (For example, only jpg and pdf files, or if the blob name is "exactName").
     text: az storage remove -c MyContainer -n path/to/directory --recursive --include "*.jpg;*.pdf;exactName"
@@ -1124,6 +1166,8 @@ examples:
     text: az storage remove -s MyShare -p MyFile
   - name: Remove an entire directory.
     text: az storage remove -s MyShare -p path/to/directory --recursive
+  - name: Remove all the files in a Storage File Share.
+    text: az storage remove -s MyShare --recursive
 """
 
 helps['storage share'] = """

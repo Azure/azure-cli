@@ -164,6 +164,10 @@ def load_arguments(self, _):
 
     with self.argument_context('keyvault key set-attributes') as c:
         c.attributes_argument('key', KeyAttributes)
+
+    for scope in ['list', 'list-deleted', 'list-versions']:
+        with self.argument_context('keyvault key {}'.format(scope)) as c:
+            c.argument('maxresults', options_list=['--maxresults'], type=int)
     # endregion
 
     # region KeyVault Secret
@@ -186,6 +190,11 @@ def load_arguments(self, _):
     for scope in ['backup', 'restore']:
         with self.argument_context('keyvault secret {}'.format(scope)) as c:
             c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(), help='File to receive the secret contents.')
+
+    for scope in ['list', 'list-deleted', 'list-versions']:
+        with self.argument_context('keyvault secret {}'.format(scope)) as c:
+            c.argument('maxresults', options_list=['--maxresults'], type=int)
+
     # endregion
 
     # region KeyVault Storage Account
@@ -295,4 +304,8 @@ def load_arguments(self, _):
         c.argument('admin_last_name')
         c.argument('admin_email')
         c.argument('admin_phone')
+
+    for scope in ['list', 'list-deleted', 'list-versions']:
+        with self.argument_context('keyvault certificate {}'.format(scope)) as c:
+            c.argument('maxresults', options_list=['--maxresults'], type=int)
     # endregion

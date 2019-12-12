@@ -5,14 +5,17 @@
 
 from azure.cli.core.util import (sdk_no_wait, CLIError)
 from azure.cli.core.commands import LongRunningOperation
-from azure.cli.command_modules.ams._utils import create_ip_range
+from azure.cli.command_modules.ams._utils import (create_ip_range, show_resource_not_found_message)
+
+from azure.mgmt.media.models import (AkamaiAccessControl, AkamaiSignatureHeaderAuthenticationKey,
+                                     CrossSiteAccessPolicies, IPAccessControl,
+                                     StreamingEndpoint, StreamingEndpointAccessControl)
 
 
 def create_streaming_endpoint(cmd, client, resource_group_name, account_name, streaming_endpoint_name,  # pylint: disable=too-many-locals
                               scale_units, auto_start=None, tags=None, cross_domain_policy=None, ips=None,
                               description=None, availability_set_name=None, max_cache_age=None, cdn_provider=None,
                               cdn_profile=None, custom_host_names=None, client_access_policy=None, no_wait=False):
-    from azure.mgmt.media.models import (StreamingEndpoint, IPAccessControl, StreamingEndpointAccessControl)
     from azure.cli.command_modules.ams._client_factory import (get_mediaservices_client)
 
     allow_list = []
@@ -47,8 +50,6 @@ def create_streaming_endpoint(cmd, client, resource_group_name, account_name, st
 
 def add_akamai_access_control(client, account_name, resource_group_name, streaming_endpoint_name,
                               identifier=None, base64_key=None, expiration=None):
-    from azure.mgmt.media.models import (AkamaiAccessControl, AkamaiSignatureHeaderAuthenticationKey,
-                                         StreamingEndpointAccessControl)
 
     streaming_endpoint = client.get(resource_group_name, account_name, streaming_endpoint_name)
 
@@ -98,7 +99,6 @@ def update_streaming_endpoint_setter(client, resource_group_name, account_name, 
 def update_streaming_endpoint(instance, tags=None, cross_domain_policy=None, client_access_policy=None,
                               description=None, max_cache_age=None, ips=None, disable_cdn=None,
                               cdn_provider=None, cdn_profile=None, custom_host_names=None):
-    from azure.mgmt.media.models import (IPAccessControl, StreamingEndpointAccessControl, CrossSiteAccessPolicies)
 
     if not instance:
         raise CLIError('The streaming endpoint resource was not found.')
@@ -159,7 +159,6 @@ def update_streaming_endpoint(instance, tags=None, cross_domain_policy=None, cli
 
 
 def create_cross_site_access_policies(client_access_policy, cross_domain_policy):
-    from azure.mgmt.media.models import CrossSiteAccessPolicies
 
     policies = CrossSiteAccessPolicies()
 
@@ -194,3 +193,16 @@ def stop(cmd, client, resource_group_name, account_name,
                                                   streaming_endpoint_name))
 
     return client.get(resource_group_name, account_name, streaming_endpoint_name)
+
+
+def get_streaming_endpoint(client, resource_group_name, account_name,
+                           streaming_endpoint_name):
+    streaming_endpoint = client.get(resource_group_name, account_name, streaming_endpoint_name)
+    if not streaming_endpoint:
+        show_resource_not_found_message(
+            account_name,
+            resource_group_name,
+            'streamingEndpoints',
+            streaming_endpoint_name)
+
+    return streaming_endpoint

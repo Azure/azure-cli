@@ -174,7 +174,9 @@ def load_arguments(self, _):
         with self.argument_context(scope + ' config appsettings') as c:
             c.argument('settings', nargs='+', help="space-separated app settings in a format of <name>=<value>")
             c.argument('setting_names', nargs='+', help="space-separated app setting names")
-
+        with self.argument_context(scope + ' config ssl import') as c:
+            c.argument('key_vault', help='The name or resource ID of the Key Vault')
+            c.argument('key_vault_certificate_name', help='The name of the certificate in Key Vault')
         with self.argument_context(scope + ' config hostname') as c:
             c.argument('hostname', completer=get_hostname_completion_list, help="hostname assigned to the site, such as custom domains", id_part='child_name_1')
         with self.argument_context(scope + ' deployment user') as c:
@@ -556,8 +558,13 @@ def load_arguments(self, _):
             c.argument('name', arg_type=webapp_name_arg_type)
             c.argument('rule_name', options_list=['--rule-name', '-r'],
                        help='Name of the access restriction to remove')
+            c.argument('ip_address', help="IP address or CIDR range")
+            c.argument('vnet_name', help="vNet name")
+            c.argument('subnet', help="Subnet name (requires vNet name) or subnet resource id")
             c.argument('scm_site', help='True if access restriction should be removed from scm site',
                        arg_type=get_three_state_flag())
+            c.argument('action', arg_type=get_enum_type(ACCESS_RESTRICTION_ACTION_TYPES),
+                       help="Allow or deny access")
         with self.argument_context(scope + ' config access-restriction set') as c:
             c.argument('name', arg_type=webapp_name_arg_type)
             c.argument('use_same_restrictions_for_scm_site',
