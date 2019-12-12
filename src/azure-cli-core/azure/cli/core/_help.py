@@ -84,7 +84,8 @@ class CLIPrintMixin(CLIHelp):
         # That way it can fall back to the default one if there was a server
         # error more elegantly.
         if in_cloud_console():
-            examples = AzCliHelp.example_provider(help_file.command)
+            # Specify az to force all the examples to be for the exact command
+            examples = AzCliHelp.example_provider("az " + help_file.command)
             if examples:
                 use_default_examples = False
                 for e in examples:
