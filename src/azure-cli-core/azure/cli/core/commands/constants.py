@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from colorama import Fore, Style
 from knack.parser import ARGPARSE_SUPPORTED_KWARGS
 
 
@@ -29,3 +30,6 @@ CONFIRM_PARAM_NAME = 'yes'
 DEFAULT_QUERY_TIME_RANGE = 3600000
 
 BLACKLISTED_MODS = ['context', 'shell', 'documentdb', 'component']
+
+SURVEY_PROMPT = Fore.YELLOW + Style.BRIGHT + 'Please let us know how we are doing: ' + Fore.BLUE \
+    + 'https://aka.ms/clihats' + Style.RESET_ALL

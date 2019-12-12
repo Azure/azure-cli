@@ -1,9 +1,17 @@
 {
   "if": {
-    "field": "Microsoft.KeyVault.Data/vaults/certificates/keyProperties.keyType",
-    "equals": "RSA"
+    "field": "Microsoft.DataCatalog.Data/catalog/entity/type",
+    "equals": "SomeEntityType"
   },
   "then": {
-    "effect": "audit"
+    "effect": "ModifyClassifications",
+    "details": {
+      "classificationsToAdd": [
+        "foo"
+      ],
+      "classificationsToRemove": [
+        "bar"
+      ]
+    }
   }
 }

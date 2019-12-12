@@ -180,7 +180,7 @@ class AmsContentKeyPolicyTests(ScenarioTest):
             'description': 'ExampleDescription',
             'policyOptionName': policy_option_name,
             'configurationODataType': '#Microsoft.Media.ContentKeyPolicyFairPlayConfiguration',
-            'ask': '1234567890ABCDEF1234567890ABCDEF',
+            'ask': 'testtesttesttest',
             'fairPlayPfx': _get_test_data_file('TestCert2.pfx'),
             'fairPlayPfxPassword': 'password',
             'rentalAndLeaseKeyType': 'Undefined',

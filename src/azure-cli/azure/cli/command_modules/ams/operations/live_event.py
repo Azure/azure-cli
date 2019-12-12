@@ -3,10 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.util import sdk_no_wait
 from azure.cli.core.commands import LongRunningOperation
-from azure.cli.core.util import CLIError
-from azure.cli.command_modules.ams._utils import create_ip_range
+from azure.cli.core.util import CLIError, sdk_no_wait
+
+from azure.cli.command_modules.ams._utils import (create_ip_range, show_resource_not_found_message)
+from azure.mgmt.media.models import (CrossSiteAccessPolicies, IPAccessControl, LiveEvent,
+                                     LiveEventEncoding, LiveEventInput, LiveEventInputAccessControl,
+                                     LiveEventInputProtocol, LiveEventPreview, LiveEventPreviewAccessControl)
 
 
 def create(cmd, client, resource_group_name, account_name, live_event_name, streaming_protocol, ips,  # pylint: disable=too-many-locals
@@ -14,8 +17,7 @@ def create(cmd, client, resource_group_name, account_name, live_event_name, stre
            key_frame_interval_duration=None, access_token=None, no_wait=False, preview_ips=None,
            preview_locator=None, streaming_policy_name=None, alternative_media_id=None,
            vanity_url=False, client_access_policy=None, cross_domain_policy=None, stream_options=None):
-    from azure.mgmt.media.models import (LiveEventInputProtocol, LiveEventInput, LiveEvent,
-                                         LiveEventEncoding, LiveEventInputAccessControl, IPAccessControl)
+
     from azure.cli.command_modules.ams._client_factory import (get_mediaservices_client)
 
     allowed_ips = []
@@ -51,7 +53,6 @@ def create(cmd, client, resource_group_name, account_name, live_event_name, stre
 
 def create_live_event_preview(preview_locator, streaming_policy_name,
                               alternative_media_id, preview_ips, live_event_name):
-    from azure.mgmt.media.models import (IPAccessControl, LiveEventPreviewAccessControl, LiveEventPreview)
 
     allow_list = []
     if preview_ips is None:
@@ -70,7 +71,6 @@ def create_live_event_preview(preview_locator, streaming_policy_name,
 
 
 def create_cross_site_access_policies(client_access_policy, cross_domain_policy):
-    from azure.mgmt.media.models import CrossSiteAccessPolicies
 
     policies = CrossSiteAccessPolicies()
 
@@ -170,3 +170,12 @@ def update_live_event(instance, tags=None, description=None, key_frame_interval_
             instance.cross_site_access_policies.cross_domain_policy = cross_domain_policy
 
     return instance
+
+
+def get_live_event(client, resource_group_name, account_name, live_event_name):
+    live_event = client.get(resource_group_name, account_name, live_event_name)
+    if not live_event:
+        show_resource_not_found_message(
+            resource_group_name, account_name, 'liveEvents', live_event_name)
+
+    return live_event

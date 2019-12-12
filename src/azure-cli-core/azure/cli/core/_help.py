@@ -7,6 +7,7 @@ from __future__ import print_function
 import argparse
 
 from azure.cli.core.commands import ExtensionCommandSource
+from azure.cli.core.commands.constants import SURVEY_PROMPT
 
 from knack.help import (HelpFile as KnackHelpFile, CommandHelpFile as KnackCommandHelpFile,
                         GroupHelpFile as KnackGroupHelpFile, ArgumentGroupRegistry as KnackArgumentGroupRegistry,
@@ -150,6 +151,7 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
     def show_help(self, cli_name, nouns, parser, is_group):
         self.update_loaders_with_help_file_contents(nouns)
         super(AzCliHelp, self).show_help(cli_name, nouns, parser, is_group)
+        print(SURVEY_PROMPT)
 
     def _register_help_loaders(self):
         import azure.cli.core._help_loaders as help_loaders

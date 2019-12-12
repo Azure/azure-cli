@@ -194,6 +194,9 @@ def _get_object_id_by_upn(graph_client, upn):
 
 
 def _get_object_id_from_subscription(graph_client, subscription):
+    if not subscription:
+        return None
+
     if subscription['user']:
         if subscription['user']['type'] == 'user':
             return _get_object_id_by_upn(graph_client, subscription['user']['name'])

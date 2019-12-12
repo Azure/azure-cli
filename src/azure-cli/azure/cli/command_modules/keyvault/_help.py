@@ -193,6 +193,11 @@ examples:
         --auto-regenerate-key --regeneration-period P90D  --resource-id $id
 """
 
+helps['keyvault storage remove'] = """
+type: command
+short-summary: Remove a Key Vault managed Azure Storage Account and all associated SAS definitions. This operation requires the storage/delete permission.
+"""
+
 helps['keyvault storage sas-definition'] = """
 type: group
 short-summary: Manage storage account SAS definitions.
