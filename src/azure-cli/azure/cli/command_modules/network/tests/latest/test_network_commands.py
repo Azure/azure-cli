@@ -847,11 +847,16 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
     def test_network_ag_rule(self, resource_group):
 
         self.kwargs.update({
+            'ip': 'pip1',
             'ag': 'ag1',
             'res': 'application-gateway rule',
-            'name': 'myrule'
+            'name': 'myrule',
+            'name2': 'myrule2',
+            'set': 'myruleset'
         })
-        self._create_ag()
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
+        self.cmd('network application-gateway create -g {rg} -n {ag} --public-ip-address {ip} --sku Standard_v2 --no-wait')
+        self.cmd('network application-gateway wait -g {rg} -n {ag} --exists')
 
         self.cmd('network application-gateway http-listener create -g {rg} --gateway-name {ag} -n mylistener --no-wait --frontend-port appGatewayFrontendPort --host-name www.test.com')
         self.cmd('network application-gateway http-listener create -g {rg} --gateway-name {ag} -n mylistener2 --no-wait --frontend-port appGatewayFrontendPort --host-name www.test2.com')
@@ -862,9 +867,47 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
         self.cmd('network {res} update -g {rg} --gateway-name {ag} -n {name} --no-wait --http-listener mylistener2')
         rule = self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}').get_output_in_json()
         self.assertTrue(rule['httpListener']['id'].endswith('mylistener2'))
-        self.cmd('network {res} list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 2))
+
+        self.cmd('network application-gateway rewrite-rule set create -g {rg} --gateway-name {ag} -n {set}')
+        self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name2} --no-wait --rewrite-rule-set {set} --http-listener mylistener')
+        rule = self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name2}').get_output_in_json()
+        self.kwargs['set_id'] = rule['rewriteRuleSet']['id']
+        self.cmd('network {res} update -g {rg} --gateway-name {ag} -n {name2} --rewrite-rule-set {set_id}', checks=[
+            self.check('rewriteRuleSet.id', '{set_id}')
+        ])
+
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 3))
         self.cmd('network {res} delete -g {rg} --gateway-name {ag} --no-wait -n {name}')
-        self.cmd('network {res} list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 1))
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 2))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_url_path_map')
+    def test_network_ag_url_path_map(self, resource_group):
+        self.kwargs.update({
+            'ip': 'pip1',
+            'ag': 'ag1',
+            'name': 'mypathmap',
+            'rulename': 'myurlrule',
+            'rulename2': 'myurlrule2',
+            'pool': 'mypool',
+            'set': 'myruleset',
+            'settings': 'http_settings',
+            'rg': resource_group
+        })
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
+        self.cmd('network application-gateway create -g {rg} -n {ag} --public-ip-address {ip} --sku Standard_v2 --no-wait')
+        self.cmd('network application-gateway wait -g {rg} -n {ag} --exists')
+
+        self.cmd('network application-gateway http-listener create -g {rg} --gateway-name {ag} -n mylistener --no-wait --frontend-port appGatewayFrontendPort --host-name www.test.com')
+
+        self.cmd('network application-gateway rewrite-rule set create -g {rg} --gateway-name {ag} -n {set}')
+        self.cmd('network application-gateway address-pool create -g {rg} --gateway-name {ag} -n {pool} --no-wait')
+        self.cmd('network application-gateway http-settings create -g {rg} --gateway-name {ag} -n {settings} --port 443 --protocol https')
+        self.cmd('network application-gateway url-path-map create -g {rg} --gateway-name {ag} -n {name} --rule-name {rulename} --paths /mypath1/* --address-pool {pool} '
+                 '--default-address-pool {pool} --http-settings {settings} --default-http-settings {settings} '
+                 '--default-rewrite-rule-set {set} --rewrite-rule-set {set}')
+        self.cmd('network application-gateway url-path-map update -g {rg} --gateway-name {ag} -n {name} --default-rewrite-rule-set {set}')
+        self.cmd('network application-gateway url-path-map rule create -g {rg} --gateway-name {ag} -n {rulename2} --path-map-name {name} '
+                 '--paths /mypath122/* --address-pool {pool} --http-settings {settings} --rewrite-rule-set {set}')
 
 
 class NetworkAppGatewayRewriteRuleset(ScenarioTest):

@@ -135,3 +135,7 @@ def cf_log_analytics_data_plane(cli_ctx, _):
     cred, _, _ = profile.get_login_credentials(
         resource="https://api.loganalytics.io")
     return LogAnalyticsDataClient(cred)
+
+
+def cf_disk_encryption_set(cli_ctx, _):
+    return _compute_client_factory(cli_ctx).disk_encryption_sets

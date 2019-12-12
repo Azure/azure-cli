@@ -12,20 +12,41 @@ Release History
 
 * Fix issue #11217: webapp: az webapp config ssl upload should support slot parameter
 * Fix issue #10965: Error: Name cannot be empty. Allow remove by ip_address and subnet
+* Add support for importing certificates from Key Vault `az webapp config ssl import`
 
 **ARM**
 
 * Update azure-mgmt-resource package to use 6.0.0
+* Cross Tenant Support for `az group deployment create` command by adding new parameter `--aux-subs`
+
+**BotService**
+
+* [Breaking change] Remove '--version' flag from preview command 'az bot create'. Only v4 SDK bots are supported.
+* Add name availability check for 'az bot create'.
+* Add support for updating the icon URL for a bot via 'az bot update'.
+* Add support for updating a Direct Line channel via 'az bot directline update'.
+* Add '--enable-enhanced-auth' flag support to 'az bot directline create'.
+* The following command groups are GA and not in preview: 'az bot authsetting'.
+* The following commands in 'az bot' are GA and not in preview: 'create', 'prepare-deploy', 'show', 'delete', 'update'.
+* Fix 'az bot prepare-deploy' changing '--proj-file-path' value to lower case (e.g. "Test.csproj" to "test.csproj").
 
 **Compute**
 
 * vmss create/update: Add --scale-in-policy, which decides which virtual machines are chosen for removal when a VMSS is scaled-in.
 * vm/vmss update: Add --priority.
 * vm/vmss update: Add --max-price.
+* Add disk-encryption-set command group (create, show, update, delete, list).
+* disk create: Add --encryption-type and --disk-encryption-set.
+* vm/vmss create: Add --os-disk-encryption-set and --data-disk-encryption-sets.
 
 **Core**
 
 * Remove support for Python 3.4
+* Plug in HaTS survey in multiple commands
+
+**DLS**
+
+* Update ADLS sdk version (0.0.48).
 
 **Install**
 
@@ -37,14 +58,18 @@ Release History
 
 **Key Vault**
 
+* Fix #8095: Misleading command descriptions
+* Fix #8921: Command `az keyvault key/secret/certificate list/list-deleted/list-versions` with parameter `--maxresults` do not work as intended
 * Fix #10846: Calling az keyvault secret show-deleted --id <value> still says secret_name "can not" be none
 * Fix #11084: Confusing encoding information
 
 **Network**
 
-* az application-gateway probe: Support --port option to specify a port for probing backend servers when create and update
+* az network application-gateway probe: Support --port option to specify a port for probing backend servers when create and update
+* az network application-gateway url-path-map create/update: bug fix for `--waf-policy`
+* az network application-gateway: support `--rewrite-rule-set`
 * az network list-service-aliases: Support list service aliases which can be used for Service Endpoint Policies
-
+* az network dns zone import: Support .@ in record name
 
 **Packaging**
 
@@ -56,12 +81,17 @@ Release History
 * Support for Policy API version 2019-09-01.
 * az policy set-definition: Support grouping within policy set definitions with `--definition-groups` parameter
 
+**SQL**
+
+* Added "--read-scale" and "--read-replicas" parameters to sql db create and update commands, to support read scale management.
+
 **Storage**
 
 * GA Release Large File Shares property for storage account create and update command
 * GA Release User Delegation SAS token Support
 * Add new commands `az storage account blob-service-properties show` and `az storage account blob-service-properties update --enable-change-feed` to manage blob service properties for storage account.
 * [COMING BREAKING CHANGE] `az storage copy`: `*` character is no longer supported as a wildcard in URL, but new parameters --include-pattern and --exclude-pattern will be added with `*` wildcard support.
+* Fix issue #11043: Support to remove whole container/share in `az storage remove` command
 
 2.0.77
 ++++++
@@ -130,6 +160,10 @@ Release History
 * [BREAKING CHANGE] application-gateway waf-policy: Rename subgroup rule to custom-rule
 * application-gateway http-listener: Add --firewall-policy when create
 * application-gateway url-path-map rule: Add --firewall-policy when create
+
+**Backup**
+
+* Added Backup support for SQL and SAP Hana workload.
 
 **Packaging**
 
