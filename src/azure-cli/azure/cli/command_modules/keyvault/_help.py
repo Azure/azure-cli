@@ -195,8 +195,7 @@ examples:
 
 helps['keyvault storage remove'] = """
 type: command
-short-summary: Remove a Key Vault managed Azure Storage Account and all associated SAS definitions.
-               This operation requires the storage/delete permission.
+short-summary: Remove a Key Vault managed Azure Storage Account and all associated SAS definitions. This operation requires the storage/delete permission.
 """
 
 helps['keyvault storage sas-definition'] = """
