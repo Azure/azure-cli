@@ -36,6 +36,10 @@ Release History
 * Cross Tenant Support for `az group deployment create` command by adding new parameter `--aux-subs`
 * Add new parameter `--metadata` to support adding metadata information for policy set definitions.
 
+**Backup**
+
+* Added Backup support for SQL and SAP Hana workload.
+
 **BotService**
 
 * [Breaking change] Remove '--version' flag from preview command 'az bot create'. Only v4 SDK bots are supported.
@@ -98,6 +102,11 @@ Release History
 
 * Support for Policy API version 2019-09-01.
 * az policy set-definition: Support grouping within policy set definitions with `--definition-groups` parameter
+
+** Redis **
+
+* Add preview param `--replicas-per-master` to `az redis create` command
+* Update azure-mgmt-redis from 6.0.0 to 7.0.0rc1
 
 **ServiceFabric**
 
@@ -184,10 +193,6 @@ Release History
 * application-gateway http-listener: Add --firewall-policy when create
 * application-gateway url-path-map rule: Add --firewall-policy when create
 
-**Backup**
-
-* Added Backup support for SQL and SAP Hana workload.
-
 **Packaging**
 
 * Rewrite the az wrapper in Python
@@ -208,8 +213,6 @@ Release History
 
 **Redis**
 
-* Add preview param `--replicas-per-master` to `az redis create` command
-* Update azure-mgmt-redis from 6.0.0 to 7.0.0rc1
 * Fix #2902: Avoid setting memory configs while updating Basic SKU cache
 
 **Reservations**
