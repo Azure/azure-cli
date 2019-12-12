@@ -224,6 +224,19 @@ aad_admin_sid_param_type = CLIArgumentType(
     options_list=['--object-id', '-i'],
     help='The unique ID of the Azure AD administrator.')
 
+read_scale_param_type = CLIArgumentType(
+    options_list=['--read-scale'],
+    help='If enabled, connections that have application intent set to readonly '
+    'in their connection string may be routed to a readonly secondary replica. '
+    'This property is only settable for Premium and Business Critical databases.',
+    arg_type=get_enum_type(['Enabled', 'Disabled']))
+
+read_replicas_param_type = CLIArgumentType(
+    options_list=['--read-replicas'],
+    type=int,
+    help='The number of readonly replicas to provision for the database. '
+    'Only settable for Hyperscale edition.')
+
 db_service_objective_examples = 'Basic, S0, P1, GP_Gen4_1, BC_Gen5_2, GP_Gen5_S_8.'
 dw_service_objective_examples = 'DW100, DW1000c'
 
@@ -287,7 +300,9 @@ def _configure_db_create_params(
             'zone_redundant',
             'auto_pause_delay',
             'min_capacity',
-            'compute_model'
+            'compute_model',
+            'read_scale',
+            'read_replica_count'
         ])
 
     # Create args that will be used to build up the Database's Sku object
@@ -319,11 +334,16 @@ def _configure_db_create_params(
     arg_ctx.argument('min_capacity',
                      arg_type=min_capacity_param_type)
 
+    arg_ctx.argument('read_scale',
+                     arg_type=read_scale_param_type)
+
+    arg_ctx.argument('read_replicas',
+                     arg_type=read_replicas_param_type)
+
     # Only applicable to default create mode. Also only applicable to db.
     if create_mode != CreateMode.default or engine != Engine.db:
         arg_ctx.ignore('sample_name')
         arg_ctx.ignore('catalog_collation')
-        arg_ctx.ignore('read_scale')
 
     # Only applicable to point in time restore or deleted restore create mode.
     if create_mode not in [CreateMode.restore, CreateMode.point_in_time_restore]:
@@ -359,6 +379,10 @@ def _configure_db_create_params(
         arg_ctx.ignore('auto_pause_delay')
         arg_ctx.ignore('min_capacity')
         arg_ctx.ignore('compute_model')
+
+        # ReadScale properties are not valid for DataWarehouse
+        arg_ctx.ignore('read_scale')
+        arg_ctx.ignore('read_replicas')
 
 
 # pylint: disable=too-many-statements
@@ -400,12 +424,11 @@ def load_arguments(self, _):
         c.argument('license_type',
                    arg_type=get_enum_type(DatabaseLicenseType))
 
-        # Needs testing
-        c.ignore('read_scale')
-        # c.argument('read_scale',
-        #            arg_type=get_three_state_flag(DatabaseReadScale.enabled.value,
-        #                                         DatabaseReadScale.disabled.value,
-        #                                         return_label=True))
+        c.argument('read_scale',
+                   arg_type=read_scale_param_type)
+
+        c.argument('read_replica_count',
+                   arg_type=read_replicas_param_type)
 
         c.argument('zone_redundant',
                    arg_type=zone_redundant_param_type)

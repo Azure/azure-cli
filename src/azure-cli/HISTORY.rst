@@ -79,6 +79,10 @@ Release History
 * Support for Policy API version 2019-09-01.
 * az policy set-definition: Support grouping within policy set definitions with `--definition-groups` parameter
 
+**SQL**
+
+* Added "--read-scale" and "--read-replicas" parameters to sql db create and update commands, to support read scale management.
+
 **Storage**
 
 * GA Release Large File Shares property for storage account create and update command
