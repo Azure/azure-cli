@@ -21,7 +21,6 @@ from ._azconfig.azconfig_client import AzconfigClient
 from ._azconfig.models import (KeyValue,
                                ModifyKeyValueOptions,
                                QueryKeyValueCollectionOptions)
-from .feature import list_feature
 from._featuremodels import (map_keyvalue_to_featureflag,
                             map_featureflag_to_keyvalue,
                             FeatureFlagValue)
@@ -163,19 +162,6 @@ def __read_kv_from_config_store(cmd, name=None, connection_string=None, key=None
     return key_values
 
 
-def __read_features_from_config_store(cmd, name=None, connection_string=None, key=None, label=None):
-    try:
-        # fetch list of all FeatureFlag objects matching the given label
-        return list_feature(cmd,
-                            feature=key,
-                            label=QueryKeyValueCollectionOptions.empty_label if label is None else label,
-                            name=name,
-                            connection_string=connection_string,
-                            all_=True)
-    except Exception as exception:
-        raise CLIError(str(exception))
-
-
 def __write_kv_and_features_to_config_store(cmd, key_values, features=None, name=None, connection_string=None, label=None):
     if not key_values and not features:
         return
@@ -287,16 +273,12 @@ def __serialize_kv_list_to_comparable_json_object(keyvalues, level):
 
 
 def __serialize_features_from_kv_list_to_comparable_json_object(keyvalues):
-    res = {}
+    features = []
     for kv in keyvalues:
         feature = map_keyvalue_to_featureflag(kv)
-        # state
-        feature_json = {'state': feature.state}
-        # conditions
-        feature_json['conditions'] = feature.conditions
-        # key
-        res[feature.key] = feature_json
-    return res
+        features.append(feature)
+
+    return __serialize_feature_list_to_comparable_json_object(features)
 
 
 def __serialize_feature_list_to_comparable_json_object(features):
@@ -593,8 +575,7 @@ def __export_features(retrieved_features, format_):
 
             feature_entry = {feature.key: feature_state}
 
-            if format_ == 'json':
-                exported_dict["FeatureManagement"].update(feature_entry)
+            exported_dict["FeatureManagement"].update(feature_entry)
 
         return __compact_key_values(exported_dict)
 
@@ -606,30 +587,24 @@ def __convert_feature_dict_to_keyvalue_list(features_dict, format_):
     # pylint: disable=too-many-nested-blocks
     key_values = []
     default_conditions = {'client_filters': []}
-    default_value = FeatureFlagValue(id_="")
 
     try:
         if format_ == 'json':
             for k, v in features_dict.items():
                 key = FEATURE_FLAG_PREFIX + str(k)
-                default_value.id_ = str(k)
+                default_value = FeatureFlagValue(id_=str(k))
 
                 if isinstance(v, dict):
-                    # This is a conditional feature
-                    default_value.enabled = True
+                    # This may be a conditional feature
+                    default_value.enabled = False
                     try:
                         default_value.conditions = {'client_filters': v["EnabledFor"]}
                     except KeyError:
                         raise CLIError("Feature '{0}' must contain 'EnabledFor' definition or have a true/false value. \n".format(str(k)))
 
-                    if not default_value.conditions["client_filters"]:
-                        # We support alternate format for specifying always OFF features
-                        # "FeatureU": {"EnabledFor": []}
-                        default_value.enabled = False
-                        default_value.conditions = default_conditions
+                    if default_value.conditions["client_filters"]:
+                        default_value.enabled = True
 
-                    else:
-                        # Convert Name and Parameters to lowercase for backend compatibility
                         for idx, val in enumerate(default_value.conditions["client_filters"]):
                             # each val should be a dict with at most 2 keys (Name, Parameters) or at least 1 key (Name)
                             val = {filter_key.lower(): filter_val for filter_key, filter_val in val.items()}
@@ -640,7 +615,6 @@ def __convert_feature_dict_to_keyvalue_list(features_dict, format_):
                             if val["name"].lower() == "alwayson":
                                 # We support alternate format for specifying always ON features
                                 # "FeatureT": {"EnabledFor": [{ "Name": "AlwaysOn"}]}
-                                default_value.conditions = default_conditions
                                 break
 
                             filter_param = val.get("parameters", {})

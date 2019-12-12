@@ -21,10 +21,11 @@ from ._azconfig.models import (KeyValue,
                                QueryKeyValueCollectionOptions,
                                QueryKeyValueOptions)
 from ._kv_helpers import (__compare_kvs_for_restore, __read_kv_from_file, __read_features_from_file,
-                          __write_kv_and_features_to_file, __read_kv_from_config_store, __read_features_from_config_store,
+                          __write_kv_and_features_to_file, __read_kv_from_config_store,
                           __write_kv_and_features_to_config_store, __discard_features_from_retrieved_kv, __read_kv_from_app_service,
                           __write_kv_to_app_service, __serialize_kv_list_to_comparable_json_object, __serialize_features_from_kv_list_to_comparable_json_object,
                           __serialize_feature_list_to_comparable_json_object, __print_features_preview, __print_preview, __print_restore_preview)
+from .feature import list_feature
 
 logger = get_logger(__name__)
 FEATURE_FLAG_PREFIX = ".appconfig.featureflag/"
@@ -158,8 +159,12 @@ def export_config(cmd,
         # Get all Feature flags with matching label
         if destination in ('file', 'appconfig'):
             # src_features is a list of FeatureFlag objects
-            src_features = __read_features_from_config_store(
-                cmd, name=name, connection_string=connection_string, key='*', label=label)
+            src_features = list_feature(cmd,
+                                        feature='*',
+                                        label=QueryKeyValueCollectionOptions.empty_label if label is None else label,
+                                        name=name,
+                                        connection_string=connection_string,
+                                        all_=True)
 
     # if customer needs preview & confirmation
     if not yes:
@@ -171,8 +176,12 @@ def export_config(cmd,
 
             if not skip_features:
                 # Append all features to dest_features list
-                dest_features = __read_features_from_config_store(
-                    cmd, name=dest_name, connection_string=dest_connection_string, key='*', label=dest_label)
+                dest_features = list_feature(cmd,
+                                             feature='*',
+                                             label=QueryKeyValueCollectionOptions.empty_label if dest_label is None else dest_label,
+                                             name=dest_name,
+                                             connection_string=dest_connection_string,
+                                             all_=True)
 
         elif destination == 'appservice':
             dest_kvs = __read_kv_from_app_service(cmd, appservice_account=appservice_account)
