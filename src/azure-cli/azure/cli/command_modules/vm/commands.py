@@ -472,7 +472,7 @@ def load_command_table(self, _):
     with self.command_group('vm monitor log', log_analytics_data_plane_sdk, client_factory=cf_log_analytics_data_plane) as g:
         g.custom_command('show', 'execute_query_for_vm', transform=transform_log_analytics_query_output)
 
-    with self.command_group('vm monitor metrics', resource_type=ResourceType.MGMT_MONITOR, operation_group='metric_definitions', is_preview=True) as g:
+    with self.command_group('vm monitor metrics', is_preview=True, min_api='2019-07-01') as g:
         from azure.cli.command_modules.monitor.transformers import metrics_table, metrics_definitions_table
         g.command('tail', 'list_metrics', command_type=monitor_custom, table_transformer=metrics_table)
-        g.command('list-definitions', 'list', command_type=metric_definitions_sdk, table_transformer=metrics_definitions_table)
+        g.custom_command('list-definitions', 'list_metrics_defintions', command_type=metric_definitions_sdk, table_transformer=metrics_definitions_table)
