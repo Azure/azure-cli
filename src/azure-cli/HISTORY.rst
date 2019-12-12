@@ -87,7 +87,7 @@ Release History
 
 **ServiceFabric**
 
-* Fixes in node-type add logic inclusding #10963: Adding new node type with durability level Gold will always throw CLI error
+* Fixes in node-type add logic including #10963: Adding new node type with durability level Gold will always throw CLI error
 * Update ServiceFabricNodeVmExt version to 1.1 in creation template
 
 2.0.77
