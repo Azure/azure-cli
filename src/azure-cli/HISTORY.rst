@@ -7,6 +7,11 @@ Release History
 
 * Support Local context in acr task run
 
+**AppConfig**
+
+* Fix bug when appending api-version to request url. The existing solution doesn't work with pagination.
+* Support showing languages besides English as our backend service support unicode for globalization.
+
 **AppService**
 
 * Fix issue #11217: webapp: az webapp config ssl upload should support slot parameter
