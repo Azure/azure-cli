@@ -357,6 +357,36 @@ class TestProfile(unittest.TestCase):
         self.assertTrue(profile.is_tenant_level_account())
 
     @mock.patch('adal.AuthenticationContext', autospec=True)
+    def test_create_account_with_subscriptions_allow_no_subscriptions_thru_service_principal(self, mock_auth_context):
+        """test subscription is returned even with --allow-no-subscriptions. """
+        mock_auth_context.acquire_token_with_client_credentials.return_value = self.token_entry1
+        cli = DummyCli()
+        mock_arm_client = mock.MagicMock()
+        mock_arm_client.subscriptions.list.return_value = [self.subscription1]
+        finder = SubscriptionFinder(cli, lambda _, _1, _2: mock_auth_context, None, lambda _: mock_arm_client)
+
+        storage_mock = {'subscriptions': []}
+        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
+        profile._management_resource_uri = 'https://management.core.windows.net/'
+
+        # action
+        result = profile.find_subscriptions_on_login(False,
+                                                     '1234',
+                                                     'my-secret',
+                                                     True,
+                                                     self.tenant_id,
+                                                     use_device_code=False,
+                                                     allow_no_subscriptions=True,
+                                                     subscription_finder=finder)
+        # assert
+        self.assertEqual(1, len(result))
+        self.assertEqual(result[0]['id'], self.id1.split('/')[-1])
+        self.assertEqual(result[0]['state'], 'Enabled')
+        self.assertEqual(result[0]['tenantId'], self.tenant_id)
+        self.assertEqual(result[0]['name'], self.display_name1)
+        self.assertFalse(profile.is_tenant_level_account())
+
+    @mock.patch('adal.AuthenticationContext', autospec=True)
     def test_create_account_without_subscriptions_thru_common_tenant(self, mock_auth_context):
         mock_auth_context.acquire_token.return_value = self.token_entry1
         mock_auth_context.acquire_token_with_username_password.return_value = self.token_entry1

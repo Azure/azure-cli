@@ -34,17 +34,20 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                  checks=[self.check('name', '{config_store_name}'),
                          self.check('location', '{rg_loc}'),
                          self.check('resourceGroup', resource_group),
-                         self.check('provisioningState', 'Succeeded')])
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('sku.name', 'free')])   # hard code the sku as it is not public facing yet.
         self.cmd('appconfig list -g {rg}',
                  checks=[self.check('[0].name', '{config_store_name}'),
                          self.check('[0].location', '{rg_loc}'),
                          self.check('[0].resourceGroup', resource_group),
-                         self.check('[0].provisioningState', 'Succeeded')])
+                         self.check('[0].provisioningState', 'Succeeded'),
+                         self.check('[0].sku.name', 'free')])
         self.cmd('appconfig show -n {config_store_name} -g {rg}',
                  checks=[self.check('name', '{config_store_name}'),
                          self.check('location', '{rg_loc}'),
                          self.check('resourceGroup', resource_group),
-                         self.check('provisioningState', 'Succeeded')])
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('sku.name', 'free')])
 
         tag_key = "Env"
         tag_value = "Prod"

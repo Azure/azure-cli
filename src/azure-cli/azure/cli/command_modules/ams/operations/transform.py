@@ -9,9 +9,11 @@ import os
 from knack.util import CLIError
 
 from azure.cli.command_modules.ams._sdk_utils import (get_sdk_model_class, get_stand_alone_presets)
+from azure.cli.command_modules.ams._utils import show_resource_not_found_message
 
-from azure.mgmt.media.models import (StandardEncoderPreset, TransformOutput,
-                                     BuiltInStandardEncoderPreset, EncoderNamedPreset)
+from azure.mgmt.media.models import (BuiltInStandardEncoderPreset, EncoderNamedPreset,
+                                     OnErrorType, Priority,
+                                     StandardEncoderPreset, TransformOutput)
 
 
 def create_transform(client, account_name, resource_group_name, transform_name, preset,
@@ -32,7 +34,7 @@ def add_transform_output(client, account_name, resource_group_name, transform_na
     transform = client.get(resource_group_name, account_name, transform_name)
 
     if not transform:
-        raise CLIError('The transform resource was not found.')
+        show_resource_not_found_message(resource_group_name, account_name, 'transforms', transform_name)
 
     transform.outputs.append(build_transform_output(preset, insights_to_extract, audio_language,
                                                     on_error, relative_priority))
@@ -42,7 +44,6 @@ def add_transform_output(client, account_name, resource_group_name, transform_na
 
 def build_transform_output(preset, insights_to_extract, audio_language, on_error,
                            relative_priority):
-    from azure.mgmt.media.models import (OnErrorType, Priority)
 
     validate_arguments(preset, insights_to_extract, audio_language)
     transform_output = get_transform_output(preset)
@@ -127,3 +128,11 @@ def parse_standard_encoder_preset(custom_preset_path):
     except:
         raise CLIError("Couldn't find a valid custom preset JSON definition in '{}'. Check the schema is correct."
                        .format(custom_preset_path))
+
+
+def get_transform(client, account_name, resource_group_name, transform_name):
+    transform = client.get(resource_group_name, account_name, transform_name)
+    if not transform:
+        show_resource_not_found_message(resource_group_name, account_name, 'transforms', transform_name)
+
+    return transform

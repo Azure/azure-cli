@@ -1,208 +1,5 @@
 interactions:
 - request:
-    body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
-      "date": "2019-06-13T22:53:01Z"}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - group create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '110'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - --location --name --tag
-      User-Agent:
-      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.66
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-07-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-06-13T22:53:01Z"},"properties":{"provisioningState":"Succeeded"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '384'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 13 Jun 2019 22:53:01 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
-    status:
-      code: 201
-      message: Created
-- request:
-    body: '{"sku": {"name": "Standard_LRS"}, "kind": "Storage", "location": "westus"}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - storage account create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '74'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -n -g -l --sku
-      User-Agent:
-      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 azure-mgmt-storage/3.3.0
-        Azure-SDK-For-Python AZURECLI/2.0.66
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2019-04-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      content-type:
-      - text/plain; charset=utf-8
-      date:
-      - Thu, 13 Jun 2019 22:53:02 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/731715f2-3b2f-496c-b6bf-508bb13c8e77?monitor=true&api-version=2019-04-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - storage account create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l --sku
-      User-Agent:
-      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 azure-mgmt-storage/3.3.0
-        Azure-SDK-For-Python AZURECLI/2.0.66
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/731715f2-3b2f-496c-b6bf-508bb13c8e77?monitor=true&api-version=2019-04-01
-  response:
-    body:
-      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"minimumTlsVersion":"TLS1_2","allowBlobPublicAccess":false,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2019-06-13T22:53:02.4738752Z"},"blob":{"enabled":true,"lastEnabledTime":"2019-06-13T22:53:02.4738752Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2019-06-13T22:53:02.2394969Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1227'
-      content-type:
-      - application/json
-      date:
-      - Thu, 13 Jun 2019 22:53:19 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - storage account keys list
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - -n -g --query -o
-      User-Agent:
-      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 azure-mgmt-storage/3.3.0
-        Azure-SDK-For-Python AZURECLI/2.0.66
-      accept-language:
-      - en-US
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2019-04-01
-  response:
-    body:
-      string: '{"keys":[{"keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '288'
-      content-type:
-      - application/json
-      date:
-      - Thu, 13 Jun 2019 22:53:20 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
-    status:
-      code: 200
-      message: OK
-- request:
     body: 'b''b\''{"location": "australiasoutheast", "properties": {"storageAccounts":
       [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002",
       "type": "Primary"}]}}\'''''
@@ -222,8 +19,8 @@ interactions:
       ParameterSetName:
       - -n -g --storage-account -l
       User-Agent:
-      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 azure-mgmt-media/1.1.1
-        Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-media/1.1.1
+        Azure-SDK-For-Python AZURECLI/2.0.71
       accept-language:
       - en-US
     method: PUT
@@ -231,7 +28,7 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\":\"ams000003\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003\",\"type\":\"Microsoft.Media/mediaservices\",\"location\":\"Australia
-        Southeast\",\"properties\":{\r\n    \"mediaServiceId\":\"b3d77d68-abe6-48b0-9dc3-de7554fdbb51\",\"storageAccounts\":[\r\n
+        Southeast\",\"properties\":{\r\n    \"mediaServiceId\":\"e4b30c84-8e19-4edc-a83e-259aeb26c8cf\",\"storageAccounts\":[\r\n
         \     {\r\n        \"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002\",\"type\":\"Primary\"\r\n
         \     }\r\n    ]\r\n  }\r\n}"
     headers:
@@ -242,7 +39,7 @@ interactions:
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Thu, 13 Jun 2019 22:53:24 GMT
+      - Tue, 17 Sep 2019 17:05:47 GMT
       expires:
       - '-1'
       odata-version:
@@ -250,15 +47,13 @@ interactions:
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/10.0
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
-      x-powered-by:
-      - ASP.NET
+      - '1199'
     status:
       code: 201
       message: Created
@@ -277,8 +72,8 @@ interactions:
       - -g -a -n --availability-set-name --cdn-provider --cdn-profile --description
         --max-cache-age --scale-units --tags --client-access-policy --cross-domain-policy
       User-Agent:
-      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 azure-mgmt-media/1.1.1
-        Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-media/1.1.1
+        Azure-SDK-For-Python AZURECLI/2.0.71
       accept-language:
       - en-US
     method: GET
@@ -286,7 +81,7 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\":\"ams000003\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003\",\"type\":\"Microsoft.Media/mediaservices\",\"location\":\"Australia
-        Southeast\",\"properties\":{\r\n    \"mediaServiceId\":\"b3d77d68-abe6-48b0-9dc3-de7554fdbb51\",\"storageAccounts\":[\r\n
+        Southeast\",\"properties\":{\r\n    \"mediaServiceId\":\"e4b30c84-8e19-4edc-a83e-259aeb26c8cf\",\"storageAccounts\":[\r\n
         \     {\r\n        \"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002\",\"type\":\"Primary\"\r\n
         \     }\r\n    ]\r\n  }\r\n}"
     headers:
@@ -297,7 +92,7 @@ interactions:
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Thu, 13 Jun 2019 22:53:26 GMT
+      - Tue, 17 Sep 2019 17:06:07 GMT
       expires:
       - '-1'
       odata-version:
@@ -305,17 +100,11 @@ interactions:
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/10.0
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-powered-by:
-      - ASP.NET
     status:
       code: 200
       message: OK
@@ -348,8 +137,8 @@ interactions:
       - -g -a -n --availability-set-name --cdn-provider --cdn-profile --description
         --max-cache-age --scale-units --tags --client-access-policy --cross-domain-policy
       User-Agent:
-      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 azure-mgmt-media/1.1.1
-        Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-media/1.1.1
+        Azure-SDK-For-Python AZURECLI/2.0.71
       accept-language:
       - en-US
     method: PUT
@@ -367,11 +156,11 @@ interactions:
         \\r\\n            <grant-to>\\r\\n                <resource path='/' include-subpaths='false'
         />\\r\\n            </grant-to>    \\r\\n        </policy>\\r\\n    </cross-domain-access>\\r\\n</access-policy>\",\"crossDomainPolicy\":\"<?xml
         version=\\\"1.0\\\" ?>\\r\\n<!DOCTYPE cross-domain-policy SYSTEM 'http://www.macromedia.com/xml/dtds/cross-domain-policy.dtd'>\\r\\n<cross-domain-policy>\\r\\n
-        \ <allow-access-from domain='*' />\\r\\n</cross-domain-policy>\"\r\n    },\"hostName\":\"strep000004-ams000003-ausoe.streaming.media.azure.net\",\"freeTrialEndTime\":\"0001-01-01T00:00:00Z\",\"provisioningState\":\"InProgress\",\"resourceState\":\"Stopped\",\"created\":\"2019-06-13T22:53:28.1898569Z\",\"lastModified\":\"2019-06-13T22:53:28.1898569Z\"\r\n
+        \ <allow-access-from domain='*' />\\r\\n</cross-domain-policy>\"\r\n    },\"hostName\":\"strep000004-ams000003-ausoe.streaming.media.azure.net\",\"freeTrialEndTime\":\"0001-01-01T00:00:00Z\",\"provisioningState\":\"InProgress\",\"resourceState\":\"Stopped\",\"created\":\"2019-09-17T17:07:51.8760825Z\",\"lastModified\":\"2019-09-17T17:07:51.8760825Z\"\r\n
         \ }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingendpointoperations/cac3de68-dc8a-4e99-a8bc-46f3afe7aa15?api-version=2018-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingendpointoperations/42dc255d-eb7d-44d8-9591-604187c4b032?api-version=2018-07-01
       cache-control:
       - no-cache
       content-length:
@@ -379,11 +168,11 @@ interactions:
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Thu, 13 Jun 2019 22:53:28 GMT
+      - Tue, 17 Sep 2019 17:07:51 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingendpointoperations/cac3de68-dc8a-4e99-a8bc-46f3afe7aa15?api-version=2018-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingendpointoperations/42dc255d-eb7d-44d8-9591-604187c4b032?api-version=2018-07-01
       odata-version:
       - '4.0'
       pragma:
@@ -395,7 +184,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1199'
       x-powered-by:
       - ASP.NET
     status:
@@ -416,18 +205,18 @@ interactions:
       - -g -a -n --availability-set-name --cdn-provider --cdn-profile --description
         --max-cache-age --scale-units --tags --client-access-policy --cross-domain-policy
       User-Agent:
-      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 azure-mgmt-media/1.1.1
-        Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-media/1.1.1
+        Azure-SDK-For-Python AZURECLI/2.0.71
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingendpointoperations/cac3de68-dc8a-4e99-a8bc-46f3afe7aa15?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingendpointoperations/42dc255d-eb7d-44d8-9591-604187c4b032?api-version=2018-07-01
   response:
     body:
-      string: "{\r\n  \"name\":\"cac3de68-dc8a-4e99-a8bc-46f3afe7aa15\",\"status\":\"InProgress\",\"error\":{\r\n
-        \   \"code\":\"None\",\"message\":null,\"target\":\"c009a993-d7c8-4506-830d-54fc31b07dc3\"\r\n
+      string: "{\r\n  \"name\":\"42dc255d-eb7d-44d8-9591-604187c4b032\",\"status\":\"InProgress\",\"error\":{\r\n
+        \   \"code\":\"None\",\"message\":null,\"target\":\"0a5e31cd-cc08-4a30-b0d3-8b685796a935\"\r\n
         \ }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingendpointoperations/cac3de68-dc8a-4e99-a8bc-46f3afe7aa15?api-version=2018-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingendpointoperations/42dc255d-eb7d-44d8-9591-604187c4b032?api-version=2018-07-01
       cache-control:
       - no-cache
       content-length:
@@ -435,11 +224,11 @@ interactions:
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Thu, 13 Jun 2019 22:53:31 GMT
+      - Tue, 17 Sep 2019 17:07:55 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingendpointoperations/cac3de68-dc8a-4e99-a8bc-46f3afe7aa15?api-version=2018-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingendpointoperations/42dc255d-eb7d-44d8-9591-604187c4b032?api-version=2018-07-01
       odata-version:
       - '4.0'
       pragma:
@@ -474,18 +263,76 @@ interactions:
       - -g -a -n --availability-set-name --cdn-provider --cdn-profile --description
         --max-cache-age --scale-units --tags --client-access-policy --cross-domain-policy
       User-Agent:
-      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 azure-mgmt-media/1.1.1
-        Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-media/1.1.1
+        Azure-SDK-For-Python AZURECLI/2.0.71
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingendpointoperations/cac3de68-dc8a-4e99-a8bc-46f3afe7aa15?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingendpointoperations/42dc255d-eb7d-44d8-9591-604187c4b032?api-version=2018-07-01
   response:
     body:
-      string: "{\r\n  \"name\":\"cac3de68-dc8a-4e99-a8bc-46f3afe7aa15\",\"status\":\"Succeeded\",\"error\":{\r\n
-        \   \"code\":\"None\",\"message\":null,\"target\":\"c009a993-d7c8-4506-830d-54fc31b07dc3\"\r\n
+      string: "{\r\n  \"name\":\"42dc255d-eb7d-44d8-9591-604187c4b032\",\"status\":\"InProgress\",\"error\":{\r\n
+        \   \"code\":\"None\",\"message\":null,\"target\":\"0a5e31cd-cc08-4a30-b0d3-8b685796a935\"\r\n
         \ }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingendpointoperations/cac3de68-dc8a-4e99-a8bc-46f3afe7aa15?api-version=2018-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingendpointoperations/42dc255d-eb7d-44d8-9591-604187c4b032?api-version=2018-07-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '172'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Tue, 17 Sep 2019 17:07:58 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingendpointoperations/42dc255d-eb7d-44d8-9591-604187c4b032?api-version=2018-07-01
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ams streaming-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -a -n --availability-set-name --cdn-provider --cdn-profile --description
+        --max-cache-age --scale-units --tags --client-access-policy --cross-domain-policy
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-media/1.1.1
+        Azure-SDK-For-Python AZURECLI/2.0.71
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingendpointoperations/42dc255d-eb7d-44d8-9591-604187c4b032?api-version=2018-07-01
+  response:
+    body:
+      string: "{\r\n  \"name\":\"42dc255d-eb7d-44d8-9591-604187c4b032\",\"status\":\"Succeeded\",\"error\":{\r\n
+        \   \"code\":\"None\",\"message\":null,\"target\":\"0a5e31cd-cc08-4a30-b0d3-8b685796a935\"\r\n
+        \ }\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingendpointoperations/42dc255d-eb7d-44d8-9591-604187c4b032?api-version=2018-07-01
       cache-control:
       - no-cache
       content-length:
@@ -493,11 +340,11 @@ interactions:
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Thu, 13 Jun 2019 22:53:34 GMT
+      - Tue, 17 Sep 2019 17:08:02 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingendpointoperations/cac3de68-dc8a-4e99-a8bc-46f3afe7aa15?api-version=2018-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingendpointoperations/42dc255d-eb7d-44d8-9591-604187c4b032?api-version=2018-07-01
       odata-version:
       - '4.0'
       pragma:
@@ -532,8 +379,8 @@ interactions:
       - -g -a -n --availability-set-name --cdn-provider --cdn-profile --description
         --max-cache-age --scale-units --tags --client-access-policy --cross-domain-policy
       User-Agent:
-      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 azure-mgmt-media/1.1.1
-        Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-media/1.1.1
+        Azure-SDK-For-Python AZURECLI/2.0.71
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingEndpoints/strep000004?api-version=2018-07-01
   response:
@@ -548,7 +395,7 @@ interactions:
         \\r\\n            <grant-to>\\r\\n                <resource path='/' include-subpaths='false'
         />\\r\\n            </grant-to>    \\r\\n        </policy>\\r\\n    </cross-domain-access>\\r\\n</access-policy>\",\"crossDomainPolicy\":\"<?xml
         version=\\\"1.0\\\" ?>\\r\\n<!DOCTYPE cross-domain-policy SYSTEM 'http://www.macromedia.com/xml/dtds/cross-domain-policy.dtd'>\\r\\n<cross-domain-policy>\\r\\n
-        \ <allow-access-from domain='*' />\\r\\n</cross-domain-policy>\"\r\n    },\"hostName\":\"strep000004-ams000003-ausoe.streaming.media.azure.net\",\"freeTrialEndTime\":\"0001-01-01T00:00:00Z\",\"provisioningState\":\"Succeeded\",\"resourceState\":\"Stopped\",\"created\":\"2019-06-13T22:53:28.2054815Z\",\"lastModified\":\"2019-06-13T22:53:28.2054815Z\"\r\n
+        \ <allow-access-from domain='*' />\\r\\n</cross-domain-policy>\"\r\n    },\"hostName\":\"strep000004-ams000003-ausoe.streaming.media.azure.net\",\"freeTrialEndTime\":\"0001-01-01T00:00:00Z\",\"provisioningState\":\"Succeeded\",\"resourceState\":\"Stopped\",\"created\":\"2019-09-17T17:07:51.9557476Z\",\"lastModified\":\"2019-09-17T17:07:51.9557476Z\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
@@ -558,7 +405,7 @@ interactions:
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Thu, 13 Jun 2019 22:53:35 GMT
+      - Tue, 17 Sep 2019 17:08:02 GMT
       expires:
       - '-1'
       odata-version:
@@ -594,8 +441,8 @@ interactions:
       ParameterSetName:
       - -g -a -n
       User-Agent:
-      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 azure-mgmt-media/1.1.1
-        Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-media/1.1.1
+        Azure-SDK-For-Python AZURECLI/2.0.71
       accept-language:
       - en-US
     method: GET
@@ -612,7 +459,7 @@ interactions:
         \\r\\n            <grant-to>\\r\\n                <resource path='/' include-subpaths='false'
         />\\r\\n            </grant-to>    \\r\\n        </policy>\\r\\n    </cross-domain-access>\\r\\n</access-policy>\",\"crossDomainPolicy\":\"<?xml
         version=\\\"1.0\\\" ?>\\r\\n<!DOCTYPE cross-domain-policy SYSTEM 'http://www.macromedia.com/xml/dtds/cross-domain-policy.dtd'>\\r\\n<cross-domain-policy>\\r\\n
-        \ <allow-access-from domain='*' />\\r\\n</cross-domain-policy>\"\r\n    },\"hostName\":\"strep000004-ams000003-ausoe.streaming.media.azure.net\",\"freeTrialEndTime\":\"0001-01-01T00:00:00Z\",\"provisioningState\":\"Succeeded\",\"resourceState\":\"Stopped\",\"created\":\"2019-06-13T22:53:28.2054815Z\",\"lastModified\":\"2019-06-13T22:53:28.2054815Z\"\r\n
+        \ <allow-access-from domain='*' />\\r\\n</cross-domain-policy>\"\r\n    },\"hostName\":\"strep000004-ams000003-ausoe.streaming.media.azure.net\",\"freeTrialEndTime\":\"0001-01-01T00:00:00Z\",\"provisioningState\":\"Succeeded\",\"resourceState\":\"Stopped\",\"created\":\"2019-09-17T17:07:51.9557476Z\",\"lastModified\":\"2019-09-17T17:07:51.9557476Z\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
@@ -622,7 +469,7 @@ interactions:
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Thu, 13 Jun 2019 22:53:38 GMT
+      - Tue, 17 Sep 2019 17:08:06 GMT
       expires:
       - '-1'
       odata-version:
@@ -652,6 +499,52 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
+      - ams streaming-endpoint show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -a -n
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-media/1.1.1
+        Azure-SDK-For-Python AZURECLI/2.0.71
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingEndpoints/se000005?api-version=2018-07-01
+  response:
+    body:
+      string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''Microsoft.Media/mediaservices/ams000003/streamingEndpoints/se000005''
+        under resource group ''clitest.rg000001'' was not found."}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '261'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 17 Sep 2019 17:08:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
       - ams streaming-endpoint delete
       Connection:
       - keep-alive
@@ -660,8 +553,8 @@ interactions:
       ParameterSetName:
       - -g -a -n
       User-Agent:
-      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 azure-mgmt-media/1.1.1
-        Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-media/1.1.1
+        Azure-SDK-For-Python AZURECLI/2.0.71
       accept-language:
       - en-US
     method: DELETE
@@ -671,17 +564,17 @@ interactions:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingendpointoperations/a8faed5e-7700-4f92-9dd8-c1e1508a59d0?api-version=2018-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingendpointoperations/fc00c9a3-956a-495a-a92a-03db443f252b?api-version=2018-07-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Thu, 13 Jun 2019 22:53:40 GMT
+      - Tue, 17 Sep 2019 17:08:08 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingendpointoperations/a8faed5e-7700-4f92-9dd8-c1e1508a59d0?api-version=2018-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingendpointoperations/fc00c9a3-956a-495a-a92a-03db443f252b?api-version=2018-07-01
       pragma:
       - no-cache
       server:
@@ -691,7 +584,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14998'
+      - '14999'
       x-powered-by:
       - ASP.NET
     status:
@@ -711,18 +604,18 @@ interactions:
       ParameterSetName:
       - -g -a -n
       User-Agent:
-      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 azure-mgmt-media/1.1.1
-        Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-media/1.1.1
+        Azure-SDK-For-Python AZURECLI/2.0.71
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingendpointoperations/a8faed5e-7700-4f92-9dd8-c1e1508a59d0?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingendpointoperations/fc00c9a3-956a-495a-a92a-03db443f252b?api-version=2018-07-01
   response:
     body:
-      string: "{\r\n  \"name\":\"a8faed5e-7700-4f92-9dd8-c1e1508a59d0\",\"status\":\"InProgress\",\"error\":{\r\n
-        \   \"code\":\"None\",\"message\":null,\"target\":\"c009a993-d7c8-4506-830d-54fc31b07dc3\"\r\n
+      string: "{\r\n  \"name\":\"fc00c9a3-956a-495a-a92a-03db443f252b\",\"status\":\"InProgress\",\"error\":{\r\n
+        \   \"code\":\"None\",\"message\":null,\"target\":\"0a5e31cd-cc08-4a30-b0d3-8b685796a935\"\r\n
         \ }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingendpointoperations/a8faed5e-7700-4f92-9dd8-c1e1508a59d0?api-version=2018-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingendpointoperations/fc00c9a3-956a-495a-a92a-03db443f252b?api-version=2018-07-01
       cache-control:
       - no-cache
       content-length:
@@ -730,11 +623,11 @@ interactions:
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Thu, 13 Jun 2019 22:53:43 GMT
+      - Tue, 17 Sep 2019 17:08:12 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingendpointoperations/a8faed5e-7700-4f92-9dd8-c1e1508a59d0?api-version=2018-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingendpointoperations/fc00c9a3-956a-495a-a92a-03db443f252b?api-version=2018-07-01
       odata-version:
       - '4.0'
       pragma:
@@ -768,18 +661,18 @@ interactions:
       ParameterSetName:
       - -g -a -n
       User-Agent:
-      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 azure-mgmt-media/1.1.1
-        Azure-SDK-For-Python AZURECLI/2.0.66
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-media/1.1.1
+        Azure-SDK-For-Python AZURECLI/2.0.71
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingendpointoperations/a8faed5e-7700-4f92-9dd8-c1e1508a59d0?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingendpointoperations/fc00c9a3-956a-495a-a92a-03db443f252b?api-version=2018-07-01
   response:
     body:
-      string: "{\r\n  \"name\":\"a8faed5e-7700-4f92-9dd8-c1e1508a59d0\",\"status\":\"Succeeded\",\"error\":{\r\n
-        \   \"code\":\"None\",\"message\":null,\"target\":\"c009a993-d7c8-4506-830d-54fc31b07dc3\"\r\n
+      string: "{\r\n  \"name\":\"fc00c9a3-956a-495a-a92a-03db443f252b\",\"status\":\"Succeeded\",\"error\":{\r\n
+        \   \"code\":\"None\",\"message\":null,\"target\":\"0a5e31cd-cc08-4a30-b0d3-8b685796a935\"\r\n
         \ }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingendpointoperations/a8faed5e-7700-4f92-9dd8-c1e1508a59d0?api-version=2018-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingendpointoperations/fc00c9a3-956a-495a-a92a-03db443f252b?api-version=2018-07-01
       cache-control:
       - no-cache
       content-length:
@@ -787,11 +680,11 @@ interactions:
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Thu, 13 Jun 2019 22:53:46 GMT
+      - Tue, 17 Sep 2019 17:08:14 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingendpointoperations/a8faed5e-7700-4f92-9dd8-c1e1508a59d0?api-version=2018-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingendpointoperations/fc00c9a3-956a-495a-a92a-03db443f252b?api-version=2018-07-01
       odata-version:
       - '4.0'
       pragma:
@@ -811,51 +704,4 @@ interactions:
     status:
       code: 200
       message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - group delete
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - --name --yes --no-wait
-      User-Agent:
-      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.66
-      accept-language:
-      - en-US
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-07-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Thu, 13 Jun 2019 22:53:48 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdCQjQ1Q1VCQUNDTjZKQ1hZMjZDTlRHVjVFNUMzVkFDS0JGSnwxNjM0RDI1MDk1N0FGMUMxLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2019-07-01
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
-    status:
-      code: 202
-      message: Accepted
 version: 1

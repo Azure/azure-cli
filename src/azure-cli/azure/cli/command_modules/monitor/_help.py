@@ -272,9 +272,15 @@ parameters:
   - name: --name -n
     short-summary: Name of the activity log alerts
   - name: --scope -s
-    short-summary: The scopes to add
+    short-summary: List of scopes to add. Each scope could be a resource ID, a resource group ID or a subscription ID.
   - name: --reset
     short-summary: Remove all the existing scopes before add new scopes.
+examples:
+  - name: Add three levels of scopes into activity-log alert.
+    text: >
+        az monitor activity-log alert scope add -n {AlertName} -g {ResourceGroup} -s /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx \\
+        /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myRG \\
+        /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myRG/Microsoft.KeyVault/vaults/mykey
 """
 
 helps['monitor activity-log alert scope remove'] = """
@@ -746,6 +752,17 @@ short-summary: Manage service diagnostic settings.
 helps['monitor diagnostic-settings categories'] = """
 type: group
 short-summary: Retrieve service diagnostic settings categories.
+"""
+
+helps['monitor diagnostic-settings categories list'] = """
+type: command
+short-summary:  List the diagnostic settings categories for the specified resource.
+examples:
+  - name: List diagnostic settings categories by using resource ID
+    text: az monitor diagnostic-settings categories list --resource /subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/myRG/providers/microsoft.logic/workflows/myWorkflow
+  - name: List diagnostic settings categories by using resource name
+    text: az monitor diagnostic-settings categories list -g myRG --resource-type microsoft.logic/workflows --resource myWorkflow
+
 """
 
 helps['monitor diagnostic-settings create'] = """

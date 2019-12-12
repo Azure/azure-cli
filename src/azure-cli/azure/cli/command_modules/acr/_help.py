@@ -624,26 +624,26 @@ examples:
   - name: Add a registry login credential to a task using a plain text username and password.
     text: |
         az acr task credential add -n taskname -r registryname --login-server myregistry.docker.io \\
-            -u 'myusername' -p 'mysecret'
+            -u myusername -p mysecret
   - name: Add a registry login credential to a task using key vault secret URIs for the username and password and the task system-assigned identity.
     text: |
         az acr task credential add -n taskname -r registryname --login-server myregistry.docker.io \\
-            -u 'https://mykeyvault.vault.azure.net/secrets/secretusername' -p 'https://mykeyvault.vault.azure.net/secrets/secretpassword' \\
+            -u https://mykeyvault.vault.azure.net/secrets/secretusername -p https://mykeyvault.vault.azure.net/secrets/secretpassword \\
             --use-identity [system]
   - name: Add a registry login credential to a task using key vault secret URIs for the username and password and a task user-assigned identity given by its client id.
     text: |
         az acr task credential add -n taskname -r registryname --login-server myregistry.docker.io \\
-            -u 'https://mykeyvault.vault.azure.net/secrets/secretusername' -p 'https://mykeyvault.vault.azure.net/secrets/secretpassword' \\
+            -u https://mykeyvault.vault.azure.net/secrets/secretusername -p https://mykeyvault.vault.azure.net/secrets/secretpassword \\
             --use-identity 00000000-0000-0000-0000-000000000000
   - name: Add a registry login credential to a task using a plain text username and key vault secret URI for the password and the task user-assigned identity given by its client id.
     text: |
         az acr task credential add -n taskname -r registryname --login-server myregistry.docker.io \\
-            -u 'myusername' -p 'https://mykeyvault.vault.azure.net/secrets/secretpassword' \\
+            -u myusername -p https://mykeyvault.vault.azure.net/secrets/secretpassword \\
             --use-identity 00000000-0000-0000-0000-000000000000
   - name: Add a registry login credential to a task using a plain text username and key vault secret URI for the password and the default managed identity for the task if one exists.
     text: |
         az acr task credential add -n taskname -r registryname --login-server myregistry.docker.io \\
-            -u 'myusername' -p 'https://mykeyvault.vault.azure.net/secrets/secretpassword'
+            -u myusername -p https://mykeyvault.vault.azure.net/secrets/secretpassword
   - name: Add a registry login credential to a task that uses only the task system-assigned identity to authenticate to the registry.
     text: |
         az acr task credential add -n taskname -r registryname --login-server myregistry.docker.io \\
@@ -675,7 +675,7 @@ examples:
   - name: Update the credential for a task
     text: |
         az acr task credential update -n taskname -r registryname --login-server myregistry.docker.io \\
-            -u 'myusername2' -p 'mysecret'
+            -u myusername2 -p mysecret
 """
 
 helps['acr task delete'] = """
@@ -786,9 +786,12 @@ examples:
   - name: Trigger a task run.
     text: >
         az acr task run -n MyTask -r MyRegistry
-  - name: Trigger a task run by overriding the context and file passed during Task create.
+  - name: Trigger a task run by overriding the context and file passed during Task create with a remote repository.
     text: >
         az acr task run -n MyTask -r MyRegistry -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile
+  - name: Trigger a task run by overriding the context and file passed during Task create with a local context.
+    text: >
+        az acr task run -n MyTask -r MyRegistry -c . -f Dockerfile
   - name: Trigger a task run by adding or overriding build arguments set during Task create.
     text: |
         az acr task run -n MyTask -r MyRegistry --arg DOCKER_CLI_BASE_IMAGE=docker:18.03.0-ce-git

@@ -249,8 +249,13 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                         # below are generated internally from 'source'
                         source_blob_uri=None, source_disk=None, source_snapshot=None,
                         source_storage_account_id=None, no_wait=False, tags=None, zone=None,
-                        disk_iops_read_write=None, disk_mbps_read_write=None, hyper_v_generation=None):
-    Disk, CreationData, DiskCreateOption = cmd.get_models('Disk', 'CreationData', 'DiskCreateOption')
+                        disk_iops_read_write=None, disk_mbps_read_write=None, hyper_v_generation=None,
+                        encryption_type=None, disk_encryption_set=None):
+    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    Disk, CreationData, DiskCreateOption, Encryption = cmd.get_models(
+        'Disk', 'CreationData', 'DiskCreateOption', 'Encryption')
 
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     if source_blob_uri:
@@ -263,8 +268,6 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         option = DiskCreateOption.empty
 
     if source_storage_account_id is None and source_blob_uri is not None:
-        from azure.cli.core.commands.client_factory import get_subscription_id
-        from msrestazure.tools import resource_id
         subscription_id = get_subscription_id(cmd.cli_ctx)
         storage_account_name = source_blob_uri.split('.')[0].split('/')[-1]
         source_storage_account_id = resource_id(
@@ -282,8 +285,21 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
 
     if size_gb is None and upload_size_bytes is None and (option == DiskCreateOption.empty or for_upload):
         raise CLIError('usage error: --size-gb or --upload-size-bytes required to create an empty disk')
+
+    if disk_encryption_set is not None and not is_valid_resource_id(disk_encryption_set):
+        disk_encryption_set = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
+            namespace='Microsoft.Compute', type='diskEncryptionSets', name=disk_encryption_set)
+
+    if disk_encryption_set is not None and encryption_type is None:
+        raise CLIError('usage error: Please specify --encryption-type.')
+    if encryption_type is not None:
+        encryption = Encryption(type=encryption_type, disk_encryption_set_id=disk_encryption_set)
+    else:
+        encryption = None
+
     disk = Disk(location=location, creation_data=creation_data, tags=(tags or {}),
-                sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb, os_type=os_type)
+                sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb, os_type=os_type, encryption=encryption)
 
     if hyper_v_generation:
         disk.hyper_vgeneration = hyper_v_generation
@@ -532,7 +548,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               identity_role='Contributor', identity_role_id=None, application_security_groups=None, zone=None,
               boot_diagnostics_storage=None, ultra_ssd_enabled=None, ephemeral_os_disk=None,
               proximity_placement_group=None, dedicated_host=None, dedicated_host_group=None, aux_subscriptions=None,
-              priority=None, max_price=None, eviction_policy=None, enable_agent=None, workspace=None, vmss=None):
+              priority=None, max_price=None, eviction_policy=None, enable_agent=None, workspace=None, vmss=None,
+              os_disk_encryption_set=None, data_disk_encryption_sets=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -545,9 +562,23 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                                                                 build_vm_daExtensionName_resource)
     from msrestazure.tools import resource_id, is_valid_resource_id
 
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+
+    if os_disk_encryption_set is not None and not is_valid_resource_id(os_disk_encryption_set):
+        os_disk_encryption_set = resource_id(
+            subscription=subscription_id, resource_group=resource_group_name,
+            namespace='Microsoft.Compute', type='diskEncryptionSets', name=os_disk_encryption_set)
+
+    if data_disk_encryption_sets is None:
+        data_disk_encryption_sets = []
+    for i, des in enumerate(data_disk_encryption_sets):
+        if des is not None and not is_valid_resource_id(des):
+            data_disk_encryption_sets[i] = resource_id(
+                subscription=subscription_id, resource_group=resource_group_name,
+                namespace='Microsoft.Compute', type='diskEncryptionSets', name=des)
+
     storage_sku = disk_info['os'].get('storageAccountType')
 
-    subscription_id = get_subscription_id(cmd.cli_ctx)
     network_id_template = resource_id(
         subscription=subscription_id, resource_group=resource_group_name,
         namespace='Microsoft.Network')
@@ -660,7 +691,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         boot_diagnostics_storage_uri=boot_diagnostics_storage, ultra_ssd_enabled=ultra_ssd_enabled,
         proximity_placement_group=proximity_placement_group, computer_name=computer_name,
         dedicated_host=dedicated_host, priority=priority, max_price=max_price, eviction_policy=eviction_policy,
-        enable_agent=enable_agent, vmss=vmss)
+        enable_agent=enable_agent, vmss=vmss, os_disk_encryption_set=os_disk_encryption_set,
+        data_disk_encryption_sets=data_disk_encryption_sets)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -964,7 +996,8 @@ def show_vm(cmd, resource_group_name, vm_name, show_details=False):
 
 
 def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None,
-              write_accelerator=None, license_type=None, no_wait=False, ultra_ssd_enabled=None, **kwargs):
+              write_accelerator=None, license_type=None, no_wait=False, ultra_ssd_enabled=None,
+              priority=None, max_price=None, **kwargs):
     from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
     vm = kwargs['parameters']
@@ -994,6 +1027,16 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
             vm.additional_capabilities = AdditionalCapabilities(ultra_ssd_enabled=ultra_ssd_enabled)
         else:
             vm.additional_capabilities.ultra_ssd_enabled = ultra_ssd_enabled
+
+    if priority is not None:
+        vm.priority = priority
+
+    if max_price is not None:
+        if vm.billing_profile is None:
+            BillingProfile = cmd.get_models('BillingProfile')
+            vm.billing_profile = BillingProfile(max_price=max_price)
+        else:
+            vm.billing_profile.max_price = max_price
 
     return sdk_no_wait(no_wait, _compute_client_factory(cmd.cli_ctx).virtual_machines.create_or_update,
                        resource_group_name, vm_name, **kwargs)
@@ -1996,7 +2039,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 identity_role_id=None, zones=None, priority=None, eviction_policy=None,
                 application_security_groups=None, ultra_ssd_enabled=None, ephemeral_os_disk=None,
                 proximity_placement_group=None, aux_subscriptions=None, terminate_notification_time=None,
-                max_price=None, computer_name_prefix=None, orchestration_mode='ScaleSetVM'):
+                max_price=None, computer_name_prefix=None, orchestration_mode='ScaleSetVM', scale_in_policy=None,
+                os_disk_encryption_set=None, data_disk_encryption_sets=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -2017,6 +2061,20 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
         storage_sku = disk_info['os'].get('storageAccountType')
 
         subscription_id = get_subscription_id(cmd.cli_ctx)
+
+        if os_disk_encryption_set is not None and not is_valid_resource_id(os_disk_encryption_set):
+            os_disk_encryption_set = resource_id(
+                subscription=subscription_id, resource_group=resource_group_name,
+                namespace='Microsoft.Compute', type='diskEncryptionSets', name=os_disk_encryption_set)
+
+        if data_disk_encryption_sets is None:
+            data_disk_encryption_sets = []
+        for i, des in enumerate(data_disk_encryption_sets):
+            if des is not None and not is_valid_resource_id(des):
+                data_disk_encryption_sets[i] = resource_id(
+                    subscription=subscription_id, resource_group=resource_group_name,
+                    namespace='Microsoft.Compute', type='diskEncryptionSets', name=des)
+
         network_id_template = resource_id(
             subscription=subscription_id, resource_group=resource_group_name,
             namespace='Microsoft.Network')
@@ -2208,7 +2266,9 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             custom_data=custom_data, secrets=secrets, license_type=license_type, zones=zones, priority=priority,
             eviction_policy=eviction_policy, application_security_groups=application_security_groups,
             ultra_ssd_enabled=ultra_ssd_enabled, proximity_placement_group=proximity_placement_group,
-            terminate_notification_time=terminate_notification_time, max_price=max_price)
+            terminate_notification_time=terminate_notification_time, max_price=max_price,
+            scale_in_policy=scale_in_policy, os_disk_encryption_set=os_disk_encryption_set,
+            data_disk_encryption_sets=data_disk_encryption_sets)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -2458,7 +2518,7 @@ def update_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_
 def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False, instance_id=None,
                 protect_from_scale_in=None, protect_from_scale_set_actions=None,
                 enable_terminate_notification=None, terminate_notification_time=None, ultra_ssd_enabled=None,
-                **kwargs):
+                scale_in_policy=None, priority=None, max_price=None, **kwargs):
     vmss = kwargs['parameters']
     client = _compute_client_factory(cmd.cli_ctx)
 
@@ -2505,6 +2565,20 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                     ultra_ssd_enabled=ultra_ssd_enabled)
             else:
                 vmss.virtual_machine_profile.additional_capabilities.ultra_ssd_enabled = ultra_ssd_enabled
+
+    if scale_in_policy is not None:
+        ScaleInPolicy = cmd.get_models('ScaleInPolicy')
+        vmss.scale_in_policy = ScaleInPolicy(rules=scale_in_policy)
+
+    if priority is not None:
+        vmss.virtual_machine_profile.priority = priority
+
+    if max_price is not None:
+        if vmss.virtual_machine_profile.billing_profile is None:
+            BillingProfile = cmd.get_models('BillingProfile')
+            vmss.virtual_machine_profile.billing_profile = BillingProfile(max_price=max_price)
+        else:
+            vmss.virtual_machine_profile.billing_profile.max_price = max_price
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.create_or_update,
                        resource_group_name, name, **kwargs)
@@ -2768,9 +2842,10 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
     return client.gallery_images.create_or_update(resource_group_name, gallery_name, gallery_image_name, image)
 
 
-def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_name, managed_image,
-                         gallery_image_version, location=None, target_regions=None, storage_account_type=None,
-                         end_of_life_date=None, exclude_from_latest=None, replica_count=None, tags=None):
+def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_name, gallery_image_version,
+                         location=None, target_regions=None, storage_account_type=None,
+                         end_of_life_date=None, exclude_from_latest=None, replica_count=None, tags=None,
+                         os_snapshot=None, data_snapshots=None, managed_image=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     ImageVersionPublishingProfile, GalleryArtifactSource, ManagedArtifact, ImageVersion, TargetRegion = cmd.get_models(
         'GalleryImageVersionPublishingProfile', 'GalleryArtifactSource', 'ManagedArtifact', 'GalleryImageVersion',
@@ -2778,24 +2853,46 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
     client = _compute_client_factory(cmd.cli_ctx)
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     end_of_life_date = fix_gallery_image_date_info(end_of_life_date)
-    if not is_valid_resource_id(managed_image):
+    if managed_image and not is_valid_resource_id(managed_image):
         managed_image = resource_id(subscription=client.config.subscription_id, resource_group=resource_group_name,
                                     namespace='Microsoft.Compute', type='images', name=managed_image)
+    if os_snapshot and not is_valid_resource_id(os_snapshot):
+        os_snapshot = resource_id(subscription=client.config.subscription_id, resource_group=resource_group_name,
+                                  namespace='Microsoft.Compute', type='snapshots', name=os_snapshot)
+    if data_snapshots:
+        for i, s in enumerate(data_snapshots):
+            if not is_valid_resource_id(data_snapshots[i]):
+                data_snapshots[i] = resource_id(
+                    subscription=client.config.subscription_id, resource_group=resource_group_name,
+                    namespace='Microsoft.Compute', type='snapshots', name=s)
     source = GalleryArtifactSource(managed_image=ManagedArtifact(id=managed_image))
     profile = ImageVersionPublishingProfile(exclude_from_latest=exclude_from_latest, end_of_life_date=end_of_life_date,
                                             target_regions=target_regions or [TargetRegion(name=location)],
                                             source=source, replica_count=replica_count,
                                             storage_account_type=storage_account_type)
     if cmd.supported_api_version(min_api='2019-07-01', operation_group='gallery_image_versions'):
+        if managed_image is None and os_snapshot is None:
+            raise CLIError('usage error: Please provide --managed-image or --os-snapshot')
         GalleryImageVersionStorageProfile = cmd.get_models('GalleryImageVersionStorageProfile')
         GalleryArtifactVersionSource = cmd.get_models('GalleryArtifactVersionSource')
-        # GalleryOSDiskImage = cmd.get_models('GalleryOSDiskImage')
-        # GalleryDataDiskImage = cmd.get_models('GalleryDataDiskImage')
-        source = GalleryArtifactVersionSource(id=managed_image)
-        storage_profile = GalleryImageVersionStorageProfile(source=source)
+        GalleryOSDiskImage = cmd.get_models('GalleryOSDiskImage')
+        GalleryDataDiskImage = cmd.get_models('GalleryDataDiskImage')
+        source = os_disk_image = data_disk_images = None
+        if managed_image is not None:
+            source = GalleryArtifactVersionSource(id=managed_image)
+        if os_snapshot is not None:
+            os_disk_image = GalleryOSDiskImage(source=GalleryArtifactVersionSource(id=os_snapshot))
+        if data_snapshots:
+            data_disk_images = []
+            for i, s in enumerate(data_snapshots):
+                data_disk_images.append(GalleryDataDiskImage(source=GalleryArtifactVersionSource(id=s), lun=i))
+        storage_profile = GalleryImageVersionStorageProfile(source=source, os_disk_image=os_disk_image,
+                                                            data_disk_images=data_disk_images)
         image_version = ImageVersion(publishing_profile=profile, location=location, tags=(tags or {}),
                                      storage_profile=storage_profile)
     else:
+        if managed_image is None:
+            raise CLIError('usage error: Please provide --managed-image')
         image_version = ImageVersion(publishing_profile=profile, location=location, tags=(tags or {}))
 
     return client.gallery_image_versions.create_or_update(resource_group_name=resource_group_name,
@@ -2904,4 +3001,42 @@ def execute_query_for_vm(cmd, client, resource_group_name, vm_name, analytics_qu
         raise CLIError('Cannot find the corresponding log analytics workspace. '
                        'Please check the status of log analytics workpsace.')
     return client.query(workspace, QueryBody(query=analytics_query, timespan=timespan))
+# endregion
+
+
+# disk encryption set
+def create_disk_encryption_set(cmd, client, resource_group_name, disk_encryption_set_name,
+                               key_url, source_vault, location=None, tags=None, no_wait=False):
+    from msrestazure.tools import resource_id, is_valid_resource_id
+    DiskEncryptionSet, EncryptionSetIdentity, KeyVaultAndKeyReference, SourceVault = cmd.get_models(
+        'DiskEncryptionSet', 'EncryptionSetIdentity', 'KeyVaultAndKeyReference', 'SourceVault')
+    encryption_set_identity = EncryptionSetIdentity(type='SystemAssigned')
+    if not is_valid_resource_id(source_vault):
+        source_vault = resource_id(subscription=client.config.subscription_id, resource_group=resource_group_name,
+                                   namespace='Microsoft.KeyVault', type='vaults', name=source_vault)
+    source_vault = SourceVault(id=source_vault)
+    keyVault_and_key_reference = KeyVaultAndKeyReference(source_vault=source_vault, key_url=key_url)
+    disk_encryption_set = DiskEncryptionSet(location=location, tags=tags, identity=encryption_set_identity,
+                                            active_key=keyVault_and_key_reference)
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, disk_encryption_set_name,
+                       disk_encryption_set)
+
+
+def list_disk_encryption_sets(cmd, client, resource_group_name=None):
+    if resource_group_name:
+        return client.list_by_resource_group(resource_group_name)
+    return client.list()
+
+
+def update_disk_encryption_set(instance, client, resource_group_name, key_url=None, source_vault=None):
+    from msrestazure.tools import resource_id, is_valid_resource_id
+    if not is_valid_resource_id(source_vault):
+        source_vault = resource_id(subscription=client.config.subscription_id, resource_group=resource_group_name,
+                                   namespace='Microsoft.KeyVault', type='vaults', name=source_vault)
+    if key_url:
+        instance.active_key.key_url = key_url
+    if source_vault:
+        instance.active_key.source_vault.id = source_vault
+    return instance
+
 # endregion

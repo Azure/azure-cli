@@ -30,9 +30,11 @@ def load_command_table(self, _):
         client_factory=base_mgmt_client_factory
     )
 
-    with self.command_group('reservations reservation-order', reservations_order_sdk) as g:
+    with self.command_group('reservations reservation-order', reservations_order_sdk, client_factory=reservation_order_mgmt_client_factory) as g:
         g.command('list', 'list')
         g.show_command('show', 'get')
+        g.custom_command('calculate', 'cli_calculate')
+        g.custom_command('purchase', 'cli_purchase')
 
     with self.command_group('reservations reservation', reservations_sdk) as g:
         g.command('list', 'list')

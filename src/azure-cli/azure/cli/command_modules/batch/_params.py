@@ -119,7 +119,7 @@ def load_arguments(self, _):
             c.argument('pool_id', options_list=('--pool-id',), help='The id of an existing pool. All the tasks of the job will run on the specified pool.')
 
     with self.argument_context('batch pool create') as c:
-        c.argument('os_family', arg_type=get_enum_type(['2', '3', '4', '5']))
+        c.argument('os_family', arg_type=get_enum_type(['2', '3', '4', '5', '6']))
         c.argument('auto_scale_formula', help='A formula for the desired number of compute nodes in the pool. The formula is checked for validity before the pool is created. If the formula is not valid, the Batch service rejects the request with detailed error information. For more information about specifying this formula, see https://azure.microsoft.com/documentation/articles/batch-automatic-scaling/.')
         c.extra('image', completer=load_supported_images, arg_group="Pool: Virtual Machine Configuration",
                 help="OS image reference. This can be either 'publisher:offer:sku[:version]' format, or a fully qualified ARM image id of the form '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.Compute/images/{imageName}'. If 'publisher:offer:sku[:version]' format, version is optional and if omitted latest will be used. Valid values can be retrieved via 'az batch pool supported-images list'. For example: 'MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:latest'")

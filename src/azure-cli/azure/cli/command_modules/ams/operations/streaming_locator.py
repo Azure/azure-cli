@@ -7,6 +7,9 @@ import json
 
 from knack.util import CLIError
 
+from azure.cli.command_modules.ams._utils import show_resource_not_found_message
+from azure.mgmt.media.models import (StreamingLocator, StreamingLocatorContentKey)
+
 
 def create_streaming_locator(client, resource_group_name, account_name,
                              streaming_locator_name, streaming_policy_name,
@@ -14,7 +17,6 @@ def create_streaming_locator(client, resource_group_name, account_name,
                              end_time=None, streaming_locator_id=None, alternative_media_id=None,
                              content_keys=None,
                              filters=None):
-    from azure.mgmt.media.models import StreamingLocator
 
     if not _valid_content_keys(content_keys):
         raise CLIError('Malformed content keys.')
@@ -40,7 +42,6 @@ def list_content_keys(client, resource_group_name, account_name,
 
 
 def _build_content_keys(content_keys):
-    from azure.mgmt.media.models import StreamingLocatorContentKey
 
     def __content_key_builder(key):
         return StreamingLocatorContentKey(
@@ -67,3 +68,12 @@ def _valid_content_keys(content_keys):
         raise CLIError('Malformed JSON: ' + str(err))
 
     return isinstance(obj, list) and all(__valid_content_key(k) for k in obj)
+
+
+def get_streaming_locator(client, resource_group_name, account_name,
+                          streaming_locator_name):
+    streaming_locator = client.get(resource_group_name, account_name, streaming_locator_name)
+    if not streaming_locator:
+        show_resource_not_found_message(resource_group_name, account_name, 'streamingLocators', streaming_locator_name)
+
+    return streaming_locator
