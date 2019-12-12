@@ -178,7 +178,7 @@ def _arm_to_cli_mapper(arm_dict):
             ossrdbms_resource_id=_get_ossrdbms_resource_id(arm_dict['name']),  # pylint: disable=line-too-long # change once ossrdbms_resource_id is available via ARM
             active_directory_data_lake_resource_id=arm_dict['activeDirectoryDataLake'] if 'activeDirectoryDataLake' in arm_dict else None,  # pylint: disable=line-too-long
             app_insights_resource_id=arm_dict['appInsightsResourceId'] if 'appInsightsResourceId' in arm_dict else None,
-            log_analytics_resource_id=arm_dict['logAnalyticsResourceId'] if 'logAnalyticsResourceId' in arm_dict else None), # pylint: disable=line-too-long
+            log_analytics_resource_id=arm_dict['logAnalyticsResourceId'] if 'logAnalyticsResourceId' in arm_dict else None),  # pylint: disable=line-too-long
         suffixes=CloudSuffixes(
             storage_endpoint=arm_dict['suffixes']['storage'],
             keyvault_dns=arm_dict['suffixes']['keyVaultDns'],
