@@ -625,3 +625,21 @@ class RevokeStorageAccountTests(StorageScenarioMixin, RoleScenarioTest, LiveScen
         time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
 
         self.cmd('storage blob show -c {container} -n {blob} --account-name {account} --sas-token {blob_sas}', expect_failure=True)
+
+
+@api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
+class BlobServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_storage_account_update_change_feed(self):
+        result = self.cmd('storage account blob-service-properties update --enable-change-feed true -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['changeFeed']['enabled'], True)
+
+        result = self.cmd('storage account blob-service-properties update --enable-change-feed false -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['changeFeed']['enabled'], False)
+
+        result = self.cmd('storage account blob-service-properties update --enable-change-feed -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['changeFeed']['enabled'], True)
+
+        result = self.cmd('storage account blob-service-properties show -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['changeFeed']['enabled'], True)

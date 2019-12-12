@@ -5,12 +5,13 @@
 
 from datetime import datetime, timedelta
 from knack.util import CLIError
-from azure.mgmt.media.models import AssetContainerPermission
+
+from azure.cli.command_modules.ams._utils import show_resource_not_found_message
+from azure.mgmt.media.models import (Asset, AssetContainerPermission)
 
 
 def create_asset(client, account_name, resource_group_name, asset_name, alternate_id=None, description=None,
                  storage_account=None, container=None):
-    from azure.mgmt.media.models import Asset
 
     asset = Asset(alternate_id=alternate_id, description=description, storage_account_name=storage_account,
                   container=container)
@@ -22,6 +23,14 @@ def get_sas_urls(client, resource_group_name, account_name, asset_name, permissi
                  expiry_time=(datetime.now() + timedelta(hours=23))):
     return client.list_container_sas(resource_group_name, account_name,
                                      asset_name, permissions, expiry_time).asset_container_sas_urls
+
+
+def get_asset(client, account_name, resource_group_name, asset_name):
+    asset = client.get(resource_group_name, account_name, asset_name)
+    if not asset:
+        show_resource_not_found_message(resource_group_name, account_name, 'assets', asset_name)
+
+    return asset
 
 
 def update_asset(instance, alternate_id=None, description=None):

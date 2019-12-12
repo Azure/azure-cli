@@ -126,6 +126,14 @@ helps['bot directline create'] = """
           text: |-
             az bot directline create -n botName -g MyResourceGroup --disablev1
 """
+helps['bot directline update'] = """
+    type: command
+    short-summary: Update the DirectLine Channel on a bot with only v3 protocol enabled.
+    examples:
+        - name: Update the DirectLine Channel for a bot.
+          text: |-
+            az bot directline update -n botName -g MyResourceGroup --disablev1
+"""
 helps['bot telegram create'] = """
     type: command
     short-summary: Create the Telegram Channel on a bot.

@@ -391,7 +391,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['policy1_json']['properties']['retentionPolicy']['dailySchedule']['retentionDuration']['count'] = 25
         self.kwargs['policy1_json'] = json.dumps(self.kwargs['policy1_json'])
 
-        self.cmd("backup policy create -g {rg} -v {vault} --policy '{policy1_json}' --name {policy2}")
+        self.cmd("backup policy create -g {rg} -v {vault} --policy '{policy1_json}' --name {policy2} --backup-management-type {type}")
 
         self.kwargs['policy2_json'] = self.cmd('backup policy show -g {rg} -v {vault} --n {policy2}', checks=[
             self.check("name", '{policy2}'),

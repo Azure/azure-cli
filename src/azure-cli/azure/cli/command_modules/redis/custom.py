@@ -44,6 +44,10 @@ def cli_redis_update(cmd, instance, sku=None, vm_size=None):
         if 'maxmemory-delta' in instance.redis_configuration:
             instance.redis_configuration.pop('maxmemory-delta')
 
+    # Trim zonal-configuration
+    if 'zonal-configuration' in instance.redis_configuration:
+        instance.redis_configuration.pop('zonal-configuration')
+
     # pylint: disable=too-many-function-args
     update_params = RedisUpdateParameters(
         redis_configuration=instance.redis_configuration,
@@ -61,7 +65,8 @@ def cli_redis_update(cmd, instance, sku=None, vm_size=None):
 def cli_redis_create(cmd, client,
                      resource_group_name, name, location, sku, vm_size, tags=None,
                      redis_configuration=None, enable_non_ssl_port=None, tenant_settings=None,
-                     shard_count=None, minimum_tls_version=None, subnet_id=None, static_ip=None, zones=None):
+                     shard_count=None, minimum_tls_version=None, subnet_id=None, static_ip=None,
+                     zones=None, replicas_per_master=None):
     # pylint:disable=line-too-long
     if ((sku.lower() in ['standard', 'basic'] and vm_size.lower() not in allowed_c_family_sizes) or (sku.lower() in ['premium'] and vm_size.lower() not in allowed_p_family_sizes)):
         raise wrong_vmsize_error
@@ -76,6 +81,7 @@ def cli_redis_create(cmd, client,
         location=location,
         redis_configuration=redis_configuration,
         enable_non_ssl_port=enable_non_ssl_port,
+        replicas_per_master=replicas_per_master,
         tenant_settings=tenant_settings_in_json,
         shard_count=shard_count,
         minimum_tls_version=minimum_tls_version,

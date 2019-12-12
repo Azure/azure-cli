@@ -113,6 +113,15 @@ def validate_object(obj, error_message):
         raise ValueError(error_message)
 
 
+def get_target_path(resource_type, path, logical_name, data_directory_paths):
+    for filepath in data_directory_paths:
+        if filepath.type == resource_type:
+            data_directory_path = filepath
+    file_type = path.split('\\')[-1].split('.')[1]
+    file_name = logical_name + '_' + str(int(time.time())) + '.' + file_type
+    return data_directory_path.path + file_name
+
+
 # Tracking Utilities
 # pylint: disable=inconsistent-return-statements
 def track_backup_ilr(cli_ctx, result, vault_name, resource_group):
