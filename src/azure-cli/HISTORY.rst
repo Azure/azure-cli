@@ -57,11 +57,11 @@ Release History
 
 **Key Vault**
 
-* Fix #8095: `az keyvault storage remove`: Misleading command descriptions
-* Fix #8921: Command `az keyvault key/secret/certificate list/list-deleted/list-versions` with parameter `--maxresults` do not work as intended
+* Fix #8095: `az keyvault storage remove`: improve the help message
+* Fix #8921: `az keyvault key/secret/certificate list/list-deleted/list-versions`: fix the validation bug on parameter `--maxresults`
 * Fix #10512: `az keyvault set-policy`: improve the error message when none of `--object-id`, `--spn` or `--upn` is specified
-* Fix #10846: Calling `az keyvault secret show-deleted --id <value>` still says secret_name "can not" be none
-* Fix #11084: `az keyvault secret download`: Confusing encoding information
+* Fix #10846: `az keyvault secret show-deleted`: when `--id` is specified, `--name/-n` is not required
+* Fix #11084: `az keyvault secret download`: improve the help message of parameter `--encoding`
 
 **Network**
 
