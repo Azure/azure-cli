@@ -17,6 +17,7 @@ Release History
 **ARM**
 
 * Update azure-mgmt-resource package to use 6.0.0
+* Add new parameter '--metadata' to support adding metadata information for policy set definitions.
 
 **BotService**
 
