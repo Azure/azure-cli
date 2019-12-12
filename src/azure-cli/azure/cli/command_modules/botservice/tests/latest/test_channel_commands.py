@@ -102,3 +102,20 @@ class ChannelTests(ScenarioTest):
         ])
 
         self.cmd('az bot directline delete -g {rg} -n {botname}')
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_update_directline(self, resource_group):
+        self.create_bot(resource_group)
+        self.cmd('az bot directline create -g {rg} -n {botname}', checks=[
+            self.check('properties.properties.sites[0].siteName', 'Default Site'),
+            self.check('properties.properties.sites[0].isEnabled', True),
+            self.check('properties.properties.sites[0].isSecureSiteEnabled', False)
+        ])
+
+        origin_url = 'https://mybotsite1.azurewebsites.net'
+        self.kwargs.update({'origin_url': origin_url})
+
+        self.cmd('az bot directline update -g {rg} -n {botname} --enable-enhanced-auth --trusted-origins {origin_url} --debug', checks=[
+            self.check('properties.properties.sites[0].trustedOrigins[0]', 'https://mybotsite1.azurewebsites.net'),
+            self.check('properties.properties.sites[0].isSecureSiteEnabled', True)
+        ])

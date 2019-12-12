@@ -6,6 +6,8 @@
 
 from enum import Enum
 
+from knack.util import CLIError
+
 from azure.cli.core.util import b64encode
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -249,7 +251,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
         attach_os_disk=None, os_disk_size_gb=None, custom_data=None, secrets=None, license_type=None, zone=None,
         disk_info=None, boot_diagnostics_storage_uri=None, ultra_ssd_enabled=None, proximity_placement_group=None,
         computer_name=None, dedicated_host=None, priority=None, max_price=None, eviction_policy=None,
-        enable_agent=None, vmss=None):
+        enable_agent=None, vmss=None, os_disk_encryption_set=None, data_disk_encryption_sets=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -337,7 +339,12 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
                     'createOption': 'fromImage',
                     'name': os_disk_name,
                     'caching': os_caching,
-                    'managedDisk': {'storageAccountType': disk_info['os'].get('storageAccountType')}
+                    'managedDisk': {
+                        'storageAccountType': disk_info['os'].get('storageAccountType'),
+                        'diskEncryptionSet': {
+                            'id': os_disk_encryption_set,
+                        }
+                    }
                 },
                 'imageReference': {
                     'publisher': os_publisher,
@@ -351,7 +358,12 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
                     'createOption': 'fromImage',
                     'name': os_disk_name,
                     'caching': os_caching,
-                    'managedDisk': {'storageAccountType': disk_info['os'].get('storageAccountType')}
+                    'managedDisk': {
+                        'storageAccountType': disk_info['os'].get('storageAccountType'),
+                        'diskEncryptionSet': {
+                            'id': os_disk_encryption_set,
+                        }
+                    }
                 },
                 "imageReference": {
                     'id': image_reference
@@ -373,6 +385,12 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
         if disk_info['os'].get('writeAcceleratorEnabled') is not None:
             profile['osDisk']['writeAcceleratorEnabled'] = disk_info['os']['writeAcceleratorEnabled']
         data_disks = [v for k, v in disk_info.items() if k != 'os']
+        if data_disk_encryption_sets:
+            if len(data_disk_encryption_sets) != len(data_disks):
+                raise CLIError(
+                    'usage error: Number of --data-disk-encryption-sets mismatches with number of data disks.')
+            for i, data_disk in enumerate(data_disks):
+                data_disk['managedDisk']['diskEncryptionSet'] = {'id': data_disk_encryption_sets[i]}
         if data_disks:
             profile['dataDisks'] = data_disks
 
@@ -651,7 +669,8 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
                         single_placement_group=None, platform_fault_domain_count=None, custom_data=None,
                         secrets=None, license_type=None, zones=None, priority=None, eviction_policy=None,
                         application_security_groups=None, ultra_ssd_enabled=None, proximity_placement_group=None,
-                        terminate_notification_time=None, max_price=None):
+                        terminate_notification_time=None, max_price=None, scale_in_policy=None,
+                        os_disk_encryption_set=None, data_disk_encryption_sets=None):
 
     # Build IP configuration
     ip_configuration = {
@@ -715,6 +734,10 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
             'caching': os_caching,
             'managedDisk': {'storageAccountType': disk_info['os'].get('storageAccountType')}
         }
+        if os_disk_encryption_set is not None:
+            storage_properties['osDisk']['managedDisk']['diskEncryptionSet'] = {
+                'id': os_disk_encryption_set
+            }
         if disk_info['os'].get('diffDiskSettings'):
             storage_properties['osDisk']['diffDiskSettings'] = disk_info['os']['diffDiskSettings']
 
@@ -730,6 +753,12 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
             'id': image
         }
     data_disks = [v for k, v in disk_info.items() if k != 'os']
+    if data_disk_encryption_sets:
+        if len(data_disk_encryption_sets) != len(data_disks):
+            raise CLIError(
+                'usage error: Number of --data-disk-encryption-sets mismatches with number of data disks.')
+        for i, data_disk in enumerate(data_disks):
+            data_disk['managedDisk']['diskEncryptionSet'] = {'id': data_disk_encryption_sets[i]}
     if data_disks:
         storage_properties['dataDisks'] = data_disks
 
@@ -835,6 +864,9 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
             }
         }
         vmss_properties['virtualMachineProfile']['scheduledEventsProfile'] = scheduled_events_profile
+
+    if scale_in_policy:
+        vmss_properties['scaleInPolicy'] = {'rules': scale_in_policy}
 
     vmss = {
         'type': 'Microsoft.Compute/virtualMachineScaleSets',

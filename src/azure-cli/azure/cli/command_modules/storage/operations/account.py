@@ -24,8 +24,9 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
     scf = storage_client_factory(cmd.cli_ctx)
-    logger.warning("The default kind for created storage account will change to 'StorageV2' from 'Storage' "
-                   "in the future")
+    if kind is None:
+        logger.warning("The default kind for created storage account will change to 'StorageV2' from 'Storage' "
+                       "in the future")
     params = StorageAccountCreateParameters(sku=Sku(name=sku), kind=Kind(kind), location=location, tags=tags)
     if custom_domain:
         params.custom_domain = CustomDomain(name=custom_domain, use_sub_domain=None)
@@ -334,3 +335,10 @@ def update_management_policies(client, resource_group_name, account_name, parame
     if parameters:
         parameters = parameters.policy
     return client.create_or_update(resource_group_name, account_name, policy=parameters)
+
+
+# TODO: support updating other properties besides 'enable_change_feed'
+def update_blob_service_properties(cmd, instance, enable_change_feed=None):
+    if enable_change_feed is not None:
+        instance.change_feed = cmd.get_models('ChangeFeed')(enabled=enable_change_feed)
+    return instance

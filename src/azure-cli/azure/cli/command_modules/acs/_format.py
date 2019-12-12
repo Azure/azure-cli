@@ -19,7 +19,7 @@ def _aks_agentpool_table_format(result):
     parsed = compile_jmes("""{
         name: name,
         osType: osType,
-        kubernetesVersion: kubernetesVersion,
+        kubernetesVersion: orchestratorVersion,
         vmSize: vmSize,
         osDiskSizeGB: osDiskSizeGB,
         count: count,
