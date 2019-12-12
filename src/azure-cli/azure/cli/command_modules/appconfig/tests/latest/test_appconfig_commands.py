@@ -209,7 +209,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
         # KeyVault reference tests
         keyvault_key = "HostSecrets"
         keyvault_id = "https://fake.vault.azure.net/secrets/fakesecret"
-        keyvault_value = "{{u\"uri\": \"https://fake.vault.azure.net/secrets/fakesecret\"}}" if sys.version_info[0] < 3 else "{{\"uri\": \"https://fake.vault.azure.net/secrets/fakesecret\"}}"
+        keyvault_value = "{{\"uri\": \"https://fake.vault.azure.net/secrets/fakesecret\"}}"
         keyvault_content_type = "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
 
         self.kwargs.update({
