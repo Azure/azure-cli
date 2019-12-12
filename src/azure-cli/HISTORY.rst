@@ -8,6 +8,10 @@ Release History
 
 * Support Local context in acr task run
 
+**AMS**
+
+* Update show commands to return 3 when resource not found
+
 **AppService**
 
 * Fix issue #11217: webapp: az webapp config ssl upload should support slot parameter
