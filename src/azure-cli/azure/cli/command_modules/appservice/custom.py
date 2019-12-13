@@ -1962,9 +1962,9 @@ def _get_log(url, user_name, password, log_file=None):
     r.release_conn()
 
 
-def upload_ssl_cert(cmd, resource_group_name, name, certificate_password, certificate_file):
+def upload_ssl_cert(cmd, resource_group_name, name, certificate_password, certificate_file, slot=None):
     client = web_client_factory(cmd.cli_ctx)
-    webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
+    webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     cert_file = open(certificate_file, 'rb')
     cert_contents = cert_file.read()
     hosting_environment_profile_param = (webapp.hosting_environment_profile.name
@@ -2003,6 +2003,54 @@ def delete_ssl_cert(cmd, resource_group_name, certificate_thumbprint):
         if webapp_cert.thumbprint == certificate_thumbprint:
             return client.certificates.delete(resource_group_name, webapp_cert.name)
     raise CLIError("Certificate for thumbprint '{}' not found".format(certificate_thumbprint))
+
+
+def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certificate_name):
+    client = web_client_factory(cmd.cli_ctx)
+    webapp = client.web_apps.get(resource_group_name, name)
+    if not webapp:
+        raise CLIError("'{}' app doesn't exist in resource group {}".format(name, resource_group_name))
+    server_farm_id = webapp.server_farm_id
+    location = webapp.location
+    kv_id = _format_key_vault_id(cmd.cli_ctx, key_vault, resource_group_name)
+    kv_id_parts = parse_resource_id(kv_id)
+    kv_name = kv_id_parts['name']
+    kv_resource_group_name = kv_id_parts['resource_group']
+    cert_name = '{}-{}-{}'.format(resource_group_name, kv_name, key_vault_certificate_name)
+    lnk = 'https://azure.github.io/AppService/2016/05/24/Deploying-Azure-Web-App-Certificate-through-Key-Vault.html'
+    lnk_msg = 'Find more details here: {}'.format(lnk)
+    if not _check_service_principal_permissions(cmd, kv_resource_group_name, kv_name):
+        logger.warning('Unable to verify Key Vault permissions.')
+        logger.warning('You may need to grant Microsoft.Azure.WebSites service principal the Secret:Get permission')
+        logger.warning(lnk_msg)
+
+    kv_cert_def = Certificate(location=location, key_vault_id=kv_id, password='',
+                              key_vault_secret_name=key_vault_certificate_name, server_farm_id=server_farm_id)
+
+    return client.certificates.create_or_update(name=cert_name, resource_group_name=resource_group_name,
+                                                certificate_envelope=kv_cert_def)
+
+
+def _check_service_principal_permissions(cmd, resource_group_name, key_vault_name):
+    from azure.cli.command_modules.keyvault._client_factory import keyvault_client_vaults_factory
+    from azure.cli.command_modules.role._client_factory import _graph_client_factory
+    from azure.graphrbac.models import GraphErrorException
+    kv_client = keyvault_client_vaults_factory(cmd.cli_ctx, None)
+    vault = kv_client.get(resource_group_name=resource_group_name, vault_name=key_vault_name)
+    # Check for Microsoft.Azure.WebSites app registration
+    AZURE_PUBLIC_WEBSITES_APP_ID = 'abfa0a7c-a6b6-4736-8310-5855508787cd'
+    AZURE_GOV_WEBSITES_APP_ID = '6a02c803-dafd-4136-b4c3-5a6f318b4714'
+    graph_sp_client = _graph_client_factory(cmd.cli_ctx).service_principals
+    for policy in vault.properties.access_policies:
+        try:
+            sp = graph_sp_client.get(policy.object_id)
+            if sp.app_id == AZURE_PUBLIC_WEBSITES_APP_ID or sp.app_id == AZURE_GOV_WEBSITES_APP_ID:
+                for perm in policy.permissions.secrets:
+                    if perm == "Get":
+                        return True
+        except GraphErrorException:
+            pass  # Lookup will fail for non service principals (users, groups, etc.)
+    return False
 
 
 def _update_host_name_ssl_state(cli_ctx, resource_group_name, webapp_name, webapp,
@@ -3251,3 +3299,18 @@ def _validate_asp_sku(app_service_environment, sku):
         if app_service_environment:
             raise CLIError("Only pricing tier 'Isolated' is allowed in this app service plan. Use this link to "
                            "learn more: https://docs.microsoft.com/en-us/azure/app-service/overview-hosting-plans")
+
+
+def _format_key_vault_id(cli_ctx, key_vault, resource_group_name):
+    key_vault_is_id = is_valid_resource_id(key_vault)
+    if key_vault_is_id:
+        return key_vault
+
+    from msrestazure.tools import resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    return resource_id(
+        subscription=get_subscription_id(cli_ctx),
+        resource_group=resource_group_name,
+        namespace='Microsoft.KeyVault',
+        type='vaults',
+        name=key_vault)

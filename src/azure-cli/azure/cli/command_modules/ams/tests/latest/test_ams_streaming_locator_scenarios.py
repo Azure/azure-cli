@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
+from azure.cli.core.util import CLIError
 
 import os
 import json
@@ -60,6 +61,13 @@ class AmsStreamingLocatorTests(ScenarioTest):
             self.check('name', '{streamingLocatorName}'),
             self.check('resourceGroup', '{rg}')
         ])
+
+        nonexits_streaming_locator_name = self.create_random_name(prefix='sl', length=20)
+        self.kwargs.update({
+            'nonexits_streaming_locator_name': nonexits_streaming_locator_name
+        })
+        with self.assertRaisesRegexp(SystemExit, '3'):
+            self.cmd('az ams streaming-locator show -a {amsname} -n {nonexits_streaming_locator_name} -g {rg}')
 
         list = self.cmd('az ams streaming-locator list -a {amsname} -g {rg}').get_output_in_json()
         assert len(list) > 0

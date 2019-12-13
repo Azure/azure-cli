@@ -34,7 +34,7 @@ from time import sleep
 
 # Constants
 server_name_prefix = 'clitestserver'
-server_name_max_length = 63
+server_name_max_length = 62
 managed_instance_name_prefix = 'clitestmi'
 managed_instance_name_max_length = 63
 
@@ -279,20 +279,24 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
         database_name = "cliautomationdb01"
         database_name_2 = "cliautomationdb02"
         database_name_3 = "cliautomationdb03"
-        update_service_objective = 'S1'
+        update_service_objective = 'P1'
         update_storage = '10GB'
         update_storage_bytes = str(10 * 1024 * 1024 * 1024)
+        read_scale_disabled = 'Disabled'
+        read_scale_enabled = 'Enabled'
 
         # test sql db commands
-        db1 = self.cmd('sql db create -g {} --server {} --name {}'
-                       .format(resource_group, server, database_name),
+        db1 = self.cmd('sql db create -g {} --server {} --name {} --read-scale {}'
+                       .format(resource_group, server, database_name, read_scale_disabled),
                        checks=[
                            JMESPathCheck('resourceGroup', resource_group),
                            JMESPathCheck('name', database_name),
                            JMESPathCheck('location', resource_group_location),
                            JMESPathCheck('elasticPoolId', None),
                            JMESPathCheck('status', 'Online'),
-                           JMESPathCheck('zoneRedundant', False)]).get_output_in_json()
+                           JMESPathCheck('zoneRedundant', False),
+                           JMESPathCheck('readScale', 'Disabled'),
+                           JMESPathCheck('readReplicaCount', '0')]).get_output_in_json()
 
         self.cmd('sql db list -g {} --server {}'
                  .format(resource_group, server),
@@ -321,16 +325,19 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group)])
 
         # Update by group/server/name
-        self.cmd('sql db update -g {} -s {} -n {} --service-objective {} --max-size {}'
+        self.cmd('sql db update -g {} -s {} -n {} --service-objective {} --max-size {} --read-scale {}'
                  ' --set tags.key1=value1'
                  .format(resource_group, server, database_name,
-                         update_service_objective, update_storage),
+                         update_service_objective, update_storage,
+                         read_scale_enabled),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('name', database_name),
                      JMESPathCheck('requestedServiceObjectiveName', update_service_objective),
                      JMESPathCheck('maxSizeBytes', update_storage_bytes),
-                     JMESPathCheck('tags.key1', 'value1')])
+                     JMESPathCheck('tags.key1', 'value1'),
+                     JMESPathCheck('readScale', 'Enabled'),
+                     JMESPathCheck('readReplicaCount', '1')])
 
         # Update by id
         self.cmd('sql db update --id {} --set tags.key2=value2'
@@ -458,6 +465,40 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('sku.tier', vcore_edition_updated),
                      JMESPathCheck('sku.capacity', vcore_capacity_updated),
                      JMESPathCheck('sku.family', vcore_family_updated)])
+
+    @ResourceGroupPreparer(name_prefix='clitest-sql', location='eastus2')
+    @SqlServerPreparer(name_prefix='clitest-sql', location='eastus2')
+    @AllowLargeResponse()
+    def test_sql_db_read_replica_mgmt(self, resource_group, resource_group_location, server):
+        database_name = "cliautomationdb01"
+
+        # Create database with Hyperscale edition
+        edition = 'Hyperscale'
+        family = 'Gen5'
+        capacity = 2
+        self.cmd('sql db create -g {} --server {} --name {} --edition {} --family {} --capacity {}'
+                 .format(resource_group, server, database_name, edition, family, capacity),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('edition', edition),
+                     JMESPathCheck('sku.tier', edition),
+                     JMESPathCheck('readScale', 'Enabled'),
+                     JMESPathCheck('readReplicaCount', '1')])
+
+        # Increase read replicas
+        self.cmd('sql db update -g {} --server {} --name {} --read-replicas {}'
+                 .format(resource_group, server, database_name, 3),
+                 checks=[
+                     JMESPathCheck('readScale', 'Enabled'),
+                     JMESPathCheck('readReplicaCount', '3')])
+
+        # Decrease read replicas
+        self.cmd('sql db update -g {} --server {} --name {} --read-replicas {}'
+                 .format(resource_group, server, database_name, 0),
+                 checks=[
+                     JMESPathCheck('readScale', 'Disabled'),
+                     JMESPathCheck('readReplicaCount', '0')])
 
 
 class SqlServerServerlessDbMgmtScenarioTest(ScenarioTest):
