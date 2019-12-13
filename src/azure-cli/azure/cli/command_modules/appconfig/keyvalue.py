@@ -173,7 +173,8 @@ def set_key(cmd,
             "value": set_kv.value,
             "tags": set_kv.tags
         }
-        entry = json.dumps(verification_kv, indent=2, sort_keys=True)
+
+        entry = json.dumps(verification_kv, indent=2, sort_keys=True, ensure_ascii=False)
         confirmation_message = "Are you sure you want to set the key: \n" + entry + "\n"
         user_confirmation(confirmation_message, yes)
 
@@ -233,7 +234,7 @@ def delete_key(cmd,
     if not_deleted_entries:
         if deleted_entries:
             logger.error('Deletion operation partially succeed. Some keys are not successfully deleted. \n %s',
-                         json.dumps(not_deleted_entries, indent=2))
+                         json.dumps(not_deleted_entries, indent=2, ensure_ascii=False))
         else:
             raise CLIError('Deletion operation failed.' + str(http_exception))
 

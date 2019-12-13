@@ -3,7 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.mgmt.botservice.models import BotChannel
+from azure.mgmt.botservice.models import (
+    BotChannel,
+    DirectLineChannel,
+    DirectLineChannelProperties,
+    DirectLineSite)
 
 
 def create_channel(client, channel, channel_name, resource_group_name, resource_name):
@@ -16,6 +20,25 @@ def create_channel(client, channel, channel_name, resource_group_name, resource_
         resource_name=resource_name,
         channel_name=channel_name,
         parameters=botChannel
+    )
+
+
+def update_channel(client, channel, channel_name, resource_group_name, resource_name):
+    bot_channel_data = client.get(
+        resource_group_name,
+        resource_name,
+        channel_name)
+    sites = bot_channel_data.properties.properties.sites
+
+    for site in sites:
+        if site.site_name == channel.properties.sites[0].site_name:
+            channel.properties.sites[0].site_id = site.site_id
+
+    return client.update(
+        resource_group_name=resource_group_name,
+        resource_name=resource_name,
+        channel_name=channel_name,
+        properties=channel
     )
 
 
@@ -91,19 +114,45 @@ def kik_create(client, resource_group_name, resource_name, user_name, api_key, i
 
 
 def directline_create(client, resource_group_name, resource_name, is_disabled=None,
-                      is_v1_disabled=None, is_v3_disabled=None, site_name='Default Site'):
-    from azure.mgmt.botservice.models import DirectLineChannel, DirectLineChannelProperties, DirectLineSite
+                      is_v1_disabled=None, is_v3_disabled=None, site_name='Default Site',
+                      enable_enhanced_auth=False, trusted_origins=None):
+    if not trusted_origins:
+        trusted_origins = []
     channel = DirectLineChannel(
         properties=DirectLineChannelProperties(
             sites=[DirectLineSite(
                 site_name=site_name,
                 is_enabled=not is_disabled,
                 is_v1_enabled=not is_v1_disabled,
-                is_v3_enabled=not is_v3_disabled
+                is_v3_enabled=not is_v3_disabled,
+                is_secure_site_enabled=enable_enhanced_auth,
+                trusted_origins=trusted_origins
             )]
         )
     )
-    return create_channel(client, channel, 'DirectLineChannel', resource_group_name, resource_name)
+    return create_channel(
+        client, channel, 'DirectLineChannel',
+        resource_group_name, resource_name)
+
+
+def directline_update(client, resource_group_name, resource_name, is_disabled=None,
+                      is_v1_disabled=None, is_v3_disabled=None, site_name='Default Site',
+                      enable_enhanced_auth=False, trusted_origins=None):
+    if not trusted_origins:
+        trusted_origins = []
+    channel = DirectLineChannel(
+        properties=DirectLineChannelProperties(
+            sites=[DirectLineSite(
+                site_name=site_name,
+                is_enabled=not is_disabled,
+                is_v1_enabled=not is_v1_disabled,
+                is_v3_enabled=not is_v3_disabled,
+                is_secure_site_enabled=enable_enhanced_auth,
+                trusted_origins=trusted_origins
+            )]
+        )
+    )
+    return update_channel(client, channel, 'DirectLineChannel', resource_group_name, resource_name)
 
 
 def telegram_create(client, resource_group_name, resource_name, access_token, is_disabled=None, is_validated=None):

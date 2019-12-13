@@ -301,19 +301,20 @@ def validate_subnet(cmd, namespace):
 
 
 def validate_vault_id(entity_type):
-
     def _validate(ns):
         from azure.keyvault.key_vault_id import KeyVaultIdentifier
-        name = getattr(ns, entity_type.replace('deleted', '') + '_name', None)
+
+        pure_entity_type = entity_type.replace('deleted', '')
+        name = getattr(ns, pure_entity_type + '_name', None)
         vault = getattr(ns, 'vault_base_url', None)
         identifier = getattr(ns, 'identifier', None)
 
         if identifier:
             ident = KeyVaultIdentifier(uri=identifier, collection=entity_type + 's')
-            setattr(ns, entity_type + '_name', ident.name)
+            setattr(ns, pure_entity_type + '_name', ident.name)
             setattr(ns, 'vault_base_url', ident.vault)
-            if hasattr(ns, entity_type + '_version'):
-                setattr(ns, entity_type + '_version', ident.version)
+            if hasattr(ns, pure_entity_type + '_version'):
+                setattr(ns, pure_entity_type + '_version', ident.version)
         elif not (name and vault):
             raise CLIError('incorrect usage: --id ID | --vault-name VAULT --name NAME [--version VERSION]')
 

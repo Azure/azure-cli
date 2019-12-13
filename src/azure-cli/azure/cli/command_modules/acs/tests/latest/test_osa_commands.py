@@ -18,7 +18,7 @@ from azure.cli.testsdk.checkers import (StringContainCheck, StringContainCheckIg
 
 
 class AzureOpenShiftServiceScenarioTest(ScenarioTest):
-    
+
     # It works in --live mode but fails in replay mode.get rid off @live_only attribute once this resolved
     @live_only()
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitestosa', location='eastus')
@@ -67,7 +67,7 @@ class AzureOpenShiftServiceScenarioTest(ScenarioTest):
 
         # delete
         self.cmd('openshift delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
-    
+
     # It works in --live mode but fails in replay mode.get rid off @live_only attribute once this resolved
     @live_only()
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitestosa', location='eastus')
@@ -108,7 +108,7 @@ class AzureOpenShiftServiceScenarioTest(ScenarioTest):
 
         # show again and expect failure
         self.cmd('openshift show -g {resource_group} -n {name}', expect_failure=True)
-    
+
     # It works in --live mode but fails in replay mode.get rid off @live_only attribute once this resolved
     @live_only()
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitestosa', location='eastus')
@@ -153,3 +153,39 @@ class AzureOpenShiftServiceScenarioTest(ScenarioTest):
 
         # delete
         self.cmd('openshift delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+    # It works in --live mode but fails in replay mode.get rid off @live_only attribute once this resolved
+    @live_only()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitestosa', location='eastus')
+    @ManagedApplicationPreparer()
+    def test_openshift_create_with_monitoring(self, resource_group, resource_group_location, aad_client_app_id, aad_client_app_secret):
+        # kwargs for string formatting
+        osa_name = self.create_random_name('clitestosa', 15)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': osa_name,
+            'location': resource_group_location,
+            'aad_client_app_id': aad_client_app_id,
+            'aad_client_app_secret': aad_client_app_secret
+        })
+        workspace = self.cmd("monitor log-analytics workspace create -g {resource_group} -n {osa_name}").get_output_in_json()
+        workspace_id = workspace["id"]
+        # create
+        create_cmd = 'openshift create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--compute-count=1 ' \
+                     '--aad-client-app-id {aad_client_app_id} --aad-client-app-secret {aad_client_app_secret}' \
+                     '--workspace-id {workspace_id}'
+
+        self.cmd(create_cmd, checks=[
+            self.exists('fqdn'),
+            self.check('provisioningState', 'Succeeded'),
+            self.exists('monitorProfile')
+        ])
+        # show
+        self.cmd('openshift show -g {resource_group} -n {name}', checks=[
+            self.check('name', '{name}'),
+            self.check('resourceGroup', '{resource_group}'),
+            self.exists('openShiftVersion')
+        ])
+        # delete
+        self.cmd('openshift delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+

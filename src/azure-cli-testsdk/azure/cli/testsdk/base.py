@@ -43,11 +43,11 @@ class CheckerMixin(object):
             raise KeyError("Key '{}' not found in kwargs. Check spelling and ensure it has been registered."
                            .format(ex.args[0]))
 
-    def check(self, query, expected_results):
+    def check(self, query, expected_results, case_sensitive=True):
         from azure.cli.testsdk.checkers import JMESPathCheck
         query = self._apply_kwargs(query)
         expected_results = self._apply_kwargs(expected_results)
-        return JMESPathCheck(query, expected_results)
+        return JMESPathCheck(query, expected_results, case_sensitive)
 
     def exists(self, query):
         from azure.cli.testsdk.checkers import JMESPathCheckExists
