@@ -73,15 +73,14 @@ from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterLoadBal
 from azure.mgmt.containerservice.v2019_08_01.models import AgentPool
 from azure.mgmt.containerservice.v2019_08_01.models import ResourceReference
 
-from azure.mgmt.containerservice.v2019_04_30.models import OpenShiftManagedClusterAgentPoolProfile
-from azure.mgmt.containerservice.v2019_04_30.models import OpenShiftAgentPoolProfileRole
-from azure.mgmt.containerservice.v2019_04_30.models import OpenShiftManagedClusterIdentityProvider
-from azure.mgmt.containerservice.v2019_04_30.models import OpenShiftManagedClusterAADIdentityProvider
-from azure.mgmt.containerservice.v2019_04_30.models import OpenShiftManagedCluster
-from azure.mgmt.containerservice.v2019_04_30.models import OpenShiftRouterProfile
-from azure.mgmt.containerservice.v2019_04_30.models import OpenShiftManagedClusterAuthProfile
-from azure.mgmt.containerservice.v2019_04_30.models import NetworkProfile
-from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedCluster as OpenShiftManagedClusterMonitor  # pylint: disable=line-too-long
+from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedClusterAgentPoolProfile
+from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftAgentPoolProfileRole
+from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedClusterIdentityProvider
+from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedClusterAADIdentityProvider
+from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedCluster
+from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftRouterProfile
+from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedClusterAuthProfile
+from azure.mgmt.containerservice.v2019_09_30_preview.models import NetworkProfile
 from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedClusterMonitorProfile
 
 from ._client_factory import cf_container_services
@@ -3126,7 +3125,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
                      vnet_peer=None,
                      tags=None,
                      no_wait=False,
-                     workspace_resource_id=None,
+                     workspace_id=None,
                      customer_admin_group_id=None):
 
     if location is None:
@@ -3197,37 +3196,26 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
                 namespace='Microsoft.Network', type='virtualNetwork',
                 name=vnet_peer
             )
-    if workspace_resource_id is not None:
-        workspace_resource_id = workspace_resource_id.strip()
-        if not workspace_resource_id.startswith('/'):
-            workspace_resource_id = '/' + workspace_resource_id
-        if workspace_resource_id.endswith('/'):
-            workspace_resource_id = workspace_resource_id.rstrip('/')
-        monitor_profile = OpenShiftManagedClusterMonitorProfile(enabled=True, workspace_resource_id=workspace_resource_id)  # pylint: disable=line-too-long
+    if workspace_id is not None:
+        workspace_id = workspace_id.strip()
+        if not workspace_id.startswith('/'):
+            workspace_id = '/' + workspace_id
+        if workspace_id.endswith('/'):
+            workspace_id = workspace_id.rstrip('/')
+        monitor_profile = OpenShiftManagedClusterMonitorProfile(enabled=True, workspace_id=workspace_id)  # pylint: disable=line-too-long
     else:
         monitor_profile = None
 
     network_profile = NetworkProfile(vnet_cidr=vnet_prefix, peer_vnet_id=vnet_peer)
-
-    if monitor_profile is not None:
-        osamc = OpenShiftManagedClusterMonitor(
-            location=location, tags=tags,
-            open_shift_version="v3.11",
-            network_profile=network_profile,
-            auth_profile=auth_profile,
-            agent_pool_profiles=agent_pool_profiles,
-            master_pool_profile=agent_master_pool_profile,
-            router_profiles=[default_router_profile],
-            monitor_profile=monitor_profile)
-    else:
-        osamc = OpenShiftManagedCluster(
-            location=location, tags=tags,
-            open_shift_version="v3.11",
-            network_profile=network_profile,
-            auth_profile=auth_profile,
-            agent_pool_profiles=agent_pool_profiles,
-            master_pool_profile=agent_master_pool_profile,
-            router_profiles=[default_router_profile])
+    osamc = OpenShiftManagedCluster(
+        location=location, tags=tags,
+        open_shift_version="v3.11",
+        network_profile=network_profile,
+        auth_profile=auth_profile,
+        agent_pool_profiles=agent_pool_profiles,
+        master_pool_profile=agent_master_pool_profile,
+        router_profiles=[default_router_profile],
+        monitor_profile=monitor_profile)
 
     try:
         # long_running_operation_timeout=300

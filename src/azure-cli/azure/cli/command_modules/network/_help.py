@@ -718,10 +718,46 @@ helps['network application-gateway ssl-cert create'] = """
 type: command
 short-summary: Upload an SSL certificate.
 examples:
-  - name: Upload an SSL certificate.
+  - name: Upload an SSL certificate via --cert-file and --cert-password.
     text: |
         az network application-gateway ssl-cert create -g MyResourceGroup --gateway-name MyAppGateway \\
-            -n MySslCert --cert-file \\path\\to\\cert\\file --cert-password Abc123
+            -n MySSLCert --cert-file \\path\\to\\cert\\file --cert-password Abc123
+  - name: |-
+        Upload an SSL certificate via --key-vault-secret-id of a KeyVault Secret
+        with Base64 encoded value of an unencrypted pfx
+    text: |-
+        openssl req -x509 -nodes -days 365 -newkey rsa:2048 \\
+          -out azure-cli-app-tls.crt \\
+          -keyout azure-cli-app-tls.key \\
+          -subj "/CN=azure-cli-app"
+
+        openssl pkcs12 -export \\
+          -in azure-cli-tls.crt \\
+          -inkey sample-app-tls.key \\
+          -passout pass: -out azure-cli-cert.pfx
+
+        SecretValue=$(cat azure-cli-cert.pfx | base64)
+
+        az keyvault secret set --vault-name MyKeyVault --name MySecret --value ${SecretValue}
+
+        az network application-gateway ssl-cert create \\
+          --resource-group MyResourceGroup \\
+          --gateway-name MyAppGateway \\
+          -n MySSLCert \\
+          --key-vault-secret-id MySecretSecretID
+  - name: |-
+        Upload an SSL certificate via --key-vault-secret-id of a KeyVault Certificate
+    text: |-
+        az keyvault certificate create \\
+          --vault-name MyKeyVault \\
+          --name MyCertificate \\
+          --policy "$(az keyvault certificate get-default-policy)" \\
+
+        az network application-gateway ssl-cert create \\
+          --resource-group MyResourceGroup \\
+          --gateway-name MyAppGateway \\
+          -n MySSLCert \\
+          --key-vault-secret-id MyCertificateSecretID
 """
 
 helps['network application-gateway ssl-cert delete'] = """
@@ -5100,4 +5136,9 @@ examples:
         az network watcher troubleshooting start -g MyResourceGroup --resource MyVPNConnection \\
             --resource-type vpnConnection --storage-account MyStorageAccount \\
             --storage-path https://{storageAccountName}.blob.core.windows.net/{containerName}
+"""
+
+helps['network list-service-aliases'] = """
+type: command
+short-summary: List available service aliases in the region which can be used for Service Endpoint Policies.
 """

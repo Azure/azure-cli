@@ -261,6 +261,13 @@ class AmsStreamingEndpointsTests(ScenarioTest):
             self.check('length(tags)', 1)
         ])
 
+        nonexits_streaming_endpoint_name = self.create_random_name(prefix='se', length=20)
+        self.kwargs.update({
+            'nonexits_streaming_endpoint_name': nonexits_streaming_endpoint_name
+        })
+        with self.assertRaisesRegexp(SystemExit, '3'):
+            self.cmd('az ams streaming-endpoint show -g {rg} -a {amsname} -n {nonexits_streaming_endpoint_name}')
+
         self.cmd('az ams streaming-endpoint delete -g {rg} -a {amsname} -n {streamingEndpointName}')
 
     @ResourceGroupPreparer()

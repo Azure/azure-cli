@@ -24,6 +24,7 @@ from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zo
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
 from azure.cli.core.profiles import ResourceType, supported_api_version
 
+
 logger = get_logger(__name__)
 
 
@@ -665,7 +666,7 @@ def delete_ag_rewrite_rule_condition(cmd, resource_group_name, application_gatew
 
 def create_ag_probe(cmd, resource_group_name, application_gateway_name, item_name, protocol, host,
                     path, interval=30, timeout=120, threshold=8, no_wait=False, host_name_from_http_settings=None,
-                    min_servers=None, match_body=None, match_status_codes=None):
+                    min_servers=None, match_body=None, match_status_codes=None, port=None):
     ApplicationGatewayProbe, ProbeMatchCriteria = cmd.get_models(
         'ApplicationGatewayProbe', 'ApplicationGatewayProbeHealthResponseMatch')
     ncf = network_client_factory(cmd.cli_ctx)
@@ -682,6 +683,8 @@ def create_ag_probe(cmd, resource_group_name, application_gateway_name, item_nam
         new_probe.pick_host_name_from_backend_http_settings = host_name_from_http_settings
         new_probe.min_servers = min_servers
         new_probe.match = ProbeMatchCriteria(body=match_body, status_codes=match_status_codes)
+    if cmd.supported_api_version(min_api='2019-04-01'):
+        new_probe.port = port
 
     upsert_to_collection(ag, 'probes', new_probe, 'name')
     return sdk_no_wait(no_wait, ncf.application_gateways.create_or_update,
@@ -690,7 +693,7 @@ def create_ag_probe(cmd, resource_group_name, application_gateway_name, item_nam
 
 def update_ag_probe(cmd, instance, parent, item_name, protocol=None, host=None, path=None,
                     interval=None, timeout=None, threshold=None, host_name_from_http_settings=None,
-                    min_servers=None, match_body=None, match_status_codes=None):
+                    min_servers=None, match_body=None, match_status_codes=None, port=None):
     if protocol is not None:
         instance.protocol = protocol
     if host is not None:
@@ -715,12 +718,14 @@ def update_ag_probe(cmd, instance, parent, item_name, protocol=None, host=None, 
             instance.match.body = match_body
         if match_status_codes is not None:
             instance.match.status_codes = match_status_codes
+    if port is not None:
+        instance.port = port
     return parent
 
 
 def create_ag_request_routing_rule(cmd, resource_group_name, application_gateway_name, item_name,
                                    address_pool=None, http_settings=None, http_listener=None, redirect_config=None,
-                                   url_path_map=None, rule_type='Basic', no_wait=False):
+                                   url_path_map=None, rule_type='Basic', no_wait=False, rewrite_rule_set=None):
     ApplicationGatewayRequestRoutingRule, SubResource = cmd.get_models(
         'ApplicationGatewayRequestRoutingRule', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
@@ -740,6 +745,10 @@ def create_ag_request_routing_rule(cmd, resource_group_name, application_gateway
         url_path_map=SubResource(id=url_path_map) if url_path_map else None)
     if cmd.supported_api_version(min_api='2017-06-01'):
         new_rule.redirect_configuration = SubResource(id=redirect_config) if redirect_config else None
+
+    rewrite_rule_set_name = next(key for key, value in locals().items() if id(value) == id(rewrite_rule_set))
+    if cmd.supported_api_version(parameter_name=rewrite_rule_set_name):
+        new_rule.rewrite_rule_set = SubResource(id=rewrite_rule_set) if rewrite_rule_set else None
     upsert_to_collection(ag, 'request_routing_rules', new_rule, 'name')
     return sdk_no_wait(no_wait, ncf.application_gateways.create_or_update,
                        resource_group_name, application_gateway_name, ag)
@@ -747,7 +756,7 @@ def create_ag_request_routing_rule(cmd, resource_group_name, application_gateway
 
 def update_ag_request_routing_rule(cmd, instance, parent, item_name, address_pool=None,
                                    http_settings=None, http_listener=None, redirect_config=None, url_path_map=None,
-                                   rule_type=None):
+                                   rule_type=None, rewrite_rule_set=None):
     SubResource = cmd.get_models('SubResource')
     if address_pool is not None:
         instance.backend_address_pool = SubResource(id=address_pool)
@@ -761,6 +770,8 @@ def update_ag_request_routing_rule(cmd, instance, parent, item_name, address_poo
         instance.url_path_map = SubResource(id=url_path_map)
     if rule_type is not None:
         instance.rule_type = rule_type
+    if rewrite_rule_set is not None:
+        instance.rewrite_rule_set = SubResource(id=rewrite_rule_set)
     return parent
 
 
@@ -844,9 +855,9 @@ def update_ag_trusted_root_certificate(instance, parent, item_name, cert_data=No
 
 
 def create_ag_url_path_map(cmd, resource_group_name, application_gateway_name, item_name, paths,
-                           address_pool=None, http_settings=None, redirect_config=None,
+                           address_pool=None, http_settings=None, redirect_config=None, rewrite_rule_set=None,
                            default_address_pool=None, default_http_settings=None, default_redirect_config=None,
-                           no_wait=False, rule_name='default'):
+                           no_wait=False, rule_name='default', default_rewrite_rule_set=None, firewall_policy=None):
     ApplicationGatewayUrlPathMap, ApplicationGatewayPathRule, SubResource = cmd.get_models(
         'ApplicationGatewayUrlPathMap', 'ApplicationGatewayPathRule', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
@@ -868,6 +879,15 @@ def create_ag_url_path_map(cmd, resource_group_name, application_gateway_name, i
         new_map.default_redirect_configuration = \
             SubResource(id=default_redirect_config) if default_redirect_config else None
 
+    rewrite_rule_set_name = next(key for key, value in locals().items() if id(value) == id(rewrite_rule_set))
+    if cmd.supported_api_version(parameter_name=rewrite_rule_set_name):
+        new_rule.rewrite_rule_set = SubResource(id=rewrite_rule_set) if rewrite_rule_set else None
+        new_map.default_rewrite_rule_set = \
+            SubResource(id=default_rewrite_rule_set) if default_rewrite_rule_set else None
+
+    if cmd.supported_api_version(min_api='2019-09-01'):
+        new_rule.firewall_policy = SubResource(id=firewall_policy) if firewall_policy else None
+
     # pull defaults from the rule specific properties if the default-* option isn't specified
     if new_rule.backend_address_pool and not new_map.default_backend_address_pool:
         new_map.default_backend_address_pool = new_rule.backend_address_pool
@@ -885,7 +905,8 @@ def create_ag_url_path_map(cmd, resource_group_name, application_gateway_name, i
 
 
 def update_ag_url_path_map(cmd, instance, parent, item_name, default_address_pool=None,
-                           default_http_settings=None, default_redirect_config=None, raw=False):
+                           default_http_settings=None, default_redirect_config=None, raw=False,
+                           default_rewrite_rule_set=None):
     SubResource = cmd.get_models('SubResource')
     if default_address_pool == '':
         instance.default_backend_address_pool = None
@@ -901,12 +922,17 @@ def update_ag_url_path_map(cmd, instance, parent, item_name, default_address_poo
         instance.default_redirect_configuration = None
     elif default_redirect_config:
         instance.default_redirect_configuration = SubResource(id=default_redirect_config)
+
+    if default_rewrite_rule_set == '':
+        instance.default_rewrite_rule_set = None
+    elif default_rewrite_rule_set:
+        instance.default_rewrite_rule_set = SubResource(id=default_rewrite_rule_set)
     return parent
 
 
 def create_ag_url_path_map_rule(cmd, resource_group_name, application_gateway_name, url_path_map_name,
                                 item_name, paths, address_pool=None, http_settings=None, redirect_config=None,
-                                firewall_policy=None, no_wait=False):
+                                firewall_policy=None, no_wait=False, rewrite_rule_set=None):
     ApplicationGatewayPathRule, SubResource = cmd.get_models('ApplicationGatewayPathRule', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
@@ -926,6 +952,10 @@ def create_ag_url_path_map_rule(cmd, resource_group_name, application_gateway_na
         default_redirect = SubResource(id=url_map.default_redirect_configuration.id) \
             if url_map.default_redirect_configuration else None
         new_rule.redirect_configuration = SubResource(id=redirect_config) if redirect_config else default_redirect
+
+    rewrite_rule_set_name = next(key for key, value in locals().items() if id(value) == id(rewrite_rule_set))
+    if cmd.supported_api_version(parameter_name=rewrite_rule_set_name):
+        new_rule.rewrite_rule_set = SubResource(id=rewrite_rule_set) if rewrite_rule_set else None
 
     if cmd.supported_api_version(min_api='2019-09-01'):
         new_rule.firewall_policy = SubResource(id=firewall_policy) if firewall_policy else None
@@ -1706,56 +1736,65 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
           .format(cum_records, total_records, zone_name), file=sys.stderr)
 
 
-def add_dns_aaaa_record(cmd, resource_group_name, zone_name, record_set_name, ipv6_address):
+def add_dns_aaaa_record(cmd, resource_group_name, zone_name, record_set_name, ipv6_address,
+                        ttl=None):
     AaaaRecord = cmd.get_models('AaaaRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = AaaaRecord(ipv6_address=ipv6_address)
     record_type = 'aaaa'
-    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name)
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
+                            ttl=ttl)
 
 
-def add_dns_a_record(cmd, resource_group_name, zone_name, record_set_name, ipv4_address):
+def add_dns_a_record(cmd, resource_group_name, zone_name, record_set_name, ipv4_address,
+                     ttl=None):
     ARecord = cmd.get_models('ARecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = ARecord(ipv4_address=ipv4_address)
     record_type = 'a'
-    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
-                            'arecords')
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name, 'arecords',
+                            ttl=ttl)
 
 
-def add_dns_caa_record(cmd, resource_group_name, zone_name, record_set_name, value, flags, tag):
+def add_dns_caa_record(cmd, resource_group_name, zone_name, record_set_name, value, flags, tag,
+                       ttl=None):
     CaaRecord = cmd.get_models('CaaRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = CaaRecord(flags=flags, tag=tag, value=value)
     record_type = 'caa'
-    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name)
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
+                            ttl=ttl)
 
 
-def add_dns_cname_record(cmd, resource_group_name, zone_name, record_set_name, cname):
+def add_dns_cname_record(cmd, resource_group_name, zone_name, record_set_name, cname, ttl=None):
     CnameRecord = cmd.get_models('CnameRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = CnameRecord(cname=cname)
     record_type = 'cname'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
-                            is_list=False)
+                            is_list=False, ttl=ttl)
 
 
-def add_dns_mx_record(cmd, resource_group_name, zone_name, record_set_name, preference, exchange):
+def add_dns_mx_record(cmd, resource_group_name, zone_name, record_set_name, preference, exchange,
+                      ttl=None):
     MxRecord = cmd.get_models('MxRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = MxRecord(preference=int(preference), exchange=exchange)
     record_type = 'mx'
-    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name)
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
+                            ttl=ttl)
 
 
-def add_dns_ns_record(cmd, resource_group_name, zone_name, record_set_name, dname, subscription_id=None):
+def add_dns_ns_record(cmd, resource_group_name, zone_name, record_set_name, dname,
+                      subscription_id=None, ttl=None):
     NsRecord = cmd.get_models('NsRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = NsRecord(nsdname=dname)
     record_type = 'ns'
-    return _add_save_record(cmd, record, record_type, record_set_name,
-                            resource_group_name, zone_name, subscription_id=subscription_id)
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
+                            subscription_id=subscription_id, ttl=ttl)
 
 
-def add_dns_ptr_record(cmd, resource_group_name, zone_name, record_set_name, dname):
+def add_dns_ptr_record(cmd, resource_group_name, zone_name, record_set_name, dname, ttl=None):
     PtrRecord = cmd.get_models('PtrRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = PtrRecord(ptrdname=dname)
     record_type = 'ptr'
-    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name)
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
+                            ttl=ttl)
 
 
 def update_dns_soa_record(cmd, resource_group_name, zone_name, host=None, email=None,
@@ -1900,14 +1939,16 @@ def _add_record(record_set, record, record_type, is_list=False):
 
 
 def _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
-                     is_list=True, subscription_id=None):
+                     is_list=True, subscription_id=None, ttl=None):
     ncf = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS,
                                   subscription_id=subscription_id).record_sets
     try:
         record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
     except CloudError:
         RecordSet = cmd.get_models('RecordSet', resource_type=ResourceType.MGMT_NETWORK_DNS)
-        record_set = RecordSet(ttl=3600)
+        record_set = RecordSet()
+
+    record_set.ttl = ttl if ttl is not None else 3600
 
     _add_record(record_set, record, record_type, is_list)
 
@@ -4784,4 +4825,13 @@ def update_virtual_router_peering(cmd, instance, peer_asn=None, peer_ip=None):
         c.set_param('peer_asn', peer_asn)
         c.set_param('peer_ip', peer_ip)
     return instance
+# endregion
+
+
+# region service aliases
+def list_service_aliases(cmd, location, resource_group_name=None):
+    client = network_client_factory(cmd.cli_ctx).available_service_aliases
+    if resource_group_name is not None:
+        return client.list_by_resource_group(resource_group_name=resource_group_name, location=location)
+    return client.list(location=location)
 # endregion
