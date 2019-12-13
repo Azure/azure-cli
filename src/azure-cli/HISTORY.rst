@@ -8,7 +8,6 @@ Release History
 * Add support for importing/exporting feature flags
 
 2.0.78
-++++++
 
 **ACR**
 
