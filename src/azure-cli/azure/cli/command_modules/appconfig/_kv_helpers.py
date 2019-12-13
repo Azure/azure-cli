@@ -592,20 +592,20 @@ def __convert_feature_dict_to_keyvalue_list(features_dict, format_):
         if format_ == 'json':
             for k, v in features_dict.items():
                 key = FEATURE_FLAG_PREFIX + str(k)
-                default_value = FeatureFlagValue(id_=str(k))
+                feature_flag_value = FeatureFlagValue(id_=str(k))
 
                 if isinstance(v, dict):
                     # This may be a conditional feature
-                    default_value.enabled = False
+                    feature_flag_value.enabled = False
                     try:
-                        default_value.conditions = {'client_filters': v["EnabledFor"]}
+                        feature_flag_value.conditions = {'client_filters': v["EnabledFor"]}
                     except KeyError:
                         raise CLIError("Feature '{0}' must contain 'EnabledFor' definition or have a true/false value. \n".format(str(k)))
 
-                    if default_value.conditions["client_filters"]:
-                        default_value.enabled = True
+                    if feature_flag_value.conditions["client_filters"]:
+                        feature_flag_value.enabled = True
 
-                        for idx, val in enumerate(default_value.conditions["client_filters"]):
+                        for idx, val in enumerate(feature_flag_value.conditions["client_filters"]):
                             # each val should be a dict with at most 2 keys (Name, Parameters) or at least 1 key (Name)
                             val = {filter_key.lower(): filter_val for filter_key, filter_val in val.items()}
                             if not val.get("name", None):
@@ -621,14 +621,14 @@ def __convert_feature_dict_to_keyvalue_list(features_dict, format_):
                             new_val = {'name': val["name"]}
                             if filter_param:
                                 new_val["parameters"] = filter_param
-                            default_value.conditions["client_filters"][idx] = new_val
+                            feature_flag_value.conditions["client_filters"][idx] = new_val
 
                 else:
-                    default_value.enabled = v
-                    default_value.conditions = default_conditions
+                    feature_flag_value.enabled = v
+                    feature_flag_value.conditions = default_conditions
 
                 set_kv = KeyValue(key=key,
-                                  value=json.dumps(default_value, default=lambda o: o.__dict__, ensure_ascii=False),
+                                  value=json.dumps(feature_flag_value, default=lambda o: o.__dict__, ensure_ascii=False),
                                   content_type=FEATURE_FLAG_CONTENT_TYPE)
                 key_values.append(set_kv)
 
