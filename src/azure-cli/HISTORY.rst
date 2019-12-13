@@ -10,6 +10,8 @@ Release History
 2.0.78
 ++++++
 
+2.0.78
+
 **ACR**
 
 * Support Local context in acr task run
@@ -38,6 +40,10 @@ Release History
 * Update azure-mgmt-resource package to use 6.0.0
 * Cross Tenant Support for `az group deployment create` command by adding new parameter `--aux-subs`
 * Add new parameter `--metadata` to support adding metadata information for policy set definitions.
+
+**Backup**
+
+* Added Backup support for SQL and SAP Hana workload.
 
 **BotService**
 
@@ -102,6 +108,16 @@ Release History
 * Support for Policy API version 2019-09-01.
 * az policy set-definition: Support grouping within policy set definitions with `--definition-groups` parameter
 
+**Redis**
+
+* Add preview param `--replicas-per-master` to `az redis create` command
+* Update azure-mgmt-redis from 6.0.0 to 7.0.0rc1
+
+**ServiceFabric**
+
+* Fixes in node-type add logic including #10963: Adding new node type with durability level Gold will always throw CLI error
+* Update ServiceFabricNodeVmExt version to 1.1 in creation template
+
 **SQL**
 
 * Added "--read-scale" and "--read-replicas" parameters to sql db create and update commands, to support read scale management.
@@ -113,11 +129,6 @@ Release History
 * Add new commands `az storage account blob-service-properties show` and `az storage account blob-service-properties update --enable-change-feed` to manage blob service properties for storage account.
 * [COMING BREAKING CHANGE] `az storage copy`: `*` character is no longer supported as a wildcard in URL, but new parameters --include-pattern and --exclude-pattern will be added with `*` wildcard support.
 * Fix issue #11043: Support to remove whole container/share in `az storage remove` command
-
-**ServiceFabric**
-
-* Fixes in node-type add logic including #10963: Adding new node type with durability level Gold will always throw CLI error
-* Update ServiceFabricNodeVmExt version to 1.1 in creation template
 
 2.0.77
 ++++++
@@ -187,10 +198,6 @@ Release History
 * application-gateway http-listener: Add --firewall-policy when create
 * application-gateway url-path-map rule: Add --firewall-policy when create
 
-**Backup**
-
-* Added Backup support for SQL and SAP Hana workload.
-
 **Packaging**
 
 * Rewrite the az wrapper in Python
@@ -211,8 +218,6 @@ Release History
 
 **Redis**
 
-* Add preview param `--replicas-per-master` to `az redis create` command
-* Update azure-mgmt-redis from 6.0.0 to 7.0.0rc1
 * Fix #2902: Avoid setting memory configs while updating Basic SKU cache
 
 **Reservations**
