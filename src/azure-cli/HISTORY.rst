@@ -24,6 +24,10 @@ Release History
 * Add back edge builds for pip install
 * Add Ubuntu eoan package
 
+**Redis**
+
+* Fixing `az redis update` operation to work for caches with RDB/AOF enabled
+
 **Storage**
 
 * GA Release Large File Shares property for storage account create and update command
@@ -117,7 +121,6 @@ Release History
 
 **Redis**
 
-* Fixing `az redis update` operation to work for caches with RDB/AOF enabled
 * Fix #2902: Avoid setting memory configs while updating Basic SKU cache
 
 **Reservations**
