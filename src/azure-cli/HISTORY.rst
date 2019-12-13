@@ -229,8 +229,10 @@ Release History
 
 **Policy**
 
-* Support for Policy API version 2019-09-01.
+* Support for Policy API version 2019-09-01
 * az policy set-definition: Support grouping within policy set definitions with `--definition-groups` parameter
+* Add new command `az policy metadata` to retrieve rich policy metadata resources
+* az policy remediation create: Specify whether compliance should be re-evaluated prior to remediation with the `--resource-discovery-mode` parameter
 
 **Redis**
 
