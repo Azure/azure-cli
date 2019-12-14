@@ -36,6 +36,7 @@ def _get_proxy_instance():
     if os_platform == 'Darwin':
         return MacProxy()
     if os_platform == 'Windows':
+        # pylint: disable=import-outside-toplevel
         from .win_proxy import WinProxy
         return WinProxy()
     if os_platform == 'Linux':

@@ -5,6 +5,14 @@
 
 from azure.cli.core.commands.parameters import get_one_of_subscription_locations
 from azure.cli.core.decorators import Completer
+from azure.mgmt.containerservice.models import ContainerServiceVMSizeTypes
+from ._client_factory import cf_managed_clusters
+from ._client_factory import cf_container_services
+from ._client_factory import cf_compute_service
+from ._client_factory import cf_resource_groups
+from jmespath import search
+from msrestazure.azure_exceptions import CloudError
+from argcomplete import warn
 
 
 @Completer
@@ -16,7 +24,6 @@ def get_k8s_upgrades_completion_list(cmd, prefix, namespace, **kwargs):  # pylin
 
 
 def get_k8s_upgrades(cli_ctx, resource_group, name):
-    from ._client_factory import cf_managed_clusters
 
     results = cf_managed_clusters(cli_ctx).get_upgrade_profile(resource_group, name).as_dict()
     return results['control_plane_profile']['upgrades']
@@ -31,8 +38,6 @@ def get_k8s_versions_completion_list(cmd, prefix, namespace, **kwargs):  # pylin
 
 def get_k8s_versions(cli_ctx, location):
     """Return a list of Kubernetes versions available for a new cluster."""
-    from ._client_factory import cf_container_services
-    from jmespath import search
 
     results = cf_container_services(cli_ctx).list_orchestrators(location, resource_type='managedClusters').as_dict()
     # Flatten all the "orchestrator_version" fields into one array
@@ -42,7 +47,6 @@ def get_k8s_versions(cli_ctx, location):
 @Completer
 def get_vm_size_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
     """Return the intersection of the VM sizes allowed by the ACS SDK with those returned by the Compute Service."""
-    from azure.mgmt.containerservice.models import ContainerServiceVMSizeTypes
 
     location = _get_location(cmd.cli_ctx, namespace)
     result = get_vm_sizes(cmd.cli_ctx, location)
@@ -50,7 +54,6 @@ def get_vm_size_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: di
 
 
 def get_vm_sizes(cli_ctx, location):
-    from ._client_factory import cf_compute_service
 
     return cf_compute_service(cli_ctx).virtual_machine_sizes.list(location)
 
@@ -71,8 +74,6 @@ def _get_location(cli_ctx, namespace):
 
 
 def _get_location_from_resource_group(cli_ctx, resource_group_name):
-    from ._client_factory import cf_resource_groups
-    from msrestazure.azure_exceptions import CloudError
 
     try:
         rg = cf_resource_groups(cli_ctx).get(resource_group_name)
@@ -80,5 +81,4 @@ def _get_location_from_resource_group(cli_ctx, resource_group_name):
     except CloudError as err:
         # Print a warning if the user hit [TAB] but the `--resource-group` argument was incorrect.
         # For example: "Warning: Resource group 'bogus' could not be found."
-        from argcomplete import warn
         warn('Warning: {}'.format(err.message))

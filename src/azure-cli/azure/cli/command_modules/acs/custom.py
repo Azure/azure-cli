@@ -34,14 +34,20 @@ import dateutil.parser
 from dateutil.relativedelta import relativedelta
 from knack.log import get_logger
 from knack.util import CLIError
+from knack.prompting import prompt_y_n, NoTTYException
 from msrestazure.azure_exceptions import CloudError
+from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id
 import requests
+
 
 # pylint: disable=no-name-in-module,import-error
 from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.acs._params import regions_in_preview, regions_in_prod
 from azure.cli.core.api import get_config_dir
+from azure.cli.core.extension.operations import add_extension_to_path, operations
+from azure.cli.core.extension import (ExtensionNotInstalledException, get_extension)
 from azure.cli.core._profile import Profile
+from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
 from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, truncate_text, sdk_no_wait
@@ -49,6 +55,7 @@ from azure.cli.core.commands import LongRunningOperation
 from azure.graphrbac.models import (ApplicationCreateParameters,
                                     ApplicationUpdateParameters,
                                     PasswordCredential,
+                                    GraphErrorException,
                                     KeyCredential,
                                     ServicePrincipalCreateParameters,
                                     GetObjectsParameters,
@@ -90,6 +97,10 @@ from ._client_factory import get_graph_rbac_management_client
 from ._client_factory import cf_resources
 from ._client_factory import get_resource_by_name
 from ._client_factory import cf_container_registry_service
+
+from subprocess import PIPE, Popen
+
+from importlib import import_module
 
 logger = get_logger(__name__)
 
@@ -381,7 +392,6 @@ def k8s_upgrade_connector(cmd, client, name, resource_group_name, connector_name
 def _k8s_install_or_upgrade_connector(helm_cmd, cmd, client, name, resource_group_name, connector_name,
                                       location, service_principal, client_secret, chart_url, os_type,
                                       image_tag, aci_resource_group):
-    from subprocess import PIPE, Popen
     instance = client.get(resource_group_name, name)
     helm_not_installed = 'Helm not detected, please verify if it is installed.'
     url_chart = chart_url
@@ -460,7 +470,6 @@ def _helm_install_or_upgrade_aci_connector(helm_cmd, image_tag, url_chart, conne
 
 def k8s_uninstall_connector(cmd, client, name, resource_group_name, connector_name='aci-connector',
                             location=None, graceful=False, os_type='Linux'):
-    from subprocess import PIPE, Popen
     helm_not_installed = "Error : Helm not detected, please verify if it is installed."
     # Check if Helm is installed locally
     try:
@@ -492,7 +501,6 @@ def k8s_uninstall_connector(cmd, client, name, resource_group_name, connector_na
 def _undeploy_connector(graceful, node_name, helm_release_name):
     if graceful:
         logger.warning('Graceful option selected, will try to drain the node first')
-        from subprocess import PIPE, Popen
         kubectl_not_installed = 'Kubectl not detected, please verify if it is installed.'
         try:
             Popen(["kubectl"], stdout=PIPE, stderr=PIPE)
@@ -591,7 +599,6 @@ def delete_role_assignments(cli_ctx, ids=None, assignee=None, role=None, resourc
             assignments_client.delete_by_id(i)
         return
     if not any([ids, assignee, role, resource_group_name, scope, assignee, yes]):
-        from knack.prompting import prompt_y_n
         msg = 'This will delete all role assignments under the subscription. Are you sure?'
         if not prompt_y_n(msg, default="n"):
             return
@@ -1051,7 +1058,6 @@ def load_service_principals(config_path):
 def _invoke_deployment(cli_ctx, resource_group_name, deployment_name, template, parameters, validate, no_wait,
                        subscription_id=None):
 
-    from azure.cli.core.profiles import ResourceType, get_sdk
     DeploymentProperties = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'DeploymentProperties', mod='models')
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
     smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
@@ -1126,7 +1132,6 @@ def _handle_merge(existing, addition, key, replace):
                 if replace or i == j:
                     existing[key].remove(j)
                 else:
-                    from knack.prompting import prompt_y_n, NoTTYException
                     msg = 'A different object named {} already exists in your kubeconfig file.\nOverwrite?'
                     overwrite = False
                     try:
@@ -1301,7 +1306,6 @@ def create_application(client, display_name, homepage, identifier_uris,
                        available_to_other_tenants=False, password=None, reply_urls=None,
                        key_value=None, key_type=None, key_usage=None, start_date=None,
                        end_date=None, required_resource_accesses=None):
-    from azure.graphrbac.models import GraphErrorException
     password_creds, key_creds = _build_application_creds(password, key_value, key_type,
                                                          key_usage, start_date, end_date)
 
@@ -1327,7 +1331,6 @@ def update_application(client, object_id, display_name, homepage, identifier_uri
                        available_to_other_tenants=False, password=None, reply_urls=None,
                        key_value=None, key_type=None, key_usage=None, start_date=None,
                        end_date=None, required_resource_accesses=None):
-    from azure.graphrbac.models import GraphErrorException
     password_creds, key_creds = _build_application_creds(password, key_value, key_type,
                                                          key_usage, start_date, end_date)
     try:
@@ -1402,7 +1405,6 @@ def create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, sc
 
 
 def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, scope=None, resolve_assignee=True):
-    from azure.cli.core.profiles import ResourceType, get_sdk
     factory = get_auth_management_client(cli_ctx, scope)
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
@@ -1547,7 +1549,15 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
     proxy_url = '{0}://{1}:{2}/'.format(protocol, listen_address, listen_port)
     # launch kubectl port-forward locally to access the remote dashboard
 
+    _open_dashboard(disable_browser, proxy_url, listen_port, listen_address, dashboard_pod,
+                    dashboard_port, browse_path)
+
+
+# helper function for aks_browse
+def _open_dashboard(disable_browser, proxy_url, listen_port, listen_address, dashboard_pod,
+                    dashboard_port, browse_path):
     # run in a loop to deal with idle connection drops from Azure LB
+
     first_connection = True
     exit_requested = False
 
@@ -1592,8 +1602,8 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
 
         if exit_requested:
             break
-        else:
-            logger.warning('Connection dropped. Reconnecting...')
+
+        logger.warning('Connection dropped. Reconnecting...')
 
         first_connection = False
 
@@ -1810,7 +1820,6 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             # mdm metrics supported only in azure public cloud so add the  role assignment only in this cloud
             cloud_name = cmd.cli_ctx.cloud.name
             if cloud_name.lower() == 'azurecloud' and monitoring:
-                from msrestazure.tools import resource_id
                 cluster_resource_id = resource_id(
                     subscription=subscription_id,
                     resource_group=resource_group_name,
@@ -1862,7 +1871,6 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons, workspace_
         cloud_name = cmd.cli_ctx.cloud.name
         # mdm metrics supported only in Azure Public cloud so add the role assignment only in this cloud
         if cloud_name.lower() == 'azurecloud':
-            from msrestazure.tools import resource_id
             cluster_resource_id = resource_id(
                 subscription=subscription_id,
                 resource_group=resource_group_name,
@@ -2090,8 +2098,6 @@ def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, cont
             logger.warning("Cluster currently in failed state. Proceeding with upgrade to existing version %s to "
                            "attempt resolution of failed cluster state.", instance.kubernetes_version)
 
-    from knack.prompting import prompt_y_n
-
     upgrade_all = False
     instance.kubernetes_version = kubernetes_version
 
@@ -2256,10 +2262,9 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, 
 def _get_azext_module(extension_name, module_name):
     try:
         # Adding the installed extension in the path
-        from azure.cli.core.extension.operations import add_extension_to_path
+
         add_extension_to_path(extension_name)
         # Import the extension module
-        from importlib import import_module
         azext_custom = import_module(module_name)
         return azext_custom
     except ImportError as ie:
@@ -2304,7 +2309,6 @@ def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, a
 
 def _install_dev_spaces_extension(cmd, extension_name):
     try:
-        from azure.cli.core.extension import operations
         operations.add_extension(cmd=cmd, extension_name=extension_name)
     except Exception:  # nopa pylint: disable=broad-except
         return False
@@ -2312,9 +2316,7 @@ def _install_dev_spaces_extension(cmd, extension_name):
 
 
 def _update_dev_spaces_extension(cmd, extension_name, extension_module):
-    from azure.cli.core.extension import ExtensionNotInstalledException
     try:
-        from azure.cli.core.extension import operations
         operations.update_extension(cmd=cmd, extension_name=extension_name)
         operations.reload_extension(extension_name=extension_name)
     except CLIError as err:
@@ -2330,7 +2332,6 @@ def _update_dev_spaces_extension(cmd, extension_name, extension_module):
 
 
 def _get_or_add_extension(cmd, extension_name, extension_module, update=False):
-    from azure.cli.core.extension import (ExtensionNotInstalledException, get_extension)
     try:
         get_extension(extension_name)
         if update:
@@ -2619,7 +2620,6 @@ def _ensure_aks_acr(cli_ctx,
                     acr_name_or_id,
                     subscription_id,
                     detach=False):
-    from msrestazure.tools import is_valid_resource_id, parse_resource_id
     # Check if the ACR exists by resource ID.
     if is_valid_resource_id(acr_name_or_id):
         try:
@@ -3205,7 +3205,6 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
     default_router_profile = OpenShiftRouterProfile(name='default')
 
     if vnet_peer is not None:
-        from msrestazure.tools import is_valid_resource_id, resource_id
         if not is_valid_resource_id(vnet_peer):
             vnet_peer = resource_id(
                 subscription=get_subscription_id(cmd.cli_ctx),
