@@ -44,7 +44,7 @@ import requests
 from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.acs._params import regions_in_preview, regions_in_prod
 from azure.cli.core.api import get_config_dir
-from azure.cli.core.extension.operations import add_extension_to_path, operations
+from azure.cli.core.extension.operations import add_extension_to_path
 from azure.cli.core.extension import (ExtensionNotInstalledException, get_extension)
 from azure.cli.core._profile import Profile
 from azure.cli.core.profiles import ResourceType, get_sdk
@@ -2309,6 +2309,8 @@ def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, a
 
 def _install_dev_spaces_extension(cmd, extension_name):
     try:
+        # pylint: disable=import-outside-toplevel
+        from azure.cli.core.extension.operations import operations
         operations.add_extension(cmd=cmd, extension_name=extension_name)
     except Exception:  # nopa pylint: disable=broad-except
         return False
@@ -2317,6 +2319,8 @@ def _install_dev_spaces_extension(cmd, extension_name):
 
 def _update_dev_spaces_extension(cmd, extension_name, extension_module):
     try:
+        # pylint: disable=import-outside-toplevel
+        from azure.cli.core.extension.operations import operations
         operations.update_extension(cmd=cmd, extension_name=extension_name)
         operations.reload_extension(extension_name=extension_name)
     except CLIError as err:
