@@ -156,6 +156,6 @@ def validate_secret_identifier(namespace):
     identifier = getattr(namespace, 'secret_identifier', None)
     try:
         # this throws an exception for invalid format of secret identifier
-        KeyVaultIdentifier(uri=identifier, collection="secrets")
+        KeyVaultIdentifier(uri=identifier)
     except Exception as e:
         raise CLIError("--secret-identifier is invalid.\n{0}".format(str(e)))
