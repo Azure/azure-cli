@@ -489,7 +489,7 @@ def _deploy_arm_template_at_resource_group(cli_ctx,
 
     mgmt_client = _get_deployment_management_client(cli_ctx, handle_extended_json_format=handle_extended_json_format)
 
-    validation_result = mgmt_client.deployments.validate(resource_group_name=resource_group_name,deployment_name=deployment_name, properties=deployment_properties)
+    validation_result = mgmt_client.deployments.validate(resource_group_name=resource_group_name, deployment_name=deployment_name, properties=deployment_properties)
 
     if validate_only or validation_result.error:
         return validation_result
@@ -536,7 +536,7 @@ def _deploy_arm_template_at_management_group(cli_ctx,
 
     mgmt_client = _get_deployment_management_client(cli_ctx, handle_extended_json_format=handle_extended_json_format)
 
-    validation_result = mgmt_client.deployments.validate_at_management_group_scope(group_id=management_group_id,deployment_name=deployment_name, properties=deployment_properties, location=deployment_location)
+    validation_result = mgmt_client.deployments.validate_at_management_group_scope(group_id=management_group_id, deployment_name=deployment_name, properties=deployment_properties, location=deployment_location)
 
     if validate_only or validation_result.error:
         return validation_result
