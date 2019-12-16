@@ -154,10 +154,8 @@ def validate_secret_identifier(namespace):
     from azure.keyvault.key_vault_id import KeyVaultIdentifier
 
     identifier = getattr(namespace, 'secret_identifier', None)
-    if identifier:
-        try:
-            KeyVaultIdentifier(uri=identifier, collection="secrets")
-        except Exception as e:
-            raise CLIError("--secret-identifier is invalid.\n{0}".format(str(e)))
-    else:
-        raise CLIError("usage error: --secret-identifier is required.")
+    try:
+        # this throws an exception for invalid format of secret identifier
+        KeyVaultIdentifier(uri=identifier, collection="secrets")
+    except Exception as e:
+        raise CLIError("--secret-identifier is invalid.\n{0}".format(str(e)))
