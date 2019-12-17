@@ -158,4 +158,4 @@ def validate_secret_identifier(namespace):
         # this throws an exception for invalid format of secret identifier
         KeyVaultIdentifier(uri=identifier)
     except Exception as e:
-        raise CLIError("--secret-identifier is invalid.\n{0}".format(str(e)))
+        raise CLIError("Received an exception while validating the format of secret identifier.\n{0}".format(str(e)))
