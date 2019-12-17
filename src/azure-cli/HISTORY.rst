@@ -7,6 +7,10 @@ Release History
 
 * Add support for importing/exporting feature flags
 
+**SQL**
+
+* New commands `sql db sensitivity-labels show/list/list-recommended/update/delete/enable-recommendation/disable-recommendation` to manage sensitivity labels for SQL databases.
+
 2.0.78
 
 **ACR**
@@ -118,7 +122,6 @@ Release History
 **SQL**
 
 * Added "--read-scale" and "--read-replicas" parameters to sql db create and update commands, to support read scale management.
-* New commands `sql db sensitivity-labels show/list/list-recommended/update/delete/enable-recommendation/disable-recommendation` to manage sensitivity labels for SQL databases.
 
 **Storage**
 
