@@ -55,7 +55,7 @@ class AmsJobTests(ScenarioTest):
             'outputLabel': 'outputLabel'
         })
 
-        self.cmd('az ams job create -t {transformName} -a {amsname} -g {rg} -n {jobName} --input-asset-name {inputAssetName} --output-assets {outputAssetName}={outputLabel} --priority {priority} --label {label} --correlation-data {correlationData}', checks=[
+        self.cmd('az ams job start -t {transformName} -a {amsname} -g {rg} -n {jobName} --input-asset-name {inputAssetName} --output-assets {outputAssetName}={outputLabel} --priority {priority} --label {label} --correlation-data {correlationData}', checks=[
             self.check('name', '{jobName}'),
             self.check('resourceGroup', '{rg}'),
             self.check('input.label', '{label}'),
@@ -70,6 +70,13 @@ class AmsJobTests(ScenarioTest):
             self.check('length(correlationData)', 2),
             self.check('outputs[0].label', '{outputLabel}')
         ])
+
+        nonexits_job_name = self.create_random_name(prefix='job', length=20)
+        self.kwargs.update({
+            'nonexits_job_name': nonexits_job_name
+        })
+        with self.assertRaisesRegexp(SystemExit, '3'):
+            self.cmd('az ams job show -a {amsname} -n{nonexits_job_name} -g {rg} -t {transformName}')
 
         list = self.cmd('az ams job list -a {amsname} -g {rg} -t {transformName}').get_output_in_json()
         assert len(list) > 0

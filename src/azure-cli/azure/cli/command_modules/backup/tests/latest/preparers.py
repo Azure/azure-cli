@@ -323,8 +323,8 @@ class AFSPolicyPreparer(AbstractPreparer, SingleValueReplacer):
             policy_json['properties']['backupManagementType'] = "AzureStorage"
             policy_json = json.dumps(policy_json)
 
-            command_string = 'az backup policy create -g {} -v {} --policy \'{}\' -n {}'
-            command_string = command_string.format(self.resource_group, self.vault, policy_json, name)
+            command_string = 'az backup policy create -g {} -v {} --policy \'{}\' -n {} --backup-management-type {}'
+            command_string = command_string.format(self.resource_group, self.vault, policy_json, name, "AzureStorage")
             execute(self.cli_ctx, command_string)
             return {self.parameter_name: name}
         return {self.parameter_name: os.environ.get('AZURE_CLI_TEST_DEV_BACKUP_POLICY_NAME', None)}

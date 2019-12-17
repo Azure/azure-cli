@@ -156,6 +156,8 @@ def load_arguments(self, _):
         c.argument('description', help='Description of policy set definition.')
         c.argument('params', help='JSON formatted string or a path to a file or uri with parameter definitions.', type=file_type, completer=FilesCompleter())
         c.argument('definitions', help='JSON formatted string or a path to a file or uri containing definitions.', type=file_type, completer=FilesCompleter())
+        c.argument('definition_groups', min_api='2019-09-01', help='JSON formatted string or a path to a file or uri containing policy definition groups. Groups are used to organize policy definitions within a policy set.', type=file_type, completer=FilesCompleter())
+        c.argument('metadata', nargs='+', validator=validate_metadata, help='Metadata in space-separated key=value pairs.')
         c.argument('management_group', arg_type=management_group_name_type)
         c.argument('subscription', arg_type=subscription_type)
         c.ignore('_subscription')  # disable global subscription
@@ -171,16 +173,23 @@ def load_arguments(self, _):
     with self.argument_context('group deployment') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type, completer=get_resource_group_completion_list)
         c.argument('deployment_name', options_list=['--name', '-n'], required=True, help='The deployment name.')
-        c.argument('template_file', completer=FilesCompleter(), type=file_type, help="a template file path in the file system")
-        c.argument('template_uri', help='a uri to a remote template file')
-        c.argument('mode', arg_type=get_enum_type(DeploymentMode, default='incremental'), help='Incremental (only add resources to resource group) or Complete (remove extra resources from resource group)')
+        c.argument('template_file', completer=FilesCompleter(), type=file_type,
+                   help="The template file path in the file system")
+        c.argument('template_uri', help='The URI to a remote template file')
+        c.argument('mode', arg_type=get_enum_type(DeploymentMode, default='incremental'),
+                   help='Incremental (only add resources to resource group) or Complete '
+                        '(remove extra resources from resource group)')
         c.argument('parameters', action='append', nargs='+', completer=FilesCompleter())
-        c.argument('rollback_on_error', nargs='?', action=RollbackAction, help='The name of a deployment to roll back to on error, or use as a flag to roll back to the last successful deployment.')
+        c.argument('rollback_on_error', nargs='?', action=RollbackAction,
+                   help='The name of a deployment to roll back to on error, or use as a flag to roll back to the last '
+                        'successful deployment.')
 
     with self.argument_context('group deployment create') as c:
         c.argument('deployment_name', options_list=['--name', '-n'], required=False,
                    help='The deployment name. Default to template file base name')
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
+        c.argument('aux_subscriptions', nargs='*', options_list=['--aux-subs'],
+                   help='Auxiliary subscriptions which will be used during deployment across tenants.')
 
     with self.argument_context('group deployment validate') as c:
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
@@ -191,8 +200,8 @@ def load_arguments(self, _):
     with self.argument_context('deployment') as c:
         c.argument('deployment_name', options_list=['--name', '-n'], required=True, help='The deployment name.')
         c.argument('deployment_location', arg_type=get_location_type(self.cli_ctx), required=True)
-        c.argument('template_file', completer=FilesCompleter(), type=file_type, help="a template file path in the file system")
-        c.argument('template_uri', help='a uri to a remote template file')
+        c.argument('template_file', completer=FilesCompleter(), type=file_type, help="The template file path in the file system")
+        c.argument('template_uri', help='The URI to a remote template file')
         c.argument('parameters', action='append', nargs='+', completer=FilesCompleter())
 
     with self.argument_context('deployment create') as c:
