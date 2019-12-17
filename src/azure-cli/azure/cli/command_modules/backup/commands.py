@@ -34,7 +34,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_vault')
         g.show_command('show', 'get')
         g.custom_command('list', 'list_vaults')
-        g.show_command('backup-properties show', 'get', command_type=backup_storage_config_sdk, client_factory=backup_storage_configs_cf)
+        g.custom_command('backup-properties show', 'get_backup_properties', client_factory=backup_storage_configs_cf)
         g.custom_command('backup-properties set', 'set_backup_properties', client_factory=backup_storage_configs_cf)
         g.custom_command('delete', 'delete_vault', confirmation=True)
 
@@ -66,6 +66,10 @@ def load_command_table(self, _):
         g.custom_command('backup-now', 'backup_now', client_factory=backups_cf)
         g.custom_command('disable', 'disable_protection', confirmation=True)
         g.custom_command('enable-for-azurefileshare', 'enable_for_azurefileshare')
+        g.custom_command('enable-for-azurewl', 'enable_protection_for_azure_wl')
+        g.custom_command('auto-enable-for-azurewl', 'auto_enable_for_azure_wl', client_factory=protection_intent_cf)
+        g.custom_command('auto-disable-for-azurewl', 'disable_auto_for_azure_wl', client_factory=protection_intent_cf)
+        g.custom_command('resume', 'resume_protection')
         g.custom_command('undelete', 'undelete_protection')
 
     with self.command_group('backup item', backup_custom_base, client_factory=protected_items_cf) as g:

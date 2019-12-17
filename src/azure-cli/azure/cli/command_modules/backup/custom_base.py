@@ -360,7 +360,7 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
                                           item_name, rp_name, target_item, target_item_name, log_point_in_time)
 
 
-def undelete_protection(cmd, client, resource_group_name, vault_name, container_name, item_name, 
+def undelete_protection(cmd, client, resource_group_name, vault_name, container_name, item_name,
                         backup_management_type, workload_type=None):
     items_client = backup_protected_items_cf(cmd.cli_ctx)
     item = show_item(cmd, items_client, resource_group_name, vault_name, container_name, item_name,
@@ -372,6 +372,8 @@ def undelete_protection(cmd, client, resource_group_name, vault_name, container_
 
     if item.properties.backup_management_type.lower() == "azureiaasvm":
         return custom.undelete_protection(cmd, client, resource_group_name, vault_name, item)
+
+    return None
 
 
 def _get_containers(client, container_type, status, resource_group_name, vault_name, container_name=None):

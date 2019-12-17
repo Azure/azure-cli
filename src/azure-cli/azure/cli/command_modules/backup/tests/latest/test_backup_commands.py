@@ -492,3 +492,46 @@ class BackupTests(ScenarioTest, unittest.TestCase):
                  checks=self.check("length([?name == '{job}'])", 1))
 
         self.cmd('backup job stop -g {rg} -v {vault} -n {job}')
+
+    @record_only()
+    @ResourceGroupPreparer()
+    @VaultPreparer()
+    @VMPreparer()
+    @ItemPreparer()
+    def test_backup_softdelete(self, resource_group, vault_name, vm_name):
+        self.kwargs.update({
+            'vault': vault_name,
+            'vm': vm_name,
+            'rg': resource_group
+        })
+
+        self.cmd('backup protection disable --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm} -i {vm} --delete-backup-data --yes', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "DeleteBackupData"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ])
+
+        self.cmd('backup item show --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm} -n {vm}', checks=[
+            self.check("properties.friendlyName", '{vm}'),
+            self.check("properties.protectionState", "ProtectionStopped"),
+            self.check("resourceGroup", '{rg}'),
+            self.check("properties.isScheduledForDeferredDelete", True)
+        ])
+
+        self.cmd('backup protection undelete -g {rg} -v {vault} -c {vm} -i {vm} --workload-type VM --backup-management-type AzureIaasVM ', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "Undelete"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ])
+
+        self.cmd('backup vault backup-properties set -g {rg} -n {vault} --soft-delete-feature-state Disable')
+
+        self.cmd('backup item show --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm} -n {vm}', checks=[
+            self.check("properties.friendlyName", '{vm}'),
+            self.check("properties.protectionState", "ProtectionStopped"),
+            self.check("resourceGroup", '{rg}'),
+            self.check("properties.isScheduledForDeferredDelete", None)
+        ])
+  

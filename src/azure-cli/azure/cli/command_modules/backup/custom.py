@@ -19,14 +19,15 @@ from azure.mgmt.recoveryservices.models import Vault, VaultProperties, Sku, SkuN
 from azure.mgmt.recoveryservicesbackup.models import ProtectedItemResource, AzureIaaSComputeVMProtectedItem, \
     AzureIaaSClassicComputeVMProtectedItem, ProtectionState, IaasVMBackupRequest, BackupRequestResource, \
     IaasVMRestoreRequest, RestoreRequestResource, BackupManagementType, WorkloadType, OperationStatusValues, \
-    JobStatus, ILRRequestResource, IaasVMILRRegistrationRequest, BackupResourceConfig, BackupResourceConfigResource
+    JobStatus, ILRRequestResource, IaasVMILRRegistrationRequest, BackupResourceConfig, BackupResourceConfigResource, \
+    BackupResourceVaultConfig, BackupResourceVaultConfigResource
 
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.command_modules.backup._client_factory import (
     vaults_cf, backup_protected_items_cf, protection_policies_cf, virtual_machines_cf, recovery_points_cf,
     protection_containers_cf, backup_protectable_items_cf, resources_cf, backup_operation_statuses_cf,
     job_details_cf, protection_container_refresh_operation_results_cf, backup_protection_containers_cf,
-    protected_items_cf)
+    protected_items_cf, backup_resource_vault_config_cf)
 
 logger = get_logger(__name__)
 
@@ -89,10 +90,28 @@ def list_vaults(client, resource_group_name=None):
     return client.list_by_subscription_id()
 
 
-def set_backup_properties(client, vault_name, resource_group_name, backup_storage_redundancy):
+def set_backup_properties(cmd, client, vault_name, resource_group_name, backup_storage_redundancy=None,
+                          soft_delete_feature_state=None):
+    if soft_delete_feature_state:
+        soft_delete_feature_state += "d"
+        vault_config_client = backup_resource_vault_config_cf(cmd.cli_ctx)
+        vault_config_response = vault_config_client.get(vault_name, resource_group_name)
+        enhanced_security_state = vault_config_response.properties.enhanced_security_state
+        vault_config =  BackupResourceVaultConfig(soft_delete_feature_state=soft_delete_feature_state,
+                                                  enhanced_security_state=enhanced_security_state)
+        vault_config_resource = BackupResourceVaultConfigResource(properties=vault_config)
+        return vault_config_client.update(vault_name, resource_group_name, vault_config_resource)
+
     backup_storage_config = BackupResourceConfig(storage_model_type=backup_storage_redundancy)
     backup_storage_config_resource = BackupResourceConfigResource(properties=backup_storage_config)
-    client.update(vault_name, resource_group_name, backup_storage_config_resource)
+    return client.update(vault_name, resource_group_name, backup_storage_config_resource)
+
+
+def get_backup_properties(cmd, client, vault_name, resource_group_name):
+    vault_config_client = backup_resource_vault_config_cf(cmd.cli_ctx)
+    vault_config_response = vault_config_client.get(vault_name, resource_group_name)
+    backup_config_response = client.get(vault_name, resource_group_name)
+    return [backup_config_response, vault_config_response]
 
 
 def get_default_policy_for_vm(client, resource_group_name, vault_name):
