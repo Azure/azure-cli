@@ -37,6 +37,10 @@ Release History
 * Add back edge builds for pip install
 * Add Ubuntu eoan package
 
+**SQL**
+
+* New commands `sql db sensitivity-labels show/list/list-recommended/update/delete/enable-recommendation/disable-recommendation` to manage sensitivity labels for SQL databases.
+
 **Storage**
 
 * GA Release Large File Shares property for storage account create and update command

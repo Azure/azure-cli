@@ -1475,6 +1475,59 @@ def db_threat_detection_policy_update(
 
     return instance
 
+def db_sensitivity_label_update(
+        cmd,
+        client,
+        database_name,
+        server_name,
+        schema_name,
+        table_name,
+        column_name,
+        resource_group_name,
+        label_name = None,
+        information_type = None):
+    '''
+    Updates a sensitivity label. Custom update function to apply parameters to instance.
+    '''
+
+    if (label_name is None and information_type is None):
+        raise CLIError('A label name or an information type must be provided.')
+
+    '''
+    Get the information protection policy
+    '''
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.mgmt.security import SecurityCenter
+
+    securityCenterclient = get_mgmt_service_client(cmd.cli_ctx, SecurityCenter, asc_location="centralus")
+
+    informationProtectionPolicy = securityCenterclient.information_protection_policies.get(
+        scope = '/providers/Microsoft.Management/managementGroups/{}'.format(_get_tenant_id()),
+        information_protection_policy_name = "effective")
+
+    '''
+    Find the label id and information type id in the policy by the label name provided
+    '''
+    label_id = None
+    if (label_name is not None):
+        label_id = next((id for id in informationProtectionPolicy.labels if informationProtectionPolicy.labels[id].display_name.lower() == label_name.lower()), None)
+        if label_id is None:
+            raise CLIError('The provided label name was not found in the information protection policy.')
+    information_type_id = None
+    if (information_type is not None):
+        information_type_id = next((id for id in informationProtectionPolicy.information_types if informationProtectionPolicy.information_types[id].display_name.lower() == information_type.lower()), None)
+        if information_type_id is None:
+            raise CLIError('The provided information type was not found in the information protection policy.')
+    
+    params = {
+        'label_name': label_name,
+        'label_id': label_id,
+        'information_type': information_type,
+        'information_type_id': information_type_id
+        }
+
+    return client.create_or_update(resource_group_name, server_name, database_name, schema_name, table_name, column_name, params)
+
 
 ###############################################
 #                sql dw                       #

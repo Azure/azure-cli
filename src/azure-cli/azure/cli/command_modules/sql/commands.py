@@ -25,6 +25,7 @@ from ._util import (
     get_sql_capabilities_operations,
     get_sql_databases_operations,
     get_sql_database_blob_auditing_policies_operations,
+    get_sql_database_sensitivity_labels_operations,
     get_sql_database_operations_operations,
     get_sql_database_threat_detection_policies_operations,
     get_sql_database_transparent_data_encryption_activities_operations,
@@ -230,6 +231,22 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.generic_update_command('update',
                                  custom_func_name='db_audit_policy_update')
+
+    database_sensitivity_labels_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#SensitivityLabelsOperations.{}',
+        client_factory=get_sql_database_sensitivity_labels_operations)
+
+    with self.command_group('sql db sensitivity-labels',
+                            database_sensitivity_labels_operations,
+                            client_factory=get_sql_database_sensitivity_labels_operations) as g:
+
+        g.show_command('list', 'list_current_by_database')
+        g.show_command('list-recommended', 'list_recommended_by_database')
+        g.show_command('show', 'get')
+        g.show_command('delete', 'delete')
+        g.show_command('enable-recommendation', 'enable_recommendation')
+        g.show_command('disable-recommendation', 'disable_recommendation')
+        g.custom_command('update', 'db_sensitivity_label_update')
 
     database_threat_detection_policies_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#DatabaseThreatDetectionPoliciesOperations.{}',
