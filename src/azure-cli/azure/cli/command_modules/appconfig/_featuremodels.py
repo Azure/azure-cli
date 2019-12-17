@@ -7,12 +7,14 @@ from enum import Enum
 import json
 from knack.log import get_logger
 from azure.cli.core.util import shell_safe_json_parse
+from ._azconfig.models import KeyValue
 
 # pylint: disable=too-few-public-methods
 # pylint: disable=too-many-instance-attributes
 
 logger = get_logger(__name__)
 FEATURE_FLAG_PREFIX = ".appconfig.featureflag/"
+FEATURE_FLAG_CONTENT_TYPE = "application/vnd.microsoft.appconfig.ff+json;charset=utf-8"
 
 # Feature Flag Models #
 
@@ -53,10 +55,12 @@ class FeatureFlagValue(object):
                  description=None,
                  enabled=None,
                  conditions=None):
+        default_conditions = {'client_filters': []}
+
         self.id = id_
         self.description = description
-        self.enabled = enabled
-        self.conditions = conditions
+        self.enabled = enabled if enabled else False
+        self.conditions = conditions if conditions else default_conditions
 
     def __repr__(self):
         featureflagvalue = {
@@ -66,7 +70,7 @@ class FeatureFlagValue(object):
             "conditions": custom_serialize_conditions(self.conditions)
         }
 
-        return json.dumps(featureflagvalue, indent=2)
+        return json.dumps(featureflagvalue, indent=2, ensure_ascii=False)
 
 
 class FeatureFlag(object):
@@ -118,7 +122,7 @@ class FeatureFlag(object):
             "Conditions": custom_serialize_conditions(self.conditions)
         }
 
-        return json.dumps(featureflag, indent=2)
+        return json.dumps(featureflag, indent=2, ensure_ascii=False)
 
 
 class FeatureFilter(object):
@@ -142,7 +146,7 @@ class FeatureFilter(object):
             "name": self.name,
             "parameters": self.parameters
         }
-        return json.dumps(featurefilter, indent=2)
+        return json.dumps(featurefilter, indent=2, ensure_ascii=False)
 
 # Feature Flag Helper Functions #
 
@@ -165,6 +169,48 @@ def custom_serialize_conditions(conditions_dict):
             featurefilters.append(str(featurefilter))
         featurefilterdict[key] = featurefilters
     return featurefilterdict
+
+
+def map_featureflag_to_keyvalue(featureflag):
+    '''
+        Helper Function to convert FeatureFlag object to KeyValue object
+
+        Args:
+            featureflag - FeatureFlag object to be converted
+
+        Return:
+            KeyValue object
+    '''
+    try:
+        enabled = False
+        if featureflag.state in ("on", "conditional"):
+            enabled = True
+
+        feature_flag_value = FeatureFlagValue(id_=featureflag.key,
+                                              description=featureflag.description,
+                                              enabled=enabled,
+                                              conditions=featureflag.conditions)
+
+        set_kv = KeyValue(key=FEATURE_FLAG_PREFIX + featureflag.key,
+                          label=featureflag.label,
+                          value=json.dumps(feature_flag_value,
+                                           default=lambda o: o.__dict__,
+                                           ensure_ascii=False),
+                          content_type=FEATURE_FLAG_CONTENT_TYPE,
+                          tags={})
+
+        set_kv.locked = featureflag.locked
+        set_kv.last_modified = featureflag.last_modified
+
+    except ValueError as exception:
+        error_msg = "Exception while converting feature flag to key value: {0}\n{1}".format(featureflag.key, exception)
+        raise ValueError(error_msg)
+
+    except Exception as exception:
+        error_msg = "Exception while converting feature flag to key value: {0}\n{1}".format(featureflag.key, exception)
+        raise Exception(error_msg)
+
+    return set_kv
 
 
 def map_keyvalue_to_featureflag(keyvalue, show_conditions=True):
@@ -223,8 +269,6 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
             Valid FeatureFlagValue object
     '''
 
-    default_conditions = {'client_filters': []}
-
     try:
         # Make sure value string is a valid json
         feature_flag_dict = shell_safe_json_parse(keyvalue.value)
@@ -240,22 +284,23 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
             logger.debug("'%s' feature flag is missing required values or it contains ", feature_name +
                          "unsupported values. Setting missing value to defaults and ignoring unsupported values\n")
 
-        conditions = feature_flag_dict.get('conditions', default_conditions)
-        client_filters = conditions.get('client_filters', [])
+        conditions = feature_flag_dict.get('conditions', None)
+        if conditions:
+            client_filters = conditions.get('client_filters', [])
 
-        # Convert all filters to FeatureFilter objects
-        client_filters_list = []
-        for client_filter in client_filters:
-            # If there is a filter, it should always have a name
-            # In case it doesn't, ignore this filter
-            name = client_filter.get('name')
-            if name:
-                params = client_filter.get('parameters', {})
-                client_filters_list.append(FeatureFilter(name, params))
-            else:
-                logger.warning("Ignoring this filter without the 'name' attribute:\n%s",
-                               json.dumps(client_filter, indent=2))
-        conditions['client_filters'] = client_filters_list
+            # Convert all filters to FeatureFilter objects
+            client_filters_list = []
+            for client_filter in client_filters:
+                # If there is a filter, it should always have a name
+                # In case it doesn't, ignore this filter
+                name = client_filter.get('name')
+                if name:
+                    params = client_filter.get('parameters', {})
+                    client_filters_list.append(FeatureFilter(name, params))
+                else:
+                    logger.warning("Ignoring this filter without the 'name' attribute:\n%s",
+                                   json.dumps(client_filter, indent=2, ensure_ascii=False))
+            conditions['client_filters'] = client_filters_list
 
         feature_flag_value = FeatureFlagValue(id_=feature_name,
                                               description=feature_flag_dict.get(
