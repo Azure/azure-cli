@@ -105,7 +105,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
         storage_model_types = [e.value for e in StorageType]
-        vault_properties = self.cmd('backup vault backup-properties show -n {vault1} -g {rg}', checks=[
+        vault_properties = self.cmd('backup vault backup-properties show -n {vault1} -g {rg} --query [0]', checks=[
             JMESPathCheckExists("contains({}, properties.storageModelType)".format(storage_model_types)),
             self.check('properties.storageTypeState', 'Unlocked'),
             self.check('resourceGroup', '{rg}')
@@ -119,7 +119,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['model'] = new_storage_model
         self.cmd('backup vault backup-properties set -n {vault1} -g {rg} --backup-storage-redundancy {model}')
 
-        self.cmd('backup vault backup-properties show -n {vault1} -g {rg}', checks=[
+        self.cmd('backup vault backup-properties show -n {vault1} -g {rg} --query [0]', checks=[
             self.check('properties.storageModelType', new_storage_model)
         ])
 
