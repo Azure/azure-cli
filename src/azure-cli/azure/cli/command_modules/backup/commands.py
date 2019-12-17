@@ -26,10 +26,6 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.recoveryservices.operations#VaultsOperations.{}',
         client_factory=vaults_cf)
 
-    backup_storage_config_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.recoveryservicesbackup.operations._backup_resource_storage_configs_operations#BackupResourceStorageConfigsOperations.{}',
-        client_factory=vaults_cf)
-
     with self.command_group('backup vault', backup_vaults_sdk, client_factory=vaults_cf) as g:
         g.custom_command('create', 'create_vault')
         g.show_command('show', 'get')

@@ -97,7 +97,7 @@ def set_backup_properties(cmd, client, vault_name, resource_group_name, backup_s
         vault_config_client = backup_resource_vault_config_cf(cmd.cli_ctx)
         vault_config_response = vault_config_client.get(vault_name, resource_group_name)
         enhanced_security_state = vault_config_response.properties.enhanced_security_state
-        vault_config =  BackupResourceVaultConfig(soft_delete_feature_state=soft_delete_feature_state,
+        vault_config = BackupResourceVaultConfig(soft_delete_feature_state=soft_delete_feature_state,
                                                   enhanced_security_state=enhanced_security_state)
         vault_config_resource = BackupResourceVaultConfigResource(properties=vault_config)
         return vault_config_client.update(vault_name, resource_group_name, vault_config_resource)

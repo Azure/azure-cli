@@ -534,4 +534,3 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("resourceGroup", '{rg}'),
             self.check("properties.isScheduledForDeferredDelete", None)
         ])
-  
