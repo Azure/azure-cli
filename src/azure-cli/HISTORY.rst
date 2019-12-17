@@ -45,6 +45,7 @@ Release History
 **Cosmos DB**
 
 * Update azure-mgmt-cosmosdb package to use 0.11.0
+* az cosmosdb network-rule allows --vnet-name and --ignore-missing-endpoint as parameters
 
 **DLS**
 
