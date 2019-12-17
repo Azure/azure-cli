@@ -7,6 +7,7 @@ import json
 
 from knack.util import CLIError
 
+from azure.cli.command_modules.ams._utils import show_child_resource_not_found_message
 from azure.mgmt.media.models import (AssetFilter, FilterTrackSelection, FilterTrackPropertyCondition,
                                      PresentationTimeRange, FirstQuality)
 
@@ -110,3 +111,12 @@ def _parse_filter_tracks_json(tracks):
             errorMessage = 'Malformed JSON.'
             raise CLIError('{}. {}'.format(str(ex), errorMessage))
     return tracks_result
+
+
+def get_asset_filter(client, account_name, resource_group_name, asset_name, filter_name):
+    asset_filter = client.get(resource_group_name, account_name, asset_name, filter_name)
+    if not asset_filter:
+        show_child_resource_not_found_message(
+            resource_group_name, account_name, 'assets', asset_name, 'assetFilters', filter_name)
+
+    return asset_filter
