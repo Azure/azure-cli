@@ -11,6 +11,10 @@ Release History
 
 * Fix `az resource tag`: Recovery Services Vault tags cannot be updated
 
+**AppService**
+
+* Fix issue #7154: webapp:Single quotes instead of back ticks
+
 2.0.78
 ++++++
 
