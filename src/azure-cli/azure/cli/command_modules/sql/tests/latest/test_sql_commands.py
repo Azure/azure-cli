@@ -3602,6 +3602,7 @@ class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
                  .format(resource_group_name, mi2_location, failover_group_name),
                  expect_failure=True)
 
+
 class SqlDbSensitivityLabelsScenarioTest(ScenarioTest):
     def _get_storage_endpoint(self, storage_account, resource_group):
         return self.cmd('storage account show -g {} -n {}'
@@ -3628,8 +3629,9 @@ class SqlDbSensitivityLabelsScenarioTest(ScenarioTest):
 
         # list current sensitivity labels
         self.cmd('sql db sensitivity-labels list -g {} -s {} -n {}'
-                  .format(resource_group, server, database_name),
-                  checks=[JMESPathCheck('length(@)', 0)]) # No labels are set at the beginning
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('length(@)', 0)])  # No labels are set at the beginning
 
         # get storage account endpoint and key
         storage_endpoint = self._get_storage_endpoint(storage_account, resource_group)
@@ -3663,9 +3665,10 @@ class SqlDbSensitivityLabelsScenarioTest(ScenarioTest):
 
         # list recommended sensitivity labels
         expected_recommended_sensitivitylabels_count = 15
-        recommendedLabels = self.cmd('sql db sensitivity-labels list-recommended -g {} -s {} -n {}'
-                  .format(resource_group, server, database_name),
-                  checks=[JMESPathCheck('length(@)', expected_recommended_sensitivitylabels_count)])
+        self.cmd('sql db sensitivity-labels list-recommended -g {} -s {} -n {}'
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('length(@)', expected_recommended_sensitivitylabels_count)])
 
         schema_name = 'SalesLT'
         table_name = 'Customer'
@@ -3677,8 +3680,9 @@ class SqlDbSensitivityLabelsScenarioTest(ScenarioTest):
 
         # list recommended sensitivity labels
         self.cmd('sql db sensitivity-labels list-recommended -g {} -s {} -n {}'
-                  .format(resource_group, server, database_name),
-                  checks=[JMESPathCheck('length(@)', expected_recommended_sensitivitylabels_count - 1)])
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('length(@)', expected_recommended_sensitivitylabels_count - 1)])
 
         # re-enable the disabled recommendation
         self.cmd('sql db sensitivity-labels enable-recommendation -g {} -s {} -n {} --schema-name {} --table-name {} --column-name {}'
@@ -3686,8 +3690,9 @@ class SqlDbSensitivityLabelsScenarioTest(ScenarioTest):
 
         # lits recommended sensitivity labels
         self.cmd('sql db sensitivity-labels list-recommended -g {} -s {} -n {}'
-                  .format(resource_group, server, database_name),
-                  checks=[JMESPathCheck('length(@)', expected_recommended_sensitivitylabels_count)])
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('length(@)', expected_recommended_sensitivitylabels_count)])
 
         # update the sensitivity label
         information_type = 'Name'
@@ -3714,13 +3719,15 @@ class SqlDbSensitivityLabelsScenarioTest(ScenarioTest):
 
         # list recommended labels
         self.cmd('sql db sensitivity-labels list-recommended -g {} -s {} -n {}'
-                  .format(resource_group, server, database_name),
-                  checks=[JMESPathCheck('length(@)', expected_recommended_sensitivitylabels_count - 1)])
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('length(@)', expected_recommended_sensitivitylabels_count - 1)])
 
         # list current labels
         self.cmd('sql db sensitivity-labels list -g {} -s {} -n {}'
-                  .format(resource_group, server, database_name),
-                  checks=[JMESPathCheck('length(@)', 1)])
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('length(@)', 1)])
 
         # delete the label
         self.cmd('sql db sensitivity-labels delete -g {} -s {} -n {} --schema-name {} --table-name {} --column-name {}'
@@ -3728,5 +3735,6 @@ class SqlDbSensitivityLabelsScenarioTest(ScenarioTest):
 
         # list current labels
         self.cmd('sql db sensitivity-labels list -g {} -s {} -n {}'
-                  .format(resource_group, server, database_name),
-                  checks=[JMESPathCheck('length(@)', 0)])
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('length(@)', 0)])
