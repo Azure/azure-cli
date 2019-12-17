@@ -1,5 +1,10 @@
 .. :changelog:
 
+**Backup**
+
+* Added new command to enable soft-delete feature for IaasVM workload
+* Added new parameter '--soft-delete-feature-state' to set backup-properties command
+
 Release History
 ===============
 
