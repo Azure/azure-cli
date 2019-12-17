@@ -81,11 +81,11 @@ def load_arguments(self, _):
     with self.argument_context('cosmosdb network-rule add') as c:
         c.argument('subnet', help="Name or ID of the subnet")
         c.argument('virtual_network', options_list=['--vnet-name', '--virtual-network'], help="The name of the VNET, which must be provided in conjunction with the name of the subnet")
-        c.argument("ignore_missing_vnet_service_endpoint", arg_type=get_three_state_flag(), help="Create firewall rule before the virtual network has vnet service endpoint enabled.")
+        c.argument("ignore_missing_vnet_service_endpoint", options_list=['--ignore-missing-endpoint', '--ignore-missing-vnet-service-endpoint'], arg_type=get_three_state_flag(), help="Create firewall rule before the virtual network has vnet service endpoint enabled.")
 
     with self.argument_context('cosmosdb network-rule remove') as c:
         c.argument('subnet', help="Name or ID of the subnet")
-        c.argument('virtual_network', help="The name of the VNET, which must be provided in conjunction with the name of the subnet")
+        c.argument('virtual_network', options_list=['--vnet-name', '--virtual-network'], help="The name of the VNET, which must be provided in conjunction with the name of the subnet")
 
     with self.argument_context('cosmosdb collection') as c:
         c.argument('collection_id', options_list=['--collection-name', '-c'], help='Collection Name')

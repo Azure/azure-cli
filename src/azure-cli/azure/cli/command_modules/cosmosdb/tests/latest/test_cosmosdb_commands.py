@@ -270,7 +270,7 @@ class CosmosDBTests(ScenarioTest):
         assert vnet_rule["virtualNetworkRules"][0]["id"] == vnet_output["newVNet"]["subnets"][0]["id"]
         assert vnet_rule["virtualNetworkRules"][0]["ignoreMissingVnetServiceEndpoint"]
 
-        existing_rule = self.cmd('az cosmosdb network-rule add -n {acc} -g {rg} --virtual-network {vnet} --subnet {sub} --ignore-missing-vnet-service-endpoint').get_output_in_json()
+        existing_rule = self.cmd('az cosmosdb network-rule add -n {acc} -g {rg} --vnet-name {vnet} --subnet {sub} --ignore-missing-endpoint').get_output_in_json()
         assert len(existing_rule["virtualNetworkRules"]) == 1
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
