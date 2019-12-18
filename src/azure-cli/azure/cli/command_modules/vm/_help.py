@@ -2449,18 +2449,16 @@ parameters:
     short-summary: >
         The interval over which to aggregate metrics, in ##h##m format.
   - name: --filter
-    short-summary: A string used to reduce the set of metric data returned. eg. "BlobType eq '*'"
+    short-summary: A string used to reduce the set of metric data returned. eg. "LUN eq '*'"
     long-summary: 'For a full list of filters, see the filter string reference at https://docs.microsoft.com/rest/api/monitor/metrics/list'
   - name: --metadata
-    short-summary: Returns the metadata values instead of metric data
+    short-summary: Return the metadata values instead of metric data
   - name: --dimension
     short-summary: The list of dimensions (space-separated) the metrics are queried into.
     populator-commands:
       - az vm monitor metrics list-definitions
   - name: --namespace
     short-summary: Namespace to query metric definitions for.
-    populator-commands:
-      - az vm monitor metrics list-definitions
   - name: --offset
     short-summary: >
         Time offset of the query range, in ##d##h format.
@@ -2475,9 +2473,15 @@ parameters:
     populator-commands:
       - az vm monitor metrics list-definitions
 examples:
-  - name: List a VM's CPU usage for the past hour
+  - name: List CPU usage of VM for past one hour
     text: >
         az vm monitor metrics tail --name myVM -g myRG --metric "Percentage CPU"
+  - name: List one hour CPU usage of VM started at 2019-12-18T00:00:00Z
+    text: >
+        az vm monitor metrics tail --name myVM -g myRG --metric "Percentage CPU" --start-time 2019-12-18T00:00:00Z
+- name: List CPU usage of VM for past one hour with filter
+    text: >
+        az vm monitor metrics tail --name myVM -g myRG --metrics "Per Disk Read Bytes/sec" --filter "SlotId eq '*'"
 """
 
 helps['vm monitor metrics list-definitions'] = """
