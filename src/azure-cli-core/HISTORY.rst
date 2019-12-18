@@ -4,7 +4,7 @@ Release History
 ===============
 
 2.0.78
-
+++++++
 * Plug in HaTS survey
 
 2.0.77
