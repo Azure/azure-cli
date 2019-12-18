@@ -10,7 +10,7 @@ from azure.cli.core.commands.parameters import (
     tags_type, get_location_type,
     get_enum_type,
     get_three_state_flag)
-from azure.cli.command_modules.rdbms.validators import configuration_value_validator, validate_subnet, retention_validator
+from azure.cli.command_modules.rdbms.validators import configuration_value_validator, validate_subnet, retention_validator, tls_validator
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 
 
@@ -80,7 +80,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('administrator_login', options_list=['--admin-user', '-u'], help='Administrator username for the server. Once set, it cannot be changed.')
             c.argument('administrator_login_password', options_list=['--admin-password', '-p'], help='The password of the administrator. Minimum 8 characters and maximum 128 characters. Password must contain characters from three of the following categories: English uppercase letters, English lowercase letters, numbers, and non-alphanumeric characters.')
             c.argument('ssl_enforcement', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--ssl-enforcement'], help='Enable or disable ssl enforcement for connections to server. Default is Enabled.')
-            c.argument('minimal_tls_version', arg_type=get_enum_type(['TLS1_0', 'TLS1_1', 'TLS1_2']), options_list=['--minimal_tls_version'], help='Set the minimal TLS version for connections to server when SSL is enabled. Default is TLS1_2.')
+            c.argument('minimal_tls_version', arg_type=get_enum_type(['TLS1_0', 'TLS1_1', 'TLS1_2']), options_list=['--minimal_tls_version'], help='Set the minimal TLS version for connections to server when SSL is enabled. Default is TLS1_2.', validator=tls_validator)
             c.argument('tier', arg_type=get_enum_type(['Basic', 'GeneralPurpose', 'MemoryOptimized']), options_list=['--performance-tier'], help='The performance tier of the server.')
             c.argument('capacity', options_list=['--vcore'], type=int, help='Number of vcore.')
             c.argument('family', options_list=['--family'], arg_type=get_enum_type(['Gen4', 'Gen5']), help='Hardware generation.')

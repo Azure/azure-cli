@@ -884,6 +884,10 @@ Release History
 * storage blob generate-sas: User delegation SAS token support with --as-user
 * storage container generate-sas: User delegation SAS token support with --as-user
 
+**RDBMS**
+
+* Support specifying minimal TLS version for client connections to Postgres and MySQL
+
 2.0.67
 ++++++
 * Introduced a new [Preview] status to tag to more clearly communicate to customers
