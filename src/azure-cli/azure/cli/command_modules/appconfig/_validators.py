@@ -76,7 +76,7 @@ def validate_export(namespace):
         if (namespace.dest_name is None) and (namespace.dest_connection_string is None):
             raise CLIError("usage error: --config-name NAME | --connection-string STR")
     elif destination == 'appservice':
-        if namespace.appservice_name is None:
+        if namespace.appservice_account is None:
             raise CLIError("usage error: --appservice-account NAME_OR_ID")
 
 
