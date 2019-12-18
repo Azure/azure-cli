@@ -18,7 +18,7 @@ SKU_TIER_MAP = {'Basic': 'b', 'GeneralPurpose': 'gp', 'MemoryOptimized': 'mo'}
 
 def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_wait=False,
                    location=None, administrator_login=None, administrator_login_password=None, backup_retention=None,
-                   geo_redundant_backup=None, ssl_enforcement=None, storage_mb=None, tags=None, version=None, auto_grow='Enabled'):
+                   geo_redundant_backup=None, ssl_enforcement=None, storage_mb=None, tags=None, version=None, auto_grow='Enabled', minimal_tls_version='TLS1_2'):
     provider = 'Microsoft.DBforPostgreSQL'
     if isinstance(client, MySqlServersOperations):
         provider = 'Microsoft.DBforMySQL'
@@ -35,6 +35,7 @@ def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_w
                 administrator_login_password=administrator_login_password,
                 version=version,
                 ssl_enforcement=ssl_enforcement,
+                minimal_tls_version=minimal_tls_version,
                 storage_profile=mysql.models.StorageProfile(
                     backup_retention_days=backup_retention,
                     geo_redundant_backup=geo_redundant_backup,
@@ -51,6 +52,7 @@ def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_w
                 administrator_login_password=administrator_login_password,
                 version=version,
                 ssl_enforcement=ssl_enforcement,
+                minimal_tls_version=minimal_tls_version,
                 storage_profile=postgresql.models.StorageProfile(
                     backup_retention_days=backup_retention,
                     geo_redundant_backup=geo_redundant_backup,
@@ -67,6 +69,7 @@ def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_w
                 administrator_login_password=administrator_login_password,
                 version=version,
                 ssl_enforcement=ssl_enforcement,
+                minimal_tls_version=minimal_tls_version,
                 storage_profile=mariadb.models.StorageProfile(
                     backup_retention_days=backup_retention,
                     geo_redundant_backup=geo_redundant_backup,
@@ -283,7 +286,8 @@ def _server_update_custom_func(instance,
                                administrator_login_password=None,
                                ssl_enforcement=None,
                                tags=None,
-                               auto_grow=None):
+                               auto_grow=None,
+                               minimal_tls_version=None):
     from importlib import import_module
     server_module_path = instance.__module__
     module = import_module(server_module_path.replace('server', 'server_update_parameters'))
@@ -311,7 +315,8 @@ def _server_update_custom_func(instance,
                                     administrator_login_password=administrator_login_password,
                                     version=None,
                                     ssl_enforcement=ssl_enforcement,
-                                    tags=tags)
+                                    tags=tags,
+                                    minimal_tls_version=minimal_tls_version)
 
     return params
 

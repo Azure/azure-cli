@@ -80,6 +80,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('administrator_login', options_list=['--admin-user', '-u'], help='Administrator username for the server. Once set, it cannot be changed.')
             c.argument('administrator_login_password', options_list=['--admin-password', '-p'], help='The password of the administrator. Minimum 8 characters and maximum 128 characters. Password must contain characters from three of the following categories: English uppercase letters, English lowercase letters, numbers, and non-alphanumeric characters.')
             c.argument('ssl_enforcement', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--ssl-enforcement'], help='Enable or disable ssl enforcement for connections to server. Default is Enabled.')
+            c.argument('minimal_tls_version', arg_type=get_enum_type(['TLS1_0', 'TLS1_1', 'TLS1_2']), options_list=['--minimal_tls_version'], help='Set the minimal TLS version for connections to server when SSL is enabled. Default is TLS1_2.')
             c.argument('tier', arg_type=get_enum_type(['Basic', 'GeneralPurpose', 'MemoryOptimized']), options_list=['--performance-tier'], help='The performance tier of the server.')
             c.argument('capacity', options_list=['--vcore'], type=int, help='Number of vcore.')
             c.argument('family', options_list=['--family'], arg_type=get_enum_type(['Gen4', 'Gen5']), help='Hardware generation.')
@@ -87,6 +88,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('backup_retention', options_list=['--backup-retention'], type=int, help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.', validator=retention_validator)
             c.argument('auto_grow', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--auto-grow'], help='Enable or disable autogrow of the storage. Default value is Enabled.')
             c.argument('tags', tags_type)
+
+            if scope == 'mariadb server':
+                c.ignore('minimal_tls_version')
 
     for scope in ['mariadb server-logs', 'mysql server-logs', 'postgres server-logs']:
         with self.argument_context(scope) as c:
