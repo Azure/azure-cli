@@ -98,9 +98,9 @@ class AzCli(CLI):
         else:
             print('Your CLI is up-to-date.')
 
-        colorama.init() #This could be removed when knack fix is released
+        colorama.init()  # This could be removed when knack fix is released
         print('\n' + SURVEY_PROMPT)
-        colorama.deinit() #This could be removed when knack fix is released
+        colorama.deinit()  # This could be removed when knack fix is released
 
     def exception_handler(self, ex):  # pylint: disable=no-self-use
         from azure.cli.core.util import handle_exception
