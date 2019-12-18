@@ -13,7 +13,7 @@ Release History
 
 **AppService**
 
-* Fix issue #7154: webapp:Single quotes instead of back ticks
+* Fix issue #7154: Updating documentation for comand <> to use back ticks instead of single quotes
 
 2.0.78
 ++++++
