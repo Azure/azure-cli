@@ -9,6 +9,9 @@ Release History
 
 2.0.78
 
+2.0.78
+++++++
+
 **ACR**
 
 * Support Local context in acr task run
