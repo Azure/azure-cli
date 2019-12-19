@@ -1233,7 +1233,10 @@ class VMMonitorTest(ScenarioTest):
 
         time.sleep(60)
 
-        self.cmd('vm monitor metrics tail -n {vm} -g {rg} --metrics "Percentage CPU"')
+        self.cmd('vm monitor metrics tail -n {vm} -g {rg} --metrics "Percentage CPU"', checks=[
+            self.check('type', 'Microsoft.Insights/metrics'),
+            self.check('name.value', 'Percentage CPU')
+        ])
         self.cmd('vm monitor metrics list-definitions -n {vm} -g {rg}', checks=[
             self.check("length(@[*].id) != '0'", True)
         ])
