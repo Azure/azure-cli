@@ -7,6 +7,10 @@ Release History
 
 * Add support for importing/exporting feature flags
 
+**Compute**
+
+* Fix `vm create` failure in Azure Stack profile.
+
 2.0.78
 
 2.0.78
