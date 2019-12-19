@@ -16,6 +16,12 @@ except ImportError:
 MSI_LOCAL_ID = '[system]'
 
 
+def process_deployment_create_namespace(namespace):
+    if bool(namespace.template_uri) == bool(namespace.template_file):
+        raise CLIError('incorrect usage: --template-file FILE | --template-uri URI')
+    _validate_deployment_name(namespace)
+
+
 def _validate_deployment_name(namespace):
     # If missing,try come out with a name associated with the template name
     if namespace.deployment_name is None:
@@ -29,12 +35,6 @@ def _validate_deployment_name(namespace):
             namespace.deployment_name = os.path.splitext(template_filename)[0]
         else:
             namespace.deployment_name = 'deployment1'
-
-
-def process_deployment_create_namespace(namespace):
-    if bool(namespace.template_uri) == bool(namespace.template_file):
-        raise CLIError('incorrect usage: --template-file FILE | --template-uri URI')
-    _validate_deployment_name(namespace)
 
 
 def internal_validate_lock_parameters(namespace, resource_group, resource_provider_namespace,
