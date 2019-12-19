@@ -3,10 +3,33 @@
 Release History
 ===============
 
+**AppConfig**
+
+* Add support for importing/exporting feature flags
+
+**ARM**
+
+* Fix `az resource tag`: Recovery Services Vault tags cannot be updated
+
+2.0.78
+++++++
 
 **ACR**
 
 * Support Local context in acr task run
+
+**ACS**
+
+* [BREAKING CHANGE]az openshift create: rename `--workspace-resource-id` to `--workspace-id`.
+
+**AMS**
+
+* Update show commands to return 3 when resource not found
+
+**AppConfig**
+
+* Fix bug when appending api-version to request url. The existing solution doesn't work with pagination.
+* Support showing languages besides English as our backend service support unicode for globalization.
 
 **AppService**
 
@@ -17,6 +40,12 @@ Release History
 **ARM**
 
 * Update azure-mgmt-resource package to use 6.0.0
+* Cross Tenant Support for `az group deployment create` command by adding new parameter `--aux-subs`
+* Add new parameter `--metadata` to support adding metadata information for policy set definitions.
+
+**Backup**
+
+* Added Backup support for SQL and SAP Hana workload.
 
 **BotService**
 
@@ -61,9 +90,11 @@ Release History
 
 **Key Vault**
 
-* Fix #8921: Command `az keyvault key/secret/certificate list/list-deleted/list-versions` with parameter `--maxresults` do not work as intended
-* Fix #10846: Calling az keyvault secret show-deleted --id <value> still says secret_name "can not" be none
-* Fix #11084: Confusing encoding information
+* Fix #8095: `az keyvault storage remove`: improve the help message
+* Fix #8921: `az keyvault key/secret/certificate list/list-deleted/list-versions`: fix the validation bug on parameter `--maxresults`
+* Fix #10512: `az keyvault set-policy`: improve the error message when none of `--object-id`, `--spn` or `--upn` is specified
+* Fix #10846: `az keyvault secret show-deleted`: when `--id` is specified, `--name/-n` is not required
+* Fix #11084: `az keyvault secret download`: improve the help message of parameter `--encoding`
 
 **Network**
 
@@ -87,11 +118,27 @@ Release History
 
 * [BREAKING CHANGE] Remove 'ReceiveDisabled' status option from command 'az servicebus topic create', 'az servicebus topic update', 'az servicebus queue create', and 'az servicebus queue update'. This option is not valid for Service Bus topics and queues.
 
+**Redis**
+
+* Add preview param `--replicas-per-master` to `az redis create` command
+* Update azure-mgmt-redis from 6.0.0 to 7.0.0rc1
+
+**ServiceFabric**
+
+* Fixes in node-type add logic including #10963: Adding new node type with durability level Gold will always throw CLI error
+* Update ServiceFabricNodeVmExt version to 1.1 in creation template
+
+**SQL**
+
+* Added "--read-scale" and "--read-replicas" parameters to sql db create and update commands, to support read scale management.
+
 **Storage**
 
 * GA Release Large File Shares property for storage account create and update command
 * GA Release User Delegation SAS token Support
 * Add new commands `az storage account blob-service-properties show` and `az storage account blob-service-properties update --enable-change-feed` to manage blob service properties for storage account.
+* [COMING BREAKING CHANGE] `az storage copy`: `*` character is no longer supported as a wildcard in URL, but new parameters --include-pattern and --exclude-pattern will be added with `*` wildcard support.
+* Fix issue #11043: Support to remove whole container/share in `az storage remove` command
 
 2.0.77
 ++++++
@@ -161,10 +208,6 @@ Release History
 * application-gateway http-listener: Add --firewall-policy when create
 * application-gateway url-path-map rule: Add --firewall-policy when create
 
-**Backup**
-
-* Added Backup support for SQL and SAP Hana workload.
-
 **Packaging**
 
 * Rewrite the az wrapper in Python
@@ -185,8 +228,6 @@ Release History
 
 **Redis**
 
-* Add preview param `--replicas-per-master` to `az redis create` command
-* Update azure-mgmt-redis from 6.0.0 to 7.0.0rc1
 * Fix #2902: Avoid setting memory configs while updating Basic SKU cache
 
 **Reservations**

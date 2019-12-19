@@ -1912,7 +1912,7 @@ type: command
 short-summary: Update a user account.
 parameters:
   - name: --ssh-key-value
-    short-summary: SSH public key file value or public key file path
+    short-summary: SSH public key file value or public key file path. This command appends the new public key text to the ~/.ssh/authorized_keys file for the admin user on the VM. This does not replace or remove any existing SSH keys.
 examples:
   - name: Update a Windows user account.
     text: az vm user update -u username -p password -n MyVm -g MyResourceGroup

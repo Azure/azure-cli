@@ -293,6 +293,26 @@ class TagScenarioTest(ScenarioTest):
         self.cmd('tag list --query "[?tagName == \'{tag}\']"',
                  checks=self.is_empty())
 
+    @ResourceGroupPreparer(name_prefix='cli_test_tag_update_by_patch', location='westus')
+    @record_only()
+    def test_tag_update_by_patch(self, resource_group, resource_group_location):
+
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'vault': self.create_random_name('vault-', 30),
+            'tag': 'cli-test=test'
+        })
+
+        resource = self.cmd('resource create -g {rg} -n {vault} --resource-type Microsoft.RecoveryServices/vaults --is-full-object -p "{{\\"properties\\":{{}},\\"location\\":\\"{loc}\\",\\"sku\\":{{\\"name\\":\\"Standard\\"}}}}"',
+                            checks=self.check('name', '{vault}')).get_output_in_json()
+
+        self.kwargs['vault_id'] = resource['id']
+
+        self.cmd('resource tag --ids {vault_id} --tags {tag}', checks=self.check('tags', {'cli-test': 'test'}))
+        self.cmd('resource tag --ids {vault_id} --tags', checks=self.check('tags', {}))
+
+        self.cmd('resource delete --id {vault_id}', checks=self.is_empty())
+
 
 class ProviderRegistrationTest(ScenarioTest):
 
@@ -779,7 +799,9 @@ class PolicyScenarioTest(ScenarioTest):
             'rf': os.path.join(curr_dir, 'sample_policy_rule.json').replace('\\', '\\\\'),
             'dprf': os.path.join(curr_dir, 'sample_data_policy_rule.json').replace('\\', '\\\\'),
             'psf': os.path.join(curr_dir, 'sample_policy_set.json').replace('\\', '\\\\'),
-            'pdf': os.path.join(curr_dir, 'sample_policy_param_def.json').replace('\\', '\\\\')
+            'pdf': os.path.join(curr_dir, 'sample_policy_param_def.json').replace('\\', '\\\\'),
+            'metadata': 'test',
+            'updated_metadata': 'test2',
         })
         if (management_group):
             self.kwargs.update({'mg': management_group})
@@ -803,21 +825,23 @@ class PolicyScenarioTest(ScenarioTest):
         with open(os.path.join(curr_dir, 'sample_policy_set.json'), 'w') as outfile:
             json.dump(policyset, outfile)
 
-        cmd = self.cmdstring('policy set-definition create -n {psn} --definitions @"{psf}" --display-name {psdn} --description {ps_desc}', management_group, subscription)
+        cmd = self.cmdstring('policy set-definition create -n {psn} --definitions @"{psf}" --display-name {psdn} --description {ps_desc} --metadata category={metadata}', management_group, subscription)
         self.cmd(cmd, checks=[
             self.check('name', '{psn}'),
             self.check('displayName', '{psdn}'),
-            self.check('description', '{ps_desc}')
+            self.check('description', '{ps_desc}'),
+            self.check('metadata.category', '{metadata}')
         ])
 
         # update it
         self.kwargs['ps_desc'] = self.kwargs['ps_desc'] + '_new'
         self.kwargs['psdn'] = self.kwargs['psdn'] + '_new'
 
-        cmd = self.cmdstring('policy set-definition update -n {psn} --display-name {psdn} --description {ps_desc}', management_group, subscription)
+        cmd = self.cmdstring('policy set-definition update -n {psn} --display-name {psdn} --description {ps_desc} --metadata category={updated_metadata}', management_group, subscription)
         self.cmd(cmd, checks=[
             self.check('description', '{ps_desc}'),
-            self.check('displayName', '{psdn}')
+            self.check('displayName', '{psdn}'),
+            self.check('metadata.category', '{updated_metadata}')
         ])
 
         # list and show it
@@ -864,21 +888,23 @@ class PolicyScenarioTest(ScenarioTest):
         with open(os.path.join(curr_dir, 'sample_policy_set_parameterized.json'), 'w') as outfile:
             json.dump(policyset, outfile)
 
-        cmd = self.cmdstring('policy set-definition create -n {psn} --definitions @"{psf}" --display-name {psdn} --description {ps_desc} --params {pdf}', management_group, subscription)
+        cmd = self.cmdstring('policy set-definition create -n {psn} --definitions @"{psf}" --display-name {psdn} --description {ps_desc} --params {pdf} --metadata category={updated_metadata}', management_group, subscription)
         self.cmd(cmd, checks=[
             self.check('name', '{psn}'),
             self.check('displayName', '{psdn}'),
             self.check('description', '{ps_desc}'),
             self.check('policyDefinitions[0].parameters.allowedLocations.value', "[parameters('allowedLocations')]"),
-            self.check('parameters.allowedLocations.type', 'Array')
+            self.check('parameters.allowedLocations.type', 'Array'),
+            self.check('metadata.category', '{updated_metadata}')
         ])
 
         # update the parameters on the policy set
         self.kwargs['pdf'] = os.path.join(curr_dir, 'sample_policy_param_def_2.json').replace('\\', '\\\\')
 
-        cmd = self.cmdstring('policy set-definition update -n {psn} --params {pdf}', management_group, subscription)
+        cmd = self.cmdstring('policy set-definition update -n {psn} --params {pdf} --metadata category={updated_metadata}', management_group, subscription)
         self.cmd(cmd, checks=[
             self.check('parameters.allowedLocations.metadata.displayName', 'Allowed locations 2'),
+            self.check('metadata.category', '{updated_metadata}')
         ])
 
         # delete the parameterized policy set
@@ -1049,9 +1075,9 @@ class PolicyScenarioTest(ScenarioTest):
         if not self.in_recording:
             with mock.patch('azure.cli.command_modules.resource.custom._get_subscription_id_from_subscription',
                             return_value=MOCKED_SUBSCRIPTION_ID):
-                self.resource_policyset_operations(resource_group, None, 'f67cc918-f64f-4c3f-aa24-a855465f9d41')
+                self.resource_policyset_operations(resource_group, None, '0b1f6471-1bf0-4dda-aec3-cb9272f09590')
         else:
-            self.resource_policyset_operations(resource_group, None, 'f67cc918-f64f-4c3f-aa24-a855465f9d41')
+            self.resource_policyset_operations(resource_group, None, '0b1f6471-1bf0-4dda-aec3-cb9272f09590')
 
     @ResourceGroupPreparer(name_prefix='cli_test_policyset_grouping')
     @AllowLargeResponse()
@@ -1307,6 +1333,85 @@ class CrossRGDeploymentScenarioTest(ScenarioTest):
         self.cmd('group deployment operation list -g {rg1} -n {dn}', checks=[
             self.check('length([])', 3),
             self.check('[0].resourceGroup', '{rg1}')
+        ])
+
+
+class CrossTenantDeploymentScenarioTest(LiveScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cross_tenant_deploy', location='eastus')
+    def test_group_deployment_crosstenant(self, resource_group):
+        # Prepare Network Interface
+        self.kwargs.update({
+            'vm_rg': resource_group,
+            'vnet': 'clivmVNET',
+            'subnet': 'clivmSubnet',
+            'nsg': 'clivmNSG',
+            'ip': 'clivmPublicIp',
+            'nic': 'clivmVMNic'
+        })
+        self.cmd('network vnet create -n {vnet} -g {vm_rg} --subnet-name {subnet}')
+        self.cmd('network nsg create -n {nsg} -g {vm_rg}')
+        self.cmd('network public-ip create -n {ip} -g {vm_rg} --allocation-method Dynamic')
+        res = self.cmd('network nic create -n {nic} -g {vm_rg} --subnet {subnet} --vnet {vnet} --network-security-group {nsg} --public-ip-address {ip}').get_output_in_json()
+        self.kwargs.update({
+            'nic_id': res['NewNIC']['id']
+        })
+
+        # Prepare SIG in another tenant
+        self.kwargs.update({
+            'location': 'eastus',
+            'vm': self.create_random_name('cli_crosstenantvm', 40),
+            'gallery': self.create_random_name('cli_crosstenantgallery', 40),
+            'image': self.create_random_name('cli_crosstenantimage', 40),
+            'version': '1.1.2',
+            'captured': self.create_random_name('cli_crosstenantmanagedimage', 40),
+            'aux_sub': '685ba005-af8d-4b04-8f16-a7bf38b2eb5a',
+            'rg': self.create_random_name('cli_test_cross_tenant_rg', 40),
+        })
+        self.cmd('group create -g {rg} --location {location} --subscription {aux_sub}',
+                 checks=self.check('name', self.kwargs['rg']))
+        self.cmd('sig create -g {rg} --gallery-name {gallery} --subscription {aux_sub}', checks=self.check('name', self.kwargs['gallery']))
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1 --subscription {aux_sub}',
+                 checks=self.check('name', self.kwargs['image']))
+        self.cmd('sig image-definition show -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --subscription {aux_sub}',
+                 checks=self.check('name', self.kwargs['image']))
+
+        self.cmd('vm create -g {rg} -n {vm} --image ubuntults --admin-username clitest1 --generate-ssh-key --subscription {aux_sub}')
+        self.cmd(
+            'vm run-command invoke -g {rg} -n {vm} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes" --subscription {aux_sub}')
+        time.sleep(70)
+
+        self.cmd('vm deallocate -g {rg} -n {vm} --subscription {aux_sub}')
+        self.cmd('vm generalize -g {rg} -n {vm} --subscription {aux_sub}')
+        self.cmd('image create -g {rg} -n {captured} --source {vm} --subscription {aux_sub}')
+        res = self.cmd(
+            'sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --managed-image {captured} --replica-count 1 --subscription {aux_sub}').get_output_in_json()
+        self.kwargs.update({
+            'sig_id': res['id']
+        })
+
+        # Cross tenant deploy
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'crosstenant_vm_deploy.json').replace('\\', '\\\\'),
+            'dn': self.create_random_name('cli-crosstenantdeployment', 40),
+        })
+
+        self.cmd('group deployment validate -g {vm_rg} --template-file "{tf}" --parameters SIG_ImageVersion_id={sig_id} NIC_id={nic_id}', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+        self.cmd('group deployment create -g {vm_rg} -n {dn} --template-file "{tf}" --parameters SIG_ImageVersion_id={sig_id} NIC_id={nic_id} --aux-subs "{aux_sub}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('resourceGroup', '{vm_rg}')
+        ])
+        self.cmd('group deployment list -g {vm_rg}', checks=[
+            self.check('[0].name', '{dn}'),
+            self.check('[0].resourceGroup', '{vm_rg}')
+        ])
+        self.cmd('group deployment show -g {vm_rg} -n {dn}', checks=[
+            self.check('name', '{dn}'),
+            self.check('resourceGroup', '{vm_rg}')
         ])
 
 
