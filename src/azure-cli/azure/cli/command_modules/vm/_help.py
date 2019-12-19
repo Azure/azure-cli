@@ -2479,7 +2479,7 @@ examples:
   - name: List one hour CPU usage of VM started at 2019-12-18T00:00:00Z
     text: >
         az vm monitor metrics tail --name myVM -g myRG --metric "Percentage CPU" --start-time 2019-12-18T00:00:00Z
-- name: List CPU usage of VM for past one hour with filter
+  - name: List CPU usage of VM for past one hour with filter
     text: >
         az vm monitor metrics tail --name myVM -g myRG --metrics "Per Disk Read Bytes/sec" --filter "SlotId eq '*'"
 """
