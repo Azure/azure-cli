@@ -20,7 +20,7 @@ Release History
 
 **BotService**
 
-* [Breaking change] Remove '--version' flag from preview command 'az bot create'. Only v4 SDK bots are supported.
+* [BREAKING CHANGE] Remove '--version' flag from preview command 'az bot create'. Only v4 SDK bots are supported.
 * Add name availability check for 'az bot create'.
 * Add support for updating the icon URL for a bot via 'az bot update'.
 * Add support for updating a Direct Line channel via 'az bot directline update'.
@@ -46,6 +46,10 @@ Release History
 **DLS**
 
 * Update ADLS sdk version (0.0.48).
+
+**Event Hubs**
+
+* [BREAKING CHANGE] Remove 'ReceiveDisabled' status option from command 'az eventhubs eventhub update' and 'az eventhubs eventhub create'. This option is not valid for Event Hub entities.
 
 **Install**
 
@@ -78,6 +82,10 @@ Release History
 
 * Support for Policy API version 2019-09-01.
 * az policy set-definition: Support grouping within policy set definitions with `--definition-groups` parameter
+
+**Service Bus**
+
+* [BREAKING CHANGE] Remove 'ReceiveDisabled' status option from command 'az servicebus topic create', 'az servicebus topic update', 'az servicebus queue create', and 'az servicebus queue update'. This option is not valid for Service Bus topics and queues.
 
 **Storage**
 
