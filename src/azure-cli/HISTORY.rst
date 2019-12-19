@@ -7,7 +7,9 @@ Release History
 
 * Add support for importing/exporting feature flags
 
-2.0.78
+**ARM**
+
+* Fix `az resource tag`: Recovery Services Vault tags cannot be updated
 
 2.0.78
 ++++++
