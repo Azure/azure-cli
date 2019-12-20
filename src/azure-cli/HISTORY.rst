@@ -7,11 +7,13 @@ Release History
 
 * Add support for importing/exporting feature flags
 
+**ARM**
+
+* Fix `az resource tag`: Recovery Services Vault tags cannot be updated
+
 **Compute**
 
 * Fix `vm create` failure in Azure Stack profile.
-
-2.0.78
 
 2.0.78
 ++++++
