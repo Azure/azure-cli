@@ -10,6 +10,7 @@ Release History
 **AppService**
 
 * Fix issue #7154: Updating documentation for comand <> to use back ticks instead of single quotes
+* Fix issue #11287: webapp up: By default make the app created using up 'should be 'SSL enabled'
 
 **ARM**
 
@@ -50,7 +51,6 @@ Release History
 * Fix issue #11217: webapp: az webapp config ssl upload should support slot parameter
 * Fix issue #10965: Error: Name cannot be empty. Allow remove by ip_address and subnet
 * Add support for importing certificates from Key Vault `az webapp config ssl import`
-* Fix issue #11287: webapp up: By default make the app created using up 'should be 'SSL enabled'
 
 **ARM**
 
