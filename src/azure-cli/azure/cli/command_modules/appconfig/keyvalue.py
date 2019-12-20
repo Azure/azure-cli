@@ -20,7 +20,7 @@ from ._azconfig.models import (KeyValue,
                                ModifyKeyValueOptions,
                                QueryKeyValueCollectionOptions,
                                QueryKeyValueOptions)
-from ._kv_helpers import (__compare_kvs_for_restore, __read_kv_from_file, __read_features_from_file,
+from ._kv_helpers import (FeatureManagementReservedKeywords, __compare_kvs_for_restore, __read_kv_from_file, __read_features_from_file,
                           __write_kv_and_features_to_file, __read_kv_from_config_store,
                           __write_kv_and_features_to_config_store, __discard_features_from_retrieved_kv, __read_kv_from_app_service,
                           __write_kv_to_app_service, __serialize_kv_list_to_comparable_json_object, __serialize_features_from_kv_list_to_comparable_json_object,
@@ -52,21 +52,31 @@ def import_config(cmd,
                   src_label=None,
                   # from-appservice parameters
                   appservice_account=None,
-                  skip_features=False):
+                  skip_features=False,
+                  naming_convention=None):
+    # pylint: disable=too-many-locals
     src_features = []
     dest_features = []
     dest_kvs = []
     source = source.lower()
     format_ = format_.lower() if format_ else None
 
+    if not naming_convention:
+        logger.warning("--naming-convention was not provided. Reserved keywords for feature management section will default to PascalCase.")
+        naming_convention = 'pascal'
+    else:
+        naming_convention = naming_convention.lower()
+
+    feature_reserved_keywords = FeatureManagementReservedKeywords(naming_convention)
+
     # fetch key values from source
     if source == 'file':
         src_kvs = __read_kv_from_file(
-            file_path=path, format_=format_, separator=separator, prefix_to_add=prefix, depth=depth)
+            file_path=path, format_=format_, feature_reserved_keywords=feature_reserved_keywords, separator=separator, prefix_to_add=prefix, depth=depth)
 
         if not skip_features:
             # src_features is a list of KeyValue objects
-            src_features = __read_features_from_file(file_path=path, format_=format_)
+            src_features = __read_features_from_file(file_path=path, format_=format_, feature_reserved_keywords=feature_reserved_keywords)
 
     elif source == 'appconfig':
         src_kvs = __read_kv_from_config_store(cmd, name=src_name, connection_string=src_connection_string,
@@ -142,12 +152,20 @@ def export_config(cmd,
                   dest_label=None,
                   # to-app-service parameters
                   appservice_account=None,
-                  skip_features=False):
+                  skip_features=False,
+                  naming_convention=None):
     src_features = []
     dest_features = []
     dest_kvs = []
     destination = destination.lower()
     format_ = format_.lower() if format_ else None
+    if not naming_convention:
+        logger.warning("--naming-convention was not provided. Reserved keywords for feature management section will default to PascalCase.")
+        naming_convention = 'pascal'
+    else:
+        naming_convention = naming_convention.lower()
+
+    feature_reserved_keywords = FeatureManagementReservedKeywords(naming_convention)
 
     # fetch key values from user's configstore
     src_kvs = __read_kv_from_config_store(
@@ -206,7 +224,8 @@ def export_config(cmd,
     # export to destination
     if destination == 'file':
         __write_kv_and_features_to_file(file_path=path, key_values=src_kvs, features=src_features,
-                                        format_=format_, separator=separator, skip_features=skip_features)
+                                        format_=format_, separator=separator, skip_features=skip_features,
+                                        feature_reserved_keywords=feature_reserved_keywords)
     elif destination == 'appconfig':
         __write_kv_and_features_to_config_store(cmd, key_values=src_kvs, features=src_features, name=dest_name,
                                                 connection_string=dest_connection_string, label=dest_label)

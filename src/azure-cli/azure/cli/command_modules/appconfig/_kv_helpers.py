@@ -30,6 +30,42 @@ FEATURE_FLAG_PREFIX = ".appconfig.featureflag/"
 FEATURE_FLAG_CONTENT_TYPE = "application/vnd.microsoft.appconfig.ff+json;charset=utf-8"
 
 
+class FeatureManagementReservedKeywords(object):
+    '''
+    Feature management keywords used in files in different naming conventions.
+
+    :ivar str featuremanagement:
+        "FeatureManagement" keyword denoting feature management section in config file.
+    :ivar str enabledfor:
+        "EnabledFor" keyword denoting feature filters associated with a feature flag.
+    '''
+
+    def pascal(self):
+        self.featuremanagement = "FeatureManagement"
+        self.enabledfor = "EnabledFor"
+
+    def camel(self):
+        self.featuremanagement = "featureManagement"
+        self.enabledfor = "enabledFor"
+
+    def underscore(self):
+        self.featuremanagement = "feature_management"
+        self.enabledfor = "enabled_for"
+
+    def hyphen(self):
+        self.featuremanagement = "feature-management"
+        self.enabledfor = "enabled-for"
+
+    def __init__(self,
+                 naming_convention):
+        self.featuremanagement = "FeatureManagement"
+        self.enabledfor = "EnabledFor"
+
+        if naming_convention != 'pascal':
+            select_keywords = getattr(self, naming_convention, self.pascal)
+            select_keywords()
+
+
 def __compare_kvs_for_restore(restore_kvs, current_kvs):
     # compares two lists and find those that are new or changed in the restore_kvs
     # optionally (delete == True) find the new ones in current_kvs for deletion
@@ -54,21 +90,24 @@ def __compare_kvs_for_restore(restore_kvs, current_kvs):
 # File <-> List of KeyValue object
 
 
-def __read_kv_from_file(file_path, format_, separator=None, prefix_to_add="", depth=None):
+def __read_kv_from_file(file_path, format_, feature_reserved_keywords, separator=None, prefix_to_add="", depth=None):
     config_data = {}
     try:
         with io.open(file_path, 'r', encoding=__check_file_encoding(file_path)) as config_file:
             if format_ == 'json':
                 config_data = json.load(config_file)
-                if 'FeatureManagement' in config_data:
-                    del config_data['FeatureManagement']
+                if feature_reserved_keywords.featuremanagement in config_data:
+                    del config_data[feature_reserved_keywords.featuremanagement]
+
             elif format_ == 'yaml':
                 for yaml_data in list(yaml.safe_load_all(config_file)):
                     config_data.update(yaml_data)
-                logger.warning("Importing feature flags from a yaml file is not supported yet. If yaml file contains feature flags, they will be imported as regular key-values.")
+                if feature_reserved_keywords.featuremanagement in config_data:
+                    del config_data[feature_reserved_keywords.featuremanagement]
+
             elif format_ == 'properties':
                 config_data = javaproperties.load(config_file)
-                logger.warning("Importing feature flags from a properties file is not supported yet. If properties file contains feature flags, they will be imported as regular key-values.")
+                logger.warning("Importing feature flags from a properties file is not supported. If properties file contains feature flags, they will be imported as regular key-values.")
 
     except ValueError:
         raise CLIError(
@@ -94,35 +133,41 @@ def __read_kv_from_file(file_path, format_, separator=None, prefix_to_add="", de
     return key_values
 
 
-def __read_features_from_file(file_path, format_):
+def __read_features_from_file(file_path, format_, feature_reserved_keywords):
     config_data = {}
     features_dict = {}
+    if format_ == 'properties':
+        logger.warning("Importing feature flags from a properties file is not supported. If properties file contains feature flags, they will be imported as regular key-values.")
+        return features_dict
+
     try:
         with io.open(file_path, 'r', encoding=__check_file_encoding(file_path)) as config_file:
             if format_ == 'json':
                 config_data = json.load(config_file)
-                if 'FeatureManagement' in config_data:
-                    features_dict = config_data['FeatureManagement']
+                if feature_reserved_keywords.featuremanagement in config_data:
+                    features_dict = config_data[feature_reserved_keywords.featuremanagement]
+
             elif format_ == 'yaml':
-                logger.warning("Importing feature flags from a yaml file is not supported yet. Ignoring all feature flags.")
-            elif format_ == 'properties':
-                logger.warning("Importing feature flags from a properties file is not supported yet. Ignoring all feature flags.")
+                for yaml_data in list(yaml.safe_load_all(config_file)):
+                    config_data.update(yaml_data)
+                if feature_reserved_keywords.featuremanagement in config_data:
+                    features_dict = config_data[feature_reserved_keywords.featuremanagement]
 
     except ValueError:
         raise CLIError(
-            'The input is not a well formatted %s file.' % (format_))
+            'The feature management section of input is not a well formatted %s file.' % (format_))
     except OSError:
         raise CLIError('File is not available.')
 
     # features_dict contains all features that need to be converted to KeyValue format now
-    return __convert_feature_dict_to_keyvalue_list(features_dict, format_)
+    return __convert_feature_dict_to_keyvalue_list(features_dict, feature_reserved_keywords)
 
 
-def __write_kv_and_features_to_file(file_path, key_values=None, features=None, format_=None, separator=None, skip_features=False):
+def __write_kv_and_features_to_file(file_path, key_values=None, features=None, format_=None, separator=None, skip_features=False, feature_reserved_keywords='pascal'):
     try:
         exported_keyvalues = __export_keyvalues(key_values, format_, separator, None)
         if features and not skip_features:
-            exported_features = __export_features(features, format_)
+            exported_features = __export_features(features, feature_reserved_keywords)
             exported_keyvalues.update(exported_features)
 
         with open(file_path, 'w') as fp:
@@ -324,7 +369,7 @@ def __print_features_preview(old_json, new_json):
     # to simplify output, add one shared key in src and dest configuration
     new_json['@base'] = ''
     old_json['@base'] = ''
-    differ = JsonDiffer(syntax='symmetric')
+    differ = JsonDiffer(syntax='explicit')
     res = differ.diff(old_json, new_json)
     keys = str(res.keys())
     if res == {} or (('update' not in keys) and ('insert' not in keys)):
@@ -539,17 +584,10 @@ def __export_keyvalues(fetched_items, format_, separator, prefix=None):
         raise CLIError("Fail to export key-values." + str(exception))
 
 
-def __export_features(retrieved_features, format_):
+def __export_features(retrieved_features, feature_reserved_keywords):
     exported_dict = {}
+    exported_dict[feature_reserved_keywords.featuremanagement] = {}
     client_filters = []
-
-    if format_ in ('yaml', 'properties'):
-        # We only support json feature flags for now
-        logger.warning("Exporting feature flags to a yaml or properties file is not supported yet. Ignoring all feature flags.")
-        return exported_dict
-
-    if format_ == 'json':
-        exported_dict["FeatureManagement"] = {}
 
     try:
         # retrieved_features is a list of FeatureFlag objects
@@ -563,7 +601,7 @@ def __export_features(retrieved_features, format_):
                 feature_state = False
 
             elif feature.state == "conditional":
-                feature_state = {"EnabledFor": []}
+                feature_state = {feature_reserved_keywords.enabledfor: []}
                 client_filters = feature.conditions["client_filters"]
                 # client_filters is a list of dictionaries, where all dictionaries have 2 keys - Name and Parameters
                 for filter_ in client_filters:
@@ -571,11 +609,11 @@ def __export_features(retrieved_features, format_):
                     feature_filter["Name"] = filter_.name
                     if filter_.parameters:
                         feature_filter["Parameters"] = filter_.parameters
-                    feature_state["EnabledFor"].append(feature_filter)
+                    feature_state[feature_reserved_keywords.enabledfor].append(feature_filter)
 
             feature_entry = {feature.key: feature_state}
 
-            exported_dict["FeatureManagement"].update(feature_entry)
+            exported_dict[feature_reserved_keywords.featuremanagement].update(feature_entry)
 
         return __compact_key_values(exported_dict)
 
@@ -583,54 +621,54 @@ def __export_features(retrieved_features, format_):
         raise CLIError("Failed to export feature flags. " + str(exception))
 
 
-def __convert_feature_dict_to_keyvalue_list(features_dict, format_):
+def __convert_feature_dict_to_keyvalue_list(features_dict, feature_reserved_keywords):
     # pylint: disable=too-many-nested-blocks
     key_values = []
     default_conditions = {'client_filters': []}
 
     try:
-        if format_ == 'json':
-            for k, v in features_dict.items():
-                key = FEATURE_FLAG_PREFIX + str(k)
-                feature_flag_value = FeatureFlagValue(id_=str(k))
+        for k, v in features_dict.items():
+            key = FEATURE_FLAG_PREFIX + str(k)
+            feature_flag_value = FeatureFlagValue(id_=str(k))
 
-                if isinstance(v, dict):
-                    # This may be a conditional feature
-                    feature_flag_value.enabled = False
-                    try:
-                        feature_flag_value.conditions = {'client_filters': v["EnabledFor"]}
-                    except KeyError:
-                        raise CLIError("Feature '{0}' must contain 'EnabledFor' definition or have a true/false value. \n".format(str(k)))
+            if isinstance(v, dict):
+                # This may be a conditional feature
+                feature_flag_value.enabled = False
+                try:
+                    feature_flag_value.conditions = {'client_filters': v[feature_reserved_keywords.enabledfor]}
+                except KeyError:
+                    raise CLIError("Feature '{0}' must contain '{1}' definition or have a true/false value. \n".format(str(k), feature_reserved_keywords.enabledfor))
 
-                    if feature_flag_value.conditions["client_filters"]:
-                        feature_flag_value.enabled = True
+                if feature_flag_value.conditions["client_filters"]:
+                    feature_flag_value.enabled = True
 
-                        for idx, val in enumerate(feature_flag_value.conditions["client_filters"]):
-                            # each val should be a dict with at most 2 keys (Name, Parameters) or at least 1 key (Name)
-                            val = {filter_key.lower(): filter_val for filter_key, filter_val in val.items()}
-                            if not val.get("name", None):
-                                logger.warning("Ignoring a filter for feature '%s' because it doesn't have a 'Name' attribute.", str(k))
-                                continue
+                    for idx, val in enumerate(feature_flag_value.conditions["client_filters"]):
+                        # each val should be a dict with at most 2 keys (Name, Parameters) or at least 1 key (Name)
+                        val = {filter_key.lower(): filter_val for filter_key, filter_val in val.items()}
+                        if not val.get("name", None):
+                            logger.warning("Ignoring a filter for feature '%s' because it doesn't have a 'Name' attribute.", str(k))
+                            continue
 
-                            if val["name"].lower() == "alwayson":
-                                # We support alternate format for specifying always ON features
-                                # "FeatureT": {"EnabledFor": [{ "Name": "AlwaysOn"}]}
-                                break
+                        if val["name"].lower() == "alwayson":
+                            # We support alternate format for specifying always ON features
+                            # "FeatureT": {"EnabledFor": [{ "Name": "AlwaysOn"}]}
+                            feature_flag_value.conditions = default_conditions
+                            break
 
-                            filter_param = val.get("parameters", {})
-                            new_val = {'name': val["name"]}
-                            if filter_param:
-                                new_val["parameters"] = filter_param
-                            feature_flag_value.conditions["client_filters"][idx] = new_val
+                        filter_param = val.get("parameters", {})
+                        new_val = {'name': val["name"]}
+                        if filter_param:
+                            new_val["parameters"] = filter_param
+                        feature_flag_value.conditions["client_filters"][idx] = new_val
 
-                else:
-                    feature_flag_value.enabled = v
-                    feature_flag_value.conditions = default_conditions
+            else:
+                feature_flag_value.enabled = v
+                feature_flag_value.conditions = default_conditions
 
-                set_kv = KeyValue(key=key,
-                                  value=json.dumps(feature_flag_value, default=lambda o: o.__dict__, ensure_ascii=False),
-                                  content_type=FEATURE_FLAG_CONTENT_TYPE)
-                key_values.append(set_kv)
+            set_kv = KeyValue(key=key,
+                              value=json.dumps(feature_flag_value, default=lambda o: o.__dict__, ensure_ascii=False),
+                              content_type=FEATURE_FLAG_CONTENT_TYPE)
+            key_values.append(set_kv)
 
     except Exception as exception:
         raise CLIError("File contains feature flags in invalid format. " + str(exception))
