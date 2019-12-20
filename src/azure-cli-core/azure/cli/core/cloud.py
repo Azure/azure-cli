@@ -219,6 +219,17 @@ class Cloud(object):  # pylint: disable=too-few-public-methods
         return pformat(o)
 
 
+AZURE_DF_CLOUD = Cloud(
+    'AzureDFCloud',
+    endpoints=CloudEndpoints(
+        resource_manager='https://api-dogfood.resources.windows-int.net/',
+        active_directory='https://login.windows-ppe.net',
+        active_directory_graph_resource_id='https://graph.ppe.windows.net/',
+        active_directory_resource_id='https://management.core.windows.net/',
+        microsoft_graph_resource_id='https://graph.ppe.windows.net/'),
+    suffixes=CloudSuffixes(
+        keyvault_dns='.vault-int.azure-int.net'))
+
 AZURE_PUBLIC_CLOUD = Cloud(
     'AzureCloud',
     endpoints=CloudEndpoints(
@@ -314,7 +325,7 @@ AZURE_GERMAN_CLOUD = Cloud(
         keyvault_dns='.vault.microsoftazure.de',
         sql_server_hostname='.database.cloudapi.de'))
 
-KNOWN_CLOUDS = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_GERMAN_CLOUD]
+KNOWN_CLOUDS = [AZURE_DF_CLOUD, AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_GERMAN_CLOUD]
 
 if 'ARM_CLOUD_METADATA_URL' in os.environ:
     try:
@@ -335,7 +346,7 @@ def _set_active_cloud(cli_ctx, cloud_name):
 
 def get_active_cloud_name(cli_ctx):
     try:
-        return cli_ctx.config.get('cloud', 'name')
+        return 'AzureDFCloud'  # cli_ctx.config.get('cloud', 'name')
     except (configparser.NoOptionError, configparser.NoSectionError):
         _set_active_cloud(cli_ctx, AZURE_PUBLIC_CLOUD.name)
         return AZURE_PUBLIC_CLOUD.name
