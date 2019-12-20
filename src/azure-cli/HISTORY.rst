@@ -1,10 +1,5 @@
 .. :changelog:
 
-**Backup**
-
-* Added new command to enable soft-delete feature for IaasVM workload
-* Added new parameter '--soft-delete-feature-state' to set backup-properties command
-
 Release History
 ===============
 
@@ -19,6 +14,11 @@ Release History
 **ARM**
 
 * Fix `az resource tag`: Recovery Services Vault tags cannot be updated
+
+**Backup**
+
+* Added new command 'backup protection undelete' to enable soft-delete feature for IaasVM workload
+* Added new parameter '--soft-delete-feature-state' to set backup-properties command
 
 **Compute**
 
