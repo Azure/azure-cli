@@ -11,6 +11,10 @@ Release History
 
 * Fix `az resource tag`: Recovery Services Vault tags cannot be updated
 
+**AppService**
+
+* Fix issue #7154: Updating documentation for comand <> to use back ticks instead of single quotes
+
 2.0.78
 ++++++
 
