@@ -7,13 +7,17 @@ Release History
 
 * Add support for importing/exporting feature flags
 
+**AppService**
+
+* Fix issue #7154: Updating documentation for comand <> to use back ticks instead of single quotes
+
 **ARM**
 
 * Fix `az resource tag`: Recovery Services Vault tags cannot be updated
 
-**AppService**
+**Compute**
 
-* Fix issue #7154: Updating documentation for comand <> to use back ticks instead of single quotes
+* Fix `vm create` failure in Azure Stack profile.
 
 2.0.78
 ++++++
