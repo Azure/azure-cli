@@ -28,6 +28,8 @@ from._featuremodels import (map_keyvalue_to_featureflag,
 logger = get_logger(__name__)
 FEATURE_FLAG_PREFIX = ".appconfig.featureflag/"
 FEATURE_FLAG_CONTENT_TYPE = "application/vnd.microsoft.appconfig.ff+json;charset=utf-8"
+FEATURE_MANAGEMENT_KEYWORDS = ["FeatureManagement", "featureManagement", "feature_management", "feature-management"]
+ENABLED_FOR_KEYWORDS = ["EnabledFor", "enabledFor", "enabled_for", "enabled-for"]
 
 
 class FeatureManagementReservedKeywords(object):
@@ -41,25 +43,25 @@ class FeatureManagementReservedKeywords(object):
     '''
 
     def pascal(self):
-        self.featuremanagement = "FeatureManagement"
-        self.enabledfor = "EnabledFor"
+        self.featuremanagement = FEATURE_MANAGEMENT_KEYWORDS[0]
+        self.enabledfor = ENABLED_FOR_KEYWORDS[0]
 
     def camel(self):
-        self.featuremanagement = "featureManagement"
-        self.enabledfor = "enabledFor"
+        self.featuremanagement = FEATURE_MANAGEMENT_KEYWORDS[1]
+        self.enabledfor = ENABLED_FOR_KEYWORDS[1]
 
     def underscore(self):
-        self.featuremanagement = "feature_management"
-        self.enabledfor = "enabled_for"
+        self.featuremanagement = FEATURE_MANAGEMENT_KEYWORDS[2]
+        self.enabledfor = ENABLED_FOR_KEYWORDS[2]
 
     def hyphen(self):
-        self.featuremanagement = "feature-management"
-        self.enabledfor = "enabled-for"
+        self.featuremanagement = FEATURE_MANAGEMENT_KEYWORDS[3]
+        self.enabledfor = ENABLED_FOR_KEYWORDS[3]
 
     def __init__(self,
                  naming_convention):
-        self.featuremanagement = "FeatureManagement"
-        self.enabledfor = "EnabledFor"
+        self.featuremanagement = FEATURE_MANAGEMENT_KEYWORDS[0]
+        self.enabledfor = ENABLED_FOR_KEYWORDS[0]
 
         if naming_convention != 'pascal':
             select_keywords = getattr(self, naming_convention, self.pascal)
@@ -90,28 +92,35 @@ def __compare_kvs_for_restore(restore_kvs, current_kvs):
 # File <-> List of KeyValue object
 
 
-def __read_kv_from_file(file_path, format_, feature_reserved_keywords, separator=None, prefix_to_add="", depth=None):
+def __read_kv_from_file(file_path, format_, separator=None, prefix_to_add="", depth=None):
     config_data = {}
     try:
         with io.open(file_path, 'r', encoding=__check_file_encoding(file_path)) as config_file:
             if format_ == 'json':
                 config_data = json.load(config_file)
-                if feature_reserved_keywords.featuremanagement in config_data:
-                    del config_data[feature_reserved_keywords.featuremanagement]
+                for feature_management_keyword in FEATURE_MANAGEMENT_KEYWORDS:
+                    # delete all feature management sections in any name format.
+                    # If users have not skipped features, and there are multiple
+                    # feature sections, we will error out while reading features.
+                    if feature_management_keyword in config_data:
+                        del config_data[feature_management_keyword]
 
             elif format_ == 'yaml':
                 for yaml_data in list(yaml.safe_load_all(config_file)):
                     config_data.update(yaml_data)
-                if feature_reserved_keywords.featuremanagement in config_data:
-                    del config_data[feature_reserved_keywords.featuremanagement]
+                for feature_management_keyword in FEATURE_MANAGEMENT_KEYWORDS:
+                    # delete all feature management sections in any name format.
+                    # If users have not skipped features, and there are multiple
+                    # feature sections, we will error out while reading features.
+                    if feature_management_keyword in config_data:
+                        del config_data[feature_management_keyword]
 
             elif format_ == 'properties':
                 config_data = javaproperties.load(config_file)
                 logger.warning("Importing feature flags from a properties file is not supported. If properties file contains feature flags, they will be imported as regular key-values.")
 
     except ValueError:
-        raise CLIError(
-            'The input is not a well formatted %s file.' % (format_))
+        raise CLIError('The input is not a well formatted %s file.' % (format_))
     except OSError:
         raise CLIError('File is not available.')
     flattened_data = {}
@@ -133,9 +142,12 @@ def __read_kv_from_file(file_path, format_, feature_reserved_keywords, separator
     return key_values
 
 
-def __read_features_from_file(file_path, format_, feature_reserved_keywords):
+def __read_features_from_file(file_path, format_):
     config_data = {}
     features_dict = {}
+    # Default is PascalCase, but it will always be overwritten as long as there is a feature section in file
+    enabled_for_keyword = ENABLED_FOR_KEYWORDS[0]
+
     if format_ == 'properties':
         logger.warning("Importing feature flags from a properties file is not supported. If properties file contains feature flags, they will be imported as regular key-values.")
         return features_dict
@@ -144,14 +156,23 @@ def __read_features_from_file(file_path, format_, feature_reserved_keywords):
         with io.open(file_path, 'r', encoding=__check_file_encoding(file_path)) as config_file:
             if format_ == 'json':
                 config_data = json.load(config_file)
-                if feature_reserved_keywords.featuremanagement in config_data:
-                    features_dict = config_data[feature_reserved_keywords.featuremanagement]
 
             elif format_ == 'yaml':
                 for yaml_data in list(yaml.safe_load_all(config_file)):
                     config_data.update(yaml_data)
-                if feature_reserved_keywords.featuremanagement in config_data:
-                    features_dict = config_data[feature_reserved_keywords.featuremanagement]
+
+        found_feature_section = False
+        for index, feature_management_keyword in enumerate(FEATURE_MANAGEMENT_KEYWORDS):
+            # find the first occurence of feature management section in file.
+            # Enforce the same naming convention for 'EnabledFor' keyword
+            # If there are multiple feature sections, we will error out here.
+            if feature_management_keyword in config_data:
+                if not found_feature_section:
+                    features_dict = config_data[feature_management_keyword]
+                    enabled_for_keyword = ENABLED_FOR_KEYWORDS[index]
+                    found_feature_section = True
+                else:
+                    raise CLIError('Unable to proceed because file contains multiple sections corresponding to "Feature Management".')
 
     except ValueError:
         raise CLIError(
@@ -160,14 +181,14 @@ def __read_features_from_file(file_path, format_, feature_reserved_keywords):
         raise CLIError('File is not available.')
 
     # features_dict contains all features that need to be converted to KeyValue format now
-    return __convert_feature_dict_to_keyvalue_list(features_dict, feature_reserved_keywords)
+    return __convert_feature_dict_to_keyvalue_list(features_dict, enabled_for_keyword)
 
 
-def __write_kv_and_features_to_file(file_path, key_values=None, features=None, format_=None, separator=None, skip_features=False, feature_reserved_keywords='pascal'):
+def __write_kv_and_features_to_file(file_path, key_values=None, features=None, format_=None, separator=None, skip_features=False, naming_convention='pascal'):
     try:
         exported_keyvalues = __export_keyvalues(key_values, format_, separator, None)
         if features and not skip_features:
-            exported_features = __export_features(features, feature_reserved_keywords)
+            exported_features = __export_features(features, naming_convention)
             exported_keyvalues.update(exported_features)
 
         with open(file_path, 'w') as fp:
@@ -584,7 +605,8 @@ def __export_keyvalues(fetched_items, format_, separator, prefix=None):
         raise CLIError("Fail to export key-values." + str(exception))
 
 
-def __export_features(retrieved_features, feature_reserved_keywords):
+def __export_features(retrieved_features, naming_convention):
+    feature_reserved_keywords = FeatureManagementReservedKeywords(naming_convention)
     exported_dict = {}
     exported_dict[feature_reserved_keywords.featuremanagement] = {}
     client_filters = []
@@ -621,7 +643,7 @@ def __export_features(retrieved_features, feature_reserved_keywords):
         raise CLIError("Failed to export feature flags. " + str(exception))
 
 
-def __convert_feature_dict_to_keyvalue_list(features_dict, feature_reserved_keywords):
+def __convert_feature_dict_to_keyvalue_list(features_dict, enabled_for_keyword):
     # pylint: disable=too-many-nested-blocks
     key_values = []
     default_conditions = {'client_filters': []}
@@ -635,9 +657,9 @@ def __convert_feature_dict_to_keyvalue_list(features_dict, feature_reserved_keyw
                 # This may be a conditional feature
                 feature_flag_value.enabled = False
                 try:
-                    feature_flag_value.conditions = {'client_filters': v[feature_reserved_keywords.enabledfor]}
+                    feature_flag_value.conditions = {'client_filters': v[enabled_for_keyword]}
                 except KeyError:
-                    raise CLIError("Feature '{0}' must contain '{1}' definition or have a true/false value. \n".format(str(k), feature_reserved_keywords.enabledfor))
+                    raise CLIError("Feature '{0}' must contain '{1}' definition or have a true/false value. \n".format(str(k), enabled_for_keyword))
 
                 if feature_flag_value.conditions["client_filters"]:
                     feature_flag_value.enabled = True

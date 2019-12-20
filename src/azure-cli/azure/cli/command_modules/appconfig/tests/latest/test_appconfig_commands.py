@@ -5,10 +5,12 @@
 
 # pylint: disable=line-too-long
 
+import javaproperties
 import json
 import os
 import sys
 import time
+import yaml
 
 from knack.util import CLIError
 from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest)
@@ -389,6 +391,88 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         with open(exported_file_path) as json_file:
             exported_kvs = json.load(json_file)
         assert imported_kvs == exported_kvs
+
+        # Naming convention tests
+        import_hyphen_path = os.path.join(TEST_DIR, 'import_features_hyphen.json')
+        export_underscore_path = os.path.join(TEST_DIR, 'export_features_underscore.json')
+        import_multiple_feature_sections_path = os.path.join(TEST_DIR, 'import_multiple_feature_sections.json')
+        import_wrong_enabledfor_format_path = os.path.join(TEST_DIR, 'import_wrong_enabledfor_format.json')
+
+        self.kwargs.update({
+            'label': 'NamingConventionTest',
+            'naming_convention': 'underscore',
+            'imported_file_path': import_hyphen_path
+        })
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} --naming-convention {naming_convention} -y')
+        with open(export_underscore_path) as json_file:
+            export_underscore_path = json.load(json_file)
+        with open(exported_file_path) as json_file:
+            exported_kvs = json.load(json_file)
+        assert export_underscore_path == exported_kvs
+
+        # Error if imported file has multiple feature sections
+        self.kwargs.update({
+            'imported_file_path': import_multiple_feature_sections_path
+        })
+        with self.assertRaisesRegexp(CLIError, 'Unable to proceed because file contains multiple sections corresponding to "Feature Management".'):
+            self.cmd('appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
+
+        # Error if imported file has "enabled for" in wrong format
+        self.kwargs.update({
+            'imported_file_path': import_wrong_enabledfor_format_path
+        })
+        with self.assertRaisesRegexp(CLIError, 'definition or have a true/false value.'):
+            self.cmd('appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
+
+        # Import/Export yaml file
+        imported_yaml_file_path = os.path.join(TEST_DIR, 'import_features.yaml')
+        exported_yaml_file_path = os.path.join(TEST_DIR, 'export_features.yaml')
+        exported_hyphen_yaml_file_path = os.path.join(TEST_DIR, 'export_features_hyphen.yaml')
+
+        self.kwargs.update({
+            'label': 'YamlTests',
+            'imported_format': 'yaml',
+            'naming_convention': 'hyphen',
+            'imported_file_path': imported_yaml_file_path,
+            'exported_file_path': exported_yaml_file_path
+        })
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} --naming-convention {naming_convention} -y')
+        exported_yaml_file = {}
+        exported_hyphen_yaml_file = {}
+        with open(exported_yaml_file_path) as yaml_file:
+            for yaml_data in list(yaml.safe_load_all(yaml_file)):
+                exported_yaml_file.update(yaml_data)
+        with open(exported_hyphen_yaml_file_path) as yaml_file:
+            for yaml_data in list(yaml.safe_load_all(yaml_file)):
+                exported_hyphen_yaml_file.update(yaml_data)
+        assert exported_yaml_file == exported_hyphen_yaml_file
+
+        # Import/Export properties file
+        imported_prop_file_path = os.path.join(TEST_DIR, 'import_features.properties')
+        exported_prop_file_path = os.path.join(TEST_DIR, 'export_features.properties')
+        exported_as_kv_prop_file_path = os.path.join(TEST_DIR, 'export_as_kv.properties')
+
+        self.kwargs.update({
+            'label': 'PropertiesTests',
+            'imported_format': 'properties',
+            'imported_file_path': imported_prop_file_path,
+            'exported_file_path': exported_prop_file_path
+        })
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} -y')
+        with open(exported_prop_file_path) as prop_file:
+            exported_prop_file = javaproperties.load(prop_file)
+        with open(exported_as_kv_prop_file_path) as prop_file:
+            exported_kv_prop_file = javaproperties.load(prop_file)
+        assert exported_prop_file == exported_kv_prop_file
 
 
 class AppConfigFeatureScenarioTest(ScenarioTest):
