@@ -222,7 +222,9 @@ class Cloud(object):  # pylint: disable=too-few-public-methods
 AZURE_DF_CLOUD = Cloud(
     'AzureDFCloud',
     endpoints=CloudEndpoints(
+        management='https://management-preview.core.windows-int.net/',
         resource_manager='https://api-dogfood.resources.windows-int.net/',
+        gallery='https://df.gallery.azure-test.net/',
         active_directory='https://login.windows-ppe.net',
         active_directory_graph_resource_id='https://graph.ppe.windows.net/',
         active_directory_resource_id='https://management.core.windows.net/',
@@ -346,7 +348,7 @@ def _set_active_cloud(cli_ctx, cloud_name):
 
 def get_active_cloud_name(cli_ctx):
     try:
-        return 'AzureDFCloud'  # cli_ctx.config.get('cloud', 'name')
+        return cli_ctx.config.get('cloud', 'name')
     except (configparser.NoOptionError, configparser.NoSectionError):
         _set_active_cloud(cli_ctx, AZURE_PUBLIC_CLOUD.name)
         return AZURE_PUBLIC_CLOUD.name
