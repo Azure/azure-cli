@@ -698,6 +698,10 @@ Release History
 * Update azure-mgmt-storage version to 7.0.0 to use api version 2019-06-01
 * Add new parameters `--enable-delete-retention` and `--delete-retention-days` to support managing delete retention policy for storage account blob-service-properties.
 
+**Key Vault**
+
+* Add support for RBAC authorization
+
 2.0.78
 ++++++
 
