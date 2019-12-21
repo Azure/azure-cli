@@ -20,7 +20,7 @@ examples:
     text: |-
         az apim backup --name MyApim -g MyResourceGroup --backup-name myBackup \
              --storage-account-name mystorageaccount --storage-account-container backups \
-             --storage-account-key Ay2ZbdxLnD4OJP//k4MnmT3HQCLuqLOFdI2eAtiwfehawcELsqKhBaQYUJKT29/F6jLPkB6KynOzx85YCObhrw==
+             --storage-account-key Ay2ZbdxLnD4OJPT29F6jLPkB6KynOzx85YCObhrw==
 """
 
 helps['apim create'] = """
