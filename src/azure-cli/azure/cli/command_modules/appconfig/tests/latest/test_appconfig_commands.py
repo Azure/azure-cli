@@ -428,9 +428,9 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             self.cmd('appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
 
         # Import/Export yaml file
-        imported_yaml_file_path = os.path.join(TEST_DIR, 'import_features.yaml')
-        exported_yaml_file_path = os.path.join(TEST_DIR, 'export_features.yaml')
-        exported_hyphen_yaml_file_path = os.path.join(TEST_DIR, 'export_features_hyphen.yaml')
+        imported_yaml_file_path = os.path.join(TEST_DIR, 'import_features_yaml.json')
+        exported_yaml_file_path = os.path.join(TEST_DIR, 'export_features_yaml.json')
+        exported_hyphen_yaml_file_path = os.path.join(TEST_DIR, 'export_features_hyphen_yaml.json')
 
         self.kwargs.update({
             'label': 'YamlTests',
@@ -454,9 +454,9 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         assert exported_yaml_file == exported_hyphen_yaml_file
 
         # Import/Export properties file
-        imported_prop_file_path = os.path.join(TEST_DIR, 'import_features.properties')
-        exported_prop_file_path = os.path.join(TEST_DIR, 'export_features.properties')
-        exported_as_kv_prop_file_path = os.path.join(TEST_DIR, 'export_as_kv.properties')
+        imported_prop_file_path = os.path.join(TEST_DIR, 'import_features_prop.json')
+        exported_prop_file_path = os.path.join(TEST_DIR, 'export_features_prop.json')
+        exported_as_kv_prop_file_path = os.path.join(TEST_DIR, 'export_as_kv_prop.json')
 
         self.kwargs.update({
             'label': 'PropertiesTests',
