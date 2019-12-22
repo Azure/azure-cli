@@ -19,6 +19,10 @@ Release History
 
 * Fix `vm create` failure in Azure Stack profile.
 
+**Storage**
+
+* `az storage account create`: Remove preview flag for --enable-hierarchical-namespace parameter
+
 2.0.78
 ++++++
 
