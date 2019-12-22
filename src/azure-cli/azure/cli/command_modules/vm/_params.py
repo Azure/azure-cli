@@ -54,6 +54,7 @@ def load_arguments(self, _):
 
     extension_instance_name_type = CLIArgumentType(help="Name of extension instance, which can be customized. Default: name of the extension.")
     image_template_name_type = CLIArgumentType(overrides=name_arg_type, id_part='name')
+    disk_encryption_set_name = CLIArgumentType(overrides=name_arg_type, help='Name of disk encryption set.', id_part='name')
 
     # StorageAccountTypes renamed to DiskStorageAccountTypes in 2018_06_01 of azure-mgmt-compute
     DiskStorageAccountTypes = DiskStorageAccountTypes or StorageAccountTypes
@@ -109,6 +110,8 @@ def load_arguments(self, _):
                 c.argument('hyper_v_generation', arg_type=hyper_v_gen_sku, help='The hypervisor generation of the Virtual Machine. Applicable to OS disks only.')
             else:
                 c.ignore('access_level', 'for_upload', 'hyper_v_generation')
+            c.argument('encryption_type', arg_type=get_enum_type(self.get_models('EncryptionType')), help='Encryption type.')
+            c.argument('disk_encryption_set', help='Name or ID of disk encryption set that is used to encrypt the disk.')
 
     for scope in ['disk create', 'snapshot create']:
         with self.argument_context(scope) as c:
@@ -297,11 +300,7 @@ def load_arguments(self, _):
         c.argument('accelerated_networking', resource_type=ResourceType.MGMT_NETWORK, min_api='2016-09-01', arg_type=get_three_state_flag(), arg_group='Network',
                    help="enable accelerated networking. Unless specified, CLI will enable it based on machine image and size")
         if self.supported_api_version(min_api='2019-03-01', resource_type=ResourceType.MGMT_COMPUTE):
-            VMPriorityTypes = self.get_models('VirtualMachinePriorityTypes', resource_type=ResourceType.MGMT_COMPUTE)
             VirtualMachineEvictionPolicyTypes = self.get_models('VirtualMachineEvictionPolicyTypes', resource_type=ResourceType.MGMT_COMPUTE)
-            c.argument('priority', resource_type=ResourceType.MGMT_COMPUTE, min_api='2019-03-01',
-                       arg_type=get_enum_type(VMPriorityTypes, default=None),
-                       help="Priority. Use 'Spot' to run short-lived workloads in a cost-effective way. 'Low' enum will be deprecated in the future. Please use 'Spot' to deploy Azure spot VM and/or VMSS")
             c.argument('eviction_policy', resource_type=ResourceType.MGMT_COMPUTE, min_api='2019-03-01',
                        arg_type=get_enum_type(VirtualMachineEvictionPolicyTypes, default=None),
                        help="The eviction policy for the low priority virtual machine.")
@@ -489,7 +488,6 @@ def load_arguments(self, _):
                 c.argument(dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
 
     with self.argument_context('vmss create') as c:
-        VMPriorityTypes = self.get_models('VirtualMachinePriorityTypes', resource_type=ResourceType.MGMT_COMPUTE)
         VirtualMachineEvictionPolicyTypes = self.get_models('VirtualMachineEvictionPolicyTypes', resource_type=ResourceType.MGMT_COMPUTE)
         c.argument('name', name_arg_type)
         c.argument('nat_backend_port', default=None, help='Backend port to open with NAT rules. Defaults to 22 on Linux and 3389 on Windows.')
@@ -503,8 +501,6 @@ def load_arguments(self, _):
         c.argument('health_probe', help='Probe name from the existing load balancer, mainly used for rolling upgrade')
         c.argument('vm_sku', help='Size of VMs in the scale set. Default to "Standard_DS1_v2". See https://azure.microsoft.com/pricing/details/virtual-machines/ for size info.')
         c.argument('nsg', help='Name or ID of an existing Network Security Group.', arg_group='Network')
-        c.argument('priority', resource_type=ResourceType.MGMT_COMPUTE, min_api='2017-12-01', arg_type=get_enum_type(VMPriorityTypes, default=None),
-                   help="Priority. Use 'Spot' to run short-lived workloads in a cost-effective way. 'Low' enum will be deprecated in the future. Please use 'Spot' to deploy Azure spot VM and/or VMSS")
         c.argument('eviction_policy', resource_type=ResourceType.MGMT_COMPUTE, min_api='2017-12-01', arg_type=get_enum_type(VirtualMachineEvictionPolicyTypes, default=None),
                    help="The eviction policy for virtual machines in a low priority scale set.", is_preview=True)
         c.argument('application_security_groups', resource_type=ResourceType.MGMT_COMPUTE, min_api='2018-06-01', nargs='+', options_list=['--asgs'], help='Space-separated list of existing application security groups to associate with the VM.', arg_group='Network', validator=validate_asg_names_or_ids)
@@ -632,8 +628,6 @@ def load_arguments(self, _):
             c.argument('secrets', multi_ids_type, help='One or many Key Vault secrets as JSON strings or files via `@{path}` containing `[{ "sourceVault": { "id": "value" }, "vaultCertificates": [{ "certificateUrl": "value", "certificateStore": "cert store name (only on windows)"}] }]`', type=file_type, completer=FilesCompleter())
             c.argument('assign_identity', nargs='*', arg_group='Managed Service Identity', help="accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples")
             c.ignore('aux_subscriptions')
-            max_price_help = 'The maximum price (in US Dollars) you are willing to pay for a low priority VM/VMSS. -1 indicates that the low priority VM/VMSS should not be evicted for price reasons'
-            c.argument('max_price', help=max_price_help, min_api='2019-03-01', type=float, is_preview=True)
 
         with self.argument_context(scope, arg_group='Authentication') as c:
             c.argument('generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing. The keys will be stored in the ~/.ssh directory')
@@ -669,6 +663,9 @@ def load_arguments(self, _):
             c.argument('ultra_ssd_enabled', ultra_ssd_enabled_type)
             c.argument('ephemeral_os_disk', arg_type=get_three_state_flag(), min_api='2018-06-01',
                        help='Allows you to create an OS disk directly on the host node, providing local disk performance and faster VM/VMSS reimage time.', is_preview=True)
+            c.argument('os_disk_encryption_set', min_api='2019-07-01', help='Name or ID of disk encryption set for OS disk.')
+            c.argument('data_disk_encryption_sets', nargs='+', min_api='2019-07-01',
+                       help='Names or IDs (space delimited) of disk encryption sets for data disks.')
 
         with self.argument_context(scope, arg_group='Network') as c:
             c.argument('vnet_name', help='Name of the virtual network when creating a new one or referencing an existing one.')
@@ -749,6 +746,16 @@ def load_arguments(self, _):
                           "To enable Multitenant Hosting Rights for Windows 10, use 'Windows_Client'. " \
                           "For more information see the Azure Windows VM online docs."
             c.argument('license_type', help=license_msg, arg_type=get_enum_type(['Windows_Server', 'Windows_Client', 'None']))
+            c.argument('priority', resource_type=ResourceType.MGMT_COMPUTE, min_api='2019-03-01',
+                       arg_type=get_enum_type(self.get_models('VirtualMachinePriorityTypes'), default=None),
+                       help="Priority. Use 'Spot' to run short-lived workloads in a cost-effective way. 'Low' enum will be deprecated in the future. Please use 'Spot' to deploy Azure spot VM and/or VMSS")
+            c.argument('max_price', min_api='2019-03-01', type=float, is_preview=True,
+                       help='The maximum price (in US Dollars) you are willing to pay for a low priority VM/VMSS. -1 indicates that the low priority VM/VMSS should not be evicted for price reasons')
+
+    with self.argument_context('vmss create') as c:
+        c.argument('priority', resource_type=ResourceType.MGMT_COMPUTE, min_api='2017-12-01',
+                   arg_type=get_enum_type(self.get_models('VirtualMachinePriorityTypes'), default=None),
+                   help="Priority. Use 'Spot' to run short-lived workloads in a cost-effective way. 'Low' enum will be deprecated in the future. Please use 'Spot' to deploy Azure spot VM and/or VMSS")
 
     with self.argument_context('sig') as c:
         c.argument('gallery_name', options_list=['--gallery-name', '-r'], help='gallery name')
@@ -837,4 +844,13 @@ def load_arguments(self, _):
     with self.argument_context('vm monitor log show') as c:
         c.argument('analytics_query', options_list=['--analytics-query', '-q'], help="Query to execute over Log Analytics data.")
         c.argument('timespan', help="Timespan over which to query. Defaults to querying all available data.")
+    # endregion
+
+    # region disk encryption set
+    with self.argument_context('disk-encryption-set') as c:
+        c.argument('disk_encryption_set_name', disk_encryption_set_name)
+        c.argument('key_url', help='URL pointing to a key or secret in KeyVault.')
+        c.argument('source_vault', help='Name or ID of the KeyVault containing the key or secret.')
+        c.argument('location', validator=get_default_location_from_resource_group)
+        c.argument('tags', tags_type)
     # endregion

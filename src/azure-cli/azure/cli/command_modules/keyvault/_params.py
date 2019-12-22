@@ -95,6 +95,7 @@ def load_arguments(self, _):
         c.argument('object_id', validator=validate_principal)
 
     with self.argument_context('keyvault set-policy', arg_group='Permission') as c:
+        c.argument('object_id', validator=validate_principal)
         c.argument('key_permissions', arg_type=get_enum_type(KeyPermissions), metavar='PERM', nargs='*', help='Space-separated list of key permissions to assign.', validator=validate_policy_permissions)
         c.argument('secret_permissions', arg_type=get_enum_type(SecretPermissions), metavar='PERM', nargs='*', help='Space-separated list of secret permissions to assign.')
         c.argument('certificate_permissions', arg_type=get_enum_type(CertificatePermissions), metavar='PERM', nargs='*', help='Space-separated list of certificate permissions to assign.')
@@ -164,6 +165,10 @@ def load_arguments(self, _):
 
     with self.argument_context('keyvault key set-attributes') as c:
         c.attributes_argument('key', KeyAttributes)
+
+    for scope in ['list', 'list-deleted', 'list-versions']:
+        with self.argument_context('keyvault key {}'.format(scope)) as c:
+            c.argument('maxresults', options_list=['--maxresults'], type=int)
     # endregion
 
     # region KeyVault Secret
@@ -181,11 +186,16 @@ def load_arguments(self, _):
 
     with self.argument_context('keyvault secret download') as c:
         c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(), help='File to receive the secret contents.')
-        c.argument('encoding', arg_type=get_enum_type(secret_encoding_values), options_list=['--encoding', '-e'], help="Encoding of the destination file. By default, will look for the 'file-encoding' tag on the secret. Otherwise will assume 'utf-8'.", default=None)
+        c.argument('encoding', arg_type=get_enum_type(secret_encoding_values), options_list=['--encoding', '-e'], help="Encoding of the secret. By default, will look for the 'file-encoding' tag on the secret. Otherwise will assume 'utf-8'.", default=None)
 
     for scope in ['backup', 'restore']:
         with self.argument_context('keyvault secret {}'.format(scope)) as c:
             c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(), help='File to receive the secret contents.')
+
+    for scope in ['list', 'list-deleted', 'list-versions']:
+        with self.argument_context('keyvault secret {}'.format(scope)) as c:
+            c.argument('maxresults', options_list=['--maxresults'], type=int)
+
     # endregion
 
     # region KeyVault Storage Account
@@ -295,4 +305,8 @@ def load_arguments(self, _):
         c.argument('admin_last_name')
         c.argument('admin_email')
         c.argument('admin_phone')
+
+    for scope in ['list', 'list-deleted', 'list-versions']:
+        with self.argument_context('keyvault certificate {}'.format(scope)) as c:
+            c.argument('maxresults', options_list=['--maxresults'], type=int)
     # endregion

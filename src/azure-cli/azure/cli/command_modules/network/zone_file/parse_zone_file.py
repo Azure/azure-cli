@@ -442,10 +442,11 @@ def parse_zone_file(text, zone_name, ignore_invalid=False):
             current_ttl = _convert_to_seconds(record['val'])
         else:
             record_name = record['name']
-            if record_name == '@':
-                record_name = current_origin
+            if '@' in record_name:
+                record_name = record_name.replace('@', current_origin)
             elif not record_name.endswith('.'):
                 record_name = '{}.{}'.format(record_name, current_origin)
+            print(current_origin, record_name)
 
             # special record-specific fix-ups
             if record_type == 'ptr':

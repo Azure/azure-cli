@@ -240,6 +240,17 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('vnet_name', help='Name of a virtual network.', validator=validate_subnet)
         c.argument('action', help='The action of virtual network rule.')
 
+    with self.argument_context('storage account blob-service-properties show',
+                               resource_type=ResourceType.MGMT_STORAGE) as c:
+        c.argument('account_name', acct_name_type, id_part=None)
+        c.argument('resource_group_name', required=False, validator=process_resource_group)
+
+    with self.argument_context('storage account blob-service-properties update',
+                               resource_type=ResourceType.MGMT_STORAGE) as c:
+        c.argument('account_name', acct_name_type, id_part=None)
+        c.argument('resource_group_name', required=False, validator=process_resource_group)
+        c.argument('enable_change_feed', arg_type=get_three_state_flag(), min_api='2019-04-01')
+
     with self.argument_context('storage account generate-sas') as c:
         t_account_permissions = self.get_sdk('common.models#AccountPermissions')
         c.register_sas_arguments()

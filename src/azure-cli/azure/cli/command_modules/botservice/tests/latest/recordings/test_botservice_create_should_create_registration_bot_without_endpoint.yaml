@@ -15,8 +15,8 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-botservice/0.2.0
-        Azure-SDK-For-Python AZURECLI/2.0.70
+      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-botservice/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.76
       accept-language:
       - en-US
     method: DELETE
@@ -28,7 +28,7 @@ interactions:
       cache-control:
       - no-cache
       date:
-      - Tue, 06 Aug 2019 20:53:03 GMT
+      - Wed, 27 Nov 2019 23:51:41 GMT
       expires:
       - '-1'
       pragma:
@@ -38,7 +38,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14996'
+      - '14999'
     status:
       code: 204
       message: No Content
@@ -56,8 +56,8 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 subscriptionclient/2.2.0
-        Azure-SDK-For-Python AZURECLI/2.0.70
+      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.76
       accept-language:
       - en-US
     method: GET
@@ -98,16 +98,22 @@ interactions:
         Central","longitude":"54.366669","latitude":"24.466667"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uaenorth","name":"uaenorth","displayName":"UAE
         North","longitude":"55.316666","latitude":"25.266666"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southafricanorth","name":"southafricanorth","displayName":"South
         Africa North","longitude":"28.218370","latitude":"-25.731340"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southafricawest","name":"southafricawest","displayName":"South
-        Africa West","longitude":"18.843266","latitude":"-34.075691"}]}'
+        Africa West","longitude":"18.843266","latitude":"-34.075691"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerlandnorth","name":"switzerlandnorth","displayName":"Switzerland
+        North","longitude":"8.564572","latitude":"47.451542"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerlandwest","name":"switzerlandwest","displayName":"Switzerland
+        West","longitude":"6.143158","latitude":"46.204391"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/germanynorth","name":"germanynorth","displayName":"Germany
+        North","longitude":"8.806422","latitude":"53.073635"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/germanywestcentral","name":"germanywestcentral","displayName":"Germany
+        West Central","longitude":"8.682127","latitude":"50.110924"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norwaywest","name":"norwaywest","displayName":"Norway
+        West","longitude":"5.733107","latitude":"58.969975"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norwayeast","name":"norwayeast","displayName":"Norway
+        East","longitude":"10.752245","latitude":"59.913868"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '6008'
+      - '7129'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 06 Aug 2019 20:53:04 GMT
+      - Wed, 27 Nov 2019 23:51:41 GMT
       expires:
       - '-1'
       pragma:
@@ -122,8 +128,63 @@ interactions:
       code: 200
       message: OK
 - request:
+    body: '{"name": "cli000002", "type": "bot"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - bot create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '42'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -k -g -n --appid
+      User-Agent:
+      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-botservice/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.76
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/providers/Microsoft.BotService/checkNameAvailability?api-version=2018-07-12
+  response:
+    body:
+      string: '{"valid":true,"message":""}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '27'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 27 Nov 2019 23:51:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-tenant-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
     body: '{"location": "global", "sku": {"name": "F0"}, "kind": "bot", "properties":
-      {"displayName": "cli000002", "endpoint": "", "msaAppId": "fe63e25c-959e-4310-a362-d22ae669a8db"}}'
+      {"displayName": "cli000002", "endpoint": "", "msaAppId": "364e79c9-7e33-4409-b252-e0cc755f3288"}}'
     headers:
       Accept:
       - application/json
@@ -138,17 +199,17 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
-      - -k -g -n --appid -p
+      - -k -g -n --appid
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.1 azure-mgmt-botservice/0.2.0
-        Azure-SDK-For-Python AZURECLI/2.0.70
+      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-botservice/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.76
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002?api-version=2018-07-12
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","name":"cli000002","type":"Microsoft.BotService/botServices","etag":"\"1700d984-0000-0100-0000-5d49e8b20000\"","location":"global","sku":{"name":"F0"},"kind":"bot","tags":{},"properties":{"displayName":"cli000002","description":null,"iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"","msaAppId":"fe63e25c-959e-4310-a362-d22ae669a8db","developerAppInsightKey":null,"developerAppInsightsApplicationId":null,"luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"isStreamingSupported":false,"publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","name":"cli000002","type":"Microsoft.BotService/botServices","etag":"\"54007c11-0000-0100-0000-5ddf0c100000\"","location":"global","sku":{"name":"F0"},"kind":"bot","tags":{},"properties":{"displayName":"cli000002","description":null,"iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"","msaAppId":"364e79c9-7e33-4409-b252-e0cc755f3288","developerAppInsightKey":null,"developerAppInsightsApplicationId":null,"luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"isStreamingSupported":false,"publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -157,9 +218,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 06 Aug 2019 20:53:06 GMT
+      - Wed, 27 Nov 2019 23:51:44 GMT
       etag:
-      - '"1700d984-0000-0100-0000-5d49e8b20000"'
+      - '"54007c11-0000-0100-0000-5ddf0c100000"'
       expires:
       - '-1'
       pragma:

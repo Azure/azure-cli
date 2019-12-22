@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.0.77"
+VERSION = "2.0.78"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -45,7 +45,6 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 2',
     'Programming Language :: Python :: 2.7',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.4',
     'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
@@ -70,7 +69,7 @@ DEPENDENCIES = [
     'requests~=2.20',
     'six~=1.12',
     'wheel==0.30.0',
-    'azure-mgmt-resource~=4.0',
+    'azure-mgmt-resource~=6.0',
 ]
 
 TESTS_REQUIRE = [

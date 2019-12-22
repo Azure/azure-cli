@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from __future__ import print_function
 
-__version__ = "2.0.77"
+__version__ = "2.0.78"
 
 import os
 import sys
@@ -85,6 +85,7 @@ class AzCli(CLI):
 
     def show_version(self):
         from azure.cli.core.util import get_az_version_string
+        from azure.cli.core.commands.constants import SURVEY_PROMPT
         ver_string, updates_available = get_az_version_string()
         print(ver_string)
         if updates_available == -1:
@@ -95,6 +96,8 @@ class AzCli(CLI):
                            updates_available)
         else:
             print('Your CLI is up-to-date.')
+
+        print('\n' + SURVEY_PROMPT)
 
     def exception_handler(self, ex):  # pylint: disable=no-self-use
         from azure.cli.core.util import handle_exception
