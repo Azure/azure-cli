@@ -84,6 +84,11 @@ Release History
 
 * Update ADLS sdk version (0.0.48).
 
+**HDInsight**
+
+* Support for creating a Kafka cluster with Kafka Rest Proxy
+* Upgrade azure-mgmt-hdinsight to 1.3.0
+
 **Install**
 
 * Install script support python 3.8
