@@ -142,6 +142,11 @@ Release History
 
 * Added "--read-scale" and "--read-replicas" parameters to sql db create and update commands, to support read scale management.
 
+**SQL VM**
+
+* New package upgrade 0.5.
+* Add new --license-type supporting Disaster Recovery Benefit (DR).
+
 **Storage**
 
 * GA Release Large File Shares property for storage account create and update command
@@ -169,8 +174,8 @@ Release History
 **AppConfig**
 
 * Add support for using ":" for `as az appconfig kv import` separator
-* Fix issue for listing key values with multiple labels including null label. 
-* Update management plane sdk, azure-mgmt-appconfiguration, to version 0.3.0. 
+* Fix issue for listing key values with multiple labels including null label.
+* Update management plane sdk, azure-mgmt-appconfiguration, to version 0.3.0.
 
 **AppService**
 
@@ -259,10 +264,6 @@ Release History
 * storage account create: Add --enable-hierarchical-namespace to support filesystem semantics in blob service.
 * Remove unrelated exception from error message
 * Fix issues with incorrect error message "You do not have the required permissions needed to perform this operation." when blocked by network rules or AuthenticationFailed.
-
-**SQL VM**
-
-* Add new --license-type supporting Disaster Recovery Benefit (DR).
 
 2.0.76
 ++++++
