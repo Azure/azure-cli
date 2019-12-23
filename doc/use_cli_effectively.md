@@ -182,9 +182,16 @@ foreach ($vm_id in $vm_ids) {
 ```
 
 ### Argument parsing issue in PowerShell
-On Windows, `az` is a batch script (at `C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\wbin\az.cmd`). Invoking it with PowerShell may have issues because arguments are parsed twice by both PowerShell and Command Prompt. For example, `az "a&b"` behaves differently in PowerShell and Command Prompt. In PowerShell, `b` is treated as a separate command instead of part of the argument.
 
-To prevent this, you may use [stop-parsing symbol `--%`](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_parsing) between `az` and arguments like `az --% vm create --nsg "" ...`
+#### Special characters get parsed by PowerShell 
+When running Azure CLI commands in PowerShell, parsing errors will occur when the arguments contain special characters of PowerShell.
+ 
+You can solve this problem by adding `` ` `` before the special character to escape it, or by enclosing the argument with single or double quotes `'`/`"`. For example, `az group deployment create --parameters @parameters.json` dose't work in PowerShell because `@` is parsed as a [splatting symbol](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_splatting). To fix this, you may change the argument to `` `@parameters.json`` or `'@parameters.json'`. 
+
+#### Quotes get stripped by PowerShell
+On Windows, `az` is a CMD script (at `C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\wbin\az.cmd`). When there is no space in an argument, PowerShell will strip the quotes and pass the argument to CMD. This causes the argument to be parsed again by CMD. For example, when running `az "a&b"` in PowerShell, `b` is treated as a separate command instead of part of the argument like CMD does, because quotes are removed by PowerShell and the ampersand `&` is parsed again by CMD as a [command separator](https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-xp/bb490954(v=technet.10)#using-multiple-commands-and-conditional-processing-symbols). 
+
+To prevent this, you may use [stop-parsing symbol `--%`](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_parsing) between `az` and arguments like `az --% vm create ...`. This can also solve the above-mentioned special character issue and is recommended whenever any issue happens when invoking a CMD batch script from PowerShell.
 
 > The stop-parsing symbol (--%), introduced in PowerShell 3.0, directs PowerShell to refrain from interpreting input as PowerShell commands or expressions.
 >
