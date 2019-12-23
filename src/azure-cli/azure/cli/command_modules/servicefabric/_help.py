@@ -60,6 +60,33 @@ examples:
         az sf application certificate add -g group-name -n cluster1  --secret-identifier 'https://{KeyVault}.vault.azure.net/secrets/{Secret}'
 """
 
+helps['sf application show'] = """
+type: command
+short-summary: Get an application.
+examples:
+  - name: Get application.
+    text: >
+        az sf application show -g testRG -n testCluster --application-name testApp
+"""
+
+helps['sf application list'] = """
+type: command
+short-summary: List applications of a given cluster.
+examples:
+  - name: List applications for a given application type.
+    text: >
+        az sf application list -g testRG -n testCluster
+"""
+
+helps['sf application delete'] = """
+type: command
+short-summary: Delete an application type.
+examples:
+  - name: Delete application type.
+    text: >
+        az sf application delete -g testRG -n testCluster --application-name testApp
+"""
+
 helps['sf application-type'] = """
 type: group
 short-summary: Manage application types on an Azure Service Fabric cluster.
@@ -74,6 +101,33 @@ examples:
         az sf application-type create -g testRG -n testCluster --application-type-name testAppType
 """
 
+helps['sf application-type show'] = """
+type: command
+short-summary: Get an application type.
+examples:
+  - name: Get application type.
+    text: >
+        az sf application-type show -g testRG -n testCluster --application-type-name CalcServiceApp
+"""
+
+helps['sf application-type list'] = """
+type: command
+short-summary: List application types of a given cluster.
+examples:
+  - name: List application types for a given cluster.
+    text: >
+        az sf application-type list -g testRG -n testCluster
+"""
+
+helps['sf application-type delete'] = """
+type: command
+short-summary: Delete an application type.
+examples:
+  - name: Delete application type.
+    text: >
+        az sf application-type delete -g testRG -n testCluster --application-type-name CalcServiceApp
+"""
+
 helps['sf application-type-version'] = """
 type: group
 short-summary: Manage application type versions on an Azure Service Fabric cluster.
@@ -86,7 +140,34 @@ examples:
   - name: Create new application type version using the provided package url. The version in the application manifest contained in the package should have the same version as the one specified in --version.
     text: >
         az sf application-type-version create -g testRG -n testCluster --application-type-name testAppType \\
-          --version v1 --package-url "https://sftestapp.blob.core.windows.net/sftestapp/testApp_1.0.sfpkg"
+          --version 1.0 --package-url "https://sftestapp.blob.core.windows.net/sftestapp/testApp_1.0.sfpkg"
+"""
+
+helps['sf application-type-version show'] = """
+type: command
+short-summary: Get an application type version.
+examples:
+  - name: Get application type version.
+    text: >
+        az sf application-type-version show -g testRG -n testCluster --application-type-name CalcServiceApp --version 1.0
+"""
+
+helps['sf application-type-version list'] = """
+type: command
+short-summary: List version of a given application type.
+examples:
+  - name: List versions for a particular application type.
+    text: >
+        az sf application-type-version list -g testRG -n testCluster --application-type-name CalcServiceApp
+"""
+
+helps['sf application-type-version delete'] = """
+type: command
+short-summary: Delete an application type version.
+examples:
+  - name: Delete application type version.
+    text: >
+        az sf application-type-version delete -g testRG -n testCluster --application-type-name CalcServiceApp --version 1.0
 """
 
 helps['sf service'] = """
@@ -100,12 +181,39 @@ short-summary: Create a new service on an Azure Service Fabric cluster.
 examples:
   - name: Create a new stateless service "testApp~testService1" with instance count -1 (on all the nodes).
     text: >
-        az sf service create -g testRG -n testCluster --application-name testApp --stateless --service-name testApp~testService \\
-          --service-type testStateless --instance-count -1 --partition-scheme-singleton
+        az sf service create -g testRG -n testCluster --application-name testApp --state stateless --service-name testApp~testService \\
+          --service-type testStateless --instance-count -1 --partition-scheme singleton
   - name: Create a new stateful service "testApp~testService2" with a target of 5 nodes.
     text: >
-        az sf service create -g testRG -n testCluster --application-name testApp --stateful --service-name testApp~testService2 \\
+        az sf service create -g testRG -n testCluster --application-name testApp --state stateful --service-name testApp~testService2 \\
           --service-type testStatefulType --min-replica-set-size 3 --target-replica-set-size 5
+"""
+
+helps['sf service show'] = """
+type: command
+short-summary: Get a service.
+examples:
+  - name: Get service.
+    text: >
+        az sf service show -g testRG -n testCluster --application-name testApp --service-name testApp~testService
+"""
+
+helps['sf service list'] = """
+type: command
+short-summary: List services of a given application.
+examples:
+  - name: List services.
+    text: >
+        az sf service list -g testRG -n testCluster --application-name testApp
+"""
+
+helps['sf service delete'] = """
+type: command
+short-summary: Delete a service.
+examples:
+  - name: Delete service.
+    text: >
+        az sf service delete -g testRG -n testCluster --application-name testApp --service-name testApp~testService
 """
 
 helps['sf cluster'] = """

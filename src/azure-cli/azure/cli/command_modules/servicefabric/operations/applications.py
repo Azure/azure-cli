@@ -75,7 +75,7 @@ def update_app(client,
                consider_warning_as_error=False,
                default_service_type_max_percent_unhealthy_partitions_per_service=None,
                default_service_type_max_percent_unhealthy_replicas_per_partition=None,
-               default_max_percent_service_type_unhealthy_services=None,
+               default_service_type_max_percent_unhealthy_services=None,
                max_percent_unhealthy_deployed_applications=None,
                service_type_health_policy_map=None):
     try:
@@ -105,7 +105,7 @@ def update_app(client,
                                                         consider_warning_as_error,
                                                         default_service_type_max_percent_unhealthy_partitions_per_service,
                                                         default_service_type_max_percent_unhealthy_replicas_per_partition,
-                                                        default_max_percent_service_type_unhealthy_services,
+                                                        default_service_type_max_percent_unhealthy_services,
                                                         max_percent_unhealthy_deployed_applications,
                                                         service_type_health_policy_map)
 
@@ -165,15 +165,12 @@ def create_service(cmd,
                    application_name,
                    service_name,
                    service_type,
-                   stateless=False,
+                   state,
                    instance_count=None,
-                   stateful=False,
                    target_replica_set_size=None,
                    min_replica_set_size=None,
                    default_move_cost=None,
-                   partition_scheme_singleton=False,
-                   partition_scheme_uniformInt64=False,
-                   partition_scheme_named=False):
+                   partition_scheme='singleton'):
     parameter_file, template_file = _get_template_file_and_parameters_file()
     template = get_file_json(template_file)
     parameters = get_file_json(parameter_file)['parameters']
@@ -185,16 +182,16 @@ def create_service(cmd,
 
     _set_service_parameters(template, parameters, "serviceTypeName", service_type, "string")
 
-    if partition_scheme_singleton:
+    if partition_scheme == 'singleton':
         _set_service_parameters(template, parameters, "partitionDescription", {"partitionScheme": "Singleton"}, "object")
-    elif partition_scheme_uniformInt64:
+    elif partition_scheme == 'uniformInt64':
         _set_service_parameters(template, parameters, "partitionDescription", {"partitionScheme": "UniformInt64Range"}, "object")
-    elif partition_scheme_named:
+    elif partition_scheme == 'named':
         _set_service_parameters(template, parameters, "partitionDescription", {"partitionScheme": "Named"}, "object")
 
-    if stateless:
+    if state == 'stateless':
         _set_service_parameters(template, parameters, "instanceCount", int(instance_count), "int")
-    elif stateful:
+    else:
         _set_service_parameters(template, parameters, "targetReplicaSetSize", int(target_replica_set_size), "int")
         _set_service_parameters(template, parameters, "minReplicaSetSize", int(min_replica_set_size), "int")
 
@@ -306,7 +303,6 @@ def _set_uprade_policy(current_upgrade_policy,
         current_upgrade_policy.ApplicationHealthPolicy.max_percent_unhealthy_deployed_applications \
             = max_percent_unhealthy_deployed_applications
 
-    # revisar
     if service_type_health_policy_map:
         current_upgrade_policy.application_health_policy.service_type_health_policy_map = service_type_health_policy_map
     return current_upgrade_policy

@@ -103,8 +103,8 @@ class ServiceFabricApplicationTests(ScenarioTest):
         self.cmd('az sf application show -g {rg} -n {cluster_name} --application-name {app_name}',
                  checks=[self.check('id', app['id'])])
 
-        service = self.cmd('az sf service create -g {rg} -n {cluster_name} --application-name {app_name} --stateless --instance-count -1 '
-                           '--service-name "{app_name}~testService" --service-type {service_type} --partition-scheme-singleton',
+        service = self.cmd('az sf service create -g {rg} -n {cluster_name} --application-name {app_name} --state stateless --instance-count -1 '
+                           '--service-name "{app_name}~testService" --service-type {service_type} --partition-scheme singleton',
                            checks=[self.check('provisioningState', 'Succeeded')]).get_output_in_json()
 
         self.cmd('az sf service show -g {rg} -n {cluster_name} --application-name {app_name} --service-name "{app_name}~testService"',
@@ -117,8 +117,6 @@ class ServiceFabricApplicationTests(ScenarioTest):
         self.cmd('az sf application update -g {rg} -n {cluster_name} --application-name {app_name} --application-type-version {v2} '
                  '--application-parameters Mode=decimal --health-check-stable-duration 0 --health-check-wait-duration 0 --health-check-retry-timeout 0 '
                  '--upgrade-domain-timeout 5000 --upgrade-timeout 7000 --failure-action Rollback --upgrade-replica-set-check-timeout 300 --force-restart',
-                 checks=[self.check('provisioningState', 'Succeeded')])
-        self.cmd('az sf application show -g {rg} -n {cluster_name} --application-name {app_name}',
                  checks=[self.check('provisioningState', 'Succeeded'),
                          self.check('typeVersion', '{v2}'),
                          self.check('parameters.Mode', 'decimal'),
