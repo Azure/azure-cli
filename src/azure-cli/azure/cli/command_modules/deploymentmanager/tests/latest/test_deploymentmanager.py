@@ -94,7 +94,7 @@ class DeploymentManagerTests(ScenarioTest):
         }
 
         self.cmd('deploymentmanager service-topology create -g {rg} -n {st_name} -l \"{location}\" --artifact-source {as_id}', checks=[
-            self.check('type', 'Microsoft.DeploymentManager/servicetopologies'),
+            self.check('type', 'Microsoft.DeploymentManager/serviceTopologies'),
             self.check('name', topology_name),
             self.check('artifactSourceId', artifact_source_id)])
 
