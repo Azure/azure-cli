@@ -96,7 +96,7 @@ Most update commands in the CLI feature the three generic arguments: `--add`, `-
 
 ## Quoting Issues ##
 
-This becomes an issue because when the command shell (bash, zsh, Windows command prompt, PowerShell etc) parses the CLI command, it will interpret the quotes. To avoid surprises, here are a few suggestions:
+This becomes an issue because when the command shell (bash, zsh, Windows Command Prompt, PowerShell etc) parses the CLI command, it will interpret the quotes. To avoid surprises, here are a few suggestions:
 
 1. If the value contains whitespace, you must wrap it in quotes.
 2. In bash or Windows PowerShell, both single and double quotes will be interpreted, while in Windows Command Prompt, only double quotes are handled which means single quotes will be interpreted as a part of the value.
