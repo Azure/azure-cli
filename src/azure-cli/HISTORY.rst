@@ -15,6 +15,11 @@ Release History
 
 * Fix `az resource tag`: Recovery Services Vault tags cannot be updated
 
+**Backup**
+
+* Added new command 'backup protection undelete' to enable soft-delete feature for IaasVM workload
+* Added new parameter '--soft-delete-feature-state' to set backup-properties command
+
 **Compute**
 
 * Fix `vm create` failure in Azure Stack profile.

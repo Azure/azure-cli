@@ -278,6 +278,14 @@ examples:
     text: az backup protection enable-for-azurefileshare --policy-name MyPolicy --resource-group MyResourceGroup --vault-name MyVault --storage-account MyStorageAccount --azure-file-share MyAzureFileShare
 """
 
+helps['backup protection undelete'] = """
+type: command
+short-summary: Rehydrate an item from softdeleted state to stop protection with retained data state.
+examples:
+  - name: Rehydrate an item from softdeleted state to stop protection with retained data state.
+    text: az backup protection undelete --container-name MyContainer --item-name MyItem --resource-group MyResourceGroup --vault-name MyVault --backup-management-type AzureIaasVM --workload-type VM
+"""
+
 helps['backup protection enable-for-azurewl'] = """
 type: command
 short-summary: Start protecting a previously unprotected workload within an Azure VM as per the specified policy to a Recovery services vault. Provide the workload details as a protectable item.
