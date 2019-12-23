@@ -199,13 +199,6 @@ To prevent this, you may use [stop-parsing symbol `--%`](https://docs.microsoft.
 
 This issue is tracked at https://github.com/PowerShell/PowerShell/issues/1995#issuecomment-539822061
 
-### Special characters in PowerShell affect parameter parsing
-When cli is used in PowerShell, parsing errors may occur when special characters of PowerShell are entered as parameters. 
-You can try to solve this problem by adding ` before a special character to escape it , or adding '' to the whole parameter.
-> For example:
-`az group deployment create --parameters @parameters.json` in the PowerShell environment dose't work.
-You can change the parameters to **--parameters `@parameters.json** or **--parameters '@parameters.json'** 
-
 ### CLI Environment Variables
 
 |  Environment Variable          | Description            |
