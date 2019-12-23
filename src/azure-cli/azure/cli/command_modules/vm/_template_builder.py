@@ -341,9 +341,6 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
                     'caching': os_caching,
                     'managedDisk': {
                         'storageAccountType': disk_info['os'].get('storageAccountType'),
-                        'diskEncryptionSet': {
-                            'id': os_disk_encryption_set,
-                        }
                     }
                 },
                 'imageReference': {
@@ -360,9 +357,6 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
                     'caching': os_caching,
                     'managedDisk': {
                         'storageAccountType': disk_info['os'].get('storageAccountType'),
-                        'diskEncryptionSet': {
-                            'id': os_disk_encryption_set,
-                        }
                     }
                 },
                 "imageReference": {
@@ -379,6 +373,13 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
                 }
             }
         }
+        if os_disk_encryption_set is not None:
+            storage_profiles['ManagedPirImage']['osDisk']['managedDisk']['diskEncryptionSet'] = {
+                'id': os_disk_encryption_set,
+            }
+            storage_profiles['ManagedCustomImage']['osDisk']['managedDisk']['diskEncryptionSet'] = {
+                'id': os_disk_encryption_set,
+            }
         profile = storage_profiles[storage_profile.name]
         if os_disk_size_gb:
             profile['osDisk']['diskSizeGb'] = os_disk_size_gb

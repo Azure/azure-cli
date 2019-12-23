@@ -26,15 +26,11 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.recoveryservices.operations#VaultsOperations.{}',
         client_factory=vaults_cf)
 
-    backup_storage_config_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.recoveryservicesbackup.operations.backup_resource_storage_configs_operations#BackupResourceStorageConfigsOperations.{}',
-        client_factory=vaults_cf)
-
     with self.command_group('backup vault', backup_vaults_sdk, client_factory=vaults_cf) as g:
         g.custom_command('create', 'create_vault')
         g.show_command('show', 'get')
         g.custom_command('list', 'list_vaults')
-        g.show_command('backup-properties show', 'get', command_type=backup_storage_config_sdk, client_factory=backup_storage_configs_cf)
+        g.custom_command('backup-properties show', 'get_backup_properties', client_factory=backup_storage_configs_cf)
         g.custom_command('backup-properties set', 'set_backup_properties', client_factory=backup_storage_configs_cf)
         g.custom_command('delete', 'delete_vault', confirmation=True)
 
@@ -70,6 +66,7 @@ def load_command_table(self, _):
         g.custom_command('auto-enable-for-azurewl', 'auto_enable_for_azure_wl', client_factory=protection_intent_cf)
         g.custom_command('auto-disable-for-azurewl', 'disable_auto_for_azure_wl', client_factory=protection_intent_cf)
         g.custom_command('resume', 'resume_protection')
+        g.custom_command('undelete', 'undelete_protection')
 
     with self.command_group('backup item', backup_custom_base, client_factory=protected_items_cf) as g:
         g.show_command('show', 'show_item', client_factory=backup_protected_items_cf, table_transformer=transform_item)

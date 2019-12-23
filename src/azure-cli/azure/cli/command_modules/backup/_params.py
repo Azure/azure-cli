@@ -68,6 +68,7 @@ def load_arguments(self, _):
 
     with self.argument_context('backup vault backup-properties set') as c:
         c.argument('backup_storage_redundancy', arg_type=get_enum_type(['GeoRedundant', 'LocallyRedundant']), help='Sets backup storage properties for a Recovery Services vault.')
+        c.argument('soft_delete_feature_state', arg_type=get_enum_type(['Enable', 'Disable']), help='Set soft-delete feature state for a Recovery Services Vault.')
 
     # Container
     with self.argument_context('backup container') as c:
@@ -172,7 +173,7 @@ def load_arguments(self, _):
         c.argument('policy_name', policy_name_type)
 
     # TODO: Need to use item.id once https://github.com/Azure/msrestazure-for-python/issues/80 is fixed.
-    for command in ['backup-now', 'disable', 'auto-disable-for-azurewl', 'resume']:
+    for command in ['backup-now', 'disable', 'auto-disable-for-azurewl', 'resume', 'undelete']:
         with self.argument_context('backup protection ' + command) as c:
             c.argument('container_name', container_name_type)
             c.argument('item_name', item_name_type)
