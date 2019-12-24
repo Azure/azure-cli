@@ -32,7 +32,8 @@ def _query_account_key(cli_ctx, account_name):
     t_storage_account_keys = get_sdk(
         cli_ctx, ResourceType.MGMT_STORAGE, 'models.storage_account_keys#StorageAccountKeys')
 
-    scf.config.enable_http_logger = False
+    if hasattr(scf, 'config'):
+        scf.config.enable_http_logger = False
     logger.debug('Disable HTTP logging to avoid having storage keys in debug logs')
     if t_storage_account_keys:
         return scf.storage_accounts.list_keys(rg, account_name).key1
