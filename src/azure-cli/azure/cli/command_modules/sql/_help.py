@@ -837,7 +837,7 @@ short-summary: Update a columns's sensitivity label.
 long-summary: At least one of information-type or label-name must be provided.
 examples:
   - name: Update sensitivity label for a given column.
-    text: sql db sensitivity-labels update -g mygroup -s myserver -n mydb --schema-name dbo --table-name mytable --column-name mycolumn --information-type Name --label-name "Confidential - GDPR"
+    text: az sql db sensitivity-labels update -g mygroup -s myserver -n mydb --schema-name dbo --table-name mytable --column-name mycolumn --information-type Name --label-name "Confidential - GDPR"
 """
 
 helps['sql db sensitivity-labels list'] = """
@@ -845,7 +845,7 @@ type: command
 short-summary: Get the sensitivity labels of a given database.
 examples:
   - name: Get the sensitivity labels of a given database.
-    text: sql db sensitivity-labels list -g mygroup -s myserver -n mydb
+    text: az sql db sensitivity-labels list -g mygroup -s myserver -n mydb
 """
 
 helps['sql db sensitivity-labels list-recommended'] = """
@@ -853,7 +853,7 @@ type: command
 short-summary: Get the recommended sensitivity labels of a given database.
 examples:
   - name: Get the recommended sensitivity labels of a given database.
-    text: sql db sensitivity-labels list-recommended -g mygroup -s myserver -n mydb
+    text: az sql db sensitivity-labels list-recommended -g mygroup -s myserver -n mydb
 """
 
 helps['sql db sensitivity-labels show'] = """
@@ -861,7 +861,7 @@ type: command
 short-summary: Get the sensitivity label of a given column.
 examples:
   - name: Get the sensitivity label of a given column.
-    text: sql db sensitivity-labels show -g mygroup -s myserver -n mydb --schema-name dbo --table-name mytable --column-name mycolumn --sensitivity-label-source current
+    text: az sql db sensitivity-labels show -g mygroup -s myserver -n mydb --schema-name dbo --table-name mytable --column-name mycolumn --sensitivity-label-source current
 """
 
 helps['sql db sensitivity-labels delete'] = """
@@ -869,7 +869,7 @@ type: command
 short-summary: Delete the sensitivity label of a given column.
 examples:
   - name: Delete the sensitivity label of a given column.
-    text: sql db sensitivity-labels delete -g mygroup -s myserver -n mydb --schema-name dbo --table-name mytable --column-name mycolumn
+    text: az sql db sensitivity-labels delete -g mygroup -s myserver -n mydb --schema-name dbo --table-name mytable --column-name mycolumn
 """
 
 helps['sql db sensitivity-labels enable-recommendation'] = """
@@ -877,7 +877,7 @@ type: command
 short-summary: Enable sensitivity recommendations for a given column (recommendations are enabled by default on all columns).
 examples:
   - name: Enable sensitivity recommendations for a given column.
-    text: sql db sensitivity-labels enable-recommendation -g mygroup -s myserver -n mydb --schema-name dbo --table-name mytable --column-name mycolumn
+    text: az sql db sensitivity-labels enable-recommendation -g mygroup -s myserver -n mydb --schema-name dbo --table-name mytable --column-name mycolumn
 """
 
 helps['sql db sensitivity-labels disable-recommendation'] = """
@@ -885,5 +885,5 @@ type: command
 short-summary: Disable sensitivity recommendations for a given column (recommendations are enabled by default on all columns).
 examples:
   - name: Disable sensitivity recommendations for a given column.
-    text: sql db sensitivity-labels disable-recommendation -g mygroup -s myserver -n mydb --schema-name dbo --table-name mytable --column-name mycolumn
+    text: az sql db sensitivity-labels disable-recommendation -g mygroup -s myserver -n mydb --schema-name dbo --table-name mytable --column-name mycolumn
 """
