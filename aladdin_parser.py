@@ -6,7 +6,6 @@
 
 import os
 import sys
-import copy
 import shlex
 from collections import defaultdict
 from importlib import import_module
@@ -63,20 +62,41 @@ def format_examples(cmd, examples):
     return formatted
 
 
-def calculate_preceding_indent(s):
-    for c in s:
+def calculate_preceding_indent(raw_cli_help):
+    yaml_indent_key = raw_cli_help[0]
+    yaml_indent_idx = 0
+
+    for idx, s in enumerate(raw_cli_help):
+        if s.strip().startswith('examples'):
+            yaml_indent_key = s
+            yaml_indent_idx = idx
+            break
+
+    for c in yaml_indent_key:
         if c != ' ':
             break
-    return s[:s.index(c)]
+    
+    preceding_indent = yaml_indent_key[:yaml_indent_key.index(c)]
+
+    if 'examples' in yaml_indent_key:
+        yaml_indent_key = raw_cli_help[yaml_indent_idx + 1]
+        for c in yaml_indent_key:
+            if c != ' ':
+                break
+        example_inner_indent = yaml_indent_key[:yaml_indent_key.index(c)]
+    else:
+        example_inner_indent = preceding_indent + ' ' * 2
+
+    return preceding_indent, example_inner_indent
 
 
-def write_examples(cmd, examples, buffer, preceding_indent):
+def write_examples(cmd, examples, buffer, example_inner_indent):
     two_space = '  '
-    name_tpl = preceding_indent + two_space + '- name: {}\n'
-    text_tpl = preceding_indent+ two_space * 2 + 'text: |\n'
-    cmd_tpl = preceding_indent + two_space * 4 + 'az {}'
-    opt_tpl = ' \\\\\n' + preceding_indent + two_space * 4 + '{} '
-    crafted_tpl = '\n' + preceding_indent + two_space * 2 + 'crafted: true'
+    name_tpl = example_inner_indent + '- name: {}\n'
+    text_tpl = example_inner_indent+ two_space + 'text: |\n'
+    crafted_tpl = '\n' + example_inner_indent + two_space + 'crafted: true'
+    cmd_tpl = example_inner_indent + two_space * 3 + 'az {}'
+    opt_tpl = ' \\\\\n' + example_inner_indent + two_space * 3 + '{} '
 
     for ex in examples:
         buffer.append(name_tpl.format(ex['name']))
@@ -85,11 +105,14 @@ def write_examples(cmd, examples, buffer, preceding_indent):
 
         parameters = ex['text']
         parameters = parameters[parameters.index(cmd) + len(cmd):].strip()
-        for p in shlex.split(parameters):
-            if p.startswith('-'):
-                buffer.append(opt_tpl.format(p))
-            else:
-                buffer.append(p)
+        if len(parameters) + len(example_inner_indent) < 80:
+            buffer.append(' ' + parameters)
+        else:            
+            for p in shlex.split(parameters):
+                if p.startswith('-'):
+                    buffer.append(opt_tpl.format(p))
+                else:
+                    buffer.append(p)
 
         if 'crafted' in ex:
             buffer.append(crafted_tpl)
@@ -114,7 +137,9 @@ def merge_examples(cmd, raw_cli_help, aladdin_help, buffer):
     yaml_example_key_written = False
 
     # get preceding indent
-    preceding_indent = calculate_preceding_indent(raw_cli_help[-1])
+    preceding_indent, example_inner_indent = calculate_preceding_indent(raw_cli_help)
+    # print('preceding_indent =', len(preceding_indent))
+    # print('example_inner_indent =', len(example_inner_indent))
 
     # append Aladdin added examples
     for parameter_seq, examples in formatted_aladdin_examples.items():
@@ -132,7 +157,7 @@ def merge_examples(cmd, raw_cli_help, aladdin_help, buffer):
             buffer.append(preceding_indent + 'examples:\n')
             yaml_example_key_written = True
 
-        write_examples(cmd, examples, buffer, preceding_indent)
+        write_examples(cmd, examples, buffer, example_inner_indent)
 
 
 def extract_command(raw_line):
@@ -188,7 +213,7 @@ if __name__ == '__main__':
 
     # test_mod = None
     # for mod in modules:
-    #     if 'acs' in mod.__file__:
+    #     if 'ams' in mod.__file__:
     #         test_mod = mod
     #         break
     # merge(aladdin_helps, test_mod)
