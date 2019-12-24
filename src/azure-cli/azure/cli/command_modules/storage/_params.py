@@ -636,6 +636,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('share_name', share_name_type, options_list=('--name', '-n'))
 
     with self.argument_context('storage share-rm', resource_type=ResourceType.MGMT_STORAGE) as c:
+        c.argument('account_name', help='The name of the storage account within the specified resource group.')
         c.argument('share_name', share_name_type, options_list=('--name', '-n'))
         c.argument('share_quota', type=int)
         c.argument('metadata', nargs='+',

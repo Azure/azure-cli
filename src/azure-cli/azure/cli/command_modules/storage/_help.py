@@ -1188,7 +1188,7 @@ type: command
 short-summary: Create a new Azure file share under the specified storage account.
 examples:
   - name: Create a new Azure file share 'MyFileShare' with metadata and share quota as 10 GB under the storage account 'MyStorageAccount' in resource group 'MyResourceGroup'.
-    text: az storage share create -g MyResourceGroup --account-name MyStorageAccount --name MyFileShare --share-quota 10 --metadata key1=value1 key2=value2
+    text: az storage share-rm create -g MyResourceGroup --account-name MyStorageAccount --name MyFileShare --share-quota 10 --metadata key1=value1 key2=value2
 """
 
 helps['storage share-rm delete'] = """
