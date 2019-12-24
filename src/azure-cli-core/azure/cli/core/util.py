@@ -16,6 +16,7 @@ import six
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from knack.log import get_logger
 from knack.util import CLIError, to_snake_case
+from azure.common import AzureException
 
 logger = get_logger(__name__)
 
@@ -42,7 +43,7 @@ def handle_exception(ex):  # pylint: disable=too-many-return-statements
             logger.error("To learn more about --query, please visit: "
                          "https://docs.microsoft.com/cli/azure/query-azure-cli?view=azure-cli-latest")
             return 1
-        if isinstance(ex, (CLIError, CloudError)):
+        if isinstance(ex, (CLIError, CloudError, AzureException)):
             logger.error(ex.args[0])
             return ex.args[1] if len(ex.args) >= 2 else 1
         if isinstance(ex, ValidationError):
@@ -190,6 +191,9 @@ def get_az_version_string():
     _print('Python ({}) {}'.format(platform.system(), sys.version))
     _print()
     _print('Legal docs and information: aka.ms/AzureCliLegal')
+    _print()
+    if sys.version.startswith('2.7'):
+        _print("* DEPRECATION: Python 2.7 will reach the end of its life on January 1st, 2020. \nA future version of Azure CLI will drop support for Python 2.7.")
     _print()
     version_string = output.getvalue()
 
@@ -570,8 +574,12 @@ def send_raw_request(cli_ctx, method, uri, headers=None, uri_parameters=None,  #
     if not skip_authorization_header and uri.lower().startswith('https://'):
         if not resource:
             endpoints = cli_ctx.cloud.endpoints
+            from azure.cli.core.cloud import CloudEndpointNotSetException
             for p in [x for x in dir(endpoints) if not x.startswith('_')]:
-                value = getattr(endpoints, p)
+                try:
+                    value = getattr(endpoints, p)
+                except CloudEndpointNotSetException:
+                    continue
                 if isinstance(value, six.string_types) and uri.lower().startswith(value.lower()):
                     resource = value
                     break

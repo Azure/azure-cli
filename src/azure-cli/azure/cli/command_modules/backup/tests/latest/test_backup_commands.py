@@ -105,7 +105,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
         storage_model_types = [e.value for e in StorageType]
-        vault_properties = self.cmd('backup vault backup-properties show -n {vault1} -g {rg}', checks=[
+        vault_properties = self.cmd('backup vault backup-properties show -n {vault1} -g {rg} --query [0]', checks=[
             JMESPathCheckExists("contains({}, properties.storageModelType)".format(storage_model_types)),
             self.check('properties.storageTypeState', 'Unlocked'),
             self.check('resourceGroup', '{rg}')
@@ -119,7 +119,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['model'] = new_storage_model
         self.cmd('backup vault backup-properties set -n {vault1} -g {rg} --backup-storage-redundancy {model}')
 
-        self.cmd('backup vault backup-properties show -n {vault1} -g {rg}', checks=[
+        self.cmd('backup vault backup-properties show -n {vault1} -g {rg} --query [0]', checks=[
             self.check('properties.storageModelType', new_storage_model)
         ])
 
@@ -492,3 +492,45 @@ class BackupTests(ScenarioTest, unittest.TestCase):
                  checks=self.check("length([?name == '{job}'])", 1))
 
         self.cmd('backup job stop -g {rg} -v {vault} -n {job}')
+
+    @record_only()
+    @ResourceGroupPreparer()
+    @VaultPreparer()
+    @VMPreparer()
+    @ItemPreparer()
+    def test_backup_softdelete(self, resource_group, vault_name, vm_name):
+        self.kwargs.update({
+            'vault': vault_name,
+            'vm': vm_name,
+            'rg': resource_group
+        })
+
+        self.cmd('backup protection disable --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm} -i {vm} --delete-backup-data --yes', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "DeleteBackupData"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ])
+
+        self.cmd('backup item show --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm} -n {vm}', checks=[
+            self.check("properties.friendlyName", '{vm}'),
+            self.check("properties.protectionState", "ProtectionStopped"),
+            self.check("resourceGroup", '{rg}'),
+            self.check("properties.isScheduledForDeferredDelete", True)
+        ])
+
+        self.cmd('backup protection undelete -g {rg} -v {vault} -c {vm} -i {vm} --workload-type VM --backup-management-type AzureIaasVM ', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "Undelete"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ])
+
+        self.cmd('backup vault backup-properties set -g {rg} -n {vault} --soft-delete-feature-state Disable')
+
+        self.cmd('backup item show --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm} -n {vm}', checks=[
+            self.check("properties.friendlyName", '{vm}'),
+            self.check("properties.protectionState", "ProtectionStopped"),
+            self.check("resourceGroup", '{rg}'),
+            self.check("properties.isScheduledForDeferredDelete", None)
+        ])

@@ -40,7 +40,7 @@ from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan, SiteC
                                    HybridConnection, RampUpRule, UnauthenticatedClientAction,
                                    ManagedServiceIdentity, DeletedAppRestoreRequest,
                                    DefaultErrorResponseException, SnapshotRestoreRequest,
-                                   SnapshotRecoverySource, SwiftVirtualNetwork)
+                                   SnapshotRecoverySource, SwiftVirtualNetwork, HostingEnvironmentProfile)
 from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient
 from azure.mgmt.relay.models import AccessRights
 from azure.cli.command_modules.relay._client_factory import hycos_mgmt_client_factory, namespaces_mgmt_client_factory
@@ -51,7 +51,7 @@ from azure.mgmt.network.models import Delegation
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_page_in_browser, get_json_object, \
-    ConfiguredDefaultSetter
+    ConfiguredDefaultSetter, sdk_no_wait
 from azure.cli.core.commands.client_factory import UA_AGENT
 
 from .tunnel import TunnelServer
@@ -369,7 +369,7 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
         zip_content = fs.read()
         logger.warning("Starting zip deployment. This operation can take a while to complete ...")
         res = requests.post(zip_url, data=zip_content, headers=headers, verify=not should_disable_connection_verify())
-        logger.warning("Deployment endpoint responses with status code %d", res.status_code)
+        logger.warning("Deployment endpoint responded with status code %d", res.status_code)
 
     # check if there's an ongoing process
     if res.status_code == 409:
@@ -1376,23 +1376,46 @@ def list_app_service_plans(cmd, resource_group_name=None):
     return plans
 
 
-def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, per_site_scaling=False, sku='B1',
-                            number_of_workers=None, location=None, tags=None):
+def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, per_site_scaling=False,
+                            app_service_environment=None, sku='B1', number_of_workers=None, location=None,
+                            tags=None, no_wait=False):
+    sku = _normalize_sku(sku)
+    _validate_asp_sku(app_service_environment, sku)
     if is_linux and hyper_v:
         raise CLIError('usage error: --is-linux | --hyper-v')
+
     client = web_client_factory(cmd.cli_ctx)
-    sku = _normalize_sku(sku)
-    if location is None:
-        location = _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
+    if app_service_environment:
+        if hyper_v:
+            raise CLIError('Windows containers is not yet supported in app service environment')
+        ase_id = _validate_app_service_environment_id(cmd.cli_ctx, app_service_environment, resource_group_name)
+        ase_def = HostingEnvironmentProfile(id=ase_id)
+        ase_list = client.app_service_environments.list()
+        ase_found = False
+        for ase in ase_list:
+            if ase.id.lower() == ase_id.lower():
+                location = ase.location
+                ase_found = True
+                break
+        if not ase_found:
+            raise CLIError("App service environment '{}' not found in subscription.".format(ase_id))
+    else:  # Non-ASE
+        ase_def = None
+        if location is None:
+            location = _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
+
     # the api is odd on parameter naming, have to live with it for now
     sku_def = SkuDescription(tier=get_sku_name(sku), name=sku, capacity=number_of_workers)
     plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
                               reserved=(is_linux or None), hyper_v=(hyper_v or None), name=name,
-                              per_site_scaling=per_site_scaling)
-    return client.app_service_plans.create_or_update(resource_group_name, name, plan_def)
+                              per_site_scaling=per_site_scaling, hosting_environment_profile=ase_def)
+    return sdk_no_wait(no_wait, client.app_service_plans.create_or_update, name=name,
+                       resource_group_name=resource_group_name, app_service_plan=plan_def)
 
 
 def update_app_service_plan(instance, sku=None, number_of_workers=None):
+    if number_of_workers is None and sku is None:
+        logger.warning('No update is done. Specify --sku and/or --number-of-workers.')
     sku_def = instance.sku
     if sku is not None:
         sku = _normalize_sku(sku)
@@ -1939,9 +1962,9 @@ def _get_log(url, user_name, password, log_file=None):
     r.release_conn()
 
 
-def upload_ssl_cert(cmd, resource_group_name, name, certificate_password, certificate_file):
+def upload_ssl_cert(cmd, resource_group_name, name, certificate_password, certificate_file, slot=None):
     client = web_client_factory(cmd.cli_ctx)
-    webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
+    webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     cert_file = open(certificate_file, 'rb')
     cert_contents = cert_file.read()
     hosting_environment_profile_param = (webapp.hosting_environment_profile.name
@@ -1980,6 +2003,54 @@ def delete_ssl_cert(cmd, resource_group_name, certificate_thumbprint):
         if webapp_cert.thumbprint == certificate_thumbprint:
             return client.certificates.delete(resource_group_name, webapp_cert.name)
     raise CLIError("Certificate for thumbprint '{}' not found".format(certificate_thumbprint))
+
+
+def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certificate_name):
+    client = web_client_factory(cmd.cli_ctx)
+    webapp = client.web_apps.get(resource_group_name, name)
+    if not webapp:
+        raise CLIError("'{}' app doesn't exist in resource group {}".format(name, resource_group_name))
+    server_farm_id = webapp.server_farm_id
+    location = webapp.location
+    kv_id = _format_key_vault_id(cmd.cli_ctx, key_vault, resource_group_name)
+    kv_id_parts = parse_resource_id(kv_id)
+    kv_name = kv_id_parts['name']
+    kv_resource_group_name = kv_id_parts['resource_group']
+    cert_name = '{}-{}-{}'.format(resource_group_name, kv_name, key_vault_certificate_name)
+    lnk = 'https://azure.github.io/AppService/2016/05/24/Deploying-Azure-Web-App-Certificate-through-Key-Vault.html'
+    lnk_msg = 'Find more details here: {}'.format(lnk)
+    if not _check_service_principal_permissions(cmd, kv_resource_group_name, kv_name):
+        logger.warning('Unable to verify Key Vault permissions.')
+        logger.warning('You may need to grant Microsoft.Azure.WebSites service principal the Secret:Get permission')
+        logger.warning(lnk_msg)
+
+    kv_cert_def = Certificate(location=location, key_vault_id=kv_id, password='',
+                              key_vault_secret_name=key_vault_certificate_name, server_farm_id=server_farm_id)
+
+    return client.certificates.create_or_update(name=cert_name, resource_group_name=resource_group_name,
+                                                certificate_envelope=kv_cert_def)
+
+
+def _check_service_principal_permissions(cmd, resource_group_name, key_vault_name):
+    from azure.cli.command_modules.keyvault._client_factory import keyvault_client_vaults_factory
+    from azure.cli.command_modules.role._client_factory import _graph_client_factory
+    from azure.graphrbac.models import GraphErrorException
+    kv_client = keyvault_client_vaults_factory(cmd.cli_ctx, None)
+    vault = kv_client.get(resource_group_name=resource_group_name, vault_name=key_vault_name)
+    # Check for Microsoft.Azure.WebSites app registration
+    AZURE_PUBLIC_WEBSITES_APP_ID = 'abfa0a7c-a6b6-4736-8310-5855508787cd'
+    AZURE_GOV_WEBSITES_APP_ID = '6a02c803-dafd-4136-b4c3-5a6f318b4714'
+    graph_sp_client = _graph_client_factory(cmd.cli_ctx).service_principals
+    for policy in vault.properties.access_policies:
+        try:
+            sp = graph_sp_client.get(policy.object_id)
+            if sp.app_id == AZURE_PUBLIC_WEBSITES_APP_ID or sp.app_id == AZURE_GOV_WEBSITES_APP_ID:
+                for perm in policy.permissions.secrets:
+                    if perm == "Get":
+                        return True
+        except GraphErrorException:
+            pass  # Lookup will fail for non service principals (users, groups, etc.)
+    return False
 
 
 def _update_host_name_ssl_state(cli_ctx, resource_group_name, webapp_name, webapp,
@@ -3201,3 +3272,45 @@ def _configure_default_logging(cmd, rg_name, name):
     return config_diagnostics(cmd, rg_name, name,
                               application_logging=True, web_server_logging='filesystem',
                               docker_container_logging='true')
+
+
+def _validate_app_service_environment_id(cli_ctx, ase, resource_group_name):
+    ase_is_id = is_valid_resource_id(ase)
+    if ase_is_id:
+        return ase
+
+    from msrestazure.tools import resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    return resource_id(
+        subscription=get_subscription_id(cli_ctx),
+        resource_group=resource_group_name,
+        namespace='Microsoft.Web',
+        type='hostingEnvironments',
+        name=ase)
+
+
+def _validate_asp_sku(app_service_environment, sku):
+    # Isolated SKU is supported only for ASE
+    if sku in ['I1', 'I2', 'I3']:
+        if not app_service_environment:
+            raise CLIError("The pricing tier 'Isolated' is not allowed for this app service plan. Use this link to "
+                           "learn more: https://docs.microsoft.com/en-us/azure/app-service/overview-hosting-plans")
+    else:
+        if app_service_environment:
+            raise CLIError("Only pricing tier 'Isolated' is allowed in this app service plan. Use this link to "
+                           "learn more: https://docs.microsoft.com/en-us/azure/app-service/overview-hosting-plans")
+
+
+def _format_key_vault_id(cli_ctx, key_vault, resource_group_name):
+    key_vault_is_id = is_valid_resource_id(key_vault)
+    if key_vault_is_id:
+        return key_vault
+
+    from msrestazure.tools import resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    return resource_id(
+        subscription=get_subscription_id(cli_ctx),
+        resource_group=resource_group_name,
+        namespace='Microsoft.KeyVault',
+        type='vaults',
+        name=key_vault)

@@ -28,8 +28,7 @@ class IoTHubTest(ScenarioTest):
         self.cmd('iot hub create -n {0} -g {1} --sku S1 --partition-count 4 --retention-day 3'
                  ' --c2d-ttl 23 --c2d-max-delivery-count 89 --feedback-ttl 29 --feedback-lock-duration 35'
                  ' --feedback-max-delivery-count 40 --fileupload-notification-max-delivery-count 79'
-                 ' --fileupload-notification-ttl 20 --fcs {2} --fc {3}'
-                 .format(hub, rg, storageConnectionString, containerName),
+                 ' --fileupload-notification-ttl 20'.format(hub, rg),
                  checks=[self.check('resourcegroup', rg),
                          self.check('location', location),
                          self.check('name', hub),
@@ -216,6 +215,9 @@ class IoTHubTest(ScenarioTest):
         storage_endpoint_name = 'Storage1'
         storage_endpoint_type = 'azurestoragecontainer'
         storage_encoding_format = 'avro'
+        storage_chunk_size = 150
+        storage_batch_frequency = 100
+        storage_file_name_format = '{iothub}/{partition}/{YYYY}/{MM}/{DD}/{HH}/{mm}'
         # Test 'az iot hub routing-endpoint create'
         self.cmd('iot hub routing-endpoint create --hub-name {0} -g {1} -n {2} -t {3} -r {4} -s {5} -c "{6}"'
                  .format(hub, rg, endpoint_name, endpoint_type, rg, subscription_id, ehConnectionString),
@@ -246,16 +248,21 @@ class IoTHubTest(ScenarioTest):
                          self.check('name', endpoint_name)])
 
         # Test 'az iot hub routing-endpoint create' with storage endpoint
-        self.cmd('iot hub routing-endpoint create --hub-name {0} -g {1} -n {2} -t {3} -r {4} -s {5} -c "{6}" '
-                 '--container-name {7} --encoding {8}'
-                 .format(hub, rg, storage_endpoint_name, storage_endpoint_type, rg, subscription_id,
-                         storageConnectionString, containerName, storage_encoding_format),
-                 checks=[self.check('length(storageContainers[*])', 1),
-                         self.check('storageContainers[0].containerName', containerName),
-                         self.check('storageContainers[0].name', storage_endpoint_name),
-                         self.check('length(serviceBusQueues[*])', 0),
-                         self.check('length(serviceBusTopics[*])', 0),
-                         self.check('length(eventHubs[*])', 1)])
+        endpoint = self.cmd('iot hub routing-endpoint create --hub-name {0} -g {1} -n {2} -t {3} -r {4} -s {5} '
+                            '-c "{6}" --container-name {7} --encoding {8} -b {9} -w {10}'
+                            .format(hub, rg, storage_endpoint_name, storage_endpoint_type, rg, subscription_id,
+                                    storageConnectionString, containerName, storage_encoding_format,
+                                    storage_batch_frequency, storage_chunk_size)).get_output_in_json()
+
+        assert len(endpoint['storageContainers']) == 1
+        assert endpoint["storageContainers"][0]["containerName"] == containerName
+        assert endpoint["storageContainers"][0]["name"] == storage_endpoint_name
+        assert endpoint["storageContainers"][0]["batchFrequencyInSeconds"] == storage_batch_frequency
+        assert endpoint["storageContainers"][0]["maxChunkSizeInBytes"] == 1048576 * storage_chunk_size
+        assert endpoint["storageContainers"][0]["fileNameFormat"] == storage_file_name_format
+        assert len(endpoint['serviceBusQueues']) == 0
+        assert len(endpoint['serviceBusTopics']) == 0
+        assert len(endpoint['eventHubs']) == 1
 
         # Test 'az iot hub route create'
         route_name = 'route1'
@@ -372,7 +379,7 @@ class IoTHubTest(ScenarioTest):
                  checks=[self.check('length(properties.routing.enrichments)', 0)])
 
         # Test 'az iot hub manual-failover'
-        self.cmd('iot hub manual-failover -n {0} -g {1} --failover-region "{2}"'.format(hub, rg, 'westcentralus'),
+        self.cmd('iot hub manual-failover -n {0} -g {1}'.format(hub, rg),
                  checks=[self.check('location', location)])
         # Test 'az iot hub delete'
         self.cmd('iot hub delete -n {0}'.format(hub), checks=self.is_empty())

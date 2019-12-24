@@ -368,7 +368,7 @@ def iot_hub_certificate_verify(client, hub_name, certificate_name, certificate_p
 def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
                    sku=IotHubSku.f1.value,
                    unit=1,
-                   partition_count=2,
+                   partition_count=4,
                    retention_day=1,
                    c2d_ttl=1,
                    c2d_max_delivery_count=10,
@@ -395,7 +395,7 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
     sku = IotHubSkuInfo(name=sku, capacity=unit)
 
     event_hub_dic = {}
-    event_hub_dic['events'] = EventHubProperties(retention_time_in_days=retention_day if retention_day else 1,
+    event_hub_dic['events'] = EventHubProperties(retention_time_in_days=retention_day,
                                                  partition_count=partition_count)
     feedback_Properties = FeedbackProperties(lock_duration_as_iso8601=timedelta(seconds=feedback_lock_duration),
                                              ttl_as_iso8601=timedelta(hours=feedback_ttl),
@@ -407,10 +407,11 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
     msg_endpoint_dic['fileNotifications'] = MessagingEndpointProperties(max_delivery_count=fileupload_notification_max_delivery_count,
                                                                         ttl_as_iso8601=timedelta(hours=fileupload_notification_ttl))
     storage_endpoint_dic = {}
-    if fileupload_storage_connectionstring and fileupload_storage_container_name:
-        storage_endpoint_dic['$default'] = StorageEndpointProperties(sas_ttl_as_iso8601=timedelta(hours=fileupload_sas_ttl),
-                                                                     connection_string=fileupload_storage_connectionstring,
-                                                                     container_name=fileupload_storage_container_name)
+    storage_endpoint_dic['$default'] = StorageEndpointProperties(
+        sas_ttl_as_iso8601=timedelta(hours=fileupload_sas_ttl),
+        connection_string=fileupload_storage_connectionstring if fileupload_storage_connectionstring else '',
+        container_name=fileupload_storage_container_name if fileupload_storage_container_name else '')
+
     properties = IotHubProperties(event_hub_endpoints=event_hub_dic,
                                   messaging_endpoints=msg_endpoint_dic,
                                   storage_endpoints=storage_endpoint_dic,
@@ -666,7 +667,8 @@ def iot_hub_get_stats(client, hub_name, resource_group_name=None):
 def iot_hub_routing_endpoint_create(cmd, client, hub_name, endpoint_name, endpoint_type,
                                     endpoint_resource_group, endpoint_subscription_id,
                                     connection_string, container_name=None, encoding=None,
-                                    resource_group_name=None):
+                                    resource_group_name=None, batch_frequency=300, chunk_size_window=300,
+                                    file_name_format='{iothub}/{partition}/{YYYY}/{MM}/{DD}/{HH}/{mm}'):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     hub = iot_hub_get(cmd, client, hub_name, resource_group_name)
     if EndpointType.EventHub.value == endpoint_type.lower():
@@ -706,7 +708,10 @@ def iot_hub_routing_endpoint_create(cmd, client, hub_name, endpoint_name, endpoi
                 subscription_id=endpoint_subscription_id,
                 resource_group=endpoint_resource_group,
                 container_name=container_name,
-                encoding=encoding.lower() if encoding else EncodingFormat.AVRO.value
+                encoding=encoding.lower() if encoding else EncodingFormat.AVRO.value,
+                file_name_format=file_name_format,
+                batch_frequency_in_seconds=batch_frequency,
+                max_chunk_size_in_bytes=(chunk_size_window * 1048576)
             )
         )
     return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
@@ -883,8 +888,11 @@ def iot_hub_devicestream_show(cmd, client, hub_name, resource_group_name=None):
     return hub.properties.device_streams
 
 
-def iot_hub_manual_failover(cmd, client, hub_name, failover_region, resource_group_name=None, no_wait=False):
-    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
+def iot_hub_manual_failover(cmd, client, hub_name, resource_group_name=None, no_wait=False):
+    hub = iot_hub_get(cmd, client, hub_name, resource_group_name)
+    resource_group_name = hub.additional_properties['resourcegroup']
+    failover_region = next(x['location'] for x in hub.properties.additional_properties['locations']
+                           if x['role'].lower() == 'secondary')
     if no_wait:
         return client.iot_hub.manual_failover(hub_name, resource_group_name, failover_region)
     LongRunningOperation(cmd.cli_ctx)(client.iot_hub.manual_failover(hub_name, resource_group_name, failover_region))

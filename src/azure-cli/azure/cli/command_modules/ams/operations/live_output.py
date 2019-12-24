@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azure.cli.command_modules.ams._utils import show_child_resource_not_found_message
 from azure.mgmt.media.models import LiveOutput
 
 
@@ -20,3 +21,12 @@ def create_live_output(client, resource_group_name, account_name, live_event_nam
                                                archive_window_length=archive_window_length,
                                                description=description, hls=fragments_per_ts_segment,
                                                output_snap_time=output_snap_time))
+
+
+def get_live_output(client, resource_group_name, account_name, live_event_name, live_output_name):
+    live_output = client.get(resource_group_name, account_name, live_event_name, live_output_name)
+    if not live_output:
+        show_child_resource_not_found_message(
+            resource_group_name, account_name, 'liveEvents', live_event_name, 'liveEventOutputs', live_output_name)
+
+    return live_output

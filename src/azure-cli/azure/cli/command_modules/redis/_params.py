@@ -31,7 +31,7 @@ def load_arguments(self, _):
         c.argument('prefix', help='Prefix to use for exported files')
         c.argument('cache_name', arg_type=cache_name)
         c.argument('shard_count', type=int, help='The number of shards to be created on a Premium Cluster Cache.')
-        c.argument('subnet_id', help='The full resource ID of a subnet in a virtual network to deploy the redis cache in. Example format /subscriptions/{subid}/resourceGroups/{resourceGroupName}/Microsoft.{Network|ClassicNetwork}/VirtualNetworks/vnet1/subnets/subnet1')
+        c.argument('subnet_id', help='The full resource ID of a subnet in a virtual network to deploy the redis cache in. Example format /subscriptions/{subid}/resourceGroups/{resourceGroupName}/providers/Microsoft.{Network|ClassicNetwork}/virtualNetworks/vnet1/subnets/subnet1')
         c.argument('static_ip', help='Specify a static ip if required for the VNET. If you do not specify a static IP then an IP address is chosen automatically')
         c.argument('tenant_settings', arg_type=tags_type, help='Space-separated tenant settings in key[=value] format')
         c.argument('tags', arg_type=tags_type)
@@ -41,6 +41,7 @@ def load_arguments(self, _):
         c.argument('minimum_tls_version', help='Specifies the TLS version required by clients to connect to cache', arg_type=get_enum_type(TlsVersion))
         c.argument('vm_size', arg_type=get_enum_type(allowed_c_family_sizes + allowed_p_family_sizes), help='Size of Redis cache to deploy. Basic and Standard Cache sizes start with C. Premium Cache sizes start with P')
         c.argument('enable_non_ssl_port', action='store_true', help='If the value is true, then the non-ssl redis server port (6379) will be enabled.')
+        c.argument('replicas_per_master', help='The number of replicas to be created per master.', is_preview=True)
 
     with self.argument_context('redis firewall-rules list') as c:
         c.argument('cache_name', arg_type=cache_name, id_part=None)

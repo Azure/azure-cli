@@ -13,10 +13,21 @@ logger = get_logger(__name__)
 def create_metric_alert(client, resource_group_name, rule_name, scopes, description, condition, disabled=False,
                         tags=None, actions=None, severity=2, window_size='5m', evaluation_frequency='1m',
                         auto_mitigate=None):
-    from azure.mgmt.monitor.models import MetricAlertResource, MetricAlertSingleResourceMultipleMetricCriteria
+    from azure.mgmt.monitor.models import (MetricAlertResource,
+                                           MetricAlertSingleResourceMultipleMetricCriteria,
+                                           MetricAlertMultipleResourceMultipleMetricCriteria)
     # generate names for the conditions
     for i, cond in enumerate(condition):
         cond.name = 'cond{}'.format(i)
+    criteria = None
+    target_resource_type = None
+    target_resource_region = None
+    if len(scopes) == 1:
+        criteria = MetricAlertSingleResourceMultipleMetricCriteria(all_of=condition)
+    else:
+        criteria = MetricAlertMultipleResourceMultipleMetricCriteria(all_of=condition)
+        target_resource_type = _parse_resource_type(scopes)
+        target_resource_region = 'global'
     kwargs = {
         'description': description,
         'severity': severity,
@@ -24,7 +35,9 @@ def create_metric_alert(client, resource_group_name, rule_name, scopes, descript
         'scopes': scopes,
         'evaluation_frequency': evaluation_frequency,
         'window_size': window_size,
-        'criteria': MetricAlertSingleResourceMultipleMetricCriteria(all_of=condition),
+        'criteria': criteria,
+        'target_resource_type': target_resource_type,
+        'target_resource_region': target_resource_region,
         'actions': actions,
         'tags': tags,
         'location': 'global',
@@ -197,3 +210,20 @@ def _parse_action_removals(actions):
         else:
             emails.append(item)
     return emails, webhooks
+
+
+def _parse_resource_type(scopes):
+    from msrestazure.tools import parse_resource_id
+    from azure.cli.core import CLIError
+    namespace = None
+    resource_type = None
+    for item in scopes:
+        item_namespace = parse_resource_id(item)['namespace']
+        item_resource_type = parse_resource_id(item)['resource_type']
+        if namespace is None and resource_type is None:
+            namespace = item_namespace
+            resource_type = item_resource_type
+        else:
+            if namespace != item_namespace or resource_type != item_resource_type:
+                raise CLIError('Multiple scopes should be the same resource type.')
+    return namespace + '/' + resource_type

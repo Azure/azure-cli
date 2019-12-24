@@ -11,13 +11,10 @@ addons:
       - libssl-dev
       - libffi-dev
       - python-dev
-install: pip install --upgrade pip tox six~=1.12.0
+install: pip install --upgrade pip tox six
 cache: pip
 jobs:
   include:
-    - stage: precheck
-      env: PURPOSE='Reject PRs to master'
-      script: ./scripts/ci/reject_master_prs.sh
     - stage: precheck
       env: PURPOSE='Dependency Check'
       script: ./scripts/ci/dependency_check.sh

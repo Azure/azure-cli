@@ -19,14 +19,15 @@ from azure.mgmt.recoveryservices.models import Vault, VaultProperties, Sku, SkuN
 from azure.mgmt.recoveryservicesbackup.models import ProtectedItemResource, AzureIaaSComputeVMProtectedItem, \
     AzureIaaSClassicComputeVMProtectedItem, ProtectionState, IaasVMBackupRequest, BackupRequestResource, \
     IaasVMRestoreRequest, RestoreRequestResource, BackupManagementType, WorkloadType, OperationStatusValues, \
-    JobStatus, ILRRequestResource, IaasVMILRRegistrationRequest, BackupResourceConfig, BackupResourceConfigResource
+    JobStatus, ILRRequestResource, IaasVMILRRegistrationRequest, BackupResourceConfig, BackupResourceConfigResource, \
+    BackupResourceVaultConfig, BackupResourceVaultConfigResource
 
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.command_modules.backup._client_factory import (
     vaults_cf, backup_protected_items_cf, protection_policies_cf, virtual_machines_cf, recovery_points_cf,
     protection_containers_cf, backup_protectable_items_cf, resources_cf, backup_operation_statuses_cf,
     job_details_cf, protection_container_refresh_operation_results_cf, backup_protection_containers_cf,
-    protected_items_cf)
+    protected_items_cf, backup_resource_vault_config_cf)
 
 logger = get_logger(__name__)
 
@@ -89,10 +90,28 @@ def list_vaults(client, resource_group_name=None):
     return client.list_by_subscription_id()
 
 
-def set_backup_properties(client, vault_name, resource_group_name, backup_storage_redundancy):
+def set_backup_properties(cmd, client, vault_name, resource_group_name, backup_storage_redundancy=None,
+                          soft_delete_feature_state=None):
+    if soft_delete_feature_state:
+        soft_delete_feature_state += "d"
+        vault_config_client = backup_resource_vault_config_cf(cmd.cli_ctx)
+        vault_config_response = vault_config_client.get(vault_name, resource_group_name)
+        enhanced_security_state = vault_config_response.properties.enhanced_security_state
+        vault_config = BackupResourceVaultConfig(soft_delete_feature_state=soft_delete_feature_state,
+                                                 enhanced_security_state=enhanced_security_state)
+        vault_config_resource = BackupResourceVaultConfigResource(properties=vault_config)
+        return vault_config_client.update(vault_name, resource_group_name, vault_config_resource)
+
     backup_storage_config = BackupResourceConfig(storage_model_type=backup_storage_redundancy)
     backup_storage_config_resource = BackupResourceConfigResource(properties=backup_storage_config)
-    client.update(vault_name, resource_group_name, backup_storage_config_resource)
+    return client.update(vault_name, resource_group_name, backup_storage_config_resource)
+
+
+def get_backup_properties(cmd, client, vault_name, resource_group_name):
+    vault_config_client = backup_resource_vault_config_cf(cmd.cli_ctx)
+    vault_config_response = vault_config_client.get(vault_name, resource_group_name)
+    backup_config_response = client.get(vault_name, resource_group_name)
+    return [backup_config_response, vault_config_response]
 
 
 def get_default_policy_for_vm(client, resource_group_name, vault_name):
@@ -108,14 +127,15 @@ def list_policies(client, resource_group_name, vault_name):
     return _get_list_from_paged_response(policies)
 
 
-def list_associated_items_for_policy(client, resource_group_name, vault_name, name):
+def list_associated_items_for_policy(client, resource_group_name, vault_name, name, backup_management_type):
     filter_string = _get_filter_string({
-        'policyName': name})
+        'policyName': name,
+        'backupManagementType': backup_management_type})
     items = client.list(vault_name, resource_group_name, filter_string)
     return _get_list_from_paged_response(items)
 
 
-def set_policy(client, resource_group_name, vault_name, policy):
+def set_policy(client, resource_group_name, vault_name, policy, policy_name):
     policy_object = _get_policy_from_json(client, policy)
     retention_range_in_days = policy_object.properties.instant_rp_retention_range_in_days
     schedule_run_frequency = policy_object.properties.schedule_policy.schedule_run_frequency
@@ -148,7 +168,9 @@ def set_policy(client, resource_group_name, vault_name, policy):
                 logger.error(error_message)
         else:
             policy_object.properties.instant_rp_retention_range_in_days = 2
-    return client.create_or_update(vault_name, resource_group_name, policy_object.name, policy_object)
+    if policy_name is None:
+        policy_name = policy_object.name
+    return client.create_or_update(vault_name, resource_group_name, policy_name, policy_object)
 
 
 def delete_policy(client, resource_group_name, vault_name, name):
@@ -474,6 +496,16 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item, delet
     return _track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
+def undelete_protection(cmd, client, resource_group_name, vault_name, item):
+    container_uri = _get_protection_container_uri_from_id(item.id)
+    item_uri = _get_protected_item_uri_from_id(item.id)
+
+    vm_item = _get_disable_protection_request(item, True)
+    result = sdk_no_wait(True, client.create_or_update,
+                         vault_name, resource_group_name, fabric_name, container_uri, item_uri, vm_item)
+    return _track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
+
+
 def list_jobs(client, resource_group_name, vault_name, status=None, operation=None, start_date=None, end_date=None):
     query_end_date, query_start_date = _get_query_dates(end_date, start_date)
 
@@ -592,12 +624,14 @@ def _get_storage_account_id(cli_ctx, storage_account_name, storage_account_rg):
 
 
 # pylint: disable=inconsistent-return-statements
-def _get_disable_protection_request(item):
+def _get_disable_protection_request(item, undelete=False):
     if item.properties.workload_type == WorkloadType.vm.value:
         vm_item_properties = _get_vm_item_properties_from_vm_id(item.properties.virtual_machine_id)
         vm_item_properties.policy_id = ''
         vm_item_properties.protection_state = ProtectionState.protection_stopped
         vm_item_properties.source_resource_id = item.properties.source_resource_id
+        if undelete:
+            vm_item_properties.is_rehydrate = True
         vm_item = ProtectedItemResource(properties=vm_item_properties)
         return vm_item
 

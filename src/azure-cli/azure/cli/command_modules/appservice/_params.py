@@ -14,7 +14,8 @@ from azure.mgmt.web.models import DatabaseType, ConnectionStringType, BuiltInAut
 
 from ._completers import get_hostname_completion_list
 from ._constants import RUNTIME_TO_IMAGE_FUNCTIONAPP
-from ._validators import validate_timeout_value, validate_site_create, validate_asp_create, validate_add_vnet
+from ._validators import (validate_timeout_value, validate_site_create, validate_asp_create,
+                          validate_add_vnet, validate_front_end_scale_factor, validate_ase_create)
 
 
 AUTH_TYPES = {
@@ -31,6 +32,7 @@ OS_TYPES = ['Windows', 'Linux']
 LINUX_RUNTIMES = ['dotnet', 'node', 'python']
 WINDOWS_RUNTIMES = ['dotnet', 'node', 'java', 'powershell']
 ACCESS_RESTRICTION_ACTION_TYPES = ['Allow', 'Deny']
+ASE_LOADBALANCER_MODES = ['Internal', 'External']
 
 # pylint: disable=too-many-statements
 
@@ -40,11 +42,13 @@ def load_arguments(self, _):
     # pylint: disable=line-too-long
     # PARAMETER REGISTRATION
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
-    sku_arg_type = CLIArgumentType(help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1V2(Premium V2 Small), PC2 (Premium Container Small), PC3 (Premium Container Medium), PC4 (Premium Container Large)',
+    sku_arg_type = CLIArgumentType(help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1V2(Premium V2 Small), PC2 (Premium Container Small), PC3 (Premium Container Medium), PC4 (Premium Container Large), I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large)',
                                    arg_type=get_enum_type(['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1V2', 'P2V2', 'P3V2', 'PC2', 'PC3', 'PC4', 'I1', 'I2', 'I3']))
     webapp_name_arg_type = CLIArgumentType(configured_default='web', options_list=['--name', '-n'], metavar='NAME',
                                            completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name',
-                                           help="name of the web app. You can configure the default using 'az configure --defaults web=<name>'")
+                                           help="name of the web app. You can configure the default using `az configure --defaults web=<name>`")
+    isolated_sku_arg_type = CLIArgumentType(help='The Isolated pricing tiers, e.g., I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large)',
+                                            arg_type=get_enum_type(['I1', 'I2', 'I3']))
 
     functionapp_runtime_to_version_texts = []
     for runtime, val in RUNTIME_TO_IMAGE_FUNCTIONAPP.items():
@@ -59,7 +63,7 @@ def load_arguments(self, _):
         c.argument('slot', options_list=['--slot', '-s'], help="the name of the slot. Default to the productions slot if not specified")
         c.argument('name', configured_default='web', arg_type=name_arg_type,
                    completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name',
-                   help="name of the web app. You can configure the default using 'az configure --defaults web=<name>'")
+                   help="name of the web app. You can configure the default using `az configure --defaults web=<name>`")
 
     with self.argument_context('appservice') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
@@ -80,6 +84,8 @@ def load_arguments(self, _):
     with self.argument_context('appservice plan create') as c:
         c.argument('name', options_list=['--name', '-n'], help="Name of the new app service plan", completer=None,
                    validator=validate_asp_create)
+        c.argument('app_service_environment', options_list=['--app-service-environment', '-e'],
+                   help="Name or ID of the app service environment")
         c.argument('sku', arg_type=sku_arg_type)
         c.argument('is_linux', action='store_true', required=False, help='host web app on Linux worker')
         c.argument('hyper_v', action='store_true', required=False, help='Host web app on Windows container', is_preview=True)
@@ -100,7 +106,7 @@ def load_arguments(self, _):
         c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-w'], help='The container registry server password. Required for private registries.')
         c.argument('multicontainer_config_type', options_list=['--multicontainer-config-type'], help="Linux only.", arg_type=get_enum_type(MULTI_CONTAINER_TYPES))
         c.argument('multicontainer_config_file', options_list=['--multicontainer-config-file'], help="Linux only. Config file for multicontainer apps. (local or remote)")
-        c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework|Version, e.g. \"PHP|5.6\". Use 'az webapp list-runtimes' for available list")  # TODO ADD completer
+        c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework|Version, e.g. \"PHP|5.6\". Use `az webapp list-runtimes` for available list")  # TODO ADD completer
         c.argument('plan', options_list=['--plan', '-p'], configured_default='appserviceplan',
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                    help="name or resource id of the app service plan. Use 'appservice plan create' to get one")
@@ -162,12 +168,15 @@ def load_arguments(self, _):
         with self.argument_context(scope + ' config ssl upload') as c:
             c.argument('certificate_password', help='The ssl cert password')
             c.argument('certificate_file', type=file_type, help='The filepath for the .pfx file')
+            c.argument('slot', options_list=['--slot', '-s'], help='The name of the slot. Default to the productions slot if not specified')
         with self.argument_context(scope + ' config ssl') as c:
             c.argument('certificate_thumbprint', help='The ssl cert thumbprint')
         with self.argument_context(scope + ' config appsettings') as c:
             c.argument('settings', nargs='+', help="space-separated app settings in a format of <name>=<value>")
             c.argument('setting_names', nargs='+', help="space-separated app setting names")
-
+        with self.argument_context(scope + ' config ssl import') as c:
+            c.argument('key_vault', help='The name or resource ID of the Key Vault')
+            c.argument('key_vault_certificate_name', help='The name of the certificate in Key Vault')
         with self.argument_context(scope + ' config hostname') as c:
             c.argument('hostname', completer=get_hostname_completion_list, help="hostname assigned to the site, such as custom domains", id_part='child_name_1')
         with self.argument_context(scope + ' deployment user') as c:
@@ -265,7 +274,7 @@ def load_arguments(self, _):
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
 
     with self.argument_context('webapp config hostname') as c:
-        c.argument('webapp_name', help="webapp name. You can configure the default using 'az configure --defaults web=<name>'", configured_default='web',
+        c.argument('webapp_name', help="webapp name. You can configure the default using `az configure --defaults web=<name>`", configured_default='web',
                    completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name')
     with self.argument_context('webapp deployment slot') as c:
         c.argument('slot', help='the name of the slot')
@@ -288,7 +297,7 @@ def load_arguments(self, _):
         c.argument('docker_container_logging', help='configure gathering STDOUT and STDERR output from container', arg_type=get_enum_type(['off', 'filesystem']))
 
     with self.argument_context('webapp log tail') as c:
-        c.argument('provider', help="By default all live traces configured by 'az webapp log config' will be shown, but you can scope to certain providers/folders, e.g. 'application', 'http', etc. For details, check out https://github.com/projectkudu/kudu/wiki/Diagnostic-Log-Stream")
+        c.argument('provider', help="By default all live traces configured by `az webapp log config` will be shown, but you can scope to certain providers/folders, e.g. 'application', 'http', etc. For details, check out https://github.com/projectkudu/kudu/wiki/Diagnostic-Log-Stream")
 
     with self.argument_context('webapp log download') as c:
         c.argument('log_file', default='webapp_logs.zip', type=file_type, completer=FilesCompleter(), help='the downloaded zipped log file path')
@@ -365,8 +374,8 @@ def load_arguments(self, _):
         c.argument('client_secret', options_list=['--aad-client-secret'], arg_group='Azure Active Directory', help='AAD application secret')
         c.argument('allowed_audiences', nargs='+', options_list=['--aad-allowed-token-audiences'], arg_group='Azure Active Directory', help="One or more token audiences (space-delimited).")
         c.argument('issuer', options_list=['--aad-token-issuer-url'],
-                   help='This url can be found in the JSON output returned from your active directory endpoint using your tenantID. The endpoint can be queried from \'az cloud show\' at \"endpoints.activeDirectory\". '
-                        'The tenantID can be found using \'az account show\'. Get the \"issuer\" from the JSON at <active directory endpoint>/<tenantId>/.well-known/openid-configuration.', arg_group='Azure Active Directory')
+                   help='This url can be found in the JSON output returned from your active directory endpoint using your tenantID. The endpoint can be queried from `az cloud show` at \"endpoints.activeDirectory\". '
+                        'The tenantID can be found using `az account show`. Get the \"issuer\" from the JSON at <active directory endpoint>/<tenantId>/.well-known/openid-configuration.', arg_group='Azure Active Directory')
         c.argument('facebook_app_id', arg_group='Facebook', help="Application ID to integrate Facebook Sign-in into your web app")
         c.argument('facebook_app_secret', arg_group='Facebook', help='Facebook Application client secret')
         c.argument('facebook_oauth_scopes', nargs='+', help="One or more facebook authentication scopes (space-delimited).", arg_group='Facebook')
@@ -449,7 +458,7 @@ def load_arguments(self, _):
         c.argument('storage_account', options_list=['--storage-account', '-s'],
                    help='Provide a string value of a Storage Account in the provided Resource Group. Or Resource ID of a Storage Account in a different Resource Group')
         c.argument('consumption_plan_location', options_list=['--consumption-plan-location', '-c'],
-                   help="Geographic location where Function App will be hosted. Use 'az functionapp list-consumption-locations' to view available locations.")
+                   help="Geographic location where Function App will be hosted. Use `az functionapp list-consumption-locations` to view available locations.")
         c.argument('runtime', help='The functions runtime stack.', arg_type=get_enum_type(set(LINUX_RUNTIMES).union(set(WINDOWS_RUNTIMES))))
         c.argument('runtime_version', help='The version of the functions runtime stack. '
                                            'Allowed values for each --runtime are: ' + ', '.join(functionapp_runtime_to_version_texts))
@@ -522,7 +531,7 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(['swap', 'preview', 'reset']))
 
 
-# Access Resction Commands
+# Access Restriction Commands
     for scope in ['webapp', 'functionapp']:
         with self.argument_context(scope + ' config access-restriction show') as c:
             c.argument('name', arg_type=webapp_name_arg_type)
@@ -549,10 +558,58 @@ def load_arguments(self, _):
             c.argument('name', arg_type=webapp_name_arg_type)
             c.argument('rule_name', options_list=['--rule-name', '-r'],
                        help='Name of the access restriction to remove')
+            c.argument('ip_address', help="IP address or CIDR range")
+            c.argument('vnet_name', help="vNet name")
+            c.argument('subnet', help="Subnet name (requires vNet name) or subnet resource id")
             c.argument('scm_site', help='True if access restriction should be removed from scm site',
                        arg_type=get_three_state_flag())
+            c.argument('action', arg_type=get_enum_type(ACCESS_RESTRICTION_ACTION_TYPES),
+                       help="Allow or deny access")
         with self.argument_context(scope + ' config access-restriction set') as c:
             c.argument('name', arg_type=webapp_name_arg_type)
             c.argument('use_same_restrictions_for_scm_site',
                        help="Use same access restrictions for scm site",
                        arg_type=get_three_state_flag())
+
+# App Service Environment Commands
+    with self.argument_context('appservice ase show') as c:
+        c.argument('name', options_list=['--name', '-n'],
+                   help='Name of the app service environment')
+    with self.argument_context('appservice ase create') as c:
+        c.argument('name', options_list=['--name', '-n'], validator=validate_ase_create,
+                   help='Name of the app service environment')
+        c.argument('subnet', help='Name or ID of existing subnet. To create vnet and/or subnet \
+                   use `az network vnet [subnet] create`')
+        c.argument('vnet_name', help='Name of the vNet. Mandatory if only subnet name is specified.')
+        c.argument('virtual_ip_type', arg_type=get_enum_type(ASE_LOADBALANCER_MODES),
+                   help="Specify if app service environment should be accessible from internet")
+        c.argument('ignore_subnet_size_validation', arg_type=get_three_state_flag(),
+                   help='Do not check if subnet is sized according to recommendations.')
+        c.argument('ignore_route_table', arg_type=get_three_state_flag(),
+                   help='Configure route table manually.')
+        c.argument('ignore_network_security_group', arg_type=get_three_state_flag(),
+                   help='Configure network security group manually.')
+        c.argument('force_route_table', arg_type=get_three_state_flag(),
+                   help='Override route table for subnet')
+        c.argument('force_network_security_group', arg_type=get_three_state_flag(),
+                   help='Override network security group for subnet')
+        c.argument('front_end_scale_factor', type=int, validator=validate_front_end_scale_factor,
+                   help='Scale of front ends to app service plan instance ratio.', default=15)
+        c.argument('front_end_sku', arg_type=isolated_sku_arg_type, default='I1',
+                   help='Size of front end servers.')
+    with self.argument_context('appservice ase delete') as c:
+        c.argument('name', options_list=['--name', '-n'],
+                   help='Name of the app service environment')
+    with self.argument_context('appservice ase update') as c:
+        c.argument('name', options_list=['--name', '-n'],
+                   help='Name of the app service environment')
+        c.argument('front_end_scale_factor', type=int, validator=validate_front_end_scale_factor,
+                   help='Scale of front ends to app service plan instance ratio between 5 and 15.')
+        c.argument('front_end_sku', arg_type=isolated_sku_arg_type,
+                   help='Size of front end servers.')
+    with self.argument_context('appservice ase list-addresses') as c:
+        c.argument('name', options_list=['--name', '-n'],
+                   help='Name of the app service environment')
+    with self.argument_context('appservice ase list-plans') as c:
+        c.argument('name', options_list=['--name', '-n'],
+                   help='Name of the app service environment')

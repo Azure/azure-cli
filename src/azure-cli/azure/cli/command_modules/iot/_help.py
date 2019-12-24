@@ -485,9 +485,9 @@ helps['iot hub manual-failover'] = """
 type: command
 short-summary: Initiate a manual failover for the IoT Hub to the geo-paired disaster recovery region.
 examples:
-  - name: This fails over “myhub” from East US to West US.
+  - name: Initiate failover “myhub” from primary to secondary region.
     text: >
-        az iot hub manual-failover -n myhub --fr "West US"
+        az iot hub manual-failover -n myhub
 """
 
 helps['iot hub message-enrichment'] = """
@@ -683,7 +683,8 @@ examples:
         az iot hub routing-endpoint create --resource-group MyResourceGroup --hub-name MyIotHub \\
         --endpoint-name S1 --endpoint-type azurestoragecontainer --endpoint-resource-group "[Resource Group]" \\
         --endpoint-subscription-id {SubscriptionId} --connection-string {ConnectionString} \\
-        --container-name {ContainerName}
+        --container-name {ContainerName} --batch-frequency 100 --chunk-size 100 \\
+        --ff {iothub}-{partition}-{YYYY}-{MM}-{DD}-{HH}-{mm}
 """
 
 helps['iot hub routing-endpoint delete'] = """

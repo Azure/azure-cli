@@ -251,7 +251,7 @@ def _urlretrieve(url):
 def _deploy_arm_template_core(cli_ctx, resource_group_name,
                               template_file=None, template_uri=None, deployment_name=None,
                               parameters=None, mode=None, rollback_on_error=None, validate_only=False,
-                              no_wait=False):
+                              no_wait=False, aux_subscriptions=None):
     DeploymentProperties, TemplateLink, OnErrorDeployment = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
                                                                     'DeploymentProperties', 'TemplateLink',
                                                                     'OnErrorDeployment', mod='models')
@@ -283,7 +283,7 @@ def _deploy_arm_template_core(cli_ctx, resource_group_name,
     properties = DeploymentProperties(template=template, template_link=template_link,
                                       parameters=parameters, mode=mode, on_error_deployment=on_error_deployment)
 
-    smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+    smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, aux_subscriptions=aux_subscriptions)
     if validate_only:
         return sdk_no_wait(no_wait, smc.deployments.validate, resource_group_name, deployment_name, properties)
     return sdk_no_wait(no_wait, smc.deployments.create_or_update, resource_group_name, deployment_name, properties)
@@ -301,7 +301,8 @@ def _remove_comments_from_json(template):
 # pylint: disable=too-many-locals, too-many-statements, too-few-public-methods
 def _deploy_arm_template_unmodified(cli_ctx, resource_group_name, template_file=None,
                                     template_uri=None, deployment_name=None, parameters=None,
-                                    mode=None, rollback_on_error=None, validate_only=False, no_wait=False):
+                                    mode=None, rollback_on_error=None, validate_only=False, no_wait=False,
+                                    aux_subscriptions=None):
     DeploymentProperties, TemplateLink, OnErrorDeployment = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
                                                                     'DeploymentProperties', 'TemplateLink',
                                                                     'OnErrorDeployment', mod='models')
@@ -332,7 +333,7 @@ def _deploy_arm_template_unmodified(cli_ctx, resource_group_name, template_file=
     properties = DeploymentProperties(template=template_content, template_link=template_link,
                                       parameters=parameters, mode=mode, on_error_deployment=on_error_deployment)
 
-    smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+    smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, aux_subscriptions=aux_subscriptions)
 
     deployments_operation_group = smc.deployments  # This solves the multi-api for you
 
@@ -925,13 +926,19 @@ def delete_deployment_at_subscription_scope(cmd, deployment_name):
 
 def deploy_arm_template(cmd, resource_group_name,
                         template_file=None, template_uri=None, deployment_name=None,
-                        parameters=None, mode=None, rollback_on_error=None, no_wait=False, handle_extended_json_format=False):
+                        parameters=None, mode=None, rollback_on_error=None, no_wait=False,
+                        handle_extended_json_format=False, aux_subscriptions=None):
     if handle_extended_json_format:
-        return _deploy_arm_template_unmodified(cmd.cli_ctx, resource_group_name, template_file, template_uri,
-                                               deployment_name, parameters, mode, rollback_on_error, no_wait=no_wait)
+        return _deploy_arm_template_unmodified(cmd.cli_ctx, resource_group_name=resource_group_name,
+                                               template_file=template_file, template_uri=template_uri,
+                                               deployment_name=deployment_name, parameters=parameters, mode=mode,
+                                               rollback_on_error=rollback_on_error, no_wait=no_wait,
+                                               aux_subscriptions=aux_subscriptions)
 
-    return _deploy_arm_template_core(cmd.cli_ctx, resource_group_name, template_file, template_uri,
-                                     deployment_name, parameters, mode, rollback_on_error, no_wait=no_wait)
+    return _deploy_arm_template_core(cmd.cli_ctx, resource_group_name=resource_group_name, template_file=template_file,
+                                     template_uri=template_uri, deployment_name=deployment_name,
+                                     parameters=parameters, mode=mode, rollback_on_error=rollback_on_error,
+                                     no_wait=no_wait, aux_subscriptions=aux_subscriptions)
 
 
 def deploy_arm_template_at_subscription_scope(cmd, template_file=None, template_uri=None,
@@ -951,7 +958,8 @@ def validate_arm_template(cmd, resource_group_name, template_file=None, template
                           parameters=None, mode=None, rollback_on_error=None, handle_extended_json_format=None):
     if handle_extended_json_format:
         return _deploy_arm_template_unmodified(cmd.cli_ctx, resource_group_name, template_file, template_uri,
-                                               'deployment_dry_run', parameters, mode, rollback_on_error, validate_only=True)
+                                               'deployment_dry_run', parameters, mode, rollback_on_error,
+                                               validate_only=True)
     return _deploy_arm_template_core(cmd.cli_ctx, resource_group_name, template_file, template_uri,
                                      'deployment_dry_run', parameters, mode, rollback_on_error, validate_only=True)
 
@@ -1439,14 +1447,19 @@ def create_policy_definition(cmd, name, rules=None, params=None, display_name=No
 
 
 def create_policy_setdefinition(cmd, name, definitions, params=None, display_name=None, description=None,
-                                subscription=None, management_group=None):
+                                subscription=None, management_group=None, definition_groups=None, metadata=None):
+
     definitions = _load_file_string_or_uri(definitions, 'definitions')
     params = _load_file_string_or_uri(params, 'params', False)
+    definition_groups = _load_file_string_or_uri(definition_groups, 'definition_groups', False)
 
     policy_client = _resource_policy_client_factory(cmd.cli_ctx)
     PolicySetDefinition = cmd.get_models('PolicySetDefinition')
     parameters = PolicySetDefinition(policy_definitions=definitions, parameters=params, description=description,
-                                     display_name=display_name)
+                                     display_name=display_name, policy_definition_groups=definition_groups)
+
+    if cmd.supported_api_version(min_api='2017-06-01-preview'):
+        parameters.metadata = metadata
     if cmd.supported_api_version(min_api='2018-03-01'):
         enforce_mutually_exclusive(subscription, management_group)
         if management_group:
@@ -1554,10 +1567,11 @@ def update_policy_definition(cmd, policy_definition_name, rules=None, params=Non
 
 def update_policy_setdefinition(cmd, policy_set_definition_name, definitions=None, params=None,
                                 display_name=None, description=None,
-                                subscription=None, management_group=None):
+                                subscription=None, management_group=None, definition_groups=None, metadata=None):
 
     definitions = _load_file_string_or_uri(definitions, 'definitions', False)
     params = _load_file_string_or_uri(params, 'params', False)
+    definition_groups = _load_file_string_or_uri(definition_groups, 'definition_groups', False)
 
     policy_client = _resource_policy_client_factory(cmd.cli_ctx)
     definition = _get_custom_or_builtin_policy(cmd, policy_client, policy_set_definition_name, subscription, management_group, True)
@@ -1567,7 +1581,10 @@ def update_policy_setdefinition(cmd, policy_set_definition_name, definitions=Non
         policy_definitions=definitions if definitions is not None else definition.policy_definitions,
         description=description if description is not None else definition.description,
         display_name=display_name if display_name is not None else definition.display_name,
-        parameters=params if params is not None else definition.parameters)
+        parameters=params if params is not None else definition.parameters,
+        policy_definition_groups=definition_groups if definition_groups is not None else definition.policy_definition_groups,
+        metadata=metadata if metadata is not None else definition.metadata)
+
     if cmd.supported_api_version(min_api='2018-03-01'):
         enforce_mutually_exclusive(subscription, management_group)
         if management_group:
@@ -2115,6 +2132,24 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
 
     def tag(self, tags):
         resource = self.get_resource()
+
+        # please add the service type that needs to be requested with PATCH type here
+        # for example: the properties of RecoveryServices/vaults must be filled, and a PUT request that passes back
+        # to properties will fail due to the lack of properties, so the PATCH type should be used
+        need_patch_service = ['Microsoft.RecoveryServices/vaults']
+
+        if resource is not None and resource.type in need_patch_service:
+            parameters = GenericResource(tags=tags)
+            if self.resource_id:
+                return self.rcf.resources.update_by_id(self.resource_id, self.api_version, parameters)
+            return self.rcf.resources.update(self.resource_group_name,
+                                             self.resource_provider_namespace,
+                                             self.parent_resource_path,
+                                             self.resource_type,
+                                             self.resource_name,
+                                             self.api_version,
+                                             parameters)
+
         # pylint: disable=no-member
         parameters = GenericResource(
             location=resource.location,

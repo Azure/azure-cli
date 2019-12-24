@@ -5,6 +5,8 @@
 
 from knack.util import CLIError
 
+from azure.cli.command_modules.ams._utils import show_child_resource_not_found_message
+
 
 def create_job(client, resource_group_name, account_name, transform_name, job_name,
                output_assets, input_asset_name=None,
@@ -30,6 +32,9 @@ def create_job(client, resource_group_name, account_name, transform_name, job_na
 
 
 def update_job(instance, description=None, priority=None):
+    if not instance:
+        raise CLIError('The job resource was not found.')
+
     if description is not None:
         instance.description = description
 
@@ -49,3 +54,13 @@ def cancel_job(client, resource_group_name, account_name,
                              transform_name, job_name)
 
     return cancel_result
+
+
+def get_job(client, resource_group_name, account_name,
+            transform_name, job_name):
+    job = client.get(resource_group_name, account_name, transform_name, job_name)
+    if not job:
+        show_child_resource_not_found_message(
+            resource_group_name, account_name, 'transforms', transform_name, 'jobs', job_name)
+
+    return job

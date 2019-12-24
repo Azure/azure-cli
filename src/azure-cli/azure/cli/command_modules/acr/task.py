@@ -3,11 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import re
 from msrest.exceptions import ValidationError
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
-
 from ._utils import (
     get_registry_by_name,
     validate_managed_registry,
@@ -16,19 +16,21 @@ from ._utils import (
     get_yaml_template,
     build_timers_info,
     remove_timer_trigger,
-    get_task_id_from_task_name
+    get_task_id_from_task_name,
+    prepare_source_location
 )
 from ._stream_utils import stream_logs
+from ._constants import (
+    ACR_NULL_CONTEXT
+)
 
 logger = get_logger(__name__)
 
 
 TASK_NOT_SUPPORTED = 'Task is only supported for managed registries.'
 DEFAULT_TOKEN_TYPE = 'PAT'
-NULL_CONTEXT = '/dev/null'
 IDENTITY_LOCAL_ID = '[system]'
 IDENTITY_GLOBAL_REMOVE = '[all]'
-
 DEFAULT_TIMEOUT_IN_SEC = 60 * 60  # 60 minutes
 DEFAULT_CPU = 2
 ALLOWED_TASK_FILE_TYPES = ('.yaml', '.yml', '.toml', '.json', '.sh', '.bash', '.zsh', '.ps1',
@@ -53,7 +55,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     commit_trigger_enabled=True,
                     pull_request_trigger_enabled=False,
                     schedule=None,
-                    branch='master',
+                    branch=None,
                     no_push=False,
                     no_cache=False,
                     arg=None,
@@ -73,7 +75,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
     registry, resource_group_name = get_registry_by_name(
         cmd.cli_ctx, registry_name, resource_group_name)
 
-    if context_path.lower() == NULL_CONTEXT:
+    if context_path.lower() == ACR_NULL_CONTEXT:
         context_path = None
         commit_trigger_enabled = False
         pull_request_trigger_enabled = False
@@ -114,8 +116,12 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
     source_trigger_events = _get_trigger_event_list_put(cmd,
                                                         commit_trigger_enabled,
                                                         pull_request_trigger_enabled)
-    # if source_trigger_events contains any event types we know they are enabled
+    # if source_trigger_events contains any event types we assume they are enabled
     if source_trigger_events:
+        if not branch:
+            branch = _get_branch_name(context_path)
+            branch = 'master' if not branch else branch
+
         SourceTrigger, SourceProperties, AuthInfo, TriggerStatus = cmd.get_models(
             'SourceTrigger', 'SourceProperties', 'AuthInfo', 'TriggerStatus')
         source_triggers = [
@@ -383,6 +389,8 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
         source_triggers = task.trigger.source_triggers
         base_image_trigger = task.trigger.base_image_trigger
         if (commit_trigger_enabled or pull_request_trigger_enabled) or source_triggers:
+            branch = _get_branch_name(context_path) if not branch else branch
+
             SourceTriggerUpdateParameters, SourceUpdateParameters, AuthInfoUpdateParameters = cmd.get_models(
                 'SourceTriggerUpdateParameters', 'SourceUpdateParameters', 'AuthInfoUpdateParameters')
 
@@ -778,6 +786,8 @@ def acr_task_run(cmd,  # pylint: disable=too-many-locals
         update_trigger_token = base64.b64encode(update_trigger_token.encode()).decode()
 
     task_id = get_task_id_from_task_name(cmd.cli_ctx, resource_group_name, registry_name, task_name)
+    context_path = prepare_source_location(context_path, client_registries, registry_name, resource_group_name)
+
     override_task_step_properties = OverrideTaskStepProperties(
         context_path=context_path,
         file=file,
@@ -796,7 +806,6 @@ def acr_task_run(cmd,  # pylint: disable=too-many-locals
             )
         )
     )
-
     run_id = queued_run.run_id
     logger.warning("Queued a run with ID: %s", run_id)
 
@@ -862,7 +871,6 @@ def acr_task_list_runs(cmd,
 def _add_run_filter(orig_filter, name, value, operator):
     if not value:
         return orig_filter
-
     if operator == 'contains':
         new_filter_str = "contains({}, '{}')".format(name, value)
     elif operator == 'eq':
@@ -870,7 +878,6 @@ def _add_run_filter(orig_filter, name, value, operator):
     else:
         raise ValueError(
             "Allowed filter operator: {}".format(['contains', 'eq']))
-
     return "{} and {}".format(orig_filter, new_filter_str) if orig_filter else new_filter_str
 
 
@@ -962,7 +969,6 @@ def _get_trigger_event_list_patch(cmd,
                                   commit_trigger_enabled=None,
                                   pull_request_trigger_enabled=None):
     TriggerStatus, SourceTriggerEvent = cmd.get_models('TriggerStatus', 'SourceTriggerEvent')
-
     source_trigger_events = set()
     # perform merge with server-side event list
     if source_triggers:
@@ -982,3 +988,13 @@ def _get_trigger_event_list_patch(cmd,
             if SourceTriggerEvent.pullrequest.value in source_trigger_events:
                 source_trigger_events.remove(SourceTriggerEvent.pullrequest.value)
     return source_trigger_events
+
+
+def _get_branch_name(context_path):
+    # Context formats https://docs.docker.com/engine/reference/commandline/build/#git-repositories
+    # The regex matches from the first '#' to the next ':', space, or end of line.
+    # It doesn't consider pull and tags scenarios.
+    branch = re.search(r'(?<=#)([^:\n\s]*)', context_path)
+    if branch:
+        return branch.group()
+    return None

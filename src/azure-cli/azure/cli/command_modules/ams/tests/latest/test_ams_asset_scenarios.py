@@ -66,6 +66,15 @@ class AmsAssetTests(ScenarioTest):
             self.check('description', 'mydesc')
         ])
 
+        nonexits_asset_name = self.create_random_name(prefix='asset', length=20)
+
+        self.kwargs.update({
+            'nonexits_asset_name': nonexits_asset_name
+        })
+
+        with self.assertRaisesRegexp(SystemExit, '3'):
+            self.cmd('az ams asset show -a {amsname} -g {rg} -n {nonexits_asset_name}')
+
         list = self.cmd('az ams asset list -a {amsname} -g {rg}').get_output_in_json()
         assert len(list) > 0
 

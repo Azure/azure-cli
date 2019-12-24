@@ -71,8 +71,7 @@ class AzconfigClient(object):
         if modify_options is None:
             modify_options = models.ModifyKeyValueOptions()
 
-        key, label = utils.encode_key_and_label(
-            keyvalue.key, keyvalue.label)
+        key, label = utils.unescape_encode_key_and_label(keyvalue.key, keyvalue.label)
         body_content = {
             "content_type": keyvalue.content_type,
             "value": keyvalue.value,
@@ -104,7 +103,7 @@ class AzconfigClient(object):
         if modify_options is None:
             modify_options = models.ModifyKeyValueOptions()
 
-        key, label = utils.encode_key_and_label(keyvalue.key, keyvalue.label)
+        key, label = utils.unescape_encode_key_and_label(keyvalue.key, keyvalue.label)
         body_content = {
             "content_type": keyvalue.content_type,
             "value": keyvalue.value,
@@ -139,8 +138,7 @@ class AzconfigClient(object):
         if keyvalue.etag is None:
             raise ValueError("Etag of the keyvalue cannot be null")
 
-        key, label = utils.encode_key_and_label(
-            keyvalue.key, keyvalue.label)
+        key, label = utils.unescape_encode_key_and_label(keyvalue.key, keyvalue.label)
         body_content = {
             "content_type": keyvalue.content_type,
             "value": keyvalue.value,
@@ -171,9 +169,9 @@ class AzconfigClient(object):
         if modify_options is None:
             modify_options = models.ModifyKeyValueOptions()
 
-        key, label = utils.encode_key_and_label(key, label)
-        query_url = '/kv/{}?label={}'.format(key,
-                                             '' if label is None else label)
+        key, label = utils.unescape_encode_key_and_label(key, label)
+        query_url = '/kv/{}?label={}'.format(key, '' if label is None else label)
+        query_url = self.__append_api_version(query_url)
 
         endpoint = utils.get_endpoint_from_connection_string(
             self.connection_string)
@@ -220,9 +218,10 @@ class AzconfigClient(object):
         if keyvalue.etag is None:
             raise ValueError("Etag of the keyvalue cannot be null")
 
-        key, label = utils.encode_key_and_label(keyvalue.key, keyvalue.label)
-        query_url = '/kv/{}?label={}'.format(key,
-                                             '' if label is None else label)
+        key, label = utils.unescape_encode_key_and_label(keyvalue.key, keyvalue.label)
+        query_url = '/kv/{}?label={}'.format(key, '' if label is None else label)
+        query_url = self.__append_api_version(query_url)
+
         endpoint = utils.get_endpoint_from_connection_string(
             self.connection_string)
         url = 'https://{}{}'.format(endpoint, query_url)
@@ -312,10 +311,12 @@ class AzconfigClient(object):
         if modify_options is None:
             modify_options = models.ModifyKeyValueOptions()
 
-        key, label = utils.encode_key_and_label(keyvalue.key, keyvalue.label)
+        key, label = utils.unescape_encode_key_and_label(keyvalue.key, keyvalue.label)
 
         query_url = '/locks/{}'.format(key)
         query_url += '?label={}'.format('' if label is None else label)
+        query_url = self.__append_api_version(query_url)
+
         endpoint = utils.get_endpoint_from_connection_string(
             self.connection_string)
         url = 'https://{}{}'.format(endpoint, query_url)
@@ -354,10 +355,11 @@ class AzconfigClient(object):
         if modify_options is None:
             modify_options = models.ModifyKeyValueOptions()
 
-        key, label = utils.encode_key_and_label(keyvalue.key, keyvalue.label)
+        key, label = utils.unescape_encode_key_and_label(keyvalue.key, keyvalue.label)
 
         query_url = '/locks/{}'.format(key)
         query_url += '?label={}'.format('' if label is None else label)
+        query_url = self.__append_api_version(query_url)
 
         endpoint = utils.get_endpoint_from_connection_string(
             self.connection_string)
@@ -390,8 +392,9 @@ class AzconfigClient(object):
                     modify_options,
                     if_match_etag=None,
                     if_none_match_etag=None):
-        query_url = '/kv/{}?label={}'.format(key,
-                                             '' if label is None else label)
+        query_url = '/kv/{}?label={}'.format(key, '' if label is None else label)
+        query_url = self.__append_api_version(query_url)
+
         endpoint = utils.get_endpoint_from_connection_string(
             self.connection_string)
         url = 'https://{}{}'.format(endpoint, query_url)
@@ -415,8 +418,7 @@ class AzconfigClient(object):
                                        response.headers, response.content)
 
     def __list_revision(self, query_option, continuation_link):
-        key, label = utils.encode_key_and_label(
-            query_option.key_filter, query_option.label_filter)
+        key, label = utils.unescape_encode_key_and_label(query_option.key_filter, query_option.label_filter)
         query_datetime = query_option.query_datetime
         query_fields = self.__construct_query_fields_to_string(
             query_option.fields)
@@ -425,6 +427,7 @@ class AzconfigClient(object):
             query_url = '/revisions?key={}'.format('*' if key is None else key)
             query_url += '&label={}'.format('*'if label is None else label)
             query_url += '&fields={}'.format(query_fields)
+            query_url = self.__append_api_version(query_url)
         else:
             query_url = self.__parse_link_header(continuation_link)
             if query_url is None:
@@ -452,13 +455,14 @@ class AzconfigClient(object):
                                        response.headers, response.content)
 
     def __query_key(self, key, query_kv_option):
-        key, label = utils.encode_key_and_label(key, query_kv_option.label)
+        key, label = utils.unescape_encode_key_and_label(key, query_kv_option.label)
         fields = self.__construct_query_fields_to_string(
             query_kv_option.fields)
 
         query_url = '/kv/{}?label={}'.format(key,
                                              label if label is not None else '')
         query_url += '&fields={}'.format('*' if fields is None else fields)
+        query_url = self.__append_api_version(query_url)
 
         endpoint = utils.get_endpoint_from_connection_string(
             self.connection_string)
@@ -483,8 +487,8 @@ class AzconfigClient(object):
                                        response.headers, response.content)
 
     def __query_keys(self, query_kv_collection_option, continuation_link):
-        key, label = utils.encode_key_and_label(
-            query_kv_collection_option.key_filter, query_kv_collection_option.label_filter)
+        key, label = utils.unescape_encode_key_and_label(query_kv_collection_option.key_filter, query_kv_collection_option.label_filter)
+
         query_datetime = query_kv_collection_option.query_datetime
         query_fields = self.__construct_query_fields_to_string(
             query_kv_collection_option.fields)
@@ -492,8 +496,8 @@ class AzconfigClient(object):
         if continuation_link is None:
             query_url = '/kv?key={}'.format('*' if key is None else key)
             query_url += '&label={}'.format('*' if label is None else label)
-            query_url += '&fields={}'.format(
-                '*' if query_fields is None else query_fields)
+            query_url += '&fields={}'.format('*' if query_fields is None else query_fields)
+            query_url = self.__append_api_version(query_url)
         else:
             query_url = self.__parse_link_header(continuation_link)
             if query_url is None:
@@ -553,3 +557,8 @@ class AzconfigClient(object):
         custom_headers[constants.HttpHeaders.CorrelationRequestId] = request_options.correlation_request_id
 
         return custom_headers
+
+    @staticmethod
+    def __append_api_version(url):
+        api_version = "&api-version=" if '?' in url else "?api-version="
+        return url + api_version + constants.Versions.ApiVersion

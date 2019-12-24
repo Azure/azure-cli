@@ -100,6 +100,39 @@ examples:
     crafted: true
 """
 
+helps['disk-encryption-set'] = """
+type: group
+short-summary: Disk Encryption Set resource.
+"""
+
+helps['disk-encryption-set create'] = """
+type: command
+short-summary: Create a disk encryption set.
+examples:
+  - name: Create a disk encryption set
+    text: az disk-encryption-set create -g MyResourceGroup -n MyDiskEncryptionSet --key-url MyKey --source-vault MyVault
+"""
+
+helps['disk-encryption-set delete'] = """
+type: command
+short-summary: Delete a disk encryption set.
+"""
+
+helps['disk-encryption-set list'] = """
+type: command
+short-summary: List disk encryption sets.
+"""
+
+helps['disk-encryption-set show'] = """
+type: command
+short-summary: Get information of a disk encryption sets.
+"""
+
+helps['disk-encryption-set update'] = """
+type: command
+short-summary: Update a disk encryption set.
+"""
+
 helps['image'] = """
 type: group
 short-summary: Manage custom virtual machine images.
@@ -1879,15 +1912,15 @@ type: command
 short-summary: Update a user account.
 parameters:
   - name: --ssh-key-value
-    short-summary: SSH public key file value or public key file path
+    short-summary: SSH public key file value or public key file path. This command appends the new public key text to the ~/.ssh/authorized_keys file for the admin user on the VM. This does not replace or remove any existing SSH keys.
 examples:
   - name: Update a Windows user account.
     text: az vm user update -u username -p password -n MyVm -g MyResourceGroup
-  - name: Update a Linux user account.
-    text: az vm user update -u username --ssh-key-value "$({ ~/.ssh/id_rsa.pub)" -n MyVm -g MyResourceGroup
-  - name: Update a user on all VMs in a resource group.
+  - name: Update a Linux user account. ("$(< filename)" syntax is not supported on Command Prompt or PowerShell.)
+    text: az vm user update -u username --ssh-key-value "$(< ~/.ssh/id_rsa.pub)" -n MyVm -g MyResourceGroup
+  - name: Update a user on all VMs in a resource group. ("$(< filename)" syntax is not supported on Command Prompt or PowerShell.)
     text: >
-        az vm user update -u username --ssh-key-value "$({ ~/.ssh/id_rsa.pub)" --ids $(az vm list -g MyResourceGroup --query "[].id" -o tsv)
+        az vm user update -u username --ssh-key-value "$(< ~/.ssh/id_rsa.pub)" --ids $(az vm list -g MyResourceGroup --query "[].id" -o tsv)
 
 """
 
@@ -2387,4 +2420,14 @@ examples:
     text: az vmss wait --updated --name MyScaleSet --resource-group MyResourceGroup
   - name: Place the CLI in a waiting state until the VMSS instance has been updated.
     text: az vmss wait --updated --instance-id 1 --name MyScaleSet --resource-group MyResourceGroup
+"""
+
+helps['vm monitor'] = """
+type: group
+short-summary: Manage monitor aspect for a vm.
+"""
+
+helps['vm monitor log'] = """
+type: group
+short-summary: Manage log analytics workspace for a vm.
 """

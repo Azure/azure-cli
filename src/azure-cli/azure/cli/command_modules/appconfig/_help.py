@@ -68,38 +68,44 @@ helps['appconfig kv export'] = """
 type: command
 short-summary: Export configurations to another place from your App Configuration.
 examples:
-  - name: Export all keys with label test to a json file.
+  - name: Export all keys and feature flags with label test to a json file.
     text: az appconfig kv export -n MyAppConfiguration --label test -d file --path D:/abc.json --format json
-  - name: Export all keys with null label to another App Configuration.
+  - name: Export all keys and feature flags with null label to another App Configuration.
     text: az appconfig kv export -n MyAppConfiguration -d appconfig --dest-name AnotherAppConfiguration
-  - name: Export all keys with null label to an App Service appliaction.
+  - name: Export all keys with null label to an App Service application.
     text: az appconfig kv export -n MyAppConfiguration -d appservice  --appservice-account MyAppService
+  - name: Export all keys with label test excluding feature flags to a json file.
+    text: az appconfig kv export -n MyAppConfiguration --label test -d file --path D:/abc.json --format json --skip-features
 """
 
 helps['appconfig kv import'] = """
 type: command
 short-summary: Import configurations into your App Configuration from another place.
 examples:
-  - name: Import all keys with label test from a file.
+  - name: Import all keys and feature flags from a file and apply test label.
     text: az appconfig kv import -n MyAppConfiguration --label test -s file --path D:/abc.json --format json
-  - name: Import all keys with null label from an App Configuration.
+  - name: Import all keys and feature flags and apply null label from an App Configuration.
     text: az appconfig kv import -n MyAppConfiguration -s appconfig --src-name AnotherAppConfiguration
-  - name: Import all keys with null label from an App Service appliaction.
+  - name: Import all keys and apply null label from an App Service appliaction.
     text: az appconfig kv import -n MyAppConfiguration -s appservice --appservice-account MyAppService
+  - name: Import all keys with label test and apply test2 label excluding feature flags from an App Configuration.
+    text: az appconfig kv import -n MyAppConfiguration -s appconfig --src-label test --label test2 --src-name AnotherAppConfiguration --skip-features
 """
 
 helps['appconfig kv list'] = """
 type: command
 short-summary: List key-values.
 examples:
-  - name: List all key-values.
-    text: az appconfig kv list -n MyAppConfiguration
+  - name: List all key-values with null label.
+    text: az appconfig kv list -n MyAppConfiguration --label \\0
   - name: List a specfic key for any label start with v1. using connection string.
     text: az appconfig kv list --key color --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --label v1.*
   - name: List all keys with any labels and query only key, value and tags.
     text: az appconfig kv list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --fields key value tags --datetime "2019-05-01T11:24:12Z"
   - name: List 150 key-values with any labels.
     text: az appconfig kv list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx  --top 150
+  - name: List key-values with multiple labels.
+    text: az appconfig kv list --label test,prod,\\0 -n MyAppConfiguration
 """
 
 helps['appconfig kv lock'] = """
@@ -169,8 +175,10 @@ helps['appconfig revision list'] = """
 type: command
 short-summary: Lists revision history of key-values.
 examples:
-  - name: List revision history of key "color" label "test" using App Configuration name.
+  - name: List revision history of a key-value using App Configuration name.
     text: az appconfig revision list -n MyAppConfiguration --key color --label test
+  - name: List revision history of a key-value with multiple labels.
+    text: az appconfig revision list -n MyAppConfiguration --key color --label test,prod,\\0
   - name: List revision history for key "color" with any labels using connection string
     text: az appconfig revision list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --key color --datetime "2019-05-01T11:24:12Z"
 """
@@ -241,7 +249,7 @@ helps['appconfig feature list'] = """
             az appconfig feature list -n MyAppConfiguration
         - name: List all feature flags with null labels.
           text:
-            az appconfig feature list -n MyAppConfiguration --label ""
+            az appconfig feature list -n MyAppConfiguration --label \\0
         - name: List a specfic feature for any label start with v1. using connection string.
           text:
             az appconfig feature list --feature color --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --label v1.*
@@ -251,6 +259,9 @@ helps['appconfig feature list'] = """
         - name: List 150 feature flags with any labels.
           text:
             az appconfig feature list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx  --top 150
+        - name: List feature flags with multiple labels.
+          text:
+            az appconfig feature list --label test,prod,\\0 -n MyAppConfiguration
     """
 
 helps['appconfig feature lock'] = """

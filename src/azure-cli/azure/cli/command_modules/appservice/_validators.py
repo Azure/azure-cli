@@ -14,7 +14,7 @@ def validate_timeout_value(namespace):
     """Validates that zip deployment timeout is set to a reasonable min value"""
     if isinstance(namespace.timeout, int):
         if namespace.timeout <= 29:
-            raise CLIError('--timeout value should be a positive value in seconds and should be atleast 30')
+            raise CLIError('--timeout value should be a positive value in seconds and should be at least 30')
 
 
 def validate_site_create(cmd, namespace):
@@ -42,6 +42,16 @@ def validate_site_create(cmd, namespace):
         validation = client.validate(resource_group_name, validation_payload)
         if validation.status.lower() == "failure" and validation.error.code != 'SiteAlreadyExists':
             raise CLIError(validation.error.message)
+
+
+def validate_ase_create(cmd, namespace):
+    # Validate the ASE Name availability
+    client = web_client_factory(cmd.cli_ctx)
+    resource_type = 'Microsoft.Web/hostingEnvironments'
+    if isinstance(namespace.name, str):
+        name_validation = client.check_name_availability(namespace.name, resource_type)
+        if not name_validation.name_available:
+            raise CLIError(name_validation.message)
 
 
 def validate_asp_create(cmd, namespace):
@@ -121,7 +131,17 @@ def validate_add_vnet(cmd, namespace):
                         Cannot integrate a regional VNET to an app in a different region")
 
 
-def validate_asp_exists_in_rg(cmd, namespace):
+def validate_front_end_scale_factor(namespace):
+    if namespace.front_end_scale_factor:
+        min_scale_factor = 5
+        max_scale_factor = 15
+        scale_error_text = "Frontend Scale Factor '{}' is invalid. Must be between {} and {}"
+        scale_factor = namespace.front_end_scale_factor
+        if scale_factor < min_scale_factor or scale_factor > max_scale_factor:
+            raise CLIError(scale_error_text.format(scale_factor, min_scale_factor, max_scale_factor))
+
+
+def validate_asp_sku(cmd, namespace):
     import json
     client = web_client_factory(cmd.cli_ctx)
     serverfarm = namespace.name
@@ -129,11 +149,16 @@ def validate_asp_exists_in_rg(cmd, namespace):
     asp = client.app_service_plans.get(resource_group_name, serverfarm, None, raw=True)
     if asp.response.status_code != 200:
         raise CLIError(asp.response.text)
+    # convert byte array to json
+    output_str = asp.response.content.decode('utf8')
+    res = json.loads(output_str)
+
     # Isolated SKU is supported only for ASE
     if namespace.sku in ['I1', 'I2', 'I3']:
-        # convert byte array to json
-        output_str = asp.response.content.decode('utf8')
-        res = json.loads(output_str)
         if res.get('properties').get('hostingEnvironment') is None:
-            raise CLIError("The pricing tier 'Isolated' is not allowed in this resource group.Use this link to "
-                           "learn more: http://go.microsoft.com/fwlink/?LinkId=825764")
+            raise CLIError("The pricing tier 'Isolated' is not allowed for this app service plan. Use this link to "
+                           "learn more: https://docs.microsoft.com/en-us/azure/app-service/overview-hosting-plans")
+    else:
+        if res.get('properties').get('hostingEnvironment') is not None:
+            raise CLIError("Only pricing tier 'Isolated' is allowed in this app service plan. Use this link to "
+                           "learn more: https://docs.microsoft.com/en-us/azure/app-service/overview-hosting-plans")

@@ -218,6 +218,7 @@ def load_arguments(self, _):
         c.argument('ssl_cert', help='The name or ID of the SSL certificate to use.', completer=get_ag_subresource_completion_list('ssl_certificates'))
         c.ignore('protocol')
         c.argument('host_name', help='Host name to use for multisite gateways.')
+        c.argument('firewall_policy', min_api='2019-09-01', help='Name or ID of a Firewall Policy resource.')
 
     with self.argument_context('network application-gateway http-listener create') as c:
         c.argument('frontend_ip', help='The name or ID of the frontend IP configuration. {}'.format(default_existing))
@@ -269,6 +270,11 @@ def load_arguments(self, _):
         c.argument('interval', help='The time interval in seconds between consecutive probes.')
         c.argument('threshold', help='The number of failed probes after which the back end server is marked down.')
         c.argument('timeout', help='The probe timeout in seconds.')
+        c.argument('port', type=int, min_api='2019-04-01',
+                   help='Custom port which will be used for probing the backend servers. '
+                        'The valid value ranges from 1 to 65535. '
+                        'In case not set, port from http settings will be used. '
+                        'This property is valid for Standard_v2 and WAF_v2 only.')
 
     with self.argument_context('network application-gateway rule') as c:
         c.argument('address_pool', help='The name or ID of the backend address pool.', completer=get_ag_subresource_completion_list('backend_address_pools'))
@@ -276,6 +282,7 @@ def load_arguments(self, _):
         c.argument('http_settings', help='The name or ID of the backend HTTP settings.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
         c.argument('rule_type', help='The rule type (Basic, PathBasedRouting).')
         c.argument('url_path_map', help='The name or ID of the URL path map.', completer=get_ag_subresource_completion_list('url_path_maps'))
+        c.argument('rewrite_rule_set', min_api='2019-04-01', help='The name or ID of the rewrite rule set.')
 
     with self.argument_context('network application-gateway ssl-cert') as c:
         c.argument('cert_data', options_list='--cert-file', type=file_type, completer=FilesCompleter(), help='The path to the PFX certificate file.', validator=validate_ssl_cert)
@@ -291,21 +298,25 @@ def load_arguments(self, _):
         c.argument('paths', nargs='+', help='Space-separated list of paths to associate with the rule. Valid paths start and end with "/" (ex: "/bar/")', arg_group='First Rule')
         c.argument('address_pool', help='The name or ID of the backend address pool to use with the created rule.', completer=get_ag_subresource_completion_list('backend_address_pools'), arg_group='First Rule')
         c.argument('http_settings', help='The name or ID of the HTTP settings to use with the created rule.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'), arg_group='First Rule')
+        c.argument('firewall_policy', min_api='2019-09-01', help='Name or ID of a Firewall Policy resource.', arg_group='First Rule')
+        c.argument('rewrite_rule_set', min_api='2019-04-01', help='The name or ID of the rewrite rule set. If not specified, the default for the map will be used.', arg_group='First Rule')
 
     with self.argument_context('network application-gateway url-path-map create') as c:
         c.argument('default_address_pool', help='The name or ID of the default backend address pool, if different from --address-pool.', completer=get_ag_subresource_completion_list('backend_address_pools'))
         c.argument('default_http_settings', help='The name or ID of the default HTTP settings, if different from --http-settings.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
+        c.argument('default_rewrite_rule_set', min_api='2019-04-01', help='The name or ID of the default rewrite rule set, if different from --rewrite-rule-set.')
 
     with self.argument_context('network application-gateway url-path-map update') as c:
         c.argument('default_address_pool', help='The name or ID of the default backend address pool.', completer=get_ag_subresource_completion_list('backend_address_pools'))
         c.argument('default_http_settings', help='The name or ID of the default HTTP settings.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
+        c.argument('default_rewrite_rule_set', min_api='2019-04-01', help='The name or ID of the default rewrite rule set.')
 
     with self.argument_context('network application-gateway url-path-map rule') as c:
         c.argument('item_name', options_list=['--name', '-n'], help='The name of the url-path-map rule.', completer=ag_url_map_rule_completion_list, id_part='child_name_2')
         c.argument('url_path_map_name', options_list='--path-map-name', help='The name of the URL path map.', completer=get_ag_subresource_completion_list('url_path_maps'), id_part='child_name_1')
         c.argument('address_pool', help='The name or ID of the backend address pool. If not specified, the default for the map will be used.', completer=get_ag_subresource_completion_list('backend_address_pools'))
         c.argument('http_settings', help='The name or ID of the HTTP settings. If not specified, the default for the map will be used.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
-        for item in ['address_pool', 'http_settings', 'redirect_config', 'paths']:
+        for item in ['address_pool', 'http_settings', 'redirect_config', 'paths', 'rewrite_rule_set', 'firewall_policy']:
             c.argument(item, arg_group=None)
 
     with self.argument_context('network application-gateway url-path-map rule create') as c:
@@ -371,38 +382,101 @@ def load_arguments(self, _):
         c.argument('application_gateway_name', app_gateway_name_type)
     # endregion
 
-    # region ApplicationGatewayWAFPolicies
+    # region WebApplicationFirewallPolicy
     (WebApplicationFirewallAction, WebApplicationFirewallMatchVariable,
      WebApplicationFirewallOperator, WebApplicationFirewallRuleType,
-     WebApplicationFirewallTransform) = self.get_models(
+     WebApplicationFirewallTransform,
+     OwaspCrsExclusionEntryMatchVariable, OwaspCrsExclusionEntrySelectorMatchOperator,
+     WebApplicationFirewallEnabledState, WebApplicationFirewallMode) = self.get_models(
          'WebApplicationFirewallAction', 'WebApplicationFirewallMatchVariable',
          'WebApplicationFirewallOperator', 'WebApplicationFirewallRuleType',
-         'WebApplicationFirewallTransform')
+         'WebApplicationFirewallTransform',
+         'OwaspCrsExclusionEntryMatchVariable', 'OwaspCrsExclusionEntrySelectorMatchOperator',
+         'WebApplicationFirewallEnabledState', 'WebApplicationFirewallMode')
     with self.argument_context('network application-gateway waf-policy', min_api='2018-12-01') as c:
         c.argument('policy_name', name_arg_type, id_part='name', help='The name of the application gateway WAF policy.')
 
-    with self.argument_context('network application-gateway waf-policy rule', min_api='2018-12-01') as c:
+    with self.argument_context('network application-gateway waf-policy policy-setting', min_api='2019-09-01') as c:
+        c.argument('policy_name', options_list='--policy-name', id_part=None,
+                   help='The name of the web application firewall policy.')
+        c.argument('state',
+                   arg_type=get_enum_type(WebApplicationFirewallEnabledState),
+                   help='Describes if the policy is in enabled state or disabled state.')
+        c.argument('mode',
+                   arg_type=get_enum_type(WebApplicationFirewallMode),
+                   help='Describes if it is in detection mode or prevention mode at policy level.')
+        c.argument('request_body_check',
+                   arg_type=get_three_state_flag(),
+                   help='Specified to require WAF to check request Body.')
+        c.argument('max_request_body_size_in_kb',
+                   type=int,
+                   help='Maximum request body size in Kb for WAF.')
+        c.argument('file_upload_limit_in_mb',
+                   type=int,
+                   help='Maximum file upload size in Mb for WAF."')
+
+    with self.argument_context('network application-gateway waf-policy custom-rule', min_api='2018-12-01') as c:
         c.argument('policy_name', options_list='--policy-name')
         c.argument('rule_name', options_list=['--name', '-n'], id_part='child_name_1', help='Name of the WAF policy rule.')
         c.argument('priority', type=int, help='Rule priority. Lower values are evaluated prior to higher values.')
         c.argument('action', arg_type=get_enum_type(WebApplicationFirewallAction), help='Action to take.')
         c.argument('rule_type', arg_type=get_enum_type(WebApplicationFirewallRuleType), help='Type of rule.')
 
-    with self.argument_context('network application-gateway waf-policy rule list', min_api='2018-12-01') as c:
+    with self.argument_context('network application-gateway waf-policy custom-rule list', min_api='2018-12-01') as c:
         c.argument('policy_name', options_list='--policy-name', id_part=None)
 
-    with self.argument_context('network application-gateway waf-policy rule match-condition', min_api='2018-12-01') as c:
+    with self.argument_context('network application-gateway waf-policy custom-rule match-condition',
+                               min_api='2018-12-01') as c:
         c.argument('operator', arg_type=get_enum_type(WebApplicationFirewallOperator), help='Operator for matching.')
-        c.argument('negation_condition', options_list='--negate', arg_type=get_three_state_flag(), help='Match the negative of the condition.')
-        c.argument('match_values', options_list='--values', nargs='+', help='Space-separated list of values to match.')
-        c.argument('transforms', arg_type=get_enum_type(WebApplicationFirewallTransform), nargs='+', help='Space-separated list of transforms to apply when matching.')
+        c.argument('negation_condition',
+                   options_list='--negate',
+                   arg_type=get_three_state_flag(),
+                   help='Match the negative of the condition.')
+        c.argument('match_values',
+                   options_list='--values',
+                   nargs='+',
+                   help='Space-separated list of values to match.')
+        c.argument('transforms',
+                   arg_type=get_enum_type(WebApplicationFirewallTransform),
+                   nargs='+',
+                   help='Space-separated list of transforms to apply when matching.')
         if WebApplicationFirewallMatchVariable:
-            help_string = 'Space-separated list of `VARIABLE[.SELECTOR]` variables to use when matching. Variable values: {}'.format(', '.join(x for x in WebApplicationFirewallMatchVariable))
+            waf_custom_rule_match_variables = [x for x in WebApplicationFirewallMatchVariable]
+            help_string = 'Space-separated list of variables to use when matching. ' \
+                          'Variable values: {}'.format(', '.join(waf_custom_rule_match_variables))
             c.argument('match_variables', nargs='+', help=help_string, validator=validate_match_variables)
         c.argument('index', type=int, help='Index of the match condition to remove.')
 
-    with self.argument_context('network application-gateway waf-policy rule match-condition list', min_api='2018-12-01') as c:
+    with self.argument_context('network application-gateway waf-policy custom-rule match-condition list', min_api='2018-12-01') as c:
         c.argument('policy_name', options_list='--policy-name', id_part=None)
+
+    with self.argument_context('network application-gateway waf-policy managed-rule') as c:
+        c.argument('policy_name', options_list='--policy-name', id_part=None,
+                   help='The name of the web application firewall policy.')
+
+    with self.argument_context('network application-gateway waf-policy managed-rule rule-set',
+                               min_api='2019-09-01') as c:
+        c.argument('rule_set_type', options_list='--type', help='The type of the web application firewall rule set.')
+        c.argument('rule_set_version',
+                   options_list='--version',
+                   help='The version of the web application firewall rule set type.')
+        c.argument('rule_group_name',
+                   options_list='--group-name',
+                   help='The name of the web application firewall rule set group.')
+        c.argument('rules', nargs='+', help='List of rules that will be disabled.')
+
+    with self.argument_context('network application-gateway waf-policy managed-rule exclusion',
+                               min_api='2019-09-01') as c:
+        c.argument('match_variable',
+                   arg_type=get_enum_type(OwaspCrsExclusionEntryMatchVariable),
+                   help='The variable to be excluded.')
+        c.argument('selector_match_operator',
+                   arg_type=get_enum_type(OwaspCrsExclusionEntrySelectorMatchOperator),
+                   help='When matchVariable is a collection, operate on the selector to '
+                        'specify which elements in the collection this exclusion applies to.')
+        c.argument('selector',
+                   help='When matchVariable is a collection, operator used to '
+                        'specify which elements in the collection this exclusion applies to.')
     # region
 
     # region ApplicationSecurityGroups
@@ -432,8 +506,20 @@ def load_arguments(self, _):
         c.ignore('location')
 
         c.argument('zone_type', help='Type of DNS zone to create.', arg_type=get_enum_type(ZoneType))
-        c.argument('registration_vnets', arg_group='Private Zone', nargs='+', help='Space-separated names or IDs of virtual networks that register hostnames in this DNS zone.', validator=get_vnet_validator('registration_vnets'))
-        c.argument('resolution_vnets', arg_group='Private Zone', nargs='+', help='Space-separated names or IDs of virtual networks that resolve records in this DNS zone.', validator=get_vnet_validator('resolution_vnets'))
+
+        c.argument('registration_vnets',
+                   arg_group='Private Zone',
+                   nargs='+',
+                   help='Space-separated names or IDs of virtual networks that register hostnames in this DNS zone. '
+                        'Number of private DNS zones with virtual network auto-registration enabled is 1. '
+                        'If you need to increase this limit, please contact Azure Support: '
+                        'https://docs.microsoft.com/en-us/azure/azure-subscription-service-limits',
+                   validator=get_vnet_validator('registration_vnets'))
+        c.argument('resolution_vnets',
+                   arg_group='Private Zone',
+                   nargs='+',
+                   help='Space-separated names or IDs of virtual networks that resolve records in this DNS zone.',
+                   validator=get_vnet_validator('resolution_vnets'))
 
     with self.argument_context('network dns zone import') as c:
         c.argument('file_name', options_list=['--file-name', '-f'], type=file_type, completer=FilesCompleter(), help='Path to the DNS zone file to import')
@@ -459,7 +545,11 @@ def load_arguments(self, _):
 
     for item in ['a', 'aaaa', 'caa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
         with self.argument_context('network dns record-set {} add-record'.format(item)) as c:
-            c.argument('record_set_name', options_list=['--record-set-name', '-n'], help='The name of the record set relative to the zone. Creates a new record set if one does not exist.')
+            c.argument('ttl', help='Record set TTL (time-to-live)')
+            c.argument('record_set_name',
+                       options_list=['--record-set-name', '-n'],
+                       help='The name of the record set relative to the zone. '
+                            'Creates a new record set if one does not exist.')
 
         with self.argument_context('network dns record-set {} remove-record'.format(item)) as c:
             c.argument('record_set_name', options_list=['--record-set-name', '-n'], help='The name of the record set relative to the zone.')
@@ -467,15 +557,16 @@ def load_arguments(self, _):
 
     with self.argument_context('network dns record-set cname set-record') as c:
         c.argument('record_set_name', options_list=['--record-set-name', '-n'], help='The name of the record set relative to the zone. Creates a new record set if one does not exist.')
+        c.argument('ttl', help='Record set TTL (time-to-live)')
 
     with self.argument_context('network dns record-set soa') as c:
         c.argument('relative_record_set_name', ignore_type, default='@')
 
     with self.argument_context('network dns record-set a') as c:
-        c.argument('ipv4_address', options_list=['--ipv4-address', '-a'], help='IPV4 address in string notation.')
+        c.argument('ipv4_address', options_list=['--ipv4-address', '-a'], help='IPv4 address in string notation.')
 
     with self.argument_context('network dns record-set aaaa') as c:
-        c.argument('ipv6_address', options_list=['--ipv6-address', '-a'], help='IPV6 address in string notation.')
+        c.argument('ipv6_address', options_list=['--ipv6-address', '-a'], help='IPv6 address in string notation.')
 
     with self.argument_context('network dns record-set caa') as c:
         c.argument('value', help='Value of the CAA record.')
@@ -1213,6 +1304,7 @@ def load_arguments(self, _):
 
     with self.argument_context('network vnet subnet update') as c:
         c.argument('network_security_group', validator=get_nsg_validator(), help='Name or ID of a network security group (NSG). Use empty string "" to detach it.')
+        c.argument('route_table', help='Name or ID of a route table to associate with the subnet. Use empty string "" to detach it. You can also append "--remove routeTable" in "az network vnet subnet update" to detach it.')
 
     for scope in ['network vnet subnet list', 'network vnet peering list']:
         with self.argument_context(scope) as c:

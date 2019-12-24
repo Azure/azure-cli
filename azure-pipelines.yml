@@ -8,6 +8,44 @@ trigger:
     - '*'
 
 jobs:
+- job: RejectPullRequestToMasterBranch
+  displayName: "Reject Pull Request To Master Branch"
+  condition: and(succeeded(), eq(variables['System.PullRequest.TargetBranch'], 'master'))
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+    - bash: |
+        echo "Reject pull request directly to master branch"
+        exit 1
+
+- job: CredScan
+  displayName: "Credential Scan"
+
+  pool:
+    vmImage: "windows-2019"
+  steps:
+  - task: CredScan@2
+    inputs:
+      toolMajorVersion: 'V2'
+
+  - task: PostAnalysis@1
+    inputs:
+      AllTools: false
+      APIScan: false
+      BinSkim: false
+      CodesignValidation: false
+      CredScan: true
+      FortifySCA: false
+      FxCop: false
+      ModernCop: false
+      PoliCheck: false
+      RoslynAnalyzers: false
+      SDLNativeRules: false
+      Semmle: false
+      TSLint: false
+      ToolLogsNotFoundAction: 'Standard'
+
 - job: ExtractMetadata
   displayName: Extract Metadata
 
@@ -322,12 +360,65 @@ jobs:
          --rm -v $PYPI_FILES:/mnt/pypi python:3.7 \
          /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION && az self-test && az --version && sleep 5"
 
+       echo "== Testing pip install on Python 3.8 =="
+       docker run \
+         --rm -v $PYPI_FILES:/mnt/pypi python:3.8 \
+         /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION && az self-test && az --version && sleep 5"  
+
        echo "== Testing pip install on Python 2.7 =="
        docker run \
          --rm -v $PYPI_FILES:/mnt/pypi python:2.7 \
          /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION && az self-test && az --version && sleep 5"
 
     displayName: 'Test pip Install'
+
+- job: UnitTest
+  displayName: Unit Test for Core and Telemetry
+  timeoutInMinutes: 10
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  strategy:
+    matrix:
+      Python27:
+        python.version: '2.7'
+      Python36:
+        python.version: '3.6'
+      Python38:
+        python.version: '3.8'
+  steps:
+    - task: UsePythonVersion@0
+      displayName: 'Use Python $(python.version)'
+      inputs:
+        versionSpec: '$(python.version)'
+    - bash: pip install --upgrade pip tox
+      displayName: 'Install pip and tox'
+    - bash: ./scripts/ci/unittest.sh
+      displayName: 'Run Unit Test'
+
+- job: IntegrationTestAgainstProfiles
+  displayName: Integration Test against Profiles
+  dependsOn: BuildPythonWheel
+  condition: succeeded()
+  timeoutInMinutes: 20
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  strategy:
+    matrix:
+      Python36:
+        python.version: '3.6'
+      Python38:
+        python.version: '3.8'
+  steps:
+    - task: UsePythonVersion@0
+      displayName: 'Use Python $(python.version)'
+      inputs:
+        versionSpec: '$(python.version)'
+    - bash: pip install --upgrade pip wheel
+      displayName: 'Install pip and wheel'
+    - bash: ./scripts/ci/test_profile_integration.sh
+      displayName: 'Run Integration Test against Profiles'
 
 - job: RunAutomationFullPython2
   displayName: Run Automation, Python 2
@@ -354,8 +445,8 @@ jobs:
       targetType: 'filePath'
       filePath: ./scripts/ci/test_automation.sh
 
-- job: RunAutomationReducedPython3
-  displayName: Run Automation, Python 3
+- job: RunAutomationReducedPython3_6
+  displayName: Run Automation Reduced Python 3.6
   dependsOn: BuildPythonWheel
   timeoutInMinutes: 90
 
@@ -382,7 +473,7 @@ jobs:
       REDUCE_SDK: 'True'
 
 - job: RunAutomationReduced20190301
-  displayName: Run Automation Reduced
+  displayName: Run Automation Reduced Python 3.6, Profile 2019-03-01
   dependsOn: BuildPythonWheel
 
   pool:
@@ -408,7 +499,7 @@ jobs:
       REDUCE_SDK: 'True'
       AZURE_CLI_TEST_TARGET_PROFILE: '2019-03-01'
 
-- job: RunAutomationReduced20180301
+- job: RunAutomation20180301
   displayName: Run Automation, Profile 2018-03-01
   dependsOn: BuildPythonWheel
 
@@ -433,6 +524,108 @@ jobs:
       filePath: ./scripts/ci/test_automation.sh
     env:
       AZURE_CLI_TEST_TARGET_PROFILE: '2018-03-01'
+
+- job: RunAutomationReducedPython3_8
+  displayName: Run Automation Reduced Python 3.8
+  dependsOn: BuildPythonWheel
+  timeoutInMinutes: 90
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.8'
+    inputs:
+      versionSpec: 3.8
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Python Wheels'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
+      artifactName: pypi
+  - bash: |
+      pip install --force-reinstall wheel
+  - task: Bash@3
+    displayName: 'Run Test Automation'
+    inputs:
+      targetType: 'filePath'
+      filePath: ./scripts/ci/test_automation.sh
+    env:
+      REDUCE_SDK: 'True'
+
+- job: RunAutomationReduced20190301Python3_8
+  displayName: Run Automation Reduced Python 3.8, Profile 2019-03-01
+  dependsOn: BuildPythonWheel
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.8'
+    inputs:
+      versionSpec: 3.8
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Python Wheels'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
+      artifactName: pypi
+  - bash: |
+      pip install --force-reinstall wheel
+  - task: Bash@3
+    displayName: 'Run Test Automation'
+    inputs:
+      targetType: 'filePath'
+      filePath: ./scripts/ci/test_automation.sh
+    env:
+      REDUCE_SDK: 'True'
+      AZURE_CLI_TEST_TARGET_PROFILE: '2019-03-01'
+
+- job: TestExtensionsLoading
+  displayName: Test Extensions Loading
+  dependsOn: BuildPythonWheel
+  condition: succeeded()
+  timeoutInMinutes: 10
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  strategy:
+    matrix:
+      Python36:
+        python.version: '3.6'
+  steps:
+    - task: UsePythonVersion@0
+      displayName: 'Use Python $(python.version)'
+      inputs:
+        versionSpec: '$(python.version)'
+    - bash: pip install --upgrade pip wheel
+      displayName: 'Install pip and wheel'
+    - bash: ./scripts/ci/test_extensions.sh
+      displayName: 'Load extensions'
+
+- job: RunAutomation20180301Python3_8
+  displayName: Run Automation Python 3.8, Profile 2018-03-01
+  dependsOn: BuildPythonWheel
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.8'
+    inputs:
+      versionSpec: 3.8
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Python Wheels'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
+      artifactName: pypi
+  - bash: |
+      pip install --force-reinstall wheel
+  - task: Bash@3
+    displayName: 'Run Test Automation'
+    inputs:
+      targetType: 'filePath'
+      filePath: ./scripts/ci/test_automation.sh
+    env:
+      AZURE_CLI_TEST_TARGET_PROFILE: '2018-03-01'      
 
 - job: BuildHomebrewFormula
   displayName: Build Homebrew Formula
@@ -713,6 +906,32 @@ jobs:
         TargetPath: $(Build.ArtifactStagingDirectory)
         ArtifactName: ubuntu-disco
 
+- job: BuildUbuntuEoan
+  displayName: Build Ubuntu Eoan Package
+
+  dependsOn: BuildPythonWheel
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+    - task: DownloadPipelineArtifact@1
+      displayName: 'Download Build Artifacts'
+      inputs:
+        TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
+        artifactName: pypi
+
+    - bash: scripts/release/debian/pipeline.sh
+      displayName: 'Build Ubuntu Eoan Package'
+      env:
+        DISTRO: eoan
+        DISTRO_BASE_IMAGE: ubuntu:eoan
+
+    - task: PublishPipelineArtifact@0
+      displayName: 'Publish Artifact: debian'
+      inputs:
+        TargetPath: $(Build.ArtifactStagingDirectory)
+        ArtifactName: ubuntu-eoan
+
 - job: BuildDebianJessie
   displayName: Build Debian Jessie Package
 
@@ -813,6 +1032,7 @@ jobs:
    - BuildDebianStretch
    - BuildUbuntuCosmic
    - BuildUbuntuDisco
+   - BuildUbuntuEoan
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
   pool:
     vmImage: 'ubuntu-16.04'
@@ -877,6 +1097,13 @@ jobs:
       artifactName: ubuntu-trusty
 
 
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Ubuntu:Eoan Builds'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
+      artifactName: ubuntu-eoan    
+
+
   - bash: |
        set -exv
 
@@ -897,8 +1124,8 @@ jobs:
        done
 
        # Distros that do require libssl1.1
-       DISTROS=(bionic cosmic disco buster)
-       BASE_IMAGES=(ubuntu:bionic ubuntu:cosmic ubuntu:disco debian:buster)
+       DISTROS=(bionic cosmic disco eoan buster)
+       BASE_IMAGES=(ubuntu:bionic ubuntu:cosmic ubuntu:disco ubuntu:eoan debian:buster)
 
        for i in ${!DISTROS[@]}; do
            echo "== Test debian package on ${DISTROS[$i]} =="
@@ -999,3 +1226,17 @@ jobs:
   - bash: |
       . scripts/ci/install_azdev.sh
       azdev linter --ci-exclusions
+
+- job: VerifySphinxDocumentGenerator
+  displayName: "Verify Sphinx Document Generator"
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+    - task: UsePythonVersion@0
+      displayName: 'Use Python 3.6'
+      inputs:
+        versionSpec: 3.6
+    - bash: pip install --upgrade pip wheel
+      displayName: "Install pip and wheel"
+    - bash: ./scripts/ci/test_ref_doc.sh
+      displayName: "Verify Sphinx Document Generator"

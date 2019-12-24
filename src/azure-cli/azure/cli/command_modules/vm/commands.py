@@ -12,11 +12,13 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set, c
                                                           cf_rolling_upgrade_commands, cf_galleries,
                                                           cf_gallery_images, cf_gallery_image_versions,
                                                           cf_proximity_placement_groups,
-                                                          cf_dedicated_hosts, cf_dedicated_host_groups)
+                                                          cf_dedicated_hosts, cf_dedicated_host_groups,
+                                                          cf_log_analytics_data_plane,
+                                                          cf_disk_encryption_set)
 from azure.cli.command_modules.vm._format import (
     transform_ip_addresses, transform_vm, transform_vm_create_output, transform_vm_usage_list, transform_vm_list,
     transform_sku_for_table_output, transform_disk_show_table_output, transform_extension_show_table_output,
-    get_vmss_table_output_transformer, transform_vm_encryption_show_table_output)
+    get_vmss_table_output_transformer, transform_vm_encryption_show_table_output, transform_log_analytics_query_output)
 from azure.cli.command_modules.vm._validators import (
     process_vm_create_namespace, process_vmss_create_namespace, process_image_create_namespace,
     process_disk_or_snapshot_create_namespace, process_disk_encryption_namespace, process_assign_identity_namespace,
@@ -166,6 +168,16 @@ def load_command_table(self, _):
         client_factory=cf_img_bldr_image_templates,
     )
 
+    log_analytics_data_plane_sdk = CliCommandType(
+        operations_tmpl="custom#{}",
+        client_factory=cf_log_analytics_data_plane,
+    )
+
+    compute_disk_encryption_set_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations#DiskEncryptionSetsOperations.{}',
+        client_factory=cf_disk_encryption_set
+    )
+
     with self.command_group('disk', compute_disk_sdk, operation_group='disks', min_api='2017-03-30') as g:
         g.custom_command('create', 'create_managed_disk', supports_no_wait=True, table_transformer=transform_disk_show_table_output, validator=process_disk_or_snapshot_create_namespace)
         g.command('delete', 'delete', supports_no_wait=True, confirmation=True)
@@ -175,6 +187,13 @@ def load_command_table(self, _):
         g.show_command('show', 'get', table_transformer=transform_disk_show_table_output)
         g.generic_update_command('update', custom_func_name='update_managed_disk', setter_arg_name='disk', supports_no_wait=True)
         g.wait_command('wait')
+
+    with self.command_group('disk-encryption-set', compute_disk_encryption_set_sdk, client_factory=cf_disk_encryption_set, min_api='2019-07-01', is_preview=True) as g:
+        g.custom_command('create', 'create_disk_encryption_set', supports_no_wait=True)
+        g.command('delete', 'delete')
+        g.generic_update_command('update', custom_func_name='update_disk_encryption_set', setter_arg_name='disk_encryption_set')
+        g.show_command('show', 'get')
+        g.custom_command('list', 'list_disk_encryption_sets')
 
     with self.command_group('image', compute_image_sdk, min_api='2016-04-30-preview') as g:
         g.custom_command('create', 'create_image', validator=process_image_create_namespace)
@@ -435,3 +454,6 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_proximity_placement_groups')
         g.generic_update_command('update')
         g.command('delete', 'delete')
+
+    with self.command_group('vm monitor log', log_analytics_data_plane_sdk, client_factory=cf_log_analytics_data_plane) as g:
+        g.custom_command('show', 'execute_query_for_vm', transform=transform_log_analytics_query_output)

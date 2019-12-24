@@ -364,75 +364,70 @@ class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
     def test_network_app_gateway_with_identity(self, resource_group):
 
         self.kwargs.update({
-            'emsi': 'id1',
-            'emsi2': 'id2',
-            'ip': 'pubip1',
-            'kv': self.create_random_name('cli-test-kevault-', 24),
-            'loc': 'westus',
-            'sec': 'secret1',
-            'sec_value': "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tDQpNSUlFdmdJQkFEQU5CZ2txaGtpRzl3MEJBUUVGQUFTQ0JLZ3dnZ1NrQWdFQUFvSUJBUUNybWp0MlJCSFRBbllkDQprOWE3ZHgvTU1EK3hjSGkvdk9zcEwzN1lJREdGbEMrZnU3d2RiRzZpUGVWRm5xMkRKOHhSUm1TUkdabUc0SWJYDQpFYzIxcy85WWJPTmVaSXhhOWlSc0ZKdERNRU5EY2VQZ0lNQ2pqcGczb01vcHNaSUhHdk1pVzI4TG54RzZvVXJ6DQovVzUwazNTMGUzT0NvcTZuNlBmdElsbGhuRlFKUmV6d01pRHpUeHIvOHBJaGFOaitnNG5pd0QraEErSDhqU2tmDQpmT3BVWXQ0UndoWUo1ZDBlMit1R0tSUkJUNFZ4YnlGVGw3MzFPd3VacUxYa1hncjlXTUNONkN2VHJlSC9JQWpIDQpaRHN2cU9veTZ2SGE3bk5tRUNZT2VQbnlhTkVpSjJ3Mjh3NGl3Q3N0Z2RRNEVaWk5KUGh5R3IzZDdrWUNXcnZODQpYR3RPZUhYekFnTUJBQUVDZ2dFQUZtRmhJVVdJeFpVV21UanZmVGViY0ExWU5wTjM5c1IwTHhwQXJYNEFETVNNDQozdHBQUGM4bk1Wc1NqSWZyWi9yeXpNN1BlRC9NZVg0akFwTVIyZGJiUUo4WVJhRlF6NG1MLzludGZmcDNhMVBEDQo1K0ZJVStIWnZHSStFT2lySmo0VTQ3QTZjQVkrVVFia09FOTBtUmo2S1pKeTR1REdGL2xzWWEyNTFvbmE4L0p4DQo1QjFpNTNmNzdFSHhBbXJ5Tkxac0h3VzA2ZkNBMTdCTmd1TEZ2VjVCM0Zoa081QzhSb05XdkhSZ01NZzFFQURZDQpZODVjempnNnk2UlhSVjdvT3QyT3ZyNmJRNnEzMURVSU5zZ3lrczZ1djY5Y3lKbjh0TWt6Z1RRYm9seTRKTUJwDQp6V2tEYjlzZHMwVHRrN3NBQ1pKWU5GWk95UTlXaDh3NkpSY2VoeTBHQVFLQmdRREI1OE5qTTMxbFdxbGFXNEVjDQpFZFRMNnkwRXVmVmEzVlFhd0tJTVIreFZWWHFsUGxiYXdQNEY2bzNETTNIZThEbzVZVVRuUjFMM2tua1U3TGZTDQpwTFhhTlk1c2V3V0crMmxFd0NmQXpMVGpyOE9acUlFSXd3N0c0QjczdTVnQ2dJU0dsSWE5djBxQVp0bUVqL3pnDQpQUEZwaXhyOE5UNVo4eFZSdERkNlE5c21nUUtCZ1FEaWpoaFArOVdGaEhHblRLQWpBZDUxY1ZjcnFIOHpFdmYzDQppRWRLYlRsdi8zc3l4emQ2UmNJR2NLOExmbGx1bHhMVWhOY3ovU0FpeElxU2V0UW9IcU5LYzZwTGh6T3BmM3dyDQpVd29ldWcxNkhKUWh5WTVzVkswNG5MamVMZHdYN1ZEQlVjQkFPcHd0WHNUZy81UjlEMFYrMlNWN0hSZXZKVUNhDQpvNWxtNWpVcWN3S0JnUUNla1FHRjZRQmRWdU53d2ExMkg5ck5teGJvYTQySjdiNnVWZUx1ZWc1NHhmc1NrRVVFDQpoSmYyakpXN0VDSEpkdGVXUHNYUy84K0lKeDZmRHVsUDkyUEMrdExxUVR3RzR5ZDFrbEd2NTNieFRyVjh2WUF2DQpneHRkWkwvT1JIa05hcjExTkpadktyUXBCbkpRWmxNYnFKcWVmYVBtcFQvRTNQVU5LSHZKbngzaWdRS0JnUUNsDQpQVzZPSitmOGtqVXpDTGhqMENFcEY1bTB4aGpBYjcxY1ZaRnB2M0I5TjZIcnoxR3ZaT0czUU1qcllTUnBmTmJIDQpHbnk3OW90UjBIZ2hqbVRmUGpsclBDR2hKT09SWk9KejF3VXlsQkR3VjVmVGJPYnNMSGFMTEFQS1NUaVdXd2pqDQpkM1Q1WThZMWNVRzN1YkhiNVIrUy9WNVJCVThZOTlxKzcwUWJ3UnhWOFFLQmdHSW1yY1pXSkpJa2lkYVMrR2dYDQpYRmlVOTA4QTJpRlQ3Kzkva3B3Q08rRVVYZjljWS80WFZoNkVLa2RQaXhUN2gwT2duamVnMWQwbjcrWkl5bUlQDQpkUGVLeGNvcGlzdm9zOXd2eSs0ZmV0YmZQeG5vbXlIUlpzMnhZQUs0VzZTMmVPZ2F3aUN0aDc1bmlxNmxZeTVvDQpJTjNmWitjNHJqYUt6UUo0Vm5hOWlNUE4NCi0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0NCi0tLS0tQkVHSU4gQ0VSVElGSUNBVEUtLS0tLQ0KTUlJRThUQ0NBOW1nQXdJQkFnSVRWZ0JmMFR5b2dRbGg1eUk5c0FBQUFGL1JQREFOQmdrcWhraUc5dzBCQVFzRg0KQURBVk1STXdFUVlEVlFRREV3cE5VMGxVSUVOQklGb3lNQjRYRFRFNE1EWXhPVEF4TVRZeE4xb1hEVEU1TURZeA0KT1RBeE1UWXhOMW93R1RFWE1CVUdBMVVFQXhNT2EyVjVkbUYxYkhRdGRHVnpkSE13Z2dFaU1BMEdDU3FHU0liMw0KRFFFQkFRVUFBNElCRHdBd2dnRUtBb0lCQVFDcm1qdDJSQkhUQW5ZZGs5YTdkeC9NTUQreGNIaS92T3NwTDM3WQ0KSURHRmxDK2Z1N3dkYkc2aVBlVkZucTJESjh4UlJtU1JHWm1HNEliWEVjMjFzLzlZYk9OZVpJeGE5aVJzRkp0RA0KTUVORGNlUGdJTUNqanBnM29Nb3BzWklIR3ZNaVcyOExueEc2b1Vyei9XNTBrM1MwZTNPQ29xNm42UGZ0SWxsaA0KbkZRSlJlendNaUR6VHhyLzhwSWhhTmorZzRuaXdEK2hBK0g4alNrZmZPcFVZdDRSd2hZSjVkMGUyK3VHS1JSQg0KVDRWeGJ5RlRsNzMxT3d1WnFMWGtYZ3I5V01DTjZDdlRyZUgvSUFqSFpEc3ZxT295NnZIYTduTm1FQ1lPZVBueQ0KYU5FaUoydzI4dzRpd0NzdGdkUTRFWlpOSlBoeUdyM2Q3a1lDV3J2TlhHdE9lSFh6QWdNQkFBR2pnZ0kwTUlJQw0KTURBbkJna3JCZ0VFQVlJM0ZRb0VHakFZTUFvR0NDc0dBUVVGQndNQk1Bb0dDQ3NHQVFVRkJ3TUNNRDRHQ1NzRw0KQVFRQmdqY1ZCd1F4TUM4R0p5c0dBUVFCZ2pjVkNJZmFobldEN3RrQmdzbUZHNEcxbm1HRjlPdGdnVjJGM3Vscg0KZ2RTRlp3SUJaQUlCRkRDQmhRWUlLd1lCQlFVSEFRRUVlVEIzTURFR0NDc0dBUVVGQnpBQ2hpVm9kSFJ3T2k4dg0KWTI5eWNIQnJhUzloYVdFdlRWTkpWQ1V5TUVOQkpUSXdXakl1WTNKME1FSUdDQ3NHQVFVRkJ6QUNoalpvZEhSdw0KT2k4dmQzZDNMbTFwWTNKdmMyOW1kQzVqYjIwdmNHdHBMMjF6WTI5eWNDOU5VMGxVSlRJd1EwRWxNakJhTWk1ag0KY25Rd0hRWURWUjBPQkJZRUZHaktXQzNiSmNtcTRvK0pTQlJVSFI1SjdGWUJNQXNHQTFVZER3UUVBd0lGb0RBWg0KQmdOVkhSRUVFakFRZ2c1clpYbDJZWFZzZEMxMFpYTjBjekNCdFFZRFZSMGZCSUd0TUlHcU1JR25vSUdrb0lHaA0KaGlWb2RIUndPaTh2WTI5eWNIQnJhUzlqY213dlRWTkpWQ1V5TUVOQkpUSXdXakl1WTNKc2hqeG9kSFJ3T2k4dg0KYlhOamNtd3ViV2xqY205emIyWjBMbU52YlM5d2Eya3ZiWE5qYjNKd0wyTnliQzlOVTBsVUpUSXdRMEVsTWpCYQ0KTWk1amNteUdPbWgwZEhBNkx5OWpjbXd1YldsamNtOXpiMlowTG1OdmJTOXdhMmt2YlhOamIzSndMMk55YkM5Tg0KVTBsVUpUSXdRMEVsTWpCYU1pNWpjbXd3SHdZRFZSMGpCQmd3Rm9BVVljdTdobUZCWXpMVlcyYkdqcmVjVFFCdg0KQlBrd0hRWURWUjBsQkJZd0ZBWUlLd1lCQlFVSEF3RUdDQ3NHQVFVRkJ3TUNNQTBHQ1NxR1NJYjNEUUVCQ3dVQQ0KQTRJQkFRQmdLb0hZdlZPdHZDYXpwc1RWZVoxVENFbTdBVnA5cUtRUVd5YXNUbTdwT3FVQkplM2twMkhuSFNVWA0KemU4YzMvK2FZcmdaS25uOS9VWGFxdHk3QXFadWxNcjloWFJQVWhCeFpqV0J1Q1NTV1dvS2MxckdUcDlmY3lKdw0KZ0M5VTcxQnAwQzYyTnlQRnhqZkcvOFNwYlR5a09lejNJdHY5R1JPelIxUVhpU01tdE1LSzlvMVl3SUZDVmRXRw0KR0U3VnhsbitvUlFYckVqUHdIcFBEam5CWGJIelh3SXZUVVNsL0VrZExqRW5teDI2ZHMxL0RMaHdMWVJCSERpTA0KUzFNWXcrdHZacmNXNnMvOVdLOGNkc0VWUXFCMVBPMXlpVHlRdFRxUXNjblhxMzd6S0ZJUTArL2w3R1pBMEhJOA0KYlB4K3ExSUNJWXpVcUYzN3Y0UTZWZVdUbHZMaQ0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ0K",
-            'sec2': 'secret2'
+            'rg': resource_group,
+            'gw': 'gateway',
+            'one_off_identity': 'id1',
+            'access_identity': 'id2',
+            'ip': 'ip1',
+            'kv': self.create_random_name('cli-test-keyvault-', 24),
+            'cert': 'MyCertificate'
         })
 
         # create a managed identity
-        emsi_result = self.cmd('identity create -g {rg} -n {emsi}').get_output_in_json()
-        emsi2_result = self.cmd('identity create -g {rg} -n {emsi2}').get_output_in_json()
-
-        emsi_id = emsi_result['principalId']
-        emsi2_id = emsi2_result['principalId']
-
+        self.cmd('identity create -g {rg} -n {one_off_identity}').get_output_in_json()
+        access_identity_result = self.cmd('identity create -g {rg} -n {access_identity}').get_output_in_json()
         self.kwargs.update({
-            'emsi_id': emsi_id,
-            'emsi2_id': emsi2_id
+            'access_identity_principal': access_identity_result['principalId']
+        })
+
+        self.cmd('keyvault create -g {rg} -n {kv} --sku premium')
+        self.cmd('keyvault set-policy -g {rg} -n {kv} '
+                 '--object-id {access_identity_principal} --secret-permissions get list set')
+        self.cmd('keyvault update -n {kv} --enable-soft-delete -g {rg}')
+
+        # create a certificate
+        keyvault_cert_policy = self.cmd('az keyvault certificate get-default-policy').get_output_in_json()
+        self.kwargs.update({
+            'keyvault_cert_policy': keyvault_cert_policy
+        })
+        self.cmd('keyvault certificate create '
+                 '--vault-name {kv} '
+                 '--name {cert} '
+                 '--policy "{keyvault_cert_policy}"')
+        cert_result = self.cmd('keyvault certificate show --vault-name {kv} --name {cert}').get_output_in_json()
+        self.kwargs.update({
+            'secret_id': cert_result['sid']
         })
 
         self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
 
-        self.cmd('keyvault create -g {rg} -n {kv} -l {loc} --sku premium')
-
-        self.cmd('keyvault set-policy -n {kv} -g {rg} --object-id {emsi_id} --secret-permissions get list set')
-        self.cmd('keyvault set-policy -n {kv} -g {rg} --object-id {emsi2_id} --secret-permissions get list set')
-
-        self.cmd('keyvault update -n {kv} --enable-soft-delete -g {rg}')
-
-        # create a secret
-        secret = self.cmd('keyvault secret set --vault-name {kv} -n {sec} --value {sec_value}',
-                          checks=self.check('value', self.kwargs['sec_value'])).get_output_in_json()
-        first_sid = secret['id']
-        first_version = first_sid.rsplit('/', 1)[1]
-        self.kwargs.update({
-            'sid1': first_sid,
-            'ver1': first_version
-        })
-
-        secret = self.cmd('keyvault secret set --vault-name {kv} -n {sec2} --value {sec_value}',
-                          checks=self.check('value', self.kwargs['sec_value'])).get_output_in_json()
-        first_sid = secret['id']
-        first_version = first_sid.rsplit('/', 1)[1]
-        self.kwargs.update({
-            'sid2': first_sid,
-            'ver2': first_version
-        })
-
-        self.cmd('network application-gateway create -g {rg} -n ag1 --identity {emsi} --sku Standard_v2 --public-ip-address {ip}')
-        self.cmd('network application-gateway show -g {rg} -n ag1', checks=[
+        # create application-gateway with one_off_identity
+        self.cmd('network application-gateway create '
+                 '-g {rg} -n {gw} '
+                 '--sku Standard_v2 --public-ip-address {ip} '
+                 '--identity {one_off_identity} ')
+        self.cmd('network application-gateway show -g {rg} -n {gw}', checks=[
             self.check('identity.type', 'UserAssigned')
         ])
 
-        self.cmd('network application-gateway identity remove -g {rg} --gateway-name ag1', checks=[
+        # remove one_off_identity
+        self.cmd('network application-gateway identity remove -g {rg} --gateway-name {gw}', checks=[
             self.check('identity', None)
         ])
-        self.cmd('network application-gateway identity assign -g {rg} --gateway-name ag1 --identity {emsi2}', checks=[
-            self.check('identity.type', 'UserAssigned')
-        ])
-        self.cmd('network application-gateway identity show -g {rg} --gateway-name ag1', checks=[
+        # assign access_identity
+        self.cmd('network application-gateway identity assign '
+                 '-g {rg} --gateway-name {gw} --identity {access_identity}',
+                 checks=[
+                     self.check('identity.type', 'UserAssigned')
+                 ])
+        self.cmd('network application-gateway identity show -g {rg} --gateway-name {gw}', checks=[
             self.check('type', 'UserAssigned')
         ])
 
-        # There is a validation by the backend server to check the effectiveness of the certificate.
-        # Since we cannot create a real certificate, so here we just check that the communication between the CLI and the backend server works.
-        with self.assertRaisesRegexp(CLIError, '^Deployment failed'):
-            self.cmd('network application-gateway ssl-cert create --gateway-name ag1 --name ssl-cert1 -g {rg} --key-vault-secret-id {sid2}')
+        self.cmd('network application-gateway ssl-cert create '
+                 ' -g {rg} --gateway-name {gw} '
+                 '--name MySSLCert '
+                 '--key-vault-secret-id {secret_id}')
 
 
 class NetworkAppGatewayZoneScenario(ScenarioTest):
@@ -786,13 +781,29 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
     def test_network_ag_probe(self, resource_group):
 
         self.kwargs.update({
+            'rg': resource_group,
+            'gateway_ip': 'gateway_ip',
             'ag': 'ag1',
             'res': 'application-gateway probe',
             'name': 'myprobe'
         })
-        self._create_ag()
 
-        self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name} --no-wait --path /test --protocol http --interval 25 --timeout 100 --threshold 10 --min-servers 2 --host www.test.com --match-status-codes 200 204 --host-name-from-http-settings false')
+        self.cmd('network public-ip create -g {rg} -n {gateway_ip} --sku Standard')
+        self.cmd('network application-gateway create -g {rg} -n {ag} '
+                 '--sku WAF_v2 '
+                 '--public-ip-address {gateway_ip} ')
+
+        self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name} --no-wait '
+                 '--path /test '
+                 '--protocol http '
+                 '--interval 25 '
+                 '--timeout 100 '
+                 '--threshold 10 '
+                 '--min-servers 2 '
+                 '--host www.test.com '
+                 '--match-status-codes 200 204 '
+                 '--host-name-from-http-settings false '
+                 '--port 2048 ')
         self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}', checks=[
             self.check('path', '/test'),
             self.check('protocol', 'Http'),
@@ -802,9 +813,20 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
             self.check('minServers', 2),
             self.check('host', 'www.test.com'),
             self.check('length(match.statusCodes)', 2),
-            self.check('pickHostNameFromBackendHttpSettings', False)
+            self.check('pickHostNameFromBackendHttpSettings', False),
+            self.check('port', 2048)
         ])
-        self.cmd('network {res} update -g {rg} --gateway-name {ag} -n {name} --no-wait --path /test2 --protocol https --interval 26 --timeout 101 --threshold 11 --min-servers 3 --host "" --match-status-codes 201 --host-name-from-http-settings')
+        self.cmd('network {res} update -g {rg} --gateway-name {ag} -n {name} --no-wait '
+                 '--path /test2 '
+                 '--protocol https '
+                 '--interval 26 '
+                 '--timeout 101 '
+                 '--threshold 11 '
+                 '--min-servers 3 '
+                 '--host "" '
+                 '--match-status-codes 201 '
+                 '--host-name-from-http-settings '
+                 '--port 4096 ')
         self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}', checks=[
             self.check('path', '/test2'),
             self.check('protocol', 'Https'),
@@ -814,7 +836,8 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
             self.check('minServers', 3),
             self.check('host', ''),
             self.check('length(match.statusCodes)', 1),
-            self.check('pickHostNameFromBackendHttpSettings', True)
+            self.check('pickHostNameFromBackendHttpSettings', True),
+            self.check('port', 4096)
         ])
         self.cmd('network {res} list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 1))
         self.cmd('network {res} delete -g {rg} --gateway-name {ag} --no-wait -n {name}')
@@ -824,11 +847,16 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
     def test_network_ag_rule(self, resource_group):
 
         self.kwargs.update({
+            'ip': 'pip1',
             'ag': 'ag1',
             'res': 'application-gateway rule',
-            'name': 'myrule'
+            'name': 'myrule',
+            'name2': 'myrule2',
+            'set': 'myruleset'
         })
-        self._create_ag()
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
+        self.cmd('network application-gateway create -g {rg} -n {ag} --public-ip-address {ip} --sku Standard_v2 --no-wait')
+        self.cmd('network application-gateway wait -g {rg} -n {ag} --exists')
 
         self.cmd('network application-gateway http-listener create -g {rg} --gateway-name {ag} -n mylistener --no-wait --frontend-port appGatewayFrontendPort --host-name www.test.com')
         self.cmd('network application-gateway http-listener create -g {rg} --gateway-name {ag} -n mylistener2 --no-wait --frontend-port appGatewayFrontendPort --host-name www.test2.com')
@@ -839,9 +867,47 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
         self.cmd('network {res} update -g {rg} --gateway-name {ag} -n {name} --no-wait --http-listener mylistener2')
         rule = self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}').get_output_in_json()
         self.assertTrue(rule['httpListener']['id'].endswith('mylistener2'))
-        self.cmd('network {res} list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 2))
+
+        self.cmd('network application-gateway rewrite-rule set create -g {rg} --gateway-name {ag} -n {set}')
+        self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name2} --no-wait --rewrite-rule-set {set} --http-listener mylistener')
+        rule = self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name2}').get_output_in_json()
+        self.kwargs['set_id'] = rule['rewriteRuleSet']['id']
+        self.cmd('network {res} update -g {rg} --gateway-name {ag} -n {name2} --rewrite-rule-set {set_id}', checks=[
+            self.check('rewriteRuleSet.id', '{set_id}')
+        ])
+
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 3))
         self.cmd('network {res} delete -g {rg} --gateway-name {ag} --no-wait -n {name}')
-        self.cmd('network {res} list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 1))
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 2))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_url_path_map')
+    def test_network_ag_url_path_map(self, resource_group):
+        self.kwargs.update({
+            'ip': 'pip1',
+            'ag': 'ag1',
+            'name': 'mypathmap',
+            'rulename': 'myurlrule',
+            'rulename2': 'myurlrule2',
+            'pool': 'mypool',
+            'set': 'myruleset',
+            'settings': 'http_settings',
+            'rg': resource_group
+        })
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
+        self.cmd('network application-gateway create -g {rg} -n {ag} --public-ip-address {ip} --sku Standard_v2 --no-wait')
+        self.cmd('network application-gateway wait -g {rg} -n {ag} --exists')
+
+        self.cmd('network application-gateway http-listener create -g {rg} --gateway-name {ag} -n mylistener --no-wait --frontend-port appGatewayFrontendPort --host-name www.test.com')
+
+        self.cmd('network application-gateway rewrite-rule set create -g {rg} --gateway-name {ag} -n {set}')
+        self.cmd('network application-gateway address-pool create -g {rg} --gateway-name {ag} -n {pool} --no-wait')
+        self.cmd('network application-gateway http-settings create -g {rg} --gateway-name {ag} -n {settings} --port 443 --protocol https')
+        self.cmd('network application-gateway url-path-map create -g {rg} --gateway-name {ag} -n {name} --rule-name {rulename} --paths /mypath1/* --address-pool {pool} '
+                 '--default-address-pool {pool} --http-settings {settings} --default-http-settings {settings} '
+                 '--default-rewrite-rule-set {set} --rewrite-rule-set {set}')
+        self.cmd('network application-gateway url-path-map update -g {rg} --gateway-name {ag} -n {name} --default-rewrite-rule-set {set}')
+        self.cmd('network application-gateway url-path-map rule create -g {rg} --gateway-name {ag} -n {rulename2} --path-map-name {name} '
+                 '--paths /mypath122/* --address-pool {pool} --http-settings {settings} --rewrite-rule-set {set}')
 
 
 class NetworkAppGatewayRewriteRuleset(ScenarioTest):
@@ -946,52 +1012,314 @@ class NetworkAppGatewayWafV2ConfigScenarioTest(ScenarioTest):
 
 class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy')
-    def test_network_app_gateway_waf_policy(self, resource_group):
-
+    @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_')
+    def test_network_app_gateway_waf_policy_with_application_gateway(self, resource_group):
         self.kwargs.update({
-            'wafp': 'agp1',
+            'waf': 'agp1',
+            'custom-rule1': 'rule1',
+            'custom-rule2': 'rule2',
+            'ip1': 'pip1',
+            'ag1': 'ag1',
+            'ip2': 'pip2',
+            'ag2': 'ag2',
+            'rg': resource_group,
+            'csr_grp1': 'REQUEST-921-PROTOCOL-ATTACK',
+            'csr_grp2': 'REQUEST-913-SCANNER-DETECTION'
+        })
+
+        # create a waf policy
+        self.cmd('network application-gateway waf-policy create -g {rg} -n {waf}')
+        self.cmd('network application-gateway waf-policy update -g {rg} -n {waf} --tags test=best',
+                 checks=self.check('tags.test', 'best'))
+        self.cmd('network application-gateway waf-policy show -g {rg} -n {waf}')
+        self.cmd('network application-gateway waf-policy list -g {rg}',
+                 checks=self.check('length(@)', 1))
+
+        # add two custom rules of this waf-policy
+        self.cmd('network application-gateway waf-policy custom-rule create -g {rg} '
+                 '--policy-name {waf} -n {custom-rule1} '
+                 '--priority 50 --action log --rule-type MatchRule',
+                 checks=self.check('priority', 50))
+        self.cmd('network application-gateway waf-policy custom-rule create -g {rg} '
+                 '--policy-name {waf} -n {custom-rule2} '
+                 '--priority 100 --action log --rule-type MatchRule')
+
+        # update some policy settings of this waf-policy
+        self.cmd('network application-gateway waf-policy policy-setting update -g {rg} --policy-name {waf} '
+                 '--state Enabled --file-upload-limit-in-mb 64 --mode Prevention')
+
+        # add two managed rule set to the managed rules of this waf-policy
+        self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
+                 '--type OWASP --version 3.0 '
+                 '--group-name {csr_grp1} --rules 921100 921110')
+        self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
+                 '--type OWASP --version 3.0 '
+                 '--group-name {csr_grp2} --rules 913100')
+
+        # add one exclusion rule to the managed rules of this waf-policy
+        self.cmd('network application-gateway waf-policy managed-rule exclusion add -g {rg} --policy-name {waf} '
+                 '--match-variable "RequestHeaderNames" --selector-match-operator "StartsWith" --selector "Bing"')
+
+        self.cmd('network application-gateway waf-policy show -g {rg} -n {waf}', checks=[
+            self.check('customRules | length(@)', 2),
+            self.check('customRules[0].priority', 50),
+            self.check('customRules[1].priority', 100),
+            self.check('managedRules.managedRuleSets[0].ruleSetType', 'OWASP'),
+            self.check('managedRules.managedRuleSets[0].ruleSetVersion', '3.0'),
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules | length(@)', 2),
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].ruleGroupName', self.kwargs['csr_grp1']),
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules[0].ruleId', '921100'),
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[1].ruleGroupName', self.kwargs['csr_grp2']),
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[1].rules[0].ruleId', '913100'),
+            self.check('policySettings.fileUploadLimitInMb', 64),
+            self.check('policySettings.maxRequestBodySizeInKb', 128),
+            self.check('policySettings.mode', 'Prevention'),
+            self.check('policySettings.requestBodyCheck', False),
+            self.check('policySettings.state', 'Enabled')
+        ])
+
+        # prepare two IPs
+        self.cmd('network public-ip create -g {rg} -n {ip1} --sku standard')
+        self.cmd('network public-ip create -g {rg} -n {ip2} --sku standard')
+
+        # create two application gateways and assign with the same waf-policy
+        self.cmd('network application-gateway create -g {rg} -n {ag1} '
+                 '--subnet subnet1 --vnet-name vnet1 --public-ip-address {ip1} --sku WAF_v2 --waf-policy {waf}')
+        self.cmd('network application-gateway create -g {rg} -n {ag2} '
+                 '--subnet subnet2 --vnet-name vnet2 --public-ip-address {ip2} --sku WAF_v2 --waf-policy {waf}')
+
+        self.cmd('network application-gateway show -g {rg} -n {ag1}',
+                 checks=self.check("firewallPolicy.contains(id, '{waf}')", True))
+        self.cmd('network application-gateway show -g {rg} -n {ag2}',
+                 checks=self.check("firewallPolicy.contains(id, '{waf}')", True))
+
+        # test assigned application-gateways
+        self.cmd('network application-gateway waf-policy show -g {rg} -n {waf}', checks=[
+            self.check('applicationGateways | length(@)', 2),
+            self.check("contains(applicationGateways[0].id, '{ag1}')", True),
+            self.check("contains(applicationGateways[1].id, '{ag2}')", True)
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_custom_rule_')
+    def test_network_app_gateway_waf_custom_rule(self, resource_group):
+        self.kwargs.update({
+            'waf': 'agp1',
             'rule': 'rule1',
             'ip': 'pip1',
             'ag': 'ag1',
             'rg': resource_group
         })
-        self.cmd('network application-gateway waf-policy create -g {rg} -n {wafp}')
-        self.cmd('network application-gateway waf-policy update -g {rg} -n {wafp} --tags test=best',
-                 checks=self.check('tags.test', 'best'))
-        self.cmd('network application-gateway waf-policy show -g {rg} -n {wafp}')
-        self.cmd('network application-gateway waf-policy list -g {rg}',
-                 checks=self.check('length(@)', 1))
 
-        self.cmd('network application-gateway waf-policy rule create -g {rg} --policy-name {wafp} -n {rule} --priority 50 --action log --rule-type matchrule',
-                 checks=self.check('priority', 50))
-        self.cmd('network application-gateway waf-policy rule create -g {rg} --policy-name {wafp} -n rule2 --priority 100 --action log --rule-type matchrule')
-        self.cmd('network application-gateway waf-policy rule update -g {rg} --policy-name {wafp} -n {rule} --priority 75',
-                 checks=self.check('priority', 75))
-        self.cmd('network application-gateway waf-policy rule show -g {rg} --policy-name {wafp} -n {rule}')
-        self.cmd('network application-gateway waf-policy rule list -g {rg} --policy-name {wafp}',
-                 checks=self.check('length(@)', 2))
-        self.cmd('network application-gateway waf-policy rule delete -g {rg} --policy-name {wafp} -n rule2')
-        self.cmd('network application-gateway waf-policy rule list -g {rg} --policy-name {wafp}',
-                 checks=self.check('length(@)', 1))
-
-        self.cmd('network application-gateway waf-policy rule match-condition add -g {rg} --policy-name {wafp} -n {rule} --match-variables RequestHeaders.value --operator contains --values foo boo --transform lowercase')
-        self.cmd('network application-gateway waf-policy rule match-condition add -g {rg} --policy-name {wafp} -n {rule} --match-variables RequestHeaders.value --operator contains --values remove this --transform lowercase')
-        self.cmd('network application-gateway waf-policy rule match-condition remove -g {rg} --policy-name {wafp} -n {rule} --index 1')
-        self.cmd('network application-gateway waf-policy rule match-condition list -g {rg} --policy-name {wafp} -n {rule}', checks=[
-            self.check('length(@)', 1),
-            self.check('@[0].matchValues[0]', 'foo')
+        # create a waf-policy with empty custom rule
+        self.cmd('network application-gateway waf-policy create -g {rg} -n {waf}')
+        self.cmd('network application-gateway waf-policy show -g {rg} -n {waf}', checks=[
+            self.check('customRules | length(@)', 0)
         ])
 
-        self.cmd('network public-ip create -g {rg} -n {ip} --sku standard')
-        self.cmd('network application-gateway create -g {rg} -n {ag} --subnet subnet1 --vnet-name vnet1 --public-ip-address {ip} --sku WAF_v2 --waf-policy {wafp}')
-        self.cmd('network application-gateway show -g {rg} -n {ag}',
-                 checks=self.check("firewallPolicy.contains(id, '{wafp}')", True))
-        self.cmd('network application-gateway delete -g {rg} -n {ag}')
+        # create a custom rule
+        self.cmd('network application-gateway waf-policy custom-rule create -g {rg} '
+                 '--policy-name {waf} -n {rule} '
+                 '--priority 50 --action LOG --rule-type MatchRule',
+                 checks=[
+                     self.check('priority', 50),
+                     self.check('ruleType', 'MatchRule'),
+                     self.check('action', 'Log'),
+                     self.check('matchConditions | length(@)', 0)
+                 ])
+        self.cmd('network application-gateway waf-policy show -g {rg} -n {waf}', checks=[
+            self.check('customRules | length(@)', 1)
+        ])
+        self.cmd('network application-gateway waf-policy custom-rule show -g {rg} '
+                 '--policy-name {waf} -n {rule}',
+                 checks=[
+                     self.check('priority', 50),
+                     self.check('ruleType', 'MatchRule'),
+                     self.check('action', 'Log'),
+                     self.check('matchConditions | length(@)', 0)
+                 ])
 
-        self.cmd('network application-gateway waf-policy delete -g {rg} -n {wafp}')
-        self.cmd('network application-gateway waf-policy list -g {rg}',
-                 checks=self.is_empty())
+        # add match condition to the previous created custom rule
+        self.cmd('network application-gateway waf-policy custom-rule match-condition add -g {rg} '
+                 '--policy-name {waf} -n {rule} '
+                 '--match-variables RequestHeaders.value --operator contains --values foo boo --transform lowercase')
+        self.cmd('network application-gateway waf-policy custom-rule show -g {rg} '
+                 '--policy-name {waf} -n {rule}',
+                 checks=[
+                     self.check('priority', 50),
+                     self.check('ruleType', 'MatchRule'),
+                     self.check('action', 'Log'),
+                     self.check('matchConditions | length(@)', 1)
+                 ])
+
+        # update one of properties
+        self.cmd('network application-gateway waf-policy custom-rule update -g {rg} '
+                 '--policy-name {waf} -n {rule} '
+                 '--priority 75',
+                 checks=self.check('priority', 75))
+
+        # add another match condition to the same custom rule
+        self.cmd('network application-gateway waf-policy custom-rule match-condition add -g {rg} '
+                 '--policy-name {waf} -n {rule} '
+                 '--match-variables RequestHeaders.value --operator contains '
+                 '--values remove this --transform lowercase')
+        self.cmd('network application-gateway waf-policy custom-rule show -g {rg} '
+                 '--policy-name {waf} -n {rule}',
+                 checks=[
+                     self.check('priority', 75),
+                     self.check('ruleType', 'MatchRule'),
+                     self.check('action', 'Log'),
+                     self.check('matchConditions | length(@)', 2)
+                 ])
+
+        # remove one of match condition of custom rule
+        self.cmd('network application-gateway waf-policy custom-rule match-condition remove -g {rg} '
+                 '--policy-name {waf} -n {rule} '
+                 '--index 0')
+        self.cmd('network application-gateway waf-policy custom-rule show -g {rg} '
+                 '--policy-name {waf} -n {rule}',
+                 checks=[
+                     self.check('priority', 75),
+                     self.check('ruleType', 'MatchRule'),
+                     self.check('action', 'Log'),
+                     self.check('matchConditions | length(@)', 1)
+                 ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_setting_')
+    def test_network_app_gateway_waf_policy_setting(self, resource_group):
+        self.kwargs.update({
+            'waf': 'agp1',
+            'ag': 'ag1',
+            'rg': resource_group,
+        })
+
+        # check default policy setting values
+        self.cmd('network application-gateway waf-policy create -g {rg} -n {waf}', checks=[
+            self.check('policySettings.fileUploadLimitInMb', 100),
+            self.check('policySettings.maxRequestBodySizeInKb', 128),
+            self.check('policySettings.mode', 'Detection'),
+            self.check('policySettings.requestBodyCheck', True),
+            self.check('policySettings.state', 'Disabled')
+        ])
+
+        # randomly update some properties
+        self.cmd('network application-gateway waf-policy policy-setting update -g {rg} --policy-name {waf} '
+                 '--state Enabled --file-upload-limit-in-mb 64 --mode Prevention',
+                 checks=[
+                     self.check('policySettings.fileUploadLimitInMb', 64),
+                     self.check('policySettings.maxRequestBodySizeInKb', 128),
+                     self.check('policySettings.mode', 'Prevention'),
+                     self.check('policySettings.requestBodyCheck', False),
+                     self.check('policySettings.state', 'Enabled')
+                 ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_managed_rules_')
+    def test_network_app_gateway_waf_policy_managed_rules(self, resource_group):
+        self.kwargs.update({
+            'waf': 'agp1',
+            'ip': 'pip1',
+            'ag': 'ag1',
+            'rg': resource_group,
+            'csr_grp1': 'REQUEST-921-PROTOCOL-ATTACK',
+            'csr_grp2': 'REQUEST-913-SCANNER-DETECTION'
+        })
+        self.cmd('network application-gateway waf-policy create -g {rg} -n {waf}')
+
+        # case 1: Initialize(add) managed rule set
+        self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
+                 '--type OWASP --version 3.0 '
+                 '--group-name {csr_grp1} --rules 921100 921110')
+        self.cmd('network application-gateway waf-policy show -g {rg} -n {waf}', checks=[
+            self.check('managedRules.managedRuleSets[0].ruleSetType', 'OWASP'),
+            self.check('managedRules.managedRuleSets[0].ruleSetVersion', '3.0'),
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules | length(@)', 2),
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].ruleGroupName', self.kwargs['csr_grp1']),
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules[0].ruleId', '921100')
+        ])
+
+        # case 2: Append(add) another managed rule set to same rule group
+        self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
+                 '--type OWASP --version 3.0 '
+                 '--group-name {csr_grp1} --rules 921150')
+        self.cmd('network application-gateway waf-policy managed-rule rule-set list -g {rg} --policy-name {waf}',
+                 checks=[
+                     self.check('managedRuleSets[0].ruleSetType', 'OWASP'),
+                     self.check('managedRuleSets[0].ruleSetVersion', '3.0'),
+                     self.check('managedRuleSets[0].ruleGroupOverrides[0].rules | length(@)', 3),
+                     self.check('managedRuleSets[0].ruleGroupOverrides[0].ruleGroupName', self.kwargs['csr_grp1']),
+                     self.check('managedRuleSets[0].ruleGroupOverrides[0].rules[2].ruleId', '921150')
+                 ])
+
+        # # case 3: Add another managed rule set of different rule group
+        self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
+                 '--type OWASP --version 3.0 '
+                 '--group-name {csr_grp2} --rules 913100')
+        self.cmd('network application-gateway waf-policy managed-rule rule-set list -g {rg} --policy-name {waf}',
+                 checks=[
+                     self.check('managedRuleSets[0].ruleSetType', 'OWASP'),
+                     self.check('managedRuleSets[0].ruleSetVersion', '3.0'),
+                     self.check('managedRuleSets[0].ruleGroupOverrides[1].rules | length(@)', 1),
+                     self.check('managedRuleSets[0].ruleGroupOverrides[1].ruleGroupName', self.kwargs['csr_grp2']),
+                     self.check('managedRuleSets[0].ruleGroupOverrides[1].rules[0].ruleId', '913100')
+                 ])
+
+        # case 4: override(update) existing managed rule set
+        self.cmd('network application-gateway waf-policy managed-rule rule-set update -g {rg} --policy-name {waf} '
+                 '--type OWASP --version 3.0 '
+                 '--group-name {csr_grp1} --rules 921100 921150')
+        self.cmd('network application-gateway waf-policy managed-rule rule-set list -g {rg} --policy-name {waf}',
+                 checks=[
+                     self.check('managedRuleSets[0].ruleSetType', 'OWASP'),
+                     self.check('managedRuleSets[0].ruleSetVersion', '3.0'),
+                     self.check('managedRuleSets[0].ruleGroupOverrides[0].rules | length(@)', 2),
+                     self.check('managedRuleSets[0].ruleGroupOverrides[0].ruleGroupName', self.kwargs['csr_grp1']),
+                     self.check('managedRuleSets[0].ruleGroupOverrides[0].rules[0].ruleId', '921100'),
+                     self.check('managedRuleSets[0].ruleGroupOverrides[0].rules[1].ruleId', '921150')
+                 ])
+
+        # # case 5: clear manage rule set by group {csr_grp1}
+        self.cmd('network application-gateway waf-policy managed-rule rule-set remove -g {rg} --policy-name {waf} '
+                 '--type OWASP --version 3.0 '
+                 '--group-name {csr_grp1} ')
+        self.cmd('network application-gateway waf-policy managed-rule rule-set list -g {rg} --policy-name {waf}',
+                 checks=[
+                     self.check('managedRuleSets[0].ruleSetType', 'OWASP'),
+                     self.check('managedRuleSets[0].ruleSetVersion', '3.0'),
+                     self.check('managedRuleSets[0].ruleGroupOverrides[0].ruleGroupName', self.kwargs['csr_grp2'])
+                 ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_managed_rules_exclusion')
+    def test_network_app_gateway_waf_policy_managed_rules_exclusions(self, resource_group):
+        self.kwargs.update({
+            'waf': 'agp1',
+            'ip': 'pip1',
+            'ag': 'ag1',
+            'rg': resource_group
+        })
+
+        self.cmd('network application-gateway waf-policy create -g {rg} -n {waf}')
+
+        # add one exclusion rule
+        self.cmd('network application-gateway waf-policy managed-rule exclusion add -g {rg} --policy-name {waf} '
+                 '--match-variable "RequestHeaderNames" --selector-match-operator "StartsWith" --selector "Bing"')
+        self.cmd('network application-gateway waf-policy managed-rule exclusion list -g {rg} --policy-name {waf}',
+                 checks=[
+                     self.check('exclusions | length(@)', 1)
+                 ])
+
+        # add another exclusion rule
+        self.cmd('network application-gateway waf-policy managed-rule exclusion add -g {rg} --policy-name {waf} '
+                 '--match-variable "RequestHeaderNames" --selector-match-operator "Contains" --selector "Azure"')
+        self.cmd('network application-gateway waf-policy managed-rule exclusion list -g {rg} --policy-name {waf}',
+                 checks=[
+                     self.check('exclusions | length(@)', 2)
+                 ])
+
+        # clear all exclusion rules
+        self.cmd('network application-gateway waf-policy managed-rule exclusion remove  -g {rg} --policy-name {waf} ')
+        self.cmd('network application-gateway waf-policy managed-rule exclusion list -g {rg} --policy-name {waf}',
+                 checks=[
+                     self.check('exclusions | length(@)', 0)
+                 ])
 
 
 class NetworkDdosProtectionScenarioTest(LiveScenarioTest):
@@ -1217,6 +1545,9 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
         self.cmd('network express-route delete --resource-group {rg} --name {er}')
         # Expecting no results as we just deleted the only express route in the resource group
         self.cmd('network express-route list --resource-group {rg}', checks=self.is_empty())
+
+        with self.assertRaisesRegexp(CLIError, 'Please provide a complete resource ID'):
+            self.cmd('network express-route gateway connection show --ids /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myrg/providers/Microsoft.Network/expressRouteGateways/aaa')
 
 
 class NetworkExpressRoutePortScenarioTest(ScenarioTest):
@@ -3009,6 +3340,17 @@ class NetworkProfileScenarioTest(ScenarioTest):
         with self.assertRaisesRegexp(SystemExit, '3'):
             self.cmd('network profile show -g {rg} -n dummy')
         self.cmd('network profile delete -g {rg} -n dummy -y')
+
+
+class NetworkServiceAliasesScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='test_network_service_aliases')
+    def test_network_service_aliases(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group
+        })
+        self.cmd('network list-service-aliases -l centralus')
+        self.cmd('network list-service-aliases -l centralus -g {rg}')
 
 
 if __name__ == '__main__':

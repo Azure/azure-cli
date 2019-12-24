@@ -210,7 +210,7 @@ class Profile(object):
 
         if not allow_no_subscriptions and not subscriptions:
             raise CLIError("No subscriptions were found for '{}'. If this is expected, use "
-                           "'--allow-no-subscriptions' to have tenant level accesses".format(
+                           "'--allow-no-subscriptions' to have tenant level access".format(
                                username))
 
         if is_service_principal:
@@ -223,7 +223,8 @@ class Profile(object):
             t_list = [s.tenant_id for s in subscriptions]
             bare_tenants = [t for t in subscription_finder.tenants if t not in t_list]
             profile = Profile(cli_ctx=self.cli_ctx)
-            subscriptions = profile._build_tenant_level_accounts(bare_tenants)  # pylint: disable=protected-access
+            tenant_accounts = profile._build_tenant_level_accounts(bare_tenants)  # pylint: disable=protected-access
+            subscriptions.extend(tenant_accounts)
             if not subscriptions:
                 return []
 
@@ -342,13 +343,12 @@ class Profile(object):
             if allow_no_subscriptions:
                 subscriptions = self._build_tenant_level_accounts([tenant])
             else:
-                raise CLIError('No access was configured for the VM, hence no subscriptions were found')
+                raise CLIError('No access was configured for the VM, hence no subscriptions were found. '
+                               "If this is expected, use '--allow-no-subscriptions' to have tenant level access.")
 
         consolidated = self._normalize_properties(user, subscriptions, is_service_principal=True,
                                                   user_assigned_identity_id=base_name)
-
-        # key-off subscription name to allow accounts with same id(but under different identities)
-        self._set_subscriptions(consolidated, secondary_key_name=_SUBSCRIPTION_NAME)
+        self._set_subscriptions(consolidated)
         return deepcopy(consolidated)
 
     def find_subscriptions_in_cloud_console(self):
@@ -755,11 +755,13 @@ class SubscriptionFinder(object):
                 return arm_client_factory(credentials)
             from azure.cli.core.profiles._shared import get_client_class
             from azure.cli.core.profiles import ResourceType, get_api_version
-            from azure.cli.core._debug import change_ssl_cert_verification
+            from azure.cli.core.commands.client_factory import configure_common_settings
             client_type = get_client_class(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
             api_version = get_api_version(cli_ctx, ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
-            return change_ssl_cert_verification(client_type(credentials, api_version=api_version,
-                                                            base_url=self.cli_ctx.cloud.endpoints.resource_manager))
+            client = client_type(credentials, api_version=api_version,
+                                 base_url=self.cli_ctx.cloud.endpoints.resource_manager)
+            configure_common_settings(cli_ctx, client)
+            return client
 
         self._arm_client_factory = create_arm_client_factory
         self.tenants = []
