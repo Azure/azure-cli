@@ -11,7 +11,6 @@ import yaml
 from setuptools import find_packages
 from pprint import pprint
 
-from azure.cli.command_modules import aladdin
 
 # disable deprecation warning
 yaml.warnings({'YAMLLoadWarning': False})
@@ -20,6 +19,7 @@ BASE_PATH = os.path.abspath(os.path.curdir)
 
 
 def load_aladdin_helps():
+    import aladdin
     aladdin_helps = aladdin.aladdin_helps
     return {cmd: next(yaml.load_all(content)) for cmd, content in aladdin_helps.items()}
 
@@ -51,7 +51,7 @@ def format_examples(cmd, examples):
         parameter_section = command_line[command_line.index(cmd) + len(cmd):]
         parameter_section = shlex.split(parameter_section)
 
-        parameter_names = [p for p in parameter_section if p.startswith('-')]
+        parameter_names = [p.strip() for p in parameter_section if p.startswith('-')]
         parameter_names.sort()
 
         formatted[tuple(parameter_names)].append(example)
@@ -59,13 +59,20 @@ def format_examples(cmd, examples):
     return formatted
 
 
-def write_examples(cmd, examples, buffer):
+def calculate_preceding_indent(s):
+    for c in s:
+        if c != ' ':
+            break
+    return s[:s.index(c)]
+
+
+def write_examples(cmd, examples, buffer, preceding_indent):
     two_space = '  '
-    name_tpl = two_space + '- name: {}\n'
-    text_tpl = two_space * 2 + 'text: |\n'
-    cmd_tpl = two_space * 4 + 'az {}'
-    opt_tpl = ' \\\\\n' + two_space * 4 + '{} '
-    crafted_tpl = '\n' + two_space * 2 + 'crafted: true'
+    name_tpl = preceding_indent + two_space + '- name: {}\n'
+    text_tpl = preceding_indent+ two_space * 2 + 'text: |\n'
+    cmd_tpl = preceding_indent + two_space * 4 + 'az {}'
+    opt_tpl = ' \\\\\n' + preceding_indent + two_space * 4 + '{} '
+    crafted_tpl = '\n' + preceding_indent + two_space * 2 + 'crafted: true'
 
     for ex in examples:
         buffer.append(name_tpl.format(ex['name']))
@@ -102,6 +109,9 @@ def merge_examples(cmd, raw_cli_help, aladdin_help, buffer):
 
     yaml_example_key_written = False
 
+    # get preceding indent
+    preceding_indent = calculate_preceding_indent(raw_cli_help[-1])
+
     # append Aladdin added examples
     for parameter_seq, examples in formatted_aladdin_examples.items():
         if parameter_seq in formatted_cli_examples:
@@ -111,14 +121,14 @@ def merge_examples(cmd, raw_cli_help, aladdin_help, buffer):
                 len(formatted_cli_examples), len(examples)))
 
         if (
-            len(formatted_aladdin_examples) > 0 and 
-            len(formatted_cli_examples) == 0 and 
+            len(formatted_aladdin_examples) > 0 and
+            len(formatted_cli_examples) == 0 and
             yaml_example_key_written is False
         ):
-            buffer.append('examples:\n')
+            buffer.append(preceding_indent + 'examples:\n')
             yaml_example_key_written = True
 
-        write_examples(cmd, examples, buffer)
+        write_examples(cmd, examples, buffer, preceding_indent)
 
 
 def extract_command(raw_line):
@@ -174,10 +184,10 @@ if __name__ == '__main__':
 
     # test_mod = None
     # for mod in modules:
-    #     if 'botservice' in mod.__file__:
+    #     if 'acs' in mod.__file__:
     #         test_mod = mod
     #         break
-    # merge(aladdin_helps, test_mod, test_mod.__name__ + '.py')
+    # merge(aladdin_helps, test_mod)
 
     for mod in modules:
         merge(aladdin_helps, mod)
