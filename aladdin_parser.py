@@ -5,14 +5,13 @@
 # --------------------------------------------------------------------------------------------
 
 import os
-import sys
 import shlex
 from collections import defaultdict
 from importlib import import_module
 
 import yaml
 from setuptools import find_packages
-from pprint import pprint
+# from pprint import pprint
 
 
 # disable deprecation warning
@@ -23,8 +22,7 @@ BASE_PATH = os.path.abspath(os.path.curdir)
 
 def load_aladdin_helps():
     import aladdin
-    aladdin_helps = aladdin.aladdin_helps
-    return {cmd: next(yaml.load_all(content)) for cmd, content in aladdin_helps.items()}
+    return {cmd: next(yaml.load_all(content)) for cmd, content in aladdin.aladdin_helps.items()}
 
 
 def load_command_help_modules():
@@ -75,7 +73,7 @@ def calculate_preceding_indent(raw_cli_help):
     for c in yaml_indent_key:
         if c != ' ':
             break
-    
+
     preceding_indent = yaml_indent_key[:yaml_indent_key.index(c)]
 
     if 'examples' in yaml_indent_key:
@@ -96,7 +94,8 @@ def write_examples(cmd, examples, buffer, example_inner_indent):
     text_tpl = example_inner_indent+ two_space + 'text: |\n'
     crafted_tpl = '\n' + example_inner_indent + two_space + 'crafted: true'
     cmd_tpl = example_inner_indent + two_space * 3 + 'az {}'
-    opt_tpl = ' \\\\\n' + example_inner_indent + two_space * 3 + '{} '
+    opt_tpl = ' \\\\\n' + example_inner_indent + two_space * 3 + '{}'
+    val_tpl = ' {}'
 
     for ex in examples:
         buffer.append(name_tpl.format(ex['name']))
@@ -104,15 +103,16 @@ def write_examples(cmd, examples, buffer, example_inner_indent):
         buffer.append(cmd_tpl.format(cmd))
 
         parameters = ex['text']
+        parameters = parameters.replace('\\', '\\\\')
         parameters = parameters[parameters.index(cmd) + len(cmd):].strip()
         if len(parameters) + len(example_inner_indent) < 80:
             buffer.append(' ' + parameters)
-        else:            
-            for p in shlex.split(parameters):
+        else:
+            for p in parameters.split(' '):
                 if p.startswith('-'):
                     buffer.append(opt_tpl.format(p))
                 else:
-                    buffer.append(p)
+                    buffer.append(val_tpl.format(p))
 
         if 'crafted' in ex:
             buffer.append(crafted_tpl)
@@ -121,7 +121,7 @@ def write_examples(cmd, examples, buffer, example_inner_indent):
 
 
 def merge_examples(cmd, raw_cli_help, aladdin_help, buffer):
-    # print('-' * 40, cmd, '-' * 40)
+    print('-' * 40, cmd, '-' * 40)
 
     yaml_cli_help = next(yaml.load_all(''.join(raw_cli_help)))
 
@@ -147,13 +147,9 @@ def merge_examples(cmd, raw_cli_help, aladdin_help, buffer):
             continue
 
         print("number of cli examples: {}  |  number of Aladdin examples: {}".format(
-                len(formatted_cli_examples), len(examples)))
+            len(formatted_cli_examples), len(examples)))
 
-        if (
-            len(formatted_aladdin_examples) > 0 and
-            len(formatted_cli_examples) == 0 and
-            yaml_example_key_written is False
-        ):
+        if yaml_example_key_written is False and formatted_aladdin_examples and not formatted_cli_examples:
             buffer.append(preceding_indent + 'examples:\n')
             yaml_example_key_written = True
 
@@ -166,7 +162,7 @@ def extract_command(raw_line):
     return raw_line[start_index: end_index].strip()
 
 
-def merge(aladdin_helps, help_module):
+def merge(aladdin_generated_helps, help_module):
     print('==================== [ Processing: {:50.50} ] ==================='.format(help_module.__name__))
 
     help_start_flag = "helps['"
@@ -193,8 +189,8 @@ def merge(aladdin_helps, help_module):
 
             buffer.extend(raw_yaml_body)  # save the hardcode help entries first
 
-            if cmd in aladdin_helps:
-                merge_examples(cmd, raw_yaml_body, aladdin_helps[cmd], buffer)
+            if cmd in aladdin_generated_helps:
+                merge_examples(cmd, raw_yaml_body, aladdin_generated_helps[cmd], buffer)
 
             buffer.append(line)    # line == '""""\n'
 
