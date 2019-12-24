@@ -1178,6 +1178,59 @@ examples:
     text: az storage remove -s MyShare --recursive
 """
 
+helps['storage share-rm'] = """
+type: group
+short-summary: Manage Azure file shares using the Microsoft.Storage resource provider.
+"""
+
+helps['storage share-rm create'] = """
+type: command
+short-summary: Create a new Azure file share under the specified storage account.
+examples:
+  - name: Create a new Azure file share 'MyFileShare' with metadata and share quota as 10 GB under the storage account 'MyStorageAccount' in resource group 'MyResourceGroup'.
+    text: az storage share create -g MyResourceGroup --account-name MyStorageAccount --name MyFileShare --share-quota 10 --metadata key1=value1 key2=value2
+"""
+
+helps['storage share-rm delete'] = """
+type: command
+short-summary: Delete the specified Azure file share.
+examples:
+  - name: Delete an Azure file share 'MyFileShare' under the storage account 'MyStorageAccount' in resource group 'MyResourceGroup'.
+    text: az storage share-rm delete -g MyResourceGroup --account-name MyStorageAccount --name MyFileShare
+"""
+
+helps['storage share-rm exists'] = """
+type: command
+short-summary: Check for the existence of an Azure file share.
+examples:
+  - name: Check for the existence of an Azure file share 'MyFileShare' under the storage account 'MyStorageAccount' in resource group 'MyResourceGroup'.
+    text: az storage share-rm exists -g MyResourceGroup --account-name MyStorageAccount --name MyFileShare
+"""
+
+helps['storage share-rm list'] = """
+type: command
+short-summary: List the Azure file shares under the specified storage account.
+examples:
+  - name: List the Azure file shares under the storage account 'MyStorageAccount' in resource group 'MyResourceGroup'.
+    text: az storage share-rm list -g MyResourceGroup --account-name MyStorageAccount
+"""
+
+helps['storage share-rm show'] = """
+type: command
+short-summary: Show the properties for a specified Azure file share.
+examples:
+  - name: Show the properties for an Azure file share 'MyFileShare' under the storage account 'MyStorageAccount' in resource group 'MyResourceGroup'.
+    text: az storage share-rm show -g MyResourceGroup --account-name MyStorageAccount --name MyFileShare
+"""
+
+helps['storage share-rm update'] = """
+type: command
+short-summary: Update the properties for an Azure file share.
+examples:
+  - name: Update the properties for an Azure file share 'MyFileShare' under the storage account 'MyStorageAccount' in resource group 'MyResourceGroup'.
+    text: az storage share-rm update -g MyResourceGroup --account-name MyStorageAccount --name MyFileShare --share-quota 3 --metadata key1=value1 key2=value2
+"""
+
 helps['storage share'] = """
 type: group
 short-summary: Manage file shares.

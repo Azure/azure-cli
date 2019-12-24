@@ -635,6 +635,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage share') as c:
         c.argument('share_name', share_name_type, options_list=('--name', '-n'))
 
+    with self.argument_context('storage share-rm', resource_type=ResourceType.MGMT_STORAGE) as c:
+        c.argument('share_name', share_name_type, options_list=('--name', '-n'))
+        c.argument('share_quota', type=int)
+        c.argument('metadata', nargs='+',
+                   help='Metadata in space-separated key=value pairs that is associated with the share. '
+                        'This overwrites any existing metadata',
+                   validator=validate_metadata)
+        c.ignore('filter', 'maxpagesize', 'skip_token')
+
     with self.argument_context('storage share url') as c:
         c.argument('unc', action='store_true', help='Output UNC network path.')
         c.argument('protocol', arg_type=get_enum_type(['http', 'https'], 'https'), help='Protocol to use.')
