@@ -123,6 +123,31 @@ Release History
 * Update azure-mgmt-storage version to 7.0.0 to use api version 2019-06-01
 * Add new parameters `--enable-delete-retention` and `--delete-retention-days` to support managing delete retention policy for storage account blob-service-properties.
 
+**ServiceFabric**
+
+* Adding new commands to manage appliaction and services.
+    - sf application-type-version
+        - list
+        - delete
+        - show
+        - create
+    - sf application-type
+        - list
+        - delete
+        - show
+        - create
+    - sf application
+        - list
+        - delete
+        - show
+        - create
+        - update
+    - sf service
+        - list
+        - delete
+        - show
+        - create
+
 2.0.78
 ++++++
 
@@ -478,28 +503,6 @@ Release History
 **ServiceFabric**
 
 * az sf cluster create: fix #10916 modify service fabric linux and windows template.json compute vmss from standard to managed disks
-* Adding new commands to manage appliaction and services.
-    - sf application-type-version
-        - list
-        - delete
-        - show
-        - create
-    - sf application-type
-        - list
-        - delete
-        - show
-        - create
-    - sf application
-        - list
-        - delete
-        - show
-        - create
-        - update
-    - sf service
-        - list
-        - delete
-        - show
-        - create
 
 **SQL**
 
