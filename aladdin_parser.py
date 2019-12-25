@@ -121,7 +121,7 @@ def write_examples(cmd, examples, buffer, example_inner_indent):
 
 
 def merge_examples(cmd, raw_cli_help, aladdin_help, buffer):
-    print('-' * 40, cmd, '-' * 40)
+    print('--- merge examples for: [ {:<35} ]'.format(cmd))
 
     yaml_cli_help = next(yaml.load_all(''.join(raw_cli_help)))
 
@@ -163,7 +163,7 @@ def extract_command(raw_line):
 
 
 def merge(aladdin_generated_helps, help_module):
-    print('==================== [ Processing: {:50.50} ] ==================='.format(help_module.__name__))
+    print('==================== [ Processing: {:<50} ] ==================='.format(help_module.__name__))
 
     help_start_flag = "helps['"
 
