@@ -1197,7 +1197,16 @@ class VMCreateNoneOptionsTest(ScenarioTest):  # pylint: disable=too-many-instanc
         self.cmd('network public-ip show -n {vm}PublicIP -g {rg}', expect_failure=True)
 
 
-class VMCreateMonitorTest(ScenarioTest):
+class VMMonitorTest(ScenarioTest):
+    def __init__(self, method_name, config_file=None, recording_dir=None, recording_name=None, recording_processors=None,
+                 replay_processors=None, recording_patches=None, replay_patches=None):
+        from ._test_util import TimeSpanProcessor
+        TIMESPANTEMPLATE = '0000-00-00'
+        super(VMMonitorTest, self).__init__(
+            method_name,
+            recording_processors=TimeSpanProcessor(TIMESPANTEMPLATE),
+            replay_processors=TimeSpanProcessor(TIMESPANTEMPLATE)
+        )
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_with_monitor', location='eastus')
     def test_vm_create_with_monitor(self, resource_group):
@@ -1210,6 +1219,27 @@ class VMCreateMonitorTest(ScenarioTest):
 
         self.cmd('vm create -n {vm} -g {rg} --image UbuntuLTS --workspace {workspace}')
         self.cmd('vm monitor log show -n {vm} -g {rg} -q "Perf | limit 10"')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_metric_tail', location='eastus')
+    def test_vm_metric_tail(self, resource_group):
+
+        self.kwargs.update({
+            'vm': 'monitorvm',
+            'rg': resource_group
+        })
+
+        self.cmd('vm create -n {vm} -g {rg} --image UbuntuLTS')
+        self.cmd('vm start -n {vm} -g {rg}')
+
+        time.sleep(60)
+
+        self.cmd('vm monitor metrics tail -n {vm} -g {rg} --metrics "Percentage CPU"', checks=[
+            self.check('value[0].type', 'Microsoft.Insights/metrics'),
+            self.check('value[0].name.value', 'Percentage CPU')
+        ])
+        self.cmd('vm monitor metrics list-definitions -n {vm} -g {rg}', checks=[
+            self.check("length(@) != '0'", True)
+        ])
 
 
 class VMBootDiagnostics(ScenarioTest):
