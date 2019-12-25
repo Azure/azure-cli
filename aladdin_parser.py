@@ -12,6 +12,7 @@ from importlib import import_module
 
 import yaml
 from setuptools import find_packages
+from git import Repo
 # from pprint import pprint
 
 
@@ -85,6 +86,8 @@ def calculate_example_yaml_indent(raw_cli_help):
 
 
 def write_examples(cmd, examples, buffer, example_inner_indent):
+    print('--- merge examples for: [ {:<35} ]'.format(cmd))
+
     two_space = '  '
     name_tpl = example_inner_indent + '- name: {}\n'
     text_tpl = example_inner_indent+ two_space + 'text: |\n'
@@ -117,8 +120,6 @@ def write_examples(cmd, examples, buffer, example_inner_indent):
 
 
 def merge_examples(cmd, raw_cli_help, aladdin_help, buffer):
-    print('--- merge examples for: [ {:<35} ]'.format(cmd))
-
     yaml_cli_help = next(yaml.load_all(''.join(raw_cli_help)))
 
     cli_examples = yaml_cli_help.get('examples', None)
@@ -139,9 +140,6 @@ def merge_examples(cmd, raw_cli_help, aladdin_help, buffer):
     for parameter_seq, examples in formatted_aladdin_examples.items():
         if parameter_seq in formatted_cli_examples:
             continue
-
-        print('    number of azure-cli examples: {}'.format(len(formatted_cli_examples)))
-        print('    number of Aladdin   examples: {}'.format(len(examples)))
 
         if yaml_example_key_written is False and formatted_aladdin_examples and not formatted_cli_examples:
             buffer.append(preceding_indent + 'examples:\n')
@@ -184,8 +182,35 @@ def merge(aladdin_generated_helps, help_module):
     with open(temp_file_name, 'w', encoding='utf-8') as tmp:
         tmp.writelines(buffer)
 
-    # apply changes to original file if there are, otherwise, content not changed
+    # apply changes to original file if there are, otherwise, nothing not changed
     os.replace(temp_file_name, help_module.__file__)
+
+
+def git_operation(modules):    # pylint: disable=redefined-outer-name
+    print('\n==================== [ Processing Changes, commits, push, Pull Request ] ===================')
+
+    git = Repo(BASE_PATH).git
+
+    has_changes = False
+
+    # 1. commit changes if any
+    for module in modules:
+        short_name = module.__name__.split('.')[-2]
+
+        if git.diff(module.__file__):
+            git.add(module.__file__)
+            git.commit('-m', '[{}] Merge Aladdin generated examples'.format(short_name))
+
+            has_changes = True
+
+    if has_changes is False:
+        print('No changes from Aladdin.')
+        print('No need to push commits and fire Pull Request.')
+        return
+
+    # 2. if changes, push commits
+    target_remote, target_branch = 'origin', 'Aladdin-dst'
+    git.push(target_remote, target_branch)
 
 
 if __name__ == '__main__':
@@ -201,8 +226,18 @@ if __name__ == '__main__':
     #         break
     # merge(aladdin_helps, test_mod)
 
-    azure_cli_own_modules = ['arm', 'monitor', 'network', 'storage', 'keyvault', 'vm']
+    azure_cli_own_helps = [
+        'azure.cli.command_modules.arm._help',
+        'azure.cli.command_modules.monitor._help',
+        'azure.cli.command_modules.network._help',
+        'azure.cli.command_modules.storage._help',
+        'azure.cli.command_modules.keyvault._help',
+        'azure.cli.command_modules.vm._help'
+    ]
 
     for mod in modules:
-        if mod.__name__.split('.')[-2] in azure_cli_own_modules:
+        # merge(aladdin_helps, mod)
+        if mod.__name__ in azure_cli_own_helps:
             merge(aladdin_helps, mod)
+
+    git_operation(modules)
