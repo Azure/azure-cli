@@ -409,7 +409,6 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
         if not min_api and not max_api:
             # optimistically assume that fully supported if no api restriction listed
             return True
-        api_support = None
         api_support = supported_api_version(
             cli_ctx=self.cli_ctx,
             resource_type=resource_type or self._get_resource_type(),
