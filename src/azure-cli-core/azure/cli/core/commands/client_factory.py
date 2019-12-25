@@ -30,8 +30,9 @@ def resolve_client_arg_name(operation, kwargs):
     if path_comps[0] == 'azure':
         # for CLI command modules
         # SDK method: azure.mgmt.foo... or azure.foo...
+        # Vendored_SDK method: azure.cli.command_modules.foo.vendored_sdk...
         # custom method: azure.cli.command_modules.foo...
-        client_arg_name = 'client' if path_comps[1] == 'cli' else 'self'
+        client_arg_name = 'client' if path_comps[1] == 'cli' and 'vendored_sdk' not in path_comps else 'self'
     elif path_comps[0].startswith(EXTENSIONS_MOD_PREFIX):
         # for CLI extensions
         # SDK method: the operation takes the form '<class name>.<method_name>'
