@@ -23,7 +23,7 @@ LABEL maintainer="Microsoft" \
       org.label-schema.usage="https://docs.microsoft.com/cli/azure/install-az-cli2#docker" \
       org.label-schema.build-date=$BUILD_DATE \
       org.label-schema.vcs-url="https://github.com/Azure/azure-cli.git" \
-      org.label-schema.docker.cmd="docker run -v \${HOME}/.azure:/root/.azure -it microsoft/azure-cli:$CLI_VERSION"
+      org.label-schema.docker.cmd="docker run -v \${HOME}/.azure:/root/.azure -it mcr.microsoft.com/azure-cli:$CLI_VERSION"
 
 # bash gcc make openssl-dev libffi-dev musl-dev - dependencies required for CLI
 # openssh - included for ssh-keygen
