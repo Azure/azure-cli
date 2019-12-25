@@ -6,6 +6,7 @@
 
 import os
 import shlex
+import re
 from collections import defaultdict
 from importlib import import_module
 
@@ -33,11 +34,11 @@ def load_command_help_modules():
     pkgs = find_packages(where=command_modules_dir, exclude=['*test*'])
     for pkg in pkgs:
         try:
-            mod = import_module(pkg + '._help')
-        except Exception as e:
+            m = import_module(pkg + '._help')
+        except ModuleNotFoundError:
             continue
 
-        mods.append(mod)
+        mods.append(m)
 
     return mods
 
@@ -60,7 +61,7 @@ def format_examples(cmd, examples):
     return formatted
 
 
-def calculate_preceding_indent(raw_cli_help):
+def calculate_example_yaml_indent(raw_cli_help):
     yaml_indent_key = raw_cli_help[0]
     yaml_indent_idx = 0
 
@@ -70,18 +71,13 @@ def calculate_preceding_indent(raw_cli_help):
             yaml_indent_idx = idx
             break
 
-    for c in yaml_indent_key:
-        if c != ' ':
-            break
-
-    preceding_indent = yaml_indent_key[:yaml_indent_key.index(c)]
+    indent_width = re.search(r'[^ ]', yaml_indent_key).start()
+    preceding_indent = yaml_indent_key[:indent_width]
 
     if 'examples' in yaml_indent_key:
         yaml_indent_key = raw_cli_help[yaml_indent_idx + 1]
-        for c in yaml_indent_key:
-            if c != ' ':
-                break
-        example_inner_indent = yaml_indent_key[:yaml_indent_key.index(c)]
+        indent_width = re.search(r'[^ ]', yaml_indent_key).start()
+        example_inner_indent = yaml_indent_key[:indent_width]
     else:
         example_inner_indent = preceding_indent + ' ' * 2
 
@@ -121,7 +117,7 @@ def write_examples(cmd, examples, buffer, example_inner_indent):
 
 
 def merge_examples(cmd, raw_cli_help, aladdin_help, buffer):
-    print('-' * 40, cmd, '-' * 40)
+    print('--- merge examples for: [ {:<35} ]'.format(cmd))
 
     yaml_cli_help = next(yaml.load_all(''.join(raw_cli_help)))
 
@@ -137,17 +133,15 @@ def merge_examples(cmd, raw_cli_help, aladdin_help, buffer):
     yaml_example_key_written = False
 
     # get preceding indent
-    preceding_indent, example_inner_indent = calculate_preceding_indent(raw_cli_help)
-    # print('preceding_indent =', len(preceding_indent))
-    # print('example_inner_indent =', len(example_inner_indent))
+    preceding_indent, example_inner_indent = calculate_example_yaml_indent(raw_cli_help)
 
     # append Aladdin added examples
     for parameter_seq, examples in formatted_aladdin_examples.items():
         if parameter_seq in formatted_cli_examples:
             continue
 
-        print("number of cli examples: {}  |  number of Aladdin examples: {}".format(
-            len(formatted_cli_examples), len(examples)))
+        print('    number of azure-cli examples: {}'.format(len(formatted_cli_examples)))
+        print('    number of Aladdin   examples: {}'.format(len(examples)))
 
         if yaml_example_key_written is False and formatted_aladdin_examples and not formatted_cli_examples:
             buffer.append(preceding_indent + 'examples:\n')
@@ -156,28 +150,20 @@ def merge_examples(cmd, raw_cli_help, aladdin_help, buffer):
         write_examples(cmd, examples, buffer, example_inner_indent)
 
 
-def extract_command(raw_line):
-    raw_line = raw_line.strip()
-    start_index, end_index = raw_line.index("['") + 2, raw_line.index("']")
-    return raw_line[start_index: end_index].strip()
-
-
 def merge(aladdin_generated_helps, help_module):
-    print('==================== [ Processing: {:50.50} ] ==================='.format(help_module.__name__))
-
-    help_start_flag = "helps['"
+    print('==================== [ Processing: {:<50} ] ==================='.format(help_module.__name__))
 
     buffer = []
 
     with open(help_module.__file__, 'r', encoding='utf-8') as f:
         for line in f:
-            if line.startswith(help_start_flag) is False:
+            if line.startswith("helps['") is False:
                 buffer.append(line)
                 continue
 
             buffer.append(line)
 
-            cmd = extract_command(line)
+            cmd = re.search(r"helps\['(.*?)'\] = \"\"\"\n", line).groups()[0].strip()
 
             # start parseing help entries
             raw_yaml_body = []
@@ -198,6 +184,7 @@ def merge(aladdin_generated_helps, help_module):
     with open(temp_file_name, 'w', encoding='utf-8') as tmp:
         tmp.writelines(buffer)
 
+    # apply changes to original file if there are, otherwise, content not changed
     os.replace(temp_file_name, help_module.__file__)
 
 
@@ -214,5 +201,8 @@ if __name__ == '__main__':
     #         break
     # merge(aladdin_helps, test_mod)
 
+    azure_cli_own_modules = ['arm', 'monitor', 'network', 'storage', 'keyvault', 'vm']
+
     for mod in modules:
-        merge(aladdin_helps, mod)
+        if mod.__name__.split('.')[-2] in azure_cli_own_modules:
+            merge(aladdin_helps, mod)
