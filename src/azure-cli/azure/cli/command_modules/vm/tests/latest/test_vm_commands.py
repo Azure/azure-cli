@@ -14,7 +14,7 @@ import mock
 import uuid
 
 from knack.util import CLIError
-from azure_devtools.scenario_tests import AllowLargeResponse, record_only, RecordingProcessor
+from azure_devtools.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.core.profiles import ResourceType
 from azure.cli.testsdk import (
     ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, api_version_constraint,
@@ -1238,7 +1238,7 @@ class VMMonitorTest(ScenarioTest):
             self.check('value[0].name.value', 'Percentage CPU')
         ])
         self.cmd('vm monitor metrics list-definitions -n {vm} -g {rg}', checks=[
-            self.check("length(@[*].id) != '0'", True)
+            self.check("length(@) != '0'", True)
         ])
 
 

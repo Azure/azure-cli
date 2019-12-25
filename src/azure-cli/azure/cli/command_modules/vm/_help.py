@@ -2444,7 +2444,7 @@ parameters:
   - name: --aggregation
     short-summary: The list of aggregation types (space-separated) to retrieve.
     populator-commands:
-      - az vm monitor metrics list-definitions
+      - az vm monitor metrics list-definitions -n MyVM -g MyRG --query "@[*].supportedAggregationTypes"
   - name: --interval
     short-summary: >
         The interval over which to aggregate metrics, in ##h##m format.
@@ -2456,7 +2456,7 @@ parameters:
   - name: --dimension
     short-summary: The list of dimensions (space-separated) the metrics are queried into.
     populator-commands:
-      - az vm monitor metrics list-definitions
+      - az vm monitor metrics list-definitions -n MyVM -g MyRG --query "@[*].dimensions"
   - name: --namespace
     short-summary: Namespace to query metric definitions for.
   - name: --offset
@@ -2471,7 +2471,7 @@ parameters:
     short-summary: >
         Space-separated list of metric names to retrieve.
     populator-commands:
-      - az vm monitor metrics list-definitions
+      - az vm monitor metrics list-definitions -n MyVM -g MyRG --query "@[*].name.value"
 examples:
   - name: List CPU usage of VM for past one hour
     text: >

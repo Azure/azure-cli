@@ -474,5 +474,9 @@ def load_command_table(self, _):
 
     with self.command_group('vm monitor metrics', custom_command_type=monitor_custom, command_type=metric_definitions_sdk, resource_type=ResourceType.MGMT_MONITOR, operation_group='metric_definitions', min_api='2018-01-01', is_preview=True) as g:
         from azure.cli.command_modules.monitor.transformers import metrics_table, metrics_definitions_table
-        g.custom_command('tail', 'list_metrics', command_type=monitor_custom, table_transformer=metrics_table)
-        g.command('list-definitions', 'list', table_transformer=metrics_definitions_table)
+        from azure.cli.core.profiles._shared import APIVersionException
+        try:
+            g.custom_command('tail', 'list_metrics', command_type=monitor_custom, table_transformer=metrics_table)
+            g.command('list-definitions', 'list', table_transformer=metrics_definitions_table)
+        except APIVersionException:
+            pass

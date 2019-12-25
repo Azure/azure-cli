@@ -406,20 +406,16 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
 
     def supported_api_version(self, resource_type=None, min_api=None, max_api=None, operation_group=None):
         from azure.cli.core.profiles import supported_api_version
-        from azure.cli.core.profiles._shared import APIVersionException
         if not min_api and not max_api:
             # optimistically assume that fully supported if no api restriction listed
             return True
         api_support = None
-        try:
-            api_support = supported_api_version(
-                cli_ctx=self.cli_ctx,
-                resource_type=resource_type or self._get_resource_type(),
-                min_api=min_api,
-                max_api=max_api,
-                operation_group=operation_group)
-        except APIVersionException:
-            api_support = False
+        api_support = supported_api_version(
+            cli_ctx=self.cli_ctx,
+            resource_type=resource_type or self._get_resource_type(),
+            min_api=min_api,
+            max_api=max_api,
+            operation_group=operation_group)
         if isinstance(api_support, bool):
             return api_support
         if operation_group:
