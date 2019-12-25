@@ -169,7 +169,7 @@ class ContainerClient(StorageAccountHostsMixin):
             key, or an instance of a TokenCredentials class from azure.identity.
             Credentials provided here will take precedence over those in the connection string.
         :returns: A container client.
-        :rtype: ~azure.storage.blob.ContainerClient
+        :rtype: ~.ContainerClient
         """
         try:
             if not container_url.lower().startswith('http'):
@@ -215,7 +215,7 @@ class ContainerClient(StorageAccountHostsMixin):
             key, or an instance of a TokenCredentials class from azure.identity.
             Credentials provided here will take precedence over those in the connection string.
         :returns: A container client.
-        :rtype: ~azure.storage.blob.ContainerClient
+        :rtype: ~.ContainerClient
 
         .. admonition:: Example:
 
@@ -243,7 +243,7 @@ class ContainerClient(StorageAccountHostsMixin):
             A dict with name_value pairs to associate with the
             container as metadata. Example:{'Category':'test'}
         :type metadata: dict[str, str]
-        :param ~azure.storage.blob.PublicAccess public_access:
+        :param ~.PublicAccess public_access:
             Possible values include: 'container', 'blob'.
         :keyword int timeout:
             The timeout parameter is expressed in seconds.
@@ -283,7 +283,7 @@ class ContainerClient(StorageAccountHostsMixin):
             If specified, delete_container only succeeds if the
             container's lease is active and matches this ID.
             Required if the container has an active lease.
-        :paramtype lease: ~azure.storage.blob.BlobLeaseClient or str
+        :paramtype lease: ~.BlobLeaseClient or str
         :keyword ~datetime.datetime if_modified_since:
             A DateTime value. Azure expects the date value passed in to be UTC.
             If timezone is included, any non-UTC datetimes will be converted to UTC.
@@ -366,7 +366,7 @@ class ContainerClient(StorageAccountHostsMixin):
         :keyword int timeout:
             The timeout parameter is expressed in seconds.
         :returns: A BlobLeaseClient object, that can be run in a context manager.
-        :rtype: ~azure.storage.blob.BlobLeaseClient
+        :rtype: ~.BlobLeaseClient
 
         .. admonition:: Example:
 
@@ -408,11 +408,11 @@ class ContainerClient(StorageAccountHostsMixin):
         :keyword lease:
             If specified, get_container_properties only succeeds if the
             container's lease is active and matches this ID.
-        :paramtype lease: ~azure.storage.blob.BlobLeaseClient or str
+        :paramtype lease: ~.BlobLeaseClient or str
         :keyword int timeout:
             The timeout parameter is expressed in seconds.
         :return: Properties for the specified container within a container object.
-        :rtype: ~azure.storage.blob.ContainerProperties
+        :rtype: ~.ContainerProperties
 
         .. admonition:: Example:
 
@@ -455,7 +455,7 @@ class ContainerClient(StorageAccountHostsMixin):
         :keyword lease:
             If specified, set_container_metadata only succeeds if the
             container's lease is active and matches this ID.
-        :paramtype lease: ~azure.storage.blob.BlobLeaseClient or str
+        :paramtype lease: ~.BlobLeaseClient or str
         :keyword ~datetime.datetime if_modified_since:
             A DateTime value. Azure expects the date value passed in to be UTC.
             If timezone is included, any non-UTC datetimes will be converted to UTC.
@@ -511,7 +511,7 @@ class ContainerClient(StorageAccountHostsMixin):
         :keyword lease:
             If specified, get_container_access_policy only succeeds if the
             container's lease is active and matches this ID.
-        :paramtype lease: ~azure.storage.blob.BlobLeaseClient or str
+        :paramtype lease: ~.BlobLeaseClient or str
         :keyword int timeout:
             The timeout parameter is expressed in seconds.
         :returns: Access policy information in a dict.
@@ -556,13 +556,13 @@ class ContainerClient(StorageAccountHostsMixin):
             A dictionary of access policies to associate with the container. The
             dictionary may contain up to 5 elements. An empty dictionary
             will clear the access policies set on the service.
-        :type signed_identifiers: dict[str, ~azure.storage.blob.AccessPolicy]
-        :param ~azure.storage.blob.PublicAccess public_access:
+        :type signed_identifiers: dict[str, ~.AccessPolicy]
+        :param ~.PublicAccess public_access:
             Possible values include: 'container', 'blob'.
         :keyword lease:
             Required if the container has an active lease. Value can be a BlobLeaseClient object
             or the lease ID as a string.
-        :paramtype lease: ~azure.storage.blob.BlobLeaseClient or str
+        :paramtype lease: ~.BlobLeaseClient or str
         :keyword ~datetime.datetime if_modified_since:
             A datetime value. Azure expects the date value passed in to be UTC.
             If timezone is included, any non-UTC datetimes will be converted to UTC.
@@ -632,7 +632,7 @@ class ContainerClient(StorageAccountHostsMixin):
         :keyword int timeout:
             The timeout parameter is expressed in seconds.
         :returns: An iterable (auto-paging) response of BlobProperties.
-        :rtype: ~azure.core.paging.ItemPaged[~azure.storage.blob.BlobProperties]
+        :rtype: ~azure.core.paging.ItemPaged[~.BlobProperties]
 
         .. admonition:: Example:
 
@@ -684,7 +684,7 @@ class ContainerClient(StorageAccountHostsMixin):
         :keyword int timeout:
             The timeout parameter is expressed in seconds.
         :returns: An iterable (auto-paging) response of BlobProperties.
-        :rtype: ~azure.core.paging.ItemPaged[~azure.storage.blob.BlobProperties]
+        :rtype: ~azure.core.paging.ItemPaged[~.BlobProperties]
         """
         if include and not isinstance(include, list):
             include = [include]
@@ -717,9 +717,9 @@ class ContainerClient(StorageAccountHostsMixin):
 
         :param name: The blob with which to interact. If specified, this value will override
             a blob value specified in the blob URL.
-        :type name: str or ~azure.storage.blob.BlobProperties
+        :type name: str or ~.BlobProperties
         :param data: The blob data to upload.
-        :param ~azure.storage.blob.BlobType blob_type: The type of the blob. This can be
+        :param ~.BlobType blob_type: The type of the blob. This can be
             either BlockBlob, PageBlob or AppendBlob. The default value is BlockBlob.
         :param int length:
             Number of bytes to read from the stream. This is optional, but
@@ -733,7 +733,7 @@ class ContainerClient(StorageAccountHostsMixin):
             blob types: if set to False and the data already exists, an error will not be raised
             and the data will be appended to the existing blob. If set overwrite=True, then the existing
             append blob will be deleted, and a new one created. Defaults to False.
-        :keyword ~azure.storage.blob.ContentSettings content_settings:
+        :keyword ~.ContentSettings content_settings:
             ContentSettings object used to set blob properties. Used to set content type, encoding,
             language, disposition, md5, and cache control.
         :keyword bool validate_content:
@@ -748,7 +748,7 @@ class ContainerClient(StorageAccountHostsMixin):
         :keyword lease:
             Required if the container has an active lease. Value can be a BlobLeaseClient object
             or the lease ID as a string.
-        :paramtype lease: ~azure.storage.blob.BlobLeaseClient or str
+        :paramtype lease: ~.BlobLeaseClient or str
         :keyword ~datetime.datetime if_modified_since:
             A DateTime value. Azure expects the date value passed in to be UTC.
             If timezone is included, any non-UTC datetimes will be converted to UTC.
@@ -770,11 +770,11 @@ class ContainerClient(StorageAccountHostsMixin):
             The timeout parameter is expressed in seconds. This method may make
             multiple calls to the Azure service and the timeout will apply to
             each call individually.
-        :keyword ~azure.storage.blob.PremiumPageBlobTier premium_page_blob_tier:
+        :keyword ~.PremiumPageBlobTier premium_page_blob_tier:
             A page blob tier value to set the blob to. The tier correlates to the size of the
             blob and number of allowed IOPS. This is only applicable to page blobs on
             premium storage accounts.
-        :keyword ~azure.storage.blob.StandardBlobTier standard_blob_tier:
+        :keyword ~.StandardBlobTier standard_blob_tier:
             A standard blob tier value to set the blob to. For this version of the library,
             this is only applicable to block blobs on standard storage accounts.
         :keyword int maxsize_condition:
@@ -786,7 +786,7 @@ class ContainerClient(StorageAccountHostsMixin):
         :keyword int max_concurrency:
             Maximum number of parallel connections to use when the blob size exceeds
             64MB.
-        :keyword ~azure.storage.blob.CustomerProvidedEncryptionKey cpk:
+        :keyword ~.CustomerProvidedEncryptionKey cpk:
             Encrypts the data on the service-side with the given key.
             Use of customer-provided keys must be done over HTTPS.
             As the encryption key itself is provided in the request,
@@ -794,7 +794,7 @@ class ContainerClient(StorageAccountHostsMixin):
         :keyword str encoding:
             Defaults to UTF-8.
         :returns: A BlobClient to interact with the newly uploaded blob.
-        :rtype: ~azure.storage.blob.BlobClient
+        :rtype: ~.BlobClient
 
         .. admonition:: Example:
 
@@ -842,7 +842,7 @@ class ContainerClient(StorageAccountHostsMixin):
 
         :param blob: The blob with which to interact. If specified, this value will override
             a blob value specified in the blob URL.
-        :type blob: str or ~azure.storage.blob.BlobProperties
+        :type blob: str or ~.BlobProperties
         :param str delete_snapshots:
             Required if the blob has associated snapshots. Values include:
              - "only": Deletes only the blobs snapshots.
@@ -850,7 +850,7 @@ class ContainerClient(StorageAccountHostsMixin):
         :keyword lease:
             Required if the blob has an active lease. Value can be a BlobLeaseClient object
             or the lease ID as a string.
-        :paramtype lease: ~azure.storage.blob.BlobLeaseClient or str
+        :paramtype lease: ~.BlobLeaseClient or str
         :keyword ~datetime.datetime if_modified_since:
             A DateTime value. Azure expects the date value passed in to be UTC.
             If timezone is included, any non-UTC datetimes will be converted to UTC.
@@ -889,7 +889,7 @@ class ContainerClient(StorageAccountHostsMixin):
 
         :param blob: The blob with which to interact. If specified, this value will override
             a blob value specified in the blob URL.
-        :type blob: str or ~azure.storage.blob.BlobProperties
+        :type blob: str or ~.BlobProperties
         :param int offset:
             Start of byte range to use for downloading a section of the blob.
             Must be set if length is provided.
@@ -909,7 +909,7 @@ class ContainerClient(StorageAccountHostsMixin):
             Required if the blob has an active lease. If specified, download_blob only
             succeeds if the blob's lease is active and matches this ID. Value can be a
             BlobLeaseClient object or the lease ID as a string.
-        :paramtype lease: ~azure.storage.blob.BlobLeaseClient or str
+        :paramtype lease: ~.BlobLeaseClient or str
         :keyword ~datetime.datetime if_modified_since:
             A DateTime value. Azure expects the date value passed in to be UTC.
             If timezone is included, any non-UTC datetimes will be converted to UTC.
@@ -927,7 +927,7 @@ class ContainerClient(StorageAccountHostsMixin):
             and act according to the condition specified by the `match_condition` parameter.
         :keyword ~azure.core.MatchConditions match_condition:
             The match condition to use upon the etag.
-        :keyword ~azure.storage.blob.CustomerProvidedEncryptionKey cpk:
+        :keyword ~.CustomerProvidedEncryptionKey cpk:
             Encrypts the data on the service-side with the given key.
             Use of customer-provided keys must be done over HTTPS.
             As the encryption key itself is provided in the request,
@@ -941,7 +941,7 @@ class ContainerClient(StorageAccountHostsMixin):
             multiple calls to the Azure service and the timeout will apply to
             each call individually.
         :returns: A streaming object (StorageStreamDownloader)
-        :rtype: ~azure.storage.blob.StorageStreamDownloader
+        :rtype: ~.StorageStreamDownloader
         """
         blob_client = self.get_blob_client(blob) # type: ignore
         kwargs.setdefault('merge_span', True)
@@ -1026,7 +1026,7 @@ class ContainerClient(StorageAccountHostsMixin):
 
         :param blobs: The blobs to delete. This can be a single blob, or multiple values can
             be supplied, where each value is either the name of the blob (str) or BlobProperties.
-        :type blobs: str or ~azure.storage.blob.BlobProperties
+        :type blobs: str or ~.BlobProperties
         :keyword str delete_snapshots:
             Required if a blob has associated snapshots. Values include:
              - "only": Deletes only the blobs snapshots.
@@ -1034,7 +1034,7 @@ class ContainerClient(StorageAccountHostsMixin):
         :keyword lease:
             Required if a blob has an active lease. Value can be a BlobLeaseClient object
             or the lease ID as a string.
-        :paramtype lease: ~azure.storage.blob.BlobLeaseClient or str
+        :paramtype lease: ~.BlobLeaseClient or str
         :keyword ~datetime.datetime if_modified_since:
             A DateTime value. Azure expects the date value passed in to be UTC.
             If timezone is included, any non-UTC datetimes will be converted to UTC.
@@ -1146,16 +1146,16 @@ class ContainerClient(StorageAccountHostsMixin):
             is infrequently accessed and stored for at least a month. The archive
             tier is optimized for storing data that is rarely accessed and stored
             for at least six months with flexible latency requirements.
-        :type standard_blob_tier: str or ~azure.storage.blob.StandardBlobTier
+        :type standard_blob_tier: str or ~.StandardBlobTier
         :param blobs: The blobs with which to interact. This can be a single blob, or multiple values can
             be supplied, where each value is either the name of the blob (str) or BlobProperties.
-        :type blobs: str or ~azure.storage.blob.BlobProperties
+        :type blobs: str or ~.BlobProperties
         :keyword int timeout:
             The timeout parameter is expressed in seconds.
         :keyword lease:
             Required if the blob has an active lease. Value can be a BlobLeaseClient object
             or the lease ID as a string.
-        :paramtype lease: ~azure.storage.blob.BlobLeaseClient or str
+        :paramtype lease: ~.BlobLeaseClient or str
         :keyword bool raise_on_any_failure:
             This is a boolean param which defaults to True. When this is set, an exception
             is raised even if there is a single operation failure.
@@ -1203,10 +1203,10 @@ class ContainerClient(StorageAccountHostsMixin):
             A page blob tier value to set the blob to. The tier correlates to the size of the
             blob and number of allowed IOPS. This is only applicable to page blobs on
             premium storage accounts.
-        :type premium_page_blob_tier: ~azure.storage.blob.PremiumPageBlobTier
+        :type premium_page_blob_tier: ~.PremiumPageBlobTier
         :param blobs: The blobs with which to interact. This can be a single blob, or multiple values can
             be supplied, where each value is either the name of the blob (str) or BlobProperties.
-        :type blobs: str or ~azure.storage.blob.BlobProperties
+        :type blobs: str or ~.BlobProperties
         :keyword int timeout:
             The timeout parameter is expressed in seconds. This method may make
             multiple calls to the Azure service and the timeout will apply to
@@ -1214,7 +1214,7 @@ class ContainerClient(StorageAccountHostsMixin):
         :keyword lease:
             Required if the blob has an active lease. Value can be a BlobLeaseClient object
             or the lease ID as a string.
-        :paramtype lease: ~azure.storage.blob.BlobLeaseClient or str
+        :paramtype lease: ~.BlobLeaseClient or str
         :keyword bool raise_on_any_failure:
             This is a boolean param which defaults to True. When this is set, an exception
             is raised even if there is a single operation failure.
@@ -1259,12 +1259,12 @@ class ContainerClient(StorageAccountHostsMixin):
 
         :param blob:
             The blob with which to interact.
-        :type blob: str or ~azure.storage.blob.BlobProperties
+        :type blob: str or ~.BlobProperties
         :param str snapshot:
             The optional blob snapshot on which to operate. This can be the snapshot ID string
             or the response returned from :func:`~BlobClient.create_snapshot()`.
         :returns: A BlobClient.
-        :rtype: ~azure.storage.blob.BlobClient
+        :rtype: ~.BlobClient
 
         .. admonition:: Example:
 

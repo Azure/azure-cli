@@ -70,29 +70,29 @@ class BlockBlobOperations(object):
         :param tier: Optional. Indicates the tier to be set on the blob.
          Possible values include: 'P4', 'P6', 'P10', 'P15', 'P20', 'P30',
          'P40', 'P50', 'P60', 'P70', 'P80', 'Hot', 'Cool', 'Archive'
-        :type tier: str or ~azure.storage.blob.models.AccessTierOptional
+        :type tier: str or ~.models.AccessTierOptional
         :param request_id: Provides a client-generated, opaque value with a 1
          KB character limit that is recorded in the analytics logs when storage
          analytics logging is enabled.
         :type request_id: str
         :param blob_http_headers: Additional parameters for the operation
-        :type blob_http_headers: ~azure.storage.blob.models.BlobHTTPHeaders
+        :type blob_http_headers: ~.models.BlobHTTPHeaders
         :param lease_access_conditions: Additional parameters for the
          operation
         :type lease_access_conditions:
-         ~azure.storage.blob.models.LeaseAccessConditions
+         ~.models.LeaseAccessConditions
         :param cpk_info: Additional parameters for the operation
-        :type cpk_info: ~azure.storage.blob.models.CpkInfo
+        :type cpk_info: ~.models.CpkInfo
         :param modified_access_conditions: Additional parameters for the
          operation
         :type modified_access_conditions:
-         ~azure.storage.blob.models.ModifiedAccessConditions
+         ~.models.ModifiedAccessConditions
         :param callable cls: A custom type or function that will be passed the
          direct response
         :return: None or the result of cls(response)
         :rtype: None
         :raises:
-         :class:`StorageErrorException<azure.storage.blob.models.StorageErrorException>`
+         :class:`StorageErrorException<.models.StorageErrorException>`
         """
         error_map = kwargs.pop('error_map', None)
         blob_content_type = None
@@ -251,15 +251,15 @@ class BlockBlobOperations(object):
         :param lease_access_conditions: Additional parameters for the
          operation
         :type lease_access_conditions:
-         ~azure.storage.blob.models.LeaseAccessConditions
+         ~.models.LeaseAccessConditions
         :param cpk_info: Additional parameters for the operation
-        :type cpk_info: ~azure.storage.blob.models.CpkInfo
+        :type cpk_info: ~.models.CpkInfo
         :param callable cls: A custom type or function that will be passed the
          direct response
         :return: None or the result of cls(response)
         :rtype: None
         :raises:
-         :class:`StorageErrorException<azure.storage.blob.models.StorageErrorException>`
+         :class:`StorageErrorException<.models.StorageErrorException>`
         """
         error_map = kwargs.pop('error_map', None)
         lease_id = None
@@ -368,21 +368,21 @@ class BlockBlobOperations(object):
          analytics logging is enabled.
         :type request_id: str
         :param cpk_info: Additional parameters for the operation
-        :type cpk_info: ~azure.storage.blob.models.CpkInfo
+        :type cpk_info: ~.models.CpkInfo
         :param lease_access_conditions: Additional parameters for the
          operation
         :type lease_access_conditions:
-         ~azure.storage.blob.models.LeaseAccessConditions
+         ~.models.LeaseAccessConditions
         :param source_modified_access_conditions: Additional parameters for
          the operation
         :type source_modified_access_conditions:
-         ~azure.storage.blob.models.SourceModifiedAccessConditions
+         ~.models.SourceModifiedAccessConditions
         :param callable cls: A custom type or function that will be passed the
          direct response
         :return: None or the result of cls(response)
         :rtype: None
         :raises:
-         :class:`StorageErrorException<azure.storage.blob.models.StorageErrorException>`
+         :class:`StorageErrorException<.models.StorageErrorException>`
         """
         error_map = kwargs.pop('error_map', None)
         encryption_key = None
@@ -492,7 +492,7 @@ class BlockBlobOperations(object):
         block, whichever list it may belong to.
 
         :param blocks:
-        :type blocks: ~azure.storage.blob.models.BlockLookupList
+        :type blocks: ~.models.BlockLookupList
         :param timeout: The timeout parameter is expressed in seconds. For
          more information, see <a
          href="https://docs.microsoft.com/en-us/rest/api/storageservices/fileservices/setting-timeouts-for-blob-service-operations">Setting
@@ -517,29 +517,29 @@ class BlockBlobOperations(object):
         :param tier: Optional. Indicates the tier to be set on the blob.
          Possible values include: 'P4', 'P6', 'P10', 'P15', 'P20', 'P30',
          'P40', 'P50', 'P60', 'P70', 'P80', 'Hot', 'Cool', 'Archive'
-        :type tier: str or ~azure.storage.blob.models.AccessTierOptional
+        :type tier: str or ~.models.AccessTierOptional
         :param request_id: Provides a client-generated, opaque value with a 1
          KB character limit that is recorded in the analytics logs when storage
          analytics logging is enabled.
         :type request_id: str
         :param blob_http_headers: Additional parameters for the operation
-        :type blob_http_headers: ~azure.storage.blob.models.BlobHTTPHeaders
+        :type blob_http_headers: ~.models.BlobHTTPHeaders
         :param lease_access_conditions: Additional parameters for the
          operation
         :type lease_access_conditions:
-         ~azure.storage.blob.models.LeaseAccessConditions
+         ~.models.LeaseAccessConditions
         :param cpk_info: Additional parameters for the operation
-        :type cpk_info: ~azure.storage.blob.models.CpkInfo
+        :type cpk_info: ~.models.CpkInfo
         :param modified_access_conditions: Additional parameters for the
          operation
         :type modified_access_conditions:
-         ~azure.storage.blob.models.ModifiedAccessConditions
+         ~.models.ModifiedAccessConditions
         :param callable cls: A custom type or function that will be passed the
          direct response
         :return: None or the result of cls(response)
         :rtype: None
         :raises:
-         :class:`StorageErrorException<azure.storage.blob.models.StorageErrorException>`
+         :class:`StorageErrorException<.models.StorageErrorException>`
         """
         error_map = kwargs.pop('error_map', None)
         blob_cache_control = None
@@ -679,7 +679,7 @@ class BlockBlobOperations(object):
         :param list_type: Specifies whether to return the list of committed
          blocks, the list of uncommitted blocks, or both lists together.
          Possible values include: 'committed', 'uncommitted', 'all'
-        :type list_type: str or ~azure.storage.blob.models.BlockListType
+        :type list_type: str or ~.models.BlockListType
         :param snapshot: The snapshot parameter is an opaque DateTime value
          that, when present, specifies the blob snapshot to retrieve. For more
          information on working with blob snapshots, see <a
@@ -698,13 +698,13 @@ class BlockBlobOperations(object):
         :param lease_access_conditions: Additional parameters for the
          operation
         :type lease_access_conditions:
-         ~azure.storage.blob.models.LeaseAccessConditions
+         ~.models.LeaseAccessConditions
         :param callable cls: A custom type or function that will be passed the
          direct response
         :return: BlockList or the result of cls(response)
-        :rtype: ~azure.storage.blob.models.BlockList
+        :rtype: ~.models.BlockList
         :raises:
-         :class:`StorageErrorException<azure.storage.blob.models.StorageErrorException>`
+         :class:`StorageErrorException<.models.StorageErrorException>`
         """
         error_map = kwargs.pop('error_map', None)
         lease_id = None

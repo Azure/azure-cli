@@ -57,7 +57,7 @@ class ContainerOperations:
         :param access: Specifies whether data in the container may be accessed
          publicly and the level of access. Possible values include:
          'container', 'blob'
-        :type access: str or ~azure.storage.blob.models.PublicAccessType
+        :type access: str or ~.models.PublicAccessType
         :param request_id: Provides a client-generated, opaque value with a 1
          KB character limit that is recorded in the analytics logs when storage
          analytics logging is enabled.
@@ -67,7 +67,7 @@ class ContainerOperations:
         :return: None or the result of cls(response)
         :rtype: None
         :raises:
-         :class:`StorageErrorException<azure.storage.blob.models.StorageErrorException>`
+         :class:`StorageErrorException<.models.StorageErrorException>`
         """
         error_map = kwargs.pop('error_map', None)
         restype = "container"
@@ -134,13 +134,13 @@ class ContainerOperations:
         :param lease_access_conditions: Additional parameters for the
          operation
         :type lease_access_conditions:
-         ~azure.storage.blob.models.LeaseAccessConditions
+         ~.models.LeaseAccessConditions
         :param callable cls: A custom type or function that will be passed the
          direct response
         :return: None or the result of cls(response)
         :rtype: None
         :raises:
-         :class:`StorageErrorException<azure.storage.blob.models.StorageErrorException>`
+         :class:`StorageErrorException<.models.StorageErrorException>`
         """
         error_map = kwargs.pop('error_map', None)
         lease_id = None
@@ -216,17 +216,17 @@ class ContainerOperations:
         :param lease_access_conditions: Additional parameters for the
          operation
         :type lease_access_conditions:
-         ~azure.storage.blob.models.LeaseAccessConditions
+         ~.models.LeaseAccessConditions
         :param modified_access_conditions: Additional parameters for the
          operation
         :type modified_access_conditions:
-         ~azure.storage.blob.models.ModifiedAccessConditions
+         ~.models.ModifiedAccessConditions
         :param callable cls: A custom type or function that will be passed the
          direct response
         :return: None or the result of cls(response)
         :rtype: None
         :raises:
-         :class:`StorageErrorException<azure.storage.blob.models.StorageErrorException>`
+         :class:`StorageErrorException<.models.StorageErrorException>`
         """
         error_map = kwargs.pop('error_map', None)
         lease_id = None
@@ -312,17 +312,17 @@ class ContainerOperations:
         :param lease_access_conditions: Additional parameters for the
          operation
         :type lease_access_conditions:
-         ~azure.storage.blob.models.LeaseAccessConditions
+         ~.models.LeaseAccessConditions
         :param modified_access_conditions: Additional parameters for the
          operation
         :type modified_access_conditions:
-         ~azure.storage.blob.models.ModifiedAccessConditions
+         ~.models.ModifiedAccessConditions
         :param callable cls: A custom type or function that will be passed the
          direct response
         :return: None or the result of cls(response)
         :rtype: None
         :raises:
-         :class:`StorageErrorException<azure.storage.blob.models.StorageErrorException>`
+         :class:`StorageErrorException<.models.StorageErrorException>`
         """
         error_map = kwargs.pop('error_map', None)
         lease_id = None
@@ -399,13 +399,13 @@ class ContainerOperations:
         :param lease_access_conditions: Additional parameters for the
          operation
         :type lease_access_conditions:
-         ~azure.storage.blob.models.LeaseAccessConditions
+         ~.models.LeaseAccessConditions
         :param callable cls: A custom type or function that will be passed the
          direct response
         :return: list or the result of cls(response)
-        :rtype: list[~azure.storage.blob.models.SignedIdentifier]
+        :rtype: list[~.models.SignedIdentifier]
         :raises:
-         :class:`StorageErrorException<azure.storage.blob.models.StorageErrorException>`
+         :class:`StorageErrorException<.models.StorageErrorException>`
         """
         error_map = kwargs.pop('error_map', None)
         lease_id = None
@@ -473,7 +473,7 @@ class ContainerOperations:
         indicate whether blobs in a container may be accessed publicly.
 
         :param container_acl: the acls for the container
-        :type container_acl: list[~azure.storage.blob.models.SignedIdentifier]
+        :type container_acl: list[~.models.SignedIdentifier]
         :param timeout: The timeout parameter is expressed in seconds. For
          more information, see <a
          href="https://docs.microsoft.com/en-us/rest/api/storageservices/fileservices/setting-timeouts-for-blob-service-operations">Setting
@@ -482,7 +482,7 @@ class ContainerOperations:
         :param access: Specifies whether data in the container may be accessed
          publicly and the level of access. Possible values include:
          'container', 'blob'
-        :type access: str or ~azure.storage.blob.models.PublicAccessType
+        :type access: str or ~.models.PublicAccessType
         :param request_id: Provides a client-generated, opaque value with a 1
          KB character limit that is recorded in the analytics logs when storage
          analytics logging is enabled.
@@ -490,17 +490,17 @@ class ContainerOperations:
         :param lease_access_conditions: Additional parameters for the
          operation
         :type lease_access_conditions:
-         ~azure.storage.blob.models.LeaseAccessConditions
+         ~.models.LeaseAccessConditions
         :param modified_access_conditions: Additional parameters for the
          operation
         :type modified_access_conditions:
-         ~azure.storage.blob.models.ModifiedAccessConditions
+         ~.models.ModifiedAccessConditions
         :param callable cls: A custom type or function that will be passed the
          direct response
         :return: None or the result of cls(response)
         :rtype: None
         :raises:
-         :class:`StorageErrorException<azure.storage.blob.models.StorageErrorException>`
+         :class:`StorageErrorException<.models.StorageErrorException>`
         """
         error_map = kwargs.pop('error_map', None)
         lease_id = None
@@ -601,13 +601,13 @@ class ContainerOperations:
         :param modified_access_conditions: Additional parameters for the
          operation
         :type modified_access_conditions:
-         ~azure.storage.blob.models.ModifiedAccessConditions
+         ~.models.ModifiedAccessConditions
         :param callable cls: A custom type or function that will be passed the
          direct response
         :return: None or the result of cls(response)
         :rtype: None
         :raises:
-         :class:`StorageErrorException<azure.storage.blob.models.StorageErrorException>`
+         :class:`StorageErrorException<.models.StorageErrorException>`
         """
         error_map = kwargs.pop('error_map', None)
         if_modified_since = None
@@ -692,13 +692,13 @@ class ContainerOperations:
         :param modified_access_conditions: Additional parameters for the
          operation
         :type modified_access_conditions:
-         ~azure.storage.blob.models.ModifiedAccessConditions
+         ~.models.ModifiedAccessConditions
         :param callable cls: A custom type or function that will be passed the
          direct response
         :return: None or the result of cls(response)
         :rtype: None
         :raises:
-         :class:`StorageErrorException<azure.storage.blob.models.StorageErrorException>`
+         :class:`StorageErrorException<.models.StorageErrorException>`
         """
         error_map = kwargs.pop('error_map', None)
         if_modified_since = None
@@ -779,13 +779,13 @@ class ContainerOperations:
         :param modified_access_conditions: Additional parameters for the
          operation
         :type modified_access_conditions:
-         ~azure.storage.blob.models.ModifiedAccessConditions
+         ~.models.ModifiedAccessConditions
         :param callable cls: A custom type or function that will be passed the
          direct response
         :return: None or the result of cls(response)
         :rtype: None
         :raises:
-         :class:`StorageErrorException<azure.storage.blob.models.StorageErrorException>`
+         :class:`StorageErrorException<.models.StorageErrorException>`
         """
         error_map = kwargs.pop('error_map', None)
         if_modified_since = None
@@ -875,13 +875,13 @@ class ContainerOperations:
         :param modified_access_conditions: Additional parameters for the
          operation
         :type modified_access_conditions:
-         ~azure.storage.blob.models.ModifiedAccessConditions
+         ~.models.ModifiedAccessConditions
         :param callable cls: A custom type or function that will be passed the
          direct response
         :return: None or the result of cls(response)
         :rtype: None
         :raises:
-         :class:`StorageErrorException<azure.storage.blob.models.StorageErrorException>`
+         :class:`StorageErrorException<.models.StorageErrorException>`
         """
         error_map = kwargs.pop('error_map', None)
         if_modified_since = None
@@ -969,13 +969,13 @@ class ContainerOperations:
         :param modified_access_conditions: Additional parameters for the
          operation
         :type modified_access_conditions:
-         ~azure.storage.blob.models.ModifiedAccessConditions
+         ~.models.ModifiedAccessConditions
         :param callable cls: A custom type or function that will be passed the
          direct response
         :return: None or the result of cls(response)
         :rtype: None
         :raises:
-         :class:`StorageErrorException<azure.storage.blob.models.StorageErrorException>`
+         :class:`StorageErrorException<.models.StorageErrorException>`
         """
         error_map = kwargs.pop('error_map', None)
         if_modified_since = None
@@ -1066,7 +1066,7 @@ class ContainerOperations:
         :param include: Include this parameter to specify one or more datasets
          to include in the response.
         :type include: list[str or
-         ~azure.storage.blob.models.ListBlobsIncludeItem]
+         ~.models.ListBlobsIncludeItem]
         :param timeout: The timeout parameter is expressed in seconds. For
          more information, see <a
          href="https://docs.microsoft.com/en-us/rest/api/storageservices/fileservices/setting-timeouts-for-blob-service-operations">Setting
@@ -1079,9 +1079,9 @@ class ContainerOperations:
         :param callable cls: A custom type or function that will be passed the
          direct response
         :return: ListBlobsFlatSegmentResponse or the result of cls(response)
-        :rtype: ~azure.storage.blob.models.ListBlobsFlatSegmentResponse
+        :rtype: ~.models.ListBlobsFlatSegmentResponse
         :raises:
-         :class:`StorageErrorException<azure.storage.blob.models.StorageErrorException>`
+         :class:`StorageErrorException<.models.StorageErrorException>`
         """
         error_map = kwargs.pop('error_map', None)
         restype = "container"
@@ -1177,7 +1177,7 @@ class ContainerOperations:
         :param include: Include this parameter to specify one or more datasets
          to include in the response.
         :type include: list[str or
-         ~azure.storage.blob.models.ListBlobsIncludeItem]
+         ~.models.ListBlobsIncludeItem]
         :param timeout: The timeout parameter is expressed in seconds. For
          more information, see <a
          href="https://docs.microsoft.com/en-us/rest/api/storageservices/fileservices/setting-timeouts-for-blob-service-operations">Setting
@@ -1191,9 +1191,9 @@ class ContainerOperations:
          direct response
         :return: ListBlobsHierarchySegmentResponse or the result of
          cls(response)
-        :rtype: ~azure.storage.blob.models.ListBlobsHierarchySegmentResponse
+        :rtype: ~.models.ListBlobsHierarchySegmentResponse
         :raises:
-         :class:`StorageErrorException<azure.storage.blob.models.StorageErrorException>`
+         :class:`StorageErrorException<.models.StorageErrorException>`
         """
         error_map = kwargs.pop('error_map', None)
         restype = "container"
@@ -1265,7 +1265,7 @@ class ContainerOperations:
         :return: None or the result of cls(response)
         :rtype: None
         :raises:
-         :class:`StorageErrorException<azure.storage.blob.models.StorageErrorException>`
+         :class:`StorageErrorException<.models.StorageErrorException>`
         """
         error_map = kwargs.pop('error_map', None)
         restype = "account"

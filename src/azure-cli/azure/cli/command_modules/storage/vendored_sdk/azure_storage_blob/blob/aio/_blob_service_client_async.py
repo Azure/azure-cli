@@ -128,7 +128,7 @@ class BlobServiceClient(AsyncStorageAccountHostsMixin, BlobServiceClientBase):
         :keyword int timeout:
             The timeout parameter is expressed in seconds.
         :return: The user delegation key.
-        :rtype: ~azure.storage.blob.UserDelegationKey
+        :rtype: ~.UserDelegationKey
         """
         key_info = KeyInfo(start=_to_utc_datetime(key_start_time), expiry=_to_utc_datetime(key_expiry_time))
         timeout = kwargs.pop('timeout', None)
@@ -257,31 +257,31 @@ class BlobServiceClient(AsyncStorageAccountHostsMixin, BlobServiceClientBase):
 
         :param analytics_logging:
             Groups the Azure Analytics Logging settings.
-        :type analytics_logging: ~azure.storage.blob.BlobAnalyticsLogging
+        :type analytics_logging: ~.BlobAnalyticsLogging
         :param hour_metrics:
             The hour metrics settings provide a summary of request
             statistics grouped by API in hourly aggregates for blobs.
-        :type hour_metrics: ~azure.storage.blob.Metrics
+        :type hour_metrics: ~.Metrics
         :param minute_metrics:
             The minute metrics settings provide request statistics
             for each minute for blobs.
-        :type minute_metrics: ~azure.storage.blob.Metrics
+        :type minute_metrics: ~.Metrics
         :param cors:
             You can include up to five CorsRule elements in the
             list. If an empty list is specified, all CORS rules will be deleted,
             and CORS will be disabled for the service.
-        :type cors: list[~azure.storage.blob.CorsRule]
+        :type cors: list[~.CorsRule]
         :param str target_version:
             Indicates the default version to use for requests if an incoming
             request's version is not specified.
         :param delete_retention_policy:
             The delete retention policy specifies whether to retain deleted blobs.
             It also specifies the number of days and versions of blob to keep.
-        :type delete_retention_policy: ~azure.storage.blob.RetentionPolicy
+        :type delete_retention_policy: ~.RetentionPolicy
         :param static_website:
             Specifies whether the static website feature is enabled,
             and if yes, indicates the index document and 404 error document to use.
-        :type static_website: ~azure.storage.blob.StaticWebsite
+        :type static_website: ~.StaticWebsite
         :keyword int timeout:
             The timeout parameter is expressed in seconds.
         :rtype: None
@@ -334,7 +334,7 @@ class BlobServiceClient(AsyncStorageAccountHostsMixin, BlobServiceClientBase):
         :keyword int timeout:
             The timeout parameter is expressed in seconds.
         :returns: An iterable (auto-paging) of ContainerProperties.
-        :rtype: ~azure.core.async_paging.AsyncItemPaged[~azure.storage.blob.ContainerProperties]
+        :rtype: ~azure.core.async_paging.AsyncItemPaged[~.ContainerProperties]
 
         .. admonition:: Example:
 
@@ -382,10 +382,10 @@ class BlobServiceClient(AsyncStorageAccountHostsMixin, BlobServiceClientBase):
         :type metadata: dict(str, str)
         :param public_access:
             Possible values include: 'container', 'blob'.
-        :type public_access: str or ~azure.storage.blob.PublicAccess
+        :type public_access: str or ~.PublicAccess
         :keyword int timeout:
             The timeout parameter is expressed in seconds.
-        :rtype: ~azure.storage.blob.aio.ContainerClient
+        :rtype: ~.aio.ContainerClient
 
         .. admonition:: Example:
 
@@ -418,12 +418,12 @@ class BlobServiceClient(AsyncStorageAccountHostsMixin, BlobServiceClientBase):
         :param container:
             The container to delete. This can either be the name of the container,
             or an instance of ContainerProperties.
-        :type container: str or ~azure.storage.blob.ContainerProperties
+        :type container: str or ~.ContainerProperties
         :param lease:
             If specified, delete_container only succeeds if the
             container's lease is active and matches this ID.
             Required if the container has an active lease.
-        :paramtype lease: ~azure.storage.blob.aio.BlobLeaseClient or str
+        :paramtype lease: ~.aio.BlobLeaseClient or str
         :keyword ~datetime.datetime if_modified_since:
             A DateTime value. Azure expects the date value passed in to be UTC.
             If timezone is included, any non-UTC datetimes will be converted to UTC.
@@ -471,9 +471,9 @@ class BlobServiceClient(AsyncStorageAccountHostsMixin, BlobServiceClientBase):
         :param container:
             The container. This can either be the name of the container,
             or an instance of ContainerProperties.
-        :type container: str or ~azure.storage.blob.ContainerProperties
+        :type container: str or ~.ContainerProperties
         :returns: A ContainerClient.
-        :rtype: ~azure.storage.blob.aio.ContainerClient
+        :rtype: ~.aio.ContainerClient
 
         .. admonition:: Example:
 
@@ -512,18 +512,18 @@ class BlobServiceClient(AsyncStorageAccountHostsMixin, BlobServiceClientBase):
         :param container:
             The container that the blob is in. This can either be the name of the container,
             or an instance of ContainerProperties.
-        :type container: str or ~azure.storage.blob.ContainerProperties
+        :type container: str or ~.ContainerProperties
         :param blob:
             The blob with which to interact. This can either be the name of the blob,
             or an instance of BlobProperties.
-        :type blob: str or ~azure.storage.blob.BlobProperties
+        :type blob: str or ~.BlobProperties
         :param snapshot:
             The optional blob snapshot on which to operate. This can either be the ID of the snapshot,
             or a dictionary output returned by
-            :func:`~azure.storage.blob.aio.BlobClient.create_snapshot()`.
+            :func:`~.aio.BlobClient.create_snapshot()`.
         :type snapshot: str or dict(str, Any)
         :returns: A BlobClient.
-        :rtype: ~azure.storage.blob.aio.BlobClient
+        :rtype: ~.aio.BlobClient
 
         .. admonition:: Example:
 

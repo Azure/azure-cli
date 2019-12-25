@@ -29,19 +29,19 @@ class AzureBlobStorage(object):
 
 
     :ivar service: Service operations
-    :vartype service: azure.storage.blob.aio.operations_async.ServiceOperations
+    :vartype service: .aio.operations_async.ServiceOperations
     :ivar container: Container operations
-    :vartype container: azure.storage.blob.aio.operations_async.ContainerOperations
+    :vartype container: .aio.operations_async.ContainerOperations
     :ivar directory: Directory operations
-    :vartype directory: azure.storage.blob.aio.operations_async.DirectoryOperations
+    :vartype directory: .aio.operations_async.DirectoryOperations
     :ivar blob: Blob operations
-    :vartype blob: azure.storage.blob.aio.operations_async.BlobOperations
+    :vartype blob: .aio.operations_async.BlobOperations
     :ivar page_blob: PageBlob operations
-    :vartype page_blob: azure.storage.blob.aio.operations_async.PageBlobOperations
+    :vartype page_blob: .aio.operations_async.PageBlobOperations
     :ivar append_blob: AppendBlob operations
-    :vartype append_blob: azure.storage.blob.aio.operations_async.AppendBlobOperations
+    :vartype append_blob: .aio.operations_async.AppendBlobOperations
     :ivar block_blob: BlockBlob operations
-    :vartype block_blob: azure.storage.blob.aio.operations_async.BlockBlobOperations
+    :vartype block_blob: .aio.operations_async.BlockBlobOperations
 
     :param url: The URL of the service account, container, or blob that is the
      targe of the desired operation.

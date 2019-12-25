@@ -52,9 +52,10 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         resource_type=ResourceType.DATA_STORAGE)
 
     container_sdk = CliCommandType(
-        operations_tmpl='azure.storage.blob#BlobServiceClient.{}',
+        operations_tmpl='azure.cli.command_modules.storage.vendored_sdk.azure_storage_blob.blob#BlobServiceClient.{}',
         client_factory=container_data_factory
     )
+
     def get_custom_sdk(custom_module, client_factory, resource_type=ResourceType.DATA_STORAGE):
         """Returns a CliCommandType instance with specified operation template based on the given custom module name.
         This is useful when the command is not defined in the default 'custom' module but instead in a module under

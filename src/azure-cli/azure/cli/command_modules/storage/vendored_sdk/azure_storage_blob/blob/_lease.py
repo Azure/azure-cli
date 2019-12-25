@@ -50,8 +50,8 @@ class BlobLeaseClient(object):
 
     :param client:
         The client of the blob or container to lease.
-    :type client: ~azure.storage.blob.BlobClient or
-        ~azure.storage.blob.ContainerClient
+    :type client: ~.BlobClient or
+        ~.ContainerClient
     :param str lease_id:
         A string representing the lease ID of an existing lease. This value does not
         need to be specified in order to acquire a new lease, or break one.

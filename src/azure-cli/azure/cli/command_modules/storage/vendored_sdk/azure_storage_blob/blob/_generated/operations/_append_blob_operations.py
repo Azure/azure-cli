@@ -64,23 +64,23 @@ class AppendBlobOperations(object):
          analytics logging is enabled.
         :type request_id: str
         :param blob_http_headers: Additional parameters for the operation
-        :type blob_http_headers: ~azure.storage.blob.models.BlobHTTPHeaders
+        :type blob_http_headers: ~.models.BlobHTTPHeaders
         :param lease_access_conditions: Additional parameters for the
          operation
         :type lease_access_conditions:
-         ~azure.storage.blob.models.LeaseAccessConditions
+         ~.models.LeaseAccessConditions
         :param cpk_info: Additional parameters for the operation
-        :type cpk_info: ~azure.storage.blob.models.CpkInfo
+        :type cpk_info: ~.models.CpkInfo
         :param modified_access_conditions: Additional parameters for the
          operation
         :type modified_access_conditions:
-         ~azure.storage.blob.models.ModifiedAccessConditions
+         ~.models.ModifiedAccessConditions
         :param callable cls: A custom type or function that will be passed the
          direct response
         :return: None or the result of cls(response)
         :rtype: None
         :raises:
-         :class:`StorageErrorException<azure.storage.blob.models.StorageErrorException>`
+         :class:`StorageErrorException<.models.StorageErrorException>`
         """
         error_map = kwargs.pop('error_map', None)
         blob_content_type = None
@@ -229,23 +229,23 @@ class AppendBlobOperations(object):
         :param lease_access_conditions: Additional parameters for the
          operation
         :type lease_access_conditions:
-         ~azure.storage.blob.models.LeaseAccessConditions
+         ~.models.LeaseAccessConditions
         :param append_position_access_conditions: Additional parameters for
          the operation
         :type append_position_access_conditions:
-         ~azure.storage.blob.models.AppendPositionAccessConditions
+         ~.models.AppendPositionAccessConditions
         :param cpk_info: Additional parameters for the operation
-        :type cpk_info: ~azure.storage.blob.models.CpkInfo
+        :type cpk_info: ~.models.CpkInfo
         :param modified_access_conditions: Additional parameters for the
          operation
         :type modified_access_conditions:
-         ~azure.storage.blob.models.ModifiedAccessConditions
+         ~.models.ModifiedAccessConditions
         :param callable cls: A custom type or function that will be passed the
          direct response
         :return: None or the result of cls(response)
         :rtype: None
         :raises:
-         :class:`StorageErrorException<azure.storage.blob.models.StorageErrorException>`
+         :class:`StorageErrorException<.models.StorageErrorException>`
         """
         error_map = kwargs.pop('error_map', None)
         lease_id = None
@@ -386,29 +386,29 @@ class AppendBlobOperations(object):
          analytics logging is enabled.
         :type request_id: str
         :param cpk_info: Additional parameters for the operation
-        :type cpk_info: ~azure.storage.blob.models.CpkInfo
+        :type cpk_info: ~.models.CpkInfo
         :param lease_access_conditions: Additional parameters for the
          operation
         :type lease_access_conditions:
-         ~azure.storage.blob.models.LeaseAccessConditions
+         ~.models.LeaseAccessConditions
         :param append_position_access_conditions: Additional parameters for
          the operation
         :type append_position_access_conditions:
-         ~azure.storage.blob.models.AppendPositionAccessConditions
+         ~.models.AppendPositionAccessConditions
         :param modified_access_conditions: Additional parameters for the
          operation
         :type modified_access_conditions:
-         ~azure.storage.blob.models.ModifiedAccessConditions
+         ~.models.ModifiedAccessConditions
         :param source_modified_access_conditions: Additional parameters for
          the operation
         :type source_modified_access_conditions:
-         ~azure.storage.blob.models.SourceModifiedAccessConditions
+         ~.models.SourceModifiedAccessConditions
         :param callable cls: A custom type or function that will be passed the
          direct response
         :return: None or the result of cls(response)
         :rtype: None
         :raises:
-         :class:`StorageErrorException<azure.storage.blob.models.StorageErrorException>`
+         :class:`StorageErrorException<.models.StorageErrorException>`
         """
         error_map = kwargs.pop('error_map', None)
         encryption_key = None

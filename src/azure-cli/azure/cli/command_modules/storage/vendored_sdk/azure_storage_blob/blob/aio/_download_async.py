@@ -160,7 +160,7 @@ class StorageStreamDownloader(object):  # pylint: disable=too-many-instance-attr
         The name of the blob being downloaded.
     :ivar str container:
         The name of the container where the blob is.
-    :ivar ~azure.storage.blob.BlobProperties properties:
+    :ivar ~.BlobProperties properties:
         The properties of the blob being downloaded. If only a range of the data is being
         downloaded, this will be reflected in the properties.
     :ivar int size:
