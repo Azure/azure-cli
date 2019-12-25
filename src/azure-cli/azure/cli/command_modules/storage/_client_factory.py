@@ -78,6 +78,14 @@ def blob_data_service_factory(cli_ctx, kwargs):
                                         socket_timeout=kwargs.pop('socket_timeout', None),
                                         token_credential=kwargs.pop('token_credential', None))
 
+def container_data_factory(cli_ctx, kwargs):
+    from azure.storage.blob import BlobServiceClient
+
+    return generic_data_service_factory(cli_ctx, BlobServiceClient,
+                                        kwargs.pop('account_name', None),
+                                        kwargs.pop('account_key', None),
+                                        connection_string=kwargs.pop('connection_string', None),
+                                        sas_token=kwargs.pop('sas_token', None))
 
 def table_data_service_factory(cli_ctx, kwargs):
     return generic_data_service_factory(cli_ctx,

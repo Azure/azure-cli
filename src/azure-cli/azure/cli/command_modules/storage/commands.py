@@ -10,7 +10,7 @@ from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_co
                                                                multi_service_properties_factory,
                                                                cf_mgmt_policy,
                                                                cf_blob_data_gen_update, cf_sa_for_keys,
-                                                               cf_mgmt_blob_services)
+                                                               cf_mgmt_blob_services, container_data_factory)
 from azure.cli.command_modules.storage.sdkutil import cosmosdb_table_exists
 from azure.cli.command_modules.storage._format import transform_immutability_policy
 from azure.cli.core.commands import CliCommandType
@@ -51,6 +51,10 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         client_factory=blob_data_service_factory,
         resource_type=ResourceType.DATA_STORAGE)
 
+    container_sdk = CliCommandType(
+        operations_tmpl='azure.storage.blob#BlobServiceClient.{}',
+        client_factory=container_data_factory
+    )
     def get_custom_sdk(custom_module, client_factory, resource_type=ResourceType.DATA_STORAGE):
         """Returns a CliCommandType instance with specified operation template based on the given custom module name.
         This is useful when the command is not defined in the default 'custom' module but instead in a module under
@@ -241,6 +245,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                             custom_command_type=get_custom_sdk('azcopy', blob_data_service_factory)) as g:
         g.storage_custom_command_oauth('sync', 'storage_blob_sync', is_preview=True)
 
+    with self.command_group('storage container', command_type=container_sdk) as g:
+        g.storage_command_oauth('create', 'create_container')
+
     with self.command_group('storage container', command_type=block_blob_sdk,
                             custom_command_type=get_custom_sdk('blob', blob_data_service_factory)) as g:
         from azure.cli.command_modules.storage._transformers import (transform_storage_list_output,
@@ -258,10 +265,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                        table_transformer=transform_boolean_for_table)
         g.storage_command_oauth('show', 'get_container_properties', table_transformer=transform_container_show,
                                 exception_handler=show_exception_handler)
-        g.storage_command_oauth('create', 'create_container',
-                                transform=create_boolean_result_output_transformer(
-                                    'created'),
-                                table_transformer=transform_boolean_for_table)
+
         g.storage_custom_command_oauth('generate-sas', 'generate_container_shared_access_signature',
                                        min_api='2018-11-09')
         g.storage_command_oauth(
