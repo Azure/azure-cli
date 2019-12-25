@@ -112,7 +112,13 @@ def get_azure_core_blob_client(cli_ctx, service, name=None, key=None, connection
 def container_data_factory(cli_ctx, kwargs):
     from .vendored_sdk.azure_storage_blob.blob import BlobServiceClient
     account_name = kwargs.pop('account_name', None)
-    credential = kwargs.pop('account_name', None) or kwargs.pop('account_key', None)
+    account_key = kwargs.pop('account_key', None)
+    sas_token = kwargs.pop('sas_token', None)
+    # Consider many credentials exist scenario
+    if account_key:
+        credential = account_key
+    if sas_token:
+        credential = sas_token
     connection_string = kwargs.pop('connection_string', None)
     account_url = "https://{}.blob.core.windows.net".format(account_name)
     if credential:
