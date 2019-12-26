@@ -1204,8 +1204,8 @@ class VMMonitorTest(ScenarioTest):
         TIMESPANTEMPLATE = '0000-00-00'
         super(VMMonitorTest, self).__init__(
             method_name,
-            recording_processors=TimeSpanProcessor(TIMESPANTEMPLATE),
-            replay_processors=TimeSpanProcessor(TIMESPANTEMPLATE)
+            recording_processors=[TimeSpanProcessor(TIMESPANTEMPLATE), DataSourceProcessor()],
+            replay_processors=[TimeSpanProcessor(TIMESPANTEMPLATE), DataSourceProcessor()]
         )
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_with_monitor', location='eastus')
