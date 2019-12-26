@@ -32,7 +32,8 @@ def _query_account_key(cli_ctx, account_name):
     t_storage_account_keys = get_sdk(
         cli_ctx, ResourceType.MGMT_STORAGE, 'models.storage_account_keys#StorageAccountKeys')
 
-    scf.config.enable_http_logger = False
+    if hasattr(scf, 'config'):
+        scf.config.enable_http_logger = False
     logger.debug('Disable HTTP logging to avoid having storage keys in debug logs')
     if t_storage_account_keys:
         return scf.storage_accounts.list_keys(rg, account_name).key1
@@ -550,6 +551,8 @@ def validate_key_name(namespace):
         namespace.key_name = namespace.key_type + key_options[namespace.key_name]
     else:
         namespace.key_name = storage_account_key_options[namespace.key_name]
+    # Azure core doesn't allow extra arguments that are not used in SDK.
+    del namespace.key_type
 
 
 def validate_metadata(namespace):

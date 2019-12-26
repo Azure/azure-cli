@@ -36,6 +36,7 @@ def handle_exception(ex):  # pylint: disable=too-many-return-statements
     from msrestazure.azure_exceptions import CloudError
     from msrest.exceptions import HttpOperationError, ValidationError, ClientRequestError
     from azure.cli.core.azlogging import CommandLoggerContext
+    from azure.mgmt.core.exceptions import ARMError
 
     with CommandLoggerContext(logger):
         if isinstance(ex, JMESPathTypeError):
@@ -43,7 +44,7 @@ def handle_exception(ex):  # pylint: disable=too-many-return-statements
             logger.error("To learn more about --query, please visit: "
                          "https://docs.microsoft.com/cli/azure/query-azure-cli?view=azure-cli-latest")
             return 1
-        if isinstance(ex, (CLIError, CloudError, AzureException)):
+        if isinstance(ex, (CLIError, CloudError, AzureException, ARMError)):
             logger.error(ex.args[0])
             return ex.args[1] if len(ex.args) >= 2 else 1
         if isinstance(ex, ValidationError):
@@ -348,7 +349,8 @@ def should_disable_connection_verify():
 def poller_classes():
     from msrestazure.azure_operation import AzureOperationPoller
     from msrest.polling.poller import LROPoller
-    return (AzureOperationPoller, LROPoller)
+    from azure.core.polling import LROPoller as AzureCoreLROPoller
+    return (AzureOperationPoller, LROPoller, AzureCoreLROPoller)
 
 
 def augment_no_wait_handler_args(no_wait_enabled, handler, handler_args):

@@ -122,7 +122,6 @@ DEPENDENCIES = [
     'azure-mgmt-signalr~=0.3.0',
     'azure-mgmt-sql~=0.15.0',
     'azure-mgmt-sqlvirtualmachine~=0.4.0',
-    'azure-mgmt-storage~=5.0.0',
     'azure-mgmt-trafficmanager~=0.51.0',
     'azure-mgmt-web~=0.42.0',
     'azure-multiapi-storage~=0.2.4',
@@ -150,7 +149,9 @@ DEPENDENCIES = [
     'websocket-client~=0.56.0',
     'xmltodict~=0.12',
     'javaproperties==0.5.1',
-    'jsondiff==1.2.0'
+    'jsondiff==1.2.0',
+    'azure-mgmt-core @ https://azurecorepoc.blob.core.windows.net/sdks/azure_mgmt_core-0.1.0-py2.py3-none-any.whl',
+    'azure-mgmt-storage @ https://azurecorepoc.blob.core.windows.net/sdks/azure_mgmt_storage-6.0.0-py2.py3-none-any.whl'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
