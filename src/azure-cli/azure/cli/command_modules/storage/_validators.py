@@ -551,6 +551,8 @@ def validate_key_name(namespace):
         namespace.key_name = namespace.key_type + key_options[namespace.key_name]
     else:
         namespace.key_name = storage_account_key_options[namespace.key_name]
+    # Azure core doesn't allow extra arguments that are not used in SDK.
+    del namespace.key_type
 
 
 def validate_metadata(namespace):
