@@ -110,7 +110,7 @@ def write_examples(cmd, examples, buffer, example_inner_indent):
             buffer.append(' ' + parameters)
         else:
             for p in parameters.split(' '):
-                if p.startswith('-'):
+                if p.startswith('--'):
                     buffer.append(opt_tpl.format(p))
                 else:
                     buffer.append(val_tpl.format(p))
@@ -184,7 +184,7 @@ def merge(aladdin_generated_helps, help_module):
     with open(temp_file_name, 'w', encoding='utf-8') as tmp:
         tmp.writelines(buffer)
 
-    # apply changes to original file if there are, otherwise, nothing not changed
+    # apply changes to original file if there are, otherwise, nothing changed
     os.replace(temp_file_name, help_module.__file__)
 
 
@@ -197,14 +197,18 @@ def git_operation(modules):    # pylint: disable=redefined-outer-name
     repo = Repo(BASE_PATH)
     git = repo.git
 
-    current_branch = repo.active_branch.name
+    try:
+        current_branch = repo.active_branch.name
+    except TypeError:
+        # raise if HEAD is a detached symbolic reference
+        git.checkout('-b', source_branch)
+        current_branch = repo.active_branch.name
 
     has_changes = False
 
     # 1. commit changes if any
     for module in modules:
-        short_name = module.__name__.split('.')[-2]
-
+        short_name = module.__name__.split('.')[-2].capitalize()
         if git.diff(module.__file__):
             git.add(module.__file__)
             git.commit('-m', '[{}] Merge Aladdin generated examples'.format(short_name))
@@ -216,14 +220,15 @@ def git_operation(modules):    # pylint: disable=redefined-outer-name
         print('No need to push commits and fire Pull Request.')
 
     # 2. if changes, push commits to source repo
-    git.push('origin', '{}:{}'.format(current_branch, source_branch))
+    # git.push('origin', '{}:{}'.format(current_branch, source_branch))
 
     # # 3. draft a pull request from source branch to target branch
     # headers = {
     #     'Authorization': 'token xxx',
     #     # 'Accept': 'application/vnd.github.shadow-cat-preview+json'  # draft PR needed
     # }
-    # url = 'https://api.github.com/repos/{owner}/{repo}/pulls'.format(owner=target_repo_owner, repo=target_repo)
+    # url = 'https://api.github.com/repos/{owner}/{repo}/pulls'.format(
+    #         owner=target_repo_owner,repo=target_repo)
     # data = {
     #     'title': "[Aladdin Parser] Parse aladdin.py into commands' _help.py",
     #     'head': '{}:{}'.format(source_repo_owner, source_branch),
@@ -266,3 +271,4 @@ if __name__ == '__main__':
             merge(aladdin_helps, mod)
 
     git_operation(modules)
+
