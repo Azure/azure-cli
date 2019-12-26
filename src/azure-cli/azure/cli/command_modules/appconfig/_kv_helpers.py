@@ -117,7 +117,7 @@ def __read_kv_from_file(file_path, format_, separator=None, prefix_to_add="", de
 
             elif format_ == 'properties':
                 config_data = javaproperties.load(config_file)
-                logger.warning("Importing feature flags from a properties file is not supported. If properties file contains feature flags, they will be imported as regular key-values.")
+                logger.debug("Importing feature flags from a properties file is not supported. If properties file contains feature flags, they will be imported as regular key-values.")
 
     except ValueError:
         raise CLIError('The input is not a well formatted %s file.' % (format_))
@@ -195,7 +195,7 @@ def __write_kv_and_features_to_file(file_path, key_values=None, features=None, f
             if format_ == 'json':
                 json.dump(exported_keyvalues, fp, indent=2, ensure_ascii=False)
             elif format_ == 'yaml':
-                yaml.dump(exported_keyvalues, fp, sort_keys=False)
+                yaml.safe_dump(exported_keyvalues, fp, sort_keys=False)
             elif format_ == 'properties':
                 javaproperties.dump(exported_keyvalues, fp)
     except Exception as exception:
@@ -607,8 +607,7 @@ def __export_keyvalues(fetched_items, format_, separator, prefix=None):
 
 def __export_features(retrieved_features, naming_convention):
     feature_reserved_keywords = FeatureManagementReservedKeywords(naming_convention)
-    exported_dict = {}
-    exported_dict[feature_reserved_keywords.featuremanagement] = {}
+    exported_dict = {feature_reserved_keywords.featuremanagement: {}}
     client_filters = []
 
     try:

@@ -165,7 +165,7 @@ def export_config(cmd,
                 skip_features = True
             else:
                 if not naming_convention:
-                    logger.warning("--naming-convention was not provided. Reserved keywords for feature management section will default to PascalCase.")
+                    logger.debug("--naming-convention was not provided. Reserved keywords for feature management section will default to PascalCase.")
                     naming_convention = 'pascal'
                 else:
                     naming_convention = naming_convention.lower()
