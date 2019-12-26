@@ -151,8 +151,8 @@ DEPENDENCIES = [
     'xmltodict~=0.12',
     'javaproperties==0.5.1',
     'jsondiff==1.2.0',
-    'azure-mgmt-core @ git+https://github.com/Azure/azure-sdk-for-python@azure_mgmt_core#subdirectory=sdk/core/azure-mgmt-core&egg=azure-mgmt-core',
-    'azure-mgmt-storage @ git+https://github.com/Azure/azure-sdk-for-python@mgmt_core#subdirectory=sdk/storage/azure-mgmt-storage&egg=azure-mgmt-storage'
+    'azure-mgmt-core @ https://azurecorepoc.blob.core.windows.net/sdks/azure_mgmt_core-0.1.0-py2.py3-none-any.whl',
+    'azure-mgmt-storage @ https://azurecorepoc.blob.core.windows.net/sdks/azure_mgmt_storage-6.0.0-py2.py3-none-any.whl'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
