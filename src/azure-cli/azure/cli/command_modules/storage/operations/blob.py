@@ -280,6 +280,47 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
     return results
 
 
+def upload_blob(client, container_name, blob_name, file_path, blob_type=None, length=None, metadata=None, overwrite=None,
+                content_settings=None,  validate_content=False, lease=None, if_modified_since=None,
+                if_unmodified_since=None, etag=None, match_condition=None, timeout=None, tier=None,
+                maxsize_condition=None, max_connections=None, encoding="UTF-8", cpk=None):
+    from ..vendored_sdk.azure_storage_blob.blob import ContentSettings
+    content_settings = guess_content_type(file_path, content_settings, ContentSettings)
+    container_client = client.get_container_client(container_name)
+    if blob_type == "block":
+        blob_type = 'BlockBlob'
+    if blob_type == "page":
+        blob_type = 'PageBlob'
+    if blob_type == "append":
+        blob_type = 'AppendBlob'
+
+    upload_blob_args = {
+        'blob_type': blob_type,
+        'length': length,
+        'overwrite': overwrite,
+        'content_settings': content_settings,
+        'validate_content': validate_content,
+        'metadata': metadata,
+        'max_concurrency': max_connections,
+        'lease': lease,
+        'if_modified_since': if_modified_since,
+        'if_unmodified_since': if_unmodified_since,
+        'encoding': encoding,
+        'timeout': timeout,
+        'cpk': cpk,
+        'standard_blob_tier': tier,
+        'premium_page_blob_tier': tier
+    }
+    if etag and match_condition:
+        upload_blob_args['etag'] = etag
+        upload_blob_args['match_condition'] = match_condition
+    if maxsize_condition:
+        upload_blob_args['maxsize_condition'] = maxsize_condition
+
+    with open(file_path, "rb") as data:
+        return container_client.upload_blob(name=blob_name, data=data)
+
+'''
 def upload_blob(cmd, client, container_name, blob_name, file_path, blob_type=None, content_settings=None, metadata=None,
                 validate_content=False, maxsize_condition=None, max_connections=2, lease_id=None, tier=None,
                 if_modified_since=None, if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None,
@@ -288,6 +329,9 @@ def upload_blob(cmd, client, container_name, blob_name, file_path, blob_type=Non
 
     t_content_settings = cmd.get_models('blob.models#ContentSettings')
     content_settings = guess_content_type(file_path, content_settings, t_content_settings)
+
+
+
 
     def upload_append_blob():
         check_blob_args = {
@@ -358,7 +402,7 @@ def upload_blob(cmd, client, container_name, blob_name, file_path, blob_type=Non
         'page': upload_block_blob  # same implementation
     }
     return type_func[blob_type]()
-
+'''
 
 def show_blob(cmd, client, container_name, blob_name, snapshot=None, lease_id=None,
               if_modified_since=None, if_unmodified_since=None, if_match=None,

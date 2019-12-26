@@ -373,8 +373,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('blob_type', options_list=('--type', '-t'), validator=validate_blob_type,
                    arg_type=get_enum_type(get_blob_types()))
         c.argument('validate_content', action='store_true', min_api='2016-05-31')
-        c.extra('no_progress', progress_type)
-        c.extra('socket_timeout', socket_timeout_type)
+        #c.extra('no_progress', progress_type)
+        #c.extra('socket_timeout', socket_timeout_type)
         # TODO: Remove once #807 is complete. Smart Create Generation requires this parameter.
         # register_extra_cli_argument('storage blob upload', '_subscription_id', options_list=('--subscription',),
         #                              help=argparse.SUPPRESS)

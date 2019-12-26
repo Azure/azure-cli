@@ -246,6 +246,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                             custom_command_type=get_custom_sdk('azcopy', blob_data_service_factory)) as g:
         g.storage_custom_command_oauth('sync', 'storage_blob_sync', is_preview=True)
 
+    with self.command_group('storage blob', custom_command_type=get_custom_sdk('blob', container_data_factory)) as g:
+        g.storage_custom_command_oauth('upload', 'upload_blob')
+
     with self.command_group('storage container', command_type=container_sdk) as g:
         g.storage_command_oauth('create', 'create_container')
 

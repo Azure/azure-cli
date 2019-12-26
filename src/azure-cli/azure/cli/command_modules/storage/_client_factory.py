@@ -83,31 +83,6 @@ def blob_data_service_factory(cli_ctx, kwargs):
                                         socket_timeout=kwargs.pop('socket_timeout', None),
                                         token_credential=kwargs.pop('token_credential', None))
 
-def get_azure_core_blob_client(cli_ctx, service, name=None, key=None, connection_string=None, sas_token=None,
-                               socket_timeout=None, token_credential=None):
-    logger.debug('Getting data service client service_type=%s', service_type.__name__)
-    try:
-        client_kwargs = {'account_name': account_name,
-                         'account_key': account_key,
-                         'connection_string': connection_string,
-                         'sas_token': sas_token}
-        if socket_timeout:
-            client_kwargs['socket_timeout'] = socket_timeout
-        if token_credential:
-            client_kwargs['token_credential'] = token_credential
-        if endpoint_suffix:
-            client_kwargs['endpoint_suffix'] = endpoint_suffix
-        client = service_type(**client_kwargs)
-    except ValueError as exc:
-        _ERROR_STORAGE_MISSING_INFO = get_sdk(cli_ctx, ResourceType.DATA_STORAGE,
-                                              'common._error#_ERROR_STORAGE_MISSING_INFO')
-        if _ERROR_STORAGE_MISSING_INFO in str(exc):
-            raise ValueError(exc)
-        raise CLIError('Unable to obtain data client. Check your connection parameters.')
-    # TODO: enable Fiddler
-    client.request_callback = _get_add_headers_callback(cli_ctx)
-    return client
-
 
 def container_data_factory(cli_ctx, kwargs):
     from .vendored_sdk.azure_storage_blob.blob import BlobServiceClient
@@ -126,6 +101,7 @@ def container_data_factory(cli_ctx, kwargs):
     if connection_string:
         client = BlobServiceClient.from_connection_string(conn_str=connection_string)
     return client
+
 
 def table_data_service_factory(cli_ctx, kwargs):
     return generic_data_service_factory(cli_ctx,
