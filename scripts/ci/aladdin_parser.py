@@ -219,10 +219,11 @@ def git_operation(modules):    # pylint: disable=redefined-outer-name
         print('No changes from Aladdin.')
         print('No need to push commits and fire Pull Request.')
 
-    # 2. if changes, push commits to source repo
+    # 2. if changes, push commits to source repo, uncomment next line if you test locally
     # git.push('origin', '{}:{}'.format(current_branch, source_branch))
 
     # # 3. draft a pull request from source branch to target branch
+    # # replace xxx with your access token if test locally
     # headers = {
     #     'Authorization': 'token xxx',
     #     # 'Accept': 'application/vnd.github.shadow-cat-preview+json'  # draft PR needed
