@@ -166,8 +166,10 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
         g.storage_command_oauth('list', 'list_blobs', transform=transform_storage_list_output,
                                 table_transformer=transform_blob_output)
+        '''
         g.storage_command_oauth(
-            'download', 'get_blob_to_path', table_transformer=transform_blob_output)
+            'download', 'get_blob_to_path', table_tformer=transform_blob_output)
+        '''
         g.storage_custom_command_oauth('generate-sas', 'generate_sas_blob_uri')
         g.storage_custom_command_oauth(
             'url', 'create_blob_url', transform=transform_url)
@@ -182,8 +184,10 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                 table_transformer=transform_boolean_for_table, min_api='2017-07-29')
 
         g.storage_custom_command_oauth('set-tier', 'set_blob_tier')
+        '''
         g.storage_custom_command_oauth('upload', 'upload_blob',
                                        doc_string_source='blob#BlockBlobService.create_blob_from_path')
+        '''
         g.storage_custom_command_oauth('upload-batch', 'storage_blob_upload_batch',
                                        validator=process_blob_upload_batch_parameters)
         g.storage_custom_command_oauth('download-batch', 'storage_blob_download_batch',
@@ -248,9 +252,14 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('storage blob', custom_command_type=get_custom_sdk('blob', container_data_factory)) as g:
         g.storage_custom_command_oauth('upload', 'upload_blob')
+        g.storage_custom_command_oauth('download', 'download_blob')
+        g.storage_custom_command_oauth('delete', 'delete_blob')
 
     with self.command_group('storage container', command_type=container_sdk) as g:
+        from azure.cli.command_modules.storage._transformers import transform_storage_list_output
         g.storage_command_oauth('create', 'create_container')
+        g.storage_command_oauth('delete', 'delete_container')
+        g.storage_command_oauth('list', 'list_containers', transform=transform_storage_list_output)
 
     with self.command_group('storage container', command_type=block_blob_sdk,
                             custom_command_type=get_custom_sdk('blob', blob_data_service_factory)) as g:
@@ -260,13 +269,15 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         from azure.cli.command_modules.storage._format import (transform_container_list, transform_boolean_for_table,
                                                                transform_container_show)
         from ._validators import process_container_delete_parameters
-
+        '''
         g.storage_command_oauth('list', 'list_containers', transform=transform_storage_list_output,
                                 table_transformer=transform_container_list)
+        
         g.storage_custom_command_oauth('delete', 'delete_container', validator=process_container_delete_parameters,
                                        transform=create_boolean_result_output_transformer(
                                            'deleted'),
                                        table_transformer=transform_boolean_for_table)
+        '''
         g.storage_command_oauth('show', 'get_container_properties', table_transformer=transform_container_show,
                                 exception_handler=show_exception_handler)
 

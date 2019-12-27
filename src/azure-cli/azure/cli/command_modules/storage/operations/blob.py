@@ -280,43 +280,28 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
     return results
 
 
-def upload_blob(client, container_name, blob_name, file_path, blob_type=None, length=None, metadata=None, overwrite=None,
-                content_settings=None,  validate_content=False, lease=None, if_modified_since=None,
-                if_unmodified_since=None, etag=None, match_condition=None, timeout=None, tier=None,
-                maxsize_condition=None, max_connections=None, encoding="UTF-8", cpk=None):
+def upload_blob(client, container_name, blob_name, file_path, blob_type=None, metadata=None, overwrite=None):
     from ..vendored_sdk.azure_storage_blob.blob import ContentSettings
-    content_settings = guess_content_type(file_path, content_settings, ContentSettings)
+    #content_settings = guess_content_type(file_path, content_settings, ContentSettings)
     container_client = client.get_container_client(container_name)
+    upload_blob_args = {}
     if blob_type == "block":
         blob_type = 'BlockBlob'
     if blob_type == "page":
         blob_type = 'PageBlob'
     if blob_type == "append":
         blob_type = 'AppendBlob'
-
-    upload_blob_args = {
-        'blob_type': blob_type,
-        'length': length,
-        'overwrite': overwrite,
-        'content_settings': content_settings,
-        'validate_content': validate_content,
-        'metadata': metadata,
-        'max_concurrency': max_connections,
-        'lease': lease,
-        'if_modified_since': if_modified_since,
-        'if_unmodified_since': if_unmodified_since,
-        'encoding': encoding,
-        'timeout': timeout,
-        'cpk': cpk,
-        'standard_blob_tier': tier,
-        'premium_page_blob_tier': tier
-    }
+    if blob_type:
+        upload_blob_args['blob_type'] = blob_type
+    if overwrite is not None:
+        upload_blob_args['overwrite'] = overwrite
+    '''
     if etag and match_condition:
         upload_blob_args['etag'] = etag
         upload_blob_args['match_condition'] = match_condition
     if maxsize_condition:
         upload_blob_args['maxsize_condition'] = maxsize_condition
-
+    '''
     with open(file_path, "rb") as data:
         return container_client.upload_blob(name=blob_name, data=data)
 
@@ -550,3 +535,17 @@ def _get_datetime_from_string(dt_str):
         except ValueError:
             continue
     raise ValueError("datetime string '{}' not valid. Valid example: 2000-12-31T12:59:59Z".format(dt_str))
+
+
+def download_blob(client, container_name, file_path, blob_name):
+    container_client = client.get_container_client(container_name)
+    blob_client = container_client.get_blob_client(blob_name)
+    with open(file_path, "wb") as my_blob:
+        download_stream = blob_client.download_blob()
+        my_blob.write(download_stream.readall())
+
+
+def delete_blob(client, container_name,  blob_name):
+    container_client = client.get_container_client(container_name)
+    blob_client = container_client.get_blob_client(blob_name)
+    return blob_client.delete_blob()

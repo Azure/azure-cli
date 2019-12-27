@@ -362,6 +362,17 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                         ' in other words, when a browser requests a page that does not exist.')
 
     with self.argument_context('storage blob upload') as c:
+        from .sdkutil import get_blob_types
+        c.argument('file_path', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter(),
+                   help='Path of the file to upload as the blob content.')
+        c.argument('blob_type', options_list=('--type', '-t'), validator=validate_blob_type,
+                   arg_type=get_enum_type(get_blob_types()))
+        c.argument('overwrite', options_list=('--overwrite', '-w'), arg_type=get_three_state_flag(),
+                   help='Whether the blob to be uploaded should overwrite the current data.')
+        c.argument('max_connections', type=int)
+
+    '''
+    with self.argument_context('storage blob upload') as c:
         from ._validators import page_blob_tier_validator
         from .sdkutil import get_blob_types, get_blob_tier_names
 
@@ -381,7 +392,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('tier', validator=page_blob_tier_validator,
                    arg_type=get_enum_type(get_blob_tier_names(self.cli_ctx, 'PremiumPageBlobTier')),
                    min_api='2017-04-17')
-
+    '''
     with self.argument_context('storage blob upload-batch') as c:
         from .sdkutil import get_blob_types
 
@@ -398,15 +409,19 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('blob_type', options_list=('--type', '-t'), arg_type=get_enum_type(get_blob_types()))
         c.extra('no_progress', progress_type)
         c.extra('socket_timeout', socket_timeout_type)
-
+    '''
     with self.argument_context('storage blob download') as c:
         c.argument('file_path', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter())
         c.argument('max_connections', type=int)
         c.argument('start_range', type=int)
         c.argument('end_range', type=int)
         c.argument('validate_content', action='store_true', min_api='2016-05-31')
-        c.extra('no_progress', progress_type)
-        c.extra('socket_timeout', socket_timeout_type)
+        #c.extra('no_progress', progress_type)
+        #c.extra('socket_timeout', socket_timeout_type)
+    '''
+    with self.argument_context('storage blob download') as c:
+        c.argument('file_path', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter(),
+                   help=' Path of file to write out to.')
 
     with self.argument_context('storage blob download-batch') as c:
         c.ignore('source_container_name')
@@ -529,9 +544,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Specifies whether data in the container may be accessed publicly.')
 
     with self.argument_context('storage container create') as c:
+        c.argument('name', container_name_type, options_list=('--name', '-n'), completer=None)
+        '''
         c.argument('container_name', container_name_type, options_list=('--name', '-n'), completer=None)
         c.argument('fail_on_exist', help='Throw an exception if the container already exists.')
-
+        '''
+    '''
     with self.argument_context('storage container delete') as c:
         c.argument('fail_not_exist', help='Throw an exception if the container does not exist.')
         c.argument('bypass_immutability_policy', action='store_true', help='Bypasses upcoming service behavior that '
@@ -542,6 +560,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.ignore('processed_resource_group')
         c.ignore('processed_account_name')
         c.ignore('mgmt_client')
+    '''
+    with self.argument_context('storage container delete') as c:
+        c.argument('container', container_name_type, options_list=('--name', '-n'), completer=None)
 
     with self.argument_context('storage container exists') as c:
         c.ignore('blob_name', 'snapshot')
