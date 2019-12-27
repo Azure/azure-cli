@@ -37,6 +37,7 @@ def handle_exception(ex):  # pylint: disable=too-many-return-statements
     from msrest.exceptions import HttpOperationError, ValidationError, ClientRequestError
     from azure.cli.core.azlogging import CommandLoggerContext
     from azure.mgmt.core.exceptions import ARMError
+    from azure.core.exceptions import HttpResponseError
 
     with CommandLoggerContext(logger):
         if isinstance(ex, JMESPathTypeError):
@@ -44,7 +45,7 @@ def handle_exception(ex):  # pylint: disable=too-many-return-statements
             logger.error("To learn more about --query, please visit: "
                          "https://docs.microsoft.com/cli/azure/query-azure-cli?view=azure-cli-latest")
             return 1
-        if isinstance(ex, (CLIError, CloudError, AzureException, ARMError)):
+        if isinstance(ex, (CLIError, CloudError, AzureException, ARMError, HttpResponseError)):
             logger.error(ex.args[0])
             return ex.args[1] if len(ex.args) >= 2 else 1
         if isinstance(ex, ValidationError):
