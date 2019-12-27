@@ -7,6 +7,7 @@
 
 import io
 import json
+import re
 import sys
 
 import chardet
@@ -51,6 +52,36 @@ def __compare_kvs_for_restore(restore_kvs, current_kvs):
 
     return kvs_to_restore, kvs_to_modify, kvs_to_delete
 
+
+def validate_import_key(key):
+    if key:
+        if key == '.' or key == '..' or '%' in key:
+            logger.warning("Ignoring invalid key '%s'. Key cannot be a '.' or '..', or contain the '%%' character.", key)
+            return False
+        if key.startswith(FEATURE_FLAG_PREFIX):
+            logger.warning("Ignoring invalid key '%s'. Key cannot start with the reserved prefix for feature flags.", key)
+            return False
+    else:
+        logger.warning("Ignoring invalid key ''. Key cannot be empty.")
+        return False
+
+    return True
+
+
+def validate_import_feature(feature):
+    if feature:
+        invalid_pattern = re.compile(r'[^a-zA-Z0-9._-]')
+        invalid = re.search(invalid_pattern, feature)
+        if invalid:
+            logger.warning("Ignoring invalid feature '%s'. Only alphanumeric characters, '.', '-' and '_' are allowed in feature name.", feature)
+            return False
+    else:
+        logger.warning("Ignoring invalid feature ''. Feature name cannot be empty.")
+        return False
+
+    return True
+
+
 # File <-> List of KeyValue object
 
 
@@ -90,7 +121,8 @@ def __read_kv_from_file(file_path, format_, separator=None, prefix_to_add="", de
     # convert to KeyValue list
     key_values = []
     for k, v in flattened_data.items():
-        key_values.append(KeyValue(key=k, value=v))
+        if validate_import_key(key=k):
+            key_values.append(KeyValue(key=k, value=v))
     return key_values
 
 
@@ -203,14 +235,14 @@ def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add=""):
             cmd, resource_group_name=appservice_account["resource_group"], name=appservice_account["name"], slot=None)
         for item in settings:
             key = prefix_to_add + item['name']
-            value = item['value']
-            tags = {'AppService:SlotSetting': str(item['slotSetting']).lower()} if item['slotSetting'] else {}
-            kv = KeyValue(key=key, value=value, tags=tags)
-            key_values.append(kv)
+            if validate_import_key(key):
+                value = item['value']
+                tags = {'AppService:SlotSetting': str(item['slotSetting']).lower()} if item['slotSetting'] else {}
+                kv = KeyValue(key=key, value=value, tags=tags)
+                key_values.append(kv)
         return key_values
     except Exception as exception:
-        raise CLIError(
-            "Fail to read key-values from appservice." + str(exception))
+        raise CLIError("Fail to read key-values from appservice." + str(exception))
 
 
 def __write_kv_to_app_service(cmd, key_values, appservice_account):
@@ -229,8 +261,7 @@ def __write_kv_to_app_service(cmd, key_values, appservice_account):
         update_app_settings(cmd, resource_group_name=appservice_account["resource_group"],
                             name=appservice_account["name"], settings=non_slot_settings, slot_settings=slot_settings)
     except Exception as exception:
-        raise CLIError(
-            "Fail to write key-values to appservice: " + str(exception))
+        raise CLIError("Fail to write key-values to appservice: " + str(exception))
 
 
 # Helper functions
@@ -591,46 +622,47 @@ def __convert_feature_dict_to_keyvalue_list(features_dict, format_):
     try:
         if format_ == 'json':
             for k, v in features_dict.items():
-                key = FEATURE_FLAG_PREFIX + str(k)
-                feature_flag_value = FeatureFlagValue(id_=str(k))
+                if validate_import_feature(feature=k):
+                    key = FEATURE_FLAG_PREFIX + str(k)
+                    feature_flag_value = FeatureFlagValue(id_=str(k))
 
-                if isinstance(v, dict):
-                    # This may be a conditional feature
-                    feature_flag_value.enabled = False
-                    try:
-                        feature_flag_value.conditions = {'client_filters': v["EnabledFor"]}
-                    except KeyError:
-                        raise CLIError("Feature '{0}' must contain 'EnabledFor' definition or have a true/false value. \n".format(str(k)))
+                    if isinstance(v, dict):
+                        # This may be a conditional feature
+                        feature_flag_value.enabled = False
+                        try:
+                            feature_flag_value.conditions = {'client_filters': v["EnabledFor"]}
+                        except KeyError:
+                            raise CLIError("Feature '{0}' must contain 'EnabledFor' definition or have a true/false value. \n".format(str(k)))
 
-                    if feature_flag_value.conditions["client_filters"]:
-                        feature_flag_value.enabled = True
+                        if feature_flag_value.conditions["client_filters"]:
+                            feature_flag_value.enabled = True
 
-                        for idx, val in enumerate(feature_flag_value.conditions["client_filters"]):
-                            # each val should be a dict with at most 2 keys (Name, Parameters) or at least 1 key (Name)
-                            val = {filter_key.lower(): filter_val for filter_key, filter_val in val.items()}
-                            if not val.get("name", None):
-                                logger.warning("Ignoring a filter for feature '%s' because it doesn't have a 'Name' attribute.", str(k))
-                                continue
+                            for idx, val in enumerate(feature_flag_value.conditions["client_filters"]):
+                                # each val should be a dict with at most 2 keys (Name, Parameters) or at least 1 key (Name)
+                                val = {filter_key.lower(): filter_val for filter_key, filter_val in val.items()}
+                                if not val.get("name", None):
+                                    logger.warning("Ignoring a filter for feature '%s' because it doesn't have a 'Name' attribute.", str(k))
+                                    continue
 
-                            if val["name"].lower() == "alwayson":
-                                # We support alternate format for specifying always ON features
-                                # "FeatureT": {"EnabledFor": [{ "Name": "AlwaysOn"}]}
-                                break
+                                if val["name"].lower() == "alwayson":
+                                    # We support alternate format for specifying always ON features
+                                    # "FeatureT": {"EnabledFor": [{ "Name": "AlwaysOn"}]}
+                                    break
 
-                            filter_param = val.get("parameters", {})
-                            new_val = {'name': val["name"]}
-                            if filter_param:
-                                new_val["parameters"] = filter_param
-                            feature_flag_value.conditions["client_filters"][idx] = new_val
+                                filter_param = val.get("parameters", {})
+                                new_val = {'name': val["name"]}
+                                if filter_param:
+                                    new_val["parameters"] = filter_param
+                                feature_flag_value.conditions["client_filters"][idx] = new_val
 
-                else:
-                    feature_flag_value.enabled = v
-                    feature_flag_value.conditions = default_conditions
+                    else:
+                        feature_flag_value.enabled = v
+                        feature_flag_value.conditions = default_conditions
 
-                set_kv = KeyValue(key=key,
-                                  value=json.dumps(feature_flag_value, default=lambda o: o.__dict__, ensure_ascii=False),
-                                  content_type=FEATURE_FLAG_CONTENT_TYPE)
-                key_values.append(set_kv)
+                    set_kv = KeyValue(key=key,
+                                      value=json.dumps(feature_flag_value, default=lambda o: o.__dict__, ensure_ascii=False),
+                                      content_type=FEATURE_FLAG_CONTENT_TYPE)
+                    key_values.append(set_kv)
 
     except Exception as exception:
         raise CLIError("File contains feature flags in invalid format. " + str(exception))
