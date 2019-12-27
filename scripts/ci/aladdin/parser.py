@@ -25,7 +25,7 @@ BASE_PATH = os.path.abspath(os.path.curdir)
 
 
 def load_aladdin_helps():
-    from azure.cli.command_modules import aladdin
+    import aladdin
     return {cmd: next(yaml.load_all(content)) for cmd, content in aladdin.aladdin_helps.items()}
 
 
