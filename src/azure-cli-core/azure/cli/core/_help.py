@@ -7,7 +7,6 @@ from __future__ import print_function
 import argparse
 
 from azure.cli.core.commands import ExtensionCommandSource
-from azure.cli.core.util import in_cloud_console
 
 from knack.help import (HelpFile as KnackHelpFile, CommandHelpFile as KnackCommandHelpFile,
                         GroupHelpFile as KnackGroupHelpFile, ArgumentGroupRegistry as KnackArgumentGroupRegistry,
@@ -78,32 +77,14 @@ class CLIPrintMixin(CLIHelp):
         from colorama import Style
         indent = 0
         _print_indent('Examples', indent)
-        use_default_examples = True
-        # TODO: Once Python 3.8 support is added, switch to an Assignment
-        # Expressions to check if the the generated example list is not empty.
-        # That way it can fall back to the default one if there was a server
-        # error more elegantly.
-        if in_cloud_console():
-            # Specify az to force all the examples to be for the exact command
-            examples = AzCliHelp.example_provider("az " + help_file.command)
-            if examples:
-                use_default_examples = False
-                for e in examples:
-                    indent = 1
-                    _print_indent(u'{0}'.format(e.title), indent)
-                    indent = 2
-                    _print_indent(u'{0}'.format(e.snippet), indent)
-                    print('')
-
-        if use_default_examples:
-            for e in help_file.examples:
-                indent = 1
-                _print_indent(u'{0}'.format(e.short_summary), indent)
-                indent = 2
-                if e.long_summary:
-                    _print_indent(u'{0}'.format(e.long_summary), indent)
-                _print_indent(u'{0}'.format(e.command), indent)
-                print('')
+        for e in AzCliHelp.example_provider(help_file):
+            indent = 1
+            _print_indent(u'{0}'.format(e.short_summary), indent)
+            indent = 2
+            if e.long_summary:
+                _print_indent(u'{0}'.format(e.long_summary), indent)
+            _print_indent(u'{0}'.format(e.command), indent)
+            print('')
         indent = 0
         message = 'For more specific examples, use: az find "az {}"'.format(help_file.command)
         _print_indent(Style.BRIGHT + message + Style.RESET_ALL + '\n', indent)
@@ -207,11 +188,10 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
                 file_contents[name] = self._name_to_content[name]
             self.versioned_loaders[ldr_cls_name].update_file_contents(file_contents)
 
-    # This method is meant to be overridden by one in the Find module.
+    # This method is meant to be a hook that can be overridden by an extension or module.
     @staticmethod
-    def example_provider(placeholder):
-        placeholder = []
-        return placeholder
+    def example_provider(help_file):
+        return help_file.examples
 
 
 class CliHelpFile(KnackHelpFile):
