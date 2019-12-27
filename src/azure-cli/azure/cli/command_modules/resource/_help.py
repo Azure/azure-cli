@@ -1303,12 +1303,13 @@ examples:
         az rest --method put --uri https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/publicIPAddresses/{publicIpAddressName}?api-version=2019-09-01 --body @body.json
 """
 
-helps['version show'] = """
-type: command
-short-summary: Show the versions of Azure CLI modules and extensions in JSON format
-"""
-
 helps['tag'] = """
 type: group
 short-summary: Manage resource tags.
 """
+
+helps['version'] = """
+type: command
+short-summary: Show the versions of Azure CLI modules and extensions in JSON format
+"""
+
