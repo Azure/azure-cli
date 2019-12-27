@@ -32,7 +32,6 @@ def cli_main(cli, args):
 
 az_cli = get_default_cli()
 
-
 telemetry.set_application(az_cli, ARGCOMPLETE_ENV_NAME)
 
 try:
