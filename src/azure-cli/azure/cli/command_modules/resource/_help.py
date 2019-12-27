@@ -1312,4 +1312,3 @@ helps['version'] = """
 type: command
 short-summary: Show the versions of Azure CLI modules and extensions in JSON format
 """
-
