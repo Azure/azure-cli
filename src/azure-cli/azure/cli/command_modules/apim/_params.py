@@ -45,3 +45,9 @@ def load_arguments(self, _):
         c.argument('sku_name', arg_type=get_enum_type(SKU_TYPES), help='The sku of the api management instance')
         c.argument('sku_capacity', type=int, help='The number of deployed units of the SKU.')
         c.argument('enable_managed_identity', arg_type=get_three_state_flag(), help='Create a managed identity for the API Management service to access other Azure resources.')
+
+    with self.argument_context('apim backup') as c:
+        c.argument('backup_name', help='The name of the backup file to create.')
+        c.argument('storage_account_name', arg_group='Storage', help='The name of the storage account used to place the backup.')
+        c.argument('storage_account_key', arg_group='Storage', help='The access key of the storage account used to place the backup.')
+        c.argument('storage_account_container', arg_group='Storage', help='The name of the storage account container used to place the backup.')

@@ -7,11 +7,34 @@ Release History
 
 * Add support for importing/exporting feature flags
 
+**AppService**
+
+* Fix issue #7154: Updating documentation for comand <> to use back ticks instead of single quotes
+
+**ARM**
+
+* Fix `az resource tag`: Recovery Services Vault tags cannot be updated
+
+**Backup**
+
+* Added new command 'backup protection undelete' to enable soft-delete feature for IaasVM workload
+* Added new parameter '--soft-delete-feature-state' to set backup-properties command
+
+**Compute**
+
+* Fix `vm create` failure in Azure Stack profile.
+* vm monitor metrics tail/list-definitions: support query metric and list definitions for a vm.
+
+**Storage**
+
+* `az storage account create`: Remove preview flag for --enable-hierarchical-namespace parameter
+
 **SQL**
 
 * New commands `sql db sensitivity-labels show/list/list-recommended/update/delete/enable-recommendation/disable-recommendation` to manage sensitivity labels for SQL databases.
 
 2.0.78
+++++++
 
 **ACR**
 
@@ -75,6 +98,11 @@ Release History
 
 * Update ADLS sdk version (0.0.48).
 
+**HDInsight**
+
+* Support for creating a Kafka cluster with Kafka Rest Proxy
+* Upgrade azure-mgmt-hdinsight to 1.3.0
+
 **Install**
 
 * Install script support python 3.8
@@ -123,6 +151,11 @@ Release History
 
 * Added "--read-scale" and "--read-replicas" parameters to sql db create and update commands, to support read scale management.
 
+**SQL VM**
+
+* New package upgrade 0.5.
+* Add new --license-type supporting Disaster Recovery Benefit (DR).
+
 **Storage**
 
 * GA Release Large File Shares property for storage account create and update command
@@ -150,8 +183,8 @@ Release History
 **AppConfig**
 
 * Add support for using ":" for `as az appconfig kv import` separator
-* Fix issue for listing key values with multiple labels including null label. 
-* Update management plane sdk, azure-mgmt-appconfiguration, to version 0.3.0. 
+* Fix issue for listing key values with multiple labels including null label.
+* Update management plane sdk, azure-mgmt-appconfiguration, to version 0.3.0.
 
 **AppService**
 

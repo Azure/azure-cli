@@ -136,3 +136,7 @@ def restores_cf(cli_ctx, *_):
 
 def item_level_recovery_connections_cf(cli_ctx, *_):
     return _backup_client_factory(cli_ctx).item_level_recovery_connections
+
+
+def backup_resource_vault_config_cf(cli_ctx, *_):
+    return _backup_client_factory(cli_ctx).backup_resource_vault_configs

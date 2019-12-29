@@ -394,6 +394,32 @@ class SqlVmScenarioTest(ScenarioTest):
                      JMESPathCheck('sqlServerLicenseType', 'AHUB')
                  ])
 
+        # test license change for DR only.
+        self.cmd('sql vm update -n {} -g {} --license-type {}'
+                 .format(sqlvm1, resource_group, 'DR'),
+                 checks=[
+                     JMESPathCheck('name', sqlvm1),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('provisioningState', "Succeeded"),
+                     JMESPathCheck('sqlImageSku', 'Enterprise'),
+                     JMESPathCheck('sqlServerLicenseType', 'DR')
+                 ])
+
+        # delete sqlvm
+        self.cmd('sql vm delete -n {} -g {} --yes'
+                 .format(sqlvm1, resource_group),
+                 checks=NoneCheck())
+
+        # test create sqlvm with sql license type DR.
+        self.cmd('sql vm create -n {} -g {} -l {} --license-type {}'
+                 .format(sqlvm1, resource_group, resource_group_location, 'DR'),
+                 checks=[
+                     JMESPathCheck('name', sqlvm1),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('provisioningState', "Succeeded"),
+                     JMESPathCheck('sqlServerLicenseType', 'DR'),
+                 ])
+
 
 class SqlVmGroupScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
