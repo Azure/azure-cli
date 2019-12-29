@@ -92,7 +92,9 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
             # Check the job's standard output: stdout.txt with length equal 3 ("hi\n"), stderr.txt
             self.cmd('az batchai job file list -g {0} -w workspace -e experiment -j job -d stdouterr'.format(
                 resource_group), checks=[
-                JMESPathCheck("[].name | sort(@)", ['execution.log', 'stderr.txt', 'stdout.txt']),
+                JMESPathCheck("[].name | contains(@, 'execution.log')", True),
+                JMESPathCheck("[].name | contains(@, 'stderr.txt')", True),
+                JMESPathCheck("[].name | contains(@, 'stdout.txt')", True),
                 JMESPathCheck("[?name == 'stdout.txt'].contentLength", [3]),
                 JMESPathCheck("[?name == 'stderr.txt'].contentLength", [0]),
                 JMESPathCheckExists("[0].downloadUrl"),
