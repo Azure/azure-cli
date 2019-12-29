@@ -240,12 +240,12 @@ def load_command_table(self, _):
                             database_sensitivity_labels_operations,
                             client_factory=get_sql_database_sensitivity_labels_operations) as g:
 
-        g.show_command('list', 'list_current_by_database')
-        g.show_command('list-recommended', 'list_recommended_by_database')
+        g.command('list', 'list_current_by_database')
+        g.command('list-recommended', 'list_recommended_by_database')
         g.show_command('show', 'get')
-        g.show_command('delete', 'delete')
-        g.show_command('enable-recommendation', 'enable_recommendation')
-        g.show_command('disable-recommendation', 'disable_recommendation')
+        g.command('delete', 'delete')
+        g.command('enable-recommendation', 'enable_recommendation')
+        g.command('disable-recommendation', 'disable_recommendation')
         g.custom_command('update', 'db_sensitivity_label_update')
 
     database_threat_detection_policies_operations = CliCommandType(
