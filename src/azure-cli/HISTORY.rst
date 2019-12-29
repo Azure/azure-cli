@@ -147,6 +147,11 @@ Release History
 
 * Added "--read-scale" and "--read-replicas" parameters to sql db create and update commands, to support read scale management.
 
+**SQL VM**
+
+* New package upgrade 0.5.
+* Add new --license-type supporting Disaster Recovery Benefit (DR).
+
 **Storage**
 
 * GA Release Large File Shares property for storage account create and update command
@@ -174,8 +179,8 @@ Release History
 **AppConfig**
 
 * Add support for using ":" for `as az appconfig kv import` separator
-* Fix issue for listing key values with multiple labels including null label. 
-* Update management plane sdk, azure-mgmt-appconfiguration, to version 0.3.0. 
+* Fix issue for listing key values with multiple labels including null label.
+* Update management plane sdk, azure-mgmt-appconfiguration, to version 0.3.0.
 
 **AppService**
 
