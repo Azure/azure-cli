@@ -15,6 +15,12 @@ short-summary: Manage Azure API Management services.
 helps['apim backup'] = """
 type: command
 short-summary: Creates a backup of the API Management service to the given Azure Storage Account. This is long running operation and could take several minutes to complete.
+examples:
+  - name: Create a backup of the API Management service instance
+    text: |-
+        az apim backup --name MyApim -g MyResourceGroup --backup-name myBackup \
+             --storage-account-name mystorageaccount --storage-account-container backups \
+             --storage-account-key Ay2ZbdxLnD4OJPT29F6jLPkB6KynOzx85YCObhrw==
 """
 
 helps['apim create'] = """
