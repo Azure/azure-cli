@@ -108,15 +108,25 @@ def load_arguments(self, _):
 
     with self.argument_context('keyvault set-policy', arg_group='Permission') as c:
         c.argument('object_id', validator=validate_principal)
-        c.argument('key_permissions', arg_type=get_enum_type(KeyPermissions), metavar='PERM', nargs='*', help='Space-separated list of key permissions to assign.', validator=validate_policy_permissions)
-        c.argument('secret_permissions', arg_type=get_enum_type(SecretPermissions), metavar='PERM', nargs='*', help='Space-separated list of secret permissions to assign.')
-        c.argument('certificate_permissions', arg_type=get_enum_type(CertificatePermissions), metavar='PERM', nargs='*', help='Space-separated list of certificate permissions to assign.')
-        c.argument('storage_permissions', arg_type=get_enum_type(StoragePermissions), metavar='PERM', nargs='*', help='Space-separated list of storage permissions to assign.')
+        c.argument('key_permissions', arg_type=get_enum_type(KeyPermissions), metavar='PERM', nargs='*',
+                   help='Space-separated list of key permissions to assign.', validator=validate_policy_permissions)
+        c.argument('secret_permissions', arg_type=get_enum_type(SecretPermissions), metavar='PERM', nargs='*',
+                   help='Space-separated list of secret permissions to assign.')
+        c.argument('certificate_permissions', arg_type=get_enum_type(CertificatePermissions), metavar='PERM', nargs='*',
+                   help='Space-separated list of certificate permissions to assign.')
+        c.argument('storage_permissions', arg_type=get_enum_type(StoragePermissions), metavar='PERM', nargs='*',
+                   help='Space-separated list of storage permissions to assign.')
 
     with self.argument_context('keyvault network-rule', min_api='2018-02-14') as c:
         c.argument('ip_address', help='IPv4 address or CIDR range.')
         c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
         c.argument('vnet_name', help='Name of a virtual network.', validator=validate_subnet)
+
+    with self.argument_context('keyvault private-endpoint', min_api='2018-02-14') as c:
+        c.argument('approval_description', help='Comments for the approval.')
+        c.argument('private_endpoint_connection_name', required=True,
+                   help='The name of the private endpoint connection associated with the Key Vault.')
+        c.argument('rejection_description', help='Comments for the rejection.')
     # endregion
 
     # region Shared

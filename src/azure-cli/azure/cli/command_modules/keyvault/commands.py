@@ -8,7 +8,8 @@ from azure.cli.core.profiles import get_api_version, ResourceType
 
 
 from ._client_factory import (
-    keyvault_client_vaults_factory, keyvault_data_plane_factory)
+    keyvault_client_vaults_factory, keyvault_client_private_endpoint_connections_factory,
+    keyvault_client_private_link_resources_factory, keyvault_data_plane_factory)
 
 from ._validators import (
     process_secret_set_namespace, process_certificate_cancel_namespace)
@@ -31,6 +32,18 @@ def load_command_table(self, _):
     kv_vaults_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.keyvault.operations#VaultsOperations.{}',
         client_factory=keyvault_client_vaults_factory,
+        resource_type=ResourceType.MGMT_KEYVAULT
+    )
+
+    kv_private_endpoint_connections_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.keyvault.operations#PrivateEndpointConnectionsOperations.{}',
+        client_factory=keyvault_client_private_endpoint_connections_factory,
+        resource_type=ResourceType.MGMT_KEYVAULT
+    )
+
+    kv_private_link_resources_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.keyvault.operations#PrivateLinkResourcesOperations.{}',
+        client_factory=keyvault_client_private_link_resources_factory,
         resource_type=ResourceType.MGMT_KEYVAULT
     )
 
@@ -63,6 +76,23 @@ def load_command_table(self, _):
         g.custom_command('add', 'add_network_rule')
         g.custom_command('remove', 'remove_network_rule')
         g.custom_command('list', 'list_network_rules')
+
+    with self.command_group('keyvault private-endpoint',
+                            kv_private_endpoint_connections_sdk,
+                            min_api='2018-02-14',
+                            client_factory=keyvault_client_private_endpoint_connections_factory,
+                            is_preview=True) as g:
+        g.custom_command('approve', 'approve_private_endpoint_connection')
+        g.custom_command('reject', 'reject_private_endpoint_connection')
+        g.show_command('show', 'get')
+        g.command('delete', 'delete')
+
+    with self.command_group('keyvault private-link-resource',
+                            kv_private_link_resources_sdk,
+                            min_api='2018-02-14',
+                            client_factory=keyvault_client_private_link_resources_factory,
+                            is_preview=True) as g:
+        g.show_command('show', 'list_by_vault')
 
     # Data Plane Commands
     with self.command_group('keyvault key', kv_data_sdk) as g:
