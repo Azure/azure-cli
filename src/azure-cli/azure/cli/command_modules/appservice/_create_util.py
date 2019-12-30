@@ -118,6 +118,7 @@ def get_lang_from_content(src_path, html=False):
     runtime_details_dict = dict.fromkeys(['language', 'file_loc', 'default_sku'])
     package_json_file = os.path.join(src_path, 'package.json')
     package_python_file = os.path.join(src_path, 'requirements.txt')
+    static_html_file = ""
     package_netcore_file = ""
     runtime_details_dict['language'] = ''
     runtime_details_dict['file_loc'] = ''
