@@ -151,7 +151,7 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
 
         if self.in_recording:
             name = uuid.uuid4()
-            self.name_replacer.register_name_pair(str(name), moniker)
+            self.name_replacer.register_name_pair(str(name), moniker.lower())
             return name
 
         return uuid.UUID(moniker)
