@@ -92,36 +92,29 @@ def write_examples(cmd, examples, buffer, example_inner_indent):
 
     two_space = '  '
     name_tpl = example_inner_indent + '- name: {}\n'
-    text1_tpl = example_inner_indent+ two_space + 'text: az {}{}'
-    text2_tpl = example_inner_indent+ two_space + 'text: |\n'
+    text_tpl = example_inner_indent+ two_space + 'text: |\n'
     crafted_tpl = '\n' + example_inner_indent + two_space + 'crafted: true'
-    cmd_tpl = example_inner_indent + two_space * 3 + 'az {}'
+    cmd_tpl = example_inner_indent + two_space * 3 + 'az {}{}'
     opt_tpl = ' \\\\\n' + example_inner_indent + two_space * 3 + '{}'
     val_tpl = ' {}'
 
     for ex in examples:
         buffer.append(name_tpl.format(ex['name']))
+        buffer.append(text_tpl)
 
         parameters = ex['text']
-        parameters = parameters.replace('\\', '\\\\')
+        parameters = parameters.replace('\\', '')
         parameters = parameters[parameters.index(cmd) + len(cmd):].strip()
 
-        # buffer.append(text1_tpl.format(cmd, ' ' + parameters))
-
-        if len(text1_tpl.format(cmd, ' ' + parameters)) < 80:
-            buffer.append(text1_tpl.format(cmd, ' ' + parameters))
-        else:
-            buffer.append(text2_tpl)
-            buffer.append(cmd_tpl.format(cmd))
-
-            if len(parameters) + len(example_inner_indent) < 80:
-                buffer.append(' ' + parameters)
+        parameter_arr = []
+        for p in re.split(r'\s', parameters):
+            if p.startswith('--'):
+                parameter_arr.append(' ' + p.strip())
             else:
-                for p in parameters.split(' '):
-                    if p.startswith('--'):
-                        buffer.append(opt_tpl.format(p))
-                    else:
-                        buffer.append(val_tpl.format(p))
+                parameter_arr.append(' ' + p.strip())
+        parameters = ''.join(parameter_arr)
+
+        buffer.append(cmd_tpl.format(cmd, parameters))
 
         buffer.append(crafted_tpl)
 
@@ -129,8 +122,8 @@ def write_examples(cmd, examples, buffer, example_inner_indent):
 
 
 def filter_out_existed_aladdin_examples(cmd, raw_cli_help):
-    # exceptions cannot hanlde now
-    if cmd == 'group deployment validate':
+    # exceptions cannot handle now
+    if cmd == 'iot hub show':
         return raw_cli_help
 
     filtered_raw_helps = []
@@ -281,7 +274,7 @@ if __name__ == '__main__':
 
     # test_mod = None
     # for mod in modules:
-    #     if 'resource' in mod.__file__:
+    #     if 'iot' in mod.__file__:
     #         test_mod = mod
     #         break
     # merge(aladdin_helps, test_mod)
