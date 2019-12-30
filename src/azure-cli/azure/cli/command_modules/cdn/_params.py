@@ -89,6 +89,7 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(['Moved', 'Found', 'TemporaryRedirect', 'PermanentRedirect']))
         c.argument('redirect_protocol', arg_type=get_enum_type(['MatchRequest', 'Http', 'Https']))
         c.argument('query_string_behavior', arg_type=get_enum_type(['Include', 'IncludeAll', 'Exclude', 'ExcludeAll']))
+        c.argument('transform', arg_type=get_enum_type(['Lowercase', 'Uppercase']))
         c.argument('preserve_unmatched_path', arg_type=get_three_state_flag(), options_list='--preserve-unmatched-path',
                    help='If True, the remaining path after the source pattern '
                         'will be appended to the new destination path.')

@@ -191,7 +191,7 @@ parameters:
     short-summary: Describes if this is negate condition or not.
   - name: --transform
     type: string
-    short-summary: Describes what transforms are applied before matching.
+    short-summary: Describes what transforms are applied before matching. Possible values are Lowercase, Uppercase.
   - name: --action-name
     type: string
     short-summary: Name of the action.
@@ -215,7 +215,7 @@ parameters:
     short-summary: Action to perform on headers. Possible values are Append, Overwrite, Delete.
   - name: --redirect-type
     type: string
-    short-summary: The redirect type the rule will use when redirecting traffic.
+    short-summary: The redirect type the rule will use when redirecting traffic. Possible values are Moved, Found, TemporaryRedirect and PermanentRedirect.
   - name: --redirect-protocol
     type: string
     short-summary: Protocol to use for the redirect. Possible values are MatchRequest, Http, Https.
@@ -309,7 +309,7 @@ parameters:
     short-summary: Describes if this is negate condition or not.
   - name: --transform
     type: string
-    short-summary: Describes what transforms are applied before matching.
+    short-summary: Describes what transforms are applied before matching. Possible values are Lowercase, Uppercase.
 examples:
   - name: Add a remote address condition.
     text: >
