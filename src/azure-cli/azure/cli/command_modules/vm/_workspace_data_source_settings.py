@@ -225,14 +225,14 @@ windows_performance_counter_properties = [
     }
 ]
 
-default_linux_data_sources = OrderedDict({
-    "LinuxPerformanceCollection": linux_performance_collection_properties,
-    "LinuxPerformanceObject": linux_performance_object_properties,
-    "LinuxSyslogCollection": linux_syslog_collection_properties,
-    "LinuxSyslog": linux_syslog_properties
-})
+default_linux_data_sources = OrderedDict()
 
-default_windows_data_sources = OrderedDict({
-    "WindowsEvent": windows_event_properties,
-    "WindowsPerformanceCounter": windows_performance_counter_properties
-})
+default_linux_data_sources['LinuxPerformanceCollection'] = linux_performance_collection_properties
+default_linux_data_sources['LinuxPerformanceObject'] = linux_performance_object_properties
+default_linux_data_sources['LinuxSyslogCollection'] = linux_syslog_collection_properties
+default_linux_data_sources['LinuxSyslog'] = linux_syslog_properties
+
+default_windows_data_sources = OrderedDict()
+
+default_windows_data_sources['WindowsEvent'] = windows_event_properties
+default_windows_data_sources['WindowsPerformanceCounter'] = windows_performance_counter_properties
