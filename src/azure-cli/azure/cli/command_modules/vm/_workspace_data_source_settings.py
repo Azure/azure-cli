@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+from collections import OrderedDict
 
 linux_performance_collection_properties = [
     {
@@ -224,14 +225,14 @@ windows_performance_counter_properties = [
     }
 ]
 
-default_linux_data_sources = {
+default_linux_data_sources = OrderedDict({
     "LinuxPerformanceCollection": linux_performance_collection_properties,
     "LinuxPerformanceObject": linux_performance_object_properties,
     "LinuxSyslogCollection": linux_syslog_collection_properties,
     "LinuxSyslog": linux_syslog_properties
-}
+})
 
-default_windows_data_sources = {
+default_windows_data_sources = OrderedDict({
     "WindowsEvent": windows_event_properties,
     "WindowsPerformanceCounter": windows_performance_counter_properties
-}
+})
