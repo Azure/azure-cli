@@ -132,10 +132,14 @@ def get_lang_from_content(src_path, html=False):
                 package_netcore_file = os.path.join(src_path, file)
                 break
 
-    if html and static_html_file:
-        runtime_details_dict['language'] = STATIC_RUNTIME_NAME
-        runtime_details_dict['file_loc'] = static_html_file
-        runtime_details_dict['default_sku'] = 'F1'
+    if html:
+        if static_html_file:
+            runtime_details_dict['language'] = STATIC_RUNTIME_NAME
+            runtime_details_dict['file_loc'] = static_html_file
+            runtime_details_dict['default_sku'] = 'F1'
+        else:
+            raise CLIError("The html flag was passed, but could not find HTML files, "
+                           "see 'https://go.microsoft.com/fwlink/?linkid=2109470' for more information")
     elif os.path.isfile(package_python_file):
         runtime_details_dict['language'] = PYTHON_RUNTIME_NAME
         runtime_details_dict['file_loc'] = package_python_file
