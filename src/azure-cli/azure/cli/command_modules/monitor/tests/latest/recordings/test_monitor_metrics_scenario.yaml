@@ -14,23 +14,23 @@ interactions:
       - -n -g
       User-Agent:
       - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-storage/4.2.0 Azure-SDK-For-Python AZURECLI/2.0.75
+        azure-mgmt-storage/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2019-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2019-06-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2019-10-23T02:57:07.6689544Z"},"blob":{"enabled":true,"lastEnabledTime":"2019-10-23T02:57:07.6689544Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2019-10-23T02:57:07.6064797Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2019-12-27T14:58:01.2970669Z"},"blob":{"enabled":true,"lastEnabledTime":"2019-12-27T14:58:01.2970669Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2019-12-27T14:58:01.2189526Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1168'
+      - '1200'
       content-type:
       - application/json
       date:
-      - Wed, 23 Oct 2019 02:57:27 GMT
+      - Fri, 27 Dec 2019 14:58:22 GMT
       expires:
       - '-1'
       pragma:
@@ -59,13 +59,11 @@ interactions:
       - monitor metrics list-definitions
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - --resource --namespace
       User-Agent:
       - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-monitor/0.5.2 Azure-SDK-For-Python AZURECLI/2.0.75
+        azure-mgmt-monitor/0.7.0 Azure-SDK-For-Python AZURECLI/2.0.78
       accept-language:
       - en-US
     method: GET
@@ -110,7 +108,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 23 Oct 2019 02:57:28 GMT
+      - Fri, 27 Dec 2019 14:58:24 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -139,13 +137,11 @@ interactions:
       - monitor metrics list
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - --resource --namespace --metrics --start-time --end-time
       User-Agent:
       - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-monitor/0.5.2 Azure-SDK-For-Python AZURECLI/2.0.75
+        azure-mgmt-monitor/0.7.0 Azure-SDK-For-Python AZURECLI/2.0.78
       accept-language:
       - en-US
     method: GET
@@ -154,19 +150,19 @@ interactions:
     body:
       string: '{"cost":0,"timespan":"2998-12-01T00:00:00Z/2999-01-01T00:00:00Z","interval":"PT1M","value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/Microsoft.Insights/metrics/Ingress","type":"Microsoft.Insights/metrics","name":{"value":"Ingress","localizedValue":"Ingress"},"displayDescription":"The
         amount of ingress data, in bytes. This number includes ingress from an external
-        client into Azure Storage as well as ingress within Azure.","unit":"Bytes","timeseries":[]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/Microsoft.Insights/metrics/Egress","type":"Microsoft.Insights/metrics","name":{"value":"Egress","localizedValue":"Egress"},"displayDescription":"The
+        client into Azure Storage as well as ingress within Azure.","unit":"Bytes","timeseries":[],"errorCode":"Success"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/Microsoft.Insights/metrics/Egress","type":"Microsoft.Insights/metrics","name":{"value":"Egress","localizedValue":"Egress"},"displayDescription":"The
         amount of egress data, in bytes. This number includes egress from an external
         client into Azure Storage as well as egress within Azure. As a result, this
-        number does not reflect billable egress.","unit":"Bytes","timeseries":[]}],"namespace":"Microsoft.Storage/storageAccounts","resourceregion":"westus"}'
+        number does not reflect billable egress.","unit":"Bytes","timeseries":[],"errorCode":"Success"}],"namespace":"Microsoft.Storage/storageAccounts","resourceregion":"westus"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1326'
+      - '1370'
       content-type:
       - application/json
       date:
-      - Wed, 23 Oct 2019 02:58:15 GMT
+      - Fri, 27 Dec 2019 14:58:25 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -195,13 +191,11 @@ interactions:
       - monitor metrics list
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - --resource --metrics --start-time --offset
       User-Agent:
       - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-monitor/0.5.2 Azure-SDK-For-Python AZURECLI/2.0.75
+        azure-mgmt-monitor/0.7.0 Azure-SDK-For-Python AZURECLI/2.0.78
       accept-language:
       - en-US
     method: GET
@@ -210,19 +204,19 @@ interactions:
     body:
       string: '{"cost":0,"timespan":"2031-08-10T00:00:00Z/2031-09-10T00:00:00Z","interval":"PT1M","value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/Microsoft.Insights/metrics/Ingress","type":"Microsoft.Insights/metrics","name":{"value":"Ingress","localizedValue":"Ingress"},"displayDescription":"The
         amount of ingress data, in bytes. This number includes ingress from an external
-        client into Azure Storage as well as ingress within Azure.","unit":"Bytes","timeseries":[]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/Microsoft.Insights/metrics/Egress","type":"Microsoft.Insights/metrics","name":{"value":"Egress","localizedValue":"Egress"},"displayDescription":"The
+        client into Azure Storage as well as ingress within Azure.","unit":"Bytes","timeseries":[],"errorCode":"Success"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/Microsoft.Insights/metrics/Egress","type":"Microsoft.Insights/metrics","name":{"value":"Egress","localizedValue":"Egress"},"displayDescription":"The
         amount of egress data, in bytes. This number includes egress from an external
         client into Azure Storage as well as egress within Azure. As a result, this
-        number does not reflect billable egress.","unit":"Bytes","timeseries":[]}],"namespace":"Microsoft.Storage/storageAccounts","resourceregion":"westus"}'
+        number does not reflect billable egress.","unit":"Bytes","timeseries":[],"errorCode":"Success"}],"namespace":"Microsoft.Storage/storageAccounts","resourceregion":"westus"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1326'
+      - '1370'
       content-type:
       - application/json
       date:
-      - Wed, 23 Oct 2019 02:58:16 GMT
+      - Fri, 27 Dec 2019 14:58:27 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -251,13 +245,11 @@ interactions:
       - monitor metrics list
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - --resource --metrics --end-time --offset
       User-Agent:
       - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-monitor/0.5.2 Azure-SDK-For-Python AZURECLI/2.0.75
+        azure-mgmt-monitor/0.7.0 Azure-SDK-For-Python AZURECLI/2.0.78
       accept-language:
       - en-US
     method: GET
@@ -266,19 +258,19 @@ interactions:
     body:
       string: '{"cost":0,"timespan":"2024-12-01T00:00:00Z/2025-01-01T00:00:00Z","interval":"PT1M","value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/Microsoft.Insights/metrics/Ingress","type":"Microsoft.Insights/metrics","name":{"value":"Ingress","localizedValue":"Ingress"},"displayDescription":"The
         amount of ingress data, in bytes. This number includes ingress from an external
-        client into Azure Storage as well as ingress within Azure.","unit":"Bytes","timeseries":[]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/Microsoft.Insights/metrics/Egress","type":"Microsoft.Insights/metrics","name":{"value":"Egress","localizedValue":"Egress"},"displayDescription":"The
+        client into Azure Storage as well as ingress within Azure.","unit":"Bytes","timeseries":[],"errorCode":"Success"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/Microsoft.Insights/metrics/Egress","type":"Microsoft.Insights/metrics","name":{"value":"Egress","localizedValue":"Egress"},"displayDescription":"The
         amount of egress data, in bytes. This number includes egress from an external
         client into Azure Storage as well as egress within Azure. As a result, this
-        number does not reflect billable egress.","unit":"Bytes","timeseries":[]}],"namespace":"Microsoft.Storage/storageAccounts","resourceregion":"westus"}'
+        number does not reflect billable egress.","unit":"Bytes","timeseries":[],"errorCode":"Success"}],"namespace":"Microsoft.Storage/storageAccounts","resourceregion":"westus"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1326'
+      - '1370'
       content-type:
       - application/json
       date:
-      - Wed, 23 Oct 2019 02:58:17 GMT
+      - Fri, 27 Dec 2019 14:58:29 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
