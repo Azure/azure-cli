@@ -28,6 +28,7 @@ Release History
 **Storage**
 
 * `az storage account create`: Remove preview flag for --enable-hierarchical-namespace parameter
+* Update azure-mgmt-storage version to 7.0.0 to use api version 2019-06-01
 
 2.0.78
 ++++++

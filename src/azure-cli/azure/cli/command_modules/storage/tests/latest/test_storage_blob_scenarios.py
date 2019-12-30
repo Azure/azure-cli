@@ -446,7 +446,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
                                     'r --https-only --full-uri', account_info, b, c, expiry).output
         self.assertTrue(blob_uri)
         self.assertIn('&sig=', blob_uri)
-        self.assertTrue(blob_uri.startswith('"https://clitest000002.blob.core.windows.net/cont000003/blob000004?s'))
+        self.assertTrue(blob_uri.startswith('"https://{}.blob.core.windows.net/{}/{}?s'.format(storage_account, c, b)))
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
