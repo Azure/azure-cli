@@ -1722,6 +1722,7 @@ short-summary: >
     Create a webapp and deploy code from a local workspace to the app. The command is required to run from the folder
     where the code is present. Current support includes Node, Python, .NET Core and ASP.NET. Node,
     Python apps are created as Linux apps. .Net Core, ASP.NET apps are created as Windows apps.
+    Append the html flag to deploy as an HTML app.
 examples:
   - name: View the details of the app that will be created, without actually running the operation
     text: >
