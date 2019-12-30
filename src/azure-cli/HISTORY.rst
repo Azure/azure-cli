@@ -60,6 +60,11 @@ Release History
 * disk create: Add --encryption-type and --disk-encryption-set.
 * vm/vmss create: Add --os-disk-encryption-set and --data-disk-encryption-sets.
 
+**Cdn**
+
+* Add support for rulesEngine feature
+* Add commands for rule managemnt: 'az cdn endpoint rule'
+
 **Core**
 
 * Remove support for Python 3.4
@@ -68,10 +73,6 @@ Release History
 **DLS**
 
 * Update ADLS sdk version (0.0.48).
-
-**Cdn**
-
-* Add support for rulesEngine feature
 
 **Install**
 
