@@ -318,6 +318,14 @@ examples:
     text: az backup protection resume --vault-name MyVault --resource-group MyResourceGroup --container-name MyContainer --item-name MyItem --policy-name MyPolicy
 """
 
+helps['backup protection update-for-vm'] = """
+type: command
+short-summary: Update disk exclusion settings associated with a backed up VM item.
+examples:
+  - name: Update disk exclusion settings associated with a backed up VM item.
+    text: az backup protection update-for-vm --vault-name MyVault --resource-group MyResourceGroup --container-name MyContainer --item-name MyItem  --disk-list-setting exclude --diskslist 1
+"""
+
 helps['backup recoveryconfig'] = """
 type: group
 short-summary: Manage recovery configuration of an Azure workload backed up item.

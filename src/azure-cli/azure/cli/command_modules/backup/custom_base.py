@@ -244,8 +244,23 @@ def check_protection_enabled_for_vm(cmd, vm_id):
     return custom.check_protection_enabled_for_vm(cmd, vm_id)
 
 
-def enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, policy_name):
-    return custom.enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, policy_name)
+def enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, policy_name, diskslist=None,
+                             disk_list_setting=None):
+    return custom.enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, policy_name,
+                                           diskslist, disk_list_setting)
+
+
+def update_protection_for_vm(cmd, client, resource_group_name, vault_name, container_name, item_name, diskslist,
+                             disk_list_setting):
+    items_client = backup_protected_items_cf(cmd.cli_ctx)
+    item = show_item(cmd, items_client, resource_group_name, vault_name, container_name, item_name,
+                     "AzureIaasVM", "VM")
+    custom_help.validate_item(item)
+
+    if isinstance(item, list):
+        raise CLIError("Multiple items found. Please give native names instead.")
+    return custom.update_protection_for_vm(cmd, client, resource_group_name, vault_name, item, diskslist,
+                                           disk_list_setting)
 
 
 def enable_protection_for_azure_wl(cmd, client, resource_group_name, vault_name, policy_name, protectable_item_type,
@@ -273,9 +288,11 @@ def disable_auto_for_azure_wl(client, resource_group_name, vault_name, item_name
 
 
 def restore_disks(cmd, client, resource_group_name, vault_name, container_name, item_name, rp_name, storage_account,
-                  target_resource_group=None, restore_to_staging_storage_account=None):
+                  target_resource_group=None, restore_to_staging_storage_account=None, restore_only_osdisk=None,
+                  diskslist=None, restoredisks=None):
     return custom.restore_disks(cmd, client, resource_group_name, vault_name, container_name, item_name, rp_name,
-                                storage_account, target_resource_group, restore_to_staging_storage_account)
+                                storage_account, target_resource_group, restore_to_staging_storage_account,
+                                restore_only_osdisk, diskslist, restoredisks)
 
 
 def enable_for_azurefileshare(cmd, client, resource_group_name, vault_name, policy_name, storage_account,
