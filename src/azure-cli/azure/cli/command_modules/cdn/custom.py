@@ -23,7 +23,7 @@ from azure.mgmt.cdn.models import (Endpoint, SkuName, EndpointUpdateParameters, 
                                    DeliveryRuleRequestHeaderAction, HeaderActionParameters,
                                    DeliveryRuleResponseHeaderAction, DeliveryRuleCacheKeyQueryStringAction,
                                    CacheKeyQueryStringActionParameters, UrlRedirectAction,
-                                   DeliveryRuleCondition, DeliveryRuleAction, UrlRedirectActionParameters,
+                                   DeliveryRuleAction, UrlRedirectActionParameters,
                                    UrlRewriteAction, UrlRewriteActionParameters)
 
 from azure.cli.core.util import sdk_no_wait
@@ -204,11 +204,11 @@ def create_condition(match_variable=None, operator=None, match_values=None,
                 negate_condition=negate_condition,
                 transforms=transforms
             ))
-    return DeliveryRuleCondition()
+    return None
 
 
 # pylint: disable=too-many-return-statements
-def create_action(action_name=None, cache_behavior=None, cache_duration=None, header_action=None,
+def create_action(action_name, cache_behavior=None, cache_duration=None, header_action=None,
                   header_name=None, header_value=None, query_string_behavior=None, query_parameters=None,
                   redirect_type=None, redirect_protocol=None, custom_hostname=None, custom_path=None,
                   custom_query_string=None, custom_fragment=None, source_pattern=None, destination=None,
@@ -261,9 +261,9 @@ def create_action(action_name=None, cache_behavior=None, cache_duration=None, he
 
 
 # pylint: disable=too-many-locals
-def add_rule(instance, order=None, rule_name=None, match_variable=None, operator=None,
+def add_rule(instance, order, rule_name, action_name, match_variable=None, operator=None,
              match_values=None, selector=None, negate_condition=None, transform=None,
-             action_name=None, cache_behavior=None, cache_duration=None, header_action=None,
+             cache_behavior=None, cache_duration=None, header_action=None,
              header_name=None, header_value=None, query_string_behavior=None, query_parameters=None,
              redirect_type=None, redirect_protocol=None, custom_hostname=None, custom_path=None,
              custom_querystring=None, custom_fragment=None, source_pattern=None,

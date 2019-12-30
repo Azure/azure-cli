@@ -173,7 +173,7 @@ parameters:
     short-summary: Name of the rule.
   - name: --order
     type: string
-    short-summary: Order of the rule.
+    short-summary: The order of the rule. The order number must start from 0 and consecutive. Rule with higher order will be applied later.
   - name: --match-variable
     type: string
     short-summary: Name of the match condition.
@@ -378,7 +378,7 @@ parameters:
     short-summary: Action to perform on headers. Possible values are Append, Overwrite, Delete.
   - name: --redirect-type
     type: string
-    short-summary: The redirect type the rule will use when redirecting traffic.
+    short-summary: The redirect type the rule will use when redirecting traffic. Possible values are Moved, Found, TemporaryRedirect and PermanentRedirect.
   - name: --redirect-protocol
     type: string
     short-summary: Protocol to use for the redirect. Possible values are MatchRequest, Http, Https.
