@@ -190,6 +190,19 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         create_cmd = 'az storage account create -n {} -g {} --kind StorageV2 --hns false'.format(name, resource_group)
         self.cmd(create_cmd, checks=[JMESPathCheck('isHnsEnabled', False)])
 
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
+    @ResourceGroupPreparer(location='eastus2euap', name_prefix='cli_storage_account_encryption')
+    def test_storage_create_with_encryption_key_type(self, resource_group):
+        name = self.create_random_name(prefix='cliencryption', length=24)
+        create_cmd = 'az storage account create -n {} -g {} --kind StorageV2 -t Account -q Service'.format(
+            name, resource_group)
+        self.cmd(create_cmd, checks=[
+            JMESPathCheck('encryption.services.queue.enabled', True),
+            JMESPathCheck('encryption.services.queue.keyType', 'Service'),
+            JMESPathCheck('encryption.services.table.enabled', True),
+            JMESPathCheck('encryption.services.table.keyType', 'Account'),
+        ])
+
     def test_show_usage(self):
         self.cmd('storage account show-usage -l westus', checks=JMESPathCheck('name.value', 'StorageAccounts'))
 
