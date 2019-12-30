@@ -59,7 +59,7 @@ def ex_handler_factory(creating_plan=False):
 # pylint: disable=too-many-statements
 def load_command_table(self, _):
     webclient_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.web.web_site_management_client#WebSiteManagementClient.{}',
+        operations_tmpl='azure.mgmt.web.operations#WebSiteManagementClientOperationsMixin.{}',
         client_factory=cf_web_client
     )
     appservice_plan_sdk = CliCommandType(

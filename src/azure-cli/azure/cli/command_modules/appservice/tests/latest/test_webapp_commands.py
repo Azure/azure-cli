@@ -347,35 +347,6 @@ class WebappConfigureTest(ScenarioTest):
                      JMESPathCheck('length(@)', 1),
                      JMESPathCheck('[0].name', '{0}.azurewebsites.net'.format(webapp_name))])
 
-        # site azure storage account configurations tests
-        # add
-        self.cmd(('webapp config storage-account add -g {} -n {} --custom-id Id --storage-type AzureFiles --account-name name '
-                 '--share-name sharename --access-key key --mount-path /path/to/mount').format(resource_group, webapp_name))
-        self.cmd('webapp config storage-account list -g {} -n {}'.format(resource_group, webapp_name)).assert_with_checks([
-            JMESPathCheck('length(@)', 1),
-            JMESPathCheck("[?name=='Id']|[0].value.type", "AzureFiles"),
-            JMESPathCheck("[?name=='Id']|[0].value.accountName", "name"),
-            JMESPathCheck("[?name=='Id']|[0].value.shareName", "sharename"),
-            JMESPathCheck("[?name=='Id']|[0].value.accessKey", "key"),
-            JMESPathCheck("[?name=='Id']|[0].value.mountPath", "/path/to/mount")])
-        # update
-        self.cmd('webapp config storage-account update -g {} -n {} --custom-id Id --mount-path /different/path'
-                 .format(resource_group, webapp_name))
-        self.cmd('webapp config storage-account list -g {} -n {}'.format(resource_group, webapp_name)).assert_with_checks([
-            JMESPathCheck("length(@)", 1),
-            JMESPathCheck("[?name=='Id']|[0].value.type", "AzureFiles"),
-            JMESPathCheck("[?name=='Id']|[0].value.accountName", "name"),
-            JMESPathCheck("[?name=='Id']|[0].value.shareName", "sharename"),
-            JMESPathCheck("[?name=='Id']|[0].value.accessKey", "key"),
-            JMESPathCheck("[?name=='Id']|[0].value.mountPath", "/different/path")])
-        # list
-        self.cmd('webapp config storage-account list -g {} -n {}'.format(resource_group, webapp_name)).assert_with_checks([
-            JMESPathCheck("length(@)", 1),
-            JMESPathCheck('[0].name', 'Id')])
-        # delete
-        self.cmd('webapp config storage-account delete -g {} -n {} --custom-id Id'.format(resource_group, webapp_name)).assert_with_checks([
-            JMESPathCheck("length(@)", 0)])
-
         # site connection string tests
         self.cmd('webapp config connection-string set -t mysql -g {} -n {} --settings c1="conn1" c2=conn2 '
                  '--slot-settings c3=conn3'.format(resource_group, webapp_name))
@@ -394,9 +365,6 @@ class WebappConfigureTest(ScenarioTest):
                      JMESPathCheck('length([])', 1),
                      JMESPathCheck('[0].slotSetting', False),
                      JMESPathCheck('[0].name', 'c2')])
-
-        # see deployment user; just make sure the command does return something
-        self.assertTrue(self.cmd('webapp deployment user show').get_output_in_json()['type'])
 
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_json')
     def test_update_webapp_settings_thru_json(self, resource_group):
@@ -811,7 +779,7 @@ class FunctionAppReservedInstanceTest(ScenarioTest):
                      JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
         self.cmd('functionapp config set -g {} -n {} --prewarmed-instance-count 4'
                  .format(resource_group, functionapp_name)).assert_with_checks([
-                     JMESPathCheck('reservedInstanceCount', 4)])
+                     JMESPathCheck('preWarmedInstanceCount', 4)])
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
 
 
@@ -1665,7 +1633,7 @@ class WebappTriggeredWebJobListTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_webapp_triggeredWebjob_list(self, resource_group):
         # testing this using a webjob already created
-        # given there is no create command inorder to re-record please create a webjob before
+        # given there is no create command in order to re-record please create a webjob before
         # recording this. Once the create command is available, please remove the "record_only" flag
         resource_group_name = 'cliTestApp'
         webapp_name = 'cliTestApp'

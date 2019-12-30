@@ -33,6 +33,7 @@ class CustomResourceType(object):  # pylint: disable=too-few-public-methods
 class ResourceType(Enum):  # pylint: disable=too-few-public-methods
 
     MGMT_APIMANAGEMENT = ('azure.mgmt.apimanagement', 'ApiManagementClient')
+    MGMT_APPSERVICE = ('azure.mgmt.web', 'WebSiteManagementClient')
     MGMT_KUSTO = ('azure.mgmt.kusto', 'KustoManagementClient')
     MGMT_KEYVAULT = ('azure.mgmt.keyvault', 'KeyVaultManagementClient')
     MGMT_STORAGE = ('azure.mgmt.storage', 'StorageManagementClient')
@@ -90,7 +91,6 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_SQLVM = ('azure.mgmt.sqlvirtualmachine', None)
     MGMT_MANAGEDSERVICES = ('azure.mgmt.managedservices', None)
     MGMT_NETAPPFILES = ('azure.mgmt.netappfiles', None)
-    MGMT_APPSERVICE = ('azure.mgmt.web', None)
 
     def __init__(self, import_prefix, client_name):
         """Constructor.
@@ -174,7 +174,8 @@ AZURE_API_PROFILES = {
             'service_diagnostic_settings': '2016-09-01',
             'tenant_activity_logs': '2015-04-01',
             'vm_insights': '2018-11-27-preview'
-        })
+        }),
+        ResourceType.MGMT_APPSERVICE: '2019-08-01'
     },
     '2019-03-01-hybrid': {
         ResourceType.MGMT_STORAGE: '2017-10-01',
@@ -198,7 +199,8 @@ AZURE_API_PROFILES = {
         }),
         ResourceType.DATA_KEYVAULT: '2016-10-01',
         ResourceType.DATA_STORAGE: '2017-11-09',
-        ResourceType.DATA_COSMOS_TABLE: '2017-04-17'
+        ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
+        ResourceType.MGMT_APPSERVICE: '2018-02-01'
     },
     '2018-03-01-hybrid': {
         ResourceType.MGMT_STORAGE: '2016-01-01',
@@ -216,7 +218,8 @@ AZURE_API_PROFILES = {
         }),
         ResourceType.DATA_KEYVAULT: '2016-10-01',
         ResourceType.DATA_STORAGE: '2017-04-17',
-        ResourceType.DATA_COSMOS_TABLE: '2017-04-17'
+        ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
+        ResourceType.MGMT_APPSERVICE: '2018-02-01'
     },
     '2017-03-09-profile': {
         ResourceType.MGMT_STORAGE: '2016-01-01',
@@ -233,7 +236,8 @@ AZURE_API_PROFILES = {
             'classic_administrators': '2015-06-01'
         }),
         ResourceType.DATA_KEYVAULT: '2016-10-01',
-        ResourceType.DATA_STORAGE: '2015-04-05'
+        ResourceType.DATA_STORAGE: '2015-04-05',
+        ResourceType.MGMT_APPSERVICE: '2018-02-01'
     }
 }
 

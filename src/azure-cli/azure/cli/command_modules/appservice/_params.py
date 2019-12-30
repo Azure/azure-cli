@@ -231,9 +231,9 @@ def load_arguments(self, _):
             c.argument('windows_fx_version', help="A docker image name used for your windows container web app, e.g., microsoft/nanoserver:ltsc2016", is_preview=True)
             if scope == 'functionapp':
                 c.ignore('windows_fx_version')
-            c.argument('reserved_instance_count', options_list=['--prewarmed-instance-count'], help="Number of pre-warmed instances a function app has")
+            c.argument('pre_warmed_instance_count', options_list=['--prewarmed-instance-count'], help="Number of pre-warmed instances a function app has")
             if scope == 'webapp':
-                c.ignore('reserved_instance_count')
+                c.ignore('pre_warmed_instance_count')
             c.argument('java_version', help="The version used to run your web app if using Java, e.g., '1.7' for Java 7, '1.8' for Java 8")
             c.argument('java_container', help="The java container, e.g., Tomcat, Jetty")
             c.argument('java_container_version', help="The version of the java container, e.g., '8.0.23' for Tomcat")

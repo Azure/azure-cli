@@ -3,6 +3,11 @@
 Release History
 ===============
 
+**AppService**
+
+** Updating AppService to use the latest azure-mgt-web SDK version 0.44.0
+
+
 2.0.80
 ++++++
 
@@ -15,6 +20,7 @@ Release History
 
 * Upgrade azure-mgmt-storage version to 7.1.0
 * `az storage account create`: Add `--encryption-key-type-for-table` and `--encryption-key-type-for-queue` to support Table and Queue Encryption Service
+
 
 2.0.79
 ++++++

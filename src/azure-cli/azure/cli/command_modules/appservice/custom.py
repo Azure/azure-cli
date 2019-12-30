@@ -850,7 +850,8 @@ def _get_linux_multicontainer_encoded_config_from_file(file_name):
 # for any modifications to the non-optional parameters, adjust the reflection logic accordingly
 # in the method
 def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_workers=None,
-                        linux_fx_version=None, windows_fx_version=None, reserved_instance_count=None, php_version=None,  # pylint: disable=unused-argument
+                        linux_fx_version=None, windows_fx_version=None,  # pylint: disable=unused-argument
+                        pre_warmed_instance_count=None, php_version=None,  # pylint: disable=unused-argument
                         python_version=None, net_framework_version=None,  # pylint: disable=unused-argument
                         java_version=None, java_container=None, java_container_version=None,  # pylint: disable=unused-argument
                         remote_debugging_enabled=None, web_sockets_enabled=None,  # pylint: disable=unused-argument
@@ -870,14 +871,14 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
         else:
             delete_app_settings(cmd, resource_group_name, name, ["WEBSITES_ENABLE_APP_SERVICE_STORAGE"])
 
-    if reserved_instance_count is not None:
-        reserved_instance_count = validate_range_of_int_flag('--prewarmed-instance-count', reserved_instance_count,
-                                                             min_val=0, max_val=20)
+    if pre_warmed_instance_count is not None:
+        pre_warmed_instance_count = validate_range_of_int_flag('--prewarmed-instance-count', pre_warmed_instance_count,
+                                                               min_val=0, max_val=20)
     import inspect
     frame = inspect.currentframe()
     bool_flags = ['remote_debugging_enabled', 'web_sockets_enabled', 'always_on',
                   'auto_heal_enabled', 'use32_bit_worker_process', 'http20_enabled']
-    int_flags = ['reserved_instance_count', 'number_of_workers']
+    int_flags = ['pre_warmed_instance_count', 'number_of_workers']
     # note: getargvalues is used already in azure.cli.core.commands.
     # and no simple functional replacement for this deprecating method for 3.5
     args, _, _, values = inspect.getargvalues(frame)  # pylint: disable=deprecated-method
