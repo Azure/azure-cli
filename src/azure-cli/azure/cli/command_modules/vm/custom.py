@@ -1082,6 +1082,7 @@ def _prepare_workspace(cmd, resource_group_name, workspace):
         workspace_id = workspace
     return workspace_id
 
+
 def _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_id):
     from ._client_factory import cf_log_analytics_data_sources
     from azure.cli.core.commands.client_factory import get_subscription_id

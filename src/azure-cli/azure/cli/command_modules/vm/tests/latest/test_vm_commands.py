@@ -1241,6 +1241,7 @@ class VMMonitorTestDefault(ScenarioTest):
             self.check("length(@) != '0'", True)
         ])
 
+
 class VMMonitorTestLinux(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_with_workspace_linux', location='eastus')
@@ -1275,6 +1276,7 @@ class VMMonitorTestLinux(ScenarioTest):
         self.cmd("az rest --method get --uri \"{}\"".format(uri), checks=[
             self.check('length(value)', 4)
         ])
+
 
 class VMMonitorTestWindows(ScenarioTest):
 
