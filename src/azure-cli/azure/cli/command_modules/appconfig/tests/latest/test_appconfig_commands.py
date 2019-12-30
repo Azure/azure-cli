@@ -392,16 +392,34 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             exported_kvs = json.load(json_file)
         assert imported_kvs == exported_kvs
 
-        # Naming convention tests
+
+class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(parameter_name_for_location='location')
+    def test_azconfig_import_export_naming_conventions(self, resource_group, location):
+        config_store_name = self.create_random_name(prefix='NamingConventionTest', length=24)
+
+        location = 'eastus'
+        self.kwargs.update({
+            'config_store_name': config_store_name,
+            'rg_loc': location,
+            'rg': resource_group
+        })
+        _create_config_store(self, self.kwargs)
+
         import_hyphen_path = os.path.join(TEST_DIR, 'import_features_hyphen.json')
+        exported_file_path = os.path.join(TEST_DIR, 'export_features.json')
         export_underscore_path = os.path.join(TEST_DIR, 'export_features_underscore.json')
         import_multiple_feature_sections_path = os.path.join(TEST_DIR, 'import_multiple_feature_sections.json')
         import_wrong_enabledfor_format_path = os.path.join(TEST_DIR, 'import_wrong_enabledfor_format.json')
 
         self.kwargs.update({
+            'import_source': 'file',
+            'imported_format': 'json',
             'label': 'NamingConventionTest',
             'naming_convention': 'underscore',
-            'imported_file_path': import_hyphen_path
+            'imported_file_path': import_hyphen_path,
+            'exported_file_path': exported_file_path
         })
         self.cmd(
             'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')

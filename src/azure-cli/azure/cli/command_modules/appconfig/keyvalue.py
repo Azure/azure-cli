@@ -144,12 +144,13 @@ def export_config(cmd,
                   # to-app-service parameters
                   appservice_account=None,
                   skip_features=False,
-                  naming_convention=None):
+                  naming_convention='pascal'):
     src_features = []
     dest_features = []
     dest_kvs = []
     destination = destination.lower()
     format_ = format_.lower() if format_ else None
+    naming_convention = naming_convention.lower()
 
     # fetch key values from user's configstore
     src_kvs = __read_kv_from_config_store(
@@ -164,12 +165,6 @@ def export_config(cmd,
             if format_ == 'properties':
                 skip_features = True
             else:
-                if not naming_convention:
-                    logger.debug("--naming-convention was not provided. Reserved keywords for feature management section will default to PascalCase.")
-                    naming_convention = 'pascal'
-                else:
-                    naming_convention = naming_convention.lower()
-
                 # src_features is a list of FeatureFlag objects
                 src_features = list_feature(cmd,
                                             feature='*',
