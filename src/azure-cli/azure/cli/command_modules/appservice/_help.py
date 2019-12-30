@@ -1741,7 +1741,7 @@ examples:
         az webapp up -n MyUniqueAppName --logs
   - name: Create a web app and deploy as a static HTML app.
     text: >
-        az webapp up -n MyUniqueAppName --html      
+        az webapp up -n MyUniqueAppName --html
 """
 
 helps['webapp update'] = """
