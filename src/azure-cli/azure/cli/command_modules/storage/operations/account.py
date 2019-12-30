@@ -96,7 +96,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
             table_encryption_service = EncryptionService(enabled=True, key_type=encryption_key_type_for_table)
             params.encryption.services.table = table_encryption_service
         if encryption_key_type_for_queue is not None:
-            queue_encryption_service = EncryptionService(keyType=encryption_key_type_for_queue)
+            queue_encryption_service = EncryptionService(enabled=True, key_type=encryption_key_type_for_queue)
             params.encryption.services.queue = queue_encryption_service
 
     return scf.storage_accounts.create(resource_group_name, account_name, params)
