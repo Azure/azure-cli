@@ -304,7 +304,7 @@ def add_rule(instance, order, rule_name, action_name, match_variable=None, opera
     return params
 
 
-def add_condition(instance, rule_name=None, match_variable=None, operator=None, match_values=None, selector=None,
+def add_condition(instance, rule_name, match_variable, operator, match_values=None, selector=None,
                   negate_condition=None, transform=None):
 
     policy = instance.delivery_policy
@@ -322,7 +322,7 @@ def add_condition(instance, rule_name=None, match_variable=None, operator=None, 
     return params
 
 
-def add_action(instance, rule_name=None, action_name=None, cache_behavior=None, cache_duration=None,
+def add_action(instance, rule_name, action_name, cache_behavior=None, cache_duration=None,
                header_action=None, header_name=None, header_value=None, query_string_behavior=None,
                query_parameters=None, redirect_type=None, redirect_protocol=None, custom_hostname=None,
                custom_path=None, custom_querystring=None, custom_fragment=None, source_pattern=None,
@@ -346,7 +346,7 @@ def add_action(instance, rule_name=None, action_name=None, cache_behavior=None, 
     return params
 
 
-def remove_rule(instance, rule_name=None):
+def remove_rule(instance, rule_name):
 
     policy = instance.delivery_policy
     if policy is not None:
@@ -364,7 +364,7 @@ def remove_rule(instance, rule_name=None):
     return params
 
 
-def remove_condition(instance, rule_name=None, index=None):
+def remove_condition(instance, rule_name, index):
 
     policy = instance.delivery_policy
     if policy is not None:
@@ -382,7 +382,7 @@ def remove_condition(instance, rule_name=None, index=None):
     return params
 
 
-def remove_action(instance, rule_name=None, index=None):
+def remove_action(instance, rule_name, index):
 
     policy = instance.delivery_policy
     if policy is not None:
