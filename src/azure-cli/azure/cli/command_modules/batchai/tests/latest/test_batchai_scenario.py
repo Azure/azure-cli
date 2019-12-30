@@ -92,7 +92,9 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
             # Check the job's standard output: stdout.txt with length equal 3 ("hi\n"), stderr.txt
             self.cmd('az batchai job file list -g {0} -w workspace -e experiment -j job -d stdouterr'.format(
                 resource_group), checks=[
-                JMESPathCheck("[].name | sort(@)", ['execution.log', 'stderr.txt', 'stdout.txt']),
+                JMESPathCheck("[].name | contains(@, 'execution.log')", True),
+                JMESPathCheck("[].name | contains(@, 'stderr.txt')", True),
+                JMESPathCheck("[].name | contains(@, 'stdout.txt')", True),
                 JMESPathCheck("[?name == 'stdout.txt'].contentLength", [3]),
                 JMESPathCheck("[?name == 'stderr.txt'].contentLength", [0]),
                 JMESPathCheckExists("[0].downloadUrl"),
@@ -360,7 +362,9 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
             # Check the job's standard output: stdout.txt with length equal 3 ("hi\n"), stderr.txt
             self.cmd('az batchai job file list -g {0} -w workspace -e experiment -j job -d stdouterr'.format(
                 resource_group), checks=[
-                    JMESPathCheck("[].name | sort(@)", ['execution.log', 'stderr.txt', 'stdout.txt']),
+                    JMESPathCheck("[].name | contains(@, 'execution.log')", True),
+                    JMESPathCheck("[].name | contains(@, 'stderr.txt')", True),
+                    JMESPathCheck("[].name | contains(@, 'stdout.txt')", True),
                     JMESPathCheck("[?name == 'stdout.txt'].contentLength", [3]),
                     JMESPathCheck("[?name == 'stderr.txt'].contentLength", [0]),
                     JMESPathCheckExists("[0].downloadUrl"),
@@ -369,7 +373,7 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
             # Check the job's output directory
             self.cmd('az batchai job file list -g {0} -w workspace -e experiment -j job -d OUTPUT'.format(
                 resource_group), checks=[
-                JMESPathCheck("[].name | sort(@)", ['result.txt']),
+                JMESPathCheck("[].name | contains(@, 'result.txt')", True),
                 JMESPathCheck("[0].contentLength", 3),  # hi/n
                 JMESPathCheckExists("[0].downloadUrl")
             ])
@@ -391,7 +395,9 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
             # Check the job's standard output: stdout.txt with length equal 3 ("hi\n"), stderr.txt
             self.cmd('batchai job file list -g {0} -w workspace -e experiment -j job2 -d stdouterr'.format(
                 resource_group), checks=[
-                JMESPathCheck("[].name | sort(@)", ['execution.log', 'stderr.txt', 'stdout.txt']),
+                JMESPathCheck("[].name | contains(@, 'execution.log')", True),
+                JMESPathCheck("[].name | contains(@, 'stderr.txt')", True),
+                JMESPathCheck("[].name | contains(@, 'stdout.txt')", True),
                 JMESPathCheck("[?name == 'stdout.txt'].contentLength", [3]),
                 JMESPathCheck("[?name == 'stderr.txt'].contentLength", [0]),
                 JMESPathCheckExists("[0].downloadUrl"),
@@ -400,7 +406,7 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
             # Check the job's output directory
             self.cmd('batchai job file list -g {0} -w workspace -e experiment -j job2 -d OUTPUT'.format(
                 resource_group), checks=[
-                JMESPathCheck("[].name | sort(@)", ['result.txt']),
+                JMESPathCheck("[].name | contains(@, 'result.txt')", True),
                 JMESPathCheck("[0].contentLength", 3),  # hi/n
                 JMESPathCheckExists("[0].downloadUrl")
             ])
