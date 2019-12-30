@@ -126,7 +126,8 @@ def get_lang_from_content(src_path, html=False):
     import fnmatch
     for _dirpath, _dirnames, files in os.walk(src_path):
         for file in files:
-            if html and fnmatch.fnmatch(file, "*.html"):
+            if html and (fnmatch.fnmatch(file, "*.html") or fnmatch.fnmatch(file, "*.htm") or
+                         fnmatch.fnmatch(file, "*shtml.")):
                 static_html_file = os.path.join(src_path, file)
                 break
             elif fnmatch.fnmatch(file, "*.csproj"):
