@@ -37,7 +37,7 @@ protectable_item_name_type_help = """Specify the resource name to be protected b
 backup_type_help = """'Full, Differential, Log, Copy-only-full' for backup Item type 'MSSQL'. 'Full, Differential' for backup item type 'SAPHANA'."""
 retain_until_help = """The date until which this backed up copy will be available for retrieval, in UTC (d-m-Y). For SAPHANA and SQL workload, retain-until parameter value will be overridden by the underlying policy."""
 diskslist_help = """List of disks to be excluded or included."""
-disk_list_setting_help = """Option to decide whether to include, exclude disks during backup."""
+disk_list_setting_help = """option to decide whether to include or exclude the disk or reset any previous settings to default behavior"""
 
 vault_name_type = CLIArgumentType(help='Name of the Recovery services vault.', options_list=['--vault-name', '-v'], completer=get_resource_name_completion_list('Microsoft.RecoveryServices/vaults'))
 container_name_type = CLIArgumentType(help=container_name_help, options_list=['--container-name', '-c'])
@@ -240,7 +240,7 @@ def load_arguments(self, _):
         c.argument('target_resource_group', options_list=['--target-resource-group', '-t'], help='Use this to specify the target resource group in which the restored disks will be saved')
         c.argument('diskslist', diskslist_type)
         c.argument('restore_only_osdisk', arg_type=get_three_state_flag(), help='Use this flag to restore only OS disks of a backed up VM.')
-        c.argument('restoredisks', arg_type=get_three_state_flag(), help='Use this flag to restore specified disks of a backed up VM.')
+        c.argument('restore_disks', arg_type=get_three_state_flag(), help='Use this flag to restore specified disks of a backed up VM.')
 
     with self.argument_context('backup restore restore-azurefileshare') as c:
         c.argument('resolve_conflict', resolve_conflict_type)

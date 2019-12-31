@@ -608,7 +608,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("resourceGroup", '{rg}')
         ])
 
-        trigger_restore_job_json = self.cmd('backup restore restore-disks -g {rg} -v {vault} -c {vm} -i {vm} -r {rp} -t {rg} --storage-account {sa} --restore-to-staging-storage-account --diskslist 0', checks=[
+        trigger_restore_job_json = self.cmd('backup restore restore-disks -g {rg} -v {vault} -c {vm} -i {vm} -r {rp} -t {rg} --storage-account {sa} --restore-to-staging-storage-account --diskslist 0 --restore-disks', checks=[
             self.check("properties.entityFriendlyName", '{vm}'),
             self.check("properties.operation", "Restore"),
             self.check("properties.status", "InProgress"),

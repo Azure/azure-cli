@@ -323,7 +323,7 @@ type: command
 short-summary: Update disk exclusion settings associated with a backed up VM item.
 examples:
   - name: Update disk exclusion settings associated with a backed up VM item.
-    text: az backup protection update-for-vm --vault-name MyVault --resource-group MyResourceGroup --container-name MyContainer --item-name MyItem  --disk-list-setting exclude --diskslist 1
+    text: az backup protection update-for-vm --vault-name MyVault --resource-group MyResourceGroup --container-name MyContainer --item-name MyItem --disk-list-setting exclude --diskslist 1
 """
 
 helps['backup recoveryconfig'] = """
