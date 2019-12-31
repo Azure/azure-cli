@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**ACR**
+
+* [BREAKING CHANGE] Remove '--os' parameter for 'acr build', 'acr task create/update', 'acr run', and 'acr pack'. Use '--platform' instead.
+
 **AppConfig**
 
 * Add support for importing/exporting feature flags
