@@ -78,6 +78,7 @@ Release History
 * [BREAKING CHANGE] application-gateway waf-policy: Rename subgroup rule to custom-rule
 * application-gateway http-listener: Add --firewall-policy when create
 * application-gateway url-path-map rule: Add --firewall-policy when create
+* nat-gateway allow empty resource creation
 
 **Packaging**
 
