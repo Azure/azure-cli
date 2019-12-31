@@ -426,7 +426,7 @@ def _should_use_original_storage_account(recovery_point, restore_to_staging_stor
 # pylint: disable=too-many-locals
 def restore_disks(cmd, client, resource_group_name, vault_name, container_name, item_name, rp_name, storage_account,
                   target_resource_group=None, restore_to_staging_storage_account=None, restore_only_osdisk=None,
-                  diskslist=None, restoredisks=None):
+                  diskslist=None):
     item = show_item(cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name, container_name,
                      item_name, "AzureIaasVM", "VM")
     _validate_item(item)
@@ -457,12 +457,12 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
     if recovery_point.properties.is_managed_virtual_machine and target_resource_group is not None:
         target_rg_id = '/'.join(_source_resource_id.split('/')[:4]) + "/" + target_resource_group
 
-    _validate_restore_disk_parameters(restore_only_osdisk, diskslist, restoredisks)
+    _validate_restore_disk_parameters(restore_only_osdisk, diskslist)
     restore_disk_lun_list = None
     if restore_only_osdisk:
         restore_disk_lun_list = []
 
-    if restoredisks:
+    if diskslist:
         restore_disk_lun_list = diskslist
 
     trigger_restore_properties = IaasVMRestoreRequest(create_new_cloud_service=True,
@@ -812,15 +812,9 @@ def _validate_object(obj, error_message):
         raise ValueError(error_message)
 
 
-def _validate_restore_disk_parameters(restore_only_osdisk, diskslist, restoredisks):
-    if restore_only_osdisk and restoredisks:
-        raise CLIError("Both restore-only-osdisk and restoredisks can't be true at the same time.")
-
+def _validate_restore_disk_parameters(restore_only_osdisk, diskslist):
     if restore_only_osdisk and diskslist is not None:
         logger.warning("Value of diskslist parameter will be ignored as restore-only-osdisk is set to be true.")
-
-    if restoredisks and diskslist is None:
-        raise CLIError("Please specify the disk LUNs which are to be restored.")
 
 
 # Tracking Utilities
