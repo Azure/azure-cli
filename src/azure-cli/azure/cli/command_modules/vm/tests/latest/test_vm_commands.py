@@ -1197,15 +1197,15 @@ class VMCreateNoneOptionsTest(ScenarioTest):  # pylint: disable=too-many-instanc
         self.cmd('network public-ip show -n {vm}PublicIP -g {rg}', expect_failure=True)
 
 
-class VMMonitorTest(ScenarioTest):
+class VMMonitorTestDefault(ScenarioTest):
     def __init__(self, method_name, config_file=None, recording_dir=None, recording_name=None, recording_processors=None,
                  replay_processors=None, recording_patches=None, replay_patches=None):
         from ._test_util import TimeSpanProcessor
         TIMESPANTEMPLATE = '0000-00-00'
-        super(VMMonitorTest, self).__init__(
+        super(VMMonitorTestDefault, self).__init__(
             method_name,
-            recording_processors=TimeSpanProcessor(TIMESPANTEMPLATE),
-            replay_processors=TimeSpanProcessor(TIMESPANTEMPLATE)
+            recording_processors=[TimeSpanProcessor(TIMESPANTEMPLATE)],
+            replay_processors=[TimeSpanProcessor(TIMESPANTEMPLATE)]
         )
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_with_monitor', location='eastus')
@@ -1216,8 +1216,8 @@ class VMMonitorTest(ScenarioTest):
             'workspace': self.create_random_name('cliworkspace', 20),
             'rg': resource_group
         })
-
-        self.cmd('vm create -n {vm} -g {rg} --image UbuntuLTS --workspace {workspace}')
+        with mock.patch('azure.cli.command_modules.vm.custom._gen_guid', side_effect=self.create_guid):
+            self.cmd('vm create -n {vm} -g {rg} --image UbuntuLTS --workspace {workspace}')
         self.cmd('vm monitor log show -n {vm} -g {rg} -q "Perf | limit 10"')
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_metric_tail', location='eastus')
@@ -1239,6 +1239,69 @@ class VMMonitorTest(ScenarioTest):
         ])
         self.cmd('vm monitor metrics list-definitions -n {vm} -g {rg}', checks=[
             self.check("length(@) != '0'", True)
+        ])
+
+
+class VMMonitorTestLinux(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_create_with_workspace_linux', location='eastus')
+    def test_vm_create_with_workspace_linux(self, resource_group):
+
+        self.kwargs.update({
+            'vm': 'monitorvm',
+            'workspace': self.create_random_name('cliworkspace', 20),
+            'rg': resource_group
+        })
+        with mock.patch('azure.cli.command_modules.vm.custom._gen_guid', side_effect=self.create_guid):
+            self.cmd('vm create -n {vm} -g {rg} --image UbuntuLTS --workspace {workspace}')
+
+        workspace_id = self.cmd('monitor log-analytics workspace show -n {workspace} -g {rg}').get_output_in_json()['id']
+        uri_template = "https://management.azure.com{0}/dataSources?$filter=kind eq '{1}'&api-version=2015-11-01-preview"
+        uri = uri_template.format(workspace_id, 'LinuxPerformanceCollection')
+        self.cmd("az rest --method get --uri \"{}\"".format(uri), checks=[
+            self.check('length(value)', 1)
+        ])
+
+        uri = uri_template.format(workspace_id, 'LinuxSyslog')
+        self.cmd("az rest --method get --uri \"{}\"".format(uri), checks=[
+            self.check('length(value)', 1)
+        ])
+
+        uri = uri_template.format(workspace_id, 'LinuxSyslogCollection')
+        self.cmd("az rest --method get --uri \"{}\"".format(uri), checks=[
+            self.check('length(value)', 1)
+        ])
+
+        uri = uri_template.format(workspace_id, 'LinuxPerformanceObject')
+        self.cmd("az rest --method get --uri \"{}\"".format(uri), checks=[
+            self.check('length(value)', 4)
+        ])
+
+
+class VMMonitorTestWindows(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_create_with_workspace_windows', location='eastus')
+    def test_vm_create_with_workspace_windows(self, resource_group):
+
+        self.kwargs.update({
+            'vm': 'monitorvm',
+            'workspace': self.create_random_name('cliworkspace', 20),
+            'rg': resource_group
+        })
+        with mock.patch('azure.cli.command_modules.vm.custom._gen_guid', side_effect=self.create_guid):
+            self.cmd('vm create -n {vm} -g {rg} --image Win2016Datacenter --workspace {workspace} --admin-password AzureCLI@1224')
+
+        workspace_id = self.cmd('monitor log-analytics workspace show -n {workspace} -g {rg}').get_output_in_json()[
+            'id']
+        uri_template = "https://management.azure.com{0}/dataSources?$filter=kind eq '{1}'&api-version=2015-11-01-preview"
+        uri = uri_template.format(workspace_id, 'WindowsEvent')
+        self.cmd("az rest --method get --uri \"{}\"".format(uri), checks=[
+            self.check('length(value)', 1)
+        ])
+
+        uri = uri_template.format(workspace_id, 'WindowsPerformanceCounter')
+        self.cmd("az rest --method get --uri \"{}\"".format(uri), checks=[
+            self.check('length(value)', 15)
         ])
 
 
