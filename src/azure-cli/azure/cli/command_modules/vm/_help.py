@@ -2467,6 +2467,13 @@ examples:
     text: |
         az vmss update --name MyScaleSet --resource-group MyResourceGroup --set virtualMachineProfile.storageProfile.imageReference.version=16.04.201801090
     crafted: true
+  - name: Update a VMSS' license type for Azure Hybrid Benefit.
+    text: az vmss update --name MyScaleSet --resource-group MyResourceGroup --license-type windows_server
+  - name: Update a VM instance's protection policies.
+    text: az vmss update --name MyScaleSet --resource-group MyResourceGroup --instance-id 4 --protect-from-scale-set-actions False --protect-from-scale-in
+  - name: Update a VM instance's protection policies.
+    text: az vmss update --name MyScaleSet --resource-group MyResourceGroup --instance-id 4 --set protectionPolicy.protectFromScaleIn=True protectionPolicy.protectFromScaleSetActions=False
+
 """
 
 helps['vmss update-instances'] = """
@@ -2487,6 +2494,10 @@ examples:
     text: |
         az vmss wait --created --name MyScaleSet --resource-group MyResourceGroup
     crafted: true
+  - name: Place the CLI in a waiting state until the VMSS has been updated.
+    text: az vmss wait --updated --name MyScaleSet --resource-group MyResourceGroup
+  - name: Place the CLI in a waiting state until the VMSS instance has been updated.
+    text: az vmss wait --updated --instance-id 1 --name MyScaleSet --resource-group MyResourceGroup
 """
 
 helps['vm monitor'] = """
