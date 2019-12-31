@@ -915,8 +915,10 @@ def build_av_set_resource(cmd, name, location, tags, platform_update_domain_coun
     return av_set
 
 
-# used for log analytics workspace
-def build_vm_mmaExtension_resource(_, vm_name, location):
+def build_vm_linux_log_analytics_workspace_agent(_, vm_name, location):
+    '''
+    This is used for log analytics workspace
+    '''
     mmaExtension_resource = {
         'type': 'Microsoft.Compute/virtualMachines/extensions',
         'apiVersion': '2018-10-01',
@@ -941,8 +943,10 @@ def build_vm_mmaExtension_resource(_, vm_name, location):
     return mmaExtension_resource
 
 
-# used for log analytics workspace
-def build_vm_daExtensionName_resource(_, vm_name, location):
+def build_vm_daExtension_resource(_, vm_name, location):
+    '''
+    This is used for log analytics workspace
+    '''
     daExtensionName_resource = {
         'type': 'Microsoft.Compute/virtualMachines/extensions',
         'apiVersion': '2018-10-01',
@@ -958,3 +962,31 @@ def build_vm_daExtensionName_resource(_, vm_name, location):
     daExtensionName_resource['location'] = location
     daExtensionName_resource['dependsOn'] = ['Microsoft.Compute/virtualMachines/{0}/extensions/OMSExtension'.format(vm_name)]  # pylint: disable=line-too-long
     return daExtensionName_resource
+
+
+def build_vm_windows_log_analytics_workspace_agent(_, vm_name, location):
+    '''
+    This function is used for log analytics workspace.
+    '''
+    mmaExtension_resource = {
+        'type': 'Microsoft.Compute/virtualMachines/extensions',
+        'apiVersion': '2018-10-01',
+        'properties': {
+            'publisher': 'Microsoft.EnterpriseCloud.Monitoring',
+            'type': 'MicrosoftMonitoringAgent',
+            'typeHandlerVersion': '1.0',
+            'autoUpgradeMinorVersion': 'true',
+            'settings': {
+                'workspaceId': "[reference(parameters('workspaceId'), '2015-11-01-preview').customerId]",
+                'stopOnMultipleConnections': 'true'
+            },
+            'protectedSettings': {
+                'workspaceKey': "[listKeys(parameters('workspaceId'), '2015-11-01-preview').primarySharedKey]"
+            }
+        }
+    }
+
+    mmaExtension_resource['name'] = vm_name + '/MicrosoftMonitoringAgent'
+    mmaExtension_resource['location'] = location
+    mmaExtension_resource['dependsOn'] = ['Microsoft.Compute/virtualMachines/' + vm_name]
+    return mmaExtension_resource
