@@ -763,6 +763,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
 
     if workspace is not None:
         _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_id)
+
     return vm
 
 
@@ -1088,6 +1089,7 @@ def _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.mgmt.loganalytics.models import DataSource
     from msrestazure.tools import parse_resource_id
+    from msrestazure.azure_exceptions import CloudError
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
     data_sources_client = cf_log_analytics_data_sources(cmd.cli_ctx, subscription_id)
@@ -1108,10 +1110,14 @@ def _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_
                 data_source = DataSource(kind=data_source_kind,
                                          properties=data_source_setting)
                 data_source_name = data_source_name_template.format(data_source_kind, _gen_guid())
-                data_sources_client.create_or_update(resource_group_name,
-                                                     workspace_name,
-                                                     data_source_name,
-                                                     data_source)
+                try:
+                    data_sources_client.create_or_update(resource_group_name,
+                                                         workspace_name,
+                                                         data_source_name,
+                                                         data_source)
+                except CloudError as ex:
+                    logger.warning("Failed to set data source due to {}. "
+                                   "Skip this step and need manual work later.".format(ex.message))
     else:
         logger.warning("Unsupported OS type. Skip the default settings for log analytics workspace.")
 

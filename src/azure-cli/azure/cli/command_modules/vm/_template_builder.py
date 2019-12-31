@@ -960,8 +960,10 @@ def build_vm_daExtension_resource(_, vm_name, location):
     return daExtensionName_resource
 
 
-# used for log analytics workspace
 def build_vm_windows_log_analytics_workspace_agent(_, vm_name, location):
+    '''
+    This function is used for log analytics workspace.
+    '''
     mmaExtension_resource = {
         'type': 'Microsoft.Compute/virtualMachines/extensions',
         'apiVersion': '2018-10-01',
