@@ -102,6 +102,10 @@ class WebappBasicE2ETest(ScenarioTest):
         # show publishing credentials
         result = self.cmd('webapp deployment list-publishing-credentials -g {} -n {}'.format(resource_group, webapp_name)).get_output_in_json()
         self.assertTrue('scm' in result['scmUri'])
+        # verify httpsOnly is false
+        self.cmd('webapp show -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('httpsOnly', False),
+        ])
 
 
 class WebappQuickCreateTest(ScenarioTest):

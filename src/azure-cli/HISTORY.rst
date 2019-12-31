@@ -19,6 +19,7 @@ Release History
 **AppService**
 
 * Fix issue #7154: Updating documentation for comand <> to use back ticks instead of single quotes
+* Fix issue #11287: webapp up: By default make the app created using up 'should be 'SSL enabled'
 
 **ARM**
 

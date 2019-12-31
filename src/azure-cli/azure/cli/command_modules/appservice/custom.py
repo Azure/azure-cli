@@ -101,7 +101,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     if isinstance(plan_info.sku, SkuDescription) and plan_info.sku.name.upper() not in ['F1', 'FREE', 'SHARED', 'D1',
                                                                                         'B1', 'B2', 'B3', 'BASIC']:
         site_config.always_on = True
-    webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags)
+    webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags,
+                      https_only=using_webapp_up)
     helper = _StackRuntimeHelper(client, linux=is_linux)
 
     if is_linux:
