@@ -208,8 +208,8 @@ class ApplicationSetScenarioTest(ScenarioTest):
 
     def test_app_show_exit_code(self):
         with self.assertRaises(SystemExit):
-            self.assertEqual(self.cmd('ad sp show --id non-exist-identifierUris').exit_code, 3)
-            self.assertEqual(self.cmd('ad sp show --id 00000000-0000-0000-0000-000000000000').exit_code, 3)
+            self.assertEqual(self.cmd('ad app show --id non-exist-identifierUris').exit_code, 3)
+            self.assertEqual(self.cmd('ad app show --id 00000000-0000-0000-0000-000000000000').exit_code, 3)
 
 
 class CreateForRbacScenarioTest(ScenarioTest):
