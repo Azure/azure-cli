@@ -49,7 +49,6 @@ class DateTimeParseTest(unittest.TestCase):
 
 
 class KeyVaultMgmtScenarioTest(ScenarioTest):
-
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_mgmt')
     def test_keyvault_mgmt(self, resource_group):
 
@@ -92,7 +91,7 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
         ])
         # test updating updating other properties
         self.cmd('keyvault update -g {rg} -n {kv} --enable-soft-delete --enable-purge-protection '
-                 '--enabled-for-deploymen --enabled-for-disk-encryption --enabled-for-template-deployment '
+                 '--enabled-for-deployment --enabled-for-disk-encryption --enabled-for-template-deployment '
                  '--bypass AzureServices --default-action Deny',
                  checks=[
                      self.check('name', '{kv}'),
@@ -116,17 +115,18 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
         self.cmd('keyvault list -g {rg}', checks=self.is_empty())
 
         # test create keyvault further
-
         self.cmd('keyvault create -g {rg} -n {kv2} -l {loc} --no-self-perms', checks=[
             self.check('type(properties.accessPolicies)', 'array'),
             self.check('length(properties.accessPolicies)', 0)
         ])
 
-        self.cmd('keyvault create -g {rg} -n {kv3} -l {loc} --enabled-for-deployment true --enabled-for-disk-encryption true --enabled-for-template-deployment true', checks=[
-            self.check('properties.enabledForDeployment', True),
-            self.check('properties.enabledForDiskEncryption', True),
-            self.check('properties.enabledForTemplateDeployment', True)
-        ])
+        self.cmd('keyvault create -g {rg} -n {kv3} -l {loc} --enabled-for-deployment true '
+                 '--enabled-for-disk-encryption true --enabled-for-template-deployment true',
+                 checks=[
+                     self.check('properties.enabledForDeployment', True),
+                     self.check('properties.enabledForDiskEncryption', True),
+                     self.check('properties.enabledForTemplateDeployment', True)
+                 ])
         self.cmd('keyvault create -g {rg} -n {kv4} -l {loc} --sku premium', checks=[
             self.check('properties.sku.name', 'premium')
         ])
