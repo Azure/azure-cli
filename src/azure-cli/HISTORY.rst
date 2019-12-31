@@ -30,6 +30,10 @@ Release History
 * Fix `vm create` failure in Azure Stack profile.
 * vm monitor metrics tail/list-definitions: support query metric and list definitions for a vm.
 
+**RBAC**
+
+* Fix #11712: `az ad sp show` does not return exit code 3 when the sp does not exist
+
 **Storage**
 
 * `az storage account create`: Remove preview flag for --enable-hierarchical-namespace parameter
