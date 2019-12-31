@@ -75,6 +75,11 @@ Release History
 
 * Fixing `az redis update` operation to work for caches with RDB/AOF enabled
 
+**Cdn**
+
+Add support for rulesEngine feature
+Add commands for rule managemnt: 'az cdn endpoint rule'
+
 **Storage**
 
 * `az storage account create`: Remove preview flag for --enable-hierarchical-namespace parameter

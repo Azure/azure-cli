@@ -159,6 +159,293 @@ examples:
             --enable-compression
 """
 
+helps['cdn endpoint rule'] = """
+type: group
+short-summary: Manage delivery rules for an endpoint.
+"""
+
+helps['cdn endpoint rule add'] = """
+type: command
+short-summary: Add a delivery rule to a CDN endpoint.
+parameters:
+  - name: --rule-name
+    type: string
+    short-summary: Name of the rule.
+  - name: --order
+    type: string
+    short-summary: The order of the rule. The order number must start from 0 and consecutive. Rule with higher order will be applied later.
+  - name: --match-variable
+    type: string
+    short-summary: Name of the match condition.
+  - name: --operator
+    type: string
+    short-summary: Operator of the match condition.
+  - name: --selector
+    type: string
+    short-summary: Selector of the match condition.
+  - name: --match-values
+    type: string
+    short-summary: Match values of the match condition (comma separated).
+  - name: --negate-condition
+    type: string
+    short-summary: Describes if this is negate condition or not.
+  - name: --transform
+    type: string
+    short-summary: Describes what transforms are applied before matching. Possible values are Lowercase, Uppercase.
+  - name: --action-name
+    type: string
+    short-summary: Name of the action.
+  - name: --cache-behavior
+    type: string
+    short-summary: Caching behavior for the requests. Possible values are BypassCache, Override, SetIfMissing.
+  - name: --cache-duration
+    type: string
+    short-summary: The duration for which the content needs to be cached. Allowed format is [d.]hh:mm:ss.
+  - name: --header-action
+    type: string
+    short-summary: Action to perform on headers. Possible values are Append, Overwrite, Delete.
+  - name: --header-name
+    type: string
+    short-summary: Name of header.
+  - name: --header-value
+    type: string
+    short-summary: Value of header.
+  - name: --header-action
+    type: string
+    short-summary: Action to perform on headers. Possible values are Append, Overwrite, Delete.
+  - name: --redirect-type
+    type: string
+    short-summary: The redirect type the rule will use when redirecting traffic. Possible values are Moved, Found, TemporaryRedirect and PermanentRedirect.
+  - name: --redirect-protocol
+    type: string
+    short-summary: Protocol to use for the redirect. Possible values are MatchRequest, Http, Https.
+  - name: --custom-hostname
+    type: string
+    short-summary: Host to redirect. Leave empty to use the incoming host as the destination host.
+  - name: --custom-path
+    type: string
+    short-summary: The full path to redirect. Path cannot be empty and must start with /. Leave empty to use the incoming path as destination path.
+  - name: --custom-querystring
+    type: string
+    short-summary: The set of query strings to be placed in the redirect URL. leave empty to preserve the incoming query string.
+  - name: --custom-fragment
+    type: string
+    short-summary: Fragment to add to the redirect URL.
+  - name: --query-string-behavior
+    type: string
+    short-summary: Caching behavior for the requests. Possible values are Include, IncludeAll, Exclude and ExcludeAll.
+  - name: --query-parameters
+    type: string
+    short-summary: query parameters to include or exclude (comma separated).
+  - name: --source-pattern
+    type: string
+    short-summary: define a request URI pattern that identifies the type of requests that may be rewritten.
+  - name: --destination
+    type: string
+    short-summary: Define the destination path for be used in the rewrite. This will overwrite the source pattern.
+  - name: --preserve-unmatched-path
+    type: boolean
+    short-summary: If True, the remaining path after the source pattern will be appended to the new destination path.
+examples:
+  - name: Create a global rule to disable caching.
+    text: >
+        az cdn endpoint rule add -g group -n endpoint --profile-name profile --order 0\\
+            --rule-name global --action-name CacheExpiration --cache-behavior BypassCache
+  - name: Create a rule for http to https redirect
+    text: >
+        az cdn endpoint rule add -g group -n endpoint --profile-name profile --order 1\\
+            --rule-name "redirect" --match-variable RequestScheme --operator Equal --match-values HTTPS\\
+            --action-name "UrlRedirect" --redirect-protocol Https --redirect-type Moved
+"""
+
+helps['cdn endpoint rule remove'] = """
+type: command
+short-summary: Remove a delivery rule from an endpoint.
+parameters:
+  - name: --rule-name
+    type: string
+    short-summary: Name of the rule.
+examples:
+  - name: Remove the global rule.
+    text: >
+        az cdn endpoint rule remove -g group -n endpoint --profile-name profile --rule-name Global\\
+"""
+
+helps['cdn endpoint rule show'] = """
+type: command
+short-summary: show delivery rules asscociate with the endpoint.
+examples:
+  - name: show delivery rules asscociate with the endpoint.
+    text: >
+        az cdn endpoint rule show -g group --profile-name profile-name
+"""
+
+helps['cdn endpoint rule condition'] = """
+type: group
+short-summary: Manage delivery rule conditions for an endpoint.
+"""
+
+helps['cdn endpoint rule condition add'] = """
+type: command
+short-summary: Add a condition to a delivery rule.
+parameters:
+  - name: --rule-name
+    type: string
+    short-summary: Name of the rule.
+  - name: --match-variable
+    type: string
+    short-summary: Name of the match condition.
+  - name: --operator
+    type: string
+    short-summary: Operator of the match condition.
+  - name: --selector
+    type: string
+    short-summary: Selector of the match condition.
+  - name: --match-values
+    type: string
+    short-summary: Match values of the match condition (comma separated).
+  - name: --negate-condition
+    type: string
+    short-summary: Describes if this is negate condition or not.
+  - name: --transform
+    type: string
+    short-summary: Describes what transforms are applied before matching. Possible values are Lowercase, Uppercase.
+examples:
+  - name: Add a remote address condition.
+    text: >
+        az cdn endpoint rule condition add -g group -n endpoint --profile-name profile --rule-name name\\
+            --match-variable RemoteAddress --operator GeoMatch --match-values "TH"
+"""
+
+helps['cdn endpoint rule condition remove'] = """
+type: command
+short-summary: Remove a condition from a delivery rule.
+parameters:
+  - name: --rule-name
+    type: string
+    short-summary: Name of the rule.
+  - name: --index
+    type: string
+    short-summary: index of the condition.
+examples:
+  - name: Remove the first condition.
+    text: >
+        az cdn endpoint rule condition remove -g group -n endpoint --profile-name profile --rule-name name\\
+            --index 0
+"""
+
+helps['cdn endpoint rule condition show'] = """
+type: command
+short-summary: show delivery rules asscociate with the endpoint.
+examples:
+  - name: show delivery rules asscociate with the endpoint.
+    text: >
+        az cdn endpoint rule condition show -g group --profile-name profile-name
+"""
+
+helps['cdn endpoint rule action'] = """
+type: group
+short-summary: Manage delivery rule actions for an endpoint.
+"""
+
+helps['cdn endpoint rule action add'] = """
+type: command
+short-summary: Add an action to a delivery rule.
+parameters:
+  - name: --rule-name
+    type: string
+    short-summary: Name of the rule.
+  - name: --action-name
+    type: string
+    short-summary: Name of the action.
+  - name: --cache-behavior
+    type: string
+    short-summary: Caching behavior for the requests. Possible values are BypassCache, Override, SetIfMissing.
+  - name: --cache-duration
+    type: string
+    short-summary: The duration for which the content needs to be cached. Allowed format is [d.]hh:mm:ss.
+  - name: --header-action
+    type: string
+    short-summary: Action to perform on headers. Possible values are Append, Overwrite, Delete.
+  - name: --header-name
+    type: string
+    short-summary: Name of header.
+  - name: --header-value
+    type: string
+    short-summary: Value of header.
+  - name: --header-action
+    type: string
+    short-summary: Action to perform on headers. Possible values are Append, Overwrite, Delete.
+  - name: --redirect-type
+    type: string
+    short-summary: The redirect type the rule will use when redirecting traffic. Possible values are Moved, Found, TemporaryRedirect and PermanentRedirect.
+  - name: --redirect-protocol
+    type: string
+    short-summary: Protocol to use for the redirect. Possible values are MatchRequest, Http, Https.
+  - name: --custom-hostname
+    type: string
+    short-summary: Host to redirect. Leave empty to use the incoming host as the destination host.
+  - name: --custom-path
+    type: string
+    short-summary: The full path to redirect. Path cannot be empty and must start with /. Leave empty to use the incoming path as destination path.
+  - name: --custom-querystring
+    type: string
+    short-summary: The set of query strings to be placed in the redirect URL. leave empty to preserve the incoming query string.
+  - name: --custom-fragment
+    type: string
+    short-summary: Fragment to add to the redirect URL.
+  - name: --query-string-behavior
+    type: string
+    short-summary: Caching behavior for the requests. Possible values are Include, IncludeAll, Exclude and ExcludeAll.
+  - name: --query-parameters
+    type: string
+    short-summary: query parameters to include or exclude (comma separated).
+  - name: --source-pattern
+    type: string
+    short-summary: define a request URI pattern that identifies the type of requests that may be rewritten.
+  - name: --destination
+    type: string
+    short-summary: Define the destination path for be used in the rewrite. This will overwrite the source pattern.
+  - name: --preserve-unmatched-path
+    type: boolean
+    short-summary: If True, the remaining path after the source pattern will be appended to the new destination path.
+examples:
+  - name: Add a redirect action.
+    text: >
+        az cdn endpoint rule action add -g group -n endpoint --profile-name profile --rule-name name\\
+            --action-name "UrlRedirect" --redirect-protocol HTTPS --redirect-type Moved
+  - name: Add a cache expiration action
+    text: >
+        az cdn endpoint rule action add -g group -n endpoint --profile-name profile --rule-name name\\
+            --action-name "CacheExpiration" --cache-behavior BypassCache
+"""
+
+helps['cdn endpoint rule action remove'] = """
+type: command
+short-summary: Remove an action from a delivery rule.
+parameters:
+  - name: --rule-name
+    type: string
+    short-summary: Name of the rule.
+  - name: --index
+    type: string
+    short-summary: index of the action.
+examples:
+  - name: Remove the first action.
+    text: >
+        az cdn endpoint rule action remove -g group -n endpoint --profile-name profile --rule-name name\\
+            --index 0
+"""
+
+helps['cdn endpoint rule action show'] = """
+type: command
+short-summary: show delivery rules asscociate with the endpoint.
+examples:
+  - name: show delivery rules asscociate with the endpoint.
+    text: >
+        az cdn endpoint rule action show -g group --profile-name profile-name
+"""
+
 helps['cdn origin'] = """
 type: group
 short-summary: List or show existing origins related to CDN endpoints.

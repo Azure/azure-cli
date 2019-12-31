@@ -82,6 +82,20 @@ def load_arguments(self, _):
         c.argument('content_types_to_compress', nargs='+')
         c.argument('profile_name', help=profile_name_help, id_part='name')
 
+    with self.argument_context('cdn endpoint rule') as c:
+        c.argument('cache_behavior', arg_type=get_enum_type(['BypassCache', 'Override', 'SetIfMissing']))
+        c.argument('header_action', arg_type=get_enum_type(['Append', 'Overwrite', 'Delete']))
+        c.argument('redirect_type',
+                   arg_type=get_enum_type(['Moved', 'Found', 'TemporaryRedirect', 'PermanentRedirect']))
+        c.argument('redirect_protocol', arg_type=get_enum_type(['MatchRequest', 'Http', 'Https']))
+        c.argument('query_string_behavior', arg_type=get_enum_type(['Include', 'IncludeAll', 'Exclude', 'ExcludeAll']))
+        c.argument('transform', arg_type=get_enum_type(['Lowercase', 'Uppercase']))
+        c.argument('preserve_unmatched_path', arg_type=get_three_state_flag(), options_list='--preserve-unmatched-path',
+                   help='If True, the remaining path after the source pattern '
+                        'will be appended to the new destination path.')
+        c.argument('negate_condition', arg_type=get_three_state_flag(), options_list='--negate-condition',
+                   help='Describes if this is negate condition or not.')
+
     with self.argument_context('cdn endpoint create') as c:
         c.argument('name', name_arg_type, id_part='name', help='Name of the CDN endpoint.')
 
