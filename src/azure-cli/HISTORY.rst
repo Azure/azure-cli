@@ -30,6 +30,11 @@ Release History
 * Fix `vm create` failure in Azure Stack profile.
 * vm monitor metrics tail/list-definitions: support query metric and list definitions for a vm.
 
+**Cdn**
+
+Add support for rulesEngine feature
+Add commands for rule managemnt: 'az cdn endpoint rule'
+
 **Storage**
 
 * `az storage account create`: Remove preview flag for --enable-hierarchical-namespace parameter
