@@ -80,6 +80,10 @@ def get_sql_firewall_rules_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).firewall_rules
 
 
+def get_sql_instance_pools_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).instance_pools
+
+
 def get_sql_recommended_elastic_pools_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).recommended_elastic_pools
 

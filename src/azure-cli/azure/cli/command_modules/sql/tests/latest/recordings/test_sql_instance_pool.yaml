@@ -1,0 +1,450 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql instance-pool show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-sql/0.15.0 Azure-SDK-For-Python AZURECLI/2.0.78
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/billingPools/providers/Microsoft.Sql/instancePools/billingpool1?api-version=2018-06-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5"},"properties":{"subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/billingPools/providers/Microsoft.Network/virtualNetworks/vnet-billingpool1/subnets/InstancePool","vCores":8,"licenseType":"LicenseIncluded"},"location":"northcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/billingPools/providers/Microsoft.Sql/instancePools/billingpool1","name":"billingpool1","type":"Microsoft.Sql/instancePools"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '535'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 31 Dec 2019 00:05:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"tags": {"bar": "foo", "foo": "bar"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql instance-pool update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '38'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --tags
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-sql/0.15.0 Azure-SDK-For-Python AZURECLI/2.0.78
+      accept-language:
+      - en-US
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/billingPools/providers/Microsoft.Sql/instancePools/billingpool1?api-version=2018-06-01-preview
+  response:
+    body:
+      string: '{"operation":"UpsertInstancePoolAsync","startTime":"2019-12-31T00:06:00.517Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/billingPools/providers/Microsoft.Sql/locations/northcentralus/instancePoolAzureAsyncOperation/baa45319-df9d-4b1b-b5bb-ab07790c78cc?api-version=2018-06-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '78'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 31 Dec 2019 00:06:00 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/billingPools/providers/Microsoft.Sql/locations/northcentralus/instancePoolOperationResults/baa45319-df9d-4b1b-b5bb-ab07790c78cc?api-version=2018-06-01-preview
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql instance-pool update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --tags
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-sql/0.15.0 Azure-SDK-For-Python AZURECLI/2.0.78
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/billingPools/providers/Microsoft.Sql/locations/northcentralus/instancePoolAzureAsyncOperation/baa45319-df9d-4b1b-b5bb-ab07790c78cc?api-version=2018-06-01-preview
+  response:
+    body:
+      string: '{"name":"baa45319-df9d-4b1b-b5bb-ab07790c78cc","status":"Succeeded","startTime":"2019-12-31T00:06:00.517Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 31 Dec 2019 00:07:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql instance-pool update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --tags
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-sql/0.15.0 Azure-SDK-For-Python AZURECLI/2.0.78
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/billingPools/providers/Microsoft.Sql/instancePools/billingpool1?api-version=2018-06-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5"},"properties":{"subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/billingPools/providers/Microsoft.Network/virtualNetworks/vnet-billingpool1/subnets/InstancePool","vCores":8,"licenseType":"LicenseIncluded"},"location":"northcentralus","tags":{"bar":"foo","foo":"bar"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/billingPools/providers/Microsoft.Sql/instancePools/billingpool1","name":"billingpool1","type":"Microsoft.Sql/instancePools"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '558'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 31 Dec 2019 00:07:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"tags": {}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql instance-pool update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '12'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --tags
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-sql/0.15.0 Azure-SDK-For-Python AZURECLI/2.0.78
+      accept-language:
+      - en-US
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/billingPools/providers/Microsoft.Sql/instancePools/billingpool1?api-version=2018-06-01-preview
+  response:
+    body:
+      string: '{"operation":"UpsertInstancePoolAsync","startTime":"2019-12-31T00:07:02.937Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/billingPools/providers/Microsoft.Sql/locations/northcentralus/instancePoolAzureAsyncOperation/eb5a7229-7900-4acd-802a-7d42de9a3afd?api-version=2018-06-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '78'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 31 Dec 2019 00:07:02 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/billingPools/providers/Microsoft.Sql/locations/northcentralus/instancePoolOperationResults/eb5a7229-7900-4acd-802a-7d42de9a3afd?api-version=2018-06-01-preview
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql instance-pool update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --tags
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-sql/0.15.0 Azure-SDK-For-Python AZURECLI/2.0.78
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/billingPools/providers/Microsoft.Sql/locations/northcentralus/instancePoolAzureAsyncOperation/eb5a7229-7900-4acd-802a-7d42de9a3afd?api-version=2018-06-01-preview
+  response:
+    body:
+      string: '{"name":"eb5a7229-7900-4acd-802a-7d42de9a3afd","status":"Succeeded","startTime":"2019-12-31T00:07:02.937Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 31 Dec 2019 00:08:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql instance-pool update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --tags
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-sql/0.15.0 Azure-SDK-For-Python AZURECLI/2.0.78
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/billingPools/providers/Microsoft.Sql/instancePools/billingpool1?api-version=2018-06-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5"},"properties":{"subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/billingPools/providers/Microsoft.Network/virtualNetworks/vnet-billingpool1/subnets/InstancePool","vCores":8,"licenseType":"LicenseIncluded"},"location":"northcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/billingPools/providers/Microsoft.Sql/instancePools/billingpool1","name":"billingpool1","type":"Microsoft.Sql/instancePools"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '535'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 31 Dec 2019 00:08:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql instance-pool delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-sql/0.15.0 Azure-SDK-For-Python AZURECLI/2.0.78
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/billingPools/providers/Microsoft.Sql/instancePools/billingpool1?api-version=2018-06-01-preview
+  response:
+    body:
+      string: '{"operation":"DropInstancePool","startTime":"2019-12-31T00:08:05.157Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/billingPools/providers/Microsoft.Sql/locations/northcentralus/instancePoolAzureAsyncOperation/6cfdc79c-a18b-40b3-9b73-40e0ce72e1ea?api-version=2018-06-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '71'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 31 Dec 2019 00:08:04 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/billingPools/providers/Microsoft.Sql/locations/northcentralus/instancePoolOperationResults/6cfdc79c-a18b-40b3-9b73-40e0ce72e1ea?api-version=2018-06-01-preview
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql instance-pool delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-sql/0.15.0 Azure-SDK-For-Python AZURECLI/2.0.78
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/billingPools/providers/Microsoft.Sql/locations/northcentralus/instancePoolAzureAsyncOperation/6cfdc79c-a18b-40b3-9b73-40e0ce72e1ea?api-version=2018-06-01-preview
+  response:
+    body:
+      string: '{"name":"6cfdc79c-a18b-40b3-9b73-40e0ce72e1ea","status":"Failed","startTime":"2019-12-31T00:08:05.157Z","error":{"code":"InstancePoolNotEmpty","message":"An
+        instance pool with name ''billingpool1'' is not empty"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '211'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 31 Dec 2019 00:08:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

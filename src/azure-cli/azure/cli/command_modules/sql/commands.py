@@ -15,6 +15,7 @@ from ._format import (
     elastic_pool_table_format,
     elastic_pool_edition_table_format,
     firewall_rule_table_format,
+    instance_pool_table_format,
     server_table_format,
     usage_table_format,
     LongRunningOperationResultTransform,
@@ -35,6 +36,7 @@ from ._util import (
     get_sql_encryption_protectors_operations,
     get_sql_failover_groups_operations,
     get_sql_firewall_rules_operations,
+    get_sql_instance_pools_operations,
     get_sql_managed_databases_operations,
     get_sql_managed_instance_azure_ad_administrators_operations,
     get_sql_managed_instance_encryption_protectors_operations,
@@ -322,6 +324,25 @@ def load_command_table(self, _):
         g.generic_update_command('update', custom_func_name='failover_group_update')
         g.command('delete', 'delete')
         g.custom_command('set-primary', 'failover_group_failover')
+
+    ###############################################
+    #             sql instance-pool               #
+    ###############################################
+
+    instance_pools_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#InstancePoolsOperations.{}',
+        client_factory=get_sql_instance_pools_operations)
+    with self.command_group('sql instance-pool', instance_pools_operations, client_factory=get_sql_instance_pools_operations) as g:
+        g.command('show', 'get',
+                  table_transformer=instance_pool_table_format)
+        g.custom_command('list', 'instance_pool_list',
+                         table_transformer=instance_pool_table_format)
+        g.command('update', 'update')
+        g.command('delete', 'delete', supports_no_wait=True)
+        g.custom_command(
+            'create',
+            'instance_pool_create',
+            supports_no_wait=True)
 
     ###############################################
     #                sql server                   #
