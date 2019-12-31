@@ -457,6 +457,11 @@ type: command
 short-summary: Updates the instance failover group.
 """
 
+helps['sql instance-pool'] = """
+type: group
+short-summary: Manage instance pools.
+"""
+
 helps['sql mi'] = """
 type: group
 short-summary: Manage SQL managed instances.

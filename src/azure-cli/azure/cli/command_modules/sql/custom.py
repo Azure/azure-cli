@@ -1795,6 +1795,91 @@ def elastic_pool_list_capabilities(
 
     return editions
 
+###############################################
+#                sql instance-pool            #
+###############################################
+
+
+def instance_pool_list(
+        client,
+        resource_group_name=None):
+    '''
+    Lists servers in a resource group or subscription
+    '''
+
+    if resource_group_name:
+        # List all instance pools in the resource group
+        return client.list_by_resource_group(
+            resource_group_name=resource_group_name)
+
+    # List all instance pools in the subscription
+    return client.list()
+
+
+def instance_pool_create(
+        cmd,
+        client,
+        instance_pool_name,
+        resource_group_name,
+        sku=None,
+        **kwargs):
+    '''
+    Creates a new instance pool
+    '''
+
+    kwargs['sku'] = _find_instance_pool_sku_from_capabilities(
+        cmd.cli_ctx, kwargs['location'], sku)
+
+    return client.create_or_update(
+        instance_pool_name=instance_pool_name,
+        resource_group_name=resource_group_name,
+        parameters=kwargs)
+
+
+def _find_instance_pool_sku_from_capabilities(cli_ctx, location, sku):
+    '''
+    Validate if the sku family and edition input by user are permissible in the region using
+    capabilities API and get the SKU name
+    '''
+
+    logger.debug('_find_instance_pool_sku_from_capabilities input: %s', sku)
+
+    # Get location capability
+    loc_capability = _get_location_capability(
+        cli_ctx, location, CapabilityGroup.supported_managed_instance_versions)
+
+    # Get default server version capability
+    managed_instance_version_capability = _get_default_capability(
+        loc_capability.supported_managed_instance_versions)
+
+    # Find edition capability, based on requested sku properties
+    edition_capability = _find_edition_capability(
+        sku, managed_instance_version_capability.supported_instance_pool_editions)
+
+    # Find family level capability, based on requested sku properties
+    family_capability = _find_family_capability(
+        sku, edition_capability.supported_families)
+
+    result = Sku(
+        name=_build_sku_name(
+            edition_capability.name,
+            family_capability.name),
+        tier=sku.tier,
+        family=sku.family)
+    logger.debug(
+        '_find_instance_pool_sku_from_capabilities return: %s',
+        result)
+    return result
+
+
+def _build_sku_name(edition, family):
+    '''
+    Build SKU name from edition and family
+    '''
+
+    editions = {"GeneralPurpose": "GP", "BusinessCritical": "BC"}
+    return "%s_%s" % (editions[edition], family)
+
 
 ###############################################
 #                sql server                   #
