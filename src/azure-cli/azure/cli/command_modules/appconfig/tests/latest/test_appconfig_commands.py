@@ -17,6 +17,7 @@ from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest)
 from azure.cli.testsdk.checkers import NoneCheck
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
+FEATURE_FLAG_PREFIX = ".appconfig.featureflag/"
 
 
 class AppConfigMgmtScenarioTest(ScenarioTest):
@@ -491,6 +492,198 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
         with open(exported_as_kv_prop_file_path) as prop_file:
             exported_kv_prop_file = javaproperties.load(prop_file)
         assert exported_prop_file == exported_kv_prop_file
+
+
+class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(parameter_name_for_location='location')
+    def test_appconfig_to_appconfig_import_export(self, resource_group, location):
+        src_config_store_name = self.create_random_name(prefix='Source', length=24)
+        dest_config_store_name = self.create_random_name(prefix='Destination', length=24)
+
+        location = 'eastus'
+        self.kwargs.update({
+            'config_store_name': src_config_store_name,
+            'rg_loc': location,
+            'rg': resource_group
+        })
+        _create_config_store(self, self.kwargs)
+
+        # Get src connection string
+        credential_list = self.cmd(
+            'appconfig credential list -n {config_store_name} -g {rg}').get_output_in_json()
+        self.kwargs.update({
+            'src_connection_string': credential_list[0]['connectionString'],
+            'config_store_name': dest_config_store_name
+        })
+        _create_config_store(self, self.kwargs)
+
+        # Get dest connection string
+        credential_list = self.cmd(
+            'appconfig credential list -n {config_store_name} -g {rg}').get_output_in_json()
+        self.kwargs.update({
+            'dest_connection_string': credential_list[0]['connectionString']
+        })
+
+        # Add duplicate keys with different labels in src config store
+        entry_key = "Color"
+        entry_value = "Red"
+        entry_label = 'v1'
+        self.kwargs.update({
+            'key': entry_key,
+            'value': entry_value,
+            'label': entry_label
+        })
+        # add a new key-value entry
+        self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --label {label} -y',
+                 checks=[self.check('key', entry_key),
+                         self.check('value', entry_value),
+                         self.check('label', entry_label)])
+        # add a new label for same key
+        updated_value = "Blue"
+        updated_label = 'v2'
+        self.kwargs.update({
+            'value': updated_value,
+            'label': updated_label
+        })
+        self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --label {label} -y',
+                 checks=[self.check('key', entry_key),
+                         self.check('value', updated_value),
+                         self.check('label', updated_label)])
+
+        # Add duplicate features with different labels in src config store
+        entry_feature = 'Beta'
+        internal_feature_key = FEATURE_FLAG_PREFIX + entry_feature
+        self.kwargs.update({
+            'feature': entry_feature,
+            'label': entry_label
+        })
+        # add a new feature flag entry
+        self.cmd('appconfig feature set --connection-string {src_connection_string} --feature {feature} --label {label} -y',
+                 checks=[self.check('key', entry_feature),
+                         self.check('label', entry_label)])
+
+        # add a new label for same feature
+        self.kwargs.update({
+            'label': updated_label
+        })
+        self.cmd('appconfig feature set --connection-string {src_connection_string} --feature {feature} --label {label} -y',
+                 checks=[self.check('key', entry_feature),
+                         self.check('label', updated_label)])
+
+        # import all kv and features from src config store to dest config store
+        any_key_pattern = '*'
+        any_label_pattern = '*'
+        null_label = None
+        dest_label = 'DestLabel'
+        self.kwargs.update({
+            'import_source': 'appconfig',
+            'label': dest_label,
+            'src_label': any_label_pattern
+        })
+
+        # Importing with a new label should only import one KV and one feature as src labels will be overwritten in dest
+        self.cmd(
+            'appconfig kv import --connection-string {dest_connection_string} -s {import_source} --src-connection-string {src_connection_string} --src-label {src_label} --label {label} -y')
+
+        # Check kv and features that were imported to dest config store
+        # We can check by deleting since its better to clear dest config store for next import test
+        self.kwargs.update({
+            'key': any_key_pattern,
+            'label': any_label_pattern
+        })
+        deleted_kvs = self.cmd('appconfig kv delete --connection-string {dest_connection_string} --key {key} --label {label} -y',
+                               checks=[self.check('[0].key', internal_feature_key),
+                                       self.check('[0].label', dest_label),
+                                       self.check('[1].key', entry_key),
+                                       self.check('[1].value', updated_value),
+                                       self.check('[1].label', dest_label)]).get_output_in_json()
+        assert len(deleted_kvs) == 2
+
+        # Not specifying a label or preserve-labels should assign null label and import only one KV and one feature
+        self.cmd(
+            'appconfig kv import --connection-string {dest_connection_string} -s {import_source} --src-connection-string {src_connection_string} --src-label {src_label} -y')
+        deleted_kvs = self.cmd('appconfig kv delete --connection-string {dest_connection_string} --key {key} --label {label} -y',
+                               checks=[self.check('[0].key', internal_feature_key),
+                                       self.check('[0].label', null_label),
+                                       self.check('[1].key', entry_key),
+                                       self.check('[1].value', updated_value),
+                                       self.check('[1].label', null_label)]).get_output_in_json()
+        assert len(deleted_kvs) == 2
+
+        # Preserving labels and importing all kv and all features
+        self.cmd(
+            'appconfig kv import --connection-string {dest_connection_string} -s {import_source} --src-connection-string {src_connection_string} --src-label {src_label} --preserve-labels -y')
+        deleted_kvs = self.cmd('appconfig kv delete --connection-string {dest_connection_string} --key {key} --label {label} -y',
+                               checks=[self.check('[0].key', internal_feature_key),
+                                       self.check('[0].label', entry_label),
+                                       self.check('[1].key', internal_feature_key),
+                                       self.check('[1].label', updated_label),
+                                       self.check('[2].key', entry_key),
+                                       self.check('[2].value', entry_value),
+                                       self.check('[2].label', entry_label),
+                                       self.check('[3].key', entry_key),
+                                       self.check('[3].value', updated_value),
+                                       self.check('[3].label', updated_label)]).get_output_in_json()
+        assert len(deleted_kvs) == 4
+
+        # Error when both label and preserve-labels is specified
+        self.kwargs.update({
+            'label': dest_label
+        })
+        with self.assertRaisesRegexp(CLIError, "Import failed! Please provide only one of these arguments: 'label' or 'preserve-labels'."):
+            self.cmd('appconfig kv import --connection-string {dest_connection_string} -s {import_source} --src-connection-string {src_connection_string} --src-label {src_label} --label {label} --preserve-labels -y')
+
+        # Export tests from src config store to dest config store
+        # Exporting with a new label should only export one KV and one feature as src labels will be overwritten in dest
+        self.cmd(
+            'appconfig kv export --connection-string {src_connection_string} -d {import_source} --dest-connection-string {dest_connection_string} --label {src_label} --dest-label {label} -y')
+        # Check kv and features that were exported to dest config store
+        # We can check by deleting since its better to clear dest config store for next export test
+        self.kwargs.update({
+            'label': any_label_pattern
+        })
+        deleted_kvs = self.cmd('appconfig kv delete --connection-string {dest_connection_string} --key {key} --label {label} -y',
+                               checks=[self.check('[0].key', internal_feature_key),
+                                       self.check('[0].label', dest_label),
+                                       self.check('[1].key', entry_key),
+                                       self.check('[1].value', updated_value),
+                                       self.check('[1].label', dest_label)]).get_output_in_json()
+        assert len(deleted_kvs) == 2
+
+        # Not specifying a label or preserve-labels should assign null label and export only one KV and one feature
+        self.cmd(
+            'appconfig kv export --connection-string {src_connection_string} -d {import_source} --dest-connection-string {dest_connection_string} --label {src_label} -y')
+        deleted_kvs = self.cmd('appconfig kv delete --connection-string {dest_connection_string} --key {key} --label {label} -y',
+                               checks=[self.check('[0].key', internal_feature_key),
+                                       self.check('[0].label', null_label),
+                                       self.check('[1].key', entry_key),
+                                       self.check('[1].value', updated_value),
+                                       self.check('[1].label', null_label)]).get_output_in_json()
+        assert len(deleted_kvs) == 2
+
+        # Preserving labels and exporting all kv and all features
+        self.cmd(
+            'appconfig kv export --connection-string {src_connection_string} -d {import_source} --dest-connection-string {dest_connection_string} --label {src_label} --preserve-labels -y')
+        deleted_kvs = self.cmd('appconfig kv delete --connection-string {dest_connection_string} --key {key} --label {label} -y',
+                               checks=[self.check('[0].key', internal_feature_key),
+                                       self.check('[0].label', entry_label),
+                                       self.check('[1].key', internal_feature_key),
+                                       self.check('[1].label', updated_label),
+                                       self.check('[2].key', entry_key),
+                                       self.check('[2].value', entry_value),
+                                       self.check('[2].label', entry_label),
+                                       self.check('[3].key', entry_key),
+                                       self.check('[3].value', updated_value),
+                                       self.check('[3].label', updated_label)]).get_output_in_json()
+        assert len(deleted_kvs) == 4
+
+        # Error when both dest-label and preserve-labels is specified
+        self.kwargs.update({
+            'label': dest_label
+        })
+        with self.assertRaisesRegexp(CLIError, "Export failed! Please provide only one of these arguments: 'dest-label' or 'preserve-labels'."):
+            self.cmd('appconfig kv export --connection-string {src_connection_string} -d {import_source} --dest-connection-string {dest_connection_string} --label {src_label} --dest-label {label} --preserve-labels -y')
 
 
 class AppConfigFeatureScenarioTest(ScenarioTest):
