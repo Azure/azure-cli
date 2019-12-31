@@ -13,7 +13,7 @@ Release History
 
 **AppService**
 
-* Fix issue #7154: Updating documentation for comand <> to use back ticks instead of single quotes
+* Fix issue #7154: Updating documentation for command <> to use back ticks instead of single quotes
 
 **ARM**
 
