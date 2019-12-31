@@ -1116,8 +1116,8 @@ def _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_
                                                          data_source_name,
                                                          data_source)
                 except CloudError as ex:
-                    logger.warning("Failed to set data source due to {}. "
-                                   "Skip this step and need manual work later.".format(ex.message))
+                    logger.warning("Failed to set data source due to %s. "
+                                   "Skip this step and need manual work later.", ex.message)
     else:
         logger.warning("Unsupported OS type. Skip the default settings for log analytics workspace.")
 
