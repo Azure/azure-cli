@@ -175,7 +175,7 @@ AZURE_API_PROFILES = {
             'tenant_activity_logs': '2015-04-01',
             'vm_insights': '2018-11-27-preview'
         }),
-        ResourceType.MGMT_APPSERVICE: '2018-11-01'
+        ResourceType.MGMT_APPSERVICE: '2019-08-01'
     },
     '2019-03-01-hybrid': {
         ResourceType.MGMT_STORAGE: '2017-10-01',
