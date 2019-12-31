@@ -18,9 +18,9 @@ from ._utils import (
 from ._client_factory import cf_acr_registries_tasks
 from .run import prepare_source_location
 
-PACK_TASK_YAML_FMT = '''version: v1.0.0
+PACK_TASK_YAML_FMT = '''version: v1.1.0
 steps:
-  - cmd: mcr.microsoft.com/oryx/pack:{pack_image_tag} build {image_name} --builder {builder} {no_pull} --env REGISTRY_NAME={{{{.Run.Registry}}}} -p .
+  - cmd: mcr.microsoft.com/oryx/pack:{pack_image_tag} build {image_name} --builder {builder} {no_pull} --env REGISTRY_NAME=$Registry -p .
     timeout: 28800
   - push: ["{image_name}"]
     timeout: 1800
@@ -60,7 +60,7 @@ def acr_pack_build(cmd,  # pylint: disable=too-many-locals
     if builder not in ACR_CACHED_BUILDER_IMAGES and not pull:
         logger.warning('Using a non-cached builder image; `--pull` is probably needed as well')
 
-    registry_prefixes = '{{.Run.Registry}}/', registry.login_server + '/'
+    registry_prefixes = '$Registry/', registry.login_server + '/'
     # If the image name doesn't have any required prefix, add it
     if all((not image_name.startswith(prefix) for prefix in registry_prefixes)):
         original_image_name = image_name

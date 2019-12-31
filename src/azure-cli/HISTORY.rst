@@ -8,6 +8,10 @@ Release History
 * Add new cmdlets for Instance Pools 'sql instance-pool'
 * Support create, delete, show, list and update for Instance Pools.
 
+**ACR**
+
+* [BREAKING CHANGE] Remove '--os' parameter for 'acr build', 'acr task create/update', 'acr run', and 'acr pack'. Use '--platform' instead.
+
 **AppConfig**
 
 * Add support for importing/exporting feature flags

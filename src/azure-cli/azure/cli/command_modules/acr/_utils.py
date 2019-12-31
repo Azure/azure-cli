@@ -216,10 +216,8 @@ def get_validate_platform(cmd, platform):
     if platform:
         platform_split = platform.split('/')
         platform_os = platform_split[0]
-        platform_arch = platform_split[1] if len(
-            platform_split) > 1 else Architecture.amd64.value
-        platform_variant = platform_split[2] if len(
-            platform_split) > 2 else None
+        platform_arch = platform_split[1] if len(platform_split) > 1 else Architecture.amd64.value
+        platform_variant = platform_split[2] if len(platform_split) > 2 else None
 
     platform_os = platform_os.lower()
     platform_arch = platform_arch.lower()
@@ -230,7 +228,7 @@ def get_validate_platform(cmd, platform):
 
     if platform_os not in valid_os:
         raise CLIError(
-            "'{0}' is not a valid value for OS specified in --os or --platform. "
+            "'{0}' is not a valid value for OS specified in --platform. "
             "Valid options are {1}.".format(platform_os, ','.join(valid_os))
         )
     if platform_arch not in valid_arch:
