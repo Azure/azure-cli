@@ -94,7 +94,6 @@ def update_endpoint(instance,
 # pylint: disable=too-many-return-statements
 def create_condition(match_variable=None, operator=None, match_values=None,
                      selector=None, negate_condition=None, transform=None):
-
     if match_variable == 'RemoteAddress':
         return DeliveryRuleRemoteAddressCondition(
             parameters=RemoteAddressMatchConditionParameters(
