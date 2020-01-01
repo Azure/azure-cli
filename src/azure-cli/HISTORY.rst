@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**Deployment Manager**
+
+* Add list operations for all resources.
+
 **ACR**
 
 * [BREAKING CHANGE] Remove '--os' parameter for 'acr build', 'acr task create/update', 'acr run', and 'acr pack'. Use '--platform' instead.

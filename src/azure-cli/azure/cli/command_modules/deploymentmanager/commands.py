@@ -41,6 +41,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'cli_artifact_source_create')
         g.command('delete', 'delete', confirmation="There might be rollouts referencing the artifact source. Do you want to delete?")
         g.command('show', 'get')
+        g.custom_command('list', 'cli_artifact_sources_list')
         g.generic_update_command(
             'update',
             setter_arg_name='artifact_source_info',
@@ -51,6 +52,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'cli_service_topology_create')
         g.command('delete', 'delete')
         g.command('show', 'get')
+        g.custom_command('list', 'cli_service_topologies_list')
         g.generic_update_command(
             'update',
             setter_arg_name='service_topology_info',
@@ -61,6 +63,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'cli_service_create')
         g.command('delete', 'delete')
         g.command('show', 'get')
+        g.custom_command('list', 'cli_services_list')
         g.generic_update_command(
             'update',
             setter_arg_name='service_info',
@@ -71,6 +74,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'cli_service_unit_create')
         g.command('delete', 'delete')
         g.command('show', 'get')
+        g.custom_command('list', 'cli_service_units_list')
         g.generic_update_command(
             'update',
             setter_arg_name='service_unit_info',
@@ -81,6 +85,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'cli_step_create')
         g.command('delete', 'delete')
         g.command('show', 'get')
+        g.custom_command('list', 'cli_steps_list')
         g.generic_update_command(
             'update',
             setter_arg_name='step_info',
@@ -89,6 +94,7 @@ def load_command_table(self, _):
 
     with self.command_group('deploymentmanager rollout', rollouts) as g:
         g.command('show', 'get')
+        g.custom_command('list', 'cli_rollouts_list')
         g.command('stop', 'cancel', confirmation="Do you want to cancel the rollout?")
         g.custom_command(
             'restart',

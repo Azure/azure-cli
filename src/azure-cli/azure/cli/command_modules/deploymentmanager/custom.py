@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import json
+import os
 from knack.log import get_logger
 from knack.util import CLIError
 
@@ -72,6 +74,13 @@ def cli_artifact_source_update(
 
     return instance
 
+def cli_artifact_sources_list(
+        cmd,
+        resource_group_name):
+
+    client = cf_artifact_sources(cmd.cli_ctx)
+    return client.list(
+        resource_group_name=resource_group_name)
 
 def cli_service_topology_create(
         cmd,
@@ -132,6 +141,13 @@ def cli_service_topology_update(
 
     return instance
 
+def cli_service_topologies_list(
+        cmd,
+        resource_group_name):
+
+    client = cf_service_topologies(cmd.cli_ctx)
+    return client.list(
+        resource_group_name=resource_group_name)
 
 def cli_service_create(
         cmd,
@@ -177,6 +193,15 @@ def cli_service_update(
 
     return instance
 
+def cli_services_list(
+        cmd,
+        resource_group_name,
+        service_topology_name):
+
+    client = cf_services(cmd.cli_ctx)
+    return client.list(
+        resource_group_name=resource_group_name,
+        service_topology_name=service_topology_name)
 
 def cli_service_unit_create(
         cmd,
@@ -267,45 +292,93 @@ def cli_service_unit_update(
 
     return instance
 
+def cli_service_units_list(
+        cmd,
+        resource_group_name,
+        service_topology_name,
+        service_name):
+
+    client = cf_service_units(cmd.cli_ctx)
+    return client.list(
+        resource_group_name=resource_group_name,
+        service_topology_name=service_topology_name,
+        service_name=service_name)
 
 def cli_step_create(
         cmd,
         resource_group_name,
-        step_name,
-        duration,
+        step_name=None,
+        step=None,
+        duration=None,
         location=None,
         tags=None):
 
-    waitStepProperties = WaitStepProperties(
-        attributes=WaitStepAttributes(duration=duration))
+    if (step is None and duration is None):
+        raise CLIError('usage error: specify either step or duration. If step is specified, it can either be a wait step or health check step.')  # pylint: disable=line-too-long
 
-    if location is None:
-        location = get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
-
-    step = StepResource(
-        properties=waitStepProperties,
-        location=location,
-        tags=tags)
+    if (step is not None and duration is not None):
+        raise CLIError('usage error: specify only one of step or duration. If step is specified, it can either be a wait step or health check step.')  # pylint: disable=line-too-long
 
     client = cf_steps(cmd.cli_ctx)
+    if step is not None:
+        step_resource = get_healthcheck_step_from_json(client, step)
+        step_name = step_resource.name
+        location = step_resource.location
+
+        if location is None:
+            if resource_group_name is not None:
+                location = get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
+
+    elif duration is not None:
+        waitStepProperties = WaitStepProperties(attributes=WaitStepAttributes(duration=duration))
+
+        if location is None:
+            if resource_group_name is not None:
+                location = get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
+
+        step_resource = StepResource(
+            properties=waitStepProperties,
+            location=location,
+            tags=tags)
+
     return client.create_or_update(
         resource_group_name=resource_group_name,
         step_name=step_name,
-        step_info=step)
+        step_info=step_resource)
 
 
 def cli_step_update(
         cmd,
         instance,
-        duration,
+        step=None,
+        duration=None,
         tags=None):
 
-    instance.properties.attributes.duration = duration
+    if (step is None and duration is None):
+        raise CLIError('usage error: specify either step or duration. If step is specified, it can either be a wait step or health check step.')  # pylint: disable=line-too-long
 
-    if tags is not None:
-        instance.tags = tags
+    if (step is not None and duration is not None):
+        raise CLIError('usage error: specify only one of step or duration. If step is specified, it can either be a wait step or health check step.')  # pylint: disable=line-too-long
+
+    if duration is not None:
+        instance.properties.attributes.duration = duration
+
+        if tags is not None:
+            instance.tags = tags
+
+    elif step is not None:
+        client = cf_steps(cmd.cli_ctx)
+        step_resource = get_healthcheck_step_from_json(client, step)
+        instance = step_resource
 
     return instance
+
+def cli_steps_list(
+        cmd,
+        resource_group_name):
+    client = cf_steps(cmd.cli_ctx)
+    return client.list(
+        resource_group_name=resource_group_name)
 
 
 def cli_rollout_restart(
@@ -320,6 +393,12 @@ def cli_rollout_restart(
         rollout_name=rollout_name,
         skip_succeeded=bool(skip_succeeded))
 
+def cli_rollouts_list(
+        cmd,
+        resource_group_name):
+    client = cf_rollouts(cmd.cli_ctx)
+    return client.list(
+        resource_group_name=resource_group_name)
 
 def get_location_from_resource_group(cli_ctx, resource_group_name):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -327,3 +406,50 @@ def get_location_from_resource_group(cli_ctx, resource_group_name):
     client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     group = client.resource_groups.get(resource_group_name)
     return group.location
+
+def get_healthcheck_step_from_json(client, health_check_step):
+    return get_object_from_json(client, health_check_step, 'StepResource')
+
+def get_or_read_json(json_or_file):
+    json_obj = None
+    if is_json(json_or_file):
+        json_obj = json.loads(json_or_file)
+    elif os.path.exists(json_or_file):
+        with open(json_or_file) as f:
+            json_obj = json.load(f)
+    if json_obj is None:
+        raise ValueError(
+            """
+            The variable passed should be in valid JSON format and be supplied by az deploymentmanager step CLI commands.
+            Make sure that you use output of relevant 'az deploymentmanager step show' commands and the --out is 'json'
+            (use -o json for explicit JSON output) while assigning value to this variable.
+            Take care to edit only the values and not the keys within the JSON file or string.
+            """)
+    return json_obj
+
+
+def get_object_from_json(client, json_or_file, class_name):
+    # Determine if input is json or file
+    json_obj = get_or_read_json(json_or_file)
+
+    # Deserialize json to object
+    param = client._deserialize(class_name, json_obj)  # pylint: disable=protected-access
+    if param is None:
+        raise ValueError(
+            """
+            The variable passed should be in valid JSON format and be supplied by az deploymentmanager step CLI commands.
+            Make sure that you use output of relevant 'az deploymentmanager step show' commands and the --out is 'json'
+            (use -o json for explicit JSON output) while assigning value to this variable.
+            Take care to edit only the values and not the keys within the JSON file or string.
+            """)
+
+    return param
+
+
+def is_json(content):
+    try:
+        json.loads(content)
+    except ValueError:
+        return False
+    return True
+
