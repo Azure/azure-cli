@@ -24,6 +24,7 @@ Release History
 
 * Added new command 'backup protection undelete' to enable soft-delete feature for IaasVM workload
 * Added new parameter '--soft-delete-feature-state' to set backup-properties command
+* Added disk exclusion support for IaasVM workload
 
 **Compute**
 
