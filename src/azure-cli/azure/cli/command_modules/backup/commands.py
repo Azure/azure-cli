@@ -57,6 +57,7 @@ def load_command_table(self, _):
     with self.command_group('backup protection', backup_custom_base, client_factory=protected_items_cf) as g:
         g.command('check-vm', 'check_protection_enabled_for_vm')
         g.command('enable-for-vm', 'enable_protection_for_vm')
+        g.command('update-for-vm', 'update_protection_for_vm')
 
     with self.command_group('backup protection', custom_command_type=backup_custom_base, client_factory=protected_items_cf) as g:
         g.custom_command('backup-now', 'backup_now', client_factory=backups_cf)
