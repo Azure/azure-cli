@@ -3,13 +3,46 @@
 Release History
 ===============
 
+**ACR**
+
+* [BREAKING CHANGE] Remove '--os' parameter for 'acr build', 'acr task create/update', 'acr run', and 'acr pack'. Use '--platform' instead.
+
 **AppConfig**
 
 * Add support for importing/exporting feature flags
 
+**AppService**
+
+* Fix issue #7154: Updating documentation for command <> to use back ticks instead of single quotes
+* Fix issue #11287: webapp up: By default make the app created using up 'should be 'SSL enabled'
+
 **ARM**
 
 * Fix `az resource tag`: Recovery Services Vault tags cannot be updated
+
+**Backup**
+
+* Added new command 'backup protection undelete' to enable soft-delete feature for IaasVM workload
+* Added new parameter '--soft-delete-feature-state' to set backup-properties command
+* Added disk exclusion support for IaasVM workload
+
+**Compute**
+
+* Fix `vm create` failure in Azure Stack profile.
+* vm monitor metrics tail/list-definitions: support query metric and list definitions for a vm.
+
+**Event Hubs**
+
+* [BREAKING CHANGE] Remove 'ReceiveDisabled' status option from command 'az eventhubs eventhub update' and 'az eventhubs eventhub create'. This option is not valid for Event Hub entities.
+
+**Service Bus**
+
+* [BREAKING CHANGE] Remove 'ReceiveDisabled' status option from command 'az servicebus topic create', 'az servicebus topic update', 'az servicebus queue create', and 'az servicebus queue update'. This option is not valid for Service Bus topics and queues.
+
+**Storage**
+
+* `az storage account create`: Remove preview flag for --enable-hierarchical-namespace parameter
+* Update azure-mgmt-storage version to 7.0.0 to use api version 2019-06-01
 
 2.0.78
 ++++++
@@ -72,13 +105,19 @@ Release History
 * Remove support for Python 3.4
 * Plug in HaTS survey in multiple commands
 
+**Cosmos DB**
+
+* Update azure-mgmt-cosmosdb package to use 0.11.0
+* az cosmosdb network-rule allows --vnet-name and --ignore-missing-endpoint as parameters
+
 **DLS**
 
 * Update ADLS sdk version (0.0.48).
 
-**Event Hubs**
+**HDInsight**
 
-* [BREAKING CHANGE] Remove 'ReceiveDisabled' status option from command 'az eventhubs eventhub update' and 'az eventhubs eventhub create'. This option is not valid for Event Hub entities.
+* Support for creating a Kafka cluster with Kafka Rest Proxy
+* Upgrade azure-mgmt-hdinsight to 1.3.0
 
 **Install**
 
@@ -114,10 +153,6 @@ Release History
 * Support for Policy API version 2019-09-01.
 * az policy set-definition: Support grouping within policy set definitions with `--definition-groups` parameter
 
-**Service Bus**
-
-* [BREAKING CHANGE] Remove 'ReceiveDisabled' status option from command 'az servicebus topic create', 'az servicebus topic update', 'az servicebus queue create', and 'az servicebus queue update'. This option is not valid for Service Bus topics and queues.
-
 **Redis**
 
 * Add preview param `--replicas-per-master` to `az redis create` command
@@ -131,6 +166,11 @@ Release History
 **SQL**
 
 * Added "--read-scale" and "--read-replicas" parameters to sql db create and update commands, to support read scale management.
+
+**SQL VM**
+
+* New package upgrade 0.5.
+* Add new --license-type supporting Disaster Recovery Benefit (DR).
 
 **Storage**
 
@@ -159,8 +199,8 @@ Release History
 **AppConfig**
 
 * Add support for using ":" for `as az appconfig kv import` separator
-* Fix issue for listing key values with multiple labels including null label. 
-* Update management plane sdk, azure-mgmt-appconfiguration, to version 0.3.0. 
+* Fix issue for listing key values with multiple labels including null label.
+* Update management plane sdk, azure-mgmt-appconfiguration, to version 0.3.0.
 
 **AppService**
 
