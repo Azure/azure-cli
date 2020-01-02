@@ -3,6 +3,8 @@
 Release History
 ===============
 
+2.0.79
+++++++
 * Fix #11586: `az login` is not recorded in server telemetry
 
 2.0.78
