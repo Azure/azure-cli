@@ -206,6 +206,42 @@ class AppConfigKVScenarioTest(ScenarioTest):
                          self.check('[0].value', updated_entry_value),
                          self.check('[0].label', updated_label)])
 
+        # KeyVault reference tests
+        keyvault_key = "HostSecrets"
+        keyvault_id = "https://fake.vault.azure.net/secrets/fakesecret"
+        keyvault_value = "{{\"uri\": \"https://fake.vault.azure.net/secrets/fakesecret\"}}"
+        keyvault_content_type = "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
+
+        self.kwargs.update({
+            'key': keyvault_key,
+            'secret_identifier': keyvault_id,
+        })
+
+        # Add new KeyVault ref
+        self.cmd('appconfig kv set-keyvault --connection-string {connection_string} --key {key} --secret-identifier {secret_identifier} -y',
+                 checks=[self.check('contentType', keyvault_content_type),
+                         self.check('key', keyvault_key),
+                         self.check('value', keyvault_value)])
+
+        # Update existing key to KeyVault ref
+        self.kwargs.update({
+            'key': entry_key,
+            'label': updated_label,
+        })
+
+        self.cmd('appconfig kv set-keyvault --connection-string {connection_string} --key {key} --label {label} --secret-identifier {secret_identifier} -y',
+                 checks=[self.check('contentType', keyvault_content_type),
+                         self.check('key', entry_key),
+                         self.check('value', keyvault_value),
+                         self.check('label', updated_label)])
+
+        # Delete KeyVault ref
+        self.cmd('appconfig kv delete --connection-string {connection_string} --key {key} --label {label} -y',
+                 checks=[self.check('[0].key', entry_key),
+                         self.check('[0].contentType', keyvault_content_type),
+                         self.check('[0].value', keyvault_value),
+                         self.check('[0].label', updated_label)])
+
 
 class AppConfigImportExportScenarioTest(ScenarioTest):
 

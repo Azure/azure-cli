@@ -20,7 +20,7 @@ from ._validators import (validate_appservice_name_or_id,
                           validate_export, validate_import,
                           validate_import_depth, validate_query_fields,
                           validate_feature_query_fields, validate_filter_parameters,
-                          validate_separator)
+                          validate_separator, validate_secret_identifier)
 
 
 def load_arguments(self, _):
@@ -126,6 +126,12 @@ def load_arguments(self, _):
         c.argument('tags', arg_type=tags_type)
         c.argument('content_type', help='Content type of the keyvalue to be set.')
         c.argument('value', help='Value of the keyvalue to be set.')
+
+    with self.argument_context('appconfig kv set-keyvault') as c:
+        c.argument('key', help='Key to be set.')
+        c.argument('label', help="If no label specified, set the key with null label by default")
+        c.argument('tags', arg_type=tags_type)
+        c.argument('secret_identifier', validator=validate_secret_identifier, help="ID of the Key Vault object. Can be found using 'az keyvault {collection} show' command, where collection is key, secret or certificate. To set reference to the latest version of your secret, remove version information from secret identifier.")
 
     with self.argument_context('appconfig kv delete') as c:
         c.argument('key', help='Support star sign as filters, for instance * means all key and abc* means keys with abc as prefix. Similarly, *abc and *abc* are also supported.')
