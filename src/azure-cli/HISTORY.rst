@@ -14,6 +14,7 @@ Release History
 **AppConfig**
 
 * Add support for importing/exporting feature flags
+* Add new command 'az appconfig kv set-keyvault' for creating keyvault reference
 
 **AppService**
 
@@ -28,6 +29,7 @@ Release History
 
 * Added new command 'backup protection undelete' to enable soft-delete feature for IaasVM workload
 * Added new parameter '--soft-delete-feature-state' to set backup-properties command
+* Added disk exclusion support for IaasVM workload
 
 **Compute**
 
@@ -99,6 +101,11 @@ Release History
 
 * Remove support for Python 3.4
 * Plug in HaTS survey in multiple commands
+
+**Cosmos DB**
+
+* Update azure-mgmt-cosmosdb package to use 0.11.0
+* az cosmosdb network-rule allows --vnet-name and --ignore-missing-endpoint as parameters
 
 **DLS**
 
