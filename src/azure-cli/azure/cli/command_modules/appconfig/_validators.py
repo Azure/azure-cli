@@ -181,7 +181,7 @@ def validate_content_type(namespace):
             raise CLIError("Content type is invalid. It's a reserved content type for feature flags.")
         if namespace.content_type == KEYVAULT_CONTENT_TYPE:
             raise CLIError("Content type is invalid. It's a reserved content type for KeyVault references.")
-        
+
 
 def validate_feature(namespace):
     if namespace.feature:
