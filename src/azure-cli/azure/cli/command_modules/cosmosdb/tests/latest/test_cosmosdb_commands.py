@@ -24,10 +24,11 @@ class CosmosDBTests(ScenarioTest):
             self.check('consistencyPolicy.defaultConsistencyLevel', 'ConsistentPrefix'),
         ])
 
-        self.cmd('az cosmosdb update -n {acc} -g {rg} --enable-automatic-failover false --default-consistency-level Session')
+        self.cmd('az cosmosdb update -n {acc} -g {rg} --enable-automatic-failover false --default-consistency-level Session --disable-key-based-metadata-write-access')
         self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
             self.check('enableAutomaticFailover', False),
-            self.check('consistencyPolicy.defaultConsistencyLevel', 'Session')
+            self.check('consistencyPolicy.defaultConsistencyLevel', 'Session'),
+            self.check('disableKeyBasedMetadataWriteAccess', True)
         ])
 
         self.cmd('az cosmosdb update -n {acc} -g {rg} --tags testKey=testValue')
@@ -269,7 +270,7 @@ class CosmosDBTests(ScenarioTest):
         assert vnet_rule["virtualNetworkRules"][0]["id"] == vnet_output["newVNet"]["subnets"][0]["id"]
         assert vnet_rule["virtualNetworkRules"][0]["ignoreMissingVnetServiceEndpoint"]
 
-        existing_rule = self.cmd('az cosmosdb network-rule add -n {acc} -g {rg} --virtual-network {vnet} --subnet {sub} --ignore-missing-vnet-service-endpoint').get_output_in_json()
+        existing_rule = self.cmd('az cosmosdb network-rule add -n {acc} -g {rg} --vnet-name {vnet} --subnet {sub} --ignore-missing-endpoint').get_output_in_json()
         assert len(existing_rule["virtualNetworkRules"]) == 1
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
@@ -386,10 +387,10 @@ class CosmosDBTests(ScenarioTest):
         self.cmd('az cosmosdb create -n {acc} -g {rg}')
 
         database_create = self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}').get_output_in_json()
-        assert database_create["sqlDatabaseId"] == db_name
+        assert database_create["name"] == db_name
 
         database_show = self.cmd('az cosmosdb sql database show -g {rg} -a {acc} -n {db_name}').get_output_in_json()
-        assert database_show["sqlDatabaseId"] == db_name
+        assert database_show["name"] == db_name
 
         database_list = self.cmd('az cosmosdb sql database list -g {rg} -a {acc}').get_output_in_json()
         assert len(database_list) == 1
@@ -425,18 +426,19 @@ class CosmosDBTests(ScenarioTest):
         self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
 
         container_create = self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {ctn_name} -p {part} --ttl {ttl} --unique-key-policy {unique_key} --conflict-resolution-policy {conflict_resolution} --idx {indexing}').get_output_in_json()
-        assert container_create["sqlContainerId"] == ctn_name
-        assert container_create["partitionKey"]["paths"][0] == partition_key
-        assert container_create["defaultTtl"] == default_ttl
-        assert len(container_create["uniqueKeyPolicy"]["uniqueKeys"]) == 2
-        assert container_create["conflictResolutionPolicy"]["mode"] == "lastWriterWins"
-        assert container_create["indexingPolicy"]["excludedPaths"][0]["path"] == "/headquarters/employees/?"
+
+        assert container_create["name"] == ctn_name
+        assert container_create["resource"]["partitionKey"]["paths"][0] == partition_key
+        assert container_create["resource"]["defaultTtl"] == default_ttl
+        assert len(container_create["resource"]["uniqueKeyPolicy"]["uniqueKeys"]) == 2
+        assert container_create["resource"]["conflictResolutionPolicy"]["mode"] == "lastWriterWins"
+        assert container_create["resource"]["indexingPolicy"]["excludedPaths"][0]["path"] == "/headquarters/employees/?"
 
         container_update = self.cmd('az cosmosdb sql container update -g {rg} -a {acc} -d {db_name} -n {ctn_name} --ttl {nttl}').get_output_in_json()
-        assert container_update["defaultTtl"] == new_default_ttl
+        assert container_update["resource"]["defaultTtl"] == new_default_ttl
 
         container_show = self.cmd('az cosmosdb sql container show -g {rg} -a {acc} -d {db_name} -n {ctn_name}').get_output_in_json()
-        assert container_show["sqlContainerId"] == ctn_name
+        assert container_show["name"] == ctn_name
 
         container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
         assert len(container_list) == 1
@@ -457,10 +459,10 @@ class CosmosDBTests(ScenarioTest):
         self.cmd('az cosmosdb create -n {acc} -g {rg} --kind MongoDB')
 
         database_create = self.cmd('az cosmosdb mongodb database create -g {rg} -a {acc} -n {db_name}').get_output_in_json()
-        assert database_create["mongoDbDatabaseId"] == db_name
+        assert database_create["name"] == db_name
 
         database_show = self.cmd('az cosmosdb mongodb database show -g {rg} -a {acc} -n {db_name}').get_output_in_json()
-        assert database_show["mongoDbDatabaseId"] == db_name
+        assert database_show["name"] == db_name
 
         database_list = self.cmd('az cosmosdb mongodb database list -g {rg} -a {acc}').get_output_in_json()
         assert len(database_list) == 1
@@ -486,16 +488,16 @@ class CosmosDBTests(ScenarioTest):
 
         collection_create = self.cmd(
             'az cosmosdb mongodb collection create -g {rg} -a {acc} -d {db_name} -n {col_name} --shard {shard_key}').get_output_in_json()
-        assert collection_create["mongoDbCollectionId"] == col_name
+        assert collection_create["name"] == col_name
 
-        indexes_size = len(collection_create["indexes"])
+        indexes_size = len(collection_create["resource"]["indexes"])
         collection_update = self.cmd(
             'az cosmosdb mongodb collection update -g {rg} -a {acc} -d {db_name} -n {col_name} --idx {indexes}').get_output_in_json()
-        assert len(collection_update["indexes"]) == indexes_size + 1
+        assert len(collection_update["resource"]["indexes"]) == indexes_size + 1
 
         collection_show = self.cmd(
             'az cosmosdb mongodb collection show -g {rg} -a {acc} -d {db_name} -n {col_name}').get_output_in_json()
-        assert collection_show["mongoDbCollectionId"] == col_name
+        assert collection_show["name"] == col_name
 
         collection_list = self.cmd(
             'az cosmosdb mongodb collection list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
@@ -518,10 +520,10 @@ class CosmosDBTests(ScenarioTest):
         self.cmd('az cosmosdb create -n {acc} -g {rg} --capabilities EnableCassandra')
 
         keyspace_create = self.cmd('az cosmosdb cassandra keyspace create -g {rg} -a {acc} -n {ks_name}').get_output_in_json()
-        assert keyspace_create["cassandraKeyspaceId"] == ks_name
+        assert keyspace_create["name"] == ks_name
 
         keyspace_show = self.cmd('az cosmosdb cassandra keyspace show -g {rg} -a {acc} -n {ks_name}').get_output_in_json()
-        assert keyspace_show["cassandraKeyspaceId"] == ks_name
+        assert keyspace_show["name"] == ks_name
 
         keyspace_list = self.cmd('az cosmosdb cassandra keyspace list -g {rg} -a {acc}').get_output_in_json()
         assert len(keyspace_list) == 1
@@ -546,14 +548,14 @@ class CosmosDBTests(ScenarioTest):
         self.cmd('az cosmosdb cassandra keyspace create -g {rg} -a {acc} -n {ks_name}').get_output_in_json()
 
         table_create = self.cmd('az cosmosdb cassandra table create -g {rg} -a {acc} -k {ks_name} -n {table_name} --schema {schema}').get_output_in_json()
-        assert table_create["cassandraTableId"] == table_name
-        assert len(table_create["schema"]["columns"]) == 1
+        assert table_create["name"] == table_name
+        assert len(table_create["resource"]["schema"]["columns"]) == 1
 
         table_update = self.cmd('az cosmosdb cassandra table update -g {rg} -a {acc} -k {ks_name} -n {table_name} --schema {new_schema}').get_output_in_json()
-        assert len(table_update["schema"]["columns"]) == 2
+        assert len(table_update["resource"]["schema"]["columns"]) == 2
 
         table_show = self.cmd('az cosmosdb cassandra table show -g {rg} -a {acc} -k {ks_name} -n {table_name}').get_output_in_json()
-        assert table_show["cassandraTableId"] == table_name
+        assert table_show["name"] == table_name
 
         table_list = self.cmd('az cosmosdb cassandra table list -g {rg} -a {acc} -k {ks_name}').get_output_in_json()
         assert len(table_list) == 1
@@ -574,10 +576,10 @@ class CosmosDBTests(ScenarioTest):
         self.cmd('az cosmosdb create -n {acc} -g {rg} --capabilities EnableGremlin')
 
         database_create = self.cmd('az cosmosdb gremlin database create -g {rg} -a {acc} -n {db_name}').get_output_in_json()
-        assert database_create["gremlinDatabaseId"] == db_name
+        assert database_create["name"] == db_name
 
         database_show = self.cmd('az cosmosdb gremlin database show -g {rg} -a {acc} -n {db_name}').get_output_in_json()
-        assert database_show["gremlinDatabaseId"] == db_name
+        assert database_show["name"] == db_name
 
         database_list = self.cmd('az cosmosdb gremlin database list -g {rg} -a {acc}').get_output_in_json()
         assert len(database_list) == 1
@@ -611,17 +613,17 @@ class CosmosDBTests(ScenarioTest):
         self.cmd('az cosmosdb gremlin database create -g {rg} -a {acc} -n {db_name}')
 
         graph_create = self.cmd('az cosmosdb gremlin graph create -g {rg} -a {acc} -d {db_name} -n {gp_name} -p {part} --ttl {ttl} --conflict-resolution-policy {conflict_resolution} --idx {indexing}').get_output_in_json()
-        assert graph_create["gremlinGraphId"] == gp_name
-        assert graph_create["partitionKey"]["paths"][0] == partition_key
-        assert graph_create["defaultTtl"] == default_ttl
-        assert graph_create["conflictResolutionPolicy"]["mode"] == "lastWriterWins"
-        assert graph_create["indexingPolicy"]["excludedPaths"][0]["path"] == "/headquarters/employees/?"
+        assert graph_create["name"] == gp_name
+        assert graph_create["resource"]["partitionKey"]["paths"][0] == partition_key
+        assert graph_create["resource"]["defaultTtl"] == default_ttl
+        assert graph_create["resource"]["conflictResolutionPolicy"]["mode"] == "lastWriterWins"
+        assert graph_create["resource"]["indexingPolicy"]["excludedPaths"][0]["path"] == "/headquarters/employees/?"
 
         graph_update = self.cmd('az cosmosdb gremlin graph update -g {rg} -a {acc} -d {db_name} -n {gp_name} --ttl {nttl}').get_output_in_json()
-        assert graph_update["defaultTtl"] == new_default_ttl
+        assert graph_update["resource"]["defaultTtl"] == new_default_ttl
 
         graph_show = self.cmd('az cosmosdb gremlin graph show -g {rg} -a {acc} -d {db_name} -n {gp_name}').get_output_in_json()
-        assert graph_show["gremlinGraphId"] == gp_name
+        assert graph_show["name"] == gp_name
 
         graph_list = self.cmd('az cosmosdb gremlin graph list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
         assert len(graph_list) == 1
@@ -642,10 +644,10 @@ class CosmosDBTests(ScenarioTest):
         self.cmd('az cosmosdb create -n {acc} -g {rg} --capabilities EnableTable')
 
         table_create = self.cmd('az cosmosdb table create -g {rg} -a {acc} -n {table_name}').get_output_in_json()
-        assert table_create["tableId"] == table_name
+        assert table_create["name"] == table_name
 
         table_show = self.cmd('az cosmosdb table show -g {rg} -a {acc} -n {table_name}').get_output_in_json()
-        assert table_show["tableId"] == table_name
+        assert table_show["name"] == table_name
 
         table_list = self.cmd('az cosmosdb table list -g {rg} -a {acc}').get_output_in_json()
         assert len(table_list) == 1
@@ -672,17 +674,17 @@ class CosmosDBTests(ScenarioTest):
 
         self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name} --throughput {tp1}')
         db_throughput_show = self.cmd('az cosmosdb sql database throughput show -g {rg} -a {acc} -n {db_name}').get_output_in_json()
-        assert db_throughput_show["throughput"] == tp1
+        assert db_throughput_show["resource"]["throughput"] == tp1
 
         db_througput_update = self.cmd('az cosmosdb sql database throughput update -g {rg} -a {acc} -n {db_name} --throughput {tp2}').get_output_in_json()
-        assert db_througput_update["throughput"] == tp2
+        assert db_througput_update["resource"]["throughput"] == tp2
 
         self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {ctn_name} -p {part} --throughput {tp1}')
         ctn_throughput_show = self.cmd('az cosmosdb sql container throughput show -g {rg} -a {acc} -d {db_name} -n {ctn_name}').get_output_in_json()
-        assert ctn_throughput_show["throughput"] == tp1
+        assert ctn_throughput_show["resource"]["throughput"] == tp1
 
         ctn_througput_update = self.cmd('az cosmosdb sql container throughput update -g {rg} -a {acc} -d {db_name} -n {ctn_name} --throughput {tp2}').get_output_in_json()
-        assert ctn_througput_update["throughput"] == tp2
+        assert ctn_througput_update["resource"]["throughput"] == tp2
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_mongodb_resource_throughput')
     def test_cosmosdb_mongodb_resource_throughput(self, resource_group):
@@ -702,17 +704,17 @@ class CosmosDBTests(ScenarioTest):
 
         self.cmd('az cosmosdb mongodb database create -g {rg} -a {acc} -n {db_name} --throughput {tp1}')
         db_throughput_show = self.cmd('az cosmosdb mongodb database throughput show -g {rg} -a {acc} -n {db_name}').get_output_in_json()
-        assert db_throughput_show["throughput"] == tp1
+        assert db_throughput_show["resource"]["throughput"] == tp1
 
         db_througput_update = self.cmd('az cosmosdb mongodb database throughput update -g {rg} -a {acc} -n {db_name} --throughput {tp2}').get_output_in_json()
-        assert db_througput_update["throughput"] == tp2
+        assert db_througput_update["resource"]["throughput"] == tp2
 
         self.cmd('az cosmosdb mongodb collection create -g {rg} -a {acc} -d {db_name} -n {col_name} --shard {shard_key} --throughput {tp1}')
         col_throughput_show = self.cmd('az cosmosdb mongodb collection throughput show -g {rg} -a {acc} -d {db_name} -n {col_name}').get_output_in_json()
-        assert col_throughput_show["throughput"] == tp1
+        assert col_throughput_show["resource"]["throughput"] == tp1
 
         col_througput_update = self.cmd('az cosmosdb mongodb collection throughput update -g {rg} -a {acc} -d {db_name} -n {col_name} --throughput {tp2}').get_output_in_json()
-        assert col_througput_update["throughput"] == tp2
+        assert col_througput_update["resource"]["throughput"] == tp2
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_cassandra_resource_throughput')
     def test_cosmosdb_cassandra_resource_throughput(self, resource_group):
@@ -732,17 +734,17 @@ class CosmosDBTests(ScenarioTest):
 
         self.cmd('az cosmosdb cassandra keyspace create -g {rg} -a {acc} -n {ks_name} --throughput {tp1}')
         db_throughput_show = self.cmd('az cosmosdb cassandra keyspace throughput show -g {rg} -a {acc} -n {ks_name}').get_output_in_json()
-        assert db_throughput_show["throughput"] == tp1
+        assert db_throughput_show["resource"]["throughput"] == tp1
 
         db_througput_update = self.cmd('az cosmosdb cassandra keyspace throughput update -g {rg} -a {acc} -n {ks_name} --throughput {tp2}').get_output_in_json()
-        assert db_througput_update["throughput"] == tp2
+        assert db_througput_update["resource"]["throughput"] == tp2
 
         self.cmd('az cosmosdb cassandra table create -g {rg} -a {acc} -k {ks_name} -n {tb_name} --throughput {tp1} --schema {schema}')
         col_throughput_show = self.cmd('az cosmosdb cassandra table throughput show -g {rg} -a {acc} -k {ks_name} -n {tb_name}').get_output_in_json()
-        assert col_throughput_show["throughput"] == tp1
+        assert col_throughput_show["resource"]["throughput"] == tp1
 
         col_througput_update = self.cmd('az cosmosdb cassandra table throughput update -g {rg} -a {acc} -k {ks_name} -n {tb_name} --throughput {tp2}').get_output_in_json()
-        assert col_througput_update["throughput"] == tp2
+        assert col_througput_update["resource"]["throughput"] == tp2
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_gremlin_resource_throughput')
     def test_cosmosdb_gremlin_resource_throughput(self, resource_group):
@@ -763,20 +765,20 @@ class CosmosDBTests(ScenarioTest):
         self.cmd('az cosmosdb gremlin database create -g {rg} -a {acc} -n {db_name} --throughput {tp1}')
         db_throughput_show = self.cmd(
             'az cosmosdb gremlin database throughput show -g {rg} -a {acc} -n {db_name}').get_output_in_json()
-        assert db_throughput_show["throughput"] == tp1
+        assert db_throughput_show["resource"]["throughput"] == tp1
 
         db_througput_update = self.cmd(
             'az cosmosdb gremlin database throughput update -g {rg} -a {acc} -n {db_name} --throughput {tp2}').get_output_in_json()
-        assert db_througput_update["throughput"] == tp2
+        assert db_througput_update["resource"]["throughput"] == tp2
 
         self.cmd('az cosmosdb gremlin graph create -g {rg} -a {acc} -d {db_name} -n {gp_name} -p {part} --throughput {tp1}')
         col_throughput_show = self.cmd(
             'az cosmosdb gremlin graph throughput show -g {rg} -a {acc} -d {db_name} -n {gp_name}').get_output_in_json()
-        assert col_throughput_show["throughput"] == tp1
+        assert col_throughput_show["resource"]["throughput"] == tp1
 
         col_througput_update = self.cmd(
             'az cosmosdb gremlin graph throughput update -g {rg} -a {acc} -d {db_name} -n {gp_name} --throughput {tp2}').get_output_in_json()
-        assert col_througput_update["throughput"] == tp2
+        assert col_througput_update["resource"]["throughput"] == tp2
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_table_resource_throughput')
     def test_cosmosdb_table_resource_throughput(self, resource_group):
@@ -794,7 +796,7 @@ class CosmosDBTests(ScenarioTest):
 
         self.cmd('az cosmosdb table create -g {rg} -a {acc} -n {tb_name} --throughput {tp1}')
         db_throughput_show = self.cmd('az cosmosdb table throughput show -g {rg} -a {acc} -n {tb_name}').get_output_in_json()
-        assert db_throughput_show["throughput"] == tp1
+        assert db_throughput_show["resource"]["throughput"] == tp1
 
         db_througput_update = self.cmd('az cosmosdb table throughput update -g {rg} -a {acc} -n {tb_name} --throughput {tp2}').get_output_in_json()
-        assert db_througput_update["throughput"] == tp2
+        assert db_througput_update["resource"]["throughput"] == tp2
