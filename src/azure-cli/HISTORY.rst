@@ -33,7 +33,7 @@ Release History
 
 **Misc.**
 
-* Add preview command `az version show` to show the versions of Azure CLI modules and extensions in JSON format
+* Add preview command `az version show` to show the versions of Azure CLI modules and extensions in JSON format by default or format configured by --output
 
 **Storage**
 
