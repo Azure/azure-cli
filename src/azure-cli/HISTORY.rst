@@ -10,6 +10,7 @@ Release History
 **AppConfig**
 
 * Add support for importing/exporting feature flags
+* Add new command 'az appconfig kv set-keyvault' for creating keyvault reference
 
 **AppService**
 
