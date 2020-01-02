@@ -32,7 +32,7 @@ Release History
 
 **RBAC**
 
-* Fix #11712: `az ad sp show` does not return exit code 3 when the sp does not exist
+* Fix #11712: `az ad app/sp show` does not return exit code 3 when the application or service principal does not exist
 
 **Storage**
 
