@@ -3,13 +3,18 @@
 Release History
 ===============
 
+**ACR**
+
+* [BREAKING CHANGE] Remove '--os' parameter for 'acr build', 'acr task create/update', 'acr run', and 'acr pack'. Use '--platform' instead.
+
 **AppConfig**
 
 * Add support for importing/exporting feature flags
 
 **AppService**
 
-* Fix issue #7154: Updating documentation for comand <> to use back ticks instead of single quotes
+* Fix issue #7154: Updating documentation for command <> to use back ticks instead of single quotes
+* Fix issue #11287: webapp up: By default make the app created using up 'should be 'SSL enabled'
 
 **ARM**
 
@@ -19,6 +24,7 @@ Release History
 
 * Added new command 'backup protection undelete' to enable soft-delete feature for IaasVM workload
 * Added new parameter '--soft-delete-feature-state' to set backup-properties command
+* Added disk exclusion support for IaasVM workload
 
 **Compute**
 
@@ -28,6 +34,11 @@ Release History
 **Misc.**
 
 * Add preview command `az version show` to show the versions of Azure CLI modules and extensions in JSON format
+
+**Storage**
+
+* `az storage account create`: Remove preview flag for --enable-hierarchical-namespace parameter
+* Update azure-mgmt-storage version to 7.0.0 to use api version 2019-06-01
 
 2.0.78
 ++++++
@@ -147,6 +158,11 @@ Release History
 
 * Added "--read-scale" and "--read-replicas" parameters to sql db create and update commands, to support read scale management.
 
+**SQL VM**
+
+* New package upgrade 0.5.
+* Add new --license-type supporting Disaster Recovery Benefit (DR).
+
 **Storage**
 
 * GA Release Large File Shares property for storage account create and update command
@@ -174,8 +190,8 @@ Release History
 **AppConfig**
 
 * Add support for using ":" for `as az appconfig kv import` separator
-* Fix issue for listing key values with multiple labels including null label. 
-* Update management plane sdk, azure-mgmt-appconfiguration, to version 0.3.0. 
+* Fix issue for listing key values with multiple labels including null label.
+* Update management plane sdk, azure-mgmt-appconfiguration, to version 0.3.0.
 
 **AppService**
 

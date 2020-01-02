@@ -92,7 +92,7 @@ class ApimScenarioTest(ScenarioTest):
         self.cmd('apim delete -g {rg} -n {service_name} -y')
 
         final_count = len(self.cmd('apim list').get_output_in_json())
-        self.assertTrue(final_count, count - 1)
+        self.assertEqual(final_count, count - 1)
 
 
 KNOWN_LOCS = {'eastasia': 'East Asia',
