@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.0.77"
+VERSION = "2.0.78"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -79,7 +79,7 @@ DEPENDENCIES = [
     'azure-mgmt-containerinstance~=1.4',
     'azure-mgmt-containerregistry~=3.0.0rc7',
     'azure-mgmt-containerservice~=8.0.0',
-    'azure-mgmt-cosmosdb~=0.8.0',
+    'azure-mgmt-cosmosdb~=0.11.0',
     'azure-mgmt-datalake-analytics~=0.2.1',
     'azure-mgmt-datalake-store~=0.5.0',
     'azure-mgmt-datamigration~=0.1.0',
@@ -88,7 +88,7 @@ DEPENDENCIES = [
     'azure-mgmt-dns~=2.1',
     'azure-mgmt-eventgrid~=2.2',
     'azure-mgmt-eventhub~=2.6',
-    'azure-mgmt-hdinsight~=1.1.0',
+    'azure-mgmt-hdinsight~=1.3.0',
     'azure-mgmt-imagebuilder~=0.2.1',
     'azure-mgmt-iotcentral~=1.0',
     'azure-mgmt-iothub~=0.8.2',
@@ -109,7 +109,7 @@ DEPENDENCIES = [
     'azure-mgmt-privatedns~=0.1.0',
     'azure-mgmt-rdbms~=1.8',
     'azure-mgmt-recoveryservices~=0.4.0',
-    'azure-mgmt-recoveryservicesbackup~=0.4.0',
+    'azure-mgmt-recoveryservicesbackup~=0.5.0',
     'azure-mgmt-redis~=7.0.0rc1',
     'azure-mgmt-relay~=0.1.0',
     # 'azure-mgmt-reservations~=0.6.0',
@@ -120,9 +120,9 @@ DEPENDENCIES = [
     'azure-mgmt-servicebus~=0.6.0',
     'azure-mgmt-servicefabric~=0.2.0',
     'azure-mgmt-signalr~=0.3.0',
-    'azure-mgmt-sql~=0.15',
-    'azure-mgmt-sqlvirtualmachine~=0.4.0',
-    'azure-mgmt-storage~=5.0.0',
+    'azure-mgmt-sql~=0.15.0',
+    'azure-mgmt-sqlvirtualmachine~=0.5.0',
+    'azure-mgmt-storage~=7.0.0',
     'azure-mgmt-trafficmanager~=0.51.0',
     'azure-mgmt-web~=0.42.0',
     'azure-multiapi-storage~=0.2.4',

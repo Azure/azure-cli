@@ -206,6 +206,42 @@ class AppConfigKVScenarioTest(ScenarioTest):
                          self.check('[0].value', updated_entry_value),
                          self.check('[0].label', updated_label)])
 
+        # KeyVault reference tests
+        keyvault_key = "HostSecrets"
+        keyvault_id = "https://fake.vault.azure.net/secrets/fakesecret"
+        keyvault_value = "{{\"uri\": \"https://fake.vault.azure.net/secrets/fakesecret\"}}"
+        keyvault_content_type = "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
+
+        self.kwargs.update({
+            'key': keyvault_key,
+            'secret_identifier': keyvault_id,
+        })
+
+        # Add new KeyVault ref
+        self.cmd('appconfig kv set-keyvault --connection-string {connection_string} --key {key} --secret-identifier {secret_identifier} -y',
+                 checks=[self.check('contentType', keyvault_content_type),
+                         self.check('key', keyvault_key),
+                         self.check('value', keyvault_value)])
+
+        # Update existing key to KeyVault ref
+        self.kwargs.update({
+            'key': entry_key,
+            'label': updated_label,
+        })
+
+        self.cmd('appconfig kv set-keyvault --connection-string {connection_string} --key {key} --label {label} --secret-identifier {secret_identifier} -y',
+                 checks=[self.check('contentType', keyvault_content_type),
+                         self.check('key', entry_key),
+                         self.check('value', keyvault_value),
+                         self.check('label', updated_label)])
+
+        # Delete KeyVault ref
+        self.cmd('appconfig kv delete --connection-string {connection_string} --key {key} --label {label} -y',
+                 checks=[self.check('[0].key', entry_key),
+                         self.check('[0].contentType', keyvault_content_type),
+                         self.check('[0].value', keyvault_value),
+                         self.check('[0].label', updated_label)])
+
 
 class AppConfigImportExportScenarioTest(ScenarioTest):
 
@@ -221,31 +257,137 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         })
         _create_config_store(self, self.kwargs)
 
+        # File <--> AppConfig tests
+
         imported_file_path = os.path.join(TEST_DIR, 'import.json')
         exported_file_path = os.path.join(TEST_DIR, 'export.json')
-
         self.kwargs.update({
-            'key': "Color",
-            'value': "Red",
-            'label': 'v1.0.0',
-            'content_type': 'text',
             'import_source': 'file',
             'imported_format': 'json',
             'separator': '/',
             'imported_file_path': imported_file_path,
             'exported_file_path': exported_file_path
         })
-
         self.cmd(
             'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --separator {separator} -y')
         self.cmd(
             'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --separator {separator} -y')
-
         with open(imported_file_path) as json_file:
             imported_kvs = json.load(json_file)
         with open(exported_file_path) as json_file:
             exported_kvs = json.load(json_file)
+        assert imported_kvs == exported_kvs
 
+        # Feature flags test
+        imported_file_path = os.path.join(TEST_DIR, 'import_features.json')
+        exported_file_path = os.path.join(TEST_DIR, 'export_features.json')
+        key_filtered_features_file_path = os.path.join(TEST_DIR, 'key_filtered_features.json')
+        prefix_added_features_file_path = os.path.join(TEST_DIR, 'prefix_added_features.json')
+        skipped_features_file_path = os.path.join(TEST_DIR, 'skipped_features.json')
+        export_separator_features_file_path = os.path.join(TEST_DIR, 'export_separator_features.json')
+        import_separator_features_file_path = os.path.join(TEST_DIR, 'import_separator_features.json')
+        import_features_alt_syntax_file_path = os.path.join(TEST_DIR, 'import_features_alt_syntax.json')
+
+        self.kwargs.update({
+            'label': 'KeyValuesWithFeatures',
+            'imported_file_path': imported_file_path,
+            'exported_file_path': exported_file_path
+        })
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} -y')
+        with open(imported_file_path) as json_file:
+            imported_kvs = json.load(json_file)
+        with open(exported_file_path) as json_file:
+            exported_kvs = json.load(json_file)
+        assert imported_kvs == exported_kvs
+
+        # skip features while exporting
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} --skip-features -y')
+        with open(skipped_features_file_path) as json_file:
+            only_kvs = json.load(json_file)
+        with open(exported_file_path) as json_file:
+            exported_kvs = json.load(json_file)
+        assert only_kvs == exported_kvs
+
+        # skip features while importing
+        self.kwargs.update({
+            'label': 'SkipFeatures'
+        })
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} --skip-features -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} -y')
+        with open(exported_file_path) as json_file:
+            exported_kvs = json.load(json_file)
+        assert only_kvs == exported_kvs
+
+        # Prefix addition test
+        self.kwargs.update({
+            'label': 'PrefixTest',
+            'prefix': 'Test'
+        })
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} --prefix {prefix} -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} -y')
+        with open(prefix_added_features_file_path) as json_file:
+            prefix_added_kvs = json.load(json_file)
+        with open(exported_file_path) as json_file:
+            exported_kvs = json.load(json_file)
+        assert prefix_added_kvs == exported_kvs
+
+        # Prefix trimming test
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} --prefix {prefix} -y')
+        with open(exported_file_path) as json_file:
+            exported_kvs = json.load(json_file)
+        assert imported_kvs == exported_kvs
+
+        # Key filtering test
+        self.kwargs.update({
+            'label': 'KeyValuesWithFeatures',
+            'key': 'Col*'
+        })
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} --key {key} -y')
+        with open(key_filtered_features_file_path) as json_file:
+            key_filtered_features = json.load(json_file)
+        with open(exported_file_path) as json_file:
+            exported_kvs = json.load(json_file)
+        assert key_filtered_features == exported_kvs
+
+        # Separator test
+        self.kwargs.update({
+            'label': 'SeparatorTest',
+            'separator': ':',
+            'imported_file_path': import_separator_features_file_path
+        })
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} --separator {separator} -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} --separator {separator} -y')
+        with open(export_separator_features_file_path) as json_file:
+            imported_kvs = json.load(json_file)
+        with open(exported_file_path) as json_file:
+            exported_kvs = json.load(json_file)
+        assert imported_kvs == exported_kvs
+
+        # Support alternative syntax for always ON/OFF features
+        self.kwargs.update({
+            'label': 'AltSyntaxTest',
+            'imported_file_path': import_features_alt_syntax_file_path
+        })
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} --separator {separator} -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} --separator {separator} -y')
+        with open(imported_file_path) as json_file:
+            imported_kvs = json.load(json_file)
+        with open(exported_file_path) as json_file:
+            exported_kvs = json.load(json_file)
         assert imported_kvs == exported_kvs
 
 

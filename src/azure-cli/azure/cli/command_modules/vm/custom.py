@@ -558,8 +558,9 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                                                                 build_vnet_resource, build_nsg_resource,
                                                                 build_public_ip_resource, StorageProfile,
                                                                 build_msi_role_assignment,
-                                                                build_vm_mmaExtension_resource,
-                                                                build_vm_daExtensionName_resource)
+                                                                build_vm_linux_log_analytics_workspace_agent,
+                                                                build_vm_daExtension_resource,
+                                                                build_vm_windows_log_analytics_workspace_agent)
     from msrestazure.tools import resource_id, is_valid_resource_id
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -716,10 +717,16 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     if workspace is not None:
         workspace_id = _prepare_workspace(cmd, resource_group_name, workspace)
         master_template.add_secure_parameter('workspaceId', workspace_id)
-        vm_mmaExtension_resource = build_vm_mmaExtension_resource(cmd, vm_name, location)
-        vm_daExtensionName_resource = build_vm_daExtensionName_resource(cmd, vm_name, location)
-        master_template.add_resource(vm_mmaExtension_resource)
-        master_template.add_resource(vm_daExtensionName_resource)
+        if os_type.lower() == 'linux':
+            vm_mmaExtension_resource = build_vm_linux_log_analytics_workspace_agent(cmd, vm_name, location)
+            vm_daExtensionName_resource = build_vm_daExtension_resource(cmd, vm_name, location)
+            master_template.add_resource(vm_mmaExtension_resource)
+            master_template.add_resource(vm_daExtensionName_resource)
+        elif os_type.lower() == 'windows':
+            vm_mmaExtension_resource = build_vm_windows_log_analytics_workspace_agent(cmd, vm_name, location)
+            master_template.add_resource(vm_mmaExtension_resource)
+        else:
+            logger.warning("Unsupported OS type. Skip the connection step for log analytics workspace.")
 
     master_template.add_resource(vm_resource)
 
@@ -753,6 +760,10 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
             _show_missing_access_warning(resource_group_name, vm_name, 'vm')
         setattr(vm, 'identity', _construct_identity_info(identity_scope, identity_role, vm.identity.principal_id,
                                                          vm.identity.user_assigned_identities))
+
+    if workspace is not None:
+        _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_id)
+
     return vm
 
 
@@ -1071,6 +1082,45 @@ def _prepare_workspace(cmd, resource_group_name, workspace):
     else:
         workspace_id = workspace
     return workspace_id
+
+
+def _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_id):
+    from ._client_factory import cf_log_analytics_data_sources
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from azure.mgmt.loganalytics.models import DataSource
+    from msrestazure.tools import parse_resource_id
+    from msrestazure.azure_exceptions import CloudError
+
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    data_sources_client = cf_log_analytics_data_sources(cmd.cli_ctx, subscription_id)
+    workspace_name = parse_resource_id(workspace_id)['name']
+    data_source_name_template = "DataSource_{}_{}"
+
+    default_data_sources = None
+    if os_type.lower() == 'linux':
+        from ._workspace_data_source_settings import default_linux_data_sources
+        default_data_sources = default_linux_data_sources
+    elif os_type.lower() == 'windows':
+        from ._workspace_data_source_settings import default_windows_data_sources
+        default_data_sources = default_windows_data_sources
+
+    if default_data_sources is not None:
+        for data_source_kind, data_source_settings in default_data_sources.items():
+            for data_source_setting in data_source_settings:
+                data_source = DataSource(kind=data_source_kind,
+                                         properties=data_source_setting)
+                data_source_name = data_source_name_template.format(data_source_kind, _gen_guid())
+                try:
+                    data_sources_client.create_or_update(resource_group_name,
+                                                         workspace_name,
+                                                         data_source_name,
+                                                         data_source)
+                except CloudError as ex:
+                    logger.warning("Failed to set data source due to %s. "
+                                   "Skip this step and need manual work later.", ex.message)
+    else:
+        logger.warning("Unsupported OS type. Skip the default settings for log analytics workspace.")
+
 # endregion
 
 

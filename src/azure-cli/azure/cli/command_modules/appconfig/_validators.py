@@ -76,7 +76,7 @@ def validate_export(namespace):
         if (namespace.dest_name is None) and (namespace.dest_connection_string is None):
             raise CLIError("usage error: --config-name NAME | --connection-string STR")
     elif destination == 'appservice':
-        if namespace.appservice_name is None:
+        if namespace.appservice_account is None:
             raise CLIError("usage error: --appservice-account NAME_OR_ID")
 
 
@@ -147,3 +147,15 @@ def validate_filter_parameter(string):
         else:
             logger.warning("Ignoring filter parameter '%s' because parameter name is empty.", string)
     return result
+
+
+def validate_secret_identifier(namespace):
+    """ Validate the format of keyvault reference secret identifier """
+    from azure.keyvault.key_vault_id import KeyVaultIdentifier
+
+    identifier = getattr(namespace, 'secret_identifier', None)
+    try:
+        # this throws an exception for invalid format of secret identifier
+        KeyVaultIdentifier(uri=identifier)
+    except Exception as e:
+        raise CLIError("Received an exception while validating the format of secret identifier.\n{0}".format(str(e)))
