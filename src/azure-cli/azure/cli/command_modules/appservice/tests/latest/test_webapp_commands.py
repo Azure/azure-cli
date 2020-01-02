@@ -822,7 +822,7 @@ class FunctionAppReservedInstanceTest(ScenarioTest):
                      JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
         self.cmd('functionapp config set -g {} -n {} --prewarmed-instance-count 4'
                  .format(resource_group, functionapp_name)).assert_with_checks([
-                     JMESPathCheck('reservedInstanceCount', 4)])
+                     JMESPathCheck('preWarmedInstanceCount', 4)])
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
 
 
