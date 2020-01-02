@@ -73,6 +73,9 @@ examples:
     text: az sql db create -g mygroup -s myserver -n mydb -z false
   - name: Create a GeneralPurpose Gen5 2 vcore serverless database with auto pause delay of 120 minutes
     text: az sql db create -g mygroup -s myserver -n mydb -e GeneralPurpose -f Gen5 -c 2 --compute-model Serverless --auto-pause-delay 120
+  - name: Create a Hyperscale Gen5 2 vcore database with 2 read replicas
+    text: az sql db create -g mygroup -s myserver -n mydb -e Hyperscale -f Gen5 -c 2 --read-replicas 2
+
 """
 
 helps['sql db delete'] = """
