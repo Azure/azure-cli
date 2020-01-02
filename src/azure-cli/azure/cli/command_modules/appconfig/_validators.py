@@ -166,7 +166,7 @@ def validate_secret_identifier(namespace):
 
 def validate_key(namespace):
     if namespace.key:
-        input_key = str(namespace.key)
+        input_key = str(namespace.key).lower()
         if input_key == '.' or input_key == '..' or '%' in input_key:
             raise CLIError("Key is invalid. Key cannot be a '.' or '..', or contain the '%' character.")
         if input_key.startswith(FEATURE_FLAG_PREFIX):
@@ -177,9 +177,10 @@ def validate_key(namespace):
 
 def validate_content_type(namespace):
     if namespace.content_type is not None:
-        if namespace.content_type == FEATURE_FLAG_CONTENT_TYPE:
+        content_type = str(namespace.content_type).lower()
+        if content_type == FEATURE_FLAG_CONTENT_TYPE:
             raise CLIError("Content type is invalid. It's a reserved content type for feature flags.")
-        if namespace.content_type == KEYVAULT_CONTENT_TYPE:
+        if content_type == KEYVAULT_CONTENT_TYPE:
             raise CLIError("Content type is invalid. It's a reserved content type for KeyVault references.")
 
 

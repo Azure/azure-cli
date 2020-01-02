@@ -918,6 +918,12 @@ class AppConfigKeyValidationScenarioTest(ScenarioTest):
         with self.assertRaisesRegexp(CLIError, "Key is invalid. Key cannot start with the reserved prefix for feature flags."):
             self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} -y')
 
+        self.kwargs.update({
+            'key': FEATURE_FLAG_PREFIX.upper() + 'test'
+        })
+        with self.assertRaisesRegexp(CLIError, "Key is invalid. Key cannot start with the reserved prefix for feature flags."):
+            self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} -y')
+
         # validate key for KeyVault ref
         self.kwargs.update({
             'key': "%KeyVault",
@@ -930,6 +936,13 @@ class AppConfigKeyValidationScenarioTest(ScenarioTest):
         self.kwargs.update({
             'key': "Color",
             'content_type': FEATURE_FLAG_CONTENT_TYPE
+        })
+        with self.assertRaisesRegexp(CLIError, "Content type is invalid. It's a reserved content type for feature flags."):
+            self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} --content-type {content_type} -y')
+
+        self.kwargs.update({
+            'key': "Color",
+            'content_type': FEATURE_FLAG_CONTENT_TYPE.upper()
         })
         with self.assertRaisesRegexp(CLIError, "Content type is invalid. It's a reserved content type for feature flags."):
             self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} --content-type {content_type} -y')
