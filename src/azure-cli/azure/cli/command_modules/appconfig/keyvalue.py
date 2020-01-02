@@ -30,6 +30,7 @@ from .feature import list_feature
 logger = get_logger(__name__)
 FEATURE_FLAG_PREFIX = ".appconfig.featureflag/"
 FEATURE_FLAG_CONTENT_TYPE = "application/vnd.microsoft.appconfig.ff+json;charset=utf-8"
+KEYVAULT_CONTENT_TYPE = "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
 
 
 def import_config(cmd,
@@ -271,6 +272,65 @@ def set_key(cmd,
             raise CLIError(str(exception))
     raise CLIError(
         "Fail to set the key '{}' due to a conflicting operation.".format(key))
+
+
+def set_keyvault(cmd,
+                 key,
+                 secret_identifier,
+                 name=None,
+                 label=None,
+                 tags=None,
+                 yes=False,
+                 connection_string=None):
+    connection_string = resolve_connection_string(cmd, name, connection_string)
+    azconfig_client = AzconfigClient(connection_string)
+
+    keyvault_ref_value = json.dumps({"uri": secret_identifier}, ensure_ascii=False)
+    retry_times = 3
+    retry_interval = 1
+
+    label = label if label and label != ModifyKeyValueOptions.empty_label else None
+    for i in range(0, retry_times):
+        try:
+            retrieved_kv = azconfig_client.get_keyvalue(key, QueryKeyValueOptions(label))
+        except HTTPException as exception:
+            raise CLIError(str(exception))
+
+        if retrieved_kv is None:
+            set_kv = KeyValue(key, keyvault_ref_value, label, tags, KEYVAULT_CONTENT_TYPE)
+        else:
+            logger.warning("This operation will result in overwriting existing key whose value is: %s", retrieved_kv.value)
+            set_kv = KeyValue(key=key,
+                              label=label,
+                              value=keyvault_ref_value,
+                              content_type=KEYVAULT_CONTENT_TYPE,
+                              tags=retrieved_kv.tags if tags is None else tags)
+            set_kv.etag = retrieved_kv.etag
+
+        verification_kv = {
+            "key": set_kv.key,
+            "label": set_kv.label,
+            "content_type": set_kv.content_type,
+            "value": set_kv.value,
+            "tags": set_kv.tags
+        }
+        entry = json.dumps(verification_kv, indent=2, sort_keys=True, ensure_ascii=False)
+        confirmation_message = "Are you sure you want to set the keyvault reference: \n" + entry + "\n"
+        user_confirmation(confirmation_message, yes)
+
+        try:
+            return azconfig_client.add_keyvalue(set_kv, ModifyKeyValueOptions()) if set_kv.etag is None else azconfig_client.update_keyvalue(set_kv, ModifyKeyValueOptions())
+        except HTTPException as exception:
+            if exception.status == StatusCodes.PRECONDITION_FAILED:
+                logger.debug(
+                    'Retrying setting %s times with exception: concurrent setting operations', i + 1)
+                time.sleep(retry_interval)
+            else:
+                raise CLIError(str(exception))
+        except Exception as exception:
+            raise CLIError(str(exception))
+    raise CLIError(
+        "Failed to set the keyvault reference '{}' due to a conflicting operation.".format(key))
 
 
 def delete_key(cmd,
