@@ -17,6 +17,7 @@ from azure.cli.testsdk.checkers import NoneCheck
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 FEATURE_FLAG_PREFIX = ".appconfig.featureflag/"
 FEATURE_FLAG_CONTENT_TYPE = "application/vnd.microsoft.appconfig.ff+json;charset=utf-8"
+KEYVAULT_CONTENT_TYPE = "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
 
 
 class AppConfigMgmtScenarioTest(ScenarioTest):
@@ -212,7 +213,6 @@ class AppConfigKVScenarioTest(ScenarioTest):
         keyvault_key = "HostSecrets"
         keyvault_id = "https://fake.vault.azure.net/secrets/fakesecret"
         keyvault_value = "{{\"uri\": \"https://fake.vault.azure.net/secrets/fakesecret\"}}"
-        keyvault_content_type = "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
 
         self.kwargs.update({
             'key': keyvault_key,
@@ -221,7 +221,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
 
         # Add new KeyVault ref
         self.cmd('appconfig kv set-keyvault --connection-string {connection_string} --key {key} --secret-identifier {secret_identifier} -y',
-                 checks=[self.check('contentType', keyvault_content_type),
+                 checks=[self.check('contentType', KEYVAULT_CONTENT_TYPE),
                          self.check('key', keyvault_key),
                          self.check('value', keyvault_value)])
 
@@ -232,7 +232,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
         })
 
         self.cmd('appconfig kv set-keyvault --connection-string {connection_string} --key {key} --label {label} --secret-identifier {secret_identifier} -y',
-                 checks=[self.check('contentType', keyvault_content_type),
+                 checks=[self.check('contentType', KEYVAULT_CONTENT_TYPE),
                          self.check('key', entry_key),
                          self.check('value', keyvault_value),
                          self.check('label', updated_label)])
@@ -240,7 +240,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
         # Delete KeyVault ref
         self.cmd('appconfig kv delete --connection-string {connection_string} --key {key} --label {label} -y',
                  checks=[self.check('[0].key', entry_key),
-                         self.check('[0].contentType', keyvault_content_type),
+                         self.check('[0].contentType', KEYVAULT_CONTENT_TYPE),
                          self.check('[0].value', keyvault_value),
                          self.check('[0].label', updated_label)])
 
@@ -918,12 +918,26 @@ class AppConfigKeyValidationScenarioTest(ScenarioTest):
         with self.assertRaisesRegexp(CLIError, "Key is invalid. Key cannot start with the reserved prefix for feature flags."):
             self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} -y')
 
+        # validate key for KeyVault ref
+        self.kwargs.update({
+            'key': "%KeyVault",
+            'secret_identifier': "https://fake.vault.azure.net/secrets/fakesecret"
+        })
+        with self.assertRaisesRegexp(CLIError, "Key is invalid. Key cannot be a '.' or '..', or contain the '%' character."):
+            self.cmd('appconfig kv set-keyvault --connection-string {connection_string} --key {key} --secret-identifier {secret_identifier} -y')
+
         # validate content type
         self.kwargs.update({
             'key': "Color",
             'content_type': FEATURE_FLAG_CONTENT_TYPE
         })
         with self.assertRaisesRegexp(CLIError, "Content type is invalid. It's a reserved content type for feature flags."):
+            self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} --content-type {content_type} -y')
+
+        self.kwargs.update({
+            'content_type': KEYVAULT_CONTENT_TYPE
+        })
+        with self.assertRaisesRegexp(CLIError, "Content type is invalid. It's a reserved content type for KeyVault references."):
             self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} --content-type {content_type} -y')
 
         # validate feature name

@@ -16,6 +16,7 @@ from ._featuremodels import FeatureQueryFields
 logger = get_logger(__name__)
 FEATURE_FLAG_PREFIX = ".appconfig.featureflag/"
 FEATURE_FLAG_CONTENT_TYPE = "application/vnd.microsoft.appconfig.ff+json;charset=utf-8"
+KEYVAULT_CONTENT_TYPE = "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
 
 
 def validate_datetime(namespace):
@@ -178,7 +179,9 @@ def validate_content_type(namespace):
     if namespace.content_type is not None:
         if namespace.content_type == FEATURE_FLAG_CONTENT_TYPE:
             raise CLIError("Content type is invalid. It's a reserved content type for feature flags.")
-
+        if namespace.content_type == KEYVAULT_CONTENT_TYPE:
+            raise CLIError("Content type is invalid. It's a reserved content type for KeyVault references.")
+        
 
 def validate_feature(namespace):
     if namespace.feature:
