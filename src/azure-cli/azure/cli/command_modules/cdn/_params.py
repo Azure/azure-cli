@@ -96,15 +96,19 @@ def load_arguments(self, _):
         c.argument('negate_condition', arg_type=get_three_state_flag(), options_list='--negate-condition',
                    help='If true, negates the condition')
         c.argument('action_name', help='Name of the action.')
-        c.argument('cache_behavior', arg_type=get_enum_type(['BypassCache', 'Override', 'SetIfMissing']))
+        c.argument('cache_behavior', arg_type=get_enum_type(['BypassCache', 'Override', 'SetIfMissing']), 
+                   help='Caching behavior for the requests.')
         c.argument('cache_duration', help='The duration for which the content needs to be cached. \
                    Allowed format is [d.]hh:mm:ss.')
-        c.argument('header_action', arg_type=get_enum_type(['Append', 'Overwrite', 'Delete']))
+        c.argument('header_action', arg_type=get_enum_type(['Append', 'Overwrite', 'Delete']),
+                   help='Header action for the requests.')
         c.argument('header_name', help='Name of the header to modify.')
         c.argument('header_value', help='Value of the header.')
         c.argument('redirect_type',
-                   arg_type=get_enum_type(['Moved', 'Found', 'TemporaryRedirect', 'PermanentRedirect']))
-        c.argument('redirect_protocol', arg_type=get_enum_type(['MatchRequest', 'Http', 'Https']))
+                   arg_type=get_enum_type(['Moved', 'Found', 'TemporaryRedirect', 'PermanentRedirect'],
+                   help='The redirect type the rule will use when redirecting traffic.')
+        c.argument('redirect_protocol', arg_type=get_enum_type(['MatchRequest', 'Http', 'Https']),
+                   help='Protocol to use for the redirect. Possible values are MatchRequest, Http, Https.')
         c.argument('custom_hostname', help='Host to redirect. \
                    Leave empty to use the incoming host as the destination host.')
         c.argument('custom_path', help='The full path to redirect. Path cannot be empty and must start with /. \
@@ -112,14 +116,16 @@ def load_arguments(self, _):
         c.argument('custom_querystring', help='The set of query strings to be placed in the redirect URL. \
                    leave empty to preserve the incoming query string.')
         c.argument('custom_fragment', help='Fragment to add to the redirect URL.')
-        c.argument('query_string_behavior', arg_type=get_enum_type(['Include', 'IncludeAll', 'Exclude', 'ExcludeAll']))
+        c.argument('query_string_behavior', arg_type=get_enum_type(['Include', 'IncludeAll', 'Exclude', 'ExcludeAll']),
+                   help='Query string behavior for the requests.')
         c.argument('query_parameters', help='Query parameters to include or exclude (comma separated).')
-        c.argument('source-pattern', help='A request URI pattern that identifies the type of \
+        c.argument('source_pattern', help='A request URI pattern that identifies the type of \
                    requests that may be rewritten.')
         c.argument('destination', help='The destination path to be used in the rewrite.')
         c.argument('preserve_unmatched_path', arg_type=get_three_state_flag(), options_list='--preserve-unmatched-path',
                    help='If True, the remaining path after the source pattern '
                         'will be appended to the new destination path.')
+        c.argument('index', help='The index of the condition/action')
 
     with self.argument_context('cdn endpoint create') as c:
         c.argument('name', name_arg_type, id_part='name', help='Name of the CDN endpoint.')
