@@ -33,6 +33,7 @@ Release History
 
 * Fix `vm create` failure in Azure Stack profile.
 * vm monitor metrics tail/list-definitions: support query metric and list definitions for a vm.
+* Add new reapply command action for az vm
 
 **Storage**
 

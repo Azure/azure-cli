@@ -1606,6 +1606,18 @@ examples:
 
 """
 
+helps['vm reapply'] = """
+type: command
+short-summary: Reapply VMs.
+examples:
+  - name: Reapply a VM.
+    text: az vm reapply -g MyResourceGroup -n MyVm
+  - name: Reapply all VMs in a resource group.
+    text: >
+        az vm reapply --ids $(az vm list -g MyResourceGroup --query "[].id" -o tsv)
+
+"""
+
 helps['vm redeploy'] = """
 type: command
 short-summary: Redeploy an existing VM.
