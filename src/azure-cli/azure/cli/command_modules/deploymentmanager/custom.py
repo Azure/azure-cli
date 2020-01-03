@@ -431,10 +431,9 @@ def get_object_from_json(client, json_or_file, class_name):
     if param is None:
         raise ValueError(
             """
-            The variable passed should be in valid JSON format and be supplied by az deploymentmanager step CLI commands.
+            The variable passed should be in valid JSON format and be supplied by az deploymentmanager step CLI command.
             Make sure that you use output of relevant 'az deploymentmanager step show' commands and the --out is 'json'
             """)
-
     return param
 
 
@@ -444,4 +443,3 @@ def is_json(content):
     except ValueError:
         return False
     return True
-

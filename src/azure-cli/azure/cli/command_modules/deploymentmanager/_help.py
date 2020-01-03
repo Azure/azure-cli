@@ -150,7 +150,7 @@ short-summary: Lists all services in a service topology.
 examples:
   - name: Lists all the services under the given service topology.
     text: >
-        az deploymentmanager service list -g rg1 --service-topology-name contosoServiceTopology -n contosoService1
+        az deploymentmanager service list -g rg1 --service-topology-name contosoServiceTopology
 """
 
 helps['deploymentmanager service update'] = """
@@ -286,10 +286,10 @@ short-summary: Creates the step.
 examples:
   - name: Creates a wait step.
     text: >
-        az deploymentmanager step create -g rg1 -l location -n contosoServiceWaitStep --duration PT30M
+        az deploymentmanager step create -g rg1 -l location -n contosoServiceWaitStep --duration PT30M 
   - name: Creates a health check step from a JSON file. The step information is read from the file. 
     text: >
-        az deploymentmanager step create -g rg1 --step .\healthcheck_step.json
+        az deploymentmanager step create -g rg1 --step healthcheck_step.json
 """
 
 helps['deploymentmanager step show'] = """
@@ -307,7 +307,7 @@ short-summary: List all steps in a resource group.
 examples:
   - name: List available steps in the given resource group.
     text: >
-        az deploymentmanager step show -g rg1 
+        az deploymentmanager step list -g rg1 
 """
 
 helps['deploymentmanager step update'] = """
