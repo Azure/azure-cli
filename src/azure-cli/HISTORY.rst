@@ -8,6 +8,9 @@ Release History
 * Adds list operation for all resources.
 * Enhances step resource for new step type.
 
+2.0.79
+++++++
+
 **ACR**
 
 * [BREAKING CHANGE] Remove '--os' parameter for 'acr build', 'acr task create/update', 'acr run', and 'acr pack'. Use '--platform' instead.
@@ -16,11 +19,13 @@ Release History
 
 * Add support for importing/exporting feature flags
 * Add new command 'az appconfig kv set-keyvault' for creating keyvault reference
+* Support various naming conventions when exporting feature flags to file
 
 **AppService**
 
 * Fix issue #7154: Updating documentation for command <> to use back ticks instead of single quotes
 * Fix issue #11287: webapp up: By default make the app created using up 'should be 'SSL enabled'
+* Fix issue #11592: Add az webapp up flag for html static sites
 
 **ARM**
 
@@ -36,11 +41,29 @@ Release History
 
 * Fix `vm create` failure in Azure Stack profile.
 * vm monitor metrics tail/list-definitions: support query metric and list definitions for a vm.
+* Add new reapply command action for az vm
+
+**Misc.**
+
+* Add preview command `az version show` to show the versions of Azure CLI modules and extensions in JSON format by default or format configured by --output
+
+**Event Hubs**
+
+* [BREAKING CHANGE] Remove 'ReceiveDisabled' status option from command 'az eventhubs eventhub update' and 'az eventhubs eventhub create'. This option is not valid for Event Hub entities.
+
+**Service Bus**
+
+* [BREAKING CHANGE] Remove 'ReceiveDisabled' status option from command 'az servicebus topic create', 'az servicebus topic update', 'az servicebus queue create', and 'az servicebus queue update'. This option is not valid for Service Bus topics and queues.
+
+**RBAC**
+
+* Fix #11712: `az ad app/sp show` does not return exit code 3 when the application or service principal does not exist
 
 **Storage**
 
 * `az storage account create`: Remove preview flag for --enable-hierarchical-namespace parameter
 * Update azure-mgmt-storage version to 7.0.0 to use api version 2019-06-01
+* Add new parameters `--enable-delete-retention` and `--delete-retention-days` to support managing delete retention policy for storage account blob-service-properties.
 
 2.0.78
 ++++++
@@ -80,7 +103,7 @@ Release History
 
 **BotService**
 
-* [Breaking change] Remove '--version' flag from preview command 'az bot create'. Only v4 SDK bots are supported.
+* [BREAKING CHANGE] Remove '--version' flag from preview command 'az bot create'. Only v4 SDK bots are supported.
 * Add name availability check for 'az bot create'.
 * Add support for updating the icon URL for a bot via 'az bot update'.
 * Add support for updating a Direct Line channel via 'az bot directline update'.

@@ -110,7 +110,7 @@ def get_num_apps_in_asp(cmd, rg_name, asp_name):
 
 
 # pylint:disable=unexpected-keyword-arg
-def get_lang_from_content(src_path):
+def get_lang_from_content(src_path, html=False):
     # NODE: package.json should exist in the application root dir
     # NETCORE & DOTNET: *.csproj should exist in the application dir
     # NETCORE: <TargetFramework>netcoreapp2.0</TargetFramework>
@@ -118,6 +118,7 @@ def get_lang_from_content(src_path):
     runtime_details_dict = dict.fromkeys(['language', 'file_loc', 'default_sku'])
     package_json_file = os.path.join(src_path, 'package.json')
     package_python_file = os.path.join(src_path, 'requirements.txt')
+    static_html_file = ""
     package_netcore_file = ""
     runtime_details_dict['language'] = ''
     runtime_details_dict['file_loc'] = ''
@@ -125,11 +126,23 @@ def get_lang_from_content(src_path):
     import fnmatch
     for _dirpath, _dirnames, files in os.walk(src_path):
         for file in files:
-            if fnmatch.fnmatch(file, "*.csproj"):
+            if html and (fnmatch.fnmatch(file, "*.html") or fnmatch.fnmatch(file, "*.htm") or
+                         fnmatch.fnmatch(file, "*shtml.")):
+                static_html_file = os.path.join(src_path, file)
+                break
+            elif fnmatch.fnmatch(file, "*.csproj"):
                 package_netcore_file = os.path.join(src_path, file)
                 break
 
-    if os.path.isfile(package_python_file):
+    if html:
+        if static_html_file:
+            runtime_details_dict['language'] = STATIC_RUNTIME_NAME
+            runtime_details_dict['file_loc'] = static_html_file
+            runtime_details_dict['default_sku'] = 'F1'
+        else:
+            raise CLIError("The html flag was passed, but could not find HTML files, "
+                           "see 'https://go.microsoft.com/fwlink/?linkid=2109470' for more information")
+    elif os.path.isfile(package_python_file):
         runtime_details_dict['language'] = PYTHON_RUNTIME_NAME
         runtime_details_dict['file_loc'] = package_python_file
         runtime_details_dict['default_sku'] = LINUX_SKU_DEFAULT
@@ -318,21 +331,21 @@ def get_profile_username():
     return user
 
 
-def get_sku_to_use(src_dir, sku=None):
+def get_sku_to_use(src_dir, html=False, sku=None):
     if sku is None:
-        lang_details = get_lang_from_content(src_dir)
+        lang_details = get_lang_from_content(src_dir, html)
         return lang_details.get("default_sku")
     logger.info("Found sku argument, skipping use default sku")
     return sku
 
 
-def set_language(src_dir):
-    lang_details = get_lang_from_content(src_dir)
+def set_language(src_dir, html=False):
+    lang_details = get_lang_from_content(src_dir, html)
     return lang_details.get('language')
 
 
-def detect_os_form_src(src_dir):
-    lang_details = get_lang_from_content(src_dir)
+def detect_os_form_src(src_dir, html=False):
+    lang_details = get_lang_from_content(src_dir, html)
     language = lang_details.get('language')
     return "Linux" if language is not None and language.lower() == NODE_RUNTIME_NAME \
         or language.lower() == PYTHON_RUNTIME_NAME else OS_DEFAULT
