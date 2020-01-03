@@ -415,7 +415,7 @@ class DeploymentManagerTests(ScenarioTest):
             location):
 
         step_name = resource_group_name + "RestHealthCheckStep"
-        updated_healthy_state_duration = "PT60M"
+        updated_healthy_state_duration = "PT30M"
             
         self.replace_string("__HEALTH_CHECK_STEP_NAME__", step_name, healthcheck_file_path, True)
 

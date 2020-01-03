@@ -5,7 +5,8 @@ Release History
 
 **Deployment Manager**
 
-* Add list operations for all resources.
+* Adds list operation for all resources.
+* Enhances step resource for new step type.
 
 **ACR**
 
