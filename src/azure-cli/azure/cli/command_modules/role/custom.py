@@ -1040,7 +1040,9 @@ def _resolve_application(client, identifier):
             # it is either app id or object id, let us verify
             result = list(client.list(filter="appId eq '{}'".format(identifier)))
         else:
-            raise CLIError("Application '{}' doesn't exist".format(identifier))
+            error = CLIError("Application '{}' doesn't exist".format(identifier))
+            error.status_code = 404  # Make sure CLI returns 3
+            raise error
 
     return result[0].object_id if result else identifier
 
@@ -1194,7 +1196,9 @@ def _resolve_service_principal(client, identifier):
         return result[0].object_id
     if _is_guid(identifier):
         return identifier  # assume an object id
-    raise CLIError("service principal '{}' doesn't exist".format(identifier))
+    error = CLIError("Service principal '{}' doesn't exist".format(identifier))
+    error.status_code = 404  # Make sure CLI returns 3
+    raise error
 
 
 def _process_service_principal_creds(cli_ctx, years, app_start_date, app_end_date, cert, create_cert,
