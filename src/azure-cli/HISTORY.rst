@@ -35,6 +35,10 @@ Release History
 * vm monitor metrics tail/list-definitions: support query metric and list definitions for a vm.
 * Add new reapply command action for az vm
 
+**Misc.**
+
+* Add preview command `az version show` to show the versions of Azure CLI modules and extensions in JSON format by default or format configured by --output
+
 **Storage**
 
 * `az storage account create`: Remove preview flag for --enable-hierarchical-namespace parameter
