@@ -2967,7 +2967,7 @@ def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, sl
 
 
 def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku=None, dryrun=False, logs=False,  # pylint: disable=too-many-statements,
-              launch_browser=False):
+              launch_browser=False, html=False):
     import os
     src_dir = os.getcwd()
     _src_path_escaped = "{}".format(src_dir.replace(os.sep, os.sep + os.sep))
@@ -2975,8 +2975,8 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
     user = get_profile_username()
     _create_new_rg = False
     _create_new_app = does_app_already_exist(cmd, name)
-    os_name = detect_os_form_src(src_dir)
-    lang_details = get_lang_from_content(src_dir)
+    os_name = detect_os_form_src(src_dir, html)
+    lang_details = get_lang_from_content(src_dir, html)
     language = lang_details.get('language')
 
     # detect the version
@@ -3023,7 +3023,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
         site_config = client.web_apps.get_configuration(rg_name, name)
     else:  # need to create new app, check if we need to use default RG or use user entered values
         logger.warning("webapp %s doesn't exist", name)
-        sku = get_sku_to_use(src_dir, sku)
+        sku = get_sku_to_use(src_dir, html, sku)
         loc = set_location(cmd, sku, location)
         rg_name = get_rg_to_use(cmd, user, loc, os_name, resource_group_name)
         _is_linux = os_name.lower() == 'linux'
