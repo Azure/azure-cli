@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**AppConfig**
+
+* Validate key and feature names before setting and importing
+
 2.0.79
 ++++++
 
