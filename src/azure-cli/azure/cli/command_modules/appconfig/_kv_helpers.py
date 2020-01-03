@@ -719,8 +719,8 @@ def __convert_feature_dict_to_keyvalue_list(features_dict, enabled_for_keyword):
                     feature_flag_value.conditions = default_conditions
 
                 set_kv = KeyValue(key=key,
-                                value=json.dumps(feature_flag_value, default=lambda o: o.__dict__, ensure_ascii=False),
-                                content_type=FEATURE_FLAG_CONTENT_TYPE)
+                                  value=json.dumps(feature_flag_value, default=lambda o: o.__dict__, ensure_ascii=False),
+                                  content_type=FEATURE_FLAG_CONTENT_TYPE)
                 key_values.append(set_kv)
 
     except Exception as exception:
