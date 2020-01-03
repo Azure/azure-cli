@@ -32,8 +32,8 @@ Release History
 
 **Cdn**
 
-Add support for rulesEngine feature
-Add commands for rule managemnt: 'az cdn endpoint rule'
+* Add support for rulesEngine feature
+* Update azure-mgmt-cdn version to 4.0.0 to use api version 2019-04-15
 
 **Storage**
 
