@@ -97,6 +97,7 @@ def create_condition(match_variable=None, operator=None, match_values=None,
     transforms = []
     if transform is not None:
         transforms = [transform]
+
     if match_variable == 'RemoteAddress':
         return DeliveryRuleRemoteAddressCondition(
             parameters=RemoteAddressMatchConditionParameters(
@@ -256,7 +257,6 @@ def create_action(action_name, cache_behavior=None, cache_duration=None, header_
                 destination=destination,
                 preserve_unmatched_path=preserve_unmatched_path
             ))
-
     return DeliveryRuleAction()
 
 
