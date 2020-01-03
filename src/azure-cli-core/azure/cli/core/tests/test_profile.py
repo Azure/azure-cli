@@ -934,6 +934,7 @@ class TestProfile(unittest.TestCase):
                 self.subscriptions = mock.MagicMock()
                 self.subscriptions.list.return_value = [TestProfile.subscription1]
                 self.config = mock.MagicMock()
+                self._client = mock.MagicMock()
 
         mock_get_client_class.return_value = ClientStub
         cli = DummyCli()
@@ -971,6 +972,7 @@ class TestProfile(unittest.TestCase):
                 self.subscriptions = mock.MagicMock()
                 self.subscriptions.list.return_value = []
                 self.config = mock.MagicMock()
+                self._client = mock.MagicMock()
 
         mock_get_client_class.return_value = ClientStub
         cli = DummyCli()
@@ -1008,6 +1010,7 @@ class TestProfile(unittest.TestCase):
                 self.subscriptions = mock.MagicMock()
                 self.subscriptions.list.return_value = [TestProfile.subscription1]
                 self.config = mock.MagicMock()
+                self._client = mock.MagicMock()
 
         mock_get_client_class.return_value = ClientStub
         cli = DummyCli()
@@ -1094,6 +1097,7 @@ class TestProfile(unittest.TestCase):
                 self.subscriptions = mock.MagicMock()
                 self.subscriptions.list.return_value = [TestProfile.subscription1]
                 self.config = mock.MagicMock()
+                self._client = mock.MagicMock()
 
         mock_get_client_class.return_value = ClientStub
         cli = DummyCli()

@@ -475,9 +475,8 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd('policy definition list',
                  checks=self.check("length([?name=='{pn}'])", 0))
 
-    # remove and re-record once issue #6008 is fixed
-    @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_policy')
+    @AllowLargeResponse
     def test_resource_policyset(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
 

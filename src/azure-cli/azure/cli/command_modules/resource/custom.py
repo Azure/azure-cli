@@ -2025,6 +2025,12 @@ def rest_call(cmd, method, uri, headers=None, uri_parameters=None,
             print(r.text)
 
 
+def show_version(cmd):
+    from azure.cli.core.util import get_az_version_json
+    versions = get_az_version_json()
+    return versions
+
+
 class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
     def __init__(self, cli_ctx,
                  resource_group_name=None, resource_provider_namespace=None,
@@ -2132,6 +2138,24 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
 
     def tag(self, tags):
         resource = self.get_resource()
+
+        # please add the service type that needs to be requested with PATCH type here
+        # for example: the properties of RecoveryServices/vaults must be filled, and a PUT request that passes back
+        # to properties will fail due to the lack of properties, so the PATCH type should be used
+        need_patch_service = ['Microsoft.RecoveryServices/vaults']
+
+        if resource is not None and resource.type in need_patch_service:
+            parameters = GenericResource(tags=tags)
+            if self.resource_id:
+                return self.rcf.resources.update_by_id(self.resource_id, self.api_version, parameters)
+            return self.rcf.resources.update(self.resource_group_name,
+                                             self.resource_provider_namespace,
+                                             self.parent_resource_path,
+                                             self.resource_type,
+                                             self.resource_name,
+                                             self.api_version,
+                                             parameters)
+
         # pylint: disable=no-member
         parameters = GenericResource(
             location=resource.location,
