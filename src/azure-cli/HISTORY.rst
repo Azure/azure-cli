@@ -79,7 +79,7 @@ Release History
 
 * Added support for rulesEngine feature
 * Added new commands group 'cdn endpoint rule' to manage rules
-* Update azure-mgmt-cdn version to 4.0.0 to use api version 2019-04-15
+* Updated azure-mgmt-cdn version to 4.0.0 to use api version 2019-04-15
 
 **Storage**
 
