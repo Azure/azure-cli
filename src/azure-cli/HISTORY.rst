@@ -47,6 +47,10 @@ Release History
 
 * [BREAKING CHANGE] Remove 'ReceiveDisabled' status option from command 'az servicebus topic create', 'az servicebus topic update', 'az servicebus queue create', and 'az servicebus queue update'. This option is not valid for Service Bus topics and queues.
 
+**RBAC**
+
+* Fix #11712: `az ad app/sp show` does not return exit code 3 when the application or service principal does not exist
+
 **Storage**
 
 * `az storage account create`: Remove preview flag for --enable-hierarchical-namespace parameter
