@@ -3,6 +3,9 @@
 Release History
 ===============
 
+2.0.79
+++++++
+
 **ACR**
 
 * [BREAKING CHANGE] Remove '--os' parameter for 'acr build', 'acr task create/update', 'acr run', and 'acr pack'. Use '--platform' instead.
