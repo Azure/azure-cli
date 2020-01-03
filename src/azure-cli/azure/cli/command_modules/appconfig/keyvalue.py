@@ -53,6 +53,7 @@ def import_config(cmd,
                   # from-appservice parameters
                   appservice_account=None,
                   skip_features=False):
+    # pylint: disable=too-many-locals
     src_features = []
     dest_features = []
     dest_kvs = []
@@ -142,12 +143,14 @@ def export_config(cmd,
                   dest_label=None,
                   # to-app-service parameters
                   appservice_account=None,
-                  skip_features=False):
+                  skip_features=False,
+                  naming_convention='pascal'):
     src_features = []
     dest_features = []
     dest_kvs = []
     destination = destination.lower()
     format_ = format_.lower() if format_ else None
+    naming_convention = naming_convention.lower()
 
     # fetch key values from user's configstore
     src_kvs = __read_kv_from_config_store(
@@ -158,7 +161,18 @@ def export_config(cmd,
 
     if not skip_features:
         # Get all Feature flags with matching label
-        if destination in ('file', 'appconfig'):
+        if destination == 'file':
+            if format_ == 'properties':
+                skip_features = True
+            else:
+                # src_features is a list of FeatureFlag objects
+                src_features = list_feature(cmd,
+                                            feature='*',
+                                            label=QueryKeyValueCollectionOptions.empty_label if label is None else label,
+                                            name=name,
+                                            connection_string=connection_string,
+                                            all_=True)
+        elif destination == 'appconfig':
             # src_features is a list of FeatureFlag objects
             src_features = list_feature(cmd,
                                         feature='*',
@@ -206,7 +220,8 @@ def export_config(cmd,
     # export to destination
     if destination == 'file':
         __write_kv_and_features_to_file(file_path=path, key_values=src_kvs, features=src_features,
-                                        format_=format_, separator=separator, skip_features=skip_features)
+                                        format_=format_, separator=separator, skip_features=skip_features,
+                                        naming_convention=naming_convention)
     elif destination == 'appconfig':
         __write_kv_and_features_to_config_store(cmd, key_values=src_kvs, features=src_features, name=dest_name,
                                                 connection_string=dest_connection_string, label=dest_label)
