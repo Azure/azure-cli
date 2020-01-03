@@ -258,7 +258,7 @@ def create_action(action_name, cache_behavior=None, cache_duration=None, header_
 
 
 # pylint: disable=too-many-locals
-def add_rule(client, resource_group_name, profile_name, name,
+def add_rule(client, resource_group_name, profile_name, endpoint_name,
              order, rule_name, action_name, match_variable=None, operator=None,
              match_values=None, selector=None, negate_condition=None, transform=None,
              cache_behavior=None, cache_duration=None, header_action=None,
@@ -266,7 +266,7 @@ def add_rule(client, resource_group_name, profile_name, name,
              redirect_type=None, redirect_protocol=None, custom_hostname=None, custom_path=None,
              custom_querystring=None, custom_fragment=None, source_pattern=None,
              destination=None, preserve_unmatched_path=None):
-    endpoint = client.endpoints.get(resource_group_name, profile_name, name)
+    endpoint = client.endpoints.get(resource_group_name, profile_name, endpoint_name)
     policy = endpoint.delivery_policy
     if policy is None:
         policy = EndpointPropertiesUpdateParametersDeliveryPolicy(
@@ -297,14 +297,14 @@ def add_rule(client, resource_group_name, profile_name, name,
         delivery_policy=policy
     )
 
-    return client.endpoints.update(resource_group_name, profile_name, name, params)
+    return client.endpoints.update(resource_group_name, profile_name, endpoint_name, params)
 
 
-def add_condition(client, resource_group_name, profile_name, name,
+def add_condition(client, resource_group_name, profile_name, endpoint_name,
                   rule_name, match_variable, operator, match_values=None, selector=None,
                   negate_condition=None, transform=None):
 
-    endpoint = client.endpoints.get(resource_group_name, profile_name, name)
+    endpoint = client.endpoints.get(resource_group_name, profile_name, endpoint_name)
     policy = endpoint.delivery_policy
     condition = create_condition(match_variable, operator, match_values, selector, negate_condition, transform)
     for i in range(0, len(policy.rules)):
@@ -315,17 +315,17 @@ def add_condition(client, resource_group_name, profile_name, name,
         delivery_policy=policy
     )
 
-    return client.endpoints.update(resource_group_name, profile_name, name, params)
+    return client.endpoints.update(resource_group_name, profile_name, endpoint_name, params)
 
 
-def add_action(client, resource_group_name, profile_name, name,
+def add_action(client, resource_group_name, profile_name, endpoint_name,
                rule_name, action_name, cache_behavior=None, cache_duration=None,
                header_action=None, header_name=None, header_value=None, query_string_behavior=None,
                query_parameters=None, redirect_type=None, redirect_protocol=None, custom_hostname=None,
                custom_path=None, custom_querystring=None, custom_fragment=None, source_pattern=None,
                destination=None, preserve_unmatched_path=None):
 
-    endpoint = client.endpoints.get(resource_group_name, profile_name, name)
+    endpoint = client.endpoints.get(resource_group_name, profile_name, endpoint_name)
     policy = endpoint.delivery_policy
     action = create_action(action_name, cache_behavior, cache_duration, header_action, header_name,
                            header_value, query_string_behavior, query_parameters, redirect_type,
@@ -339,12 +339,12 @@ def add_action(client, resource_group_name, profile_name, name,
         delivery_policy=policy
     )
 
-    return client.endpoints.update(resource_group_name, profile_name, name, params)
+    return client.endpoints.update(resource_group_name, profile_name, endpoint_name, params)
 
 
-def remove_rule(client, resource_group_name, profile_name, name, rule_name):
+def remove_rule(client, resource_group_name, profile_name, endpoint_name, rule_name):
 
-    endpoint = client.endpoints.get(resource_group_name, profile_name, name)
+    endpoint = client.endpoints.get(resource_group_name, profile_name, endpoint_name)
     policy = endpoint.delivery_policy
     if policy is not None:
         for rule in policy.rules:
@@ -355,12 +355,12 @@ def remove_rule(client, resource_group_name, profile_name, name, rule_name):
         delivery_policy=policy
     )
 
-    return client.endpoints.update(resource_group_name, profile_name, name, params)
+    return client.endpoints.update(resource_group_name, profile_name, endpoint_name, params)
 
 
-def remove_condition(client, resource_group_name, profile_name, name, rule_name, index):
+def remove_condition(client, resource_group_name, profile_name, endpoint_name, rule_name, index):
 
-    endpoint = client.endpoints.get(resource_group_name, profile_name, name)
+    endpoint = client.endpoints.get(resource_group_name, profile_name, endpoint_name)
     policy = endpoint.delivery_policy
     if policy is not None:
         for i in range(0, len(policy.rules)):
@@ -371,12 +371,12 @@ def remove_condition(client, resource_group_name, profile_name, name, rule_name,
         delivery_policy=policy
     )
 
-    return client.endpoints.update(resource_group_name, profile_name, name, params)
+    return client.endpoints.update(resource_group_name, profile_name, endpoint_name, params)
 
 
-def remove_action(client, resource_group_name, profile_name, name, rule_name, index):
+def remove_action(client, resource_group_name, profile_name, endpoint_name, rule_name, index):
 
-    endpoint = client.endpoints.get(resource_group_name, profile_name, name)
+    endpoint = client.endpoints.get(resource_group_name, profile_name, endpoint_name)
     policy = endpoint.delivery_policy
     if policy is not None:
         for i in range(0, len(policy.rules)):
@@ -387,7 +387,7 @@ def remove_action(client, resource_group_name, profile_name, name, rule_name, in
         delivery_policy=policy
     )
 
-    return client.endpoints.update(resource_group_name, profile_name, name, params)
+    return client.endpoints.update(resource_group_name, profile_name, endpoint_name, params)
 
 
 def create_endpoint(client, resource_group_name, profile_name, name, origins, location=None,
