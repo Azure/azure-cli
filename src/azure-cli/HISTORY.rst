@@ -17,6 +17,7 @@ Release History
 
 * Fix issue #7154: Updating documentation for command <> to use back ticks instead of single quotes
 * Fix issue #11287: webapp up: By default make the app created using up 'should be 'SSL enabled'
+* Fix issue #11592: Add az webapp up flag for html static sites
 
 **ARM**
 
