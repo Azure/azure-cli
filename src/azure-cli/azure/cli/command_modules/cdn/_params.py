@@ -36,6 +36,7 @@ class OriginType(argparse._AppendAction):
         return deep_created_origin
 
 
+# pylint:disable=too-many-statements
 def load_arguments(self, _):
 
     name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME')
@@ -83,18 +84,42 @@ def load_arguments(self, _):
         c.argument('profile_name', help=profile_name_help, id_part='name')
 
     with self.argument_context('cdn endpoint rule') as c:
+        c.argument('rule_name', help='Name of the rule.')
+        c.argument('order', help='The order of the rule. The order number must start from 0 and consecutive.\
+                    Rule with higher order will be applied later.')
+        c.argument('match_variable', help='Name of the match condition.')
+        c.argument('operator', help='Operator of the match condition.')
+        c.argument('selector', help='Selector of the match condition.')
+        c.argument('match_values', help='Match values of the match condition (comma separated).')
+        c.argument('transform', arg_type=get_enum_type(['Lowercase', 'Uppercase']),
+                   help='Transform to apply before matching.')
+        c.argument('negate_condition', arg_type=get_three_state_flag(), options_list='--negate-condition',
+                   help='If true, negates the condition')
+        c.argument('action_name', help='Name of the action.')
         c.argument('cache_behavior', arg_type=get_enum_type(['BypassCache', 'Override', 'SetIfMissing']))
+        c.argument('cache_duration', help='The duration for which the content needs to be cached. \
+                   Allowed format is [d.]hh:mm:ss.')
         c.argument('header_action', arg_type=get_enum_type(['Append', 'Overwrite', 'Delete']))
+        c.argument('header_name', help='Name of the header to modify.')
+        c.argument('header_value', help='Value of the header.')
         c.argument('redirect_type',
                    arg_type=get_enum_type(['Moved', 'Found', 'TemporaryRedirect', 'PermanentRedirect']))
         c.argument('redirect_protocol', arg_type=get_enum_type(['MatchRequest', 'Http', 'Https']))
+        c.argument('custom_hostname', help='Host to redirect. \
+                   Leave empty to use the incoming host as the destination host.')
+        c.argument('custom_path', help='The full path to redirect. Path cannot be empty and must start with /. \
+                   Leave empty to use the incoming path as destination path.')
+        c.argument('custom_querystring', help='The set of query strings to be placed in the redirect URL. \
+                   leave empty to preserve the incoming query string.')
+        c.argument('custom_fragment', help='Fragment to add to the redirect URL.')
         c.argument('query_string_behavior', arg_type=get_enum_type(['Include', 'IncludeAll', 'Exclude', 'ExcludeAll']))
-        c.argument('transform', arg_type=get_enum_type(['Lowercase', 'Uppercase']))
+        c.argument('query_parameters', help='Query parameters to include or exclude (comma separated).')
+        c.argument('source-pattern', help='A request URI pattern that identifies the type of \
+                   requests that may be rewritten.')
+        c.argument('destination', help='The destination path to be used in the rewrite.')
         c.argument('preserve_unmatched_path', arg_type=get_three_state_flag(), options_list='--preserve-unmatched-path',
                    help='If True, the remaining path after the source pattern '
                         'will be appended to the new destination path.')
-        c.argument('negate_condition', arg_type=get_three_state_flag(), options_list='--negate-condition',
-                   help='Describes if this is negate condition or not.')
 
     with self.argument_context('cdn endpoint create') as c:
         c.argument('name', name_arg_type, id_part='name', help='Name of the CDN endpoint.')
