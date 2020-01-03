@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**AppConfig**
+
+* Support import/export of all labels from appconfig to appconfig
+
 2.0.79
 ++++++
 
