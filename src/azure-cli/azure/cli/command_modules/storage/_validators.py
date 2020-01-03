@@ -1121,3 +1121,27 @@ def as_user_validator(namespace):
             import argparse
             raise argparse.ArgumentError(
                 None, "incorrect usage: specify '--auth-mode login' when as-user is enabled")
+
+
+def validator_delete_retention_days(namespace):
+    if namespace.enable_delete_retention is True and namespace.delete_retention_days is None:
+        raise ValueError(
+            "incorrect usage: you have to provide value for '--delete-retention-days' when '--enable-delete-retention' "
+            "is set to true")
+
+    if namespace.enable_delete_retention is False and namespace.delete_retention_days is not None:
+        raise ValueError(
+            "incorrect usage: '--delete-retention-days' is invalid when '--enable-delete-retention' is set to false")
+
+    if namespace.enable_delete_retention is None and namespace.delete_retention_days is not None:
+        raise ValueError(
+            "incorrect usage: please specify '--enable-delete-retention true' if you want to set the value for "
+            "'--delete-retention-days'")
+
+    if namespace.delete_retention_days or namespace.delete_retention_days == 0:
+        if namespace.delete_retention_days < 1:
+            raise ValueError(
+                "incorrect usage: '--delete-retention-days' must be greater than or equal to 1")
+        if namespace.delete_retention_days > 365:
+            raise ValueError(
+                "incorrect usage: '--delete-retention-days' must be less than or equal to 365")
