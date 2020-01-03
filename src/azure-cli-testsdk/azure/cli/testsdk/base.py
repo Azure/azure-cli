@@ -147,7 +147,7 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
     def create_guid(self):
         import uuid
         self.test_guid_count += 1
-        moniker = '88888888-0000-0000-0000-00000000' + ("%0.4X" % self.test_guid_count)
+        moniker = '88888888-0000-0000-0000-00000000' + ("%0.4x" % self.test_guid_count)
 
         if self.in_recording:
             name = uuid.uuid4()

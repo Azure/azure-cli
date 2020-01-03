@@ -105,7 +105,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
         storage_model_types = [e.value for e in StorageType]
-        vault_properties = self.cmd('backup vault backup-properties show -n {vault1} -g {rg}', checks=[
+        vault_properties = self.cmd('backup vault backup-properties show -n {vault1} -g {rg} --query [0]', checks=[
             JMESPathCheckExists("contains({}, properties.storageModelType)".format(storage_model_types)),
             self.check('properties.storageTypeState', 'Unlocked'),
             self.check('resourceGroup', '{rg}')
@@ -119,7 +119,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['model'] = new_storage_model
         self.cmd('backup vault backup-properties set -n {vault1} -g {rg} --backup-storage-redundancy {model}')
 
-        self.cmd('backup vault backup-properties show -n {vault1} -g {rg}', checks=[
+        self.cmd('backup vault backup-properties show -n {vault1} -g {rg} --query [0]', checks=[
             self.check('properties.storageModelType', new_storage_model)
         ])
 
@@ -492,3 +492,134 @@ class BackupTests(ScenarioTest, unittest.TestCase):
                  checks=self.check("length([?name == '{job}'])", 1))
 
         self.cmd('backup job stop -g {rg} -v {vault} -n {job}')
+
+    @record_only()
+    @ResourceGroupPreparer()
+    @VaultPreparer()
+    @VMPreparer()
+    @ItemPreparer()
+    def test_backup_softdelete(self, resource_group, vault_name, vm_name):
+        self.kwargs.update({
+            'vault': vault_name,
+            'vm': vm_name,
+            'rg': resource_group
+        })
+
+        self.cmd('backup protection disable --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm} -i {vm} --delete-backup-data --yes', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "DeleteBackupData"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ])
+
+        self.cmd('backup item show --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm} -n {vm}', checks=[
+            self.check("properties.friendlyName", '{vm}'),
+            self.check("properties.protectionState", "ProtectionStopped"),
+            self.check("resourceGroup", '{rg}'),
+            self.check("properties.isScheduledForDeferredDelete", True)
+        ])
+
+        self.cmd('backup protection undelete -g {rg} -v {vault} -c {vm} -i {vm} --workload-type VM --backup-management-type AzureIaasVM ', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "Undelete"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ])
+
+        self.cmd('backup vault backup-properties set -g {rg} -n {vault} --soft-delete-feature-state Disable')
+
+        self.cmd('backup item show --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm} -n {vm}', checks=[
+            self.check("properties.friendlyName", '{vm}'),
+            self.check("properties.protectionState", "ProtectionStopped"),
+            self.check("resourceGroup", '{rg}'),
+            self.check("properties.isScheduledForDeferredDelete", None)
+        ])
+
+    @record_only()
+    @ResourceGroupPreparer(location="southeastasia")
+    @VaultPreparer()
+    @VMPreparer()
+    @StorageAccountPreparer(location="southeastasia")
+    def test_backup_disk_exclusion(self, resource_group, vault_name, vm_name, storage_account):
+        self.kwargs.update({
+            'vault': vault_name,
+            'vm': vm_name,
+            'rg': resource_group,
+            'sa': storage_account
+        })
+
+        self.cmd('backup vault backup-properties set -g {rg} -n {vault} --soft-delete-feature-state Disable')
+
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name mydisk1 --new --size-gb 10')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name mydisk2 --new --size-gb 10')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name mydisk3 --new --size-gb 10')
+
+        self.cmd('backup protection enable-for-vm -g {rg} -v {vault} --vm {vm} -p DefaultPolicy --disk-list-setting include --diskslist 0 1', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "ConfigureBackup"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ])
+
+        self.cmd('backup item show --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm} -n {vm}', checks=[
+            self.check('properties.friendlyName', '{vm}'),
+            self.check('properties.healthStatus', 'Passed'),
+            self.check('properties.protectionState', 'IRPending'),
+            self.check('properties.protectionStatus', 'Healthy'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('properties.extendedProperties.diskExclusionProperties.isInclusionList', True),
+        ])
+
+        self.cmd('backup protection update-for-vm -g {rg} -v {vault} -c {vm} -i {vm} --disk-list-setting exclude --diskslist 1', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "ConfigureBackup"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ])
+
+        self.cmd('backup item show --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm} -n {vm}', checks=[
+            self.check('properties.friendlyName', '{vm}'),
+            self.check('properties.healthStatus', 'Passed'),
+            self.check('properties.protectionState', 'IRPending'),
+            self.check('properties.protectionStatus', 'Healthy'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('properties.extendedProperties.diskExclusionProperties.isInclusionList', False),
+        ])
+
+        self.kwargs['retain_date'] = (datetime.utcnow() + timedelta(days=30)).strftime('%d-%m-%Y')
+        self.kwargs['job'] = self.cmd('backup protection backup-now -g {rg} -v {vault} -c {vm} -i {vm} --backup-management-type AzureIaasVM --workload-type VM --retain-until {retain_date} --query name').get_output_in_json()
+        self.cmd('backup job wait -g {rg} -v {vault} -n {job}')
+
+        self.kwargs['rp'] = self.cmd('backup recoverypoint list --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm} -i {vm} --query [0].name').get_output_in_json()
+
+        trigger_restore_job_json = self.cmd('backup restore restore-disks -g {rg} -v {vault} -c {vm} -i {vm} -r {rp} -t {rg} --storage-account {sa} --restore-to-staging-storage-account --restore-only-osdisk', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "InProgress"),
+            self.check("resourceGroup", '{rg}')
+        ]).get_output_in_json()
+        self.kwargs['job'] = trigger_restore_job_json['name']
+        self.cmd('backup job wait -g {rg} -v {vault} -n {job}')
+
+        self.cmd('backup job show -g {rg} -v {vault} -n {job}', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ])
+
+        trigger_restore_job_json = self.cmd('backup restore restore-disks -g {rg} -v {vault} -c {vm} -i {vm} -r {rp} -t {rg} --storage-account {sa} --restore-to-staging-storage-account --diskslist 0', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "InProgress"),
+            self.check("resourceGroup", '{rg}')
+        ]).get_output_in_json()
+        self.kwargs['job2'] = trigger_restore_job_json['name']
+        self.cmd('backup job wait -g {rg} -v {vault} -n {job2}')
+
+        self.cmd('backup job show -g {rg} -v {vault} -n {job2}', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ])

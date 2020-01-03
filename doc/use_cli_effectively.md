@@ -96,14 +96,14 @@ Most update commands in the CLI feature the three generic arguments: `--add`, `-
 
 ## Quoting Issues ##
 
-This becomes an issue because when the command shell (bash, zsh, Windows command prompt, etc) parses the CLI command, it will interpret the quotes. To avoid surprises, here are a few suggestions:
+This becomes an issue because when the command shell (bash, zsh, Windows Command Prompt, PowerShell etc) parses the CLI command, it will interpret the quotes. To avoid surprises, here are a few suggestions:
 
 1. If the value contains whitespace, you must wrap it in quotes.
-2. In bash or Windows PowerShell, both single and double quotes will be intepreted, while in Windows command prompt, only double quotes are handled which means single quotes will be interpreted as a part of the value.
+2. In bash or Windows PowerShell, both single and double quotes will be interpreted, while in Windows Command Prompt, only double quotes are handled which means single quotes will be interpreted as a part of the value.
 3. If your command only runs on bash (or zsh), using single quotes has the benefit of preserving the content inside. This can be very helpful when supplying inline JSON. For example this works in bash: `'{"foo": "bar"}'`
-4. If your command will run on Windows command prompt, you must use double quotes exclusively. If the value contains double quotes, you must escape it: "i like to use \\" a lot". The command prompt equivalent of the above would be: `"{\"foo\": \"bar\"}"`
+4. If your command will run on Windows Command Prompt, you must use double quotes exclusively. If the value contains double quotes, you must escape it: "i like to use \\" a lot". The Command Prompt equivalent of the above would be: `"{\"foo\": \"bar\"}"`
 5. Exported variables in bash inside double quotes will be evaluated. If this is not what you want, again use \\ to escape it like `"\\$var"` or use single quotes `'$var'`.
-6. A few CLI arguments, including the generic update arguments, take a list of space-separated values, like `<key1>=<value1> <key2>=<value2>`. Since the key name and value can take arbitary string which might contain whitespace, using quotes will be necessary. Wrap the pair, not individual key or value. So `"my name"=john` is wrong. Instead, use `"my name=john"`. For example:
+6. A few CLI arguments, including the generic update arguments, take a list of space-separated values, like `<key1>=<value1> <key2>=<value2>`. Since the key name and value can take arbitrary string which might contain whitespace, using quotes will be necessary. Wrap the pair, not individual key or value. So `"my name"=john` is wrong. Instead, use `"my name=john"`. For example:
     ```sh
     az webapp config appsettings set -g my_rg -n my_web --settings "client id=id1" "my name=john"
     ```
@@ -115,6 +115,16 @@ This becomes an issue because when the command shell (bash, zsh, Windows command
     - `--arg foo bar`: OK. Unquoted, space-separated list
     - `--arg "foo" "bar"`: OK: Quoted, space-separated list
     - `--arg "foo bar"`: BAD. This is a string with a space in it, not a space-separated list.
+9. When running Azure CLI commands in PowerShell, parsing errors will occur when the arguments contain special characters of PowerShell, such as at `@`. You can solve this problem by adding `` ` `` before the special character to escape it, or by enclosing the argument with single or double quotes `'`/`"`. For example, `az group deployment create --parameters @parameters.json` dose't work in PowerShell because `@` is parsed as a [splatting symbol](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_splatting). To fix this, you may change the argument to `` `@parameters.json`` or `'@parameters.json'`. 
+10. On Windows, `az` is a batch script (at `C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\wbin\az.cmd`). When there is no space in an argument, PowerShell will strip the quotes and pass the argument to Command Prompt. This causes the argument to be parsed again by Command Prompt. For example, when running `az "a&b"` in PowerShell, `b` is treated as a separate command instead of part of the argument like Command Prompt does, because quotes are removed by PowerShell and the ampersand `&` is parsed again by Command Prompt as a [command separator](https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-xp/bb490954(v=technet.10)#using-multiple-commands-and-conditional-processing-symbols). 
+     
+    To prevent this, you may use [stop-parsing symbol](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_parsing) `--%` between `az` and arguments like `az --% vm create ...`. This can also solve the above-mentioned special character issue and is recommended whenever any issue happens when invoking a batch script from PowerShell.
+     
+    > The stop-parsing symbol (--%), introduced in PowerShell 3.0, directs PowerShell to refrain from interpreting input as PowerShell commands or expressions.
+    >
+    > When it encounters a stop-parsing symbol, PowerShell treats the remaining characters in the line as a literal.
+     
+    This issue is tracked at https://github.com/PowerShell/PowerShell/issues/1995#issuecomment-539822061
 
 ## Generic Resource Commands
   There may be cases where a service you are interested in does not have CLI command coverage. You can use the `az resource create/show/list/delete/update/invoke-action` commands to work with these resources. A few suggestions here:
@@ -180,17 +190,6 @@ foreach ($vm_id in $vm_ids) {
     az vm stop --ids $vm_id
 }
 ```
-
-### Argument parsing issue in PowerShell
-On Windows, `az` is a batch script (at `C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\wbin\az.cmd`). Invoking it with PowerShell may have issues because arguments are parsed twice by both PowerShell and Command Prompt. For example, `az "a&b"` behaves differently in PowerShell and Command Prompt. In PowerShell, `b` is treated as a separate command instead of part of the argument.
-
-To prevent this, you may use [stop-parsing symbol `--%`](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_parsing) between `az` and arguments like `az --% vm create --nsg "" ...`
-
-> The stop-parsing symbol (--%), introduced in PowerShell 3.0, directs PowerShell to refrain from interpreting input as PowerShell commands or expressions.
->
-> When it encounters a stop-parsing symbol, PowerShell treats the remaining characters in the line as a literal.
-
-This issue is tracked at https://github.com/PowerShell/PowerShell/issues/1995#issuecomment-539822061
 
 ### CLI Environment Variables
 

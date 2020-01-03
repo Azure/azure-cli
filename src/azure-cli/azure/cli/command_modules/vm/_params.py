@@ -9,6 +9,7 @@ from argcomplete.completers import FilesCompleter
 from knack.arguments import CLIArgumentType
 
 from azure.cli.core.profiles import ResourceType
+from azure.cli.core.commands.parameters import get_datetime_type
 from azure.cli.core.util import get_default_admin_username
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict)
@@ -21,10 +22,13 @@ from azure.cli.command_modules.vm._completers import (
 from azure.cli.command_modules.vm._validators import (
     validate_nsg_name, validate_vm_nics, validate_vm_nic, validate_vm_disk, validate_vmss_disk,
     validate_asg_names_or_ids, validate_keyvault, _validate_proximity_placement_group,
-    process_gallery_image_version_namespace)
+    process_gallery_image_version_namespace, validate_vm_name_for_monitor_metrics)
 
 from azure.cli.command_modules.vm._vm_utils import MSI_LOCAL_ID
 from azure.cli.command_modules.vm._image_builder import ScriptType
+
+from azure.cli.command_modules.monitor.validators import validate_metric_dimension
+from azure.cli.command_modules.monitor.actions import get_period_type
 
 
 # pylint: disable=too-many-statements, too-many-branches, too-many-locals
@@ -663,8 +667,8 @@ def load_arguments(self, _):
             c.argument('ultra_ssd_enabled', ultra_ssd_enabled_type)
             c.argument('ephemeral_os_disk', arg_type=get_three_state_flag(), min_api='2018-06-01',
                        help='Allows you to create an OS disk directly on the host node, providing local disk performance and faster VM/VMSS reimage time.', is_preview=True)
-            c.argument('os_disk_encryption_set', help='Name or ID of disk encryption set for OS disk.')
-            c.argument('data_disk_encryption_sets', nargs='+',
+            c.argument('os_disk_encryption_set', min_api='2019-07-01', help='Name or ID of disk encryption set for OS disk.')
+            c.argument('data_disk_encryption_sets', nargs='+', min_api='2019-07-01',
                        help='Names or IDs (space delimited) of disk encryption sets for data disks.')
 
         with self.argument_context(scope, arg_group='Network') as c:
@@ -844,6 +848,34 @@ def load_arguments(self, _):
     with self.argument_context('vm monitor log show') as c:
         c.argument('analytics_query', options_list=['--analytics-query', '-q'], help="Query to execute over Log Analytics data.")
         c.argument('timespan', help="Timespan over which to query. Defaults to querying all available data.")
+
+    with self.argument_context('vm monitor metrics') as c:
+        c.argument('metricnamespace', options_list=['--namespace'],
+                   help='Namespace to query metric definitions for.')
+
+    with self.argument_context('vm monitor metrics tail') as c:
+        from azure.mgmt.monitor.models import AggregationType
+        c.extra('resource_group_name', required=True)
+        c.argument('resource', arg_type=existing_vm_name, help='Name or ID of a virtual machine', validator=validate_vm_name_for_monitor_metrics, id_part=None)
+        c.argument('metadata', action='store_true')
+        c.argument('dimension', nargs='*', validator=validate_metric_dimension)
+        c.argument('aggregation', arg_type=get_enum_type(t for t in AggregationType if t.name != 'none'), nargs='*')
+        c.argument('metrics', nargs='*')
+        c.argument('orderby',
+                   help='Aggregation to use for sorting results and the direction of the sort. Only one order can be specificed. Examples: sum asc')
+        c.argument('top', help='Max number of records to retrieve. Valid only if --filter used.')
+        c.argument('filters', options_list=['--filter'])
+        c.argument('metric_namespace', options_list=['--namespace'])
+
+    with self.argument_context('vm monitor metrics tail', arg_group='Time') as c:
+        c.argument('start_time', arg_type=get_datetime_type(help='Start time of the query.'))
+        c.argument('end_time', arg_type=get_datetime_type(help='End time of the query. Defaults to the current time.'))
+        c.argument('offset', type=get_period_type(as_timedelta=True))
+        c.argument('interval', arg_group='Time', type=get_period_type())
+
+    with self.argument_context('vm monitor metrics list-definitions') as c:
+        c.extra('resource_group_name', required=True)
+        c.argument('resource_uri', arg_type=existing_vm_name, help='Name or ID of a virtual machine', validator=validate_vm_name_for_monitor_metrics, id_part=None)
     # endregion
 
     # region disk encryption set

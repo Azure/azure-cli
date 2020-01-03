@@ -80,6 +80,15 @@ examples:
         --encryption-key-version 00000000000000000000000000000000 \\
         --encryption-vault-uri https://MyKeyVault.vault.azure.net \\
         --assign-identity MyMSI
+  - name: Create a kafka cluster with kafka rest proxy.
+    text: |-
+        az hdinsight create -t kafka -g MyResourceGroup -n MyCluster \\
+        -p "HttpPassword1234!" --workernode-data-disks-per-node 2 \\
+        --storage-account MyStorageAccount \\
+        --kafka-management-node-size "Standard_D4_v2" \\
+        --kafka-client-group-id MySecurityGroupId \\
+        --kafka-client-group-name MySecurityGroupName
+        --component-version kafka=2.1
   - name: Create a cluster with Azure Data Lake Storage Gen2
     text: |-
         az hdinsight create -t spark -g MyResourceGroup -n MyCluster \\

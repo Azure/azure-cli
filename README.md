@@ -103,7 +103,7 @@ To provide feedback from the command line, try the `az feedback` command.
 ### Docker
 
 We maintain a Docker image preconfigured with the Azure CLI.
-See our [Docker tags](https://hub.docker.com/r/microsoft/azure-cli/tags/) for available versions.
+See our [Docker tags](https://mcr.microsoft.com/v2/azure-cli/tags/list) for available versions.
 
 ```bash
 $ docker run -u $(id -u):$(id -g) -v ${HOME}:/home/az -e HOME=/home/az --rm -it mcr.microsoft.com/azure-cli:<version>

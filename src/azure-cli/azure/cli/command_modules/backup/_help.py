@@ -278,6 +278,14 @@ examples:
     text: az backup protection enable-for-azurefileshare --policy-name MyPolicy --resource-group MyResourceGroup --vault-name MyVault --storage-account MyStorageAccount --azure-file-share MyAzureFileShare
 """
 
+helps['backup protection undelete'] = """
+type: command
+short-summary: Rehydrate an item from softdeleted state to stop protection with retained data state.
+examples:
+  - name: Rehydrate an item from softdeleted state to stop protection with retained data state.
+    text: az backup protection undelete --container-name MyContainer --item-name MyItem --resource-group MyResourceGroup --vault-name MyVault --backup-management-type AzureIaasVM --workload-type VM
+"""
+
 helps['backup protection enable-for-azurewl'] = """
 type: command
 short-summary: Start protecting a previously unprotected workload within an Azure VM as per the specified policy to a Recovery services vault. Provide the workload details as a protectable item.
@@ -308,6 +316,14 @@ short-summary: Resume backup for the associated backup item. Use this to change 
 examples:
   - name: Resume backup for the associated backup item. Use this to change the policy associated with the backup item.
     text: az backup protection resume --vault-name MyVault --resource-group MyResourceGroup --container-name MyContainer --item-name MyItem --policy-name MyPolicy
+"""
+
+helps['backup protection update-for-vm'] = """
+type: command
+short-summary: Update disk exclusion settings associated with a backed up VM item.
+examples:
+  - name: Update disk exclusion settings associated with a backed up VM item.
+    text: az backup protection update-for-vm --vault-name MyVault --resource-group MyResourceGroup --container-name MyContainer --item-name MyItem --disk-list-setting exclude --diskslist 1
 """
 
 helps['backup recoveryconfig'] = """

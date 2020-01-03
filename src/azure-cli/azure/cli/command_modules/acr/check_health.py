@@ -23,7 +23,7 @@ IMAGE = "mcr.microsoft.com/mcr/hello-world:latest"
 FAQ_MESSAGE = "\nPlease refer to https://aka.ms/acr/health-check for more information."
 ERROR_MSG_DEEP_LINK = "\nPlease refer to https://aka.ms/acr/errors#{} for more information."
 MIN_HELM_VERSION = "2.11.0"
-HELM_VERSION_REGEX = re.compile(r'SemVer:"v([.\d]+)"', re.I)
+HELM_VERSION_REGEX = re.compile(r'(SemVer|Version):"v([.\d]+)"')
 ACR_CHECK_HEALTH_MSG = "Try running 'az acr check-health -n {} --yes' to diagnose this issue."
 
 
@@ -156,7 +156,7 @@ def _get_helm_version(ignore_errors):
     # Retrieve the helm version if regex pattern is found
     match_obj = HELM_VERSION_REGEX.search(output)
     if match_obj:
-        output = match_obj.group(1)
+        output = match_obj.group(2)
 
     print("Helm version: {}".format(output), file=sys.stderr)
 

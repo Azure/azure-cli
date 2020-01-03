@@ -20,7 +20,7 @@ from ._validators import (validate_appservice_name_or_id,
                           validate_export, validate_import,
                           validate_import_depth, validate_query_fields,
                           validate_feature_query_fields, validate_filter_parameters,
-                          validate_separator)
+                          validate_separator, validate_secret_identifier)
 
 
 def load_arguments(self, _):
@@ -83,7 +83,7 @@ def load_arguments(self, _):
 
     with self.argument_context('appconfig kv import', arg_group='File') as c:
         c.argument('path', help='Local configuration file path. Required for file arguments.')
-        c.argument('format_', options_list=['--format'], arg_type=get_enum_type(['json', 'yaml', 'properties']), help='Imported file format. Required for file arguments. Currently, feature flags are only supported in json format.')
+        c.argument('format_', options_list=['--format'], arg_type=get_enum_type(['json', 'yaml', 'properties']), help='Imported file format. Required for file arguments. Currently, feature flags are not supported in properties format.')
         c.argument('depth', validator=validate_import_depth, help="Depth for flattening the json or yaml file to key-value pairs. Flatten to the deepest level by default. Not applicable for property files or feature flags.")
         # bypass cli allowed values limition
         c.argument('separator', validator=validate_separator, help="Delimiter for flattening the json or yaml file to key-value pairs. Required for importing hierarchical structure. Separator will be ignored for property files and feature flags. Supported values: '.', ',', ';', '-', '_', '__', '/', ':' ")
@@ -107,10 +107,11 @@ def load_arguments(self, _):
 
     with self.argument_context('appconfig kv export', arg_group='File') as c:
         c.argument('path', help='Local configuration file path. Required for file arguments.')
-        c.argument('format_', options_list=['--format'], arg_type=get_enum_type(['json', 'yaml', 'properties']), help='File format exporting to. Required for file arguments. Currently, feature flags are only supported in json format.')
+        c.argument('format_', options_list=['--format'], arg_type=get_enum_type(['json', 'yaml', 'properties']), help='File format exporting to. Required for file arguments. Currently, feature flags are not supported in properties format.')
         c.argument('depth', validator=validate_import_depth, help="Depth for flattening the json or yaml file to key-value pairs. Flatten to the deepest level by default. Not appicable for property files or feature flags.")
         # bypass cli allowed values limition
         c.argument('separator', validator=validate_separator, help="Delimiter for flattening the json or yaml file to key-value pairs. Required for importing hierarchical structure. Separator will be ignored for property files and feature flags. Supported values: '.', ',', ';', '-', '_', '__', '/', ':' ")
+        c.argument('naming_convention', arg_type=get_enum_type(['pascal', 'camel', 'underscore', 'hyphen']), help='Naming convention to be used for "Feature Management" section of file. Example: pascal = FeatureManagement, camel = featureManagement, underscore = feature_management, hyphen = feature-management.')
 
     with self.argument_context('appconfig kv export', arg_group='AppConfig') as c:
         c.argument('dest_name', help='The name of the destination App Configuration.')
@@ -126,6 +127,12 @@ def load_arguments(self, _):
         c.argument('tags', arg_type=tags_type)
         c.argument('content_type', help='Content type of the keyvalue to be set.')
         c.argument('value', help='Value of the keyvalue to be set.')
+
+    with self.argument_context('appconfig kv set-keyvault') as c:
+        c.argument('key', help='Key to be set.')
+        c.argument('label', help="If no label specified, set the key with null label by default")
+        c.argument('tags', arg_type=tags_type)
+        c.argument('secret_identifier', validator=validate_secret_identifier, help="ID of the Key Vault object. Can be found using 'az keyvault {collection} show' command, where collection is key, secret or certificate. To set reference to the latest version of your secret, remove version information from secret identifier.")
 
     with self.argument_context('appconfig kv delete') as c:
         c.argument('key', help='Support star sign as filters, for instance * means all key and abc* means keys with abc as prefix. Similarly, *abc and *abc* are also supported.')

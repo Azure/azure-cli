@@ -138,6 +138,16 @@ examples:
     text: az appconfig kv set --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --key color --value red --tags key1=value1 key2=value2
 """
 
+helps['appconfig kv set-keyvault'] = """
+type: command
+short-summary: Set a keyvault reference.
+examples:
+  - name: Set a keyvault reference with label MyLabel.
+    text: az appconfig kv set-keyvault -n MyAppConfiguration --key HostSecret --label MyLabel --secret-identifier https://contoso.vault.azure.net/Secrets/DummySecret/Dummyversion
+  - name: Set a keyvault reference with null label and multiple tags using connection string.
+    text: az appconfig kv set-keyvault --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --key HostSecret --secret-identifier https://contoso.vault.azure.net/Secrets/DummySecret --tags tag1=value1 tag2=value2
+"""
+
 helps['appconfig kv show'] = """
 type: command
 short-summary: Show all attributes of a key-value.
