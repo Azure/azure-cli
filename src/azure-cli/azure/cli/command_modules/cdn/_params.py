@@ -96,7 +96,7 @@ def load_arguments(self, _):
         c.argument('negate_condition', arg_type=get_three_state_flag(), options_list='--negate-condition',
                    help='If true, negates the condition')
         c.argument('action_name', help='Name of the action.')
-        c.argument('cache_behavior', arg_type=get_enum_type(['BypassCache', 'Override', 'SetIfMissing']), 
+        c.argument('cache_behavior', arg_type=get_enum_type(['BypassCache', 'Override', 'SetIfMissing']),
                    help='Caching behavior for the requests.')
         c.argument('cache_duration', help='The duration for which the content needs to be cached. \
                    Allowed format is [d.]hh:mm:ss.')
@@ -105,7 +105,7 @@ def load_arguments(self, _):
         c.argument('header_name', help='Name of the header to modify.')
         c.argument('header_value', help='Value of the header.')
         c.argument('redirect_type',
-                   arg_type=get_enum_type(['Moved', 'Found', 'TemporaryRedirect', 'PermanentRedirect'],
+                   arg_type=get_enum_type(['Moved', 'Found', 'TemporaryRedirect', 'PermanentRedirect']),
                    help='The redirect type the rule will use when redirecting traffic.')
         c.argument('redirect_protocol', arg_type=get_enum_type(['MatchRequest', 'Http', 'Https']),
                    help='Protocol to use for the redirect. Possible values are MatchRequest, Http, Https.')
@@ -123,8 +123,8 @@ def load_arguments(self, _):
                    requests that may be rewritten.')
         c.argument('destination', help='The destination path to be used in the rewrite.')
         c.argument('preserve_unmatched_path', arg_type=get_three_state_flag(), options_list='--preserve-unmatched-path',
-                   help='If True, the remaining path after the source pattern '
-                        'will be appended to the new destination path.')
+                   help='If True, the remaining path after the source \
+                   pattern will be appended to the new destination path.')
         c.argument('index', help='The index of the condition/action')
 
     with self.argument_context('cdn endpoint create') as c:
