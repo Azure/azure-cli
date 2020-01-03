@@ -2025,6 +2025,12 @@ def rest_call(cmd, method, uri, headers=None, uri_parameters=None,
             print(r.text)
 
 
+def show_version(cmd):
+    from azure.cli.core.util import get_az_version_json
+    versions = get_az_version_json()
+    return versions
+
+
 class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
     def __init__(self, cli_ctx,
                  resource_group_name=None, resource_provider_namespace=None,
