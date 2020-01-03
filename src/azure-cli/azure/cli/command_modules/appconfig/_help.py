@@ -97,11 +97,11 @@ examples:
   - name: Import all keys with label test and apply test2 label excluding feature flags from an App Configuration.
     text: az appconfig kv import -n MyAppConfiguration -s appconfig --src-label test --label test2 --src-name AnotherAppConfiguration --skip-features
   - name: Import all keys and feature flags with all labels to another App Configuration.
-    text: az appconfig kv import -n MyAppConfiguration -s appconfig --src-name AnotherAppConfiguration --key * --src-label * --preserve-labels
+    text: az appconfig kv import -n MyAppConfiguration -s appconfig --src-name AnotherAppConfiguration --src-key * --src-label * --preserve-labels
   - name: Import all keys and feature flags with all labels to another App Configuration and overwrite labels.
-    text: az appconfig kv import -n MyAppConfiguration -s appconfig --src-name AnotherAppConfiguration --key * --src-label * --label ImportedKeys
+    text: az appconfig kv import -n MyAppConfiguration -s appconfig --src-name AnotherAppConfiguration --src-key * --src-label * --label ImportedKeys
   - name: Import all keys and feature flags with all labels to another App Configuration and assign null label.
-    text: az appconfig kv import -n MyAppConfiguration -s appconfig --src-name AnotherAppConfiguration --key * --src-label *
+    text: az appconfig kv import -n MyAppConfiguration -s appconfig --src-name AnotherAppConfiguration --src-key * --src-label *
 """
 
 helps['appconfig kv list'] = """
