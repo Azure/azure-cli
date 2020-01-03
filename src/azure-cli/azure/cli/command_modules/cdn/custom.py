@@ -94,9 +94,6 @@ def update_endpoint(instance,
 # pylint: disable=too-many-return-statements
 def create_condition(match_variable=None, operator=None, match_values=None,
                      selector=None, negate_condition=None, transform=None):
-    transforms = []
-    if transform is not None:
-        transforms = [transform]
 
     if match_variable == 'RemoteAddress':
         return DeliveryRuleRemoteAddressCondition(
@@ -104,7 +101,7 @@ def create_condition(match_variable=None, operator=None, match_values=None,
                 operator=operator,
                 match_values=match_values.split(","),
                 negate_condition=negate_condition,
-                transforms=transforms
+                transforms=transform
             ))
     if match_variable == 'RequestMethod':
         return DeliveryRuleRequestMethodCondition(
@@ -118,7 +115,7 @@ def create_condition(match_variable=None, operator=None, match_values=None,
                 operator=operator,
                 match_values=match_values.split(","),
                 negate_condition=negate_condition,
-                transforms=transforms
+                transforms=transform
             ))
     if match_variable == 'PostArgs':
         return DeliveryRulePostArgsCondition(
@@ -127,7 +124,7 @@ def create_condition(match_variable=None, operator=None, match_values=None,
                 selector=selector,
                 match_values=match_values.split(","),
                 negate_condition=negate_condition,
-                transforms=transforms
+                transforms=transform
             ))
     if match_variable == 'RequestHeader':
         return DeliveryRuleRequestHeaderCondition(
@@ -136,7 +133,7 @@ def create_condition(match_variable=None, operator=None, match_values=None,
                 selector=selector,
                 match_values=match_values.split(","),
                 negate_condition=negate_condition,
-                transforms=transforms
+                transforms=transform
             ))
     if match_variable == 'RequestUri':
         return DeliveryRuleRequestUriCondition(
@@ -144,7 +141,7 @@ def create_condition(match_variable=None, operator=None, match_values=None,
                 operator=operator,
                 match_values=match_values.split(","),
                 negate_condition=negate_condition,
-                transforms=transforms
+                transforms=transform
             ))
     if match_variable == 'RequestBody':
         return DeliveryRuleRequestBodyCondition(
@@ -152,7 +149,7 @@ def create_condition(match_variable=None, operator=None, match_values=None,
                 operator=operator,
                 match_values=match_values.split(","),
                 negate_condition=negate_condition,
-                transforms=transforms
+                transforms=transform
             ))
     if match_variable == 'RequestScheme':
         return DeliveryRuleRequestSchemeCondition(
@@ -166,7 +163,7 @@ def create_condition(match_variable=None, operator=None, match_values=None,
                 operator=operator,
                 match_values=match_values.split(","),
                 negate_condition=negate_condition,
-                transforms=transforms
+                transforms=transform
             ))
     if match_variable == 'UrlFileExtension':
         return DeliveryRuleUrlFileExtensionCondition(
@@ -174,7 +171,7 @@ def create_condition(match_variable=None, operator=None, match_values=None,
                 operator=operator,
                 match_values=match_values.split(","),
                 negate_condition=negate_condition,
-                transforms=transforms
+                transforms=transform
             ))
     if match_variable == 'UrlFileName':
         return DeliveryRuleUrlFileNameCondition(
@@ -182,7 +179,7 @@ def create_condition(match_variable=None, operator=None, match_values=None,
                 operator=operator,
                 match_values=match_values.split(","),
                 negate_condition=negate_condition,
-                transforms=transforms
+                transforms=transform
             ))
     if match_variable == 'HttpVersion':
         return DeliveryRuleHttpVersionCondition(
@@ -203,7 +200,7 @@ def create_condition(match_variable=None, operator=None, match_values=None,
                 selector=selector,
                 match_values=match_values.split(","),
                 negate_condition=negate_condition,
-                transforms=transforms
+                transforms=transform
             ))
     return None
 
@@ -261,14 +258,16 @@ def create_action(action_name, cache_behavior=None, cache_duration=None, header_
 
 
 # pylint: disable=too-many-locals
-def add_rule(instance, order, rule_name, action_name, match_variable=None, operator=None,
+def add_rule(client, resource_group_name, profile_name, name,
+             order, rule_name, action_name, match_variable=None, operator=None,
              match_values=None, selector=None, negate_condition=None, transform=None,
              cache_behavior=None, cache_duration=None, header_action=None,
              header_name=None, header_value=None, query_string_behavior=None, query_parameters=None,
              redirect_type=None, redirect_protocol=None, custom_hostname=None, custom_path=None,
              custom_querystring=None, custom_fragment=None, source_pattern=None,
              destination=None, preserve_unmatched_path=None):
-    policy = instance.delivery_policy
+    endpoint = client.endpoints.get(resource_group_name, profile_name, name)
+    policy = endpoint.delivery_policy
     if policy is None:
         policy = EndpointPropertiesUpdateParametersDeliveryPolicy(
             description='delivery_policy',
@@ -298,16 +297,15 @@ def add_rule(instance, order, rule_name, action_name, match_variable=None, opera
         delivery_policy=policy
     )
 
-    _update_mapper(instance, params, [
-        'delivery_policy'
-    ])
-    return params
+    return client.endpoints.update(resource_group_name, profile_name, name, params)
 
 
-def add_condition(instance, rule_name, match_variable, operator, match_values=None, selector=None,
+def add_condition(client, resource_group_name, profile_name, name,
+                  rule_name, match_variable, operator, match_values=None, selector=None,
                   negate_condition=None, transform=None):
 
-    policy = instance.delivery_policy
+    endpoint = client.endpoints.get(resource_group_name, profile_name, name)
+    policy = endpoint.delivery_policy
     condition = create_condition(match_variable, operator, match_values, selector, negate_condition, transform)
     for i in range(0, len(policy.rules)):
         if policy.rules[i].name == rule_name:
@@ -316,19 +314,19 @@ def add_condition(instance, rule_name, match_variable, operator, match_values=No
     params = EndpointUpdateParameters(
         delivery_policy=policy
     )
-    _update_mapper(instance, params, [
-        'delivery_policy'
-    ])
-    return params
+
+    return client.endpoints.update(resource_group_name, profile_name, name, params)
 
 
-def add_action(instance, rule_name, action_name, cache_behavior=None, cache_duration=None,
+def add_action(client, resource_group_name, profile_name, name,
+               rule_name, action_name, cache_behavior=None, cache_duration=None,
                header_action=None, header_name=None, header_value=None, query_string_behavior=None,
                query_parameters=None, redirect_type=None, redirect_protocol=None, custom_hostname=None,
                custom_path=None, custom_querystring=None, custom_fragment=None, source_pattern=None,
                destination=None, preserve_unmatched_path=None):
 
-    policy = instance.delivery_policy
+    endpoint = client.endpoints.get(resource_group_name, profile_name, name)
+    policy = endpoint.delivery_policy
     action = create_action(action_name, cache_behavior, cache_duration, header_action, header_name,
                            header_value, query_string_behavior, query_parameters, redirect_type,
                            redirect_protocol, custom_hostname, custom_path, custom_querystring,
@@ -340,15 +338,14 @@ def add_action(instance, rule_name, action_name, cache_behavior=None, cache_dura
     params = EndpointUpdateParameters(
         delivery_policy=policy
     )
-    _update_mapper(instance, params, [
-        'delivery_policy'
-    ])
-    return params
+
+    return client.endpoints.update(resource_group_name, profile_name, name, params)
 
 
-def remove_rule(instance, rule_name):
+def remove_rule(client, resource_group_name, profile_name, name, rule_name):
 
-    policy = instance.delivery_policy
+    endpoint = client.endpoints.get(resource_group_name, profile_name, name)
+    policy = endpoint.delivery_policy
     if policy is not None:
         for rule in policy.rules:
             if rule.name == rule_name:
@@ -358,15 +355,13 @@ def remove_rule(instance, rule_name):
         delivery_policy=policy
     )
 
-    _update_mapper(instance, params, [
-        'delivery_policy'
-    ])
-    return params
+    return client.endpoints.update(resource_group_name, profile_name, name, params)
 
 
-def remove_condition(instance, rule_name, index):
+def remove_condition(client, resource_group_name, profile_name, name, rule_name, index):
 
-    policy = instance.delivery_policy
+    endpoint = client.endpoints.get(resource_group_name, profile_name, name)
+    policy = endpoint.delivery_policy
     if policy is not None:
         for i in range(0, len(policy.rules)):
             if policy.rules[i].name == rule_name:
@@ -376,15 +371,13 @@ def remove_condition(instance, rule_name, index):
         delivery_policy=policy
     )
 
-    _update_mapper(instance, params, [
-        'delivery_policy'
-    ])
-    return params
+    return client.endpoints.update(resource_group_name, profile_name, name, params)
 
 
-def remove_action(instance, rule_name, index):
+def remove_action(client, resource_group_name, profile_name, name, rule_name, index):
 
-    policy = instance.delivery_policy
+    endpoint = client.endpoints.get(resource_group_name, profile_name, name)
+    policy = endpoint.delivery_policy
     if policy is not None:
         for i in range(0, len(policy.rules)):
             if policy.rules[i].name == rule_name:
@@ -394,10 +387,7 @@ def remove_action(instance, rule_name, index):
         delivery_policy=policy
     )
 
-    _update_mapper(instance, params, [
-        'delivery_policy'
-    ])
-    return params
+    return client.endpoints.update(resource_group_name, profile_name, name, params)
 
 
 def create_endpoint(client, resource_group_name, profile_name, name, origins, location=None,

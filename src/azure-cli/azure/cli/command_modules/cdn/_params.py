@@ -91,7 +91,7 @@ def load_arguments(self, _):
         c.argument('operator', help='Operator of the match condition.')
         c.argument('selector', help='Selector of the match condition.')
         c.argument('match_values', help='Match values of the match condition (comma separated).')
-        c.argument('transform', arg_type=get_enum_type(['Lowercase', 'Uppercase']),
+        c.argument('transform', arg_type=get_enum_type(['Lowercase', 'Uppercase']), nargs='*',
                    help='Transform to apply before matching.')
         c.argument('negate_condition', arg_type=get_three_state_flag(), options_list='--negate-condition',
                    help='If true, negates the condition')
@@ -108,7 +108,7 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(['Moved', 'Found', 'TemporaryRedirect', 'PermanentRedirect']),
                    help='The redirect type the rule will use when redirecting traffic.')
         c.argument('redirect_protocol', arg_type=get_enum_type(['MatchRequest', 'Http', 'Https']),
-                   help='Protocol to use for the redirect. Possible values are MatchRequest, Http, Https.')
+                   help='Protocol to use for the redirect.')
         c.argument('custom_hostname', help='Host to redirect. \
                    Leave empty to use the incoming host as the destination host.')
         c.argument('custom_path', help='The full path to redirect. Path cannot be empty and must start with /. \
