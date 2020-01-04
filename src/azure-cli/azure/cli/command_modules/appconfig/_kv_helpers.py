@@ -28,6 +28,8 @@ from._featuremodels import (map_keyvalue_to_featureflag,
 logger = get_logger(__name__)
 FEATURE_FLAG_PREFIX = ".appconfig.featureflag/"
 FEATURE_FLAG_CONTENT_TYPE = "application/vnd.microsoft.appconfig.ff+json;charset=utf-8"
+KEYVAULT_CONTENT_TYPE = "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
+APPSVC_KEYVAULT_PREFIX = "@Microsoft.KeyVault"
 FEATURE_MANAGEMENT_KEYWORDS = ["FeatureManagement", "featureManagement", "feature_management", "feature-management"]
 ENABLED_FOR_KEYWORDS = ["EnabledFor", "enabledFor", "enabled_for", "enabled-for"]
 
@@ -269,14 +271,44 @@ def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add=""):
             cmd, resource_group_name=appservice_account["resource_group"], name=appservice_account["name"], slot=None)
         for item in settings:
             key = prefix_to_add + item['name']
-            value = item['value']
             tags = {'AppService:SlotSetting': str(item['slotSetting']).lower()} if item['slotSetting'] else {}
+            value = item['value']
+
+            # Value will look like one of the following if it is a KeyVault reference:
+            # @Microsoft.KeyVault(SecretUri=https://myvault.vault.azure.net/secrets/mysecret/ec96f02080254f109c51a1f14cdb1931)
+            # @Microsoft.KeyVault(VaultName=myvault;SecretName=mysecret;SecretVersion=ec96f02080254f109c51a1f14cdb1931)
+            if value and value.lower().startswith(APPSVC_KEYVAULT_PREFIX.lower()):
+                try:
+                    appsvc_value_dict = dict(x.split('=') for x in value[len(APPSVC_KEYVAULT_PREFIX) + 1: -1].split(';'))
+                    appsvc_value_dict_lower = {k.lower(): v for k, v in appsvc_value_dict.items()}
+                    secret_identifier = appsvc_value_dict_lower.get('secreturi')
+                    if not secret_identifier:
+                        # Construct secreturi
+                        vault_name = appsvc_value_dict_lower.get('vaultname')
+                        secret_name = appsvc_value_dict_lower.get('secretname')
+                        secret_version = appsvc_value_dict_lower.get('secretversion')
+                        secret_identifier = "https://{0}.vault.azure.net/secrets/{1}/{2}".format(vault_name, secret_name, secret_version)
+                    try:
+                        from azure.keyvault.key_vault_id import KeyVaultIdentifier
+                        # this throws an exception for invalid format of secret identifier
+                        KeyVaultIdentifier(uri=secret_identifier)
+                        appconfig_value = json.dumps({"uri": secret_identifier}, ensure_ascii=False, separators=(',', ':'))
+                        content_type = KEYVAULT_CONTENT_TYPE
+                        kv = KeyValue(key=key, value=appconfig_value, tags=tags, content_type=content_type)
+                        key_values.append(kv)
+                        continue
+                    except (TypeError, ValueError) as e:
+                        logger.debug(
+                            'Exception while validating the format of KeyVault identifier. Key "%s" with value "%s" will be treated like a regular key-value.\n%s', key, value, str(e))
+                except (AttributeError, TypeError, ValueError) as e:
+                    logger.debug(
+                        'Key "%s" with value "%s" is not a well-formatted KeyVault reference. It will be treated like a regular key-value.\n%s', key, value, str(e))
+
             kv = KeyValue(key=key, value=value, tags=tags)
             key_values.append(kv)
         return key_values
     except Exception as exception:
-        raise CLIError(
-            "Fail to read key-values from appservice." + str(exception))
+        raise CLIError("Failed to read key-values from appservice." + str(exception))
 
 
 def __write_kv_to_app_service(cmd, key_values, appservice_account):
@@ -286,6 +318,16 @@ def __write_kv_to_app_service(cmd, key_values, appservice_account):
         for kv in key_values:
             name = kv.key
             value = kv.value
+            # If its a KeyVault ref, convert the format to AppService KeyVault ref format
+            if kv.content_type and kv.content_type.lower() == KEYVAULT_CONTENT_TYPE:
+                from azure.cli.core.util import shell_safe_json_parse
+                secret_uri = shell_safe_json_parse(value).get("uri")
+                if secret_uri:
+                    value = APPSVC_KEYVAULT_PREFIX + '(SecretUri={0})'.format(secret_uri)
+                else:
+                    logger.debug(
+                        'Key "%s" with value "%s" is not a well-formatted KeyVault reference. It will be treated like a regular key-value.', name, value)
+
             if 'AppService:SlotSetting' in kv.tags and kv.tags['AppService:SlotSetting'] == 'true':
                 slot_settings.append(name + '=' + value)
             else:
@@ -295,8 +337,7 @@ def __write_kv_to_app_service(cmd, key_values, appservice_account):
         update_app_settings(cmd, resource_group_name=appservice_account["resource_group"],
                             name=appservice_account["name"], settings=non_slot_settings, slot_settings=slot_settings)
     except Exception as exception:
-        raise CLIError(
-            "Fail to write key-values to appservice: " + str(exception))
+        raise CLIError("Failed to write key-values to appservice: " + str(exception))
 
 
 # Helper functions

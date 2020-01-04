@@ -36,7 +36,7 @@ def resolve_resource_group(cmd, config_store_name):
     config_store_client = cf_configstore(cmd.cli_ctx)
     all_stores = config_store_client.list()
     for store in all_stores:
-        if store.name == config_store_name:
+        if store.name.lower() == config_store_name.lower():
             # Id has a fixed structure /subscriptions/subscriptionName/resourceGroups/groupName/providers/providerName/configurationStores/storeName"
             return store.id.split('/')[4], store.endpoint
     raise CLIError(
@@ -99,3 +99,10 @@ def is_valid_connection_string(connection_string):
             return False
         return True
     return False
+
+
+def get_store_name_from_connection_string(connection_string):
+    if is_valid_connection_string(connection_string):
+        segments = connection_string.split(';')
+        return segments[0].split('//')[1].split('.')[0]
+    return None

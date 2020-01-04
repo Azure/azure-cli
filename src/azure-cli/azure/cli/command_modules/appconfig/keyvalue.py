@@ -300,7 +300,7 @@ def set_keyvault(cmd,
     connection_string = resolve_connection_string(cmd, name, connection_string)
     azconfig_client = AzconfigClient(connection_string)
 
-    keyvault_ref_value = json.dumps({"uri": secret_identifier}, ensure_ascii=False)
+    keyvault_ref_value = json.dumps({"uri": secret_identifier}, ensure_ascii=False, separators=(',', ':'))
     retry_times = 3
     retry_interval = 1
 
