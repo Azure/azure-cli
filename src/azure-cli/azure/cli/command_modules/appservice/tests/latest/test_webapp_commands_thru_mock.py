@@ -73,11 +73,12 @@ class TestWebappMocked(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     def test_set_domain_name(self, client_factory_mock):
-        client_factory_mock.return_value = self.client
+        client = mock.Mock()
+        client_factory_mock.return_value = client
         # set up the return value for getting a webapp
         webapp = Site(location='westus')
         webapp.name = 'veryNiceWebApp'
-        self.client.web_apps.get = lambda _, _1: webapp
+        client.web_apps.get.return_value = webapp
 
         # set up the result value of putting a domain name
         domain = 'veryNiceDomain'
@@ -85,10 +86,7 @@ class TestWebappMocked(unittest.TestCase):
                                   domain_id=domain,
                                   custom_host_name_dns_record_type='A',
                                   host_name_type='Managed')
-        self.client.web_apps._client = mock.MagicMock()
-        self.client.web_apps._client.send.return_value = FakedResponse(200)
-        self.client.web_apps._deserialize = mock.MagicMock()
-        self.client.web_apps._deserialize.return_value = binding
+        client.web_apps.create_or_update_host_name_binding.return_value = binding
         # action
         result = add_hostname(mock.MagicMock(), 'g1', webapp.name, domain)
 
