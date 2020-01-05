@@ -31,7 +31,7 @@ Release History
 
 **SQL**
 
-* New commands `sql db sensitivity-labels show/list/list-recommended/update/delete/enable-recommendation/disable-recommendation` to manage sensitivity labels for SQL databases.
+* New commands `sql db sensitivity-classification show/list/update/delete` and `sql db sensitivity-classification recommendation list/enable/disable` to manage sensitivity classifications for SQL databases.
 
 2.0.78
 ++++++

@@ -1423,10 +1423,10 @@ def load_arguments(self, _):
         c.argument('allow_data_loss',
                    arg_type=allow_data_loss_param_type)
 
-    ###############################################
-    #             sql sensitivity labels          #
-    ###############################################
-    with self.argument_context('sql db sensitivity-labels update') as c:
+    ###################################################
+    #             sql sensitivity classification      #
+    ###################################################
+    with self.argument_context('sql db sensitivity-classification update') as c:
         c.argument('schema_name',
                    required=True,
                    help='The name of the schema.')
@@ -1447,7 +1447,7 @@ def load_arguments(self, _):
                    required=True,
                    help='The label name')
 
-    with self.argument_context('sql db sensitivity-labels list-recommended') as c:
+    with self.argument_context('sql db sensitivity-classification recommendation list') as c:
         c.argument('skip-token',
                    required=True,
                    help='The name of the schema.')

@@ -826,64 +826,68 @@ examples:
     text: az sql virtual-cluster show -g mygroup -n mycluster
 """
 
-helps['sql db sensitivity-labels'] = """
+helps['sql db sensitivity-classification'] = """
 type: group
-short-summary: Manage sensitivity labels.
+short-summary: Manage sensitivity classifications.
 """
 
-helps['sql db sensitivity-labels update'] = """
+helps['sql db sensitivity-classification update'] = """
 type: command
-short-summary: Update a columns's sensitivity label.
-long-summary: At least one of information-type or label-name must be provided.
+short-summary: Update a columns's sensitivity classification.
 examples:
-  - name: Update sensitivity label for a given column.
-    text: az sql db sensitivity-labels update -g mygroup -s myserver -n mydb --schema-name dbo --table-name mytable --column-name mycolumn --information-type Name --label-name "Confidential - GDPR"
+  - name: Update sensitivity classification for a given column.
+    text: az sql db sensitivity-classification update -g mygroup -s myserver -n mydb --schema-name dbo --table-name mytable --column-name mycolumn --information-type Name --label-name "Confidential - GDPR"
 """
 
-helps['sql db sensitivity-labels list'] = """
+helps['sql db sensitivity-classification list'] = """
 type: command
-short-summary: Get the sensitivity labels of a given database.
+short-summary: Get the sensitivity classifications of a given database.
 examples:
-  - name: Get the sensitivity labels of a given database.
-    text: az sql db sensitivity-labels list -g mygroup -s myserver -n mydb
+  - name: List the sensitivity classification of a given database.
+    text: az sql db sensitivity-classification list -g mygroup -s myserver -n mydb
 """
 
-helps['sql db sensitivity-labels list-recommended'] = """
+helps['sql db sensitivity-classification show'] = """
 type: command
-short-summary: Get the recommended sensitivity labels of a given database.
+short-summary: Get the sensitivity classification of a given column.
 examples:
-  - name: Get the recommended sensitivity labels of a given database.
-    text: az sql db sensitivity-labels list-recommended -g mygroup -s myserver -n mydb
+  - name: Get the sensitivity classification of a given column.
+    text: az sql db sensitivity-classification show -g mygroup -s myserver -n mydb --schema-name dbo --table-name mytable --column-name mycolumn --sensitivity-label-source current
 """
 
-helps['sql db sensitivity-labels show'] = """
+helps['sql db sensitivity-classification delete'] = """
 type: command
-short-summary: Get the sensitivity label of a given column.
+short-summary: Delete the sensitivity classification of a given column.
 examples:
-  - name: Get the sensitivity label of a given column.
-    text: az sql db sensitivity-labels show -g mygroup -s myserver -n mydb --schema-name dbo --table-name mytable --column-name mycolumn --sensitivity-label-source current
+  - name: Delete the sensitivity classification of a given column.
+    text: az sql db sensitivity-classification delete -g mygroup -s myserver -n mydb --schema-name dbo --table-name mytable --column-name mycolumn
 """
 
-helps['sql db sensitivity-labels delete'] = """
+helps['sql db sensitivity-classification recommendation'] = """
+type: group
+short-summary: Manage sensitivity classification recommendations.
+"""
+
+helps['sql db sensitivity-classification recommendation list'] = """
 type: command
-short-summary: Delete the sensitivity label of a given column.
+short-summary: List the recommended sensitivity classifications of a given database.
 examples:
-  - name: Delete the sensitivity label of a given column.
-    text: az sql db sensitivity-labels delete -g mygroup -s myserver -n mydb --schema-name dbo --table-name mytable --column-name mycolumn
+  - name: List the recommended sensitivity classifications of a given database.
+    text: az sql db sensitivity-classification recommendation list -g mygroup -s myserver -n mydb
 """
 
-helps['sql db sensitivity-labels enable-recommendation'] = """
+helps['sql db sensitivity-classification recommendation enable'] = """
 type: command
 short-summary: Enable sensitivity recommendations for a given column (recommendations are enabled by default on all columns).
 examples:
   - name: Enable sensitivity recommendations for a given column.
-    text: az sql db sensitivity-labels enable-recommendation -g mygroup -s myserver -n mydb --schema-name dbo --table-name mytable --column-name mycolumn
+    text: az sql db sensitivity-classification recommendation enable -g mygroup -s myserver -n mydb --schema-name dbo --table-name mytable --column-name mycolumn
 """
 
-helps['sql db sensitivity-labels disable-recommendation'] = """
+helps['sql db sensitivity-classification recommendation disable'] = """
 type: command
 short-summary: Disable sensitivity recommendations for a given column (recommendations are enabled by default on all columns).
 examples:
   - name: Disable sensitivity recommendations for a given column.
-    text: az sql db sensitivity-labels disable-recommendation -g mygroup -s myserver -n mydb --schema-name dbo --table-name mytable --column-name mycolumn
+    text: az sql db sensitivity-classification recommendation disable -g mygroup -s myserver -n mydb --schema-name dbo --table-name mytable --column-name mycolumn
 """

@@ -236,17 +236,22 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.sql.operations#SensitivityLabelsOperations.{}',
         client_factory=get_sql_database_sensitivity_labels_operations)
 
-    with self.command_group('sql db sensitivity-labels',
+    with self.command_group('sql db sensitivity-classification',
                             database_sensitivity_labels_operations,
                             client_factory=get_sql_database_sensitivity_labels_operations) as g:
 
         g.command('list', 'list_current_by_database')
-        g.command('list-recommended', 'list_recommended_by_database')
         g.show_command('show', 'get')
         g.command('delete', 'delete')
-        g.command('enable-recommendation', 'enable_recommendation')
-        g.command('disable-recommendation', 'disable_recommendation')
         g.custom_command('update', 'db_sensitivity_label_update')
+
+    with self.command_group('sql db sensitivity-classification recommendation',
+                            database_sensitivity_labels_operations,
+                            client_factory=get_sql_database_sensitivity_labels_operations) as g:
+
+        g.command('list', 'list_recommended_by_database')
+        g.command('enable', 'enable_recommendation')
+        g.command('disable', 'disable_recommendation')
 
     database_threat_detection_policies_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#DatabaseThreatDetectionPoliciesOperations.{}',
