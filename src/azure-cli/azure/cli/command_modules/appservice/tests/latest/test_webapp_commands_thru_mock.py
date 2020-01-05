@@ -58,12 +58,10 @@ class TestWebappMocked(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     def test_set_source_control_token(self, client_factory_mock):
-        client_factory_mock.return_value = self.client
-        self.client._client = mock.MagicMock()
+        client = mock.Mock()
+        client_factory_mock.return_value = client
         sc = SourceControl(name='not-really-needed', source_control_name='GitHub', token='veryNiceToken')
-        self.client._client.send.return_value = FakedResponse(200)
-        self.client._deserialize = mock.MagicMock()
-        self.client._deserialize.return_value = sc
+        client.update_source_control.return_value = sc
 
         # action
         result = update_git_token(mock.MagicMock(), 'veryNiceToken')
