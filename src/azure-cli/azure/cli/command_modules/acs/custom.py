@@ -1612,6 +1612,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                vm_set_type=None,
                skip_subnet_role_assignment=False,
                enable_cluster_autoscaler=False,
+               cluster_autoscaler_profile=None,
                network_plugin=None,
                network_policy=None,
                pod_cidr=None,
@@ -1779,7 +1780,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         network_profile=network_profile,
         addon_profiles=addon_profiles,
         aad_profile=aad_profile,
-        api_server_access_profile=api_server_access_profile
+        api_server_access_profile=api_server_access_profile,
+        auto_scaler_profile=cluster_autoscaler_profile
     )
 
     # Due to SPN replication latency, we do a few retries here
@@ -1964,6 +1966,7 @@ def aks_update(cmd, client, resource_group_name, name,
                enable_cluster_autoscaler=False,
                disable_cluster_autoscaler=False,
                update_cluster_autoscaler=False,
+               cluster_autoscaler_profile=None,
                min_count=None, max_count=None,
                load_balancer_managed_outbound_ip_count=None,
                load_balancer_outbound_ips=None,
@@ -1984,10 +1987,12 @@ def aks_update(cmd, client, resource_group_name, name,
     if (update_autoscaler != 1 and not update_lb_profile and
             not attach_acr and
             not detach_acr and
+            not cluster_autoscaler_profile and
             api_server_authorized_ip_ranges is None):
         raise CLIError('Please specify one or more of "--enable-cluster-autoscaler" or '
                        '"--disable-cluster-autoscaler" or '
                        '"--update-cluster-autoscaler" or '
+                       '"--cluster-autoscaler-profile" or '
                        '"--load-balancer-managed-outbound-ip-count" or'
                        '"--load-balancer-outbound-ips" or '
                        '"--load-balancer-outbound-ip-prefixes" or'
@@ -2031,6 +2036,8 @@ def aks_update(cmd, client, resource_group_name, name,
         instance.agent_pool_profiles[0].enable_auto_scaling = False
         instance.agent_pool_profiles[0].min_count = None
         instance.agent_pool_profiles[0].max_count = None
+
+    instance.auto_scaler_profile = _update_dict(instance.auto_scaler_profile, cluster_autoscaler_profile)
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
