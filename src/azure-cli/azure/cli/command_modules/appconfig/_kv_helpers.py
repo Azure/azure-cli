@@ -16,6 +16,7 @@ from jsondiff import JsonDiffer
 from knack.log import get_logger
 from knack.util import CLIError
 
+from ._constants import FeatureFlagConstants, KeyVaultConstants
 from ._utils import resolve_connection_string, user_confirmation
 from ._azconfig.azconfig_client import AzconfigClient
 from ._azconfig.models import (KeyValue,
@@ -26,10 +27,6 @@ from._featuremodels import (map_keyvalue_to_featureflag,
                             FeatureFlagValue)
 
 logger = get_logger(__name__)
-FEATURE_FLAG_PREFIX = ".appconfig.featureflag/"
-FEATURE_FLAG_CONTENT_TYPE = "application/vnd.microsoft.appconfig.ff+json;charset=utf-8"
-KEYVAULT_CONTENT_TYPE = "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
-APPSVC_KEYVAULT_PREFIX = "@Microsoft.KeyVault"
 FEATURE_MANAGEMENT_KEYWORDS = ["FeatureManagement", "featureManagement", "feature_management", "feature-management"]
 ENABLED_FOR_KEYWORDS = ["EnabledFor", "enabledFor", "enabled_for", "enabled-for"]
 
@@ -250,7 +247,7 @@ def __write_kv_and_features_to_config_store(cmd, key_values, features=None, name
 
 def __is_feature_flag(kv):
     if kv and kv.key and kv.content_type:
-        return kv.key.startswith(FEATURE_FLAG_PREFIX) and kv.content_type == FEATURE_FLAG_CONTENT_TYPE
+        return kv.key.startswith(FeatureFlagConstants.FEATURE_FLAG_PREFIX) and kv.content_type == FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE
     return False
 
 
@@ -277,9 +274,9 @@ def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add=""):
             # Value will look like one of the following if it is a KeyVault reference:
             # @Microsoft.KeyVault(SecretUri=https://myvault.vault.azure.net/secrets/mysecret/ec96f02080254f109c51a1f14cdb1931)
             # @Microsoft.KeyVault(VaultName=myvault;SecretName=mysecret;SecretVersion=ec96f02080254f109c51a1f14cdb1931)
-            if value and value.lower().startswith(APPSVC_KEYVAULT_PREFIX.lower()):
+            if value and value.lower().startswith(KeyVaultConstants.APPSVC_KEYVAULT_PREFIX.lower()):
                 try:
-                    appsvc_value_dict = dict(x.split('=') for x in value[len(APPSVC_KEYVAULT_PREFIX) + 1: -1].split(';'))
+                    appsvc_value_dict = dict(x.split('=') for x in value[len(KeyVaultConstants.APPSVC_KEYVAULT_PREFIX) + 1: -1].split(';'))
                     appsvc_value_dict_lower = {k.lower(): v for k, v in appsvc_value_dict.items()}
                     secret_identifier = appsvc_value_dict_lower.get('secreturi')
                     if not secret_identifier:
@@ -293,7 +290,7 @@ def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add=""):
                         # this throws an exception for invalid format of secret identifier
                         KeyVaultIdentifier(uri=secret_identifier)
                         appconfig_value = json.dumps({"uri": secret_identifier}, ensure_ascii=False, separators=(',', ':'))
-                        content_type = KEYVAULT_CONTENT_TYPE
+                        content_type = KeyVaultConstants.KEYVAULT_CONTENT_TYPE
                         kv = KeyValue(key=key, value=appconfig_value, tags=tags, content_type=content_type)
                         key_values.append(kv)
                         continue
@@ -319,11 +316,11 @@ def __write_kv_to_app_service(cmd, key_values, appservice_account):
             name = kv.key
             value = kv.value
             # If its a KeyVault ref, convert the format to AppService KeyVault ref format
-            if kv.content_type and kv.content_type.lower() == KEYVAULT_CONTENT_TYPE:
+            if kv.content_type and kv.content_type.lower() == KeyVaultConstants.KEYVAULT_CONTENT_TYPE:
                 from azure.cli.core.util import shell_safe_json_parse
                 secret_uri = shell_safe_json_parse(value).get("uri")
                 if secret_uri:
-                    value = APPSVC_KEYVAULT_PREFIX + '(SecretUri={0})'.format(secret_uri)
+                    value = KeyVaultConstants.APPSVC_KEYVAULT_PREFIX + '(SecretUri={0})'.format(secret_uri)
                 else:
                     logger.debug(
                         'Key "%s" with value "%s" is not a well-formatted KeyVault reference. It will be treated like a regular key-value.', name, value)
@@ -690,7 +687,7 @@ def __convert_feature_dict_to_keyvalue_list(features_dict, enabled_for_keyword):
 
     try:
         for k, v in features_dict.items():
-            key = FEATURE_FLAG_PREFIX + str(k)
+            key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + str(k)
             feature_flag_value = FeatureFlagValue(id_=str(k))
 
             if isinstance(v, dict):
@@ -729,7 +726,7 @@ def __convert_feature_dict_to_keyvalue_list(features_dict, enabled_for_keyword):
 
             set_kv = KeyValue(key=key,
                               value=json.dumps(feature_flag_value, default=lambda o: o.__dict__, ensure_ascii=False),
-                              content_type=FEATURE_FLAG_CONTENT_TYPE)
+                              content_type=FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE)
             key_values.append(set_kv)
 
     except Exception as exception:

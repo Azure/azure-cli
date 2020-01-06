@@ -15,9 +15,9 @@ import yaml
 from knack.util import CLIError
 from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest)
 from azure.cli.testsdk.checkers import NoneCheck
+from ._constants import KeyVaultConstants
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
-KEYVAULT_CONTENT_TYPE = "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
 
 
 class AppConfigMgmtScenarioTest(ScenarioTest):
@@ -221,7 +221,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
 
         # Add new KeyVault ref
         self.cmd('appconfig kv set-keyvault --connection-string {connection_string} --key {key} --secret-identifier {secret_identifier} -y',
-                 checks=[self.check('contentType', KEYVAULT_CONTENT_TYPE),
+                 checks=[self.check('contentType', KeyVaultConstants.KEYVAULT_CONTENT_TYPE),
                          self.check('key', keyvault_key),
                          self.check('value', keyvault_value)])
 
@@ -232,7 +232,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
         })
 
         self.cmd('appconfig kv set-keyvault --connection-string {connection_string} --key {key} --label {label} --secret-identifier {secret_identifier} -y',
-                 checks=[self.check('contentType', KEYVAULT_CONTENT_TYPE),
+                 checks=[self.check('contentType', KeyVaultConstants.KEYVAULT_CONTENT_TYPE),
                          self.check('key', entry_key),
                          self.check('value', keyvault_value),
                          self.check('label', updated_label)])
@@ -240,7 +240,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
         # Delete KeyVault ref
         self.cmd('appconfig kv delete --connection-string {connection_string} --key {key} --label {label} -y',
                  checks=[self.check('[0].key', entry_key),
-                         self.check('[0].contentType', KEYVAULT_CONTENT_TYPE),
+                         self.check('[0].contentType', KeyVaultConstants.KEYVAULT_CONTENT_TYPE),
                          self.check('[0].value', keyvault_value),
                          self.check('[0].label', updated_label)])
 
@@ -435,7 +435,7 @@ class AppConfigAppServiceImportExportScenarioTest(ScenarioTest):
 
         # Add new KeyVault ref in AppConfig
         self.cmd('appconfig kv set-keyvault --key {key} --secret-identifier {secret_identifier} --label {label} -y',
-                 checks=[self.check('contentType', KEYVAULT_CONTENT_TYPE),
+                 checks=[self.check('contentType', KeyVaultConstants.KEYVAULT_CONTENT_TYPE),
                          self.check('key', keyvault_key),
                          self.check('label', label),
                          self.check('value', appconfig_keyvault_value)])
@@ -461,7 +461,7 @@ class AppConfigAppServiceImportExportScenarioTest(ScenarioTest):
         self.cmd('appconfig kv import -s {export_dest} --appservice-account {appservice_account} --label {label} -y')
 
         self.cmd('appconfig kv list --label {label}',
-                 checks=[self.check('[0].contentType', KEYVAULT_CONTENT_TYPE),
+                 checks=[self.check('[0].contentType', KeyVaultConstants.KEYVAULT_CONTENT_TYPE),
                          self.check('[0].key', keyvault_key),
                          self.check('[0].value', appconfig_keyvault_value),
                          self.check('[0].label', updated_label)])
@@ -479,7 +479,7 @@ class AppConfigAppServiceImportExportScenarioTest(ScenarioTest):
         self.cmd('webapp config appsettings set -g {rg} -n {appservice_account} --slot-settings {settings}')
         self.cmd('appconfig kv import -s {export_dest} --appservice-account {appservice_account} --label {label} -y')
         self.cmd('appconfig kv list --label {label}',
-                 checks=[self.check('[0].contentType', KEYVAULT_CONTENT_TYPE),
+                 checks=[self.check('[0].contentType', KeyVaultConstants.KEYVAULT_CONTENT_TYPE),
                          self.check('[0].key', alt_keyvault_key),
                          self.check('[0].value', appconfig_keyvault_value),
                          self.check('[0].label', alt_label)])
