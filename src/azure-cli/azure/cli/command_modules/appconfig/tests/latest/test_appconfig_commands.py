@@ -15,7 +15,7 @@ import yaml
 from knack.util import CLIError
 from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest)
 from azure.cli.testsdk.checkers import NoneCheck
-from ._constants import KeyVaultConstants
+from azure.cli.command_modules.appconfig._constants import KeyVaultConstants
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -407,13 +407,12 @@ class AppConfigAppServiceImportExportScenarioTest(ScenarioTest):
         })
         _create_config_store(self, self.kwargs)
 
-        # Get connection string and set as default
+        # Get connection string
         credential_list = self.cmd(
             'appconfig credential list -n {config_store_name} -g {rg}').get_output_in_json()
         self.kwargs.update({
             'connection_string': credential_list[0]['connectionString']
         })
-        self.cmd('configure --defaults appconfig_connection_string={connection_string}')
 
         # Create AppService plan and webapp
         webapp_name = self.create_random_name(prefix='WebApp', length=24)
@@ -434,7 +433,7 @@ class AppConfigAppServiceImportExportScenarioTest(ScenarioTest):
         })
 
         # Add new KeyVault ref in AppConfig
-        self.cmd('appconfig kv set-keyvault --key {key} --secret-identifier {secret_identifier} --label {label} -y',
+        self.cmd('appconfig kv set-keyvault --connection-string {connection_string} --key {key} --secret-identifier {secret_identifier} --label {label} -y',
                  checks=[self.check('contentType', KeyVaultConstants.KEYVAULT_CONTENT_TYPE),
                          self.check('key', keyvault_key),
                          self.check('label', label),
@@ -445,7 +444,7 @@ class AppConfigAppServiceImportExportScenarioTest(ScenarioTest):
             'export_dest': 'appservice',
             'appservice_account': webapp_name
         })
-        self.cmd('appconfig kv export -d {export_dest} --appservice-account {appservice_account} --label {label} -y')
+        self.cmd('appconfig kv export --connection-string {connection_string} -d {export_dest} --appservice-account {appservice_account} --label {label} -y')
 
         app_settings = self.cmd('webapp config appsettings list -g {rg} -n {appservice_account}').get_output_in_json()
         exported_keys = next(x for x in app_settings if x['name'] == keyvault_key)
@@ -458,9 +457,9 @@ class AppConfigAppServiceImportExportScenarioTest(ScenarioTest):
         self.kwargs.update({
             'label': updated_label
         })
-        self.cmd('appconfig kv import -s {export_dest} --appservice-account {appservice_account} --label {label} -y')
+        self.cmd('appconfig kv import --connection-string {connection_string} -s {export_dest} --appservice-account {appservice_account} --label {label} -y')
 
-        self.cmd('appconfig kv list --label {label}',
+        self.cmd('appconfig kv list --connection-string {connection_string} --label {label}',
                  checks=[self.check('[0].contentType', KeyVaultConstants.KEYVAULT_CONTENT_TYPE),
                          self.check('[0].key', keyvault_key),
                          self.check('[0].value', appconfig_keyvault_value),
@@ -472,16 +471,18 @@ class AppConfigAppServiceImportExportScenarioTest(ScenarioTest):
         alt_keyvault_value = "@Microsoft.KeyVault(VaultName=myvault;SecretName=mysecret;SecretVersion=ec96f02080254f109c51a1f14cdb1931)"
         appconfig_keyvault_value = "{{\"uri\":\"https://myvault.vault.azure.net/secrets/mysecret/ec96f02080254f109c51a1f14cdb1931\"}}"
         keyvault_ref = "{0}={1}".format(alt_keyvault_key, alt_keyvault_value)
+        slotsetting_tag = {"AppService:SlotSetting": "true"}
         self.kwargs.update({
             'label': alt_label,
             'settings': keyvault_ref
         })
         self.cmd('webapp config appsettings set -g {rg} -n {appservice_account} --slot-settings {settings}')
-        self.cmd('appconfig kv import -s {export_dest} --appservice-account {appservice_account} --label {label} -y')
-        self.cmd('appconfig kv list --label {label}',
+        self.cmd('appconfig kv import --connection-string {connection_string} -s {export_dest} --appservice-account {appservice_account} --label {label} -y')
+        self.cmd('appconfig kv list --connection-string {connection_string} --label {label}',
                  checks=[self.check('[0].contentType', KeyVaultConstants.KEYVAULT_CONTENT_TYPE),
                          self.check('[0].key', alt_keyvault_key),
                          self.check('[0].value', appconfig_keyvault_value),
+                         self.check('[0].tags', slotsetting_tag),
                          self.check('[0].label', alt_label)])
 
 
