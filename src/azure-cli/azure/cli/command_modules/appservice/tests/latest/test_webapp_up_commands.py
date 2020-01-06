@@ -13,12 +13,13 @@ import tempfile
 import os
 
 from azure.cli.testsdk import (
-    ScenarioTest, ResourceGroupPreparer, JMESPathCheck)
+    ScenarioTest, ResourceGroupPreparer, JMESPathCheck, live_only)
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
 class WebAppUpE2ETests(ScenarioTest):
+    @live_only()
     @ResourceGroupPreparer()
     def test_webapp_up_node_e2e(self, resource_group):
         plan = self.create_random_name('up-nodeplan', 24)
@@ -85,6 +86,7 @@ class WebAppUpE2ETests(ScenarioTest):
         import shutil
         shutil.rmtree(temp_dir)
 
+    @live_only()
     @ResourceGroupPreparer()
     def test_webapp_up_python_e2e(self, resource_group):
         plan = self.create_random_name('up-pythonplan', 24)
@@ -152,6 +154,7 @@ class WebAppUpE2ETests(ScenarioTest):
         import shutil
         shutil.rmtree(temp_dir)
 
+    @live_only()
     @ResourceGroupPreparer()
     def test_webapp_up_dotnetcore_e2e(self, resource_group):
         plan = self.create_random_name('up-dotnetcoreplan', 24)
@@ -219,6 +222,7 @@ class WebAppUpE2ETests(ScenarioTest):
         import shutil
         shutil.rmtree(temp_dir)
 
+    @live_only()
     @ResourceGroupPreparer()
     def test_webapp_up_statichtml_e2e(self, resource_group):
         plan = self.create_random_name('up-statichtmlplan', 24)
