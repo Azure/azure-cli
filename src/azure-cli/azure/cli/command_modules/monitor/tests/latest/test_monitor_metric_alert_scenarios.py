@@ -32,7 +32,7 @@ class MonitorTests(ScenarioTest):
         })
         self.cmd('monitor action-group create -g {rg} -n {ag1}')
         self.cmd('monitor action-group create -g {rg} -n {ag2}')
-        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {sa_id} --action {ag1} --description "Test" --condition "total transactions > 5 where ResponseType includes Success and ApiName includes GetBlob" --condition "avg SuccessE2ELatency > 250 where ApiName includes GetBlob or PutBlob"', checks=[
+        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {sa_id} --action {ag1} --description "Test" --condition "total transactions > 5 where ResponseType includes Success and ApiName includes GetBlob" --condition "avg SuccessE2ELatency > 250 where ApiName includes GetBlob"', checks=[
             self.check('description', 'Test'),
             self.check('severity', 2),
             self.check('autoMitigate', None),
@@ -42,7 +42,7 @@ class MonitorTests(ScenarioTest):
             self.check('length(criteria.allOf[0].dimensions)', 2),
             self.check('length(criteria.allOf[1].dimensions)', 1)
         ])
-        self.cmd('monitor metrics alert update -g {rg} -n {alert} --severity 3 --description "alt desc" --add-action ag2 test=best --remove-action ag1 --remove-condition cond0 --add-condition "total transactions < 100" --evaluation-frequency 5m --window-size 15m --tags foo=boo --auto-mitigate', checks=[
+        self.cmd('monitor metrics alert update -g {rg} -n {alert} --severity 3 --description "alt desc" --add-action ag2 test=best --remove-action ag1 --remove-conditions cond0 --add-condition "total transactions < 100" --evaluation-frequency 5m --window-size 15m --tags foo=boo --auto-mitigate', checks=[
             self.check('description', 'alt desc'),
             self.check('severity', 3),
             self.check('autoMitigate', True),
@@ -64,7 +64,7 @@ class MonitorTests(ScenarioTest):
         self.cmd('monitor metrics alert list -g {rg}',
                  checks=self.check('length(@)', 0))
 
-        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {sa_id} --action {ag1} --description "Test2" --condition "avg SuccessE2ELatency > 250 where ApiName includes GetBlob: or PutBlob"', checks=[
+        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {sa_id} --action {ag1} --description "Test2" --condition "avg SuccessE2ELatency > 250 where ApiName includes GetBlob:"', checks=[
             self.check('description', 'Test2'),
             self.check('severity', 2),
             self.check('length(criteria.allOf)', 1),
