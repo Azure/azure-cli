@@ -149,6 +149,9 @@ def validate_filter_parameter(string):
     return result
 
 
+def validate_assigned_identity(namespace):
+    return True
+
 def validate_secret_identifier(namespace):
     """ Validate the format of keyvault reference secret identifier """
     from azure.keyvault.key_vault_id import KeyVaultIdentifier

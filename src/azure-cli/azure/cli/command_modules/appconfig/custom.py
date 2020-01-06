@@ -2,19 +2,23 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+
+# pylint: disable=line-too-long
+
 from azure.mgmt.appconfiguration.models import (ConfigurationStoreUpdateParameters,
                                                 ConfigurationStore,
-                                                Sku)
+                                                Sku,
+                                                ResourceIdentity,
+                                                UserIdentity)
 
 from ._utils import resolve_resource_group, user_confirmation
 
 
-def create_configstore(client, resource_group_name, name, location, sku=None):
-    sku = "Free" if sku is None else sku
+def create_configstore(client, resource_group_name, name, location, sku, assign_identity=None):
+    configstore_params = ConfigurationStore(location.lower(),
+                                            identity=__get_resource_identity(assign_identity) if assign_identity else None,
+                                            sku=Sku(sku))
 
-    configstore_params = ConfigurationStore(location=location.lower(),
-                                            identity=None,
-                                            sku=Sku(name=sku))
     return client.create(resource_group_name, name, configstore_params)
 
 
@@ -51,15 +55,24 @@ def configstore_update_set(cmd,
     if resource_group_name is None:
         resource_group_name, _ = resolve_resource_group(cmd, name)
 
-    update_params = ConfigurationStoreUpdateParameters(tags=parameters.tags)
+    update_params = ConfigurationStoreUpdateParameters(tags=parameters.tags,
+                                                       sku=parameters.sku)
+
     return client.update(resource_group_name=resource_group_name,
                          config_store_name=name,
                          config_store_update_parameters=update_params)
 
 
-def configstore_update_custom(instance, tags=None):
+def configstore_update_custom(instance, tags=None, sku=None, assign_identity=None):
     if tags is not None:
         instance.tags = tags
+
+    if sku is not None:
+        instance.sku = Sku(sku)
+
+    if assign_identity is not None:
+        instance.assign_identity = __get_resource_identity(assign_identity)
+
     return instance
 
 
@@ -78,6 +91,29 @@ def regenerate_credential(cmd, client, name, id_, resource_group_name=None):
     resource_group_name, endpoint = resolve_resource_group(cmd, name)
     credentail = client.regenerate_key(resource_group_name, name, id_)
     return __convert_api_key_to_json(credentail, endpoint)
+
+
+def __get_resource_identity(assign_identity):
+    system_assigned = False
+    user_assigned = {}
+    for identity in assign_identity:
+        if identity == '[system]':
+            system_assigned = True
+        else:
+            user_assigned[identity] = UserIdentity()
+
+    if system_assigned:
+        identity_type = "SystemAssigned"
+    elif user_assigned:
+        identity_type = "UserAssigned"
+    else:
+        identity_type = "None"
+
+    if system_assigned and user_assigned:
+        identity_type = "SystemAssigned, UserAssigned"
+
+    return ResourceIdentity(type=identity_type,
+                            user_assigned_identities=user_assigned if user_assigned else None)
 
 
 def __convert_api_key_to_json(credentail, endpoint):

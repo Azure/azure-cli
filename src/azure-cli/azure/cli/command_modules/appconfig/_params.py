@@ -20,7 +20,8 @@ from ._validators import (validate_appservice_name_or_id,
                           validate_export, validate_import,
                           validate_import_depth, validate_query_fields,
                           validate_feature_query_fields, validate_filter_parameters,
-                          validate_separator, validate_secret_identifier)
+                          validate_separator, validate_secret_identifier,
+                          validate_assigned_identity)
 
 
 def load_arguments(self, _):
@@ -63,10 +64,11 @@ def load_arguments(self, _):
         c.argument('top', arg_type=top_arg_type)
         c.argument('all_', options_list=['--all'], action='store_true', help="List all items.")
         c.argument('fields', arg_type=fields_arg_type)
+        c.argument('sku', help='The sku of App Configuration', choices=['Free', 'Standard'])
+        c.argument('assign_identity', nargs='*', validator=validate_assigned_identity, arg_group='Managed Service Identity', help="Accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples")
 
     with self.argument_context('appconfig create') as c:
         c.argument('location', options_list=['--location', '-l'], arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
-        c.ignore('sku')
 
     with self.argument_context('appconfig update') as c:
         c.argument('tags', arg_type=tags_type)
