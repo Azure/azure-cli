@@ -42,15 +42,14 @@ class MonitorTests(ScenarioTest):
             self.check('length(criteria.allOf[0].dimensions)', 2),
             self.check('length(criteria.allOf[1].dimensions)', 1)
         ])
-        self.cmd('monitor metrics alert update -g {rg} -n {alert} --severity 3 --description "alt desc" --add-action ag2 test=best --remove-action ag1 --remove-conditions cond0 --add-condition "total transactions < 100" --evaluation-frequency 5m --window-size 15m --tags foo=boo --auto-mitigate', checks=[
+        self.cmd('monitor metrics alert update -g {rg} -n {alert} --severity 3 --description "alt desc" --add-action ag2 test=best --remove-action ag1 --remove-conditions cond0 --evaluation-frequency 5m --window-size 15m --tags foo=boo --auto-mitigate', checks=[
             self.check('description', 'alt desc'),
             self.check('severity', 3),
             self.check('autoMitigate', True),
             self.check('windowSize', '0:15:00'),
             self.check('evaluationFrequency', '0:05:00'),
-            self.check('length(criteria.allOf)', 2),
+            self.check('length(criteria.allOf)', 1),
             self.check('length(criteria.allOf[0].dimensions)', 1),
-            self.check('length(criteria.allOf[1].dimensions)', 0),
             self.check("contains(actions[0].actionGroupId, 'actionGroups/ag2')", True),
             self.check('length(actions)', 1)
         ])
