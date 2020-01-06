@@ -158,7 +158,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    options_list=['--enable-hierarchical-namespace', '--hns'],
                    help=" Allow the blob service to exhibit filesystem semantics. This property can be enabled only "
                    "when storage account kind is StorageV2.",
-                   min_api='2018-02-01', is_preview=True)
+                   min_api='2018-02-01')
 
     with self.argument_context('storage account update', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.register_common_storage_account_options()
@@ -239,6 +239,22 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
         c.argument('vnet_name', help='Name of a virtual network.', validator=validate_subnet)
         c.argument('action', help='The action of virtual network rule.')
+
+    with self.argument_context('storage account blob-service-properties show',
+                               resource_type=ResourceType.MGMT_STORAGE) as c:
+        c.argument('account_name', acct_name_type, id_part=None)
+        c.argument('resource_group_name', required=False, validator=process_resource_group)
+
+    with self.argument_context('storage account blob-service-properties update',
+                               resource_type=ResourceType.MGMT_STORAGE) as c:
+        from ._validators import validator_delete_retention_days
+        c.argument('account_name', acct_name_type, id_part=None)
+        c.argument('resource_group_name', required=False, validator=process_resource_group)
+        c.argument('enable_change_feed', arg_type=get_three_state_flag(), min_api='2019-04-01')
+        c.argument('enable_delete_retention', arg_type=get_three_state_flag(), arg_group='Delete Retention Policy',
+                   min_api='2018-07-01')
+        c.argument('delete_retention_days', type=int, arg_group='Delete Retention Policy',
+                   validator=validator_delete_retention_days, min_api='2018-07-01')
 
     with self.argument_context('storage account generate-sas') as c:
         t_account_permissions = self.get_sdk('common.models#AccountPermissions')

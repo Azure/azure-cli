@@ -102,6 +102,10 @@ class WebappBasicE2ETest(ScenarioTest):
         # show publishing credentials
         result = self.cmd('webapp deployment list-publishing-credentials -g {} -n {}'.format(resource_group, webapp_name)).get_output_in_json()
         self.assertTrue('scm' in result['scmUri'])
+        # verify httpsOnly is false
+        self.cmd('webapp show -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('httpsOnly', False),
+        ])
 
 
 class WebappQuickCreateTest(ScenarioTest):
@@ -991,13 +995,14 @@ class WebappSSLCertTest(ScenarioTest):
     def test_webapp_ssl(self, resource_group, resource_group_location):
         plan = self.create_random_name(prefix='ssl-test-plan', length=24)
         webapp_name = self.create_random_name(prefix='web-ssl-test', length=20)
+        slot_name = self.create_random_name(prefix='slot-ssl-test', length=20)
         # Cert Generated using
         # https://docs.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
         pfx_file = os.path.join(TEST_DIR, 'server.pfx')
         cert_password = 'test'
         cert_thumbprint = '9E9735C45C792B03B3FFCCA614852B32EE71AD6B'
         # we configure tags here in a hope to capture a repro for https://github.com/Azure/azure-cli/issues/6929
-        self.cmd('appservice plan create -g {} -n {} --sku B1 --tags plan=plan1'.format(resource_group, plan))
+        self.cmd('appservice plan create -g {} -n {} --sku S1 --tags plan=plan1'.format(resource_group, plan))
         self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), self.check('tags.plan', 'plan1'))
         self.cmd('webapp create -g {} -n {} --plan {} --tags web=web1'.format(resource_group, webapp_name, plan, resource_group_location))
         self.cmd('webapp config ssl upload -g {} -n {} --certificate-file "{}" --certificate-password {}'.format(resource_group, webapp_name, pfx_file, cert_password), checks=[
@@ -1015,7 +1020,54 @@ class WebappSSLCertTest(ScenarioTest):
         self.cmd('webapp show -g {} -n {}'.format(resource_group, webapp_name), self.check('tags.web', 'web1'))
         self.cmd('webapp config ssl delete -g {} --certificate-thumbprint {}'.format(resource_group, cert_thumbprint))
         self.cmd('webapp show -g {} -n {}'.format(resource_group, webapp_name), self.check('tags.web', 'web1'))
+        # test with slot
+        self.cmd('webapp deployment slot create -g {} -n {} --slot {}'.format(resource_group, webapp_name, slot_name))
+        self.cmd('webapp config ssl upload -g {} -n {} --certificate-file "{}" --certificate-password {} -s {}'.format(resource_group, webapp_name, pfx_file, cert_password, slot_name), checks=[
+            JMESPathCheck('thumbprint', cert_thumbprint)
+        ])
+        self.cmd('webapp show -g {} -n {} -s {}'.format(resource_group, webapp_name, slot_name))
+        self.cmd('webapp config ssl bind -g {} -n {} --certificate-thumbprint {} --ssl-type {} -s {}'.format(resource_group, webapp_name, cert_thumbprint, 'SNI', slot_name), checks=[
+            JMESPathCheck("hostNameSslStates|[?name=='{}-{}.azurewebsites.net']|[0].sslState".format(webapp_name, slot_name), 'SniEnabled'),
+            JMESPathCheck("hostNameSslStates|[?name=='{}-{}.azurewebsites.net']|[0].thumbprint".format(webapp_name, slot_name), cert_thumbprint)
+        ])
+        self.cmd('webapp show -g {} -n {} -s {}'.format(resource_group, webapp_name, slot_name))
+        self.cmd('webapp config ssl unbind -g {} -n {} --certificate-thumbprint {} -s {}'.format(resource_group, webapp_name, cert_thumbprint, slot_name), checks=[
+            JMESPathCheck("hostNameSslStates|[?name=='{}-{}.azurewebsites.net']|[0].sslState".format(webapp_name, slot_name), 'Disabled'),
+        ])
+        self.cmd('webapp show -g {} -n {} -s {}'.format(resource_group, webapp_name, slot_name))
+        self.cmd('webapp config ssl delete -g {} --certificate-thumbprint {}'.format(resource_group, cert_thumbprint))
+        self.cmd('webapp show -g {} -n {} -s {}'.format(resource_group, webapp_name, slot_name))
         self.cmd('webapp delete -g {} -n {}'.format(resource_group, webapp_name))
+
+
+class WebappSSLImportCertTest(ScenarioTest):
+    @ResourceGroupPreparer(location='westeurope')
+    def test_webapp_ssl_import(self, resource_group):
+        plan_name = self.create_random_name(prefix='ssl-test-plan', length=24)
+        webapp_name = self.create_random_name(prefix='web-ssl-test', length=20)
+        kv_name = self.create_random_name(prefix='kv-ssl-test', length=20)
+        # Cert Generated using
+        # https://docs.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
+        pfx_file = os.path.join(TEST_DIR, 'server.pfx')
+        cert_password = 'test'
+        cert_thumbprint = '9E9735C45C792B03B3FFCCA614852B32EE71AD6B'
+        cert_name = 'test-cert'
+        # we configure tags here in a hope to capture a repro for https://github.com/Azure/azure-cli/issues/6929
+        self.cmd('appservice plan create -g {} -n {} --sku B1'.format(resource_group, plan_name))
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
+        self.cmd('keyvault create -g {} -n {}'.format(resource_group, kv_name))
+        self.cmd('keyvault set-policy --name {} --spn {} --secret-permissions get'.format(kv_name, 'Microsoft.Azure.WebSites'))
+        self.cmd('keyvault certificate import --name {} --vault-name {} --file "{}" --password {}'.format(cert_name, kv_name, pfx_file, cert_password))
+
+        self.cmd('webapp config ssl import --resource-group {} --name {}  --key-vault {} --key-vault-certificate-name {}'.format(resource_group, webapp_name, kv_name, cert_name), checks=[
+            JMESPathCheck('keyVaultSecretStatus', 'Initialized'),
+            JMESPathCheck('thumbprint', cert_thumbprint)
+        ])
+
+        self.cmd('webapp config ssl bind -g {} -n {} --certificate-thumbprint {} --ssl-type {}'.format(resource_group, webapp_name, cert_thumbprint, 'SNI'), checks=[
+            JMESPathCheck("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].sslState".format(webapp_name), 'SniEnabled'),
+            JMESPathCheck("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].thumbprint".format(webapp_name), cert_thumbprint)
+        ])
 
 
 class WebappUndeleteTest(ScenarioTest):

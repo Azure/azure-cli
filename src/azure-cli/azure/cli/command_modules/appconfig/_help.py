@@ -68,24 +68,28 @@ helps['appconfig kv export'] = """
 type: command
 short-summary: Export configurations to another place from your App Configuration.
 examples:
-  - name: Export all keys with label test to a json file.
+  - name: Export all keys and feature flags with label test to a json file.
     text: az appconfig kv export -n MyAppConfiguration --label test -d file --path D:/abc.json --format json
-  - name: Export all keys with null label to another App Configuration.
+  - name: Export all keys and feature flags with null label to another App Configuration.
     text: az appconfig kv export -n MyAppConfiguration -d appconfig --dest-name AnotherAppConfiguration
-  - name: Export all keys with null label to an App Service appliaction.
+  - name: Export all keys with null label to an App Service application.
     text: az appconfig kv export -n MyAppConfiguration -d appservice  --appservice-account MyAppService
+  - name: Export all keys with label test excluding feature flags to a json file.
+    text: az appconfig kv export -n MyAppConfiguration --label test -d file --path D:/abc.json --format json --skip-features
 """
 
 helps['appconfig kv import'] = """
 type: command
 short-summary: Import configurations into your App Configuration from another place.
 examples:
-  - name: Import all keys with label test from a file.
+  - name: Import all keys and feature flags from a file and apply test label.
     text: az appconfig kv import -n MyAppConfiguration --label test -s file --path D:/abc.json --format json
-  - name: Import all keys with null label from an App Configuration.
+  - name: Import all keys and feature flags and apply null label from an App Configuration.
     text: az appconfig kv import -n MyAppConfiguration -s appconfig --src-name AnotherAppConfiguration
-  - name: Import all keys with null label from an App Service appliaction.
+  - name: Import all keys and apply null label from an App Service appliaction.
     text: az appconfig kv import -n MyAppConfiguration -s appservice --appservice-account MyAppService
+  - name: Import all keys with label test and apply test2 label excluding feature flags from an App Configuration.
+    text: az appconfig kv import -n MyAppConfiguration -s appconfig --src-label test --label test2 --src-name AnotherAppConfiguration --skip-features
 """
 
 helps['appconfig kv list'] = """
@@ -132,6 +136,16 @@ examples:
     text: az appconfig kv set -n MyAppConfiguration --key color --label MyLabel --value red
   - name: Set a key with null label using connection string.
     text: az appconfig kv set --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --key color --value red --tags key1=value1 key2=value2
+"""
+
+helps['appconfig kv set-keyvault'] = """
+type: command
+short-summary: Set a keyvault reference.
+examples:
+  - name: Set a keyvault reference with label MyLabel.
+    text: az appconfig kv set-keyvault -n MyAppConfiguration --key HostSecret --label MyLabel --secret-identifier https://contoso.vault.azure.net/Secrets/DummySecret/Dummyversion
+  - name: Set a keyvault reference with null label and multiple tags using connection string.
+    text: az appconfig kv set-keyvault --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --key HostSecret --secret-identifier https://contoso.vault.azure.net/Secrets/DummySecret --tags tag1=value1 tag2=value2
 """
 
 helps['appconfig kv show'] = """

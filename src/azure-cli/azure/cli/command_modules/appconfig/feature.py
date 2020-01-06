@@ -72,7 +72,7 @@ def set_feature(cmd,
             if retrieved_kv is None:
                 set_kv = KeyValue(
                     key,
-                    json.dumps(default_value),
+                    json.dumps(default_value, ensure_ascii=False),
                     label,
                     tags,
                     FEATURE_FLAG_CONTENT_TYPE)
@@ -93,7 +93,8 @@ def set_feature(cmd,
                     label=label,
                     value=json.dumps(
                         feature_flag_value,
-                        default=lambda o: o.__dict__),
+                        default=lambda o: o.__dict__,
+                        ensure_ascii=False),
                     content_type=FEATURE_FLAG_CONTENT_TYPE,
                     tags=retrieved_kv.tags if retrieved_kv.tags else tags)
                 set_kv.etag = retrieved_kv.etag
@@ -103,7 +104,7 @@ def set_feature(cmd,
             # display
             feature_flag = map_keyvalue_to_featureflag(
                 set_kv, show_conditions=True)
-            entry = json.dumps(feature_flag, default=lambda o: o.__dict__, indent=2, sort_keys=True)
+            entry = json.dumps(feature_flag, default=lambda o: o.__dict__, indent=2, sort_keys=True, ensure_ascii=False)
 
         except Exception as exception:
             # Exceptions for ValueError and AttributeError already have customized message
@@ -186,7 +187,8 @@ def delete_feature(cmd,
                         failed_ff,
                         default=lambda o: o.__dict__,
                         indent=2,
-                        sort_keys=True))
+                        sort_keys=True,
+                        ensure_ascii=False))
         else:
             raise CLIError('Delete operation failed.' + str(http_exception))
 
@@ -412,7 +414,8 @@ def enable_feature(cmd,
             updated_key_value = __update_existing_key_value(azconfig_client=azconfig_client,
                                                             retrieved_kv=retrieved_kv,
                                                             updated_value=json.dumps(feature_flag_value,
-                                                                                     default=lambda o: o.__dict__))
+                                                                                     default=lambda o: o.__dict__,
+                                                                                     ensure_ascii=False))
 
             return map_keyvalue_to_featureflag(
                 keyvalue=updated_key_value, show_conditions=False)
@@ -466,7 +469,8 @@ def disable_feature(cmd,
             updated_key_value = __update_existing_key_value(azconfig_client=azconfig_client,
                                                             retrieved_kv=retrieved_kv,
                                                             updated_value=json.dumps(feature_flag_value,
-                                                                                     default=lambda o: o.__dict__))
+                                                                                     default=lambda o: o.__dict__,
+                                                                                     ensure_ascii=False))
 
             return map_keyvalue_to_featureflag(
                 keyvalue=updated_key_value, show_conditions=False)
@@ -527,7 +531,7 @@ def add_filter(cmd,
             feature_flag_value = map_keyvalue_to_featureflagvalue(retrieved_kv)
             feature_filters = feature_flag_value.conditions['client_filters']
 
-            entry = json.dumps(new_filter.__dict__, indent=2)
+            entry = json.dumps(new_filter.__dict__, indent=2, ensure_ascii=False)
             confirmation_message = "Are you sure you want to add this filter?\n" + entry
             user_confirmation(confirmation_message, yes)
 
@@ -545,7 +549,8 @@ def add_filter(cmd,
             __update_existing_key_value(azconfig_client=azconfig_client,
                                         retrieved_kv=retrieved_kv,
                                         updated_value=json.dumps(feature_flag_value,
-                                                                 default=lambda o: o.__dict__))
+                                                                 default=lambda o: o.__dict__,
+                                                                 ensure_ascii=False))
 
             return new_filter
 
@@ -615,7 +620,7 @@ def delete_filter(cmd,
                         display_filter = copy.deepcopy(feature_filters[index])
 
                         confirmation_message = "Are you sure you want to delete this filter?\n" + \
-                            json.dumps(display_filter.__dict__, indent=2)
+                            json.dumps(display_filter.__dict__, indent=2, ensure_ascii=False)
                         user_confirmation(confirmation_message, yes)
 
                         del feature_filters[index]
@@ -633,7 +638,7 @@ def delete_filter(cmd,
                         feature_filters[match_index[0]])
 
                     confirmation_message = "Are you sure you want to delete this filter?\n" + \
-                        json.dumps(display_filter.__dict__, indent=2)
+                        json.dumps(display_filter.__dict__, indent=2, ensure_ascii=False)
                     user_confirmation(confirmation_message, yes)
 
                     del feature_filters[match_index[0]]
@@ -650,7 +655,8 @@ def delete_filter(cmd,
             __update_existing_key_value(azconfig_client=azconfig_client,
                                         retrieved_kv=retrieved_kv,
                                         updated_value=json.dumps(feature_flag_value,
-                                                                 default=lambda o: o.__dict__))
+                                                                 default=lambda o: o.__dict__,
+                                                                 ensure_ascii=False))
 
             return display_filter
 
@@ -802,7 +808,8 @@ def __clear_filter(azconfig_client,
                 __update_existing_key_value(azconfig_client=azconfig_client,
                                             retrieved_kv=retrieved_kv,
                                             updated_value=json.dumps(feature_flag_value,
-                                                                     default=lambda o: o.__dict__))
+                                                                     default=lambda o: o.__dict__,
+                                                                     ensure_ascii=False))
 
             return display_filters
 

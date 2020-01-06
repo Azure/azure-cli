@@ -3125,7 +3125,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
                      vnet_peer=None,
                      tags=None,
                      no_wait=False,
-                     workspace_resource_id=None,
+                     workspace_id=None,
                      customer_admin_group_id=None):
 
     if location is None:
@@ -3196,13 +3196,13 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
                 namespace='Microsoft.Network', type='virtualNetwork',
                 name=vnet_peer
             )
-    if workspace_resource_id is not None:
-        workspace_resource_id = workspace_resource_id.strip()
-        if not workspace_resource_id.startswith('/'):
-            workspace_resource_id = '/' + workspace_resource_id
-        if workspace_resource_id.endswith('/'):
-            workspace_resource_id = workspace_resource_id.rstrip('/')
-        monitor_profile = OpenShiftManagedClusterMonitorProfile(enabled=True, workspace_resource_id=workspace_resource_id)  # pylint: disable=line-too-long
+    if workspace_id is not None:
+        workspace_id = workspace_id.strip()
+        if not workspace_id.startswith('/'):
+            workspace_id = '/' + workspace_id
+        if workspace_id.endswith('/'):
+            workspace_id = workspace_id.rstrip('/')
+        monitor_profile = OpenShiftManagedClusterMonitorProfile(enabled=True, workspace_id=workspace_id)  # pylint: disable=line-too-long
     else:
         monitor_profile = None
 

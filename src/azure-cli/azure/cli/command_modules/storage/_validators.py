@@ -1058,8 +1058,8 @@ def validate_azcopy_upload_destination_url(cmd, namespace):
 def validate_azcopy_remove_arguments(cmd, namespace):
     usage_string = \
         'Invalid usage: {}. Supply only one of the following argument sets to specify source:' \
-        '\n\t   --container-name  --name' \
-        '\n\tOR --share-name --path'
+        '\n\t   --container-name  [--name]' \
+        '\n\tOR --share-name [--path]'
 
     ns = vars(namespace)
 
@@ -1072,8 +1072,8 @@ def validate_azcopy_remove_arguments(cmd, namespace):
     path = ns.pop('path', None)
 
     # ensure either a file or blob source is specified
-    valid_blob = container and blob and not share and not path
-    valid_file = share and path and not container and not blob
+    valid_blob = container and not share
+    valid_file = share and not container
 
     if not valid_blob and not valid_file:
         raise ValueError(usage_string.format('Neither a valid blob or file source is specified'))
@@ -1083,6 +1083,8 @@ def validate_azcopy_remove_arguments(cmd, namespace):
     if valid_blob:
         client = blob_data_service_factory(cmd.cli_ctx, {
             'account_name': namespace.account_name})
+        if not blob:
+            blob = ''
         url = client.make_blob_url(container, blob)
         namespace.service = 'blob'
         namespace.target = url
@@ -1119,3 +1121,27 @@ def as_user_validator(namespace):
             import argparse
             raise argparse.ArgumentError(
                 None, "incorrect usage: specify '--auth-mode login' when as-user is enabled")
+
+
+def validator_delete_retention_days(namespace):
+    if namespace.enable_delete_retention is True and namespace.delete_retention_days is None:
+        raise ValueError(
+            "incorrect usage: you have to provide value for '--delete-retention-days' when '--enable-delete-retention' "
+            "is set to true")
+
+    if namespace.enable_delete_retention is False and namespace.delete_retention_days is not None:
+        raise ValueError(
+            "incorrect usage: '--delete-retention-days' is invalid when '--enable-delete-retention' is set to false")
+
+    if namespace.enable_delete_retention is None and namespace.delete_retention_days is not None:
+        raise ValueError(
+            "incorrect usage: please specify '--enable-delete-retention true' if you want to set the value for "
+            "'--delete-retention-days'")
+
+    if namespace.delete_retention_days or namespace.delete_retention_days == 0:
+        if namespace.delete_retention_days < 1:
+            raise ValueError(
+                "incorrect usage: '--delete-retention-days' must be greater than or equal to 1")
+        if namespace.delete_retention_days > 365:
+            raise ValueError(
+                "incorrect usage: '--delete-retention-days' must be less than or equal to 365")

@@ -31,7 +31,6 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
 def _create_keyvault(test, kwargs, additional_args=None):
-
     # need premium KeyVault to store keys in HSM
     kwargs['add'] = additional_args or ''
     return test.cmd('keyvault create -g {rg} -n {kv} -l {loc} --sku premium {add}')
@@ -50,7 +49,6 @@ class DateTimeParseTest(unittest.TestCase):
 
 
 class KeyVaultMgmtScenarioTest(ScenarioTest):
-
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_mgmt')
     def test_keyvault_mgmt(self, resource_group):
 
@@ -93,7 +91,7 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
         ])
         # test updating updating other properties
         self.cmd('keyvault update -g {rg} -n {kv} --enable-soft-delete --enable-purge-protection '
-                 '--enabled-for-deploymen --enabled-for-disk-encryption --enabled-for-template-deployment '
+                 '--enabled-for-deployment --enabled-for-disk-encryption --enabled-for-template-deployment '
                  '--bypass AzureServices --default-action Deny',
                  checks=[
                      self.check('name', '{kv}'),
@@ -117,17 +115,18 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
         self.cmd('keyvault list -g {rg}', checks=self.is_empty())
 
         # test create keyvault further
-
         self.cmd('keyvault create -g {rg} -n {kv2} -l {loc} --no-self-perms', checks=[
             self.check('type(properties.accessPolicies)', 'array'),
             self.check('length(properties.accessPolicies)', 0)
         ])
 
-        self.cmd('keyvault create -g {rg} -n {kv3} -l {loc} --enabled-for-deployment true --enabled-for-disk-encryption true --enabled-for-template-deployment true', checks=[
-            self.check('properties.enabledForDeployment', True),
-            self.check('properties.enabledForDiskEncryption', True),
-            self.check('properties.enabledForTemplateDeployment', True)
-        ])
+        self.cmd('keyvault create -g {rg} -n {kv3} -l {loc} --enabled-for-deployment true '
+                 '--enabled-for-disk-encryption true --enabled-for-template-deployment true',
+                 checks=[
+                     self.check('properties.enabledForDeployment', True),
+                     self.check('properties.enabledForDiskEncryption', True),
+                     self.check('properties.enabledForTemplateDeployment', True)
+                 ])
         self.cmd('keyvault create -g {rg} -n {kv4} -l {loc} --sku premium', checks=[
             self.check('properties.sku.name', 'premium')
         ])
@@ -137,7 +136,6 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_key')
     def test_keyvault_key(self, resource_group):
-
         self.kwargs.update({
             'kv': self.create_random_name('cli-test-keyvault-', 24),
             'loc': 'westus',
@@ -155,6 +153,8 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
         # list keys
         self.cmd('keyvault key list --vault-name {kv}',
                  checks=self.check('length(@)', 1))
+        self.cmd('keyvault key list --vault-name {kv} --maxresults 10',
+                 checks=self.check('length(@)', 1))
 
         # create a new key version
         key = self.cmd('keyvault key create --vault-name {kv} -n {key} -p software --disabled --ops encrypt decrypt --tags test=foo', checks=[
@@ -165,6 +165,8 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
         second_kid = key['key']['kid']
         # list key versions
         self.cmd('keyvault key list-versions --vault-name {kv} -n {key}',
+                 checks=self.check('length(@)', 2))
+        self.cmd('keyvault key list-versions --vault-name {kv} -n {key} --maxresults 10',
                  checks=self.check('length(@)', 2))
 
         # show key (latest)
@@ -195,12 +197,14 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
         self.kwargs['key_file'] = key_file
         self.cmd('keyvault key backup --vault-name {kv} -n {key} --file {key_file}')
         self.cmd('keyvault key delete --vault-name {kv} -n {key}')
-        self.cmd('keyvault key list --vault-name {kv}',
-                 checks=self.is_empty())
+        self.cmd('keyvault key list --vault-name {kv}', checks=self.is_empty())
+        self.cmd('keyvault key list --vault-name {kv} --maxresults 10', checks=self.is_empty())
 
         # restore key from backup
         self.cmd('keyvault key restore --vault-name {kv} --file {key_file}')
         self.cmd('keyvault key list-versions --vault-name {kv} -n {key}',
+                 checks=self.check('length(@)', 2))
+        self.cmd('keyvault key list-versions --vault-name {kv} -n {key} --maxresults 10',
                  checks=self.check('length(@)', 2))
         if os.path.isfile(key_file):
             os.remove(key_file)
@@ -233,6 +237,34 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
                  checks=[self.check('key.kty', 'EC'), self.check('key.crv', 'P-521')])
 
 
+class KeyVaultSecretSoftDeleteScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_secret')
+    def test_keyvault_secret_soft_delete(self, resource_group):
+        self.kwargs.update({
+            'kv': self.create_random_name('cli-test-keyvault-', 24),
+            'loc': 'westus',
+            'sec': 'secret1'
+        })
+        _create_keyvault(self, self.kwargs, additional_args='--enable-soft-delete')
+        self.cmd('keyvault show -n {kv}', checks=self.check('properties.enableSoftDelete', True))
+        if self.is_live:
+            time.sleep(20)
+
+        # show deleted
+        self.cmd('keyvault secret set --vault-name {kv} -n {sec} --value ABC123',
+                 checks=self.check('value', 'ABC123'))
+        data = self.cmd('keyvault secret delete --vault-name {kv} -n {sec}').get_output_in_json()
+        if self.is_live:
+            time.sleep(20)
+
+        self.kwargs['secret_id'] = data['id']
+        self.kwargs['secret_recovery_id'] = data['recoveryId']
+        self.cmd('keyvault secret list-deleted --vault-name {kv}', checks=self.check('length(@)', 1))
+        self.cmd('keyvault secret list-deleted --vault-name {kv} --maxresults 10', checks=self.check('length(@)', 1))
+        self.cmd('keyvault secret show-deleted --id {secret_recovery_id}', checks=self.check('id', '{secret_id}'))
+        self.cmd('keyvault secret show-deleted --vault-name {kv} -n {sec}', checks=self.check('id', '{secret_id}'))
+
+
 class KeyVaultSecretScenarioTest(ScenarioTest):
 
     def _test_download_secret(self):
@@ -257,13 +289,11 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_secret')
     def test_keyvault_secret(self, resource_group):
-
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-kevault-', 24),
+            'kv': self.create_random_name('cli-test-keyvault-', 24),
             'loc': 'westus',
             'sec': 'secret1'
         })
-
         _create_keyvault(self, self.kwargs)
 
         # create a secret
@@ -278,6 +308,7 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
 
         # list secrets
         self.cmd('keyvault secret list --vault-name {kv}', checks=self.check('length(@)', 1))
+        self.cmd('keyvault secret list --vault-name {kv} --maxresults 10', checks=self.check('length(@)', 1))
 
         # create a new secret version
         secret = self.cmd('keyvault secret set --vault-name {kv} -n {sec} --value DEF456 --tags test=foo --description "test type"', checks=[
@@ -289,6 +320,8 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
 
         # list secret versions
         self.cmd('keyvault secret list-versions --vault-name {kv} -n {sec}',
+                 checks=self.check('length(@)', 2))
+        self.cmd('keyvault secret list-versions --vault-name {kv} -n {sec} --maxresults 10',
                  checks=self.check('length(@)', 2))
 
         # show secret (latest)
@@ -325,8 +358,8 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
 
         # delete secret
         self.cmd('keyvault secret delete --vault-name {kv} -n {sec}')
-        self.cmd('keyvault secret list --vault-name {kv}',
-                 checks=self.is_empty())
+        self.cmd('keyvault secret list --vault-name {kv}', checks=self.is_empty())
+        self.cmd('keyvault secret list --vault-name {kv} --maxresults 10', checks=self.is_empty())
 
         self._test_download_secret()
 
@@ -554,6 +587,8 @@ class KeyVaultCertificateScenarioTest(ScenarioTest):
         # list certificates
         self.cmd('keyvault certificate list --vault-name {kv}',
                  checks=self.check('length(@)', 1))
+        self.cmd('keyvault certificate list --vault-name {kv} --maxresults 10',
+                 checks=self.check('length(@)', 1))
 
         # create a new certificate version
         self.cmd('keyvault certificate create --vault-name {kv} -n cert1 -p @"{policy2_path}"', checks=[
@@ -561,6 +596,8 @@ class KeyVaultCertificateScenarioTest(ScenarioTest):
         ])
 
         # list certificate versions
+        self.cmd('keyvault certificate list-versions --vault-name {kv} -n cert1 --maxresults 10',
+                 checks=self.check('length(@)', 2))
         ver_list = self.cmd('keyvault certificate list-versions --vault-name {kv} -n cert1',
                             checks=self.check('length(@)', 2)).get_output_in_json()
 
@@ -594,6 +631,8 @@ class KeyVaultCertificateScenarioTest(ScenarioTest):
         # delete certificate
         self.cmd('keyvault certificate delete --vault-name {kv} -n cert1')
         self.cmd('keyvault certificate list --vault-name {kv}',
+                 checks=self.is_empty())
+        self.cmd('keyvault certificate list --vault-name {kv} --maxresults 10',
                  checks=self.is_empty())
 
 

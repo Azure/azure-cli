@@ -184,6 +184,10 @@ def cf_virtual_network_peerings(cli_ctx, _):
     return network_client_factory(cli_ctx).virtual_network_peerings
 
 
+def cf_service_aliases(cli_ctx, _):
+    return network_client_factory(cli_ctx).available_service_aliases
+
+
 def cf_traffic_manager_mgmt_profiles(cli_ctx, _):
     from azure.mgmt.trafficmanager import TrafficManagerManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client

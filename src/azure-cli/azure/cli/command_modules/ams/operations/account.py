@@ -5,6 +5,8 @@
 
 from knack.util import CLIError
 
+from azure.mgmt.media.models import (ApiErrorException, MediaService, StorageAccount)
+
 
 def get_mediaservice(client, account_name, resource_group_name=None):
     return client.get(resource_group_name,
@@ -16,7 +18,6 @@ def list_mediaservices(client, resource_group_name=None):
 
 
 def create_mediaservice(client, resource_group_name, account_name, storage_account, location=None, tags=None):
-    from azure.mgmt.media.models import StorageAccount
     storage_account_primary = StorageAccount(type='Primary', id=storage_account)
 
     return create_or_update_mediaservice(client, resource_group_name, account_name, [storage_account_primary],
@@ -29,7 +30,6 @@ def add_mediaservice_secondary_storage(client, resource_group_name, account_name
 
     storage_accounts_filtered = list(filter(lambda s: storage_account in s.id, ams.storage_accounts))
 
-    from azure.mgmt.media.models import StorageAccount
     storage_account_secondary = StorageAccount(type='Secondary', id=storage_account)
 
     if not storage_accounts_filtered:
@@ -59,14 +59,12 @@ def create_or_update_mediaservice(client, resource_group_name, account_name, sto
                                   location=None,
                                   tags=None):
 
-    from azure.mgmt.media.models import MediaService
     media_service = MediaService(location=location, storage_accounts=storage_accounts, tags=tags)
 
     return client.create_or_update(resource_group_name, account_name, media_service)
 
 
 def mediaservice_update_getter(client, resource_group_name, account_name):
-    from azure.mgmt.media.models import ApiErrorException
 
     try:
         return client.get(resource_group_name, account_name)
@@ -75,6 +73,9 @@ def mediaservice_update_getter(client, resource_group_name, account_name):
 
 
 def update_mediaservice(instance, tags=None):
+    if not instance:
+        raise CLIError('The account resource was not found.')
+
     if tags:
         instance.tags = tags
 

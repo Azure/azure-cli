@@ -625,3 +625,64 @@ class RevokeStorageAccountTests(StorageScenarioMixin, RoleScenarioTest, LiveScen
         time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
 
         self.cmd('storage blob show -c {container} -n {blob} --account-name {account} --sas-token {blob_sas}', expect_failure=True)
+
+
+@api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
+class BlobServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_storage_account_update_change_feed(self):
+        result = self.cmd('storage account blob-service-properties update --enable-change-feed true -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['changeFeed']['enabled'], True)
+
+        result = self.cmd('storage account blob-service-properties update --enable-change-feed false -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['changeFeed']['enabled'], False)
+
+        result = self.cmd('storage account blob-service-properties update --enable-change-feed -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['changeFeed']['enabled'], True)
+
+        result = self.cmd('storage account blob-service-properties show -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['changeFeed']['enabled'], True)
+
+    @ResourceGroupPreparer(name_prefix='cli_storage_account_update_delete_retention_policy')
+    @StorageAccountPreparer()
+    def test_storage_account_update_delete_retention_policy(self, resource_group, storage_account):
+        self.kwargs.update({
+            'sa': storage_account,
+            'rg': resource_group,
+            'cmd': 'storage account blob-service-properties update'
+        })
+
+        with self.assertRaises(SystemExit):
+            self.cmd('{cmd} --enable-delete-retention true -n {sa} -g {rg}')
+
+        with self.assertRaises(SystemExit):
+            self.cmd('{cmd} --enable-delete-retention false --delete-retention-days 365 -n {sa} -g {rg}').get_output_in_json()
+
+        with self.assertRaises(SystemExit):
+            self.cmd('{cmd} --delete-retention-days 1 -n {sa} -g {rg}').get_output_in_json()
+
+        with self.assertRaises(SystemExit):
+            self.cmd('{cmd} --enable-delete-retention true --delete-retention-days -1 -n {sa} -g {rg}')
+
+        with self.assertRaises(SystemExit):
+            self.cmd('{cmd} --enable-delete-retention true --delete-retention-days 0 -n {sa} -g {rg}')
+
+        with self.assertRaises(SystemExit):
+            self.cmd('{cmd} --enable-delete-retention true --delete-retention-days 366 -n {sa} -g {rg}')
+
+        result = self.cmd('{cmd} --enable-delete-retention true --delete-retention-days 1 -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['deleteRetentionPolicy']['enabled'], True)
+        self.assertEqual(result['deleteRetentionPolicy']['days'], 1)
+
+        result = self.cmd('{cmd} --enable-delete-retention true --delete-retention-days 100 -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['deleteRetentionPolicy']['enabled'], True)
+        self.assertEqual(result['deleteRetentionPolicy']['days'], 100)
+
+        result = self.cmd('{cmd} --enable-delete-retention true --delete-retention-days 365 -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['deleteRetentionPolicy']['enabled'], True)
+        self.assertEqual(result['deleteRetentionPolicy']['days'], 365)
+
+        result = self.cmd('{cmd} --enable-delete-retention false -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['deleteRetentionPolicy']['enabled'], False)
+        self.assertEqual(result['deleteRetentionPolicy']['days'], None)

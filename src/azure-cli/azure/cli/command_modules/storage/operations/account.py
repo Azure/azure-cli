@@ -335,3 +335,18 @@ def update_management_policies(client, resource_group_name, account_name, parame
     if parameters:
         parameters = parameters.policy
     return client.create_or_update(resource_group_name, account_name, policy=parameters)
+
+
+# TODO: support updating other properties besides 'enable_change_feed,delete_retention_policy'
+def update_blob_service_properties(cmd, instance, enable_change_feed=None, enable_delete_retention=None,
+                                   delete_retention_days=None):
+    if enable_change_feed is not None:
+        instance.change_feed = cmd.get_models('ChangeFeed')(enabled=enable_change_feed)
+
+    if enable_delete_retention is not None:
+        if enable_delete_retention is False:
+            delete_retention_days = None
+        instance.delete_retention_policy = cmd.get_models('DeleteRetentionPolicy')(
+            enabled=enable_delete_retention, days=delete_retention_days)
+
+    return instance

@@ -567,7 +567,7 @@ However, most commonly, the `custom_func_name` and `custom_func_type` kwargs wil
 - `getter_type` - A `CliCommandType` object which will be used to locate the getter. Only needed if the getter is a custom command (uncommon).
 - `setter_name` - The name of the method which will be used to update the object instance using a PUT method. If the method is named `create_or_update` (which is the case for most SDKs), this can be omitted.
 - `setter_type` - A `CliCommandType` object which will be used to locate the setter. Only needed if the setter is a custom command (uncommon).
-- `setter_arg_name` - The name of the argument in the setter which corresponds to the object being updated. If the name if `parameters` (which is the case for most SDKs), this can be omitted.
+- `setter_arg_name` - The name of the argument in the setter which corresponds to the object being updated. If the name is `parameters` (which is the case for most SDKs), this can be omitted.
 - `custom_func_name` (optional) - The name of a method which accepts the object being updated (must be named `instance`), mutates, and returns that object. This is commonly used to add convenience options to the command by listing them in the method signature, similar to a purely custom method. The difference is that a custom command function returns the command result while a generic update custom function returns only the object being updated. A simple custom function might look like:
 
   ```Python

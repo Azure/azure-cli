@@ -204,6 +204,19 @@ def get_az_version_string():
     return version_string, updates_available
 
 
+def get_az_version_json():
+    from azure.cli.core.extension import get_extensions
+    versions = {'extensions': {}}
+
+    for dist in get_installed_cli_distributions():
+        versions[dist.key] = dist.version
+    extensions = get_extensions()
+    if extensions:
+        for ext in extensions:
+            versions['extensions'][ext.name] = ext.version or 'Unknown'
+    return versions
+
+
 def get_json_object(json_string):
     """ Loads a JSON string as an object and converts all keys to snake case """
 
@@ -574,8 +587,12 @@ def send_raw_request(cli_ctx, method, uri, headers=None, uri_parameters=None,  #
     if not skip_authorization_header and uri.lower().startswith('https://'):
         if not resource:
             endpoints = cli_ctx.cloud.endpoints
+            from azure.cli.core.cloud import CloudEndpointNotSetException
             for p in [x for x in dir(endpoints) if not x.startswith('_')]:
-                value = getattr(endpoints, p)
+                try:
+                    value = getattr(endpoints, p)
+                except CloudEndpointNotSetException:
+                    continue
                 if isinstance(value, six.string_types) and uri.lower().startswith(value.lower()):
                     resource = value
                     break

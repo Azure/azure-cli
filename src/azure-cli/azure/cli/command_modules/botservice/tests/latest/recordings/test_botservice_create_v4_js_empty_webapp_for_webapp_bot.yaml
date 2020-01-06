@@ -11,8 +11,8 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.76
       accept-language:
       - en-US
     method: GET
@@ -68,7 +68,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 11:24:32 GMT
+      - Wed, 27 Nov 2019 23:24:29 GMT
       expires:
       - '-1'
       pragma:
@@ -79,6 +79,61 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"name": "cli000002", "type": "webapp"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - bot create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '45'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -k -g -n --appid -p --lang
+      User-Agent:
+      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-botservice/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.76
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/providers/Microsoft.BotService/checkNameAvailability?api-version=2018-07-12
+  response:
+    body:
+      string: '{"valid":true,"message":""}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '27'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 27 Nov 2019 23:24:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-tenant-writes:
+      - '1199'
     status:
       code: 200
       message: OK
@@ -129,7 +184,7 @@ interactions:
       "[resourceId(\''Microsoft.Web/sites/\'', parameters(\''siteName\''))]", "MSDeploy"]}]},
       "parameters": {"location": {"value": "centralus"}, "kind": {"value": "sdk"},
       "sku": {"value": "F0"}, "siteName": {"value": "cli000002"}, "appId": {"value":
-      "f5cdb816-3349-4940-b073-4fd43c3e9713"}, "appSecret": {"value": "9bb8155f-c3f5-4c2f-932f-02692d97053d"},
+      "9f724df3-672b-4dcd-b0da-b2cf45064004"}, "appSecret": {"value": "5e7102a1-d7c3-4fc3-8bbe-c8eeb7f4cd73"},
       "serverFarmId": {"value": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002"},
       "zipUrl": {"value": ""}, "botEnv": {"value": "prod"}, "createServerFarm": {"value":
       true}, "serverFarmLocation": {"value": "centralus"}, "botId": {"value": "cli000002"}},
@@ -150,26 +205,26 @@ interactions:
       ParameterSetName:
       - -k -g -n --appid -p --lang
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.76
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2019-07-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/cli000002","name":"cli000002","type":"Microsoft.Resources/deployments","properties":{"templateHash":"12265489627004014712","parameters":{"botEnv":{"type":"String","value":"prod"},"botId":{"type":"String","value":"cli000002"},"description":{"type":"String","value":""},"location":{"type":"String","value":"centralus"},"sku":{"type":"String","value":"F0"},"kind":{"type":"String","value":"sdk"},"siteName":{"type":"String","value":"cli000002"},"appId":{"type":"String","value":"f5cdb816-3349-4940-b073-4fd43c3e9713"},"appSecret":{"type":"String","value":"9bb8155f-c3f5-4c2f-932f-02692d97053d"},"zipUrl":{"type":"String","value":""},"serverFarmId":{"type":"String","value":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002"},"createServerFarm":{"type":"Bool","value":true},"serverFarmLocation":{"type":"String","value":"centralus"},"serverFarmSku":{"type":"Object","value":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}},"endpoint":{"type":"String","value":""},"botFileEncryptionKey":{"type":"String","value":""}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2019-10-21T11:24:36.8171024Z","duration":"PT2.0490138S","correlationId":"300af333-a9ae-48b1-90e5-9906e5e6af4b","providers":[{"namespace":"Microsoft.Web","resourceTypes":[{"resourceType":"serverfarms","locations":["centralus"]},{"resourceType":"sites","locations":["centralus"]}]},{"namespace":"Microsoft.BotService","resourceTypes":[{"resourceType":"botServices","locations":["global"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","resourceType":"Microsoft.Web/serverfarms","resourceName":"cli000002"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002","resourceType":"Microsoft.Web/sites","resourceName":"cli000002"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002","resourceType":"Microsoft.Web/sites","resourceName":"cli000002"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002/Extensions/MSDeploy","resourceType":"Microsoft.Web/sites/Extensions","resourceName":"cli000002/MSDeploy"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","resourceType":"Microsoft.Web/serverfarms","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002","resourceType":"Microsoft.Web/sites","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002/Extensions/MSDeploy","resourceType":"Microsoft.Web/sites/Extensions","resourceName":"cli000002/MSDeploy"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/Sites/cli000002/config/publishingcredentials","resourceType":"Microsoft.Web/Sites/config","resourceName":"cli000002/publishingcredentials","actionName":"list","apiVersion":"2018-02-01"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","resourceType":"Microsoft.BotService/botServices","resourceName":"cli000002"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/cli000002","name":"cli000002","type":"Microsoft.Resources/deployments","properties":{"templateHash":"12265489627004014712","parameters":{"botEnv":{"type":"String","value":"prod"},"botId":{"type":"String","value":"cli000002"},"description":{"type":"String","value":""},"location":{"type":"String","value":"centralus"},"sku":{"type":"String","value":"F0"},"kind":{"type":"String","value":"sdk"},"siteName":{"type":"String","value":"cli000002"},"appId":{"type":"String","value":"9f724df3-672b-4dcd-b0da-b2cf45064004"},"appSecret":{"type":"String","value":"5e7102a1-d7c3-4fc3-8bbe-c8eeb7f4cd73"},"zipUrl":{"type":"String","value":""},"serverFarmId":{"type":"String","value":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002"},"createServerFarm":{"type":"Bool","value":true},"serverFarmLocation":{"type":"String","value":"centralus"},"serverFarmSku":{"type":"Object","value":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}},"endpoint":{"type":"String","value":""},"botFileEncryptionKey":{"type":"String","value":""}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2019-11-27T23:24:31.1386234Z","duration":"PT0.276688S","correlationId":"9d63bf31-9050-4442-9068-9dbdbd39b70b","providers":[{"namespace":"Microsoft.Web","resourceTypes":[{"resourceType":"serverfarms","locations":["centralus"]},{"resourceType":"sites","locations":["centralus"]}]},{"namespace":"Microsoft.BotService","resourceTypes":[{"resourceType":"botServices","locations":["global"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","resourceType":"Microsoft.Web/serverfarms","resourceName":"cli000002"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002","resourceType":"Microsoft.Web/sites","resourceName":"cli000002"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002","resourceType":"Microsoft.Web/sites","resourceName":"cli000002"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002/Extensions/MSDeploy","resourceType":"Microsoft.Web/sites/Extensions","resourceName":"cli000002/MSDeploy"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","resourceType":"Microsoft.Web/serverfarms","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002","resourceType":"Microsoft.Web/sites","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002/Extensions/MSDeploy","resourceType":"Microsoft.Web/sites/Extensions","resourceName":"cli000002/MSDeploy"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/Sites/cli000002/config/publishingcredentials","resourceType":"Microsoft.Web/Sites/config","resourceName":"cli000002/publishingcredentials","actionName":"list","apiVersion":"2018-02-01"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","resourceType":"Microsoft.BotService/botServices","resourceName":"cli000002"}]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/cli000002/operationStatuses/08586299498107095621?api-version=2019-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/cli000002/operationStatuses/08586267098146157061?api-version=2019-07-01
       cache-control:
       - no-cache
       content-length:
-      - '3952'
+      - '3951'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 11:24:37 GMT
+      - Wed, 27 Nov 2019 23:24:30 GMT
       expires:
       - '-1'
       pragma:
@@ -179,7 +234,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1114'
+      - '1198'
     status:
       code: 201
       message: Created
@@ -197,10 +252,10 @@ interactions:
       ParameterSetName:
       - -k -g -n --appid -p --lang
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.76
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586299498107095621?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586267098146157061?api-version=2019-07-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -212,7 +267,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 11:25:09 GMT
+      - Wed, 27 Nov 2019 23:25:00 GMT
       expires:
       - '-1'
       pragma:
@@ -240,10 +295,10 @@ interactions:
       ParameterSetName:
       - -k -g -n --appid -p --lang
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.76
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586299498107095621?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586267098146157061?api-version=2019-07-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -255,7 +310,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 11:25:39 GMT
+      - Wed, 27 Nov 2019 23:25:30 GMT
       expires:
       - '-1'
       pragma:
@@ -283,10 +338,10 @@ interactions:
       ParameterSetName:
       - -k -g -n --appid -p --lang
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.76
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586299498107095621?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586267098146157061?api-version=2019-07-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -298,7 +353,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 11:26:10 GMT
+      - Wed, 27 Nov 2019 23:26:01 GMT
       expires:
       - '-1'
       pragma:
@@ -326,10 +381,10 @@ interactions:
       ParameterSetName:
       - -k -g -n --appid -p --lang
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.76
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586299498107095621?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586267098146157061?api-version=2019-07-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -341,7 +396,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 11:26:41 GMT
+      - Wed, 27 Nov 2019 23:26:31 GMT
       expires:
       - '-1'
       pragma:
@@ -369,10 +424,10 @@ interactions:
       ParameterSetName:
       - -k -g -n --appid -p --lang
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.76
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586299498107095621?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586267098146157061?api-version=2019-07-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -384,7 +439,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 11:27:11 GMT
+      - Wed, 27 Nov 2019 23:27:00 GMT
       expires:
       - '-1'
       pragma:
@@ -412,10 +467,10 @@ interactions:
       ParameterSetName:
       - -k -g -n --appid -p --lang
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.76
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586299498107095621?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586267098146157061?api-version=2019-07-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -427,7 +482,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 11:27:41 GMT
+      - Wed, 27 Nov 2019 23:27:31 GMT
       expires:
       - '-1'
       pragma:
@@ -455,10 +510,10 @@ interactions:
       ParameterSetName:
       - -k -g -n --appid -p --lang
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.76
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586299498107095621?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586267098146157061?api-version=2019-07-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -470,7 +525,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 11:28:12 GMT
+      - Wed, 27 Nov 2019 23:28:01 GMT
       expires:
       - '-1'
       pragma:
@@ -498,10 +553,10 @@ interactions:
       ParameterSetName:
       - -k -g -n --appid -p --lang
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.76
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586299498107095621?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586267098146157061?api-version=2019-07-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -513,7 +568,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 11:28:44 GMT
+      - Wed, 27 Nov 2019 23:28:31 GMT
       expires:
       - '-1'
       pragma:
@@ -541,10 +596,53 @@ interactions:
       ParameterSetName:
       - -k -g -n --appid -p --lang
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.76
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586299498107095621?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586267098146157061?api-version=2019-07-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 27 Nov 2019 23:29:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - bot create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -k -g -n --appid -p --lang
+      User-Agent:
+      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.76
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586267098146157061?api-version=2019-07-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -556,7 +654,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 11:29:14 GMT
+      - Wed, 27 Nov 2019 23:29:31 GMT
       expires:
       - '-1'
       pragma:
@@ -584,13 +682,13 @@ interactions:
       ParameterSetName:
       - -k -g -n --appid -p --lang
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.76
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2019-07-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/cli000002","name":"cli000002","type":"Microsoft.Resources/deployments","properties":{"templateHash":"12265489627004014712","parameters":{"botEnv":{"type":"String","value":"prod"},"botId":{"type":"String","value":"cli000002"},"description":{"type":"String","value":""},"location":{"type":"String","value":"centralus"},"sku":{"type":"String","value":"F0"},"kind":{"type":"String","value":"sdk"},"siteName":{"type":"String","value":"cli000002"},"appId":{"type":"String","value":"f5cdb816-3349-4940-b073-4fd43c3e9713"},"appSecret":{"type":"String","value":"9bb8155f-c3f5-4c2f-932f-02692d97053d"},"zipUrl":{"type":"String","value":""},"serverFarmId":{"type":"String","value":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002"},"createServerFarm":{"type":"Bool","value":true},"serverFarmLocation":{"type":"String","value":"centralus"},"serverFarmSku":{"type":"Object","value":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}},"endpoint":{"type":"String","value":""},"botFileEncryptionKey":{"type":"String","value":""}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2019-10-21T11:28:50.1691411Z","duration":"PT4M15.4010525S","correlationId":"300af333-a9ae-48b1-90e5-9906e5e6af4b","providers":[{"namespace":"Microsoft.Web","resourceTypes":[{"resourceType":"serverfarms","locations":["centralus"]},{"resourceType":"sites","locations":["centralus"]}]},{"namespace":"Microsoft.BotService","resourceTypes":[{"resourceType":"botServices","locations":["global"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","resourceType":"Microsoft.Web/serverfarms","resourceName":"cli000002"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002","resourceType":"Microsoft.Web/sites","resourceName":"cli000002"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002","resourceType":"Microsoft.Web/sites","resourceName":"cli000002"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002/Extensions/MSDeploy","resourceType":"Microsoft.Web/sites/Extensions","resourceName":"cli000002/MSDeploy"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","resourceType":"Microsoft.Web/serverfarms","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002","resourceType":"Microsoft.Web/sites","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002/Extensions/MSDeploy","resourceType":"Microsoft.Web/sites/Extensions","resourceName":"cli000002/MSDeploy"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/Sites/cli000002/config/publishingcredentials","resourceType":"Microsoft.Web/Sites/config","resourceName":"cli000002/publishingcredentials","actionName":"list","apiVersion":"2018-02-01"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","resourceType":"Microsoft.BotService/botServices","resourceName":"cli000002"}],"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/cli000002","name":"cli000002","type":"Microsoft.Resources/deployments","properties":{"templateHash":"12265489627004014712","parameters":{"botEnv":{"type":"String","value":"prod"},"botId":{"type":"String","value":"cli000002"},"description":{"type":"String","value":""},"location":{"type":"String","value":"centralus"},"sku":{"type":"String","value":"F0"},"kind":{"type":"String","value":"sdk"},"siteName":{"type":"String","value":"cli000002"},"appId":{"type":"String","value":"9f724df3-672b-4dcd-b0da-b2cf45064004"},"appSecret":{"type":"String","value":"5e7102a1-d7c3-4fc3-8bbe-c8eeb7f4cd73"},"zipUrl":{"type":"String","value":""},"serverFarmId":{"type":"String","value":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002"},"createServerFarm":{"type":"Bool","value":true},"serverFarmLocation":{"type":"String","value":"centralus"},"serverFarmSku":{"type":"Object","value":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}},"endpoint":{"type":"String","value":""},"botFileEncryptionKey":{"type":"String","value":""}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2019-11-27T23:29:26.3870906Z","duration":"PT4M55.5251552S","correlationId":"9d63bf31-9050-4442-9068-9dbdbd39b70b","providers":[{"namespace":"Microsoft.Web","resourceTypes":[{"resourceType":"serverfarms","locations":["centralus"]},{"resourceType":"sites","locations":["centralus"]}]},{"namespace":"Microsoft.BotService","resourceTypes":[{"resourceType":"botServices","locations":["global"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","resourceType":"Microsoft.Web/serverfarms","resourceName":"cli000002"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002","resourceType":"Microsoft.Web/sites","resourceName":"cli000002"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002","resourceType":"Microsoft.Web/sites","resourceName":"cli000002"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002/Extensions/MSDeploy","resourceType":"Microsoft.Web/sites/Extensions","resourceName":"cli000002/MSDeploy"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","resourceType":"Microsoft.Web/serverfarms","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002","resourceType":"Microsoft.Web/sites","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002/Extensions/MSDeploy","resourceType":"Microsoft.Web/sites/Extensions","resourceName":"cli000002/MSDeploy"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/Sites/cli000002/config/publishingcredentials","resourceType":"Microsoft.Web/Sites/config","resourceName":"cli000002/publishingcredentials","actionName":"list","apiVersion":"2018-02-01"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","resourceType":"Microsoft.BotService/botServices","resourceName":"cli000002"}],"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002"}]}}'
     headers:
       cache-control:
       - no-cache
@@ -599,7 +697,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 11:29:14 GMT
+      - Wed, 27 Nov 2019 23:29:31 GMT
       expires:
       - '-1'
       pragma:
@@ -627,15 +725,15 @@ interactions:
       ParameterSetName:
       - -k -g -n --appid -p --lang
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-botservice/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-botservice/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.76
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002?api-version=2018-07-12
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","name":"cli000002","type":"Microsoft.BotService/botServices","etag":"\"1e007585-0000-0100-0000-5dad964c0000\"","location":"global","sku":{"name":"F0"},"kind":"sdk","tags":{},"properties":{"displayName":"cli000002","description":null,"iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://cli000002.azurewebsites.net/api/messages","msaAppId":"f5cdb816-3349-4940-b073-4fd43c3e9713","developerAppInsightKey":null,"developerAppInsightsApplicationId":null,"luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"isStreamingSupported":false,"publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","name":"cli000002","type":"Microsoft.BotService/botServices","etag":"\"5300cdb3-0000-0100-0000-5ddf068f0000\"","location":"global","sku":{"name":"F0"},"kind":"sdk","tags":{},"properties":{"displayName":"cli000002","description":null,"iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://cli000002.azurewebsites.net/api/messages","msaAppId":"9f724df3-672b-4dcd-b0da-b2cf45064004","developerAppInsightKey":null,"developerAppInsightsApplicationId":null,"luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"isStreamingSupported":false,"publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -644,9 +742,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 11:29:15 GMT
+      - Wed, 27 Nov 2019 23:29:32 GMT
       etag:
-      - '"1e007585-0000-0100-0000-5dad964c0000"'
+      - '"5300cdb3-0000-0100-0000-5ddf068f0000"'
       expires:
       - '-1'
       pragma:

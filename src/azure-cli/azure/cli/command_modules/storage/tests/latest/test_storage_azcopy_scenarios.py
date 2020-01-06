@@ -154,6 +154,11 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 21))
 
+        self.cmd('storage remove -c {} --account-name {} --recursive'.format(
+            container, storage_account))
+        self.cmd('storage blob list -c {} --account-name {}'.format(
+            container, storage_account), checks=JMESPathCheck('length(@)', 0))
+
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     def test_storage_file_azcopy_remove(self, resource_group, storage_account):
@@ -189,6 +194,12 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
                          account_info, s2, d2)
         self.storage_cmd('storage file exists -p "{}" -s {}', account_info, src2_file, s2) \
             .assert_with_checks(JMESPathCheck('exists', False))
+
+        self.storage_cmd('storage remove --share-name {}',
+                         account_info, s2)
+        self.storage_cmd('storage file list -s {}', account_info, s2) \
+            .assert_with_checks(JMESPathCheck('length(@)', 1)) \
+            .assert_with_checks(JMESPathCheck('[0].type', 'dir'))
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='first_account')

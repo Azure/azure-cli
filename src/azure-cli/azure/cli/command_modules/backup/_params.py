@@ -21,14 +21,24 @@ from azure.cli.command_modules.backup._validators import \
 # ARGUMENT DEFINITIONS
 
 allowed_container_types = ['AzureIaasVM']
-allowed_workload_types = ['VM', 'AzureFileShare']
-allowed_backup_management_types = ['AzureIaasVM', 'AzureStorage']
+allowed_workload_types = ['VM', 'AzureFileShare', 'SAPHANA', 'MSSQL', 'SAPHanaDatabase', 'SQLDataBase']
+allowed_backup_management_types = ['AzureIaasVM', 'AzureStorage', 'AzureWorkload']
+allowed_protectable_item_type = ['SQLAG', 'SQLInstance', 'SQLDatabase', 'HANAInstance', 'SAPHanaDatabase', 'SAPHanaSystem']
 
 backup_management_type_help = """Specifiy the backup management type. Define how Azure Backup manages the backup of entities within the ARM resource. For eg: AzureWorkloads refers to workloads installed within Azure VMs, AzureStorage refers to entities within Storage account. Required only if friendly name is used as Container name."""
 container_name_help = """Name of the backup container. Accepts 'Name' or 'FriendlyName' from the output of az backup container list command. If 'FriendlyName' is passed then BackupManagementType is required."""
 workload_type_help = """Specifiy the type of applications within the Resource which should be discovered and protected by Azure Backup. """
-restore_mode_help = """Accepts OriginalLocation or AlternateLocation"""
+restore_mode_help = """Specify the restore mode."""
 resolve_conflict_help = "Instruction if there's a conflict with the restored data."
+resource_id_help = """ID of the Azure Resource containing items to be protected by Azure Backup service. Currently, only Azure VM resource IDs are supported."""
+policy_help = """JSON encoded policy definition. Use the show command with JSON output to obtain a policy object. Modify the values using a file editor and pass the object."""
+target_server_type_help = """Specify the type of the server which should be discovered."""
+protectable_item_name_type_help = """Specify the resource name to be protected by Azure Backup service."""
+backup_type_help = """'Full, Differential, Log, Copy-only-full' for backup Item type 'MSSQL'. 'Full, Differential' for backup item type 'SAPHANA'."""
+retain_until_help = """The date until which this backed up copy will be available for retrieval, in UTC (d-m-Y). For SAPHANA and SQL workload, retain-until parameter value will be overridden by the underlying policy."""
+diskslist_help = """List of disks to be excluded or included."""
+disk_list_setting_help = """option to decide whether to include or exclude the disk or reset any previous settings to default behavior"""
+
 vault_name_type = CLIArgumentType(help='Name of the Recovery services vault.', options_list=['--vault-name', '-v'], completer=get_resource_name_completion_list('Microsoft.RecoveryServices/vaults'))
 container_name_type = CLIArgumentType(help=container_name_help, options_list=['--container-name', '-c'])
 item_name_type = CLIArgumentType(help='Name of the backed up item.', options_list=['--item-name', '-i'])
@@ -38,7 +48,14 @@ rp_name_type = CLIArgumentType(help='Name of the recovery point.', options_list=
 backup_management_type = CLIArgumentType(help=backup_management_type_help, arg_type=get_enum_type(allowed_backup_management_types), options_list=['--backup-management-type'])
 workload_type = CLIArgumentType(help=workload_type_help, arg_type=get_enum_type(allowed_workload_types), options_list=['--workload-type'])
 restore_mode_type = CLIArgumentType(help=restore_mode_help, arg_type=get_enum_type(['OriginalLocation', 'AlternateLocation']), options_list=['--restore-mode'])
+restore_mode_workload_type = CLIArgumentType(help=restore_mode_help, arg_type=get_enum_type(['AlternateWorkloadRestore', 'OriginalWorkloadRestore']), options_list=['--restore-mode'])
 resolve_conflict_type = CLIArgumentType(help=resolve_conflict_help, arg_type=get_enum_type(['Overwrite', 'Skip']), options_list=['--resolve-conflict'])
+resource_id_type = CLIArgumentType(help=resource_id_help, options_list=['--resource-id'])
+policy_type = CLIArgumentType(help=policy_help, options_list=['--policy'], completer=FilesCompleter(), type=file_type)
+protectable_item_type = CLIArgumentType(help=workload_type_help, options_list=['--protectable-item-type'], arg_type=get_enum_type(allowed_protectable_item_type))
+target_server_type = CLIArgumentType(help=target_server_type_help, options_list=['--target-server-type'], arg_type=get_enum_type(allowed_protectable_item_type))
+protectable_item_name_type = CLIArgumentType(help=protectable_item_name_type_help, options_list=['--protectable-item-name'])
+diskslist_type = CLIArgumentType(nargs='+', help=diskslist_help)
 
 
 # pylint: disable=too-many-statements
@@ -54,6 +71,7 @@ def load_arguments(self, _):
 
     with self.argument_context('backup vault backup-properties set') as c:
         c.argument('backup_storage_redundancy', arg_type=get_enum_type(['GeoRedundant', 'LocallyRedundant']), help='Sets backup storage properties for a Recovery Services vault.')
+        c.argument('soft_delete_feature_state', arg_type=get_enum_type(['Enable', 'Disable']), help='Set soft-delete feature state for a Recovery Services Vault.')
 
     # Container
     with self.argument_context('backup container') as c:
@@ -70,6 +88,16 @@ def load_arguments(self, _):
     with self.argument_context('backup container unregister') as c:
         c.argument('backup_management_type', backup_management_type)
         c.argument('container_name', container_name_type)
+
+    with self.argument_context('backup container re-register') as c:
+        c.argument('backup_management_type', backup_management_type)
+        c.argument('container_name', container_name_type)
+        c.argument('workload_type', workload_type)
+
+    with self.argument_context('backup container register') as c:
+        c.argument('backup_management_type', backup_management_type)
+        c.argument('resource_id', resource_id_type)
+        c.argument('workload_type', workload_type)
 
     # Item
     with self.argument_context('backup item') as c:
@@ -111,6 +139,8 @@ def load_arguments(self, _):
     with self.argument_context('backup policy create') as c:
         c.argument('policy', type=file_type, help='JSON encoded policy definition. Use the show command with JSON output to obtain a policy object. Modify the values using a file editor and pass the object.', completer=FilesCompleter())
         c.argument('name', options_list=['--name', '-n'], help='Name of the Policy.')
+        c.argument('backup_management_type', backup_management_type)
+        c.argument('workload_type', workload_type)
 
     with self.argument_context('backup policy list') as c:
         c.argument('vault_name', vault_name_type, id_part=None)
@@ -124,13 +154,14 @@ def load_arguments(self, _):
         c.argument('container_name', container_name_type)
         c.argument('item_name', item_name_type)
 
-    with self.argument_context('backup recoverypoint list') as c:
-        c.argument('vault_name', vault_name_type, id_part=None)
-        c.argument('start_date', type=datetime_type, help='The start date of the range in UTC (d-m-Y).')
-        c.argument('end_date', type=datetime_type, help='The end date of the range in UTC (d-m-Y).')
-        c.argument('backup_management_type', backup_management_type)
-        c.argument('container_name', container_name_type)
-        c.argument('workload_type', workload_type)
+    for command in ['list', 'show-log-chain']:
+        with self.argument_context('backup recoverypoint ' + command) as c:
+            c.argument('vault_name', vault_name_type, id_part=None)
+            c.argument('start_date', type=datetime_type, help='The start date of the range in UTC (d-m-Y).')
+            c.argument('end_date', type=datetime_type, help='The end date of the range in UTC (d-m-Y).')
+            c.argument('backup_management_type', backup_management_type)
+            c.argument('container_name', container_name_type)
+            c.argument('workload_type', workload_type)
 
     with self.argument_context('backup recoverypoint show') as c:
         c.argument('name', rp_name_type, options_list=['--name', '-n'], help='Name of the recovery point. You can use the backup recovery point list command to get the name of a backed up item.')
@@ -145,15 +176,17 @@ def load_arguments(self, _):
         c.argument('policy_name', policy_name_type)
 
     # TODO: Need to use item.id once https://github.com/Azure/msrestazure-for-python/issues/80 is fixed.
-    for command in ['backup-now', 'disable']:
+    for command in ['backup-now', 'disable', 'auto-disable-for-azurewl', 'resume', 'undelete', 'update-for-vm']:
         with self.argument_context('backup protection ' + command) as c:
             c.argument('container_name', container_name_type)
             c.argument('item_name', item_name_type)
             c.argument('backup_management_type', backup_management_type)
             c.argument('workload_type', workload_type)
+            c.argument('enable_compression', arg_type=get_three_state_flag(), help='Option to enable compression')
+            c.argument('backup_type', help=backup_type_help, options_list=['--backup-type'])
 
     with self.argument_context('backup protection backup-now') as c:
-        c.argument('retain_until', type=datetime_type, help='The date until which this backed up copy will be available for retrieval, in UTC (d-m-Y).')
+        c.argument('retain_until', type=datetime_type, help=retain_until_help)
 
     with self.argument_context('backup protection disable') as c:
         c.argument('delete_backup_data', arg_type=get_three_state_flag(), help='Option to delete existing backed up data in the Recovery services vault.')
@@ -163,9 +196,35 @@ def load_arguments(self, _):
     with self.argument_context('backup protection check-vm') as c:
         c.argument('vm_id', help='ID of the virtual machine to be checked for protection.')
 
+    with self.argument_context('backup protection enable-for-vm') as c:
+        c.argument('diskslist', diskslist_type)
+        c.argument('disk_list_setting', arg_type=get_enum_type(['include', 'exclude']), options_list=['--disk-list-setting'], help=disk_list_setting_help)
+
+    with self.argument_context('backup protection update-for-vm') as c:
+        c.argument('diskslist', diskslist_type)
+        c.argument('disk_list_setting', arg_type=get_enum_type(['include', 'exclude', 'resetexclusionsettings']), options_list=['--disk-list-setting'], help=disk_list_setting_help)
+
     with self.argument_context('backup protection enable-for-azurefileshare') as c:
         c.argument('azure_file_share', options_list=['--azure-file-share'], help='Name of the Azure FileShare.')
         c.argument('storage_account', options_list=['--storage-account'], help='Name of the Storage Account of the FileShare.')
+
+    for command in ["enable-for-azurewl", "auto-enable-for-azurewl"]:
+        with self.argument_context('backup protection ' + command) as c:
+            c.argument('protectable_item_type', protectable_item_type)
+            c.argument('protectable_item_name', protectable_item_name_type)
+            c.argument('server_name', options_list=['--server-name'], help='Parent Server name of the item.')
+            c.argument('workload_type', workload_type)
+
+    # Protectable-item
+    with self.argument_context('backup protectable-item') as c:
+        c.argument('vault_name', vault_name_type)
+        c.argument('workload_type', workload_type)
+        c.argument('container_name', container_name_type)
+
+    with self.argument_context('backup protectable-item show') as c:
+        c.argument('name', options_list=['--name'], help='Name of the protectable item.')
+        c.argument('server_name', options_list=['--server-name'], help='Parent Server name of the item.')
+        c.argument('protectable_item_type', protectable_item_type)
 
     # Restore
     # TODO: Need to use recovery_point.id once https://github.com/Azure/msrestazure-for-python/issues/80 is fixed.
@@ -179,6 +238,8 @@ def load_arguments(self, _):
         c.argument('storage_account', help='Name or ID of the staging storage account. The VM configuration will be restored to this storage account. See the help for --restore-to-staging-storage-account parameter for more info.')
         c.argument('restore_to_staging_storage_account', arg_type=get_three_state_flag(), help='Use this flag when you want disks to be restored to the staging storage account using the --storage-account parameter. When not specified, disks will be restored to their original storage accounts. Default: false.')
         c.argument('target_resource_group', options_list=['--target-resource-group', '-t'], help='Use this to specify the target resource group in which the restored disks will be saved')
+        c.argument('diskslist', diskslist_type)
+        c.argument('restore_only_osdisk', arg_type=get_three_state_flag(), help='Use this flag to restore only OS disks of a backed up VM.')
 
     with self.argument_context('backup restore restore-azurefileshare') as c:
         c.argument('resolve_conflict', resolve_conflict_type)
@@ -196,6 +257,21 @@ def load_arguments(self, _):
         c.argument('source_file_type', arg_type=get_enum_type(['File', 'Directory']), options_list=['--source-file-type'], help='Specify the source file type to be selected')
         c.argument('source_file_path', options_list=['--source-file-path'], help="""The absolute path of the file, to be restored within the file share, as a string. This path is the same path used in the 'az storage file download' or 'az storage file show' CLI commands.""")
 
+    with self.argument_context('backup restore restore-azurewl') as c:
+        c.argument('recovery_config', options_list=['--recovery-config'], help="""Specify the recovery configuration of a backed up item. The configuration object can be obtained from 'backup recoveryconfig show' command.""")
+
+    # Recoveryconfig
+    with self.argument_context('backup recoveryconfig show') as c:
+        c.argument('container_name', container_name_type)
+        c.argument('item_name', item_name_type)
+        c.argument('restore_mode', restore_mode_workload_type)
+        c.argument('vault_name', vault_name_type)
+        c.argument('log_point_in_time', options_list=['--log-point-in-time'], help="""Specify the point-in-time which will be restored.""")
+        c.argument('rp_name', rp_name_type)
+        c.argument('target_item_name', options_list=['--target-item-name'], help="""Specify the target item name for the restore operation.""")
+        c.argument('target_server_type', target_server_type)
+        c.argument('target_server_name', options_list=['--target-server-name'], help="""Specify the parent server name of the target item.""")
+        c.argument('workload_type', workload_type)
     # Job
     with self.argument_context('backup job') as c:
         c.argument('vault_name', vault_name_type, id_part='name')

@@ -228,7 +228,7 @@ def load_arguments(self, _):
     for scope in ['aks', 'acs kubernetes', 'acs dcos']:
         with self.argument_context('{} install-cli'.format(scope)) as c:
             c.argument('client_version', validator=validate_k8s_client_version, help='Version of the client to install.')
-            c.argument('install_location', default=_get_default_install_location('kubectl'), help='Path at which to install DC/OS.')
+            c.argument('install_location', default=_get_default_install_location('kubectl'), help='Path at which to install kubectl.')
 
     with self.argument_context('aks install-connector') as c:
         c.argument('aci_resource_group', help='The resource group to create the ACI container groups')
@@ -321,7 +321,7 @@ def load_arguments(self, _):
         c.argument('name', validator=validate_linux_host_name)
         c.argument('compute_vm_size', options_list=['--compute-vm-size', '-s'])
         c.argument('customer_admin_group_id', options_list=['--customer-admin-group-id'])
-        c.argument('workspace_resource_id')
+        c.argument('workspace_id')
 
 
 def _get_default_install_location(exe_name):

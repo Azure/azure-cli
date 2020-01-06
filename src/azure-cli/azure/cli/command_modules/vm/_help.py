@@ -100,6 +100,39 @@ examples:
     crafted: true
 """
 
+helps['disk-encryption-set'] = """
+type: group
+short-summary: Disk Encryption Set resource.
+"""
+
+helps['disk-encryption-set create'] = """
+type: command
+short-summary: Create a disk encryption set.
+examples:
+  - name: Create a disk encryption set
+    text: az disk-encryption-set create -g MyResourceGroup -n MyDiskEncryptionSet --key-url MyKey --source-vault MyVault
+"""
+
+helps['disk-encryption-set delete'] = """
+type: command
+short-summary: Delete a disk encryption set.
+"""
+
+helps['disk-encryption-set list'] = """
+type: command
+short-summary: List disk encryption sets.
+"""
+
+helps['disk-encryption-set show'] = """
+type: command
+short-summary: Get information of a disk encryption sets.
+"""
+
+helps['disk-encryption-set update'] = """
+type: command
+short-summary: Update a disk encryption set.
+"""
+
 helps['image'] = """
 type: group
 short-summary: Manage custom virtual machine images.
@@ -1573,6 +1606,18 @@ examples:
 
 """
 
+helps['vm reapply'] = """
+type: command
+short-summary: Reapply VMs.
+examples:
+  - name: Reapply a VM.
+    text: az vm reapply -g MyResourceGroup -n MyVm
+  - name: Reapply all VMs in a resource group.
+    text: >
+        az vm reapply --ids $(az vm list -g MyResourceGroup --query "[].id" -o tsv)
+
+"""
+
 helps['vm redeploy'] = """
 type: command
 short-summary: Redeploy an existing VM.
@@ -1879,15 +1924,15 @@ type: command
 short-summary: Update a user account.
 parameters:
   - name: --ssh-key-value
-    short-summary: SSH public key file value or public key file path
+    short-summary: SSH public key file value or public key file path. This command appends the new public key text to the ~/.ssh/authorized_keys file for the admin user on the VM. This does not replace or remove any existing SSH keys.
 examples:
   - name: Update a Windows user account.
     text: az vm user update -u username -p password -n MyVm -g MyResourceGroup
-  - name: Update a Linux user account.
-    text: az vm user update -u username --ssh-key-value "$({ ~/.ssh/id_rsa.pub)" -n MyVm -g MyResourceGroup
-  - name: Update a user on all VMs in a resource group.
+  - name: Update a Linux user account. ("$(< filename)" syntax is not supported on Command Prompt or PowerShell.)
+    text: az vm user update -u username --ssh-key-value "$(< ~/.ssh/id_rsa.pub)" -n MyVm -g MyResourceGroup
+  - name: Update a user on all VMs in a resource group. ("$(< filename)" syntax is not supported on Command Prompt or PowerShell.)
     text: >
-        az vm user update -u username --ssh-key-value "$({ ~/.ssh/id_rsa.pub)" --ids $(az vm list -g MyResourceGroup --query "[].id" -o tsv)
+        az vm user update -u username --ssh-key-value "$(< ~/.ssh/id_rsa.pub)" --ids $(az vm list -g MyResourceGroup --query "[].id" -o tsv)
 
 """
 
@@ -2397,4 +2442,61 @@ short-summary: Manage monitor aspect for a vm.
 helps['vm monitor log'] = """
 type: group
 short-summary: Manage log analytics workspace for a vm.
+"""
+
+helps['vm monitor metrics'] = """
+type: group
+short-summary: Manage metrics for a vm.
+"""
+
+helps['vm monitor metrics tail'] = """
+type: command
+short-summary: List the metric values for a VM.
+parameters:
+  - name: --aggregation
+    short-summary: The list of aggregation types (space-separated) to retrieve.
+    populator-commands:
+      - az vm monitor metrics list-definitions -n MyVM -g MyRG --query "@[*].supportedAggregationTypes"
+  - name: --interval
+    short-summary: >
+        The interval over which to aggregate metrics, in ##h##m format.
+  - name: --filter
+    short-summary: A string used to reduce the set of metric data returned. eg. "LUN eq '*'"
+    long-summary: 'For a full list of filters, see the filter string reference at https://docs.microsoft.com/rest/api/monitor/metrics/list'
+  - name: --metadata
+    short-summary: Return the metadata values instead of metric data
+  - name: --dimension
+    short-summary: The list of dimensions (space-separated) the metrics are queried into.
+    populator-commands:
+      - az vm monitor metrics list-definitions -n MyVM -g MyRG --query "@[*].dimensions"
+  - name: --namespace
+    short-summary: Namespace to query metric definitions for.
+  - name: --offset
+    short-summary: >
+        Time offset of the query range, in ##d##h format.
+    long-summary: >
+        Can be used with either --start-time or --end-time. If used with --start-time, then
+        the end time will be calculated by adding the offset. If used with --end-time (default), then
+        the start time will be calculated by subtracting the offset. If --start-time and --end-time are
+        provided, then --offset will be ignored.
+  - name: --metrics
+    short-summary: >
+        Space-separated list of metric names to retrieve.
+    populator-commands:
+      - az vm monitor metrics list-definitions -n MyVM -g MyRG --query "@[*].name.value"
+examples:
+  - name: List CPU usage of VM for past one hour
+    text: >
+        az vm monitor metrics tail --name myVM -g myRG --metric "Percentage CPU"
+  - name: List one hour CPU usage of VM started at 2019-12-18T00:00:00Z
+    text: >
+        az vm monitor metrics tail --name myVM -g myRG --metric "Percentage CPU" --start-time 2019-12-18T00:00:00Z
+  - name: List CPU usage of VM for past one hour with filter
+    text: >
+        az vm monitor metrics tail --name myVM -g myRG --metrics "Per Disk Read Bytes/sec" --filter "SlotId eq '*'"
+"""
+
+helps['vm monitor metrics list-definitions'] = """
+type: command
+short-summary: List the metric definitions for a VM.
 """

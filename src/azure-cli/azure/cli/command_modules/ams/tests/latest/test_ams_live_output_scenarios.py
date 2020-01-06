@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
+from knack.util import CLIError
 
 
 class AmsLiveOutputTests(ScenarioTest):
@@ -130,6 +131,13 @@ class AmsLiveOutputTests(ScenarioTest):
             self.check('name', '{liveOutputName}'),
             self.check('resourceGroup', '{rg}')
         ])
+
+        nonexits_live_output_name = self.create_random_name(prefix='live-output', length=20)
+        self.kwargs.update({
+            'nonexits_live_output_name': nonexits_live_output_name
+        })
+        with self.assertRaisesRegexp(SystemExit, '3'):
+            self.cmd('az ams live-output show -a {amsname} -n {liveOutputName} -g {rg} --live-event-name {nonexits_live_output_name}')
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
