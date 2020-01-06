@@ -283,7 +283,7 @@ parameters:
   - name: --pattern
     type: string
     short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
-    long-summary: "*" will match any character including "/".
+    long-summary: '*' will match any character including '/'.
   - name: --dryrun
     type: bool
     short-summary: List the files or blobs to be uploaded. No actual data transfer will occur.
@@ -334,7 +334,7 @@ parameters:
   - name: --pattern
     type: string
     short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
-    long-summary: "*" will match any character including "/". You can also try "az stroage remove" command with --include and --exclude with azure cli >= 2.0.70 to match multiple patterns.
+    long-summary: '*' will match any character including '/'. You can also try "az stroage remove" command with --include and --exclude with azure cli >= 2.0.70 to match multiple patterns.
   - name: --dryrun
     type: bool
     short-summary: Show the summary of the operations to be taken instead of actually deleting the file(s).
@@ -359,7 +359,7 @@ examples:
         az storage blob delete-batch -s mycontainer --account-name mystorageaccount --pattern cli-201[89]-??-??.txt
   - name: Delete all blobs with the format 'cli-201x-xx-xx.txt' except cli-2018-xx-xx.txt' and 'cli-2019-xx-xx.txt' in a container.
     text: |
-        az storage blob delete-batch -s mycontainer --account-name mystorageaccount --pattern cli-201[!89]-??-??.txt     
+        az storage blob delete-batch -s mycontainer --account-name mystorageaccount --pattern cli-201[!89]-??-??.txt
 """
 
 helps['storage blob download-batch'] = """
@@ -376,7 +376,7 @@ parameters:
   - name: --pattern
     type: string
     short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
-    long-summary: "*" will match any character including "/".
+    long-summary: '*' will match any character including '/'.
   - name: --dryrun
     type: bool
     short-summary: Show the summary of the operations to be taken instead of actually downloading the file(s).
@@ -568,7 +568,7 @@ parameters:
   - name: --pattern
     type: string
     short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
-    long-summary: "*" will match any character including "/".
+    long-summary: '*' will match any character including '/'.
   - name: --dryrun
     type: bool
     short-summary: Show the summary of the operations to be taken instead of actually uploading the file(s).
@@ -599,7 +599,7 @@ examples:
         az storage blob upload-batch -d mycontainer --account-name mystorageaccount -s <path-to-directory> --pattern cli-201[89]-??-??.txt
   - name: Upload all files with the format 'cli-201x-xx-xx.txt' except cli-2018-xx-xx.txt' and 'cli-2019-xx-xx.txt' in a container.
     text: |
-        az storage blob upload-batch -d mycontainer --account-name mystorageaccount -s <path-to-directory> --pattern cli-201[!89]-??-??.txt  
+        az storage blob upload-batch -d mycontainer --account-name mystorageaccount -s <path-to-directory> --pattern cli-201[!89]-??-??.txt
 """
 
 helps['storage blob url'] = """
@@ -917,7 +917,7 @@ parameters:
   - name: --pattern
     type: string
     short-summary: The pattern used for globbing files and blobs. The supported patterns are '*', '?', '[seq', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
-    long-summary: "*" will match any character including "/".
+    long-summary: '*' will match any character including '/'.
   - name: --dryrun
     type: bool
     short-summary: List the files and blobs to be copied. No actual data transfer will occur.
@@ -952,7 +952,7 @@ parameters:
   - name: --pattern
     type: string
     short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
-    long-summary: "*" will match any character including "/".
+    long-summary: '*' will match any character including '/'.
   - name: --dryrun
     type: bool
     short-summary: List the files and blobs to be deleted. No actual data deletion will occur.
@@ -978,7 +978,7 @@ parameters:
   - name: --pattern
     type: string
     short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
-    long-summary: "*" will match any character including "/".
+    long-summary: '*' will match any character including '/'.
   - name: --dryrun
     type: bool
     short-summary: List the files and blobs to be downloaded. No actual data transfer will occur.
@@ -1069,7 +1069,7 @@ parameters:
   - name: --pattern
     type: string
     short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
-    long-summary: "*" will match any character including "/".
+    long-summary: '*' will match any character including '/'.
   - name: --dryrun
     type: bool
     short-summary: List the files and blobs to be uploaded. No actual data transfer will occur.
