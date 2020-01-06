@@ -286,8 +286,8 @@ short-summary: Creates the step.
 examples:
   - name: Creates a wait step.
     text: >
-        az deploymentmanager step create -g rg1 -l location -n contosoServiceWaitStep --duration PT30M 
-  - name: Creates a health check step from a JSON file. The step information is read from the file. 
+        az deploymentmanager step create -g rg1 -l location -n contosoServiceWaitStep --duration PT30M
+  - name: Creates a health check step from a JSON file. The step information is read from the file.
     text: >
         az deploymentmanager step create -g rg1 --step healthcheck_step.json
 """
@@ -307,7 +307,7 @@ short-summary: List all steps in a resource group.
 examples:
   - name: List available steps in the given resource group.
     text: >
-        az deploymentmanager step list -g rg1 
+        az deploymentmanager step list -g rg1
 """
 
 helps['deploymentmanager step update'] = """

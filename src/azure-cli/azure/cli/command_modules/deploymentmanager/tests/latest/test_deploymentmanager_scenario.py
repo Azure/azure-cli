@@ -416,7 +416,7 @@ class DeploymentManagerTests(ScenarioTest):
 
         step_name = resource_group_name + "RestHealthCheckStep"
         updated_healthy_state_duration = "PT30M"
-            
+
         self.replace_string("__HEALTH_CHECK_STEP_NAME__", step_name, healthcheck_file_path, True)
 
         self.kwargs = {
@@ -727,11 +727,11 @@ class DeploymentManagerTests(ScenarioTest):
             'step_name': step_name
         }
 
-        steps = self.cmd('deploymentmanager step list -g {rg}', checks= [
+        steps = self.cmd('deploymentmanager step list -g {rg}', checks=[
             self.check("length(@)", 3)
         ]).get_output_in_json()
 
-        selected_step = [x for x in steps if(x['name'].lower() == step_name.lower())] 
+        selected_step = [x for x in steps if(x['name'].lower() == step_name.lower())]
         self.assertIsNotNone(selected_step, "list steps did not return {step_name}.")
 
     def list_service_units(self, resource_group_name, service_topology_name, service_name, service_unit_name):
@@ -742,11 +742,11 @@ class DeploymentManagerTests(ScenarioTest):
             'su_name': service_unit_name
         }
 
-        service_units = self.cmd('deploymentmanager service-unit list -g {rg} --service-topology-name {st_name} --service-name {s_name}', checks= [
+        service_units = self.cmd('deploymentmanager service-unit list -g {rg} --service-topology-name {st_name} --service-name {s_name}', checks=[
             self.check("length(@)", 2)
         ]).get_output_in_json()
 
-        selected_service_unit = [x for x in service_units if(x['name'].lower() == service_unit_name.lower())] 
+        selected_service_unit = [x for x in service_units if(x['name'].lower() == service_unit_name.lower())]
         self.assertIsNotNone(selected_service_unit, "list service units did not return {su_name}.")
 
     def list_services(self, resource_group_name, service_topology_name, service_name):
@@ -755,7 +755,7 @@ class DeploymentManagerTests(ScenarioTest):
             'st_name': service_topology_name
         }
 
-        services = self.cmd('deploymentmanager service list -g {rg} --service-topology-name {st_name}', checks= [
+        services = self.cmd('deploymentmanager service list -g {rg} --service-topology-name {st_name}', checks=[
             self.check("length(@)", 2)
         ]).get_output_in_json()
 
@@ -763,7 +763,7 @@ class DeploymentManagerTests(ScenarioTest):
             's_name': service_name
         }
 
-        selected_service = [x for x in services if(x['name'].lower() == service_name.lower())] 
+        selected_service = [x for x in services if(x['name'].lower() == service_name.lower())]
         self.assertIsNotNone(selected_service, "list services did not return {s_name}.")
 
     def list_service_topologies(self, resource_group_name, service_topology_name):
@@ -771,7 +771,7 @@ class DeploymentManagerTests(ScenarioTest):
             'rg': resource_group_name
         }
 
-        service_topologies = self.cmd('deploymentmanager service-topology list -g {rg}', checks= [
+        service_topologies = self.cmd('deploymentmanager service-topology list -g {rg}', checks=[
             self.check("length(@)", 2)
         ]).get_output_in_json()
 
@@ -779,16 +779,15 @@ class DeploymentManagerTests(ScenarioTest):
             'st_name': service_topology_name
         }
 
-        selected_service_topology = [x for x in service_topologies if(x['name'].lower() == service_topology_name.lower())] 
+        selected_service_topology = [x for x in service_topologies if(x['name'].lower() == service_topology_name.lower())]
         self.assertIsNotNone(selected_service_topology, "list service topologies did not return {st_name}.")
-
 
     def list_artifact_sources(self, resource_group_name, artifact_source_name):
         self.kwargs = {
             'rg': resource_group_name
         }
 
-        artifact_sources = self.cmd('deploymentmanager artifact-source list -g {rg}', checks= [
+        artifact_sources = self.cmd('deploymentmanager artifact-source list -g {rg}', checks=[
             self.check("length(@)", 2)
         ]).get_output_in_json()
 
@@ -796,7 +795,7 @@ class DeploymentManagerTests(ScenarioTest):
             'as_name': artifact_source_name
         }
 
-        selected_artifact_source = [x for x in artifact_sources if(x['name'].lower() == artifact_source_name.lower())] 
+        selected_artifact_source = [x for x in artifact_sources if(x['name'].lower() == artifact_source_name.lower())]
         self.assertIsNotNone(selected_artifact_source, "list artifact sources did not return {as_name}.")
 
     def delete_artifact_source(self, resource_group_name, artifact_source_name):
