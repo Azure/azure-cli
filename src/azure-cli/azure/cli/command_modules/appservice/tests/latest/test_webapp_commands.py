@@ -287,7 +287,7 @@ class WebappConfigureTest(ScenarioTest):
 
         # verify the baseline
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name)).assert_with_checks([
-            JMESPathCheck('alwaysOn', False),
+            JMESPathCheck('alwaysOn', True),
             JMESPathCheck('autoHealEnabled', False),
             JMESPathCheck('phpVersion', '5.6'),
             JMESPathCheck('netFrameworkVersion', 'v4.0'),
