@@ -9,24 +9,24 @@ Azure CLI releases new versions every 3 weeks. Many customers and developers are
 
 Step 1. Select a commit. Click the √ or × symbol. Click "Details" of a "build package" item.
 
-![](assets/1.png)
+![](assets/1.PNG)
 
 Step 2. Click "View more details on Azure Pipelines".
 
-![](assets/2.png)
+![](assets/2.PNG)
 
 Step 3. Click "1 artifact"
 
-![](assets/3.png)
+![](assets/3.PNG)
 
 Step 4. Download your favorite artifact.
 
-![](assets/4.png)
+![](assets/4.PNG)
 
 ## Tutorial for PR
 
 Step 1. Open a PR no matter it is merged or not. Click "Checks" tab.
 
-![](assets/5.png)
+![](assets/5.PNG)
 
 Step 2-4. Follow the same steps of tutorial for commit.
