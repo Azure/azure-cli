@@ -835,9 +835,10 @@ class DeploymentManagerTests(ScenarioTest):
     def replace_string(self, replacement_symbol, replacement_value, filePath, overridePlayback=False):
         is_playback = os.path.exists(self.recording_file)
         if (not is_playback or overridePlayback):
-            with fileinput.FileInput(filePath, inplace=True) as file:
-                for line in file:
-                    print(line.replace(replacement_symbol, replacement_value), end='')
+            file = fileinput.FileInput(filePath, inplace=True)
+            for line in file:
+                print(line.replace(replacement_symbol, replacement_value), end='')
+            file.close()
 
     def replace_rollout_placeholders(
         self,
