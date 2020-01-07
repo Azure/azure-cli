@@ -317,13 +317,15 @@ def __write_kv_to_app_service(cmd, key_values, appservice_account):
             value = kv.value
             # If its a KeyVault ref, convert the format to AppService KeyVault ref format
             if kv.content_type and kv.content_type.lower() == KeyVaultConstants.KEYVAULT_CONTENT_TYPE:
-                from azure.cli.core.util import shell_safe_json_parse
-                secret_uri = shell_safe_json_parse(value).get("uri")
-                if secret_uri:
-                    value = KeyVaultConstants.APPSVC_KEYVAULT_PREFIX + '(SecretUri={0})'.format(secret_uri)
-                else:
+                try:
+                    secret_uri = json.loads(value).get("uri")
+                    if secret_uri:
+                        value = KeyVaultConstants.APPSVC_KEYVAULT_PREFIX + '(SecretUri={0})'.format(secret_uri)
+                    else:
+                        raise ValueError("Not a valid KeyVault reference.")
+                except (AttributeError, TypeError, ValueError) as e:
                     logger.debug(
-                        'Key "%s" with value "%s" is not a well-formatted KeyVault reference. It will be treated like a regular key-value.', name, value)
+                        'Key "%s" with value "%s" is not a well-formatted KeyVault reference. It will be treated like a regular key-value.\n%s', name, value, str(e))
 
             if 'AppService:SlotSetting' in kv.tags and kv.tags['AppService:SlotSetting'] == 'true':
                 slot_settings.append(name + '=' + value)
