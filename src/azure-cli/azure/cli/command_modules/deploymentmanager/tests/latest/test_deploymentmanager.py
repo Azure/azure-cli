@@ -123,7 +123,7 @@ class DeploymentManagerTests(ScenarioTest):
         }
 
         self.cmd('deploymentmanager service-topology update -g {rg} -n {st_name} --artifact-source {as_id}', checks=[
-            self.check('type', 'Microsoft.DeploymentManager/servicetopologies'),
+            self.check('type', 'Microsoft.DeploymentManager/serviceTopologies'),
             self.check('name', topology_name),
             self.check('artifactSourceId', updated_artifact_source_id)])
 
