@@ -13,7 +13,7 @@ import time
 import yaml
 
 from knack.util import CLIError
-from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest)
+from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest, LiveScenarioTest)
 from azure.cli.testsdk.checkers import NoneCheck
 from azure.cli.command_modules.appconfig._constants import KeyVaultConstants
 
@@ -393,7 +393,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         assert imported_kvs == exported_kvs
 
 
-class AppConfigAppServiceImportExportScenarioTest(ScenarioTest):
+class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_appconfig_to_appservice_import_export(self, resource_group, location):
