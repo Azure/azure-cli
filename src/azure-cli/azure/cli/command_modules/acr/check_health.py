@@ -23,8 +23,10 @@ IMAGE = "mcr.microsoft.com/mcr/hello-world:latest"
 FAQ_MESSAGE = "\nPlease refer to https://aka.ms/acr/health-check for more information."
 ERROR_MSG_DEEP_LINK = "\nPlease refer to https://aka.ms/acr/errors#{} for more information."
 MIN_HELM_VERSION = "2.11.0"
-HELM_VERSION_REGEX = re.compile(r'(SemVer|Version):"v([.\d]+)"')
+HELM_VERSION_REGEX = re.compile(r'SemVer:"v([.\d]+)"', re.I)
 ACR_CHECK_HEALTH_MSG = "Try running 'az acr check-health -n {} --yes' to diagnose this issue."
+RECOMMENDED_NOTARY_VERSION = "0.6.0"
+NOTARY_VERSION_REGEX = re.compile(r'Version:\s+([.\d]+)', re.I)
 
 
 # Utilities functions
@@ -156,7 +158,7 @@ def _get_helm_version(ignore_errors):
     # Retrieve the helm version if regex pattern is found
     match_obj = HELM_VERSION_REGEX.search(output)
     if match_obj:
-        output = match_obj.group(2)
+        output = match_obj.group(1)
 
     print("Helm version: {}".format(output), file=sys.stderr)
 
@@ -166,6 +168,58 @@ def _get_helm_version(ignore_errors):
             "Current Helm client version is not recommended. Please upgrade your Helm client to at least version {}."
             .format(MIN_HELM_VERSION))
         _handle_error(obsolete_ver_error, ignore_errors)
+
+
+def _get_notary_version(ignore_errors):
+    from ._errors import NOTARY_VERSION_ERROR
+    from .notary import get_notary_command
+    from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module
+
+    # Notary command check
+    notary_command, error = get_notary_command(is_diagnostics_context=True)
+
+    if error:
+        _handle_error(error, ignore_errors)
+        return
+
+    # Notary version check
+    output, warning, stderr = _subprocess_communicate([notary_command, "version"])
+
+    if stderr:
+        _handle_error(NOTARY_VERSION_ERROR.append_error_message(stderr), ignore_errors)
+        return
+
+    if warning:
+        logger.warning(warning)
+
+    # Retrieve the notary version if regex pattern is found
+    match_obj = NOTARY_VERSION_REGEX.search(output)
+    if match_obj:
+        output = match_obj.group(1)
+
+    print("Notary version: {}".format(output), file=sys.stderr)
+
+    # Display error if the current version does not match the recommended version
+    if match_obj and LooseVersion(output) != LooseVersion(RECOMMENDED_NOTARY_VERSION):
+        version_msg = "upgrade"
+        if LooseVersion(output) > LooseVersion(RECOMMENDED_NOTARY_VERSION):
+            version_msg = "downgrade"
+        obsolete_ver_error = NOTARY_VERSION_ERROR.set_error_message(
+            "Current notary version is not recommended. Please {} your notary client to version {}."
+            .format(version_msg, RECOMMENDED_NOTARY_VERSION))
+        _handle_error(obsolete_ver_error, ignore_errors)
+
+
+def _check_health_environment(ignore_errors, yes):
+    from azure.cli.core.util import in_cloud_console
+    if in_cloud_console():
+        logger.warning("Environment checks are not supported in Azure Cloud Shell.")
+        return
+
+    _get_docker_status_and_version(ignore_errors, yes)
+    _get_cli_version()
+    _get_helm_version(ignore_errors)
+    _get_notary_version(ignore_errors)
 
 
 # Checks for the connectivity
@@ -277,17 +331,7 @@ def acr_check_health(cmd,  # pylint: disable useless-return
                      ignore_errors=False,
                      yes=False,
                      registry_name=None):
-    from azure.cli.core.util import in_cloud_console
-    in_cloud_console = in_cloud_console()
-    if in_cloud_console:
-        logger.warning("Environment checks are not supported in Azure Cloud Shell.")
-    else:
-        _get_docker_status_and_version(ignore_errors, yes)
-        _get_cli_version()
 
+    _check_health_environment(ignore_errors, yes)
     _check_health_connectivity(cmd, registry_name, ignore_errors)
-
-    if not in_cloud_console:
-        _get_helm_version(ignore_errors)
-
     print(FAQ_MESSAGE, file=sys.stderr)
