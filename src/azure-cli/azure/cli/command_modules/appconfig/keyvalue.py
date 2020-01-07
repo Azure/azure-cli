@@ -161,13 +161,14 @@ def export_config(cmd,
     format_ = format_.lower() if format_ else None
     naming_convention = naming_convention.lower()
 
-    if destination == 'appconfig' and dest_label is not None and preserve_labels:
-        raise CLIError("Export failed! Please provide only one of these arguments: 'dest-label' or 'preserve-labels'. See 'az appconfig kv export -h' for examples.")
-    if destination == 'appconfig' and preserve_labels:
-        # We need dest_label to be the same as label for preview later.
-        # This will have no effect on label while writing to config store
-        # as we check preserve_labels again before labelling KVs.
-        dest_label = label
+    if destination == 'appconfig':
+        if dest_label is not None and preserve_labels:
+            raise CLIError("Export failed! Please provide only one of these arguments: 'dest-label' or 'preserve-labels'. See 'az appconfig kv export -h' for examples.")
+        if preserve_labels:
+            # We need dest_label to be the same as label for preview later.
+            # This will have no effect on label while writing to config store
+            # as we check preserve_labels again before labelling KVs.
+            dest_label = label
 
     # fetch key values from user's configstore
     src_kvs = __read_kv_from_config_store(

@@ -70,8 +70,6 @@ short-summary: Export configurations to another place from your App Configuratio
 examples:
   - name: Export all keys and feature flags with label test to a json file.
     text: az appconfig kv export -n MyAppConfiguration --label test -d file --path D:/abc.json --format json
-  - name: Export all keys and feature flags with null label to another App Configuration.
-    text: az appconfig kv export -n MyAppConfiguration -d appconfig --dest-name AnotherAppConfiguration
   - name: Export all keys with null label to an App Service application.
     text: az appconfig kv export -n MyAppConfiguration -d appservice  --appservice-account MyAppService
   - name: Export all keys with label test excluding feature flags to a json file.
@@ -80,8 +78,6 @@ examples:
     text: az appconfig kv export -n MyAppConfiguration -d appconfig --dest-name AnotherAppConfiguration --key * --label * --preserve-labels
   - name: Export all keys and feature flags with all labels to another App Configuration and overwrite destination labels.
     text: az appconfig kv export -n MyAppConfiguration -d appconfig --dest-name AnotherAppConfiguration --key * --label * --dest-label ExportedKeys
-  - name: Export all keys and feature flags with all labels to another App Configuration and assign null label in destination AppConfig.
-    text: az appconfig kv export -n MyAppConfiguration -d appconfig --dest-name AnotherAppConfiguration --key * --label *
 """
 
 helps['appconfig kv import'] = """
@@ -90,18 +86,14 @@ short-summary: Import configurations into your App Configuration from another pl
 examples:
   - name: Import all keys and feature flags from a file and apply test label.
     text: az appconfig kv import -n MyAppConfiguration --label test -s file --path D:/abc.json --format json
-  - name: Import all keys and feature flags with null label and apply null label from an App Configuration.
-    text: az appconfig kv import -n MyAppConfiguration -s appconfig --src-name AnotherAppConfiguration
+  - name: Import all keys and feature flags with null label and apply new label from an App Configuration.
+    text: az appconfig kv import -n MyAppConfiguration -s appconfig --src-name AnotherAppConfiguration --label ImportedKeys
   - name: Import all keys and apply null label from an App Service appliaction.
     text: az appconfig kv import -n MyAppConfiguration -s appservice --appservice-account MyAppService
   - name: Import all keys with label test and apply test2 label excluding feature flags from an App Configuration.
     text: az appconfig kv import -n MyAppConfiguration -s appconfig --src-label test --label test2 --src-name AnotherAppConfiguration --skip-features
   - name: Import all keys and feature flags with all labels to another App Configuration.
     text: az appconfig kv import -n MyAppConfiguration -s appconfig --src-name AnotherAppConfiguration --src-key * --src-label * --preserve-labels
-  - name: Import all keys and feature flags with all labels to another App Configuration and overwrite labels.
-    text: az appconfig kv import -n MyAppConfiguration -s appconfig --src-name AnotherAppConfiguration --src-key * --src-label * --label ImportedKeys
-  - name: Import all keys and feature flags with all labels to another App Configuration and assign null label.
-    text: az appconfig kv import -n MyAppConfiguration -s appconfig --src-name AnotherAppConfiguration --src-key * --src-label *
 """
 
 helps['appconfig kv list'] = """
