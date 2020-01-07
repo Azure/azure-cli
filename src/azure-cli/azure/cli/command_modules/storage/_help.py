@@ -40,13 +40,19 @@ short-summary: Update the properties of a storage account's blob service.
 long-summary: >
     Update the properties of a storage account's blob service, including
     properties for Storage Analytics and CORS (Cross-Origin Resource
-    Sharing) rules. But currently we only support enabling or disabling change feed for a storage account's blob service.
+    Sharing) rules.
 parameters:
   - name: --enable-change-feed
     short-summary: 'Indicate whether change feed event logging is enabled. If it is true, you enable the storage account to begin capturing changes. The default value is true. You can see more details in https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-change-feed?tabs=azure-portal#register-by-using-azure-cli'
+  - name: --enable-delete-retention
+    short-summary: 'Indicate whether delete retention policy is enabled for the blob service.'
+  - name: --delete-retention-days
+    short-summary: 'Indicate the number of days that the deleted blob should be retained. The value must be in range [1,365]. It must be provided when `--enable-delete-retention` is true.'
 examples:
   - name: Enable the change feed for the storage account 'MyStorageAccount' in resource group 'MyResourceGroup'.
     text: az storage account blob-service-properties update --enable-change-feed true -n MyStorageAccount -g MyResourceGroup
+  - name: Enable delete retention policy and set delete retention days to 100 for the storage account 'MyStorageAccount' in resource group 'MyResourceGroup'.
+    text: az storage account blob-service-properties update --enable-delete-retention true --delete-retention-days 100 -n MyStorageAccount -g MyResourceGroup
 """
 
 helps['storage account create'] = """
