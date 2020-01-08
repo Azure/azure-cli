@@ -1563,9 +1563,7 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
         wait_then_open_async(proxy_url)
     try:
         try:
-            subprocess.check_output(["kubectl", "--kubeconfig", browse_path, "--namespace", "kube-system",
-                                     "port-forward", "--address", listen_address, dashboard_pod,
-                                     "{0}:{1}".format(listen_port, dashboard_port)], stderr=subprocess.STDOUT)
+            subprocess.check_output(["kubectl", "--kubeconfig", browse_path, "proxy", stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as err:
             if err.output.find(b'unknown flag: --address'):
                 if listen_address != '127.0.0.1':
