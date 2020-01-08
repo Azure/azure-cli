@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**IoT**
+
+* Deprecated 'IoT hub Job' commands.
+
 2.0.79
 ++++++
 
