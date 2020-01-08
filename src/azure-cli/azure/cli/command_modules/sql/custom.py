@@ -1484,6 +1484,14 @@ def db_threat_detection_policy_update(
     return instance
 
 
+def db_recommended_sensitivity_labels_list(
+        client,
+        database_name,
+        server_name,
+        resource_group_name):
+    return client.list_recommended_by_database(resource_group_name, server_name, database_name)
+
+
 def db_sensitivity_label_update(
         cmd,
         client,

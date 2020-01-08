@@ -3628,7 +3628,7 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
                      JMESPathCheck('status', 'Online')])
 
         # list current sensitivity classifications
-        self.cmd('sql db sensitivity-classification list -g {} -s {} -n {}'
+        self.cmd('sql db classification list -g {} -s {} -n {}'
                  .format(resource_group, server, database_name),
                  checks=[
                      JMESPathCheck('length(@)', 0)])  # No classifications are set at the beginning
@@ -3665,7 +3665,7 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
 
         # list recommended sensitivity classifications
         expected_recommended_sensitivityclassifications_count = 15
-        self.cmd('sql db sensitivity-classification recommendation list -g {} -s {} -n {}'
+        self.cmd('sql db classification recommendation list -g {} -s {} -n {}'
                  .format(resource_group, server, database_name),
                  checks=[
                      JMESPathCheck('length(@)', expected_recommended_sensitivityclassifications_count)])
@@ -3675,21 +3675,21 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
         column_name = 'FirstName'
 
         # disable the recommendation for SalesLT/Customer/FirstName
-        self.cmd('sql db sensitivity-classification recommendation disable -g {} -s {} -n {} --schema-name {} --table-name {} --column-name {}'
+        self.cmd('sql db classification recommendation disable -g {} -s {} -n {} --schema-name {} --table-name {} --column-name {}'
                  .format(resource_group, server, database_name, schema_name, table_name, column_name))
 
         # list recommended sensitivity classifications
-        self.cmd('sql db sensitivity-classification recommendation list -g {} -s {} -n {}'
+        self.cmd('sql db classification recommendation list -g {} -s {} -n {}'
                  .format(resource_group, server, database_name),
                  checks=[
                      JMESPathCheck('length(@)', expected_recommended_sensitivityclassifications_count - 1)])
 
         # re-enable the disabled recommendation
-        self.cmd('sql db sensitivity-classification recommendation enable -g {} -s {} -n {} --schema-name {} --table-name {} --column-name {}'
+        self.cmd('sql db classification recommendation enable -g {} -s {} -n {} --schema-name {} --table-name {} --column-name {}'
                  .format(resource_group, server, database_name, schema_name, table_name, column_name))
 
         # lits recommended sensitivity classifications
-        self.cmd('sql db sensitivity-classification recommendation list -g {} -s {} -n {}'
+        self.cmd('sql db classification recommendation list -g {} -s {} -n {}'
                  .format(resource_group, server, database_name),
                  checks=[
                      JMESPathCheck('length(@)', expected_recommended_sensitivityclassifications_count)])
@@ -3700,7 +3700,7 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
         information_type_id = '57845286-7598-22f5-9659-15b24aeb125e'
         label_id = 'bf91e08c-f4f0-478a-b016-25164b2a65ff'
 
-        self.cmd('sql db sensitivity-classification update -g {} -s {} -n {} --schema-name {} --table-name {} --column-name {} --information-type {} --label-name "{}"'
+        self.cmd('sql db classification update -g {} -s {} -n {} --schema-name {} --table-name {} --column-name {} --information-type {} --label-name "{}"'
                  .format(resource_group, server, database_name, schema_name, table_name, column_name, information_type, label_name),
                  checks=[
                      JMESPathCheck('informationType', information_type),
@@ -3709,7 +3709,7 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
                      JMESPathCheck('labelId', label_id)])
 
         # get the classified column
-        self.cmd('sql db sensitivity-classification show -g {} -s {} -n {} --schema-name {} --table-name {} --column-name {} --sensitivity-label-source current'
+        self.cmd('sql db classification show -g {} -s {} -n {} --schema-name {} --table-name {} --column-name {} --sensitivity-label-source current'
                  .format(resource_group, server, database_name, schema_name, table_name, column_name, information_type),
                  checks=[
                      JMESPathCheck('informationType', information_type),
@@ -3718,23 +3718,23 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
                      JMESPathCheck('labelId', label_id)])
 
         # list recommended classifications
-        self.cmd('sql db sensitivity-classification recommendation list -g {} -s {} -n {}'
+        self.cmd('sql db classification recommendation list -g {} -s {} -n {}'
                  .format(resource_group, server, database_name),
                  checks=[
                      JMESPathCheck('length(@)', expected_recommended_sensitivityclassifications_count - 1)])
 
         # list current classifications
-        self.cmd('sql db sensitivity-classification list -g {} -s {} -n {}'
+        self.cmd('sql db classification list -g {} -s {} -n {}'
                  .format(resource_group, server, database_name),
                  checks=[
                      JMESPathCheck('length(@)', 1)])
 
         # delete the label
-        self.cmd('sql db sensitivity-classification delete -g {} -s {} -n {} --schema-name {} --table-name {} --column-name {}'
+        self.cmd('sql db classification delete -g {} -s {} -n {} --schema-name {} --table-name {} --column-name {}'
                  .format(resource_group, server, database_name, schema_name, table_name, column_name))
 
         # list current labels
-        self.cmd('sql db sensitivity-classification list -g {} -s {} -n {}'
+        self.cmd('sql db classification list -g {} -s {} -n {}'
                  .format(resource_group, server, database_name),
                  checks=[
                      JMESPathCheck('length(@)', 0)])
