@@ -83,7 +83,7 @@ def configstore_update_custom(instance, tags=None, sku=None):
     return instance
 
 
-def assign_identity(cmd, client, name, resource_group_name=None, identities=None):
+def assign_managed_identity(cmd, client, name, resource_group_name=None, identities=None):
     if resource_group_name is None:
         resource_group_name, _ = resolve_resource_group(cmd, name)
 
@@ -93,7 +93,7 @@ def assign_identity(cmd, client, name, resource_group_name=None, identities=None
     if '[all]' in identities:
         raise CLIError("[all] is not supported for identity assignment")
 
-    current_identities = show_identity(cmd, client, name, resource_group_name)
+    current_identities = show_managed_identity(cmd, client, name, resource_group_name)
     user_assigned_identities = {}
     identity_types = set()
 
@@ -118,14 +118,14 @@ def assign_identity(cmd, client, name, resource_group_name=None, identities=None
 
     # Due to a bug in RP https://msazure.visualstudio.com/Azure%20AppConfig/_workitems/edit/6017040
     # It client.update does not return the updated identities.
-    return show_identity(cmd, client, name, resource_group_name)
+    return show_managed_identity(cmd, client, name, resource_group_name)
 
 
-def remove_identity(cmd, client, name, resource_group_name=None, identities=None):
+def remove_managed_identity(cmd, client, name, resource_group_name=None, identities=None):
     if resource_group_name is None:
         resource_group_name, _ = resolve_resource_group(cmd, name)
 
-    current_identities = show_identity(cmd, client, name, resource_group_name)
+    current_identities = show_managed_identity(cmd, client, name, resource_group_name)
     if not current_identities or current_identities.type == 'None':
         logger.warning("No identity associated with this App Configuration.")
         return
@@ -158,7 +158,7 @@ def remove_identity(cmd, client, name, resource_group_name=None, identities=None
                   config_store_update_parameters=ConfigurationStoreUpdateParameters(identity=managed_identities))
 
 
-def show_identity(cmd, client, name, resource_group_name=None):
+def show_managed_identity(cmd, client, name, resource_group_name=None):
     config_store = show_configstore(cmd, client, name, resource_group_name)
 
     return config_store.identity

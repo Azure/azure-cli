@@ -67,9 +67,9 @@ def load_command_table(self, _):
         g.command('regenerate', 'regenerate_credential')
 
     with self.command_group('appconfig identity', configstore_identity_util, is_preview=True) as g:
-        g.command('assign', 'assign_identity')
-        g.command('remove', 'remove_identity')
-        g.command('show', 'show_identity')
+        g.command('assign', 'assign_managed_identity')
+        g.command('remove', 'remove_managed_identity')
+        g.command('show', 'show_managed_identity')
 
     with self.command_group('appconfig revision', configstore_keyvalue_util) as g:
         g.command('list', 'list_revision')
