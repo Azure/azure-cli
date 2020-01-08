@@ -109,10 +109,11 @@ class AppConfigCredentialScenarioTest(ScenarioTest):
         self.cmd('appconfig credential regenerate -n {config_store_name} -g {rg} --id {id}',
                  checks=[self.check('name', credential_list[0]['name'])])
 
+
 class AppConfigIdentityScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
-    def test_azconfig_credential(self, resource_group, location):
+    def test_azconfig_identity(self, resource_group, location):
 
         config_store_name = self.create_random_name(prefix='IdentityTest', length=24)
 
@@ -130,10 +131,11 @@ class AppConfigIdentityScenarioTest(ScenarioTest):
         self.cmd('appconfig identity assign -n {config_store_name} -g {rg}',
                  checks=[self.check('type', 'SystemAssigned'),
                          self.check('userAssignedIdentities', None)])
-        
+
         self.cmd('appconfig identity show -n {config_store_name} -g {rg}',
                  checks=[self.check('type', 'SystemAssigned'),
                          self.check('userAssignedIdentities', None)])
+
 
 class AppConfigKVScenarioTest(ScenarioTest):
 

@@ -105,7 +105,7 @@ def assign_identity(cmd, client, name, resource_group_name=None, identities=None
         identities.remove(SYSTEM_ASSIGNED_IDENTITY)
         identity_types.add(SYSTEM_ASSIGNED)
 
-    user_assigned_identities.update({identity:UserIdentity() for identity in identities})
+    user_assigned_identities.update({identity: UserIdentity() for identity in identities})
     if user_assigned_identities:
         identity_types.add(USER_ASSIGNED)
 
