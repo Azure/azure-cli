@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**Compute**
+
+* vmss create: Add --data-disk-iops and --data-disk-mbps.
+
 2.0.79
 ++++++
 
