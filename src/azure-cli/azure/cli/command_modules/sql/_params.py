@@ -1440,9 +1440,9 @@ def load_arguments(self, _):
                    help='The name of the column.')
 
         c.argument('information_type',
-                   required=True,
+                   required=False,
                    help='The information type.')
 
         c.argument('label_name',
-                   required=True,
+                   required=False,
                    help='The label name')
