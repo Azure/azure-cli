@@ -93,7 +93,7 @@ class KeyVaultPrivateEndpointScenarioTest(ScenarioTest):
                             checks=self.check('length(properties.privateEndpointConnections)', 1)).get_output_in_json()
         self.kwargs['kv_pe_id'] = keyvault['properties']['privateEndpointConnections'][0]['id']
         self.kwargs['kv_pe_name'] = self.kwargs['kv_pe_id'].split('/')[-1]
-        self.cmd('keyvault private-endpoint show -n {kv} --private-endpoint-connection-name {kv_pe_name}',
+        self.cmd('keyvault private-endpoint show -n {kv} --connection-name {kv_pe_name}',
                  checks=self.check('name', '{kv_pe_name}'))
 
         # Test approval/rejection
@@ -101,7 +101,7 @@ class KeyVaultPrivateEndpointScenarioTest(ScenarioTest):
             'approval_desc': 'You are approved!',
             'rejection_desc': 'You are rejected!'
         })
-        self.cmd('keyvault private-endpoint reject -n {kv} --private-endpoint-connection-name {kv_pe_name} '
+        self.cmd('keyvault private-endpoint reject -n {kv} --connection-name {kv_pe_name} '
                  '--rejection-description "{rejection_desc}"', checks=[
                      self.check('privateLinkServiceConnectionState.status', 'Rejected'),
                      self.check('privateLinkServiceConnectionState.description', '{rejection_desc}')
@@ -109,12 +109,12 @@ class KeyVaultPrivateEndpointScenarioTest(ScenarioTest):
 
         max_retries = 20
         retries = 0
-        while self.cmd('keyvault private-endpoint show -n {kv} --private-endpoint-connection-name {kv_pe_name}').\
+        while self.cmd('keyvault private-endpoint show -n {kv} --connection-name {kv_pe_name}').\
                 get_output_in_json()['provisioningState'] != 'Succeeded' or retries > max_retries:
             time.sleep(5)
             retries += 1
 
-        self.cmd('keyvault private-endpoint approve -n {kv} --private-endpoint-connection-name {kv_pe_name} '
+        self.cmd('keyvault private-endpoint approve -n {kv} --connection-name {kv_pe_name} '
                  '--approval-description "{approval_desc}"', checks=[
                      self.check('privateLinkServiceConnectionState.status', 'Approved'),
                      self.check('privateLinkServiceConnectionState.description', '{approval_desc}')

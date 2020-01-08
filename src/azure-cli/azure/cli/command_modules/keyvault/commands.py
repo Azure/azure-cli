@@ -84,8 +84,8 @@ def load_command_table(self, _):
                             is_preview=True) as g:
         g.custom_command('approve', 'approve_private_endpoint_connection')
         g.custom_command('reject', 'reject_private_endpoint_connection')
-        g.show_command('show', 'get')
-        g.command('delete', 'delete')
+        g.custom_command('delete', 'delete_private_endpoint_connection')
+        g.custom_show_command('show', 'show_private_endpoint_connection')
 
     with self.command_group('keyvault private-link-resource',
                             kv_private_link_resources_sdk,

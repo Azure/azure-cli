@@ -124,7 +124,7 @@ def load_arguments(self, _):
 
     with self.argument_context('keyvault private-endpoint', min_api='2018-02-14') as c:
         c.argument('approval_description', help='Comments for the approval.')
-        c.argument('private_endpoint_connection_name', required=True,
+        c.argument('connection_name', required=True,
                    help='The name of the private endpoint connection associated with the Key Vault.')
         c.argument('rejection_description', help='Comments for the rejection.')
     # endregion

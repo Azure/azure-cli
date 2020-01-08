@@ -1157,7 +1157,19 @@ def restore_storage_account(client, vault_base_url, file_path):
 
 
 # region private_endpoint
-def approve_private_endpoint_connection(cmd, client, resource_group_name, vault_name, private_endpoint_connection_name,
+def show_private_endpoint_connection(client, resource_group_name, vault_name, connection_name):
+    """Show details of a private endpoint connection associated with a Key Vault."""
+    return client.get(resource_group_name=resource_group_name, vault_name=vault_name,
+                      private_endpoint_connection_name=connection_name)
+
+
+def delete_private_endpoint_connection(client, resource_group_name, vault_name, connection_name):
+    """ Delete the specified private endpoint connection associated with a Key Vault."""
+    return client.delete(resource_group_name=resource_group_name, vault_name=vault_name,
+                         private_endpoint_connection_name=connection_name)
+
+
+def approve_private_endpoint_connection(cmd, client, resource_group_name, vault_name, connection_name,
                                         approval_description=None):
     """Approve a private endpoint connection request for a Key Vault."""
 
@@ -1166,11 +1178,11 @@ def approve_private_endpoint_connection(cmd, client, resource_group_name, vault_
                                                        resource_type=ResourceType.MGMT_KEYVAULT)
 
     private_endpoint_connection = client.get(resource_group_name=resource_group_name, vault_name=vault_name,
-                                             private_endpoint_connection_name=private_endpoint_connection_name)
+                                             private_endpoint_connection_name=connection_name)
 
     return client.put(resource_group_name=resource_group_name,
                       vault_name=vault_name,
-                      private_endpoint_connection_name=private_endpoint_connection_name,
+                      private_endpoint_connection_name=connection_name,
                       private_endpoint=private_endpoint_connection.private_endpoint,
                       properties=PrivateEndpointConnection(
                           tags=private_endpoint_connection.tags,
@@ -1182,7 +1194,7 @@ def approve_private_endpoint_connection(cmd, client, resource_group_name, vault_
                       ))
 
 
-def reject_private_endpoint_connection(cmd, client, resource_group_name, vault_name, private_endpoint_connection_name,
+def reject_private_endpoint_connection(cmd, client, resource_group_name, vault_name, connection_name,
                                        rejection_description=None):
     """Reject a private endpoint connection request for a Key Vault."""
 
@@ -1191,11 +1203,11 @@ def reject_private_endpoint_connection(cmd, client, resource_group_name, vault_n
                                                        resource_type=ResourceType.MGMT_KEYVAULT)
 
     private_endpoint_connection = client.get(resource_group_name=resource_group_name, vault_name=vault_name,
-                                             private_endpoint_connection_name=private_endpoint_connection_name)
+                                             private_endpoint_connection_name=connection_name)
 
     return client.put(resource_group_name=resource_group_name,
                       vault_name=vault_name,
-                      private_endpoint_connection_name=private_endpoint_connection_name,
+                      private_endpoint_connection_name=connection_name,
                       private_endpoint=private_endpoint_connection.private_endpoint,
                       properties=PrivateEndpointConnection(
                           tags=private_endpoint_connection.tags,
