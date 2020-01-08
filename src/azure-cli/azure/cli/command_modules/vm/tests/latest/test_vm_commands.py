@@ -3890,5 +3890,25 @@ class DiskEncryptionSetTest(ScenarioTest):
         ])
 
 
+class VMSSCreateDiskOptionTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_disk_iops_mbps_', location='eastus')
+    @AllowLargeResponse(size_kb=99999)
+    def test_vmss_create_disk_iops_mbps(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss1'
+        })
+
+        self.cmd('vmss create -g {rg} -n {vmss} --image debian --data-disk-sizes-gb 10 10 --data-disk-iops 555 666 '
+                 '--data-disk-mbps 77 88 --ultra-ssd-enabled --zone 1 --vm-sku Standard_D2s_v3 '
+                 '--storage-sku UltraSSD_LRS --location eastus',
+                 checks=[
+                     self.check('vmss.virtualMachineProfile.storageProfile.dataDisks[0].diskIOPSReadWrite', '555'),
+                     self.check('vmss.virtualMachineProfile.storageProfile.dataDisks[1].diskIOPSReadWrite', '666'),
+                     self.check('vmss.virtualMachineProfile.storageProfile.dataDisks[0].diskMBpsReadWrite', '77'),
+                     self.check('vmss.virtualMachineProfile.storageProfile.dataDisks[1].diskMBpsReadWrite', '88')
+                 ])
+
+
 if __name__ == '__main__':
     unittest.main()

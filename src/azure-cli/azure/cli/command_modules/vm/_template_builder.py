@@ -659,7 +659,7 @@ def build_vmss_storage_account_pool_resource(_, loop_name, location, tags, stora
     return storage_resource
 
 
-# pylint: disable=too-many-locals, too-many-branches, too-many-statements
+# pylint: disable=too-many-locals, too-many-branches, too-many-statements, too-many-lines
 def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision, upgrade_policy_mode,
                         vm_sku, instance_count, ip_config_name, nic_name, subnet_id,
                         public_ip_per_vm, vm_domain_name, dns_servers, nsg, accelerated_networking,
@@ -764,9 +764,13 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
     if data_disk_iops:
         if len(data_disk_iops) != len(data_disks):
             raise CLIError('usage error: Number of --data-disk-iops mismatches with number of data disks.')
+        for i, data_disk in enumerate(data_disks):
+            data_disk['diskIOPSReadWrite'] = data_disk_iops[i]
     if data_disk_mbps:
         if len(data_disk_mbps) != len(data_disks):
             raise CLIError('usage error: Number of --data-disk-mbps mismatches with number of data disks.')
+        for i, data_disk in enumerate(data_disks):
+            data_disk['diskMBpsReadWrite'] = data_disk_mbps[i]
     if data_disks:
         storage_properties['dataDisks'] = data_disks
 
