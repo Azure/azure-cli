@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**AppConfig**
+
+* Support import/export of keyvault references from/to appservice
+
 2.0.79
 ++++++
 
