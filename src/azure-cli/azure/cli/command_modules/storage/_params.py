@@ -15,7 +15,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           storage_account_key_options, process_file_download_namespace, process_metric_update_namespace,
                           get_char_options_validator, validate_bypass, validate_encryption_source, validate_marker,
                           validate_storage_data_plane_list, validate_azcopy_upload_destination_url,
-                          validate_azcopy_remove_arguments, as_user_validator)
+                          validate_azcopy_remove_arguments, as_user_validator, parse_storage_account)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements
@@ -33,6 +33,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     t_file_service = self.get_sdk('file#FileService')
     t_queue_service = self.get_sdk('queue#QueueService')
     t_table_service = get_table_data_type(self.cli_ctx, 'table', 'TableService')
+
+    storage_account_type = CLIArgumentType(options_list='--storage-account',
+                                           help='The name or ID of the storage account.',
+                                           validator=parse_storage_account, id_part='name')
 
     acct_name_type = CLIArgumentType(options_list=['--account-name', '-n'], help='The storage account name.',
                                      id_part='name',
@@ -635,15 +639,20 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage share') as c:
         c.argument('share_name', share_name_type, options_list=('--name', '-n'))
 
-    with self.argument_context('storage share-rm', resource_type=ResourceType.MGMT_STORAGE) as c:
-        c.argument('account_name', help='The name of the storage account within the specified resource group.')
-        c.argument('share_name', share_name_type, options_list=('--name', '-n'))
-        c.argument('share_quota', type=int)
-        c.argument('metadata', nargs='+',
-                   help='Metadata in space-separated key=value pairs that is associated with the share. '
-                        'This overwrites any existing metadata',
-                   validator=validate_metadata)
-        c.ignore('filter', 'maxpagesize', 'skip_token')
+    for item in ['create', 'delete', 'exists', 'list', 'show', 'update']:
+        with self.argument_context('storage share-rm {}'.format(item), resource_type=ResourceType.MGMT_STORAGE) as c:
+            c.argument('resource_group_name', required=False)
+            c.argument('account_name', storage_account_type)
+            c.argument('share_name', share_name_type, options_list=('--name', '-n'), id_part='child_name_2')
+            c.argument('share_quota', type=int)
+            c.argument('metadata', nargs='+',
+                       help='Metadata in space-separated key=value pairs that is associated with the share. '
+                            'This overwrites any existing metadata',
+                       validator=validate_metadata)
+            c.ignore('filter', 'maxpagesize', 'skip_token')
+
+    with self.argument_context('storage share-rm list', resource_type=ResourceType.MGMT_STORAGE) as c:
+        c.argument('account_name', storage_account_type, id_part=None)
 
     with self.argument_context('storage share url') as c:
         c.argument('unc', action='store_true', help='Output UNC network path.')
