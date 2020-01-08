@@ -3,6 +3,12 @@
 Release History
 ===============
 
+**AppConfig**
+
+* Remove preview tag for most commands.
+* Expose sku modification for configuration store.
+* Add command group for managed identity.
+
 2.0.79
 ++++++
 

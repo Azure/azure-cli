@@ -7,6 +7,7 @@ from azure.cli.core.commands import CliCommandType
 
 from ._client_factory import cf_configstore, cf_configstore_operations
 from ._format import (configstore_credential_format,
+                      configstore_identity_format,
                       configstore_output_format,
                       keyvalue_entry_format,
                       featureflag_entry_format,
@@ -18,6 +19,12 @@ def load_command_table(self, _):
     configstore_custom_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.appconfig.custom#{}',
         table_transformer=configstore_output_format,
+        client_factory=cf_configstore
+    )
+
+    configstore_identity_util = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.appconfig.custom#{}',
+        table_transformer=configstore_identity_format,
         client_factory=cf_configstore
     )
 
@@ -44,7 +51,7 @@ def load_command_table(self, _):
         )
 
     # Management Plane Commands
-    with self.command_group('appconfig', configstore_custom_util, is_preview=True) as g:
+    with self.command_group('appconfig', configstore_custom_util) as g:
         g.command('create', 'create_configstore')
         g.command('delete', 'delete_configstore')
         g.command('update', 'update_configstore')
@@ -58,6 +65,11 @@ def load_command_table(self, _):
     with self.command_group('appconfig credential', configstore_credential_util) as g:
         g.command('list', 'list_credential')
         g.command('regenerate', 'regenerate_credential')
+
+    with self.command_group('appconfig identity', configstore_identity_util, is_preview=True) as g:
+        g.command('assign', 'assign_identity')
+        g.command('remove', 'remove_identity')
+        g.command('show', 'show_identity')
 
     with self.command_group('appconfig revision', configstore_keyvalue_util) as g:
         g.command('list', 'list_revision')
@@ -73,13 +85,14 @@ def load_command_table(self, _):
         g.command('restore', 'restore_key')
         g.command('import', 'import_config')
         g.command('export', 'export_config')
-        g.command('set-keyvault', 'set_keyvault')
+        g.command('set-keyvault', 'set_keyvault', is_preview=True)
 
     # FeatureManagement Commands
     with self.command_group('appconfig feature',
                             custom_command_type=get_custom_sdk('feature',
                                                                cf_configstore_operations,
-                                                               featureflag_entry_format)) as g:
+                                                               featureflag_entry_format),
+                            is_preview=True) as g:
         g.custom_command('set', 'set_feature')
         g.custom_command('delete', 'delete_feature')
         g.custom_command('show', 'show_feature')
@@ -92,7 +105,8 @@ def load_command_table(self, _):
     with self.command_group('appconfig feature filter',
                             custom_command_type=get_custom_sdk('feature',
                                                                cf_configstore_operations,
-                                                               featurefilter_entry_format)) as g:
+                                                               featurefilter_entry_format),
+                            is_preview=True) as g:
         g.custom_command('add', 'add_filter')
         g.custom_command('delete', 'delete_filter')
         g.custom_command('show', 'show_filter')
