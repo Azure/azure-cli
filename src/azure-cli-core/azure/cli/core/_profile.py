@@ -587,7 +587,9 @@ class Profile(object):
         sp_secret = self._creds_cache.retrieve_secret_of_service_principal(username_or_sp_id)
         return username_or_sp_id, sp_secret, None, str(account[_TENANT_ID])
 
-    def get_raw_token(self, resource=None, subscription=None):
+    def get_raw_token(self, resource=None, subscription=None, tenant=None):
+        if subscription and tenant:
+            raise CLIError("Please specify only one of subscription and tenant, not both")
         account = self.get_subscription(subscription)
         user_type = account[_USER_ENTITY][_USER_TYPE]
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
@@ -595,23 +597,32 @@ class Profile(object):
 
         identity_type, identity_id = Profile._try_parse_msi_account_name(account)
         if identity_type:
+            # MSI
+            if tenant:
+                raise CLIError("Tenant shouldn't be specified for MSI account")
             msi_creds = MsiAccountTypes.msi_auth_factory(identity_type, identity_id, resource)
             msi_creds.set_token()
             token_entry = msi_creds.token
             creds = (token_entry['token_type'], token_entry['access_token'], token_entry)
         elif in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
+            # Cloud Shell
+            if tenant:
+                raise CLIError("Tenant shouldn't be specified for Cloud Shell account")
             creds = self._get_token_from_cloud_shell(resource)
-
-        elif user_type == _USER:
-            creds = self._creds_cache.retrieve_token_for_user(username_or_sp_id,
-                                                              account[_TENANT_ID], resource)
         else:
-            creds = self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id,
-                                                                           resource,
-                                                                           account[_TENANT_ID])
+            tenant_dest = tenant if tenant else account[_TENANT_ID]
+            if user_type == _USER:
+                # User
+                creds = self._creds_cache.retrieve_token_for_user(username_or_sp_id,
+                                                                  tenant_dest, resource)
+            else:
+                # Service Principal
+                creds = self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id,
+                                                                               resource,
+                                                                               tenant_dest)
         return (creds,
-                str(account[_SUBSCRIPTION_ID]),
-                str(account[_TENANT_ID]))
+                str('N/A' if tenant else account[_SUBSCRIPTION_ID]),
+                str(tenant if tenant else account[_TENANT_ID]))
 
     def refresh_accounts(self, subscription_finder=None):
         subscriptions = self.load_cached_subscriptions()

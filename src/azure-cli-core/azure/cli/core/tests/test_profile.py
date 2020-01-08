@@ -716,6 +716,17 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(sub, '1')
         self.assertEqual(tenant, self.tenant_id)
 
+        # Test get_raw_token with tenant
+        creds, sub, tenant = profile.get_raw_token(resource='https://foo', tenant=self.tenant_id)
+
+        self.assertEqual(creds[0], self.token_entry1['tokenType'])
+        self.assertEqual(creds[1], self.raw_token1)
+        self.assertEqual(creds[2]['expiresOn'], self.token_entry1['expiresOn'])
+        mock_get_token.assert_called_with(mock.ANY, self.user1, self.tenant_id, 'https://foo')
+        self.assertEqual(mock_get_token.call_count, 2)
+        self.assertEqual(sub, 'N/A')
+        self.assertEqual(tenant, self.tenant_id)
+
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_service_principal', autospec=True)
     def test_get_raw_token_for_sp(self, mock_get_token, mock_read_cred_file):
@@ -744,6 +755,17 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(sub, '1')
         self.assertEqual(tenant, self.tenant_id)
 
+        # Test get_raw_token with tenant
+        creds, sub, tenant = profile.get_raw_token(resource='https://foo', tenant=self.tenant_id)
+
+        self.assertEqual(creds[0], self.token_entry1['tokenType'])
+        self.assertEqual(creds[1], self.raw_token1)
+        self.assertEqual(creds[2]['expiresOn'], self.token_entry1['expiresOn'])
+        mock_get_token.assert_called_with(mock.ANY, 'sp1', 'https://foo', self.tenant_id)
+        self.assertEqual(mock_get_token.call_count, 2)
+        self.assertEqual(sub, 'N/A')
+        self.assertEqual(tenant, self.tenant_id)
+
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('msrestazure.azure_active_directory.MSIAuthentication', autospec=True)
     def test_get_raw_token_msi_system_assigned(self, mock_msi_auth, mock_read_cred_file):
@@ -765,12 +787,54 @@ class TestProfile(unittest.TestCase):
         mock_msi_auth.side_effect = MSRestAzureAuthStub
 
         # action
-        cred, subscription_id, _ = profile.get_raw_token(resource='http://test_resource')
+        cred, subscription_id, tenant_id = profile.get_raw_token(resource='http://test_resource')
 
         # assert
         self.assertEqual(subscription_id, test_subscription_id)
         self.assertEqual(cred[0], 'Bearer')
         self.assertEqual(cred[1], TestProfile.test_msi_access_token)
+        self.assertEqual(subscription_id, test_subscription_id)
+        self.assertEqual(tenant_id, test_tenant_id)
+
+        # verify tenant shouldn't be specified for MSI account
+        with self.assertRaisesRegex(CLIError, "MSI"):
+            cred, subscription_id, _ = profile.get_raw_token(resource='http://test_resource', tenant=self.tenant_id)
+
+    @mock.patch('azure.cli.core._profile.in_cloud_console', autospec=True)
+    @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
+    @mock.patch('msrestazure.azure_active_directory.MSIAuthentication', autospec=True)
+    def test_get_raw_token_in_cloud_console(self, mock_msi_auth, mock_read_cred_file, mock_in_cloud_console):
+        mock_read_cred_file.return_value = []
+        mock_in_cloud_console.return_value = True
+
+        # setup an existing msi subscription
+        profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None}, use_global_creds_cache=False,
+                          async_persist=False)
+        test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
+        test_tenant_id = '12345678-38d6-4fb2-bad9-b7b93a3e1234'
+        msi_subscription = SubscriptionStub('/subscriptions/' + test_subscription_id,
+                                            self.display_name1, self.state1, test_tenant_id)
+        consolidated = profile._normalize_properties(self.user1,
+                                                     [msi_subscription],
+                                                     True)
+        consolidated[0]['user']['cloudShellID'] = True
+        profile._set_subscriptions(consolidated)
+
+        mock_msi_auth.side_effect = MSRestAzureAuthStub
+
+        # action
+        cred, subscription_id, tenant_id = profile.get_raw_token(resource='http://test_resource')
+
+        # assert
+        self.assertEqual(subscription_id, test_subscription_id)
+        self.assertEqual(cred[0], 'Bearer')
+        self.assertEqual(cred[1], TestProfile.test_msi_access_token)
+        self.assertEqual(subscription_id, test_subscription_id)
+        self.assertEqual(tenant_id, test_tenant_id)
+
+        # verify tenant shouldn't be specified for Cloud Shell account
+        with self.assertRaisesRegex(CLIError, 'Cloud Shell'):
+            cred, subscription_id, _ = profile.get_raw_token(resource='http://test_resource', tenant=self.tenant_id)
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user', autospec=True)

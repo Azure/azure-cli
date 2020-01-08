@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**Profile**
+
+* `az account get-access-token`: Add `--tenant` parameter to acquire token for the tenant directly, needless to specify a subscription
+
 2.0.79
 ++++++
 
