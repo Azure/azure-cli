@@ -341,6 +341,9 @@ def update_managed_disk(cmd, resource_group_name, instance, size_gb=None, sku=No
     if disk_mbps_read_write is not None:
         instance.disk_mbps_read_write = disk_mbps_read_write
     if disk_encryption_set is not None:
+        if instance.encryption.type != 'EncryptionAtRestWithCustomerKey' and \
+                encryption_type != 'EncryptionAtRestWithCustomerKey':
+            raise CLIError('usage error: Please set --encryption-type to EncryptionAtRestWithCustomerKey')
         if not is_valid_resource_id(disk_encryption_set):
             disk_encryption_set = resource_id(
                 subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
@@ -492,6 +495,9 @@ def update_snapshot(cmd, resource_group_name, instance, sku=None, disk_encryptio
     if sku is not None:
         _set_sku(cmd, instance, sku)
     if disk_encryption_set is not None:
+        if instance.encryption.type != 'EncryptionAtRestWithCustomerKey' and \
+                encryption_type != 'EncryptionAtRestWithCustomerKey':
+            raise CLIError('usage error: Please set --encryption-type to EncryptionAtRestWithCustomerKey')
         if not is_valid_resource_id(disk_encryption_set):
             disk_encryption_set = resource_id(
                 subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
