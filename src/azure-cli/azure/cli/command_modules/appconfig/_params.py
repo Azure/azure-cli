@@ -68,7 +68,7 @@ def load_arguments(self, _):
 
     with self.argument_context('appconfig create') as c:
         c.argument('location', options_list=['--location', '-l'], arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
-        c.argument('assign_identity', nargs='*', validator=validate_assigned_identity, arg_group='Managed Service Identity', is_preview=True, help="Accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples")
+        c.argument('assign_identity', nargs='*', validator=validate_assigned_identity, is_preview=True, help="Accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples")
 
     with self.argument_context('appconfig update') as c:
         c.argument('tags', arg_type=tags_type)

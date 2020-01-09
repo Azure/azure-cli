@@ -119,18 +119,31 @@ class AppConfigIdentityScenarioTest(ScenarioTest):
 
         location = 'eastus'
         sku = 'standard'
+        identity_name = self.create_random_name(prefix='UserAssignedIdentity', length=24)
+
         self.kwargs.update({
             'config_store_name': config_store_name,
             'rg_loc': location,
             'rg': resource_group,
-            'sku': sku
+            'sku': sku,
+            'identity_name': identity_name
         })
 
         _create_config_store(self, self.kwargs)
+        user_assigned_identity = _create_user_assigned_identity(self, self.kwargs)
+
+        self.kwargs.update({
+            'identity_id': user_assigned_identity['id']
+        })
 
         self.cmd('appconfig identity assign -n {config_store_name} -g {rg}',
                  checks=[self.check('type', 'SystemAssigned'),
                          self.check('userAssignedIdentities', None)])
+
+        self.cmd('appconfig identity assign -n {config_store_name} -g {rg} --identities {identity_id}',
+                 checks=[self.check('type', 'SystemAssigned, UserAssigned')])
+
+        self.cmd('appconfig identity remove -n {config_store_name} -g {rg} --identities {identity_id}')
 
         self.cmd('appconfig identity show -n {config_store_name} -g {rg}',
                  checks=[self.check('type', 'SystemAssigned'),
@@ -1020,6 +1033,10 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
 
 def _create_config_store(test, kwargs):
     test.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku}')
+
+
+def _create_user_assigned_identity(test, kwargs):
+    return test.cmd('identity create -n {identity_name} -g {rg}').get_output_in_json()
 
 
 def _format_datetime(date_string):

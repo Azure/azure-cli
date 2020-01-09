@@ -53,34 +53,21 @@ def show_configstore(cmd, client, name, resource_group_name=None):
     return client.get(resource_group_name, name)
 
 
-def configstore_update_get():
-    return ConfigurationStoreUpdateParameters()
-
-
-def configstore_update_set(cmd,
-                           client,
-                           parameters,
-                           name,
-                           resource_group_name=None):
+def update_configstore(cmd,
+                       client,
+                       name,
+                       resource_group_name=None,
+                       tags=None,
+                       sku=None):
     if resource_group_name is None:
         resource_group_name, _ = resolve_resource_group(cmd, name)
 
-    update_params = ConfigurationStoreUpdateParameters(tags=parameters.tags,
-                                                       sku=parameters.sku)
+    update_params = ConfigurationStoreUpdateParameters(tags=tags,
+                                                       sku=sku)
 
     return client.update(resource_group_name=resource_group_name,
                          config_store_name=name,
                          config_store_update_parameters=update_params)
-
-
-def configstore_update_custom(instance, tags=None, sku=None):
-    if tags is not None:
-        instance.tags = tags
-
-    if sku is not None:
-        instance.sku = Sku(name=sku)
-
-    return instance
 
 
 def assign_managed_identity(cmd, client, name, resource_group_name=None, identities=None):
@@ -190,15 +177,14 @@ def __get_resource_identity(assign_identity):
         else:
             user_assigned[identity] = UserIdentity()
 
-    if system_assigned:
+    if system_assigned and user_assigned:
+        identity_type = SYSTEM_USER_ASSIGNED
+    elif system_assigned:
         identity_type = SYSTEM_ASSIGNED
     elif user_assigned:
         identity_type = USER_ASSIGNED
     else:
         identity_type = "None"
-
-    if system_assigned and user_assigned:
-        identity_type = SYSTEM_USER_ASSIGNED
 
     return ResourceIdentity(type=identity_type,
                             user_assigned_identities=user_assigned if user_assigned else None)

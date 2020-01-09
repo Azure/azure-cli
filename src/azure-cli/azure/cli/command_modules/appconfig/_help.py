@@ -31,12 +31,12 @@ helps['appconfig identity assign'] = """
 type: command
 short-summary: Update managed identities for an App Configuration.
 examples:
-  - name: Enable the system-assigned identity for an existing an App Configuration
+  - name: Enable the system-assigned identity for an existing App Configuration
     text: az appconfig identity assign -g MyResourceGroup -n MyAppConfiguration
-  - name: Assign a user-assigned managed identity for an existing an App Configuration
-    text: az appconfig identity assign -g MyResourceGroup -n MyAppConfiguration --identities "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCEGROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentitiy"
-  - name: Assign both system-assigned and user assigned identities for an existing an App Configuration
-    text: az appconfig identity assign -g MyResourceGroup -n MyAppConfiguration --identities [system] "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCEGROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentitiy"
+  - name: Assign a user-assigned managed identity for an existing App Configuration
+    text: az appconfig identity assign -g MyResourceGroup -n MyAppConfiguration --identities "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCEGROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentity"
+  - name: Assign both system-assigned and user assigned identities for an existing App Configuration
+    text: az appconfig identity assign -g MyResourceGroup -n MyAppConfiguration --identities [system] "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCEGROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentity"
 """
 
 helps['appconfig identity remove'] = """
@@ -46,7 +46,7 @@ examples:
   - name: Remove the system-assigned identity from a App Configuration.
     text: az appconfig identity remove -g MyResourceGroup -n MyAppConfiguration
   - name: Remove a user assigned identity from a App Configuration.
-    text: az appconfig identity remove -g MyResourceGroup -n MyAppConfiguration --identities "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCEGROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentitiy"
+    text: az appconfig identity remove -g MyResourceGroup -n MyAppConfiguration --identities "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCEGROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentity"
   - name: Remove all identities from an App Configuration.
     text: az appconfig identity remove -g MyResourceGroup -n MyAppConfiguration --identities [all]
 """
