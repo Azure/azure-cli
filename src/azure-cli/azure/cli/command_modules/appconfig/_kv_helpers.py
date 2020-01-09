@@ -274,8 +274,11 @@ def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add=""):
             # Value will look like one of the following if it is a KeyVault reference:
             # @Microsoft.KeyVault(SecretUri=https://myvault.vault.azure.net/secrets/mysecret/ec96f02080254f109c51a1f14cdb1931)
             # @Microsoft.KeyVault(VaultName=myvault;SecretName=mysecret;SecretVersion=ec96f02080254f109c51a1f14cdb1931)
-            if value and value.lower().startswith(KeyVaultConstants.APPSVC_KEYVAULT_PREFIX.lower()):
+            if value and value.strip().lower().startswith(KeyVaultConstants.APPSVC_KEYVAULT_PREFIX.lower()):
                 try:
+                    # Strip all whitespaces from value string.
+                    # Valid values of SecretUri, VaultName, SecretName or SecretVersion will never have whitespaces.
+                    value = value.replace(" ", "")
                     appsvc_value_dict = dict(x.split('=') for x in value[len(KeyVaultConstants.APPSVC_KEYVAULT_PREFIX) + 1: -1].split(';'))
                     appsvc_value_dict_lower = {k.lower(): v for k, v in appsvc_value_dict.items()}
                     secret_identifier = appsvc_value_dict_lower.get('secreturi')
@@ -289,9 +292,10 @@ def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add=""):
                         from azure.keyvault.key_vault_id import KeyVaultIdentifier
                         # this throws an exception for invalid format of secret identifier
                         KeyVaultIdentifier(uri=secret_identifier)
-                        appconfig_value = json.dumps({"uri": secret_identifier}, ensure_ascii=False, separators=(',', ':'))
-                        content_type = KeyVaultConstants.KEYVAULT_CONTENT_TYPE
-                        kv = KeyValue(key=key, value=appconfig_value, tags=tags, content_type=content_type)
+                        kv = KeyValue(key=key,
+                                      value=json.dumps({"uri": secret_identifier}, ensure_ascii=False, separators=(',', ':')),
+                                      tags=tags,
+                                      content_type=KeyVaultConstants.KEYVAULT_CONTENT_TYPE)
                         key_values.append(kv)
                         continue
                     except (TypeError, ValueError) as e:
@@ -322,7 +326,8 @@ def __write_kv_to_app_service(cmd, key_values, appservice_account):
                     if secret_uri:
                         value = KeyVaultConstants.APPSVC_KEYVAULT_PREFIX + '(SecretUri={0})'.format(secret_uri)
                     else:
-                        raise ValueError("Not a valid KeyVault reference.")
+                        logger.debug(
+                            'Key "%s" with value "%s" is not a well-formatted KeyVault reference. It will be treated like a regular key-value.\n', name, value)
                 except (AttributeError, TypeError, ValueError) as e:
                     logger.debug(
                         'Key "%s" with value "%s" is not a well-formatted KeyVault reference. It will be treated like a regular key-value.\n%s', name, value, str(e))

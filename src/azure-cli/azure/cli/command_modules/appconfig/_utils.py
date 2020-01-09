@@ -103,6 +103,8 @@ def is_valid_connection_string(connection_string):
 
 def get_store_name_from_connection_string(connection_string):
     if is_valid_connection_string(connection_string):
-        segments = connection_string.split(';')
-        return segments[0].split('//')[1].split('.')[0]
+        segments = dict(seg.split("=", 1) for seg in connection_string.split(";"))
+        endpoint = segments.get("Endpoint")
+        if endpoint:
+            return endpoint.split("//")[1].split('.')[0]
     return None
