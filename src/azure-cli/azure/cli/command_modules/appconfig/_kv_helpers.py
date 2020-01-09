@@ -280,13 +280,13 @@ def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add=""):
                     # Valid values of SecretUri, VaultName, SecretName or SecretVersion will never have whitespaces.
                     value = value.replace(" ", "")
                     appsvc_value_dict = dict(x.split('=') for x in value[len(KeyVaultConstants.APPSVC_KEYVAULT_PREFIX) + 1: -1].split(';'))
-                    appsvc_value_dict_lower = {k.lower(): v for k, v in appsvc_value_dict.items()}
-                    secret_identifier = appsvc_value_dict_lower.get('secreturi')
+                    appsvc_value_dict = {k.lower(): v for k, v in appsvc_value_dict.items()}
+                    secret_identifier = appsvc_value_dict.get('secreturi')
                     if not secret_identifier:
                         # Construct secreturi
-                        vault_name = appsvc_value_dict_lower.get('vaultname')
-                        secret_name = appsvc_value_dict_lower.get('secretname')
-                        secret_version = appsvc_value_dict_lower.get('secretversion')
+                        vault_name = appsvc_value_dict.get('vaultname')
+                        secret_name = appsvc_value_dict.get('secretname')
+                        secret_version = appsvc_value_dict.get('secretversion')
                         secret_identifier = "https://{0}.vault.azure.net/secrets/{1}/{2}".format(vault_name, secret_name, secret_version)
                     try:
                         from azure.keyvault.key_vault_id import KeyVaultIdentifier
