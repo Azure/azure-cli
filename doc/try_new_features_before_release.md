@@ -1,7 +1,7 @@
 Try new features before release
 ===
 
-This documentation shows how to try new features in commit or PR before release.
+This documentation shows how to try new features in commit or PR before release even if the PR is not merged.
 
 Azure CLI releases new versions every 3 weeks. Many customers and developers are eager to try and test new features before the formal release. Fortunately, Azure CLI project builds artifacts for every commit and PR and you can download them.
 
