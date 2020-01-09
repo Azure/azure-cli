@@ -161,7 +161,7 @@ def remove_managed_identity(cmd, client, name, resource_group_name=None, identit
 def show_managed_identity(cmd, client, name, resource_group_name=None):
     config_store = show_configstore(cmd, client, name, resource_group_name)
 
-    return config_store.identity
+    return config_store.identity if config_store.identity else {}
 
 
 def list_credential(cmd, client, name, resource_group_name=None):

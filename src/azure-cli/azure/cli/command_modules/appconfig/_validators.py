@@ -152,6 +152,8 @@ def validate_filter_parameter(string):
 def validate_assigned_identity(namespace):
     if namespace.assign_identity:
         from msrestazure.tools import is_valid_resource_id
+
+        namespace.assign_identity = set(namespace.assign_identity)
         for identity in namespace.assign_identity:
             if identity != '[system]' and not is_valid_resource_id(identity):
                 raise CLIError("Invalid identity '{}'. Use '[system]' to refer system assigned identity, or a resource id to refer user assigned identity.".format(identity))
@@ -160,6 +162,8 @@ def validate_assigned_identity(namespace):
 def validate_identities(namespace):
     if namespace.identities:
         from msrestazure.tools import is_valid_resource_id
+
+        namespace.identities = set(namespace.identities)
         for identity in namespace.identities:
             if identity != '[system]' and identity != '[all]' and not is_valid_resource_id(identity):
                 raise CLIError("Invalid identity '{}'. Use '[system]' to refer system assigned identity '[all]' for all identities, or a resource id to refer user assigned identity.".format(identity))
