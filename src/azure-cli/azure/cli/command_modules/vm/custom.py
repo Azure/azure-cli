@@ -327,7 +327,11 @@ def list_managed_disks(cmd, resource_group_name=None):
     return client.disks.list()
 
 
-def update_managed_disk(cmd, instance, size_gb=None, sku=None, disk_iops_read_write=None, disk_mbps_read_write=None):
+def update_managed_disk(cmd, resource_group_name, instance, size_gb=None, sku=None, disk_iops_read_write=None,
+                        disk_mbps_read_write=None, encryption_type=None, disk_encryption_set=None):
+    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
     if size_gb is not None:
         instance.disk_size_gb = size_gb
     if sku is not None:
@@ -336,6 +340,14 @@ def update_managed_disk(cmd, instance, size_gb=None, sku=None, disk_iops_read_wr
         instance.disk_iops_read_write = disk_iops_read_write
     if disk_mbps_read_write is not None:
         instance.disk_mbps_read_write = disk_mbps_read_write
+    if disk_encryption_set is not None:
+        if not is_valid_resource_id(disk_encryption_set):
+            disk_encryption_set = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
+                namespace='Microsoft.Compute', type='diskEncryptionSets', name=disk_encryption_set)
+        instance.encryption.disk_encryption_set_id = disk_encryption_set
+    if encryption_type is not None:
+        instance.encryption.type = encryption_type
     return instance
 # endregion
 
