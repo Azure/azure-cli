@@ -424,8 +424,13 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
                     source=None, for_upload=None, incremental=None,  # pylint: disable=unused-argument
                     # below are generated internally from 'source'
                     source_blob_uri=None, source_disk=None, source_snapshot=None, source_storage_account_id=None,
-                    hyper_v_generation=None, tags=None, no_wait=False):
-    Snapshot, CreationData, DiskCreateOption = cmd.get_models('Snapshot', 'CreationData', 'DiskCreateOption')
+                    hyper_v_generation=None, tags=None, no_wait=False, disk_encryption_set=None,
+                    encryption_type=None):
+    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    Snapshot, CreationData, DiskCreateOption, Encryption = cmd.get_models(
+        'Snapshot', 'CreationData', 'DiskCreateOption', 'Encryption')
 
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     if source_blob_uri:
@@ -444,8 +449,22 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
 
     if size_gb is None and option == DiskCreateOption.empty:
         raise CLIError('Please supply size for the snapshots')
+
+    if disk_encryption_set is not None and not is_valid_resource_id(disk_encryption_set):
+        disk_encryption_set = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
+            namespace='Microsoft.Compute', type='diskEncryptionSets', name=disk_encryption_set)
+
+    if disk_encryption_set is not None and encryption_type is None:
+        raise CLIError('usage error: Please specify --encryption-type.')
+    if encryption_type is not None:
+        encryption = Encryption(type=encryption_type, disk_encryption_set_id=disk_encryption_set)
+    else:
+        encryption = None
+
     snapshot = Snapshot(location=location, creation_data=creation_data, tags=(tags or {}),
-                        sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb, incremental=incremental)
+                        sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb, incremental=incremental,
+                        encryption=encryption)
     if hyper_v_generation:
         snapshot.hyper_vgeneration = hyper_v_generation
 
@@ -465,9 +484,20 @@ def list_snapshots(cmd, resource_group_name=None):
     return client.snapshots.list()
 
 
-def update_snapshot(cmd, instance, sku=None):
+def update_snapshot(cmd, resource_group_name, instance, sku=None, disk_encryption_set=None, encryption_type=None):
+    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
     if sku is not None:
         _set_sku(cmd, instance, sku)
+    if disk_encryption_set is not None:
+        if not is_valid_resource_id(disk_encryption_set):
+            disk_encryption_set = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
+                namespace='Microsoft.Compute', type='diskEncryptionSets', name=disk_encryption_set)
+        instance.encryption.disk_encryption_set_id = disk_encryption_set
+    if encryption_type is not None:
+        instance.encryption.type = encryption_type
     return instance
 # endregion
 

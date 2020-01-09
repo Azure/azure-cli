@@ -6,6 +6,7 @@ Release History
 **Compute**
 
 * disk update: Add --disk-encryption-set and --encryption-type
+* snapshot create/update: Add --disk-encryption-set and --encryption-type
 
 2.0.79
 ++++++
