@@ -5,6 +5,7 @@
 
 from __future__ import print_function
 
+import argparse
 import os
 import time
 import unittest
@@ -92,6 +93,8 @@ class KeyVaultPrivateEndpointScenarioTest(ScenarioTest):
         keyvault = self.cmd('keyvault show -n {kv}',
                             checks=self.check('length(properties.privateEndpointConnections)', 1)).get_output_in_json()
         self.kwargs['kv_pe_id'] = keyvault['properties']['privateEndpointConnections'][0]['id']
+        self.cmd('keyvault private-endpoint show --connection-id {kv_pe_id}',
+                 checks=self.check('id', '{kv_pe_id}'))
         self.kwargs['kv_pe_name'] = self.kwargs['kv_pe_id'].split('/')[-1]
         self.cmd('keyvault private-endpoint show -n {kv} --connection-name {kv_pe_name}',
                  checks=self.check('name', '{kv_pe_name}'))
@@ -101,7 +104,7 @@ class KeyVaultPrivateEndpointScenarioTest(ScenarioTest):
             'approval_desc': 'You are approved!',
             'rejection_desc': 'You are rejected!'
         })
-        self.cmd('keyvault private-endpoint reject -n {kv} --connection-name {kv_pe_name} '
+        self.cmd('keyvault private-endpoint reject --connection-id {kv_pe_id} '
                  '--rejection-description "{rejection_desc}"', checks=[
                      self.check('privateLinkServiceConnectionState.status', 'Rejected'),
                      self.check('privateLinkServiceConnectionState.description', '{rejection_desc}')
@@ -109,7 +112,7 @@ class KeyVaultPrivateEndpointScenarioTest(ScenarioTest):
 
         max_retries = 20
         retries = 0
-        while self.cmd('keyvault private-endpoint show -n {kv} --connection-name {kv_pe_name}').\
+        while self.cmd('keyvault private-endpoint show --connection-id {kv_pe_id}').\
                 get_output_in_json()['provisioningState'] != 'Succeeded' or retries > max_retries:
             time.sleep(5)
             retries += 1

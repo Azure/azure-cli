@@ -12,7 +12,7 @@ from ._client_factory import (
     keyvault_client_private_link_resources_factory, keyvault_data_plane_factory)
 
 from ._validators import (
-    process_secret_set_namespace, process_certificate_cancel_namespace)
+    process_secret_set_namespace, process_certificate_cancel_namespace, validate_private_endpoint_connection_id)
 
 
 # pylint: disable=too-many-locals, too-many-statements
@@ -82,10 +82,14 @@ def load_command_table(self, _):
                             min_api='2018-02-14',
                             client_factory=keyvault_client_private_endpoint_connections_factory,
                             is_preview=True) as g:
-        g.custom_command('approve', 'approve_private_endpoint_connection')
-        g.custom_command('reject', 'reject_private_endpoint_connection')
-        g.custom_command('delete', 'delete_private_endpoint_connection')
-        g.custom_show_command('show', 'show_private_endpoint_connection')
+        g.custom_command('approve', 'approve_private_endpoint_connection',
+                         validator=validate_private_endpoint_connection_id)
+        g.custom_command('reject', 'reject_private_endpoint_connection',
+                         validator=validate_private_endpoint_connection_id)
+        g.custom_command('delete', 'delete_private_endpoint_connection',
+                         validator=validate_private_endpoint_connection_id)
+        g.custom_show_command('show', 'show_private_endpoint_connection',
+                              validator=validate_private_endpoint_connection_id)
 
     with self.command_group('keyvault private-link-resource',
                             kv_private_link_resources_sdk,

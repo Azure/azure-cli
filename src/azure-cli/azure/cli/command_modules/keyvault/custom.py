@@ -1157,20 +1157,22 @@ def restore_storage_account(client, vault_base_url, file_path):
 
 
 # region private_endpoint
-def show_private_endpoint_connection(client, resource_group_name, vault_name, connection_name):
+def show_private_endpoint_connection(client, resource_group_name,  # pylint: disable=unused-argument
+                                     vault_name, connection_name, connection_id=None):
     """Show details of a private endpoint connection associated with a Key Vault."""
     return client.get(resource_group_name=resource_group_name, vault_name=vault_name,
                       private_endpoint_connection_name=connection_name)
 
 
-def delete_private_endpoint_connection(client, resource_group_name, vault_name, connection_name):
+def delete_private_endpoint_connection(client, resource_group_name,  # pylint: disable=unused-argument
+                                       vault_name, connection_name, connection_id=None):
     """ Delete the specified private endpoint connection associated with a Key Vault."""
     return client.delete(resource_group_name=resource_group_name, vault_name=vault_name,
                          private_endpoint_connection_name=connection_name)
 
 
-def approve_private_endpoint_connection(cmd, client, resource_group_name, vault_name, connection_name,
-                                        approval_description=None):
+def approve_private_endpoint_connection(cmd, client, resource_group_name,  # pylint: disable=unused-argument
+                                        vault_name, connection_name, connection_id=None, approval_description=None):
     """Approve a private endpoint connection request for a Key Vault."""
 
     PrivateEndpointConnection = cmd.get_models('PrivateEndpointConnection', resource_type=ResourceType.MGMT_KEYVAULT)
@@ -1194,8 +1196,8 @@ def approve_private_endpoint_connection(cmd, client, resource_group_name, vault_
                       ))
 
 
-def reject_private_endpoint_connection(cmd, client, resource_group_name, vault_name, connection_name,
-                                       rejection_description=None):
+def reject_private_endpoint_connection(cmd, client, resource_group_name,  # pylint: disable=unused-argument
+                                       vault_name, connection_name, connection_id=None, rejection_description=None):
     """Reject a private endpoint connection request for a Key Vault."""
 
     PrivateEndpointConnection = cmd.get_models('PrivateEndpointConnection', resource_type=ResourceType.MGMT_KEYVAULT)

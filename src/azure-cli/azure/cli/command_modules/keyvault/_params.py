@@ -22,8 +22,8 @@ from ._validators import (
     datetime_type, certificate_type,
     get_vault_base_url_type, validate_key_import_source,
     validate_key_type, validate_policy_permissions,
-    validate_principal, validate_resource_group_name,
-    validate_x509_certificate_chain,
+    validate_principal, validate_private_endpoint_connection_id,
+    validate_resource_group_name, validate_x509_certificate_chain,
     secret_text_encoding_values, secret_binary_encoding_values, validate_subnet,
     validate_vault_id, validate_sas_definition_id, validate_storage_account_id, validate_storage_disabled_attribute,
     validate_deleted_vault_name)
@@ -124,8 +124,14 @@ def load_arguments(self, _):
 
     with self.argument_context('keyvault private-endpoint', min_api='2018-02-14') as c:
         c.argument('approval_description', help='Comments for the approval.')
-        c.argument('connection_name', required=True,
-                   help='The name of the private endpoint connection associated with the Key Vault.')
+        c.argument('connection_name', required=False,
+                   help='The name of the private endpoint connection associated with the Key Vault. '
+                        'Required if --connection-id is not specified')
+        c.argument('connection_id', required=False,
+                   help='The ID of the private endpoint connection associated with the Key Vault. '
+                        'If specified --vault-name and --connection-name, this should be omitted.')
+        c.argument('vault_name', vault_name_type, options_list=['--name', '-n'], required=False,
+                   help='Name of the Key Vault. Required if --connection-id is not specified')
         c.argument('rejection_description', help='Comments for the rejection.')
     # endregion
 
@@ -226,7 +232,6 @@ def load_arguments(self, _):
     # endregion
 
     # region KeyVault Storage Account
-
     with self.argument_context('keyvault storage', arg_group='Id') as c:
         c.argument('storage_account_name', options_list=['--name', '-n'], help='Name to identify the storage account in the vault.', id_part='child_name_1', completer=get_keyvault_name_completion_list('storage_account'))
         c.argument('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None)

@@ -166,6 +166,27 @@ def validate_policy_permissions(ns):
             '--certificate-permissions --storage-permissions')
 
 
+def validate_private_endpoint_connection_id(cmd, ns):
+    connection_id = ns.connection_id
+    connection_name = ns.connection_name
+    vault_name = ns.vault_name
+
+    if not connection_id:
+        if not all([connection_name, vault_name]):
+            raise argparse.ArgumentError(
+                None, 'specify both: --connection-name and --vault-name')
+        ns.resource_group_name = _get_resource_group_from_vault_name(cmd.cli_ctx, vault_name)
+    else:
+        if any([connection_name, vault_name]):
+            raise argparse.ArgumentError(
+                None, 'you don\'t need to specify --connection-name or --vault-name if --connection-id is specified')
+
+        id_parts = connection_id.split('/')
+        ns.connection_name = id_parts[-1]
+        ns.vault_name = id_parts[-3]
+        ns.resource_group_name = id_parts[-7]
+
+
 def validate_principal(ns):
     num_set = sum(1 for p in [ns.object_id, ns.spn, ns.upn] if p)
     if num_set != 1:
