@@ -197,8 +197,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         create_cmd = 'az storage account create -n {} -g {} --kind StorageV2 -t Account -q Service'.format(
             name, resource_group)
         self.cmd(create_cmd, checks=[
-            JMESPathCheck('encryption.services.queue.enabled', True),
-            JMESPathCheck('encryption.services.queue.keyType', 'Service'),
+            JMESPathCheck('encryption.services.queue', None),
             JMESPathCheck('encryption.services.table.enabled', True),
             JMESPathCheck('encryption.services.table.keyType', 'Account'),
         ])
