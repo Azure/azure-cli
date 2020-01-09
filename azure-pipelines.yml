@@ -382,10 +382,13 @@ jobs:
     matrix:
       Python27:
         python.version: '2.7'
+        tox_env: 'py27'
       Python36:
         python.version: '3.6'
+        tox_env: 'py36'
       Python38:
         python.version: '3.8'
+        tox_env: 'py38'
   steps:
     - task: UsePythonVersion@0
       displayName: 'Use Python $(python.version)'
@@ -395,6 +398,8 @@ jobs:
       displayName: 'Install pip and tox'
     - bash: ./scripts/ci/unittest.sh
       displayName: 'Run Unit Test'
+      env:
+        TOXENV: $(tox_env)
 
 - job: IntegrationTestAgainstProfiles
   displayName: Integration Test against Profiles
