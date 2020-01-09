@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**IoT Central**
+
+* Support app creation/update with the new sku name ST0, ST1, ST2.
+
 2.0.79
 ++++++
 

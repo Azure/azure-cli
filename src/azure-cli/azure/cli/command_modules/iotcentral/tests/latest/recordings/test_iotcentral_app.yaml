@@ -1,135 +1,60 @@
 interactions:
 - request:
-    body: '{"name": "iotc-cli-test000002", "type": "IoTApps"}'
+    body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
+      Accept-Charset:
+      - utf-8
       Accept-Encoding:
       - gzip, deflate
-      CommandName:
-      - iotcentral app create
       Connection:
       - keep-alive
-      Content-Length:
-      - '55'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -n -g --sku --subdomain
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-iotcentral/1.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.IoTCentral/checkNameAvailability?api-version=2018-09-01
+      - python-requests/2.22.0
+      return-client-request-id:
+      - 'true'
+      x-client-CPU:
+      - x86
+      x-client-OS:
+      - win32
+      x-client-SKU:
+      - Python
+      x-client-Ver:
+      - 1.2.2
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff686d426-8d16-42db-81b7-ab578e110ccd%2Foauth2%2Fauthorize&api-version=1.0
   response:
     body:
-      string: '{"nameAvailable":true}'
+      string: !!python/unicode '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration"}'
     headers:
+      access-control-allow-methods:
+      - GET, OPTIONS
+      access-control-allow-origin:
+      - '*'
       cache-control:
-      - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
+      - private, max-age=86400
       content-length:
-      - '22'
+      - '131'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 16:20:11 GMT
-      etag:
-      - W/"16-4/x+wI91pK3bZiWtoOg+Zr/n2HE"
+      - Thu, 09 Jan 2020 17:43:32 GMT
+      p3p:
+      - CP="DSP CUR OTPi IND OTRi ONL FIN"
+      set-cookie:
+      - fpc=Aiy11hFLhfpFlZKtikyNeqI; expires=Sat, 08-Feb-2020 17:43:32 GMT; path=/;
+        secure; HttpOnly; SameSite=None
+      - esctx=AQABAAAAAABeAFzDwllzTYGDLh_qYbH8FyBq06r_WVGhDpy3x9qPSrxvkZ2zmG0gKBqTEAnlUbMEBZq8z0Q9YqbhlL_ulxPsecsfX6fFZ_ciCK6VsbsF0ZiVPTb2REtMSkagyJV_MLSBbfgiGKDDY6QZMwDbXO9jvmMJaTuGHsY9KBDtWkzgJfKVTWJHI7n9nMB3XbWSgd4gAA;
+        domain=.login.windows.net; path=/; secure; HttpOnly; SameSite=None
+      - x-ms-gateway-slice=corp; path=/; SameSite=None; secure; HttpOnly
+      - stsservicecookie=estscorp; path=/; SameSite=None; secure; HttpOnly
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-download-options:
-      - noopen
-      x-envoy-upstream-service-time:
-      - '935'
-      x-frame-options:
-      - deny
-      x-iot-cluster:
-      - iotcprodsoutheastasia01
-      x-iot-correlation:
-      - ssqyqsy.0
-      x-iot-version:
-      - 101719.0001-master
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
-      x-msedge-ref:
-      - 'Ref A: CBBB73B7294648C48EE5BC13B8D6F268 Ref B: SG2EDGE1007 Ref C: 2019-10-21T16:20:10Z'
-      x-xss-protection:
-      - 1; mode=block
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"name": "iotc-cli-test000002", "type": "IoTApps"}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - iotcentral app create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '55'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -n -g --sku --subdomain
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-iotcentral/1.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.IoTCentral/checkSubdomainAvailability?api-version=2018-09-01
-  response:
-    body:
-      string: '{"nameAvailable":true}'
-    headers:
-      cache-control:
-      - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
-      content-length:
-      - '22'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 21 Oct 2019 16:20:13 GMT
-      etag:
-      - W/"16-4/x+wI91pK3bZiWtoOg+Zr/n2HE"
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-download-options:
-      - noopen
-      x-envoy-upstream-service-time:
-      - '936'
-      x-frame-options:
-      - deny
-      x-iot-cluster:
-      - iotcprodsoutheastasia01
-      x-iot-correlation:
-      - 1nm9guv1.0
-      x-iot-version:
-      - 101719.0001-master
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1193'
-      x-msedge-ref:
-      - 'Ref A: 4A7F2EA6A3F44BC4B823AF7DC89023E6 Ref B: SG2EDGE1109 Ref C: 2019-10-21T16:20:13Z'
-      x-xss-protection:
-      - 1; mode=block
+      x-ms-ests-server:
+      - 2.1.9898.10 - WST ProdSlices
     status:
       code: 200
       message: OK
@@ -145,17 +70,17 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -g --sku --subdomain
+      - -n -g --subdomain --sku
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/2.7.14 (Windows-10-10.0.18362) msrest/0.6.10 msrest_azure/0.6.2 azure-mgmt-resource/6.0.0
+        Azure-SDK-For-Python AZURECLI/2.0.79
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-07-01
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-07-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-10-21T16:20:03Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"date":"2020-01-09T17:43:14Z","product":"azurecli","cause":"automation"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -164,7 +89,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 16:20:15 GMT
+      - Thu, 09 Jan 2020 17:43:34 GMT
       expires:
       - '-1'
       pragma:
@@ -179,8 +104,67 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus", "properties": {"displayName": "iotc-cli-test000002",
-      "subdomain": "iotc-cli-test000002"}, "sku": {"name": "S1"}}'
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Charset:
+      - utf-8
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+      return-client-request-id:
+      - 'true'
+      x-client-CPU:
+      - x86
+      x-client-OS:
+      - win32
+      x-client-SKU:
+      - Python
+      x-client-Ver:
+      - 1.2.2
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff686d426-8d16-42db-81b7-ab578e110ccd%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body:
+      string: !!python/unicode '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration"}'
+    headers:
+      access-control-allow-methods:
+      - GET, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - private, max-age=86400
+      content-length:
+      - '131'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 09 Jan 2020 17:43:34 GMT
+      p3p:
+      - CP="DSP CUR OTPi IND OTRi ONL FIN"
+      set-cookie:
+      - fpc=AmPUjn8V7TZFvlaNaB1naaw; expires=Sat, 08-Feb-2020 17:43:34 GMT; path=/;
+        secure; HttpOnly; SameSite=None
+      - esctx=AQABAAAAAABeAFzDwllzTYGDLh_qYbH8eVFJdtZ7xWUzsGDUme8FVo0Oh8iDqs0zcM0baT-zEJJ5TWRrW8MQEROocCEdW3o18R4YoYt0gKU3sTd1TTEDEpVt2UTeoU8Vt6VBeofeTCVCKDP9_CyV2amyOaWvUozV7wg9bHAqdHDnLWL007eRkoypyMPWn5YWQQQong11WpwgAA;
+        domain=.login.windows.net; path=/; secure; HttpOnly; SameSite=None
+      - x-ms-gateway-slice=corp; path=/; SameSite=None; secure; HttpOnly
+      - stsservicecookie=estscorp; path=/; SameSite=None; secure; HttpOnly
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ests-server:
+      - 2.1.9898.10 - SAN ProdSlices
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/unicode '{"sku": {"name": "ST2"}, "properties": {"subdomain": "iotc-cli-test000002",
+      "displayName": "iotc-cli-test000002"}, "location": "eastus"}'
     headers:
       Accept:
       - application/json
@@ -191,57 +175,114 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '145'
+      - '146'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
-      - -n -g --sku --subdomain
+      - -n -g --subdomain --sku
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-iotcentral/1.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/2.7.14 (Windows-10-10.0.18362) msrest/0.6.10 msrest_azure/0.6.2 azure-mgmt-iotcentral/2.0.0
+        Azure-SDK-For-Python AZURECLI/2.0.79
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotc-cli-test000002?api-version=2018-09-01
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotc-cli-test000002?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotc-cli-test000002","name":"iotc-cli-test000002","type":"Microsoft.IoTCentral/IoTApps","location":"westus","tags":{},"properties":{"applicationId":"cd36259b-8948-40b1-95a8-c2a77361487b","state":"created","displayName":"iotc-cli-test000002","tenant":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","capabilities":{},"subdomain":"iotc-cli-test000002","createdDate":"2019-10-21T16:20:23.084Z","template":"iotc-default@1.0.0"},"sku":{"name":"S1"},"etag":"\"b1047199-0000-0100-0000-5daddac70000\""}'
+      string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotc-cli-test000002","name":"iotc-cli-test000002","type":"Microsoft.IoTCentral/IoTApps","location":"eastus","tags":{},"properties":{"applicationId":"34715012-3beb-4019-80a0-985f703478cb","state":"created","displayName":"iotc-cli-test000002","tenant":"f686d426-8d16-42db-81b7-ab578e110ccd","capabilities":{},"subdomain":"iotc-cli-test000002","createdDate":"2020-01-09T17:43:40.365Z","template":"iotc-default@1.0.0"},"sku":{"name":"ST2"},"etag":"\"03006a68-0000-0700-0000-5e17664c0000\""}'
     headers:
       cache-control:
       - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
       content-length:
-      - '694'
+      - '695'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 16:20:50 GMT
+      - Thu, 09 Jan 2020 17:43:43 GMT
       etag:
-      - '"b1047199-0000-0100-0000-5daddac70000"'
+      - '"03006a68-0000-0700-0000-5e17664c0000"'
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
       x-download-options:
       - noopen
-      x-envoy-upstream-service-time:
-      - '30456'
       x-frame-options:
       - deny
       x-iot-cluster:
-      - iotcprodsoutheastasia01
+      - iotcrd01eastus02
       x-iot-correlation:
-      - 4fa92aay.0
+      - cifgrwyr.0
       x-iot-version:
-      - 101719.0001-master
+      - 20200108.3-rd
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1180'
+      - '1199'
       x-msedge-ref:
-      - 'Ref A: 00B4B513BCC44A20B702444017F2E01F Ref B: SG2EDGE0115 Ref C: 2019-10-21T16:20:20Z'
+      - 'Ref A: 8AB2307BAA934FCA8B375CB456409F43 Ref B: DB3EDGE1607 Ref C: 2020-01-09T17:43:38Z'
       x-xss-protection:
       - 1; mode=block
     status:
       code: 201
       message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Charset:
+      - utf-8
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+      return-client-request-id:
+      - 'true'
+      x-client-CPU:
+      - x86
+      x-client-OS:
+      - win32
+      x-client-SKU:
+      - Python
+      x-client-Ver:
+      - 1.2.2
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff686d426-8d16-42db-81b7-ab578e110ccd%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body:
+      string: !!python/unicode '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration"}'
+    headers:
+      access-control-allow-methods:
+      - GET, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - private, max-age=86400
+      content-length:
+      - '131'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 09 Jan 2020 17:44:12 GMT
+      p3p:
+      - CP="DSP CUR OTPi IND OTRi ONL FIN"
+      set-cookie:
+      - fpc=AlpPcSmF4YhOhCvYe1xlfTM; expires=Sat, 08-Feb-2020 17:44:13 GMT; path=/;
+        secure; HttpOnly; SameSite=None
+      - esctx=AQABAAAAAABeAFzDwllzTYGDLh_qYbH8LWH0id0nB781on1c_slVaMv0aU_bcIB20QM1azru_GiHXqWZT-9xsi3C20k_W63xqZi25zoIxtYiLkFtQ1kPvsHbGRsvqTOvOKgHUCzfmU7QBhx5OWSalJOlX8MwjQuYQcptr41C2XwFCDNGdHAMo1yRJHyrZa6OWbc0SJA7nfMgAA;
+        domain=.login.windows.net; path=/; secure; HttpOnly; SameSite=None
+      - x-ms-gateway-slice=corp; path=/; SameSite=None; secure; HttpOnly
+      - stsservicecookie=estscorp; path=/; SameSite=None; secure; HttpOnly
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ests-server:
+      - 2.1.9898.10 - WST ProdSlices
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
@@ -254,26 +295,26 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -g --sku --subdomain
+      - -n -g --subdomain --sku
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-iotcentral/1.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/2.7.14 (Windows-10-10.0.18362) msrest/0.6.10 msrest_azure/0.6.2 azure-mgmt-iotcentral/2.0.0
+        Azure-SDK-For-Python AZURECLI/2.0.79
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotc-cli-test000002?api-version=2018-09-01
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotc-cli-test000002?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotc-cli-test000002","name":"iotc-cli-test000002","type":"Microsoft.IoTCentral/IoTApps","location":"westus","tags":{},"properties":{"applicationId":"cd36259b-8948-40b1-95a8-c2a77361487b","state":"created","displayName":"iotc-cli-test000002","tenant":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","capabilities":{},"subdomain":"iotc-cli-test000002","createdDate":"2019-10-21T16:20:23.084Z","template":"iotc-default@1.0.0"},"sku":{"name":"S1"},"etag":"\"b1047199-0000-0100-0000-5daddac70000\""}'
+      string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotc-cli-test000002","name":"iotc-cli-test000002","type":"Microsoft.IoTCentral/IoTApps","location":"eastus","tags":{},"properties":{"applicationId":"34715012-3beb-4019-80a0-985f703478cb","state":"created","displayName":"iotc-cli-test000002","tenant":"f686d426-8d16-42db-81b7-ab578e110ccd","capabilities":{},"subdomain":"iotc-cli-test000002","createdDate":"2020-01-09T17:43:40.365Z","template":"iotc-default@1.0.0"},"sku":{"name":"ST2"},"etag":"\"03006a68-0000-0700-0000-5e17664c0000\""}'
     headers:
       cache-control:
       - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
       content-length:
-      - '694'
+      - '695'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 16:21:50 GMT
+      - Thu, 09 Jan 2020 17:44:15 GMT
       etag:
-      - W/"b1047199-0000-0100-0000-5daddac70000"
+      - W/"03006a68-0000-0700-0000-5e17664c0000"
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -284,154 +325,77 @@ interactions:
       - nosniff
       x-download-options:
       - noopen
-      x-envoy-upstream-service-time:
-      - '27145'
       x-frame-options:
       - deny
       x-iot-cluster:
-      - iotcprodsoutheastasia01
+      - iotcrd01eastus02
       x-iot-correlation:
-      - j5956nl.0
+      - b45mkqo8.0
       x-iot-version:
-      - 101719.0001-master
+      - 20200108.3-rd
       x-msedge-ref:
-      - 'Ref A: AF851C77A7BD473194C23F41C7506F7C Ref B: SG2EDGE1022 Ref C: 2019-10-21T16:21:23Z'
+      - 'Ref A: FAF11128B19144B88E070C970FC04189 Ref B: DB3EDGE1522 Ref C: 2020-01-09T17:44:15Z'
       x-xss-protection:
       - 1; mode=block
     status:
       code: 200
       message: OK
 - request:
-    body: '{"name": "iotc-cli-test000002-template", "type": "IoTApps"}'
+    body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
+      Accept-Charset:
+      - utf-8
       Accept-Encoding:
       - gzip, deflate
-      CommandName:
-      - iotcentral app create
       Connection:
       - keep-alive
-      Content-Length:
-      - '64'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -n -g --sku --subdomain --template --display-name
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-iotcentral/1.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.IoTCentral/checkNameAvailability?api-version=2018-09-01
+      - python-requests/2.22.0
+      return-client-request-id:
+      - 'true'
+      x-client-CPU:
+      - x86
+      x-client-OS:
+      - win32
+      x-client-SKU:
+      - Python
+      x-client-Ver:
+      - 1.2.2
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff686d426-8d16-42db-81b7-ab578e110ccd%2Foauth2%2Fauthorize&api-version=1.0
   response:
     body:
-      string: '{"nameAvailable":true}'
+      string: !!python/unicode '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration"}'
     headers:
+      access-control-allow-methods:
+      - GET, OPTIONS
+      access-control-allow-origin:
+      - '*'
       cache-control:
-      - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
+      - private, max-age=86400
       content-length:
-      - '22'
+      - '131'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 16:21:54 GMT
-      etag:
-      - W/"16-4/x+wI91pK3bZiWtoOg+Zr/n2HE"
+      - Thu, 09 Jan 2020 17:44:17 GMT
+      p3p:
+      - CP="DSP CUR OTPi IND OTRi ONL FIN"
+      set-cookie:
+      - fpc=Ap-lETtEUuhAuDPx47tc58k; expires=Sat, 08-Feb-2020 17:44:18 GMT; path=/;
+        secure; HttpOnly; SameSite=None
+      - esctx=AQABAAAAAABeAFzDwllzTYGDLh_qYbH8CYjamrvtAzOQ27WrsqPyhosID-LYleS0HljCu9ubyo9YelhqikeAc2q3KvzAU1JuQDNCTIWT3v1-_II63hHh5rtXSVejlxDjVzpjFJe3cUXOhkdeyl8-LtHYi8WcuB2H-jqNp1YDhM9AWRYCbt8UgMLjRoN-iQgf20xX32BuwLYgAA;
+        domain=.login.windows.net; path=/; secure; HttpOnly; SameSite=None
+      - x-ms-gateway-slice=corp; path=/; SameSite=None; secure; HttpOnly
+      - stsservicecookie=estscorp; path=/; SameSite=None; secure; HttpOnly
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-download-options:
-      - noopen
-      x-envoy-upstream-service-time:
-      - '1631'
-      x-frame-options:
-      - deny
-      x-iot-cluster:
-      - iotcprodsoutheastasia01
-      x-iot-correlation:
-      - 5lkxa5kd.0
-      x-iot-version:
-      - 101719.0001-master
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1188'
-      x-msedge-ref:
-      - 'Ref A: 5F8335BA3506494F8A25B438AA96EE81 Ref B: SG2EDGE0317 Ref C: 2019-10-21T16:21:53Z'
-      x-xss-protection:
-      - 1; mode=block
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"name": "iotc-cli-test000002-template", "type": "IoTApps"}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - iotcentral app create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '64'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -n -g --sku --subdomain --template --display-name
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-iotcentral/1.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.IoTCentral/checkSubdomainAvailability?api-version=2018-09-01
-  response:
-    body:
-      string: '{"nameAvailable":true}'
-    headers:
-      cache-control:
-      - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
-      content-length:
-      - '22'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 21 Oct 2019 16:21:57 GMT
-      etag:
-      - W/"16-4/x+wI91pK3bZiWtoOg+Zr/n2HE"
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-download-options:
-      - noopen
-      x-envoy-upstream-service-time:
-      - '932'
-      x-frame-options:
-      - deny
-      x-iot-cluster:
-      - iotcprodsoutheastasia01
-      x-iot-correlation:
-      - 3jj3wrzj.0
-      x-iot-version:
-      - 101719.0001-master
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
-      x-msedge-ref:
-      - 'Ref A: 4C65EAB377894EDE911F0D00ACEA5A48 Ref B: SG2EDGE0121 Ref C: 2019-10-21T16:21:57Z'
-      x-xss-protection:
-      - 1; mode=block
+      x-ms-ests-server:
+      - 2.1.9898.10 - WST ProdSlices
     status:
       code: 200
       message: OK
@@ -447,17 +411,17 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -g --sku --subdomain --template --display-name
+      - -n -g --subdomain --template --display-name --sku
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/2.7.14 (Windows-10-10.0.18362) msrest/0.6.10 msrest_azure/0.6.2 azure-mgmt-resource/6.0.0
+        Azure-SDK-For-Python AZURECLI/2.0.79
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-07-01
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-07-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-10-21T16:20:03Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"date":"2020-01-09T17:43:14Z","product":"azurecli","cause":"automation"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -466,7 +430,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 16:21:59 GMT
+      - Thu, 09 Jan 2020 17:44:18 GMT
       expires:
       - '-1'
       pragma:
@@ -481,9 +445,68 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus", "properties": {"displayName": "My Custom App Display
-      Name", "subdomain": "iotc-cli-test000002-template", "template": "iotc-devkit-sample@1.0.0"},
-      "sku": {"name": "S1"}}'
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Charset:
+      - utf-8
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+      return-client-request-id:
+      - 'true'
+      x-client-CPU:
+      - x86
+      x-client-OS:
+      - win32
+      x-client-SKU:
+      - Python
+      x-client-Ver:
+      - 1.2.2
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff686d426-8d16-42db-81b7-ab578e110ccd%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body:
+      string: !!python/unicode '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration"}'
+    headers:
+      access-control-allow-methods:
+      - GET, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - private, max-age=86400
+      content-length:
+      - '131'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 09 Jan 2020 17:44:18 GMT
+      p3p:
+      - CP="DSP CUR OTPi IND OTRi ONL FIN"
+      set-cookie:
+      - fpc=AttDwFXUTh5FoFuqMteeQdA; expires=Sat, 08-Feb-2020 17:44:19 GMT; path=/;
+        secure; HttpOnly; SameSite=None
+      - esctx=AQABAAAAAABeAFzDwllzTYGDLh_qYbH87mVMl2-pKI9iogUnutvotf-rrcNg3boLRfxPFFX1h62oQpfopbQ5_avWdLqE6ZCnELJn_Ic_EgWcJ9jjUDPiF6wClgBO9x8ZnQMcZvBrvVLgKTz6QfknIRjgWPsRomY6Y-4g_CBoEzJOvPTWgReljxOhQCe_2UUFlrbyiR3v43sgAA;
+        domain=.login.windows.net; path=/; secure; HttpOnly; SameSite=None
+      - x-ms-gateway-slice=corp; path=/; SameSite=None; secure; HttpOnly
+      - stsservicecookie=estscorp; path=/; SameSite=None; secure; HttpOnly
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ests-server:
+      - 2.1.9898.10 - SAN ProdSlices
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/unicode '{"sku": {"name": "ST1"}, "properties": {"subdomain": "iotc-cli-test000002-template",
+      "displayName": "My Custom App Display Name", "template": "iotc-default@1.0.0"},
+      "location": "eastus"}'
     headers:
       Accept:
       - application/json
@@ -494,58 +517,115 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '196'
+      - '191'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
-      - -n -g --sku --subdomain --template --display-name
+      - -n -g --subdomain --template --display-name --sku
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-iotcentral/1.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/2.7.14 (Windows-10-10.0.18362) msrest/0.6.10 msrest_azure/0.6.2 azure-mgmt-iotcentral/2.0.0
+        Azure-SDK-For-Python AZURECLI/2.0.79
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotc-cli-test000002-template?api-version=2018-09-01
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotc-cli-test000002-template?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotc-cli-test000002-template","name":"iotc-cli-test000002-template","type":"Microsoft.IoTCentral/IoTApps","location":"westus","tags":{},"properties":{"applicationId":"b519cede-4325-46f0-8afb-47f728a0ab12","state":"created","displayName":"My
-        Custom App Display Name","tenant":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","capabilities":{},"subdomain":"iotc-cli-test000002-template","createdDate":"2019-10-21T16:22:07.042Z","template":"iotc-devkit-sample@1.0.0"},"sku":{"name":"S1"},"etag":"\"b104ccbf-0000-0100-0000-5daddb2f0000\""}'
+      string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotc-cli-test000002-template","name":"iotc-cli-test000002-template","type":"Microsoft.IoTCentral/IoTApps","location":"eastus","tags":{},"properties":{"applicationId":"087e69e2-dc4b-434d-9466-27bf5b5cf750","state":"created","displayName":"My
+        Custom App Display Name","tenant":"f686d426-8d16-42db-81b7-ab578e110ccd","capabilities":{},"subdomain":"iotc-cli-test000002-template","createdDate":"2020-01-09T17:44:24.020Z","template":"iotc-default@1.0.0"},"sku":{"name":"ST1"},"etag":"\"02002308-0000-0700-0000-5e1766780000\""}'
     headers:
       cache-control:
       - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
       content-length:
-      - '729'
+      - '724'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 16:22:17 GMT
+      - Thu, 09 Jan 2020 17:44:25 GMT
       etag:
-      - '"b104ccbf-0000-0100-0000-5daddb2f0000"'
+      - '"02002308-0000-0700-0000-5e1766780000"'
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
       x-download-options:
       - noopen
-      x-envoy-upstream-service-time:
-      - '14747'
       x-frame-options:
       - deny
       x-iot-cluster:
-      - iotcprodsoutheastasia01
+      - iotcrd01eastus02
       x-iot-correlation:
-      - c53a64o9.0
+      - 2nva0n53.0
       x-iot-version:
-      - 101719.0001-master
+      - 20200108.3-rd
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1190'
+      - '1199'
       x-msedge-ref:
-      - 'Ref A: FBD58C138C464B6BBCD20384424CB753 Ref B: SG2EDGE0317 Ref C: 2019-10-21T16:22:03Z'
+      - 'Ref A: E3433DB6C3F44F5C9023E9A1E0D46AA6 Ref B: DB3EDGE1522 Ref C: 2020-01-09T17:44:22Z'
       x-xss-protection:
       - 1; mode=block
     status:
       code: 201
       message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Charset:
+      - utf-8
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+      return-client-request-id:
+      - 'true'
+      x-client-CPU:
+      - x86
+      x-client-OS:
+      - win32
+      x-client-SKU:
+      - Python
+      x-client-Ver:
+      - 1.2.2
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff686d426-8d16-42db-81b7-ab578e110ccd%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body:
+      string: !!python/unicode '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration"}'
+    headers:
+      access-control-allow-methods:
+      - GET, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - private, max-age=86400
+      content-length:
+      - '131'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 09 Jan 2020 17:44:55 GMT
+      p3p:
+      - CP="DSP CUR OTPi IND OTRi ONL FIN"
+      set-cookie:
+      - fpc=AoOHZPrFkXBGvWH_GV6LcfM; expires=Sat, 08-Feb-2020 17:44:56 GMT; path=/;
+        secure; HttpOnly; SameSite=None
+      - esctx=AQABAAAAAABeAFzDwllzTYGDLh_qYbH82h7VqSXdtOclQMO4l6LOjSdKNZ2pAi5-EdL97smfnUWiTcvsxJaITJDFH9GHEuaPT7XWRfYZ0sErosXS3zLPbBvoHzcRK-Z04D1lKidGFGGvWbVGOYgnn-lTl98mrRMQ3C9xcqqmF9bgVnfkoce6QCaaIvLt_Gsoe9TcUIn_Z8YgAA;
+        domain=.login.windows.net; path=/; secure; HttpOnly; SameSite=None
+      - x-ms-gateway-slice=corp; path=/; SameSite=None; secure; HttpOnly
+      - stsservicecookie=estscorp; path=/; SameSite=None; secure; HttpOnly
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ests-server:
+      - 2.1.9898.10 - SAN ProdSlices
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
@@ -558,27 +638,27 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -g --sku --subdomain --template --display-name
+      - -n -g --subdomain --template --display-name --sku
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-iotcentral/1.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/2.7.14 (Windows-10-10.0.18362) msrest/0.6.10 msrest_azure/0.6.2 azure-mgmt-iotcentral/2.0.0
+        Azure-SDK-For-Python AZURECLI/2.0.79
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotc-cli-test000002-template?api-version=2018-09-01
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotc-cli-test000002-template?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotc-cli-test000002-template","name":"iotc-cli-test000002-template","type":"Microsoft.IoTCentral/IoTApps","location":"westus","tags":{},"properties":{"applicationId":"b519cede-4325-46f0-8afb-47f728a0ab12","state":"created","displayName":"My
-        Custom App Display Name","tenant":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","capabilities":{},"subdomain":"iotc-cli-test000002-template","createdDate":"2019-10-21T16:22:07.042Z","template":"iotc-devkit-sample@1.0.0"},"sku":{"name":"S1"},"etag":"\"b104ccbf-0000-0100-0000-5daddb2f0000\""}'
+      string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotc-cli-test000002-template","name":"iotc-cli-test000002-template","type":"Microsoft.IoTCentral/IoTApps","location":"eastus","tags":{},"properties":{"applicationId":"087e69e2-dc4b-434d-9466-27bf5b5cf750","state":"created","displayName":"My
+        Custom App Display Name","tenant":"f686d426-8d16-42db-81b7-ab578e110ccd","capabilities":{},"subdomain":"iotc-cli-test000002-template","createdDate":"2020-01-09T17:44:24.020Z","template":"iotc-default@1.0.0"},"sku":{"name":"ST1"},"etag":"\"02002308-0000-0700-0000-5e1766780000\""}'
     headers:
       cache-control:
       - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
       content-length:
-      - '729'
+      - '724'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 16:22:51 GMT
+      - Thu, 09 Jan 2020 17:44:58 GMT
       etag:
-      - W/"b104ccbf-0000-0100-0000-5daddb2f0000"
+      - W/"02002308-0000-0700-0000-5e1766780000"
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -589,20 +669,77 @@ interactions:
       - nosniff
       x-download-options:
       - noopen
-      x-envoy-upstream-service-time:
-      - '1156'
       x-frame-options:
       - deny
       x-iot-cluster:
-      - iotcprodsoutheastasia01
+      - iotcrd01eastus02
       x-iot-correlation:
-      - 4te57fmc.0
+      - 8oi7oi1y.0
       x-iot-version:
-      - 101719.0001-master
+      - 20200108.3-rd
       x-msedge-ref:
-      - 'Ref A: CE2DFD0B28934CB9A86C42E0B6A13846 Ref B: SG2EDGE0317 Ref C: 2019-10-21T16:22:50Z'
+      - 'Ref A: DE68ECCC68604216882D403AD37F5741 Ref B: DB3EDGE1507 Ref C: 2020-01-09T17:44:58Z'
       x-xss-protection:
       - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Charset:
+      - utf-8
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+      return-client-request-id:
+      - 'true'
+      x-client-CPU:
+      - x86
+      x-client-OS:
+      - win32
+      x-client-SKU:
+      - Python
+      x-client-Ver:
+      - 1.2.2
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff686d426-8d16-42db-81b7-ab578e110ccd%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body:
+      string: !!python/unicode '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration"}'
+    headers:
+      access-control-allow-methods:
+      - GET, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - private, max-age=86400
+      content-length:
+      - '131'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 09 Jan 2020 17:44:59 GMT
+      p3p:
+      - CP="DSP CUR OTPi IND OTRi ONL FIN"
+      set-cookie:
+      - fpc=Aly5hzswdAtAsmXCioZcPSM; expires=Sat, 08-Feb-2020 17:44:59 GMT; path=/;
+        secure; HttpOnly; SameSite=None
+      - esctx=AQABAAAAAABeAFzDwllzTYGDLh_qYbH8t8UBbYnN74pYDzGOoV_63extkGaJUnOtrQJR40_ObefR_JZwz25-DlHOywZmL5D2c00DqcsreFcx-rSE8IRMpHxqi9Hl8ia1Gyq0W5qGdEd2FxgurGdt9X5YsQ6tnkdIeKcTfvprKY-M9BXZfCHTqc7sP33dfpIt3B42wRFaZQcgAA;
+        domain=.login.windows.net; path=/; secure; HttpOnly; SameSite=None
+      - x-ms-gateway-slice=corp; path=/; SameSite=None; secure; HttpOnly
+      - stsservicecookie=estscorp; path=/; SameSite=None; secure; HttpOnly
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ests-server:
+      - 2.1.9898.10 - WST ProdSlices
     status:
       code: 200
       message: OK
@@ -620,27 +757,27 @@ interactions:
       ParameterSetName:
       - -n -g --set
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-iotcentral/1.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/2.7.14 (Windows-10-10.0.18362) msrest/0.6.10 msrest_azure/0.6.2 azure-mgmt-iotcentral/2.0.0
+        Azure-SDK-For-Python AZURECLI/2.0.79
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotc-cli-test000002-template?api-version=2018-09-01
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotc-cli-test000002-template?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotc-cli-test000002-template","name":"iotc-cli-test000002-template","type":"Microsoft.IoTCentral/IoTApps","location":"westus","tags":{},"properties":{"applicationId":"b519cede-4325-46f0-8afb-47f728a0ab12","state":"created","displayName":"My
-        Custom App Display Name","tenant":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","capabilities":{},"subdomain":"iotc-cli-test000002-template","createdDate":"2019-10-21T16:22:07.042Z","template":"iotc-devkit-sample@1.0.0"},"sku":{"name":"S1"},"etag":"\"b104ccbf-0000-0100-0000-5daddb2f0000\""}'
+      string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotc-cli-test000002-template","name":"iotc-cli-test000002-template","type":"Microsoft.IoTCentral/IoTApps","location":"eastus","tags":{},"properties":{"applicationId":"087e69e2-dc4b-434d-9466-27bf5b5cf750","state":"created","displayName":"My
+        Custom App Display Name","tenant":"f686d426-8d16-42db-81b7-ab578e110ccd","capabilities":{},"subdomain":"iotc-cli-test000002-template","createdDate":"2020-01-09T17:44:24.020Z","template":"iotc-default@1.0.0"},"sku":{"name":"ST1"},"etag":"\"02002308-0000-0700-0000-5e1766780000\""}'
     headers:
       cache-control:
       - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
       content-length:
-      - '729'
+      - '724'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 16:22:54 GMT
+      - Thu, 09 Jan 2020 17:45:00 GMT
       etag:
-      - W/"b104ccbf-0000-0100-0000-5daddb2f0000"
+      - W/"02002308-0000-0700-0000-5e1766780000"
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -651,27 +788,84 @@ interactions:
       - nosniff
       x-download-options:
       - noopen
-      x-envoy-upstream-service-time:
-      - '1155'
       x-frame-options:
       - deny
       x-iot-cluster:
-      - iotcprodsoutheastasia01
+      - iotcrd01eastus02
       x-iot-correlation:
-      - b1zgagv0.0
+      - 9zw5n71c.0
       x-iot-version:
-      - 101719.0001-master
+      - 20200108.3-rd
       x-msedge-ref:
-      - 'Ref A: 41C62C7C86204B99A3746CBC9F539882 Ref B: SG2EDGE1114 Ref C: 2019-10-21T16:22:53Z'
+      - 'Ref A: 5EA7B2E381764CC085988A5B3F9B58B3 Ref B: DB3EDGE1522 Ref C: 2020-01-09T17:45:00Z'
       x-xss-protection:
       - 1; mode=block
     status:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus", "tags": {}, "properties": {"displayName": "iotc-cli-test000002update",
-      "subdomain": "iotc-cli-test000002update", "template": "iotc-devkit-sample@1.0.0"},
-      "sku": {"name": "S1"}}'
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Charset:
+      - utf-8
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+      return-client-request-id:
+      - 'true'
+      x-client-CPU:
+      - x86
+      x-client-OS:
+      - win32
+      x-client-SKU:
+      - Python
+      x-client-Ver:
+      - 1.2.2
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff686d426-8d16-42db-81b7-ab578e110ccd%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body:
+      string: !!python/unicode '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration"}'
+    headers:
+      access-control-allow-methods:
+      - GET, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - private, max-age=86400
+      content-length:
+      - '131'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 09 Jan 2020 17:45:00 GMT
+      p3p:
+      - CP="DSP CUR OTPi IND OTRi ONL FIN"
+      set-cookie:
+      - fpc=AnrigucpSzVDsLZQ_471XxU; expires=Sat, 08-Feb-2020 17:45:01 GMT; path=/;
+        secure; HttpOnly; SameSite=None
+      - esctx=AQABAAAAAABeAFzDwllzTYGDLh_qYbH8cd3FK9n0Gith-hBFSVhGFq4NXJoy9uOqF0mtW84WQ-Ul-ez6d9vAjz8Sv-myZXiBbPljBcWAareVHTY-TnYO19bE-h5USzPKkm99kqlKKaMtGyw6Kue-A9Fj1lzePc3TQ4cd06anP2dNnEjqb25Od43WLKZrp-2IZWXVNZsNWPcgAA;
+        domain=.login.windows.net; path=/; secure; HttpOnly; SameSite=None
+      - x-ms-gateway-slice=corp; path=/; SameSite=None; secure; HttpOnly
+      - stsservicecookie=estscorp; path=/; SameSite=None; secure; HttpOnly
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ests-server:
+      - 2.1.9898.10 - SAN ProdSlices
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/unicode '{"sku": {"name": "ST2"}, "location": "eastus", "properties":
+      {"subdomain": "iotc-cli-test000002update", "displayName": "iotc-cli-test000002update",
+      "template": "iotc-default@1.0.0"}, "tags": {}}'
     headers:
       Accept:
       - application/json
@@ -682,34 +876,34 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '209'
+      - '204'
       Content-Type:
       - application/json; charset=utf-8
       IF-MATCH:
-      - '"b104ccbf-0000-0100-0000-5daddb2f0000"'
+      - !!python/unicode '"02002308-0000-0700-0000-5e1766780000"'
       ParameterSetName:
       - -n -g --set
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-iotcentral/1.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/2.7.14 (Windows-10-10.0.18362) msrest/0.6.10 msrest_azure/0.6.2 azure-mgmt-iotcentral/2.0.0
+        Azure-SDK-For-Python AZURECLI/2.0.79
       accept-language:
       - en-US
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotc-cli-test000002-template?api-version=2018-09-01
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotc-cli-test000002-template?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotc-cli-test000002-template","name":"iotc-cli-test000002-template","type":"Microsoft.IoTCentral/IoTApps","location":"westus","tags":{},"properties":{"applicationId":"b519cede-4325-46f0-8afb-47f728a0ab12","state":"created","displayName":"iotc-cli-test000002update","tenant":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","capabilities":{},"subdomain":"iotc-cli-test000002update","createdDate":"2019-10-21T16:22:07.042Z","lastUpdated":"2019-10-21T16:23:00.776Z","template":"iotc-devkit-sample@1.0.0"},"sku":{"name":"S1"},"etag":"\"b104dbe3-0000-0100-0000-5daddb650000\""}'
+      string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotc-cli-test000002-template","name":"iotc-cli-test000002-template","type":"Microsoft.IoTCentral/IoTApps","location":"eastus","tags":{},"properties":{"applicationId":"087e69e2-dc4b-434d-9466-27bf5b5cf750","state":"created","displayName":"iotc-cli-test000002update","tenant":"f686d426-8d16-42db-81b7-ab578e110ccd","capabilities":{},"subdomain":"iotc-cli-test000002update","createdDate":"2020-01-09T17:44:24.020Z","lastUpdated":"2020-01-09T17:45:05.264Z","template":"iotc-default@1.0.0"},"sku":{"name":"ST2"},"etag":"\"0200ce08-0000-0700-0000-5e1766a10000\""}'
     headers:
       cache-control:
       - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
       content-length:
-      - '771'
+      - '766'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 16:23:03 GMT
+      - Thu, 09 Jan 2020 17:45:05 GMT
       etag:
-      - W/"b104dbe3-0000-0100-0000-5daddb650000"
+      - W/"0200ce08-0000-0700-0000-5e1766a10000"
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -720,22 +914,79 @@ interactions:
       - nosniff
       x-download-options:
       - noopen
-      x-envoy-upstream-service-time:
-      - '4544'
       x-frame-options:
       - deny
       x-iot-cluster:
-      - iotcprodsoutheastasia01
+      - iotcrd01eastus02
       x-iot-correlation:
-      - 1qk5b7rp.0
+      - 3x21q4v6.0
       x-iot-version:
-      - 101719.0001-master
+      - 20200108.3-rd
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1191'
+      - '1199'
       x-msedge-ref:
-      - 'Ref A: A172644582B24A6D8AE8FF653251ACB4 Ref B: SG2EDGE0912 Ref C: 2019-10-21T16:22:57Z'
+      - 'Ref A: 645A4CB6C87A42908985CAA9E1B654B8 Ref B: DB3EDGE1618 Ref C: 2020-01-09T17:45:03Z'
       x-xss-protection:
       - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Charset:
+      - utf-8
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+      return-client-request-id:
+      - 'true'
+      x-client-CPU:
+      - x86
+      x-client-OS:
+      - win32
+      x-client-SKU:
+      - Python
+      x-client-Ver:
+      - 1.2.2
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff686d426-8d16-42db-81b7-ab578e110ccd%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body:
+      string: !!python/unicode '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration"}'
+    headers:
+      access-control-allow-methods:
+      - GET, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - private, max-age=86400
+      content-length:
+      - '131'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 09 Jan 2020 17:45:06 GMT
+      p3p:
+      - CP="DSP CUR OTPi IND OTRi ONL FIN"
+      set-cookie:
+      - fpc=AiH5dHldPCdPvWo1y4P6GdM; expires=Sat, 08-Feb-2020 17:45:07 GMT; path=/;
+        secure; HttpOnly; SameSite=None
+      - esctx=AQABAAAAAABeAFzDwllzTYGDLh_qYbH8XBoODubXbNsZJEkFqXbJFmfL8agFcoJaybBsja2HTweEKDIcmnIGGeaaDyegFFhytGQzjoa5V1OAWvpo94Sv_jc3U1yoRd4CtUBAtoSp5R5fgvCHh3tmEQrkiJK5YxUYpzG41VhY42SvqEcDqHHYfvUt15sgMilrAuRXf7ELlUAgAA;
+        domain=.login.windows.net; path=/; secure; HttpOnly; SameSite=None
+      - x-ms-gateway-slice=corp; path=/; SameSite=None; secure; HttpOnly
+      - stsservicecookie=estscorp; path=/; SameSite=None; secure; HttpOnly
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ests-server:
+      - 2.1.9898.10 - SAN ProdSlices
     status:
       code: 200
       message: OK
@@ -753,26 +1004,26 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-iotcentral/1.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/2.7.14 (Windows-10-10.0.18362) msrest/0.6.10 msrest_azure/0.6.2 azure-mgmt-iotcentral/2.0.0
+        Azure-SDK-For-Python AZURECLI/2.0.79
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotc-cli-test000002?api-version=2018-09-01
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotc-cli-test000002?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotc-cli-test000002","name":"iotc-cli-test000002","type":"Microsoft.IoTCentral/IoTApps","location":"westus","tags":{},"properties":{"applicationId":"cd36259b-8948-40b1-95a8-c2a77361487b","state":"created","displayName":"iotc-cli-test000002","tenant":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","capabilities":{},"subdomain":"iotc-cli-test000002","createdDate":"2019-10-21T16:20:23.084Z","template":"iotc-default@1.0.0"},"sku":{"name":"S1"},"etag":"\"b1047199-0000-0100-0000-5daddac70000\""}'
+      string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotc-cli-test000002","name":"iotc-cli-test000002","type":"Microsoft.IoTCentral/IoTApps","location":"eastus","tags":{},"properties":{"applicationId":"34715012-3beb-4019-80a0-985f703478cb","state":"created","displayName":"iotc-cli-test000002","tenant":"f686d426-8d16-42db-81b7-ab578e110ccd","capabilities":{},"subdomain":"iotc-cli-test000002","createdDate":"2020-01-09T17:43:40.365Z","template":"iotc-default@1.0.0"},"sku":{"name":"ST2"},"etag":"\"03006a68-0000-0700-0000-5e17664c0000\""}'
     headers:
       cache-control:
       - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
       content-length:
-      - '694'
+      - '695'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 16:23:06 GMT
+      - Thu, 09 Jan 2020 17:45:09 GMT
       etag:
-      - W/"b1047199-0000-0100-0000-5daddac70000"
+      - W/"03006a68-0000-0700-0000-5e17664c0000"
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -783,20 +1034,77 @@ interactions:
       - nosniff
       x-download-options:
       - noopen
-      x-envoy-upstream-service-time:
-      - '1164'
       x-frame-options:
       - deny
       x-iot-cluster:
-      - iotcprodsoutheastasia01
+      - iotcrd01eastus02
       x-iot-correlation:
-      - 6n7pi5ty.0
+      - 2x00qga9.0
       x-iot-version:
-      - 101719.0001-master
+      - 20200108.3-rd
       x-msedge-ref:
-      - 'Ref A: B9818A975CD3420F8F2EAABA8A07708C Ref B: SG2EDGE0916 Ref C: 2019-10-21T16:23:06Z'
+      - 'Ref A: FA5BFF28ADC642D98ADF1FB308E706A2 Ref B: DB3EDGE1613 Ref C: 2020-01-09T17:45:09Z'
       x-xss-protection:
       - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Charset:
+      - utf-8
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+      return-client-request-id:
+      - 'true'
+      x-client-CPU:
+      - x86
+      x-client-OS:
+      - win32
+      x-client-SKU:
+      - Python
+      x-client-Ver:
+      - 1.2.2
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff686d426-8d16-42db-81b7-ab578e110ccd%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body:
+      string: !!python/unicode '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration"}'
+    headers:
+      access-control-allow-methods:
+      - GET, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - private, max-age=86400
+      content-length:
+      - '131'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 09 Jan 2020 17:45:09 GMT
+      p3p:
+      - CP="DSP CUR OTPi IND OTRi ONL FIN"
+      set-cookie:
+      - fpc=Ar18jfYFzcRFg4oA8hTRy_g; expires=Sat, 08-Feb-2020 17:45:10 GMT; path=/;
+        secure; HttpOnly; SameSite=None
+      - esctx=AQABAAAAAABeAFzDwllzTYGDLh_qYbH8RYuHRzwzalNn8zabnqGUxi1RbcXunUWz3J_y8sd1AYEIqhATEEl49fMLdOQPV8454vUA427PbP2-X9ud9nML1WWPOWJYz2hOImk2zjlnDBxEt-cgdUXHl1WYmS5Qdca5UhzTArwcOFtJefk67tZii3YSrnZea_aIqFRUTssilKIgAA;
+        domain=.login.windows.net; path=/; secure; HttpOnly; SameSite=None
+      - x-ms-gateway-slice=corp; path=/; SameSite=None; secure; HttpOnly
+      - stsservicecookie=estscorp; path=/; SameSite=None; secure; HttpOnly
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ests-server:
+      - 2.1.9898.10 - WST ProdSlices
     status:
       code: 200
       message: OK
@@ -814,26 +1122,26 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-iotcentral/1.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/2.7.14 (Windows-10-10.0.18362) msrest/0.6.10 msrest_azure/0.6.2 azure-mgmt-iotcentral/2.0.0
+        Azure-SDK-For-Python AZURECLI/2.0.79
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotc-cli-test000002-template?api-version=2018-09-01
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotc-cli-test000002-template?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotc-cli-test000002-template","name":"iotc-cli-test000002-template","type":"Microsoft.IoTCentral/IoTApps","location":"westus","tags":{},"properties":{"applicationId":"b519cede-4325-46f0-8afb-47f728a0ab12","state":"created","displayName":"iotc-cli-test000002update","tenant":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","capabilities":{},"subdomain":"iotc-cli-test000002update","createdDate":"2019-10-21T16:22:07.042Z","lastUpdated":"2019-10-21T16:23:00.776Z","template":"iotc-devkit-sample@1.0.0"},"sku":{"name":"S1"},"etag":"\"b104dbe3-0000-0100-0000-5daddb650000\""}'
+      string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotc-cli-test000002-template","name":"iotc-cli-test000002-template","type":"Microsoft.IoTCentral/IoTApps","location":"eastus","tags":{},"properties":{"applicationId":"087e69e2-dc4b-434d-9466-27bf5b5cf750","state":"created","displayName":"iotc-cli-test000002update","tenant":"f686d426-8d16-42db-81b7-ab578e110ccd","capabilities":{},"subdomain":"iotc-cli-test000002update","createdDate":"2020-01-09T17:44:24.020Z","lastUpdated":"2020-01-09T17:45:05.264Z","template":"iotc-default@1.0.0"},"sku":{"name":"ST2"},"etag":"\"0200ce08-0000-0700-0000-5e1766a10000\""}'
     headers:
       cache-control:
       - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
       content-length:
-      - '771'
+      - '766'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 16:23:10 GMT
+      - Thu, 09 Jan 2020 17:45:11 GMT
       etag:
-      - W/"b104dbe3-0000-0100-0000-5daddb650000"
+      - W/"0200ce08-0000-0700-0000-5e1766a10000"
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -844,20 +1152,77 @@ interactions:
       - nosniff
       x-download-options:
       - noopen
-      x-envoy-upstream-service-time:
-      - '1181'
       x-frame-options:
       - deny
       x-iot-cluster:
-      - iotcprodsoutheastasia01
+      - iotcrd01eastus02
       x-iot-correlation:
-      - 5gwwnzf8.0
+      - 2fgu9cmu.0
       x-iot-version:
-      - 101719.0001-master
+      - 20200108.3-rd
       x-msedge-ref:
-      - 'Ref A: 3187C5B27F64419E84759F5C8696586F Ref B: SG2EDGE0912 Ref C: 2019-10-21T16:23:09Z'
+      - 'Ref A: 4896ECC71F524559B4FA2B782374CFA1 Ref B: DB3EDGE1510 Ref C: 2020-01-09T17:45:12Z'
       x-xss-protection:
       - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Charset:
+      - utf-8
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+      return-client-request-id:
+      - 'true'
+      x-client-CPU:
+      - x86
+      x-client-OS:
+      - win32
+      x-client-SKU:
+      - Python
+      x-client-Ver:
+      - 1.2.2
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff686d426-8d16-42db-81b7-ab578e110ccd%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body:
+      string: !!python/unicode '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration"}'
+    headers:
+      access-control-allow-methods:
+      - GET, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - private, max-age=86400
+      content-length:
+      - '131'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 09 Jan 2020 17:45:12 GMT
+      p3p:
+      - CP="DSP CUR OTPi IND OTRi ONL FIN"
+      set-cookie:
+      - fpc=AiGhDZxnitNKsuqfCyySsCM; expires=Sat, 08-Feb-2020 17:45:12 GMT; path=/;
+        secure; HttpOnly; SameSite=None
+      - esctx=AQABAAAAAABeAFzDwllzTYGDLh_qYbH8oCQaQ6KVfH3s2-i-UxUtdhX7maFapxyvqB_yNdiwzdVQikHYhEMhJ9u5w_SyMUMIflr6Wqq0HWnPR5K-oRh59A--d8r7bTY-LZkmUOIGjST2ulAfNseCvDODzCSuAJbF_NDtnXggSSKO1DdQUpgwrtztSuzI7OypFW3B5UjMHnggAA;
+        domain=.login.windows.net; path=/; secure; HttpOnly; SameSite=None
+      - x-ms-gateway-slice=corp; path=/; SameSite=None; secure; HttpOnly
+      - stsservicecookie=estscorp; path=/; SameSite=None; secure; HttpOnly
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ests-server:
+      - 2.1.9898.10 - SAN ProdSlices
     status:
       code: 200
       message: OK
@@ -877,46 +1242,141 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-iotcentral/1.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/2.7.14 (Windows-10-10.0.18362) msrest/0.6.10 msrest_azure/0.6.2 azure-mgmt-iotcentral/2.0.0
+        Azure-SDK-For-Python AZURECLI/2.0.79
       accept-language:
       - en-US
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotc-cli-test000002-template?api-version=2018-09-01
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotc-cli-test000002-template?api-version=2018-09-01
   response:
     body:
-      string: ''
+      string: !!python/unicode '{"error":{"code":"ServerTimeout","message":"The request
+        timed out. Diagnostic information: timestamp ''20200109T174619Z'', subscription
+        id ''34d077e3-2c1a-48f5-8629-ffc0e657e0ed'', tracking id ''3c7f9e79-a928-474b-ac49-69693d89d788'',
+        request correlation id ''3c7f9e79-a928-474b-ac49-69693d89d788''."}}'
     headers:
       cache-control:
-      - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
+      - no-cache
+      connection:
+      - close
       content-length:
-      - '0'
+      - '294'
       content-type:
-      - text/plain
+      - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 16:23:16 GMT
+      - Thu, 09 Jan 2020 17:46:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
-      x-download-options:
-      - noopen
-      x-envoy-upstream-service-time:
-      - '2425'
-      x-frame-options:
-      - deny
-      x-iot-cluster:
-      - iotcprodsoutheastasia01
-      x-iot-correlation:
-      - 30gv78wh.0
-      x-iot-version:
-      - 101719.0001-master
+      x-ms-failure-cause:
+      - gateway
+    status:
+      code: 503
+      message: Service Unavailable
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iotcentral app delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - python/2.7.14 (Windows-10-10.0.18362) msrest/0.6.10 msrest_azure/0.6.2 azure-mgmt-iotcentral/2.0.0
+        Azure-SDK-For-Python AZURECLI/2.0.79
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotc-cli-test000002-template?api-version=2018-09-01
+  response:
+    body:
+      string: !!python/unicode 
+    headers:
+      cache-control:
+      - no-cache
+      date:
+      - Thu, 09 Jan 2020 17:46:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14996'
-      x-msedge-ref:
-      - 'Ref A: 054729708D6A418C9055D0D1EB31D124 Ref B: SG2EDGE1007 Ref C: 2019-10-21T16:23:13Z'
-      x-xss-protection:
-      - 1; mode=block
+      - '14999'
+    status:
+      code: 204
+      message: No Content
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Charset:
+      - utf-8
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+      return-client-request-id:
+      - 'true'
+      x-client-CPU:
+      - x86
+      x-client-OS:
+      - win32
+      x-client-SKU:
+      - Python
+      x-client-Ver:
+      - 1.2.2
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff686d426-8d16-42db-81b7-ab578e110ccd%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body:
+      string: !!python/unicode '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration"}'
+    headers:
+      access-control-allow-methods:
+      - GET, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - private, max-age=86400
+      content-length:
+      - '131'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 09 Jan 2020 17:46:22 GMT
+      p3p:
+      - CP="DSP CUR OTPi IND OTRi ONL FIN"
+      set-cookie:
+      - fpc=AjGTZHXeV6ZEqBcZytRA2kg; expires=Sat, 08-Feb-2020 17:46:22 GMT; path=/;
+        secure; HttpOnly; SameSite=None
+      - esctx=AQABAAAAAABeAFzDwllzTYGDLh_qYbH8uoa6JTAZMJY5pPcwczB5qBXDQE2xv4rOIcQYVFHSekrQ9q8KycCOFcZsm3bFp6X2FZ5oKR1H2DMxsYVtZQOgOpf8hPwFLhMZ1uPbcCaKDDIgTFiPi07pOBnz1xew5YdV0ISBRbwbxCo5l4I5LEc_d-xoIYtqhpfLLkQjAetFxlsgAA;
+        domain=.login.windows.net; path=/; secure; HttpOnly; SameSite=None
+      - x-ms-gateway-slice=corp; path=/; SameSite=None; secure; HttpOnly
+      - stsservicecookie=estscorp; path=/; SameSite=None; secure; HttpOnly
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ests-server:
+      - 2.1.9898.10 - SAN ProdSlices
     status:
       code: 200
       message: OK
@@ -934,26 +1394,26 @@ interactions:
       ParameterSetName:
       - -g
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-iotcentral/1.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/2.7.14 (Windows-10-10.0.18362) msrest/0.6.10 msrest_azure/0.6.2 azure-mgmt-iotcentral/2.0.0
+        Azure-SDK-For-Python AZURECLI/2.0.79
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps?api-version=2018-09-01
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps?api-version=2018-09-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotc-cli-test000002","name":"iotc-cli-test000002","type":"Microsoft.IoTCentral/IoTApps","location":"westus","tags":{},"properties":{"applicationId":"cd36259b-8948-40b1-95a8-c2a77361487b","state":"created","displayName":"iotc-cli-test000002","tenant":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","capabilities":{},"subdomain":"iotc-cli-test000002","createdDate":"2019-10-21T16:20:23.084Z","template":"iotc-default@1.0.0"},"sku":{"name":"S1"},"etag":"\"b1047199-0000-0100-0000-5daddac70000\""}],"nextLink":null}'
+      string: !!python/unicode '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotc-cli-test000002","name":"iotc-cli-test000002","type":"Microsoft.IoTCentral/IoTApps","location":"eastus","tags":{},"properties":{"applicationId":"34715012-3beb-4019-80a0-985f703478cb","state":"created","displayName":"iotc-cli-test000002","tenant":"f686d426-8d16-42db-81b7-ab578e110ccd","capabilities":{},"subdomain":"iotc-cli-test000002","createdDate":"2020-01-09T17:43:40.365Z","template":"iotc-default@1.0.0"},"sku":{"name":"ST2"},"etag":"\"03006a68-0000-0700-0000-5e17664c0000\""}],"nextLink":null}'
     headers:
       cache-control:
       - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
       content-length:
-      - '722'
+      - '723'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 16:23:20 GMT
+      - Thu, 09 Jan 2020 17:46:25 GMT
       etag:
-      - W/"2d2-D/JuZaA6ZD9I6S6iQV1lcy7EBQU"
+      - W/"2d3-QeO3vuDlHJIQDhJM/SvGBY3ZiTI"
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -964,20 +1424,77 @@ interactions:
       - nosniff
       x-download-options:
       - noopen
-      x-envoy-upstream-service-time:
-      - '1158'
       x-frame-options:
       - deny
       x-iot-cluster:
-      - iotcprodsoutheastasia01
+      - iotcrd01eastus02
       x-iot-correlation:
-      - 875slvti.0
+      - 54buuoqu.0
       x-iot-version:
-      - 101719.0001-master
+      - 20200108.3-rd
       x-msedge-ref:
-      - 'Ref A: 029D3E86B53A486EA86C169FE635615B Ref B: SG2EDGE0109 Ref C: 2019-10-21T16:23:19Z'
+      - 'Ref A: 06868108B1874E329CA655B84B3AC710 Ref B: DB3EDGE1220 Ref C: 2020-01-09T17:46:24Z'
       x-xss-protection:
       - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Charset:
+      - utf-8
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+      return-client-request-id:
+      - 'true'
+      x-client-CPU:
+      - x86
+      x-client-OS:
+      - win32
+      x-client-SKU:
+      - Python
+      x-client-Ver:
+      - 1.2.2
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff686d426-8d16-42db-81b7-ab578e110ccd%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body:
+      string: !!python/unicode '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration"}'
+    headers:
+      access-control-allow-methods:
+      - GET, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - private, max-age=86400
+      content-length:
+      - '131'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 09 Jan 2020 17:46:25 GMT
+      p3p:
+      - CP="DSP CUR OTPi IND OTRi ONL FIN"
+      set-cookie:
+      - fpc=AgoG-03z2TVHhtsGDOQRHUA; expires=Sat, 08-Feb-2020 17:46:25 GMT; path=/;
+        secure; HttpOnly; SameSite=None
+      - esctx=AQABAAAAAABeAFzDwllzTYGDLh_qYbH8GBGBcmcLP4eU2NfOI4rY3BCbrqozKyeqeDzHgv2xnyA5ldGdmPqZgGyWz9fUrOfkhbsyjvrUin4Fcwb6QvG2OidRGVIOqXWVULNhFAUaSAHB_OsBwG3-6t_NT6xMVfkzOt1BpxCZFLlMmgmvJnWUETcvDCq_MSX9b55UsYA4yy4gAA;
+        domain=.login.windows.net; path=/; secure; HttpOnly; SameSite=None
+      - x-ms-gateway-slice=corp; path=/; SameSite=None; secure; HttpOnly
+      - stsservicecookie=estscorp; path=/; SameSite=None; secure; HttpOnly
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ests-server:
+      - 2.1.9898.10 - SAN ProdSlices
     status:
       code: 200
       message: OK
@@ -997,47 +1514,83 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-iotcentral/1.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/2.7.14 (Windows-10-10.0.18362) msrest/0.6.10 msrest_azure/0.6.2 azure-mgmt-iotcentral/2.0.0
+        Azure-SDK-For-Python AZURECLI/2.0.79
       accept-language:
       - en-US
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotc-cli-test000002?api-version=2018-09-01
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotc-cli-test000002?api-version=2018-09-01
   response:
     body:
-      string: ''
+      string: !!python/unicode '{"error":{"code":"ServerTimeout","message":"The request
+        timed out. Diagnostic information: timestamp ''20200109T174730Z'', subscription
+        id ''34d077e3-2c1a-48f5-8629-ffc0e657e0ed'', tracking id ''1e606490-75a4-426e-9339-37c2c0fc827a'',
+        request correlation id ''1e606490-75a4-426e-9339-37c2c0fc827a''."}}'
     headers:
       cache-control:
-      - no-store, must-revalidate, no-cache, max-stale=0, private, post-check=0, pre-check=0
+      - no-cache
+      connection:
+      - close
       content-length:
-      - '0'
+      - '294'
       content-type:
-      - text/plain
+      - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 16:23:27 GMT
+      - Thu, 09 Jan 2020 17:47:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
-      x-download-options:
-      - noopen
-      x-envoy-upstream-service-time:
-      - '3337'
-      x-frame-options:
-      - deny
-      x-iot-cluster:
-      - iotcprodsoutheastasia01
-      x-iot-correlation:
-      - bea4pyvj.0
-      x-iot-version:
-      - 101719.0001-master
+      x-ms-failure-cause:
+      - gateway
+    status:
+      code: 503
+      message: Service Unavailable
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iotcentral app delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - python/2.7.14 (Windows-10-10.0.18362) msrest/0.6.10 msrest_azure/0.6.2 azure-mgmt-iotcentral/2.0.0
+        Azure-SDK-For-Python AZURECLI/2.0.79
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.IoTCentral/IoTApps/iotc-cli-test000002?api-version=2018-09-01
+  response:
+    body:
+      string: !!python/unicode 
+    headers:
+      cache-control:
+      - no-cache
+      date:
+      - Thu, 09 Jan 2020 17:47:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
       - '14999'
-      x-msedge-ref:
-      - 'Ref A: 500AC2464CFF41B082158632E7AED8CE Ref B: SG2EDGE0916 Ref C: 2019-10-21T16:23:23Z'
-      x-xss-protection:
-      - 1; mode=block
     status:
-      code: 200
-      message: OK
+      code: 204
+      message: No Content
 version: 1
