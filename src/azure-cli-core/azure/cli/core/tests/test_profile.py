@@ -797,7 +797,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(tenant_id, test_tenant_id)
 
         # verify tenant shouldn't be specified for MSI account
-        with self.assertRaisesRegex(CLIError, "MSI"):
+        with self.assertRaisesRegexp(CLIError, "MSI"):
             cred, subscription_id, _ = profile.get_raw_token(resource='http://test_resource', tenant=self.tenant_id)
 
     @mock.patch('azure.cli.core._profile.in_cloud_console', autospec=True)
@@ -833,7 +833,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(tenant_id, test_tenant_id)
 
         # verify tenant shouldn't be specified for Cloud Shell account
-        with self.assertRaisesRegex(CLIError, 'Cloud Shell'):
+        with self.assertRaisesRegexp(CLIError, 'Cloud Shell'):
             cred, subscription_id, _ = profile.get_raw_token(resource='http://test_resource', tenant=self.tenant_id)
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
