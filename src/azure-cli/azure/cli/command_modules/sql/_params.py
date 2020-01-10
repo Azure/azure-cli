@@ -292,7 +292,15 @@ def _configure_db_dw_create_update_params(arg_ctx):
     _configure_db_create_params() can .ignore() the params that aren't applicable, and for update commands
     the custom update function can just avoid declaring that parameter.
     """
-    pass
+
+    arg_ctx.argument('compute_model',
+                     arg_type=compute_model_param_type)
+
+    arg_ctx.argument('auto_pause_delay',
+                     arg_type=auto_pause_delay_param_type)
+
+    arg_ctx.argument('min_capacity',
+                     arg_type=min_capacity_param_type)
 
 def _configure_db_dw_create_params(
         arg_ctx,
@@ -356,15 +364,6 @@ def _configure_db_dw_create_params(
     arg_ctx.argument('elastic_pool_id',
                      arg_type=elastic_pool_id_param_type,
                      help='The name or resource id of the elastic pool to create the database in.')
-
-    arg_ctx.argument('compute_model',
-                     arg_type=compute_model_param_type)
-
-    arg_ctx.argument('auto_pause_delay',
-                     arg_type=auto_pause_delay_param_type)
-
-    arg_ctx.argument('min_capacity',
-                     arg_type=min_capacity_param_type)
 
     arg_ctx.argument('read_scale',
                      arg_type=read_scale_param_type)
@@ -578,15 +577,6 @@ def load_arguments(self, _):
                    help='The name or resource id of the elastic pool to move the database into.')
 
         c.argument('max_size_bytes', help='The new maximum size of the database expressed in bytes.')
-
-        c.argument('compute_model',
-                   arg_type=compute_model_param_type)
-
-        c.argument('auto_pause_delay',
-                   arg_type=auto_pause_delay_param_type)
-
-        c.argument('min_capacity',
-                   arg_type=min_capacity_param_type)
 
     with self.argument_context('sql db export') as c:
         # Create args that will be used to build up the ExportRequest object
