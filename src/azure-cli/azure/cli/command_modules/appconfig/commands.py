@@ -57,7 +57,6 @@ def load_command_table(self, _):
         g.command('update', 'update_configstore')
         g.command('list', 'list_configstore')
         g.command('show', 'show_configstore')
-        g.command('update', 'update_configstore')
 
     with self.command_group('appconfig credential', configstore_credential_util) as g:
         g.command('list', 'list_credential')
