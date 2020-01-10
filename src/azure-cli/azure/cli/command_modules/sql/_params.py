@@ -258,10 +258,10 @@ dw_service_objective_examples = 'DW100, DW1000c'
 # |              | True      |              |           | argument_context('sql db update')       |
 # |              |           | True         |           | argument_context('sql dw <createmode>') |
 # |              |           |              | True      | argument_context('sql dw update')       |
-# | True         |           | True         |           | _configure_db_create_params()           |
-# | True         | True      | True         | True      | _configure_db_create_update_params()    |
+# | True         |           | True         |           | _configure_db_dw_create_params()           |
+# | True         | True      | True         | True      | _configure_db_dw_create_update_params()    |
 # | ----------------------------------------------------|-----------------------------------------|
-# |                *Any other combination*              | _configure_db_create_update_params()    |
+# |                *Any other combination*              | _configure_db_dw_create_update_params()    |
 # |                                                     | Then .ignore() when not applicable      |
 #
 # Q. Why is it like this?
@@ -289,7 +289,7 @@ def _configure_db_dw_create_update_params(arg_ctx):
 
     Some of these params might not apply to all create modes (e.g. create, restore, copy, etc)
     and might not apply to both engine types (DB and DW). That's ok because for create commands
-    _configure_db_create_params() can .ignore() the params that aren't applicable, and for update commands
+    _configure_db_dw_create_params() can .ignore() the params that aren't applicable, and for update commands
     the custom update function can just avoid declaring that parameter.
     """
 
@@ -476,10 +476,10 @@ def load_arguments(self, _):
                    'Allowed values include: Gen4, Gen5.')
 
     with self.argument_context('sql db create') as c:
-        _configure_db_create_params(c, Engine.db, CreateMode.default)
+        _configure_db_dw_create_params(c, Engine.db, CreateMode.default)
 
     with self.argument_context('sql db copy') as c:
-        _configure_db_create_params(c, Engine.db, CreateMode.copy)
+        _configure_db_dw_create_params(c, Engine.db, CreateMode.copy)
 
         c.argument('dest_name',
                    help='Name of the database that will be created as the copy destination.')
@@ -499,7 +499,7 @@ def load_arguments(self, _):
                    help='The new name that the database will be renamed to.')
 
     with self.argument_context('sql db restore') as c:
-        _configure_db_create_params(c, Engine.db, CreateMode.point_in_time_restore)
+        _configure_db_dw_create_params(c, Engine.db, CreateMode.point_in_time_restore)
 
         c.argument('dest_name',
                    help='Name of the database that will be created as the restore destination.')
@@ -659,7 +659,7 @@ def load_arguments(self, _):
     #           sql db replica
     #####
     with self.argument_context('sql db replica create') as c:
-        _configure_db_create_params(c, Engine.db, CreateMode.secondary)
+        _configure_db_dw_create_params(c, Engine.db, CreateMode.secondary)
 
         c.argument('partner_resource_group_name',
                    options_list=['--partner-resource-group'],
@@ -804,7 +804,7 @@ def load_arguments(self, _):
                    help='The collation of the data warehouse.')
 
     with self.argument_context('sql dw create') as c:
-        _configure_db_create_params(c, Engine.dw, CreateMode.default)
+        _configure_db_dw_create_params(c, Engine.dw, CreateMode.default)
 
     with self.argument_context('sql dw show') as c:
         # Service tier advisors and transparent data encryption are not included in the first batch
