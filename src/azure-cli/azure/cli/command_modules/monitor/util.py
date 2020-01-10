@@ -54,4 +54,8 @@ def get_autoscale_scale_direction_map():
     from azure.mgmt.monitor.models import ScaleDirection
     return {'to': ScaleDirection.none, 'out': ScaleDirection.increase,
             'in': ScaleDirection.decrease}
+
+def _gen_guid():
+    import uuid
+    return uuid.uuid4()
 # endregion
