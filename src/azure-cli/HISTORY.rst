@@ -3,6 +3,11 @@
 Release History
 ===============
 
+**Stoarge**
+
+* Upgrade azure-mgmt-storage version to 7.1.0
+* `az storage account create`: Add `--encryption-key-type-for-table` and `--encryption-key-type-for-queue` to support Table and Queue Encryption Service
+
 2.0.79
 ++++++
 
@@ -59,6 +64,7 @@ Release History
 * `az storage account create`: Remove preview flag for --enable-hierarchical-namespace parameter
 * Update azure-mgmt-storage version to 7.0.0 to use api version 2019-06-01
 * Add new parameters `--enable-delete-retention` and `--delete-retention-days` to support managing delete retention policy for storage account blob-service-properties.
+
 
 2.0.78
 ++++++
