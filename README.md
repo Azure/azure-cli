@@ -149,6 +149,12 @@ $ pip3 install --upgrade --pre azure-cli --extra-index-url https://azurecliprod.
 
 The edge build is generated for each PR merged to the `dev` branch as a part of the Azure DevOps Pipelines. 
 
+## Get builds of arbitrary commit or PR
+
+If you would like to get builds of arbitrary commit or PR, see:
+
+[Try new features before release](doc/try_new_features_before_release.md)
+
 ## Developer Setup
 
 If you would like to setup a development environment and contribute to the CLI, see:
