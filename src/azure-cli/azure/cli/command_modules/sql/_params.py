@@ -258,10 +258,9 @@ dw_service_objective_examples = 'DW100, DW1000c'
 # |              | True      |              |           | argument_context('sql db update')       |
 # |              |           | True         |           | argument_context('sql dw <createmode>') |
 # |              |           |              | True      | argument_context('sql dw update')       |
-# | True         |           | True         |           | _configure_db_dw_create_params()           |
-# | True         | True      | True         | True      | _configure_db_dw_create_update_params()    |
+# | True         |           | True         |           | _configure_db_dw_create_params()        |
 # | ----------------------------------------------------|-----------------------------------------|
-# |                *Any other combination*              | _configure_db_dw_create_update_params()    |
+# |                *Any other combination*              | _configure_db_dw_create_update_params() |
 # |                                                     | Then .ignore() when not applicable      |
 #
 # Q. Why is it like this?
