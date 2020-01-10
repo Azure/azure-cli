@@ -293,6 +293,9 @@ def _configure_db_dw_create_update_params(arg_ctx):
     the custom update function can just avoid declaring that parameter.
     """
 
+    arg_ctx.argument('max_size_bytes',
+                arg_type=max_size_bytes_param_type)
+
     arg_ctx.argument('elastic_pool_id',
                      arg_type=elastic_pool_id_param_type)
 
@@ -437,9 +440,6 @@ def load_arguments(self, _):
                    help='Name of the Azure SQL Database.',
                    # Allow --ids command line argument. id_part=child_name_1 is 2nd name in uri
                    id_part='child_name_1')
-
-        c.argument('max_size_bytes',
-                   arg_type=max_size_bytes_param_type)
 
         creation_arg_group = 'Creation'
 
@@ -795,9 +795,6 @@ def load_arguments(self, _):
                    help='Name of the data warehouse.',
                    # Allow --ids command line argument. id_part=child_name_1 is 2nd name in uri
                    id_part='child_name_1')
-
-        c.argument('max_size_bytes',
-                   arg_type=max_size_bytes_param_type)
 
         c.argument('service_objective',
                    help='The service objective of the data warehouse. For example: ' +
