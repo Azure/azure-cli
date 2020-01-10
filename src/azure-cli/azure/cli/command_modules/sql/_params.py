@@ -245,32 +245,61 @@ dw_service_objective_examples = 'DW100, DW1000c'
 #                sql db                       #
 ###############################################
 
+# Q. Where should db/dw params be configured?
+# A. See this table.
+#
+# |                   Param applies to                  |      Param should be configured at:     |
+# |                                                     |                                         |
+# | DB create    | DB update | DW create    | DW update |                                         |
+# | (or other    |           | (or other    |           |                                         |
+# | create mode) |           | create mode) |           |                                         |
+# |--------------|-----------|--------------|-----------|-----------------------------------------|
+# | True         |           |              |           | argument_context('sql db <createmode>') |
+# |              | True      |              |           | argument_context('sql db update')       |
+# |              |           | True         |           | argument_context('sql dw <createmode>') |
+# |              |           |              | True      | argument_context('sql dw update')       |
+# | True         |           | True         |           | _configure_db_create_params()           |
+# | True         | True      | True         | True      | _configure_db_create_update_params()    |
+# | ----------------------------------------------------|-----------------------------------------|
+# |                *Any other combination*              | _configure_db_create_update_params()    |
+# |                                                     | Then .ignore() when not applicable      |
+#
+# Q. Why is it like this?
+# A. The PUT database REST API has many parameters and many modes (`create_mode`) that control
+#    which parameters are valid. To make it easier for CLI users to get the param combinations
+#    correct, these create modes are separated into different commands (e.g.: create, copy,
+#    restore, etc).
+#
+#    On top of that, some create modes and some params are not allowed if the database edition is
+#    DataWarehouse. For this reason, regular database commands are separated from datawarehouse
+#    commands (`db` vs `dw`.)
+#
+#    As a result, the param combination matrix is a little complicated. When adding a new param,
+#    we want to make sure that the param is visible for the appropriate commands. We also want to
+#    avoid duplication.
 
 class Engine(Enum):  # pylint: disable=too-few-public-methods
     """SQL RDBMS engine type."""
     db = 'db'
     dw = 'dw'
 
+def _configure_db_dw_create_update_params(arg_ctx):
+    """
+    Configures params for db/dw create and update commands.
 
-def _configure_db_create_params(
+    Some of these params might not apply to all create modes (e.g. create, restore, copy, etc)
+    and might not apply to both engine types (DB and DW). That's ok because for create commands
+    _configure_db_create_params() can .ignore() the params that aren't applicable, and for update commands
+    the custom update function can just avoid declaring that parameter.
+    """
+    pass
+
+def _configure_db_dw_create_params(
         arg_ctx,
         engine,
         create_mode):
     """
-    Configures params for db/dw create/update commands.
-
-    The PUT database REST API has many parameters and many modes (`create_mode`) that control
-    which parameters are valid. To make it easier for CLI users to get the param combinations
-    correct, these create modes are separated into different commands (e.g.: create, copy,
-    restore, etc).
-
-    On top of that, some create modes and some params are not allowed if the database edition is
-    DataWarehouse. For this reason, regular database commands are separated from datawarehouse
-    commands (`db` vs `dw`.)
-
-    As a result, the param combination matrix is a little complicated. This function configures
-    which params are ignored for a PUT database command based on a command's SQL engine type and
-    create mode.
+    Configures params for db/dw create commands.
 
     engine: Engine enum value (e.g. `db`, `dw`)
     create_mode: Valid CreateMode enum value (e.g. `default`, `copy`, etc)
@@ -313,6 +342,9 @@ def _configure_db_create_params(
             'name',
             'tier',
         ])
+
+    # Now that all args are created, do the configuration that applies to both create and update commands.
+    _configure_db_dw_create_update_params(arg_ctx)
 
     arg_ctx.argument('name',  # Note: this is sku name, not database name
                      options_list=['--service-objective'],
