@@ -293,6 +293,9 @@ def _configure_db_dw_create_update_params(arg_ctx):
     the custom update function can just avoid declaring that parameter.
     """
 
+    arg_ctx.argument('elastic_pool_id',
+                     arg_type=elastic_pool_id_param_type)
+
     arg_ctx.argument('compute_model',
                      arg_type=compute_model_param_type)
 
@@ -368,7 +371,6 @@ def _configure_db_dw_create_params(
                      (db_service_objective_examples if engine == Engine.db else dw_service_objective_examples))
 
     arg_ctx.argument('elastic_pool_id',
-                     arg_type=elastic_pool_id_param_type,
                      help='The name or resource id of the elastic pool to create the database in.')
 
     # Only applicable to default create mode. Also only applicable to db.
@@ -567,7 +569,6 @@ def load_arguments(self, _):
                    ' the pool.')
 
         c.argument('elastic_pool_id',
-                   arg_type=elastic_pool_id_param_type,
                    help='The name or resource id of the elastic pool to move the database into.')
 
         c.argument('max_size_bytes', help='The new maximum size of the database expressed in bytes.')
