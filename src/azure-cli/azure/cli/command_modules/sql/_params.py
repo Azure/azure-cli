@@ -294,7 +294,7 @@ def _configure_db_dw_create_update_params(arg_ctx):
     """
 
     arg_ctx.argument('max_size_bytes',
-                arg_type=max_size_bytes_param_type)
+                     arg_type=max_size_bytes_param_type)
 
     arg_ctx.argument('elastic_pool_id',
                      arg_type=elastic_pool_id_param_type)
@@ -309,10 +309,10 @@ def _configure_db_dw_create_update_params(arg_ctx):
                      arg_type=min_capacity_param_type)
 
     arg_ctx.argument('read_scale',
-                arg_type=read_scale_param_type)
+                     arg_type=read_scale_param_type)
 
     arg_ctx.argument('read_replica_count',
-                arg_type=read_replicas_param_type)
+                     arg_type=read_replicas_param_type)
 
 def _configure_db_dw_create_params(
         arg_ctx,
