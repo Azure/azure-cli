@@ -3893,7 +3893,7 @@ class DiskEncryptionSetTest(ScenarioTest):
     @AllowLargeResponse(size_kb=99999)
     def test_disk_encryption_set_disk_update(self, resource_group):
         self.kwargs.update({
-            'vault': self.create_random_name(prefix='vault-', length=20),
+            'vault': self.create_random_name(prefix='vault3-', length=20),
             'key': self.create_random_name(prefix='key-', length=20),
             'des1': self.create_random_name(prefix='des1-', length=20),
             'disk': self.create_random_name(prefix='disk-', length=20),
@@ -3934,7 +3934,7 @@ class DiskEncryptionSetTest(ScenarioTest):
     @AllowLargeResponse(size_kb=99999)
     def test_disk_encryption_set_snapshot(self, resource_group):
         self.kwargs.update({
-            'vault': self.create_random_name(prefix='vault-', length=20),
+            'vault': self.create_random_name(prefix='vault4-', length=20),
             'key': self.create_random_name(prefix='key-', length=20),
             'des1': self.create_random_name(prefix='des1-', length=20),
             'des2': self.create_random_name(prefix='des2-', length=20),
