@@ -159,12 +159,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help=" Allow the blob service to exhibit filesystem semantics. This property can be enabled only "
                    "when storage account kind is StorageV2.",
                    min_api='2018-02-01')
-        c.argument('encryption_key_type_for_table', arg_type=get_enum_type(['Account', 'Service']), is_preview=True,
+        c.argument('encryption_key_type_for_table', arg_type=get_enum_type(['Account', 'Service']),
                    help='Set the encryption key type for Table encryption service. "Account": Table will be encrypted '
                         'with account-scoped encryption key. "Service": Table will always be encrypted with '
                         'Service-Managed keys. Currently the default encryption key type is "Service".',
                    min_api='2019-06-01', options_list=['--encryption-key-type-for-table', '-t'])
-        c.argument('encryption_key_type_for_queue', arg_type=get_enum_type(['Account', 'Service']), is_preview=True,
+        c.argument('encryption_key_type_for_queue', arg_type=get_enum_type(['Account', 'Service']),
                    help='Set the encryption key type for Queue encryption service. "Account": Queue will be encrypted '
                         'with account-scoped encryption key. "Service": Queue will always be encrypted with '
                         'Service-Managed keys. Currently the default encryption key type is "Service".',
