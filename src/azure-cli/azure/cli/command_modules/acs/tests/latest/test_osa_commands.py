@@ -167,13 +167,19 @@ class AzureOpenShiftServiceScenarioTest(ScenarioTest):
             'aad_client_app_id': aad_client_app_id,
             'aad_client_app_secret': aad_client_app_secret
         })
-        workspace = self.cmd("monitor log-analytics workspace create -g {resource_group} -n {osa_name}").get_output_in_json()
+        workspace = self.cmd("monitor log-analytics workspace create -g {resource_group} -n {name}").get_output_in_json()
         workspace_id = workspace["id"]
+        account = self.cmd("account show").get_output_in_json()
+        tenant_id = account["tenantId"]
+        self.kwargs.update({            
+            'workspace_id': workspace_id,
+            'tenant_id': tenant_id
+        })
         # create
         create_cmd = 'openshift create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--compute-count=1 ' \
-                     '--aad-client-app-id {aad_client_app_id} --aad-client-app-secret {aad_client_app_secret}' \
-                     '--workspace-id {workspace_id}'
+                     '--aad-client-app-id {aad_client_app_id} --aad-client-app-secret {aad_client_app_secret} ' \
+                     '--aad-tenant-id {tenant_id} --workspace-id {workspace_id}'
 
         self.cmd(create_cmd, checks=[
             self.exists('fqdn'),
