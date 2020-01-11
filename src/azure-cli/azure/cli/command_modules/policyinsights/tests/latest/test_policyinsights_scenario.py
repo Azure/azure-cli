@@ -444,16 +444,16 @@ class PolicyInsightsTests(ScenarioTest):
         # Test the --top argument
         assert len(self.cmd('policy metadata list --top 0').get_output_in_json()) == 0
 
-        top_metadata_resources = self.cmd(f'policy metadata list --top {len(all_metadata_resources) + 1}').get_output_in_json()
+        top_metadata_resources = self.cmd('policy metadata list --top {}'.format(len(all_metadata_resources) + 1)).get_output_in_json()
         assert len(top_metadata_resources) == len(all_metadata_resources)
 
-        top_metadata_resources = self.cmd(f'policy metadata list --top {len(all_metadata_resources) - 1}').get_output_in_json()
+        top_metadata_resources = self.cmd('policy metadata list --top {}'.format(len(all_metadata_resources) - 1)).get_output_in_json()
         assert len(top_metadata_resources) == len(all_metadata_resources) - 1
 
         # Test getting an individual resouce
         resource_metadata_name = top_metadata_resources[0]['name']
-        metadata_resource = self.cmd(f'policy metadata show --name {resource_metadata_name}').get_output_in_json()
+        metadata_resource = self.cmd('policy metadata show --name {}'.format(resource_metadata_name)).get_output_in_json()
         assert metadata_resource['name'] == resource_metadata_name
 
-        metadata_resource = self.cmd(f'policy metadata show -n {resource_metadata_name}').get_output_in_json()
+        metadata_resource = self.cmd('policy metadata show -n {}'.format(resource_metadata_name)).get_output_in_json()
         assert metadata_resource['name'] == resource_metadata_name
