@@ -1821,6 +1821,7 @@ def instance_pool_create(
         client,
         instance_pool_name,
         resource_group_name,
+        no_wait=False,
         sku=None,
         **kwargs):
     '''
@@ -1830,10 +1831,10 @@ def instance_pool_create(
     kwargs['sku'] = _find_instance_pool_sku_from_capabilities(
         cmd.cli_ctx, kwargs['location'], sku)
 
-    return client.create_or_update(
-        instance_pool_name=instance_pool_name,
-        resource_group_name=resource_group_name,
-        parameters=kwargs)
+    return sdk_no_wait(no_wait, client.create_or_update,
+                       instance_pool_name=instance_pool_name,
+                       resource_group_name=resource_group_name,
+                       parameters=kwargs)
 
 
 def _find_instance_pool_sku_from_capabilities(cli_ctx, location, sku):
