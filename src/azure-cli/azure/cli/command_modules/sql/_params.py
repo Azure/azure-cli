@@ -965,19 +965,21 @@ def load_arguments(self, _):
     ###############################################
 
     with self.argument_context('sql instance-pool') as c:
-        c.argument('instance_pool_name', options_list=['--name', '-n'],
+        c.argument('instance_pool_name',
+                   options_list=['--name', '-n'],
                    help="Instance Pool Name")
+
         c.argument(
             'tier',
             arg_type=tier_param_type,
             required=True,
-            help='The edition component of the sku. Allowed values: GeneralPurpose, BusinessCritical.')
+            help='The edition component of the sku. Allowed value: GeneralPurpose.')
 
         c.argument('family',
                    arg_type=family_param_type,
                    required=True,
                    help='The compute generation component of the sku. '
-                   'Allowed values include: Gen4, Gen5.')
+                   'Allowed value: Gen5')
 
     with self.argument_context('sql instance-pool create') as c:
         # Create args that will be used to build up the InstancePool object
@@ -993,13 +995,14 @@ def load_arguments(self, _):
         c.argument('vcores',
                    required=True,
                    arg_type=capacity_param_type,
-                   help='the capacity of the instance pool in vcores.')
+                   help='Capacity of the instance pool in vcores.')
 
         c.argument(
             'subnet_id',
             options_list=['--subnet'],
             required=True,
-            help='ID of the subnet that allows access to an Azure Sql Instance Pool.')
+            help='Name or ID of the subnet that allows access to an Instance Pool. '
+                 'If subnet name is provided, --vnet-name must be provided.')
 
         # Create args that will be used to build up the Instance Pool's Sku object
         create_args_for_complex_type(
@@ -1010,6 +1013,11 @@ def load_arguments(self, _):
             ])
 
         c.ignore('name')  # Hide sku name
+
+        c.extra('vnet_name',
+                options_list=['--vnet-name'],
+                help='The virtual network name',
+                validator=validate_subnet)
 
     ###############################################
     #                sql server                   #

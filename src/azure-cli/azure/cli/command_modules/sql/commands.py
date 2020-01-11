@@ -338,11 +338,12 @@ def load_command_table(self, _):
         g.custom_command('list', 'instance_pool_list',
                          table_transformer=instance_pool_table_format)
         g.command('update', 'update')
-        g.command('delete', 'delete', supports_no_wait=True)
+        g.command('delete', 'delete', supports_no_wait=True, confirmation=True)
         g.custom_command(
             'create',
             'instance_pool_create',
             supports_no_wait=True)
+        g.wait_command('wait')
 
     ###############################################
     #                sql server                   #

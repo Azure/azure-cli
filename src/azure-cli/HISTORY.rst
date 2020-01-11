@@ -25,6 +25,11 @@ Release History
 * Fix `vm create` failure in Azure Stack profile.
 * vm monitor metrics tail/list-definitions: support query metric and list definitions for a vm.
 
+**SQL**
+
+* Added new cmdlets for Instance Pools 'sql instance-pool'
+* Instance Pool create, delete, show, list and update now supported.
+
 2.0.78
 ++++++
 

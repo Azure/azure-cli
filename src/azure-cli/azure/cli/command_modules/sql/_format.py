@@ -87,14 +87,13 @@ def instance_pool_table_format(result):
         from collections import OrderedDict
         sku = result['sku']
         return OrderedDict([
-            ('License Type', result['licenseType']),
             ('name', result['name']),
             ('resourceGroup', result['resourceGroup']),
             ('location', result['location']),
-            ('Tags', str(result['tags']) if result['tags'] else ''),
-            ('vCores', result['vCores']),
-            ('SKU Name', sku['name']),
-            ('SKU Tier', sku['tier'])
+            ('Capacity', result['vCores']),
+            ('SKU Family', sku['family']),
+            ('SKU Tier', sku['tier']),
+            ('Tags', str(result['tags']) if result['tags'] else '')
         ])
 
     return _apply_format(result, _instance_pool_table_format)

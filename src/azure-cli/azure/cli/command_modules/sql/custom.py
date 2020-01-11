@@ -1857,28 +1857,18 @@ def _find_instance_pool_sku_from_capabilities(cli_ctx, location, sku):
         sku, managed_instance_version_capability.supported_instance_pool_editions)
 
     # Find family level capability, based on requested sku properties
-    family_capability = _find_family_capability(
+    _find_family_capability(
         sku, edition_capability.supported_families)
 
     result = Sku(
-        name=_build_sku_name(
-            edition_capability.name,
-            family_capability.name),
+        name="instance-pool",
         tier=sku.tier,
         family=sku.family)
+
     logger.debug(
         '_find_instance_pool_sku_from_capabilities return: %s',
         result)
     return result
-
-
-def _build_sku_name(edition, family):
-    '''
-    Build SKU name from edition and family
-    '''
-
-    editions = {"GeneralPurpose": "GP", "BusinessCritical": "BC"}
-    return "%s_%s" % (editions[edition], family)
 
 
 ###############################################
