@@ -27,7 +27,7 @@ class PolicyInsightsTests(ScenarioTest):
             '--resource "cheggkv" --namespace "microsoft.keyvault" --resource-type "vaults" -g "cheggpolicy"',
             '--resource "subnet2" --namespace "microsoft.network" --resource-type "subnets" --parent "virtualnetworks/cheggvnet" -g "cheggpolicy"',
             '-s "1f3afdf9-d0c9-4c3d-847f-89da613e70a8"',
-            '-d "34c877ad-507e-4c82-993e-3452a6e0ad3c"',  
+            '-d "34c877ad-507e-4c82-993e-3452a6e0ad3c"',
             '-a "4d31128e32d04a0098fd536e"',
             '-a "f32eeddfc32345b585f9a70b" -g "cheggpolicy" '
         ]
