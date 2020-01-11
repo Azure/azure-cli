@@ -37,7 +37,7 @@ server_name_prefix = 'clitestserver'
 server_name_max_length = 62
 managed_instance_name_prefix = 'clitestmi'
 instance_pool_name_prefix = 'clitestip'
-managed_instance_name_max_length = 63
+managed_instance_name_max_length = 20
 
 
 class SqlServerPreparer(AbstractPreparer, SingleValueReplacer):
@@ -2793,8 +2793,8 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('administratorLogin', user)])
 
-        # test list sql managed_instance in the subscription should be at least 2
-        self.cmd('sql mi list', checks=[JMESPathCheckGreaterThan('length(@)', 1)])
+        # test list sql managed_instance in the subscription should be at least 1
+        self.cmd('sql mi list', checks=[JMESPathCheckGreaterThan('length(@)', 0)])
 
         # test delete sql managed instance
         self.cmd('sql mi delete --id {} --yes'
@@ -2818,18 +2818,24 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
     def test_sql_instance_pool(self):
 
         instance_pool_name = self.create_random_name(instance_pool_name_prefix, managed_instance_name_max_length)
-        subnet = "/subscriptions/a8c9a924-06c0-4bde-9788-e7b1370969e1/resourceGroups/billingPools/providers/Microsoft.Network/virtualNetworks/vnet-billingpool1/subnets/InstancePool"
         license_type = 'LicenseIncluded'
         location = 'northcentralus'
         v_cores = 8
         edition = 'GeneralPurpose'
         family = 'Gen5'
-        resource_group = "billingPools"
+        resource_group = 'billingPools'
+        vnet_name = 'vnet-billingPool1'
+        subnet_name = 'InstancePool'
 
+        is_playback = os.path.exists(self.recording_file)
+        if is_playback:
+            subnet = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/billingPools/providers/Microsoft.Network/virtualNetworks/vnet-billingpool1/subnets/InstancePool"
+        else:
+            subnet = self.cmd('network vnet subnet show -g {} --vnet-name {} -n {}'.format(resource_group, vnet_name, subnet_name)).get_output_in_json()['id']
         # test create sql managed_instance
         self.cmd(
             'sql instance-pool create -g {} -n {} -l {} '
-            '--subnet-id {} --license-type {} --capacity {} -e {} -f {}' .format(
+            '--subnet {} --license-type {} --capacity {} -e {} -f {}'.format(
                 resource_group, instance_pool_name, location, subnet, license_type, v_cores, edition, family), checks=[
                 JMESPathCheck('name', instance_pool_name),
                 JMESPathCheck('resourceGroup', resource_group),
@@ -2864,8 +2870,8 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
                      JMESPathCheck('tags', {})])
 
         # test delete sql managed instance
-        self.cmd('sql instance-pool delete -g {} -n {}' .format(resource_group,
-                                                                instance_pool_name), checks=NoneCheck())
+        self.cmd('sql instance-pool delete -g {} -n {} --yes'
+                 .format(resource_group, instance_pool_name), checks=NoneCheck())
 
         # test show sql managed instance doesn't return anything
         self.cmd('sql instance-pool show -g {} -n {}'

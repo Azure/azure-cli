@@ -462,6 +462,60 @@ type: group
 short-summary: Manage instance pools.
 """
 
+helps['sql instance-pool create'] = """
+type: command
+short-summary: Create an instance pool.
+examples:
+  - name: Example to create an instance pool (include --no-wait in the end to get an asynchronous experience)
+    text: az sql instance-pool create -g resource_group_name -n instance_pool_name -l location --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} --license-type LicenseIncluded --capacity 8 -e GeneralPurpose -f Gen5 --no-wait
+  - name: Example to create an instance pool with subnet name and vnet-name
+    text: az sql instance-pool create --license-type LicenseIncluded -l northcentralus -n myinstancepool -c 8 -e GeneralPurpose -f Gen5 -g billingPools --subnet mysubnetname --vnet-name myvnetname
+"""
+
+helps['sql instance-pool delete'] = """
+type: command
+short-summary: Delete an instance pool.
+examples:
+  - name: Deletes an instance pool
+    text: az sql instance-pool delete -g mygroup -n myinstancepool --yes
+"""
+
+helps['sql instance-pool list'] = """
+type: command
+short-summary: List available instance pools.
+examples:
+  - name: Lists all instance pools in the current subscription.
+    text: az sql instance-pool list
+  - name: Lists all instance pools in a resource group.
+    text: az sql instance-pool list -g mygroup
+"""
+
+helps['sql instance-pool show'] = """
+type: command
+short-summary: Get the details for an instance pool.
+examples:
+  - name: Gets the details for an instance pool
+    text: az sql instance-pool show -g mygroup -n myinstancepool
+"""
+
+helps['sql instance-pool update'] = """
+type: command
+short-summary: Update an instance pool.
+examples:
+  - name: Updates an instance pool with new tags (make sure they are space separated if there are multiple tags)
+    text: az sql instance-pool update -n myinstancepool -g mygroup --tags mykey1=myvalue1 mykey2=myvalue2
+  - name: Clears the tags assigned to an instance pool
+    text: az sql instance-pool update -n myinstancepool -g mygroup --tags ""
+"""
+
+helps['sql instance-pool wait'] = """
+type: command
+short-summary: Wait for an instance pool to reach a desired state.
+examples:
+  - name: Waits until an instance pool gets created.
+    text: az sql instance-pool wait -n myinstancepool -g mygroup --created
+"""
+
 helps['sql mi'] = """
 type: group
 short-summary: Manage SQL managed instances.
