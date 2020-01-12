@@ -114,8 +114,9 @@ def load_arguments(self, _):
                 c.argument('hyper_v_generation', arg_type=hyper_v_gen_sku, help='The hypervisor generation of the Virtual Machine. Applicable to OS disks only.')
             else:
                 c.ignore('access_level', 'for_upload', 'hyper_v_generation')
-            c.argument('encryption_type', arg_type=get_enum_type(self.get_models('EncryptionType')), help='Encryption type.')
-            c.argument('disk_encryption_set', help='Name or ID of disk encryption set that is used to encrypt the disk.')
+            c.argument('encryption_type', min_api='2019-07-01', arg_type=get_enum_type(self.get_models('EncryptionType')),
+                       help='Encryption type. EncryptionAtRestWithPlatformKey: Disk is encrypted with XStore managed key at rest. It is the default encryption type. EncryptionAtRestWithCustomerKey: Disk is encrypted with Customer managed key at rest.')
+            c.argument('disk_encryption_set', min_api='2019-07-01', help='Name or ID of disk encryption set that is used to encrypt the disk.')
 
     for scope in ['disk create', 'snapshot create']:
         with self.argument_context(scope) as c:
