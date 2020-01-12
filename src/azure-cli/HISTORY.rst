@@ -3,6 +3,11 @@
 Release History
 ===============
 
+**Compute**
+
+* disk update: Add --disk-encryption-set and --encryption-type
+* snapshot create/update: Add --disk-encryption-set and --encryption-type
+
 **Stoarge**
 
 * Upgrade azure-mgmt-storage version to 7.1.0
