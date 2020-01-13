@@ -3,6 +3,9 @@
 Release History
 ===============
 
+2.0.80
+++++++
+
 **Compute**
 
 * disk update: Add --disk-encryption-set and --encryption-type
