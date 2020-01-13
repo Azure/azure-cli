@@ -1433,10 +1433,10 @@ def update_app_service_plan(instance, sku=None, number_of_workers=None):
     return instance
 
 
-def update_functionapp_app_service_plan(instance, sku=None, number_of_workers=None, max_burst=None):
+def update_functionapp_app_service_plan(cmd, instance, sku=None, number_of_workers=None, max_burst=None):
     instance = update_app_service_plan(instance, sku, number_of_workers)
     if max_burst is not None:
-        if not is_plan_elastic_premium(instance):
+        if not is_plan_elastic_premium(cmd, instance):
             raise CLIError("Usage error: --max-burst is only supported for Elastic Premium (EP) plans")
         max_burst = validate_range_of_int_flag('--max-burst', max_burst, min_val=0, max_val=20)
         instance.maximum_elastic_worker_count = max_burst
@@ -2398,12 +2398,12 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                                                                                               runtime_version)))
 
     # If plan is not consumption or elastic premium, we need to set always on
-    if consumption_plan_location is None and not is_plan_elastic_premium(plan_info):
+    if consumption_plan_location is None and not is_plan_elastic_premium(cmd, plan_info):
         site_config.always_on = True
 
     # If plan is elastic premium or windows consumption, we need these app settings
     is_windows_consumption = consumption_plan_location is not None and not is_linux
-    if is_plan_elastic_premium(plan_info) or is_windows_consumption:
+    if is_plan_elastic_premium(cmd, plan_info) or is_windows_consumption:
         site_config.app_settings.append(NameValuePair(name='WEBSITE_CONTENTAZUREFILECONNECTIONSTRING',
                                                       value=con_string))
         site_config.app_settings.append(NameValuePair(name='WEBSITE_CONTENTSHARE', value=name.lower()))
