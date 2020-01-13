@@ -181,16 +181,13 @@ class AzureOpenShiftServiceScenarioTest(ScenarioTest):
                      '--aad-client-app-id {aad_client_app_id} --aad-client-app-secret {aad_client_app_secret} ' \
                      '--aad-tenant-id {tenant_id} --workspace-id {workspace_id}'
 
-        self.cmd(create_cmd, checks=[
-            self.exists('fqdn'),
-            self.check('provisioningState', 'Succeeded'),
-            self.exists('monitorProfile')
-        ])
+        self.cmd(create_cmd, checks=[self.is_empty()])
         # show
         self.cmd('openshift show -g {resource_group} -n {name}', checks=[
             self.check('name', '{name}'),
             self.check('resourceGroup', '{resource_group}'),
-            self.exists('openShiftVersion')
+            self.exists('openShiftVersion'),
+            self.exists('monitorProfile')
         ])
         # delete
         self.cmd('openshift delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
