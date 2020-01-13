@@ -245,51 +245,20 @@ dw_service_objective_examples = 'DW100, DW1000c'
 #                sql db                       #
 ###############################################
 
-# Q. Where should db/dw params be configured?
-# A. See this table.
-#
-# |                   Param applies to                  |      Param should be configured at:     |
-# |                                                     |                                         |
-# | DB create    | DB update | DW create    | DW update |                                         |
-# | (or other    |           | (or other    |           |                                         |
-# | create mode) |           | create mode) |           |                                         |
-# |--------------|-----------|--------------|-----------|-----------------------------------------|
-# | True         |           |              |           | argument_context('sql db <createmode>') |
-# |              | True      |              |           | argument_context('sql db update')       |
-# |              |           | True         |           | argument_context('sql dw <createmode>') |
-# |              |           |              | True      | argument_context('sql dw update')       |
-# | True         |           | True         |           | _configure_db_dw_create_params()        |
-# | ----------------------------------------------------|-----------------------------------------|
-# |                *Any other combination*              | _configure_db_dw_create_update_params() |
-# |                                                     | Then .ignore() when not applicable      |
-#
-# Q. Why is it like this?
-# A. The PUT database REST API has many parameters and many modes (`create_mode`) that control
-#    which parameters are valid. To make it easier for CLI users to get the param combinations
-#    correct, these create modes are separated into different commands (e.g.: create, copy,
-#    restore, etc).
-#
-#    On top of that, some create modes and some params are not allowed if the database edition is
-#    DataWarehouse. For this reason, regular database commands are separated from datawarehouse
-#    commands (`db` vs `dw`.)
-#
-#    As a result, the param combination matrix is a little complicated. When adding a new param,
-#    we want to make sure that the param is visible for the appropriate commands. We also want to
-#    avoid duplication.
 
 class Engine(Enum):  # pylint: disable=too-few-public-methods
     """SQL RDBMS engine type."""
     db = 'db'
     dw = 'dw'
 
-def _configure_db_dw_create_update_params(arg_ctx):
+def _configure_db_dw_params(arg_ctx):
     """
-    Configures params for db/dw create and update commands.
+    Configures params that are based on `Database` resource and therefore apply to one or more DB/DW create/update commands.
+    The idea is that this does some basic configuration of each property. Each command can then potentially
+    build on top of this (e.g. to give a parameter more specific help text) and .ignore() parameters that aren't applicable.
 
-    Some of these params might not apply to all create modes (e.g. create, restore, copy, etc)
-    and might not apply to both engine types (DB and DW). That's ok because for create commands
-    _configure_db_dw_create_params() can .ignore() the params that aren't applicable, and for update commands
-    the custom update function can just avoid declaring that parameter.
+    Normally these param configurations would be implemented at the command group level, but these params are used across
+    2 different param groups - `sql db` and `sql dw`. So extracting it out into this common function prevents duplication.
     """
 
     arg_ctx.argument('max_size_bytes',
@@ -313,6 +282,26 @@ def _configure_db_dw_create_update_params(arg_ctx):
     arg_ctx.argument('read_replica_count',
                      arg_type=read_replicas_param_type)
 
+    creation_arg_group = 'Creation'
+
+    arg_ctx.argument('collation',
+                     arg_group=creation_arg_group)
+
+    arg_ctx.argument('catalog_collation',
+                     arg_group=creation_arg_group,
+                     arg_type=get_enum_type(CatalogCollationType))
+
+    arg_ctx.argument('sample_name',
+                     arg_group=creation_arg_group,
+                     arg_type=get_enum_type(SampleName))
+
+    arg_ctx.argument('license_type',
+                     arg_type=get_enum_type(DatabaseLicenseType))
+
+    arg_ctx.argument('zone_redundant',
+                     arg_type=zone_redundant_param_type)
+
+
 def _configure_db_dw_create_params(
         arg_ctx,
         engine,
@@ -320,9 +309,29 @@ def _configure_db_dw_create_params(
     """
     Configures params for db/dw create commands.
 
+    The PUT database REST API has many parameters and many modes (`create_mode`) that control
+    which parameters are valid. To make it easier for CLI users to get the param combinations
+    correct, these create modes are separated into different commands (e.g.: create, copy,
+    restore, etc).
+
+    On top of that, some create modes and some params are not allowed if the database edition is
+    DataWarehouse. For this reason, regular database commands are separated from datawarehouse
+    commands (`db` vs `dw`.)
+
+    As a result, the param combination matrix is a little complicated. When adding a new param,
+    we want to make sure that the param is visible for the appropriate commands. We also want to
+    avoid duplication. Instead of spreading out & duplicating the param definitions across all
+    the different commands, it has been more effective to define this reusable function.
+
+    The main task here is to create extra params based on the `Database` model, then .ignore() the params that
+    aren't applicable to the specified engine and create mode. There is also some minor tweaking of help text
+    to make the help text more specific to creation.
+
     engine: Engine enum value (e.g. `db`, `dw`)
     create_mode: Valid CreateMode enum value (e.g. `default`, `copy`, etc)
     """
+
+    #### Step 0: Validation ####
 
     # DW does not support all create modes. Check that engine and create_mode are consistent.
     if engine == Engine.dw and create_mode not in [
@@ -330,6 +339,8 @@ def _configure_db_dw_create_params(
             CreateMode.point_in_time_restore,
             CreateMode.restore]:
         raise ValueError('Engine {} does not support create mode {}'.format(engine, create_mode))
+
+    #### Step 1: Create extra params ####
 
     # Create args that will be used to build up the Database object
     create_args_for_complex_type(
@@ -362,8 +373,7 @@ def _configure_db_dw_create_params(
             'tier',
         ])
 
-    # Now that all args are created, do the configuration that applies to both create and update commands.
-    _configure_db_dw_create_update_params(arg_ctx)
+    #### Step 2: Apply customizations specific to create (as opposed to update) ####
 
     arg_ctx.argument('name',  # Note: this is sku name, not database name
                      options_list=['--service-objective'],
@@ -374,6 +384,8 @@ def _configure_db_dw_create_params(
 
     arg_ctx.argument('elastic_pool_id',
                      help='The name or resource id of the elastic pool to create the database in.')
+
+    #### Step 3: Ignore params that are not applicable (based on engine & create mode) ####
 
     # Only applicable to default create mode. Also only applicable to db.
     if create_mode != CreateMode.default or engine != Engine.db:
@@ -440,25 +452,11 @@ def load_arguments(self, _):
                    # Allow --ids command line argument. id_part=child_name_1 is 2nd name in uri
                    id_part='child_name_1')
 
-        creation_arg_group = 'Creation'
+        _configure_db_dw_params(c)
 
-        c.argument('collation',
-                   arg_group=creation_arg_group)
-
-        c.argument('catalog_collation',
-                   arg_group=creation_arg_group,
-                   arg_type=get_enum_type(CatalogCollationType))
-
-        c.argument('sample_name',
-                   arg_group=creation_arg_group,
-                   arg_type=get_enum_type(SampleName))
-
-        c.argument('license_type',
-                   arg_type=get_enum_type(DatabaseLicenseType))
-
-        c.argument('zone_redundant',
-                   arg_type=zone_redundant_param_type)
-
+        # SKU-related params are different from DB versus DW, so we want this configuration to apply here
+        # in 'sql db' group but not in 'sql dw' group. If we wanted to apply to both, we would put the
+        # configuration into _configure_db_dw_params().
         c.argument('tier',
                    arg_type=tier_param_type,
                    help='The edition component of the sku. Allowed values include: Basic, Standard, '
