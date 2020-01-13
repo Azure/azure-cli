@@ -343,6 +343,35 @@ def _configure_db_dw_create_params(
     #### Step 1: Create extra params ####
 
     # Create args that will be used to build up the Database object
+    #
+    # IMPORTANT: It is very easy to add a new parameter and accidentally forget to .ignore() it in
+    # some commands that it is not applicable to. Therefore, when adding a new param, you should compare
+    # command help before & after your change.
+    # e.g.:
+    #
+    #   # Get initial help text
+    #   git checkout dev
+    #   $file = 'help_original.txt'
+    #   az sql db create -h >> $file
+    #   az sql db copy -h >> $file
+    #   az sql db restore -h >> $file
+    #   az sql db replica create -h >> $file
+    #   az sql db update -h >> $file
+    #   az sql dw create -h >> $file
+    #   az sql dw update -h >> $file
+    #
+    #   # Get updated help text
+    #   git checkout mybranch
+    #   $file = 'help_updated.txt'
+    #   az sql db create -h >> $file
+    #   az sql db copy -h >> $file
+    #   az sql db restore -h >> $file
+    #   az sql db replica create -h >> $file
+    #   az sql db update -h >> $file
+    #   az sql dw create -h >> $file
+    #   az sql dw update -h >> $file
+    #
+    # Then compare 'help_original.txt' <-> 'help_updated.txt' in your favourite text diff tool.
     create_args_for_complex_type(
         arg_ctx, 'parameters', Database, [
             'catalog_collation',
@@ -429,7 +458,8 @@ def _configure_db_dw_create_params(
 
         # ReadScale properties are not valid for DataWarehouse
         arg_ctx.ignore('read_scale')
-        arg_ctx.ignore('read_replica_count')
+        arg_ctx.argument('read_replica_count',
+                         deprecate_info=arg_ctx.deprecate(target='--read-replicas'))
 
 
 # pylint: disable=too-many-statements
