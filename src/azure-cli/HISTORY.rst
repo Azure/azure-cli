@@ -7,6 +7,14 @@ Release History
 
 * Support app creation/update with the new sku name ST0, ST1, ST2.
 
+2.0.80
+++++++
+
+**Compute**
+
+* disk update: Add --disk-encryption-set and --encryption-type
+* snapshot create/update: Add --disk-encryption-set and --encryption-type
+
 **Stoarge**
 
 * Upgrade azure-mgmt-storage version to 7.1.0
