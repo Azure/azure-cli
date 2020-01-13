@@ -1163,6 +1163,7 @@ def list_hostnames(cmd, resource_group_name, webapp_name, slot=None):
 
 
 def get_external_ip(cmd, resource_group_name, webapp_name):
+    SslState = cmd.get_models('SslState')
     # logics here are ported from portal
     client = web_client_factory(cmd.cli_ctx)
     webapp = client.web_apps.get(resource_group_name, webapp_name)

@@ -34,7 +34,19 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
 
 # pylint: disable=line-too-long
 from vsts_cd_manager.continuous_delivery_manager import ContinuousDeliveryResult
+from azure.cli.core.profiles import ResourceType
 
+
+def _get_test_cmd():
+    from azure.cli.core.mock import DummyCli
+    from azure.cli.core import AzCommandsLoader
+    from azure.cli.core.commands import AzCliCommand
+    cli_ctx = DummyCli()
+    loader = AzCommandsLoader(cli_ctx, resource_type=ResourceType.MGMT_APPSERVICE)
+    cmd = AzCliCommand(loader, 'test', None)
+    cmd.command_kwargs = {'resource_type': ResourceType.MGMT_APPSERVICE}
+    cmd.cli_ctx = cli_ctx
+    return cmd
 
 class TestWebappMocked(unittest.TestCase):
     def setUp(self):
@@ -50,7 +62,7 @@ class TestWebappMocked(unittest.TestCase):
         client_factory_mock.return_value = MockClient()
 
         # action
-        user = set_deployment_user(mock.MagicMock(), 'admin', 'verySecret1')
+        user = set_deployment_user(_get_test_cmd(), 'admin', 'verySecret1')
 
         # assert things get wired up with a result returned
         assert user.publishing_user_name == 'admin'
@@ -95,11 +107,13 @@ class TestWebappMocked(unittest.TestCase):
     def test_get_external_ip_from_ase(self, client_factory_mock):
         client = mock.Mock()
         client_factory_mock.return_value = client
-        cmd_mock = mock.MagicMock()
+        cmd_mock = _get_test_cmd()
         # set up the web inside a ASE, with an ip based ssl binding
         host_env = HostingEnvironmentProfile(id='id11')
         host_env.name = 'ase1'
         host_env.resource_group = 'myRg'
+
+        HostNameSslState, SslState, Site = cmd_mock.get_models('HostNameSslState', 'SslState', 'Site')
 
         host_ssl_state = HostNameSslState(ssl_state=SslState.ip_based_enabled, virtual_ip='1.2.3.4')
         client.web_apps.get.return_value = Site(name='antarctica', hosting_environment_profile=host_env,
@@ -292,6 +306,7 @@ class TestWebappMocked(unittest.TestCase):
         cmd_mock = mock.MagicMock()
         cli_ctx_mock = mock.MagicMock()
         cmd_mock.cli_ctx = cli_ctx_mock
+        DeletedAppRestoreRequest = cmd_mock.get_models('DeletedAppRestoreRequest')
         request = DeletedAppRestoreRequest(deleted_site_id='12345', recover_configuration=False)
 
         # action
@@ -314,7 +329,7 @@ class TestWebappMocked(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     def test_restore_snapshot(self, client_factory_mock):
-        cmd_mock = mock.MagicMock()
+        cmd_mock = _get_test_cmd()
         cli_ctx_mock = mock.MagicMock()
         cli_ctx_mock.data = {'subscription_id': 'sub1'}
         cmd_mock.cli_ctx = cli_ctx_mock
@@ -324,6 +339,8 @@ class TestWebappMocked(unittest.TestCase):
         client.web_apps.restore_snapshot = mock.MagicMock()
         client_factory_mock.return_value = client
 
+        SnapshotRecoverySource, SnapshotRestoreRequest = \
+            cmd_mock.get_models('SnapshotRecoverySource', 'SnapshotRestoreRequest')
         source = SnapshotRecoverySource(id='/subscriptions/sub1/resourceGroups/src_rg/providers/Microsoft.Web/sites/src_web/slots/src_slot')
         request = SnapshotRestoreRequest(overwrite=False, snapshot_time='2018-12-07T02:01:31.4708832Z',
                                          recovery_source=source, recover_configuration=False)
