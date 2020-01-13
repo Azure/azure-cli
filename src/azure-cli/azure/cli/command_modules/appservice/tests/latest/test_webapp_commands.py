@@ -1067,7 +1067,7 @@ class WebappSSLImportCertTest(ScenarioTest):
         self.cmd('appservice plan create -g {} -n {} --sku B1'.format(resource_group, plan_name))
         self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
         self.cmd('keyvault create -g {} -n {}'.format(resource_group, kv_name))
-        self.cmd('keyvault set-policy --name {} --spn {} --secret-permissions get'.format(kv_name, 'Microsoft.Azure.WebSites'))
+        self.cmd('keyvault set-policy -g {} --name {} --spn {} --secret-permissions get'.format(resource_group, kv_name, 'Microsoft.Azure.WebSites'))
         self.cmd('keyvault certificate import --name {} --vault-name {} --file "{}" --password {}'.format(cert_name, kv_name, pfx_file, cert_password))
 
         self.cmd('webapp config ssl import --resource-group {} --name {}  --key-vault {} --key-vault-certificate-name {}'.format(resource_group, webapp_name, kv_name, cert_name), checks=[
