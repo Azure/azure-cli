@@ -8,7 +8,7 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 
 class IoTCentralTest(ScenarioTest):
 
-    @ResourceGroupPreparer(location='eastus')  # name_prefix not required, but can be useful
+    @ResourceGroupPreparer()  # name_prefix not required, but can be useful
     def test_iotcentral_app(self, resource_group, resource_group_location):
         app_name = self.create_random_name(prefix='iotc-cli-test', length=24)
         template_app_name = app_name + '-template'
