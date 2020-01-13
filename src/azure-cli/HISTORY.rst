@@ -11,7 +11,7 @@ Release History
 * disk update: Add --disk-encryption-set and --encryption-type
 * snapshot create/update: Add --disk-encryption-set and --encryption-type
 
-**Stoarge**
+**Storage**
 
 * Upgrade azure-mgmt-storage version to 7.1.0
 * `az storage account create`: Add `--encryption-key-type-for-table` and `--encryption-key-type-for-queue` to support Table and Queue Encryption Service
