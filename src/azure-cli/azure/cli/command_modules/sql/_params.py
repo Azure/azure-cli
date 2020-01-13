@@ -458,8 +458,17 @@ def _configure_db_dw_create_params(
 
         # ReadScale properties are not valid for DataWarehouse
         arg_ctx.ignore('read_scale')
+
+        # Below properties are not valid for DataWarehouse, but were accidentally
+        # included in previous releases and therefore are deprecated and will be removed
+        # in the future.
         arg_ctx.argument('read_replica_count',
-                         deprecate_info=arg_ctx.deprecate(target='--read-replicas'))
+                         options_list=['--read-replica-count'],
+                         deprecate_info=arg_ctx.deprecate(target='--read-replica-count'))
+
+        arg_ctx.argument('zone_redundant',
+                         options_list=['--zone-redundant'],
+                         deprecate_info=arg_ctx.deprecate(target='--zone-redundant'))
 
 
 # pylint: disable=too-many-statements
