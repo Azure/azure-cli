@@ -429,7 +429,7 @@ def _configure_db_dw_create_params(
 
         # ReadScale properties are not valid for DataWarehouse
         arg_ctx.ignore('read_scale')
-        arg_ctx.ignore('read_replicas')
+        arg_ctx.ignore('read_replica_count')
 
 
 # pylint: disable=too-many-statements
@@ -443,6 +443,8 @@ def load_arguments(self, _):
                    help='If specified, the failover operation will allow data loss.')
 
     with self.argument_context('sql db') as c:
+        _configure_db_dw_params(c)
+
         c.argument('server_name',
                    arg_type=server_param_type)
 
@@ -451,8 +453,6 @@ def load_arguments(self, _):
                    help='Name of the Azure SQL Database.',
                    # Allow --ids command line argument. id_part=child_name_1 is 2nd name in uri
                    id_part='child_name_1')
-
-        _configure_db_dw_params(c)
 
         # SKU-related params are different from DB versus DW, so we want this configuration to apply here
         # in 'sql db' group but not in 'sql dw' group. If we wanted to apply to both, we would put the
@@ -784,6 +784,8 @@ def load_arguments(self, _):
     #                sql dw                       #
     ###############################################
     with self.argument_context('sql dw') as c:
+        _configure_db_dw_params(c)
+
         c.argument('server_name',
                    arg_type=server_param_type)
 
