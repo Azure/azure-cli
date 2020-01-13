@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**SQL**
+
+* `sql dw create`: deprecated `--zone-redundant` and `--read-replica-count` parameters. These parameters do not apply to DataWarehouse.
+
 2.0.80
 ++++++
 

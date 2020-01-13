@@ -464,11 +464,11 @@ def _configure_db_dw_create_params(
         # in the future.
         arg_ctx.argument('read_replica_count',
                          options_list=['--read-replica-count'],
-                         deprecate_info=arg_ctx.deprecate(target='--read-replica-count'))
+                         deprecate_info=arg_ctx.deprecate(hide=True))
 
         arg_ctx.argument('zone_redundant',
                          options_list=['--zone-redundant'],
-                         deprecate_info=arg_ctx.deprecate(target='--zone-redundant'))
+                         deprecate_info=arg_ctx.deprecate(hide=True))
 
 
 # pylint: disable=too-many-statements
