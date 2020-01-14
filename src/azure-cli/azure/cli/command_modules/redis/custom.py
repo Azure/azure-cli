@@ -37,12 +37,18 @@ def cli_redis_update(cmd, instance, sku=None, vm_size=None):
 
     # avoid setting memory configs for basic sku
     if instance.sku.name == 'Basic':
-        if 'maxmemory-reserved' in instance.redis_configuration:
-            instance.redis_configuration.pop('maxmemory-reserved')
-        if 'maxfragmentationmemory-reserved' in instance.redis_configuration:
-            instance.redis_configuration.pop('maxfragmentationmemory-reserved')
-        if 'maxmemory-delta' in instance.redis_configuration:
-            instance.redis_configuration.pop('maxmemory-delta')
+        memory_configs = ['maxmemory-reserved', 'maxfragmentationmemory-reserved', 'maxmemory-delta']
+        for memory_config in memory_configs:
+            if memory_config in instance.redis_configuration:
+                instance.redis_configuration.pop(memory_config)
+
+    # trim RDB and AOF connection strings
+    rdb_aof_connection_strings = ['rdb-storage-connection-string',
+                                  'aof-storage-connection-string-0',
+                                  'aof-storage-connection-string-1']
+    for connection_string in rdb_aof_connection_strings:
+        if connection_string in instance.redis_configuration:
+            instance.redis_configuration.pop(connection_string)
 
     # Trim zonal-configuration
     if 'zonal-configuration' in instance.redis_configuration:
