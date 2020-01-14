@@ -7,7 +7,19 @@ Release History
 
 * Azure Stack: surface commands under the profile of 2019-03-01-hybrid
 
-**Stoarge**
+**IoT Central**
+
+* Support app creation/update with the new sku name ST0, ST1, ST2.
+
+2.0.80
+++++++
+
+**Compute**
+
+* disk update: Add --disk-encryption-set and --encryption-type
+* snapshot create/update: Add --disk-encryption-set and --encryption-type
+
+**Storage**
 
 * Upgrade azure-mgmt-storage version to 7.1.0
 * `az storage account create`: Add `--encryption-key-type-for-table` and `--encryption-key-type-for-queue` to support Table and Queue Encryption Service
@@ -279,15 +291,6 @@ Release History
 * Rewrite the az wrapper in Python
 * Support Python 3.8
 * Use Python 3 for RPM package
-=======
-**AppService**
-
-<<<<<<< HEAD
-* * Azure Stack: surface commands under the profile of 2019-03-01-hybrid
->>>>>>> update release note
-=======
-* Azure Stack: surface commands under the profile of 2019-03-01-hybrid
->>>>>>> fix typo
 
 **Profile**
 
@@ -351,10 +354,7 @@ Release History
 * Added "--build remote" flag for "az functionapp deployment source config-zip" to support remote build action during function app deployment.
 * Change default node version on function apps to ~10 for Windows
 * Add --runtime-version property to `az functionapp create`
-<<<<<<< HEAD
 * az appservice vnet-integration add: Fixed so that subnet delegation is case insensitive and delegating subnets does not overwrite previous data.
-=======
->>>>>>> update release note
 
 **ARM**
 
