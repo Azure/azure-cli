@@ -3617,11 +3617,13 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
     @SqlServerPreparer(location='westus')
     @StorageAccountPreparer(location='westus')
     def test_sql_db_sensitivity_classifications(self, resource_group, resource_group_location, server, storage_account):
+        from azure.mgmt.sql.models import SampleName
+        
         database_name = "sensitivityclassificationsdb01"
 
         # create db
         self.cmd('sql db create -g {} -s {} -n {} --sample-name {}'
-                 .format(resource_group, server, database_name, 'AdventureWorksLT'),
+                 .format(resource_group, server, database_name, SampleName.adventure_works_lt),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('name', database_name),
@@ -3675,7 +3677,7 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
         column_name = 'FirstName'
 
         # disable the recommendation for SalesLT/Customer/FirstName
-        self.cmd('sql db classification recommendation disable -g {} -s {} -n {} --schema-name {} --table-name {} --column-name {}'
+        self.cmd('sql db classification recommendation disable -g {} -s {} -n {} --schema {} --table {} --column {}'
                  .format(resource_group, server, database_name, schema_name, table_name, column_name))
 
         # list recommended sensitivity classifications
@@ -3685,7 +3687,7 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
                      JMESPathCheck('length(@)', expected_recommended_sensitivityclassifications_count - 1)])
 
         # re-enable the disabled recommendation
-        self.cmd('sql db classification recommendation enable -g {} -s {} -n {} --schema-name {} --table-name {} --column-name {}'
+        self.cmd('sql db classification recommendation enable -g {} -s {} -n {} --schema {} --table {} --column {}'
                  .format(resource_group, server, database_name, schema_name, table_name, column_name))
 
         # lits recommended sensitivity classifications
@@ -3700,7 +3702,7 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
         information_type_id = '57845286-7598-22f5-9659-15b24aeb125e'
         label_id = 'bf91e08c-f4f0-478a-b016-25164b2a65ff'
 
-        self.cmd('sql db classification update -g {} -s {} -n {} --schema-name {} --table-name {} --column-name {} --information-type {} --label-name "{}"'
+        self.cmd('sql db classification update -g {} -s {} -n {} --schema {} --table {} --column {} --information-type {} --label-name "{}"'
                  .format(resource_group, server, database_name, schema_name, table_name, column_name, information_type, label_name),
                  checks=[
                      JMESPathCheck('informationType', information_type),
@@ -3709,7 +3711,7 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
                      JMESPathCheck('labelId', label_id)])
 
         # get the classified column
-        self.cmd('sql db classification show -g {} -s {} -n {} --schema-name {} --table-name {} --column-name {} --sensitivity-label-source current'
+        self.cmd('sql db classification show -g {} -s {} -n {} --schema {} --table {} --column {} --sensitivity-label-source current'
                  .format(resource_group, server, database_name, schema_name, table_name, column_name, information_type),
                  checks=[
                      JMESPathCheck('informationType', information_type),
@@ -3730,7 +3732,7 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
                      JMESPathCheck('length(@)', 1)])
 
         # delete the label
-        self.cmd('sql db classification delete -g {} -s {} -n {} --schema-name {} --table-name {} --column-name {}'
+        self.cmd('sql db classification delete -g {} -s {} -n {} --schema {} --table {} --column {}'
                  .format(resource_group, server, database_name, schema_name, table_name, column_name))
 
         # list current labels

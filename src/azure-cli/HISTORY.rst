@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**SQL**
+
+* New commands `sql db classification show/list/update/delete` and `sql db classification recommendation list/enable/disable` to manage sensitivity classifications for SQL databases.
+
 2.0.80
 ++++++
 
@@ -15,10 +19,6 @@ Release History
 
 * Upgrade azure-mgmt-storage version to 7.1.0
 * `az storage account create`: Add `--encryption-key-type-for-table` and `--encryption-key-type-for-queue` to support Table and Queue Encryption Service
-
-**SQL**
-
-* New commands `sql db classification show/list/update/delete` and `sql db classification recommendation list/enable/disable` to manage sensitivity classifications for SQL databases.
 
 2.0.79
 ++++++

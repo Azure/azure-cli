@@ -1426,18 +1426,21 @@ def load_arguments(self, _):
     ###################################################
     #             sql sensitivity classification      #
     ###################################################
-    with self.argument_context('sql db classification update') as c:
+    with self.argument_context('sql db classification') as c:
         c.argument('schema_name',
                    required=True,
-                   help='The name of the schema.')
+                   help='The name of the schema.',
+                   options_list=['--schema'])
 
         c.argument('table_name',
                    required=True,
-                   help='The name of the table.')
+                   help='The name of the table.',
+                   options_list=['--table'])
 
         c.argument('column_name',
                    required=True,
-                   help='The name of the column.')
+                   help='The name of the column.',
+                   options_list=['--column'])
 
         c.argument('information_type',
                    required=False,
@@ -1445,4 +1448,7 @@ def load_arguments(self, _):
 
         c.argument('label_name',
                    required=False,
-                   help='The label name')
+                   help='The label name.')
+
+    with self.argument_context('sql db classification recommendation list') as c:
+        c.ignore('skip_token')

@@ -26,6 +26,8 @@ from azure.mgmt.sql.models import (
     ReplicationRole,
     ResourceIdentity,
     SecurityAlertPolicyState,
+    SensitivityLabel,
+    SensitivityLabelSource,
     ServerKey,
     ServerKeyType,
     ServiceObjectiveName,
@@ -1483,15 +1485,6 @@ def db_threat_detection_policy_update(
 
     return instance
 
-
-def db_recommended_sensitivity_labels_list(
-        client,
-        database_name,
-        server_name,
-        resource_group_name):
-    return client.list_recommended_by_database(resource_group_name, server_name, database_name)
-
-
 def db_sensitivity_label_update(
         cmd,
         client,
@@ -1512,28 +1505,23 @@ def db_sensitivity_label_update(
     from azure.mgmt.security import SecurityCenter
     from msrestazure.azure_exceptions import CloudError
 
-    securityCenterclient = get_mgmt_service_client(cmd.cli_ctx, SecurityCenter, asc_location="centralus")
+    security_center_client = get_mgmt_service_client(cmd.cli_ctx, SecurityCenter, asc_location="centralus")
 
-    informationProtectionPolicy = securityCenterclient.information_protection_policies.get(
+    information_protection_policy = security_center_client.information_protection_policies.get(
         scope='/providers/Microsoft.Management/managementGroups/{}'.format(_get_tenant_id()),
         information_protection_policy_name="effective")
 
-    params = {
-        'label_name': None,
-        'label_id': None,
-        'information_type': None,
-        'information_type_id': None}
+    sensitivity_label = SensitivityLabel()
 
     # Get the current label
     try:
         current_label = client.get(
-            resource_group_name, server_name, database_name, schema_name, table_name, column_name, 'current')
+            resource_group_name, server_name, database_name, schema_name, table_name, column_name, SensitivityLabelSource.current)
         # Initialize with existing values
-        params = {
-            'label_name': current_label.label_name,
-            'label_id': current_label.label_id,
-            'information_type': current_label.information_type,
-            'information_type_id': current_label.information_type_id}
+        sensitivity_label.label_name = current_label.label_name,
+        sensitivity_label.label_id = current_label.label_id,
+        sensitivity_label.information_type = current_label.information_type,
+        sensitivity_label.information_type_id = current_label.information_type_id
 
     except CloudError as ex:
         if not(ex.error and ex.error.error and 'SensitivityLabelsLabelNotFound' in ex.error.error):
@@ -1542,27 +1530,27 @@ def db_sensitivity_label_update(
     # Find the label id and information type id in the policy by the label name provided
     label_id = None
     if label_name:
-        label_id = next((id for id in informationProtectionPolicy.labels
-                         if informationProtectionPolicy.labels[id].display_name.lower() ==
+        label_id = next((id for id in information_protection_policy.labels
+                         if information_protection_policy.labels[id].display_name.lower() ==
                          label_name.lower()),
                         None)
         if label_id is None:
             raise CLIError('The provided label name was not found in the information protection policy.')
-        params['label_id'] = label_id
-        params['label_name'] = label_name
+        sensitivity_label.label_id = label_id
+        sensitivity_label.label_name = label_name
     information_type_id = None
     if information_type:
-        information_type_id = next((id for id in informationProtectionPolicy.information_types
-                                    if informationProtectionPolicy.information_types[id].display_name.lower() ==
+        information_type_id = next((id for id in information_protection_policy.information_types
+                                    if information_protection_policy.information_types[id].display_name.lower() ==
                                     information_type.lower()),
                                    None)
         if information_type_id is None:
             raise CLIError('The provided information type was not found in the information protection policy.')
-        params['information_type_id'] = information_type_id
-        params['information_type'] = information_type
+        sensitivity_label.information_type_id = information_type_id
+        sensitivity_label.information_type = information_type
 
     return client.create_or_update(
-        resource_group_name, server_name, database_name, schema_name, table_name, column_name, params)
+        resource_group_name, server_name, database_name, schema_name, table_name, column_name, sensitivity_label)
 
 
 ###############################################

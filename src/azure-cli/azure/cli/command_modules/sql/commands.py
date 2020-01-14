@@ -249,7 +249,7 @@ def load_command_table(self, _):
                             database_sensitivity_labels_operations,
                             client_factory=get_sql_database_sensitivity_labels_operations) as g:
 
-        g.custom_command('list', 'db_recommended_sensitivity_labels_list')
+        g.command('list', 'list_recommended_by_database')
         g.command('enable', 'enable_recommendation')
         g.command('disable', 'disable_recommendation')
 
