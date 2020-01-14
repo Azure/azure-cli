@@ -3618,7 +3618,7 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
     @StorageAccountPreparer(location='westus')
     def test_sql_db_sensitivity_classifications(self, resource_group, resource_group_location, server, storage_account):
         from azure.mgmt.sql.models import SampleName
-        
+
         database_name = "sensitivityclassificationsdb01"
 
         # create db

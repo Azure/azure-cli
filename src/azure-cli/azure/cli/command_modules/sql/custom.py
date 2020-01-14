@@ -1485,6 +1485,7 @@ def db_threat_detection_policy_update(
 
     return instance
 
+
 def db_sensitivity_label_update(
         cmd,
         client,
@@ -1516,11 +1517,17 @@ def db_sensitivity_label_update(
     # Get the current label
     try:
         current_label = client.get(
-            resource_group_name, server_name, database_name, schema_name, table_name, column_name, SensitivityLabelSource.current)
+            resource_group_name,
+            server_name,
+            database_name,
+            schema_name,
+            table_name,
+            column_name,
+            SensitivityLabelSource.current)
         # Initialize with existing values
-        sensitivity_label.label_name = current_label.label_name,
-        sensitivity_label.label_id = current_label.label_id,
-        sensitivity_label.information_type = current_label.information_type,
+        sensitivity_label.label_name = current_label.label_name
+        sensitivity_label.label_id = current_label.label_id
+        sensitivity_label.information_type = current_label.information_type
         sensitivity_label.information_type_id = current_label.information_type_id
 
     except CloudError as ex:
