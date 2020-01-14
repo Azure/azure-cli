@@ -5,6 +5,7 @@
 
 import json
 import os
+from azure.cli.core.util import get_file_json, read_file_content, shell_safe_json_parse
 from knack.log import get_logger
 from knack.util import CLIError
 
@@ -422,7 +423,7 @@ def get_step_from_json(client, health_check_step):
 def get_or_read_json(json_or_file):
     json_obj = None
     if is_json(json_or_file):
-        json_obj = json.loads(json_or_file)
+        json_obj = shell_safe_json_parse(json_or_file)
     elif os.path.exists(json_or_file):
         with open(json_or_file) as f:
             json_obj = json.load(f)

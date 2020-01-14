@@ -6,7 +6,8 @@ Release History
 **Deployment Manager**
 
 * Adds list operation for all resources.
-* Enhances step resource for new step type.
+* Enhance step resource for new step type.
+* Updated azure-mgmt-deploymentmanager package to use version 0.2.0.
 
 2.0.79
 ++++++

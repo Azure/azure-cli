@@ -49,7 +49,7 @@ helps['deploymentmanager artifact-source list'] = """
 type: command
 short-summary: List all artifact sources in a resource group.
 examples:
-  - name: Lists artifact sources in the given resource group.
+  - name: List artifact sources in the given resource group.
     text: >
         az deploymentmanager artifact-source list -g rg1
 """
@@ -96,9 +96,9 @@ examples:
 
 helps['deploymentmanager rollout list'] = """
 type: command
-short-summary: Lists all rollouts in a resource group
+short-summary: List all rollouts in a resource group
 examples:
-  - name: Lists all rollouts in the resource group
+  - name: List all rollouts in the resource group
     text: >
         az deploymentmanager rollout list -g rg1
 """
@@ -146,9 +146,9 @@ examples:
 
 helps['deploymentmanager service list'] = """
 type: command
-short-summary: Lists all services in a service topology.
+short-summary: List all services in a service topology.
 examples:
-  - name: Lists all the services under the given service topology.
+  - name: List all the services under the given service topology.
     text: >
         az deploymentmanager service list -g rg1 --service-topology-name contosoServiceTopology
 """
@@ -196,9 +196,9 @@ examples:
 
 helps['deploymentmanager service-topology list'] = """
 type: command
-short-summary: Lists all service topologies in a resource group.
+short-summary: List all service topologies in a resource group.
 examples:
-  - name: Lists all the service topologies in the resource group.
+  - name: List all the service topologies in the resource group.
     text: >
         az deploymentmanager service-topology list -g rg1
 """
@@ -255,9 +255,9 @@ examples:
 
 helps['deploymentmanager service-unit list'] = """
 type: command
-short-summary: Lists all service units in a service.
+short-summary: List all service units in a service.
 examples:
-  - name: Lists the service units in the given service topology and service.
+  - name: List the service units in the given service topology and service.
     text: >
         az deploymentmanager service-unit list -g rg1 --service-topology-name contosoServiceTopology --service-name contosoService1
 """
