@@ -1261,6 +1261,16 @@ def load_arguments(self, _):
                    'for use with key management services like Azure KeyVault. '
                    'If identity is already assigned - do nothing.')
 
+        # Create args that will be used to build up the Managed Instance's Sku object
+        create_args_for_complex_type(
+            c, 'sku', Sku, [
+                'family',
+                'name',
+                'tier',
+            ])
+
+        c.ignore('name')  # Hide sku name
+
     #####
     #           sql managed instance key
     #####
