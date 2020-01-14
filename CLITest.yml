@@ -1,2 +1,12 @@
-pool:
+jobs:
+- job: LiveTestPython38
+  displayName: Live Test Python 3.8
+  dependsOn: SetEnvironment
+  timeoutInMinutes: 999
+  pool:
     vmImage: 'Ubuntu-16.04'
+  steps:
+    - task: UsePythonVersion@0
+      displayName: 'Use Python 3.8'
+      inputs:
+        versionSpec: 3.8
