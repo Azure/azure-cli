@@ -836,7 +836,7 @@ type: command
 short-summary: Update a columns's sensitivity classification.
 examples:
   - name: Update sensitivity classification for a given column.
-    text: az sql db classification update -g mygroup -s myserver -n mydb --schema-name dbo --table-name mytable --column-name mycolumn --information-type Name --label-name "Confidential - GDPR"
+    text: az sql db classification update -g mygroup -s myserver -n mydb --schema dbo --table mytable --column mycolumn --information-type Name --label-name "Confidential - GDPR"
 """
 
 helps['sql db classification list'] = """
@@ -852,7 +852,7 @@ type: command
 short-summary: Get the sensitivity classification of a given column.
 examples:
   - name: Get the sensitivity classification of a given column.
-    text: az sql db classification show -g mygroup -s myserver -n mydb --schema-name dbo --table-name mytable --column-name mycolumn --sensitivity-label-source current
+    text: az sql db classification show -g mygroup -s myserver -n mydb --schema dbo --table mytable --column mycolumn --sensitivity-label-source current
 """
 
 helps['sql db classification delete'] = """
@@ -860,7 +860,7 @@ type: command
 short-summary: Delete the sensitivity classification of a given column.
 examples:
   - name: Delete the sensitivity classification of a given column.
-    text: az sql db classification delete -g mygroup -s myserver -n mydb --schema-name dbo --table-name mytable --column-name mycolumn
+    text: az sql db classification delete -g mygroup -s myserver -n mydb --schema dbo --table mytable --column mycolumn
 """
 
 helps['sql db classification recommendation'] = """
@@ -881,7 +881,7 @@ type: command
 short-summary: Enable sensitivity recommendations for a given column (recommendations are enabled by default on all columns).
 examples:
   - name: Enable sensitivity recommendations for a given column.
-    text: az sql db classification recommendation enable -g mygroup -s myserver -n mydb --schema-name dbo --table-name mytable --column-name mycolumn
+    text: az sql db classification recommendation enable -g mygroup -s myserver -n mydb --schema dbo --table mytable --column mycolumn
 """
 
 helps['sql db classification recommendation disable'] = """
@@ -889,5 +889,5 @@ type: command
 short-summary: Disable sensitivity recommendations for a given column (recommendations are enabled by default on all columns).
 examples:
   - name: Disable sensitivity recommendations for a given column.
-    text: az sql db classification recommendation disable -g mygroup -s myserver -n mydb --schema-name dbo --table-name mytable --column-name mycolumn
+    text: az sql db classification recommendation disable -g mygroup -s myserver -n mydb --schema dbo --table mytable --column mycolumn
 """
