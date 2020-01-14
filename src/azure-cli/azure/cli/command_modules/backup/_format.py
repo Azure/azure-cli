@@ -48,6 +48,8 @@ def transform_job(result):
         columns.append(('Duration', result['properties']['duration']))
     elif result['properties']['backupManagementType'] == 'AzureStorage':
         columns.append(('Duration', result['properties']['additionalProperties']['duration']))
+    elif result['properties']['backupManagementType'] == 'AzureWorkload':
+        columns.append(('Duration', result['properties']['duration']))
 
     return OrderedDict(columns)
 
