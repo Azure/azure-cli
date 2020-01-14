@@ -1565,9 +1565,13 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
         wait_then_open_async(dashboardURL)
     try:
         try:
-            subprocess.check_output(["kubectl", "--kubeconfig", browse_path, "proxy"], stderr=subprocess.STDOUT)
+            subprocess.check_output(["kubectl", "--kubeconfig", browse_path, "proxy", "--address", listen_address, "--port", listen_port], stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as err:
-            logger.warning("error occured when setup the proxy: %s", err)
+            if err.output.find(b'unknown flag: --address'):
+                if listen_address != '127.0.0.1':
+                    logger.warning('"--address" is only supported in kubectl v1.13 and later.')
+                    logger.warning('The "--listen-address" argument will be ignored.')
+                subprocess.call(["kubectl", "--kubeconfig", browse_path, "proxy", "--port", listen_port])
     except KeyboardInterrupt:
         # Let command processing finish gracefully after the user presses [Ctrl+C]
         pass
