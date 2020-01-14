@@ -3202,7 +3202,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
             workspace_id = '/' + workspace_id
         if workspace_id.endswith('/'):
             workspace_id = workspace_id.rstrip('/')
-        monitor_profile = OpenShiftManagedClusterMonitorProfile(enabled=True, workspace_id=workspace_id)  # pylint: disable=line-too-long
+        monitor_profile = OpenShiftManagedClusterMonitorProfile(enabled=True, workspace_resource_id=workspace_id)  # pylint: disable=line-too-long
     else:
         monitor_profile = None
 
