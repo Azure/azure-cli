@@ -1661,6 +1661,11 @@ def _get_scm_url(cmd, resource_group_name, name, slot=None):
     raise ValueError('Failed to retrieve Scm Uri')
 
 
+def get_publishing_user(cmd):
+    client = web_client_factory(cmd.cli_ctx)
+    return client.get_publishing_user()
+
+
 def set_deployment_user(cmd, user_name, password=None):
     '''
     Update deployment credentials.(Note, all webapps in your subscription will be impacted)
