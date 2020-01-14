@@ -30,7 +30,6 @@ def ex_handler_factory(creating_plan=False, no_throw=False):
 
 
 def web_client_factory(cli_ctx, **_):
-    #from azure.mgmt.web import WebSiteManagementClient
     from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_APPSERVICE)

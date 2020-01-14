@@ -258,7 +258,6 @@ def add_azure_storage_account(cmd, resource_group_name, name, custom_id, storage
     if slot_setting:
         slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
 
-
         slot_cfg_names.azure_storage_config_names = slot_cfg_names.azure_storage_config_names or []
         if custom_id not in slot_cfg_names.azure_storage_config_names:
             slot_cfg_names.azure_storage_config_names.append(custom_id)
@@ -627,6 +626,7 @@ def _list_deleted_app(cli_ctx, resource_group_name=None, name=None, slot=None):
 
 def assign_identity(cmd, resource_group_name, name, role='Contributor', slot=None, scope=None):
     ManagedServiceIdentity = cmd.get_models('ManagedServiceIdentity')
+
     def getter():
         return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
 
@@ -646,6 +646,7 @@ def show_identity(cmd, resource_group_name, name, slot=None):
 
 def remove_identity(cmd, resource_group_name, name, slot=None):
     ManagedServiceIdentity = cmd.get_models('ManagedServiceIdentity')
+
     def getter():
         return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
 
@@ -847,17 +848,18 @@ def _get_linux_multicontainer_encoded_config_from_file(file_name):
 
 # for any modifications to the non-optional parameters, adjust the reflection logic accordingly
 # in the method
-def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_workers=None,
-                        linux_fx_version=None, windows_fx_version=None, pre_warmed_instance_count=None, php_version=None,  # pylint: disable=unused-argument
-                        python_version=None, net_framework_version=None,  # pylint: disable=unused-argument
-                        java_version=None, java_container=None, java_container_version=None,  # pylint: disable=unused-argument
-                        remote_debugging_enabled=None, web_sockets_enabled=None,  # pylint: disable=unused-argument
-                        always_on=None, auto_heal_enabled=None,  # pylint: disable=unused-argument
-                        use32_bit_worker_process=None,  # pylint: disable=unused-argument
-                        min_tls_version=None,  # pylint: disable=unused-argument
-                        http20_enabled=None,  # pylint: disable=unused-argument
-                        app_command_line=None,  # pylint: disable=unused-argument
-                        ftps_state=None,  # pylint: disable=unused-argument
+# pylint: disable=unused-argument
+def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_workers=None, linux_fx_version=None,
+                        windows_fx_version=None, pre_warmed_instance_count=None, php_version=None,
+                        python_version=None, net_framework_version=None,
+                        java_version=None, java_container=None, java_container_version=None,
+                        remote_debugging_enabled=None, web_sockets_enabled=None,
+                        always_on=None, auto_heal_enabled=None,
+                        use32_bit_worker_process=None,
+                        min_tls_version=None,
+                        http20_enabled=None,
+                        app_command_line=None,
+                        ftps_state=None,
                         generic_configurations=None):
     configs = get_site_configs(cmd, resource_group_name, name, slot)
     if number_of_workers is not None:
@@ -870,7 +872,7 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
 
     if pre_warmed_instance_count is not None:
         pre_warmed_instance_count = validate_range_of_int_flag('--prewarmed-instance-count', pre_warmed_instance_count,
-                                                             min_val=0, max_val=20)
+                                                               min_val=0, max_val=20)
     import inspect
     frame = inspect.currentframe()
     bool_flags = ['remote_debugging_enabled', 'web_sockets_enabled', 'always_on',
@@ -1467,7 +1469,7 @@ def create_backup(cmd, resource_group_name, webapp_name, storage_account_url,
     client = web_client_factory(cmd.cli_ctx)
     if backup_name and backup_name.lower().endswith('.zip'):
         backup_name = backup_name[:-4]
-    db_setting = _create_db_setting(cmd, db_name, db_type, db_connection_string)
+    db_setting = _create_db_setting(cmd, db_name, db_type=db_type, db_connection_string=db_connection_string)
     backup_request = BackupRequest(backup_request_name=backup_name,
                                    storage_account_url=storage_account_url, databases=db_setting)
     if slot:
@@ -1524,7 +1526,7 @@ def update_backup_schedule(cmd, resource_group_name, webapp_name, storage_accoun
         db_name = db_name or db.name
         db_connection_string = db_connection_string or db.connection_string
 
-    db_setting = _create_db_setting(db_name, db_type, db_connection_string)
+    db_setting = _create_db_setting(cmd, db_name, db_type=db_type, db_connection_string=db_connection_string)
 
     backup_schedule = BackupSchedule(frequency_interval=frequency_num, frequency_unit=frequency_unit.name,
                                      keep_at_least_one_backup=keep_at_least_one_backup,
@@ -1544,7 +1546,7 @@ def restore_backup(cmd, resource_group_name, webapp_name, storage_account_url, b
     storage_blob_name = backup_name
     if not storage_blob_name.lower().endswith('.zip'):
         storage_blob_name += '.zip'
-    db_setting = _create_db_setting(db_name, db_type, db_connection_string)
+    db_setting = _create_db_setting(cmd, db_name, db_type=db_type, db_connection_string=db_connection_string)
     restore_request = RestoreRequest(storage_account_url=storage_account_url,
                                      blob_name=storage_blob_name, overwrite=overwrite,
                                      site_name=target_name, databases=db_setting,
@@ -1619,7 +1621,6 @@ def _parse_frequency(cmd, frequency):
 
 
 def _get_location_from_resource_group(cli_ctx, resource_group_name):
-    from azure.cli.core.profiles import ResourceType
     client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     group = client.resource_groups.get(resource_group_name)
     return group.location
@@ -1633,7 +1634,6 @@ def _get_location_from_webapp(client, resource_group_name, webapp):
 
 
 def _get_deleted_apps_locations(cli_ctx):
-    from azure.cli.core.profiles import ResourceType
     client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     web_provider = client.providers.get('Microsoft.Web')
     del_sites_resource = next((x for x in web_provider.resource_types if x.resource_type == 'deletedSites'), None)

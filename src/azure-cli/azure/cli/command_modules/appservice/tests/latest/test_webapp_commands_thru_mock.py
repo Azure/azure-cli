@@ -44,6 +44,7 @@ def _get_test_cmd():
     cmd.cli_ctx = cli_ctx
     return cmd
 
+
 class TestWebappMocked(unittest.TestCase):
     def setUp(self):
         self.client = WebSiteManagementClient(AdalAuthentication(lambda: ('bearer', 'secretToken')), '123455678')

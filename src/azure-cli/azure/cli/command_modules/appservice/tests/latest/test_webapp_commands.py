@@ -351,14 +351,15 @@ class WebappConfigureTest(ScenarioTest):
         runtime = 'node|6.6'
         linux_plan = self.create_random_name(prefix='webapp-linux-plan', length=24)
         linux_webapp = self.create_random_name(prefix='webapp-linux', length=24)
-        self.cmd('appservice plan create -g {} -n {} -l eastus --sku S1 --is-linux'.format(resource_group, linux_plan), checks=[
-            JMESPathCheck('reserved', True),  # this weird field means it is a linux
-            JMESPathCheck('sku.name', 'S1'),
+        self.cmd('appservice plan create -g {} -n {} -l eastus --sku S1 --is-linux'.format(resource_group, linux_plan),
+                 checks=[
+                     JMESPathCheck('reserved', True),  # this weird field means it is a linux
+                     JMESPathCheck('sku.name', 'S1'),
         ])
         self.cmd('webapp create -g {} -n {} --plan {} --runtime {}'.format(resource_group, linux_webapp, linux_plan, runtime),
                  checks=[
                      JMESPathCheck('name', linux_webapp),
-                 ])
+        ])
         # add
         self.cmd(('webapp config storage-account add -g {} -n {} --custom-id Id --storage-type AzureFiles --account-name name '
                  '--share-name sharename --access-key key --mount-path /path/to/mount').format(resource_group, linux_webapp))
