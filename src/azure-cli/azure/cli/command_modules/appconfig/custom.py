@@ -77,9 +77,6 @@ def assign_managed_identity(cmd, client, name, resource_group_name=None, identit
     if identities is None:
         identities = [SYSTEM_ASSIGNED_IDENTITY]
 
-    if '[all]' in identities:
-        raise CLIError("[all] is not supported for identity assignment")
-
     current_identities = show_managed_identity(cmd, client, name, resource_group_name)
     user_assigned_identities = {}
     identity_types = set()

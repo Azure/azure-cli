@@ -10,17 +10,16 @@ Release History
 2.0.80
 ++++++
 
-**Compute**
-
-* disk update: Add --disk-encryption-set and --encryption-type
-* snapshot create/update: Add --disk-encryption-set and --encryption-type
-
-**Storage**
 **AppConfig**
 
 * Remove preview tag for most commands.
 * Expose sku modification for configuration store.
 * Add command group for managed identity.
+
+**Compute**
+
+* disk update: Add --disk-encryption-set and --encryption-type
+* snapshot create/update: Add --disk-encryption-set and --encryption-type
 
 **Stoarge**
 

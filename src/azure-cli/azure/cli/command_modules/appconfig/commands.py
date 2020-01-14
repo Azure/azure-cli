@@ -51,7 +51,7 @@ def load_command_table(self, _):
         )
 
     # Management Plane Commands
-    with self.command_group('appconfig', configstore_custom_util) as g:
+    with self.command_group('appconfig', configstore_custom_util, is_preview=True) as g:
         g.command('create', 'create_configstore')
         g.command('delete', 'delete_configstore')
         g.command('update', 'update_configstore')
@@ -62,7 +62,7 @@ def load_command_table(self, _):
         g.command('list', 'list_credential')
         g.command('regenerate', 'regenerate_credential')
 
-    with self.command_group('appconfig identity', configstore_identity_util, is_preview=True) as g:
+    with self.command_group('appconfig identity', configstore_identity_util) as g:
         g.command('assign', 'assign_managed_identity')
         g.command('remove', 'remove_managed_identity')
         g.command('show', 'show_managed_identity')
@@ -81,14 +81,13 @@ def load_command_table(self, _):
         g.command('restore', 'restore_key')
         g.command('import', 'import_config')
         g.command('export', 'export_config')
-        g.command('set-keyvault', 'set_keyvault', is_preview=True)
+        g.command('set-keyvault', 'set_keyvault')
 
     # FeatureManagement Commands
     with self.command_group('appconfig feature',
                             custom_command_type=get_custom_sdk('feature',
                                                                cf_configstore_operations,
-                                                               featureflag_entry_format),
-                            is_preview=True) as g:
+                                                               featureflag_entry_format)) as g:
         g.custom_command('set', 'set_feature')
         g.custom_command('delete', 'delete_feature')
         g.custom_command('show', 'show_feature')
@@ -101,8 +100,7 @@ def load_command_table(self, _):
     with self.command_group('appconfig feature filter',
                             custom_command_type=get_custom_sdk('feature',
                                                                cf_configstore_operations,
-                                                               featurefilter_entry_format),
-                            is_preview=True) as g:
+                                                               featurefilter_entry_format)) as g:
         g.custom_command('add', 'add_filter')
         g.custom_command('delete', 'delete_filter')
         g.custom_command('show', 'show_filter')
