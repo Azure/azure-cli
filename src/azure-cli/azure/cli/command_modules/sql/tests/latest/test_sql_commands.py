@@ -2679,6 +2679,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         managed_instance_name_2 = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
+        families = ['Gen4', 'Gen5']
 
         is_playback = os.path.exists(self.recording_file)
         if is_playback:
@@ -2691,7 +2692,6 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         v_cores = 8
         storage_size_in_gb = '64'
         edition = 'GeneralPurpose'
-        family = 'Gen4'
         resource_group_1 = "cl_one"
         collation = "Serbian_Cyrillic_100_CS_AS"
         proxy_override = "Proxy"
@@ -2704,7 +2704,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         # test create sql managed_instance
         managed_instance_1 = self.cmd('sql mi create -g {} -n {} -l {} '
                                       '-u {} -p {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {} --collation {} --proxy-override {} --public-data-endpoint-enabled --timezone-id "{}"'
-                                      .format(resource_group_1, managed_instance_name_1, loc, user, admin_passwords[0], subnet, license_type, v_cores, storage_size_in_gb, edition, family, collation, proxy_override, timezone_id),
+                                      .format(resource_group_1, managed_instance_name_1, loc, user, admin_passwords[0], subnet, license_type, v_cores, storage_size_in_gb, edition, families[0], collation, proxy_override, timezone_id),
                                       checks=[
                                           JMESPathCheck('name', managed_instance_name_1),
                                           JMESPathCheck('resourceGroup', resource_group_1),
@@ -2713,7 +2713,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                                           JMESPathCheck('storageSizeInGb', storage_size_in_gb),
                                           JMESPathCheck('licenseType', license_type),
                                           JMESPathCheck('sku.tier', edition),
-                                          JMESPathCheck('sku.family', family),
+                                          JMESPathCheck('sku.family', families[0]),
                                           JMESPathCheck('sku.capacity', v_cores),
                                           JMESPathCheck('identity', None),
                                           JMESPathCheck('collation', collation),
@@ -2746,6 +2746,25 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('administratorLogin', user),
                      JMESPathCheck('identity.type', 'SystemAssigned')])
 
+        # test update sql managed instance hardware generation
+        self.cmd('sql mi update -g {} -n {} --family {}'
+                .format(resource_group_1, managed_instance_name_1, families[1]),
+                checks=[
+                    JMESPathCheck('name', managed_instance_name_1),
+                    JMESPathCheck('resourceGroup', resource_group_1),
+                    JMESPathCheck('administratorLogin', user),
+                    JMESPathCheck('vCores', v_cores),
+                    JMESPathCheck('storageSizeInGb', storage_size_in_gb),
+                    JMESPathCheck('licenseType', license_type),
+                    JMESPathCheck('sku.tier', edition),
+                    JMESPathCheck('sku.family', families[1]),
+                    JMESPathCheck('sku.capacity', v_cores),
+                    JMESPathCheck('identity.type', 'SystemAssigned'),
+                    JMESPathCheck('collation', collation),
+                    JMESPathCheck('proxyOverride', proxy_override),
+                    JMESPathCheck('publicDataEndpointEnabled', 'True'),
+                    JMESPathCheck('timezoneId', timezone_id)]).get_output_in_json()
+
         # test update without identity parameter, validate identity still exists
         # also use --id instead of -g/-n
         self.cmd('sql mi update --id {} --admin-password {}'
@@ -2768,7 +2787,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         # test create another sql managed instance, with identity this time
         self.cmd('sql mi create -g {} -n {} -l {} -i '
                  '--admin-user {} --admin-password {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {} --collation {} --proxy-override {} --public-data-endpoint-enabled'
-                 .format(resource_group_1, managed_instance_name_2, loc, user, admin_passwords[0], subnet, license_type, v_cores, storage_size_in_gb, edition, family, collation, proxy_override),
+                 .format(resource_group_1, managed_instance_name_2, loc, user, admin_passwords[0], subnet, license_type, v_cores, storage_size_in_gb, edition, families[0], collation, proxy_override),
                  checks=[
                      JMESPathCheck('name', managed_instance_name_2),
                      JMESPathCheck('resourceGroup', resource_group_1),
@@ -2777,7 +2796,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('storageSizeInGb', storage_size_in_gb),
                      JMESPathCheck('licenseType', license_type),
                      JMESPathCheck('sku.tier', edition),
-                     JMESPathCheck('sku.family', family),
+                     JMESPathCheck('sku.family', families[0]),
                      JMESPathCheck('sku.capacity', v_cores),
                      JMESPathCheck('identity.type', 'SystemAssigned'),
                      JMESPathCheck('collation', collation),

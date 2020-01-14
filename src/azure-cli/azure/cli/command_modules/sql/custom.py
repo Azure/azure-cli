@@ -2099,21 +2099,21 @@ def encryption_protector_update(
 ###############################################
 
 
-def _find_managed_instance_sku_from_capabilities(cli_ctx, location, sku):
+def _find_managed_instance_sku_from_capabilities(
+        cli_ctx,
+        location,
+        sku,
+        is_instance_create=True,
+        current_sku_family=None):
     '''
     Given a requested sku which may have some properties filled in
-    (e.g. tier and capacity), finds the canonical matching sku
+    (e.g. tier and family), finds the canonical matching sku
     from the given location's capabilities.
     '''
 
     logger.debug('_find_managed_instance_sku_from_capabilities input: %s', sku)
 
-    if sku.name:
-        # User specified sku.name, so nothing else needs to be resolved.
-        logger.debug('_find_managed_instance_sku_from_capabilities return sku as is')
-        return sku
-
-    if not _any_sku_values_specified(sku):
+    if is_instance_create and not _any_sku_values_specified(sku):
         # User did not request any properties of sku, so just wipe it out.
         # Server side will pick a default.
         logger.debug('_find_managed_instance_sku_from_capabilities return None')
@@ -2133,6 +2133,12 @@ def _find_managed_instance_sku_from_capabilities(cli_ctx, location, sku):
 
     # Find family level capability, based on requested sku properties
     family_capability = _find_family_capability(sku, edition_capability.supported_families)
+
+    # Check whether hardware family is being changed to a deprecated hardware family
+    if not is_instance_create:
+        if current_sku_family == 'Gen5' and 'Gen4' in family_capability.sku:
+            raise CLIError('It is not possible to switch back to Gen4 compute generation as'
+                           ' this hardware is being deprecated.')
 
     result = Sku(name=family_capability.sku)
     logger.debug('_find_managed_instance_sku_from_capabilities return: %s', result)
@@ -2183,6 +2189,7 @@ def managed_instance_list(
 
 
 def managed_instance_update(
+        cmd,
         instance,
         administrator_login_password=None,
         license_type=None,
@@ -2190,7 +2197,8 @@ def managed_instance_update(
         storage_size_in_gb=None,
         assign_identity=False,
         proxy_override=None,
-        public_data_endpoint_enabled=None):
+        public_data_endpoint_enabled=None,
+        sku=None):
     '''
     Updates a managed instance. Custom update function to apply parameters to instance.
     '''
@@ -2210,6 +2218,17 @@ def managed_instance_update(
         storage_size_in_gb or instance.storage_size_in_gb)
     instance.proxy_override = (
         proxy_override or instance.proxy_override)
+
+    sku.tier = (
+        sku.tier or instance.sku.tier)
+    sku.family = (
+        sku.family or instance.sku.family)
+    instance.sku = _find_managed_instance_sku_from_capabilities(
+        cmd.cli_ctx,
+        instance.location,
+        sku,
+        False,
+        instance.sku.family)
 
     if public_data_endpoint_enabled is not None:
         instance.public_data_endpoint_enabled = public_data_endpoint_enabled
