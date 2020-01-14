@@ -71,6 +71,10 @@ Release History
 
 * Fix #11712: `az ad app/sp show` does not return exit code 3 when the application or service principal does not exist
 
+**Redis**
+
+* Fixing `az redis update` operation to work for caches with RDB/AOF enabled
+
 **Storage**
 
 * `az storage account create`: Remove preview flag for --enable-hierarchical-namespace parameter
