@@ -6,7 +6,6 @@
 # pylint: disable=line-too-long
 
 from knack.log import get_logger
-from knack.util import CLIError
 from azure.mgmt.appconfiguration.models import (ConfigurationStoreUpdateParameters,
                                                 ConfigurationStore,
                                                 Sku,
