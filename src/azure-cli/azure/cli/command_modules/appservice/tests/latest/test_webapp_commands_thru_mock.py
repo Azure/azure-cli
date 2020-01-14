@@ -6,11 +6,7 @@ import unittest
 import mock
 
 from msrestazure.azure_exceptions import CloudError
-from azure.mgmt.web.models import (SourceControl, HostNameBinding, Site, SiteConfig,
-                                   HostNameSslState, SslState, Certificate,
-                                   AddressResponse, HostingEnvironmentProfile,
-                                   DeletedAppRestoreRequest, SnapshotRecoverySource,
-                                   SnapshotRestoreRequest)
+
 from azure.mgmt.web import WebSiteManagementClient
 from azure.cli.core.adal_authentication import AdalAuthentication
 from knack.util import CLIError
@@ -72,11 +68,13 @@ class TestWebappMocked(unittest.TestCase):
     def test_set_source_control_token(self, client_factory_mock):
         client = mock.Mock()
         client_factory_mock.return_value = client
+        cmd_mock = _get_test_cmd()
+        SourceControl = cmd_mock.get_models('SourceControl')
         sc = SourceControl(name='not-really-needed', source_control_name='GitHub', token='veryNiceToken')
         client.update_source_control.return_value = sc
 
         # action
-        result = update_git_token(mock.MagicMock(), 'veryNiceToken')
+        result = update_git_token(cmd_mock, 'veryNiceToken')
 
         # assert things gets wired up
         self.assertEqual(result.token, 'veryNiceToken')
@@ -85,7 +83,9 @@ class TestWebappMocked(unittest.TestCase):
     def test_set_domain_name(self, client_factory_mock):
         client = mock.Mock()
         client_factory_mock.return_value = client
+        cmd_mock = _get_test_cmd()
         # set up the return value for getting a webapp
+        Site, HostNameBinding = cmd_mock.get_models('Site', 'HostNameBinding')
         webapp = Site(location='westus')
         webapp.name = 'veryNiceWebApp'
         client.web_apps.get.return_value = webapp
@@ -98,7 +98,7 @@ class TestWebappMocked(unittest.TestCase):
                                   host_name_type='Managed')
         client.web_apps.create_or_update_host_name_binding.return_value = binding
         # action
-        result = add_hostname(mock.MagicMock(), 'g1', webapp.name, domain)
+        result = add_hostname(cmd_mock, 'g1', webapp.name, domain)
 
         # assert
         self.assertEqual(result.domain_id, domain)
@@ -109,11 +109,13 @@ class TestWebappMocked(unittest.TestCase):
         client_factory_mock.return_value = client
         cmd_mock = _get_test_cmd()
         # set up the web inside a ASE, with an ip based ssl binding
+        HostingEnvironmentProfile = cmd_mock.get_models('HostingEnvironmentProfile')
         host_env = HostingEnvironmentProfile(id='id11')
         host_env.name = 'ase1'
         host_env.resource_group = 'myRg'
 
-        HostNameSslState, SslState, Site = cmd_mock.get_models('HostNameSslState', 'SslState', 'Site')
+        HostNameSslState, SslState, Site, AddressResponse = \
+            cmd_mock.get_models('HostNameSslState', 'SslState', 'Site', 'AddressResponse')
 
         host_ssl_state = HostNameSslState(ssl_state=SslState.ip_based_enabled, virtual_ip='1.2.3.4')
         client.web_apps.get.return_value = Site(name='antarctica', hosting_environment_profile=host_env,
@@ -155,8 +157,9 @@ class TestWebappMocked(unittest.TestCase):
     def test_get_external_ip_from_dns(self, resolve_hostname_mock, client_factory_mock):
         client = mock.Mock()
         client_factory_mock.return_value = client
-
+        cmd_mock = _get_test_cmd()
         # set up the web inside a ASE, with an ip based ssl binding
+        Site = cmd_mock.get_models('Site')
         site = Site(name='antarctica', location='westus')
         site.default_host_name = 'myweb.com'
         client.web_apps.get.return_value = site
@@ -189,6 +192,8 @@ class TestWebappMocked(unittest.TestCase):
         # Mock the client and set the location
         client = mock.Mock()
         client_factory_mock.return_value = client
+        cmd_mock = _get_test_cmd()
+        Site = cmd_mock.get_models('Site')
         site = Site(name='antarctica', location='westus')
         site.default_host_name = 'myweb.com'
         client.web_apps.get.return_value = site
@@ -210,11 +215,12 @@ class TestWebappMocked(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
     def test_update_site_config(self, site_op_mock):
+        cmd_mock = _get_test_cmd()
+        SiteConfig = cmd_mock.get_models('SiteConfig')
         site_config = SiteConfig(name='antarctica')
         site_op_mock.side_effect = [site_config, None]
-        cmd = mock.MagicMock()
         # action
-        update_site_configs(cmd, 'myRG', 'myweb', java_version='1.8')
+        update_site_configs(cmd_mock, 'myRG', 'myweb', java_version='1.8')
         # assert
         config_for_set = site_op_mock.call_args_list[1][0][5]
         self.assertEqual(config_for_set.java_version, '1.8')
@@ -235,6 +241,8 @@ class TestWebappMocked(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.appservice.custom.get_streaming_log', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom.open_page_in_browser', autospec=True)
     def test_browse_with_trace(self, webbrowser_mock, log_mock, site_op_mock):
+        cmd_mock = _get_test_cmd()
+        Site, HostNameSslState, SslState = cmd_mock.get_models('Site', 'HostNameSslState', 'SslState')
         site = Site(location='westus', name='antarctica')
         site.default_host_name = 'haha.com'
         site.enabled_host_names = [site.default_host_name]
