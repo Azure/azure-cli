@@ -28,7 +28,7 @@ class ResourceGroupScenarioTest(ScenarioTest):
             self.check('name', '{rg}'),
             self.check('tags', {'a': 'b', 'c': ''})
         ])
-        self.cmd('group exists -n {rgF}',
+        self.cmd('group exists -n {rg}',
                  checks=self.check('@', True))
         self.cmd('group show -n {rg}', checks=[
             self.check('name', '{rg}'),
