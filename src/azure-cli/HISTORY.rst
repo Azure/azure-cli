@@ -3,6 +3,19 @@
 Release History
 ===============
 
+**IoT Central**
+
+* Support app creation/update with the new sku name ST0, ST1, ST2.
+
+2.0.80
+++++++
+
+**Compute**
+
+* disk update: Add --disk-encryption-set and --encryption-type
+* snapshot create/update: Add --disk-encryption-set and --encryption-type
+
+**Storage**
 **AppConfig**
 
 * Remove preview tag for most commands.
@@ -64,6 +77,10 @@ Release History
 **RBAC**
 
 * Fix #11712: `az ad app/sp show` does not return exit code 3 when the application or service principal does not exist
+
+**Redis**
+
+* Fixing `az redis update` operation to work for caches with RDB/AOF enabled
 
 **Storage**
 
