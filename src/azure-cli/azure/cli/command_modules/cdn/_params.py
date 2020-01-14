@@ -36,6 +36,7 @@ class OriginType(argparse._AppendAction):
         return deep_created_origin
 
 
+# pylint:disable=too-many-statements
 def load_arguments(self, _):
 
     name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME')
@@ -81,6 +82,60 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(caching_behavior))
         c.argument('content_types_to_compress', nargs='+')
         c.argument('profile_name', help=profile_name_help, id_part='name')
+
+    with self.argument_context('cdn endpoint rule') as c:
+        c.argument('rule_name', help='Name of the rule.')
+        c.argument('order', help='The order of the rule. The order number must start from 0 and consecutive.\
+                    Rule with higher order will be applied later.')
+        c.argument('match_variable', arg_group="Match Condition", help='Name of the match condition.')
+        c.argument('operator', arg_group="Match Condition", help='Operator of the match condition.')
+        c.argument('selector', arg_group="Match Condition", help='Selector of the match condition.')
+        c.argument('match_values', arg_group="Match Condition",
+                   help='Match values of the match condition (comma separated).')
+        c.argument('transform', arg_group="Match Condition", arg_type=get_enum_type(['Lowercase', 'Uppercase']),
+                   nargs='+', help='Transform to apply before matching.')
+        c.argument('negate_condition', arg_group="Match Condition", arg_type=get_three_state_flag(),
+                   options_list='--negate-condition', help='If true, negates the condition')
+        c.argument('action_name', arg_group="Action", help='Name of the action.')
+        c.argument('cache_behavior', arg_group="Action",
+                   arg_type=get_enum_type(['BypassCache', 'Override', 'SetIfMissing']),
+                   help='Caching behavior for the requests.')
+        c.argument('cache_duration', arg_group="Action",
+                   help='The duration for which the content needs to be cached. \
+                   Allowed format is [d.]hh:mm:ss.')
+        c.argument('header_action', arg_group="Action",
+                   arg_type=get_enum_type(['Append', 'Overwrite', 'Delete']),
+                   help='Header action for the requests.')
+        c.argument('header_name', arg_group="Action", help='Name of the header to modify.')
+        c.argument('header_value', arg_group="Action", help='Value of the header.')
+        c.argument('redirect_type', arg_group="Action",
+                   arg_type=get_enum_type(['Moved', 'Found', 'TemporaryRedirect', 'PermanentRedirect']),
+                   help='The redirect type the rule will use when redirecting traffic.')
+        c.argument('redirect_protocol', arg_group="Action",
+                   arg_type=get_enum_type(['MatchRequest', 'Http', 'Https']),
+                   help='Protocol to use for the redirect.')
+        c.argument('custom_hostname', arg_group="Action", help='Host to redirect. \
+                   Leave empty to use the incoming host as the destination host.')
+        c.argument('custom_path', arg_group="Action",
+                   help='The full path to redirect. Path cannot be empty and must start with /. \
+                   Leave empty to use the incoming path as destination path.')
+        c.argument('custom_querystring', arg_group="Action",
+                   help='The set of query strings to be placed in the redirect URL. \
+                   leave empty to preserve the incoming query string.')
+        c.argument('custom_fragment', arg_group="Action", help='Fragment to add to the redirect URL.')
+        c.argument('query_string_behavior', arg_group="Action",
+                   arg_type=get_enum_type(['Include', 'IncludeAll', 'Exclude', 'ExcludeAll']),
+                   help='Query string behavior for the requests.')
+        c.argument('query_parameters', arg_group="Action",
+                   help='Query parameters to include or exclude (comma separated).')
+        c.argument('source_pattern', arg_group="Action",
+                   help='A request URI pattern that identifies the type of requests that may be rewritten.')
+        c.argument('destination', help='The destination path to be used in the rewrite.')
+        c.argument('preserve_unmatched_path', arg_group="Action",
+                   arg_type=get_three_state_flag(), options_list='--preserve-unmatched-path',
+                   help='If True, the remaining path after the source \
+                   pattern will be appended to the new destination path.')
+        c.argument('index', help='The index of the condition/action')
 
     with self.argument_context('cdn endpoint create') as c:
         c.argument('name', name_arg_type, id_part='name', help='Name of the CDN endpoint.')

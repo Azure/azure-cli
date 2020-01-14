@@ -7,6 +7,12 @@ Release History
 
 * Support app creation/update with the new sku name ST0, ST1, ST2.
 
+**Cdn**
+
+* Add support for rulesEngine feature
+* Add new commands group 'cdn endpoint rule' to manage rules
+* Update azure-mgmt-cdn version to 4.0.0 to use api version 2019-04-15
+
 2.0.80
 ++++++
 
