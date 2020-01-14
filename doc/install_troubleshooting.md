@@ -83,19 +83,19 @@ $ curl https://azurecliprod.blob.core.windows.net/install | bash
 Errors on install with cffi or cryptography
 -------------------------------------------
 
-If you get errors on install on **OS X**, upgrade pip by typing:
+If you get errors on installation on **OS X**, upgrade pip by typing:
 
 ```shell
     pip install --upgrade --force-reinstall pip
 ```
 
-If you get errors on install on **Fedora** such as `No module named '_cffi_backend'`,
+If you get errors on installation on **Fedora** such as `No module named '_cffi_backend'`,
 install `python3-cffi` by typing:
 ```shell
     sudo yum install -y python3-cffi
 ```
 
-If you get errors on install on **Debian or Ubuntu** such as the examples below,
+If you get errors on installation on **Debian or Ubuntu** such as the examples below,
 install libssl-dev and libffi-dev by typing:
 
 ```shell
