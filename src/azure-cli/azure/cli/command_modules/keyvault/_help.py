@@ -5,7 +5,6 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.help_files import helps  # pylint: disable=unused-import
-
 # pylint: disable=line-too-long, too-many-lines
 
 helps['keyvault'] = """
@@ -209,19 +208,19 @@ type: command
 examples:
   - name: Add a sas-definition for an account sas-token
     text: |4
-        $sastoken = az storage account generate-sas --expiry 2020-01-01 --permissions rw --resource-types sco --services bfqt --https-only --account-name storageacct
+        $sastoken = az storage account generate-sas --expiry 2020-01-01 --permissions rw --resource-types sco --services bfqt --https-only --account-name storageacct --account-key 00000000
 
         az keyvault storage sas-definition create --vault-name vault --account-name storageacct -n rwallserviceaccess --validity-period P2D --sas-type account --template-uri $sastoken
   - name: Add a sas-definition for a blob sas-token
     text: >4
-        $sastoken = az storage blob generate-sas --account-name storageacct -c container1 -n blob1 --https-only --permissions rw
+        $sastoken = az storage blob generate-sas --account-name storageacct --account-key 00000000 -c container1 -n blob1 --https-only --permissions rw
 
         $url = az storage blob url --account-name storageacct -c container1 -n blob1
 
         az keyvault storage sas-definition create --vault-name vault --account-name storageacct -n rwblobaccess --validity-period P2D --sas-type service --template-uri $url?$sastoken
   - name: Add a sas-definition for a container sas-token
     text: >4
-        $sastoken = az storage container generate-sas --account-name storageacct -n container1 --https-only --permissions rw
+        $sastoken = az storage container generate-sas --account-name storageacct --account-key 00000000 -n container1 --https-only --permissions rw
 
         $url = "https://{storage-account-name}.blob.core.windows.net/{container-name}"  # The prefix of your blob url
 
