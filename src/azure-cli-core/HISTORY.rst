@@ -5,6 +5,10 @@ Release History
 
 * `get_raw_token`: Add `tenant` parameter to acquire token for the tenant directly, needless to specify a subscription
 
+2.0.80
+++++++
+* No changes
+
 2.0.79
 ++++++
 * Fix #11586: `az login` is not recorded in server telemetry

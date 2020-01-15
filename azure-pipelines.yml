@@ -19,32 +19,33 @@ jobs:
         echo "Reject pull request directly to master branch"
         exit 1
 
-- job: CredScan
-  displayName: "Credential Scan"
-
-  pool:
-    vmImage: "windows-2019"
-  steps:
-  - task: CredScan@2
-    inputs:
-      toolMajorVersion: 'V2'
-
-  - task: PostAnalysis@1
-    inputs:
-      AllTools: false
-      APIScan: false
-      BinSkim: false
-      CodesignValidation: false
-      CredScan: true
-      FortifySCA: false
-      FxCop: false
-      ModernCop: false
-      PoliCheck: false
-      RoslynAnalyzers: false
-      SDLNativeRules: false
-      Semmle: false
-      TSLint: false
-      ToolLogsNotFoundAction: 'Standard'
+#- job: CredScan
+#  displayName: "Credential Scan"
+#
+#  pool:
+#    vmImage: "windows-2019"
+#  steps:
+#  - task: CredScan@2
+#    inputs:
+#      toolMajorVersion: 'V2'
+#      suppressionsFile: ./scripts/ci/credscan/CredScanSuppressions.json
+#
+#  - task: PostAnalysis@1
+#    inputs:
+#      AllTools: false
+#      APIScan: false
+#      BinSkim: false
+#      CodesignValidation: false
+#      CredScan: true
+#      FortifySCA: false
+#      FxCop: false
+#      ModernCop: false
+#      PoliCheck: false
+#      RoslynAnalyzers: false
+#      SDLNativeRules: false
+#      Semmle: false
+#      TSLint: false
+#      ToolLogsNotFoundAction: 'Standard'
 
 - job: ExtractMetadata
   displayName: Extract Metadata
@@ -382,10 +383,13 @@ jobs:
     matrix:
       Python27:
         python.version: '2.7'
+        tox_env: 'py27'
       Python36:
         python.version: '3.6'
+        tox_env: 'py36'
       Python38:
         python.version: '3.8'
+        tox_env: 'py38'
   steps:
     - task: UsePythonVersion@0
       displayName: 'Use Python $(python.version)'
@@ -395,6 +399,8 @@ jobs:
       displayName: 'Install pip and tox'
     - bash: ./scripts/ci/unittest.sh
       displayName: 'Run Unit Test'
+      env:
+        TOXENV: $(tox_env)
 
 - job: IntegrationTestAgainstProfiles
   displayName: Integration Test against Profiles
