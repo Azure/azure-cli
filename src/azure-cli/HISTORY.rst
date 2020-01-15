@@ -5,7 +5,7 @@ Release History
 
 **ARM**
 
-* Fix issue #10246: `az resource tag` crashed when the parameter `--ids` passed in is resource group ID
+* Fix issue #10246: `az resource tag` crashes when the parameter `--ids` passed in is resource group ID
 
 **IoT Central**
 
