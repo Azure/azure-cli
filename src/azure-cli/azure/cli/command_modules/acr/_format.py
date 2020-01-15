@@ -49,6 +49,8 @@ def replication_output_format(result):
 def task_output_format(result):
     return _output_format(result, _task_format_group)
 
+def taskrun_output_format(result):
+    return _output_format(result, _taskrun_format_group)
 
 def build_output_format(result):
     return _output_format(result, _build_format_group)
@@ -183,6 +185,12 @@ def _task_format_group(item):
         ('TRIGGERS', _get_triggers(item))
     ])
 
+def _taskrun_format_group(item):
+    return OrderedDict([
+        ('NAME', _get_value(item, 'name')),
+        ('PLATFORM', _get_value(item, 'platform', 'os')),
+        ('STATUS', _get_value(item, 'status'))
+    ])
 
 def _build_format_group(item):
     return OrderedDict([
