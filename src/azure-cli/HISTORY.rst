@@ -7,6 +7,10 @@ Release History
 
 * Support app creation/update with the new sku name ST0, ST1, ST2.
 
+**AKS**
+
+* Each cluster gets a separate service principal to improve isolation
+
 **Misc**
 
 * Fix #6371: Support filename and environment variable completion in Bash
