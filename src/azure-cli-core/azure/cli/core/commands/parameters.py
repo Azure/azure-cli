@@ -266,7 +266,7 @@ quote_text = 'Use {} to clear existing tags.'.format(quotes)
 
 tags_type = CLIArgumentType(
     validator=validate_tags,
-    help="space-separated tags in 'key[=value]' format. {}".format(quote_text),
+    help="space-separated tags: key[=value] [key[=value] ...]. {}".format(quote_text),
     nargs='*'
 )
 
