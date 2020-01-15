@@ -488,6 +488,17 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    'to ensure destination storage account support setting access tier. In the cases that setting '
                    'access tier is not supported, please use `--preserve-s2s-access-tier false` to bypass copying '
                    'access tier. (Default true)')
+        c.argument('exclude_pattern', arg_group='Additional Flags',
+                   help='Exclude these files when copying. This option supports wildcard characters (*)')
+        c.argument('include_pattern', arg_group='Additional Flags',
+                   help='Include only these files when copying. This option supports wildcard characters (*). '
+                   'Separate files by using a ";"')
+        c.argument('exclude_path', arg_group='Additional Flags',
+                   help='Exclude these paths when copying. This option does not support wildcard characters (*). '
+                   'Checks relative path prefix. For example: myFolder;myFolder/subDirName/file.pdf.')
+        c.argument('include_path', arg_group='Additional Flags',
+                   help='Include only these paths when copying. This option does not support wildcard characters (*). '
+                   'Checks relative path prefix. For example: myFolder;myFolder/subDirName/file.pdf')
 
     with self.argument_context('storage blob copy') as c:
         for item in ['destination', 'source']:
@@ -895,8 +906,17 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('path', options_list=('--path', '-p'),
                 help='The path to the file within the file share.',
                 completer=file_path_completer)
-        c.argument('exclude', help='Exclude files whose name matches the pattern list.')
-        c.argument('include', help='Only include files whose name matches the pattern list.')
+        c.argument('exclude_pattern', arg_group='Additional Flags',
+                   help='Exclude these files when copying. This option supports wildcard characters (*)')
+        c.argument('include_pattern', arg_group='Additional Flags',
+                   help='Include only these files when copying. This option supports wildcard characters (*). '
+                        'Separate files by using a ";"')
+        c.argument('exclude_path', arg_group='Additional Flags',
+                   help='Exclude these paths when copying. This option does not support wildcard characters (*). '
+                        'Checks relative path prefix. For example: myFolder;myFolder/subDirName/file.pdf.')
+        c.argument('include_path', arg_group='Additional Flags',
+                   help='Include only these paths when copying. This option does not support wildcard characters (*). '
+                        'Checks relative path prefix. For example: myFolder;myFolder/subDirName/file.pdf')
         c.argument('recursive', options_list=['--recursive', '-r'], action='store_true',
                    help='Look into sub-directories recursively when deleting between directories.')
         c.ignore('destination')

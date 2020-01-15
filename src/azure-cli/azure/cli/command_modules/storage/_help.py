@@ -743,8 +743,10 @@ examples:
     text: az storage copy -s https://[account].blob.core.windows.net/[container]/[path/to/blob] -d /path/to/file.txt
   - name: Download an entire directory from Azure Blob, and you can also specify your storage account and container information as above.
     text: az storage copy -s https://[account].blob.core.windows.net/[container]/[path/to/directory] -d /path/to/dir --recursive
-  - name: Download a set of files from Azure Blob using wildcards, and you can also specify your storage account and container information as above.
-    text: az storage copy -s https://[account].blob.core.windows.net/[container]/foo* -d /path/to/dir --recursive
+  - name: Download a subset of containers within a storage account by using a wildcard symbol (*) in the container name, and you can also specify your storage account and container information as above.
+    text: az storage copy -s https://[account].blob.core.windows.net/[container*name] -d /path/to/dir --recursive
+  - name: Download a set of files from Azure Blob using --include-pattern, and you can also specify your storage account and container information as above.
+    text: az storage copy -s https://[account].blob.core.windows.net/[container] --include-pattern foo* -d /path/to/dir --recursive
   - name: Copy a single blob to another blob, and you can also specify the storage account and container information of source and destination as above.
     text: az storage copy -s https://[srcaccount].blob.core.windows.net/[container]/[path/to/blob] -d https://[destaccount].blob.core.windows.net/[container]/[path/to/blob]
   - name: Copy an entire account data from blob account to another blob account, and you can also specify the storage account and container information of source and destination as above.

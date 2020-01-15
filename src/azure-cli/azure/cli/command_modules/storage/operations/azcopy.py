@@ -27,7 +27,8 @@ def storage_copy(cmd, source=None,
                  destination_blob=None,
                  destination_share=None,
                  destination_file_path=None,
-                 destination_local_path=None):
+                 destination_local_path=None,
+                 exclude_pattern=None, include_pattern=None, exclude_path=None, include_path=None):
     def get_url_with_sas(source, account_name, container, blob, share, file_path, local_path):
         import re
         import os
@@ -94,11 +95,19 @@ def storage_copy(cmd, source=None,
         flags.append('--blob-type=' + blob_type)
     if preserve_s2s_access_tier is not None:
         flags.append('--s2s-preserve-access-tier=' + str(preserve_s2s_access_tier))
-
+    if include_pattern is not None:
+        flags.append('--include-pattern=' + include_pattern)
+    if exclude_pattern is not None:
+        flags.append('--exclude-pattern=' + exclude_pattern)
+    if include_path is not None:
+        flags.append('--include-path=' + include_path)
+    if exclude_pattern is not None:
+        flags.append('--exclude-path=' + exclude_path)
     azcopy.copy(full_source, full_destination, flags=flags)
 
 
-def storage_remove(cmd, client, service, target, exclude=None, include=None, recursive=None):
+def storage_remove(cmd, client, service, target, recursive=None, exclude_pattern=None, include_pattern=None,
+                   exclude_path=None, include_path=None):
     if service == 'file':
         azcopy = _azcopy_file_client(cmd, client)
     else:
@@ -106,10 +115,14 @@ def storage_remove(cmd, client, service, target, exclude=None, include=None, rec
     flags = []
     if recursive is not None:
         flags.append('--recursive')
-    if include is not None:
-        flags.append('--include=' + include)
-    if exclude is not None:
-        flags.append('--exclude=' + exclude)
+    if include_pattern is not None:
+        flags.append('--include-pattern=' + include_pattern)
+    if exclude_pattern is not None:
+        flags.append('--exclude-pattern=' + exclude_pattern)
+    if include_path is not None:
+        flags.append('--include-path=' + include_path)
+    if exclude_path is not None:
+        flags.append('--exclude-path=' + exclude_path)
     azcopy.remove(_add_url_sas(target, azcopy.creds.sas_token), flags=flags)
 
 

@@ -118,17 +118,17 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 41))
 
-        self.cmd('storage remove -c {} -n butter --account-name {} --recursive --exclude "file_*"'.format(
+        self.cmd('storage remove -c {} -n butter --account-name {} --recursive --exclude-pattern "file_*"'.format(
             container, storage_account))
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 41))
 
-        self.cmd('storage remove -c {} -n butter --account-name {} --exclude "file_1"'.format(
+        self.cmd('storage remove -c {} -n butter --account-name {} --exclude-pattern "file_1"'.format(
             container, storage_account))
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 32))
 
-        self.cmd('storage remove -c {} -n butter --account-name {} --recursive --exclude "file_1"'.format(
+        self.cmd('storage remove -c {} -n butter --account-name {} --recursive --exclude-pattern "file_1"'.format(
             container, storage_account))
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 23))
@@ -251,9 +251,9 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.assertEqual(11, sum(len(f) for r, d, f in os.walk(local_folder)))
 
         # Download a set of files
-        self.cmd('storage copy -s "{}" -d "{}" --recursive'.format(
-            '{}/file*'.format(first_container_url), local_folder))
-        self.assertEqual(1, sum(len(d) for r, d, f in os.walk(local_folder)))
+        self.cmd('storage copy -s "{}" --include-path "apple" --include-pattern file* -d "{}" --recursive'.format(
+            first_container_url, local_folder))
+        self.assertEqual(3, sum(len(d) for r, d, f in os.walk(local_folder)))
         self.assertEqual(21, sum(len(f) for r, d, f in os.walk(local_folder)))
 
         # Copy a single blob to another single blob
@@ -335,9 +335,9 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.assertEqual(11, sum(len(f) for r, d, f in os.walk(local_folder)))
 
         # Download a set of files
-        self.cmd('storage copy --source-account-name {} --source-container {} --source-blob {} --destination-local-path "{}" --recursive'
-                 .format(first_account, first_container, 'file*', local_folder))
-        self.assertEqual(1, sum(len(d) for r, d, f in os.walk(local_folder)))
+        self.cmd('storage copy --source-account-name {} --source-container {} --include-path {} --include-pattern {} --destination-local-path "{}" --recursive'
+                 .format(first_account, first_container, 'apple', 'file*', local_folder))
+        self.assertEqual(3, sum(len(d) for r, d, f in os.walk(local_folder)))
         self.assertEqual(21, sum(len(f) for r, d, f in os.walk(local_folder)))
 
         # Copy a single blob to another single blob
@@ -405,9 +405,9 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.assertEqual(11, sum(len(f) for r, d, f in os.walk(local_folder)))
 
         # Download a set of files
-        self.cmd('storage copy -s "{}" -d "{}" --recursive'.format(
-            '{}/file*'.format(share_url), local_folder))
-        self.assertEqual(1, sum(len(d) for r, d, f in os.walk(local_folder)))
+        self.cmd('storage copy -s "{}" --include-path "apple" --include-pattern file* -d "{}" --recursive'.format(
+            share_url, local_folder))
+        self.assertEqual(3, sum(len(d) for r, d, f in os.walk(local_folder)))
         self.assertEqual(21, sum(len(f) for r, d, f in os.walk(local_folder)))
 
     @ResourceGroupPreparer()
@@ -449,7 +449,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.assertEqual(11, sum(len(f) for r, d, f in os.walk(local_folder)))
 
         # Download a set of files
-        self.cmd('storage copy --source-account-name {} --source-share {} --source-file-path {} --destination-local-path "{}" --recursive'
-                 .format(storage_account, share, 'file*', local_folder))
-        self.assertEqual(1, sum(len(d) for r, d, f in os.walk(local_folder)))
+        self.cmd('storage copy --source-account-name {} --source-share {} --include-path "apple" --include-pattern file* --destination-local-path "{}" --recursive'
+                 .format(storage_account, share, local_folder))
+        self.assertEqual(3, sum(len(d) for r, d, f in os.walk(local_folder)))
         self.assertEqual(21, sum(len(f) for r, d, f in os.walk(local_folder)))
