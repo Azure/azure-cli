@@ -30,32 +30,48 @@ class AzCopy(object):
     def __init__(self, creds=None):
         self.system = platform.system()
         install_location = _get_default_install_location()
-        if not os.path.isfile(install_location):
-            install_dir = os.path.dirname(install_location)
-            if not os.path.exists(install_dir):
-                os.makedirs(install_dir)
-            base_url = 'https://azcopyvnext.azureedge.net/release20191212/azcopy_{}_{}_{}.{}'
-
-            if self.system == 'Windows':
-                if platform.machine().endswith('64'):
-                    file_url = base_url.format('windows', 'amd64', AZCOPY_VERSION, 'zip')
-                else:
-                    file_url = base_url.format('windows', '386', AZCOPY_VERSION, 'zip')
-            elif self.system == 'Linux':
-                file_url = base_url.format('linux', 'amd64', AZCOPY_VERSION,'tar.gz')
-            elif self.system == 'Darwin':
-                file_url = base_url.format('darwin', 'amd64', AZCOPY_VERSION, 'zip')
-            else:
-                raise CLIError('Azcopy ({}) does not exist.'.format(self.system))
-            try:
-                _urlretrieve(file_url, install_location)
-                os.chmod(install_location,
-                         os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
-            except IOError as err:
-                raise CLIError('Connection error while attempting to download azcopy ({})'.format(err))
-
         self.executable = install_location
         self.creds = creds
+        version = self.check_version()
+        if not os.path.isfile(install_location) or version != AZCOPY_VERSION:
+            self.install_azcopy(install_location)
+        if os.path.isfile(install_location) and version == AZCOPY_VERSION:
+            print("ok")
+
+    def install_azcopy(self, install_location):
+        install_dir = os.path.dirname(install_location)
+        if not os.path.exists(install_dir):
+            os.makedirs(install_dir)
+        base_url = 'https://azcopyvnext.azureedge.net/release20191212/azcopy_{}_{}_{}.{}'
+
+        if self.system == 'Windows':
+            if platform.machine().endswith('64'):
+                file_url = base_url.format('windows', 'amd64', AZCOPY_VERSION, 'zip')
+            else:
+                file_url = base_url.format('windows', '386', AZCOPY_VERSION, 'zip')
+        elif self.system == 'Linux':
+            file_url = base_url.format('linux', 'amd64', AZCOPY_VERSION,'tar.gz')
+        elif self.system == 'Darwin':
+            file_url = base_url.format('darwin', 'amd64', AZCOPY_VERSION, 'zip')
+        else:
+            raise CLIError('Azcopy ({}) does not exist.'.format(self.system))
+        try:
+            _urlretrieve(file_url, install_location)
+            os.chmod(install_location,
+                     os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+        except IOError as err:
+            raise CLIError('Connection error while attempting to download azcopy ({})'.format(err))
+
+    def check_version(self):
+        try:
+            import re
+            args = [self.executable] + ["--version"]
+            out_bytes = subprocess.check_output(args)
+            out_text = out_bytes.decode('utf-8')
+            version = re.findall(r"azcopy version (.+?)\n", out_text)[0]
+            return version
+        except subprocess.CalledProcessError:
+            return ""
 
     def run_command(self, args):
         args = [self.executable] + args
