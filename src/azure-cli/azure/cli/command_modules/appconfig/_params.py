@@ -54,9 +54,9 @@ def load_arguments(self, _):
         help='Maximum number of items to return. Must be a positive integer. Default to 100.'
     )
     identities_arg_type = CLIArgumentType(
-        nargs='+',
+        nargs='*',
         validator=validate_identity,
-        help="Accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity, or a resource id to refer user assigned identity."
+        help="Accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity or a resource id to refer user assigned identity. Default: '[system]'"
     )
 
     with self.argument_context('appconfig') as c:
@@ -79,7 +79,7 @@ def load_arguments(self, _):
         c.argument('tags', arg_type=tags_type)
 
     with self.argument_context('appconfig identity assign') as c:
-        c.argument('identities', arg_type=identities_arg_type, help="Accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity or a resource id to refer user assigned identity. Default: '[system]'")
+        c.argument('identities', arg_type=identities_arg_type)
 
     with self.argument_context('appconfig identity remove') as c:
         c.argument('identities', arg_type=identities_arg_type, help="Accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity, '[all]' for all identities or a resource id to refer user assigned identity. Default: '[system]'")

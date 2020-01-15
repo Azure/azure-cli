@@ -19,7 +19,9 @@ examples:
   - name: Create an App Configuration with name, location, sku and resource group.
     text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard
   - name: Create an App Configuration with name, location, sku and resource group with system assigned identity.
-    text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --assign-identity [system]
+    text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --assign-identity
+  - name: Create an App Configuration with name, location, sku and resource group with user assigned identity.
+    text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --assign-identity /subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCEGROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentity
 """
 
 helps['appconfig identity'] = """

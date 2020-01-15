@@ -24,6 +24,9 @@ SYSTEM_ASSIGNED_IDENTITY = '[system]'
 
 
 def create_configstore(client, resource_group_name, name, location, sku, assign_identity=None):
+    if assign_identity is not None and not assign_identity:
+        assign_identity = [SYSTEM_ASSIGNED_IDENTITY]
+
     configstore_params = ConfigurationStore(location=location.lower(),
                                             identity=__get_resource_identity(assign_identity) if assign_identity else None,
                                             sku=Sku(name=sku))
@@ -73,7 +76,7 @@ def assign_managed_identity(cmd, client, name, resource_group_name=None, identit
     if resource_group_name is None:
         resource_group_name, _ = resolve_resource_group(cmd, name)
 
-    if identities is None:
+    if not identities:
         identities = [SYSTEM_ASSIGNED_IDENTITY]
 
     current_identities = show_managed_identity(cmd, client, name, resource_group_name)
