@@ -5,9 +5,10 @@
 
 import json
 import os
-from azure.cli.core.util import get_file_json, read_file_content, shell_safe_json_parse
 from knack.log import get_logger
 from knack.util import CLIError
+
+from azure.cli.core.util import get_file_json, shell_safe_json_parse
 
 from azure.cli.command_modules.deploymentmanager._client_factory import (
     cf_artifact_sources,
