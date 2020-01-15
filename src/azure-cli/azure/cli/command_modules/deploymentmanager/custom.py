@@ -425,8 +425,7 @@ def get_or_read_json(json_or_file):
     if is_json(json_or_file):
         json_obj = shell_safe_json_parse(json_or_file)
     elif os.path.exists(json_or_file):
-        with open(json_or_file) as f:
-            json_obj = json.load(f)
+        json_obj = get_file_json(json_or_file)
     if json_obj is None:
         raise ValueError(
             """

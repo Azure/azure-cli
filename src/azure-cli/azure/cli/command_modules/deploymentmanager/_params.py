@@ -119,7 +119,7 @@ def load_arguments(self, _):
 
     duration_type = CLIArgumentType(options_list='--duration', help='The duration of the wait step in ISO 8601 format.')
     step_name_type = CLIArgumentType(options_list=['--step-name', '--name', '-n'], help='The name of the step', completer=get_resource_name_completion_list('Microsoft.DeploymentManager/steps'))
-    step_type = CLIArgumentType(options_list='--step', help='The step object, specify either the path to a json file or provide a json string that forms the step resource. The json is expected to be of the same format as the output of the relevant "az deploymentmanager step show" command')
+    step_type = CLIArgumentType(options_list='--step', help='The step object, specify either the path to a json file or provide a json string that forms the step resource. The json is expected to be of the same format as the output of the relevant `az deploymentmanager step show` command')
 
     with self.argument_context('deploymentmanager step') as c:
         c.argument('resource_group_name', resource_group_name_type)
