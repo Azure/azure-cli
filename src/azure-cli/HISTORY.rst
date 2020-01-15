@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**ARM**
+
+* Fix issue #10279: The exit code of `az group deployment validate` is 0 when the verification fails
+
 **IoT Central**
 
 * Support app creation/update with the new sku name ST0, ST1, ST2.
