@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**ARM**
+
+* Fix issue #9916: Improve the error message of the conflict between tag and other filter conditions for `az resource list` command
+
 **IoT Central**
 
 * Support app creation/update with the new sku name ST0, ST1, ST2.

@@ -507,6 +507,20 @@ def _deploy_arm_template_subscription_scope(cli_ctx,
 def _list_resources_odata_filter_builder(resource_group_name=None, resource_provider_namespace=None,
                                          resource_type=None, name=None, tag=None, location=None):
     """Build up OData filter string from parameters """
+    if tag is not None:
+        if resource_group_name:
+            raise IncorrectUsageError('you cannot use the tag filter with resource group filter'
+                                      '(If the default value for resource group is set, please clear it with \'az configure\' command first)')
+        if resource_provider_namespace:
+            raise IncorrectUsageError('you cannot use the tag filter with namespace filter')
+        if resource_type:
+            raise IncorrectUsageError('you cannot use the tag filter with resource type filter')
+        if name:
+            raise IncorrectUsageError('you cannot use the tag filter with name filter')
+        if location:
+            raise IncorrectUsageError('you cannot use the tag filter with location filter'
+                                      '(If the default value for location is set, please clear it with \'az configure\' command first)')
+
     filters = []
 
     if resource_group_name:
@@ -534,9 +548,6 @@ def _list_resources_odata_filter_builder(resource_group_name=None, resource_prov
             raise CLIError('--namespace also requires --resource-type')
 
     if tag:
-        if name or location:
-            raise IncorrectUsageError('you cannot use the tag filter with other filters')
-
         tag_name = list(tag.keys())[0] if isinstance(tag, dict) else tag
         tag_value = tag[tag_name] if isinstance(tag, dict) else ''
         if tag_name:
