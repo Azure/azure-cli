@@ -4009,6 +4009,18 @@ class VMSSCreateDiskOptionTest(ScenarioTest):
                      self.check('vmss.virtualMachineProfile.storageProfile.dataDisks[1].diskMBpsReadWrite', '88')
                  ])
 
+        self.cmd('vmss update -g {rg} -n {vmss} --set '
+                 'virtualMachineProfile.storageProfile.dataDisks[0].diskIOPSReadWrite=444 '
+                 'virtualMachineProfile.storageProfile.dataDisks[1].diskIOPSReadWrite=555 '
+                 'virtualMachineProfile.storageProfile.dataDisks[0].diskMBpsReadWrite=66 '
+                 'virtualMachineProfile.storageProfile.dataDisks[1].diskMBpsReadWrite=77 ',
+                 checks=[
+                     self.check('virtualMachineProfile.storageProfile.dataDisks[0].diskIopsReadWrite', '444'),
+                     self.check('virtualMachineProfile.storageProfile.dataDisks[1].diskIopsReadWrite', '555'),
+                     self.check('virtualMachineProfile.storageProfile.dataDisks[0].diskMbpsReadWrite', '66'),
+                     self.check('virtualMachineProfile.storageProfile.dataDisks[1].diskMbpsReadWrite', '77'),
+                 ])
+
 
 if __name__ == '__main__':
     unittest.main()
