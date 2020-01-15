@@ -71,7 +71,7 @@ def import_config(cmd,
 
     elif source == 'appconfig':
         if label is not None and preserve_labels:
-            raise CLIError("Import failed! Please provide only one of these arguments: 'label' or 'preserve-labels'. See 'az appconfig kv import -h' for examples.")
+            raise CLIError("Import failed! Please provide only one of these arguments: '--label' or '--preserve-labels'. See 'az appconfig kv import -h' for examples.")
         if preserve_labels:
             # We need label to be the same as src_label for preview later.
             # This will have no effect on label while writing to config store
@@ -163,7 +163,7 @@ def export_config(cmd,
 
     if destination == 'appconfig':
         if dest_label is not None and preserve_labels:
-            raise CLIError("Export failed! Please provide only one of these arguments: 'dest-label' or 'preserve-labels'. See 'az appconfig kv export -h' for examples.")
+            raise CLIError("Export failed! Please provide only one of these arguments: '--dest-label' or '--preserve-labels'. See 'az appconfig kv export -h' for examples.")
         if preserve_labels:
             # We need dest_label to be the same as label for preview later.
             # This will have no effect on label while writing to config store
