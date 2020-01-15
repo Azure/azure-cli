@@ -23,7 +23,7 @@ logger = get_logger(__name__)
 
 STORAGE_RESOURCE_ENDPOINT = "https://storage.azure.com"
 SERVICES = {'blob', 'file'}
-AZCOPY_VERSION = '10.1.0'
+AZCOPY_VERSION = '10.3.3'
 
 
 class AzCopy(object):
@@ -34,13 +34,17 @@ class AzCopy(object):
             install_dir = os.path.dirname(install_location)
             if not os.path.exists(install_dir):
                 os.makedirs(install_dir)
-            base_url = 'https://azcopyvnext.azureedge.net/release20190423/azcopy_{}_amd64_10.1.0.{}'
+            base_url = 'https://azcopyvnext.azureedge.net/release20191212/azcopy_{}_{}_{}.{}'
+
             if self.system == 'Windows':
-                file_url = base_url.format('windows', 'zip')
+                if platform.machine().endswith('64'):
+                    file_url = base_url.format('windows', 'amd64', AZCOPY_VERSION, 'zip')
+                else:
+                    file_url = base_url.format('windows', '386', AZCOPY_VERSION, 'zip')
             elif self.system == 'Linux':
-                file_url = base_url.format('linux', 'tar.gz')
+                file_url = base_url.format('linux', 'amd64', AZCOPY_VERSION,'tar.gz')
             elif self.system == 'Darwin':
-                file_url = base_url.format('darwin', 'zip')
+                file_url = base_url.format('darwin', 'amd64', AZCOPY_VERSION, 'zip')
             else:
                 raise CLIError('Azcopy ({}) does not exist.'.format(self.system))
             try:
