@@ -2011,7 +2011,7 @@ def list_resource_links(cmd, scope=None, filter_string=None):
 # endregion
 
 
-def rest_call(cmd, method, uri, headers=None, uri_parameters=None,
+def rest_call(cmd, uri, method=None, headers=None, uri_parameters=None,
               body=None, skip_authorization_header=False, resource=None, output_file=None):
     from azure.cli.core.util import send_raw_request
     r = send_raw_request(cmd.cli_ctx, method, uri, headers, uri_parameters, body,
