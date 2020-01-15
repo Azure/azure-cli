@@ -45,6 +45,28 @@ class ImageTemplateTest(ScenarioTest):
                 raise ex
             pass
 
+    @ResourceGroupPreparer(name_prefix='cli_test_image_template_no_defer')
+    def test_image_template_no_defer(self, resource_group, resource_group_location):
+        self._assign_ib_permissions(resource_group)
+        subscription_id = self.get_subscription_id()
+        self.kwargs.update({
+            'tmp': 'tmp1',
+            'img_src': LINUX_IMAGE_SOURCE,
+            'img_1': 'img_1',
+            'loc': resource_group_location,
+        })
+
+        self.cmd('image template create -g {rg} -n {tmp} --image-source {img_src} --customize @cus.json --managed-image-destinations {img_1}={loc}', checks=[
+            self.check('source.offer', 'UbuntuServer'),
+            self.check('source.publisher', 'Canonical'),
+            self.check('source.sku', '18.04-LTS'),
+            self.check('source.version', '18.04.201808140'),
+            self.check('source.type', 'PlatformImage'),
+            self.check('length(customize)', 5),
+        ])
+
+        self.cmd('image template run -g {rg} -n {tmp}')
+
     @ResourceGroupPreparer(name_prefix='img_tmpl_basic')
     def test_image_template_basic(self, resource_group):
         self._assign_ib_permissions(resource_group)

@@ -7,6 +7,8 @@
 # i.e something like image_builder/_client_factory image_builder/commands.py image_builder/_params.py
 
 import re
+import json
+from json import JSONDecodeError
 from enum import Enum
 
 
@@ -374,7 +376,7 @@ def create_image_template(  # pylint: disable=too-many-locals
         cmd, client, resource_group_name, image_template_name, location=None,
         source_dict=None, scripts_list=None, destinations_lists=None, build_timeout=None, tags=None,
         source=None, scripts=None, checksum=None, managed_image_destinations=None,  # pylint: disable=unused-argument
-        shared_image_destinations=None, no_wait=False):  # pylint: disable=unused-argument, too-many-locals
+        shared_image_destinations=None, no_wait=False, customize=None, distribute=None):  # pylint: disable=unused-argument, too-many-locals
     from azure.mgmt.imagebuilder.models import (ImageTemplate, ImageTemplateSharedImageVersionSource,
                                                 ImageTemplatePlatformImageSource, ImageTemplateIsoSource, ImageTemplateManagedImageSource,  # pylint: disable=line-too-long
                                                 ImageTemplateShellCustomizer, ImageTemplatePowerShellCustomizer,
@@ -394,29 +396,46 @@ def create_image_template(  # pylint: disable=too-many-locals
 
     # create image template customizer settings
     # Script structure can be found in _parse_script's function definition
-    for script in scripts_list:
-        script.pop("is_url")
-        script["script_uri"] = script.pop("script")
+    if customize is not None:
+        if scripts_list:
+            raise CLIError('usage error: Do not use --scripts and --customize together')
+        try:
+            template_scripts = json.loads(customize)
+        except JSONDecodeError:
+            raise CLIError('usage error: JSON decode error in --customize')
+    else:
+        for script in scripts_list:
+            script.pop("is_url")
+            script["script_uri"] = script.pop("script")
 
-        if script["type"] == ScriptType.SHELL:
-            template_scripts.append(ImageTemplateShellCustomizer(**script))
-        elif script["type"] == ScriptType.POWERSHELL:
-            template_scripts.append(ImageTemplatePowerShellCustomizer(**script))
-        else:  # Should never happen
-            logger.debug("Script %s has type %s", script["script"], script["type"])
-            raise CLIError("Script {} has an invalid type.".format(script["script"]))
+            if script["type"] == ScriptType.SHELL:
+                template_scripts.append(ImageTemplateShellCustomizer(**script))
+            elif script["type"] == ScriptType.POWERSHELL:
+                template_scripts.append(ImageTemplatePowerShellCustomizer(**script))
+            else:  # Should never happen
+                logger.debug("Script %s has type %s", script["script"], script["type"])
+                raise CLIError("Script {} has an invalid type.".format(script["script"]))
 
     # create image template distribution / destination settings
-    for dest_type, rid, loc_info in destinations_lists:
-        parsed = parse_resource_id(rid)
-        if dest_type == _DestType.MANAGED_IMAGE:
-            template_destinations.append(ImageTemplateManagedImageDistributor(
-                image_id=rid, location=loc_info, run_output_name=parsed['name']))
-        elif dest_type == _DestType.SHARED_IMAGE_GALLERY:
-            template_destinations.append(ImageTemplateSharedImageDistributor(
-                gallery_image_id=rid, replication_regions=loc_info, run_output_name=parsed['child_name_1']))
-        else:
-            logger.info("No applicable destination found for destination %s", str(tuple([dest_type, rid, loc_info])))
+    if distribute is not None:
+        if destinations_lists:
+            raise CLIError('usage error: Do not use (--managed-image-destinations | --shared-image-destinations) and --distribute together')
+        try:
+            template_destinations = json.loads(distribute)
+        except JSONDecodeError:
+            raise CLIError('usage error: JSON decode error in --distribute')
+
+    else:
+        for dest_type, rid, loc_info in destinations_lists:
+            parsed = parse_resource_id(rid)
+            if dest_type == _DestType.MANAGED_IMAGE:
+                template_destinations.append(ImageTemplateManagedImageDistributor(
+                    image_id=rid, location=loc_info, run_output_name=parsed['name']))
+            elif dest_type == _DestType.SHARED_IMAGE_GALLERY:
+                template_destinations.append(ImageTemplateSharedImageDistributor(
+                    gallery_image_id=rid, replication_regions=loc_info, run_output_name=parsed['child_name_1']))
+            else:
+                logger.info("No applicable destination found for destination %s", str(tuple([dest_type, rid, loc_info])))
 
     image_template = ImageTemplate(source=template_source, customize=template_scripts, distribute=template_destinations,
                                    location=location, build_timeout_in_minutes=build_timeout, tags=(tags or {}))
