@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**Compute**
+
+* image template create: Add --customize and --distribute.
+
 **IoT Central**
 
 * Support app creation/update with the new sku name ST0, ST1, ST2.
