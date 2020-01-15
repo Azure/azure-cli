@@ -262,11 +262,11 @@ deployment_name_type = CLIArgumentType(
 )
 
 quotes = '""' if platform.system() == 'Windows' else "''"
-quote_text = 'Use {} to clear existing tags. Usage: --tags key[=value] [key[=value] ...]'.format(quotes)
+quote_text = 'Use {} to clear existing tags.'.format(quotes)
 
 tags_type = CLIArgumentType(
     validator=validate_tags,
-    help="space-separated list of tags. {}".format(quote_text),
+    help="space-separated tags: key[=value] [key[=value] ...]. {}".format(quote_text),
     nargs='*'
 )
 
