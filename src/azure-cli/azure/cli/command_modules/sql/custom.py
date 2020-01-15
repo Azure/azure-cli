@@ -2103,8 +2103,7 @@ def _find_managed_instance_sku_from_capabilities(
         cli_ctx,
         location,
         sku,
-        is_instance_create=True,
-        current_sku_family=None):
+        is_instance_create=True):
     '''
     Given a requested sku which may have some properties filled in
     (e.g. tier and family), finds the canonical matching sku
@@ -2133,12 +2132,6 @@ def _find_managed_instance_sku_from_capabilities(
 
     # Find family level capability, based on requested sku properties
     family_capability = _find_family_capability(sku, edition_capability.supported_families)
-
-    # Check whether hardware family is being changed to a deprecated hardware family
-    if not is_instance_create:
-        if current_sku_family == 'Gen5' and 'Gen4' in family_capability.sku:
-            raise CLIError('It is not possible to switch back to Gen4 compute generation as'
-                           ' this hardware is being deprecated.')
 
     result = Sku(name=family_capability.sku)
     logger.debug('_find_managed_instance_sku_from_capabilities return: %s', result)
@@ -2227,8 +2220,7 @@ def managed_instance_update(
         cmd.cli_ctx,
         instance.location,
         sku,
-        False,
-        instance.sku.family)
+        False)
 
     if public_data_endpoint_enabled is not None:
         instance.public_data_endpoint_enabled = public_data_endpoint_enabled

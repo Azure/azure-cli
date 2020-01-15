@@ -1156,7 +1156,8 @@ def load_arguments(self, _):
 
         c.argument('tier',
                    arg_type=tier_param_type,
-                   help='The edition component of the sku. Allowed values: GeneralPurpose, BusinessCritical.')
+                   help='The edition component of the sku. Allowed values include:'
+                   ' GeneralPurpose, BusinessCritical.')
 
         c.argument('family',
                    arg_type=family_param_type,
@@ -1175,7 +1176,7 @@ def load_arguments(self, _):
 
         c.argument('vcores',
                    arg_type=capacity_param_type,
-                   help='The capacity of the managed instance in vcores.')
+                   help='The capacity of the managed instance in integer number of vcores.')
 
         c.argument('collation',
                    help='The collation of the managed instance.')
