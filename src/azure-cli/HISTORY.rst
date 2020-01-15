@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**ARM**
+
+* Fix issue #10246: `az resource tag` crashed when the parameter `--ids` passed in is resource group ID
+
 **IoT Central**
 
 * Support app creation/update with the new sku name ST0, ST1, ST2.
