@@ -48,7 +48,7 @@ class ImageTemplateTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_image_template_no_defer')
     def test_image_template_no_defer(self, resource_group, resource_group_location):
         self._assign_ib_permissions(resource_group)
-        subscription_id = self.get_subscription_id()
+
         self.kwargs.update({
             'tmp': 'tmp1',
             'img_src': LINUX_IMAGE_SOURCE,
