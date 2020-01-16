@@ -6,7 +6,7 @@
 import unittest
 from knack.util import CLIError
 
-from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer)
+from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, live_only)
 
 from msrestazure.tools import parse_resource_id
 
@@ -45,7 +45,9 @@ class ImageTemplateTest(ScenarioTest):
                 raise ex
             pass
 
+    # @cus.json has some problem in online CI checks, can't find file
     @ResourceGroupPreparer(name_prefix='cli_test_image_template_no_defer')
+    @live_only()
     def test_image_template_no_defer(self, resource_group, resource_group_location):
         self._assign_ib_permissions(resource_group)
 
