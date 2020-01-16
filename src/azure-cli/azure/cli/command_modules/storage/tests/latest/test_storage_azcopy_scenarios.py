@@ -60,7 +60,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 30))
 
-        # syn with another folder
+        # sync with another folder
         self.cmd('storage blob sync -s "{}" -c {} --account-name {}'.format(
             os.path.join(test_dir, 'butter'), container, storage_account))
         self.cmd('storage blob list -c {} --account-name {}'.format(
@@ -71,6 +71,19 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         shutil.rmtree(os.path.join(test_dir, 'duff'))
         self.cmd('storage blob sync -s "{}" -c {} --account-name {}'.format(
             test_dir, container, storage_account))
+        self.cmd('storage blob list -c {} --account-name {}'.format(
+            container, storage_account), checks=JMESPathCheck('length(@)', 0))
+
+        # sync a subset of files in a directory
+        with open(os.path.join(test_dir, 'test.json'), 'w') as f:
+            f.write('updated.')
+        self.cmd('storage blob sync -s "{}" -c {} --account-name {} --include-pattern *.json'.format(
+            test_dir, container, storage_account))
+        self.cmd('storage blob list -c {} --account-name {}'.format(
+            container, storage_account), checks=JMESPathCheck('length(@)', 1))
+
+        self.cmd('storage blob delete-batch -s {} --account-name {}'.format(
+            container, storage_account))
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 0))
 

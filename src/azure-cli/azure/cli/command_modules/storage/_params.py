@@ -99,8 +99,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     azure_storage_sid_type = CLIArgumentType(min_api='2019-04-01', arg_group="Azure Active Directory Properties",
                                              help="Specify the security identifier (SID) for Azure Storage. "
                                                   "Required when --enable-files-adds is set to True")
-    sas_help = 'The permissions the SAS grants. Allowed values: {}. Do not use if a stored access policy is ' \
-               'referenced with --id that specifies this value. Can be combined.'
     exclude_pattern_type = CLIArgumentType(arg_group='Additional Flags', help='Exclude these files where the name '
                                            'matches the pattern list. For example: *.jpg;*.pdf;exactName. This '
                                            'option supports wildcard characters (*)')
@@ -115,6 +113,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                         'myFolder;myFolder/subDirName/file.pdf')
     recursive_type = CLIArgumentType(options_list=['--recursive', '-r'], action='store_true',
                                      help='Look into sub-directories recursively.')
+    sas_help = 'The permissions the SAS grants. Allowed values: {}. Do not use if a stored access policy is ' \
+               'referenced with --id that specifies this value. Can be combined.'
 
     with self.argument_context('storage') as c:
         c.argument('container_name', container_name_type)
@@ -559,7 +559,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('exclude_pattern', exclude_pattern_type)
         c.argument('include_pattern', include_pattern_type)
         c.argument('exclude_path', exclude_path_type)
-        c.argument('recursive', recursive_type)
 
     with self.argument_context('storage container') as c:
         from .sdkutil import get_container_access_type_names
