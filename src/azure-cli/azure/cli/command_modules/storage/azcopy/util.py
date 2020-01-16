@@ -32,11 +32,8 @@ class AzCopy(object):
         install_location = _get_default_install_location()
         self.executable = install_location
         self.creds = creds
-        version = self.check_version()
-        if not os.path.isfile(install_location) or version != AZCOPY_VERSION:
+        if not os.path.isfile(install_location) or self.check_version() != AZCOPY_VERSION:
             self.install_azcopy(install_location)
-        if os.path.isfile(install_location) and version == AZCOPY_VERSION:
-            print("ok")
 
     def install_azcopy(self, install_location):
         install_dir = os.path.dirname(install_location)
