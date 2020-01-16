@@ -251,14 +251,17 @@ class Engine(Enum):  # pylint: disable=too-few-public-methods
     db = 'db'
     dw = 'dw'
 
+
 def _configure_db_dw_params(arg_ctx):
     """
-    Configures params that are based on `Database` resource and therefore apply to one or more DB/DW create/update commands.
-    The idea is that this does some basic configuration of each property. Each command can then potentially
-    build on top of this (e.g. to give a parameter more specific help text) and .ignore() parameters that aren't applicable.
+    Configures params that are based on `Database` resource and therefore apply to one or more DB/DW create/update
+    commands. The idea is that this does some basic configuration of each property. Each command can then potentially
+    build on top of this (e.g. to give a parameter more specific help text) and .ignore() parameters that aren't
+    applicable.
 
-    Normally these param configurations would be implemented at the command group level, but these params are used across
-    2 different param groups - `sql db` and `sql dw`. So extracting it out into this common function prevents duplication.
+    Normally these param configurations would be implemented at the command group level, but these params are used
+    across 2 different param groups - `sql db` and `sql dw`. So extracting it out into this common function prevents
+    duplication.
     """
 
     arg_ctx.argument('max_size_bytes',
@@ -331,7 +334,7 @@ def _configure_db_dw_create_params(
     create_mode: Valid CreateMode enum value (e.g. `default`, `copy`, etc)
     """
 
-    #### Step 0: Validation ####
+    # *** Step 0: Validation ***
 
     # DW does not support all create modes. Check that engine and create_mode are consistent.
     if engine == Engine.dw and create_mode not in [
@@ -340,7 +343,7 @@ def _configure_db_dw_create_params(
             CreateMode.restore]:
         raise ValueError('Engine {} does not support create mode {}'.format(engine, create_mode))
 
-    #### Step 1: Create extra params ####
+    # *** Step 1: Create extra params ***
 
     # Create args that will be used to build up the Database object
     #
@@ -402,7 +405,7 @@ def _configure_db_dw_create_params(
             'tier',
         ])
 
-    #### Step 2: Apply customizations specific to create (as opposed to update) ####
+    # *** Step 2: Apply customizations specific to create (as opposed to update) ***
 
     arg_ctx.argument('name',  # Note: this is sku name, not database name
                      options_list=['--service-objective'],
@@ -414,7 +417,7 @@ def _configure_db_dw_create_params(
     arg_ctx.argument('elastic_pool_id',
                      help='The name or resource id of the elastic pool to create the database in.')
 
-    #### Step 3: Ignore params that are not applicable (based on engine & create mode) ####
+    # *** Step 3: Ignore params that are not applicable (based on engine & create mode) ***
 
     # Only applicable to default create mode. Also only applicable to db.
     if create_mode != CreateMode.default or engine != Engine.db:
