@@ -123,12 +123,12 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 41))
 
-        self.cmd('storage remove -c {} -n butter --account-name {} --exclude-pattern "file_1"'.format(
+        self.cmd('storage remove -c {} -n butter --account-name {} --exclude-pattern "file_1*"'.format(
             container, storage_account))
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 32))
 
-        self.cmd('storage remove -c {} -n butter --account-name {} --recursive --exclude-pattern "file_1"'.format(
+        self.cmd('storage remove -c {} -n butter --account-name {} --recursive --exclude-pattern "file_1*"'.format(
             container, storage_account))
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 23))
@@ -139,17 +139,17 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 41))
 
-        self.cmd('storage remove -c {} -n butter --account-name {} --recursive --include "file_1"'.format(
+        self.cmd('storage remove -c {} -n butter --account-name {} --recursive --include-pattern "file_1*"'.format(
             container, storage_account))
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 39))
 
-        self.cmd('storage remove -c {} -n butter --account-name {} --include "file_*"'.format(
+        self.cmd('storage remove -c {} -n butter --account-name {} --include-pattern "file_*"'.format(
             container, storage_account))
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 30))
 
-        self.cmd('storage remove -c {} -n butter --account-name {} --recursive --include "file_*"'.format(
+        self.cmd('storage remove -c {} -n butter --account-name {} --recursive --include-pattern "file_*"'.format(
             container, storage_account))
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 21))
