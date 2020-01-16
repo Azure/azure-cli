@@ -101,6 +101,20 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                                   "Required when --enable-files-adds is set to True")
     sas_help = 'The permissions the SAS grants. Allowed values: {}. Do not use if a stored access policy is ' \
                'referenced with --id that specifies this value. Can be combined.'
+    exclude_pattern_type = CLIArgumentType(arg_group='Additional Flags', help='Exclude these files where the name '
+                                           'matches the pattern list. For example: *.jpg;*.pdf;exactName. This '
+                                           'option supports wildcard characters (*)')
+    include_pattern_type = CLIArgumentType(arg_group='Additional Flags', help='Include only these files where the name '
+                                           'matches the pattern list. For example: *.jpg;*.pdf;exactName. This '
+                                           'option supports wildcard characters (*)')
+    exclude_path_type = CLIArgumentType(arg_group='Additional Flags', help='Exclude these paths. This option does not '
+                                        'support wildcard characters (*). Checks relative path prefix. For example: '
+                                        'myFolder;myFolder/subDirName/file.pdf.')
+    include_path_type = CLIArgumentType(arg_group='Additional Flags', help='Include only these paths. This option does '
+                                        'not support wildcard characters (*). Checks relative path prefix. For example:'
+                                        'myFolder;myFolder/subDirName/file.pdf')
+    recursive_type = CLIArgumentType(options_list=['--recursive', '-r'], action='store_true',
+                                     help='Look into sub-directories recursively.')
 
     with self.argument_context('storage') as c:
         c.argument('container_name', container_name_type)
@@ -474,8 +488,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                        help='File path in file share of copy {} storage account'.format(item))
             c.argument('{}_local_path'.format(item), arg_group='Copy {}'.format(item),
                        help='Local file path')
-        c.argument('recursive', arg_group='Additional Flags', action='store_true', help='Look into sub-directories \
-                    recursively when uploading from local file system.')
         c.argument('put_md5', arg_group='Additional Flags', action='store_true',
                    help='Create an MD5 hash of each file, and save the hash as the Content-MD5 property of the '
                    'destination blob/file.Only available when uploading.')
@@ -488,17 +500,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    'to ensure destination storage account support setting access tier. In the cases that setting '
                    'access tier is not supported, please use `--preserve-s2s-access-tier false` to bypass copying '
                    'access tier. (Default true)')
-        c.argument('exclude_pattern', arg_group='Additional Flags',
-                   help='Exclude these files when copying. This option supports wildcard characters (*)')
-        c.argument('include_pattern', arg_group='Additional Flags',
-                   help='Include only these files when copying. This option supports wildcard characters (*). '
-                   'Separate files by using a ";"')
-        c.argument('exclude_path', arg_group='Additional Flags',
-                   help='Exclude these paths when copying. This option does not support wildcard characters (*). '
-                   'Checks relative path prefix. For example: myFolder;myFolder/subDirName/file.pdf.')
-        c.argument('include_path', arg_group='Additional Flags',
-                   help='Include only these paths when copying. This option does not support wildcard characters (*). '
-                   'Checks relative path prefix. For example: myFolder;myFolder/subDirName/file.pdf')
+        c.argument('exclude_pattern', exclude_pattern_type)
+        c.argument('include_pattern', include_pattern_type)
+        c.argument('exclude_path', exclude_path_type)
+        c.argument('include_path', include_path_type)
+        c.argument('recursive', recursive_type)
 
     with self.argument_context('storage blob copy') as c:
         for item in ['destination', 'source']:
@@ -550,6 +556,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('source', options_list=['--source', '-s'],
                    help='The source file path to sync from.')
         c.ignore('destination')
+        c.argument('exclude_pattern', exclude_pattern_type)
+        c.argument('include_pattern', include_pattern_type)
+        c.argument('exclude_path', exclude_path_type)
+        c.argument('recursive', recursive_type)
 
     with self.argument_context('storage container') as c:
         from .sdkutil import get_container_access_type_names
@@ -906,19 +916,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('path', options_list=('--path', '-p'),
                 help='The path to the file within the file share.',
                 completer=file_path_completer)
-        c.argument('exclude_pattern', arg_group='Additional Flags',
-                   help='Exclude these files when copying. This option supports wildcard characters (*)')
-        c.argument('include_pattern', arg_group='Additional Flags',
-                   help='Include only these files when copying. This option supports wildcard characters (*). '
-                        'Separate files by using a ";"')
-        c.argument('exclude_path', arg_group='Additional Flags',
-                   help='Exclude these paths when copying. This option does not support wildcard characters (*). '
-                        'Checks relative path prefix. For example: myFolder;myFolder/subDirName/file.pdf.')
-        c.argument('include_path', arg_group='Additional Flags',
-                   help='Include only these paths when copying. This option does not support wildcard characters (*). '
-                        'Checks relative path prefix. For example: myFolder;myFolder/subDirName/file.pdf')
-        c.argument('recursive', options_list=['--recursive', '-r'], action='store_true',
-                   help='Look into sub-directories recursively when deleting between directories.')
+        c.argument('exclude_pattern', exclude_pattern_type)
+        c.argument('include_pattern', include_pattern_type)
+        c.argument('exclude_path', exclude_path_type)
+        c.argument('include_path', include_path_type)
+        c.argument('recursive', recursive_type)
         c.ignore('destination')
         c.ignore('service')
         c.ignore('target')

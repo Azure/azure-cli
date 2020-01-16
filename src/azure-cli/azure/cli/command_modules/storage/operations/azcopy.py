@@ -126,8 +126,18 @@ def storage_remove(cmd, client, service, target, recursive=None, exclude_pattern
     azcopy.remove(_add_url_sas(target, azcopy.creds.sas_token), flags=flags)
 
 
-def storage_blob_sync(cmd, client, source, destination):
+def storage_blob_sync(cmd, client, source, destination, recursive=None, exclude_pattern=None, include_pattern=None,
+                      exclude_path=None):
     azcopy = _azcopy_blob_client(cmd, client)
+    flags = []
+    if recursive is not None:
+        flags.append('--recursive')
+    if include_pattern is not None:
+        flags.append('--include-pattern=' + include_pattern)
+    if exclude_pattern is not None:
+        flags.append('--exclude-pattern=' + exclude_pattern)
+    if exclude_path is not None:
+        flags.append('--exclude-path=' + exclude_path)
     azcopy.sync(source, _add_url_sas(destination, azcopy.creds.sas_token), flags=['--delete-destination', 'true'])
 
 
