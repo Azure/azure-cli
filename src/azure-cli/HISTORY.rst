@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**AppService**
+
+* Azure Stack: surface commands under the profile of 2019-03-01-hybrid
+
 **IoT**
 
 * Deprecated 'IoT hub Job' commands.
