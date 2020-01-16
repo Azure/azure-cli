@@ -778,7 +778,7 @@ examples:
   - name: Download an entire directory from Azure File Share, and you can also specify your storage account and share information as above.
     text: az storage copy -s https://[account].file.core.windows.net/[share]/[path/to/directory] -d /path/to/dir --recursive
   - name: Download a set of files from Azure File Share using wildcards, and you can also specify your storage account and share information as above.
-    text: az storage copy -s https://[account].file.core.windows.net/[share]/foo* -d /path/to/dir --recursive
+    text: az storage copy -s https://[account].file.core.windows.net/[share]/ --include-pattern foo* -d /path/to/dir --recursive
 """
 
 helps['storage cors'] = """
@@ -1209,9 +1209,9 @@ examples:
   - name: Remove all the blobs in a Storage Container.
     text: az storage remove -c MyContainer -n path/to/directory
   - name: Remove a subset of blobs in a virtual directory (For example, only jpg and pdf files, or if the blob name is "exactName").
-    text: az storage remove -c MyContainer -n path/to/directory --recursive --include "*.jpg;*.pdf;exactName"
+    text: az storage remove -c MyContainer --include-path path/to/directory --include-pattern "*.jpg;*.pdf;exactName" --recursive 
   - name: Remove an entire virtual directory but exclude certain blobs from the scope (For example, every blob that starts with foo or ends with bar).
-    text: az storage remove -c MyContainer -n path/to/directory --recursive --include "foo*;*bar"
+    text: az storage remove -c MyContainer --include-path path/to/directory --exclude-pattern "foo*;*bar" --recursive
   - name: Remove a single file.
     text: az storage remove -s MyShare -p MyFile
   - name: Remove an entire directory.
