@@ -115,6 +115,7 @@ server_configure_help = 'You can configure the default using `az configure --def
 
 time_format_help = 'Time should be in following format: "YYYY-MM-DDTHH:MM:SS".'
 
+
 def get_location_type_with_default_from_resource_group(cli_ctx):
     return CLIArgumentType(
         arg_type=get_location_type(cli_ctx),
