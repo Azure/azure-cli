@@ -15,7 +15,7 @@ class VersionTest(ScenarioTest):
         output = self.cmd('az version').get_output_in_json()
         self.assertIn('azure-cli', output)
         self.assertIn('azure-cli-command-modules-nspkg', output)
-        self.assertIn('azure-cli-dev-tools', output)
+        self.assertIn('azure-cli-core', output)
         self.assertIn('azure-cli-nspkg', output)
         self.assertIn('azure-cli-telemetry', output)
         self.assertIn('azure-cli-testsdk', output)
