@@ -1209,7 +1209,7 @@ examples:
   - name: Remove all the blobs in a Storage Container.
     text: az storage remove -c MyContainer -n path/to/directory
   - name: Remove a subset of blobs in a virtual directory (For example, only jpg and pdf files, or if the blob name is "exactName").
-    text: az storage remove -c MyContainer --include-path path/to/directory --include-pattern "*.jpg;*.pdf;exactName" --recursive 
+    text: az storage remove -c MyContainer --include-path path/to/directory --include-pattern "*.jpg;*.pdf;exactName" --recursive
   - name: Remove an entire virtual directory but exclude certain blobs from the scope (For example, every blob that starts with foo or ends with bar).
     text: az storage remove -c MyContainer --include-path path/to/directory --exclude-pattern "foo*;*bar" --recursive
   - name: Remove a single file.

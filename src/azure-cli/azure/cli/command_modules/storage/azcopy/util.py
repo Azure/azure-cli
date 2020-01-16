@@ -47,7 +47,7 @@ class AzCopy(object):
             else:
                 file_url = base_url.format('windows', '386', AZCOPY_VERSION, 'zip')
         elif self.system == 'Linux':
-            file_url = base_url.format('linux', 'amd64', AZCOPY_VERSION,'tar.gz')
+            file_url = base_url.format('linux', 'amd64', AZCOPY_VERSION, 'tar.gz')
         elif self.system == 'Darwin':
             file_url = base_url.format('darwin', 'amd64', AZCOPY_VERSION, 'zip')
         else:

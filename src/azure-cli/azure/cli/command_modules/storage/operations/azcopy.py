@@ -7,7 +7,7 @@ from __future__ import print_function
 from ..azcopy.util import AzCopy, client_auth_for_azcopy, login_auth_for_azcopy
 from azure.cli.command_modules.storage._client_factory import blob_data_service_factory, file_data_service_factory
 
-# pylint: disable=too-many-statements
+# pylint: disable=too-many-statements, too-many-locals
 
 
 def storage_copy(cmd, source=None,
