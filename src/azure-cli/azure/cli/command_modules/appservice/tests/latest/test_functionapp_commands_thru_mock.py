@@ -12,9 +12,21 @@ from knack.util import CLIError
 from azure.cli.command_modules.appservice.custom import (
     enable_zip_deploy_functionapp,
     enable_zip_deploy)
-
+from azure.cli.core.profiles import ResourceType
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
+
+
+def _get_test_cmd():
+    from azure.cli.core.mock import DummyCli
+    from azure.cli.core import AzCommandsLoader
+    from azure.cli.core.commands import AzCliCommand
+    cli_ctx = DummyCli()
+    loader = AzCommandsLoader(cli_ctx, resource_type=ResourceType.MGMT_APPSERVICE)
+    cmd = AzCliCommand(loader, 'test', None)
+    cmd.command_kwargs = {'resource_type': ResourceType.MGMT_APPSERVICE}
+    cmd.cli_ctx = cli_ctx
+    return cmd
 
 
 class TestFunctionappMocked(unittest.TestCase):
@@ -29,7 +41,7 @@ class TestFunctionappMocked(unittest.TestCase):
                                          enable_zip_deploy_mock,
                                          parse_resource_id_mock,
                                          web_client_factory_mock):
-        cmd_mock = mock.MagicMock()
+        cmd_mock = _get_test_cmd()
         cli_ctx_mock = mock.MagicMock()
         cmd_mock.cli_ctx = cli_ctx_mock
 
@@ -50,7 +62,7 @@ class TestFunctionappMocked(unittest.TestCase):
                                                             parse_resource_id_mock,
                                                             web_client_factory_mock):
         # prepare
-        cmd_mock = mock.MagicMock()
+        cmd_mock = _get_test_cmd()
         cli_ctx_mock = mock.MagicMock()
         cmd_mock.cli_ctx = cli_ctx_mock
 
@@ -80,7 +92,7 @@ class TestFunctionappMocked(unittest.TestCase):
                                                      web_client_factory_mock,
                                                      add_remote_build_app_settings_mock):
         # prepare
-        cmd_mock = mock.MagicMock()
+        cmd_mock = _get_test_cmd()
         cli_ctx_mock = mock.MagicMock()
         cmd_mock.cli_ctx = cli_ctx_mock
 
@@ -107,7 +119,7 @@ class TestFunctionappMocked(unittest.TestCase):
                                                              parse_resource_id_mock,
                                                              web_client_factory_mock):
         # prepare
-        cmd_mock = mock.MagicMock()
+        cmd_mock = _get_test_cmd()
         cli_ctx_mock = mock.MagicMock()
         cmd_mock.cli_ctx = cli_ctx_mock
 
@@ -132,7 +144,7 @@ class TestFunctionappMocked(unittest.TestCase):
                                                         get_scm_url_mock,
                                                         get_site_credential_mock):
         # prepare
-        cmd_mock = mock.MagicMock()
+        cmd_mock = _get_test_cmd()
         cli_ctx_mock = mock.MagicMock()
         cmd_mock.cli_ctx = cli_ctx_mock
 

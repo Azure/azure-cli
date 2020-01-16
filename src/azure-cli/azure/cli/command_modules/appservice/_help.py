@@ -1516,6 +1516,15 @@ examples:
         az webapp deployment user set --user-name MyUserName
 """
 
+helps['webapp deployment user show'] = """
+type: command
+short-summary: Get deployment publishing user.
+examples:
+  - name: Get publishing user information.
+    text: >
+        az webapp deployment user show
+"""
+
 helps['webapp hybrid-connection'] = """
 type: group
 short-summary: methods that list, add and remove hybrid-connections from webapps

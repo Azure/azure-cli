@@ -59,7 +59,7 @@ def ex_handler_factory(creating_plan=False):
 # pylint: disable=too-many-statements
 def load_command_table(self, _):
     webclient_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.web.web_site_management_client#WebSiteManagementClient.{}',
+        operations_tmpl='azure.mgmt.web.operations#WebSiteManagementClientOperationsMixin.{}',
         client_factory=cf_web_client
     )
     appservice_plan_sdk = CliCommandType(
@@ -195,7 +195,7 @@ def load_command_table(self, _):
         g.custom_command('list-publishing-credentials', 'list_publishing_credentials')
 
     with self.command_group('webapp deployment user', webclient_sdk) as g:
-        g.show_command('show', 'get_publishing_user')
+        g.custom_show_command('show', 'get_publishing_user')
         g.custom_command('set', 'set_deployment_user', exception_handler=ex_handler_factory())
 
     with self.command_group('webapp deployment container') as g:
