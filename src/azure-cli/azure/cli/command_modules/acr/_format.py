@@ -188,8 +188,15 @@ def _task_format_group(item):
 def _taskrun_format_group(item):
     return OrderedDict([
         ('NAME', _get_value(item, 'name')),
+        ('RUN ID', _get_value(item, 'runId')),
+        ('TASK', _get_value(item, 'task')),
         ('PLATFORM', _get_value(item, 'platform', 'os')),
-        ('STATUS', _get_value(item, 'status'))
+        ('STATUS', _get_value(item, 'status')),
+        ("TRIGGER", _get_build_trigger(_get_value(item, 'imageUpdateTrigger'),
+                                       _get_value(item, 'sourceTrigger', 'eventType'),
+                                       _get_value(item, 'timerTrigger'))),
+        ('STARTED', _format_datetime(_get_value(item, 'startTime'))),
+        ('DURATION', _get_duration(_get_value(item, 'startTime'), _get_value(item, 'finishTime')))
     ])
 
 def _build_format_group(item):
