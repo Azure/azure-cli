@@ -937,12 +937,21 @@ class CredsCache(object):
 
     def retrieve_token_for_service_principal(self, sp_id, resource, tenant, use_cert_sn_issuer=False):
         self.load_adal_token_cache()
-        matched = [x for x in self._service_principal_creds if sp_id == x[_SERVICE_PRINCIPAL_ID] and
-                   tenant == x[_SERVICE_PRINCIPAL_TENANT]]
+        matched = [x for x in self._service_principal_creds if sp_id == x[_SERVICE_PRINCIPAL_ID]]
         if not matched:
-            raise CLIError("Please run 'az account set' to select active account.")
-        cred = matched[0]
-        context = self._auth_ctx_factory(self._ctx, cred[_SERVICE_PRINCIPAL_TENANT], None)
+            raise CLIError("Could not retrieve credential from local cache for service principal {}. "
+                           "Please run 'az login' for this service principal."
+                           .format(sp_id))
+        matched_with_tenant = [x for x in matched if tenant == x[_SERVICE_PRINCIPAL_TENANT]]
+        if matched_with_tenant:
+            cred = matched_with_tenant[0]
+        else:
+            logger.warning("Could not retrieve credential from local cache for service principal {} under tenant {}. "
+                           "Trying credential under tenant {}, assuming that is an app credential."
+                           .format(sp_id, tenant, matched[0][_SERVICE_PRINCIPAL_TENANT]))
+            cred = matched[0]
+
+        context = self._auth_ctx_factory(self._ctx, tenant, None)
         sp_auth = ServicePrincipalAuth(cred.get(_ACCESS_TOKEN, None) or
                                        cred.get(_SERVICE_PRINCIPAL_CERT_FILE, None),
                                        use_cert_sn_issuer)
