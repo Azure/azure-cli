@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**AppConfig**
+
+* Support import/export of keyvault references from/to appservice
+
 **AppService**
 
 * Azure Stack: surface commands under the profile of 2019-03-01-hybrid
