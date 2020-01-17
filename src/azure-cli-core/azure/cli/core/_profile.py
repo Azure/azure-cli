@@ -36,7 +36,7 @@ _SUBSCRIPTION_ID = 'id'
 _SUBSCRIPTION_NAME = 'name'
 # Tenant of the token which is used to list the subscription
 _TENANT_ID = 'tenantId'
-# Home tenant of the subscription, which maps to tenantId in 'Subscriptions - List REST API'　
+# Home tenant of the subscription, which maps to tenantId in 'Subscriptions - List REST API'
 # https://docs.microsoft.com/en-us/rest/api/resources/subscriptions/list
 _SUBSCRIPTION_TENANT_ID = 'subscriptionTenantId'
 _MANAGED_BY_TENANTS = 'managedByTenants'
@@ -874,11 +874,11 @@ class SubscriptionFinder(object):
                 add_sub = True
                 for sub_to_compare in all_subscriptions:
                     if sub_to_add.subscription_id == sub_to_compare.subscription_id:
-                        logger.warning("Subscription {} '{}' can be accessed from tenants {}(default) and {}. "
+                        logger.warning("Subscription %s '%s' can be accessed from tenants %s(default) and %s. "
                                        "To select a specific tenant when accessing this subscription, "
-                                       "please include --tenant in 'az login'."
-                                       .format(sub_to_add.subscription_id, sub_to_add.display_name,
-                                               sub_to_compare.tenant_id, sub_to_add.tenant_id))
+                                       "please include --tenant in 'az login'.",
+                                       sub_to_add.subscription_id, sub_to_add.display_name,
+                                       sub_to_compare.tenant_id, sub_to_add.tenant_id)
                         add_sub = False
                         break
                 if add_sub:
