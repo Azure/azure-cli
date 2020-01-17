@@ -80,7 +80,7 @@ class AcrCommandsTests(ScenarioTest):
         assert password2 != renewed_password2
 
         # test acr delete
-        self.cmd('acr delete -n {} -g {}'.format(registry_name, resource_group))
+        self.cmd('acr delete -n {} -g {} -y'.format(registry_name, resource_group))
 
     def test_check_name_availability(self):
         # the chance of this randomly generated name has a duplication is rare
@@ -178,7 +178,7 @@ class AcrCommandsTests(ScenarioTest):
         # test webhook delete
         self.cmd('acr webhook delete -n {webhook_name} -r {registry_name}')
         # test acr delete
-        self.cmd('acr delete -n {registry_name} -g {rg}')
+        self.cmd('acr delete -n {registry_name} -g {rg} -y')
 
     @ResourceGroupPreparer()
     def test_acr_create_replication(self, resource_group, resource_group_location):
@@ -225,7 +225,7 @@ class AcrCommandsTests(ScenarioTest):
         # test replication delete
         self.cmd('acr replication delete -n {replication_name} -r {registry_name}')
         # test acr delete
-        self.cmd('acr delete -n {registry_name} -g {rg}')
+        self.cmd('acr delete -n {registry_name} -g {rg} -y')
 
     @ResourceGroupPreparer()
     @record_only()

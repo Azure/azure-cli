@@ -68,8 +68,8 @@ def acr_create(cmd,
     return lro_poller
 
 
-def acr_delete(cmd, client, registry_name, resource_group_name=None):
-    user_confirmation("Are you sure you want to delete the registry '{}'?".format(registry_name))
+def acr_delete(cmd, client, registry_name, resource_group_name=None, yes=False):
+    user_confirmation("Are you sure you want to delete the registry '{}'?".format(registry_name), yes)
     resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
     return client.delete(resource_group_name, registry_name)
 
