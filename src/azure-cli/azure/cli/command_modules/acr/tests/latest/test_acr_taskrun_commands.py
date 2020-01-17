@@ -34,14 +34,14 @@ class AcrTaskRunCommandsTests(ScenarioTest):
 
         self.cmd('group deployment create --resource-group {rg} --template-file {tf} --parameters registryName={registry_name} --parameters taskRunName={taskrun_name} --parameters sourceLocation={sourceLocation} --parameters dockerFilePath={dockerFilePath} --parameters image={image} ')
 
-        self.cmd('acr taskrun show --name {registry_name} --taskrun-name {taskrun_name} --resource-group {rg}',
+        self.cmd('acr taskrun show -r {registry_name} -n {taskrun_name} -g {rg}',
                  checks=[self.check('name', '{taskrun_name}'),
                          self.check('provisioningState', 'Succeeded'),
                          self.check('runRequest.type', 'DockerBuildRequest')])
 
-        self.cmd('acr taskrun list --name {registry_name} --resource-group {rg}',
+        self.cmd('acr taskrun list -r {registry_name} -g {rg}',
                  checks=[self.check('[0].name', '{taskrun_name}'),
                          self.check('[0].provisioningState', 'Succeeded'),
                          self.check('[0].runRequest.type', 'DockerBuildRequest')])
 
-        self.cmd('acr taskrun delete --name {registry_name} --taskrun-name {taskrun_name} --resource-group {rg}')
+        self.cmd('acr taskrun delete -r {registry_name} -n {taskrun_name} -g {rg}')
