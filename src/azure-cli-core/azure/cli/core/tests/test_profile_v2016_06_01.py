@@ -14,8 +14,8 @@ import re
 from copy import deepcopy
 
 from adal import AdalError
-from azure.mgmt.resource.subscriptions.models import \
-    (SubscriptionState, Subscription, SubscriptionPolicies, SpendingLimit, ManagedByTenant)
+from azure.mgmt.resource.subscriptions.v2016_06_01.models import \
+    (SubscriptionState, Subscription, SubscriptionPolicies, SpendingLimit)
 
 from azure.cli.core._profile import (Profile, CredsCache, SubscriptionFinder,
                                      ServicePrincipalAuth, _AUTH_CTX_FACTORY)
@@ -33,25 +33,18 @@ class TestProfile(unittest.TestCase):
         cls.id1 = 'subscriptions/1'
         cls.display_name1 = 'foo account'
         cls.state1 = SubscriptionState.enabled
-        cls.managed_by_tenants = [ManagedByTenantStub('00000003-0000-0000-0000-000000000000'),
-                                  ManagedByTenantStub('00000004-0000-0000-0000-000000000000')]
-        # Dummy Subscription from SDK azure.mgmt.resource.subscriptions.v2019_06_01.operations._subscriptions_operations.SubscriptionsOperations.list
-        # tenant_id denotes home tenant
+        # Dummy Subscription from SDK azure.mgmt.resource.subscriptions.v2016_06_01.operations._subscriptions_operations.SubscriptionsOperations.list
+        # tenant_id shouldn't be set as tenantId isn't returned by REST API
         # Must be deepcopied before used as mock_arm_client.subscriptions.list.return_value
         cls.subscription1_raw = SubscriptionStub(cls.id1,
                                                  cls.display_name1,
-                                                 cls.state1,
-                                                 tenant_id=cls.tenant_id,
-                                                 managed_by_tenants=cls.managed_by_tenants)
+                                                 cls.state1)
         # Dummy result of azure.cli.core._profile.SubscriptionFinder._find_using_specific_tenant
-        # subscription_tenant_id is mapped from tenant_id
         # tenant_id denotes token tenant
         cls.subscription1 = SubscriptionStub(cls.id1,
                                              cls.display_name1,
                                              cls.state1,
-                                             tenant_id=cls.tenant_id,
-                                             managed_by_tenants=cls.managed_by_tenants,
-                                             subscription_tenant_id=cls.tenant_id)
+                                             cls.tenant_id)
         # Dummy result of azure.cli.core._profile.Profile._normalize_properties
         cls.subscription1_normalized = {
             'environmentName': 'AzureCloud',
@@ -63,16 +56,7 @@ class TestProfile(unittest.TestCase):
                 'type': 'user'
             },
             'isDefault': False,
-            'tenantId': cls.tenant_id,
-            'subscriptionTenantId': cls.tenant_id,
-            'managedByTenants': [
-                {
-                    "tenantId": "00000003-0000-0000-0000-000000000000"
-                },
-                {
-                    "tenantId": "00000004-0000-0000-0000-000000000000"
-                }
-            ],
+            'tenantId': cls.tenant_id
         }
 
         cls.raw_token1 = 'some...secrets'
@@ -96,13 +80,11 @@ class TestProfile(unittest.TestCase):
         cls.state2 = SubscriptionState.past_due
         cls.subscription2_raw = SubscriptionStub(cls.id2,
                                                  cls.display_name2,
-                                                 cls.state2,
-                                                 tenant_id=cls.tenant_id)
+                                                 cls.state2)
         cls.subscription2 = SubscriptionStub(cls.id2,
                                              cls.display_name2,
                                              cls.state2,
-                                             tenant_id=cls.tenant_id,
-                                             subscription_tenant_id=cls.tenant_id)
+                                             cls.tenant_id)
         cls.subscription2_normalized = {
             'environmentName': 'AzureCloud',
             'id': '2',
@@ -113,9 +95,7 @@ class TestProfile(unittest.TestCase):
                 'type': 'user'
             },
             'isDefault': False,
-            'tenantId': cls.tenant_id,
-            'subscriptionTenantId': cls.tenant_id,
-            'managedByTenants': [],
+            'tenantId': cls.tenant_id
         }
         cls.test_msi_tenant = '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a'
         cls.test_msi_access_token = ('eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IlZXVkljMVdEMVRrc2JiMzAxc2FzTTVrT3E1'
@@ -1699,51 +1679,6 @@ class TestProfile(unittest.TestCase):
         r = profile.auth_ctx_factory(cli, 'common', None)
         self.assertEqual(r.authority.url, aad_url + '/common')
 
-    @mock.patch('adal.AuthenticationContext', autospec=True)
-    @mock.patch('azure.cli.core._profile._get_authorization_code', autospec=True)
-    def test_find_using_common_tenant(self, _get_authorization_code_mock, mock_auth_context):
-        """When a subscription can be listed by multiple tenants, only the first appearance is retained
-        """
-        import adal
-        cli = DummyCli()
-        mock_arm_client = mock.MagicMock()
-        tenant2 = "00000002-0000-0000-0000-000000000000"
-        mock_arm_client.tenants.list.return_value = [TenantStub(self.tenant_id), TenantStub(tenant2)]
-
-        # same subscription but listed from another tenant
-        subscription2_raw = SubscriptionStub(self.id1, self.display_name1, self.state1, self.tenant_id)
-        mock_arm_client.subscriptions.list.side_effect = [[deepcopy(self.subscription1_raw)], [subscription2_raw]]
-
-        mgmt_resource = 'https://management.core.windows.net/'
-        token_cache = adal.TokenCache()
-        finder = SubscriptionFinder(cli, lambda _, _1, _2: mock_auth_context, token_cache, lambda _: mock_arm_client)
-        all_subscriptions=finder._find_using_common_tenant(access_token="token1", resource=mgmt_resource)
-
-        self.assertEqual(len(all_subscriptions), 1)
-        self.assertEqual(all_subscriptions[0].tenant_id, self.tenant_id)
-
-    @mock.patch('adal.AuthenticationContext', autospec=True)
-    @mock.patch('azure.cli.core._profile._get_authorization_code', autospec=True)
-    def test_find_using_specific_tenant(self, _get_authorization_code_mock, mock_auth_context):
-        """ Test tenant_id -> subscription_tenant_id mapping and token tenant attachment
-        """
-        import adal
-        cli = DummyCli()
-        mock_arm_client = mock.MagicMock()
-        token_tenant = "00000001-0000-0000-0000-000000000000"
-        home_tenant = "00000002-0000-0000-0000-000000000000"
-
-        subscription_raw = SubscriptionStub(self.id1, self.display_name1, self.state1, tenant_id=home_tenant)
-        mock_arm_client.subscriptions.list.return_value = [subscription_raw]
-
-        token_cache = adal.TokenCache()
-        finder = SubscriptionFinder(cli, lambda _, _1, _2: mock_auth_context, token_cache, lambda _: mock_arm_client)
-        all_subscriptions=finder._find_using_specific_tenant(tenant=token_tenant, access_token="token1")
-
-        self.assertEqual(len(all_subscriptions), 1)
-        self.assertEqual(all_subscriptions[0].tenant_id, token_tenant)
-        self.assertEqual(all_subscriptions[0].subscription_tenant_id, home_tenant)
-
 
 class FileHandleStub(object):  # pylint: disable=too-few-public-methods
 
@@ -1759,7 +1694,7 @@ class FileHandleStub(object):  # pylint: disable=too-few-public-methods
 
 class SubscriptionStub(Subscription):  # pylint: disable=too-few-public-methods
 
-    def __init__(self, id, display_name, state, tenant_id, managed_by_tenants=[], subscription_tenant_id=None):  # pylint: disable=redefined-builtin
+    def __init__(self, id, display_name, state, tenant_id=None):  # pylint: disable=redefined-builtin
         policies = SubscriptionPolicies()
         policies.spending_limit = SpendingLimit.current_period_off
         policies.quota_id = 'some quota'
@@ -1768,19 +1703,10 @@ class SubscriptionStub(Subscription):  # pylint: disable=too-few-public-methods
         self.subscription_id = id.split('/')[1]
         self.display_name = display_name
         self.state = state
-        # for a SDK Subscription, tenant_id means home tenant id
+        # for a SDK Subscription, tenant_id isn't present
         # for a _find_using_specific_tenant Subscription, tenant_id means token tenant id
-        self.tenant_id = tenant_id
-        self.managed_by_tenants = managed_by_tenants
-        # if subscription_tenant_id is None, this denotes a Subscription from SDK
-        if subscription_tenant_id:
-            self.subscription_tenant_id = subscription_tenant_id
-
-
-class ManagedByTenantStub(ManagedByTenant):  # pylint: disable=too-few-public-methods
-
-    def __init__(self, tenant_id):  # pylint: disable=redefined-builtin
-        self.tenant_id = tenant_id
+        if tenant_id:
+            self.tenant_id = tenant_id
 
 
 class TenantStub(object):  # pylint: disable=too-few-public-methods
