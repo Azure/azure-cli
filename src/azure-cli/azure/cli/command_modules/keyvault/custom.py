@@ -7,9 +7,12 @@
 
 import codecs
 import json
+import math
 import os
 import time
+import struct
 
+from jose.constants import Algorithms
 from knack.log import get_logger
 from knack.util import CLIError
 
@@ -694,6 +697,113 @@ def import_key(cmd, client, vault_base_url, key_name, protection=None, key_ops=N
         key_obj.t = byok_data
 
     return client.import_key(vault_base_url, key_name, key_obj, protection == 'hsm', key_attrs, tags)
+
+
+def download_key(cmd, client, file_path, vault_base_url=None, key_name=None, key_version='',
+                 encoding=None, identifier=None):  # pylint: disable=unused-argument
+    """ Download a key from a KeyVault. """
+    if os.path.isfile(file_path) or os.path.isdir(file_path):
+        raise CLIError("File or directory named '{}' already exists.".format(file_path))
+
+    def _bytes_to_int(b):
+        len_diff = 4 - len(b) % 4 if len(b) % 4 > 0 else 0
+        b = len_diff * b'\x00' + b  # We have to patch leading zeros for using struct.unpack
+        bytes_num = int(math.floor(len(b) / 4))
+        return struct.unpack('>' + 'I' * bytes_num, b)[0]
+
+    def _jwk_to_dict(jwk):
+        d = {}
+        if jwk.crv:
+            d['crv'] = jwk.crv
+        if jwk.kid:
+            d['kid'] = jwk.kid
+        if jwk.kty:
+            d['kty'] = jwk.kty
+        if jwk.d:
+            d['d'] = _bytes_to_int(jwk.d)
+        if jwk.dp:
+            d['dp'] = _bytes_to_int(jwk.dp)
+        if jwk.dq:
+            d['dq'] = _bytes_to_int(jwk.dq)
+        if jwk.e:
+            d['e'] = _bytes_to_int(jwk.e)
+        if jwk.k:
+            d['k'] = _bytes_to_int(jwk.k)
+        if jwk.n:
+            d['n'] = _bytes_to_int(jwk.n)
+        if jwk.p:
+            d['p'] = _bytes_to_int(jwk.p)
+        if jwk.q:
+            d['q'] = _bytes_to_int(jwk.q)
+        if jwk.qi:
+            d['qi'] = _bytes_to_int(jwk.qi)
+        if jwk.t:
+            d['t'] = _bytes_to_int(jwk.t)
+        if jwk.x:
+            d['x'] = _bytes_to_int(jwk.x)
+        if jwk.y:
+            d['y'] = _bytes_to_int(jwk.y)
+
+        return d
+
+    def _jwk_to_rsa_private_key(jwk_dict):
+        e = jwk_dict.get('e', 256)
+        n = jwk_dict.get('n')
+        public = rsa.RSAPublicNumbers(e, n)
+
+        d = jwk_dict.get('d')
+        extra_params = ['p', 'q', 'dp', 'dq', 'qi']
+
+        if any(k in jwk_dict for k in extra_params):
+            if not all(k in jwk_dict for k in extra_params):
+                raise CLIError('Invalid key format: precomputed private key parameters are incomplete.')
+            p = jwk_dict['p']
+            q = jwk_dict['q']
+            dp = jwk_dict['dp']
+            dq = jwk_dict['dq']
+            qi = jwk_dict['qi']
+        else:
+            p, q = rsa.rsa_recover_prime_factors(n, e, d)
+            dp = rsa.rsa_crt_dmp1(d, p)
+            dq = rsa.rsa_crt_dmq1(d, q)
+            qi = rsa.rsa_crt_iqmp(p, q)
+
+        private = rsa.RSAPrivateNumbers(p, q, d, dp, dq, qi, public)
+        return private.private_key(default_backend())
+
+    key = client.get_key(vault_base_url, key_name, key_version)
+    json_web_key = _jwk_to_dict(key.key)
+    key_type = json_web_key['kty']
+    key_binary = b''
+
+    if key_type == 'RSA':
+        rsa_key = _jwk_to_rsa_private_key(json_web_key)
+        pem = rsa_key.to_pem()
+        pass
+    elif key_type == 'EC':
+        pass
+    else:
+        raise CLIError('Invalid key type: {}'.format(key_type))
+
+    try:
+        with open(file_path, 'wb') as f:
+            if encoding == 'DER':
+                f.write(key_binary)
+            else:
+                import base64
+                encoded = base64.encodestring(key_binary)  # pylint:disable=deprecated-method
+                if isinstance(encoded, bytes):
+                    encoded = encoded.decode("utf-8")
+                encoded = '-----BEGIN {algo} PRIVATE KEY-----\n{encoded}-----END {algo} PRIVATE KEY-----\n'.format(
+                    algo=key_type,
+                    encoded=encoded
+                )
+                f.write(encoded.encode("utf-8"))
+
+    except Exception as ex:  # pylint: disable=broad-except
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+        raise ex
 # endregion
 
 
