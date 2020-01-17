@@ -946,9 +946,9 @@ class CredsCache(object):
         if matched_with_tenant:
             cred = matched_with_tenant[0]
         else:
-            logger.warning("Could not retrieve credential from local cache for service principal {} under tenant {}. "
-                           "Trying credential under tenant {}, assuming that is an app credential."
-                           .format(sp_id, tenant, matched[0][_SERVICE_PRINCIPAL_TENANT]))
+            logger.warning("Could not retrieve credential from local cache for service principal %s under tenant %s. "
+                           "Trying credential under tenant %s, assuming that is an app credential.",
+                           sp_id, tenant, matched[0][_SERVICE_PRINCIPAL_TENANT])
             cred = matched[0]
 
         context = self._auth_ctx_factory(self._ctx, tenant, None)
