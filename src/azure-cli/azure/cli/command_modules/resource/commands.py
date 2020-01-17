@@ -246,7 +246,7 @@ def load_command_table(self, _):
         g.custom_command('export', 'export_template_at_subscription_scope')
         g.custom_wait_command('wait', 'get_deployment_at_subscription_scope')
 
-    with self.command_group('deployment operation', resource_deployment_operation_sdk, min_api='2019-07-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
+    with self.command_group('deployment operation', resource_deployment_operation_sdk, min_api='2018-05-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
         g.custom_command('list', 'list_deployment_operations_at_subscription_scope')
         g.custom_show_command('show', 'get_deployment_operations_at_subscription_scope', client_factory=cf_deployment_operations)
 
