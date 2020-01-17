@@ -19,6 +19,7 @@ def acr_taskrun_show(cmd,
         cmd, registry_name, resource_group_name, TASKRUN_NOT_SUPPORTED)
     return client.get(resource_group_name, registry_name, taskrun_name)
 
+
 def acr_taskrun_list(cmd,
                      client,
                      registry_name,
@@ -28,6 +29,7 @@ def acr_taskrun_list(cmd,
         cmd, registry_name, resource_group_name, TASKRUN_NOT_SUPPORTED)
     return client.list(resource_group_name, registry_name)
 
+
 def acr_taskrun_delete(cmd,
                        client,
                        taskrun_name,
@@ -36,4 +38,3 @@ def acr_taskrun_delete(cmd,
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASKRUN_NOT_SUPPORTED)
     return client.delete(resource_group_name, registry_name, taskrun_name)
-    

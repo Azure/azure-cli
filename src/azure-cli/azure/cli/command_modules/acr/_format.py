@@ -49,8 +49,10 @@ def replication_output_format(result):
 def task_output_format(result):
     return _output_format(result, _task_format_group)
 
+
 def taskrun_output_format(result):
     return _output_format(result, _taskrun_format_group)
+
 
 def build_output_format(result):
     return _output_format(result, _build_format_group)
