@@ -36,3 +36,4 @@ def acr_taskrun_delete(cmd,
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASKRUN_NOT_SUPPORTED)
     return client.delete(resource_group_name, registry_name, taskrun_name)
+    
