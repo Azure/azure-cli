@@ -8,7 +8,7 @@ from ._utils import (
 )
 
 
-TASK_NOT_SUPPORTED = 'Task is only supported for managed registries.'
+TASKRUN_NOT_SUPPORTED = 'TaskRun is only supported for managed registries.'
 
 def acr_taskrun_show(cmd,
                      client,
@@ -16,7 +16,7 @@ def acr_taskrun_show(cmd,
                      registry_name,
                      resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
-        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
+        cmd, registry_name, resource_group_name, TASKRUN_NOT_SUPPORTED)
     return client.get(resource_group_name, registry_name, taskrun_name)
 
 def acr_taskrun_list(cmd,
@@ -25,7 +25,7 @@ def acr_taskrun_list(cmd,
                      resource_group_name=None):
 
     _, resource_group_name = validate_managed_registry(
-        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
+        cmd, registry_name, resource_group_name, TASKRUN_NOT_SUPPORTED)
     return client.list(resource_group_name, registry_name)
 
 def acr_taskrun_delete(cmd,
@@ -34,5 +34,5 @@ def acr_taskrun_delete(cmd,
                        registry_name,
                        resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
-        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
+        cmd, registry_name, resource_group_name, TASKRUN_NOT_SUPPORTED)
     return client.delete(resource_group_name, registry_name, taskrun_name)
