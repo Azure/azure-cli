@@ -10,6 +10,7 @@ from ._utils import (
 
 TASKRUN_NOT_SUPPORTED = 'TaskRun is only supported for managed registries.'
 
+
 def acr_taskrun_show(cmd,
                      client,
                      taskrun_name,

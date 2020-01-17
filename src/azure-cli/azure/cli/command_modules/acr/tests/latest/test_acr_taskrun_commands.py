@@ -36,13 +36,12 @@ class AcrTaskRunCommandsTests(ScenarioTest):
 
         self.cmd('acr taskrun show --name {registry_name} --taskrun-name {taskrun_name} --resource-group {rg}',
                  checks=[self.check('name', '{taskrun_name}'),
-                 self.check('provisioningState', 'Succeeded'),
-                 self.check('runRequest.type', 'DockerBuildRequest')])
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('runRequest.type', 'DockerBuildRequest')])
 
         self.cmd('acr taskrun list --name {registry_name} --resource-group {rg}',
                  checks=[self.check('[0].name', '{taskrun_name}'),
-                        self.check('[0].provisioningState', 'Succeeded'),
-                        self.check('[0].runRequest.type', 'DockerBuildRequest')])
+                         self.check('[0].provisioningState', 'Succeeded'),
+                         self.check('[0].runRequest.type', 'DockerBuildRequest')])
 
         self.cmd('acr taskrun delete --name {registry_name} --taskrun-name {taskrun_name} --resource-group {rg}')
-
