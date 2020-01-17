@@ -75,6 +75,19 @@ helps['account get-access-token'] = """
     long-summary: >
         The token will be valid for at least 5 minutes with the maximum at 60 minutes.
         If the subscription argument isn't specified, the current account is used.
+    examples:
+        - name: Get an access token for the current account 
+          text: >
+            az account get-access-token
+        - name: Get an access token for a specific subscription
+          text: >
+            az account get-access-token --subscription 00000000-0000-0000-0000-000000000000
+        - name: Get an access token for a specific tenant
+          text: >
+            az account get-access-token --tenant 00000000-0000-0000-0000-000000000000
+        - name: Get an access token to use with MS Graph API
+          text: >
+            az account get-access-token --resource-type ms-graph
 """
 
 helps['self-test'] = """
