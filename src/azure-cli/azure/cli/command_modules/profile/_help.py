@@ -76,7 +76,7 @@ helps['account get-access-token'] = """
         The token will be valid for at least 5 minutes with the maximum at 60 minutes.
         If the subscription argument isn't specified, the current account is used.
     examples:
-        - name: Get an access token for the current account 
+        - name: Get an access token for the current account
           text: >
             az account get-access-token
         - name: Get an access token for a specific subscription
