@@ -160,7 +160,7 @@ def _get_helm_version(ignore_errors):
     if match_obj:
         output = match_obj.group(2)
 
-    logger.warning("Helm version: {}".format(output))
+    logger.warning("Helm version: %s", output)
 
     # Display an error message if the current helm version < min required version
     if match_obj and LooseVersion(output) < LooseVersion(MIN_HELM_VERSION):
@@ -197,7 +197,7 @@ def _get_notary_version(ignore_errors):
     if match_obj:
         output = match_obj.group(1)
 
-    logger.warning("Notary version: {}".format(output))
+    logger.warning("Notary version: %s", output)
 
     # Display error if the current version does not match the recommended version
     if match_obj and LooseVersion(output) != LooseVersion(RECOMMENDED_NOTARY_VERSION):
