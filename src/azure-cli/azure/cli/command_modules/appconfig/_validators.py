@@ -9,7 +9,7 @@ import re
 from knack.log import get_logger
 from knack.util import CLIError
 
-from ._utils import is_valid_connection_string, resolve_resource_group
+from ._utils import is_valid_connection_string, resolve_resource_group, get_store_name_from_connection_string
 from ._azconfig.models import QueryFields
 from ._featuremodels import FeatureQueryFields
 
@@ -85,7 +85,10 @@ def validate_appservice_name_or_id(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, parse_resource_id
     if namespace.appservice_account:
         if not is_valid_resource_id(namespace.appservice_account):
-            resource_group, _ = resolve_resource_group(cmd, namespace.name)
+            config_store_name = namespace.name
+            if not config_store_name:
+                config_store_name = get_store_name_from_connection_string(namespace.connection_string)
+            resource_group, _ = resolve_resource_group(cmd, config_store_name)
             namespace.appservice_account = {
                 "subscription": get_subscription_id(cmd.cli_ctx),
                 "resource_group": resource_group,

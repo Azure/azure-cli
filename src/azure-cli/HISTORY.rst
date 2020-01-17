@@ -3,6 +3,12 @@
 Release History
 ===============
 
+**AppConfig**
+
+* Support import/export of keyvault references from/to appservice
+* Expose sku modification for configuration store.
+* Add command group for managed identity.
+
 **AppService**
 
 * Azure Stack: surface commands under the profile of 2019-03-01-hybrid
@@ -17,11 +23,6 @@ Release History
 
 2.0.80
 ++++++
-
-**AppConfig**
-
-* Expose sku modification for configuration store.
-* Add command group for managed identity.
 
 **Compute**
 
