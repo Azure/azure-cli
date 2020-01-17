@@ -894,6 +894,12 @@ examples:
         az acr task update-run -r MyRegistry --run-id runId --no-archive false
 """
 
+helps['acr taskrun'] = """
+type: group
+short-summary: Manage taskruns using Azure Container Registries.
+"""
+
+
 helps['acr taskrun delete'] = """
 type: command
 short-summary: Delete a taskrun from an Azure Container Registry.
