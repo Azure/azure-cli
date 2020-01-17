@@ -894,6 +894,33 @@ examples:
         az acr task update-run -r MyRegistry --run-id runId --no-archive false
 """
 
+helps['acr taskrun delete'] = """
+type: command
+short-summary: Delete a taskrun from an Azure Container Registry.
+examples:
+  - name: Delete a taskrun from an Azure Container Registry.
+    text: >
+        az acr taskrun delete -n MyRegistry --taskrun-name MyTaskRun -g MyResourceGroup
+"""
+
+helps['acr taskrun list'] = """
+type: command
+short-summary: List the taskruns for an Azure Container Registry.
+examples:
+  - name: List taskruns and show the results in a table.
+    text: >
+        az acr taskrun list -n MyRegistry -g MyResourceGroup -o table
+"""
+
+helps['acr taskrun show'] = """
+type: command
+short-summary: Get the properties of a named taskrun for an Azure Container Registry.
+examples:
+  - name: Get the properties of a taskrun, displaying the results in a table.
+    text: >
+        az acr taskrun show -n MyRegistry --taskrun-name MyTaskRun -o table
+"""
+
 helps['acr token'] = """
 type: group
 short-summary: Manage tokens for an Azure Container Registry.
