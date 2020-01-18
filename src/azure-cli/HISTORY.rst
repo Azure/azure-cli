@@ -3,6 +3,35 @@
 Release History
 ===============
 
+**AppConfig**
+
+* Support import/export of keyvault references from/to appservice
+
+**AppService**
+
+* Azure Stack: surface commands under the profile of 2019-03-01-hybrid
+
+**IoT Central**
+
+* Support app creation/update with the new sku name ST0, ST1, ST2.
+
+**Misc**
+
+* Fix #6371: Support filename and environment variable completion in Bash
+
+2.0.80
+++++++
+
+**Compute**
+
+* disk update: Add --disk-encryption-set and --encryption-type
+* snapshot create/update: Add --disk-encryption-set and --encryption-type
+
+**Storage**
+
+* Upgrade azure-mgmt-storage version to 7.1.0
+* `az storage account create`: Add `--encryption-key-type-for-table` and `--encryption-key-type-for-queue` to support Table and Queue Encryption Service
+
 2.0.79
 ++++++
 
@@ -59,11 +88,16 @@ Release History
 
 * Fix #11712: `az ad app/sp show` does not return exit code 3 when the application or service principal does not exist
 
+**Redis**
+
+* Fixing `az redis update` operation to work for caches with RDB/AOF enabled
+
 **Storage**
 
 * `az storage account create`: Remove preview flag for --enable-hierarchical-namespace parameter
 * Update azure-mgmt-storage version to 7.0.0 to use api version 2019-06-01
 * Add new parameters `--enable-delete-retention` and `--delete-retention-days` to support managing delete retention policy for storage account blob-service-properties.
+
 
 2.0.78
 ++++++
@@ -338,7 +372,6 @@ Release History
 * Change default node version on function apps to ~10 for Windows
 * Add --runtime-version property to `az functionapp create`
 * az appservice vnet-integration add: Fixed so that subnet delegation is case insensitive and delegating subnets does not overwrite previous data.
-
 
 **ARM**
 
