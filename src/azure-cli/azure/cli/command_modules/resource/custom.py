@@ -756,7 +756,6 @@ def export_group_as_template(
 
     result = rcf.resource_groups.export_template(resource_group_name, ['*'], options=options)
 
-    print(json.dumps(result.template, indent=2))
     # pylint: disable=no-member
     # On error, server still returns 200, with details in the error attribute
     if result.error:
@@ -767,6 +766,8 @@ def export_group_as_template(
             logger.warning(str(error))
         for detail in getattr(error, 'details', None) or []:
             logger.error(detail.message)
+
+    return result.template
 
 
 def create_application(cmd, resource_group_name,
