@@ -18,15 +18,15 @@ class StorageFileShareUsingResourceProviderScenarios(StorageScenarioMixin, Scena
 
         # Create file share with storage account name and resource group.
         share_name_1 = self.create_random_name('share', 24)
-        initial_share_quota = 5
+        initial_quota = 5
         self.kwargs.update({
             'share_name_1': share_name_1,
-            'initial_share_quota': initial_share_quota
+            'initial_quota': initial_quota
         })
 
-        result = self.cmd('storage share-rm create --storage-account {sa} -g {rg} -n {share_name_1} --share-quota {initial_share_quota} --metadata key1=value1').get_output_in_json()
+        result = self.cmd('storage share-rm create --storage-account {sa} -g {rg} -n {share_name_1} --quota {initial_quota} --metadata key1=value1').get_output_in_json()
         self.assertEqual(result['name'], share_name_1)
-        self.assertEqual(result['shareQuota'], initial_share_quota)
+        self.assertEqual(result['shareQuota'], initial_quota)
         self.assertEqual(result['metadata']['key1'], 'value1')
 
         share_id_1 = result['id']
@@ -43,9 +43,9 @@ class StorageFileShareUsingResourceProviderScenarios(StorageScenarioMixin, Scena
             'storage_account_id': storage_account_id
         })
 
-        result = self.cmd('storage share-rm create --storage-account {storage_account_id} -n {share_name_2} --share-quota {initial_share_quota} --metadata key1=value1').get_output_in_json()
+        result = self.cmd('storage share-rm create --storage-account {storage_account_id} -n {share_name_2} --quota {initial_quota} --metadata key1=value1').get_output_in_json()
         self.assertEqual(result['name'], share_name_2)
-        self.assertEqual(result['shareQuota'], initial_share_quota)
+        self.assertEqual(result['shareQuota'], initial_quota)
         self.assertEqual(result['metadata']['key1'], 'value1')
 
         share_id_2 = result['id']
@@ -90,29 +90,29 @@ class StorageFileShareUsingResourceProviderScenarios(StorageScenarioMixin, Scena
             self.cmd('storage share-rm show --storage-account {sa} -g {rg} -n {non_exist_share_name}')
 
         # 5. Test update command.
-        updated_share_quota = 10
+        updated_quota = 10
         self.kwargs.update({
-            'updated_share_quota': updated_share_quota
+            'updated_quota': updated_quota
         })
 
         # Update file share with storage account name and resource group.
         result = self.cmd(
-            'storage share-rm update --storage-account {sa} -g {rg} -n {share_name_1} --share-quota {updated_share_quota} --metadata key2=value2').get_output_in_json()
-        self.assertEqual(result['shareQuota'], updated_share_quota)
+            'storage share-rm update --storage-account {sa} -g {rg} -n {share_name_1} --quota {updated_quota} --metadata key2=value2').get_output_in_json()
+        self.assertEqual(result['shareQuota'], updated_quota)
         self.assertEqual(result['metadata']['key2'], 'value2')
         self.assertNotIn('key1', result['metadata'])
 
         # Update file share with storage account id.
         result = self.cmd(
-            'storage share-rm update --storage-account {storage_account_id} -n {share_name_2} --share-quota {updated_share_quota} --metadata key2=value2').get_output_in_json()
-        self.assertEqual(result['shareQuota'], updated_share_quota)
+            'storage share-rm update --storage-account {storage_account_id} -n {share_name_2} --quota {updated_quota} --metadata key2=value2').get_output_in_json()
+        self.assertEqual(result['shareQuota'], updated_quota)
         self.assertEqual(result['metadata']['key2'], 'value2')
         self.assertNotIn('key1', result['metadata'])
 
         # Update file share by resource id
         result = self.cmd(
-            'storage share-rm update --ids {share_id_1} --share-quota {updated_share_quota} --metadata key2=value2').get_output_in_json()
-        self.assertEqual(result['shareQuota'], updated_share_quota)
+            'storage share-rm update --ids {share_id_1} --quota {updated_quota} --metadata key2=value2').get_output_in_json()
+        self.assertEqual(result['shareQuota'], updated_quota)
         self.assertEqual(result['metadata']['key2'], 'value2')
         self.assertNotIn('key1', result['metadata'])
 

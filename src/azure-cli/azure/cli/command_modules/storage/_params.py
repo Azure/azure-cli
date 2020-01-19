@@ -644,7 +644,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.argument('resource_group_name', required=False)
             c.argument('account_name', storage_account_type)
             c.argument('share_name', share_name_type, options_list=('--name', '-n'), id_part='child_name_2')
-            c.argument('share_quota', type=int)
+            c.argument('share_quota', type=int, options_list='--quota')
             c.argument('metadata', nargs='+',
                        help='Metadata in space-separated key=value pairs that is associated with the share. '
                             'This overwrites any existing metadata',
