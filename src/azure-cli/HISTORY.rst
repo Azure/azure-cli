@@ -3,9 +3,26 @@
 Release History
 ===============
 
+**AppConfig**
+
+* Support import/export of keyvault references from/to appservice
+
+**AppService**
+
+* Azure Stack: surface commands under the profile of 2019-03-01-hybrid
+
+**ARM**
+
+* Fix issue #11658: `az group export` command does not support `--query` and `--output` parameters
+* Fix issue #10279: The exit code of `az group deployment validate` is 0 when the verification fails
+
 **IoT Central**
 
 * Support app creation/update with the new sku name ST0, ST1, ST2.
+
+**Misc**
+
+* Fix #6371: Support filename and environment variable completion in Bash
 
 **SQL**
 
@@ -358,7 +375,6 @@ Release History
 * Change default node version on function apps to ~10 for Windows
 * Add --runtime-version property to `az functionapp create`
 * az appservice vnet-integration add: Fixed so that subnet delegation is case insensitive and delegating subnets does not overwrite previous data.
-
 
 **ARM**
 
