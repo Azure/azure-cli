@@ -510,7 +510,7 @@ def _list_resources_odata_filter_builder(resource_group_name=None, resource_prov
     if tag is not None:
         if resource_group_name:
             raise IncorrectUsageError('you cannot use the tag filter with resource group filter'
-                                      '(If the default value for resource group is set, please use \'az configure\' command to clear it first)')
+                                      '(If the default value for resource group is set, please use \'az configure --defaults group=""\' command to clear it first)')
         if resource_provider_namespace:
             raise IncorrectUsageError('you cannot use the tag filter with namespace filter')
         if resource_type:
@@ -519,7 +519,7 @@ def _list_resources_odata_filter_builder(resource_group_name=None, resource_prov
             raise IncorrectUsageError('you cannot use the tag filter with name filter')
         if location:
             raise IncorrectUsageError('you cannot use the tag filter with location filter'
-                                      '(If the default value for location is set, please use \'az configure\' command to clear it first)')
+                                      '(If the default value for location is set, please use \'az configure --defaults location=""\' command to clear it first)')
 
     filters = []
 
