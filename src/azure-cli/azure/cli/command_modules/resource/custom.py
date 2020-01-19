@@ -285,7 +285,10 @@ def _deploy_arm_template_core(cli_ctx, resource_group_name,
 
     smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, aux_subscriptions=aux_subscriptions)
     if validate_only:
-        return sdk_no_wait(no_wait, smc.deployments.validate, resource_group_name, deployment_name, properties)
+        response = sdk_no_wait(no_wait, smc.deployments.validate, resource_group_name, deployment_name, properties)
+        if response and response.error:
+            raise CLIError(response.error)
+        return response
     return sdk_no_wait(no_wait, smc.deployments.create_or_update, resource_group_name, deployment_name, properties)
 
 
@@ -756,7 +759,6 @@ def export_group_as_template(
 
     result = rcf.resource_groups.export_template(resource_group_name, ['*'], options=options)
 
-    print(json.dumps(result.template, indent=2))
     # pylint: disable=no-member
     # On error, server still returns 200, with details in the error attribute
     if result.error:
@@ -767,6 +769,8 @@ def export_group_as_template(
             logger.warning(str(error))
         for detail in getattr(error, 'details', None) or []:
             logger.error(detail.message)
+
+    return result.template
 
 
 def create_application(cmd, resource_group_name,
@@ -2011,7 +2015,7 @@ def list_resource_links(cmd, scope=None, filter_string=None):
 # endregion
 
 
-def rest_call(cmd, method, uri, headers=None, uri_parameters=None,
+def rest_call(cmd, uri, method=None, headers=None, uri_parameters=None,
               body=None, skip_authorization_header=False, resource=None, output_file=None):
     from azure.cli.core.util import send_raw_request
     r = send_raw_request(cmd.cli_ctx, method, uri, headers, uri_parameters, body,

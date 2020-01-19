@@ -113,6 +113,8 @@ serverless_arg_group = 'Serverless offering'
 
 server_configure_help = 'You can configure the default using `az configure --defaults sql-server=<name>`'
 
+time_format_help = 'Time should be in following format: "YYYY-MM-DDTHH:MM:SS".'
+
 
 def get_location_type_with_default_from_resource_group(cli_ctx):
     return CLIArgumentType(
@@ -484,14 +486,16 @@ def load_arguments(self, _):
                    arg_group=restore_point_arg_group,
                    help='The point in time of the source database that will be restored to create the'
                    ' new database. Must be greater than or equal to the source database\'s'
-                   ' earliestRestoreDate value. Either --time or --deleted-time (or both) must be specified.')
+                   ' earliestRestoreDate value. Either --time or --deleted-time (or both) must be specified. ' +
+                   time_format_help)
 
         c.argument('source_database_deletion_date',
                    options_list=['--deleted-time'],
                    arg_group=restore_point_arg_group,
                    help='If specified, restore from a deleted database instead of from an existing database.'
                    ' Must match the deleted time of a deleted database in the same server.'
-                   ' Either --time or --deleted-time (or both) must be specified.')
+                   ' Either --time or --deleted-time (or both) must be specified. ' +
+                   time_format_help)
 
     with self.argument_context('sql db show') as c:
         # Service tier advisors and transparent data encryption are not included in the first batch
@@ -1376,7 +1380,7 @@ def load_arguments(self, _):
                    required=True,
                    help='The point in time of the source database that will be restored to create the'
                    ' new database. Must be greater than or equal to the source database\'s'
-                   ' earliestRestoreDate value. Time should be in following format: "YYYY-MM-DDTHH:MM:SS"')
+                   ' earliestRestoreDate value. ' + time_format_help)
 
     with self.argument_context('sql midb list') as c:
         c.argument('managed_instance_name', id_part=None)
