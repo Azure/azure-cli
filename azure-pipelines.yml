@@ -24,10 +24,12 @@ jobs:
   pool:
     vmImage: "windows-2019"
   steps:
-    - task: CredScan@2
+    - task: ea576cd4-c61f-48f8-97e7-a3cb07b90a6f@2
+      displayName: 'CredScan'
       inputs:
         toolVersion: 'Latest'
     - task: PostAnalysis@1
+      displayName: 'PostAnalysis@1'
       inputs:
         AllTools: false
         BinSkim: false
