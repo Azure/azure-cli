@@ -11,6 +11,10 @@ Release History
 
 * Azure Stack: surface commands under the profile of 2019-03-01-hybrid
 
+**ARM**
+
+* Fix issue #11658: `az group export` command does not support `--query` and `--output` parameters
+
 **IoT Central**
 
 * Support app creation/update with the new sku name ST0, ST1, ST2.
