@@ -67,6 +67,18 @@ HELM_VERSION_ERROR = ErrorClass(
 )
 
 
+# NOTARY ERRORS
+NOTARY_COMMAND_ERROR = ErrorClass(
+    "NOTARY_COMMAND_ERROR",
+    "Please verify if notary is installed."
+)
+
+NOTARY_VERSION_ERROR = ErrorClass(
+    "NOTARY_VERSION_ERROR",
+    "An error occurred while retrieving notary version. Please make sure that you have the latest Azure CLI version, and that you are using the recommended notary version."
+)
+
+
 # CONNECTIVITY ERRORS
 CONNECTIVITY_DNS_ERROR = ErrorClass(
     "CONNECTIVITY_DNS_ERROR",
