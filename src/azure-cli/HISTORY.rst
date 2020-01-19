@@ -14,6 +14,7 @@ Release History
 **ARM**
 
 * Fix issue #11658: `az group export` command does not support `--query` and `--output` parameters
+* Fix issue #10279: The exit code of `az group deployment validate` is 0 when the verification fails
 
 **IoT Central**
 
