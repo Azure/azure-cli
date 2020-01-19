@@ -282,7 +282,8 @@ parameters:
     short-summary: The blob container where the selected source files or blobs will be copied to.
   - name: --pattern
     type: string
-    short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq', and '[!seq]'.
+    short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
+    long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'.
   - name: --dryrun
     type: bool
     short-summary: List the files or blobs to be uploaded. No actual data transfer will occur.
@@ -332,7 +333,8 @@ parameters:
     long-summary: The source can be the container URL or the container name. When the source is the container URL, the storage account name will be parsed from the URL.
   - name: --pattern
     type: string
-    short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'.
+    short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
+    long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'. You can also try "az stroage remove" command with --include and --exclude with azure cli >= 2.0.70 to match multiple patterns.
   - name: --dryrun
     type: bool
     short-summary: Show the summary of the operations to be taken instead of actually deleting the file(s).
@@ -348,7 +350,16 @@ examples:
   - name: Delete all blobs ending with ".py" in a container that have not been modified for 10 days.
     text: |
         date=`date -d "10 days ago" '+%Y-%m-%dT%H:%MZ'`
-        az storage blob delete-batch -s MyContainer --account-name MyStorageAccount --pattern *.py --if-unmodified-since $date
+        az storage blob delete-batch -s mycontainer --account-name mystorageaccount --pattern *.py --if-unmodified-since $date
+  - name: Delete all the blobs in a directory named "dir" in a container named "mycontainer".
+    text: |
+        az storage blob delete-batch -s mycontainer --account-name mystorageaccount --pattern dir/*
+  - name: Delete the blobs with the format 'cli-2018-xx-xx.txt' or 'cli-2019-xx-xx.txt' in a container.
+    text: |
+        az storage blob delete-batch -s mycontainer --account-name mystorageaccount --pattern cli-201[89]-??-??.txt
+  - name: Delete all blobs with the format 'cli-201x-xx-xx.txt' except cli-2018-xx-xx.txt' and 'cli-2019-xx-xx.txt' in a container.
+    text: |
+        az storage blob delete-batch -s mycontainer --account-name mystorageaccount --pattern cli-201[!89]-??-??.txt
 """
 
 helps['storage blob download-batch'] = """
@@ -364,13 +375,24 @@ parameters:
     short-summary: The existing destination folder for this download operation.
   - name: --pattern
     type: string
-    short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'.
+    short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
+    long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'.
   - name: --dryrun
     type: bool
     short-summary: Show the summary of the operations to be taken instead of actually downloading the file(s).
 examples:
   - name: Download all blobs that end with .py
-    text: az storage blob download-batch -d . --pattern *.py -s MyContainer --account-name MyStorageAccount
+    text: |
+        az storage blob download-batch -d . --pattern *.py -s mycontainer --account-name mystorageaccount
+  - name: Download all blobs in a directory named "dir" from container named "mycontainer".
+    text: |
+        az storage blob download-batch -d . -s mycontainer --account-name mystorageaccount --pattern dir/*
+  - name: Download all blobs with the format 'cli-2018-xx-xx.txt' or 'cli-2019-xx-xx.txt' in container to current path.
+    text: |
+        az storage blob download-batch -d . -s mycontainer --account-name mystorageaccount --pattern cli-201[89]-??-??.txt
+  - name: Download all blobs with the format 'cli-201x-xx-xx.txt' except cli-2018-xx-xx.txt' and 'cli-2019-xx-xx.txt' in container to current path.
+    text: |
+        az storage blob download-batch -d . -s mycontainer --account-name mystorageaccount --pattern cli-201[!89]-??-??.txt
 """
 
 helps['storage blob exists'] = """
@@ -545,7 +567,8 @@ parameters:
     long-summary: The destination can be the container URL or the container name. When the destination is the container URL, the storage account name will be parsed from the URL.
   - name: --pattern
     type: string
-    short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'.
+    short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
+    long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'.
   - name: --dryrun
     type: bool
     short-summary: Show the summary of the operations to be taken instead of actually uploading the file(s).
@@ -566,7 +589,17 @@ parameters:
     short-summary: The active lease id for the blob
 examples:
   - name: Upload all files that end with .py unless blob exists and has been modified since given date.
-    text: az storage blob upload-batch -d MyContainer --account-name MyStorageAccount -s directory_path --pattern *.py --if-unmodified-since 2018-08-27T20:51Z
+    text: |
+        az storage blob upload-batch -d mycontainer --account-name mystorageaccount -s <path-to-directory> --pattern *.py --if-unmodified-since 2018-08-27T20:51Z
+  - name: Upload all files from local path directory to a container named "mycontainer".
+    text: |
+        az storage blob upload-batch -d mycontainer --account-name mystorageaccount -s <path-to-directory>
+  - name: Upload all files with the format 'cli-2018-xx-xx.txt' or 'cli-2019-xx-xx.txt' in local path directory.
+    text: |
+        az storage blob upload-batch -d mycontainer --account-name mystorageaccount -s <path-to-directory> --pattern cli-201[89]-??-??.txt
+  - name: Upload all files with the format 'cli-201x-xx-xx.txt' except cli-2018-xx-xx.txt' and 'cli-2019-xx-xx.txt' in a container.
+    text: |
+        az storage blob upload-batch -d mycontainer --account-name mystorageaccount -s <path-to-directory> --pattern cli-201[!89]-??-??.txt
 """
 
 helps['storage blob url'] = """
@@ -883,7 +916,8 @@ parameters:
     short-summary: The directory where the source data is copied to. If omitted, data is copied to the root directory.
   - name: --pattern
     type: string
-    short-summary: The pattern used for globbing files and blobs. The supported patterns are '*', '?', '[seq', and '[!seq]'.
+    short-summary: The pattern used for globbing files and blobs. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
+    long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'.
   - name: --dryrun
     type: bool
     short-summary: List the files and blobs to be copied. No actual data transfer will occur.
@@ -917,7 +951,8 @@ parameters:
     short-summary: The source of the file delete operation. The source can be the file share URL or the share name.
   - name: --pattern
     type: string
-    short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq]', and '[!seq]'.
+    short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
+    long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'.
   - name: --dryrun
     type: bool
     short-summary: List the files and blobs to be deleted. No actual data deletion will occur.
@@ -942,7 +977,8 @@ parameters:
     short-summary: The local directory where the files are downloaded to. This directory must already exist.
   - name: --pattern
     type: string
-    short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq]', and '[!seq]'.
+    short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
+    long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'.
   - name: --dryrun
     type: bool
     short-summary: List the files and blobs to be downloaded. No actual data transfer will occur.
@@ -1031,7 +1067,8 @@ parameters:
     short-summary: The directory where the source data is copied to. If omitted, data is copied to the root directory.
   - name: --pattern
     type: string
-    short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq', and '[!seq]'.
+    short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
+    long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'.
   - name: --dryrun
     type: bool
     short-summary: List the files and blobs to be uploaded. No actual data transfer will occur.
