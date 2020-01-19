@@ -25,7 +25,7 @@ Release History
 
 **Storage**
 
-* Feat: Added a new command group `az storage share-rm` to use the Microsoft.Storage resource provider for Azure file share management operations.
+* Add a new command group `az storage share-rm` to use the Microsoft.Storage resource provider for Azure file share management operations.
 
 2.0.80
 ++++++
