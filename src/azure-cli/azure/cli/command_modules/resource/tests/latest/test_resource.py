@@ -48,6 +48,10 @@ class ResourceGroupScenarioTest(ScenarioTest):
         self.cmd('group update -g {rg} --set tags.b={tag} --force-string',
                  checks=self.check('tags.b', '{{\"k\":\"v\"}}'))
 
+        result = self.cmd('group export --name {rg} --query "contentVersion"')
+
+        self.assertEqual('"1.0.0.0"\n', result.output)
+
 
 class ResourceGroupNoWaitScenarioTest(ScenarioTest):
 
