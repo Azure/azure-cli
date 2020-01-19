@@ -1452,7 +1452,8 @@ def load_arguments(self, _):
 
         c.argument('label_name',
                    required=False,
-                   help='The label name.')
+                   help='The label name.',
+                   options_list=['--label'])
 
     with self.argument_context('sql db classification recommendation list') as c:
         c.ignore('skip_token')

@@ -241,7 +241,7 @@ def load_command_table(self, _):
                             client_factory=get_sql_database_sensitivity_labels_operations) as g:
 
         g.command('list', 'list_current_by_database')
-        g.show_command('show', 'get')
+        g.custom_command('show', 'db_sensitivity_label_show')
         g.command('delete', 'delete')
         g.custom_command('update', 'db_sensitivity_label_update')
 

@@ -1486,6 +1486,25 @@ def db_threat_detection_policy_update(
     return instance
 
 
+def db_sensitivity_label_show(
+        client,
+        database_name,
+        server_name,
+        schema_name,
+        table_name,
+        column_name,
+        resource_group_name):
+
+    return client.get(
+        resource_group_name,
+        server_name,
+        database_name,
+        schema_name,
+        table_name,
+        column_name,
+        SensitivityLabelSource.current)
+
+
 def db_sensitivity_label_update(
         cmd,
         client,

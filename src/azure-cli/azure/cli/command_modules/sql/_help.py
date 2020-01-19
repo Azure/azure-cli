@@ -836,7 +836,7 @@ type: command
 short-summary: Update a columns's sensitivity classification.
 examples:
   - name: Update sensitivity classification for a given column.
-    text: az sql db classification update -g mygroup -s myserver -n mydb --schema dbo --table mytable --column mycolumn --information-type Name --label-name "Confidential - GDPR"
+    text: az sql db classification update -g mygroup -s myserver -n mydb --schema dbo --table mytable --column mycolumn --information-type Name --label "Confidential - GDPR"
 """
 
 helps['sql db classification list'] = """
@@ -852,7 +852,7 @@ type: command
 short-summary: Get the sensitivity classification of a given column.
 examples:
   - name: Get the sensitivity classification of a given column.
-    text: az sql db classification show -g mygroup -s myserver -n mydb --schema dbo --table mytable --column mycolumn --sensitivity-label-source current
+    text: az sql db classification show -g mygroup -s myserver -n mydb --schema dbo --table mytable --column mycolumn
 """
 
 helps['sql db classification delete'] = """
