@@ -1189,6 +1189,10 @@ short-summary: Create a new Azure file share under the specified storage account
 examples:
   - name: Create a new Azure file share 'MyFileShare' with metadata and quota as 10 GB under the storage account 'mystorageaccount'(account name) in resource group 'MyResourceGroup'.
     text: az storage share-rm create -g MyResourceGroup --storage-account mystorageaccount --name MyFileShare --quota 10 --metadata key1=value1 key2=value2
+  - name: Create a new Azure file share 'MyFileShare' with metadata and quota as 6000 GB under the storage account 'mystorageaccount'(account name) which enables large file share in resource group 'MyResourceGroup'.
+    text: |
+        az storage account update -g MyResourceGroup --name mystorageaccount --enable-large-file-share
+        az storage share-rm create -g MyResourceGroup --storage-account mystorageaccount --name MyFileShare --quota 6000 --metadata key1=value1 key2=value2
   - name: Create a new Azure file share 'MyFileShare' with metadata and quota as 10 GB under the storage account 'mystorageaccount' (account id).
     text: az storage share-rm create --storage-account mystorageaccount --name MyFileShare --quota 10 --metadata key1=value1 key2=value2
 """
