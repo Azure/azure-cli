@@ -129,10 +129,10 @@ class StorageFileShareUsingResourceProviderScenarios(StorageScenarioMixin, Scena
         # 7. Test delete command.
 
         # Delete file shares with storage account name and resource group.
-        self.cmd('storage share-rm delete --storage-account {sa} -g {rg} -n {share_name_1}')
+        self.cmd('storage share-rm delete --storage-account {sa} -g {rg} -n {share_name_1} -y')
 
         # Delete file share by resource id.
-        self.cmd('storage share-rm delete --ids {share_id_2}')
+        self.cmd('storage share-rm delete --ids {share_id_2} -y')
 
         # 8. Test exists command (the file share doesn't exist).
         result = self.cmd('storage share-rm exists --storage-account {sa} -g {rg} -n {share_name_1}').get_output_in_json()
