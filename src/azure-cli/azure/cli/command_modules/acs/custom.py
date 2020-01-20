@@ -3275,7 +3275,8 @@ def openshift_monitor_enable(cmd, client, resource_group_name, name, workspace_i
 
 def openshift_monitor_disable(cmd, client, resource_group_name, name, no_wait=False):
     instance = client.get(resource_group_name, name)
-    instance.monitor_profile = None
+    monitor_profile = OpenShiftManagedClusterMonitorProfile(enabled=False, workspace_resource_id=None)  # pylint: disable=line-too-long
+    instance.monitor_profile = monitor_profile
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
 
