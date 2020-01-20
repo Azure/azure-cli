@@ -373,6 +373,9 @@ parameters:
   - name: --max-count
     type: int
     short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100]
+  - name: --clear-cluster-autoscaler-profile
+    type: bool
+    short-summary: Clears the cluster-autoscaler profile.
   - name: --cluster-autoscaler-profile
     type: list
     short-summary: Space-separated list of key=value pairs for configuring cluster autoscaler.

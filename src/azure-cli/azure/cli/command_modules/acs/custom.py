@@ -1966,6 +1966,7 @@ def aks_update(cmd, client, resource_group_name, name,
                enable_cluster_autoscaler=False,
                disable_cluster_autoscaler=False,
                update_cluster_autoscaler=False,
+               clear_cluster_autoscaler_profile=False,
                cluster_autoscaler_profile=None,
                min_count=None, max_count=None,
                load_balancer_managed_outbound_ip_count=None,
@@ -1988,11 +1989,13 @@ def aks_update(cmd, client, resource_group_name, name,
             not attach_acr and
             not detach_acr and
             not cluster_autoscaler_profile and
+            not clear_cluster_autoscaler_profile and
             api_server_authorized_ip_ranges is None):
         raise CLIError('Please specify one or more of "--enable-cluster-autoscaler" or '
                        '"--disable-cluster-autoscaler" or '
                        '"--update-cluster-autoscaler" or '
                        '"--cluster-autoscaler-profile" or '
+                       '"--clear-cluster-autoscaler-profile" or '
                        '"--load-balancer-managed-outbound-ip-count" or'
                        '"--load-balancer-outbound-ips" or '
                        '"--load-balancer-outbound-ip-prefixes" or'
@@ -2037,7 +2040,12 @@ def aks_update(cmd, client, resource_group_name, name,
         instance.agent_pool_profiles[0].min_count = None
         instance.agent_pool_profiles[0].max_count = None
 
-    instance.auto_scaler_profile = _update_dict(instance.auto_scaler_profile, cluster_autoscaler_profile)
+    if cluster_autoscaler_profile and clear_cluster_autoscaler_profile:
+        raise CLIError('Only one of cluster-autoscaler-profile or clear-cluster-autoscaler-profile can be specified')
+    if clear_cluster_autoscaler_profile:
+        instance.auto_scaler_profile = {}
+    if cluster_autoscaler_profile:
+        instance.auto_scaler_profile = _update_dict(instance.auto_scaler_profile, cluster_autoscaler_profile)
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
