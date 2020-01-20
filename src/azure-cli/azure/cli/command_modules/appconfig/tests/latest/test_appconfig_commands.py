@@ -15,12 +15,9 @@ import yaml
 from knack.util import CLIError
 from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest, LiveScenarioTest)
 from azure.cli.testsdk.checkers import NoneCheck
-from azure.cli.command_modules.appconfig._constants import KeyVaultConstants
+from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants, KeyVaultConstants
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
-FEATURE_FLAG_PREFIX = ".appconfig.featureflag/"
-FEATURE_FLAG_CONTENT_TYPE = "application/vnd.microsoft.appconfig.ff+json;charset=utf-8"
-KEYVAULT_CONTENT_TYPE = "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
 
 
 class AppConfigMgmtScenarioTest(ScenarioTest):
@@ -1109,13 +1106,13 @@ class AppConfigKeyValidationScenarioTest(ScenarioTest):
             self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} -y')
 
         self.kwargs.update({
-            'key': FEATURE_FLAG_PREFIX
+            'key': FeatureFlagConstants.FEATURE_FLAG_PREFIX
         })
         with self.assertRaisesRegexp(CLIError, "Key is invalid. Key cannot start with the reserved prefix for feature flags."):
             self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} -y')
 
         self.kwargs.update({
-            'key': FEATURE_FLAG_PREFIX.upper() + 'test'
+            'key': FeatureFlagConstants.FEATURE_FLAG_PREFIX.upper() + 'test'
         })
         with self.assertRaisesRegexp(CLIError, "Key is invalid. Key cannot start with the reserved prefix for feature flags."):
             self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} -y')
@@ -1131,20 +1128,20 @@ class AppConfigKeyValidationScenarioTest(ScenarioTest):
         # validate content type
         self.kwargs.update({
             'key': "Color",
-            'content_type': FEATURE_FLAG_CONTENT_TYPE
+            'content_type': FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE
         })
         with self.assertRaisesRegexp(CLIError, "Content type is invalid. It's a reserved content type for feature flags."):
             self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} --content-type {content_type} -y')
 
         self.kwargs.update({
             'key': "Color",
-            'content_type': FEATURE_FLAG_CONTENT_TYPE.upper()
+            'content_type': FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE.upper()
         })
         with self.assertRaisesRegexp(CLIError, "Content type is invalid. It's a reserved content type for feature flags."):
             self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} --content-type {content_type} -y')
 
         self.kwargs.update({
-            'content_type': KEYVAULT_CONTENT_TYPE
+            'content_type': KeyVaultConstants.KEYVAULT_CONTENT_TYPE
         })
         with self.assertRaisesRegexp(CLIError, "Content type is invalid. It's a reserved content type for KeyVault references."):
             self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} --content-type {content_type} -y')

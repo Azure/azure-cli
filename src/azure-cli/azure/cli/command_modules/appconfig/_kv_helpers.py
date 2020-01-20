@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long
+# pylint: disable=line-too-long,too-many-nested-blocks
 
 import io
 import json
@@ -95,7 +95,7 @@ def validate_import_key(key):
         if key == '.' or key == '..' or '%' in key:
             logger.warning("Ignoring invalid key '%s'. Key cannot be a '.' or '..', or contain the '%%' character.", key)
             return False
-        if key.startswith(FEATURE_FLAG_PREFIX):
+        if key.startswith(FeatureFlagConstants.FEATURE_FLAG_PREFIX):
             logger.warning("Ignoring invalid key '%s'. Key cannot start with the reserved prefix for feature flags.", key)
             return False
     else:
@@ -326,9 +326,9 @@ def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add=""):
                             # this throws an exception for invalid format of secret identifier
                             KeyVaultIdentifier(uri=secret_identifier)
                             kv = KeyValue(key=key,
-                                        value=json.dumps({"uri": secret_identifier}, ensure_ascii=False, separators=(',', ':')),
-                                        tags=tags,
-                                        content_type=KeyVaultConstants.KEYVAULT_CONTENT_TYPE)
+                                          value=json.dumps({"uri": secret_identifier}, ensure_ascii=False, separators=(',', ':')),
+                                          tags=tags,
+                                          content_type=KeyVaultConstants.KEYVAULT_CONTENT_TYPE)
                             key_values.append(kv)
                             continue
                         except (TypeError, ValueError) as e:
@@ -767,8 +767,8 @@ def __convert_feature_dict_to_keyvalue_list(features_dict, enabled_for_keyword):
                         feature_flag_value.conditions = default_conditions
 
                 set_kv = KeyValue(key=key,
-                                value=json.dumps(feature_flag_value, default=lambda o: o.__dict__, ensure_ascii=False),
-                                content_type=FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE)
+                                  value=json.dumps(feature_flag_value, default=lambda o: o.__dict__, ensure_ascii=False),
+                                  content_type=FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE)
                 key_values.append(set_kv)
 
     except Exception as exception:
