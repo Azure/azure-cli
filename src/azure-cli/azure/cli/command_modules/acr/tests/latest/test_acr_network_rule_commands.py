@@ -102,5 +102,5 @@ class AcrNetworkRuleCommandsTests(ScenarioTest):
                  checks=[self.check('virtualNetworkRules', []),
                          self.check('ipRules', [])])
 
-        self.cmd('acr delete -g {rg} -n {registry_name}')
+        self.cmd('acr delete -g {rg} -n {registry_name} -y')
         self.cmd('network vnet delete -g {rg} -n {vnet_name}')
