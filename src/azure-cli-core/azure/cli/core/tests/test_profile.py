@@ -1605,7 +1605,14 @@ class TestProfile(unittest.TestCase):
 
         # action and verify(we plant an exception to throw after the SP was found; so if the exception is thrown,
         # we know the matching did go through)
-        self.assertRaises(ValueError, creds_cache.retrieve_token_for_service_principal, 'myapp', 'resource1', 'mytenant', False)
+        self.assertRaises(ValueError, creds_cache.retrieve_token_for_service_principal,
+                          'myapp', 'resource1', 'mytenant', False)
+
+        # tenant doesn't exactly match, but it still succeeds
+        # before fully migrating to pytest and utilizing capsys fixture, use `pytest -o log_cli=True` to manually
+        # verify the warning log
+        self.assertRaises(ValueError, creds_cache.retrieve_token_for_service_principal,
+                          'myapp', 'resource1', 'mytenant2', False)
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('os.fdopen', autospec=True)
