@@ -3,13 +3,13 @@
 Release History
 ===============
 
-**IoT Central**
-
-* Support app creation/update with the new sku name ST0, ST1, ST2.
-
 **AKS**
 
 * Each cluster gets a separate service principal to improve isolation
+
+**IoT Central**
+
+* Support app creation/update with the new sku name ST0, ST1, ST2.
 
 **Misc**
 
