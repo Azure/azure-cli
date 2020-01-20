@@ -10,4 +10,9 @@ jobs:
         versionSpec: '3.8'
         addToPath: true
         architecture: 'x64'
-    - bash: ls
+    - bash: |
+        ls
+        pip install azdev
+        cd ..
+        git clone https://github.com/Azure/azure-cli.git
+        azdev test vm
