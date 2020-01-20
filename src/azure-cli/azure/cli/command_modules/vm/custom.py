@@ -1879,7 +1879,10 @@ def add_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate, cert
 
 def list_vm_secrets(cmd, resource_group_name, vm_name):
     vm = get_vm(cmd, resource_group_name, vm_name)
-    return vm.os_profile.secrets
+    if vm.os_profile:
+        return vm.os_profile.secrets
+    else:
+        return None
 
 
 def remove_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate=None):
