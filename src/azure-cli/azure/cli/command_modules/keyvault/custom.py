@@ -698,7 +698,7 @@ def import_key(cmd, client, vault_base_url, key_name, protection=None, key_ops=N
     return client.import_key(vault_base_url, key_name, key_obj, protection == 'hsm', key_attrs, tags)
 
 
-def download_key(cmd, client, file_path, vault_base_url=None, key_name=None, key_version='',
+def download_key(client, file_path, vault_base_url=None, key_name=None, key_version='',
                  encoding=None, identifier=None):  # pylint: disable=unused-argument
     """ Download a key from a KeyVault. """
     if os.path.isfile(file_path) or os.path.isdir(file_path):
@@ -777,9 +777,9 @@ def download_key(cmd, client, file_path, vault_base_url=None, key_name=None, key
     key_type = json_web_key['kty']
     pub_key = ''
 
-    if key_type == 'RSA':
+    if key_type in ['RSA', 'RSA-HSM']:
         pub_key = _extract_rsa_public_key_from_jwk(json_web_key)
-    elif key_type == 'EC':
+    elif key_type in ['EC', 'EC-HSM']:
         pub_key = _extract_ec_public_key_from_jwk(json_web_key)
     else:
         raise CLIError('Unsupported key type: {}'.format(key_type))

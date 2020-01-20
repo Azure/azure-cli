@@ -28,6 +28,7 @@ def _asn1_to_iso8601(asn1_date):
 
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
+KEYS_DIR = os.path.join(TEST_DIR, 'keys')
 
 
 def _create_keyvault(test, kwargs, additional_args=None):
@@ -235,6 +236,103 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
                  checks=[self.check('key.kty', 'EC'), self.check('key.crv', 'P-256')])
         self.cmd('keyvault key import --vault-name {kv} -n import-eckey-encrypted --pem-file "{key_enc_file}" --pem-password {key_enc_password}',
                  checks=[self.check('key.kty', 'EC'), self.check('key.crv', 'P-521')])
+
+
+class KeyVaultKeyDownloadScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_kv_key_download')
+    def test_keyvault_key_download(self, resource_group):
+        import OpenSSL.crypto
+
+        self.kwargs.update({
+            'kv': self.create_random_name('cli-test-keyvault-', 24),
+            'loc': 'eastus2'
+        })
+        _create_keyvault(self, self.kwargs)
+
+        dest_der = os.path.join(TEST_DIR, 'download-der')
+        dest_pem = os.path.join(TEST_DIR, 'download-pem')
+        if not os.path.exists(dest_der):
+            os.mkdir(dest_der)
+        if not os.path.exists(dest_pem):
+            os.mkdir(dest_pem)
+
+        self.kwargs.update({
+            'dest_der': dest_der,
+            'dest_pem': dest_pem
+        })
+
+        key_names = [
+            'ec-p256.pem',
+            'ec-p384.pem',
+            'ec-p521.pem',
+            'ec-p256k.pem',
+            'rsa-2048.pem',
+            'rsa-3072.pem',
+            'rsa-4096.pem',
+            'ec-p256-hsm.pem',
+            'ec-p384-hsm.pem',
+            'ec-p521-hsm.pem',
+            'ec-p256k-hsm.pem',
+            'rsa-2048-hsm.pem',
+            'rsa-3072-hsm.pem',
+            'rsa-4096-hsm.pem'
+        ]
+
+        # RSA Keys
+        # * Generate: `openssl genrsa -out rsa-4096.pem 4096`
+        # * Extract public key: `openssl rsa -in rsa-4096.pem -pubout > rsa-4096.pub.pem`
+        # * Public key PEM to DER: `openssl rsa -pubin -inform PEM -in rsa-4096.pub.pem -outform DER -out rsa-4096.pub.der`
+
+        # EC Keys
+        # * Generate: `openssl ecparam -genkey -name secp521r1 -out ec521.key`
+        # * Extract public key (PEM): `openssl ec -in ec-p521.pem -pubout -out ec-p521.pub.pem`
+        # * Extract public key (DER): `openssl ec -in ec-p521.pem -pubout -outform DER -out ec-p521.pub.der`
+
+        try:
+            for key_name in key_names:
+                var_name = key_name.split('.')[0] + '-file'
+                if 'hsm' in key_name:  # Should be generated
+                    continue
+                else:  # Should be imported (Have already been generated offline)
+                    self.kwargs[var_name] = os.path.join(KEYS_DIR, key_name)
+                    self.cmd('keyvault key import --vault-name {kv} -n ' + var_name + ' --pem-file "{' + var_name + '}"')
+
+                der_downloaded_filename = os.path.join(dest_der, var_name)
+                pem_downloaded_filename = os.path.join(dest_pem, var_name)
+                self.cmd('keyvault key download --vault-name {kv} -n ' + var_name + ' -f "' + der_downloaded_filename + '" -e DER')
+                self.cmd('keyvault key download --vault-name {kv} -n ' + var_name + ' -f "' + pem_downloaded_filename + '" -e PEM')
+
+                expected_pem_data = []
+                pem_pub_filename = key_name.split('.')[0] + '.pub.pem'
+                with open(pem_pub_filename, 'r') as pem_file:
+                    expected_pem_data = pem_file.readlines()
+
+                algo = key_name.split('-')[0].upper()
+                expected_pem = "-----BEGIN {} PUBLIC KEY-----\n".format(algo) + \
+                               '\n'.join(expected_pem_data) + \
+                               '-----END {} PUBLIC KEY-----\n'.format(algo)
+                expected_pem = expected_pem.replace('\n', '')
+
+                def verify(path, file_type):
+                    with open(path, 'rb') as f:
+                        pub_key = OpenSSL.crypto.load_publickey(file_type, f.read())
+                        actual_pem = OpenSSL.crypto.dump_publickey(OpenSSL.crypto.FILETYPE_PEM, pub_key)
+                        if isinstance(actual_pem, bytes):
+                            actual_pem = actual_pem.decode("utf-8")
+                        self.assertIn(expected_pem, actual_pem.replace('\n', ''))
+
+                verify(der_downloaded_filename, OpenSSL.crypto.FILETYPE_ASN1)
+                verify(pem_downloaded_filename, OpenSSL.crypto.FILETYPE_PEM)
+
+                if os.path.exists(der_downloaded_filename):
+                    os.remove(der_downloaded_filename)
+                if os.path.exists(pem_downloaded_filename):
+                    os.remove(pem_downloaded_filename)
+        finally:
+            if os.path.exists(dest_der):
+                os.remove(dest_der)
+            if os.path.exists(dest_pem):
+                os.remove(dest_pem)
 
 
 class KeyVaultSecretSoftDeleteScenarioTest(ScenarioTest):
