@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**ACR**
+
+* [BREAKING CHANGE] `az acr delete` will prompt
+
 **AppConfig**
 
 * Support import/export of keyvault references from/to appservice
