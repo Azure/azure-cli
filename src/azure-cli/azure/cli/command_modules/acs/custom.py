@@ -1962,6 +1962,7 @@ def aks_scale(cmd, client, resource_group_name, name, node_count, nodepool_name=
 
 
 # pylint: disable=inconsistent-return-statements
+# pylint: disable=too-many-boolean-expressions
 def aks_update(cmd, client, resource_group_name, name,
                enable_cluster_autoscaler=False,
                disable_cluster_autoscaler=False,
