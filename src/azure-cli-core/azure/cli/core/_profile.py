@@ -621,7 +621,7 @@ class Profile(object):
                                                                                resource,
                                                                                tenant_dest)
         return (creds,
-                str('N/A' if tenant else account[_SUBSCRIPTION_ID]),
+                None if tenant else str(account[_SUBSCRIPTION_ID]),
                 str(tenant if tenant else account[_TENANT_ID]))
 
     def refresh_accounts(self, subscription_finder=None):

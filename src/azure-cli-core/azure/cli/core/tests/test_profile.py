@@ -724,7 +724,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(creds[2]['expiresOn'], self.token_entry1['expiresOn'])
         mock_get_token.assert_called_with(mock.ANY, self.user1, self.tenant_id, 'https://foo')
         self.assertEqual(mock_get_token.call_count, 2)
-        self.assertEqual(sub, 'N/A')
+        self.assertIsNone(sub)
         self.assertEqual(tenant, self.tenant_id)
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
@@ -763,7 +763,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(creds[2]['expiresOn'], self.token_entry1['expiresOn'])
         mock_get_token.assert_called_with(mock.ANY, 'sp1', 'https://foo', self.tenant_id)
         self.assertEqual(mock_get_token.call_count, 2)
-        self.assertEqual(sub, 'N/A')
+        self.assertIsNone(sub)
         self.assertEqual(tenant, self.tenant_id)
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)

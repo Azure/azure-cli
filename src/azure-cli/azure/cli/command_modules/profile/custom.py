@@ -73,13 +73,16 @@ def get_access_token(cmd, subscription=None, resource=None, resource_type=None, 
         resource = (resource or cmd.cli_ctx.cloud.endpoints.active_directory_resource_id)
     profile = Profile(cli_ctx=cmd.cli_ctx)
     creds, subscription, tenant = profile.get_raw_token(subscription=subscription, resource=resource, tenant=tenant)
-    return {
+
+    result = {
         'tokenType': creds[0],
         'accessToken': creds[1],
         'expiresOn': creds[2].get('expiresOn', 'N/A'),
-        'subscription': subscription,
         'tenant': tenant
     }
+    if subscription:
+        result['subscription'] = subscription
+    return result
 
 
 def set_active_subscription(cmd, subscription):
