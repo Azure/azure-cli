@@ -1945,6 +1945,8 @@ def _add_save_record(cmd, record, record_type, record_set_name, resource_group_n
     try:
         record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
     except CloudError:
+        logger.warning("The record set doesn't exist and is automatically created. "
+                       "In the future, an extra argument will be supported to confirm this auto creation.")
         RecordSet = cmd.get_models('RecordSet', resource_type=ResourceType.MGMT_NETWORK_DNS)
         record_set = RecordSet()
 

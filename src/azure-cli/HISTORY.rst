@@ -24,6 +24,10 @@ Release History
 
 * Fix #6371: Support filename and environment variable completion in Bash
 
+**Network**
+
+* Fix #2092: az network dns record-set add/remove: add warning when record-set is not found. In the future, an extra argument will be supported to confirm this auto creation.
+
 **Storage**
 
 * Add a new command group `az storage share-rm` to use the Microsoft.Storage resource provider for Azure file share management operations.
