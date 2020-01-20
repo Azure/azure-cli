@@ -324,7 +324,7 @@ long-summary: >
     Both can be removed at the same time.
 examples:
   - name: Delete a blob.
-    text: az storage blob delete -c mycontainer -n MyBlob 
+    text: az storage blob delete -c mycontainer -n MyBlob
   - name: Delete a blob using login credentials.
     text: az storage blob delete -c mycontainer -n MyBlob --account-name mystorageaccount --auth-mode login
 """
