@@ -147,6 +147,9 @@ def validate_client_parameters(cmd, namespace):
 
     # if account name is specified but no key, attempt to query
     if n.account_name and not n.account_key and not n.sas_token:
+        logger.warning('No connection string, account key or sas token found, we will query account keys for your '
+                       'storage account. Please try to use --auth-mode login or provide one of the following parameters'
+                       ': connection string, account key or sas token for your storage account.')
         n.account_key = _query_account_key(cmd.cli_ctx, n.account_name)
 
 
