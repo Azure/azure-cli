@@ -724,7 +724,7 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
         self.kwargs.update({
             'label': dest_label
         })
-        with self.assertRaisesRegexp(CLIError, "Import failed! Please provide only one of these arguments: 'label' or 'preserve-labels'."):
+        with self.assertRaisesRegexp(CLIError, "Import failed! Please provide only one of these arguments: '--label' or '--preserve-labels'."):
             self.cmd('appconfig kv import --connection-string {dest_connection_string} -s {import_source} --src-connection-string {src_connection_string} --src-label {src_label} --label {label} --preserve-labels -y')
 
         # Export tests from src config store to dest config store
@@ -775,7 +775,7 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
         self.kwargs.update({
             'label': dest_label
         })
-        with self.assertRaisesRegexp(CLIError, "Export failed! Please provide only one of these arguments: 'dest-label' or 'preserve-labels'."):
+        with self.assertRaisesRegexp(CLIError, "Export failed! Please provide only one of these arguments: '--dest-label' or '--preserve-labels'."):
             self.cmd('appconfig kv export --connection-string {src_connection_string} -d {import_source} --dest-connection-string {dest_connection_string} --label {src_label} --dest-label {label} --preserve-labels -y')
 
 
