@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=too-many-lines
-
 import codecs
 import json
 import math
@@ -12,14 +11,14 @@ import os
 import time
 import struct
 
-from jose.constants import Algorithms
+
 from knack.log import get_logger
 from knack.util import CLIError
 
 from OpenSSL import crypto
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import rsa, ec
-from cryptography.hazmat.primitives.serialization import load_pem_private_key
+from cryptography.hazmat.primitives.serialization import load_pem_private_key, Encoding, PublicFormat
 from cryptography.exceptions import UnsupportedAlgorithm
 
 
@@ -709,7 +708,12 @@ def download_key(cmd, client, file_path, vault_base_url=None, key_name=None, key
         len_diff = 4 - len(b) % 4 if len(b) % 4 > 0 else 0
         b = len_diff * b'\x00' + b  # We have to patch leading zeros for using struct.unpack
         bytes_num = int(math.floor(len(b) / 4))
-        return struct.unpack('>' + 'I' * bytes_num, b)[0]
+        ans = 0
+        items = struct.unpack('>' + 'I' * bytes_num, b)
+        for sub_int in items:
+            ans *= 2 ** 32
+            ans += sub_int
+        return ans
 
     def _jwk_to_dict(jwk):
         d = {}
@@ -746,60 +750,63 @@ def download_key(cmd, client, file_path, vault_base_url=None, key_name=None, key
 
         return d
 
-    def _jwk_to_rsa_private_key(jwk_dict):
+    def _extract_rsa_public_key_from_jwk(jwk_dict):
         e = jwk_dict.get('e', 256)
         n = jwk_dict.get('n')
         public = rsa.RSAPublicNumbers(e, n)
+        return public.public_key(default_backend())
 
-        d = jwk_dict.get('d')
-        extra_params = ['p', 'q', 'dp', 'dq', 'qi']
+    def _extract_ec_public_key_from_jwk(jwk_dict):
+        if not all(k in jwk_dict for k in ['x', 'y', 'crv']):
+            raise CLIError('Invalid EC key: missing properties(x, y, crv)')
 
-        if any(k in jwk_dict for k in extra_params):
-            if not all(k in jwk_dict for k in extra_params):
-                raise CLIError('Invalid key format: precomputed private key parameters are incomplete.')
-            p = jwk_dict['p']
-            q = jwk_dict['q']
-            dp = jwk_dict['dp']
-            dq = jwk_dict['dq']
-            qi = jwk_dict['qi']
-        else:
-            p, q = rsa.rsa_recover_prime_factors(n, e, d)
-            dp = rsa.rsa_crt_dmp1(d, p)
-            dq = rsa.rsa_crt_dmq1(d, q)
-            qi = rsa.rsa_crt_iqmp(p, q)
-
-        private = rsa.RSAPrivateNumbers(p, q, d, dp, dq, qi, public)
-        return private.private_key(default_backend())
+        x = jwk_dict.get('x')
+        y = jwk_dict.get('y')
+        curves = {
+            'P-256': ec.SECP256R1,
+            'P-384': ec.SECP384R1,
+            'P-521': ec.SECP521R1,
+            'SECP256K1': ec.SECP256K1
+        }
+        curve = curves[jwk_dict['crv']]
+        public = ec.EllipticCurvePublicNumbers(x, y, curve())
+        return public.public_key(default_backend())
 
     key = client.get_key(vault_base_url, key_name, key_version)
     json_web_key = _jwk_to_dict(key.key)
     key_type = json_web_key['kty']
-    key_binary = b''
+    pub_key = ''
 
     if key_type == 'RSA':
-        rsa_key = _jwk_to_rsa_private_key(json_web_key)
-        pem = rsa_key.to_pem()
-        pass
+        pub_key = _extract_rsa_public_key_from_jwk(json_web_key)
     elif key_type == 'EC':
-        pass
+        pub_key = _extract_ec_public_key_from_jwk(json_web_key)
     else:
-        raise CLIError('Invalid key type: {}'.format(key_type))
+        raise CLIError('Unsupported key type: {}'.format(key_type))
+
+    def _to_der(k):
+        return k.public_bytes(
+            encoding=Encoding.DER,
+            format=PublicFormat.SubjectPublicKeyInfo
+        )
+
+    def _to_pem(k):
+        return k.public_bytes(
+            encoding=Encoding.PEM,
+            format=PublicFormat.SubjectPublicKeyInfo
+        )
+
+    methods = {
+        'DER': _to_der,
+        'PEM': _to_pem
+    }
+
+    if encoding not in methods.keys():
+        raise CLIError('Unsupported encoding: {}'.format(encoding))
 
     try:
         with open(file_path, 'wb') as f:
-            if encoding == 'DER':
-                f.write(key_binary)
-            else:
-                import base64
-                encoded = base64.encodestring(key_binary)  # pylint:disable=deprecated-method
-                if isinstance(encoded, bytes):
-                    encoded = encoded.decode("utf-8")
-                encoded = '-----BEGIN {algo} PRIVATE KEY-----\n{encoded}-----END {algo} PRIVATE KEY-----\n'.format(
-                    algo=key_type,
-                    encoded=encoded
-                )
-                f.write(encoded.encode("utf-8"))
-
+            f.write(methods[encoding](pub_key))
     except Exception as ex:  # pylint: disable=broad-except
         if os.path.isfile(file_path):
             os.remove(file_path)
