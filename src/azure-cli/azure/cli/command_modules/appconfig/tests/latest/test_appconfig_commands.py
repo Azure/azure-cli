@@ -13,8 +13,9 @@ import time
 import yaml
 
 from knack.util import CLIError
-from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest)
+from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest, LiveScenarioTest)
 from azure.cli.testsdk.checkers import NoneCheck
+from azure.cli.command_modules.appconfig._constants import KeyVaultConstants
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 FEATURE_FLAG_PREFIX = ".appconfig.featureflag/"
@@ -214,27 +215,27 @@ class AppConfigKVScenarioTest(ScenarioTest):
         # KeyVault reference tests
         keyvault_key = "HostSecrets"
         keyvault_id = "https://fake.vault.azure.net/secrets/fakesecret"
-        keyvault_value = "{{\"uri\": \"https://fake.vault.azure.net/secrets/fakesecret\"}}"
+        keyvault_value = "{{\"uri\":\"https://fake.vault.azure.net/secrets/fakesecret\"}}"
 
         self.kwargs.update({
             'key': keyvault_key,
-            'secret_identifier': keyvault_id,
+            'secret_identifier': keyvault_id
         })
 
         # Add new KeyVault ref
         self.cmd('appconfig kv set-keyvault --connection-string {connection_string} --key {key} --secret-identifier {secret_identifier} -y',
-                 checks=[self.check('contentType', KEYVAULT_CONTENT_TYPE),
+                 checks=[self.check('contentType', KeyVaultConstants.KEYVAULT_CONTENT_TYPE),
                          self.check('key', keyvault_key),
                          self.check('value', keyvault_value)])
 
         # Update existing key to KeyVault ref
         self.kwargs.update({
             'key': entry_key,
-            'label': updated_label,
+            'label': updated_label
         })
 
         self.cmd('appconfig kv set-keyvault --connection-string {connection_string} --key {key} --label {label} --secret-identifier {secret_identifier} -y',
-                 checks=[self.check('contentType', KEYVAULT_CONTENT_TYPE),
+                 checks=[self.check('contentType', KeyVaultConstants.KEYVAULT_CONTENT_TYPE),
                          self.check('key', entry_key),
                          self.check('value', keyvault_value),
                          self.check('label', updated_label)])
@@ -242,7 +243,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
         # Delete KeyVault ref
         self.cmd('appconfig kv delete --connection-string {connection_string} --key {key} --label {label} -y',
                  checks=[self.check('[0].key', entry_key),
-                         self.check('[0].contentType', KEYVAULT_CONTENT_TYPE),
+                         self.check('[0].contentType', KeyVaultConstants.KEYVAULT_CONTENT_TYPE),
                          self.check('[0].value', keyvault_value),
                          self.check('[0].label', updated_label)])
 
@@ -393,6 +394,99 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         with open(exported_file_path) as json_file:
             exported_kvs = json.load(json_file)
         assert imported_kvs == exported_kvs
+
+
+class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
+
+    @ResourceGroupPreparer(parameter_name_for_location='location')
+    def test_appconfig_to_appservice_import_export(self, resource_group, location):
+        config_store_name = self.create_random_name(prefix='ImportExportTest', length=24)
+
+        location = 'eastus'
+        self.kwargs.update({
+            'config_store_name': config_store_name,
+            'rg_loc': location,
+            'rg': resource_group
+        })
+        _create_config_store(self, self.kwargs)
+
+        # Get connection string
+        credential_list = self.cmd(
+            'appconfig credential list -n {config_store_name} -g {rg}').get_output_in_json()
+        self.kwargs.update({
+            'connection_string': credential_list[0]['connectionString']
+        })
+
+        # Create AppService plan and webapp
+        webapp_name = self.create_random_name(prefix='WebApp', length=24)
+        plan = self.create_random_name(prefix='Plan', length=24)
+        self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
+        self.cmd('webapp create -g {} -n {} -p {}'.format(resource_group, webapp_name, plan))
+
+        # KeyVault reference tests
+        keyvault_key = "HostSecrets"
+        keyvault_id = "https://fake.vault.azure.net/secrets/fakesecret"
+        appconfig_keyvault_value = "{{\"uri\":\"https://fake.vault.azure.net/secrets/fakesecret\"}}"
+        appsvc_keyvault_value = "@Microsoft.KeyVault(SecretUri=https://fake.vault.azure.net/secrets/fakesecret)"
+        label = 'ForExportToAppService'
+        self.kwargs.update({
+            'key': keyvault_key,
+            'label': label,
+            'secret_identifier': keyvault_id
+        })
+
+        # Add new KeyVault ref in AppConfig
+        self.cmd('appconfig kv set-keyvault --connection-string {connection_string} --key {key} --secret-identifier {secret_identifier} --label {label} -y',
+                 checks=[self.check('contentType', KeyVaultConstants.KEYVAULT_CONTENT_TYPE),
+                         self.check('key', keyvault_key),
+                         self.check('label', label),
+                         self.check('value', appconfig_keyvault_value)])
+
+        # Export KeyVault ref to AppService
+        self.kwargs.update({
+            'export_dest': 'appservice',
+            'appservice_account': webapp_name
+        })
+        self.cmd('appconfig kv export --connection-string {connection_string} -d {export_dest} --appservice-account {appservice_account} --label {label} -y')
+
+        app_settings = self.cmd('webapp config appsettings list -g {rg} -n {appservice_account}').get_output_in_json()
+        exported_keys = next(x for x in app_settings if x['name'] == keyvault_key)
+        self.assertEqual(exported_keys['name'], keyvault_key)
+        self.assertEqual(exported_keys['value'], appsvc_keyvault_value)
+        self.assertEqual(exported_keys['slotSetting'], False)
+
+        # Import KeyVault ref from AppService
+        updated_label = 'ImportedFromAppService'
+        self.kwargs.update({
+            'label': updated_label
+        })
+        self.cmd('appconfig kv import --connection-string {connection_string} -s {export_dest} --appservice-account {appservice_account} --label {label} -y')
+
+        self.cmd('appconfig kv list --connection-string {connection_string} --label {label}',
+                 checks=[self.check('[0].contentType', KeyVaultConstants.KEYVAULT_CONTENT_TYPE),
+                         self.check('[0].key', keyvault_key),
+                         self.check('[0].value', appconfig_keyvault_value),
+                         self.check('[0].label', updated_label)])
+
+        # Add keyvault ref to appservice in alt format and import to appconfig
+        alt_label = 'ImportedAltSyntaxFromAppService'
+        alt_keyvault_key = "AltKeyVault"
+        alt_keyvault_value = "@Microsoft.KeyVault(VaultName=myvault;SecretName=mysecret;SecretVersion=ec96f02080254f109c51a1f14cdb1931)"
+        appconfig_keyvault_value = "{{\"uri\":\"https://myvault.vault.azure.net/secrets/mysecret/ec96f02080254f109c51a1f14cdb1931\"}}"
+        keyvault_ref = "{0}={1}".format(alt_keyvault_key, alt_keyvault_value)
+        slotsetting_tag = {"AppService:SlotSetting": "true"}
+        self.kwargs.update({
+            'label': alt_label,
+            'settings': keyvault_ref
+        })
+        self.cmd('webapp config appsettings set -g {rg} -n {appservice_account} --slot-settings {settings}')
+        self.cmd('appconfig kv import --connection-string {connection_string} -s {export_dest} --appservice-account {appservice_account} --label {label} -y')
+        self.cmd('appconfig kv list --connection-string {connection_string} --label {label}',
+                 checks=[self.check('[0].contentType', KeyVaultConstants.KEYVAULT_CONTENT_TYPE),
+                         self.check('[0].key', alt_keyvault_key),
+                         self.check('[0].value', appconfig_keyvault_value),
+                         self.check('[0].tags', slotsetting_tag),
+                         self.check('[0].label', alt_label)])
 
 
 class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):

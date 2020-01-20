@@ -12,6 +12,7 @@ from itertools import chain
 from knack.log import get_logger
 from knack.util import CLIError
 
+from ._constants import FeatureFlagConstants, KeyVaultConstants
 from ._utils import resolve_connection_string, user_confirmation
 from ._azconfig.azconfig_client import AzconfigClient
 from ._azconfig.constants import StatusCodes
@@ -28,9 +29,6 @@ from ._kv_helpers import (__compare_kvs_for_restore, __read_kv_from_file, __read
 from .feature import list_feature
 
 logger = get_logger(__name__)
-FEATURE_FLAG_PREFIX = ".appconfig.featureflag/"
-FEATURE_FLAG_CONTENT_TYPE = "application/vnd.microsoft.appconfig.ff+json;charset=utf-8"
-KEYVAULT_CONTENT_TYPE = "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
 
 
 def import_config(cmd,
@@ -78,9 +76,9 @@ def import_config(cmd,
         if not skip_features:
             # Get all Feature flags with matching label
             all_features = __read_kv_from_config_store(cmd, name=src_name, connection_string=src_connection_string,
-                                                       key=FEATURE_FLAG_PREFIX + '*', label=src_label)
+                                                       key=FeatureFlagConstants.FEATURE_FLAG_PREFIX + '*', label=src_label)
             for feature in all_features:
-                if feature.content_type == FEATURE_FLAG_CONTENT_TYPE:
+                if feature.content_type == FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
                     src_features.append(feature)
 
     elif source == 'appservice':
@@ -103,9 +101,9 @@ def import_config(cmd,
         if src_features and not skip_features:
             # Append all features to dest_features list
             all_features = __read_kv_from_config_store(
-                cmd, name=name, connection_string=connection_string, key=FEATURE_FLAG_PREFIX + '*', label=label)
+                cmd, name=name, connection_string=connection_string, key=FeatureFlagConstants.FEATURE_FLAG_PREFIX + '*', label=label)
             for feature in all_features:
-                if feature.content_type == FEATURE_FLAG_CONTENT_TYPE:
+                if feature.content_type == FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
                     dest_features.append(feature)
 
             need_feature_change = __print_features_preview(
@@ -300,7 +298,7 @@ def set_keyvault(cmd,
     connection_string = resolve_connection_string(cmd, name, connection_string)
     azconfig_client = AzconfigClient(connection_string)
 
-    keyvault_ref_value = json.dumps({"uri": secret_identifier}, ensure_ascii=False)
+    keyvault_ref_value = json.dumps({"uri": secret_identifier}, ensure_ascii=False, separators=(',', ':'))
     retry_times = 3
     retry_interval = 1
 
@@ -312,13 +310,13 @@ def set_keyvault(cmd,
             raise CLIError(str(exception))
 
         if retrieved_kv is None:
-            set_kv = KeyValue(key, keyvault_ref_value, label, tags, KEYVAULT_CONTENT_TYPE)
+            set_kv = KeyValue(key, keyvault_ref_value, label, tags, KeyVaultConstants.KEYVAULT_CONTENT_TYPE)
         else:
             logger.warning("This operation will result in overwriting existing key whose value is: %s", retrieved_kv.value)
             set_kv = KeyValue(key=key,
                               label=label,
                               value=keyvault_ref_value,
-                              content_type=KEYVAULT_CONTENT_TYPE,
+                              content_type=KeyVaultConstants.KEYVAULT_CONTENT_TYPE,
                               tags=retrieved_kv.tags if tags is None else tags)
             set_kv.etag = retrieved_kv.etag
 
