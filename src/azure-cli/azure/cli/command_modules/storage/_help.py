@@ -254,6 +254,10 @@ examples:
 helps['storage blob'] = """
 type: group
 short-summary: Manage object storage for unstructured data (blobs).
+long-summary: >
+    Please specify one of the following authentication parameters for your commands: --auth-mode, --account-key,
+    --connection-string, --sas-token. You also can use corresponding environment variables to store your authentication
+    credentials, e.g. AZURE_STORAGE_KEY, AZURE_STORAGE_CONNECTION_STRING and AZURE_STORAGE_SAS_TOKEN.
 """
 
 helps['storage blob copy'] = """
@@ -617,6 +621,10 @@ examples:
 helps['storage container'] = """
 type: group
 short-summary: Manage blob storage containers.
+long-summary: >
+    Please specify one of the following authentication parameters for your commands: --auth-mode, --account-key,
+    --connection-string, --sas-token. You also can use corresponding environment variables to store your authentication
+    credentials, e.g. AZURE_STORAGE_KEY, AZURE_STORAGE_CONNECTION_STRING and AZURE_STORAGE_SAS_TOKEN.
 """
 
 helps['storage container create'] = """
@@ -1126,6 +1134,10 @@ parameters:
 helps['storage message'] = """
 type: group
 short-summary: Manage queue storage messages.
+long-summary: >
+    Please specify one of the following authentication parameters for your commands: --auth-mode, --account-key,
+    --connection-string, --sas-token. You also can use corresponding environment variables to store your authentication
+    credentials, e.g. AZURE_STORAGE_KEY, AZURE_STORAGE_CONNECTION_STRING and AZURE_STORAGE_SAS_TOKEN.
 """
 
 helps['storage metrics'] = """
@@ -1368,4 +1380,13 @@ short-summary: List tables in a storage account.
 helps['storage table policy'] = """
 type: group
 short-summary: Manage shared access policies of a storage table.
+"""
+
+helps['storage queue'] = """
+type: group
+short-summary: Manage shared access policies of a storage table.
+long-summary: >
+    Please specify one of the following authentication parameters for your commands: --auth-mode, --account-key,
+    --connection-string, --sas-token. You also can use corresponding environment variables to store your authentication
+    credentials, e.g. AZURE_STORAGE_KEY, AZURE_STORAGE_CONNECTION_STRING and AZURE_STORAGE_SAS_TOKEN.
 """
