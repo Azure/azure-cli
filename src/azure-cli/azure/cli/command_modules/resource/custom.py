@@ -716,7 +716,7 @@ def list_resource_groups(cmd, tag=None):  # pylint: disable=no-self-use
     return list(groups)
 
 
-def create_resource_group(cmd, rg_name, location, tags=None):
+def create_resource_group(cmd, rg_name, location, tags=None, managed_by=None):
     """ Create a new resource group.
     :param str resource_group_name:the desired resource group name
     :param str location:the resource group location
@@ -729,6 +729,10 @@ def create_resource_group(cmd, rg_name, location, tags=None):
         location=location,
         tags=tags
     )
+
+    if cmd.supported_api_version(min_api='2016-09-01'):
+        parameters.managed_by = managed_by
+
     return rcf.resource_groups.create_or_update(rg_name, parameters)
 
 
