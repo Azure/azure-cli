@@ -282,7 +282,8 @@ parameters:
     short-summary: The blob container where the selected source files or blobs will be copied to.
   - name: --pattern
     type: string
-    short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq', and '[!seq]'.
+    short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
+    long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'.
   - name: --dryrun
     type: bool
     short-summary: List the files or blobs to be uploaded. No actual data transfer will occur.
@@ -332,7 +333,8 @@ parameters:
     long-summary: The source can be the container URL or the container name. When the source is the container URL, the storage account name will be parsed from the URL.
   - name: --pattern
     type: string
-    short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'.
+    short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
+    long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'. You can also try "az stroage remove" command with --include and --exclude with azure cli >= 2.0.70 to match multiple patterns.
   - name: --dryrun
     type: bool
     short-summary: Show the summary of the operations to be taken instead of actually deleting the file(s).
@@ -348,7 +350,16 @@ examples:
   - name: Delete all blobs ending with ".py" in a container that have not been modified for 10 days.
     text: |
         date=`date -d "10 days ago" '+%Y-%m-%dT%H:%MZ'`
-        az storage blob delete-batch -s MyContainer --account-name MyStorageAccount --pattern *.py --if-unmodified-since $date
+        az storage blob delete-batch -s mycontainer --account-name mystorageaccount --pattern *.py --if-unmodified-since $date
+  - name: Delete all the blobs in a directory named "dir" in a container named "mycontainer".
+    text: |
+        az storage blob delete-batch -s mycontainer --account-name mystorageaccount --pattern dir/*
+  - name: Delete the blobs with the format 'cli-2018-xx-xx.txt' or 'cli-2019-xx-xx.txt' in a container.
+    text: |
+        az storage blob delete-batch -s mycontainer --account-name mystorageaccount --pattern cli-201[89]-??-??.txt
+  - name: Delete all blobs with the format 'cli-201x-xx-xx.txt' except cli-2018-xx-xx.txt' and 'cli-2019-xx-xx.txt' in a container.
+    text: |
+        az storage blob delete-batch -s mycontainer --account-name mystorageaccount --pattern cli-201[!89]-??-??.txt
 """
 
 helps['storage blob download-batch'] = """
@@ -364,13 +375,24 @@ parameters:
     short-summary: The existing destination folder for this download operation.
   - name: --pattern
     type: string
-    short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'.
+    short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
+    long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'.
   - name: --dryrun
     type: bool
     short-summary: Show the summary of the operations to be taken instead of actually downloading the file(s).
 examples:
   - name: Download all blobs that end with .py
-    text: az storage blob download-batch -d . --pattern *.py -s MyContainer --account-name MyStorageAccount
+    text: |
+        az storage blob download-batch -d . --pattern *.py -s mycontainer --account-name mystorageaccount
+  - name: Download all blobs in a directory named "dir" from container named "mycontainer".
+    text: |
+        az storage blob download-batch -d . -s mycontainer --account-name mystorageaccount --pattern dir/*
+  - name: Download all blobs with the format 'cli-2018-xx-xx.txt' or 'cli-2019-xx-xx.txt' in container to current path.
+    text: |
+        az storage blob download-batch -d . -s mycontainer --account-name mystorageaccount --pattern cli-201[89]-??-??.txt
+  - name: Download all blobs with the format 'cli-201x-xx-xx.txt' except cli-2018-xx-xx.txt' and 'cli-2019-xx-xx.txt' in container to current path.
+    text: |
+        az storage blob download-batch -d . -s mycontainer --account-name mystorageaccount --pattern cli-201[!89]-??-??.txt
 """
 
 helps['storage blob exists'] = """
@@ -545,7 +567,8 @@ parameters:
     long-summary: The destination can be the container URL or the container name. When the destination is the container URL, the storage account name will be parsed from the URL.
   - name: --pattern
     type: string
-    short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'.
+    short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
+    long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'.
   - name: --dryrun
     type: bool
     short-summary: Show the summary of the operations to be taken instead of actually uploading the file(s).
@@ -566,7 +589,17 @@ parameters:
     short-summary: The active lease id for the blob
 examples:
   - name: Upload all files that end with .py unless blob exists and has been modified since given date.
-    text: az storage blob upload-batch -d MyContainer --account-name MyStorageAccount -s directory_path --pattern *.py --if-unmodified-since 2018-08-27T20:51Z
+    text: |
+        az storage blob upload-batch -d mycontainer --account-name mystorageaccount -s <path-to-directory> --pattern *.py --if-unmodified-since 2018-08-27T20:51Z
+  - name: Upload all files from local path directory to a container named "mycontainer".
+    text: |
+        az storage blob upload-batch -d mycontainer --account-name mystorageaccount -s <path-to-directory>
+  - name: Upload all files with the format 'cli-2018-xx-xx.txt' or 'cli-2019-xx-xx.txt' in local path directory.
+    text: |
+        az storage blob upload-batch -d mycontainer --account-name mystorageaccount -s <path-to-directory> --pattern cli-201[89]-??-??.txt
+  - name: Upload all files with the format 'cli-201x-xx-xx.txt' except cli-2018-xx-xx.txt' and 'cli-2019-xx-xx.txt' in a container.
+    text: |
+        az storage blob upload-batch -d mycontainer --account-name mystorageaccount -s <path-to-directory> --pattern cli-201[!89]-??-??.txt
 """
 
 helps['storage blob url'] = """
@@ -883,7 +916,8 @@ parameters:
     short-summary: The directory where the source data is copied to. If omitted, data is copied to the root directory.
   - name: --pattern
     type: string
-    short-summary: The pattern used for globbing files and blobs. The supported patterns are '*', '?', '[seq', and '[!seq]'.
+    short-summary: The pattern used for globbing files and blobs. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
+    long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'.
   - name: --dryrun
     type: bool
     short-summary: List the files and blobs to be copied. No actual data transfer will occur.
@@ -917,7 +951,8 @@ parameters:
     short-summary: The source of the file delete operation. The source can be the file share URL or the share name.
   - name: --pattern
     type: string
-    short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq]', and '[!seq]'.
+    short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
+    long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'.
   - name: --dryrun
     type: bool
     short-summary: List the files and blobs to be deleted. No actual data deletion will occur.
@@ -942,7 +977,8 @@ parameters:
     short-summary: The local directory where the files are downloaded to. This directory must already exist.
   - name: --pattern
     type: string
-    short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq]', and '[!seq]'.
+    short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
+    long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'.
   - name: --dryrun
     type: bool
     short-summary: List the files and blobs to be downloaded. No actual data transfer will occur.
@@ -1031,7 +1067,8 @@ parameters:
     short-summary: The directory where the source data is copied to. If omitted, data is copied to the root directory.
   - name: --pattern
     type: string
-    short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq', and '[!seq]'.
+    short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
+    long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'.
   - name: --dryrun
     type: bool
     short-summary: List the files and blobs to be uploaded. No actual data transfer will occur.
@@ -1176,6 +1213,83 @@ examples:
     text: az storage remove -s MyShare -p path/to/directory --recursive
   - name: Remove all the files in a Storage File Share.
     text: az storage remove -s MyShare --recursive
+"""
+
+helps['storage share-rm'] = """
+type: group
+short-summary: Manage Azure file shares using the Microsoft.Storage resource provider.
+"""
+
+helps['storage share-rm create'] = """
+type: command
+short-summary: Create a new Azure file share under the specified storage account.
+examples:
+  - name: Create a new Azure file share 'myfileshare' with metadata and quota as 10 GB under the storage account 'mystorageaccount'(account name) in resource group 'MyResourceGroup'.
+    text: az storage share-rm create -g MyResourceGroup --storage-account mystorageaccount --name myfileshare --quota 10 --metadata key1=value1 key2=value2
+  - name: Create a new Azure file share 'myfileshare' with metadata and quota as 6000 GB under the storage account 'mystorageaccount'(account name) which enables large file share in resource group 'MyResourceGroup'.
+    text: |
+        az storage account update -g MyResourceGroup --name mystorageaccount --enable-large-file-share
+        az storage share-rm create -g MyResourceGroup --storage-account mystorageaccount --name myfileshare --quota 6000 --metadata key1=value1 key2=value2
+  - name: Create a new Azure file share 'myfileshare' with metadata and quota as 10 GB under the storage account 'mystorageaccount' (account id).
+    text: az storage share-rm create --storage-account mystorageaccount --name myfileshare --quota 10 --metadata key1=value1 key2=value2
+"""
+
+helps['storage share-rm delete'] = """
+type: command
+short-summary: Delete the specified Azure file share.
+examples:
+  - name: Delete an Azure file share 'myfileshare' under the storage account 'mystorageaccount' (account name) in resource group 'MyResourceGroup'.
+    text: az storage share-rm delete -g MyResourceGroup --storage-account mystorageaccount --name myfileshare
+  - name: Delete an Azure file share 'myfileshare' under the storage account 'mystorageaccount' (account id).
+    text: az storage share-rm delete --storage-account mystorageaccount --name myfileshare
+  - name: Delete an Azure file share by resource id.
+    text: az storage share-rm delete --ids file-share-id
+"""
+
+helps['storage share-rm exists'] = """
+type: command
+short-summary: Check for the existence of an Azure file share.
+examples:
+  - name: Check for the existence of an Azure file share 'myfileshare' under the storage account 'mystorageaccount' (account name) in resource group 'MyResourceGroup'.
+    text: az storage share-rm exists -g MyResourceGroup --storage-account mystorageaccount --name myfileshare
+  - name: Check for the existence of an Azure file share 'myfileshare' under the storage account 'mystorageaccount' (account id).
+    text: az storage share-rm exists --storage-account mystorageaccount --name myfileshare
+  - name: Check for the existence of an Azure file share by resource id.
+    text: az storage share-rm exists --ids file-share-id
+"""
+
+helps['storage share-rm list'] = """
+type: command
+short-summary: List the Azure file shares under the specified storage account.
+examples:
+  - name: List the Azure file shares under the storage account 'mystorageaccount' (account name) in resource group 'MyResourceGroup'.
+    text: az storage share-rm list -g MyResourceGroup --storage-account mystorageaccount
+  - name: List the Azure file shares under the storage account 'mystorageaccount' (account id).
+    text: az storage share-rm list --storage-account mystorageaccount
+"""
+
+helps['storage share-rm show'] = """
+type: command
+short-summary: Show the properties for a specified Azure file share.
+examples:
+  - name: Show the properties for an Azure file share 'myfileshare' under the storage account 'mystorageaccount' (account name) in resource group 'MyResourceGroup'.
+    text: az storage share-rm show -g MyResourceGroup --storage-account mystorageaccount --name myfileshare
+  - name: Show the properties for an Azure file share 'myfileshare' under the storage account 'mystorageaccount' (account id).
+    text: az storage share-rm show --storage-account mystorageaccount --name myfileshare
+  - name: Show the properties of an Azure file shares by resource id.
+    text: az storage share-rm show --ids file-share-id
+"""
+
+helps['storage share-rm update'] = """
+type: command
+short-summary: Update the properties for an Azure file share.
+examples:
+  - name: Update the properties for an Azure file share 'myfileshare' under the storage account 'mystorageaccount' (account name) in resource group 'MyResourceGroup'.
+    text: az storage share-rm update -g MyResourceGroup --storage-account mystorageaccount --name myfileshare --quota 3 --metadata key1=value1 key2=value2
+  - name: Update the properties for an Azure file share 'myfileshare' under the storage account 'mystorageaccount' (account id).
+    text: az storage share-rm update --storage-account mystorageaccount --name myfileshare --quota 3 --metadata key1=value1 key2=value2
+  - name: Update the properties for an Azure file shares by resource id.
+    text: az storage share-rm update --ids file-share-id --quota 3 --metadata key1=value1 key2=value2
 """
 
 helps['storage share'] = """
