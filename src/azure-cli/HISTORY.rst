@@ -27,6 +27,7 @@ Release History
 **Storage**
 
 * Add a new command group `az storage share-rm` to use the Microsoft.Storage resource provider for Azure file share management operations.
+* Fix issue #11415: permission error for `az storage blob update`
 
 2.0.80
 ++++++
