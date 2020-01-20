@@ -2815,8 +2815,10 @@ def list_vmss_extensions(cmd, resource_group_name, vmss_name):
     client = _compute_client_factory(cmd.cli_ctx)
     vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
     # pylint: disable=no-member
-    return None if not vmss.virtual_machine_profile.extension_profile \
-        else vmss.virtual_machine_profile.extension_profile.extensions
+    if vmss.virtual_machine_profile and vmss.virtual_machine_profile.extension_profile:
+        return vmss.virtual_machine_profile.extension_profile.extensions
+    else:
+        return None
 
 
 def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publisher, version=None,
