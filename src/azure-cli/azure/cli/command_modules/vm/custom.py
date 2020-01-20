@@ -1881,8 +1881,7 @@ def list_vm_secrets(cmd, resource_group_name, vm_name):
     vm = get_vm(cmd, resource_group_name, vm_name)
     if vm.os_profile:
         return vm.os_profile.secrets
-    else:
-        return None
+    return None
 
 
 def remove_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate=None):
@@ -2820,8 +2819,7 @@ def list_vmss_extensions(cmd, resource_group_name, vmss_name):
     # pylint: disable=no-member
     if vmss.virtual_machine_profile and vmss.virtual_machine_profile.extension_profile:
         return vmss.virtual_machine_profile.extension_profile.extensions
-    else:
-        return None
+    return None
 
 
 def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publisher, version=None,
