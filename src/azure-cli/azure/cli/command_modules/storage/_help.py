@@ -254,6 +254,10 @@ examples:
 helps['storage blob'] = """
 type: group
 short-summary: Manage object storage for unstructured data (blobs).
+long-summary: >
+    Please specify one of the following authentication parameters for your commands: --auth-mode, --account-key,
+    --connection-string, --sas-token. You also can use corresponding environment variables to store your authentication
+    credentials, e.g. AZURE_STORAGE_KEY, AZURE_STORAGE_CONNECTION_STRING and AZURE_STORAGE_SAS_TOKEN.
 """
 
 helps['storage blob copy'] = """
@@ -282,7 +286,8 @@ parameters:
     short-summary: The blob container where the selected source files or blobs will be copied to.
   - name: --pattern
     type: string
-    short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq', and '[!seq]'.
+    short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
+    long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'.
   - name: --dryrun
     type: bool
     short-summary: List the files or blobs to be uploaded. No actual data transfer will occur.
@@ -319,7 +324,9 @@ long-summary: >
     Both can be removed at the same time.
 examples:
   - name: Delete a blob.
-    text: az storage blob delete -c MyContainer -n MyBlob
+    text: az storage blob delete -c mycontainer -n MyBlob
+  - name: Delete a blob using login credentials.
+    text: az storage blob delete -c mycontainer -n MyBlob --account-name mystorageaccount --auth-mode login
 """
 
 helps['storage blob delete-batch'] = """
@@ -332,7 +339,8 @@ parameters:
     long-summary: The source can be the container URL or the container name. When the source is the container URL, the storage account name will be parsed from the URL.
   - name: --pattern
     type: string
-    short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'.
+    short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
+    long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'. You can also try "az stroage remove" command with --include and --exclude with azure cli >= 2.0.70 to match multiple patterns.
   - name: --dryrun
     type: bool
     short-summary: Show the summary of the operations to be taken instead of actually deleting the file(s).
@@ -348,7 +356,16 @@ examples:
   - name: Delete all blobs ending with ".py" in a container that have not been modified for 10 days.
     text: |
         date=`date -d "10 days ago" '+%Y-%m-%dT%H:%MZ'`
-        az storage blob delete-batch -s MyContainer --account-name MyStorageAccount --pattern *.py --if-unmodified-since $date
+        az storage blob delete-batch -s mycontainer --account-name mystorageaccount --pattern *.py --if-unmodified-since $date --auth-mode login
+  - name: Delete all the blobs in a directory named "dir" in a container named "mycontainer".
+    text: |
+        az storage blob delete-batch -s mycontainer --pattern dir/*
+  - name: Delete the blobs with the format 'cli-2018-xx-xx.txt' or 'cli-2019-xx-xx.txt' in a container.
+    text: |
+        az storage blob delete-batch -s mycontainer --pattern cli-201[89]-??-??.txt
+  - name: Delete all blobs with the format 'cli-201x-xx-xx.txt' except cli-2018-xx-xx.txt' and 'cli-2019-xx-xx.txt' in a container.
+    text: |
+        az storage blob delete-batch -s mycontainer --pattern cli-201[!89]-??-??.txt
 """
 
 helps['storage blob download-batch'] = """
@@ -364,13 +381,24 @@ parameters:
     short-summary: The existing destination folder for this download operation.
   - name: --pattern
     type: string
-    short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'.
+    short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
+    long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'.
   - name: --dryrun
     type: bool
     short-summary: Show the summary of the operations to be taken instead of actually downloading the file(s).
 examples:
   - name: Download all blobs that end with .py
-    text: az storage blob download-batch -d . --pattern *.py -s MyContainer --account-name MyStorageAccount
+    text: |
+        az storage blob download-batch -d . --pattern *.py -s mycontainer --account-name mystorageaccount --account-key 00000000
+  - name: Download all blobs in a directory named "dir" from container named "mycontainer".
+    text: |
+        az storage blob download-batch -d . -s mycontainer --pattern dir/*
+  - name: Download all blobs with the format 'cli-2018-xx-xx.txt' or 'cli-2019-xx-xx.txt' in container to current path.
+    text: |
+        az storage blob download-batch -d . -s mycontainer --pattern cli-201[89]-??-??.txt
+  - name: Download all blobs with the format 'cli-201x-xx-xx.txt' except cli-2018-xx-xx.txt' and 'cli-2019-xx-xx.txt' in container to current path.
+    text: |
+        az storage blob download-batch -d . -s mycontainer --pattern cli-201[!89]-??-??.txt
 """
 
 helps['storage blob exists'] = """
@@ -392,7 +420,7 @@ examples:
   - name: Generate a sas token for a blob with read-only permissions.
     text: |
         end=`date -u -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
-        az storage blob generate-sas --account-name MyStorageAccount -c MyContainer -n MyBlob --permissions r --expiry $end --https-only
+        az storage blob generate-sas -c myycontainer -n MyBlob --permissions r --expiry $end --https-only
   - name: Generates a shared access signature for the blob. (autogenerated)
     text: az storage blob generate-sas --account-key 00000000 --account-name MyStorageAccount --container-name MyContainer --expiry 2018-01-01T00:00:00Z --name MyBlob --permissions r
     crafted: true
@@ -451,7 +479,7 @@ type: command
 short-summary: Show the storage blob delete-policy.
 examples:
   - name: Show the storage blob delete-policy. (autogenerated)
-    text: az storage blob service-properties delete-policy show --account-name MyAccount
+    text: az storage blob service-properties delete-policy show --account-name mystorageccount --account-key 00000000
     crafted: true
 """
 
@@ -460,7 +488,7 @@ type: command
 short-summary: Update the storage blob delete-policy.
 examples:
   - name: Update the storage blob delete-policy. (autogenerated)
-    text: az storage blob service-properties delete-policy update --account-name MyAccount --days-retained 7 --enable true
+    text: az storage blob service-properties delete-policy update --account-name mystorageccount --account-key 00000000 --days-retained 7 --enable true
     crafted: true
 """
 
@@ -469,7 +497,7 @@ type: command
 short-summary: Update storage blob service properties.
 examples:
   - name: Update storage blob service properties. (autogenerated)
-    text: az storage blob service-properties update --404-document error.html --account-name MyAccount --index-document index.html --static-website true
+    text: az storage blob service-properties update --404-document error.html --account-name mystorageccount --account-key 00000000 --index-document index.html --static-website true
     crafted: true
 """
 
@@ -499,19 +527,18 @@ examples:
   - name: Show all properties of a blob.
     text: az storage blob show -c MyContainer -n MyBlob
   - name: Get the details of a blob (autogenerated)
-    text: az storage blob show --account-name MyAccount --container-name MyContainer --name MyBlob
+    text: az storage blob show --account-name mystorageccount --account-key 00000000 --container-name MyContainer --name MyBlob
     crafted: true
 """
 
 helps['storage blob sync'] = """
 type: command
 short-summary: Sync blobs recursively to a storage blob container.
-long-summary: Sync command depends on Azcopy, which will be upgraded to v10.3 soon to support 32-bit Operating System and utilize new features.
 examples:
   - name: Sync a single blob to a container.
-    text: az storage blob sync -c MyContainer --account-name MyStorageAccount -s "path/to/file" -d NewBlob
+    text: az storage blob sync -c mycontainer -s "path/to/file" -d NewBlob
   - name: Sync a directory to a container.
-    text: az storage blob sync -c MyContainer --account-name MyStorageAccount -s "path/to/directory"
+    text: az storage blob sync -c mycontainer --account-name mystorageccount --account-key 00000000 -s "path/to/directory"
 """
 
 helps['storage blob upload'] = """
@@ -545,7 +572,8 @@ parameters:
     long-summary: The destination can be the container URL or the container name. When the destination is the container URL, the storage account name will be parsed from the URL.
   - name: --pattern
     type: string
-    short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'.
+    short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
+    long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'.
   - name: --dryrun
     type: bool
     short-summary: Show the summary of the operations to be taken instead of actually uploading the file(s).
@@ -566,7 +594,17 @@ parameters:
     short-summary: The active lease id for the blob
 examples:
   - name: Upload all files that end with .py unless blob exists and has been modified since given date.
-    text: az storage blob upload-batch -d MyContainer --account-name MyStorageAccount -s directory_path --pattern *.py --if-unmodified-since 2018-08-27T20:51Z
+    text: |
+        az storage blob upload-batch -d mycontainer --account-name mystorageaccount --account-key 00000000 -s <path-to-directory> --pattern *.py --if-unmodified-since 2018-08-27T20:51Z
+  - name: Upload all files from local path directory to a container named "mycontainer".
+    text: |
+        az storage blob upload-batch -d mycontainer -s <path-to-directory>
+  - name: Upload all files with the format 'cli-2018-xx-xx.txt' or 'cli-2019-xx-xx.txt' in local path directory.
+    text: |
+        az storage blob upload-batch -d mycontainer -s <path-to-directory> --pattern cli-201[89]-??-??.txt
+  - name: Upload all files with the format 'cli-201x-xx-xx.txt' except cli-2018-xx-xx.txt' and 'cli-2019-xx-xx.txt' in a container.
+    text: |
+        az storage blob upload-batch -d mycontainer -s <path-to-directory> --pattern cli-201[!89]-??-??.txt
 """
 
 helps['storage blob url'] = """
@@ -577,13 +615,17 @@ examples:
     text: az storage blob url --connection-string $connectionString --container-name container1 --name blob1
     crafted: true
   - name: Create the url to access a blob (autogenerated)
-    text: az storage blob url --account-name storageacct --container-name container1 --name blob1
+    text: az storage blob url --account-name storageacct --account-key 00000000 --container-name container1 --name blob1
     crafted: true
 """
 
 helps['storage container'] = """
 type: group
 short-summary: Manage blob storage containers.
+long-summary: >
+    Please specify one of the following authentication parameters for your commands: --auth-mode, --account-key,
+    --connection-string, --sas-token. You also can use corresponding environment variables to store your authentication
+    credentials, e.g. AZURE_STORAGE_KEY, AZURE_STORAGE_CONNECTION_STRING and AZURE_STORAGE_SAS_TOKEN.
 """
 
 helps['storage container create'] = """
@@ -618,7 +660,7 @@ type: command
 short-summary: Check for the existence of a storage container.
 examples:
   - name: Check for the existence of a storage container. (autogenerated)
-    text: az storage container exists --account-name MyAccount --name MyContainer
+    text: az storage container exists --account-name mystorageccount --account-key 00000000 --name mycontainer
     crafted: true
 """
 
@@ -629,10 +671,10 @@ examples:
   - name: Generate a sas token for blob container and use it to upload a blob.
     text: |
         end=`date -u -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
-        sas=`az storage container generate-sas -n MyContainer --account-name MyStorageAccount --https-only --permissions dlrw --expiry $end -o tsv`
-        az storage blob upload -n MyBlob -c MyContainer --account-name MyStorageAccount -f file.txt --sas-token $sas
+        sas=`az storage container generate-sas -n mycontainer --https-only --permissions dlrw --expiry $end -o tsv`
+        az storage blob upload -n MyBlob -c mycontainer -f file.txt --sas-token $sas
   - name: Generates a shared access signature for the container (autogenerated)
-    text: az storage container generate-sas --account-key 00000000 --account-name MyStorageAccount --expiry 2020-01-01 --name MyContainer --permissions dlrw
+    text: az storage container generate-sas --account-key 00000000 --account-name mystorageaccount --expiry 2020-01-01 --name mycontainer --permissions dlrw
     crafted: true
 """
 
@@ -656,7 +698,7 @@ type: command
 short-summary: Get the legal hold properties of a container.
 examples:
   - name: Get the legal hold properties of a container. (autogenerated)
-    text: az storage container legal-hold show --account-name MyAccount --container-name MyContainer
+    text: az storage container legal-hold show --account-name mystorageccount --container-name MyContainer
     crafted: true
 """
 
@@ -678,12 +720,6 @@ short-summary: Manage container stored access policies.
 helps['storage copy'] = """
 type: command
 short-summary: Copy files or directories to or from Azure storage.
-long-summary: >
-    Copy command depends on Azcopy, which will be upgraded to v10.3 soon to support 32-bit Operating System and
-    utilize new features.
-
-    [COMING BREAKING CHANGE] With Azcopy v10.3, `*` character is no longer supported as a wildcard in URL, but new
-    parameters --include-pattern and --exclude-pattern will be added with `*` wildcard support.
 examples:
   - name: Upload a single file to Azure Blob using url.
     text: az storage copy -s /path/to/file.txt -d https://[account].blob.core.windows.net/[container]/[path/to/blob]
@@ -707,8 +743,10 @@ examples:
     text: az storage copy -s https://[account].blob.core.windows.net/[container]/[path/to/blob] -d /path/to/file.txt
   - name: Download an entire directory from Azure Blob, and you can also specify your storage account and container information as above.
     text: az storage copy -s https://[account].blob.core.windows.net/[container]/[path/to/directory] -d /path/to/dir --recursive
-  - name: Download a set of files from Azure Blob using wildcards, and you can also specify your storage account and container information as above.
-    text: az storage copy -s https://[account].blob.core.windows.net/[container]/foo* -d /path/to/dir --recursive
+  - name: Download a subset of containers within a storage account by using a wildcard symbol (*) in the container name, and you can also specify your storage account and container information as above.
+    text: az storage copy -s https://[account].blob.core.windows.net/[container*name] -d /path/to/dir --recursive
+  - name: Download a subset of files from Azure Blob. (Only jpg files and file names don't start with test will be included.)
+    text: az storage copy -s https://[account].blob.core.windows.net/[container] --include-pattern "*.jpg" --exclude-pattern test* -d /path/to/dir --recursive
   - name: Copy a single blob to another blob, and you can also specify the storage account and container information of source and destination as above.
     text: az storage copy -s https://[srcaccount].blob.core.windows.net/[container]/[path/to/blob] -d https://[destaccount].blob.core.windows.net/[container]/[path/to/blob]
   - name: Copy an entire account data from blob account to another blob account, and you can also specify the storage account and container information of source and destination as above.
@@ -740,7 +778,7 @@ examples:
   - name: Download an entire directory from Azure File Share, and you can also specify your storage account and share information as above.
     text: az storage copy -s https://[account].file.core.windows.net/[share]/[path/to/directory] -d /path/to/dir --recursive
   - name: Download a set of files from Azure File Share using wildcards, and you can also specify your storage account and share information as above.
-    text: az storage copy -s https://[account].file.core.windows.net/[share]/foo* -d /path/to/dir --recursive
+    text: az storage copy -s https://[account].file.core.windows.net/[share]/ --include-pattern foo* -d /path/to/dir --recursive
 """
 
 helps['storage cors'] = """
@@ -883,7 +921,8 @@ parameters:
     short-summary: The directory where the source data is copied to. If omitted, data is copied to the root directory.
   - name: --pattern
     type: string
-    short-summary: The pattern used for globbing files and blobs. The supported patterns are '*', '?', '[seq', and '[!seq]'.
+    short-summary: The pattern used for globbing files and blobs. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
+    long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'.
   - name: --dryrun
     type: bool
     short-summary: List the files and blobs to be copied. No actual data transfer will occur.
@@ -917,7 +956,8 @@ parameters:
     short-summary: The source of the file delete operation. The source can be the file share URL or the share name.
   - name: --pattern
     type: string
-    short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq]', and '[!seq]'.
+    short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
+    long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'.
   - name: --dryrun
     type: bool
     short-summary: List the files and blobs to be deleted. No actual data deletion will occur.
@@ -942,7 +982,8 @@ parameters:
     short-summary: The local directory where the files are downloaded to. This directory must already exist.
   - name: --pattern
     type: string
-    short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq]', and '[!seq]'.
+    short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
+    long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'.
   - name: --dryrun
     type: bool
     short-summary: List the files and blobs to be downloaded. No actual data transfer will occur.
@@ -1031,7 +1072,8 @@ parameters:
     short-summary: The directory where the source data is copied to. If omitted, data is copied to the root directory.
   - name: --pattern
     type: string
-    short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq', and '[!seq]'.
+    short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
+    long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'.
   - name: --dryrun
     type: bool
     short-summary: List the files and blobs to be uploaded. No actual data transfer will occur.
@@ -1089,6 +1131,10 @@ parameters:
 helps['storage message'] = """
 type: group
 short-summary: Manage queue storage messages.
+long-summary: >
+    Please specify one of the following authentication parameters for your commands: --auth-mode, --account-key,
+    --connection-string, --sas-token. You also can use corresponding environment variables to store your authentication
+    credentials, e.g. AZURE_STORAGE_KEY, AZURE_STORAGE_CONNECTION_STRING and AZURE_STORAGE_SAS_TOKEN.
 """
 
 helps['storage metrics'] = """
@@ -1153,10 +1199,6 @@ short-summary: Manage shared access policies for a storage queue.
 helps['storage remove'] = """
 type: command
 short-summary: Delete blobs or files from Azure Storage.
-long-summary: >
-    To delete blobs, both the source must either be public or be authenticated by using a shared access signature.
-    Remove command depends on Azcopy, which will be upgraded to v10.3 soon to support 32-bit Operating System and
-    utilize new features.
 examples:
   - name: Remove a single blob.
     text: az storage remove -c MyContainer -n MyBlob
@@ -1166,16 +1208,93 @@ examples:
     text: az storage remove -c MyContainer --recursive
   - name: Remove all the blobs in a Storage Container.
     text: az storage remove -c MyContainer -n path/to/directory
-  - name: Remove a subset of blobs in a virtual directory (For example, only jpg and pdf files, or if the blob name is "exactName").
-    text: az storage remove -c MyContainer -n path/to/directory --recursive --include "*.jpg;*.pdf;exactName"
+  - name: Remove a subset of blobs in a virtual directory (For example, only jpg and pdf files, or if the blob name is "exactName" and file names don't start with "test").
+    text: az storage remove -c MyContainer --include-path path/to/directory --include-pattern "*.jpg;*.pdf;exactName" --exclude-pattern "test*" --recursive
   - name: Remove an entire virtual directory but exclude certain blobs from the scope (For example, every blob that starts with foo or ends with bar).
-    text: az storage remove -c MyContainer -n path/to/directory --recursive --include "foo*;*bar"
+    text: az storage remove -c MyContainer --include-path path/to/directory --exclude-pattern "foo*;*bar" --recursive
   - name: Remove a single file.
     text: az storage remove -s MyShare -p MyFile
   - name: Remove an entire directory.
     text: az storage remove -s MyShare -p path/to/directory --recursive
   - name: Remove all the files in a Storage File Share.
     text: az storage remove -s MyShare --recursive
+"""
+
+helps['storage share-rm'] = """
+type: group
+short-summary: Manage Azure file shares using the Microsoft.Storage resource provider.
+"""
+
+helps['storage share-rm create'] = """
+type: command
+short-summary: Create a new Azure file share under the specified storage account.
+examples:
+  - name: Create a new Azure file share 'myfileshare' with metadata and quota as 10 GB under the storage account 'mystorageaccount'(account name) in resource group 'MyResourceGroup'.
+    text: az storage share-rm create -g MyResourceGroup --storage-account mystorageaccount --name myfileshare --quota 10 --metadata key1=value1 key2=value2
+  - name: Create a new Azure file share 'myfileshare' with metadata and quota as 6000 GB under the storage account 'mystorageaccount'(account name) which enables large file share in resource group 'MyResourceGroup'.
+    text: |
+        az storage account update -g MyResourceGroup --name mystorageaccount --enable-large-file-share
+        az storage share-rm create -g MyResourceGroup --storage-account mystorageaccount --name myfileshare --quota 6000 --metadata key1=value1 key2=value2
+  - name: Create a new Azure file share 'myfileshare' with metadata and quota as 10 GB under the storage account 'mystorageaccount' (account id).
+    text: az storage share-rm create --storage-account mystorageaccount --name myfileshare --quota 10 --metadata key1=value1 key2=value2
+"""
+
+helps['storage share-rm delete'] = """
+type: command
+short-summary: Delete the specified Azure file share.
+examples:
+  - name: Delete an Azure file share 'myfileshare' under the storage account 'mystorageaccount' (account name) in resource group 'MyResourceGroup'.
+    text: az storage share-rm delete -g MyResourceGroup --storage-account mystorageaccount --name myfileshare
+  - name: Delete an Azure file share 'myfileshare' under the storage account 'mystorageaccount' (account id).
+    text: az storage share-rm delete --storage-account mystorageaccount --name myfileshare
+  - name: Delete an Azure file share by resource id.
+    text: az storage share-rm delete --ids file-share-id
+"""
+
+helps['storage share-rm exists'] = """
+type: command
+short-summary: Check for the existence of an Azure file share.
+examples:
+  - name: Check for the existence of an Azure file share 'myfileshare' under the storage account 'mystorageaccount' (account name) in resource group 'MyResourceGroup'.
+    text: az storage share-rm exists -g MyResourceGroup --storage-account mystorageaccount --name myfileshare
+  - name: Check for the existence of an Azure file share 'myfileshare' under the storage account 'mystorageaccount' (account id).
+    text: az storage share-rm exists --storage-account mystorageaccount --name myfileshare
+  - name: Check for the existence of an Azure file share by resource id.
+    text: az storage share-rm exists --ids file-share-id
+"""
+
+helps['storage share-rm list'] = """
+type: command
+short-summary: List the Azure file shares under the specified storage account.
+examples:
+  - name: List the Azure file shares under the storage account 'mystorageaccount' (account name) in resource group 'MyResourceGroup'.
+    text: az storage share-rm list -g MyResourceGroup --storage-account mystorageaccount
+  - name: List the Azure file shares under the storage account 'mystorageaccount' (account id).
+    text: az storage share-rm list --storage-account mystorageaccount
+"""
+
+helps['storage share-rm show'] = """
+type: command
+short-summary: Show the properties for a specified Azure file share.
+examples:
+  - name: Show the properties for an Azure file share 'myfileshare' under the storage account 'mystorageaccount' (account name) in resource group 'MyResourceGroup'.
+    text: az storage share-rm show -g MyResourceGroup --storage-account mystorageaccount --name myfileshare
+  - name: Show the properties for an Azure file share 'myfileshare' under the storage account 'mystorageaccount' (account id).
+    text: az storage share-rm show --storage-account mystorageaccount --name myfileshare
+  - name: Show the properties of an Azure file shares by resource id.
+    text: az storage share-rm show --ids file-share-id
+"""
+
+helps['storage share-rm update'] = """
+type: command
+short-summary: Update the properties for an Azure file share.
+examples:
+  - name: Update the properties for an Azure file share 'myfileshare' under the storage account 'mystorageaccount' (account name) in resource group 'MyResourceGroup'.
+    text: az storage share-rm update -g MyResourceGroup --storage-account mystorageaccount --name myfileshare --quota 3 --metadata key1=value1 key2=value2
+  - name: Update the properties for an Azure file share 'myfileshare' under the storage account 'mystorageaccount' (account id).
+    text: az storage share-rm update --storage-account mystorageaccount --name myfileshare --quota 3 --metadata key1=value1 key2=value2
+  - name: Update the properties for an Azure file shares by resource id.
+    text: az storage share-rm update --ids file-share-id --quota 3 --metadata key1=value1 key2=value2
 """
 
 helps['storage share'] = """
@@ -1254,4 +1373,13 @@ short-summary: List tables in a storage account.
 helps['storage table policy'] = """
 type: group
 short-summary: Manage shared access policies of a storage table.
+"""
+
+helps['storage queue'] = """
+type: group
+short-summary: Manage shared access policies of a storage table.
+long-summary: >
+    Please specify one of the following authentication parameters for your commands: --auth-mode, --account-key,
+    --connection-string, --sas-token. You also can use corresponding environment variables to store your authentication
+    credentials, e.g. AZURE_STORAGE_KEY, AZURE_STORAGE_CONNECTION_STRING and AZURE_STORAGE_SAS_TOKEN.
 """
