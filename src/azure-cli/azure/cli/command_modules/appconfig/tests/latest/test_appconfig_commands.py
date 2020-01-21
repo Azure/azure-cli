@@ -28,30 +28,38 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
         config_store_name = self.create_random_name(prefix='MgmtTest', length=24)
 
         location = 'eastus'
+        sku = 'standard'
+        system_assigned_identity = '[system]'
+
         self.kwargs.update({
             'config_store_name': config_store_name,
             'rg_loc': location,
-            'rg': resource_group
+            'rg': resource_group,
+            'sku': sku,
+            'identity': system_assigned_identity
         })
 
-        self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc}',
+        self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --assign-identity {identity}',
                  checks=[self.check('name', '{config_store_name}'),
                          self.check('location', '{rg_loc}'),
                          self.check('resourceGroup', resource_group),
                          self.check('provisioningState', 'Succeeded'),
-                         self.check('sku.name', 'free')])   # hard code the sku as it is not public facing yet.
+                         self.check('sku.name', sku),
+                         self.check('identity.type', 'SystemAssigned')])
         self.cmd('appconfig list -g {rg}',
                  checks=[self.check('[0].name', '{config_store_name}'),
                          self.check('[0].location', '{rg_loc}'),
                          self.check('[0].resourceGroup', resource_group),
                          self.check('[0].provisioningState', 'Succeeded'),
-                         self.check('[0].sku.name', 'free')])
+                         self.check('[0].sku.name', sku),
+                         self.check('[0].identity.type', 'SystemAssigned')])
         self.cmd('appconfig show -n {config_store_name} -g {rg}',
                  checks=[self.check('name', '{config_store_name}'),
                          self.check('location', '{rg_loc}'),
                          self.check('resourceGroup', resource_group),
                          self.check('provisioningState', 'Succeeded'),
-                         self.check('sku.name', 'free')])
+                         self.check('sku.name', sku),
+                         self.check('identity.type', 'SystemAssigned')])
 
         tag_key = "Env"
         tag_value = "Prod"
@@ -66,7 +74,8 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('location', '{rg_loc}'),
                          self.check('resourceGroup', resource_group),
                          self.check('tags', structered_tag),
-                         self.check('provisioningState', 'Succeeded')])
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('sku.name', sku)])
 
         self.cmd('appconfig delete -n {config_store_name} -g {rg} -y')
 
@@ -79,11 +88,12 @@ class AppConfigCredentialScenarioTest(ScenarioTest):
         config_store_name = self.create_random_name(prefix='CredentialTest', length=24)
 
         location = 'eastus'
-
+        sku = 'standard'
         self.kwargs.update({
             'config_store_name': config_store_name,
             'rg_loc': location,
-            'rg': resource_group
+            'rg': resource_group,
+            'sku': sku
         })
 
         _create_config_store(self, self.kwargs)
@@ -102,6 +112,46 @@ class AppConfigCredentialScenarioTest(ScenarioTest):
                  checks=[self.check('name', credential_list[0]['name'])])
 
 
+class AppConfigIdentityScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(parameter_name_for_location='location')
+    def test_azconfig_identity(self, resource_group, location):
+
+        config_store_name = self.create_random_name(prefix='IdentityTest', length=24)
+
+        location = 'eastus'
+        sku = 'standard'
+        identity_name = self.create_random_name(prefix='UserAssignedIdentity', length=24)
+
+        self.kwargs.update({
+            'config_store_name': config_store_name,
+            'rg_loc': location,
+            'rg': resource_group,
+            'sku': sku,
+            'identity_name': identity_name
+        })
+
+        _create_config_store(self, self.kwargs)
+        user_assigned_identity = _create_user_assigned_identity(self, self.kwargs)
+
+        self.kwargs.update({
+            'identity_id': user_assigned_identity['id']
+        })
+
+        self.cmd('appconfig identity assign -n {config_store_name} -g {rg}',
+                 checks=[self.check('type', 'SystemAssigned'),
+                         self.check('userAssignedIdentities', None)])
+
+        self.cmd('appconfig identity assign -n {config_store_name} -g {rg} --identities {identity_id}',
+                 checks=[self.check('type', 'SystemAssigned, UserAssigned')])
+
+        self.cmd('appconfig identity remove -n {config_store_name} -g {rg} --identities {identity_id}')
+
+        self.cmd('appconfig identity show -n {config_store_name} -g {rg}',
+                 checks=[self.check('type', 'SystemAssigned'),
+                         self.check('userAssignedIdentities', None)])
+
+
 class AppConfigKVScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -109,10 +159,12 @@ class AppConfigKVScenarioTest(ScenarioTest):
         config_store_name = self.create_random_name(prefix='KVTest', length=24)
 
         location = 'eastus'
+        sku = 'standard'
         self.kwargs.update({
             'config_store_name': config_store_name,
             'rg_loc': location,
-            'rg': resource_group
+            'rg': resource_group,
+            'sku': sku
         })
         _create_config_store(self, self.kwargs)
 
@@ -253,10 +305,12 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         config_store_name = self.create_random_name(prefix='ImportTest', length=24)
 
         location = 'eastus'
+        sku = 'standard'
         self.kwargs.update({
             'config_store_name': config_store_name,
             'rg_loc': location,
-            'rg': resource_group
+            'rg': resource_group,
+            'sku': sku
         })
         _create_config_store(self, self.kwargs)
 
@@ -401,10 +455,12 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
         config_store_name = self.create_random_name(prefix='ImportExportTest', length=24)
 
         location = 'eastus'
+        sku = 'standard'
         self.kwargs.update({
             'config_store_name': config_store_name,
             'rg_loc': location,
-            'rg': resource_group
+            'rg': resource_group,
+            'sku': sku
         })
         _create_config_store(self, self.kwargs)
 
@@ -494,10 +550,12 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
         config_store_name = self.create_random_name(prefix='NamingConventionTest', length=24)
 
         location = 'eastus'
+        sku = 'standard'
         self.kwargs.update({
             'config_store_name': config_store_name,
             'rg_loc': location,
-            'rg': resource_group
+            'rg': resource_group,
+            'sku': sku
         })
         _create_config_store(self, self.kwargs)
 
@@ -595,10 +653,12 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
         dest_config_store_name = self.create_random_name(prefix='Destination', length=24)
 
         location = 'eastus'
+        sku = 'standard'
         self.kwargs.update({
             'config_store_name': src_config_store_name,
             'rg_loc': location,
-            'rg': resource_group
+            'rg': resource_group,
+            'sku': sku
         })
         _create_config_store(self, self.kwargs)
 
@@ -785,10 +845,12 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         config_store_name = self.create_random_name(prefix='FeatureTest', length=24)
 
         location = 'eastus'
+        sku = 'standard'
         self.kwargs.update({
             'config_store_name': config_store_name,
             'rg_loc': location,
-            'rg': resource_group
+            'rg': resource_group,
+            'sku': sku
         })
         _create_config_store(self, self.kwargs)
 
@@ -1122,10 +1184,12 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
         config_store_name = self.create_random_name(prefix='FeatureFilterTest', length=24)
 
         location = 'eastus'
+        sku = 'standard'
         self.kwargs.update({
             'config_store_name': config_store_name,
             'rg_loc': location,
-            'rg': resource_group
+            'rg': resource_group,
+            'sku': sku
         })
         _create_config_store(self, self.kwargs)
 
@@ -1264,10 +1328,12 @@ class AppConfigKeyValidationScenarioTest(ScenarioTest):
         config_store_name = self.create_random_name(prefix='KVTest', length=24)
 
         location = 'eastus'
+        sku = 'standard'
         self.kwargs.update({
             'config_store_name': config_store_name,
             'rg_loc': location,
-            'rg': resource_group
+            'rg': resource_group,
+            'sku': sku
         })
         _create_config_store(self, self.kwargs)
 
@@ -1374,7 +1440,11 @@ class AppConfigKeyValidationScenarioTest(ScenarioTest):
 
 
 def _create_config_store(test, kwargs):
-    test.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc}')
+    test.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku}')
+
+
+def _create_user_assigned_identity(test, kwargs):
+    return test.cmd('identity create -n {identity_name} -g {rg}').get_output_in_json()
 
 
 def _format_datetime(date_string):

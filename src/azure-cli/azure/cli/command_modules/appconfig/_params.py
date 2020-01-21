@@ -21,7 +21,8 @@ from ._validators import (validate_appservice_name_or_id,
                           validate_import_depth, validate_query_fields,
                           validate_feature_query_fields, validate_filter_parameters,
                           validate_separator, validate_secret_identifier,
-                          validate_key, validate_content_type, validate_feature)
+                          validate_key, validate_content_type, validate_feature,
+                          validate_identity)
 
 
 def load_arguments(self, _):
@@ -53,6 +54,11 @@ def load_arguments(self, _):
         type=int,
         help='Maximum number of items to return. Must be a positive integer. Default to 100.'
     )
+    identities_arg_type = CLIArgumentType(
+        nargs='*',
+        validator=validate_identity,
+        help="Accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity or a resource id to refer user assigned identity. Use system assigned identity if not specified."
+    )
 
     with self.argument_context('appconfig') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
@@ -64,13 +70,20 @@ def load_arguments(self, _):
         c.argument('top', arg_type=top_arg_type)
         c.argument('all_', options_list=['--all'], action='store_true', help="List all items.")
         c.argument('fields', arg_type=fields_arg_type)
+        c.argument('sku', help='The sku of App Configuration', arg_type=get_enum_type(['free', 'standard']))
 
     with self.argument_context('appconfig create') as c:
         c.argument('location', options_list=['--location', '-l'], arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
-        c.ignore('sku')
+        c.argument('assign_identity', arg_type=identities_arg_type)
 
     with self.argument_context('appconfig update') as c:
         c.argument('tags', arg_type=tags_type)
+
+    with self.argument_context('appconfig identity assign') as c:
+        c.argument('identities', arg_type=identities_arg_type)
+
+    with self.argument_context('appconfig identity remove') as c:
+        c.argument('identities', arg_type=identities_arg_type, help="Accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity, '[all]' for all identities or a resource id to refer user assigned identity. Remove system assigned identity if not specified.")
 
     with self.argument_context('appconfig credential regenerate') as c:
         c.argument('id_', options_list=['--id'], help='Id of the key to be regenerated. Can be found using az appconfig credential list command.')

@@ -12,6 +12,8 @@ Release History
 * Support import/export of keyvault references from/to appservice
 * Support import/export of all labels from appconfig to appconfig
 * Validate key and feature names before setting and importing
+* Expose sku modification for configuration store.
+* Add command group for managed identity.
 
 **AppService**
 
