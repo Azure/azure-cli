@@ -1,9 +1,14 @@
+schedules:
+- cron: "0 18 * * 5"
+  displayName: Weekly Friday test
+  always: true
+
 jobs:
 - job: LiveTestPython38
   displayName: Live Test Python 3.8
   timeoutInMinutes: 9999
   strategy:
-    maxParallel: 50
+    maxParallel: 20
     matrix:
       acr:
         Target: acr
