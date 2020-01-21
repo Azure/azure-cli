@@ -9,6 +9,9 @@ from ._client_factory import iot_service_provisioning_factory
 from ._client_factory import iot_pnp_service_factory
 
 
+JOB_DEPRECATION_INFO = 'IoT Extension (azure-cli-iot-ext) Job commands'
+
+
 class PolicyUpdateResultTransform(LongRunningOperation):  # pylint: disable=too-few-public-methods
     def __call__(self, poller):
         result = super(PolicyUpdateResultTransform, self).__call__(poller)
@@ -119,7 +122,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.custom_command('renew-key', 'iot_hub_policy_key_renew', supports_no_wait=True)
 
     # iot hub job commands
-    with self.command_group('iot hub job', client_factory=iot_hub_service_factory) as g:
+    with self.command_group('iot hub job', deprecate_info=self.deprecate(redirect=JOB_DEPRECATION_INFO),
+                            client_factory=iot_hub_service_factory) as g:
         g.custom_command('list', 'iot_hub_job_list')
         g.custom_command('show', 'iot_hub_job_get')
         g.custom_command('cancel', 'iot_hub_job_cancel')
