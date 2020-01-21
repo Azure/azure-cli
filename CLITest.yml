@@ -143,3 +143,9 @@ jobs:
         azdev setup -c azure-cli -r azure-cli-extensions
         az login --service-principal --username $(APP_ID) --password $(PASSWORD) --tenant $(TENANT_ID)
         azdev test $(Target) --live
+    - task: PublishTestResults@2
+      inputs:
+        testResultsFiles: 'env/test_results.xml'
+        testRunTitle: 'Publish test results of $(Target) for Python $(python.version)'
+        # mergeTestResults: true
+        # testResultsFormat: 'JUnit'
