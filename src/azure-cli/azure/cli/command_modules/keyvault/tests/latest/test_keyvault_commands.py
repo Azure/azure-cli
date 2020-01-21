@@ -279,7 +279,20 @@ class KeyVaultKeyDownloadScenarioTest(ScenarioTest):
         for key_name in key_names:
             var_name = key_name.split('.')[0] + '-file'
             if 'hsm' in key_name:  # Should be generated
-                continue
+                if key_name.startswith('rsa'):
+                    rsa_size = key_name.split('-')[1]
+                    self.cmd('keyvault key create --vault-name {kv} -n ' + var_name +
+                             ' -p hsm --kty RSA-HSM --size ' + rsa_size)
+                elif key_name.startswith('ec'):
+                    ec_curve = key_name.split('-')[1]
+                    curve_names = {
+                        'p256': 'P-256',
+                        'p384': 'P-384',
+                        'p521': 'P-521',
+                        'p256k': 'P-256K'
+                    }
+                    self.cmd('keyvault key create --vault-name {kv} -n ' + var_name +
+                             ' -p hsm --kty EC-HSM --curve ' + curve_names[ec_curve])
             else:  # Should be imported (Have already been generated offline)
                 self.kwargs[var_name] = os.path.join(KEYS_DIR, key_name)
                 self.cmd('keyvault key import --vault-name {kv} -n ' + var_name + ' --pem-file "{' + var_name + '}"')
@@ -290,6 +303,9 @@ class KeyVaultKeyDownloadScenarioTest(ScenarioTest):
             try:
                 self.cmd('keyvault key download --vault-name {kv} -n ' + var_name + ' -f "' + der_downloaded_filename + '" -e DER')
                 self.cmd('keyvault key download --vault-name {kv} -n ' + var_name + ' -f "' + pem_downloaded_filename + '" -e PEM')
+
+                if 'hsm' in key_name:  # TODO: Currently we haven't found a good way to verify online generated keys
+                    continue
 
                 expected_pem = []
                 pem_pub_filename = os.path.join(KEYS_DIR, key_name.split('.')[0] + '.pub.pem')
@@ -305,8 +321,8 @@ class KeyVaultKeyDownloadScenarioTest(ScenarioTest):
                             actual_pem = actual_pem.decode("utf-8")
                         self.assertIn(expected_pem, actual_pem.replace('\n', ''))
 
-                verify(der_downloaded_filename, OpenSSL.crypto.FILETYPE_ASN1)
-                verify(pem_downloaded_filename, OpenSSL.crypto.FILETYPE_PEM)
+                    verify(der_downloaded_filename, OpenSSL.crypto.FILETYPE_ASN1)
+                    verify(pem_downloaded_filename, OpenSSL.crypto.FILETYPE_PEM)
             finally:
                 if os.path.exists(der_downloaded_filename):
                     os.remove(der_downloaded_filename)

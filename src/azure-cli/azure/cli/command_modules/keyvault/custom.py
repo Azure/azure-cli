@@ -702,18 +702,20 @@ def import_key(cmd, client, vault_base_url, key_name, protection=None, key_ops=N
 
 
 def _bytes_to_int(b):
+    """Convert bytes to hex integer"""
     len_diff = 4 - len(b) % 4 if len(b) % 4 > 0 else 0
     b = len_diff * b'\x00' + b  # We have to patch leading zeros for using struct.unpack
     bytes_num = int(math.floor(len(b) / 4))
     ans = 0
     items = struct.unpack('>' + 'I' * bytes_num, b)
-    for sub_int in items:
+    for sub_int in items:  # Accumulate all items into a big integer
         ans *= 2 ** 32
         ans += sub_int
     return ans
 
 
 def _jwk_to_dict(jwk):
+    """Convert a `JsonWebKey` struct to a python dict"""
     d = {}
     if jwk.crv:
         d['crv'] = jwk.crv
@@ -766,6 +768,7 @@ def _extract_ec_public_key_from_jwk(jwk_dict):
         'P-256': ec.SECP256R1,
         'P-384': ec.SECP384R1,
         'P-521': ec.SECP521R1,
+        'P-256K': ec.SECP256K1,
         'SECP256K1': ec.SECP256K1
     }
     curve = curves[jwk_dict['crv']]
