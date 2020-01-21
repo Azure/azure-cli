@@ -1328,7 +1328,7 @@ class AppConfigKeyValidationScenarioTest(ScenarioTest):
         config_store_name = self.create_random_name(prefix='KVTest', length=24)
 
         location = 'eastus'
-        sku  = 'standard'
+        sku = 'standard'
         self.kwargs.update({
             'config_store_name': config_store_name,
             'rg_loc': location,
