@@ -232,10 +232,14 @@ def load_arguments(self, _):
     with self.argument_context('deployment group') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type, completer=get_resource_group_completion_list, required=True)
         c.argument('mode', arg_type=get_enum_type(DeploymentMode, default='incremental'), help='Incremental (only add resources to resource group) or Complete (remove extra resources from resource group)')
+        c.argument('rollback_on_error', nargs='?', action=RollbackAction,
+                   help='The name of a deployment to roll back to on error, or use as a flag to roll back to the last successful deployment.')
 
     with self.argument_context('deployment group create') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
+        c.argument('aux_subscriptions', nargs='*', options_list=['--aux-subs'],
+                   help='Auxiliary subscriptions which will be used during deployment across tenants.')
 
     with self.argument_context('deployment group validate') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)

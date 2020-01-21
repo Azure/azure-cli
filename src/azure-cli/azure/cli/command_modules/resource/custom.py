@@ -384,9 +384,9 @@ class JSONSerializer(Serializer):
             # Be sure to pass a DeploymentProperties
             template = data.properties.template
             if template:
-                data.properties.template = None
                 data_as_dict = data.serialize()
                 data_as_dict["properties"]["template"] = JsonCTemplate(template)
+
                 return data_as_dict
         return super(JSONSerializer, self).body(data, data_type, **kwargs)
 
@@ -436,65 +436,82 @@ def _deploy_arm_template_at_subscription_scope(cli_ctx,
                                                deployment_name=None, deployment_location=None,
                                                validate_only=False,
                                                no_wait=False, handle_extended_json_format=False):
-    deployment_properties = _prepare_deployment_properties(cli_ctx=cli_ctx, template_file=template_file,
-                                                           template_uri=template_uri,
-                                                           parameters=parameters, mode='Incremental')
+    deployment_properties = None
+    if handle_extended_json_format:
+        deployment_properties = _prepare_deployment_properties_unmodified(cli_ctx=cli_ctx, template_file=template_file,
+                                                                          template_uri=template_uri,
+                                                                          parameters=parameters, mode='Incremental')
+    else:
+        deployment_properties = _prepare_deployment_properties(cli_ctx=cli_ctx, template_file=template_file,
+                                                               template_uri=template_uri,
+                                                               parameters=parameters, mode='Incremental')
 
     mgmt_client = _get_deployment_management_client(cli_ctx, handle_extended_json_format=handle_extended_json_format)
 
-    validation_result = mgmt_client.deployments.validate_at_subscription_scope(deployment_name=deployment_name, properties=deployment_properties, location=deployment_location)
+    validation_result = mgmt_client.validate_at_subscription_scope(deployment_name=deployment_name, properties=deployment_properties, location=deployment_location)
 
     if validate_only or validation_result.error:
         return validation_result
 
-    return sdk_no_wait(no_wait, mgmt_client.deployments.create_or_update_at_subscription_scope,
+    return sdk_no_wait(no_wait, mgmt_client.create_or_update_at_subscription_scope,
                        deployment_name, deployment_properties, deployment_location)
 
 
 def deploy_arm_template_at_resource_group(cmd,
                                           resource_group_name=None,
                                           template_file=None, template_uri=None, parameters=None,
-                                          deployment_name=None, mode=None,
-                                          no_wait=False, handle_extended_json_format=False):
+                                          deployment_name=None, mode=None, rollback_on_error=None,
+                                          no_wait=False, handle_extended_json_format=False,
+                                          aux_subscriptions=None):
     return _deploy_arm_template_at_resource_group(cli_ctx=cmd.cli_ctx,
                                                   resource_group_name=resource_group_name,
                                                   template_file=template_file, template_uri=template_uri, parameters=parameters,
-                                                  deployment_name=deployment_name,
-                                                  mode=mode, validate_only=False,
-                                                  no_wait=no_wait, handle_extended_json_format=handle_extended_json_format)
+                                                  deployment_name=deployment_name, mode=mode, rollback_on_error=rollback_on_error,
+                                                  validate_only=False,
+                                                  no_wait=no_wait, handle_extended_json_format=handle_extended_json_format,
+                                                  aux_subscriptions=aux_subscriptions)
 
 
 def validate_arm_template_at_resource_group(cmd,
                                             resource_group_name=None,
                                             template_file=None, template_uri=None, parameters=None,
-                                            deployment_name=None, mode=None,
+                                            deployment_name=None, mode=None, rollback_on_error=None,
                                             no_wait=False, handle_extended_json_format=False):
     return _deploy_arm_template_at_resource_group(cli_ctx=cmd.cli_ctx,
                                                   resource_group_name=resource_group_name,
                                                   template_file=template_file, template_uri=template_uri, parameters=parameters,
-                                                  deployment_name=deployment_name,
-                                                  mode=mode, validate_only=True,
+                                                  deployment_name=deployment_name, mode=mode, rollback_on_error=rollback_on_error,
+                                                  validate_only=True,
                                                   no_wait=no_wait, handle_extended_json_format=handle_extended_json_format)
 
 
 def _deploy_arm_template_at_resource_group(cli_ctx,
                                            resource_group_name=None,
                                            template_file=None, template_uri=None, parameters=None,
-                                           deployment_name=None,
-                                           mode=None, validate_only=False,
-                                           no_wait=False, handle_extended_json_format=False):
-    deployment_properties = _prepare_deployment_properties(cli_ctx=cli_ctx, template_file=template_file,
-                                                           template_uri=template_uri,
-                                                           parameters=parameters, mode=mode)
+                                           deployment_name=None, mode=None, rollback_on_error=None,
+                                           validate_only=False,
+                                           no_wait=False, handle_extended_json_format=False,
+                                           aux_subscriptions=None):
+    deployment_properties = None
+    if handle_extended_json_format:
+        deployment_properties = _prepare_deployment_properties_unmodified(cli_ctx=cli_ctx, template_file=template_file,
+                                                                          template_uri=template_uri,
+                                                                          parameters=parameters, mode=mode,
+                                                                          rollback_on_error=rollback_on_error)
+    else:
+        deployment_properties = _prepare_deployment_properties(cli_ctx=cli_ctx, template_file=template_file,
+                                                               template_uri=template_uri,
+                                                               parameters=parameters, mode=mode,
+                                                               rollback_on_error=rollback_on_error)
 
-    mgmt_client = _get_deployment_management_client(cli_ctx, handle_extended_json_format=handle_extended_json_format)
+    mgmt_client = _get_deployment_management_client(cli_ctx, handle_extended_json_format=handle_extended_json_format, aux_subscriptions=aux_subscriptions)
 
-    validation_result = mgmt_client.deployments.validate(resource_group_name=resource_group_name, deployment_name=deployment_name, properties=deployment_properties)
+    validation_result = mgmt_client.validate(resource_group_name=resource_group_name, deployment_name=deployment_name, properties=deployment_properties)
 
     if validate_only or validation_result.error:
         return validation_result
 
-    return sdk_no_wait(no_wait, mgmt_client.deployments.create_or_update, resource_group_name,
+    return sdk_no_wait(no_wait, mgmt_client.create_or_update, resource_group_name,
                        deployment_name, deployment_properties)
 
 
@@ -530,18 +547,24 @@ def _deploy_arm_template_at_management_group(cli_ctx,
                                              deployment_name=None, deployment_location=None,
                                              validate_only=False,
                                              no_wait=False, handle_extended_json_format=False):
-    deployment_properties = _prepare_deployment_properties(cli_ctx=cli_ctx, template_file=template_file,
-                                                           template_uri=template_uri,
-                                                           parameters=parameters, mode='Incremental')
+    deployment_properties = None
+    if handle_extended_json_format:
+        deployment_properties = _prepare_deployment_properties_unmodified(cli_ctx=cli_ctx, template_file=template_file,
+                                                                          template_uri=template_uri,
+                                                                          parameters=parameters, mode='Incremental')
+    else:
+        deployment_properties = _prepare_deployment_properties(cli_ctx=cli_ctx, template_file=template_file,
+                                                               template_uri=template_uri,
+                                                               parameters=parameters, mode='Incremental')
 
     mgmt_client = _get_deployment_management_client(cli_ctx, handle_extended_json_format=handle_extended_json_format)
 
-    validation_result = mgmt_client.deployments.validate_at_management_group_scope(group_id=management_group_id, deployment_name=deployment_name, properties=deployment_properties, location=deployment_location)
+    validation_result = mgmt_client.validate_at_management_group_scope(group_id=management_group_id, deployment_name=deployment_name, properties=deployment_properties, location=deployment_location)
 
     if validate_only or validation_result.error:
         return validation_result
 
-    return sdk_no_wait(no_wait, mgmt_client.deployments.create_or_update_at_management_group_scope,
+    return sdk_no_wait(no_wait, mgmt_client.create_or_update_at_management_group_scope,
                        management_group_id, deployment_name, deployment_properties, deployment_location)
 
 
@@ -572,34 +595,81 @@ def _deploy_arm_template_at_tenant_scope(cli_ctx,
                                          deployment_name=None, deployment_location=None,
                                          validate_only=False,
                                          no_wait=False, handle_extended_json_format=False):
-    deployment_properties = _prepare_deployment_properties(cli_ctx=cli_ctx, template_file=template_file,
-                                                           template_uri=template_uri,
-                                                           parameters=parameters, mode='Incremental')
+    deployment_properties = None
+    if handle_extended_json_format:
+        deployment_properties = _prepare_deployment_properties_unmodified(cli_ctx=cli_ctx, template_file=template_file,
+                                                                          template_uri=template_uri,
+                                                                          parameters=parameters, mode='Incremental')
+    else:
+        deployment_properties = _prepare_deployment_properties(cli_ctx=cli_ctx, template_file=template_file,
+                                                               template_uri=template_uri,
+                                                               parameters=parameters, mode='Incremental')
 
     mgmt_client = _get_deployment_management_client(cli_ctx, handle_extended_json_format=handle_extended_json_format)
 
-    validation_result = mgmt_client.deployments.validate_at_tenant_scope(deployment_name=deployment_name, properties=deployment_properties, location=deployment_location)
+    validation_result = mgmt_client.validate_at_tenant_scope(deployment_name=deployment_name, properties=deployment_properties, location=deployment_location)
 
     if validate_only or validation_result.error:
         return validation_result
 
-    return sdk_no_wait(no_wait, mgmt_client.deployments.create_or_update_at_tenant_scope,
+    return sdk_no_wait(no_wait, mgmt_client.create_or_update_at_tenant_scope,
                        deployment_name, deployment_properties, deployment_location)
 
 
-def _prepare_deployment_properties(cli_ctx, template_file=None, template_uri=None, parameters=None, mode=None):
-    DeploymentProperties, TemplateLink = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
-                                                 'DeploymentProperties', 'TemplateLink', mod='models')
+def _prepare_deployment_properties_unmodified(cli_ctx, template_file=None, template_uri=None, parameters=None, mode=None, rollback_on_error=None):
+    DeploymentProperties, TemplateLink, OnErrorDeployment = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
+                                                                    'DeploymentProperties', 'TemplateLink',
+                                                                    'OnErrorDeployment', mod='models')
+    template_link = None
+    template_obj = None
+    on_error_deployment = None
+    template_content = None
+    if template_uri:
+        template_link = TemplateLink(uri=template_uri)
+        template_content = _urlretrieve(template_uri).decode('utf-8')
+        template_obj = _remove_comments_from_json(template_content)
+    else:
+        template_content = read_file_content(template_file)
+        template_obj = _remove_comments_from_json(template_content)
 
+    if rollback_on_error == '':
+        on_error_deployment = OnErrorDeployment(type='LastSuccessful')
+    elif rollback_on_error:
+        on_error_deployment = OnErrorDeployment(type='SpecificDeployment', deployment_name=rollback_on_error)
+
+    template_param_defs = template_obj.get('parameters', {})
+    template_obj['resources'] = template_obj.get('resources', [])
+    parameters = _process_parameters(template_param_defs, parameters) or {}
+    parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters)
+
+    parameters = json.loads(json.dumps(parameters))
+
+    properties = DeploymentProperties(template=template_content, template_link=template_link,
+                                      parameters=parameters, mode=mode, on_error_deployment=on_error_deployment)
+
+    return properties
+
+
+def _prepare_deployment_properties(cli_ctx, template_file=None, template_uri=None, parameters=None, mode=None, rollback_on_error=None):
+    DeploymentProperties, TemplateLink, OnErrorDeployment = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
+                                                                    'DeploymentProperties', 'TemplateLink',
+                                                                    'OnErrorDeployment', mod='models')
     template = None
     template_link = None
     template_obj = None
+    on_error_deployment = None
+
     if template_uri:
         template_link = TemplateLink(uri=template_uri)
         template_obj = shell_safe_json_parse(_urlretrieve(template_uri).decode('utf-8'), preserve_order=True)
     else:
         template = get_file_json(template_file, preserve_order=True)
         template_obj = template
+
+    if rollback_on_error == '':
+        on_error_deployment = OnErrorDeployment(type='LastSuccessful')
+    elif rollback_on_error:
+        on_error_deployment = OnErrorDeployment(type='SpecificDeployment', deployment_name=rollback_on_error)
 
     template_param_defs = template_obj.get('parameters', {})
     template_obj['resources'] = template_obj.get('resources', [])
@@ -610,13 +680,13 @@ def _prepare_deployment_properties(cli_ctx, template_file=None, template_uri=Non
     parameters = json.loads(json.dumps(parameters))
 
     properties = DeploymentProperties(template=template, template_link=template_link,
-                                      parameters=parameters, mode=mode)
+                                      parameters=parameters, mode=mode, on_error_deployment=on_error_deployment)
 
     return properties
 
 
-def _get_deployment_management_client(cli_ctx, handle_extended_json_format=False):
-    smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+def _get_deployment_management_client(cli_ctx, handle_extended_json_format=False, aux_subscriptions=None):
+    smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, aux_subscriptions)
 
     if handle_extended_json_format:
         deployments_operation_group = smc.deployments  # This solves the multi-api for you
@@ -646,7 +716,7 @@ def _get_deployment_management_client(cli_ctx, handle_extended_json_format=False
             sender=PipelineRequestsHTTPSender(RequestsHTTPSender(smc.config))
         )
 
-    return smc
+    return deployments_operation_group
 
 
 def _list_resources_odata_filter_builder(resource_group_name=None, resource_provider_namespace=None,
