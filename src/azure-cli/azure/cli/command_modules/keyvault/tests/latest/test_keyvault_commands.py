@@ -249,18 +249,6 @@ class KeyVaultKeyDownloadScenarioTest(ScenarioTest):
         })
         _create_keyvault(self, self.kwargs)
 
-        dest_der = os.path.join(TEST_DIR, 'download-der')
-        dest_pem = os.path.join(TEST_DIR, 'download-pem')
-        if not os.path.exists(dest_der):
-            os.mkdir(dest_der)
-        if not os.path.exists(dest_pem):
-            os.mkdir(dest_pem)
-
-        self.kwargs.update({
-            'dest_der': dest_der,
-            'dest_pem': dest_pem
-        })
-
         key_names = [
             'ec-p256.pem',
             'ec-p384.pem',
@@ -288,30 +276,26 @@ class KeyVaultKeyDownloadScenarioTest(ScenarioTest):
         # * Extract public key (PEM): `openssl ec -in ec-p521.pem -pubout -out ec-p521.pub.pem`
         # * Extract public key (DER): `openssl ec -in ec-p521.pem -pubout -outform DER -out ec-p521.pub.der`
 
-        try:
-            for key_name in key_names:
-                var_name = key_name.split('.')[0] + '-file'
-                if 'hsm' in key_name:  # Should be generated
-                    continue
-                else:  # Should be imported (Have already been generated offline)
-                    self.kwargs[var_name] = os.path.join(KEYS_DIR, key_name)
-                    self.cmd('keyvault key import --vault-name {kv} -n ' + var_name + ' --pem-file "{' + var_name + '}"')
+        for key_name in key_names:
+            var_name = key_name.split('.')[0] + '-file'
+            if 'hsm' in key_name:  # Should be generated
+                continue
+            else:  # Should be imported (Have already been generated offline)
+                self.kwargs[var_name] = os.path.join(KEYS_DIR, key_name)
+                self.cmd('keyvault key import --vault-name {kv} -n ' + var_name + ' --pem-file "{' + var_name + '}"')
 
-                der_downloaded_filename = os.path.join(dest_der, var_name)
-                pem_downloaded_filename = os.path.join(dest_pem, var_name)
+            der_downloaded_filename = var_name + '.der'
+            pem_downloaded_filename = var_name + '.pem'
+
+            try:
                 self.cmd('keyvault key download --vault-name {kv} -n ' + var_name + ' -f "' + der_downloaded_filename + '" -e DER')
                 self.cmd('keyvault key download --vault-name {kv} -n ' + var_name + ' -f "' + pem_downloaded_filename + '" -e PEM')
 
-                expected_pem_data = []
-                pem_pub_filename = key_name.split('.')[0] + '.pub.pem'
+                expected_pem = []
+                pem_pub_filename = os.path.join(KEYS_DIR, key_name.split('.')[0] + '.pub.pem')
                 with open(pem_pub_filename, 'r') as pem_file:
-                    expected_pem_data = pem_file.readlines()
-
-                algo = key_name.split('-')[0].upper()
-                expected_pem = "-----BEGIN {} PUBLIC KEY-----\n".format(algo) + \
-                               '\n'.join(expected_pem_data) + \
-                               '-----END {} PUBLIC KEY-----\n'.format(algo)
-                expected_pem = expected_pem.replace('\n', '')
+                    expected_pem = pem_file.readlines()
+                expected_pem = ''.join(expected_pem).replace('\n', '')
 
                 def verify(path, file_type):
                     with open(path, 'rb') as f:
@@ -323,16 +307,11 @@ class KeyVaultKeyDownloadScenarioTest(ScenarioTest):
 
                 verify(der_downloaded_filename, OpenSSL.crypto.FILETYPE_ASN1)
                 verify(pem_downloaded_filename, OpenSSL.crypto.FILETYPE_PEM)
-
+            finally:
                 if os.path.exists(der_downloaded_filename):
                     os.remove(der_downloaded_filename)
                 if os.path.exists(pem_downloaded_filename):
                     os.remove(pem_downloaded_filename)
-        finally:
-            if os.path.exists(dest_der):
-                os.remove(dest_der)
-            if os.path.exists(dest_pem):
-                os.remove(dest_pem)
 
 
 class KeyVaultSecretSoftDeleteScenarioTest(ScenarioTest):
@@ -364,7 +343,6 @@ class KeyVaultSecretSoftDeleteScenarioTest(ScenarioTest):
 
 
 class KeyVaultSecretScenarioTest(ScenarioTest):
-
     def _test_download_secret(self):
         secret_path = os.path.join(TEST_DIR, 'test_secret.txt')
         self.kwargs['src_path'] = secret_path
