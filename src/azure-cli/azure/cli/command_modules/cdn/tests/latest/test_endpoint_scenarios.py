@@ -124,7 +124,7 @@ class CdnEndpointScenarioTest(CdnScenarioMixin, ScenarioTest):
         return profile_name
 
     @ResourceGroupPreparer()
-    def test_rulesEngine_crud(self, resource_group):
+    def test_rule_engine_crud(self, resource_group):
         profile_name = 'profile123'
         self.endpoint_list_cmd(resource_group, profile_name, expect_failure=True)
 
@@ -171,7 +171,7 @@ class CdnEndpointScenarioTest(CdnScenarioMixin, ScenarioTest):
                                         profile_name,
                                         checks=update_checks,
                                         options='--rule-name r1 --match-variable RemoteAddress\
-                                                 --operator GeoMatch --match-values "TH"')
+                                                 --operator GeoMatch --match-values "TH" "US"')
 
         update_checks = [JMESPathCheck('name', endpoint_name),
                          JMESPathCheck('length(deliveryPolicy.rules[0].actions)', 2)]

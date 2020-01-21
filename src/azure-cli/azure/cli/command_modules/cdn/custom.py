@@ -98,21 +98,21 @@ def create_condition(match_variable=None, operator=None, match_values=None,
         return DeliveryRuleRemoteAddressCondition(
             parameters=RemoteAddressMatchConditionParameters(
                 operator=operator,
-                match_values=match_values.split(","),
+                match_values=match_values,
                 negate_condition=negate_condition,
                 transforms=transform
             ))
     if match_variable == 'RequestMethod':
         return DeliveryRuleRequestMethodCondition(
             parameters=RequestMethodMatchConditionParameters(
-                match_values=match_values.split(","),
+                match_values=match_values,
                 negate_condition=negate_condition
             ))
     if match_variable == 'QueryString':
         return DeliveryRuleQueryStringCondition(
             parameters=QueryStringMatchConditionParameters(
                 operator=operator,
-                match_values=match_values.split(","),
+                match_values=match_values,
                 negate_condition=negate_condition,
                 transforms=transform
             ))
@@ -121,7 +121,7 @@ def create_condition(match_variable=None, operator=None, match_values=None,
             parameters=PostArgsMatchConditionParameters(
                 operator=operator,
                 selector=selector,
-                match_values=match_values.split(","),
+                match_values=match_values,
                 negate_condition=negate_condition,
                 transforms=transform
             ))
@@ -130,7 +130,7 @@ def create_condition(match_variable=None, operator=None, match_values=None,
             parameters=RequestHeaderMatchConditionParameters(
                 operator=operator,
                 selector=selector,
-                match_values=match_values.split(","),
+                match_values=match_values,
                 negate_condition=negate_condition,
                 transforms=transform
             ))
@@ -138,7 +138,7 @@ def create_condition(match_variable=None, operator=None, match_values=None,
         return DeliveryRuleRequestUriCondition(
             parameters=RequestUriMatchConditionParameters(
                 operator=operator,
-                match_values=match_values.split(","),
+                match_values=match_values,
                 negate_condition=negate_condition,
                 transforms=transform
             ))
@@ -146,21 +146,21 @@ def create_condition(match_variable=None, operator=None, match_values=None,
         return DeliveryRuleRequestBodyCondition(
             parameters=RequestBodyMatchConditionParameters(
                 operator=operator,
-                match_values=match_values.split(","),
+                match_values=match_values,
                 negate_condition=negate_condition,
                 transforms=transform
             ))
     if match_variable == 'RequestScheme':
         return DeliveryRuleRequestSchemeCondition(
             parameters=RequestSchemeMatchConditionParameters(
-                match_values=match_values.split(","),
+                match_values=match_values,
                 negate_condition=negate_condition
             ))
     if match_variable == 'UrlPath':
         return DeliveryRuleUrlPathCondition(
             parameters=UrlPathMatchConditionParameters(
                 operator=operator,
-                match_values=match_values.split(","),
+                match_values=match_values,
                 negate_condition=negate_condition,
                 transforms=transform
             ))
@@ -168,7 +168,7 @@ def create_condition(match_variable=None, operator=None, match_values=None,
         return DeliveryRuleUrlFileExtensionCondition(
             parameters=UrlFileExtensionMatchConditionParameters(
                 operator=operator,
-                match_values=match_values.split(","),
+                match_values=match_values,
                 negate_condition=negate_condition,
                 transforms=transform
             ))
@@ -176,20 +176,20 @@ def create_condition(match_variable=None, operator=None, match_values=None,
         return DeliveryRuleUrlFileNameCondition(
             parameters=UrlFileNameMatchConditionParameters(
                 operator=operator,
-                match_values=match_values.split(","),
+                match_values=match_values,
                 negate_condition=negate_condition,
                 transforms=transform
             ))
     if match_variable == 'HttpVersion':
         return DeliveryRuleHttpVersionCondition(
             parameters=HttpVersionMatchConditionParameters(
-                match_values=match_values.split(","),
+                match_values=match_values,
                 negate_condition=negate_condition
             ))
     if match_variable == 'IsDevice':
         return DeliveryRuleIsDeviceCondition(
             parameters=IsDeviceMatchConditionParameters(
-                match_values=match_values.split(","),
+                match_values=match_values,
                 negate_condition=negate_condition
             ))
     if match_variable == 'Cookies':
@@ -197,7 +197,7 @@ def create_condition(match_variable=None, operator=None, match_values=None,
             parameters=CookiesMatchConditionParameters(
                 operator=operator,
                 selector=selector,
-                match_values=match_values.split(","),
+                match_values=match_values,
                 negate_condition=negate_condition,
                 transforms=transform
             ))
@@ -364,7 +364,7 @@ def remove_condition(client, resource_group_name, profile_name, endpoint_name, r
     if policy is not None:
         for i in range(0, len(policy.rules)):
             if policy.rules[i].name == rule_name:
-                policy.rules[i].conditions.pop(int(index))
+                policy.rules[i].conditions.pop(index)
 
     params = EndpointUpdateParameters(
         delivery_policy=policy
@@ -380,7 +380,7 @@ def remove_action(client, resource_group_name, profile_name, endpoint_name, rule
     if policy is not None:
         for i in range(0, len(policy.rules)):
             if policy.rules[i].name == rule_name:
-                policy.rules[i].actions.pop(int(index))
+                policy.rules[i].actions.pop(index)
 
     params = EndpointUpdateParameters(
         delivery_policy=policy

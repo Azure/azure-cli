@@ -90,12 +90,12 @@ def load_arguments(self, _):
         c.argument('match_variable', arg_group="Match Condition", help='Name of the match condition.')
         c.argument('operator', arg_group="Match Condition", help='Operator of the match condition.')
         c.argument('selector', arg_group="Match Condition", help='Selector of the match condition.')
-        c.argument('match_values', arg_group="Match Condition",
+        c.argument('match_values', arg_group="Match Condition", nargs='+',
                    help='Match values of the match condition (comma separated).')
         c.argument('transform', arg_group="Match Condition", arg_type=get_enum_type(['Lowercase', 'Uppercase']),
                    nargs='+', help='Transform to apply before matching.')
         c.argument('negate_condition', arg_group="Match Condition", arg_type=get_three_state_flag(),
-                   options_list='--negate-condition', help='If true, negates the condition')
+                   help='If true, negates the condition')
         c.argument('action_name', arg_group="Action", help='Name of the action.')
         c.argument('cache_behavior', arg_group="Action",
                    arg_type=get_enum_type(['BypassCache', 'Override', 'SetIfMissing']),
@@ -132,10 +132,10 @@ def load_arguments(self, _):
                    help='A request URI pattern that identifies the type of requests that may be rewritten.')
         c.argument('destination', help='The destination path to be used in the rewrite.')
         c.argument('preserve_unmatched_path', arg_group="Action",
-                   arg_type=get_three_state_flag(), options_list='--preserve-unmatched-path',
+                   arg_type=get_three_state_flag(),
                    help='If True, the remaining path after the source \
                    pattern will be appended to the new destination path.')
-        c.argument('index', help='The index of the condition/action')
+        c.argument('index', type=int, help='The index of the condition/action')
 
     with self.argument_context('cdn endpoint create') as c:
         c.argument('name', name_arg_type, id_part='name', help='Name of the CDN endpoint.')
