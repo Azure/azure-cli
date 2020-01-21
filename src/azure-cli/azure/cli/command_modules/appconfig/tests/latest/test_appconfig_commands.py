@@ -22,7 +22,7 @@ FEATURE_FLAG_PREFIX = ".appconfig.featureflag/"
 
 
 class AppConfigMgmtScenarioTest(ScenarioTest):
-    
+
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_mgmt(self, resource_group, location):
         config_store_name = self.create_random_name(prefix='MgmtTest', length=24)
