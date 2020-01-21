@@ -144,8 +144,9 @@ jobs:
         az login --service-principal --username $(APP_ID) --password $(PASSWORD) --tenant $(TENANT_ID)
         azdev test $(Target) --live
     - task: PublishTestResults@2
+      condition: succeededOrFailed()
       inputs:
-        testResultsFiles: 'env/test_results.xml'
+        testResultsFiles: '/home/vsts/.azdev/env_config/home/vsts/work/1/env/test_results.xml'
         testRunTitle: 'Publish test results of $(Target) for Python $(python.version)'
         # mergeTestResults: true
         # testResultsFormat: 'JUnit'
