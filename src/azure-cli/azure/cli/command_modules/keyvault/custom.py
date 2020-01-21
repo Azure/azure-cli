@@ -622,50 +622,53 @@ def restore_key(client, vault_base_url, file_path):
     return client.restore_key(vault_base_url, data)
 
 
+def _int_to_bytes(i):
+    h = hex(i)
+    if len(h) > 1 and h[0:2] == '0x':
+        h = h[2:]
+    # need to strip L in python 2.x
+    h = h.strip('L')
+    if len(h) % 2:
+        h = '0' + h
+    return codecs.decode(h, 'hex')
+
+
+def _private_rsa_key_to_jwk(rsa_key, jwk):
+    priv = rsa_key.private_numbers()
+    jwk.n = _int_to_bytes(priv.public_numbers.n)
+    jwk.e = _int_to_bytes(priv.public_numbers.e)
+    jwk.q = _int_to_bytes(priv.q)
+    jwk.p = _int_to_bytes(priv.p)
+    jwk.d = _int_to_bytes(priv.d)
+    jwk.dq = _int_to_bytes(priv.dmq1)
+    jwk.dp = _int_to_bytes(priv.dmp1)
+    jwk.qi = _int_to_bytes(priv.iqmp)
+
+
+def _private_ec_key_to_jwk(ec_key, jwk):
+    supported_curves = {
+        'secp256r1': 'P-256',
+        'secp384r1': 'P-384',
+        'secp521r1': 'P-521',
+        'secp256k1': 'SECP256K1'
+    }
+    curve = ec_key.private_numbers().public_numbers.curve.name
+
+    jwk.crv = supported_curves.get(curve, None)
+    if not jwk.crv:
+        raise CLIError("Import failed: Unsupported curve, {}.".format(curve))
+
+    jwk.x = _int_to_bytes(ec_key.private_numbers().public_numbers.x)
+    jwk.y = _int_to_bytes(ec_key.private_numbers().public_numbers.y)
+    jwk.d = _int_to_bytes(ec_key.private_numbers().private_value)
+
+
 def import_key(cmd, client, vault_base_url, key_name, protection=None, key_ops=None, disabled=False, expires=None,
                not_before=None, tags=None, pem_file=None, pem_password=None, byok_file=None):
     """ Import a private key. Supports importing base64 encoded private keys from PEM files.
         Supports importing BYOK keys into HSM for premium key vaults. """
     KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_KEYVAULT)
     JsonWebKey = cmd.get_models('JsonWebKey', resource_type=ResourceType.DATA_KEYVAULT)
-
-    def _int_to_bytes(i):
-        h = hex(i)
-        if len(h) > 1 and h[0:2] == '0x':
-            h = h[2:]
-        # need to strip L in python 2.x
-        h = h.strip('L')
-        if len(h) % 2:
-            h = '0' + h
-        return codecs.decode(h, 'hex')
-
-    def _private_rsa_key_to_jwk(rsa_key, jwk):
-        priv = rsa_key.private_numbers()
-        jwk.n = _int_to_bytes(priv.public_numbers.n)
-        jwk.e = _int_to_bytes(priv.public_numbers.e)
-        jwk.q = _int_to_bytes(priv.q)
-        jwk.p = _int_to_bytes(priv.p)
-        jwk.d = _int_to_bytes(priv.d)
-        jwk.dq = _int_to_bytes(priv.dmq1)
-        jwk.dp = _int_to_bytes(priv.dmp1)
-        jwk.qi = _int_to_bytes(priv.iqmp)
-
-    def _private_ec_key_to_jwk(ec_key, jwk):
-        supported_curves = {
-            'secp256r1': 'P-256',
-            'secp384r1': 'P-384',
-            'secp521r1': 'P-521',
-            'secp256k1': 'SECP256K1'
-        }
-        curve = ec_key.private_numbers().public_numbers.curve.name
-
-        jwk.crv = supported_curves.get(curve, None)
-        if not jwk.crv:
-            raise CLIError("Import failed: Unsupported curve, {}.".format(curve))
-
-        jwk.x = _int_to_bytes(ec_key.private_numbers().public_numbers.x)
-        jwk.y = _int_to_bytes(ec_key.private_numbers().public_numbers.y)
-        jwk.d = _int_to_bytes(ec_key.private_numbers().private_value)
 
     key_attrs = KeyAttributes(enabled=not disabled, not_before=not_before, expires=expires)
     key_obj = JsonWebKey(key_ops=key_ops)
@@ -698,79 +701,83 @@ def import_key(cmd, client, vault_base_url, key_name, protection=None, key_ops=N
     return client.import_key(vault_base_url, key_name, key_obj, protection == 'hsm', key_attrs, tags)
 
 
+def _bytes_to_int(b):
+    len_diff = 4 - len(b) % 4 if len(b) % 4 > 0 else 0
+    b = len_diff * b'\x00' + b  # We have to patch leading zeros for using struct.unpack
+    bytes_num = int(math.floor(len(b) / 4))
+    ans = 0
+    items = struct.unpack('>' + 'I' * bytes_num, b)
+    for sub_int in items:
+        ans *= 2 ** 32
+        ans += sub_int
+    return ans
+
+
+def _jwk_to_dict(jwk):
+    d = {}
+    if jwk.crv:
+        d['crv'] = jwk.crv
+    if jwk.kid:
+        d['kid'] = jwk.kid
+    if jwk.kty:
+        d['kty'] = jwk.kty
+    if jwk.d:
+        d['d'] = _bytes_to_int(jwk.d)
+    if jwk.dp:
+        d['dp'] = _bytes_to_int(jwk.dp)
+    if jwk.dq:
+        d['dq'] = _bytes_to_int(jwk.dq)
+    if jwk.e:
+        d['e'] = _bytes_to_int(jwk.e)
+    if jwk.k:
+        d['k'] = _bytes_to_int(jwk.k)
+    if jwk.n:
+        d['n'] = _bytes_to_int(jwk.n)
+    if jwk.p:
+        d['p'] = _bytes_to_int(jwk.p)
+    if jwk.q:
+        d['q'] = _bytes_to_int(jwk.q)
+    if jwk.qi:
+        d['qi'] = _bytes_to_int(jwk.qi)
+    if jwk.t:
+        d['t'] = _bytes_to_int(jwk.t)
+    if jwk.x:
+        d['x'] = _bytes_to_int(jwk.x)
+    if jwk.y:
+        d['y'] = _bytes_to_int(jwk.y)
+
+    return d
+
+
+def _extract_rsa_public_key_from_jwk(jwk_dict):
+    e = jwk_dict.get('e', 256)
+    n = jwk_dict.get('n')
+    public = rsa.RSAPublicNumbers(e, n)
+    return public.public_key(default_backend())
+
+
+def _extract_ec_public_key_from_jwk(jwk_dict):
+    if not all(k in jwk_dict for k in ['x', 'y', 'crv']):
+        raise CLIError('Invalid EC key: missing properties(x, y, crv)')
+
+    x = jwk_dict.get('x')
+    y = jwk_dict.get('y')
+    curves = {
+        'P-256': ec.SECP256R1,
+        'P-384': ec.SECP384R1,
+        'P-521': ec.SECP521R1,
+        'SECP256K1': ec.SECP256K1
+    }
+    curve = curves[jwk_dict['crv']]
+    public = ec.EllipticCurvePublicNumbers(x, y, curve())
+    return public.public_key(default_backend())
+
+
 def download_key(client, file_path, vault_base_url=None, key_name=None, key_version='',
                  encoding=None, identifier=None):  # pylint: disable=unused-argument
     """ Download a key from a KeyVault. """
     if os.path.isfile(file_path) or os.path.isdir(file_path):
         raise CLIError("File or directory named '{}' already exists.".format(file_path))
-
-    def _bytes_to_int(b):
-        len_diff = 4 - len(b) % 4 if len(b) % 4 > 0 else 0
-        b = len_diff * b'\x00' + b  # We have to patch leading zeros for using struct.unpack
-        bytes_num = int(math.floor(len(b) / 4))
-        ans = 0
-        items = struct.unpack('>' + 'I' * bytes_num, b)
-        for sub_int in items:
-            ans *= 2 ** 32
-            ans += sub_int
-        return ans
-
-    def _jwk_to_dict(jwk):
-        d = {}
-        if jwk.crv:
-            d['crv'] = jwk.crv
-        if jwk.kid:
-            d['kid'] = jwk.kid
-        if jwk.kty:
-            d['kty'] = jwk.kty
-        if jwk.d:
-            d['d'] = _bytes_to_int(jwk.d)
-        if jwk.dp:
-            d['dp'] = _bytes_to_int(jwk.dp)
-        if jwk.dq:
-            d['dq'] = _bytes_to_int(jwk.dq)
-        if jwk.e:
-            d['e'] = _bytes_to_int(jwk.e)
-        if jwk.k:
-            d['k'] = _bytes_to_int(jwk.k)
-        if jwk.n:
-            d['n'] = _bytes_to_int(jwk.n)
-        if jwk.p:
-            d['p'] = _bytes_to_int(jwk.p)
-        if jwk.q:
-            d['q'] = _bytes_to_int(jwk.q)
-        if jwk.qi:
-            d['qi'] = _bytes_to_int(jwk.qi)
-        if jwk.t:
-            d['t'] = _bytes_to_int(jwk.t)
-        if jwk.x:
-            d['x'] = _bytes_to_int(jwk.x)
-        if jwk.y:
-            d['y'] = _bytes_to_int(jwk.y)
-
-        return d
-
-    def _extract_rsa_public_key_from_jwk(jwk_dict):
-        e = jwk_dict.get('e', 256)
-        n = jwk_dict.get('n')
-        public = rsa.RSAPublicNumbers(e, n)
-        return public.public_key(default_backend())
-
-    def _extract_ec_public_key_from_jwk(jwk_dict):
-        if not all(k in jwk_dict for k in ['x', 'y', 'crv']):
-            raise CLIError('Invalid EC key: missing properties(x, y, crv)')
-
-        x = jwk_dict.get('x')
-        y = jwk_dict.get('y')
-        curves = {
-            'P-256': ec.SECP256R1,
-            'P-384': ec.SECP384R1,
-            'P-521': ec.SECP521R1,
-            'SECP256K1': ec.SECP256K1
-        }
-        curve = curves[jwk_dict['crv']]
-        public = ec.EllipticCurvePublicNumbers(x, y, curve())
-        return public.public_key(default_backend())
 
     key = client.get_key(vault_base_url, key_name, key_version)
     json_web_key = _jwk_to_dict(key.key)
