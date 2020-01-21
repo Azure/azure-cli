@@ -2830,7 +2830,7 @@ def _ensure_aks_service_principal(cli_ctx,
         # --service-principal specfied, validate --client-secret was too
         if not client_secret:
             raise CLIError('--client-secret is required if --service-principal is specified')
-    return return {
+    return {
         'client_secret': client_secret,
         'service_principal': service_principal,
     }
