@@ -1,9 +1,15 @@
 
 
+History Notes:  
+(Fill in the following template if multiple notes are needed, otherwise PR title will be used for history note.)
+
+[Component Name 1] (BREAKING CHANGE:) (az command:) make some customer-facing change.  
+[Component Name 2] (BREAKING CHANGE:) (az command:) make some customer-facing change.
+
 ---
 
 This checklist is used to make sure that common guidelines for a pull request are followed.
 
-- [ ] The PR has modified HISTORY.rst describing any customer-facing, functional changes. Note that this does not include changes only to help content. (see [Modifying change log](https://github.com/Azure/azure-cli/tree/master/doc/authoring_command_modules#modify-change-log)).
+- [ ] The PR title and description has followed the guideline in [Submitting Pull Requests](https://github.com/Azure/azure-cli/tree/dev/doc/authoring_command_modules#submitting-pull-requests).
 
 - [ ] I adhere to the [Command Guidelines](https://github.com/Azure/azure-cli/blob/dev/doc/command_guidelines.md).
