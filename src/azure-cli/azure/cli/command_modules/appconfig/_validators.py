@@ -14,6 +14,9 @@ from ._azconfig.models import QueryFields
 from ._featuremodels import FeatureQueryFields
 
 logger = get_logger(__name__)
+FEATURE_FLAG_PREFIX = ".appconfig.featureflag/"
+FEATURE_FLAG_CONTENT_TYPE = "application/vnd.microsoft.appconfig.ff+json;charset=utf-8"
+KEYVAULT_CONTENT_TYPE = "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
 
 
 def validate_datetime(namespace):
@@ -182,3 +185,33 @@ def validate_secret_identifier(namespace):
         KeyVaultIdentifier(uri=identifier)
     except Exception as e:
         raise CLIError("Received an exception while validating the format of secret identifier.\n{0}".format(str(e)))
+
+
+def validate_key(namespace):
+    if namespace.key:
+        input_key = str(namespace.key).lower()
+        if input_key == '.' or input_key == '..' or '%' in input_key:
+            raise CLIError("Key is invalid. Key cannot be a '.' or '..', or contain the '%' character.")
+        if input_key.startswith(FEATURE_FLAG_PREFIX):
+            raise CLIError("Key is invalid. Key cannot start with the reserved prefix for feature flags.")
+    else:
+        raise CLIError("Key cannot be empty.")
+
+
+def validate_content_type(namespace):
+    if namespace.content_type is not None:
+        content_type = str(namespace.content_type).lower()
+        if content_type == FEATURE_FLAG_CONTENT_TYPE:
+            raise CLIError("Content type is invalid. It's a reserved content type for feature flags.")
+        if content_type == KEYVAULT_CONTENT_TYPE:
+            raise CLIError("Content type is invalid. It's a reserved content type for KeyVault references.")
+
+
+def validate_feature(namespace):
+    if namespace.feature:
+        invalid_pattern = re.compile(r'[^a-zA-Z0-9._-]')
+        invalid = re.search(invalid_pattern, namespace.feature)
+        if invalid:
+            raise CLIError("Feature name is invalid. Only alphanumeric characters, '.', '-' and '_' are allowed.")
+    else:
+        raise CLIError("Feature name cannot be empty.")

@@ -21,7 +21,8 @@ from ._validators import (validate_appservice_name_or_id,
                           validate_import_depth, validate_query_fields,
                           validate_feature_query_fields, validate_filter_parameters,
                           validate_separator, validate_secret_identifier,
-                          validate_identity)
+                          validate_key, validate_content_type, validate_feature,
+						  validate_identity)
 
 
 def load_arguments(self, _):
@@ -137,14 +138,14 @@ def load_arguments(self, _):
         c.argument('appservice_account', validator=validate_appservice_name_or_id, help='ARM ID for AppService OR the name of the AppService, assuming it is in the same subscription and resource group as the App Configuration. Required for AppService arguments')
 
     with self.argument_context('appconfig kv set') as c:
-        c.argument('key', help='Key to be set.')
+        c.argument('key', validator=validate_key, help="Key to be set. Key cannot be a '.' or '..', or contain the '%' character.")
         c.argument('label', help="If no label specified, set the key with null label by default")
         c.argument('tags', arg_type=tags_type)
-        c.argument('content_type', help='Content type of the keyvalue to be set.')
+        c.argument('content_type', validator=validate_content_type, help='Content type of the keyvalue to be set.')
         c.argument('value', help='Value of the keyvalue to be set.')
 
     with self.argument_context('appconfig kv set-keyvault') as c:
-        c.argument('key', help='Key to be set.')
+        c.argument('key', validator=validate_key, help="Key to be set. Key cannot be a '.' or '..', or contain the '%' character.")
         c.argument('label', help="If no label specified, set the key with null label by default")
         c.argument('tags', arg_type=tags_type)
         c.argument('secret_identifier', validator=validate_secret_identifier, help="ID of the Key Vault object. Can be found using 'az keyvault {collection} show' command, where collection is key, secret or certificate. To set reference to the latest version of your secret, remove version information from secret identifier.")
@@ -183,7 +184,7 @@ def load_arguments(self, _):
         c.argument('fields', arg_type=feature_fields_arg_type)
 
     with self.argument_context('appconfig feature set') as c:
-        c.argument('feature', help="Name of the feature flag to be set. Only alphanumeric characters, '.', '-' and '_' are allowed.")
+        c.argument('feature', validator=validate_feature, help="Name of the feature flag to be set. Only alphanumeric characters, '.', '-' and '_' are allowed.")
         c.argument('label', help="If no label specified, set the feature flag with null label by default")
         c.argument('description', help='Description of the feature flag to be set.')
 
