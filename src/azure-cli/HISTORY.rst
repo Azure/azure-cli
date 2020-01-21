@@ -25,6 +25,10 @@ Release History
 
 * Support app creation/update with the new sku name ST0, ST1, ST2.
 
+**Key Vault**
+
+* Add a new command `az keyvault key download` for downloading keys.
+
 **Misc**
 
 * Fix #6371: Support filename and environment variable completion in Bash
