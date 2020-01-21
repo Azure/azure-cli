@@ -22,7 +22,7 @@ from ._validators import (validate_appservice_name_or_id,
                           validate_feature_query_fields, validate_filter_parameters,
                           validate_separator, validate_secret_identifier,
                           validate_key, validate_content_type, validate_feature,
-						  validate_identity)
+                          validate_identity)
 
 
 def load_arguments(self, _):
@@ -57,7 +57,7 @@ def load_arguments(self, _):
     identities_arg_type = CLIArgumentType(
         nargs='*',
         validator=validate_identity,
-        help="Accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity or a resource id to refer user assigned identity. Default: '[system]'"
+        help="Accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity or a resource id to refer user assigned identity. Use system assigned identity if not specified."
     )
 
     with self.argument_context('appconfig') as c:
@@ -83,7 +83,7 @@ def load_arguments(self, _):
         c.argument('identities', arg_type=identities_arg_type)
 
     with self.argument_context('appconfig identity remove') as c:
-        c.argument('identities', arg_type=identities_arg_type, help="Accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity, '[all]' for all identities or a resource id to refer user assigned identity. Default: '[system]'")
+        c.argument('identities', arg_type=identities_arg_type, help="Accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity, '[all]' for all identities or a resource id to refer user assigned identity. Remove system assigned identity if not specified.")
 
     with self.argument_context('appconfig credential regenerate') as c:
         c.argument('id_', options_list=['--id'], help='Id of the key to be regenerated. Can be found using az appconfig credential list command.')
