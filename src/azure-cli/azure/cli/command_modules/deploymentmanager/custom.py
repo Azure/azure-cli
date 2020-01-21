@@ -283,11 +283,11 @@ def cli_step_create(
 
     if step is None and duration is None:
         raise CLIError('usage error: specify either step or duration. \
-                        If step is specified, it can either be a wait step or health check step.') 
+                        If step is specified, it can either be a wait step or health check step.')
 
     if step is not None and duration is not None:
         raise CLIError('usage error: specify only one of step or duration. \
-            If step is specified, it can either be a wait step or health check step.') 
+            If step is specified, it can either be a wait step or health check step.')
 
     client = cf_steps(cmd.cli_ctx)
     if step is not None:
@@ -296,7 +296,7 @@ def cli_step_create(
 
     elif duration is not None:
         if step_name is None:
-            raise CLIError('usage error: step name is not specified.') 
+            raise CLIError('usage error: step name is not specified.')
 
         waitStepProperties = WaitStepProperties(attributes=WaitStepAttributes(duration=duration))
 
@@ -323,10 +323,12 @@ def cli_step_update(
         tags=None):
 
     if (step is None and duration is None):
-        raise CLIError('usage error: specify either step or duration. If step is specified, it can either be a wait step or health check step.')  # pylint: disable=line-too-long
+        raise CLIError('usage error: specify either step or duration. \
+            If step is specified, it can either be a wait step or health check step.')
 
     if (step is not None and duration is not None):
-        raise CLIError('usage error: specify only one of step or duration. If step is specified, it can either be a wait step or health check step.')  # pylint: disable=line-too-long
+        raise CLIError('usage error: specify only one of step or duration. \
+            If step is specified, it can either be a wait step or health check step.')
 
     if duration is not None:
         instance.properties.attributes.duration = duration
