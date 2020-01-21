@@ -101,4 +101,4 @@ class AcrTaskCommandsTests(ScenarioTest):
         self.cmd('acr task delete -n {task_name} -r {registry_name}')
 
         # test acr delete
-        self.cmd('acr delete -n {registry_name} -g {rg}')
+        self.cmd('acr delete -n {registry_name} -g {rg} -y')
