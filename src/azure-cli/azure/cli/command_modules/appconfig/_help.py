@@ -16,13 +16,54 @@ helps['appconfig create'] = """
 type: command
 short-summary: Create an App Configuration.
 examples:
-  - name: Create an App Configuration with name, location and resource group.
-    text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus
+  - name: Create an App Configuration with name, location, sku and resource group.
+    text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard
+  - name: Create an App Configuration with name, location, sku and resource group with system assigned identity.
+    text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --assign-identity
+  - name: Create an App Configuration with name, location, sku and resource group with user assigned identity.
+    text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --assign-identity /subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCEGROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentity
+"""
+
+helps['appconfig identity'] = """
+type: group
+short-summary: Managed identities for App Configurations.
+"""
+
+helps['appconfig identity assign'] = """
+type: command
+short-summary: Update managed identities for an App Configuration.
+examples:
+  - name: Enable the system-assigned identity for an existing App Configuration
+    text: az appconfig identity assign -g MyResourceGroup -n MyAppConfiguration
+  - name: Assign a user-assigned managed identity for an existing App Configuration
+    text: az appconfig identity assign -g MyResourceGroup -n MyAppConfiguration --identities "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCEGROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentity"
+  - name: Assign both system-assigned and user assigned identities for an existing App Configuration
+    text: az appconfig identity assign -g MyResourceGroup -n MyAppConfiguration --identities [system] "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCEGROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentity"
+"""
+
+helps['appconfig identity remove'] = """
+type: command
+short-summary: Remove managed identities for an App Configuration.
+examples:
+  - name: Remove the system-assigned identity from a App Configuration.
+    text: az appconfig identity remove -g MyResourceGroup -n MyAppConfiguration
+  - name: Remove a user assigned identity from a App Configuration.
+    text: az appconfig identity remove -g MyResourceGroup -n MyAppConfiguration --identities "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCEGROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentity"
+  - name: Remove all identities from an App Configuration.
+    text: az appconfig identity remove -g MyResourceGroup -n MyAppConfiguration --identities [all]
+"""
+
+helps['appconfig identity show'] = """
+type: command
+short-summary: Display managed identities for an App Configuration.
+examples:
+  - name: Display managed identities for a task.
+    text: az appconfig identity show -g MyResourceGroup -n MyAppConfiguration
 """
 
 helps['appconfig credential'] = """
 type: group
-short-summary: Manage credentials for App Configurations
+short-summary: Manage credentials for App Configurations.
 """
 
 helps['appconfig credential list'] = """
@@ -211,6 +252,8 @@ short-summary: Update an App Configuration.
 examples:
   - name: Update tags of an App Configuration
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --tags key1=value1 key2=value2
+  - name: Upgrade sku of an App Configuration to standard
+    text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --sku Standard
 """
 
 helps['appconfig feature'] = """
