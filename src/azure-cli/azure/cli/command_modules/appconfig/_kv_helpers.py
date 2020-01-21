@@ -3,10 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long
+# pylint: disable=line-too-long,too-many-nested-blocks
 
 import io
 import json
+import re
 import sys
 
 import chardet
@@ -88,6 +89,36 @@ def __compare_kvs_for_restore(restore_kvs, current_kvs):
 
     return kvs_to_restore, kvs_to_modify, kvs_to_delete
 
+
+def validate_import_key(key):
+    if key:
+        if key == '.' or key == '..' or '%' in key:
+            logger.warning("Ignoring invalid key '%s'. Key cannot be a '.' or '..', or contain the '%%' character.", key)
+            return False
+        if key.startswith(FeatureFlagConstants.FEATURE_FLAG_PREFIX):
+            logger.warning("Ignoring invalid key '%s'. Key cannot start with the reserved prefix for feature flags.", key)
+            return False
+    else:
+        logger.warning("Ignoring invalid key ''. Key cannot be empty.")
+        return False
+
+    return True
+
+
+def validate_import_feature(feature):
+    if feature:
+        invalid_pattern = re.compile(r'[^a-zA-Z0-9._-]')
+        invalid = re.search(invalid_pattern, feature)
+        if invalid:
+            logger.warning("Ignoring invalid feature '%s'. Only alphanumeric characters, '.', '-' and '_' are allowed in feature name.", feature)
+            return False
+    else:
+        logger.warning("Ignoring invalid feature ''. Feature name cannot be empty.")
+        return False
+
+    return True
+
+
 # File <-> List of KeyValue object
 
 
@@ -137,7 +168,8 @@ def __read_kv_from_file(file_path, format_, separator=None, prefix_to_add="", de
     # convert to KeyValue list
     key_values = []
     for k, v in flattened_data.items():
-        key_values.append(KeyValue(key=k, value=v))
+        if validate_import_key(key=k):
+            key_values.append(KeyValue(key=k, value=v))
     return key_values
 
 
@@ -273,45 +305,46 @@ def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add=""):
             cmd, resource_group_name=appservice_account["resource_group"], name=appservice_account["name"], slot=None)
         for item in settings:
             key = prefix_to_add + item['name']
-            tags = {'AppService:SlotSetting': str(item['slotSetting']).lower()} if item['slotSetting'] else {}
-            value = item['value']
+            if validate_import_key(key):
+                tags = {'AppService:SlotSetting': str(item['slotSetting']).lower()} if item['slotSetting'] else {}
+                value = item['value']
 
-            # Value will look like one of the following if it is a KeyVault reference:
-            # @Microsoft.KeyVault(SecretUri=https://myvault.vault.azure.net/secrets/mysecret/ec96f02080254f109c51a1f14cdb1931)
-            # @Microsoft.KeyVault(VaultName=myvault;SecretName=mysecret;SecretVersion=ec96f02080254f109c51a1f14cdb1931)
-            if value and value.strip().lower().startswith(KeyVaultConstants.APPSVC_KEYVAULT_PREFIX.lower()):
-                try:
-                    # Strip all whitespaces from value string.
-                    # Valid values of SecretUri, VaultName, SecretName or SecretVersion will never have whitespaces.
-                    value = value.replace(" ", "")
-                    appsvc_value_dict = dict(x.split('=') for x in value[len(KeyVaultConstants.APPSVC_KEYVAULT_PREFIX) + 1: -1].split(';'))
-                    appsvc_value_dict = {k.lower(): v for k, v in appsvc_value_dict.items()}
-                    secret_identifier = appsvc_value_dict.get('secreturi')
-                    if not secret_identifier:
-                        # Construct secreturi
-                        vault_name = appsvc_value_dict.get('vaultname')
-                        secret_name = appsvc_value_dict.get('secretname')
-                        secret_version = appsvc_value_dict.get('secretversion')
-                        secret_identifier = "https://{0}.vault.azure.net/secrets/{1}/{2}".format(vault_name, secret_name, secret_version)
+                # Value will look like one of the following if it is a KeyVault reference:
+                # @Microsoft.KeyVault(SecretUri=https://myvault.vault.azure.net/secrets/mysecret/ec96f02080254f109c51a1f14cdb1931)
+                # @Microsoft.KeyVault(VaultName=myvault;SecretName=mysecret;SecretVersion=ec96f02080254f109c51a1f14cdb1931)
+                if value and value.strip().lower().startswith(KeyVaultConstants.APPSVC_KEYVAULT_PREFIX.lower()):
                     try:
-                        from azure.keyvault.key_vault_id import KeyVaultIdentifier
-                        # this throws an exception for invalid format of secret identifier
-                        KeyVaultIdentifier(uri=secret_identifier)
-                        kv = KeyValue(key=key,
-                                      value=json.dumps({"uri": secret_identifier}, ensure_ascii=False, separators=(',', ':')),
-                                      tags=tags,
-                                      content_type=KeyVaultConstants.KEYVAULT_CONTENT_TYPE)
-                        key_values.append(kv)
-                        continue
-                    except (TypeError, ValueError) as e:
+                        # Strip all whitespaces from value string.
+                        # Valid values of SecretUri, VaultName, SecretName or SecretVersion will never have whitespaces.
+                        value = value.replace(" ", "")
+                        appsvc_value_dict = dict(x.split('=') for x in value[len(KeyVaultConstants.APPSVC_KEYVAULT_PREFIX) + 1: -1].split(';'))
+                        appsvc_value_dict = {k.lower(): v for k, v in appsvc_value_dict.items()}
+                        secret_identifier = appsvc_value_dict.get('secreturi')
+                        if not secret_identifier:
+                            # Construct secreturi
+                            vault_name = appsvc_value_dict.get('vaultname')
+                            secret_name = appsvc_value_dict.get('secretname')
+                            secret_version = appsvc_value_dict.get('secretversion')
+                            secret_identifier = "https://{0}.vault.azure.net/secrets/{1}/{2}".format(vault_name, secret_name, secret_version)
+                        try:
+                            from azure.keyvault.key_vault_id import KeyVaultIdentifier
+                            # this throws an exception for invalid format of secret identifier
+                            KeyVaultIdentifier(uri=secret_identifier)
+                            kv = KeyValue(key=key,
+                                          value=json.dumps({"uri": secret_identifier}, ensure_ascii=False, separators=(',', ':')),
+                                          tags=tags,
+                                          content_type=KeyVaultConstants.KEYVAULT_CONTENT_TYPE)
+                            key_values.append(kv)
+                            continue
+                        except (TypeError, ValueError) as e:
+                            logger.debug(
+                                'Exception while validating the format of KeyVault identifier. Key "%s" with value "%s" will be treated like a regular key-value.\n%s', key, value, str(e))
+                    except (AttributeError, TypeError, ValueError) as e:
                         logger.debug(
-                            'Exception while validating the format of KeyVault identifier. Key "%s" with value "%s" will be treated like a regular key-value.\n%s', key, value, str(e))
-                except (AttributeError, TypeError, ValueError) as e:
-                    logger.debug(
-                        'Key "%s" with value "%s" is not a well-formatted KeyVault reference. It will be treated like a regular key-value.\n%s', key, value, str(e))
+                            'Key "%s" with value "%s" is not a well-formatted KeyVault reference. It will be treated like a regular key-value.\n%s', key, value, str(e))
 
-            kv = KeyValue(key=key, value=value, tags=tags)
-            key_values.append(kv)
+                kv = KeyValue(key=key, value=value, tags=tags)
+                key_values.append(kv)
         return key_values
     except Exception as exception:
         raise CLIError("Failed to read key-values from appservice." + str(exception))
@@ -699,47 +732,49 @@ def __convert_feature_dict_to_keyvalue_list(features_dict, enabled_for_keyword):
 
     try:
         for k, v in features_dict.items():
-            key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + str(k)
-            feature_flag_value = FeatureFlagValue(id_=str(k))
+            if validate_import_feature(feature=k):
 
-            if isinstance(v, dict):
-                # This may be a conditional feature
-                feature_flag_value.enabled = False
-                try:
-                    feature_flag_value.conditions = {'client_filters': v[enabled_for_keyword]}
-                except KeyError:
-                    raise CLIError("Feature '{0}' must contain '{1}' definition or have a true/false value. \n".format(str(k), enabled_for_keyword))
+                key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + str(k)
+                feature_flag_value = FeatureFlagValue(id_=str(k))
 
-                if feature_flag_value.conditions["client_filters"]:
-                    feature_flag_value.enabled = True
+                if isinstance(v, dict):
+                    # This may be a conditional feature
+                    feature_flag_value.enabled = False
+                    try:
+                        feature_flag_value.conditions = {'client_filters': v[enabled_for_keyword]}
+                    except KeyError:
+                        raise CLIError("Feature '{0}' must contain '{1}' definition or have a true/false value. \n".format(str(k), enabled_for_keyword))
 
-                    for idx, val in enumerate(feature_flag_value.conditions["client_filters"]):
-                        # each val should be a dict with at most 2 keys (Name, Parameters) or at least 1 key (Name)
-                        val = {filter_key.lower(): filter_val for filter_key, filter_val in val.items()}
-                        if not val.get("name", None):
-                            logger.warning("Ignoring a filter for feature '%s' because it doesn't have a 'Name' attribute.", str(k))
-                            continue
+                    if feature_flag_value.conditions["client_filters"]:
+                        feature_flag_value.enabled = True
 
-                        if val["name"].lower() == "alwayson":
-                            # We support alternate format for specifying always ON features
-                            # "FeatureT": {"EnabledFor": [{ "Name": "AlwaysOn"}]}
-                            feature_flag_value.conditions = default_conditions
-                            break
+                        for idx, val in enumerate(feature_flag_value.conditions["client_filters"]):
+                            # each val should be a dict with at most 2 keys (Name, Parameters) or at least 1 key (Name)
+                            val = {filter_key.lower(): filter_val for filter_key, filter_val in val.items()}
+                            if not val.get("name", None):
+                                logger.warning("Ignoring a filter for feature '%s' because it doesn't have a 'Name' attribute.", str(k))
+                                continue
 
-                        filter_param = val.get("parameters", {})
-                        new_val = {'name': val["name"]}
-                        if filter_param:
-                            new_val["parameters"] = filter_param
-                        feature_flag_value.conditions["client_filters"][idx] = new_val
+                            if val["name"].lower() == "alwayson":
+                                # We support alternate format for specifying always ON features
+                                # "FeatureT": {"EnabledFor": [{ "Name": "AlwaysOn"}]}
+                                feature_flag_value.conditions = default_conditions
+                                break
 
-            else:
-                feature_flag_value.enabled = v
-                feature_flag_value.conditions = default_conditions
+                            filter_param = val.get("parameters", {})
+                            new_val = {'name': val["name"]}
+                            if filter_param:
+                                new_val["parameters"] = filter_param
+                            feature_flag_value.conditions["client_filters"][idx] = new_val
 
-            set_kv = KeyValue(key=key,
-                              value=json.dumps(feature_flag_value, default=lambda o: o.__dict__, ensure_ascii=False),
-                              content_type=FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE)
-            key_values.append(set_kv)
+                    else:
+                        feature_flag_value.enabled = v
+                        feature_flag_value.conditions = default_conditions
+
+                set_kv = KeyValue(key=key,
+                                  value=json.dumps(feature_flag_value, default=lambda o: o.__dict__, ensure_ascii=False),
+                                  content_type=FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE)
+                key_values.append(set_kv)
 
     except Exception as exception:
         raise CLIError("File contains feature flags in invalid format. " + str(exception))
