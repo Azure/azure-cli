@@ -1,6 +1,6 @@
 
 
-History Notes:  
+**History Notes:**  
 (Fill in the following template if multiple notes are needed, otherwise PR title will be used for history note.)
 
 [Component Name 1] (BREAKING CHANGE:) (az command:) make some customer-facing change.  

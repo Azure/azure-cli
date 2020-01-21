@@ -203,17 +203,17 @@ Submitting Pull Requests
 
 History notes are auto-generated based on commit messages and descriptions starting from [S165](https://github.com/Azure/azure-cli/milestone/82). The commmit message for the squashed merge commit defaults to the PR title. Starting from 01/30/2020, we require all the PR titles to follow the below format:
 1. [**Mandatory**] Each commit message must start with `[Component Name]` or `{Component Name}`. 
-* `Component Name` shall be replaced by the real ones such as `Storage`, `Compute`. It could be the name of a command module, but in title case with necessary spaces for better readability, such as `API Management`, `Managed Service`. Other possible component names include but are not limited to: `Packaging`, `Misc.`, `Aladdin`. 
-* `[]` means this change is customer-facing and the message will be put into `HISTORY.rst`. `{}` means this change is not customer-facing and the message will **NOT** be included in `HISTORY.rst`. 
-* If the component name is `Core`, the message will be written in `src/azure-cli-core/HISTORY.rst`. Otherwise, the message will be written in `src/azure-cli/HISTORY.rst`.
+  * `Component Name` shall be replaced by the real ones such as `Storage`, `Compute`. It could be the name of a command module, but in title case with necessary spaces for better readability, such as `API Management`, `Managed Service`. Other possible component names include but are not limited to: `Packaging`, `Misc.`, `Aladdin`. 
+  * `[]` means this change is customer-facing and the message will be put into `HISTORY.rst`. `{}` means this change is not customer-facing and the message will **NOT** be included in `HISTORY.rst`. 
+  * If the component name is `Core`, the message will be written in `src/azure-cli-core/HISTORY.rst`. Otherwise, the message will be written in `src/azure-cli/HISTORY.rst`.
 2. [**Mandatory**] If it's a breaking change, the second part should be `BREAKING CHANGE` followed by a colon. In the case of hotfix, put `Hotfix` in this part. For other cases, this part should be empty.
 3. [**Recommendation**] If the change can be mapped into a command, then the next part could be the command name, followed by a colon.
 4. [**Recommendation**] Use the right verb with present-tense in original form to descibe what is done:
-* **Add** for new features.
-* **Change** for changes in existing functionality.
-* **Deprecate** for once-stable features removed in upcoming releases.
-* **Remove** for deprecated features removed in this release.
-* **Fix** for any bug fixes.
+  * **Add** for new features.
+  * **Change** for changes in existing functionality.
+  * **Deprecate** for once-stable features removed in upcoming releases.
+  * **Remove** for deprecated features removed in this release.
+  * **Fix** for any bug fixes.
 5. [**Mandatory**] Use period in the end.
 
 An example of customer-facing change PR:
