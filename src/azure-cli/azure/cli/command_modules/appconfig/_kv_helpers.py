@@ -227,7 +227,7 @@ def __read_kv_from_config_store(cmd, name=None, connection_string=None, key=None
     return key_values
 
 
-def __write_kv_and_features_to_config_store(cmd, key_values, features=None, name=None, connection_string=None, label=None):
+def __write_kv_and_features_to_config_store(cmd, key_values, features=None, name=None, connection_string=None, label=None, preserve_labels=False):
     if not key_values and not features:
         return
     try:
@@ -238,9 +238,14 @@ def __write_kv_and_features_to_config_store(cmd, key_values, features=None, name
         if features:
             key_values.extend(__convert_featureflag_list_to_keyvalue_list(features))
 
-        for kv in key_values:
-            kv.label = label
-            azconfig_client.set_keyvalue(kv, ModifyKeyValueOptions())
+        if not preserve_labels:
+            for kv in key_values:
+                kv.label = label
+                azconfig_client.set_keyvalue(kv, ModifyKeyValueOptions())
+        else:
+            for kv in key_values:
+                azconfig_client.set_keyvalue(kv, ModifyKeyValueOptions())
+
     except Exception as exception:
         raise CLIError(str(exception))
 
