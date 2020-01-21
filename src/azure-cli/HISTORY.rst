@@ -10,6 +10,7 @@ Release History
 **AppConfig**
 
 * Support import/export of keyvault references from/to appservice
+* Support import/export of all labels from appconfig to appconfig
 
 **AppService**
 
