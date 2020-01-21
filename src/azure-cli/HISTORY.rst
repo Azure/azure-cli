@@ -3,13 +3,23 @@
 Release History
 ===============
 
+**ACR**
+
+* [BREAKING CHANGE] `az acr delete` will prompt
+
 **AppConfig**
 
 * Support import/export of keyvault references from/to appservice
+* Support import/export of all labels from appconfig to appconfig
 
 **AppService**
 
 * Azure Stack: surface commands under the profile of 2019-03-01-hybrid
+
+**ARM**
+
+* Fix issue #11658: `az group export` command does not support `--query` and `--output` parameters
+* Fix issue #10279: The exit code of `az group deployment validate` is 0 when the verification fails
 
 **IoT Central**
 
@@ -18,6 +28,15 @@ Release History
 **Misc**
 
 * Fix #6371: Support filename and environment variable completion in Bash
+
+**Network**
+
+* Fix #2092: az network dns record-set add/remove: add warning when record-set is not found. In the future, an extra argument will be supported to confirm this auto creation.
+
+**Storage**
+
+* Add a new command group `az storage share-rm` to use the Microsoft.Storage resource provider for Azure file share management operations.
+* Fix issue #11415: permission error for `az storage blob update`
 
 2.0.80
 ++++++
@@ -92,7 +111,6 @@ Release History
 * `az storage account create`: Remove preview flag for --enable-hierarchical-namespace parameter
 * Update azure-mgmt-storage version to 7.0.0 to use api version 2019-06-01
 * Add new parameters `--enable-delete-retention` and `--delete-retention-days` to support managing delete retention policy for storage account blob-service-properties.
-
 
 2.0.78
 ++++++
