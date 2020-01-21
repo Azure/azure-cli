@@ -44,6 +44,10 @@ Release History
 
 * Add a new command group `az storage share-rm` to use the Microsoft.Storage resource provider for Azure file share management operations.
 * Fix issue #11415: permission error for `az storage blob update`
+* Integrate Azcopy 10.3.3 and support Win32.
+* `az storage copy`: Add `--include-path`, `--include-pattern`, `--exclude-path` and`--exclude-pattern` parameters
+* `az storage remove`: Change `--inlcude` and `--exclude` parameters to `--include-path`, `--include-pattern`, `--exclude-path` and`--exclude-pattern` parameters
+* `az storage sync`: Add `--include-pattern`, `--exclude-path` and`--exclude-pattern` parameters
 
 2.0.80
 ++++++
