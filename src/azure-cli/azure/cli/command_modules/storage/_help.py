@@ -745,8 +745,8 @@ examples:
     text: az storage copy -s https://[account].blob.core.windows.net/[container]/[path/to/directory] -d /path/to/dir --recursive
   - name: Download a subset of containers within a storage account by using a wildcard symbol (*) in the container name, and you can also specify your storage account and container information as above.
     text: az storage copy -s https://[account].blob.core.windows.net/[container*name] -d /path/to/dir --recursive
-  - name: Download a set of files from Azure Blob using --include-pattern, and you can also specify your storage account and container information as above.
-    text: az storage copy -s https://[account].blob.core.windows.net/[container] --include-pattern foo* -d /path/to/dir --recursive
+  - name: Download a subset of files from Azure Blob. (Only jpg files and file names don't start with test will be included.)
+    text: az storage copy -s https://[account].blob.core.windows.net/[container] --include-pattern "*.jpg" --exclude-pattern test* -d /path/to/dir --recursive
   - name: Copy a single blob to another blob, and you can also specify the storage account and container information of source and destination as above.
     text: az storage copy -s https://[srcaccount].blob.core.windows.net/[container]/[path/to/blob] -d https://[destaccount].blob.core.windows.net/[container]/[path/to/blob]
   - name: Copy an entire account data from blob account to another blob account, and you can also specify the storage account and container information of source and destination as above.
@@ -1208,8 +1208,8 @@ examples:
     text: az storage remove -c MyContainer --recursive
   - name: Remove all the blobs in a Storage Container.
     text: az storage remove -c MyContainer -n path/to/directory
-  - name: Remove a subset of blobs in a virtual directory (For example, only jpg and pdf files, or if the blob name is "exactName").
-    text: az storage remove -c MyContainer --include-path path/to/directory --include-pattern "*.jpg;*.pdf;exactName" --recursive
+  - name: Remove a subset of blobs in a virtual directory (For example, only jpg and pdf files, or if the blob name is "exactName" and file names don't start with "test").
+    text: az storage remove -c MyContainer --include-path path/to/directory --include-pattern "*.jpg;*.pdf;exactName" --exclude-pattern "test*" --recursive
   - name: Remove an entire virtual directory but exclude certain blobs from the scope (For example, every blob that starts with foo or ends with bar).
     text: az storage remove -c MyContainer --include-path path/to/directory --exclude-pattern "foo*;*bar" --recursive
   - name: Remove a single file.

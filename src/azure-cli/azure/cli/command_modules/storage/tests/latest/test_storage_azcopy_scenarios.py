@@ -167,6 +167,11 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 21))
 
+        self.cmd('storage remove -c {} --include-path apple --account-name {} --include-pattern "file*" --exclude-pattern "file_1*" --recursive'.format(
+            container, storage_account))
+        self.cmd('storage blob list -c {} --account-name {}'.format(
+            container, storage_account), checks=JMESPathCheck('length(@)', 12))
+
         self.cmd('storage remove -c {} --account-name {} --recursive'.format(
             container, storage_account))
         self.cmd('storage blob list -c {} --account-name {}'.format(
