@@ -22,7 +22,7 @@ FEATURE_FLAG_PREFIX = ".appconfig.featureflag/"
 
 
 class AppConfigMgmtScenarioTest(ScenarioTest):
-
+    
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_mgmt(self, resource_group, location):
         config_store_name = self.create_random_name(prefix='MgmtTest', length=24)
@@ -1328,10 +1328,12 @@ class AppConfigKeyValidationScenarioTest(ScenarioTest):
         config_store_name = self.create_random_name(prefix='KVTest', length=24)
 
         location = 'eastus'
+        sku  = 'standard'
         self.kwargs.update({
             'config_store_name': config_store_name,
             'rg_loc': location,
-            'rg': resource_group
+            'rg': resource_group,
+            'sku': sku
         })
         _create_config_store(self, self.kwargs)
 
