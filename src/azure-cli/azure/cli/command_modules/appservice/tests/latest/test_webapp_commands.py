@@ -590,6 +590,10 @@ class LinuxWebappScenarioTest(ScenarioTest):
 class LinuxWebappSSHScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='japanwest')
     def test_linux_webapp_ssh(self, resource_group):
+        # Skip this test on Windows as it will fail at 'webapp ssh'
+        import platform
+        if platform.system() == "Windows":
+            return
         runtime = 'node|8.11'
         plan = self.create_random_name(prefix='webapp-ssh-plan', length=24)
         webapp = self.create_random_name(prefix='webapp-ssh', length=24)
