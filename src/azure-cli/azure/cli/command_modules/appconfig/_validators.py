@@ -155,6 +155,26 @@ def validate_filter_parameter(string):
     return result
 
 
+def validate_identity(namespace):
+    subcommand = namespace.command.split(' ')[-1]
+    identities = set()
+
+    if subcommand == 'create' and namespace.assign_identity:
+        identities = set(namespace.assign_identity)
+    elif subcommand in ('assign', 'remove') and namespace.identities:
+        identities = set(namespace.identities)
+    else:
+        return
+
+    for identity in identities:
+        from msrestazure.tools import is_valid_resource_id
+        if identity == '[all]' and subcommand == 'remove':
+            continue
+
+        if identity != '[system]' and not is_valid_resource_id(identity):
+            raise CLIError("Invalid identity '{}'. Use '[system]' to refer system assigned identity, or a resource id to refer user assigned identity.".format(identity))
+
+
 def validate_secret_identifier(namespace):
     """ Validate the format of keyvault reference secret identifier """
     from azure.keyvault.key_vault_id import KeyVaultIdentifier
