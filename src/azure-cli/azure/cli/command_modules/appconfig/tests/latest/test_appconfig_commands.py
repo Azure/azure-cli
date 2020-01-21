@@ -15,7 +15,7 @@ import yaml
 from knack.util import CLIError
 from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest, LiveScenarioTest)
 from azure.cli.testsdk.checkers import NoneCheck
-from azure.cli.command_modules.appconfig._constants import KeyVaultConstants
+from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants, KeyVaultConstants
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 FEATURE_FLAG_PREFIX = ".appconfig.featureflag/"
@@ -1255,6 +1255,122 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
         # List Filters when no filters present
         self.cmd('appconfig feature filter list -n {config_store_name} --feature {feature} --label {label}',
                  checks=NoneCheck())
+
+
+class AppConfigKeyValidationScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(parameter_name_for_location='location')
+    def test_azconfig_key_validation(self, resource_group, location):
+        config_store_name = self.create_random_name(prefix='KVTest', length=24)
+
+        location = 'eastus'
+        self.kwargs.update({
+            'config_store_name': config_store_name,
+            'rg_loc': location,
+            'rg': resource_group
+        })
+        _create_config_store(self, self.kwargs)
+
+        # get connection string
+        credential_list = self.cmd(
+            'appconfig credential list -n {config_store_name} -g {rg}').get_output_in_json()
+        self.kwargs.update({
+            'connection_string': credential_list[0]['connectionString']
+        })
+
+        # validate key
+        self.kwargs.update({
+            'key': "Col%%or",
+            'value': "Red"
+        })
+        with self.assertRaisesRegexp(CLIError, "Key is invalid. Key cannot be a '.' or '..', or contain the '%' character."):
+            self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} -y')
+
+        self.kwargs.update({
+            'key': ""
+        })
+        with self.assertRaisesRegexp(CLIError, "Key cannot be empty."):
+            self.cmd('appconfig kv set --connection-string {connection_string} --key "{key}" --value {value} -y')
+
+        self.kwargs.update({
+            'key': "."
+        })
+        with self.assertRaisesRegexp(CLIError, "Key is invalid. Key cannot be a '.' or '..', or contain the '%' character."):
+            self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} -y')
+
+        self.kwargs.update({
+            'key': FeatureFlagConstants.FEATURE_FLAG_PREFIX
+        })
+        with self.assertRaisesRegexp(CLIError, "Key is invalid. Key cannot start with the reserved prefix for feature flags."):
+            self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} -y')
+
+        self.kwargs.update({
+            'key': FeatureFlagConstants.FEATURE_FLAG_PREFIX.upper() + 'test'
+        })
+        with self.assertRaisesRegexp(CLIError, "Key is invalid. Key cannot start with the reserved prefix for feature flags."):
+            self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} -y')
+
+        # validate key for KeyVault ref
+        self.kwargs.update({
+            'key': "%KeyVault",
+            'secret_identifier': "https://fake.vault.azure.net/secrets/fakesecret"
+        })
+        with self.assertRaisesRegexp(CLIError, "Key is invalid. Key cannot be a '.' or '..', or contain the '%' character."):
+            self.cmd('appconfig kv set-keyvault --connection-string {connection_string} --key {key} --secret-identifier {secret_identifier} -y')
+
+        # validate content type
+        self.kwargs.update({
+            'key': "Color",
+            'content_type': FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE
+        })
+        with self.assertRaisesRegexp(CLIError, "Content type is invalid. It's a reserved content type for feature flags."):
+            self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} --content-type {content_type} -y')
+
+        self.kwargs.update({
+            'key': "Color",
+            'content_type': FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE.upper()
+        })
+        with self.assertRaisesRegexp(CLIError, "Content type is invalid. It's a reserved content type for feature flags."):
+            self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} --content-type {content_type} -y')
+
+        self.kwargs.update({
+            'content_type': KeyVaultConstants.KEYVAULT_CONTENT_TYPE
+        })
+        with self.assertRaisesRegexp(CLIError, "Content type is invalid. It's a reserved content type for KeyVault references."):
+            self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} --content-type {content_type} -y')
+
+        # validate feature name
+        self.kwargs.update({
+            'feature': 'Bet@'
+        })
+        with self.assertRaisesRegexp(CLIError, "Feature name is invalid. Only alphanumeric characters, '.', '-' and '_' are allowed."):
+            self.cmd('appconfig feature set --connection-string {connection_string} --feature {feature} -y')
+
+        self.kwargs.update({
+            'feature': ''
+        })
+        with self.assertRaisesRegexp(CLIError, "Feature name cannot be empty."):
+            self.cmd('appconfig feature set --connection-string {connection_string} --feature "{feature}" -y')
+
+        # validate keys and features during file import
+        imported_file_path = os.path.join(TEST_DIR, 'import_invalid_kv_and_features.json')
+        expected_export_file_path = os.path.join(TEST_DIR, 'export_valid_kv_and_features.json')
+        actual_export_file_path = os.path.join(TEST_DIR, 'export.json')
+        self.kwargs.update({
+            'import_source': 'file',
+            'imported_format': 'json',
+            'imported_file_path': imported_file_path,
+            'exported_file_path': actual_export_file_path
+        })
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} -y')
+        with open(expected_export_file_path) as json_file:
+            expected_export = json.load(json_file)
+        with open(actual_export_file_path) as json_file:
+            actual_export = json.load(json_file)
+        assert expected_export == actual_export
 
 
 def _create_config_store(test, kwargs):
