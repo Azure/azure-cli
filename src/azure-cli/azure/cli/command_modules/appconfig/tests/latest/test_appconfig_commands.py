@@ -653,10 +653,12 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
         dest_config_store_name = self.create_random_name(prefix='Destination', length=24)
 
         location = 'eastus'
+        sku = 'standard'
         self.kwargs.update({
             'config_store_name': src_config_store_name,
             'rg_loc': location,
-            'rg': resource_group
+            'rg': resource_group,
+            'sku': sku
         })
         _create_config_store(self, self.kwargs)
 
