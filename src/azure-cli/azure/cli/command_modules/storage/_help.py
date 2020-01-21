@@ -534,7 +534,6 @@ examples:
 helps['storage blob sync'] = """
 type: command
 short-summary: Sync blobs recursively to a storage blob container.
-long-summary: Sync command depends on Azcopy, which will be upgraded to v10.3 soon to support 32-bit Operating System and utilize new features.
 examples:
   - name: Sync a single blob to a container.
     text: az storage blob sync -c mycontainer -s "path/to/file" -d NewBlob
@@ -721,12 +720,6 @@ short-summary: Manage container stored access policies.
 helps['storage copy'] = """
 type: command
 short-summary: Copy files or directories to or from Azure storage.
-long-summary: >
-    Copy command depends on Azcopy, which will be upgraded to v10.3 soon to support 32-bit Operating System and
-    utilize new features.
-
-    [COMING BREAKING CHANGE] With Azcopy v10.3, `*` character is no longer supported as a wildcard in URL, but new
-    parameters --include-pattern and --exclude-pattern will be added with `*` wildcard support.
 examples:
   - name: Upload a single file to Azure Blob using url.
     text: az storage copy -s /path/to/file.txt -d https://[account].blob.core.windows.net/[container]/[path/to/blob]
@@ -750,8 +743,10 @@ examples:
     text: az storage copy -s https://[account].blob.core.windows.net/[container]/[path/to/blob] -d /path/to/file.txt
   - name: Download an entire directory from Azure Blob, and you can also specify your storage account and container information as above.
     text: az storage copy -s https://[account].blob.core.windows.net/[container]/[path/to/directory] -d /path/to/dir --recursive
-  - name: Download a set of files from Azure Blob using wildcards, and you can also specify your storage account and container information as above.
-    text: az storage copy -s https://[account].blob.core.windows.net/[container]/foo* -d /path/to/dir --recursive
+  - name: Download a subset of containers within a storage account by using a wildcard symbol (*) in the container name, and you can also specify your storage account and container information as above.
+    text: az storage copy -s https://[account].blob.core.windows.net/[container*name] -d /path/to/dir --recursive
+  - name: Download a subset of files from Azure Blob. (Only jpg files and file names don't start with test will be included.)
+    text: az storage copy -s https://[account].blob.core.windows.net/[container] --include-pattern "*.jpg" --exclude-pattern test* -d /path/to/dir --recursive
   - name: Copy a single blob to another blob, and you can also specify the storage account and container information of source and destination as above.
     text: az storage copy -s https://[srcaccount].blob.core.windows.net/[container]/[path/to/blob] -d https://[destaccount].blob.core.windows.net/[container]/[path/to/blob]
   - name: Copy an entire account data from blob account to another blob account, and you can also specify the storage account and container information of source and destination as above.
@@ -783,7 +778,7 @@ examples:
   - name: Download an entire directory from Azure File Share, and you can also specify your storage account and share information as above.
     text: az storage copy -s https://[account].file.core.windows.net/[share]/[path/to/directory] -d /path/to/dir --recursive
   - name: Download a set of files from Azure File Share using wildcards, and you can also specify your storage account and share information as above.
-    text: az storage copy -s https://[account].file.core.windows.net/[share]/foo* -d /path/to/dir --recursive
+    text: az storage copy -s https://[account].file.core.windows.net/[share]/ --include-pattern foo* -d /path/to/dir --recursive
 """
 
 helps['storage cors'] = """
@@ -1204,10 +1199,6 @@ short-summary: Manage shared access policies for a storage queue.
 helps['storage remove'] = """
 type: command
 short-summary: Delete blobs or files from Azure Storage.
-long-summary: >
-    To delete blobs, both the source must either be public or be authenticated by using a shared access signature.
-    Remove command depends on Azcopy, which will be upgraded to v10.3 soon to support 32-bit Operating System and
-    utilize new features.
 examples:
   - name: Remove a single blob.
     text: az storage remove -c MyContainer -n MyBlob
@@ -1217,10 +1208,10 @@ examples:
     text: az storage remove -c MyContainer --recursive
   - name: Remove all the blobs in a Storage Container.
     text: az storage remove -c MyContainer -n path/to/directory
-  - name: Remove a subset of blobs in a virtual directory (For example, only jpg and pdf files, or if the blob name is "exactName").
-    text: az storage remove -c MyContainer -n path/to/directory --recursive --include "*.jpg;*.pdf;exactName"
+  - name: Remove a subset of blobs in a virtual directory (For example, only jpg and pdf files, or if the blob name is "exactName" and file names don't start with "test").
+    text: az storage remove -c MyContainer --include-path path/to/directory --include-pattern "*.jpg;*.pdf;exactName" --exclude-pattern "test*" --recursive
   - name: Remove an entire virtual directory but exclude certain blobs from the scope (For example, every blob that starts with foo or ends with bar).
-    text: az storage remove -c MyContainer -n path/to/directory --recursive --include "foo*;*bar"
+    text: az storage remove -c MyContainer --include-path path/to/directory --exclude-pattern "foo*;*bar" --recursive
   - name: Remove a single file.
     text: az storage remove -s MyShare -p MyFile
   - name: Remove an entire directory.
