@@ -91,9 +91,19 @@ def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, pa
     # Check the resource name availability for the bot.
     name_response = NameAvailability.check_name_availability(client, resource_name, kind)
     if not name_response.valid:
-        # If the name is unavailable, gracefully exit and log the reason for the user.
-        raise CLIError('Unable to create a bot with a name of "{0}".\nReason: {1}'
-                       .format(resource_name, name_response.message))
+        # Creates should be idempotent, verify if the bot already exists inside of the provided Resource Group
+        logger.error('Failed name availability check for provided bot name "{}".\n'
+                     'Checking if bot exists in Resource Group "{}".'.format(resource_name, resource_group_name))
+        try:
+            # If the bot exists, return the bot's information to the user
+            existing_bot = get_bot(cmd, client, resource_group_name, resource_name)
+            logger.warning('Provided bot name already exists in Resource Group. Returning bot information:'.format(resource_name, resource_group_name))
+            return existing_bot
+        except Exception as e:
+            # If the name is unavailable, gracefully exit and log the reason for the user.
+            logger.warning('"{}" not found in Resource Group "{}".'.format(resource_name, resource_group_name))
+            raise CLIError('Unable to create bot.\nReason: "{}"'
+                        .format(name_response.message))
 
     if resource_name.find(".") > -1:
         logger.warning('"." found in --name parameter ("%s"). "." is an invalid character for Azure Bot resource names '
