@@ -700,7 +700,7 @@ def _prepare_deployment_properties(cli_ctx, template_file=None, template_uri=Non
 
 def _get_deployment_management_client(cli_ctx, handle_extended_json_format=False, aux_subscriptions=None):
     smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, aux_subscriptions)
-    deployments_operation_group = smc.deployments  # This solves the multi-api for you
+    deployments_operation_group = smc.deployments # This solves the multi-api for you
 
     if handle_extended_json_format:
         # pylint: disable=protected-access
