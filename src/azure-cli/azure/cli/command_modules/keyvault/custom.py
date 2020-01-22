@@ -751,16 +751,25 @@ def _jwk_to_dict(jwk):
     return d
 
 
-def _extract_rsa_public_key_from_jwk(jwk_dict):  # pylint: disable=line-too-long
-    # Please refer to: https://github.com/mpdavis/python-jose/blob/eed086d7650ccbd4ea8b555157aff3b1b99f14b9/jose/backends/cryptography_backend.py#L249-L254
+def _extract_rsa_public_key_from_jwk(jwk_dict):
+    """
+    Please refer to:
+    https://github.com/mpdavis/python-jose/blob/eed086d7650ccbd4ea8b555157aff3b1b99f14b9/jose/backends
+    /cryptography_backend.py#L249-L254
+    """
+    #
     e = jwk_dict.get('e', 256)
     n = jwk_dict.get('n')
     public = rsa.RSAPublicNumbers(e, n)
     return public.public_key(default_backend())
 
 
-def _extract_ec_public_key_from_jwk(jwk_dict):  # pylint: disable=line-too-long
-    # Please refer to: https://github.com/mpdavis/python-jose/blob/eed086d7650ccbd4ea8b555157aff3b1b99f14b9/jose/backends/cryptography_backend.py#L81-L100
+def _extract_ec_public_key_from_jwk(jwk_dict):
+    """
+    Please refer to:
+    https://github.com/mpdavis/python-jose/blob/eed086d7650ccbd4ea8b555157aff3b1b99f14b9/jose/backends
+    /cryptography_backend.py#L81-L100
+    """
     if not all(k in jwk_dict for k in ['x', 'y', 'crv']):
         raise CLIError('Invalid EC key: missing properties(x, y, crv)')
 
@@ -802,8 +811,12 @@ def download_key(client, file_path, vault_base_url=None, key_name=None, key_vers
             format=PublicFormat.SubjectPublicKeyInfo
         )
 
-    def _to_pem(k):  # pylint: disable=line-too-long
-        # Please refer to: https://github.com/mpdavis/python-jose/blob/eed086d7650ccbd4ea8b555157aff3b1b99f14b9/jose/backends/cryptography_backend.py#L329-L332
+    def _to_pem(k):
+        """
+        Please refer to:
+        https://github.com/mpdavis/python-jose/blob/eed086d7650ccbd4ea8b555157aff3b1b99f14b9/jose/backends
+        /cryptography_backend.py#L329-L332
+        """
         return k.public_bytes(
             encoding=Encoding.PEM,
             format=PublicFormat.SubjectPublicKeyInfo
