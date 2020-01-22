@@ -126,7 +126,7 @@ Release History
 **ServiceFabric**
 
 * Adding new commands to manage appliaction and services.
-    - sf application-type-version
+    - sf application-type version
         - list
         - delete
         - show

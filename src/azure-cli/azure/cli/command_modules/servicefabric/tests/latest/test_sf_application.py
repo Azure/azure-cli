@@ -10,54 +10,54 @@ from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPrepa
 
 class ServiceFabricApplicationTests(ScenarioTest):
     def _app_type_test(self):
-        self.cmd('az sf application-type list -g {rg} -n {cluster_name}',
+        self.cmd('az sf application-type list -g {rg} -c {cluster_name}',
                  checks=[self.check('length(value)', 0)])
-        app_type = self.cmd('az sf application-type create -g {rg} -n {cluster_name} --application-type-name {app_type_name}',
+        app_type = self.cmd('az sf application-type create -g {rg} -c {cluster_name} --application-type-name {app_type_name}',
                             checks=[self.check('provisioningState', 'Succeeded')]).get_output_in_json()
-        self.cmd('az sf application-type show -g {rg} -n {cluster_name} --application-type-name {app_type_name}',
+        self.cmd('az sf application-type show -g {rg} -c {cluster_name} --application-type-name {app_type_name}',
                  checks=[self.check('id', app_type['id'])])
-        self.cmd('az sf application-type delete -g {rg} -n {cluster_name} --application-type-name {app_type_name}')
+        self.cmd('az sf application-type delete -g {rg} -c {cluster_name} --application-type-name {app_type_name}')
 
         # SystemExit 3 'not found'
         with self.assertRaisesRegexp(SystemExit, '3'):
-            self.cmd('az sf application-type show -g {rg} -n {cluster_name} --application-type-name {app_type_name}')
+            self.cmd('az sf application-type show -g {rg} -c {cluster_name} --application-type-name {app_type_name}')
 
     def _app_type_version_test(self):
-        self.cmd('az sf application-type-version list -g {rg} -n {cluster_name} --application-type-name {app_type_name}',
+        self.cmd('az sf application-type version list -g {rg} -c {cluster_name} --application-type-name {app_type_name}',
                  checks=[self.check('length(value)', 0)])
-        app_type_version = self.cmd('az sf application-type-version create -g {rg} -n {cluster_name} '
+        app_type_version = self.cmd('az sf application-type version create -g {rg} -c {cluster_name} '
                                     '--application-type-name {app_type_name} --version {v1} --package-url {app_package_v1}',
                                     checks=[self.check('provisioningState', 'Succeeded')]).get_output_in_json()
-        self.cmd('az sf application-type-version show -g {rg} -n {cluster_name} --application-type-name {app_type_name} --version {v1}',
+        self.cmd('az sf application-type version show -g {rg} -c {cluster_name} --application-type-name {app_type_name} --version {v1}',
                  checks=[self.check('id', app_type_version['id'])])
-        self.cmd('az sf application-type-version delete -g {rg} -n {cluster_name} --application-type-name {app_type_name} --version {v1}')
+        self.cmd('az sf application-type version delete -g {rg} -c {cluster_name} --application-type-name {app_type_name} --version {v1}')
 
         # SystemExit 3 'not found'
         with self.assertRaisesRegexp(SystemExit, '3'):
-            self.cmd('az sf application-type-version show -g {rg} -n {cluster_name} --application-type-name {app_type_name} --version {v1}')
+            self.cmd('az sf application-type version show -g {rg} -c {cluster_name} --application-type-name {app_type_name} --version {v1}')
 
     def _app_service_test(self):
-        self.cmd('az sf application list -g {rg} -n {cluster_name}',
+        self.cmd('az sf application list -g {rg} -c {cluster_name}',
                  checks=[self.check('length(value)', 0)])
-        app = self.cmd('az sf application create -g {rg} -n {cluster_name} --application-name {app_name} '
+        app = self.cmd('az sf application create -g {rg} -c {cluster_name} --application-name {app_name} '
                        '--application-type-name {app_type_name} --application-type-version {v1} --package-url {app_package_v1} '
                        '--application-parameters Mode=binary',
                        checks=[self.check('provisioningState', 'Succeeded')]).get_output_in_json()
-        self.cmd('az sf application show -g {rg} -n {cluster_name} --application-name {app_name}',
+        self.cmd('az sf application show -g {rg} -c {cluster_name} --application-name {app_name}',
                  checks=[self.check('id', app['id'])])
 
-        service = self.cmd('az sf service create -g {rg} -n {cluster_name} --application-name {app_name} --state stateless --instance-count -1 '
+        service = self.cmd('az sf service create -g {rg} -c {cluster_name} --application-name {app_name} --state stateless --instance-count -1 '
                            '--service-name "{app_name}~testService" --service-type {service_type} --partition-scheme singleton',
                            checks=[self.check('provisioningState', 'Succeeded')]).get_output_in_json()
 
-        self.cmd('az sf service show -g {rg} -n {cluster_name} --application-name {app_name} --service-name "{app_name}~testService"',
+        self.cmd('az sf service show -g {rg} -c {cluster_name} --application-name {app_name} --service-name "{app_name}~testService"',
                  checks=[self.check('id', service['id'])])
 
-        self.cmd('az sf application-type-version create -g {rg} -n {cluster_name} '
+        self.cmd('az sf application-type version create -g {rg} -c {cluster_name} '
                  '--application-type-name {app_type_name} --version {v2} --package-url {app_package_v2}',
                  checks=[self.check('provisioningState', 'Succeeded')])
 
-        self.cmd('az sf application update -g {rg} -n {cluster_name} --application-name {app_name} --application-type-version {v2} '
+        self.cmd('az sf application update -g {rg} -c {cluster_name} --application-name {app_name} --application-type-version {v2} '
                  '--application-parameters Mode=decimal --health-check-stable-duration 0 --health-check-wait-duration 0 --health-check-retry-timeout 0 '
                  '--upgrade-domain-timeout 5000 --upgrade-timeout 7000 --failure-action Rollback --upgrade-replica-set-check-timeout 300 --force-restart',
                  checks=[self.check('provisioningState', 'Succeeded'),
@@ -72,19 +72,19 @@ class ServiceFabricApplicationTests(ScenarioTest):
                          self.check('upgradePolicy.rollingUpgradeMonitoringPolicy.upgradeDomainTimeout', '01:23:20'),
                          self.check('upgradePolicy.rollingUpgradeMonitoringPolicy.failureAction', 'Rollback')])
 
-        self.cmd('az sf application update -g {rg} -n {cluster_name} --application-name {app_name} --minimum-nodes 1 --maximum-nodes 3',
+        self.cmd('az sf application update -g {rg} -c {cluster_name} --application-name {app_name} --minimum-nodes 1 --maximum-nodes 3',
                  checks=[self.check('provisioningState', 'Succeeded')])
-        self.cmd('az sf application show -g {rg} -n {cluster_name} --application-name {app_name}',
+        self.cmd('az sf application show -g {rg} -c {cluster_name} --application-name {app_name}',
                  checks=[self.check('provisioningState', 'Succeeded'),
                          self.check('minimumNodes', 1),
                          self.check('maximumNodes', 3)])
 
-        self.cmd('az sf application delete -g {rg} -n {cluster_name} --application-name {app_name}')
-        self.cmd('az sf application-type delete -g {rg} -n {cluster_name} --application-type-name {app_type_name}')
+        self.cmd('az sf application delete -g {rg} -c {cluster_name} --application-name {app_name}')
+        self.cmd('az sf application-type delete -g {rg} -c {cluster_name} --application-type-name {app_type_name}')
 
         # SystemExit 3 'not found'
         with self.assertRaisesRegexp(SystemExit, '3'):
-            self.cmd('az sf application show -g {rg} -n {cluster_name} --application-name {app_name}')
+            self.cmd('az sf application show -g {rg} -c {cluster_name} --application-name {app_name}')
 
     @ResourceGroupPreparer()
     def test_application(self):

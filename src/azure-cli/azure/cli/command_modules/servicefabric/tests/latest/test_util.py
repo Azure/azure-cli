@@ -32,10 +32,10 @@ def _create_cluster(test, kwargs):
     logger.error(cert_secret_id)
     kwargs.update({'cert_secret_id': cert_secret_id})
 
-    test.cmd('az sf cluster create -g {rg} -n {cluster_name} -l {loc} --secret-identifier {cert_secret_id} --vm-password "{vm_password}" --cluster-size 3')
+    test.cmd('az sf cluster create -g {rg} -c {cluster_name} -l {loc} --secret-identifier {cert_secret_id} --vm-password "{vm_password}" --cluster-size 3')
     timeout = time.time() + 900
     while True:
-        cluster = test.cmd('az sf cluster show -g {rg} -n {cluster_name}').get_output_in_json()
+        cluster = test.cmd('az sf cluster show -g {rg} -c {cluster_name}').get_output_in_json()
         if cluster['provisioningState']:
             if cluster['provisioningState'] == 'Succeeded':
                 return
@@ -51,13 +51,16 @@ def _create_cluster(test, kwargs):
 def _wait_for_cluster_state_ready(test, kwargs):
     timeout = time.time() + 900
     while True:
-        cluster = test.cmd('az sf cluster show -g {rg} -n {cluster_name}').get_output_in_json()
+        cluster = test.cmd('az sf cluster show -g {rg} -c {cluster_name}').get_output_in_json()
 
         if cluster['clusterState']:
             if cluster['clusterState'] == 'Ready':
                 return
 
         if time.time() > timeout:
-            raise CLIError("Cluster deployment timed out. cluster state is not 'Ready'. State: {}".format(cluster['ClusterState']))
+            state = "unknown"
+            if cluster['clusterState']:
+                state = cluster['clusterState']
+            raise CLIError("Cluster deployment timed out. cluster state is not 'Ready'. State: {}".format(state))
         if not test.in_recording:
             time.sleep(20)

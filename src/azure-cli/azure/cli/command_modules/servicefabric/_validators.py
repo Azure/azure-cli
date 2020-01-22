@@ -63,8 +63,12 @@ def validate_update_application(cmd, namespace):
         namespace.upgrade_domain_timeout = int(namespace.upgrade_domain_timeout)
     if namespace.minimum_nodes:
         namespace.minimum_nodes = int(namespace.minimum_nodes)
+        if namespace.minimum_nodes < 0:
+            raise CLIError("minimum_nodes should be a non-negative integer.")
     if namespace.maximum_nodes:
         namespace.maximum_nodes = int(namespace.maximum_nodes)
+        if namespace.maximum_nodes < 0:
+            raise CLIError("maximum_nodes should be a non-negative integer.")
 
 
 def validate_create_application(cmd, namespace):
@@ -82,8 +86,12 @@ def validate_create_application(cmd, namespace):
 
     if namespace.minimum_nodes:
         namespace.minimum_nodes = int(namespace.minimum_nodes)
+        if namespace.minimum_nodes < 0:
+            raise CLIError("minimum_nodes should be a non-negative integer.")
     if namespace.maximum_nodes:
         namespace.maximum_nodes = int(namespace.maximum_nodes)
+        if namespace.maximum_nodes < 0:
+            raise CLIError("maximum_nodes should be a non-negative integer.")
 
 
 def _safe_get_resource(getResourceAction, params):

@@ -198,7 +198,7 @@ def create_service(cmd,
     if default_move_cost:
         _set_service_parameters(template, parameters, "defaultMoveCost", default_move_cost, "string")
 
-    validate_and_deploy_arm_template(cmd.cli_ctx, resource_group_name, template, parameters)
+    validate_and_deploy_arm_template(cmd, resource_group_name, template, parameters)
 
     return client.services.get(resource_group_name, cluster_name, application_name, service_name)
 

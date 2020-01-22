@@ -25,7 +25,7 @@ class ServiceFabricClusterTests(ScenarioTest):
         _create_cluster(self, self.kwargs)
         _wait_for_cluster_state_ready(self, self.kwargs)
 
-        self.cmd('az sf cluster node-type add -g {rg} -n {cluster_name} --node-type nt2 --capacity 5 --vm-user-name admintest '
+        self.cmd('az sf cluster node-type add -g {rg} -c {cluster_name} --node-type nt2 --capacity 5 --vm-user-name admintest '
                  '--vm-password {vm_password} --durability-level Gold --vm-sku Standard_D15_v2',
                  checks=[self.check('provisioningState', 'Succeeded'),
                          self.check('length(nodeTypes)', 2),

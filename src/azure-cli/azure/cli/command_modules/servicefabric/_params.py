@@ -10,12 +10,39 @@ from azure.cli.core.commands.validators import get_default_location_from_resourc
 from azure.cli.core.commands.parameters import resource_group_name_type, get_enum_type, get_three_state_flag
 from azure.cli.core.util import get_json_object
 from azure.cli.command_modules.servicefabric._validators import validate_create_service, validate_update_application, validate_create_application
+from knack.arguments import CLIArgumentType
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-statements
+    # PARAMETER REGISTRATION
+    application_parameters = CLIArgumentType(
+        options_list=['--parameters', '--application-parameters'],
+        action=addAppParamsAction,
+        nargs='+',
+        help='Specify the application parameters as key/value pairs. These parameters must exist in the application manifest. '
+        'for example: --application-parameters param1=value1 param2=value2')
+
+    minimum_nodes = CLIArgumentType(
+        options_list=['--min-nodes', '--minimum-nodes'],
+        help='Specify the minimum number of nodes where Service Fabric will reserve capacity for this application, '
+        'this does not mean that the application is guaranteed to have replicas on all those nodes. The value of this parameter must be a non-negative integer. '
+        'Default value for this is zero, which means no capacity is reserved for the application.')
+
+    maximum_nodes = CLIArgumentType(
+        options_list=['--max-nodes', '--maximum-nodes'],
+        help='Specify the maximum number of nodes on which to place an application. '
+        'The value of this parameter must be a non-negative integer. The default value is 0, which indicates the application can be placed on any number of nodes in the cluster.')
+
+    application_type_version = CLIArgumentType(
+        options_list=['--version', '--application-type-version'],
+        help='Specify the application type version.')
+
+    package_url = CLIArgumentType(
+        help='Specify the url of the application package sfpkg file.')
+
     with self.argument_context('sf') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type, id_part=None, help='Specify the resource group name. You can configure the default group using `az configure --defaults group=<name>`')
-        c.argument('cluster_name', options_list=['--cluster-name', '-n'], help='Specify the name of the cluster, if not given it will be same as resource group name')
+        c.argument('cluster_name', options_list=['--cluster-name', '-c'], help='Specify the name of the cluster, if not given it will be same as resource group name')
         c.argument('location', validator=get_default_location_from_resource_group)
         c.argument('secret_identifier', help='The existing Azure key vault secret URL')
         c.argument('certificate_file', help='The existing certificate file path for the primary cluster certificate.')
@@ -44,6 +71,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='The Operating System of the VMs that make up the cluster.')
         c.argument('node_type', help='the Node type name.')
 
+    # cluster
     with self.argument_context('sf cluster list') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type, id_part=None, help='The resource group name')
 
@@ -118,27 +146,20 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('sf application-type') as c:
         c.argument('application_type_name', options_list=['--name', '--application-type-name'], help='Specify the application type name.')
 
-    # application-type-version
-    with self.argument_context('sf application-type-version') as c:
-        c.argument('application_type_name', options_list=['--name', '--application-type-name'], help='Specify the application type name.')
-
-    with self.argument_context('sf application-type-version create') as c:
-        c.argument('version', options_list=['--version', '--application-type-version'], help='Specify the application type version.')
-        c.argument('package_url', help='Specify the url of the application package sfpkg file.')
+    # application-type version
+    with self.argument_context('sf application-type version create') as c:
+        c.argument('version', arg_type=application_type_version)
+        c.argument('package_url', arg_type=package_url)
 
     # application
     with self.argument_context('sf application') as c:
         c.argument('application_name', options_list=['--name', '--application-name'], help='Specify the application name.')
 
     with self.argument_context('sf application update', validator=validate_update_application) as c:
-        c.argument('application_type_version', options_list=['--version', '--application-type-version'], help='Specify the application type version.')
-        c.argument('application_parameters', options_list=['--parameters', '--application-parameters'], action=addAppParamsAction, nargs='+',
-                   help='Specify the application parameters as key/value pairs. These parameters must exist in the application manifest.'
-                   'for example: --application-parameters param1=value1 param2=value2')
-        c.argument('minimum_nodes', options_list=['--min-nodes', '--minimum-nodes'],
-                   help='Specify the minimum number of nodes where Service Fabric will reserve capacity for this application.')
-        c.argument('maximum_nodes', options_list=['--max-nodes', '--maximum-nodes'],
-                   help='Specify the maximum number of nodes on which to place an application.')
+        c.argument('application_type_version', arg_type=application_type_version)
+        c.argument('application_parameters', arg_type=application_parameters)
+        c.argument('minimum_nodes', arg_type=minimum_nodes)
+        c.argument('maximum_nodes', arg_type=maximum_nodes)
         c.argument('force_restart', arg_type=get_three_state_flag(),
                    help='Indicates that the service host restarts even if the upgrade is a configuration-only change.')
         c.argument('service_type_health_policy_map',
@@ -172,15 +193,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('sf application create', validator=validate_create_application) as c:
         c.argument('application_type_name', options_list=['--type-name', '--application-type-name'], help='Specify the application type name.')
-        c.argument('application_type_version', options_list=['--version', '--application-type-version'], help='Specify the application type version.')
-        c.argument('package_url', help='Specify the url of the application package sfpkg file.')
-        c.argument('application_parameters', options_list=['--parameters', '--application-parameters'], action=addAppParamsAction, nargs='+',
-                   help='Specify the application parameters as key/value pairs. These parameters must exist in the application manifest.'
-                   'for example: --application-parameters param1=value1 param2=value2')
-        c.argument('minimum_nodes', options_list=['--min-nodes', '--minimum-nodes'],
-                   help='Specify the minimum number of nodes where Service Fabric will reserve capacity for this application.')
-        c.argument('maximum_nodes', options_list=['--max-nodes', '--maximum-nodes'],
-                   help='Specify the maximum number of nodes on which to place an application.')
+        c.argument('application_type_version', arg_type=application_type_version)
+        c.argument('package_url', arg_type=package_url)
+        c.argument('application_parameters', arg_type=application_parameters)
+        c.argument('minimum_nodes', arg_type=minimum_nodes)
+        c.argument('maximum_nodes', arg_type=maximum_nodes)
 
     # service
     with self.argument_context('sf service') as c:

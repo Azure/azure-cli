@@ -71,7 +71,7 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.custom_command('create', 'create_app_type')
 
-    with self.command_group('sf application-type-version', application_type_version_mgmt,
+    with self.command_group('sf application-type version', application_type_version_mgmt,
                             custom_command_type=application_custom_type) as g:
         g.command('list', 'list')
         g.command('delete', 'delete')
