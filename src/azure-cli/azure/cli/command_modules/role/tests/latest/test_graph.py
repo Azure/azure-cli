@@ -216,8 +216,10 @@ class CreateForRbacScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     def test_revoke_sp_for_rbac(self):
+        subscription_id = self.get_subscription_id()
         self.kwargs['display_name'] = self.create_random_name(prefix='cli-graph', length=14)
         self.kwargs['name'] = 'http://' + self.kwargs['display_name']
+        self.kwargs['sub'] = subscription_id
 
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             self.cmd('ad sp create-for-rbac -n {display_name}')
@@ -226,7 +228,7 @@ class CreateForRbacScenarioTest(ScenarioTest):
 
             self.cmd('ad app list --identifier-uri {name}')
 
-            result = self.cmd('role assignment list --assignee {name}').get_output_in_json()
+            result = self.cmd('role assignment list --assignee {name} --scope /subscriptions/{sub}').get_output_in_json()
             object_id = result[0]['principalId']
 
             self.cmd('ad sp delete --id {name}')
@@ -241,8 +243,10 @@ class CreateForRbacScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     def test_create_for_rbac_idempotent(self):
+        subscription_id = self.get_subscription_id()
         self.kwargs['display_name'] = self.create_random_name(prefix='sp_', length=14)
         self.kwargs['name'] = 'http://' + self.kwargs['display_name']
+        self.kwargs['sub'] = subscription_id
 
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             try:
@@ -250,7 +254,7 @@ class CreateForRbacScenarioTest(ScenarioTest):
                 self.cmd('ad sp create-for-rbac -n {display_name}')
                 result = self.cmd('ad sp list --spn {name}').get_output_in_json()
                 self.assertEqual(1, len(result))
-                result = self.cmd('role assignment list --assignee {name}').get_output_in_json()
+                result = self.cmd('role assignment list --assignee {name} --scope /subscriptions/{sub}').get_output_in_json()
                 self.assertEqual(1, len(result))
             finally:
                 self.cmd('ad sp delete --id {name}')
