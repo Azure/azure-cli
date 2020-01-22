@@ -6,6 +6,8 @@ Release History
 **ACR**
 
 * [BREAKING CHANGE] `az acr delete` will prompt
+* [BREAKING CHANGE] 'az acr task delete' will prompt
+* Add new command 'az acr taskrun show/list/delete' to show, list, delete the taskrun
 
 **AppConfig**
 
@@ -48,10 +50,6 @@ Release History
 * `az storage copy`: Add `--include-path`, `--include-pattern`, `--exclude-path` and`--exclude-pattern` parameters
 * `az storage remove`: Change `--inlcude` and `--exclude` parameters to `--include-path`, `--include-pattern`, `--exclude-path` and`--exclude-pattern` parameters
 * `az storage sync`: Add `--include-pattern`, `--exclude-path` and`--exclude-pattern` parameters
-
-**ACR**
-
-* Add new command 'az acr taskrun show/list/delete' to show, list, delete the taskrun
 
 2.0.80
 ++++++

@@ -245,10 +245,12 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.command('logs', 'acr_task_logs', client_factory=cf_acr_runs,
                   table_transformer=None)
 
-    with self.command_group('acr taskrun', acr_taskrun_util) as g:
+    with self.command_group('acr taskrun', acr_taskrun_util, is_preview=True) as g:
         g.command('list', 'acr_taskrun_list')
         g.command('delete', 'acr_taskrun_delete')
         g.command('show', 'acr_taskrun_show')
+        g.command('logs', 'acr_taskrun_logs', client_factory=cf_acr_runs,
+                  table_transformer=None)
 
     with self.command_group('acr config content-trust', acr_policy_util) as g:
         g.command('show', 'acr_config_content_trust_show')

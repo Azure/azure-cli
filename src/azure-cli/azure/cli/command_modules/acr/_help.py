@@ -927,6 +927,15 @@ examples:
         az acr taskrun show -r MyRegistry -n MyTaskRun -o table
 """
 
+helps['acr taskrun logs'] = """
+type: command
+short-summary: Show logs for a particular run. 
+examples:
+  - name: Show logs for a particular run.
+    text: >
+        az acr task logs -r MyRegistry --run-id runId
+"""
+
 helps['acr token'] = """
 type: group
 short-summary: Manage tokens for an Azure Container Registry.

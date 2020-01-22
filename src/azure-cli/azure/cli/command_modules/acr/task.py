@@ -17,7 +17,8 @@ from ._utils import (
     build_timers_info,
     remove_timer_trigger,
     get_task_id_from_task_name,
-    prepare_source_location
+    prepare_source_location,
+    user_confirmation
 )
 from ._stream_utils import stream_logs
 from ._constants import (
@@ -283,9 +284,12 @@ def acr_task_delete(cmd,
                     client,
                     task_name,
                     registry_name,
-                    resource_group_name=None):
+                    resource_group_name=None,
+                    yes=False):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
+
+    user_confirmation("Are you sure you want to delete the task '{}' ".format(task_name), yes)
     return client.delete(resource_group_name, registry_name, task_name)
 
 
