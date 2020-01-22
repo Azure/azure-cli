@@ -338,40 +338,6 @@ class BotTests(ScenarioTest):
         shutil.rmtree(dir_path)
 
     @ResourceGroupPreparer(random_name_length=20)
-    def test_botservice_create_should_remove_invalid_char_from_name_when_registration(self, resource_group):
-        bot_name = self.create_random_name(prefix='cli.', length=15)
-        self.kwargs.update({
-            'botname': bot_name,
-            'app_id': str(uuid.uuid4()),
-            'password': str(uuid.uuid4())
-        })
-
-        self.cmd('az bot create -k registration -g {rg} -n {botname} --appid {app_id} -p {password} '
-                 '-e https://testurl.com/api/messages',
-                 checks={
-                     self.check('resourceGroup', '{rg}'),
-                     self.check('type', 'Microsoft.BotService/botServices')
-                 })
-
-    @ResourceGroupPreparer(random_name_length=20)
-    def test_botservice_create_should_remove_invalid_char_from_name_when_webapp(self, resource_group):
-        bot_name = self.create_random_name(prefix='cli.', length=15)
-        valid_bot_name = bot_name.replace(".", "")
-        self.kwargs.update({
-            'valid_bot_name': valid_bot_name,
-            'botname': bot_name,
-            'app_id': str(uuid.uuid4()),
-            'password': str(uuid.uuid4())
-        })
-
-        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Javascript',
-                 checks={
-                     self.check('resourceGroup', '{rg}'),
-                     self.check('id', '{valid_bot_name}'),
-                     self.check('type', 'abs')
-                 })
-
-    @ResourceGroupPreparer(random_name_length=20)
     def test_botservice_create_should_create_registration_bot_without_endpoint(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),
@@ -768,6 +734,42 @@ class BotTests(ScenarioTest):
             if expected_text:
                 self.assertTrue(expected_text in text, "Bot response does not match expectation: " + text +
                                 expected_text)
+
+
+class BotLiveOnlyTests(LiveScenarioTest):
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_create_should_remove_invalid_char_from_name_when_registration(self, resource_group):
+        bot_name = self.create_random_name(prefix='cli.', length=15)
+        self.kwargs.update({
+            'botname': bot_name,
+            'app_id': str(uuid.uuid4()),
+            'password': str(uuid.uuid4())
+        })
+
+        self.cmd('az bot create -k registration -g {rg} -n {botname} --appid {app_id} -p {password} '
+                 '-e https://testurl.com/api/messages',
+                 checks={
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('type', 'Microsoft.BotService/botServices')
+                 })
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_create_should_remove_invalid_char_from_name_when_webapp(self, resource_group):
+        bot_name = self.create_random_name(prefix='cli.', length=15)
+        valid_bot_name = bot_name.replace(".", "")
+        self.kwargs.update({
+            'valid_bot_name': valid_bot_name,
+            'botname': bot_name,
+            'app_id': str(uuid.uuid4()),
+            'password': str(uuid.uuid4())
+        })
+
+        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Javascript',
+                 checks={
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('id', '{valid_bot_name}'),
+                     self.check('type', 'abs')
+                 })
 
 
 class BotLocalErrorsTests(unittest.TestCase):
