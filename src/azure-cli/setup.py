@@ -135,7 +135,6 @@ DEPENDENCIES = [
     'knack~=0.6,>=0.6.3',
     'mock~=2.0',
     'paramiko>=2.0.8,<3.0.0',
-    'pydocumentdb>=2.0.1,<3.0.0',
     'pygments~=2.4',
     'pyOpenSSL>=17.1.0',
     'pytz==2019.1',
