@@ -196,7 +196,8 @@ def _taskrun_format_group(item):
         ('PLATFORM', _get_value(item, 'runResult', 'platform', 'os')),
         ('STATUS', _get_value(item, 'runResult', 'status')),
         ('STARTED', _format_datetime(_get_value(item, 'runResult', 'startTime'))),
-        ('DURATION', _get_duration(_get_value(item, 'runResult', 'startTime'), _get_value(item, 'runResult', 'finishTime')))
+        ('DURATION', _get_duration(_get_value(item, 'runResult', 'startTime'),
+                                   _get_value(item, 'runResult', 'finishTime')))
     ])
 
 
@@ -209,7 +210,8 @@ def _build_format_group(item):
         ("TRIGGER", _get_build_trigger(_get_value(item, 'imageUpdateTrigger'),
                                        _get_value(item, 'sourceTrigger', 'eventType'))),
         ('STARTED', _format_datetime(_get_value(item, 'startTime'))),
-        ('DURATION', _get_duration(_get_value(item, 'startTime'), _get_value(item, 'finishTime')))
+        ('DURATION', _get_duration(_get_value(item, 'startTime'),
+                     _get_value(item, 'finishTime')))
     ])
 
 
