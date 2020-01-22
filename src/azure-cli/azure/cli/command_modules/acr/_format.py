@@ -211,7 +211,7 @@ def _build_format_group(item):
                                        _get_value(item, 'sourceTrigger', 'eventType'))),
         ('STARTED', _format_datetime(_get_value(item, 'startTime'))),
         ('DURATION', _get_duration(_get_value(item, 'startTime'),
-                     _get_value(item, 'finishTime')))
+                                   _get_value(item, 'finishTime')))
     ])
 
 
