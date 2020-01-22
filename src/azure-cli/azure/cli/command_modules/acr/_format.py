@@ -191,12 +191,12 @@ def _task_format_group(item):
 def _taskrun_format_group(item):
     return OrderedDict([
         ('NAME', _get_value(item, 'name')),
-        ('RUN ID', _get_value(item, 'runId')),
-        ('TASK', _get_value(item, 'task')),
-        ('PLATFORM', _get_value(item, 'platform', 'os')),
-        ('STATUS', _get_value(item, 'status')),
-        ('STARTED', _format_datetime(_get_value(item, 'startTime'))),
-        ('DURATION', _get_duration(_get_value(item, 'startTime'), _get_value(item, 'finishTime')))
+        ('RUN ID', _get_value(item, 'runResult', 'runId')),
+        ('TASK', _get_value(item, 'runResult', 'task')),
+        ('PLATFORM', _get_value(item, 'runResult', 'platform', 'os')),
+        ('STATUS', _get_value(item, 'runResult', 'status')),
+        ('STARTED', _format_datetime(_get_value(item, 'runResult', 'startTime'))),
+        ('DURATION', _get_duration(_get_value(item, 'runResult', 'startTime'), _get_value(item, 'runResult', 'finishTime')))
     ])
 
 
