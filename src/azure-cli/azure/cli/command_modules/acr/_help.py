@@ -933,7 +933,7 @@ short-summary: Show logs for a particular run.
 examples:
   - name: Show logs for a particular run.
     text: >
-        az acr task logs -r MyRegistry --run-id runId
+        az acr taskrun logs -r MyRegistry --run-id runId
 """
 
 helps['acr token'] = """
