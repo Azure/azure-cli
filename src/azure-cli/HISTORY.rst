@@ -49,6 +49,31 @@ Release History
 * `az storage remove`: Change `--inlcude` and `--exclude` parameters to `--include-path`, `--include-pattern`, `--exclude-path` and`--exclude-pattern` parameters
 * `az storage sync`: Add `--include-pattern`, `--exclude-path` and`--exclude-pattern` parameters
 
+**ServiceFabric**
+
+* Adding new commands to manage appliaction and services.
+    - sf application-type
+        - list
+        - delete
+        - show
+        - create
+    - sf application-type version
+        - list
+        - delete
+        - show
+        - create
+    - sf application
+        - list
+        - delete
+        - show
+        - create
+        - update
+    - sf service
+        - list
+        - delete
+        - show
+        - create
+
 2.0.80
 ++++++
 
@@ -122,31 +147,6 @@ Release History
 * `az storage account create`: Remove preview flag for --enable-hierarchical-namespace parameter
 * Update azure-mgmt-storage version to 7.0.0 to use api version 2019-06-01
 * Add new parameters `--enable-delete-retention` and `--delete-retention-days` to support managing delete retention policy for storage account blob-service-properties.
-
-**ServiceFabric**
-
-* Adding new commands to manage appliaction and services.
-    - sf application-type version
-        - list
-        - delete
-        - show
-        - create
-    - sf application-type
-        - list
-        - delete
-        - show
-        - create
-    - sf application
-        - list
-        - delete
-        - show
-        - create
-        - update
-    - sf service
-        - list
-        - delete
-        - show
-        - create
 
 2.0.78
 ++++++

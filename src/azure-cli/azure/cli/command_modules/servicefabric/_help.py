@@ -89,6 +89,11 @@ examples:
 
 helps['sf application-type'] = """
 type: group
+short-summary: Manage applications types and its versions running on an Azure Service Fabric cluster.
+"""
+
+helps['sf application-type'] = """
+type: group
 short-summary: Manage application types on an Azure Service Fabric cluster.
 """
 
