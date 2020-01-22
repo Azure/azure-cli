@@ -40,6 +40,10 @@ examples:
     text: >
         az cdn custom-domain create -g group --endpoint-name endpoint --profile-name profile \\
             -n domain-name --hostname www.example.com
+  - name: Enable custom https with a minimum
+    text: >
+        az cdn custom-domain create -g group --endpoint-name endpoint --profile-name profile \\
+            -n domain-name --hostname www.example.com
 """
 
 helps['cdn custom-domain delete'] = """
@@ -75,6 +79,7 @@ short-summary: Manage CDN endpoints.
 helps['cdn endpoint create'] = """
 type: command
 short-summary: Create a named endpoint to connect to a CDN.
+
 examples:
   - name: Create an endpoint to service content for hostname over HTTP or HTTPS.
     text: >
@@ -87,6 +92,24 @@ examples:
   - name: Create an endpoint with a custom domain with compression and only HTTPS.
     text: >
         az cdn endpoint create -g group -n endpoint --profile-name profile \\
+            --origin www.example.com --no-http --enable-compression
+"""
+
+helps['cdn endpoint set'] = """
+type: command
+short-summary: Create or update a named endpoint to connect to a CDN.
+examples:
+  - name: Set an endpoint to service content for hostname over HTTP or HTTPS.
+    text: >
+        az cdn endpoint set -g group -n endpoint --profile-name profile \\
+            --origin www.example.com
+  - name: Set an endpoint with a custom domain origin with HTTP and HTTPS ports.
+    text: >
+        az cdn endpoint set -g group -n endpoint --profile-name profile \\
+            --origin www.example.com 88 4444
+  - name: Set an endpoint with a custom domain with compression and only HTTPS.
+    text: >
+        az cdn endpoint set -g group -n endpoint --profile-name profile \\
             --origin www.example.com --no-http --enable-compression
 """
 
@@ -170,12 +193,12 @@ short-summary: Add a delivery rule to a CDN endpoint.
 examples:
   - name: Create a global rule to disable caching.
     text: >
-        az cdn endpoint rule add -g group -n endpoint --profile-name profile --order 0\\
+        az cdn endpoint rule add -g group -n endpoint --profile-name profile --order 0 \\
             --rule-name global --action-name CacheExpiration --cache-behavior BypassCache
   - name: Create a rule for http to https redirect
     text: >
-        az cdn endpoint rule add -g group -n endpoint --profile-name profile --order 1\\
-            --rule-name "redirect" --match-variable RequestScheme --operator Equal --match-values HTTPS\\
+        az cdn endpoint rule add -g group -n endpoint --profile-name profile --order 1 \\
+            --rule-name "redirect" --match-variable RequestScheme --operator Equal --match-values HTTPS \\
             --action-name "UrlRedirect" --redirect-protocol Https --redirect-type Moved
 """
 
@@ -185,7 +208,7 @@ short-summary: Remove a delivery rule from an endpoint.
 examples:
   - name: Remove the global rule.
     text: >
-        az cdn endpoint rule remove -g group -n endpoint --profile-name profile --rule-name Global\\
+        az cdn endpoint rule remove -g group -n endpoint --profile-name profile --rule-name Global
 """
 
 helps['cdn endpoint rule show'] = """
@@ -194,7 +217,7 @@ short-summary: Show delivery rules asscociate with the endpoint.
 examples:
   - name: show delivery rules asscociate with the endpoint.
     text: >
-        az cdn endpoint rule show -g group --profile-name profile-name
+        az cdn endpoint rule show -g group -n endpoint --profile-name profile
 """
 
 helps['cdn endpoint rule condition'] = """
@@ -208,7 +231,7 @@ short-summary: Add a condition to a delivery rule.
 examples:
   - name: Add a remote address condition.
     text: >
-        az cdn endpoint rule condition add -g group -n endpoint --profile-name profile --rule-name name\\
+        az cdn endpoint rule condition add -g group -n endpoint --profile-name profile --rule-name name \\
             --match-variable RemoteAddress --operator GeoMatch --match-values "TH"
 """
 
@@ -218,7 +241,7 @@ short-summary: Remove a condition from a delivery rule.
 examples:
   - name: Remove the first condition.
     text: >
-        az cdn endpoint rule condition remove -g group -n endpoint --profile-name profile --rule-name name\\
+        az cdn endpoint rule condition remove -g group -n endpoint --profile-name profile --rule-name name \\
             --index 0
 """
 
@@ -228,7 +251,7 @@ short-summary: show delivery rules asscociate with the endpoint.
 examples:
   - name: show delivery rules asscociate with the endpoint.
     text: >
-        az cdn endpoint rule condition show -g group --profile-name profile-name
+        az cdn endpoint rule condition show -g group -n endpoint --profile-name profile-name
 """
 
 helps['cdn endpoint rule action'] = """
@@ -242,11 +265,11 @@ short-summary: Add an action to a delivery rule.
 examples:
   - name: Add a redirect action.
     text: >
-        az cdn endpoint rule action add -g group -n endpoint --profile-name profile --rule-name name\\
+        az cdn endpoint rule action add -g group -n endpoint --profile-name profile --rule-name name \\
             --action-name "UrlRedirect" --redirect-protocol HTTPS --redirect-type Moved
   - name: Add a cache expiration action
     text: >
-        az cdn endpoint rule action add -g group -n endpoint --profile-name profile --rule-name name\\
+        az cdn endpoint rule action add -g group -n endpoint --profile-name profile --rule-name name \\
             --action-name "CacheExpiration" --cache-behavior BypassCache
 """
 
@@ -256,7 +279,7 @@ short-summary: Remove an action from a delivery rule.
 examples:
   - name: Remove the first action.
     text: >
-        az cdn endpoint rule action remove -g group -n endpoint --profile-name profile --rule-name name\\
+        az cdn endpoint rule action remove -g group -n endpoint --profile-name profile --rule-name name \\
             --index 0
 """
 
@@ -266,7 +289,7 @@ short-summary: show delivery rules asscociate with the endpoint.
 examples:
   - name: show delivery rules asscociate with the endpoint.
     text: >
-        az cdn endpoint rule action show -g group --profile-name profile-name
+        az cdn endpoint rule action show -g group --profile-name profile-name -n endpoint
 """
 
 helps['cdn origin'] = """
@@ -322,4 +345,361 @@ examples:
   - name: Update a CDN profile. (autogenerated)
     text: az cdn profile update --name MyCDNProfileWhichIsUniqueWithinResourceGroup --resource-group MyResourceGroup
     crafted: true
+"""
+
+helps['cdn waf policy'] = """
+type: group
+short-summary: Manage CDN WAF policies.
+"""
+
+helps['cdn waf managed-rule-set'] = """
+type: group
+short-summary: View available CDN WAF managed rule sets.
+"""
+
+helps['cdn waf managed-rule-set list'] = """
+type: command
+short-summary: List available CDN WAF managed rule sets.
+examples:
+  - name: List all available CDN WAF managed rule sets.
+    text: az cdn waf managed-rule-set list
+"""
+
+helps['cdn waf managed-rule-set show'] = """
+type: command
+short-summary: List available CDN WAF managed rule sets.
+examples:
+  - name: Show the CDN WAF managed rule set DefaultRuleSet_1.0.
+    text: az cdn waf managed-rule-set show --rule-set-type DefaultRuleSet --rule-set-version 1.0
+"""
+
+helps['cdn waf managed-rule-set rule-group'] = """
+type: group
+short-summary: View available rule groups of a CDN WAF managed rule set.
+"""
+
+helps['cdn waf managed-rule-set rule-group list'] = """
+type: command
+short-summary: List available CDN WAF managed rule sets.
+examples:
+  - name: List available rule groups for DefaultRuleSet_1.0.
+    text: |
+      az cdn waf managed-rule-set rule-group list \\
+        --rule-set-type DefaultRuleSet --rule-set-version 1.0
+"""
+
+helps['cdn waf managed-rule-set rule-group show'] = """
+type: command
+short-summary: List available CDN WAF managed rule sets.
+examples:
+  - name: Show the SQLI rule group of DefaultRuleSet_1.0.
+    text: |
+      az cdn waf managed-rule-set rule-group show \\
+        --rule-set-type DefaultRuleSet --rule-set-version 1.0 -n SQLI
+"""
+
+helps['cdn waf policy set'] = """
+type: command
+short-summary: Create a new CDN WAF policy.
+parameters:
+  - name: --sku
+    type: string
+    short-summary: >
+        The pricing tier (defines a CDN provider, feature list and rate) of the CDN WAF policy.
+  - name: --mode
+    type: string
+    short-summary: The operation mode of the policy. Valid options are 'Detection' and 'Prevention'.
+  - name: --block-response-body
+    type: string
+    short-summary: The response body to send when a request is blocked, provided as a Base64 encoded string.
+  - name: --block-response-status-code
+    type: int
+    short-summary: The response status code to send when a request is blocked.
+  - name: --redirect-url
+    type: string
+    short-summary: The URL to use when redirecting a request.
+  - name: --disabled
+    type: bool
+    short-summary: Disable the policy.
+examples:
+  - name: Create a CDN WAF policy in detection mode.
+    text: |
+        az cdn waf policy set -g group -n policy
+  - name: Create a CDN WAF policy in with a custom block response status code.
+    text: |
+        az cdn waf policy set -g group -n policy --mode Prevention --block-response-status-code 200
+"""
+
+helps['cdn waf policy delete'] = """
+type: command
+short-summary: Delete a CDN WAF policy.
+examples:
+  - name: Delete a CDN policy.
+    text: >
+        az cdn waf policy delete -g group -n policy
+"""
+
+helps['cdn waf policy list'] = """
+type: command
+short-summary: List CDN WAF policies.
+examples:
+  - name: List CDN WAF policies in a resource group.
+    text: >
+        az cdn waf policy list -g group
+"""
+
+helps['cdn waf policy show'] = """
+type: command
+short-summary: Show details of a CDN WAF policy.
+examples:
+  - name: Get the details of a CDN WAF policy.
+    text: az cdn waf policy show -g group -n policy
+"""
+
+helps['cdn waf policy managed-rule-set'] = """
+type: group
+short-summary: Manage managed rule sets of a CDN WAF policy.
+"""
+
+helps['cdn waf policy managed-rule-set add'] = """
+type: command
+short-summary: Add a managed rule set to a CDN WAF policy.
+examples:
+  - name: Add DefaultRuleSet_1.0 to a CDN WAF policy.
+    text: |
+        az cdn waf policy managed-rule-set add -g group --policy-name policy \\
+          --rule-set-type DefaultRuleSet --rule-set-version 1.0
+"""
+
+helps['cdn waf policy managed-rule-set remove'] = """
+type: command
+short-summary: Remove a managed rule set from a CDN WAF policy.
+examples:
+  - name: Remove DefaultRuleSet_1.0 from a CDN WAF policy.
+    text: |
+        az cdn waf policy managed-rule-set remove -g group --policy-name policy \\
+          --rule-set-type DefaultRuleSet --rule-set-version 1.0
+"""
+
+helps['cdn waf policy managed-rule-set list'] = """
+type: command
+short-summary: List managed rule sets added to a CDN WAF policy.
+examples:
+  - name: List managed rule sets added to a CDN WAF policy.
+    text: >
+        az cdn waf policy managed-rule-set list -g group --policy-name policy
+"""
+
+helps['cdn waf policy managed-rule-set show'] = """
+type: command
+short-summary: Show a managed rule of a CDN WAF policy.
+examples:
+  - name: Get a managed rule set of a CDN WAF policy.
+    text: >
+        az cdn waf policy managed-rule-set show -g group --policy-name policy \\
+          --rule-set-type DefaultRuleSet --rule-set-version 1.0
+"""
+
+helps['cdn waf policy managed-rule-set rule-group-override'] = """
+type: group
+short-summary: Manage rule group overrides of a managed rule on a CDN WAF policy.
+"""
+
+helps['cdn waf policy managed-rule-set rule-group-override set'] = """
+type: command
+short-summary: Add a rule group override to a managed rule set on a CDN WAF policy.
+parameters:
+  - name: --rule-override -r
+    short-summary: Override a rule in the rule group
+    long-summary: |
+        rule overrides are specified as key value pairs in the form "KEY=VALUE [KEY=VALUE ...]".
+        Available keys are 'id', 'action', and 'enabled'. 'id' is required. Valid values for
+        'action' are 'Block', 'Redirect', 'Allow', and 'Log', defaulting to 'Block'. Valid values
+        for 'enabled' are 'Enabled' and 'Disabled', defaulting to 'Disabled'.
+examples:
+  - name: Add a rule group override for SQL injections to DefaultRuleSet_1.0 on a CDN WAF policy.
+    text: |
+        az cdn waf policy managed-rule-set rule-group-override set -g group --policy-name policy \\
+          --rule-set-type DefaultRuleSet --rule-set-version 1.0 -n SQLI -r \\
+          id=942440 action=Redirect enabled=Enabled
+  - name: Add multiple rule group overrides to DefaultRuleSet_1.0 on a CDN WAF policy.
+    text: |
+        az cdn waf policy managed-rule-set rule-group-override set -g group --policy-name policy \\
+          --rule-set-type DefaultRuleSet --rule-set-version 1.0 -n SQLI \\
+          -r id=942440 action=Redirect enabled=Enabled \\
+          -r id=942120 -r id=942100
+"""
+
+helps['cdn waf policy managed-rule-set rule-group-override delete'] = """
+type: command
+short-summary: Remove a rule group override from a managed rule set on a CDN WAF policy.
+examples:
+  - name: Remove the rule group override for SQLI from DefaultRuleSet_1.0 on a CDN WAF policy.
+    text: |
+        az cdn waf policy managed-rule-set rule-group-override delete -g group --policy-name policy \\
+          --rule-set-type DefaultRuleSet --rule-set-version 1.0 -n SQLI
+"""
+
+helps['cdn waf policy managed-rule-set rule-group-override list'] = """
+type: command
+short-summary: List rule group overrides of a managed rule on a CDN WAF policy.
+examples:
+  - name: List rule group overrides of a managed rule on a CDN WAF policy.
+    text: >
+        az cdn waf policy managed-rule-set rule-group-override list -g group --policy-name policy \\
+          --rule-set-type DefaultRuleSet --rule-set-version 1.0
+"""
+
+helps['cdn waf policy managed-rule-set rule-group-override show'] = """
+type: command
+short-summary: Show a rule group override of a managed rule on a CDN WAF policy.
+examples:
+  - name: Get the rule group override for rule group SQLI of DefaultRuleSet_1.0 on a CDN WAF policy.
+    text: >
+        az cdn waf policy managed-rule-set rule-group-override show -g group --policy-name policy \\
+          --rule-set-type DefaultRuleSet --rule-set-version 1.0 -n SQLI
+"""
+
+
+helps['cdn waf policy custom-rule'] = """
+type: group
+short-summary: Manage custom rules of a CDN WAF policy.
+"""
+
+helps['cdn waf policy custom-rule set'] = """
+type: command
+short-summary: Add a custom rule to a CDN WAF policy.
+parameters:
+  - name: --action
+    type: string
+    short-summary: >
+        The action to take when the rule is matched. Valid values are 'Block', 'Redirect', 'Allow', and 'Log'.
+  - name: --match-condition -m
+    type: string
+    short-summary: Conditions used to determine if the rule is matched for a request.
+    long-summary: >
+        Match conditions are specified as key value pairs in the form "KEY=VALUE [KEY=VALUE ...]".
+        Available keys are 'match-variable', 'operator', 'match-value', 'selector', 'negate', and
+        'transform'. 'match-variable', 'operator', and 'match-value' are required. 'match-value' and
+        'transform' may be specified multiple times per match condition.
+  - name: --priority
+    type: int
+    short-summary: The priority of the custom rule as a non-negative integer.
+  - name: --disabled
+    type: bool
+    short-summary: Disable the custom rule
+examples:
+  - name: Create or update a rule that blocks requests unless method is GET or POST.
+    text: |
+        az cdn waf policy custom-rule set -g group --policy-name policy -n customrule \\
+          --action Block --priority 100 --match-condition \\
+          match-variable=RequestMethod operator=Equal negate=true match-value=GET match-value=HEAD
+  - name: Create or update a custom rule with multiple match conditions and whitespace in a match value.
+    text: |
+        az cdn waf policy custom-rule set -g group --policy-name policy -n customrule \\
+          --action Redirect --priority 100 \\
+          -m match-variable=RequestUri operator=Contains match-value=.. \\
+          -m match-variable=QueryString operator=Contains "match-value= "
+"""
+
+helps['cdn waf policy custom-rule delete'] = """
+type: command
+short-summary: Remove a custom rule from a CDN WAF policy.
+examples:
+  - name: Remove a custom rule from a CDN WAF policy.
+    text: >
+        az cdn waf policy custom-rule delete -g group --policy-name policy -n customrule
+"""
+
+helps['cdn waf policy custom-rule list'] = """
+type: command
+short-summary: List custom rules of a CDN WAF policy.
+examples:
+  - name: List custom rules of a CDN WAF policy.
+    text: >
+        az cdn waf policy custom-rule list -g group --policy-name policy
+"""
+
+helps['cdn waf policy custom-rule show'] = """
+type: command
+short-summary: Show a custom rule of a CDN WAF policy.
+examples:
+  - name: Get a custom rule of a CDN WAF policy.
+    text: >
+        az cdn waf policy custom-rule show -g group --policy-name policy -n customrule
+"""
+
+
+helps['cdn waf policy rate-limit-rule'] = """
+type: group
+short-summary: Manage rate limit rules of a CDN WAF policy.
+"""
+
+helps['cdn waf policy rate-limit-rule set'] = """
+type: command
+short-summary: Add a rate limit rule to a CDN WAF policy.
+parameters:
+  - name: --action
+    type: string
+    short-summary: >
+        The action to take when the rule is matched. Valid values are 'Block', 'Redirect', 'Allow', and 'Log'.
+  - name: --match-condition -m
+    type: string
+    short-summary: Conditions used to determine if the rule is matched for a request.
+    long-summary: >
+        Match conditions are specified as key value pairs in the form "KEY=VALUE [KEY=VALUE ...]".
+        Available keys are 'match-variable', 'operator', 'match-value', 'selector', 'negate', and
+        'transform'. 'match-variable', 'operator', and 'match-value' are required. 'match-value' and
+        'transform' may be specified multiple times per match condition.
+  - name: --priority
+    type: int
+    short-summary: The priority of the rate limit rule as a non-negative integer.
+  - name: --disabled
+    type: bool
+    short-summary: Disable the rate limit rule
+  - name: --duration
+    type: int
+    short-summary: The duration of the rate limit in minutes. Valid values are 1 and 5.
+  - name: --request-threshold
+    type: int
+    short-summary: The request threshold to trigger rate limiting.
+examples:
+  - name: Create or update a rule that rate limits requests unless method is GET or POST.
+    text: |
+        az cdn waf policy rate-limit-rule set -g group --policy-name policy \\
+          -n ratelimitrule --action Block --priority 100 --duration 1 --request-threshold 100 \\
+          -m match-variable=RequestMethod operator=Equal negate=true match-value=GET match-value=HEAD
+  - name: Create or update a rate limit rule with multiple match conditions.
+    text: |
+        az cdn waf policy rate-limit-rule set -g group --policy-name policy \\
+          -n ratelimitrule --action Redirect --priority 200 --duration 5 --request-threshold 100 \\
+          -m match-variable=RequestMethod operator=Equal match-value=PUT \\
+          -m match-variable=RequestUri operator=Contains match-value=/expensive/resource/
+"""
+
+helps['cdn waf policy rate-limit-rule delete'] = """
+type: command
+short-summary: Remove a rate limit rule from a CDN WAF policy.
+examples:
+  - name: Remove a rate limit rule from a CDN WAF policy.
+    text: >
+        az cdn waf policy rate-limit-rule delete -g group --policy-name policy -n ratelimitrule
+"""
+
+helps['cdn waf policy rate-limit-rule list'] = """
+type: command
+short-summary: List rate limit rules of a CDN WAF policy.
+examples:
+  - name: List rate limit rules of a CDN WAF policy.
+    text: >
+        az cdn waf policy rate-limit-rule list -g group --policy-name policy
+"""
+
+helps['cdn waf policy rate-limit-rule show'] = """
+type: command
+short-summary: Show a rate limit rule of a CDN WAF policy.
+examples:
+  - name: Get a rate limit rule of a CDN WAF policy.
+    text: >
+        az cdn waf policy rate-limit-rule show -g group --policy-name policy -n ratelimitrule
 """

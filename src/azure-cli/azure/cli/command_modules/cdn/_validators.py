@@ -17,3 +17,7 @@ def validate_origin(namespace):
             check_port_range(origin.http_port, msg.format('HTTP', origin.name))
             check_port_range(origin.https_port, msg.format('HTTPS', origin.name))
     return True
+
+
+def validate_priority(namespace):
+    return 0 <= namespace.priority <= 1000
