@@ -40,6 +40,11 @@ Release History
 
 * Fix #2092: az network dns record-set add/remove: add warning when record-set is not found. In the future, an extra argument will be supported to confirm this auto creation.
 
+**Policy**
+
+* Add new command `az policy metadata` to retrieve rich policy metadata resources
+* `az policy remediation create`: Specify whether compliance should be re-evaluated prior to remediation with the `--resource-discovery-mode` parameter
+
 **Storage**
 
 * Add a new command group `az storage share-rm` to use the Microsoft.Storage resource provider for Azure file share management operations.
