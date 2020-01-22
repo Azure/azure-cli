@@ -48,6 +48,6 @@ class AcrTaskRunCommandsTests(ScenarioTest):
             'run_id': response['runResult']['runId']
         })
 
-        #This step pass in real run but fail using recorded file
-        #self.cmd('acr taskrun logs -r {registry_name} --run-id {run_id} -g {rg}')
+        # This step pass in real run but fail using recorded file
+        # self.cmd('acr taskrun logs -r {registry_name} --run-id {run_id} -g {rg}')
         self.cmd('acr taskrun delete -r {registry_name} -n {taskrun_name} -g {rg} -y')
