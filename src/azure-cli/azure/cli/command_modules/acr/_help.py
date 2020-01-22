@@ -929,7 +929,7 @@ examples:
 
 helps['acr taskrun logs'] = """
 type: command
-short-summary: Show logs for a particular run. 
+short-summary: Show logs for a particular run.
 examples:
   - name: Show logs for a particular run.
     text: >

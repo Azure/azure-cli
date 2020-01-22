@@ -47,10 +47,10 @@ def acr_taskrun_delete(cmd,
 
 
 def acr_taskrun_logs(cmd,
-                  client,  # cf_acr_runs
-                  registry_name,
-                  run_id=None,
-                  resource_group_name=None):
+                     client,  # cf_acr_runs
+                     registry_name,
+                     run_id=None,
+                     resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASKRUN_NOT_SUPPORTED)
     return stream_logs(client, run_id, registry_name, resource_group_name)
