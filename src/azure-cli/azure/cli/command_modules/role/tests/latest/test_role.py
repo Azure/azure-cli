@@ -12,6 +12,7 @@ import datetime
 import mock
 import unittest
 
+from knack.util import CLIError
 from azure_devtools.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, KeyVaultPreparer
@@ -66,7 +67,7 @@ class RbacSPSecretScenarioTest(RoleScenarioTest):
                          checks=self.check("length([])", 1))
                 self.cmd('role assignment delete --assignee {sp} -g {rg}',
                          checks=self.is_empty())
-                self.cmd('role assignment delete --assignee {sp}',
+                self.cmd('role assignment delete --assignee {sp} --scope {scope}',
                          checks=self.is_empty())
         finally:
             self.cmd('ad app delete --id {sp}')
@@ -242,6 +243,8 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
         if self.run_under_service_principal():
             return  # this test delete users which are beyond a SP's capacity, so quit...
 
+        subscription_id = self.get_subscription_id()
+        self.kwargs['sub'] = subscription_id
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             user = self.create_random_name('testuser', 15)
             self.kwargs.update({
@@ -289,14 +292,26 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                          checks=self.is_empty())
 
                 # test role assignment on subscription level
-                self.cmd('role assignment create --assignee {upn} --role reader')
-                self.cmd('role assignment list --assignee {upn} --role reader',
+                self.cmd('role assignment create --assignee {upn} --role reader --scope /subscriptions/{sub}')
+                self.cmd('role assignment list --assignee {upn} --role reader --scope /subscriptions/{sub}',
                          checks=self.check("length([])", 1))
-                self.cmd('role assignment list --assignee {upn}',
+                self.cmd('role assignment list --assignee {upn} --scope /subscriptions/{sub}',
                          checks=self.check("length([])", 1))
-                self.cmd('role assignment delete --assignee {upn} --role reader')
+                self.cmd('role assignment delete --assignee {upn} --role reader --scope /subscriptions/{sub}')
+
+                # test role assignment usage error
+                with self.assertRaisesRegexp(CLIError,
+                                             'usage error: please specify at least one of "--all", "--scope" and "--resource-group".'):
+                    self.cmd('role assignment list')
+
+                with self.assertRaisesRegexp(CLIError,
+                                             'usage error: please specify at least one of "--scope" and "--resource-group".'):
+                    self.cmd('role assignment create --assignee {upn} --role reader')
+                    self.cmd('role assignment delete --assignee {upn} --role reader')
             finally:
                 self.cmd('ad user delete --upn-or-object-id {upn}')
+
+
 
     @ResourceGroupPreparer(name_prefix='cli_role_assign')
     @AllowLargeResponse()
@@ -452,8 +467,9 @@ class RoleAssignmentListScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_assignments_for_coadmins')
     @AllowLargeResponse()
     def test_assignments_for_co_admins(self, resource_group):
-
-        result = self.cmd('role assignment list --include-classic-administrator').get_output_in_json()
+        subscription_id = self.get_subscription_id()
+        self.kwargs['sub'] = subscription_id
+        result = self.cmd('role assignment list --include-classic-administrator --scope /subscriptions/{sub}').get_output_in_json()
         self.assertTrue([x for x in result if x['roleDefinitionName'] in ['CoAdministrator', 'AccountAdministrator']])
         self.cmd('role assignment list -g {}'.format(resource_group), checks=[
             self.check("length([])", 0)
