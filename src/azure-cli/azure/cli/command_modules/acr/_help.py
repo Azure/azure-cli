@@ -929,11 +929,11 @@ examples:
 
 helps['acr taskrun logs'] = """
 type: command
-short-summary: Show logs for a particular run.
+short-summary: Show run logs for a particular taskrun.
 examples:
-  - name: Show logs for a particular run.
+  - name: Show run logs for a particular taskrun.
     text: >
-        az acr taskrun logs -r MyRegistry --run-id runId
+        az acr taskrun logs -r MyRegistry -n MyTaskRun
 """
 
 helps['acr token'] = """
