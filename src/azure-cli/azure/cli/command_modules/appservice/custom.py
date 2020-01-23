@@ -1470,7 +1470,7 @@ def create_backup(cmd, resource_group_name, webapp_name, storage_account_url,
     if backup_name and backup_name.lower().endswith('.zip'):
         backup_name = backup_name[:-4]
     db_setting = _create_db_setting(cmd, db_name, db_type=db_type, db_connection_string=db_connection_string)
-    backup_request = BackupRequest(backup_request_name=backup_name,
+    backup_request = BackupRequest(backup_name=backup_name,
                                    storage_account_url=storage_account_url, databases=db_setting)
     if slot:
         return client.web_apps.backup_slot(resource_group_name, webapp_name, backup_request, slot)
