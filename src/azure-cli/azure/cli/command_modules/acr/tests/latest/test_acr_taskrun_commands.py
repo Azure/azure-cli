@@ -39,15 +39,11 @@ class AcrTaskRunCommandsTests(ScenarioTest):
                          self.check('[0].provisioningState', 'Succeeded'),
                          self.check('[0].runRequest.type', 'DockerBuildRequest')])
 
-        response = self.cmd('acr taskrun show -r {registry_name} -n {taskrun_name} -g {rg}',
+        self.cmd('acr taskrun show -r {registry_name} -n {taskrun_name} -g {rg}',
                             checks=[self.check('name', '{taskrun_name}'),
                                     self.check('provisioningState', 'Succeeded'),
                                     self.check('runRequest.type', 'DockerBuildRequest')]).get_output_in_json()
 
-        self.kwargs.update({
-            'run_id': response['runResult']['runId']
-        })
-
         # This step pass in real run but fail using recorded file
-        # self.cmd('acr taskrun logs -r {registry_name} --run-id {run_id} -g {rg}')
+        # self.cmd('acr taskrun logs -r {registry_name} -n {taskrun_name} -g {rg}')
         self.cmd('acr taskrun delete -r {registry_name} -n {taskrun_name} -g {rg} -y')

@@ -49,8 +49,14 @@ def acr_taskrun_delete(cmd,
 def acr_taskrun_logs(cmd,
                      client,  # cf_acr_runs
                      registry_name,
-                     run_id=None,
+                     taskrun_name,
                      resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASKRUN_NOT_SUPPORTED)
+
+    from ._client_factory import cf_acr_taskruns
+    client_taskruns = cf_acr_taskruns(cmd.cli_ctx)
+    response = acr_taskrun_show(cmd, client_taskruns, taskrun_name, registry_name)
+    run_id = response.run_result.run_id
+
     return stream_logs(client, run_id, registry_name, resource_group_name)
