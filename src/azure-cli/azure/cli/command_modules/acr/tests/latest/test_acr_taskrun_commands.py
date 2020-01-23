@@ -44,6 +44,6 @@ class AcrTaskRunCommandsTests(ScenarioTest):
                          self.check('provisioningState', 'Succeeded'),
                          self.check('runRequest.type', 'DockerBuildRequest')]).get_output_in_json()
 
-        # This step pass in real run but fail using recorded file
+        # This step passes in real run but fails using recorded file
         # self.cmd('acr taskrun logs -r {registry_name} -n {taskrun_name} -g {rg}')
         self.cmd('acr taskrun delete -r {registry_name} -n {taskrun_name} -g {rg} -y')
