@@ -24,6 +24,11 @@ Release History
 * Fix issue #11658: `az group export` command does not support `--query` and `--output` parameters
 * Fix issue #10279: The exit code of `az group deployment validate` is 0 when the verification fails
 
+**BotService**
+
+* Fix issue #11697: `az bot create` is not idempotent
+* Change name-correcting tests to run in Live-mode only
+
 **IoT**
 
 * Deprecated 'IoT hub Job' commands.
