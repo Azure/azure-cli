@@ -239,7 +239,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('acr taskrun') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])
-        c.argument('run_id', help='The unique run identifier.')
         c.argument('taskrun_name', options_list=['--name', '-n'], help='The name of the taskrun.', completer=get_resource_name_completion_list(TASKRUN_RESOURCE_TYPE))
 
     with self.argument_context('acr helm') as c:
