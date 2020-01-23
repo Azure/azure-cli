@@ -128,6 +128,38 @@ class BotTests(ScenarioTest):
         self.cmd('az bot delete -g {rg} -n {botname}')
 
     @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_create_should_be_idempotent_and_return_existing_bot_info(self, resource_group):
+        self.kwargs.update({
+            'botname': self.create_random_name(prefix='cli', length=10),
+            'description': 'description1',
+            'endpoint': 'https://www.google.com/api/messages',
+            'app_id': str(uuid.uuid4()),
+            'password': str(uuid.uuid4())
+        })
+
+        self.cmd(
+            'az bot create -k registration -g {rg} -n {botname} -d {description} -e {endpoint} --appid {app_id} -p '
+            '{password} --tags key1=value1',
+            checks=[
+                self.check('name', '{botname}'),
+                self.check('properties.description', '{description}'),
+                self.check('resourceGroup', '{rg}'),
+                self.check('location', 'global'),
+                self.check('tags.key1', 'value1')
+            ])
+
+        self.cmd(
+            'az bot create -k registration -g {rg} -n {botname} -d {description} -e {endpoint} --appid {app_id} -p '
+            '{password} --tags key1=value1',
+            checks=[
+                self.check('name', '{botname}'),
+                self.check('properties.description', '{description}'),
+                self.check('resourceGroup', '{rg}'),
+                self.check('location', 'global'),
+                self.check('tags.key1', 'value1')
+            ])
+
+    @ResourceGroupPreparer(random_name_length=20)
     def test_botservice_create_v4_csharp_echo_webapp_bot(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),
@@ -673,6 +705,7 @@ class BotTests(ScenarioTest):
             raise AssertionError('should have thrown an error for empty string passwords.')
 
     @ResourceGroupPreparer(random_name_length=20)
+    @ResourceGroupPreparer(key='rg2', random_name_length=20)
     def test_botservice_should_throw_if_name_is_unavailable(self, resource_group):
         bot_name = self.create_random_name(prefix='cli', length=10)
         self.kwargs.update({
@@ -694,10 +727,10 @@ class BotTests(ScenarioTest):
 
         try:
             self.cmd(
-                'az bot create -k registration -g {rg} -n {botname} -d {description} -e {endpoint} --appid {app_id}')
+                'az bot create -k registration -g {rg2} -n {botname} -d {description} -e {endpoint} --appid {app_id}')
             raise AssertionError()
         except CLIError as cli_error:
-            assert cli_error.__str__().startswith('Unable to create a bot with a name of "{0}".'.format(bot_name))
+            assert cli_error.__str__().startswith('Unable to create bot.\nReason: ')
         except AssertionError:
             raise AssertionError('should have thrown an error for unavailable name.')
 
