@@ -56,7 +56,7 @@ def acr_taskrun_logs(cmd,
 
     from ._client_factory import cf_acr_taskruns
     client_taskruns = cf_acr_taskruns(cmd.cli_ctx)
-    response = acr_taskrun_show(cmd, client_taskruns, taskrun_name, registry_name)
+    response = client_taskruns.get(resource_group_name, registry_name, taskrun_name)
     run_id = response.run_result.run_id
 
     return stream_logs(client, run_id, registry_name, resource_group_name)
