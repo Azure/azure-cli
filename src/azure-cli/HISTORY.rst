@@ -6,6 +6,8 @@ Release History
 **ACR**
 
 * [BREAKING CHANGE] `az acr delete` will prompt
+* [BREAKING CHANGE] 'az acr task delete' will prompt
+* Add a new command group 'az acr taskrun show/list/delete' for taskrun management
 
 **AppConfig**
 
