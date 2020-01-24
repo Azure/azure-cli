@@ -17,6 +17,7 @@ from ._format import (
     replication_output_format,
     build_output_format,
     task_output_format,
+    taskrun_output_format,
     run_output_format,
     helm_list_output_format,
     helm_show_output_format,
@@ -29,6 +30,7 @@ from ._client_factory import (
     cf_acr_replications,
     cf_acr_webhooks,
     cf_acr_tasks,
+    cf_acr_taskruns,
     cf_acr_runs,
     cf_acr_scope_maps,
     cf_acr_tokens,
@@ -103,6 +105,12 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         operations_tmpl='azure.cli.command_modules.acr.task#{}',
         table_transformer=task_output_format,
         client_factory=cf_acr_tasks
+    )
+
+    acr_taskrun_util = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.acr.taskrun#{}',
+        table_transformer=taskrun_output_format,
+        client_factory=cf_acr_taskruns
     )
 
     acr_helm_util = CliCommandType(
@@ -235,6 +243,13 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.command('update-run', 'acr_task_update_run', client_factory=cf_acr_runs,
                   table_transformer=run_output_format)
         g.command('logs', 'acr_task_logs', client_factory=cf_acr_runs,
+                  table_transformer=None)
+
+    with self.command_group('acr taskrun', acr_taskrun_util, is_preview=True) as g:
+        g.command('list', 'acr_taskrun_list')
+        g.command('delete', 'acr_taskrun_delete')
+        g.command('show', 'acr_taskrun_show')
+        g.command('logs', 'acr_taskrun_logs', client_factory=cf_acr_runs,
                   table_transformer=None)
 
     with self.command_group('acr config content-trust', acr_policy_util) as g:

@@ -35,6 +35,10 @@ def cf_acr_tasks(cli_ctx, *_):
     return get_acr_service_client(cli_ctx, VERSION_2019_06_01_PREVIEW).tasks
 
 
+def cf_acr_taskruns(cli_ctx, *_):
+    return get_acr_service_client(cli_ctx, VERSION_2019_06_01_PREVIEW).task_runs
+
+
 def cf_acr_runs(cli_ctx, *_):
     return get_acr_service_client(cli_ctx, VERSION_2019_06_01_PREVIEW).runs
 

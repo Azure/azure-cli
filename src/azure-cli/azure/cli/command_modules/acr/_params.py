@@ -22,7 +22,8 @@ from ._constants import (
     REGISTRY_RESOURCE_TYPE,
     WEBHOOK_RESOURCE_TYPE,
     REPLICATION_RESOURCE_TYPE,
-    TASK_RESOURCE_TYPE
+    TASK_RESOURCE_TYPE,
+    TASKRUN_RESOURCE_TYPE
 )
 from ._validators import (
     validate_headers,
@@ -235,6 +236,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('timer_name', help="The name of the timer trigger.", required=True)
         c.argument('timer_schedule', options_list=['--schedule'], help="The schedule of the timer trigger represented as a cron expression.")
         c.argument('enabled', help="Indicates whether the timer trigger is enabled.", arg_type=get_three_state_flag())
+
+    with self.argument_context('acr taskrun') as c:
+        c.argument('registry_name', options_list=['--registry', '-r'])
+        c.argument('taskrun_name', options_list=['--name', '-n'], help='The name of the taskrun.', completer=get_resource_name_completion_list(TASKRUN_RESOURCE_TYPE))
 
     with self.argument_context('acr helm') as c:
         c.argument('resource_group_name', deprecate_info=c.deprecate(hide=True))

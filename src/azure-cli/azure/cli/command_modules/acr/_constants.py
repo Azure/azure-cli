@@ -13,6 +13,8 @@ TASK_RESOURCE_TYPE = REGISTRY_RESOURCE_TYPE + '/tasks'
 TASK_VALID_VSTS_URLS = ['visualstudio.com', 'dev.azure.com']
 TASK_RESOURCE_ID_TEMPLATE = '/subscriptions/{sub_id}/resourceGroups/{rg}/providers/Microsoft.ContainerRegistry/registries/{reg}/tasks/{name}'
 
+TASKRUN_RESOURCE_TYPE = REGISTRY_RESOURCE_TYPE + '/taskruns'
+
 ACR_TASK_YAML_DEFAULT_NAME = 'acb.yaml'
 
 ACR_CACHED_BUILDER_IMAGES = ('cloudfoundry/cnb:bionic',)
