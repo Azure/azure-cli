@@ -196,6 +196,21 @@ def validate_load_balancer_outbound_ip_prefixes(namespace):
         if not all(ip_prefix_id_list):
             raise CLIError("--load-balancer-outbound-ip-prefixes cannot contain whitespace")
 
+def validate_load_balancer_allocated_ports(namespace):
+    """validate load balancer profile outbound allocated ports"""
+    if namespace.load_balancer_allocated_ports is not None:
+        if namespace.load_balancer_allocated_ports % 8 != 0:
+            raise CLIError("--load-balancer-allocated-ports must be a multiple of 8")
+        if namespace.load_balancer_allocated_ports < 0:
+            raise CLIError("--load-balancer-allocated-ports cannot be negative")
+
+
+def validate_load_balancer_idle_timeout(namespace):
+    """validate load balancer profile idle timeout"""
+    if namespace.load_balancer_idle_timeout is not None:
+        if namespace.load_balancer_idle_timeout < 4 or namespace.load_balancer_idle_timeout > 120:
+            raise CLIError("--load-balancer-idle-timeout must be set between 4 and 120 minutes")
+
 
 def validate_nodes_count(namespace):
     """Validates that min_count and max_count is set between 1-100"""

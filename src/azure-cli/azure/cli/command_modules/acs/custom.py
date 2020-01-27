@@ -64,12 +64,7 @@ from azure.mgmt.containerservice.v2019_11_01.models import ManagedCluster
 from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterAADProfile
 from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterAddonProfile
 from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterAgentPoolProfile
-from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterLoadBalancerProfile
-from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterLoadBalancerProfileManagedOutboundIPs
-from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterLoadBalancerProfileOutboundIPPrefixes
-from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterLoadBalancerProfileOutboundIPs
 from azure.mgmt.containerservice.v2019_11_01.models import AgentPool
-from azure.mgmt.containerservice.v2019_11_01.models import ResourceReference
 
 from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedClusterAgentPoolProfile
 from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftAgentPoolProfileRole
@@ -89,7 +84,9 @@ from ._client_factory import cf_resources
 from ._client_factory import get_resource_by_name
 from ._client_factory import cf_container_registry_service
 
-from ._helpers import _populate_api_server_access_profile, _set_load_balancer_sku, _set_vm_set_type
+from ._helpers import _populate_api_server_access_profile, _set_vm_set_type
+
+from azure.cli.command_modules.acs.loadbalancer import set_load_balancer_sku, get_load_balancer_profile, is_load_balancer_provided
 
 logger = get_logger(__name__)
 
@@ -1624,6 +1621,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                load_balancer_managed_outbound_ip_count=None,
                load_balancer_outbound_ips=None,
                load_balancer_outbound_ip_prefixes=None,
+               load_balancer_allocated_ports=None,
+               load_balancer_idle_timeout=None,
                enable_addons=None,
                workspace_resource_id=None,
                vnet_subnet_id=None,
@@ -1640,8 +1639,6 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                api_server_authorized_ip_ranges=None,
                attach_acr=None,
                no_wait=False):
-    print("hello ganesha we have made it!!!")
-    raise CLIError("let's get")
     _validate_ssh_key(no_ssh_key, ssh_key_value)
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -1701,7 +1698,9 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     load_balancer_profile = _get_load_balancer_profile(
         load_balancer_managed_outbound_ip_count,
         load_balancer_outbound_ips,
-        load_balancer_outbound_ip_prefixes, None, None)
+        load_balancer_outbound_ip_prefixes,
+        load_balancer_allocated_ports,
+        load_balancer_idle_timeout)
 
     if attach_acr:
         _ensure_aks_acr(cmd.cli_ctx,
@@ -1968,7 +1967,7 @@ def aks_update(cmd, client, resource_group_name, name,
                load_balancer_managed_outbound_ip_count=None,
                load_balancer_outbound_ips=None,
                load_balancer_outbound_ip_prefixes=None,
-               load_balancer_allocated_outbound_ports=None,
+               load_balancer_outbound_ports=None,
                load_balancer_idle_timeout=None,
                attach_acr=None,
                detach_acr=None,
@@ -1976,8 +1975,9 @@ def aks_update(cmd, client, resource_group_name, name,
                no_wait=False):
     update_autoscaler = enable_cluster_autoscaler + disable_cluster_autoscaler + update_cluster_autoscaler
 
-    update_lb_profile = load_balancer_managed_outbound_ip_count is not None or \
-        load_balancer_outbound_ips is not None or load_balancer_outbound_ip_prefixes is not None
+    update_lb_profile = _is_load_balancer_provided(load_balancer_managed_outbound_ip_count, load_balancer_outbound_ips,
+                                                   load_balancer_outbound_ip_prefixes, load_balancer_outbound_ports,
+                                                   load_balancer_idle_timeout)
 
     if (update_autoscaler != 1 and not update_lb_profile and
             not attach_acr and
@@ -1986,10 +1986,12 @@ def aks_update(cmd, client, resource_group_name, name,
         raise CLIError('Please specify one or more of "--enable-cluster-autoscaler" or '
                        '"--disable-cluster-autoscaler" or '
                        '"--update-cluster-autoscaler" or '
-                       '"--load-balancer-managed-outbound-ip-count",'
-                       '"--load-balancer-outbound-ips",'
-                       '"--load-balancer-outbound-ip-prefixes",'
-                       '"--attach-acr" or "--dettach-acr",'
+                       '"--load-balancer-managed-outbound-ip-count" or'
+                       '"--load-balancer-outbound-ips" or '
+                       '"--load-balancer-outbound-ip-prefixes" or'
+                       '"--load-balancer-outbound-ports" or'
+                       '"--load-balancer-idle-timeout" or'
+                       '"--attach-acr" or "--dettach-acr" or'
                        '"--"api-server-authorized-ip-ranges')
 
     instance = client.get(resource_group_name, name)
@@ -2051,7 +2053,7 @@ def aks_update(cmd, client, resource_group_name, name,
         load_balancer_managed_outbound_ip_count,
         load_balancer_outbound_ips,
         load_balancer_outbound_ip_prefixes,
-        load_balancer_allocated_outbound_ports,
+        load_balancer_outbound_ports,
         load_balancer_idle_timeout)
 
     if load_balancer_profile:
@@ -3263,59 +3265,3 @@ def openshift_scale(cmd, client, resource_group_name, name, compute_count, no_wa
     instance.auth_profile = None
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
-
-
-def _get_load_balancer_outbound_ips(load_balancer_outbound_ips):
-    """parse load balancer profile outbound IP ids and return an array of references to the outbound IP resources"""
-    load_balancer_outbound_ip_resources = None
-    if load_balancer_outbound_ips:
-        load_balancer_outbound_ip_resources = \
-            [ResourceReference(id=x.strip()) for x in load_balancer_outbound_ips.split(',')]
-    return load_balancer_outbound_ip_resources
-
-
-def _get_load_balancer_outbound_ip_prefixes(load_balancer_outbound_ip_prefixes):
-    """parse load balancer profile outbound IP prefix ids and return an array \
-    of references to the outbound IP prefix resources"""
-    load_balancer_outbound_ip_prefix_resources = None
-    if load_balancer_outbound_ip_prefixes:
-        load_balancer_outbound_ip_prefix_resources = \
-            [ResourceReference(id=x.strip()) for x in load_balancer_outbound_ip_prefixes.split(',')]
-    return load_balancer_outbound_ip_prefix_resources
-
-
-def _get_load_balancer_profile(load_balancer_managed_outbound_ip_count,
-                               load_balancer_outbound_ips,
-                               load_balancer_outbound_ip_prefixes,
-                               load_balancer_allocated_outbound_ports,
-                               load_balancer_idle_timeout):
-    """parse and build load balancer profile"""
-    load_balancer_outbound_ip_resources = _get_load_balancer_outbound_ips(load_balancer_outbound_ips)
-    load_balancer_outbound_ip_prefix_resources = _get_load_balancer_outbound_ip_prefixes(
-        load_balancer_outbound_ip_prefixes)
-
-    load_balancer_profile = None
-    if any([load_balancer_managed_outbound_ip_count,
-            load_balancer_outbound_ip_resources,
-            load_balancer_outbound_ip_prefix_resources,
-            load_balancer_allocated_outbound_ports,
-            load_balancer_idle_timeout]):
-        load_balancer_profile = ManagedClusterLoadBalancerProfile()
-        if load_balancer_managed_outbound_ip_count:
-            load_balancer_profile.managed_outbound_ips = ManagedClusterLoadBalancerProfileManagedOutboundIPs(
-                count=load_balancer_managed_outbound_ip_count
-            )
-        if load_balancer_outbound_ip_resources:
-            load_balancer_profile.outbound_ips = ManagedClusterLoadBalancerProfileOutboundIPs(
-                public_ips=load_balancer_outbound_ip_resources
-            )
-        if load_balancer_outbound_ip_prefix_resources:
-            load_balancer_profile.outbound_ip_prefixes = ManagedClusterLoadBalancerProfileOutboundIPPrefixes(
-                public_ip_prefixes=load_balancer_outbound_ip_prefix_resources
-            )
-        if load_balancer_allocated_outbound_ports:
-            load_balancer_profile.allocated_outbound_ports = load_balancer_allocated_outbound_ports
-        if load_balancer_idle_timeout:
-            load_balancer_profile.idle_timeout_in_minutes = load_balancer_idle_timeout
-        print("Ganesha here is the profile", load_balancer_profile)
-    return load_balancer_profile
