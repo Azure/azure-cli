@@ -328,6 +328,14 @@ examples:
     text: az functionapp config ssl import --resource-group MyResourceGroup --name MyFunctionApp --key-vault MyKeyVault --key-vault-certificate-name MyCertificateName
 """
 
+helps['functionapp config ssl create-managed-certificate'] = """
+type: command
+short-summary: Create a Managed Certificate for a hostname in a function app.
+examples:
+  - name: Create a Managed Certificate for $fqdn.
+    text: az functionapp config ssl create-managed-certificate --resource-group MyResourceGroup --name MyWebapp --hostname $fqdn
+"""
+
 helps['functionapp cors'] = """
 type: group
 short-summary: Manage Cross-Origin Resource Sharing (CORS)
@@ -1178,6 +1186,14 @@ short-summary: Import an SSL certificate to a web app from Key Vault.
 examples:
   - name: Import an SSL certificate to a web app from Key Vault.
     text: az webapp config ssl import --resource-group MyResourceGroup --name MyWebapp --key-vault MyKeyVault --key-vault-certificate-name MyCertificateName
+"""
+
+helps['webapp config ssl create-managed-certificate'] = """
+type: command
+short-summary: Create a Managed Certificate for a hostname in a webapp app.
+examples:
+  - name: Create a Managed Certificate for $fqdn.
+    text: az webapp config ssl create-managed-certificate --resource-group MyResourceGroup --name MyWebapp --hostname $fqdn
 """
 
 helps['webapp config storage-account'] = """

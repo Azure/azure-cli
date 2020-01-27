@@ -2054,6 +2054,34 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
                                                 certificate_envelope=kv_cert_def)
 
 
+def create_managed_ssl_cert(cmd, resource_group_name, name, hostname):
+    Certificate = cmd.get_models('Certificate')
+    hostname = hostname.lower()
+    client = web_client_factory(cmd.cli_ctx)
+    webapp = client.web_apps.get(resource_group_name, name)
+    if not webapp:
+        raise CLIError("'{}' app doesn't exist in resource group {}".format(name, resource_group_name))
+    hostname_bindings = client.web_apps.list_host_name_bindings(resource_group_name, name)
+    verified_hostname_found = False
+    for hostname_binding in hostname_bindings:
+        binding_name = hostname_binding.name.split('/')[-1]
+        if binding_name.lower() == hostname and hostname_binding.host_name_type == 'Verified':
+            verified_hostname_found = True
+
+    if not verified_hostname_found:
+        raise CLIError("Hostname (custom domain) '{0}' is not registered with {1}. "
+                       "Use 'az webapp config hostname add --resource-group {2} "
+                       "--webapp-name {1} --hostname {0}' "
+                       "to register the hostname.".format(hostname, name, resource_group_name))
+
+    server_farm_id = webapp.server_farm_id
+    location = webapp.location
+    easy_cert_def = Certificate(location=location, canonical_name=hostname,
+                                server_farm_id=server_farm_id, password='')
+    return client.certificates.create_or_update(name=hostname, resource_group_name=resource_group_name,
+                                                certificate_envelope=easy_cert_def)
+
+
 def _check_service_principal_permissions(cmd, resource_group_name, key_vault_name):
     from azure.cli.command_modules.keyvault._client_factory import keyvault_client_vaults_factory
     from azure.cli.command_modules.role._client_factory import _graph_client_factory

@@ -41,6 +41,7 @@ Release History
 
 * Azure Stack: surface commands under the profile of 2019-03-01-hybrid
 * functionapp: Add ability to create Java function apps in Linux
+* Add support for Managed Certificate: az webapp|functionapp config ssl create-managed-certificate
 
 **ARM**
 
