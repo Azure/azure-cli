@@ -93,21 +93,9 @@ def should_enable_styling():
 
 
 def call_aladdin_service(query):
-    client_request_id = ''
-    if telemetry_core._session.application:  # pylint: disable=protected-access
-        client_request_id = telemetry_core._session.application.data['headers']['x-ms-client-request-id']  # pylint: disable=protected-access
-
-    session_id = telemetry_core._session._get_base_properties()['Reserved.SessionId']  # pylint: disable=protected-access
-    subscription_id = telemetry_core._get_azure_subscription_id()  # pylint: disable=protected-access
-    client_request_id = client_request_id  # pylint: disable=protected-access
-    installation_id = telemetry_core._get_installation_id()  # pylint: disable=protected-access
     version = str(parse_version(core_version))
 
     context = {
-        "sessionId": session_id,
-        "subscriptionId": subscription_id,
-        "clientRequestId": client_request_id,
-        "installationId": installation_id,
         "versionNumber": version
     }
 
