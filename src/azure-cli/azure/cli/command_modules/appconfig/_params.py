@@ -20,7 +20,9 @@ from ._validators import (validate_appservice_name_or_id,
                           validate_export, validate_import,
                           validate_import_depth, validate_query_fields,
                           validate_feature_query_fields, validate_filter_parameters,
-                          validate_separator, validate_secret_identifier)
+                          validate_separator, validate_secret_identifier,
+                          validate_key, validate_content_type, validate_feature,
+                          validate_identity)
 
 
 def load_arguments(self, _):
@@ -52,6 +54,11 @@ def load_arguments(self, _):
         type=int,
         help='Maximum number of items to return. Must be a positive integer. Default to 100.'
     )
+    identities_arg_type = CLIArgumentType(
+        nargs='*',
+        validator=validate_identity,
+        help="Accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity or a resource id to refer user assigned identity. Use system assigned identity if not specified."
+    )
 
     with self.argument_context('appconfig') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
@@ -63,13 +70,20 @@ def load_arguments(self, _):
         c.argument('top', arg_type=top_arg_type)
         c.argument('all_', options_list=['--all'], action='store_true', help="List all items.")
         c.argument('fields', arg_type=fields_arg_type)
+        c.argument('sku', help='The sku of App Configuration', arg_type=get_enum_type(['free', 'standard']))
 
     with self.argument_context('appconfig create') as c:
         c.argument('location', options_list=['--location', '-l'], arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
-        c.ignore('sku')
+        c.argument('assign_identity', arg_type=identities_arg_type)
 
     with self.argument_context('appconfig update') as c:
         c.argument('tags', arg_type=tags_type)
+
+    with self.argument_context('appconfig identity assign') as c:
+        c.argument('identities', arg_type=identities_arg_type)
+
+    with self.argument_context('appconfig identity remove') as c:
+        c.argument('identities', arg_type=identities_arg_type, help="Accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity, '[all]' for all identities or a resource id to refer user assigned identity. Remove system assigned identity if not specified.")
 
     with self.argument_context('appconfig credential regenerate') as c:
         c.argument('id_', options_list=['--id'], help='Id of the key to be regenerated. Can be found using az appconfig credential list command.')
@@ -92,13 +106,14 @@ def load_arguments(self, _):
         c.argument('src_name', help='The name of the source App Configuration.')
         c.argument('src_connection_string', validator=validate_connection_string, help="Combination of access key and endpoint of the source store.")
         c.argument('src_key', help='If no key specified, import all keys by default. Support star sign as filters, for instance abc* means keys with abc as prefix. Similarly, *abc and *abc* are also supported. Key filtering not applicable for feature flags. By default, all feature flags with specified label will be imported.')
-        c.argument('src_label', help="Only keys with this label in source AppConfig will be imported. If no label specified, import keys with null label by default.")
+        c.argument('src_label', help="Only keys with this label in source AppConfig will be imported. If no value specified, import keys with null label by default. Support star sign as filters, for instance * means all labels, abc* means labels with abc as prefix. Similarly, *abc and *abc* are also supported.")
+        c.argument('preserve_labels', arg_type=get_three_state_flag(), help="Flag to preserve labels from source AppConfig. This argument should NOT be specified along with --label.")
 
     with self.argument_context('appconfig kv import', arg_group='AppService') as c:
         c.argument('appservice_account', validator=validate_appservice_name_or_id, help='ARM ID for AppService OR the name of the AppService, assuming it is in the same subscription and resource group as the App Configuration. Required for AppService arguments')
 
     with self.argument_context('appconfig kv export') as c:
-        c.argument('label', help="Only keys and feature flags with this label will be exported. If no label specified, export keys and feature flags with null label by default.")
+        c.argument('label', help="Only keys and feature flags with this label will be exported. If no label specified, export keys and feature flags with null label by default. Only when export destination is appconfig, we support star sign as filters, for instance * means all labels and abc* means labels with abc as prefix. Similarly, *abc and *abc* are also supported. Label filters are not supported when exporting to file or appservice.")
         c.argument('prefix', help="Prefix to be trimmed from keys. Prefix will be ignored for feature flags.")
         c.argument('key', help='If no key specified, return all keys by default. Support star sign as filters, for instance abc* means keys with abc as prefix. Similarly, *abc and *abc* are also supported. Key filtering not applicable for feature flags. By default, all feature flags with specified label will be exported.')
         c.argument('destination', options_list=['--destination', '-d'], arg_type=get_enum_type(['file', 'appconfig', 'appservice']), validator=validate_export, help="The destination of exporting. Note that exporting feature flags to appservice is not supported.")
@@ -116,20 +131,21 @@ def load_arguments(self, _):
     with self.argument_context('appconfig kv export', arg_group='AppConfig') as c:
         c.argument('dest_name', help='The name of the destination App Configuration.')
         c.argument('dest_connection_string', validator=validate_connection_string, help="Combination of access key and endpoint of the destination store.")
-        c.argument('dest_label', help="Exported KVs will be labeled with this destination label.")
+        c.argument('dest_label', help="Exported KVs will be labeled with this destination label. If neither --dest-label nor --preserve-labels is specified, will assign null label.")
+        c.argument('preserve_labels', arg_type=get_three_state_flag(), help="Flag to preserve labels from source AppConfig. This argument should NOT be specified along with --dest-label.")
 
     with self.argument_context('appconfig kv export', arg_group='AppService') as c:
         c.argument('appservice_account', validator=validate_appservice_name_or_id, help='ARM ID for AppService OR the name of the AppService, assuming it is in the same subscription and resource group as the App Configuration. Required for AppService arguments')
 
     with self.argument_context('appconfig kv set') as c:
-        c.argument('key', help='Key to be set.')
+        c.argument('key', validator=validate_key, help="Key to be set. Key cannot be a '.' or '..', or contain the '%' character.")
         c.argument('label', help="If no label specified, set the key with null label by default")
         c.argument('tags', arg_type=tags_type)
-        c.argument('content_type', help='Content type of the keyvalue to be set.')
+        c.argument('content_type', validator=validate_content_type, help='Content type of the keyvalue to be set.')
         c.argument('value', help='Value of the keyvalue to be set.')
 
     with self.argument_context('appconfig kv set-keyvault') as c:
-        c.argument('key', help='Key to be set.')
+        c.argument('key', validator=validate_key, help="Key to be set. Key cannot be a '.' or '..', or contain the '%' character.")
         c.argument('label', help="If no label specified, set the key with null label by default")
         c.argument('tags', arg_type=tags_type)
         c.argument('secret_identifier', validator=validate_secret_identifier, help="ID of the Key Vault object. Can be found using 'az keyvault {collection} show' command, where collection is key, secret or certificate. To set reference to the latest version of your secret, remove version information from secret identifier.")
@@ -168,7 +184,7 @@ def load_arguments(self, _):
         c.argument('fields', arg_type=feature_fields_arg_type)
 
     with self.argument_context('appconfig feature set') as c:
-        c.argument('feature', help="Name of the feature flag to be set. Only alphanumeric characters, '.', '-' and '_' are allowed.")
+        c.argument('feature', validator=validate_feature, help="Name of the feature flag to be set. Only alphanumeric characters, '.', '-' and '_' are allowed.")
         c.argument('label', help="If no label specified, set the feature flag with null label by default")
         c.argument('description', help='Description of the feature flag to be set.')
 
