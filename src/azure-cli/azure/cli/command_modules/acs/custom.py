@@ -26,8 +26,6 @@ import webbrowser
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from six.moves.urllib.error import URLError  # pylint: disable=import-error
 
-from ._helpers import _populate_api_server_access_profile, _set_load_balancer_sku, _set_vm_set_type
-
 # pylint: disable=import-error
 import yaml
 import dateutil.parser
@@ -56,22 +54,22 @@ from azure.graphrbac.models import (ApplicationCreateParameters,
 
 from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes
 
-from azure.mgmt.containerservice.v2019_08_01.models import ContainerServiceNetworkProfile
-from azure.mgmt.containerservice.v2019_08_01.models import ContainerServiceLinuxProfile
-from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterServicePrincipalProfile
-from azure.mgmt.containerservice.v2019_08_01.models import ContainerServiceSshConfiguration
-from azure.mgmt.containerservice.v2019_08_01.models import ContainerServiceSshPublicKey
-from azure.mgmt.containerservice.v2019_08_01.models import ContainerServiceStorageProfileTypes
-from azure.mgmt.containerservice.v2019_08_01.models import ManagedCluster
-from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterAADProfile
-from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterAddonProfile
-from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterAgentPoolProfile
-from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterLoadBalancerProfile
-from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterLoadBalancerProfileManagedOutboundIPs
-from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterLoadBalancerProfileOutboundIPPrefixes
-from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterLoadBalancerProfileOutboundIPs
-from azure.mgmt.containerservice.v2019_08_01.models import AgentPool
-from azure.mgmt.containerservice.v2019_08_01.models import ResourceReference
+from azure.mgmt.containerservice.v2019_11_01.models import ContainerServiceNetworkProfile
+from azure.mgmt.containerservice.v2019_11_01.models import ContainerServiceLinuxProfile
+from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterServicePrincipalProfile
+from azure.mgmt.containerservice.v2019_11_01.models import ContainerServiceSshConfiguration
+from azure.mgmt.containerservice.v2019_11_01.models import ContainerServiceSshPublicKey
+from azure.mgmt.containerservice.v2019_11_01.models import ContainerServiceStorageProfileTypes
+from azure.mgmt.containerservice.v2019_11_01.models import ManagedCluster
+from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterAADProfile
+from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterAddonProfile
+from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterAgentPoolProfile
+from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterLoadBalancerProfile
+from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterLoadBalancerProfileManagedOutboundIPs
+from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterLoadBalancerProfileOutboundIPPrefixes
+from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterLoadBalancerProfileOutboundIPs
+from azure.mgmt.containerservice.v2019_11_01.models import AgentPool
+from azure.mgmt.containerservice.v2019_11_01.models import ResourceReference
 
 from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedClusterAgentPoolProfile
 from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftAgentPoolProfileRole
@@ -90,6 +88,8 @@ from ._client_factory import get_graph_rbac_management_client
 from ._client_factory import cf_resources
 from ._client_factory import get_resource_by_name
 from ._client_factory import cf_container_registry_service
+
+from ._helpers import _populate_api_server_access_profile, _set_load_balancer_sku, _set_vm_set_type
 
 logger = get_logger(__name__)
 
@@ -1640,6 +1640,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                api_server_authorized_ip_ranges=None,
                attach_acr=None,
                no_wait=False):
+    print("hello ganesha we have made it!!!")
+    raise CLIError("let's get")
     _validate_ssh_key(no_ssh_key, ssh_key_value)
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -1699,7 +1701,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     load_balancer_profile = _get_load_balancer_profile(
         load_balancer_managed_outbound_ip_count,
         load_balancer_outbound_ips,
-        load_balancer_outbound_ip_prefixes)
+        load_balancer_outbound_ip_prefixes, None, None)
 
     if attach_acr:
         _ensure_aks_acr(cmd.cli_ctx,
@@ -1966,6 +1968,8 @@ def aks_update(cmd, client, resource_group_name, name,
                load_balancer_managed_outbound_ip_count=None,
                load_balancer_outbound_ips=None,
                load_balancer_outbound_ip_prefixes=None,
+               load_balancer_allocated_outbound_ports=None,
+               load_balancer_idle_timeout=None,
                attach_acr=None,
                detach_acr=None,
                api_server_authorized_ip_ranges=None,
@@ -2046,7 +2050,9 @@ def aks_update(cmd, client, resource_group_name, name,
     load_balancer_profile = _get_load_balancer_profile(
         load_balancer_managed_outbound_ip_count,
         load_balancer_outbound_ips,
-        load_balancer_outbound_ip_prefixes)
+        load_balancer_outbound_ip_prefixes,
+        load_balancer_allocated_outbound_ports,
+        load_balancer_idle_timeout)
 
     if load_balancer_profile:
         instance.network_profile.load_balancer_profile = load_balancer_profile
@@ -3280,7 +3286,9 @@ def _get_load_balancer_outbound_ip_prefixes(load_balancer_outbound_ip_prefixes):
 
 def _get_load_balancer_profile(load_balancer_managed_outbound_ip_count,
                                load_balancer_outbound_ips,
-                               load_balancer_outbound_ip_prefixes):
+                               load_balancer_outbound_ip_prefixes,
+                               load_balancer_allocated_outbound_ports,
+                               load_balancer_idle_timeout):
     """parse and build load balancer profile"""
     load_balancer_outbound_ip_resources = _get_load_balancer_outbound_ips(load_balancer_outbound_ips)
     load_balancer_outbound_ip_prefix_resources = _get_load_balancer_outbound_ip_prefixes(
@@ -3289,7 +3297,9 @@ def _get_load_balancer_profile(load_balancer_managed_outbound_ip_count,
     load_balancer_profile = None
     if any([load_balancer_managed_outbound_ip_count,
             load_balancer_outbound_ip_resources,
-            load_balancer_outbound_ip_prefix_resources]):
+            load_balancer_outbound_ip_prefix_resources,
+            load_balancer_allocated_outbound_ports,
+            load_balancer_idle_timeout]):
         load_balancer_profile = ManagedClusterLoadBalancerProfile()
         if load_balancer_managed_outbound_ip_count:
             load_balancer_profile.managed_outbound_ips = ManagedClusterLoadBalancerProfileManagedOutboundIPs(
@@ -3303,4 +3313,9 @@ def _get_load_balancer_profile(load_balancer_managed_outbound_ip_count,
             load_balancer_profile.outbound_ip_prefixes = ManagedClusterLoadBalancerProfileOutboundIPPrefixes(
                 public_ip_prefixes=load_balancer_outbound_ip_prefix_resources
             )
+        if load_balancer_allocated_outbound_ports:
+            load_balancer_profile.allocated_outbound_ports = load_balancer_allocated_outbound_ports
+        if load_balancer_idle_timeout:
+            load_balancer_profile.idle_timeout_in_minutes = load_balancer_idle_timeout
+        print("Ganesha here is the profile", load_balancer_profile)
     return load_balancer_profile
