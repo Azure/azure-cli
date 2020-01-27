@@ -3,6 +3,7 @@
 Release History
 ===============
 
+<<<<<<< HEAD
 **ACR**
 
 * [BREAKING CHANGE] `az acr delete` will prompt
@@ -50,6 +51,11 @@ Release History
 * `az storage copy`: Add `--include-path`, `--include-pattern`, `--exclude-path` and`--exclude-pattern` parameters
 * `az storage remove`: Change `--inlcude` and `--exclude` parameters to `--include-path`, `--include-pattern`, `--exclude-path` and`--exclude-pattern` parameters
 * `az storage sync`: Add `--include-pattern`, `--exclude-path` and`--exclude-pattern` parameters
+=======
+**SQL**
+
+* Update az sql mi update with two new properties tier and family.
+>>>>>>> Fixing History.rst
 
 2.0.80
 ++++++

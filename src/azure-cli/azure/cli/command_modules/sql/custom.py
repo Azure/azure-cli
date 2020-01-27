@@ -2098,6 +2098,15 @@ def encryption_protector_update(
 #                sql managed instance         #
 ###############################################
 
+class ManagedInstanceTiers(str, Enum):
+
+    general_purpose = "GeneralPurpose"
+    business_critical = "BusinessCritical"
+
+class ManagedInstanceFamilies(str, Enum):
+
+    gen4 = "Gen4"
+    gen5 = "Gen5"
 
 def _find_managed_instance_sku_from_capabilities(
         cli_ctx,
