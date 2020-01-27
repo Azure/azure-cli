@@ -212,8 +212,8 @@ def load_arguments(self, _):
         c.argument('load_balancer_managed_outbound_ip_count', type=int)
         c.argument('load_balancer_outbound_ips', type=str, validator=validate_load_balancer_outbound_ips)
         c.argument('load_balancer_outbound_ip_prefixes', type=str, validator=validate_load_balancer_outbound_ip_prefixes)
-        c.argument('load_balancer_allocated_outbound_ports', type=int)
-        c.argument('load_balancer_idle_timeout', type=int)
+        c.argument('load_balancer_allocated_outbound_ports', type=int, validator=validate_load_balancer_allocated_ports)
+        c.argument('load_balancer_idle_timeout', type=int, validator=validate_load_balancer_idle_timeout)
         c.argument('api_server_authorized_ip_ranges', type=str, validator=validate_ip_ranges)
 
     with self.argument_context('aks disable-addons') as c:

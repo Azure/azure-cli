@@ -196,6 +196,7 @@ def validate_load_balancer_outbound_ip_prefixes(namespace):
         if not all(ip_prefix_id_list):
             raise CLIError("--load-balancer-outbound-ip-prefixes cannot contain whitespace")
 
+
 def validate_load_balancer_allocated_ports(namespace):
     """validate load balancer profile outbound allocated ports"""
     if namespace.load_balancer_allocated_ports is not None:

@@ -86,7 +86,8 @@ from ._client_factory import cf_container_registry_service
 
 from ._helpers import _populate_api_server_access_profile, _set_vm_set_type
 
-from azure.cli.command_modules.acs.loadbalancer import set_load_balancer_sku, get_load_balancer_profile, is_load_balancer_provided
+from azure.cli.command_modules.acs.loadbalancer import (set_load_balancer_sku,
+                                                        get_load_balancer_profile, is_load_balancer_provided)
 
 logger = get_logger(__name__)
 
@@ -1650,7 +1651,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         location = rg_location
 
     vm_set_type = _set_vm_set_type(vm_set_type, kubernetes_version)
-    load_balancer_sku = _set_load_balancer_sku(load_balancer_sku, kubernetes_version)
+    load_balancer_sku = set_load_balancer_sku(load_balancer_sku, kubernetes_version)
 
     if api_server_authorized_ip_ranges and load_balancer_sku == "basic":
         raise CLIError('--api-server-authorized-ip-ranges can only be used with standard load balancer')
@@ -1695,7 +1696,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             logger.warning('Could not create a role assignment for subnet. '
                            'Are you an Owner on this subscription?')
 
-    load_balancer_profile = _get_load_balancer_profile(
+    load_balancer_profile = get_load_balancer_profile(
         load_balancer_managed_outbound_ip_count,
         load_balancer_outbound_ips,
         load_balancer_outbound_ip_prefixes,
@@ -1975,9 +1976,9 @@ def aks_update(cmd, client, resource_group_name, name,
                no_wait=False):
     update_autoscaler = enable_cluster_autoscaler + disable_cluster_autoscaler + update_cluster_autoscaler
 
-    update_lb_profile = _is_load_balancer_provided(load_balancer_managed_outbound_ip_count, load_balancer_outbound_ips,
-                                                   load_balancer_outbound_ip_prefixes, load_balancer_outbound_ports,
-                                                   load_balancer_idle_timeout)
+    update_lb_profile = is_load_balancer_provided(load_balancer_managed_outbound_ip_count, load_balancer_outbound_ips,
+                                                  load_balancer_outbound_ip_prefixes, load_balancer_outbound_ports,
+                                                  load_balancer_idle_timeout)
 
     if (update_autoscaler != 1 and not update_lb_profile and
             not attach_acr and
@@ -2049,7 +2050,7 @@ def aks_update(cmd, client, resource_group_name, name,
                         subscription_id=subscription_id,
                         detach=True)
 
-    load_balancer_profile = _get_load_balancer_profile(
+    load_balancer_profile = get_load_balancer_profile(
         load_balancer_managed_outbound_ip_count,
         load_balancer_outbound_ips,
         load_balancer_outbound_ip_prefixes,
