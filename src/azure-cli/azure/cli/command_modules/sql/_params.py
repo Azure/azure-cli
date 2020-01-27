@@ -56,7 +56,9 @@ from .custom import (
     ComputeModelType,
     DatabaseCapabilitiesAdditionalDetails,
     ElasticPoolCapabilitiesAdditionalDetails,
-    FailoverPolicyType
+    FailoverPolicyType,
+    ManagedInstanceTiers,
+    ManagedInstanceFamilies
 )
 
 from ._validators import (
@@ -137,6 +139,11 @@ tier_param_type = CLIArgumentType(
     arg_group=sku_component_arg_group,
     options_list=['--tier', '--edition', '-e'])
 
+mi_tier_param_type = CLIArgumentType(
+    arg_group=sku_component_arg_group,
+    options_list=['--tier', '--edition', '-e'],
+    arg_type=get_enum_type(ManagedInstanceTiers))
+
 capacity_param_type = CLIArgumentType(
     arg_group=sku_component_arg_group,
     options_list=['--capacity', '-c'])
@@ -148,6 +155,11 @@ capacity_or_dtu_param_type = CLIArgumentType(
 family_param_type = CLIArgumentType(
     arg_group=sku_component_arg_group,
     options_list=['--family', '-f'])
+
+mi_family_param_type = CLIArgumentType(
+    arg_group=sku_component_arg_group,
+    options_list=['--family', '-f'],
+    arg_type=get_enum_type(ManagedInstanceFamilies))
 
 elastic_pool_id_param_type = CLIArgumentType(
     arg_group=sku_arg_group,
@@ -1155,14 +1167,12 @@ def load_arguments(self, _):
                    id_part='name')
 
         c.argument('tier',
-                   arg_type=tier_param_type,
-                   help='The edition component of the sku. Allowed values include:'
-                   ' GeneralPurpose, BusinessCritical.')
+                   arg_type=mi_tier_param_type,
+                   help='The edition component of the sku.')
 
         c.argument('family',
-                   arg_type=family_param_type,
-                   help='The compute generation component of the sku. '
-                   'Allowed values include: Gen4, Gen5.')
+                   arg_type=mi_family_param_type,
+                   help='The compute generation component of the sku.')
 
         c.argument('storage_size_in_gb',
                    options_list=['--storage'],
