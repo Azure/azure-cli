@@ -3,9 +3,53 @@
 Release History
 ===============
 
-**SQL**
+**ACR**
 
-* Update az sql mi update with two new properties tier and family.
+* [BREAKING CHANGE] `az acr delete` will prompt
+* [BREAKING CHANGE] 'az acr task delete' will prompt
+* Add a new command group 'az acr taskrun show/list/delete' for taskrun management
+
+**AppConfig**
+
+* Support import/export of keyvault references from/to appservice
+* Support import/export of all labels from appconfig to appconfig
+* Validate key and feature names before setting and importing
+* Expose sku modification for configuration store.
+* Add command group for managed identity.
+
+**AppService**
+
+* Azure Stack: surface commands under the profile of 2019-03-01-hybrid
+
+**ARM**
+
+* Fix issue #11658: `az group export` command does not support `--query` and `--output` parameters
+* Fix issue #10279: The exit code of `az group deployment validate` is 0 when the verification fails
+
+**IoT**
+
+* Deprecated 'IoT hub Job' commands.
+
+**IoT Central**
+
+* Support app creation/update with the new sku name ST0, ST1, ST2.
+
+**Misc**
+
+* Fix #6371: Support filename and environment variable completion in Bash
+
+**Network**
+
+* Fix #2092: az network dns record-set add/remove: add warning when record-set is not found. In the future, an extra argument will be supported to confirm this auto creation.
+
+**Storage**
+
+* Add a new command group `az storage share-rm` to use the Microsoft.Storage resource provider for Azure file share management operations.
+* Fix issue #11415: permission error for `az storage blob update`
+* Integrate Azcopy 10.3.3 and support Win32.
+* `az storage copy`: Add `--include-path`, `--include-pattern`, `--exclude-path` and`--exclude-pattern` parameters
+* `az storage remove`: Change `--inlcude` and `--exclude` parameters to `--include-path`, `--include-pattern`, `--exclude-path` and`--exclude-pattern` parameters
+* `az storage sync`: Add `--include-pattern`, `--exclude-path` and`--exclude-pattern` parameters
 
 **SQL**
 
