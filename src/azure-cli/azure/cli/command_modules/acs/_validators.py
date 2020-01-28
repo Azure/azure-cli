@@ -197,12 +197,12 @@ def validate_load_balancer_outbound_ip_prefixes(namespace):
             raise CLIError("--load-balancer-outbound-ip-prefixes cannot contain whitespace")
 
 
-def validate_load_balancer_allocated_ports(namespace):
+def validate_load_balancer_outbound_ports(namespace):
     """validate load balancer profile outbound allocated ports"""
-    if namespace.load_balancer_allocated_ports is not None:
-        if namespace.load_balancer_allocated_ports % 8 != 0:
+    if namespace.load_balancer_outbound_ports is not None:
+        if namespace.load_balancer_outbound_ports % 8 != 0:
             raise CLIError("--load-balancer-allocated-ports must be a multiple of 8")
-        if namespace.load_balancer_allocated_ports < 0:
+        if namespace.load_balancer_outbound_ports < 0:
             raise CLIError("--load-balancer-allocated-ports cannot be negative")
 
 

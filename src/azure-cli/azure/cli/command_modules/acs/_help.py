@@ -252,7 +252,7 @@ parameters:
     type: string
     short-summary: Load balancer outbound IP prefix resource IDs.
     long-summary: Comma-separated public IP prefix resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.
-  - name: --load-balancer-allocated-ports
+  - name: --load-balancer-outbound-ports
     type: string
     short-summary: Load balancer outbound allocated ports.
     long-summary: Desired static number of outbound ports per VM in the load balancer backend pool. By default, azure dynamically configures allocated ports as VM count changes.
@@ -340,7 +340,7 @@ examples:
   - name: Create a kubernetes cluster with standard SKU load balancer and two AKS created IPs for the load balancer outbound connection usage.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
   - name: Create a kubernetes cluster with a standard SKU load balancer, with two outbound AKS managed IPs an idle flow timeout of 5 minutes and 8000 allocated ports per machine
-    text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2 --load-balancer-idle-timeout 5 --load-balancer-allocated-ports 8000
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2 --load-balancer-idle-timeout 5 --load-balancer-outbound-ports 8000
   - name: Create a kubernetes cluster with standard SKU load balancer and use the provided public IPs for the load balancer outbound connection usage.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-outbound-ips <ip-resource-id-1,ip-resource-id-2>
   - name: Create a kubernetes cluster with standard SKU load balancer and use the provided public IP prefixes for the load balancer outbound connection usage.
@@ -382,7 +382,7 @@ parameters:
     type: string
     short-summary: Load balancer outbound IP prefix resource IDs.
     long-summary: Comma-separated public IP prefix resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.
-  - name: --load-balancer-allocated-ports
+  - name: --load-balancer-outbound-ports
     type: string
     short-summary: Load balancer outbound allocated ports.
     long-summary: Desired static number of outbound ports per VM in the load balancer backend pool. By default, azure dynamically configures allocated ports as VM count changes.
@@ -405,7 +405,7 @@ examples:
   - name: Update a kubernetes cluster with standard SKU load balancer to use the provided public IPs for the load balancer outbound connection usage.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-outbound-ips <ip-resource-id-1,ip-resource-id-2>
   - name: Create a kubernetes cluster with a standard SKU load balancer, with two outbound AKS managed IPs an idle flow timeout of 5 minutes and 8000 allocated ports per machine
-    text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2 --load-balancer-idle-timeout 5 --load-balancer-allocated-ports 8000
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2 --load-balancer-idle-timeout 5 --load-balancer-outbound-ports 8000
   - name: Update a kubernetes cluster with standard SKU load balancer to use the provided public IP prefixes for the load balancer outbound connection usage.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-outbound-ip-prefixes <ip-prefix-resource-id-1,ip-prefix-resource-id-2>
   - name: Attach AKS cluster to ACR by name "acrName"

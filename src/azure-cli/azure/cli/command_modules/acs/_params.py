@@ -21,7 +21,7 @@ from ._validators import (
     validate_list_of_integers, validate_ssh_key, validate_connector_name, validate_max_pods, validate_nodes_count,
     validate_nodepool_name, validate_vm_set_type, validate_load_balancer_sku, validate_load_balancer_outbound_ips,
     validate_load_balancer_outbound_ip_prefixes, validate_taints, validate_ip_ranges, validate_acr,
-    validate_load_balancer_allocated_ports, validate_load_balancer_idle_timeout)
+    validate_load_balancer_outbound_ports, validate_load_balancer_idle_timeout)
 
 aci_connector_os_type = ['Windows', 'Linux', 'Both']
 
@@ -176,7 +176,7 @@ def load_arguments(self, _):
         c.argument('load_balancer_managed_outbound_ip_count', type=int)
         c.argument('load_balancer_outbound_ips', type=str, validator=validate_load_balancer_outbound_ips)
         c.argument('load_balancer_outbound_ip_prefixes', type=str, validator=validate_load_balancer_outbound_ip_prefixes)
-        c.argument('load_balancer_outbound_ports', type=int, validator=validate_load_balancer_allocated_ports)
+        c.argument('load_balancer_outbound_ports', type=int, validator=validate_load_balancer_outbound_ports)
         c.argument('load_balancer_idle_timeout', type=int, validator=validate_load_balancer_idle_timeout)
         c.argument('enable_cluster_autoscaler', action='store_true')
         c.argument('min_count', type=int, validator=validate_nodes_count)
@@ -212,7 +212,7 @@ def load_arguments(self, _):
         c.argument('load_balancer_managed_outbound_ip_count', type=int)
         c.argument('load_balancer_outbound_ips', type=str, validator=validate_load_balancer_outbound_ips)
         c.argument('load_balancer_outbound_ip_prefixes', type=str, validator=validate_load_balancer_outbound_ip_prefixes)
-        c.argument('load_balancer_allocated_outbound_ports', type=int, validator=validate_load_balancer_allocated_ports)
+        c.argument('load_balancer_outbound_ports', type=int, validator=validate_load_balancer_outbound_ports)
         c.argument('load_balancer_idle_timeout', type=int, validator=validate_load_balancer_idle_timeout)
         c.argument('api_server_authorized_ip_ranges', type=str, validator=validate_ip_ranges)
 

@@ -26,9 +26,11 @@ def set_load_balancer_sku(sku, kubernetes_version):
 def update_load_balancer_profile(managed_outbound_ip_count, outbound_ips, outbound_ip_prefixes,
                                  outbound_ports, idle_timeout, profile):
     """parse and update an existing load balancer profile"""
-    if not is_load_balancer__profile_provided(managed_outbound_ip_count, outbound_ips, outbound_ip_prefixes, outbound_ports, idle_timeout):
+    if not is_load_balancer__profile_provided(managed_outbound_ip_count, outbound_ips, outbound_ip_prefixes,
+                                              outbound_ports, idle_timeout):
         return profile
-    return configure_load_balancer_profile(managed_outbound_ip_count, outbound_ips, outbound_ip_prefixes, outbound_ports, idle_timeout, profile)
+    return configure_load_balancer_profile(managed_outbound_ip_count, outbound_ips, outbound_ip_prefixes,
+                                           outbound_ports, idle_timeout, profile)
 
 
 def create_load_balancer_profile(managed_outbound_ip_count, outbound_ips, outbound_ip_prefixes,
@@ -68,7 +70,6 @@ def configure_load_balancer_profile(managed_outbound_ip_count, outbound_ips, out
         profile.allocated_outbound_ports = outbound_ports
     if idle_timeout:
         profile.idle_timeout_in_minutes = idle_timeout
-
     return profile
 
 

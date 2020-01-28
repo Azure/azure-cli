@@ -86,8 +86,8 @@ from ._client_factory import cf_container_registry_service
 
 from ._helpers import _populate_api_server_access_profile, _set_vm_set_type
 
-from azure.cli.command_modules.acs.loadbalancer import (set_load_balancer_sku,
-                                                        get_load_balancer_profile, is_load_balancer_provided)
+from ._loadbalancer import (set_load_balancer_sku, is_load_balancer__profile_provided,
+                            update_load_balancer_profile, create_load_balancer_profile)
 
 logger = get_logger(__name__)
 
@@ -1622,7 +1622,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                load_balancer_managed_outbound_ip_count=None,
                load_balancer_outbound_ips=None,
                load_balancer_outbound_ip_prefixes=None,
-               load_balancer_allocated_ports=None,
+               load_balancer_outbound_ports=None,
                load_balancer_idle_timeout=None,
                enable_addons=None,
                workspace_resource_id=None,
@@ -1696,11 +1696,11 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             logger.warning('Could not create a role assignment for subnet. '
                            'Are you an Owner on this subscription?')
 
-    load_balancer_profile = get_load_balancer_profile(
+    load_balancer_profile = create_load_balancer_profile(
         load_balancer_managed_outbound_ip_count,
         load_balancer_outbound_ips,
         load_balancer_outbound_ip_prefixes,
-        load_balancer_allocated_ports,
+        load_balancer_outbound_ports,
         load_balancer_idle_timeout)
 
     if attach_acr:
@@ -1975,10 +1975,11 @@ def aks_update(cmd, client, resource_group_name, name,
                api_server_authorized_ip_ranges=None,
                no_wait=False):
     update_autoscaler = enable_cluster_autoscaler + disable_cluster_autoscaler + update_cluster_autoscaler
-
-    update_lb_profile = is_load_balancer_provided(load_balancer_managed_outbound_ip_count, load_balancer_outbound_ips,
-                                                  load_balancer_outbound_ip_prefixes, load_balancer_outbound_ports,
-                                                  load_balancer_idle_timeout)
+    update_lb_profile = is_load_balancer__profile_provided(load_balancer_managed_outbound_ip_count,
+                                                           load_balancer_outbound_ips,
+                                                           load_balancer_outbound_ip_prefixes,
+                                                           load_balancer_outbound_ports,
+                                                           load_balancer_idle_timeout)
 
     if (update_autoscaler != 1 and not update_lb_profile and
             not attach_acr and
@@ -2050,15 +2051,14 @@ def aks_update(cmd, client, resource_group_name, name,
                         subscription_id=subscription_id,
                         detach=True)
 
-    load_balancer_profile = get_load_balancer_profile(
-        load_balancer_managed_outbound_ip_count,
-        load_balancer_outbound_ips,
-        load_balancer_outbound_ip_prefixes,
-        load_balancer_outbound_ports,
-        load_balancer_idle_timeout)
-
-    if load_balancer_profile:
-        instance.network_profile.load_balancer_profile = load_balancer_profile
+    if update_lb_profile:
+        instance.network_profile.load_balancer_profile = update_load_balancer_profile(
+            load_balancer_managed_outbound_ip_count,
+            load_balancer_outbound_ips,
+            load_balancer_outbound_ip_prefixes,
+            load_balancer_outbound_ports,
+            load_balancer_idle_timeout,
+            instance.network_profile.load_balancer_profile)
 
     # empty string is valid as it disables ip whitelisting
     if api_server_authorized_ip_ranges is not None:
