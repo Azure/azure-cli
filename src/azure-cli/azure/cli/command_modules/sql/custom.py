@@ -2211,15 +2211,15 @@ def managed_instance_update(
     instance.proxy_override = (
         proxy_override or instance.proxy_override)
 
-    sku.name = None
-    sku.tier = (
+    instance.sku.name = None
+    instance.sku.tier = (
         tier or instance.sku.tier)
-    sku.family = (
+    instance.sku.family = (
         family or instance.sku.family)
     instance.sku = _find_managed_instance_sku_from_capabilities(
         cmd.cli_ctx,
         instance.location,
-        sku)
+        instance.sku)
 
     if public_data_endpoint_enabled is not None:
         instance.public_data_endpoint_enabled = public_data_endpoint_enabled
