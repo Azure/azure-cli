@@ -2098,21 +2098,10 @@ def encryption_protector_update(
 #                sql managed instance         #
 ###############################################
 
-class ManagedInstanceTiers(str, Enum):
-
-    general_purpose = "GeneralPurpose"
-    business_critical = "BusinessCritical"
-
-class ManagedInstanceFamilies(str, Enum):
-
-    gen4 = "Gen4"
-    gen5 = "Gen5"
-
 def _find_managed_instance_sku_from_capabilities(
         cli_ctx,
         location,
-        sku,
-        is_instance_create=True):
+        sku):
     '''
     Given a requested sku which may have some properties filled in
     (e.g. tier and family), finds the canonical matching sku
@@ -2121,7 +2110,7 @@ def _find_managed_instance_sku_from_capabilities(
 
     logger.debug('_find_managed_instance_sku_from_capabilities input: %s', sku)
 
-    if is_instance_create and not _any_sku_values_specified(sku):
+    if not _any_sku_values_specified(sku):
         # User did not request any properties of sku, so just wipe it out.
         # Server side will pick a default.
         logger.debug('_find_managed_instance_sku_from_capabilities return None')
@@ -2200,7 +2189,8 @@ def managed_instance_update(
         assign_identity=False,
         proxy_override=None,
         public_data_endpoint_enabled=None,
-        sku=None):
+        tier=None,
+        family=None):
     '''
     Updates a managed instance. Custom update function to apply parameters to instance.
     '''
@@ -2221,15 +2211,15 @@ def managed_instance_update(
     instance.proxy_override = (
         proxy_override or instance.proxy_override)
 
+    sku.name = None
     sku.tier = (
-        sku.tier or instance.sku.tier)
+        tier or instance.sku.tier)
     sku.family = (
-        sku.family or instance.sku.family)
+        family or instance.sku.family)
     instance.sku = _find_managed_instance_sku_from_capabilities(
         cmd.cli_ctx,
         instance.location,
-        sku,
-        False)
+        sku)
 
     if public_data_endpoint_enabled is not None:
         instance.public_data_endpoint_enabled = public_data_endpoint_enabled
