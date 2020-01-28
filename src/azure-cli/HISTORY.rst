@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**ACS**
+
+* Added support to set outbound allocated ports and idle timeouts on standard load balancer
+
 **ACR**
 
 * [BREAKING CHANGE] `az acr delete` will prompt
