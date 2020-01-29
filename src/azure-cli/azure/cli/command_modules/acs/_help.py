@@ -979,3 +979,26 @@ examples:
     text: |-
         az openshift wait -g MyResourceGroup -n MyManagedCluster --updated --interval 60 --timeout 1800
 """
+
+helps['openshift monitor'] = """
+type: group
+short-summary: Commands to manage Log Analytics monitoring. Requires "--workspace-id".
+"""
+
+helps['openshift monitor enable'] = """
+type: command
+short-summary: Enable Log Analytics monitoring. Requires "--workspace-id".
+examples:
+  - name: Enable Log Analytics in a managed OpenShift cluster.
+    text: |-
+        az openshift monitor enable -g MyResourceGroup -n MyManagedCluster --workspace-id "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.OperationalInsights/workspaces/{workspace-id}"
+"""
+
+helps['openshift monitor disable'] = """
+type: command
+short-summary: Disable Log Analytics monitoring.
+examples:
+  - name: Disable Log Analytics monitoring.
+    text: |-
+        az openshift monitor disable -g MyResourceGroup -n MyManagedCluster
+"""

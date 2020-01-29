@@ -328,6 +328,9 @@ def load_arguments(self, _):
         c.argument('customer_admin_group_id', options_list=['--customer-admin-group-id'])
         c.argument('workspace_id')
 
+    with self.argument_context('openshift monitor enable') as c:
+        c.argument('workspace_id', help='The resource ID of an existing Log Analytics Workspace to use for storing monitoring data.')
+
 
 def _get_default_install_location(exe_name):
     system = platform.system()

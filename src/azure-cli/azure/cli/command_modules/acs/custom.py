@@ -3122,6 +3122,15 @@ def osa_list(cmd, client, resource_group_name=None):
     return _remove_osa_nulls(list(managed_clusters))
 
 
+def _format_workspace_id(workspace_id):
+    workspace_id = workspace_id.strip()
+    if not workspace_id.startswith('/'):
+        workspace_id = '/' + workspace_id
+    if workspace_id.endswith('/'):
+        workspace_id = workspace_id.rstrip('/')
+    return workspace_id
+
+
 def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=too-many-locals
                      location=None,
                      compute_vm_size="Standard_D4s_v3",
@@ -3206,11 +3215,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
                 name=vnet_peer
             )
     if workspace_id is not None:
-        workspace_id = workspace_id.strip()
-        if not workspace_id.startswith('/'):
-            workspace_id = '/' + workspace_id
-        if workspace_id.endswith('/'):
-            workspace_id = workspace_id.rstrip('/')
+        workspace_id = _format_workspace_id(workspace_id)
         monitor_profile = OpenShiftManagedClusterMonitorProfile(enabled=True, workspace_resource_id=workspace_id)  # pylint: disable=line-too-long
     else:
         monitor_profile = None
@@ -3265,4 +3270,20 @@ def openshift_scale(cmd, client, resource_group_name, name, compute_count, no_wa
     instance.master_pool_profile.name = "master"
     instance.auth_profile = None
 
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
+
+
+def openshift_monitor_enable(cmd, client, resource_group_name, name, workspace_id, no_wait=False):
+    instance = client.get(resource_group_name, name)
+    workspace_id = _format_workspace_id(workspace_id)
+    monitor_profile = OpenShiftManagedClusterMonitorProfile(enabled=True, workspace_resource_id=workspace_id)  # pylint: disable=line-too-long
+    instance.monitor_profile = monitor_profile
+
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
+
+
+def openshift_monitor_disable(cmd, client, resource_group_name, name, no_wait=False):
+    instance = client.get(resource_group_name, name)
+    monitor_profile = OpenShiftManagedClusterMonitorProfile(enabled=False, workspace_resource_id=None)  # pylint: disable=line-too-long
+    instance.monitor_profile = monitor_profile
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
