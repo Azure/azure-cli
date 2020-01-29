@@ -66,7 +66,7 @@ short-summary: View and manage Advanced Threat Protection settings.
 
 helps['security atp show'] = """
 type: command
-short-summary: Displays Advanced Threat Protection settings for a storage account.
+short-summary: Display Advanced Threat Protection settings for a storage account.
 examples:
   - name: Retrieve Advanced Threat Protection settings for a storage account on a subscription scope.
     text: >
@@ -75,7 +75,7 @@ examples:
 
 helps['security atp update'] = """
 type: command
-short-summary: Toggles status of Advanced Threat Protection for a storage account.
+short-summary: Toggle status of Advanced Threat Protection for a storage account.
 examples:
   - name: Enable Advanced Threat Protection for a storage account on a subscription scope.
     text: >

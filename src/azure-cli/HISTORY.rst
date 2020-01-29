@@ -2,10 +2,6 @@
 
 Release History
 ===============
-**Security**
-
-* Added new commands `az atp show` and `az atp update`
-  to view and manage advanced threat protection settings for storage accounts.
 
 **ACR**
 
@@ -246,6 +242,10 @@ Release History
 
 * Add preview param `--replicas-per-master` to `az redis create` command
 * Update azure-mgmt-redis from 6.0.0 to 7.0.0rc1
+
+**Security**
+
+* Added new commands `az atp show` and `az atp update` to view and manage advanced threat protection settings for storage accounts.
 
 **ServiceFabric**
 
