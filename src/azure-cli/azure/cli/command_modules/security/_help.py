@@ -14,7 +14,7 @@ short-summary: Manage your security posture with Azure Security Center.
 
 helps['security alert'] = """
 type: group
-short-summary: View secrity alerts.
+short-summary: View security alerts.
 """
 
 helps['security alert list'] = """
