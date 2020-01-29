@@ -12,7 +12,8 @@ from azure.cli.core.commands import CliCommandType
 from ._client_factory import (_auth_client_factory, _graph_client_factory,
                               _msi_user_identities_operations, _msi_operations_operations)
 
-from ._validators import process_msi_namespace, process_assignment_namespace, validate_change_password
+from ._validators import (process_msi_namespace, process_assignment_namespace, process_list_assignment_namespace,
+                          validate_change_password)
 
 
 def transform_definition_list(result):
@@ -131,7 +132,7 @@ def load_command_table(self, _):
 
     with self.command_group('role assignment') as g:
         g.custom_command('delete', 'delete_role_assignments', validator=process_assignment_namespace)
-        g.custom_command('list', 'list_role_assignments', validator=process_assignment_namespace, table_transformer=transform_assignment_list)
+        g.custom_command('list', 'list_role_assignments', validator=process_list_assignment_namespace, table_transformer=transform_assignment_list)
         g.custom_command('create', 'create_role_assignment', validator=process_assignment_namespace)
         g.custom_command('list-changelogs', 'list_role_assignment_change_logs')
 

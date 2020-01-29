@@ -91,6 +91,18 @@ def process_assignment_namespace(cmd, namespace):  # pylint: disable=unused-argu
     if namespace.scope and resource_group and getattr(resource_group, 'is_default', None):
         namespace.resource_group_name = None  # drop configured defaults
 
+    if not namespace.scope and not namespace.resource_group_name:
+        raise CLIError('usage error: please specify at least one of "--scope" and "--resource-group".')
+
+
+def process_list_assignment_namespace(cmd, namespace):  # pylint: disable=unused-argument
+    resource_group = namespace.resource_group_name
+    if namespace.scope and resource_group and getattr(resource_group, 'is_default', None):
+        namespace.resource_group_name = None  # drop configured defaults
+
+    if not namespace.show_all and not namespace.scope and not namespace.resource_group_name:
+        raise CLIError('usage error: please specify at least one of "--all", "--scope" and "--resource-group".')
+
 
 def process_msi_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
