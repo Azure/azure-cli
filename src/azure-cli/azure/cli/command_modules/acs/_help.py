@@ -968,10 +968,6 @@ short-summary: Commands to manage Log Analytics monitoring. Requires "--workspac
 helps['openshift monitor enable'] = """
 type: command
 short-summary: Enable Log Analytics monitoring. Requires "--workspace-id".
-parameters:
-  - name: --workspace-id
-    type: string
-    short-summary: The resource ID of an existing Log Analytics Workspace to use for storing monitoring data.
 examples:
   - name: Enable Log Analytics in a managed OpenShift cluster.
     text: |-
