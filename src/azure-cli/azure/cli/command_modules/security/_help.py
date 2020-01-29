@@ -75,7 +75,7 @@ examples:
 
 helps['security atp update'] = """
 type: command
-short-summary: Enables or disables advanced threat protection for a storage account.
+short-summary: Toggles status of Advanced Threat Protection for a storage account.
 examples:
   - name: Enable advanced threat protection for a storage account on a subscription scope.
     text: >
