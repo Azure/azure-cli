@@ -77,7 +77,7 @@ helps['security atp update'] = """
 type: command
 short-summary: Toggles status of Advanced Threat Protection for a storage account.
 examples:
-  - name: Enable advanced threat protection for a storage account on a subscription scope.
+  - name: Enable Advanced Threat Protection for a storage account on a subscription scope.
     text: >
         az security atp update --resource-group "example-rg" --storage-account-name "accountName" --is-enabled true
   - name: Disable advanced threat protection for a storage account on a subscription scope.
