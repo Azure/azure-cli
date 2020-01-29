@@ -46,6 +46,10 @@ Release History
 
 * Fix #2092: az network dns record-set add/remove: add warning when record-set is not found. In the future, an extra argument will be supported to confirm this auto creation.
 
+**Security**
+
+* Added new commands `az atp show` and `az atp update` to view and manage advanced threat protection settings for storage accounts.
+
 **Storage**
 
 * Add a new command group `az storage share-rm` to use the Microsoft.Storage resource provider for Azure file share management operations.
@@ -242,10 +246,6 @@ Release History
 
 * Add preview param `--replicas-per-master` to `az redis create` command
 * Update azure-mgmt-redis from 6.0.0 to 7.0.0rc1
-
-**Security**
-
-* Added new commands `az atp show` and `az atp update` to view and manage advanced threat protection settings for storage accounts.
 
 **ServiceFabric**
 
