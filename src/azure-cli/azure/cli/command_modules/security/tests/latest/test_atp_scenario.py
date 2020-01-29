@@ -3,45 +3,38 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure_devtools.scenario_tests import AllowLargeResponse, record_only
-from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, JMESPathCheck)
+from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer)
 
 
 class SecurityAtpSettingsTests(ScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
-    @record_only()
     def test_security_atp_settings(self, resource_group, resource_group_location, storage_account):
         # run show cli
-        self.cmd('security atp show --resource-group {} --storage-account-name {}'
-                 .format(resource_group, storage_account),
-                 checks=[
-                     JMESPathCheck('resourceGroup', resource_group)])
+        atp_settings = self.cmd('security atp show --resource-group {} --storage-account-name {}'
+                                .format(resource_group, storage_account)).get_output_in_json()
+        assert len(atp_settings) >= 0
 
         # enable atp
-        self.cmd('security atp update --resource-group {} --storage-account-name {} --is-enabled true'
-                 .format(resource_group, storage_account),
-                 checks=[
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('isEnabled', True)])
+        atp_settings = self.cmd('security atp update --resource-group {} --storage-account-name {} --is-enabled true'
+                                .format(resource_group, storage_account)).get_output_in_json()
+        self.assertTrue(atp_settings["isEnabled"])
+        self.assertEqual(atp_settings["resourceGroup"], resource_group)
 
         # validate atp setting
-        self.cmd('security atp show --resource-group {} --storage-account-name {}'
-                 .format(resource_group, storage_account),
-                 checks=[
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('isEnabled', True)])
+        atp_settings = self.cmd('security atp show --resource-group {} --storage-account-name {}'
+                                .format(resource_group, storage_account)).get_output_in_json()
+        self.assertTrue(atp_settings["isEnabled"])
+        self.assertEqual(atp_settings["resourceGroup"], resource_group)
 
         # disable atp
-        self.cmd('security atp update --resource-group {} --storage-account-name {} --is-enabled false'
-                 .format(resource_group, storage_account),
-                 checks=[
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('isEnabled', False)])
+        atp_settings = self.cmd('security atp update --resource-group {} --storage-account-name {} --is-enabled false'
+                                .format(resource_group, storage_account)).get_output_in_json()
+        self.assertFalse(atp_settings["isEnabled"])
+        self.assertEqual(atp_settings["resourceGroup"], resource_group)
 
         # validate atp setting
         self.cmd('security atp show --resource-group {} --storage-account-name {}'
-                 .format(resource_group, storage_account),
-                 checks=[
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('isEnabled', False)])
+                 .format(resource_group, storage_account)).get_output_in_json()
+        self.assertFalse(atp_settings["isEnabled"])
+        self.assertEqual(atp_settings["resourceGroup"], resource_group)
