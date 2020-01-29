@@ -68,7 +68,7 @@ helps['security atp show'] = """
 type: command
 short-summary: Displays Advanced Threat Protection settings for a storage account.
 examples:
-  - name: Get an advanced threat protection settings for a storage account on a subscription scope.
+  - name: Retrieve Advanced Threat Protection settings for a storage account on a subscription scope.
     text: >
         az security atp show --resource-group "example-rg" --storage-account-name "accountName"
 """
