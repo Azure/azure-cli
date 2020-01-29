@@ -202,15 +202,15 @@ def validate_load_balancer_outbound_ports(namespace):
     if namespace.load_balancer_outbound_ports is not None:
         if namespace.load_balancer_outbound_ports % 8 != 0:
             raise CLIError("--load-balancer-allocated-ports must be a multiple of 8")
-        if namespace.load_balancer_outbound_ports < 0:
-            raise CLIError("--load-balancer-allocated-ports cannot be negative")
+        if namespace.load_balancer_outbound_ports < 0 or namespace.load_balancer_outbound_ports > 64000:
+            raise CLIError("--load-balancer-allocated-ports must be in the range [0,64000]")
 
 
 def validate_load_balancer_idle_timeout(namespace):
     """validate load balancer profile idle timeout"""
     if namespace.load_balancer_idle_timeout is not None:
         if namespace.load_balancer_idle_timeout < 4 or namespace.load_balancer_idle_timeout > 120:
-            raise CLIError("--load-balancer-idle-timeout must be set between 4 and 120 minutes")
+            raise CLIError("--load-balancer-idle-timeout must be in the range [4,120]")
 
 
 def validate_nodes_count(namespace):

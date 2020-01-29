@@ -255,7 +255,7 @@ parameters:
   - name: --load-balancer-outbound-ports
     type: string
     short-summary: Load balancer outbound allocated ports.
-    long-summary: Desired static number of outbound ports per VM in the load balancer backend pool. By default, azure dynamically configures allocated ports as VM count changes.
+    long-summary: Desired static number of outbound ports per VM in the load balancer backend pool. By default, set to 0 which uses the default allocation based on the number of VMs.
   - name: --load-balancer-idle-timeout
     type: string
     short-summary: Load balancer idle timeout in minutes.
@@ -385,7 +385,7 @@ parameters:
   - name: --load-balancer-outbound-ports
     type: string
     short-summary: Load balancer outbound allocated ports.
-    long-summary: Desired static number of outbound ports per VM in the load balancer backend pool. By default, azure dynamically configures allocated ports as VM count changes.
+    long-summary: Desired static number of outbound ports per VM in the load balancer backend pool. By default, set to 0 which uses the default allocation based on the number of VMs.
   - name: --load-balancer-idle-timeout
     type: string
     short-summary: Load balancer idle timeout in minutes.

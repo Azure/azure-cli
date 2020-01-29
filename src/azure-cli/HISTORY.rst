@@ -6,6 +6,7 @@ Release History
 **ACS**
 
 * Added support to set outbound allocated ports and idle timeouts on standard load balancer
+* Update to API Version 2019-11-01
 
 **ACR**
 
