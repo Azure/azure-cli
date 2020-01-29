@@ -19,22 +19,18 @@ class SecurityAtpSettingsTests(ScenarioTest):
         atp_settings = self.cmd('security atp update --resource-group {} --storage-account-name {} --is-enabled true'
                                 .format(resource_group, storage_account)).get_output_in_json()
         self.assertTrue(atp_settings["isEnabled"])
-        self.assertEqual(atp_settings["resourceGroup"], resource_group)
 
         # validate atp setting
         atp_settings = self.cmd('security atp show --resource-group {} --storage-account-name {}'
                                 .format(resource_group, storage_account)).get_output_in_json()
         self.assertTrue(atp_settings["isEnabled"])
-        self.assertEqual(atp_settings["resourceGroup"], resource_group)
 
         # disable atp
         atp_settings = self.cmd('security atp update --resource-group {} --storage-account-name {} --is-enabled false'
                                 .format(resource_group, storage_account)).get_output_in_json()
         self.assertFalse(atp_settings["isEnabled"])
-        self.assertEqual(atp_settings["resourceGroup"], resource_group)
 
         # validate atp setting
         self.cmd('security atp show --resource-group {} --storage-account-name {}'
                  .format(resource_group, storage_account)).get_output_in_json()
         self.assertFalse(atp_settings["isEnabled"])
-        self.assertEqual(atp_settings["resourceGroup"], resource_group)
