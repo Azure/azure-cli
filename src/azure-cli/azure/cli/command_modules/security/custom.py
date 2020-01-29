@@ -312,15 +312,18 @@ def delete_security_workspace_setting(client, resource_name):
 # Security ATP
 # --------------------------------------------------------------------------------------------
 
-
 def get_atp_setting(client, resource_group_name, storage_account_name):
 
-    return client.get('subscriptions/{}/resourceGroups/{}/providers/Microsoft.Storage/storageAccounts/{}'
-                      .format(client.config.subscription_id, resource_group_name, storage_account_name))
+    return client.get(_construct_resource_id(client, resource_group_name, storage_account_name))
 
 
 def update_atp_setting(client, resource_group_name, storage_account_name, is_enabled):
 
-    return client.create('subscriptions/{}/resourceGroups/{}/providers/Microsoft.Storage/storageAccounts/{}'.
-                         format(client.config.subscription_id, resource_group_name, storage_account_name),
+    return client.create(_construct_resource_id(client, resource_group_name, storage_account_name),
                          is_enabled=str2bool(is_enabled))
+
+
+def _construct_resource_id(client, resource_group_name, storage_account_name):
+
+    return ('subscriptions/{}/resourceGroups/{}/providers/Microsoft.Storage/storageAccounts/{}'
+            .format(client.config.subscription_id, resource_group_name, storage_account_name))
