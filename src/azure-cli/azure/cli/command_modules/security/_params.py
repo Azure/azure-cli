@@ -36,6 +36,7 @@ workspace_setting_target_workspace_arg_type = CLIArgumentType(options_list=('--t
 
 def load_arguments(self, _):
     for scope in ['alert',
+                  'atp',
                   'task',
                   'setting',
                   'contact',
@@ -72,6 +73,15 @@ def load_arguments(self, _):
                 'auto_provision',
                 validator=validate_auto_provisioning_toggle,
                 arg_type=auto_provisioning_auto_provision_arg_type)
+
+    for scope in ['atp show']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument('storage_account_name', help='Name of an existing storage account to link to.')
+
+    for scope in ['atp update']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument('storage_account_name', help='Name of an existing storage account to link to.')
+            c.argument('is_enabled', help='Enable or disable atp for desired storage account. Possible values: {true, false}')
 
     for scope in ['contact create']:
         with self.argument_context('security {}'.format(scope)) as c:

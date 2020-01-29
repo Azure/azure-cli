@@ -15,7 +15,8 @@ from ._client_factory import (cf_security_tasks,
                               cf_security_locations,
                               cf_security_pricings,
                               cf_security_topology,
-                              cf_security_workspace_settings)
+                              cf_security_workspace_settings,
+                              cf_security_advanced_threat_protection)
 
 
 # pylint: disable=line-too-long
@@ -94,11 +95,23 @@ def load_command_table(self, _):
         operation_group='security_workspace_settings'
     )
 
+    security_advanced_threat_protection_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.security.operations#AdvancedThreatProtectionOperations.{}',
+        client_factory=cf_security_advanced_threat_protection,
+        operation_group='security_advanced_threat_protection'
+    )
+
     with self.command_group('security task',
                             security_tasks_sdk,
                             client_factory=cf_security_tasks) as g:
         g.custom_command('list', 'list_security_tasks')
         g.custom_command('show', 'get_security_task')
+
+    with self.command_group('security atp',
+                            security_advanced_threat_protection_sdk,
+                            client_factory=cf_security_advanced_threat_protection) as g:
+        g.custom_command('show', 'get_atp_setting')
+        g.custom_command('update', 'update_atp_setting')
 
     with self.command_group('security alert',
                             security_alerts_sdk,

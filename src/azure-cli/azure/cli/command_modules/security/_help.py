@@ -14,7 +14,7 @@ short-summary: Manage your security posture with Azure Security Center.
 
 helps['security alert'] = """
 type: group
-short-summary: View security alerts.
+short-summary: View secrity alerts.
 """
 
 helps['security alert list'] = """
@@ -57,6 +57,32 @@ examples:
   - name: Activate a security alert on a resource group scope.
     text: >
         az security alert update -g "myRg" --location "centralus" -n "alertName" --status "activate"
+"""
+
+helps['security atp'] = """
+type: group
+short-summary: View and manage advanced threat protection settings.
+"""
+
+helps['security atp show'] = """
+type: command
+short-summary: Shows an advanced threat protection settings for a storage account.
+examples:
+  - name: Get an advanced threat protection settings for a storage account on a subscription scope.
+    text: >
+        az security atp show --resource-group "example-rg" --storage-account-name "accountName"
+"""
+
+helps['security atp update'] = """
+type: command
+short-summary: Enables or disables advanced threat protection for a storage account.
+examples:
+  - name: Enable advanced threat protection for a storage account on a subscription scope.
+    text: >
+        az security atp update --resource-group "example-rg" --storage-account-name "accountName" --is-enabled true
+  - name: Disable advanced threat protection for a storage account on a subscription scope.
+    text: >
+        az security atp update --resource-group "example-rg" --storage-account-name "accountName" --is-enabled false
 """
 
 helps['security auto-provisioning-setting'] = """

@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.mgmt.security.models import SecurityContact, AutoProvision
+from azure.cli.command_modules.appservice.utils import str2bool
 
 # --------------------------------------------------------------------------------------------
 # Security Tasks
@@ -305,3 +306,21 @@ def create_security_workspace_setting(client, resource_name, target_workspace):
 def delete_security_workspace_setting(client, resource_name):
 
     client.delete(resource_name)
+
+
+# --------------------------------------------------------------------------------------------
+# Security ATP
+# --------------------------------------------------------------------------------------------
+
+
+def get_atp_setting(client, resource_group_name, storage_account_name):
+
+    return client.get('subscriptions/{}/resourceGroups/{}/providers/Microsoft.Storage/storageAccounts/{}'
+                      .format(client.config.subscription_id, resource_group_name, storage_account_name))
+
+
+def update_atp_setting(client, resource_group_name, storage_account_name, is_enabled):
+
+    return client.create('subscriptions/{}/resourceGroups/{}/providers/Microsoft.Storage/storageAccounts/{}'.
+                         format(client.config.subscription_id, resource_group_name, storage_account_name),
+                         is_enabled=str2bool(is_enabled))
