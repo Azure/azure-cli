@@ -3,12 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azure_devtools.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, JMESPathCheck)
 
 
 class SecurityAtpSettingsTests(ScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
+    @record_only()
     def test_security_atp_settings(self, resource_group, resource_group_location, storage_account):
         # run show cli
         self.cmd('security atp show --resource-group {} --storage-account-name {}'
