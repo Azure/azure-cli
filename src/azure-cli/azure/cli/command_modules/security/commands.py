@@ -97,8 +97,7 @@ def load_command_table(self, _):
 
     security_advanced_threat_protection_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.security.operations#AdvancedThreatProtectionOperations.{}',
-        client_factory=cf_security_advanced_threat_protection,
-        operation_group='security_advanced_threat_protection'
+        client_factory=cf_security_advanced_threat_protection
     )
 
     with self.command_group('security task',

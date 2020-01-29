@@ -11,26 +11,36 @@ class SecurityAtpSettingsTests(ScenarioTest):
     @StorageAccountPreparer()
     def test_security_atp_settings(self, resource_group, resource_group_location, storage_account):
         # run show cli
-        atp_settings = self.cmd('security atp storage show --resource-group {} --storage-account-name {}'
+        atp_settings = self.cmd('security atp storage show --resource-group {} --storage-account {}'
                                 .format(resource_group, storage_account)).get_output_in_json()
         self.assertTrue(len(atp_settings) >= 0)
 
-        # enable atp
-        atp_settings = self.cmd('security atp storage update --resource-group {} --storage-account-name {} --is-enabled true'
+        # enable atp with --is-enabled = true
+        atp_settings = self.cmd('security atp storage update --resource-group {} --storage-account {} --is-enabled true'
                                 .format(resource_group, storage_account)).get_output_in_json()
         self.assertTrue(atp_settings["isEnabled"])
 
         # validate atp setting
-        atp_settings = self.cmd('security atp storage show --resource-group {} --storage-account-name {}'
+        atp_settings = self.cmd('security atp storage show --resource-group {} --storage-account {}'
                                 .format(resource_group, storage_account)).get_output_in_json()
         self.assertTrue(atp_settings["isEnabled"])
 
-        # disable atp
-        atp_settings = self.cmd('security atp storage update --resource-group {} --storage-account-name {} --is-enabled false'
+        # disable atp with --is-enabled = false
+        atp_settings = self.cmd('security atp storage update --resource-group {} --storage-account {} --is-enabled false'
                                 .format(resource_group, storage_account)).get_output_in_json()
         self.assertFalse(atp_settings["isEnabled"])
 
         # validate atp setting
-        self.cmd('security atp storage show --resource-group {} --storage-account-name {}'
+        self.cmd('security atp storage show --resource-group {} --storage-account {}'
                  .format(resource_group, storage_account)).get_output_in_json()
         self.assertFalse(atp_settings["isEnabled"])
+
+        # enable atp with--is-enabled empty
+        atp_settings = self.cmd('security atp storage update --resource-group {} --storage-account {} --is-enabled'
+                                .format(resource_group, storage_account)).get_output_in_json()
+        self.assertTrue(atp_settings["isEnabled"])
+
+        # validate atp setting
+        atp_settings = self.cmd('security atp storage show --resource-group {} --storage-account {}'
+                                .format(resource_group, storage_account)).get_output_in_json()
+        self.assertTrue(atp_settings["isEnabled"])

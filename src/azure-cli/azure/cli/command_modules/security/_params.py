@@ -19,6 +19,9 @@ location_arg_type = CLIArgumentType(options_list=('--location', '-l'), metavar='
 # Alerts
 alert_status_arg_type = CLIArgumentType(options_list=('--status'), metavar='STATUS', help='target status of the alert. possible values are "dismiss" and "activate"')
 
+# Atp
+storage_account_arg_type = CLIArgumentType(options_list=('--storage-account'), metavar='NAME', help='Name of an existing storage account.')
+
 # Auto Provisioning
 auto_provisioning_auto_provision_arg_type = CLIArgumentType(options_list=('--auto-provision'), metavar='AUTOPROVISION', help='Automatic provisioning toggle. possible values are "On" or "Off"')
 
@@ -60,6 +63,9 @@ def load_arguments(self, _):
             c.argument(
                 'location',
                 arg_type=location_arg_type)
+            c.argument(
+                'storage_account_name',
+                arg_type=storage_account_arg_type)
 
     for scope in ['alert update']:
         with self.argument_context('security {}'.format(scope)) as c:
@@ -75,13 +81,8 @@ def load_arguments(self, _):
                 validator=validate_auto_provisioning_toggle,
                 arg_type=auto_provisioning_auto_provision_arg_type)
 
-    for scope in ['atp storage show']:
-        with self.argument_context('security {}'.format(scope)) as c:
-            c.argument('storage_account_name', help='Name of an existing storage account.')
-
     for scope in ['atp storage update']:
         with self.argument_context('security {}'.format(scope)) as c:
-            c.argument('storage_account_name', help='Name of an existing storage account.')
             c.argument('is_enabled', help='Enable or disable Advanced Threat Protection for a received storage account.', arg_type=get_three_state_flag())
 
     for scope in ['contact create']:
