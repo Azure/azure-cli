@@ -13,7 +13,7 @@ class SecurityAtpSettingsTests(ScenarioTest):
         # run show cli
         atp_settings = self.cmd('security atp show --resource-group {} --storage-account-name {}'
                                 .format(resource_group, storage_account)).get_output_in_json()
-        assert len(atp_settings) >= 0
+        self.assertTrue(len(atp_settings) >= 0)
 
         # enable atp
         atp_settings = self.cmd('security atp update --resource-group {} --storage-account-name {} --is-enabled true'
