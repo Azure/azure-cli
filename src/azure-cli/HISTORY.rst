@@ -251,6 +251,7 @@ Release History
 **SQL**
 
 * Added "--read-scale" and "--read-replicas" parameters to sql db create and update commands, to support read scale management.
+* Remove "WideWorldImportersStd" and "WideWorldImportersFull" as documented allowed values for "az sql db create --sample-name". These sample databases would always cause creation to fail.
 
 **SQL VM**
 
