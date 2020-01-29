@@ -81,7 +81,7 @@ def collect_resources() -> str:
 
 def collect_resources_dict() -> dict:
     nodes = make_graph('azure-cli')
-    filtered_nodes = {node_name: nodes[node_name] for node_name in sorted(nodes) if resource_filter(node_name)}
+    filtered_nodes = {nodes[node_name]['name']: nodes[node_name] for node_name in sorted(nodes) if resource_filter(node_name)}
     return filtered_nodes
 
 
@@ -138,18 +138,16 @@ def update_formula() -> str:
                 node_index_dict[pack] = idx
         elif pack is not None:
             if line.strip().startswith("url"):
-                #process the url of pack
+                #process the url of package
                 if pack in nodes.keys():
-                    line = re.sub('url ".*"', 'url "{}"'.format(nodes[pack]['url']), line, 1)
+                    lines[idx] = re.sub('url ".*"', 'url "{}"'.format(nodes[pack]['url']), line, 1)
                 else:
                     packs_to_remove.add(pack)
             elif line.strip().startswith("sha256"):
+                #process the sha256 of package
                 if pack in nodes.keys():
-                    line = re.sub('sha256 ".*"', 'sha256 "{}"'.format(nodes[pack]['checksum']), line, 1)
-                    # print(line)
+                    lines[idx] = re.sub('sha256 ".*"', 'sha256 "{}"'.format(nodes[pack]['checksum']), line, 1)
                     del nodes[pack]
-                else:
-                    packs_to_remove.add(pack)
                 pack = None
         elif line.strip().startswith('def install'):
             if nodes:
@@ -160,7 +158,6 @@ def update_formula() -> str:
                     l = lines[line_idx]
                     resource = RESOURCE_TEMPLATE.render(resource=node)
                     lines[line_idx] = resource + '\n\n' +l
-        lines[idx] = line
     new_text = "\n".join(lines)
     for pack in packs_to_remove:
         new_text = re.sub(r'resource "{}" do.*?\n  end\n\s+'.format(pack), '', new_text, flags=re.DOTALL)
