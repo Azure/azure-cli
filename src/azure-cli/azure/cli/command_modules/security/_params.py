@@ -80,8 +80,8 @@ def load_arguments(self, _):
 
     for scope in ['atp update']:
         with self.argument_context('security {}'.format(scope)) as c:
-            c.argument('storage_account_name', help='Name of an existing storage account.')
-            c.argument('is_enabled', help='Enable or disable atp for desired storage account. Possible values: {true, false}')
+            c.argument('storage_account_name', help='Name of an existing storage account to link to.')
+            c.argument('is_enabled', help='Enable or disable Advanced Threat Protection for a received storage account. Possible values: {true, false}')
 
     for scope in ['contact create']:
         with self.argument_context('security {}'.format(scope)) as c:
