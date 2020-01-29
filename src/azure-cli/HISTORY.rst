@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**RBAC**
+
+* [BREAKING CHANGE] Fix #11883: `az role assignment create`: empty scope will prompt error
+
 **ACR**
 
 * [BREAKING CHANGE] `az acr delete` will prompt
