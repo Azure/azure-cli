@@ -61,7 +61,7 @@ examples:
 
 helps['security atp'] = """
 type: group
-short-summary: View and manage advanced threat protection settings.
+short-summary: View and manage Advanced Threat Protection settings.
 """
 
 helps['security atp show'] = """
