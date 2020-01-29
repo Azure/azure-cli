@@ -80,7 +80,7 @@ examples:
   - name: Enable Advanced Threat Protection for a storage account on a subscription scope.
     text: >
         az security atp update --resource-group "example-rg" --storage-account-name "accountName" --is-enabled true
-  - name: Disable advanced threat protection for a storage account on a subscription scope.
+  - name: Disable Advanced Threat Protection for a storage account on a subscription scope.
     text: >
         az security atp update --resource-group "example-rg" --storage-account-name "accountName" --is-enabled false
 """
