@@ -107,7 +107,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_security_tasks')
         g.custom_command('show', 'get_security_task')
 
-    with self.command_group('security atp',
+    with self.command_group('security atp storage',
                             security_advanced_threat_protection_sdk,
                             client_factory=cf_security_advanced_threat_protection) as g:
         g.custom_command('show', 'get_atp_setting')

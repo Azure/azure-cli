@@ -64,25 +64,30 @@ type: group
 short-summary: View and manage Advanced Threat Protection settings.
 """
 
-helps['security atp show'] = """
+helps['security atp storage'] = """
+type: group
+short-summary: View and manage Advanced Threat Protection settings for storage accounts.
+"""
+
+helps['security atp storage show'] = """
 type: command
 short-summary: Display Advanced Threat Protection settings for a storage account.
 examples:
   - name: Retrieve Advanced Threat Protection settings for a storage account on a subscription scope.
     text: >
-        az security atp show --resource-group "example-rg" --storage-account-name "accountName"
+        az security atp storage show --resource-group "MyResourceGroup" --storage-account-name "myaccount"
 """
 
-helps['security atp update'] = """
+helps['security atp storage update'] = """
 type: command
 short-summary: Toggle status of Advanced Threat Protection for a storage account.
 examples:
   - name: Enable Advanced Threat Protection for a storage account on a subscription scope.
     text: >
-        az security atp update --resource-group "example-rg" --storage-account-name "accountName" --is-enabled true
+        az security atp storage update --resource-group "MyResourceGroup" --storage-account-name "myaccount" --is-enabled true
   - name: Disable Advanced Threat Protection for a storage account on a subscription scope.
     text: >
-        az security atp update --resource-group "example-rg" --storage-account-name "accountName" --is-enabled false
+        az security atp storage update --resource-group "MyResourceGroup" --storage-account-name "myaccount" --is-enabled false
 """
 
 helps['security auto-provisioning-setting'] = """

@@ -75,11 +75,11 @@ def load_arguments(self, _):
                 validator=validate_auto_provisioning_toggle,
                 arg_type=auto_provisioning_auto_provision_arg_type)
 
-    for scope in ['atp show']:
+    for scope in ['atp storage show']:
         with self.argument_context('security {}'.format(scope)) as c:
             c.argument('storage_account_name', help='Name of an existing storage account.')
 
-    for scope in ['atp update']:
+    for scope in ['atp storage update']:
         with self.argument_context('security {}'.format(scope)) as c:
             c.argument('storage_account_name', help='Name of an existing storage account.')
             c.argument('is_enabled', help='Enable or disable Advanced Threat Protection for a received storage account.', arg_type=get_three_state_flag())
