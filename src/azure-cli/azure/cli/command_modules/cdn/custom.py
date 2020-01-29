@@ -27,6 +27,9 @@ from azure.mgmt.cdn.models import (Endpoint, SkuName, EndpointUpdateParameters, 
                                    UrlRewriteAction, UrlRewriteActionParameters)
 
 from azure.cli.core.util import sdk_no_wait
+from knack.log import get_logger
+
+logger = get_logger(__name__)
 
 
 def default_content_types():
@@ -349,6 +352,8 @@ def remove_rule(client, resource_group_name, profile_name, endpoint_name, rule_n
         for rule in policy.rules:
             if rule.name == rule_name:
                 policy.rules.remove(rule)
+    else:
+        logger.warning("rule cannot be found. This command will be skipped. Please check the rule name")
 
     params = EndpointUpdateParameters(
         delivery_policy=policy
@@ -365,6 +370,8 @@ def remove_condition(client, resource_group_name, profile_name, endpoint_name, r
         for i in range(0, len(policy.rules)):
             if policy.rules[i].name == rule_name:
                 policy.rules[i].conditions.pop(index)
+    else:
+        logger.warning("rule cannot be found. This command will be skipped. Please check the rule name")
 
     params = EndpointUpdateParameters(
         delivery_policy=policy
@@ -381,6 +388,8 @@ def remove_action(client, resource_group_name, profile_name, endpoint_name, rule
         for i in range(0, len(policy.rules)):
             if policy.rules[i].name == rule_name:
                 policy.rules[i].actions.pop(index)
+    else:
+        logger.warning("rule cannot be found. This command will be skipped. Please check the rule name")
 
     params = EndpointUpdateParameters(
         delivery_policy=policy
