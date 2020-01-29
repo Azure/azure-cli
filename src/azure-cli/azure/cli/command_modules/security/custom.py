@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.mgmt.security.models import SecurityContact, AutoProvision
-from azure.cli.command_modules.appservice.utils import str2bool
 
 # --------------------------------------------------------------------------------------------
 # Security Tasks
@@ -319,13 +318,13 @@ def get_atp_setting(client, resource_group_name, storage_account_name):
 
 def update_atp_setting(client, resource_group_name, storage_account_name, is_enabled):
 
-    return client.create(_construct_resource_id(client, resource_group_name, storage_account_name), is_enabled=is_enabled)
+    return client.create(_construct_resource_id(client, resource_group_name, storage_account_name),
+                         is_enabled=is_enabled)
 
 
 def _construct_resource_id(client, resource_group_name, storage_account_name):
 
     from msrestazure.tools import resource_id
-    from azure.cli.core.commands.client_factory import get_subscription_id
     return resource_id(
         subscription=client.config.subscription_id,
         resource_group=resource_group_name,
