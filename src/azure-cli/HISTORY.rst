@@ -4,7 +4,7 @@ Release History
 ===============
 **Security**
 
-* New commands 'az atp show' and 'az atp update' 
+* Added new commands `az atp show` and `az atp update`
   to view and manage advanced threat protection settings for storage accounts.
 
 **ACR**
