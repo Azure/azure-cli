@@ -124,3 +124,9 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'openshift_show')
         g.custom_command('list', 'osa_list', table_transformer=osa_list_table_format)
         g.wait_command('wait')
+
+    # OSA monitor subgroup
+    with self.command_group('openshift monitor', openshift_managed_clusters_sdk,
+                            client_factory=cf_openshift_managed_clusters) as g:
+        g.custom_command('enable', 'openshift_monitor_enable', supports_no_wait=True)
+        g.custom_command('disable', 'openshift_monitor_disable', supports_no_wait=True)
