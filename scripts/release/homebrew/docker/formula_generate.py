@@ -41,6 +41,7 @@ def generate_formula(build_method: str, **_):
 
 
 def generate_formula_with_template() -> str:
+    """Generate a brew formula by using a template"""
     template_path = os.path.join(os.path.dirname(__file__), TEMPLATE_FILE_NAME)
     with open(template_path, mode='r') as fq:
         template_content = fq.read()
@@ -64,7 +65,7 @@ def compute_sha256(resource_url: str) -> str:
     resp = requests.get(resource_url)
     resp.raise_for_status()
     sha256.update(resp.content)
-    
+
     return sha256.hexdigest()
 
 
@@ -108,7 +109,7 @@ def last_bottle_hash():
             if 'bottle do' in content:
                 start = idx
                 look_for_end = True
-    
+
     return '\n'.join(lines[start: end + 1])
 
 
@@ -120,12 +121,12 @@ def update_formula() -> str:
     resp.raise_for_status()
     text = resp.text
 
+    # update url, version and sha256 of azure-cli
     text = re.sub('url ".*"', 'url "{}"'.format(HOMEBREW_UPSTREAM_URL), text, 1)
     text = re.sub('version ".*"', 'version "{}"'.format(CLI_VERSION), text, 1)
     upstream_sha = compute_sha256(HOMEBREW_UPSTREAM_URL)
     text = re.sub('sha256 ".*"', 'sha256 "{}"'.format(upstream_sha), text, 1)
-    # remove revision for previous version if exists
-    text = re.sub('.*revision.*\n', '', text, 1)
+    text = re.sub('.*revision.*\n', '', text, 1)  # remove revision for previous version if exists
     pack = None
     packs_to_remove = set()
     lines = text.split('\n')
@@ -138,27 +139,29 @@ def update_formula() -> str:
                 node_index_dict[pack] = idx
         elif pack is not None:
             if line.strip().startswith("url"):
-                #process the url of package
+                #update the url of package
                 if pack in nodes.keys():
                     lines[idx] = re.sub('url ".*"', 'url "{}"'.format(nodes[pack]['url']), line, 1)
                 else:
                     packs_to_remove.add(pack)
             elif line.strip().startswith("sha256"):
-                #process the sha256 of package
+                #update the sha256 of package
                 if pack in nodes.keys():
                     lines[idx] = re.sub('sha256 ".*"', 'sha256 "{}"'.format(nodes[pack]['checksum']), line, 1)
                     del nodes[pack]
                 pack = None
         elif line.strip().startswith('def install'):
             if nodes:
-                #add the remaining nodes
+                # add new dependency packages
                 for node_name, node in nodes.items():
+                    # find the right place to insert the new resource per alphabetic order
                     i = bisect.bisect_left(list(node_index_dict.keys()), node_name)
                     line_idx = list(node_index_dict.items())[i][1]
-                    l = lines[line_idx]
                     resource = RESOURCE_TEMPLATE.render(resource=node)
-                    lines[line_idx] = resource + '\n\n' +l
+                    lines[line_idx] = resource + '\n\n' + lines[line_idx]
     new_text = "\n".join(lines)
+
+    # remove dependency packages that are no longer needed
     for pack in packs_to_remove:
         new_text = re.sub(r'resource "{}" do.*?\n  end\n\s+'.format(pack), '', new_text, flags=re.DOTALL)
     return new_text
