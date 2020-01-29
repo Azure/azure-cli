@@ -86,7 +86,7 @@ from ._client_factory import cf_container_registry_service
 
 from ._helpers import _populate_api_server_access_profile, _set_vm_set_type
 
-from ._loadbalancer import (set_load_balancer_sku, is_load_balancer__profile_provided,
+from ._loadbalancer import (set_load_balancer_sku, is_load_balancer_profile_provided,
                             update_load_balancer_profile, create_load_balancer_profile)
 
 logger = get_logger(__name__)
@@ -1975,11 +1975,11 @@ def aks_update(cmd, client, resource_group_name, name,
                api_server_authorized_ip_ranges=None,
                no_wait=False):
     update_autoscaler = enable_cluster_autoscaler + disable_cluster_autoscaler + update_cluster_autoscaler
-    update_lb_profile = is_load_balancer__profile_provided(load_balancer_managed_outbound_ip_count,
-                                                           load_balancer_outbound_ips,
-                                                           load_balancer_outbound_ip_prefixes,
-                                                           load_balancer_outbound_ports,
-                                                           load_balancer_idle_timeout)
+    update_lb_profile = is_load_balancer_profile_provided(load_balancer_managed_outbound_ip_count,
+                                                          load_balancer_outbound_ips,
+                                                          load_balancer_outbound_ip_prefixes,
+                                                          load_balancer_outbound_ports,
+                                                          load_balancer_idle_timeout)
 
     if (update_autoscaler != 1 and not update_lb_profile and
             not attach_acr and

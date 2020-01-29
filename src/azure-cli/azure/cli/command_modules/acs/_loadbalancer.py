@@ -26,8 +26,8 @@ def set_load_balancer_sku(sku, kubernetes_version):
 def update_load_balancer_profile(managed_outbound_ip_count, outbound_ips, outbound_ip_prefixes,
                                  outbound_ports, idle_timeout, profile):
     """parse and update an existing load balancer profile"""
-    if not is_load_balancer__profile_provided(managed_outbound_ip_count, outbound_ips, outbound_ip_prefixes,
-                                              outbound_ports, idle_timeout):
+    if not is_load_balancer_profile_provided(managed_outbound_ip_count, outbound_ips, outbound_ip_prefixes,
+                                             outbound_ports, idle_timeout):
         return profile
     return configure_load_balancer_profile(managed_outbound_ip_count, outbound_ips, outbound_ip_prefixes,
                                            outbound_ports, idle_timeout, profile)
@@ -36,8 +36,8 @@ def update_load_balancer_profile(managed_outbound_ip_count, outbound_ips, outbou
 def create_load_balancer_profile(managed_outbound_ip_count, outbound_ips, outbound_ip_prefixes,
                                  outbound_ports, idle_timeout):
     """parse and build load balancer profile"""
-    if not is_load_balancer__profile_provided(managed_outbound_ip_count, outbound_ips, outbound_ip_prefixes,
-                                              outbound_ports, idle_timeout):
+    if not is_load_balancer_profile_provided(managed_outbound_ip_count, outbound_ips, outbound_ip_prefixes,
+                                             outbound_ports, idle_timeout):
         return None
 
     profile = ManagedClusterLoadBalancerProfile()
@@ -73,8 +73,8 @@ def configure_load_balancer_profile(managed_outbound_ip_count, outbound_ips, out
     return profile
 
 
-def is_load_balancer__profile_provided(managed_outbound_ip_count, outbound_ips, ip_prefixes,
-                                       outbound_ports, idle_timeout):
+def is_load_balancer_profile_provided(managed_outbound_ip_count, outbound_ips, ip_prefixes,
+                                      outbound_ports, idle_timeout):
     return any([managed_outbound_ip_count,
                 outbound_ips,
                 ip_prefixes,
