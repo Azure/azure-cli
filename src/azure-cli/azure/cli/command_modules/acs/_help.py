@@ -253,11 +253,11 @@ parameters:
     short-summary: Load balancer outbound IP prefix resource IDs.
     long-summary: Comma-separated public IP prefix resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.
   - name: --load-balancer-outbound-ports
-    type: string
+    type: int
     short-summary: Load balancer outbound allocated ports.
     long-summary: Desired static number of outbound ports per VM in the load balancer backend pool. By default, set to 0 which uses the default allocation based on the number of VMs.
   - name: --load-balancer-idle-timeout
-    type: string
+    type: int
     short-summary: Load balancer idle timeout in minutes.
     long-summary: Desired idle timeout for load balancer outbound flows, default is 30 minutes. Please specify a value in the range of [4, 120].
   - name: --enable-cluster-autoscaler
@@ -383,11 +383,11 @@ parameters:
     short-summary: Load balancer outbound IP prefix resource IDs.
     long-summary: Comma-separated public IP prefix resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.
   - name: --load-balancer-outbound-ports
-    type: string
+    type: int
     short-summary: Load balancer outbound allocated ports.
     long-summary: Desired static number of outbound ports per VM in the load balancer backend pool. By default, set to 0 which uses the default allocation based on the number of VMs.
   - name: --load-balancer-idle-timeout
-    type: string
+    type: int
     short-summary: Load balancer idle timeout in minutes.
     long-summary: Desired idle timeout for load balancer outbound flows, default is 30 minutes. Please specify a value in the range of [4, 120].
   - name: --attach-acr
