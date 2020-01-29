@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**RBAC**
+
+* [BREAKING CHANGE] Fix issue #11883 az role assignment create scope default to subscription if empty
+
 **ACR**
 
 * [BREAKING CHANGE] `az acr delete` will prompt
