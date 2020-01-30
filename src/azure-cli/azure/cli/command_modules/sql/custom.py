@@ -2098,6 +2098,7 @@ def encryption_protector_update(
 #                sql managed instance         #
 ###############################################
 
+
 def _find_managed_instance_sku_from_capabilities(
         cli_ctx,
         location,
