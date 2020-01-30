@@ -26,7 +26,7 @@ from azure.mgmt.resource.resources.models import GenericResource
 from azure.cli.core.parser import IncorrectUsageError
 from azure.cli.core.util import get_file_json, read_file_content, shell_safe_json_parse, sdk_no_wait
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version
+from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version, AZURE_API_PROFILES
 
 from azure.cli.command_modules.resource._client_factory import (
     _resource_client_factory, _resource_policy_client_factory, _resource_lock_client_factory,
@@ -2157,7 +2157,7 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
         # please add the service type that needs to be requested with PATCH type here
         # for example: the properties of RecoveryServices/vaults must be filled, and a PUT request that passes back
         # to properties will fail due to the lack of properties, so the PATCH type should be used
-        need_patch_service = ['Microsoft.RecoveryServices/vaults']
+        need_patch_service = ['Microsoft.RecoveryServices/vaults', 'Microsoft.Resources/resourceGroups']
 
         if resource is not None and resource.type in need_patch_service:
             parameters = GenericResource(tags=tags)
@@ -2283,6 +2283,13 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
     @staticmethod
     def _resolve_api_version_by_id(rcf, resource_id):
         parts = parse_resource_id(resource_id)
+
+        if len(parts) == 2 and parts['subscription'] is not None and parts['resource_group'] is not None:
+            return AZURE_API_PROFILES['latest'][ResourceType.MGMT_RESOURCE_RESOURCES]
+
+        if 'namespace' not in parts:
+            raise CLIError('The type of value entered by --ids parameter is not supported.')
+
         namespace = parts.get('child_namespace_1', parts['namespace'])
         if parts.get('child_type_2'):
             parent = (parts['type'] + '/' + parts['name'] + '/' +
