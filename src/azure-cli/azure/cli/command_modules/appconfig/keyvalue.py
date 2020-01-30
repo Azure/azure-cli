@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long
+# pylint: disable=line-too-long, too-many-locals
 
 import json
 import time
@@ -38,6 +38,7 @@ def import_config(cmd,
                   label=None,
                   prefix="",  # prefix to add
                   yes=False,
+                  skip_features=False,
                   # from-file parameters
                   path=None,
                   format_=None,
@@ -48,10 +49,9 @@ def import_config(cmd,
                   src_connection_string=None,
                   src_key=None,
                   src_label=None,
+                  preserve_labels=False,
                   # from-appservice parameters
-                  appservice_account=None,
-                  skip_features=False):
-    # pylint: disable=too-many-locals
+                  appservice_account=None):
     src_features = []
     dest_features = []
     dest_kvs = []
@@ -68,6 +68,14 @@ def import_config(cmd,
             src_features = __read_features_from_file(file_path=path, format_=format_)
 
     elif source == 'appconfig':
+        if label is not None and preserve_labels:
+            raise CLIError("Import failed! Please provide only one of these arguments: '--label' or '--preserve-labels'. See 'az appconfig kv import -h' for examples.")
+        if preserve_labels:
+            # We need label to be the same as src_label for preview later.
+            # This will have no effect on label while writing to config store
+            # as we check preserve_labels again before labelling KVs.
+            label = src_label
+
         src_kvs = __read_kv_from_config_store(cmd, name=src_name, connection_string=src_connection_string,
                                               key=src_key, label=src_label, prefix_to_add=prefix)
         # We need to separate KV from feature flags
@@ -120,7 +128,7 @@ def import_config(cmd,
 
     # import into configstore
     __write_kv_and_features_to_config_store(
-        cmd, key_values=src_kvs, name=name, connection_string=connection_string, label=label)
+        cmd, key_values=src_kvs, name=name, connection_string=connection_string, label=label, preserve_labels=preserve_labels)
 
 
 def export_config(cmd,
@@ -131,24 +139,34 @@ def export_config(cmd,
                   key=None,
                   prefix="",  # prefix to remove
                   yes=False,
+                  skip_features=False,
                   # to-file parameters
                   path=None,
                   format_=None,
                   separator=None,
+                  naming_convention='pascal',
                   # to-config-store parameters
                   dest_name=None,
                   dest_connection_string=None,
                   dest_label=None,
+                  preserve_labels=False,
                   # to-app-service parameters
-                  appservice_account=None,
-                  skip_features=False,
-                  naming_convention='pascal'):
+                  appservice_account=None):
     src_features = []
     dest_features = []
     dest_kvs = []
     destination = destination.lower()
     format_ = format_.lower() if format_ else None
     naming_convention = naming_convention.lower()
+
+    if destination == 'appconfig':
+        if dest_label is not None and preserve_labels:
+            raise CLIError("Export failed! Please provide only one of these arguments: '--dest-label' or '--preserve-labels'. See 'az appconfig kv export -h' for examples.")
+        if preserve_labels:
+            # We need dest_label to be the same as label for preview later.
+            # This will have no effect on label while writing to config store
+            # as we check preserve_labels again before labelling KVs.
+            dest_label = label
 
     # fetch key values from user's configstore
     src_kvs = __read_kv_from_config_store(
@@ -222,7 +240,7 @@ def export_config(cmd,
                                         naming_convention=naming_convention)
     elif destination == 'appconfig':
         __write_kv_and_features_to_config_store(cmd, key_values=src_kvs, features=src_features, name=dest_name,
-                                                connection_string=dest_connection_string, label=dest_label)
+                                                connection_string=dest_connection_string, label=dest_label, preserve_labels=preserve_labels)
     elif destination == 'appservice':
         __write_kv_to_app_service(cmd, key_values=src_kvs, appservice_account=appservice_account)
 
